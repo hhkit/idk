@@ -981,6 +981,31 @@ namespace idk::mono
         }
 		BIND_END();
 
+		// //////Font///////////////
+		BIND_START("idk.Bindings::FontGetText", string, Handle<Font> h)
+		{
+			return h->GetText();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::FontSetText", void, Handle<Font> h, string r)
+		{
+			h->SetText(r);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::FontGetColor", color, Handle<Font> h)
+		{
+			return h->GetColor();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::FontSetColor", void, Handle<Font> h, color r)
+		{
+			h->SetColor(r);
+		}
+		BIND_END();
+
 		// //////Camera///////////////
 		BIND_START("idk.Bindings::CameraGetFOV", rad, Handle<Camera> h)
 		{
