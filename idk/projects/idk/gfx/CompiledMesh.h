@@ -7,7 +7,7 @@ namespace idk
 {
 	struct CompiledBuffer
 	{
-		vector<vtx::Attrib>   attribs;
+		vector<vtx::Descriptor>   attribs;
 		vector<unsigned char> data_buffer;
 	};
 

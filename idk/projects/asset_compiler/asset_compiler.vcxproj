@@ -194,6 +194,8 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AssimpCompiler.cpp" />
+    <ClCompile Include="AssimpCompiler_helpers.cpp" />
     <ClCompile Include="IAssetLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="CompilerCore.cpp" />
@@ -201,6 +203,8 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     <ClCompile Include="TextureCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssimpCompiler.h" />
+    <ClInclude Include="AssimpCompiler_helpers.h" />
     <ClInclude Include="CompilerCore.h" />
     <ClInclude Include="CompilerList.h" />
     <ClInclude Include="DDSCompiler.h" />
