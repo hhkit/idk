@@ -12,6 +12,7 @@ namespace idk
 		hash_table<Guid, CompiledVariant> assets; // the produced assets
 
 		AssetBundle(const MetaBundle& bundle, std::initializer_list<AssetPair> assets);
+		AssetBundle(const MetaBundle& bundle, span<AssetPair> assets);
 	};
 
 	class IAssetCompiler

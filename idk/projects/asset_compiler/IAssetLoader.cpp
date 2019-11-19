@@ -9,4 +9,11 @@ namespace idk
 		, assets{assets}
 	{
 	}
+
+	AssetBundle::AssetBundle(const MetaBundle& bundle, span<AssetPair> assetspan)
+		: metabundle{ bundle }
+	{
+		for (auto& [key, value] : assetspan)
+			assets.emplace(key, value);
+	}
 }
