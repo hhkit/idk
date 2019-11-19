@@ -125,6 +125,9 @@
     <Filter Include="util">
       <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gfx\compiled">
+      <UniqueIdentifier>{0d88d823-f7dd-48bc-b708-c54f6c197ce5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -863,11 +866,14 @@
     <ClInclude Include="meta\comparator.h">
       <Filter>meta</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="res\ResourceExt.h" />
-    <ClInclude Include="res\CompiledAssets.h" />
     <ClInclude Include="res\compiler\AssetImporter.h" />
     <ClInclude Include="res\compiler\CompiledAssetLoader.h" />
+    <ClInclude Include="gfx\CompiledTexture.h">
+      <Filter>gfx\compiled</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CompiledMesh.h" />
+    <ClInclude Include="res\compiler\CompiledAssets.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

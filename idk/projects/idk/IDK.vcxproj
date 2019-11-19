@@ -52,6 +52,7 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
+    <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\Font.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
@@ -98,7 +99,7 @@
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
-    <ClInclude Include="res\CompiledAssets.h" />
+    <ClInclude Include="res\compiler\CompiledAssets.h" />
     <ClInclude Include="res\compiler\AssetImporter.h" />
     <ClInclude Include="res\compiler\CompiledAssetLoader.h" />
     <ClInclude Include="res\EasyFactory.h" />

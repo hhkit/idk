@@ -1,6 +1,5 @@
 #pragma once
 #include <idk.h>
-#include <gfx/vertex_descriptor.h>
 #include <gfx/TextureRenderMeta.h>
 #include <res/ResourceExt.h>
 namespace idk
@@ -17,22 +16,6 @@ namespace idk
 
 		EXTENSION(".idds");
 	};
-
-	struct CompiledBuffer
-	{
-		vector<vtx::Attrib>   attribs;
-		vector<unsigned char> data_buffer;
-	};
-
-	struct CompiledMesh
-	{
-		vector<CompiledBuffer> buffers;
-		EXTENSION(".idmsh");
-	};
-
-	// Skeleton resource
-
-	// Animation resource
 
 	struct CompiledCubeMap
 	{
