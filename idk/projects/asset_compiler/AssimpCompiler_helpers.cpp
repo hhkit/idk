@@ -9,23 +9,23 @@
 namespace idk::ai_helpers
 {
 
-	bool Scene::Import(Scene& scene, PathHandle path_to_resource)
+	bool Scene::Import(const fs::path& fs_path)
 	{
 		// Note to self: Try JoinIdenticalVertices see if there's a diff. Might be faster.
-		scene.ai_scene = scene.importer.ReadFile(path_to_resource.GetFullPath().data(),
+		ai_scene = importer.ReadFile(fs_path.generic_string(),
 			aiProcess_Triangulate |		// Triangulates non-triangles
 			aiProcess_GenSmoothNormals |		// Generates missing normals
 			aiProcess_CalcTangentSpace |		// Generate tangents and bi-tangents
 			aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_FindInstances | aiProcess_ImproveCacheLocality);				// UVs flip	
 
-		if (scene.ai_scene)
+		if (ai_scene)
 		{
-			scene.has_meshes = scene.ai_scene->HasMeshes();
-			scene.has_animation = scene.ai_scene->HasAnimations();
+			has_meshes = ai_scene->HasMeshes();
+			has_animation = ai_scene->HasAnimations();
 		}
-
-		scene.file_ext = path_to_resource.GetExtension();
-		return scene.ai_scene != nullptr;
+		
+		file_ext = fs_path.extension().generic_string();
+		return ai_scene != nullptr;
 	}
 
 	void Scene::CollectMeshes(aiNode* node)
@@ -88,41 +88,251 @@ namespace idk::ai_helpers
 		// 	CompileMeshes(scene, node->mChildren[i]);
 	}
 
+	vector<MeshData> Scene::BuildMeshBuffers() const
+	{
+		vector<MeshData> ret_val;
+		if (!has_meshes)
+			return ret_val;
+		const size_t num_meshes = meshes.size();
+		ret_val.resize(num_meshes);
+		for (size_t i = 0; i < num_meshes; ++i)
+		{
+			auto& ai_mesh = meshes[i];
+			auto& curr_buffer = ret_val[i];
+
+			curr_buffer.name = ai_mesh->mName.data;
+
+			// Allocating space in the buffers
+			curr_buffer.positions.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+			curr_buffer.normals.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+			curr_buffer.uvs.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+			curr_buffer.tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+			curr_buffer.bi_tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
+
+			// Bone weights are resized because we need to do subscript directly
+			curr_buffer.bone_ids.resize(s_cast<size_t>(ai_mesh->mNumVertices), ivec4{ 0,0,0,0 });
+			curr_buffer.bone_weights.resize(s_cast<size_t>(ai_mesh->mNumVertices), vec4{ 0,0,0,0 });
+
+			curr_buffer.indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
+
+			const float normalize_scale = file_ext == ".fbx" ? 0.01f : 1.0f;
+
+			const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
+			for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
+			{
+				const aiVector3D& pos = ai_mesh->mVertices[k];
+				const aiVector3D& normal = ai_mesh->mNormals[k];
+				const aiVector3D& text = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][k] : zero;
+				aiVector3D tangent, bi_tangent;
+				if (ai_mesh->HasTangentsAndBitangents())
+				{
+					tangent = ai_mesh->mTangents[k];
+					bi_tangent = ai_mesh->mBitangents[k];
+				}
+
+				curr_buffer.positions.emplace_back(vec3{ pos.x, pos.y, pos.z } *normalize_scale);
+				curr_buffer.normals.emplace_back(vec3{ normal.x, normal.y, normal.z });
+				curr_buffer.uvs.emplace_back(vec2{ text.x, text.y });
+				curr_buffer.tangents.emplace_back(vec3{ tangent.x, tangent.y, tangent.z });
+				curr_buffer.bi_tangents.emplace_back(vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z });
+				// updateBounds(vertices.back().pos, min_pos, max_pos);
+			}
+
+			// Initialize indices
+			for (size_t k = 0; k < ai_mesh->mNumFaces; k++)
+			{
+				const aiFace& face = ai_mesh->mFaces[k];
+				assert(face.mNumIndices == 3);
+				curr_buffer.indices.push_back(face.mIndices[0]);
+				curr_buffer.indices.push_back(face.mIndices[1]);
+				curr_buffer.indices.push_back(face.mIndices[2]);
+			}
+
+			// Bone weights
+			for (size_t k = 0; k < ai_mesh->mNumBones; ++k)
+			{
+				const aiBone* ai_bone = ai_mesh->mBones[k];
+				auto res = final_skeleton_table.find(ai_bone->mName.data);
+				assert(res != final_skeleton_table.end());
+
+				const int bone_index = static_cast<int>(res->second);
+				for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
+				{
+					const float weight = ai_bone->mWeights[j].mWeight;
+					const unsigned vert_id = ai_bone->mWeights[j].mVertexId;
+					ai_helpers::AddBoneData(bone_index, weight, curr_buffer.bone_ids[vert_id], curr_buffer.bone_weights[vert_id]);
+				}
+			}
+		}
+	
+		return ret_val;
+	}
+
+	vector<CompiledMesh> Scene::CompileMesh() const
+	{
+		auto mesh_data{ BuildMeshBuffers() };
+		vector<CompiledMesh> ret_val;
+		ret_val.reserve(mesh_data.size());
+		for (auto& buffer : mesh_data)
+		{
+			CompiledMesh mesh;
+			if (!buffer.positions.empty())
+			{
+				vtx::Descriptor descriptor{
+					.attrib = vtx::Attrib::Position,
+					.stride = sizeof(vec3),
+					.offset = 0,
+				};
+
+				CompiledBuffer buf{
+					{descriptor},
+					vector<unsigned char>{r_cast<unsigned char*>(buffer.positions.data()), r_cast<unsigned char*>(buffer.positions.data() + buffer.positions.size() * sizeof(vec3))}
+				};
+				mesh.buffers.emplace_back(buf);
+			}
+
+			if (!buffer.normals.empty())
+			{
+				vtx::Descriptor descriptor{
+					.attrib = vtx::Attrib::Normal,
+					.stride = sizeof(vec3),
+					.offset = 0,
+				};
+
+				CompiledBuffer buf{
+					{descriptor},
+					vector<unsigned char>{r_cast<unsigned char*>(buffer.normals.data()), r_cast<unsigned char*>(buffer.normals.data() + buffer.normals.size() * sizeof(vec3))}
+				};
+
+				mesh.buffers.emplace_back(buf);
+			}
+
+			if (!buffer.uvs.empty())
+			{
+				vtx::Descriptor descriptor{
+					.attrib = vtx::Attrib::UV,
+					.stride = sizeof(vec2),
+					.offset = 0,
+				};
+
+				CompiledBuffer buf{
+					{descriptor},
+					vector<unsigned char>{r_cast<unsigned char*>(buffer.uvs.data()), r_cast<unsigned char*>(buffer.uvs.data() + buffer.uvs.size() * sizeof(vec2))}
+				};
+
+				mesh.buffers.emplace_back(buf);
+			}
+
+			if (!buffer.tangents.empty())
+			{
+				vtx::Descriptor descriptor{
+					.attrib = vtx::Attrib::Tangent,
+					.stride = sizeof(vec3),
+					.offset = 0,
+				};
+
+
+				CompiledBuffer buf{
+					{descriptor},
+					vector<unsigned char>{r_cast<unsigned char*>(buffer.tangents.data()), r_cast<unsigned char*>(buffer.tangents.data() + buffer.tangents.size() * sizeof(vec3))}
+				};
+
+				mesh.buffers.emplace_back(buf);
+			}
+
+			if (!buffer.bi_tangents.empty())
+			{
+				vtx::Descriptor descriptor{
+					.attrib = vtx::Attrib::Bitangent,
+					.stride = sizeof(vec3),
+					.offset = 0,
+				};
+
+				CompiledBuffer buf{
+					{descriptor},
+					vector<unsigned char>{r_cast<unsigned char*>(buffer.bi_tangents.data()), r_cast<unsigned char*>(buffer.bi_tangents.data() + buffer.bi_tangents.size() * sizeof(vec3))}
+				};
+
+				mesh.buffers.emplace_back(buf);
+			}
+
+			if (!buffer.bone_ids.empty())
+			{
+				vtx::Descriptor descriptor{
+					.attrib = vtx::Attrib::BoneID,
+					.stride = sizeof(ivec4),
+					.offset = 0,
+				};
+
+				CompiledBuffer buf{
+								{descriptor},
+								vector<unsigned char>{r_cast<unsigned char*>(buffer.bone_ids.data()), r_cast<unsigned char*>(buffer.bone_ids.data() + buffer.bone_ids.size() * sizeof(ivec4))}
+				};
+
+				mesh.buffers.emplace_back(buf);
+			}
+
+			if (!buffer.bone_weights.empty())
+			{
+				vtx::Descriptor descriptor{
+					.attrib = vtx::Attrib::BoneWeight,
+					.stride = sizeof(vec4),
+					.offset = 0,
+				};
+
+				CompiledBuffer buf{
+					{descriptor},
+					vector<unsigned char>{r_cast<unsigned char*>(buffer.bone_weights.data()), r_cast<unsigned char*>(buffer.bone_weights.data() + buffer.bone_weights.size() * sizeof(vec4))}
+				};
+
+				mesh.buffers.emplace_back(buf);
+			}
+
+			// Compute ritters bounding volume
+			span<const vec3> pos{ buffer.positions };
+			mesh.bounding_volume = ritters(pos);
+
+			ret_val.emplace_back(std::move(mesh));
+		}
+		
+		return ret_val;
+	}
+
 #pragma region Compiling/Building Skeleton
-	void CompileBones(Scene & scene)
+	void Scene::CollectBones()
 	{
 		// Root bones must be denoted by the root bone keyword.
 		// Assimp only imports bones from maya as aiBones if they have weights.
 		// Generally, all bones that require animation MUST have at least one vertex weight. 
 		// Example is in YY's rig where COG is to be animated but it does not have any weights. 
-		for (size_t i = 0; i < scene.ai_scene->mNumMeshes; ++i)
+		for (size_t i = 0; i < ai_scene->mNumMeshes; ++i)
 		{
-			const aiMesh* curr_mesh = scene.ai_scene->mMeshes[i];
+			const aiMesh* curr_mesh = ai_scene->mMeshes[i];
 
 			for (size_t bone_index = 0; bone_index < curr_mesh->mNumBones; ++bone_index)
 			{
 				aiBone* ai_bone = curr_mesh->mBones[bone_index];
 				string bone_name = ai_bone->mName.data;
 
-				if (scene.bone_table.find(bone_name) == scene.bone_table.end())
+				if (bone_table.find(bone_name) == bone_table.end())
 				{
-					scene.bone_table.emplace(bone_name, ai_bone);
-					scene.has_skeleton = true;
-					scene.has_skinned_meshes = true;
+					bone_table.emplace(bone_name, ai_bone);
+					has_skeleton = true;
+					has_skinned_meshes = true;
 				}
 			}// end per mesh bone loop
 		}
 
 		// Find the skeleton root
-		if (scene.has_skeleton)
+		if (has_skeleton)
 		{
-			scene.bone_root = FindFirstNodeContains(AssimpImporter::root_bone_keyword, scene.ai_scene->mRootNode);
-			if (scene.bone_root == nullptr || scene.bone_root == scene.ai_scene->mRootNode)
-				LogWarning(string{ "Unable to find skeleton root bone. Make sure root of skeleton contains keyword: " } +AssimpImporter::root_bone_keyword);
+			bone_root = FindFirstNodeContains(Scene::root_bone_keyword.data(), ai_scene->mRootNode);
+			if (bone_root == nullptr || bone_root == ai_scene->mRootNode)
+				LogWarning(string{ "Unable to find skeleton root bone. Make sure root of skeleton contains keyword: " } + Scene::root_bone_keyword.data());
 		}
 	}
 
-	void BuildSkeleton(Scene& scene)
+	void Scene::BuildSkeleton()
 	{
 		// Compile the pivotless bone tree
 		struct BoneTreeNode
@@ -132,15 +342,13 @@ namespace idk::ai_helpers
 			mat4 parent_local_transform;
 		};
 
-		if (!scene.has_skeleton)
+		if (!has_skeleton)
 			return;
 
 		std::deque<BoneTreeNode> bone_queue;
-		vector<anim::BoneData>& final_skeleton = scene.final_skeleton;
-		auto& final_skeleton_table = scene.final_skeleton_table;
 
 		// Optionally check for pivots here
-		bone_queue.push_back(BoneTreeNode{ scene.bone_root, -1 });
+		bone_queue.push_back(BoneTreeNode{ bone_root, -1 });
 		while (!bone_queue.empty())
 		{
 			auto curr_node = bone_queue.front();
@@ -149,7 +357,7 @@ namespace idk::ai_helpers
 
 			const mat4 local_transform = curr_node.parent_local_transform * to_mat4(curr_node.node->mTransformation);
 			// Ignore all $assimp$ nodes in the final skeleton. We also ignore user specified excluded nodes. Everything else we will consider it a bone.
-			if (node_name.find(AssimpPrefix) != string::npos || node_name.find(AssimpImporter::bone_exclude_keyword) != string::npos)
+			if (node_name.find(AssimpPrefix) != string::npos || node_name.find(Scene::bone_exclude_keyword) != string::npos)
 			{
 				for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
 				{
@@ -179,11 +387,11 @@ namespace idk::ai_helpers
 			aiVector3D		child_local_scale;
 			aiQuaternion	child_local_rot;
 
-			auto bone_node = scene.bone_table.find(node_name);
+			auto bone_node = bone_table.find(node_name);
 			// If we can't find the aiBone, there are a couple of possiblities.
 			// 1) It is a mesh that is parented to the parent bone/mesh
 			// 2) It is a bone that has no weights. In which case, we will use the node transforms as the base from which we build its local transform.
-			if (bone_node == scene.bone_table.end())
+			if (bone_node == bone_table.end())
 			{
 				// Error handling
 				string error_string = "No aiBone node " + node_name + " found in bone hierarchy.";
@@ -244,7 +452,7 @@ namespace idk::ai_helpers
 			}
 		}
 
-		for (auto& bone : scene.final_skeleton)
+		for (auto& bone : final_skeleton)
 		{
 			bone._global_inverse_bind_pose[3] *= 0.01f;
 			bone._global_inverse_bind_pose[3].w = 1.0f;
@@ -253,12 +461,12 @@ namespace idk::ai_helpers
 		}
 	}
 
-	void BuildSkinlessSkeleton(Scene& scene)
+	void Scene::BuildSkinlessSkeleton()
 	{
 		// Search for the root bone
-		scene.bone_root = FindFirstNodeContains(AssimpImporter::root_bone_keyword, scene.ai_scene->mRootNode);
-		if (scene.bone_root == nullptr || scene.bone_root == scene.ai_scene->mRootNode)
-			LogWarning(string{ "Unable to find skeleton root bone. Make sure root of skeleton contains keyword: " } +AssimpImporter::root_bone_keyword);
+		bone_root = FindFirstNodeContains(Scene::root_bone_keyword.data(), ai_scene->mRootNode);
+		if (bone_root == nullptr || bone_root == ai_scene->mRootNode)
+			LogWarning(string{ "Unable to find skeleton root bone. Make sure root of skeleton contains keyword: " } + Scene::root_bone_keyword.data());
 
 		// Compile the pivotless bone tree
 		struct BoneTreeNode
@@ -270,11 +478,9 @@ namespace idk::ai_helpers
 
 
 		std::deque<BoneTreeNode> bone_queue;
-		vector<anim::BoneData>& skinless_skeleton = scene.skinless_skeleton;
-		auto& skinless_skeleton_table = scene.skinless_skeleton_table;
 
 		// Optionally check for pivots here
-		bone_queue.push_back(BoneTreeNode{ scene.bone_root, -1 });
+		bone_queue.push_back(BoneTreeNode{ bone_root, -1 });
 		while (!bone_queue.empty())
 		{
 			auto curr_node = bone_queue.front();
@@ -284,7 +490,7 @@ namespace idk::ai_helpers
 			const mat4 node_transform = curr_node.compiled_transform * to_mat4(curr_node.node->mTransformation);
 
 			// Ignore all $assimp$ nodes in the final skeleton. We also ignore user specified excluded nodes. Everything else we will consider it a bone.
-			if (node_name.find(AssimpPrefix) != string::npos || node_name.find(AssimpImporter::bone_exclude_keyword) != string::npos)
+			if (node_name.find(AssimpPrefix) != string::npos || node_name.find(Scene::bone_exclude_keyword) != string::npos)
 			{
 				for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
 				{
@@ -310,7 +516,7 @@ namespace idk::ai_helpers
 			aiVector3D		child_local_scale;
 			aiQuaternion	child_local_rot;
 
-			auto bone_node = scene.bone_table.find(node_name);
+			auto bone_node = bone_table.find(node_name);
 			aiMatrix4x4 global_inverse = curr_node.node->mTransformation;
 			global_inverse.Inverse();
 
@@ -353,7 +559,7 @@ namespace idk::ai_helpers
 			}
 		}
 
-		for (auto& bone : scene.skinless_skeleton)
+		for (auto& bone : skinless_skeleton)
 		{
 			bone._global_inverse_bind_pose[3] *= 0.01f;
 			bone._global_inverse_bind_pose[3].w = 1.0f;
@@ -361,25 +567,35 @@ namespace idk::ai_helpers
 			bone._local_bind_pose.position *= 0.01f;
 		}
 	}
+
+	anim::Skeleton Scene::CompileSkeleton() const
+	{
+		anim::Skeleton ret_val{ final_skeleton, final_skeleton_table };
+		if (!final_skeleton.empty())
+			ret_val.Name(final_skeleton[0]._name);
+		return ret_val;
+	}
+
 #pragma endregion
 
 #pragma region Compiling/Building Animations
-	void CompileAnimations(Scene & scene)
+	vector<AnimationData> Scene::CollectAndBuildAnimations()
 	{
 		// Generate anim map.
 		// Compile all animated channels.
 		// Error checking also happens here.
+		vector<AnimationData> ret_val;
 
 		// We create a skinless skeleton if the scene has animations but no mesh
-		if (scene.ai_scene->HasAnimations() && !scene.has_skeleton)
+		if (ai_scene->HasAnimations() && !has_skeleton)
 		{
-			BuildSkinlessSkeleton(scene);
+			BuildSkinlessSkeleton();
 		}
 
-		for (size_t i = 0; i < scene.ai_scene->mNumAnimations; ++i)
+		for (size_t i = 0; i < ai_scene->mNumAnimations; ++i)
 		{
-			aiAnimation* ai_anim = scene.ai_scene->mAnimations[i];
-			CompiledAnimation compiled_clip;
+			aiAnimation* ai_anim = ai_scene->mAnimations[i];
+			AnimationData compiled_clip;
 
 			compiled_clip.name = ai_anim->mName.data;
 			compiled_clip.fps = static_cast<float>(ai_anim->mTicksPerSecond <= 0.0 ? 24.0f : ai_anim->mTicksPerSecond);
@@ -442,16 +658,16 @@ namespace idk::ai_helpers
 				switch (channel_type)
 				{
 				case Translate:
-					CompileTranslateChannel(scene, animated_bone, ai_channel);
+					BuildTranslateChannel(animated_bone, ai_channel);
 					break;
 				case Rotate:
-					CompileRotateChannel(scene, animated_bone, ai_channel);
+					BuildRotateChannel(animated_bone, ai_channel);
 					break;
 				case Scale:
-					CompileScaleChannel(scene, animated_bone, ai_channel);
+					BuildScaleChannel(animated_bone, ai_channel);
 					break;
 				case Bone:
-					CompileBoneChannel(scene, animated_bone, ai_channel);
+					BuildBoneChannel(animated_bone, ai_channel);
 					break;
 				case None:
 					break;
@@ -460,17 +676,16 @@ namespace idk::ai_helpers
 				}
 
 			}
+			BuildAnimation(compiled_clip);
+			ai_anim_clips.emplace_back(ai_anim);
+			ret_val.emplace_back(compiled_clip);
 
-			scene.ai_anim_clips.emplace_back(ai_anim);
-			scene.compiled_clips.emplace_back(compiled_clip);
-
-			scene.has_animation = true;
+			has_animation = true;
 		}
 	}
 
-	void CompileTranslateChannel(Scene& scene, anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
+	void Scene::BuildTranslateChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
 	{
-		UNREFERENCED_PARAMETER(scene);
 		// Error handling: There should not be any keys in the scale or rotate section
 		if (anim_channel->mNumRotationKeys > 1)
 			LogWarning(std::to_string(anim_channel->mNumRotationKeys) +
@@ -497,9 +712,8 @@ namespace idk::ai_helpers
 		}
 	}
 
-	void CompileRotateChannel(Scene& scene, anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
+	void Scene::BuildRotateChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
 	{
-		UNREFERENCED_PARAMETER(scene);
 		// Error handling: There should not be any keys in the position or scale section
 		if (anim_channel->mNumPositionKeys > 1)
 			LogWarning(std::to_string(anim_channel->mNumPositionKeys) +
@@ -588,7 +802,7 @@ namespace idk::ai_helpers
 		}
 	}
 
-	void CompileScaleChannel(Scene& scene, anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
+	void Scene::BuildScaleChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
 	{
 		// Error handling: There should not be any keys in the position or scale section
 		if (anim_channel->mNumPositionKeys > 1)
@@ -606,7 +820,7 @@ namespace idk::ai_helpers
 				return;
 		}
 
-		aiNode* node = scene.bone_root->FindNode(anim_channel->mNodeName.data);
+		aiNode* node = bone_root->FindNode(anim_channel->mNodeName.data);
 
 		// Need to find all the chained rotations first
 		aiMatrix4x4 pre_scale;
@@ -619,7 +833,7 @@ namespace idk::ai_helpers
 		aiNode* parent = node->mParent;
 		for (int i = 0; i < PreScaleMax; ++i)
 		{
-			if (parent->mName.data == anim_bone.bone_name + AssimpPrefix + PreScaleSuffix[i])
+			if (parent->mName.data == anim_bone.bone_name + AssimpPrefix.data() + PreScaleSuffix[i].data())
 			{
 				pre_scale = pre_scale * parent->mTransformation;
 				parent = parent->mParent;
@@ -655,9 +869,8 @@ namespace idk::ai_helpers
 		}
 	}
 
-	void CompileBoneChannel(Scene& scene, anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
+	void Scene::BuildBoneChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
 	{
-		UNREFERENCED_PARAMETER(scene);
 		if (!anim_bone.scale_track.empty())
 		{
 			LogWarning("Animated bone " + anim_bone.bone_name + " has more than 1 channel that has scaling keys. Ignoring the one with fewer keys.");
@@ -705,9 +918,8 @@ namespace idk::ai_helpers
 		}
 	}
 
-	void BuildAnimations(Scene& scene)
+	void Scene::BuildAnimation(AnimationData& anim_data) const
 	{
-		UNREFERENCED_PARAMETER(scene);
 		// Do all the keyframe optimizations here.
 		const auto trans_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
 		{
@@ -719,249 +931,45 @@ namespace idk::ai_helpers
 			return vec3_equal(lhs.val, rhs.val, 0.01f);
 		};
 
-		for (auto& anim_clip : scene.compiled_clips)
+		for (auto& anim_bone : anim_data.animated_bones)
 		{
-			for (auto& anim_bone : anim_clip.animated_bones)
-			{
-				// Translation optimization
-				anim_bone.translate_track.erase(
-					std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), trans_pred), anim_bone.translate_track.end());
-				if (anim_bone.translate_track.size() == 1)
-					anim_bone.translate_track.clear();
+			// Translation optimization
+			anim_bone.translate_track.erase(
+				std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), trans_pred), anim_bone.translate_track.end());
+			if (anim_bone.translate_track.size() == 1)
+				anim_bone.translate_track.clear();
 
-				// Scale optimization
-				anim_bone.scale_track.erase(
-					std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), scale_pred), anim_bone.scale_track.end());
-				if (anim_bone.scale_track.size() == 1)
-					anim_bone.scale_track.clear();
-			}
+			// Scale optimization
+			anim_bone.scale_track.erase(
+				std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), scale_pred), anim_bone.scale_track.end());
+			if (anim_bone.scale_track.size() == 1)
+				anim_bone.scale_track.clear();
 		}
 	}
-#pragma endregion
-
-#pragma region Building Meshes
-	OpenGLMeshBuffers WriteToVertices(Scene& scene, const  aiMesh* ai_mesh)
+	vector<anim::Animation> Scene::CompileAnimations()
 	{
-		OpenGLMeshBuffers mesh_buffers;
+		auto animations{ CollectAndBuildAnimations() };
 
-		// Allocate space for the mesh data
-		mesh_buffers.vertices.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		mesh_buffers.indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
-
-		const float normalize_scale = scene.file_ext == ".fbx" ? 0.01f : 1.0f;
-
-		// Initialize vertices
-		const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
-		for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
+		vector<anim::Animation> ret_val;
+		ret_val.reserve(animations.size());
+		
+		for (auto& anim_data : animations)
 		{
-			const aiVector3D& pos = ai_mesh->mVertices[k];
-			const aiVector3D& normal = ai_mesh->mNormals[k];
-			const aiVector3D& text = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][k] : zero;
-			aiVector3D tangent, bi_tangent;
-			if (ai_mesh->HasTangentsAndBitangents())
+			anim::Animation anim_clip;
+
+			anim_clip.Name(anim_data.name);
+			anim_clip.SetSpeeds(anim_data.fps, anim_data.duration, anim_data.num_ticks);
+
+			for (auto& animated_bone : anim_data.animated_bones)
 			{
-				tangent = ai_mesh->mTangents[k];
-				bi_tangent = ai_mesh->mBitangents[k];
+				anim_clip.AddAnimatedBone(animated_bone);
 			}
 
-			mesh_buffers.vertices.emplace_back(Vertex{ vec3{ pos.x, pos.y, pos.z } *normalize_scale
-														,vec3{ normal.x, normal.y, normal.z }
-														,vec2{ text.x, text.y }
-														,vec3{ tangent.x, tangent.y, tangent.z }
-														,vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z } });
-
-			// updateBounds(vertices.back().pos, min_pos, max_pos);
+			ret_val.emplace_back(std::move(anim_clip));
 		}
 
-		// Initialize indices
-		for (size_t k = 0; k < ai_mesh->mNumFaces; k++)
-		{
-			const aiFace& face = ai_mesh->mFaces[k];
-			assert(face.mNumIndices == 3);
-			mesh_buffers.indices.push_back(face.mIndices[0]);
-			mesh_buffers.indices.push_back(face.mIndices[1]);
-			mesh_buffers.indices.push_back(face.mIndices[2]);
-		}
-
-		// Bone weights
-		for (size_t k = 0; k < ai_mesh->mNumBones; ++k)
-		{
-			const aiBone* ai_bone = ai_mesh->mBones[k];
-			auto res = scene.final_skeleton_table.find(ai_bone->mName.data);
-			assert(res != scene.final_skeleton_table.end());
-
-			const int bone_index = static_cast<int>(res->second);
-			for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
-			{
-				float weight = ai_bone->mWeights[j].mWeight;
-
-				unsigned vert_id = ai_bone->mWeights[j].mVertexId;
-				mesh_buffers.vertices[vert_id].AddBoneData(bone_index, weight);
-			}
-		}
-
-		return mesh_buffers;
+		return ret_val;
 	}
-	void BuildMeshOpenGL(Scene& scene, const OpenGLMeshBuffers& mesh_buffers, const  RscHandle<ogl::OpenGLMesh>& mesh_handle)
-	{
-		UNREFERENCED_PARAMETER(scene);
-		auto& mesh = *mesh_handle;
-
-		vector<ogl::OpenGLDescriptor> descriptor
-		{
-			ogl::OpenGLDescriptor{vtx::Attrib::Position,		sizeof(Vertex), offsetof(Vertex, pos) },
-			ogl::OpenGLDescriptor{vtx::Attrib::Normal,			sizeof(Vertex), offsetof(Vertex, normal) },
-			ogl::OpenGLDescriptor{vtx::Attrib::UV,				sizeof(Vertex), offsetof(Vertex, uv) },
-			ogl::OpenGLDescriptor{vtx::Attrib::Tangent,			sizeof(Vertex), offsetof(Vertex, tangent) },
-			ogl::OpenGLDescriptor{vtx::Attrib::Bitangent,		sizeof(Vertex), offsetof(Vertex, bi_tangent) },
-			ogl::OpenGLDescriptor{vtx::Attrib::BoneID,			sizeof(Vertex), offsetof(Vertex, bone_ids) },
-			ogl::OpenGLDescriptor{vtx::Attrib::BoneWeight,		sizeof(Vertex), offsetof(Vertex, bone_weights) }
-		};
-
-		mesh.AddBuffer(
-			ogl::OpenGLBuffer{ GL_ARRAY_BUFFER, descriptor }
-			.Bind()
-			.Buffer(mesh_buffers.vertices.data(), sizeof(Vertex), s_cast<GLsizei>(mesh_buffers.vertices.size()))
-		);
-
-		mesh.AddBuffer(
-			ogl::OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }
-			.Bind()
-			.Buffer(mesh_buffers.indices.data(), sizeof(int), s_cast<GLsizei>(mesh_buffers.indices.size()))
-		);
-
-		// Compute ritters here
-		vector<vec3> ritters_buffer;
-		ritters_buffer.resize(mesh_buffers.vertices.size());
-		std::transform(mesh_buffers.vertices.begin(), mesh_buffers.vertices.end(), ritters_buffer.begin(),
-			[](const Vertex& vtx)
-			{
-				return vtx.pos;
-			});
-
-		sphere bound_volume = ritters(span<vec3>{ritters_buffer});
-		mesh.bounding_volume = bound_volume;
-
-	}
-
-	VulkanMeshBuffers WriteToBuffers(Scene& scene, const aiMesh* ai_mesh)
-	{
-		VulkanMeshBuffers mesh_buffers;
-		// Clear the buffers
-
-		// Allocating space in the buffers
-		mesh_buffers.positions.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		mesh_buffers.normals.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		mesh_buffers.uvs.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		mesh_buffers.tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-		mesh_buffers.bi_tangents.reserve(s_cast<size_t>(ai_mesh->mNumVertices));
-
-		// Bone weights are resized because we need to do subscript directly
-		mesh_buffers.bone_ids.resize(s_cast<size_t>(ai_mesh->mNumVertices), ivec4{ 0,0,0,0 });
-		mesh_buffers.bone_weights.resize(s_cast<size_t>(ai_mesh->mNumVertices), vec4{ 0,0,0,0 });
-
-		mesh_buffers.indices.reserve(s_cast<size_t>(ai_mesh->mNumFaces) * 3);
-
-		const float normalize_scale = scene.file_ext == ".fbx" ? 0.01f : 1.0f;
-
-		// Initialize vertices
-		const aiVector3D  zero{ 0.0f, 0.0f, 0.0f };
-		for (size_t k = 0; k < ai_mesh->mNumVertices; ++k)
-		{
-			const aiVector3D& pos = ai_mesh->mVertices[k];
-			const aiVector3D& normal = ai_mesh->mNormals[k];
-			const aiVector3D& text = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][k] : zero;
-			aiVector3D tangent, bi_tangent;
-			if (ai_mesh->HasTangentsAndBitangents())
-			{
-				tangent = ai_mesh->mTangents[k];
-				bi_tangent = ai_mesh->mBitangents[k];
-			}
-
-			mesh_buffers.positions.emplace_back(vec3{ pos.x, pos.y, pos.z } *normalize_scale);
-			mesh_buffers.normals.emplace_back(vec3{ normal.x, normal.y, normal.z });
-			mesh_buffers.uvs.emplace_back(vec2{ text.x, text.y });
-			mesh_buffers.tangents.emplace_back(vec3{ tangent.x, tangent.y, tangent.z });
-			mesh_buffers.bi_tangents.emplace_back(vec3{ bi_tangent.x, bi_tangent.y, bi_tangent.z });
-			// updateBounds(vertices.back().pos, min_pos, max_pos);
-		}
-
-		// Initialize indices
-		for (size_t k = 0; k < ai_mesh->mNumFaces; k++)
-		{
-			const aiFace& face = ai_mesh->mFaces[k];
-			assert(face.mNumIndices == 3);
-			mesh_buffers.indices.push_back(face.mIndices[0]);
-			mesh_buffers.indices.push_back(face.mIndices[1]);
-			mesh_buffers.indices.push_back(face.mIndices[2]);
-		}
-
-		// Bone weights
-		for (size_t k = 0; k < ai_mesh->mNumBones; ++k)
-		{
-			const aiBone* ai_bone = ai_mesh->mBones[k];
-			auto res = scene.final_skeleton_table.find(ai_bone->mName.data);
-			assert(res != scene.final_skeleton_table.end());
-
-			const int bone_index = static_cast<int>(res->second);
-			for (size_t j = 0; j < ai_bone->mNumWeights; ++j)
-			{
-				const float weight = ai_bone->mWeights[j].mWeight;
-				const unsigned vert_id = ai_bone->mWeights[j].mVertexId;
-				ai_helpers::AddBoneData(bone_index, weight, mesh_buffers.bone_ids[vert_id], mesh_buffers.bone_weights[vert_id]);
-			}
-		}
-		return mesh_buffers;
-	}
-	void BuildMeshVulknan(Scene& scene, MeshModder& mesh_modder, RscHandle<vkn::VulkanMesh>& mesh_handle, const VulkanMeshBuffers& mesh_buffers)
-	{
-		UNREFERENCED_PARAMETER(scene);
-		hash_table<attrib_index, std::pair<std::shared_ptr<MeshBuffer::Managed>, offset_t>> attribs;
-		{
-			auto& buffer = mesh_buffers.positions;
-			//Use CreateData to create the buffer, then store the result with the offset.
-			//Since it's a shared ptr, you may share the result of CreateData with multiple attrib buffers
-			attribs[vkn::attrib_index::Position] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
-		}
-		{
-			auto& buffer = mesh_buffers.normals;
-			attribs[attrib_index::Normal] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
-		}
-		{
-			auto& buffer = mesh_buffers.uvs;
-			attribs[attrib_index::UV] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
-		}
-		{
-			auto& buffer = mesh_buffers.tangents;
-			attribs[attrib_index::Tangent] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
-		}
-		{
-			auto& buffer = mesh_buffers.bi_tangents;
-			attribs[attrib_index::Bitangent] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
-		}
-		{
-			auto& buffer = mesh_buffers.bone_ids;
-			attribs[attrib_index::BoneID] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
-		}
-		{
-			auto& buffer = mesh_buffers.bone_weights;
-			attribs[attrib_index::BoneWeight] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) }), offset_t{ 0 });
-		}
-
-		auto& buffer = mesh_buffers.indices;
-		auto index_buffer = mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),vkn::hlp::buffer_size(buffer) });
-
-		mesh_modder.RegisterAttribs(*mesh_handle, attribs);
-		mesh_modder.SetIndexBuffer32(*mesh_handle, index_buffer, s_cast<uint32_t>(mesh_buffers.indices.size()));
-
-
-		// Compute ritters here
-		span<const vec3> pos{ mesh_buffers.positions };
-		sphere bound_volume = ritters(pos);
-		auto& mesh = *mesh_handle;
-		mesh.bounding_volume = bound_volume;
-	}
-
 #pragma endregion
 
 	// Utility functions
@@ -1016,7 +1024,7 @@ namespace idk::ai_helpers
 			// Check if start_node matches any of the pre rotations.
 			for (int i = curr_pre_rot_index; i < PreRotationMax; ++i)
 			{
-				if (start_node->mName.data == node_name + AssimpPrefix + PreRotateSuffix[i])
+				if (start_node->mName.data == node_name + AssimpPrefix.data() + PreRotateSuffix[i].data())
 				{
 					// Set the starting point of the next pre rotation check
 					pre_rotation = pre_rotation * start_node->mTransformation;
@@ -1077,7 +1085,7 @@ namespace idk::ai_helpers
 			// Check if start_node matches any of the pre rotations.
 			for (int i = curr_post_rot_index; i < PostRotationMax; ++i)
 			{
-				if (start_node->mName.data == node_name + AssimpPrefix + PostRotateSuffix[i])
+				if (start_node->mName.data == node_name + AssimpPrefix.data() + PostRotateSuffix[i].data())
 				{
 					// Set the starting point of the next pre rotation check
 					post_rotation = post_rotation * start_node->mTransformation;
@@ -1163,12 +1171,14 @@ namespace idk::ai_helpers
 	{
 		return abs(a - b) < eps;
 	}
+
 	bool vec3_equal(const vec3& lhs, const vec3& rhs, float eps)
 	{
 		return	flt_equal(lhs[0], rhs[0], eps) &&
 			flt_equal(lhs[1], rhs[1], eps) &&
 			flt_equal(lhs[2], rhs[2], eps);
 	}
+
 	bool vec4_equal(const vec4& lhs, const vec4& rhs)
 	{
 		return	flt_equal(lhs[0], rhs[0]) &&
@@ -1176,6 +1186,7 @@ namespace idk::ai_helpers
 			flt_equal(lhs[2], rhs[2]) &&
 			flt_equal(lhs[3], rhs[3]);
 	}
+
 	bool quat_equal(const quat& lhs, const quat& rhs)
 	{
 		return	flt_equal(lhs[0], rhs[0], idk::constants::epsilon<float>()) &&
@@ -1183,6 +1194,7 @@ namespace idk::ai_helpers
 			flt_equal(lhs[2], rhs[2], idk::constants::epsilon<float>()) &&
 			flt_equal(lhs[3], rhs[3], idk::constants::epsilon<float>());
 	}
+
 	bool mat4_equal(const mat4& lhs, const mat4& rhs)
 	{
 		return	vec4_equal(lhs[0], rhs[0]) &&
@@ -1191,7 +1203,6 @@ namespace idk::ai_helpers
 			vec4_equal(lhs[3], rhs[3]);
 	}
 
-#pragma endregion 
 	void AddBoneData(unsigned id_in, float weight_in, ivec4& ids_out, vec4& weights_out)
 	{
 		for (unsigned i = 0; i < 4; i++)
@@ -1226,8 +1237,7 @@ namespace idk::ai_helpers
 		//assert(abs(1.0f - sum_weights) < idk::constants::epsilon<float>());
 	}
 
-	void Vertex::AddBoneData(int id, float weight)
-	{
-		ai_helpers::AddBoneData(id, weight, bone_ids, bone_weights);
-	}
+#pragma endregion 
+	
+
 }

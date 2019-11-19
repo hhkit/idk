@@ -15,6 +15,7 @@ namespace idk
 	{
 		vector<CompiledBuffer> buffers;
 		vector<unsigned> element_buffer;
+		sphere bounding_volume;
 		EXTENSION(".idmsh");
 	};
 
