@@ -10,6 +10,8 @@
 #include <phys/collision_detection/collision_sphere.h>
 #include <phys/collision_detection/collision_box_sphere.h>
 #include <phys/collision_detection/collision_capsule.h>
+#include <phys/collision_detection/collision_capsule_box.h>
+#include <phys/collision_detection/collision_capsule_sphere.h>
 #include <phys/collision_detection/ManagedCollision.h>
 
 #include <script/MonoBehavior.h>
@@ -317,21 +319,6 @@ namespace idk
                     rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz;
                 rigidbody.sleep_next_frame = false;
             }
-
-            for (const auto& elem : static_info)
-                debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
-            for (const auto& elem : dynamic_info)
-                debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
-            for (auto& elem : colliders)
-            {
-                if (!elem._active_cache)
-                {
-                    std::visit([&](const auto& shape)
-                    {
-                        debug_draw(calc_shape(shape, elem), color{ 0.5 });
-                    }, elem.shape);
-                }
-            }
 		};
 
 		collisions.clear();
@@ -341,6 +328,24 @@ namespace idk
 		for (int i = 0; i < 4;++i)
 			CollideObjects();
 		FinalizePositions();
+
+        if (!debug_draw_colliders)
+            return;
+
+        for (const auto& elem : static_info)
+            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+        for (const auto& elem : dynamic_info)
+            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+        for (auto& elem : colliders)
+        {
+            if (!elem._active_cache)
+            {
+                std::visit([&](const auto& shape)
+                {
+                    debug_draw(calc_shape(shape, elem), color{ 0.5 });
+                }, elem.shape);
+            }
+        }
 	}
 
 	void PhysicsSystem::FirePhysicsEvents()
@@ -476,19 +481,21 @@ namespace idk
 
 	}
 
+    void PhysicsSystem::DrawCollider(const Collider& collider) const
+    {
+        std::visit([&](const auto& shape)
+        {
+            Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider),
+                collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }, Core::GetDT());
+        }, collider.shape);
+    }
+
 	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)
 	{
-		// put shape into world space
-		constexpr auto debug_draw = [calc_shape = calc_shape](const Collider& collider, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
-		{
-			std::visit([&](const auto& shape)
-			{
-				Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider), collider.is_trigger ? color{0,1,1} : c, dur);
-			}, collider.shape);
-		};
-
+        if (!debug_draw_colliders)
+            return;
 		for (auto& collider : colliders)
-			debug_draw(collider);
+            DrawCollider(collider);
 	}
 
 	void PhysicsSystem::Reset()
@@ -529,8 +536,12 @@ namespace idk
 						if constexpr (std::is_same_v<RShape, box>)
 							return phys::collide_ray_aabb(
 								r, c.bounds());
-						else
-							return phys::raycast_failure{};
+					else
+						if constexpr (std::is_same_v<RShape, capsule>)
+							return phys::collide_ray_capsule(
+								r, shape);
+					else
+						return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)
@@ -573,6 +584,10 @@ namespace idk
 					if constexpr (std::is_same_v<RShape, box>)
 						return phys::collide_ray_aabb(
 							r, c.bounds());
+				else
+					if constexpr (std::is_same_v<RShape, capsule>)
+						return phys::collide_ray_capsule(
+							r, shape);
 				else
 					return phys::raycast_failure{};
 			}, c.shape);
@@ -619,8 +634,12 @@ namespace idk
 						if constexpr (std::is_same_v<RShape, box>)
 							return phys::collide_ray_aabb(
 								r, c.bounds());
-						else
-							return phys::raycast_failure{};
+					else
+						if constexpr (std::is_same_v<RShape, capsule>)
+							return phys::collide_ray_capsule(
+								r, shape);
+					else
+						return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)

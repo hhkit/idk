@@ -243,4 +243,23 @@ namespace idk::phys
 
 		return raycast_success{false,poc,lhs.origin.distance(poc) };
 	}
+
+
+	raycast_result collide_ray_capsule(const ray& lhs, const capsule& c)
+	{
+		const auto& capsule_line_points = c.get_line_points();
+		const auto& closest_pt_pair = ClosestPairPointsLineSegmentToLineSegment(lhs.origin,lhs.origin+lhs.velocity, capsule_line_points.first,capsule_line_points.second);
+		const vec3 vector_line_capsule = closest_pt_pair.first - closest_pt_pair.second; //Line to capsule vector
+		auto distance = vector_line_capsule.length();
+		if (epsilon_equal(closest_pt_pair.first.length_sq(), closest_pt_pair.second.length_sq()) || c.radius >= distance) { //Lines intersect OR //Lines are close such that the capsule radius intersect
+			float s_to_sphere = lhs.direction().get_normalized().dot(closest_pt_pair.second - lhs.origin) - c.radius;
+			const auto point_of_collision = lhs.origin + lhs.direction().get_normalized()* s_to_sphere;
+			std::cout << "capsule::success" << "\n";
+		
+			return raycast_success{ false,point_of_collision,lhs.origin.distance(point_of_collision) };
+		}
+		std::cout << "capsule::fail" << "\n";
+		return raycast_failure { lhs.origin }; //return ray origin as failed
+		//return raycast_failure();
+	}
 }

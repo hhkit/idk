@@ -33,7 +33,7 @@ namespace idk::vkn
 	template<typename T, typename...Args>
 	using has_setstate = decltype(std::declval<T>().SetState(std::declval<Args>()...));
 	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders);
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp);
+	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp);
 
 	void GBufferBarrier(vk::CommandBuffer cmd_buffer, DeferredGBuffer& gbuffer)
 	{
@@ -466,7 +466,7 @@ namespace idk::vkn
 		//TransitionFrameBuffer(camera, cmd_buffer, view);
 
 		auto sz = g_buffer.Size();
-		Viewport viewport{};
+		rect viewport{};
 		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
 
 		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };

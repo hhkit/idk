@@ -82,6 +82,7 @@ namespace idk
 			span<SkinnedMeshRenderer> skinned_mesh_renderers,
             span<class ParticleSystem>,
 			span<class Font>,
+            span<class Image>,
 			span<const class Transform>, 
 			span<const Camera> camera, 
 			span<const Light> lights);
@@ -133,8 +134,9 @@ namespace idk
 			vector<SkeletonTransforms> skeleton_transforms;
             vector<ParticleRenderData> particle_render_data;
 			vector<FontData> font_render_data;
+			vector<UIRenderObject> ui_render;
 
-			CameraData  curr_scene_camera;
+			size_t curr_scene_camera_index;
 
 			vector<InstRenderObjects> instanced_mesh_render;
 			//vector<InstAnimatedRenderObjects> instanced_skinned_mesh_render;
