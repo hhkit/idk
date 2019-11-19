@@ -886,7 +886,69 @@ namespace idk::mono
         }
 		BIND_END();
 
-		// lights
+		// //////Camera///////////////
+		BIND_START("idk.Bindings::CameraGetFOV", rad, Handle<Camera> h)
+		{
+			return h->field_of_view;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetFOV", void, Handle<Camera> h, rad r)
+		{
+			h->field_of_view = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetNearPlane", real, Handle<Camera> h)
+		{
+			return h->near_plane;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetNearPlane", void, Handle<Camera> h, real r)
+		{
+			h->near_plane = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetFarPlane", real, Handle<Camera> h)
+		{
+			return h->far_plane;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetFarPlane", void, Handle<Camera> h, real r)
+		{
+			h->far_plane = r;
+		}
+		BIND_END();
+
+
+		BIND_START("idk.Bindings::CameraGetViewport", rect, Handle<Camera> h)
+		{
+			return h->viewport;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetViewport", void, Handle<Camera> h, rect r)
+		{
+			h->viewport = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetEnabledState", bool, Handle<Camera> h)
+		{
+			return h->enabled;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetEnabledState", void, Handle<Camera> h, bool r)
+		{
+			h->enabled = r;
+		}
+		BIND_END();
+
+		// //////lights////////////////
 		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
 		{
 			return h->GetColor();
@@ -899,6 +961,30 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::LightGetCastShadow", bool, Handle<Light> h)
+		{
+			return h->GetCastShadow();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetCastShadow", void, Handle<Light> h, bool i)
+		{
+			h->SetCastShadow(i);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetShadowBias", real, Handle<Light> h)
+		{
+			return h->GetShadowBias();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetShadowBias", void, Handle<Light> h, real i)
+		{
+			h->SetShadowBias(i);
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::LightGetIntensity", real, Handle<Light> h)
 		{
 			return h->GetLightIntensity();
@@ -908,6 +994,94 @@ namespace idk::mono
 		BIND_START("idk.Bindings::LightSetIntensity", void, Handle<Light> h, real i)
 		{
 			h->SetLightIntensity(i);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetFOV", rad, Handle<Light> h)
+		{
+			return std::visit([&](auto& light_variant)-> const rad
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, PointLight>)
+					return light_variant.GetFOV();
+				else
+					return rad{};
+			}
+			, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetFOV", void, Handle<Light> h, rad i)
+		{
+			std::visit([&, val = i](auto& light_variant)
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, PointLight>)
+					light_variant.SetFOV(val);
+			}
+			, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetAttenuationRadius", real, Handle<Light> h)
+		{
+			return std::visit([&](auto& light_variant)-> const real
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (
+					std::is_same_v<T, PointLight> ||
+					std::is_same_v<T, SpotLight>
+					)
+					return light_variant.GetAttenuationRadius();
+				else
+					return 0.f;
+			}
+			, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetAttenuationRadius", void, Handle<Light> h, real i)
+		{
+			std::visit([&, val = i](auto& light_variant)
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, PointLight> ||
+					std::is_same_v<T, SpotLight>
+					)
+					light_variant.SetAttenuationRadius(val);
+			}
+			, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetIsInverseAttSqRadius", bool, Handle<Light> h)
+		{
+			return std::visit([&](auto& light_variant)-> const bool
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (
+					std::is_same_v<T, PointLight> ||
+					std::is_same_v<T, SpotLight>
+					)
+					return light_variant.GetInvSqAtten();
+				else
+					return false;
+			}
+			, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetIsInverseAttSqRadius", void, Handle<Light> h, bool i)
+		{
+			std::visit([&, val = i](auto& light_variant)
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, PointLight> ||
+					std::is_same_v<T, SpotLight>
+					)
+					light_variant.SetInvSqAtten(val);
+			}
+			, h->light);
 		}
 		BIND_END();
 

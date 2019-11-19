@@ -247,6 +247,7 @@
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
+    <ClInclude Include="VulkanFontAtlasFactory.h" />
     <ClInclude Include="VknFontAtlasLoader.h" />
     <ClInclude Include="VknFrameBuffer.h" />
     <ClInclude Include="VknFramebufferFactory.h" />
@@ -305,6 +306,7 @@
     <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />
     <ClCompile Include="UboManager.cpp" />

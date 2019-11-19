@@ -260,6 +260,38 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int AddAudioClip(ulong id, string name);
         /*
+        * Camera
+        */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Rad CameraGetFOV(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetFOV(ulong id, Rad c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float CameraGetNearPlane(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetNearPlane(ulong id, float c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float CameraGetFarPlane(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetFarPlane(ulong id, float c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Rect CameraGetViewport(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetViewport(ulong id, Rect c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool CameraGetEnabledState(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetEnabledState(ulong id, bool c);
+        /*
         * Light
         */
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -274,7 +306,35 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void LightSetIntensity(ulong id, float i);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool LightGetCastShadow(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetCastShadow(ulong id, bool i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float LightGetShadowBias(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetShadowBias(ulong id, float i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Rad LightGetFOV(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetFOV(ulong id, Rad i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float LightGetAttenuationRadius(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetAttenuationRadius(ulong id, float i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool LightGetIsInverseSqAtt(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetIsInverseSqAtt(ulong id, bool i);
         /*
          * Collider
          */

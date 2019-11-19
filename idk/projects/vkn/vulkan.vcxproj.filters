@@ -204,6 +204,9 @@
     <ClInclude Include="VknTextureRenderMeta.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanFontAtlasFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -374,6 +377,9 @@
     </ClCompile>
     <ClCompile Include="VknTextureRenderMeta.cpp">
       <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanFontAtlasFactory.cpp">
+      <Filter>resource\Factories</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

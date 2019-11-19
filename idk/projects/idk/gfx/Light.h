@@ -50,6 +50,12 @@ namespace idk
 
 		real GetLightIntensity()const;
 		void SetLightIntensity(const real& i);
+
+		bool GetCastShadow()const { return casts_shadows; }
+		void SetCastShadow(const bool& i) { casts_shadows = i; }
+
+		real GetShadowBias()const { return shadow_bias; }
+		void SetShadowBias(const real& i) { shadow_bias = i; }
 		//CameraData GenerateCameraData() const;
 	};
 }
