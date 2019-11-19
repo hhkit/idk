@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		10 SEPT 2019
+//@date		18 NOV 2019
 //@brief	
 
 /*
@@ -16,7 +16,7 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
-#include <editor/commands/CommandList.h> //DockBuilderDockNode
+#include <editor/commands/CommandList.h> //Commands
 #include <common/Transform.h> //DockBuilderDockNode
 #include <common/TagManager.h>
 #include <gfx/Camera.h> //DockBuilderDockNode
@@ -172,10 +172,14 @@ namespace idk {
 			} 
 			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
 				IDE& editor = Core::GetSystem<IDE>();
+				int execute_counter = 0;
+
 				for (auto& i : editor.copied_gameobjects) {
 					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject, i));
+					++execute_counter;
 				}
 
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 
 			}
 
@@ -188,11 +192,15 @@ namespace idk {
 			if (ImGui::MenuItem("Delete")) {
 				vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 				IDE& editor = Core::GetSystem<IDE>();
+				int execute_counter = 0;
 				while (!editor.selected_gameObjects.empty()) {
 					Handle<GameObject> i = editor.selected_gameObjects.front();
 					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
 					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+					++execute_counter;
 				}
+
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 
 				selected_gameObjects.clear();
 
@@ -266,8 +274,14 @@ namespace idk {
 
 				if (ImGui::MenuItem(displayName.c_str(),nullptr,nullptr,canSelect)) {
 					//Add component
-					for (Handle<GameObject> i : editor.selected_gameObjects)
+					int execute_counter = 0;
+					for (Handle<GameObject> i : editor.selected_gameObjects) {
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+						++execute_counter;
+					}
+
+					CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+					commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 				}
 			}
 			//Each button is disabled if gameobject is not selected!
@@ -507,9 +521,13 @@ namespace idk {
 
 			//CTRL + V
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				int execute_counter = 0;
 				for (auto& i : editor.copied_gameobjects) {
 					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject,i));
+					++execute_counter;
 				}
+
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 			}
 
 
@@ -533,11 +551,15 @@ namespace idk {
 			
 			//DEL = Delete
 			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
+				int execute_counter = 0;
 				while (!editor.selected_gameObjects.empty()) {
 					Handle<GameObject> i = editor.selected_gameObjects.front();
 					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
 					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+					++execute_counter;
 				}
+
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 			}
 
 			//F = Focus on GameObject

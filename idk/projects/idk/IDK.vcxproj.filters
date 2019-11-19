@@ -884,6 +884,12 @@
     <ClInclude Include="ui\RectTransform.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="multithread_control.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\stl_hack.h">
+      <Filter>meta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

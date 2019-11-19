@@ -276,6 +276,7 @@ namespace idk::vkn
 			pre_render_data.active_lights[i]=i;
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
+		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
 		//pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
 		//pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
@@ -310,7 +311,7 @@ namespace idk::vkn
 					}
 				}, camera.clear_data);
 		}
-
+		bool will_draw_debug = true;
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];
@@ -330,19 +331,29 @@ namespace idk::vkn
 			curr_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
+			curr_state.ProcessMaterialInstances();
 			if (curr_cam.render_target->RenderDebug())
 			{
+				will_draw_debug = true;
 				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();
 				//TODO Add cull step
-				curr_state.dbg_render.reserve(_debug_renderer->DbgDrawCalls().size());
-				for (auto& dbgcall : _debug_renderer->DbgDrawCalls())
+				curr_state.dbg_render.reserve(std::size(_debug_renderer->DbgDrawCalls()));
+				for (auto& [mesh,dbgcall] : _debug_renderer->DbgDrawCalls())
 				{
-					curr_state.dbg_render.emplace_back(&dbgcall);
+					if(dbgcall.num_instances)
+						curr_state.dbg_render.emplace_back(&dbgcall);
 				}
 			}
 			//_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
+		if (will_draw_debug)
+		{
+			for (auto& [buffer, data] : _debug_renderer->BufferUpdateInfo())
+			{
+				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
 
+			}
+		}
 		for (auto& prt : render_targets)
 		{
 			if (prt->NeedsFinalizing())
@@ -374,6 +385,7 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		instance_->View().Device()->waitIdle();
 		_pimpl.reset();
 		_debug_renderer->Shutdown();
 

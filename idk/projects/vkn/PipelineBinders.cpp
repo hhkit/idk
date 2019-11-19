@@ -193,8 +193,8 @@ namespace idk::vkn
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
 	{
 		auto& state = State();
-		the_interface.BindUniformBuffer("LightBlock", 0, light_block);//skip if pbr is already bound(not per instance)
-		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf);//skip if pbr is already bound(not per instance)
+		the_interface.BindUniformBuffer("LightBlock", 0, light_block,true);//skip if pbr is already bound(not per instance)
+		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
 
 		{
 			uint32_t i = 0;
@@ -202,7 +202,7 @@ namespace idk::vkn
 			{
 				//Make sure that it's there.
 				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
-				the_interface.BindSampler("shadow_maps", 0, tex);
+				the_interface.BindSampler("shadow_maps", 0, tex,true);
 			}
 			else
 			{
@@ -212,7 +212,7 @@ namespace idk::vkn
 					auto& sm_uni = shadow_map;
 					{
 						auto& depth_tex = sm_uni.as<VknTexture>();
-						the_interface.BindSampler("shadow_maps", i++, depth_tex);
+						the_interface.BindSampler("shadow_maps", i++, depth_tex, true);
 					}
 				}
 			}
@@ -256,28 +256,23 @@ namespace idk::vkn
 	}
 
 	//Assumes that the material is valid.
-
 	void StandardMaterialBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
 		//Bind the material uniforms
 		{
-			auto& mat_inst = *dc.material_instance;
-			[[maybe_unused]]auto& mat = *mat_inst.material;
-			auto mat_cache = mat_inst.get_cache();
-			for (auto itr = mat_cache.uniforms.begin(); itr != mat_cache.uniforms.end(); ++itr)
+			
+			auto& mat_inst = _state->material_instances.find(dc.material_instance)->second;
+			//[[maybe_unused]]auto& mat = *mat_inst.material;
+			for (auto itr = mat_inst.ubo_table.begin(); itr != mat_inst.ubo_table.end(); ++itr)
 			{
-				if (mat_cache.IsUniformBlock(itr))
+				the_interface.BindUniformBuffer(itr->first, 0, itr->second);
+			}
+			for (auto& [name, tex_array] : mat_inst.tex_table)
+			{
+				uint32_t i = 0;
+				for (auto& img : tex_array)
 				{
-					the_interface.BindUniformBuffer(itr->first, 0, mat_cache.GetUniformBlock(itr));
-				}
-				else if (mat_cache.IsImageBlock(itr))
-				{
-					auto img_block = mat_cache.GetImageBlock(itr);
-					uint32_t i = 0;
-					for (auto& img : img_block)
-					{
-						the_interface.BindSampler(itr->first.substr(0, itr->first.find_first_of('[')), i++, img.as<VknTexture>());
-					}
+					the_interface.BindSampler(name, i++, img.as<VknTexture>());
 				}
 			}
 		}

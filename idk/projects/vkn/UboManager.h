@@ -2,6 +2,7 @@
 #include  <idk.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/VulkanView.h>
+#include <meta/stl_hack.h>
 namespace idk::vkn
 {
 	template<typename T>
@@ -30,8 +31,9 @@ namespace idk::vkn
 			size_t offset{};
 			uint32_t alignment{};
 			uint32_t sz_alignment{};
-			DataPair() = default;
-			DataPair(DataPair&&) = default;
+			//DataPair() = default;
+			//DataPair(DataPair&&) noexcept = default;
+			//DataPair(const DataPair&) = delete;
 			bool CanAdd(size_t len)const;
 			size_t AlignmentOffset()const;
 			void Align();
@@ -99,4 +101,6 @@ namespace idk::vkn
 		}
 	};*/
 }
+MARK_NON_COPY_CTORABLE(idk::vkn::UboManager::DataPair)
+MARK_NON_COPY_CTORABLE(idk::vkn::UboManager)
 #include "UboManager.inl"

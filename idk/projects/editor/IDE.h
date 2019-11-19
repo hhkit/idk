@@ -85,6 +85,7 @@ namespace idk
 		friend class IGE_InspectorWindow;
 		friend class CMD_DeleteGameObject;
 		friend class CMD_CreateGameObject;
+		friend class CMD_CallCommandAgain;
 		friend class CommandController;
 
 		unique_ptr<edt::I_Interface> _interface;

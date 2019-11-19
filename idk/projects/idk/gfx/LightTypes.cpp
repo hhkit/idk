@@ -42,7 +42,7 @@ namespace idk
 				StoreOp::eStore,
 				idk::ColorFormat::DEPTH_COMPONENT,
 				FilterMode::_enum::Linear,
-				true
+				false //TEMP, CHANGE TO TRUE WHEN Point shadow is ready .
 			}
 		);
 		//TODO turn it into a cube map

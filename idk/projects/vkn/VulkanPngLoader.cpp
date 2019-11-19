@@ -14,7 +14,12 @@ namespace idk::vkn
 		fence = View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlagBits::eSignaled });
 	}
 	vk::Format ToSrgb(vk::Format f);
-
+#pragma optimize("",off)
+	void DoNothingUnopt()
+	{
+		int a = 0;
+		a++;
+	}
 	ResourceBundle PngLoader::LoadFile(PathHandle handle, RscHandle<Texture> rtex, const TextureMeta* tm)
 	{
 		VknTexture& tex = rtex.as<VknTexture>();
@@ -38,6 +43,8 @@ namespace idk::vkn
 		tci.sampled(true);
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
 		tci.internal_format = MapFormat(def.internal_format);
+		if(handle.GetFileName()=="wl_bl_room01_normal.tga")
+			DoNothingUnopt();
 		if (def.is_srgb)
 			tci.internal_format = ToSrgb(tci.internal_format);
 		//TODO detect SRGB and load set format accordingly
@@ -54,7 +61,9 @@ namespace idk::vkn
 		auto m = meta.FetchMeta<Texture>();
 		auto tex = m ? Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(m->guid)
 			: Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
-		return LoadFile(handle, RscHandle<Texture>{tex});;
+		auto met = m->GetMeta<Texture>();
+		auto meta_ptr = (met) ? &(*met) : nullptr;
+		return LoadFile(handle, RscHandle<Texture>{tex},meta_ptr);;
 	}
 
 }

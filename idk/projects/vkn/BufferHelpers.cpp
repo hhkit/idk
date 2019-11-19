@@ -100,8 +100,9 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, st
 		,(signal) ? &*signal : nullptr
 	};
 	queue.submit(submitInfo, vk::Fence{}, dispatcher);
+	if(!signal)
 	//Not very efficient, would be better to use fences instead.
-	queue.waitIdle(dispatcher);
+		queue.waitIdle(dispatcher);
 }
 
 void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)

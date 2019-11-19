@@ -11,7 +11,7 @@ namespace idk::vkn
 		uint32_t offset{};
 
 		buffer_info() = default;
-		buffer_info(vk::Buffer buf,uint32_t off) :buffer{buf},offset{off}
+		buffer_info(vk::Buffer buf, uint32_t off) :buffer{ buf }, offset{ off }
 		{
 		}
 		bool operator==(const buffer_info& bi)const { return buffer == bi.buffer && offset == bi.offset; }
@@ -24,52 +24,34 @@ namespace idk::vkn
 		eSize
 	};
 
+	struct BufferUpdateInst
+	{
+		hlp::vector_buffer* buffer{};
+		string_view data{};
+		uint32_t offset{};
+	};
+
 	struct DbgDrawCall
 	{
 		//set 0 = vtx, set 1 = instance
-		hash_table<uint32_t, buffer_info> mesh_buffer[s_cast<uint32_t>(DbgBufferType::eSize)]; //may be simplified
+		hash_table<uint32_t, buffer_info> mesh_buffer; //may be simplified
 		buffer_info index_buffer;
 		uint32_t num_indices   {};
 		uint32_t num_instances {};
 		uint32_t num_vertices  {};
 
-		void RegisterBuffer(DbgBufferType type, uint32_t binding, buffer_info info)
-		{
-			mesh_buffer[s_cast<uint32_t>(type)][binding] = info;
-		}
-		void SetNum(uint32_t num_inst, uint32_t num_vert) { num_instances = num_inst; num_vert = num_vertices; }
+		void RegisterBuffer(DbgBufferType type, uint32_t binding, buffer_info info);
+		void SetNum(uint32_t num_inst, uint32_t num_vert);
 
-		void Bind(vk::CommandBuffer cmd_buffer,const DbgDrawCall* prev)const
-		{
-			auto* pbuffers = &mesh_buffer[DbgBufferType::ePerVtx];
-			if (!prev || prev->mesh_buffer[DbgBufferType::ePerVtx] != *pbuffers)
-			{
-				auto& buffers = *pbuffers;
-				for (auto& [binding, buffer] : buffers)
-				{
-					cmd_buffer.bindVertexBuffers(binding,buffer.buffer,buffer.offset);
-				}
-			}
-			auto& buffers = mesh_buffer[DbgBufferType::ePerInst];
-			for (auto& [binding, buffer] : buffers)
-			{
-				cmd_buffer.bindVertexBuffers(binding, buffer.buffer, buffer.offset);
-			}
-
-		}
-		void Draw(vk::CommandBuffer cmd_buffer)const
-		{
-			if (num_indices)
-				cmd_buffer.drawIndexed(num_indices, num_instances, index_buffer.offset, 0, 0);
-			else
-				cmd_buffer.draw(num_vertices,num_instances, 0, 0);
-		}
+		void Bind(vk::CommandBuffer cmd_buffer)const;
+		void Draw(vk::CommandBuffer cmd_buffer)const;
 	};
 
 	using shadow_map_t = std::variant<RscHandle<Texture>, RscHandle<CubeMap>>;
 
 	struct SharedGraphicsState
 	{
+		vector<BufferUpdateInst> update_instructions;
 		RscHandle<Texture> BrdfLookupTable;
 		const vector<LightData>* lights;
 		hlp::vector_buffer inst_mesh_render_buffer;
@@ -84,26 +66,44 @@ namespace idk::vkn
 		//vector<shadow_map_t>& ShadowMaps();
 		//const vector<shadow_map_t>& ShadowMaps()const;
 	};
+
 	
-	struct GraphicsState
+	struct ProcessedMaterial
 	{
-		SharedGraphicsState* shared_gfx_state =nullptr;
+		using data_block_t = string;
+		using offset_t = size_t;
+		using texture_table_t =hash_table<string, span<RscHandle<Texture>>>;
+		using uniform_table_t =hash_table<string, string_view>;
+		texture_table_t tex_table;
+		uniform_table_t ubo_table;
+		data_block_t data_block;
+		vector<RscHandle<Texture>> texture_block;
+		RscHandle<ShaderProgram> shader;
+
+		ProcessedMaterial() = default;
+		ProcessedMaterial(RscHandle<MaterialInstance> inst);
+	};
+
+	struct CoreGraphicsState
+	{
+		SharedGraphicsState* shared_gfx_state;
+		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
+		vector<const RenderObject*> mesh_render;
+		vector<const AnimatedRenderObject*> skinned_mesh_render;
+		hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> material_instances;
+		const vector<SkeletonTransforms>* skeleton_transforms;
+
+
+		void ProcessMaterialInstances();
+	};
+
+	struct GraphicsState : CoreGraphicsState
+	{
 		CameraData camera; 
 		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
-		vector<size_t> active_lights;//indices to corresponding lights in shared_gfx_state
 		vector<RscHandle<Texture>> shadow_maps_2d  ;
 		vector<RscHandle<CubeMap>> shadow_maps_cube;
-
-		vector<const RenderObject*> mesh_render;
-		vector<const AnimatedRenderObject*> skinned_mesh_render;
-
-		const vector<InstRenderObjects>* inst_mesh_render;
-
-
-
-
-		const vector<SkeletonTransforms>* skeleton_transforms;
 
 		bool clear_render_target = false;
 
@@ -127,16 +127,11 @@ namespace idk::vkn
 	};
 
 
-	struct PreRenderData
+	struct PreRenderData :CoreGraphicsState
 	{
-		SharedGraphicsState* shared_gfx_state;
 		const vector<CameraData>* cameras;
-		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
-		vector<const RenderObject*> mesh_render;
-		vector<const AnimatedRenderObject*> skinned_mesh_render;
 		const vector<InstancedData>* inst_mesh_buffer;
-		const vector<SkeletonTransforms>* skeleton_transforms;
-
+		const vector<GraphicsSystem::LightRenderRange>* shadow_ranges;
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;

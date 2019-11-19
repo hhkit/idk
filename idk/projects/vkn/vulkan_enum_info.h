@@ -3,6 +3,9 @@
 #include <vkn/utils/utils.h>
 namespace idk::vkn
 {
+	namespace EnumInfo
+	{
+
 	using DescriptorTypePack = meta::enum_pack<vk::DescriptorType,
 		vk::DescriptorType::eSampler, // VK_DESCRIPTOR_TYPE_SAMPLER,
 		vk::DescriptorType::eCombinedImageSampler, // VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
@@ -19,4 +22,7 @@ namespace idk::vkn
 		vk::DescriptorType::eAccelerationStructureNV // VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV
 	>;
 	using DescriptorTypeI = meta::enum_info < vk::DescriptorType, DescriptorTypePack>;
+
+	}
+	using namespace EnumInfo;
 }

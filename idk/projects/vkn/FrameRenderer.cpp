@@ -32,8 +32,198 @@
 
 #include <cstdint>
 
+#include <vkn/DescriptorUpdateData.h>
+#include <thread>
+#include <mutex>
+#include <queue>
+
 namespace idk::vkn
 {
+	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
+	class Semaphore {
+	public:
+		Semaphore(int count_ = 0)
+			: count(count_)
+		{
+		}
+
+		inline void notify() {
+			std::unique_lock<std::mutex> lock(mtx);
+			count++;
+			//notify the waiting thread
+			cv.notify_one();
+		}
+		inline void wait() {
+			std::unique_lock<std::mutex> lock(mtx);
+			while (count == 0) {
+				//wait on the mutex until notify is called
+				cv.wait(lock);
+			}
+			count--;
+		}
+	private:
+		std::mutex mtx;
+		std::condition_variable cv;
+		int count;
+	};
+	/*
+	template<typename job_t>
+	struct job_queue
+	{
+		using container_t = std::list<job_t>;
+		using iterator_t = typename container_t::iterator;
+		container_t container;
+		iterator_t begin, end;
+		std::mutex fml;
+		job_queue() :begin{ container.begin() }, end{ container.end() }{}
+		void push(job_t job)
+		{
+			fml.lock();
+			if (container.end() == end)
+			{
+				container.push_back(std::move(job));
+				end = container.end();
+				if (begin == container.end())
+					begin = container.begin();
+			}
+			else
+				new (&(*end++)) job_t{ std::move(job) };
+			if (begin == container.end())
+			{
+				begin = end;
+				--begin;
+			}
+			fml.unlock();
+		}
+		job_t pop()
+		{
+			fml.lock();
+			job_t result = std::move(*begin);
+			begin->~job_t();
+			++begin;
+			fml.unlock();
+			return result;
+		}
+		bool empty()const
+		{
+			return begin == end;
+		}
+		void reset()
+		{
+			begin = end = container.begin();
+		}
+	};*/
+	class RenderThread
+	{
+	public:
+		void Start()
+		{
+			_running = true;
+		}
+		void Add(const GraphicsState& state, RenderStateV2& rs)
+		{
+			job_lock.lock();
+			jobs.push(JobData{ &state ,&rs });
+			job_lock.unlock();
+			_is_complete = false;
+			job_count++;
+			job_semaphore.notify();
+		}
+		void Run()
+		{
+
+			while (Running())
+			{
+				//job_semaphore.wait();//will wake up when either running == false or hasjob. 
+				//if(HasJob())//Don't render if there's no job.
+				Render();
+			}
+		}
+		void Render() 
+		{
+			while (!jobs.empty()&&Running())
+			{
+				job_lock.lock();
+				auto job = jobs.front();
+				jobs.pop();
+				job_lock.unlock();
+				auto& rs = *job._rs;
+				auto& state = *job._state;
+				_renderer->RenderGraphicsState(state, rs);
+				job_count--;
+			}
+		}
+		bool HasJob()const noexcept
+		{
+			return !jobs.empty();
+		}
+#pragma optimize("",off)
+		bool Complete()const noexcept
+		{
+			return job_count==0;
+		}
+		bool Running()const noexcept
+		{
+			return _running;
+		}
+		FrameRenderer* _renderer;
+		void Stop()
+		{
+			_running = false;
+			job_semaphore.notify(); //wake the guy so that he can terminate.
+		}
+		~RenderThread()
+		{
+			Stop();
+		}
+	private:
+		Semaphore job_semaphore{0};
+		std::atomic_uint32_t job_count = {};
+		bool _running = true;
+		bool _is_complete=false;
+		bool _start = false;
+		struct JobData
+		{
+			const GraphicsState* _state = {};
+			RenderStateV2* _rs = {};
+		};
+		using job_list_t = std::queue<JobData>;
+		std::mutex job_lock;
+		job_list_t jobs;
+	};
+
+	class FrameRenderer::ThreadedRender : public FrameRenderer::IRenderThread
+	{
+	public:
+		static void ThreadRun(RenderThread* thread)
+		{
+			thread->Run();
+		}
+		void Init(FrameRenderer* renderer)
+		{
+			thread._renderer = renderer;
+			my_thread = std::thread(ThreadRun,&thread);
+		}
+		void Render(const GraphicsState& state, RenderStateV2& rs)override
+		{
+			thread.Add(state, rs);
+		}
+#pragma optimize("",off)
+		void Join() override
+		{
+			while (!thread.Complete());
+		}
+		~ThreadedRender()
+		{
+			thread.Stop();
+			if (my_thread.joinable())
+				my_thread.join();
+		}
+	private:
+		std::thread my_thread;
+		RenderThread thread;
+	};
+
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
 
 	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size)
@@ -137,7 +327,7 @@ namespace idk::vkn
 		const vector<const RenderObject*>*         mesh_render;
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
 		const vector<InstRenderObjects>* inst_ro;
-		std::optional<GraphicsSystem::RenderRange> range;
+		std::variant<GraphicsSystem::RenderRange, GraphicsSystem::LightRenderRange> range;
 		GraphicsStateInterface() = default;
 		GraphicsStateInterface(const GraphicsState& state)
 		{
@@ -170,27 +360,30 @@ namespace idk::vkn
 		the_interface.SetRef(ubo_manager);
 
 		the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
+		the_interface.reserve(state.mesh_render->size() + state.skinned_mesh_render->size());
 		binders.Bind(the_interface);
 		{
-			auto range_opt = state.range;
-			if (!range_opt)
-				range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
+			//auto range_opt = state.range;
+			//if (!range_opt)
+			//	range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
 			
-			auto& inst_draw_range = *range_opt;
-			for (auto itr = state.inst_ro->data() + inst_draw_range.inst_mesh_render_begin,
-				end = state.inst_ro->data() + inst_draw_range.inst_mesh_render_end;
-				itr != end; ++itr
-				)
-			{
-				auto& dc = *itr;
-				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material)
+			//auto& inst_draw_range = *range_opt;
+			std::visit([&](auto& inst_draw_range) {
+				for (auto itr = state.inst_ro->data() + inst_draw_range.inst_mesh_render_begin,
+					end = state.inst_ro->data() + inst_draw_range.inst_mesh_render_end;
+					itr != end; ++itr
+					)
 				{
-					binders.Bind(the_interface, dc);
+					auto& dc = *itr;
+					auto& mat_inst = *dc.material_instance;
+					if (mat_inst.material)
+					{
+						binders.Bind(the_interface, dc);
 
-					the_interface.FinalizeDrawCall(dc,dc.num_instances,dc.instanced_index);
+						the_interface.FinalizeDrawCall(dc, dc.num_instances, dc.instanced_index);
+					}
 				}
-			}
+			},state.range);
 		}
 
 		{
@@ -303,10 +496,17 @@ namespace idk::vkn
 			
 			copy_semaphore = *copy_state.signal.render_finished;
 
-			auto cmd_buffer = copy_state.cmd_buffer;
+			auto cmd_buffer = copy_state.CommandBuffer();
 			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 			state.shared_gfx_state->inst_mesh_render_buffer.resize(hlp::buffer_size(instanced_data));
 			state.shared_gfx_state->inst_mesh_render_buffer.update<const InstancedData>(vk::DeviceSize{ 0 }, instanced_data, cmd_buffer);
+			for (auto& [buffer, data,offset] : state.shared_gfx_state->update_instructions)
+			{
+				if (data.size())
+				{
+					buffer->update(offset,s_cast<uint32_t>(data.size()),cmd_buffer,std::data(data));
+				}
+			}
 			cmd_buffer.end();
 			//copy_state.FlagRendered();//Don't flag, we want to submit this separately.
 
@@ -316,7 +516,7 @@ namespace idk::vkn
 				0
 				,nullptr
 				,waitStages
-				,1,&copy_state.cmd_buffer
+				,1,&copy_state.CommandBuffer()
 				,1,&*copy_semaphore
 			};
 
@@ -326,9 +526,8 @@ namespace idk::vkn
 		//Do the shadow pass here.
 		for (auto light_idx : state.active_lights)
 		{
-			auto& light = lights[light_idx];
 			auto& rs = _pre_states[curr_state++];
-			PreRenderShadow(light, state, rs, frame_index);
+			PreRenderShadow(light_idx, state, rs, frame_index);
 		}
 		//TODO: Submit the command buffers
 
@@ -359,7 +558,7 @@ namespace idk::vkn
 						}
 					}, camera.clear_data);
 			}
-			auto cmd_buffer = convolute_state.cmd_buffer;
+			auto cmd_buffer = convolute_state.CommandBuffer();
 			cmd_buffer.begin(vk::CommandBufferBeginInfo
 				{
 					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -373,7 +572,7 @@ namespace idk::vkn
 		for (auto& pre_state : _pre_states)
 		{
 			if (pre_state.has_commands)
-				buffers.emplace_back(pre_state.cmd_buffer);
+				buffers.emplace_back(pre_state.CommandBuffer());
 		}
 
 
@@ -475,7 +674,7 @@ namespace idk::vkn
 							 }
 						}
 				);
-				auto& pipeline = pipeline_manager.GetPipeline(config,shaders,frame_index,rp,has_depth_stencil);
+				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, rp, has_depth_stencil);
 				pipeline.Bind(cmd_buffer, View());
 				SetViewport(cmd_buffer, *config.viewport_offset, *config.viewport_size);
 				prev_pipeline = &pipeline;
@@ -484,9 +683,17 @@ namespace idk::vkn
 			//TODO Grab everything and render them
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			auto& mesh = obj.mesh.as<VulkanMesh>();
-			for (auto& [set, ds] : p_ro.descriptor_sets)
 			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+				uint32_t set = 0;
+				for (auto& ods : p_ro.descriptor_sets)
+				{
+					if (ods)
+					{
+						auto& ds = *ods;
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+					}
+					++set;
+				}
 			}
 
 			auto& renderer_req = *obj.renderer_req;
@@ -505,14 +712,15 @@ namespace idk::vkn
 			if (oidx)
 			{
 				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), 1, 0, 0, 0, vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 			}
 		}
 	}
 
-	void FrameRenderer::PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
+	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
-        auto cam = CameraData{ {}, 0xFFFFFFFF, light.v, light.p };
+		const LightData& light = state.shared_gfx_state->Lights()[light_index];
+		auto cam = CameraData{ GenericHandle {}, 0xFFFFFFFF,light.v,light.p };
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
 			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -521,12 +729,14 @@ namespace idk::vkn
 			},
 			cam,
 				*state.skeleton_transforms);
-		auto the_interface = vkn::ProcessRoUniforms(state, rs.ubo_manager, shadow_binding);
+		GraphicsStateInterface gsi = { state };
+		gsi.range = (*state.shadow_ranges)[light_index];
+		auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
 		the_interface.GenerateDS(rs.dpools);
 
 		//auto& swapchain = view.Swapchain();
 		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 
@@ -571,21 +781,27 @@ namespace idk::vkn
 			state.Reset();
 		}
 		bool rendered = false;
-		for (size_t i = 0; i + num_concurrent <= gfx_states.size(); i += num_concurrent)
 		{
-			//Spawn/Assign to the threads
-			for (size_t j = 0; j < num_concurrent; ++j) {
-				auto& state = gfx_states[i + j];
-				auto& rs = _states[i + j];
-				_render_threads[j]->Render(state, rs);
-				rendered = true;
-				//TODO submit command buffer here and signal the framebuffer's stuff.
-				//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
-				//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
-				//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
+			;
+			for (size_t i = 0; i  < gfx_states.size(); i += num_concurrent)
+			{
+				auto curr_concurrent = std::min(num_concurrent,gfx_states.size()-i);
+				//Spawn/Assign to the threads
+				for (size_t j = 0; j < curr_concurrent; ++j) {
+					auto& state = gfx_states[i + j];
+					auto& rs = _states[i + j];
+					_render_threads[j]->Render(state, rs);
+					rendered = true;
+					//TODO submit command buffer here and signal the framebuffer's stuff.
+					//TODO create two renderpasses, detect when a framebuffer is used for the first time, use clearing renderpass for the first and non-clearing for the second onwards.
+					//OR sort the gfx states so that we process all the gfx_states that target the same render target within the same command buffer/render pass.
+					//RenderGraphicsState(state, curr_frame.states[j]);//We may be able to multi thread this
+				}
 			}
+
 			//Wait here
-			for (auto& thread : _render_threads) {
+			for (size_t j = 0; j < _render_threads.size(); ++j) {
+				auto& thread = _render_threads[j];
 				thread->Join();
 			}
 		}
@@ -595,7 +811,7 @@ namespace idk::vkn
 		for (auto& state : curr_frame._states)
 		{
 			if (state.has_commands)
-				buffers.emplace_back(state.cmd_buffer);
+				buffers.emplace_back(state.CommandBuffer());
 		}
 		pri_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
 		//if(buffers.size())
@@ -677,17 +893,17 @@ namespace idk::vkn
 	}
 	void FrameRenderer::GrowStates(vector<RenderStateV2>& states, size_t new_min_size)
 	{
-		auto cmd_pool = *View().Commandpool();
 		auto device = *View().Device();
 		if (new_min_size > states.size())
 		{
 			auto diff = s_cast<uint32_t>(new_min_size - states.size());
-			auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ cmd_pool,vk::CommandBufferLevel::ePrimary, diff }, vk::DispatchLoaderDefault{});
 			for (auto i = diff; i-- > 0;)
 			{
-				auto& buffer = buffers[i];
-				states.emplace_back(RenderStateV2{ *buffer,UboManager{View()},PresentationSignals{},DescriptorsManager{View()},CubemapRenderer{} }).signal.Init(View());
-				_state_cmd_buffers.emplace_back(std::move(buffer));
+				auto cmd_pool = View().vulkan().CreateGfxCommandPool();
+				auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ *cmd_pool,vk::CommandBufferLevel::ePrimary, 1}, vk::DispatchLoaderDefault{});
+				auto& buffer = buffers[0];
+				states.emplace_back(RenderStateV2{std::move(cmd_pool), std::move(buffer),UboManager{View()},PresentationSignals{},DescriptorsManager{View()},CubemapRenderer{} }).signal.Init(View());
+				//_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}
 	}
@@ -696,7 +912,7 @@ namespace idk::vkn
 	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, ivec2 vp_size)
 	{
 		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		//TODO: figure out inheritance pipeline inheritance and inherit from dbg_pipeline for various viewport sizes
 		auto& pipeline = state.dbg_pipeline;
 
@@ -713,6 +929,7 @@ namespace idk::vkn
 		auto itr = layouts.find(trf_set);
 		if (itr != layouts.end())
 		{
+			DescriptorUpdateData dud;
 			auto ds_layout = itr->second;
 			auto allocated =rs.dpools.Allocate(hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>{ {ds_layout, {vk::DescriptorType::eUniformBuffer,2}}});
 			auto aitr = allocated.find(ds_layout);
@@ -721,25 +938,38 @@ namespace idk::vkn
 				auto&& [view_buffer, vb_offset] = rs.ubo_manager.Add(state.camera.view_matrix);
 				auto&& [proj_buffer, pb_offset] = rs.ubo_manager.Add(mat4{ 1,0,0,0,   0,1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix);
 				auto ds = aitr->second.GetNext();
-				UpdateUniformDS(*View().Device(), ds, vector<ProcessedRO::BindingInfo>{ 
+				UpdateUniformDS(ds, vector<ProcessedRO::BindingInfo>{ 
 					ProcessedRO::BindingInfo{
 						0,view_buffer,vb_offset,0,sizeof(mat4),itr->second
 					},
 					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
-				});
+				},dud
+				);
+				dud.SendUpdates();
 				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->pipelinelayout, 0, ds, {});
 			}
 		}
-
-		const DbgDrawCall* prev = nullptr;
+		
 		for (auto& p_dc : state.dbg_render)
 		{
+			
 			auto& dc = *p_dc;
-			dc.Bind(cmd_buffer,prev);
+			dc.Bind(cmd_buffer);
+			//cmd_buffer.bindVertexBuffers(0,
+			//	{
+			//		 *mesh.Get(attrib_index::Position).buffer(),//dc.mesh_buffer[DbgBufferType::ePerVtx].find(0)->second.buffer,
+			//		dc.mesh_buffer[DbgBufferType::ePerInst].find(1)->second.buffer
+			//	},
+			//	{
+			//		0,0
+			//	}
+			//	);
+			//cmd_buffer.bindIndexBuffer(dc.index_buffer.buffer, 0, vk::IndexType::eUint16);
+			//cmd_buffer.drawIndexed(mesh.IndexCount(), dc.nu, 0, 0, 0);
 			dc.Draw(cmd_buffer);
-			prev = p_dc;
 			
 		}
+		
 	}
 	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView&)
 	{
@@ -825,11 +1055,7 @@ namespace idk::vkn
 		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
 	}
-	void VBO_Test()
-	{
-
-	}
-
+	
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
@@ -841,7 +1067,7 @@ namespace idk::vkn
 		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
 
 		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 		cmd_buffer.begin(begin_info, dispatcher);
@@ -868,7 +1094,6 @@ namespace idk::vkn
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
-
 		auto deferred_interface = (is_deferred) ? rs.deferred_pass.ProcessDrawCalls(state, rs) : PipelineThingy{};
 		if(is_deferred)
 			deferred_interface.GenerateDS(rs.dpools, false);
@@ -1021,11 +1246,18 @@ namespace idk::vkn
 				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 				auto& mesh = obj.mesh.as<VulkanMesh>();
-				for (auto& [set,ds] : p_ro.descriptor_sets)
 				{
-					cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+					uint32_t set = 0;
+					for (auto& ods : p_ro.descriptor_sets)
+					{
+						if (ods)
+						{
+							auto& ds = *ods;
+							cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+						}
+						++set;
+					}
 				}
-			
 				auto& renderer_req = *obj.renderer_req;
 			
 				for (auto&& [attrib, location] : renderer_req.mesh_requirements)
