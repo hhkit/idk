@@ -55,6 +55,9 @@ namespace idk
 			template<typename R>
 			constexpr static void InitFactoryHC(ResourceManager* resource_man)
 			{
+				if constexpr (has_extension_v<R>)
+					resource_man->_extension_lut.emplace(R::ext, BaseResourceID<R>);
+
 				auto loader = &resource_man->GetFactoryRes<R>();
 				if (loader)
 					loader->Init();
@@ -67,24 +70,14 @@ namespace idk
 				};
 			}
 
-			static auto GenerateExtensionCreateTable()
+			constexpr static auto GenerateExtensionCreateTable()
 			{
-				return hash_table<string_view, void(*)(ResourceManager*, Guid, PathHandle)>
+				return array<void(*)(ResourceManager*, Guid, PathHandle), sizeof...(Rs)>
 				{
+					[](ResourceManager* rm, Guid guid, PathHandle path)
 					{
-						[&]() -> string_view
-						{
-							if constexpr (has_extension_v<Rs>)
-								return Rs::ext;
-							else
-								return "";
-					 	}()
-						,
-						[](ResourceManager* rm, Guid guid, PathHandle path)
-						{
-							rm->GetTable<Rs>()[guid].resource = rm->GetFactory<ResourceFactory<Rs>>().Create(path);
-							rm->OnResourceCreate<Rs>().Fire(RscHandle<Rs>{guid});
-						}
+						rm->GetTable<Rs>()[guid].resource = rm->GetFactory<ResourceFactory<Rs>>().Create(path);
+						rm->OnResourceCreate<Rs>().Fire(RscHandle<Rs>{guid});
 					}
 					...
 				};
@@ -148,11 +141,11 @@ namespace idk
 
 	void ResourceManager::LoadResource(PathHandle file)
 	{
-		static const auto load_jt = detail::ResourceHelper::GenerateExtensionCreateTable();
+		static constexpr auto load_jt = detail::ResourceHelper::GenerateExtensionCreateTable();
 
-		auto guid = Guid{ file.GetStem() };
-		auto itr = load_jt.find(file.GetExtension());
-		if (itr != load_jt.end())
-			itr->second(this, guid, file);
+		const auto guid = Guid{ file.GetStem() };
+		const auto itr = _extension_lut.find(file.GetExtension());
+		if (itr != _extension_lut.end())
+			load_jt[itr->second](this, guid, file);
 	}
 }

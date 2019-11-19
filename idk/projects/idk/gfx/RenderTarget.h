@@ -20,7 +20,14 @@ namespace idk
 	{
 	public:
 		using Saveable_t = Saveable<RenderTarget, false_type>;
-		RenderTarget()noexcept = default;
+
+		ivec2 size{ 1024, 1024 };
+		RscHandle<Texture> color_tex;
+		RscHandle<Texture> depth_tex;
+		bool is_world_renderer = true;
+		bool render_debug = true;
+
+		RenderTarget() noexcept = default;
 		RenderTarget(RenderTarget&&) noexcept = default;
 		RenderTarget& operator=(RenderTarget&&) noexcept = default;
 		RenderTarget (const RenderTarget&) = delete;
@@ -28,13 +35,16 @@ namespace idk
 
 		static constexpr uint32_t kColorIndex = 0;
 		static constexpr uint32_t kDepthIndex = 1;
-		float AspectRatio() const noexcept;
-		ivec2 Size()const noexcept { return size; }
-		void Size(const ivec2& new_size) { size = new_size; Dirty(); }
+		static constexpr string_view names[] = { "Color","Depth" };
 
-		bool IsWorldRenderer()const noexcept { return is_world_renderer; }
-		bool RenderDebug()const noexcept { return render_debug; }
-		void IsWorldRenderer(bool new_val)noexcept { is_world_renderer = new_val; }
+		float AspectRatio() const noexcept;
+		ivec2 Size() const noexcept { return size; }
+		void  Size(const ivec2& new_size) { size = new_size; Dirty(); }
+
+		bool IsWorldRenderer() const noexcept { return is_world_renderer; }
+		void IsWorldRenderer(bool new_val) noexcept { is_world_renderer = new_val; }
+
+		bool RenderDebug() const noexcept { return render_debug; }
 		void RenderDebug(bool new_val)noexcept { render_debug = new_val; }
 
 		RscHandle<Texture> GetColorBuffer();
@@ -45,17 +55,11 @@ namespace idk
 		void Finalize(); //Finalizes regardless of _need_finalizing. Sets to false after.
 		bool NeedsFinalizing()const noexcept { return _need_finalizing; }
 		
-		static constexpr char ext[] = ".rtis";
 
 		virtual ~RenderTarget();
 
-		ivec2 size{ 1024, 1024 };
-		RscHandle<Texture> color_tex;
-		RscHandle<Texture> depth_tex;
-		inline const static string names[] = {"Color","Depth"};
-		bool is_world_renderer = true;
-		bool render_debug = true;
 		void Dirty(); // hide Saveable Dirty
+		EXTENSION(".rtis");
 	protected:
 		template<typename Obj>
 		struct HandleWrapper

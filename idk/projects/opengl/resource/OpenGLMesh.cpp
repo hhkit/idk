@@ -4,13 +4,15 @@
 namespace idk::ogl
 {
 	OpenGLMesh::OpenGLMesh(const CompiledMesh& mesh)
-		: _draw_mode{GL_TRIANGLES}
 	{
 		_buffers.reserve(mesh.buffers.size());
 		for (auto& buf : mesh.buffers)
-		{
-			OpenGLBuffer(GL_ARRAY_BUFFER, )
-		}
+			_buffers.emplace_back(std::move(
+				OpenGLBuffer(GL_ARRAY_BUFFER, buf.attribs)
+					.Bind()
+					.Buffer(buf.data_buffer.data(), 1, s_cast<GLsizei>(buf.data_buffer.size()))
+			));
+		_element_array_object = std::move(OpenGLBuffer(GL_ELEMENT_ARRAY_BUFFER, {}).Bind().Buffer(mesh.element_buffer.data(), sizeof(unsigned), s_cast<GLsizei>(mesh.element_buffer.size())));
 	}
 
 	OpenGLMesh::OpenGLMesh(OpenGLMesh&& rhs)

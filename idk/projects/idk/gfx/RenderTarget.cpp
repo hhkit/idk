@@ -36,7 +36,7 @@ namespace idk
 		}
 		for (auto& tex : this->Textures())
 		{
-			tex->Name(string{ Name() }+names[i++]+" Buffer");
+			tex->Name(string{ Name() } + string{ names[i++] } + " Buffer");
 		}
 	}
 	RenderTarget::~RenderTarget()

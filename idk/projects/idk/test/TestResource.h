@@ -10,8 +10,6 @@ namespace idk
 		int j;
 	};
 
-RESOURCE_EXTENSION(TestResource, ".test")
-
 	class TestResource
 		: public Resource<TestResource>
 		, public MetaTag<TestMeta>
@@ -20,6 +18,7 @@ RESOURCE_EXTENSION(TestResource, ".test")
 	public:
         int k = 0;
 		string yolo = "haha";
+		EXTENSION(".test")
 		void OnMetaUpdate(const TestMeta& newmeta) override { (newmeta); k = meta.i * meta.j; }
 	};
 }

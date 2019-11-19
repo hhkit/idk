@@ -5,8 +5,6 @@
 
 namespace idk
 {
-    RESOURCE_EXTENSION(Prefab, ".idp")
-
 	class Prefab : public Resource<Prefab>, public Saveable<Prefab>
 	{
 	public:
@@ -17,7 +15,6 @@ namespace idk
         // data[0] = self
         // the rest refer to children
         vector<PrefabData> data;
-
-	private:
+		EXTENSION(".idp")
 	};
 }

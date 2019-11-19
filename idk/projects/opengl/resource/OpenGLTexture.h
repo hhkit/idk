@@ -10,7 +10,7 @@ namespace idk::ogl
 	{
 	public:
 		OpenGLTexture();
-		OpenGLTexture(const CompiledTexture&);
+		explicit OpenGLTexture(const CompiledTexture&);
 		OpenGLTexture(const bool& compressed);
 		OpenGLTexture(const GLuint& ,const ivec2& size, FilterMode fm = FilterMode::Linear, UVMode uv = UVMode::Repeat);
 		OpenGLTexture(OpenGLTexture&&);

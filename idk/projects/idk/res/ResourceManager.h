@@ -40,6 +40,7 @@ namespace idk
 		/* FACTORIES - for registering resource factories */
 		template<typename Factory>                    Factory& GetFactory();
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
+		template<typename Res>                        void     RegisterExtension(string_view ext) { _extension_lut.emplace(ext, BaseResourceID<Res>); }
 
 		template<typename Res> Signal<RscHandle<Res>>& OnResourceCreate();
 		template<typename Res> Signal<RscHandle<Res>>& OnResourceDestroy();

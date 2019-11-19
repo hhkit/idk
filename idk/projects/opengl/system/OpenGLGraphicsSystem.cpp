@@ -200,7 +200,7 @@ namespace idk::ogl
 	void Win32GraphicsSystem::InitResourceLoader()
 	{
 		// register factories
-		//Core::GetResourceManager().RegisterFactory<MaterialFactory>();
+		Core::GetResourceManager().RegisterFactory<MaterialFactory>();
 		//Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
 		//Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
 		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<OpenGLMesh, CompiledMesh>>();
