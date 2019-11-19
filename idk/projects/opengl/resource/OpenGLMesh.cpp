@@ -3,6 +3,16 @@
 
 namespace idk::ogl
 {
+	OpenGLMesh::OpenGLMesh(const CompiledMesh& mesh)
+		: _draw_mode{GL_TRIANGLES}
+	{
+		_buffers.reserve(mesh.buffers.size());
+		for (auto& buf : mesh.buffers)
+		{
+			OpenGLBuffer(GL_ARRAY_BUFFER, )
+		}
+	}
+
 	OpenGLMesh::OpenGLMesh(OpenGLMesh&& rhs)
 		:	_buffers				{ std::move(rhs._buffers) }, 
 			_element_array_object	{ std::move(rhs._element_array_object) }, 

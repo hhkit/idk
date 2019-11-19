@@ -232,15 +232,15 @@ namespace idk
 	{
 		return str.find_last_of(']',str.find_last_of('['))<str.size();
 	}
-	bool MaterialInstance::temp_store::IsImageBlock(uniform_store_t::iterator itr) const
+	bool MaterialInstance::temp_store::IsImageBlock(UniformStorage::iterator itr) const
 	{
 		return idk::IsImageBlock(itr->second) && is_elem_0(itr->first);//Is first index
 	}
-	bool MaterialInstance::temp_store::IsUniformBlock(uniform_store_t::iterator itr) const
+	bool MaterialInstance::temp_store::IsUniformBlock(UniformStorage::iterator itr) const
 	{
 		return idk::IsUniformBlock(itr->first);
 	}
-	vector<RscHandle<Texture>> MaterialInstance::temp_store::GetImageBlock(uniform_store_t::iterator itr) const
+	vector<RscHandle<Texture>> MaterialInstance::temp_store::GetImageBlock(UniformStorage::iterator itr) const
 	{
 		vector<RscHandle<Texture>> result;
 		if (is_not_array(itr->first))
@@ -266,7 +266,7 @@ namespace idk
 		}
 		return result;
 	}
-	string MaterialInstance::temp_store::GetUniformBlock(uniform_store_t::iterator itr) const
+	string MaterialInstance::temp_store::GetUniformBlock(UniformStorage::iterator itr) const
 	{
 		return idk::GetUniformBlock(GetBlockType(itr->first),uniforms);
 	}

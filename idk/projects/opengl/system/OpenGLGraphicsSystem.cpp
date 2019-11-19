@@ -9,9 +9,14 @@
 #include <gfx/ShaderTemplateLoader.h>
 #include <gfx/MaterialInstance.h>
 #include <gfx/MaterialFactory.h>
+
+#include <gfx/CompiledMesh.h>
+
+#include <res/compiler/CompiledAssetLoader.h>
 #include <anim/Animation.h>
 #include <anim/SkeletonFactory.h>
 #include <opengl/resource/FrameBufferFactory.h>
+#include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLMeshFactory.h>
 #include <opengl/resource/OpenGLTextureFactory.h>
 #include <opengl/resource/OpenGLRenderTargetLoader.h>
@@ -195,26 +200,26 @@ namespace idk::ogl
 	void Win32GraphicsSystem::InitResourceLoader()
 	{
 		// register factories
-		Core::GetResourceManager().RegisterFactory<MaterialFactory>();
-		Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
-		Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
-		Core::GetResourceManager().RegisterFactory<OpenGLMeshFactory>();
-		Core::GetResourceManager().RegisterFactory<anim::SkeletonFactory>();
-		Core::GetResourceManager().RegisterFactory<EasyFactory<anim::Animation>>();
-		Core::GetResourceManager().RegisterFactory<ProgramFactory>();
-		Core::GetResourceManager().RegisterFactory<OpenGLTextureFactory>();
-		Core::GetResourceManager().RegisterFactory<OpenGLRenderTargetFactory>();
-		Core::GetResourceManager().RegisterFactory<OpenGLFrameBufferFactory>();
-		Core::GetResourceManager().RegisterFactory<OpenGLFontAtlasFactory>();
+		//Core::GetResourceManager().RegisterFactory<MaterialFactory>();
+		//Core::GetResourceManager().RegisterFactory<EasyFactory<MaterialInstance>>();
+		//Core::GetResourceManager().RegisterFactory<ShaderTemplateFactory>();
+		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<OpenGLMesh, CompiledMesh>>();
+		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<anim::Skeleton, anim::Skeleton>>();
+		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<anim::Animation, anim::Animation>>();
+		//Core::GetResourceManager().RegisterFactory<ProgramFactory>();
+		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<OpenGLTexture, CompiledTexture>>();
+		//Core::GetResourceManager().RegisterFactory<OpenGLRenderTargetFactory>();
+		//Core::GetResourceManager().RegisterFactory<OpenGLFrameBufferFactory>();
+		//Core::GetResourceManager().RegisterFactory<OpenGLFontAtlasFactory>();
 
 		// register extensions
-		Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);
-		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".vert");
-		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".geom");
-		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
-		Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
-		Core::GetResourceManager().RegisterLoader<OpenGLRenderTargetLoader>(RenderTarget::ext);
-		Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
+		//Core::GetResourceManager().RegisterLoader<MaterialLoader>(Material::ext);
+		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".vert");
+		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".geom");
+		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".frag");
+		//Core::GetResourceManager().RegisterLoader<GLSLLoader>(".pfrag");
+		//Core::GetResourceManager().RegisterLoader<OpenGLRenderTargetLoader>(RenderTarget::ext);
+		//Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 		//Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 	}
 

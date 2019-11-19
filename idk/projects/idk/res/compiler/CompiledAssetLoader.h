@@ -10,6 +10,8 @@ namespace idk
 		: public ResourceFactory<EngineResource>
 	{
 	public:
+		using typename ResourceFactory<EngineResource>::Resource;
+
 		unique_ptr<Resource> GenerateDefaultResource() override;
 
 		unique_ptr<Resource> Create() override
@@ -23,8 +25,8 @@ namespace idk
 		unique_ptr<Resource> Create(PathHandle path_to_single_file) override
 		{
 			static_assert(std::is_constructible_v<EngineResource, CompiledAsset>, "Engine Resource must be constructible from Compiled Asset!");
-			auto stream = path_to_single_file.Open();
-			auto parsed = parse_text<CompiledAsset>(stringify(stream));
+			auto stream = path_to_single_file.Open(FS_PERMISSIONS::READ, true);
+			auto parsed = parse_binary<CompiledAsset>(stringify(stream));
 
 			if (parsed)
 				return std::make_unique<EngineResource>(*parsed);

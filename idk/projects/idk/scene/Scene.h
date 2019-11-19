@@ -3,14 +3,13 @@
 #include <core/Handle.h>
 #include <ds/span.h>
 #include <res/Resource.h>
+#include <res/ResourceExt.h>
 #include <res/SaveableResource.h>
 
 namespace idk
 {
 	class GameObject;
 	class Scene;
-
-	RESOURCE_EXTENSION(Scene, ".ids")
 
 	enum class SceneLoadResult
 	{
@@ -48,6 +47,8 @@ namespace idk
 
 		iterator begin() const;
 		iterator end() const;
+
+		EXTENSION(".ids");
 	private:
 		friend class ProjectManager;
 		friend class GameState;

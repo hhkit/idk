@@ -9,26 +9,11 @@ namespace idk
 {
 	void EditorAssetImporter::CheckImportDirectory()
 	{
-		const auto full_path = Core::GetSystem<FileSystem>().GetFullPath("/build");
-		const auto exec = [this, &full_path](PathHandle elem)
-		{
-			if (elem.GetExtension() == ".meta")
-				LoadMeta(elem);
-			else
-			{
-				if (elem.GetMountPath().find("/assets") != std::string_view::npos)
-				{
-					array<const char*, 2> args = { elem.GetFullPath().data(), full_path.data() };
-					Core::GetSystem<Application>().Exec("tools/compiler/idc.exe", span<const char*>(args));
-				}
-			}
-		};
-
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-			exec(elem);
+			ImportFile(elem);
 
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			exec(elem);
+			ImportFile(elem);
 	}
 
 	ResourceBundle EditorAssetImporter::GetFile(string_view mount_path)
@@ -37,6 +22,21 @@ namespace idk
 		if (itr != bundles.end())
 			return itr->second;
 		return ResourceBundle();
+	}
+
+	void EditorAssetImporter::ImportFile(PathHandle filepath)
+	{
+		const auto full_path = Core::GetSystem<FileSystem>().GetFullPath("/build");
+		if (filepath.GetExtension() == ".meta")
+			LoadMeta(filepath);
+		else
+		{
+			if (filepath.GetMountPath().find("/assets") != std::string_view::npos)
+			{
+				array<const char*, 2> args = { filepath.GetFullPath().data(), full_path.data() };
+				Core::GetSystem<Application>().Exec("tools/compiler/idc.exe", span<const char*>(args));
+			}
+		}
 	}
 
 	void EditorAssetImporter::LoadMeta(PathHandle meta_mount_path)
@@ -59,6 +59,12 @@ namespace idk
 
 	void EditorAssetImporter::Init()
 	{
+	}
+
+	void EditorAssetImporter::LateInit()
+	{
+		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL))
+			ImportFile(elem);
 	}
 
 	void EditorAssetImporter::Shutdown()

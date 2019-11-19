@@ -94,6 +94,13 @@ namespace idk
 		using ResourceHelper = ResourceManager_detail<Resources>;
 	}
 
+	void ResourceManager::WatchBuildDirectory()
+	{
+		for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
+			if (file.GetMountPath().find("/build") != std::string_view::npos)
+				LoadResource(file);
+	}
+
 	void ResourceManager::Init()
 	{
 		instance = this;
