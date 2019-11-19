@@ -26,6 +26,9 @@ namespace idk
 		template<typename FullResType> RscHandle<FullResType> CreateResource() const;
 		template<typename FullResType> RscHandle<FullResType> CreateResource(string_view name) const;
 	};
+
+	bool operator!=(const MetaBundle& lhs, const MetaBundle& rhs);
+	bool operator==(const MetaBundle& lhs, const MetaBundle& rhs);
 }
 
 #include <serialize/text.h>

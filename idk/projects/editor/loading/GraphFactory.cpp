@@ -32,46 +32,16 @@ namespace idk
 		graph->_shader_program = Core::GetResourceManager().Create<ShaderProgram>();
 		return graph;
 	}
-	ResourceBundle GraphLoader::LoadFile(PathHandle p)
+	unique_ptr<Material> GraphFactory::Create(PathHandle p)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
-		const auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>();
+		auto mat = std::make_unique<shadergraph::Graph>();
 		if (stream)
 		{
 			parse_text(stringify(stream), *mat);
-			const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
-			(discardme);
+			(void) Core::GetResourceManager().Create<ShaderProgram>(mat->_shader_program.guid);
 		}
 		mat->Compile();
 		return mat;
-	}
-
-	ResourceBundle GraphLoader::LoadFile(PathHandle p, const MetaBundle& m)
-	{
-        auto stream = p.Open(FS_PERMISSIONS::READ);
-
-        auto meta = m.FetchMeta<Material>();
-        const auto mat = meta 
-            ? Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(meta->guid)
-            : Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>();
-
-        //const auto mat = Core::GetResourceManager().LoaderEmplaceResource<shadergraph::Graph>(m.metadatas[0].guid);
-
-        if (stream)
-        {
-            parse_text(stringify(stream), *mat);
-            const auto discardme = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(mat->_shader_program.guid);
-            (discardme);
-        }
-		
-        mat->_default_instance = Core::GetResourceManager().LoaderEmplaceResource<MaterialInstance>(mat.guid);
-        mat->_default_instance->material = mat;
-
-        mat->Compile();
-
-        ResourceBundle b;
-        b.Add(mat);
-        b.Add(mat->_default_instance);
-        return b;
 	}
 }

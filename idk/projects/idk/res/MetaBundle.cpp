@@ -15,4 +15,14 @@ namespace idk
 	{
 		return metadatas.size();
 	}
+
+	bool operator!=(const MetaBundle& lhs, const MetaBundle& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	bool operator==(const MetaBundle& lhs, const MetaBundle& rhs)
+	{
+		return std::equal(lhs.metadatas.begin(), lhs.metadatas.end(), rhs.metadatas.begin());
+	}
 }

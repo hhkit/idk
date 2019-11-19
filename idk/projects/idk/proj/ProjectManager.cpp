@@ -7,6 +7,8 @@
 #include <core/ConfigurableSystem.h>
 #include <IncludeSystems.h>
 
+#include <res/compiler/AssetImporter.h>
+
 #include <fstream>
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -39,12 +41,9 @@ namespace idk
             if (path.GetExtension() == ".meta")
                 continue;
 
-            auto res = Core::GetResourceManager().Get(path);
-            if (res)
-            {
-                for (const auto& handle : res->GetAll())
-                    std::visit([](auto h) { Core::GetResourceManager().Release(h); }, handle);
-            }
+            auto res = Core::GetSystem<AssetImporter>().Get(path);
+            for (const auto& handle : res.GetAll())
+                std::visit([](auto h) { Core::GetResourceManager().Free(h); }, handle);
         }
         core_fs.Dismount("/assets");
         core_fs.Dismount("/config");

@@ -190,7 +190,9 @@
     <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
     <ClInclude Include="commands\CMD_ModifyInput.h" />
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
+    <ClInclude Include="compiler\BypassImporter.h" />
     <ClInclude Include="compiler\IDEAssetImporter.h" />
+    <ClInclude Include="compiler\Importer.h" />
     <ClInclude Include="DragDropTypes.h" />
     <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="commands\CMD_AddComponent.h" />

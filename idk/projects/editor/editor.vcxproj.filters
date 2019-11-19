@@ -127,6 +127,8 @@
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="compiler\IDEAssetImporter.h" />
+    <ClInclude Include="compiler\BypassImporter.h" />
+    <ClInclude Include="compiler\Importer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

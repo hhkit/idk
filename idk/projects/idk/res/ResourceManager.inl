@@ -77,7 +77,7 @@ namespace idk
 	}
 
 	template<typename Res>
-	inline RscHandle<Res> ResourceManager::Create(PathHandle h)
+	inline RscHandle<Res> ResourceManager::Load(PathHandle h, bool reload)
 	{
 		auto& factory = GetFactoryRes<Res>();
 		assert(&factory);
@@ -85,6 +85,9 @@ namespace idk
 		auto guid = Guid{ h.GetStem() };
 		auto& table = GetTable<Res>();
 		const auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
+
+		if (success == false && !reload)
+			return {};
 
 		auto& control_block = itr->second;
 		// attempt to put on another thread

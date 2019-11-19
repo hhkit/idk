@@ -33,7 +33,7 @@ namespace idk
 		template<typename Res> Res&           Get     (const RscHandle<Res>&);
 		template<typename Res> RscHandle<Res> Create();
 		template<typename Res> RscHandle<Res> Create(Guid guid);
-		template<typename Res> RscHandle<Res> Create(PathHandle h);
+		template<typename Res> RscHandle<Res> Load(PathHandle h, bool reload = true);
 		template<typename Res> bool           Free(const RscHandle<Res>&);
 
 		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);

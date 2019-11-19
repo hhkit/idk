@@ -10,6 +10,7 @@ namespace idk
 	public:
 		unique_ptr<Material> GenerateDefaultResource() override;
 		unique_ptr<Material> Create() override;
+		unique_ptr<Material> Create(PathHandle p) override;
 	};
 
 	class GraphLoader

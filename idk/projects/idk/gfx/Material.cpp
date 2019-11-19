@@ -2,6 +2,8 @@
 #include "Material.h"
 #include <gfx/ShaderProgram.h>
 #include <gfx/GraphicsSystem.h>
+#include <gfx/ShaderTemplate.h>
+
 namespace idk
 {
 	RscHandle<ShaderTemplate> Material::GetTemplate() const
@@ -13,14 +15,14 @@ namespace idk
 			case BlendMode::Opaque:
 				switch (model)
 				{
-				case ShadingModel::DefaultLit: return Core::GetResourceManager().Create<ShaderTemplate>(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
-				case ShadingModel::Unlit:      return Core::GetResourceManager().Create<ShaderTemplate>(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::DefaultLit: return Core::GetResourceManager().Load<ShaderTemplate>(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return Core::GetResourceManager().Load<ShaderTemplate>(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
 				}
 			case BlendMode::Masked:
 				switch (model)
 				{
-				case ShadingModel::DefaultLit: return Core::GetResourceManager().Create<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
-				case ShadingModel::Unlit:      return Core::GetResourceManager().Create<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::DefaultLit: return Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
 				}
 			}
 		}

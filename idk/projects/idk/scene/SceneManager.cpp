@@ -15,13 +15,13 @@ namespace idk
 	void SceneManager::Init()
 	{
 		Core::GetResourceManager().RegisterFactory<SceneFactory>();
-		Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
+		//Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
 	}
 
 	void SceneManager::LateInit()
 	{
-		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
-			Core::GetResourceManager().Load(elem);
+		//for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
+		//	Core::GetResourceManager().Load<Scene>(elem);
 		
 		if (_active_scene)
 		{

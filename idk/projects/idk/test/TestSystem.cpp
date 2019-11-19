@@ -17,7 +17,7 @@
 #include <PauseConfigurations.h>
 #include <file/FileSystem.h>
 #include <gfx/ShaderGraph.h>
-
+#include <res/compiler/AssetImporter.h>
 namespace idk
 {
 	void TestSystem::Init()
@@ -69,7 +69,7 @@ namespace idk
 		for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
 			if (file.GetExtension() == ".tmpt")
 			{
-				for (auto& elem : Core::GetResourceManager().GetAll<shadergraph::Graph>())
+				for (auto& elem : Core::GetSystem<AssetImporter>().GetAll<shadergraph::Graph>())
 					elem->Compile();
 			}
 

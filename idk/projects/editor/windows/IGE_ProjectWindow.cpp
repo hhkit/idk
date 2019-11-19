@@ -149,21 +149,21 @@ namespace idk {
 				if (ImGui::MenuItem("Material"))
 				{
 					auto path = unique_new_mount_path("NewMaterial", Material::ext);
-					auto res = Core::GetResourceManager().Create<shadergraph::Graph>(path);
+					auto res = Core::GetResourceManager().Load<shadergraph::Graph>(path);
 					if (res && *res)
 						Core::GetResourceManager().Save(*res);
 				}
                 if (ImGui::MenuItem("Material Instance"))
                 {
                     auto path = unique_new_mount_path("NewMaterialInst", MaterialInstance::ext);
-                    auto res = Core::GetResourceManager().Create<MaterialInstance>(path);
+                    auto res = Core::GetResourceManager().Load<MaterialInstance>(path);
                     if (res && *res)
                         Core::GetResourceManager().Save(*res);
                 }
 				if (ImGui::MenuItem("Render Target"))
 				{
 					auto path = unique_new_mount_path("NewRenderTarget", RenderTarget::ext);
-					auto res = Core::GetResourceManager().Create<RenderTarget>(path);
+					auto res = Core::GetResourceManager().Load<RenderTarget>(path);
 					if (res && *res)
 						Core::GetResourceManager().Save(*res);
 				}
@@ -560,7 +560,7 @@ namespace idk {
                         string filename{ path.GetStem() };
                         filename += "_Inst";
                         auto create_path = unique_new_mount_path(filename, MaterialInstance::ext);
-                        auto res = Core::GetResourceManager().Create<MaterialInstance>(create_path);
+                        auto res = Core::GetResourceManager().Load<MaterialInstance>(create_path);
                         if (res && *res)
                         {
                             res.value()->material = *Core::GetResourceManager().Get<Material>(path);

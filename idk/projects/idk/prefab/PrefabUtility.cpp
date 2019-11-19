@@ -361,7 +361,7 @@ namespace idk
 
 	RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go, Guid guid)
 	{
-		auto handle = Core::GetResourceManager().LoaderCreateResource<Prefab>(guid);
+		auto handle = Core::GetResourceManager().Create<Prefab>(guid);
 		_create(go, handle);
 		return handle;
 	}
@@ -369,11 +369,11 @@ namespace idk
 	RscHandle<Prefab> PrefabUtility::Save(Handle<GameObject> go, string_view save_path)
     {
         auto handle = [save_path]() {
-            auto create_res = Core::GetResourceManager().Create<Prefab>(save_path);
+            auto create_res = Core::GetResourceManager().Load<Prefab>(save_path);
             if (create_res)
-                return *create_res;
+                return create_res;
             else
-                return *Core::GetResourceManager().Load<Prefab>(save_path);
+                return Core::GetResourceManager().Load<Prefab>(save_path);
         }();
 
         _create(go, handle);
@@ -383,11 +383,11 @@ namespace idk
     RscHandle<Prefab> PrefabUtility::SaveAndConnect(Handle<GameObject> go, string_view save_path)
     {
         auto handle = [save_path]() {
-            auto create_res = Core::GetResourceManager().Create<Prefab>(save_path);
+            auto create_res = Core::GetResourceManager().Load<Prefab>(save_path);
             if (create_res)
-                return *create_res;
+                return create_res;
             else
-                return *Core::GetResourceManager().Load<Prefab>(save_path);
+                return Core::GetResourceManager().Load<Prefab>(save_path);
         }();
 
         _create(go, handle, true);

@@ -4,9 +4,34 @@
 #include <res/MetaBundle.h>
 #include <serialize/text.h>
 #include <util/ioutils.h>
-
+#include <gfx/ShaderGraph.h>
+#include <editor/compiler/BypassImporter.h>
 namespace idk
 {
+	namespace detail
+	{
+		template<typename T> struct AssetImporterHelper;
+
+		template<typename ...Ts>
+		struct AssetImporterHelper<std::tuple<Ts...>>
+		{
+			static constexpr auto GenSaveableImporterTable()
+			{
+				return array<void(*)(EditorAssetImporter*), ResourceCount>
+				{
+					[]([[maybe_unused]] EditorAssetImporter* editor)
+					{
+						if constexpr (has_extension_v<Ts>)
+							editor->RegisterImporter<BypassImporter<Ts>>(Ts::ext);
+					}
+					...
+				};
+			}
+		};
+
+		using AIHelper = AssetImporterHelper<Resources>;
+	}
+
 	void EditorAssetImporter::CheckImportDirectory()
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
@@ -16,13 +41,24 @@ namespace idk
 			ImportFile(elem);
 	}
 
-	ResourceBundle EditorAssetImporter::GetFile(string_view mount_path)
+	void EditorAssetImporter::CleanBuildDirectory()
+	{
+	}
+
+	void EditorAssetImporter::ExportCustomFiles()
+	{
+	}
+
+	ResourceBundle EditorAssetImporter::Get(string_view mount_path)
 	{
 		auto itr = bundles.find(string{ mount_path });
 		if (itr != bundles.end())
 			return itr->second;
 		return ResourceBundle();
 	}
+
+
+
 
 	void EditorAssetImporter::ImportFile(PathHandle filepath)
 	{
@@ -36,7 +72,20 @@ namespace idk
 		const auto itr = importers.find(filepath.GetExtension());
 		if (itr != importers.end())
 		{
-			// import and return
+			MetaBundle m;
+			auto meta_path = PathHandle{ string{ filepath.GetMountPath() } +".meta" };
+			{
+				auto stream = meta_path.Open(FS_PERMISSIONS::READ);
+				if (stream)
+					parse_text(stringify(stream), m);
+			}
+			auto new_m = itr->second->Import(filepath, m);
+			
+			if (new_m != m)
+			{
+				auto stream = meta_path.Open(FS_PERMISSIONS::WRITE);
+				stream << serialize_text(new_m);
+			}
 			return;
 		}
 
@@ -59,6 +108,8 @@ namespace idk
 				GenericResourceHandle insertme{ elem.guid, elem.t_hash };
 				std::visit([&bundle](const auto& guid){ bundle.Add(guid); }, insertme);
 			}
+			for (auto& elem : bundle.GetAll())
+				pathback[elem] = meta_mount_path.GetMountPath();
 			bundles[string{ meta_mount_path.GetMountPath() }] = std::move(bundle);
 		}
 		else
@@ -67,6 +118,11 @@ namespace idk
 
 	void EditorAssetImporter::Init()
 	{
+		constexpr auto importerjt = detail::AIHelper::GenSaveableImporterTable();
+		for (auto& func : importerjt)
+			func(this);
+
+		RegisterImporter<BypassImporter<shadergraph::Graph>>(Material::ext);
 	}
 
 	void EditorAssetImporter::LateInit()
