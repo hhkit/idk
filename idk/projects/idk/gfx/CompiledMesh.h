@@ -7,13 +7,14 @@ namespace idk
 {
 	struct CompiledBuffer
 	{
-		vector<vtx::Attrib>   attribs;
+		vector<vtx::Descriptor>   attribs;
 		vector<unsigned char> data_buffer;
 	};
 
 	struct CompiledMesh
 	{
 		vector<CompiledBuffer> buffers;
+		vector<unsigned> element_buffer;
 		EXTENSION(".idmsh");
 	};
 
