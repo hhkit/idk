@@ -17,6 +17,9 @@ namespace idk
 		/* FILE GET */
 		using AssetImporter::Get;
 		ResourceBundle Get(PathHandle path) override;
+		template<typename Res> vector<RscHandle<Res>> GetAll();
+		opt<string> GetPath(const GenericResourceHandle& h);
+		template<typename Res> opt<string> GetPath(RscHandle<Res>);
 
 		/* FILE OPS */
 		template<typename Res, typename = sfinae<has_tag_v<Res, Saveable>>> 
@@ -24,6 +27,9 @@ namespace idk
 
 		template<typename Res, typename = sfinae<has_tag_v<Res, Saveable>>>
 		void CopyTo(RscHandle<Res> handle, PathHandle path);
+
+		template<typename Res, typename = sfinae<has_tag_v<Res, Saveable>>>
+		void Rename(RscHandle<Res> handle, string_view mount_path);
 
 		/* IMPORTING */
 		template<typename Importer>
@@ -42,6 +48,24 @@ namespace idk
 		void Shutdown();
 	};
 	
+
+	template<typename Res>
+	inline vector<RscHandle<Res>> EditorAssetImporter::GetAll()
+	{
+		vector<RscHandle<Res>> retval{};
+		for (auto& [path, bundle] : bundles)
+		{
+			for (auto& elem : bundle.GetAll<Res>())
+				retval.emplace_back(elem);
+		}
+		return retval;
+	}
+
+	template<typename Res>
+	inline opt<string> EditorAssetImporter::GetPath(RscHandle<Res> h)
+	{
+		return GetPath(GenericResourceHandle{h});
+	}
 
 	template<typename Res, typename>
 	void EditorAssetImporter::Save(RscHandle<Res> handle)

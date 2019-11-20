@@ -1,5 +1,5 @@
 #include "stdafx.h"
-
+#include <IncludeResources.h>
 namespace idk
 {
 	namespace detail

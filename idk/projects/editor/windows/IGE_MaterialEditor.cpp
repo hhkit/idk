@@ -2,6 +2,7 @@
 
 #include "IGE_MaterialEditor.h"
 #include <editor/IDE.h>
+#include <editor/compiler/IDEAssetImporter.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/widgets/InputResource.h>
 #include <editor/widgets/EnumCombo.h>
@@ -700,7 +701,7 @@ namespace idk
             if (ImGui::Button("Compile & Save"))
             {
                 g.Compile();
-                Core::GetResourceManager().Save(_graph);
+                Core::GetSystem<EditorAssetImporter>().Save(_graph);
             }
             ImGui::EndMenuBar();
         }

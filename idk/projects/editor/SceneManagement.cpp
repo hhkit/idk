@@ -46,8 +46,7 @@ namespace idk
 		if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
 		{
 			auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-			auto scene_res = Core::GetSystem<AssetImporter>().Get<Scene>(virtual_path);
-			auto hnd = *scene_res;
+			auto hnd = Core::GetSystem<AssetImporter>().Get<Scene>(virtual_path);
 			auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
 			if (hnd != active_scene)
 			{
@@ -152,7 +151,8 @@ namespace idk
 			prefab_scene->Deactivate();
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
-					Core::GetResourceManager().Unload(path);
+					for (auto& prefab : Core::GetSystem<AssetImporter>().Get(path).GetAll<Prefab>())
+						Core::GetResourceManager().Destroy(prefab);
 
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
 
@@ -161,7 +161,7 @@ namespace idk
 
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
-					Core::GetResourceManager().Load(path, true);
+					Core::GetResourceManager().Load<Prefab>(path, true);
 		}
 	}
 }

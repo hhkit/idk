@@ -49,9 +49,18 @@ namespace idk
 	{
 	}
 
-	ResourceBundle EditorAssetImporter::Get(string_view mount_path)
+	opt<string> EditorAssetImporter::GetPath(const GenericResourceHandle& h)
 	{
-		auto itr = bundles.find(string{ mount_path });
+		auto itr = pathback.find(h);
+		if (itr != pathback.end())
+			return itr->second;
+		else
+			return std::nullopt;
+	}
+
+	ResourceBundle EditorAssetImporter::Get(PathHandle mount_path)
+	{
+		auto itr = bundles.find(mount_path.GetMountPath());
 		if (itr != bundles.end())
 			return itr->second;
 		return ResourceBundle();
