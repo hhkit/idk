@@ -302,7 +302,7 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.internal_format = vk::Format::eD16Unorm;
+		info.internal_format = vk::Format::eD32Sfloat;
 		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eDepth;
 		info.sampled(true);
@@ -531,7 +531,9 @@ namespace idk::vkn
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 	}
-	
+	bool fml = false;
+	void Mark() { fml = true; }
+#pragma optimize("",off)
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
 		TextureResult result;
