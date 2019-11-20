@@ -277,7 +277,7 @@ vec3 pbr(
 		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),1),1);
         spotlight_effect = (cos_alpha<cos_phi)?0:spotlight_effect;
 	}
-	if (light.type != 1) atten = (1.f/light.falloff)/(dist*dist);
+	if (light.type != 1) atten = pow(max(light.falloff-dist,0)/light.falloff,3);//atten = (1.f/light.falloff)/(dist*dist);
 	
 	atten = min(max(atten, 0),1);
 	

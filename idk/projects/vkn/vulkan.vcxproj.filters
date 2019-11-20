@@ -204,6 +204,9 @@
     <ClInclude Include="VknTextureRenderMeta.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanFontAtlasFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
     <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="DescriptorUpdateData.h">
       <Filter>descriptor_sets</Filter>
@@ -384,6 +387,9 @@
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="DescriptorUpdateData.cpp" />
+    <ClCompile Include="VulkanFontAtlasFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

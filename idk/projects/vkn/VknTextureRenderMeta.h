@@ -28,7 +28,9 @@ namespace idk::vkn
 		eAlways
 	};
 
-	hash_table<ColorFormat::_enum, vk::Format> CFormatMap();
+	hash_table<ColorFormat::_enum, vk::Format>			CFormatMap();
+	hash_table<FilterMode::_enum, vk::Filter>			FilterMap();
+	hash_table<UVMode::_enum, vk::SamplerAddressMode>	UVModeMap();
 
 	vk::Format    MapFormat(TextureFormat tf);
 	vk::Format    MapFormat(ColorFormat tf);

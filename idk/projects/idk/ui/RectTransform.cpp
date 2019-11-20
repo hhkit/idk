@@ -27,8 +27,8 @@ namespace idk
             this_rect.position = offset_min;
             this_rect.size = max - min;
 
-            return this_rect;
         }
+		return this_rect;
     }
 
 }
