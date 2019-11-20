@@ -707,33 +707,7 @@ namespace idk::ogl
             }
 
 			glDisable(GL_BLEND);
-            glDisable(GL_DEPTH_TEST);
 
-            //RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
-            glBindVertexArray(font_vao_id);
-            pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::VUi]);
-            auto ui_render_data = curr_object_buffer.ui_render;
-            for (auto& elem : ui_render_data)
-            {
-                std::visit([&](const auto& data)
-                {
-                    using T = std::decay_t<decltype(data)>;
-                    if constexpr (std::is_same_v<T, ImageData>)
-                    {
-                        // bind shader
-                        pipeline.PushProgram(elem.material->material->_shader_program);
-                        pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
-                        pipeline.SetUniform("PerUI.color", vec4{ elem.color });
-                        pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
-                        fsq->BindAndDraw(
-                            renderer_attributes{ {
-                                { vtx::Attrib::Position, 0 },
-                                { vtx::Attrib::UV, 1 },
-                            } }
-                        );
-                    }
-                }, elem.data);
-            }
 
 		} // for each culled camera
 
@@ -742,7 +716,34 @@ namespace idk::ogl
 
 
         // UI DRAW
+        glDisable(GL_DEPTH_TEST);
 
+        fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{});
+        RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
+        glBindVertexArray(font_vao_id);
+        pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::VUi]);
+        auto ui_render_data = curr_object_buffer.ui_render;
+        for (auto& elem : ui_render_data)
+        {
+            std::visit([&](const auto& data)
+            {
+                using T = std::decay_t<decltype(data)>;
+                if constexpr (std::is_same_v<T, ImageData>)
+                {
+                    // bind shader
+                    pipeline.PushProgram(elem.material->material->_shader_program);
+                    pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
+                    pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+                    pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+                    fsq->BindAndDraw(
+                        renderer_attributes{ {
+                            { vtx::Attrib::Position, 0 },
+                            { vtx::Attrib::UV, 1 },
+                        } }
+                    );
+                }
+            }, elem.data);
+        }
 
 
 
