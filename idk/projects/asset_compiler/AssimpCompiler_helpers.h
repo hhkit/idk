@@ -15,8 +15,12 @@ namespace fs = std::filesystem;
 #include <assimp/cimport.h>
 
 // Core includes
+#include <gfx/CompiledMesh.h>
 #include <gfx/GraphicsSystem.h>
 #include <res/MetaBundle.h>
+
+// Mesh
+
 
 // Animation
 #include <anim/Skeleton.h>
@@ -157,7 +161,7 @@ namespace idk::ai_helpers
 
 		void CollectMeshes(aiNode* node);
 		vector<MeshData> BuildMeshBuffers() const;
-		CompiledMesh CompileMesh(const MeshData& mesh_buffers) const;
+		idk::CompiledMesh CompileMesh(const MeshData& mesh_buffers) const;
 
 		void CollectBones();
 		void BuildSkeleton();
