@@ -93,8 +93,9 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");
 		}
 
-		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::SortCameras        ,  "Sort Cameras"           );
-		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::PrepareLights      ,   "Prepare Lights"        );
+        _scheduler->SchedulePass      <UpdatePhase::PreRender> (&UISystem::FinalizeMatrices,           "Finalize UI Matrices");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::SortCameras,          "Sort Cameras");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::PrepareLights,        "Prepare Lights");
 		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::BufferGraphicsState,  "Buffer graphics objects");
 
 		_scheduler->SchedulePass      <UpdatePhase::Render>    (&GraphicsSystem::Prerender,            "Prerender");

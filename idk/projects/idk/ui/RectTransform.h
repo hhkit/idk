@@ -16,7 +16,8 @@ namespace idk
         vec2 pivot{ 0.5f, 0.5f };
         // transform position: anchored position
 
-        rect global_rect; // computed, relative to parent pivot
+        rect _local_rect; // computed, relative to parent pivot
+        mat4 _matrix; // computed screen to normalized viewport matrix
 
         idk::rect RectInCanvas() const;
         Handle<class Canvas> FindCanvas() const;

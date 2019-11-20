@@ -134,7 +134,6 @@ namespace idk
     {
         mat4 transform;
         color color;
-        rect rect;
         RscHandle<MaterialInstance> material;
         variant<ImageData, TextData> data;
     };

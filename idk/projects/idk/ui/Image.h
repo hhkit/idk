@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
+#include <ui/UISystem.h>
 
 namespace idk
 {
@@ -9,6 +10,6 @@ namespace idk
     {
     public:
         RscHandle<Texture> texture;
-        RscHandle<MaterialInstance> material;
+        RscHandle<MaterialInstance> material{ UISystem::default_material_inst };
     };
 }

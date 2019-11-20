@@ -492,10 +492,8 @@ namespace idk
             const auto& rt = *go.GetComponent<RectTransform>();
             
             auto& render_data = result.ui_render.emplace_back();
-            const auto rect = rt.RectInCanvas();
-            rect.size / vec2(Core::GetSystem<Application>().GetScreenSize());
 
-            render_data.transform = go.Transform()->GlobalMatrix();
+            render_data.transform = rt._matrix * mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
             render_data.material = im.material;
             render_data.data = ImageData{ im.texture };
         }

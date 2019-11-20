@@ -13,8 +13,12 @@ namespace idk
         virtual void Init() override {};
         virtual void LateInit() override;
         virtual void Shutdown() override {};
-        virtual void Update(span<class Canvas>);
 
+        void Update(span<class Canvas>);
+        void FinalizeMatrices(span<class Canvas>);
+
+    private:
         void ComputeCanvasHierarchyRects(Handle<Canvas> canvas);
+        void FinalizeMatrices(Handle<Canvas> canvas);
     };
 }
