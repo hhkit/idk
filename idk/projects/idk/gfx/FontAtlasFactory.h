@@ -11,14 +11,8 @@ namespace idk
 	public:
 		unique_ptr<FontAtlas> GenerateDefaultResource() override;
 		unique_ptr<FontAtlas> Create() override;
+		unique_ptr<FontAtlas> Create(PathHandle h) override;
 		void Init() override final; // force inheritors to create default font atlas
 		virtual void GenerateDefaultFontAtlas() = 0;
-	};
-
-	class FontAtlasLoader
-		: public IFileLoader
-	{
-	public:
-		ResourceBundle LoadFile(PathHandle p, const MetaBundle& m) override;
 	};
 }

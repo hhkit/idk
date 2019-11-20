@@ -1,7 +1,7 @@
 #pragma once
-#include <gfx/CubeMap.h>
 #include <glad/glad.h>
-
+#include <gfx/CubeMap.h>
+#include <gfx/CompiledTexture.h>
 #include <opengl/resource/OpenGLTexture.h>
 
 namespace idk::ogl
@@ -11,6 +11,7 @@ namespace idk::ogl
 	{
 	public:
 		OpenGLCubemap();
+		explicit OpenGLCubemap(const CompiledCubeMap&);
 		OpenGLCubemap(OpenGLCubemap&&);
 		OpenGLCubemap& operator=(OpenGLCubemap&&);
 		~OpenGLCubemap();
@@ -18,7 +19,7 @@ namespace idk::ogl
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
 		void BindConvolutedToUnit(GLuint texture_unit = 0);
-		void Buffer(unsigned int face_value, void* data, ivec2 size, InputChannels inputchn = InputChannels::RGB, ColorFormat cFormat = ColorFormat::RGBAF_16);
+		void Buffer(unsigned int face_value, const void* data, ivec2 size, InputChannels inputchn = InputChannels::RGB, ColorFormat cFormat = ColorFormat::RGBAF_16);
 
 		using CubeMap::Size;
 		void Size(ivec2 new_size) override;

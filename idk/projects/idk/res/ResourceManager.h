@@ -31,9 +31,14 @@ namespace idk
 		template<typename Res> bool           Validate(const RscHandle<Res>&);
 		template<typename Res> Res&           Get     (const RscHandle<Res>&);
 		template<typename Res> RscHandle<Res> Create();
-		template<typename Res> RscHandle<Res> Create(Guid guid);
-		template<typename Res> RscHandle<Res> Load(PathHandle h, bool reload = true);
+		template<typename Res> RscHandle<Res> Create(Guid guid, bool replace = true);
+		template<typename Res> RscHandle<Res> Emplace(unique_ptr<Res> resource);
+		template<typename Res> RscHandle<Res> Emplace(Guid guid, unique_ptr<Res> resource, bool replace = true);
 		template<typename Res> bool           Destroy(const RscHandle<Res>&);
+		template<typename Res> RscHandle<Res> Load(PathHandle h, bool reload = true);
+
+		void LoadResource(PathHandle file);
+
 
 		template<typename Res> opt<string_view> GetPath(const RscHandle<Res>&);
 		bool									IsExtensionSupported(string_view ext);
@@ -66,8 +71,6 @@ namespace idk
 		void Init()     override;
 		void LateInit() override;
 		void Shutdown() override;
-
-		void LoadResource(PathHandle file);
 
 		template<typename Res> auto& GetFactoryRes() { return *r_cast<ResourceFactory<Res>*>  (_factories        [BaseResourceID<Res>].get()); }
 		template<typename Res> auto& GetTable()      { return *r_cast<ResourceStorage<Res>*>  (_resource_table   [BaseResourceID<Res>].get()); }

@@ -60,7 +60,7 @@ namespace idk
 
 	ResourceBundle EditorAssetImporter::Get(PathHandle mount_path)
 	{
-		auto itr = bundles.find(mount_path.GetMountPath());
+		auto itr = bundles.find(string{ mount_path.GetMountPath() });
 		if (itr != bundles.end())
 			return itr->second;
 		return ResourceBundle();

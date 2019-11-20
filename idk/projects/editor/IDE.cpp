@@ -35,9 +35,6 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 // resource importing
 #include <res/EasyFactory.h>
 #include <loading/GraphFactory.h>
-#include <opengl/resource/OpenGLCubeMapLoader.h>
-#include <opengl/resource/OpenGLTextureLoader.h>
-#include <opengl/resource/OpenGLFontAtlasLoader.h>
 
 // editor setup
 #include <gfx/RenderTarget.h>
@@ -111,13 +108,6 @@ namespace idk
 		{
 		case GraphicsAPI::OpenGL:
 			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
-            Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
-            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
-            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
-            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
-            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
-            Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
-			Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
@@ -125,11 +115,6 @@ namespace idk
 		default:
 			break;
 		}
-
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
-        Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetResourceManager().RegisterFactory<GraphFactory>();
         Core::GetSystem<Application>().OnClosed.Listen([&]() { closing = true; });
@@ -307,7 +292,7 @@ namespace idk
         for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
         {
             if (elem.GetExtension() != ".meta")
-                Core::GetResourceManager().Load(elem, false);
+                Core::GetResourceManager().LoadResource(elem);
         }
 
 		SetupEditorScene();
@@ -438,7 +423,7 @@ namespace idk
 			camHandle->render_target = editor_view;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
+				camHandle->clear = Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
 			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		}

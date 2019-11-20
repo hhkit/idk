@@ -53,6 +53,15 @@ namespace idk::ogl
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 
+	OpenGLCubemap::OpenGLCubemap(const CompiledCubeMap& cbm)
+		: OpenGLCubemap{}
+	{
+		int i = 0;
+		for (auto& buf : cbm.textures)
+			Buffer(i++, buf.pixel_buffer.data(), buf.size, InputChannels::RGBA, buf.internal_format);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	}
+
 	OpenGLCubemap::OpenGLCubemap(OpenGLCubemap&& rhs)
 		: CubeMap{ std::move(rhs) }
 		, _id{ rhs._id }
@@ -100,7 +109,7 @@ namespace idk::ogl
 		//GL_CHECK();
 	}
 
-	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, InputChannels format, ColorFormat colorFormat)
+	void OpenGLCubemap::Buffer(unsigned int face_value,const void* data, ivec2 size, InputChannels format, ColorFormat colorFormat)
 	{
 		format;
 

@@ -1,8 +1,9 @@
 #pragma once
 #include <idk.h>
-#include <res/FileLoader.h>
+#include <res/ResourceFactory.h>
 #include <serialize/binary.h>
 #include <util/ioutils.h>
+
 namespace idk
 {
 	template<typename EngineResource, typename CompiledAsset>

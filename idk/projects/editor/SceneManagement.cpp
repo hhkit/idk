@@ -8,6 +8,7 @@
 #include <common/Transform.h>
 #include <IDE.h>
 #include <scene/SceneManager.h>
+#include <prefab/Prefab.h>
 #include <res/compiler/AssetImporter.h>
 #include <editor/compiler/IDEAssetImporter.h>
 #include <gfx/Camera.h>
@@ -108,11 +109,12 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			auto res = Core::GetSystem<EditorAssetImporter>().CopyTo(curr_scene, p);
+			Core::GetSystem<EditorAssetImporter>().CopyTo(curr_scene, p);
+			auto res = Core::GetSystem<ResourceManager>().Load<Scene>(p);
 			if (res)
 			{
 				curr_scene->Deactivate();
-				Core::GetSystem<SceneManager>().SetActiveScene(res.value());
+				Core::GetSystem<SceneManager>().SetActiveScene(res);
 				Core::GetSystem<SceneManager>().GetActiveScene()->LoadFromResourcePath();
 			}
 			Core::GetSystem<ProjectManager>().SaveProject();

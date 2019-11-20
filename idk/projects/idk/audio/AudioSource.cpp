@@ -85,7 +85,7 @@ namespace idk
 	{
 		auto audioPtr1 = Core::GetResourceManager().Load<AudioClip>(PathHandle(filePath));
 		if (audioPtr1) {
-			audio_clip_list.emplace_back(*audioPtr1);
+			audio_clip_list.emplace_back(audioPtr1);
 			audio_clip_channels.push_back(nullptr);
 			return static_cast<int>(audio_clip_list.size() - 1);
 		}

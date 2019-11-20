@@ -27,7 +27,7 @@ namespace idk::ogl
 
 		for (auto& elem : Textures())
 		{
-			auto tex = elem = (elem == RscHandle<Texture>{})? Core::GetResourceManager().Create<OpenGLTexture>():Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid);
+			auto tex = elem = (elem == RscHandle<Texture>{})? Core::GetResourceManager().Create<OpenGLTexture>():Core::GetResourceManager().Emplace(elem.guid, std::make_unique<OpenGLTexture>());
 			tex->Size(size);
 		}
 		auto tex = Textures()[kDepthIndex];

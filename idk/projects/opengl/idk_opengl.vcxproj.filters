@@ -56,20 +56,8 @@
     <ClInclude Include="resource\OpenGLTextureFactory.h">
       <Filter>resource\Factories</Filter>
     </ClInclude>
-    <ClInclude Include="resource\OpenGLRenderTargetLoader.h">
-      <Filter>resource\Loaders</Filter>
-    </ClInclude>
-    <ClInclude Include="resource\OpenGLCubeMapLoader.h">
-      <Filter>resource\Loaders</Filter>
-    </ClInclude>
-    <ClInclude Include="resource\OpenGLTextureLoader.h">
-      <Filter>resource\Loaders</Filter>
-    </ClInclude>
     <ClInclude Include="resource\OpenGLFontAtlas.h">
       <Filter>resource</Filter>
-    </ClInclude>
-    <ClInclude Include="resource\OpenGLFontAtlasLoader.h">
-      <Filter>resource\Loaders</Filter>
     </ClInclude>
     <ClInclude Include="resource\OpenGLFontAtlasFactory.h">
       <Filter>resource\Factories</Filter>
@@ -124,17 +112,8 @@
     <ClCompile Include="resource\OpenGLTextureFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
-    <ClCompile Include="resource\OpenGLCubeMapLoader.cpp">
-      <Filter>resource\Loaders</Filter>
-    </ClCompile>
-    <ClCompile Include="resource\OpenGLTextureLoader.cpp">
-      <Filter>resource\Loaders</Filter>
-    </ClCompile>
     <ClCompile Include="resource\OpenGLFontAtlas.cpp">
       <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="resource\OpenGLFontAtlasLoader.cpp">
-      <Filter>resource\Loaders</Filter>
     </ClCompile>
     <ClCompile Include="resource\OpenGLFontAtlasFactory.cpp">
       <Filter>resource\Factories</Filter>

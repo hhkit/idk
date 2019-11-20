@@ -16,6 +16,10 @@ namespace idk
 	{
 		return unique_ptr<FontAtlas>();
 	}
+	unique_ptr<FontAtlas> FontAtlasFactory::Create(PathHandle h)
+	{
+		return unique_ptr<FontAtlas>();
+	}
 	void FontAtlasFactory::Init()
 	{
 		GenerateDefaultFontAtlas();

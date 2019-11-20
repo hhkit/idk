@@ -15,10 +15,7 @@
 // resource importing
 #include <res/EasyFactory.h>
 #include <loading/GraphFactory.h>
-#include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTexture.h>
-#include <opengl/resource/OpenGLTextureLoader.h>
-#include <opengl/resource/OpenGLFontAtlasLoader.h>
 #include <opengl/resource/OpenGLMesh.h>
 // editor setup
 #include <gfx/RenderTarget.h>
@@ -103,7 +100,7 @@ namespace idk
 		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
 		{
 			if (elem.GetExtension() != ".meta")
-				Core::GetResourceManager().Load(elem, false);
+				Core::GetResourceManager().LoadResource(elem);
 		}
 	}
 

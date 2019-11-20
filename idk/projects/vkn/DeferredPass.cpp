@@ -130,7 +130,7 @@ namespace idk::vkn
 				});
 			auto new_buffer = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(fbf.End());
 			if (gbuffer)
-				Core::GetResourceManager().Release(gbuffer);
+				Core::GetResourceManager().Destroy(gbuffer);
 			gbuffer = RscHandle<VknFrameBuffer>{ new_buffer };
 		
 			_render_complete = View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{});

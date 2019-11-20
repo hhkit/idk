@@ -3,8 +3,9 @@
 #include <particle/ParticleSystem.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
+#include <gfx/ShaderProgram.h>
+#include <gfx/Material.h>
 #include <gfx/MaterialInstance.h>
-
 namespace idk
 {
 

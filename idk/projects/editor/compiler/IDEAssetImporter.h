@@ -1,6 +1,6 @@
 #pragma once
 #include <res/compiler/AssetImporter.h>
-
+#include <editor/compiler/Importer.h>
 namespace idk
 {
 	class EditorAssetImporter
@@ -32,14 +32,14 @@ namespace idk
 		void Rename(RscHandle<Res> handle, string_view mount_path);
 
 		/* IMPORTING */
-		template<typename Importer>
+		template<typename ImporterType>
 		void RegisterImporter(string_view ext);
 	private:
 		using MountPath = string;
 
 		hash_table<MountPath, ResourceBundle> bundles;
 		hash_table<GenericResourceHandle, string> pathback;
-		hash_table<string_view, unique_ptr<class Importer>> importers;
+		hash_table<string_view, unique_ptr<Importer>> importers;
 
 		void ImportFile(PathHandle filepath);
 		void LoadMeta(PathHandle meta_mount_path);
@@ -80,12 +80,18 @@ namespace idk
 	template<typename Res, typename>
 	inline void EditorAssetImporter::CopyTo(RscHandle<Res> handle, PathHandle path)
 	{
-		auto itr = bundles.find(path.GetMountPath());
+		auto itr = bundles.find(string{ path.GetMountPath() });
 		if (itr == bundles.end())
 		{
 			auto outstream = path.Open(FS_PERMISSIONS::WRITE);
 			outstream << serialize_text(*handle);
 			// then let resource manager handle the reimport
 		}
+	}
+	template<typename ImporterType>
+	inline void EditorAssetImporter::RegisterImporter(string_view ext)
+	{
+		static_assert(std::is_base_of_v<Importer, ImporterType>, "Importer must inherit Importer from <editor/compiler/Importer.h>");
+		importers[ext] = std::make_unique<ImporterType>();
 	}
 }

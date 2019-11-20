@@ -29,7 +29,7 @@ namespace idk
 			OnSceneChange.Fire(_active_scene);
 		}
 
-		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(Scene::prefab);
+		_prefab_scene = Core::GetResourceManager().Emplace(std::make_unique<Scene>(Scene::prefab));
 		_prefab_scene->Activate();
 	}
 

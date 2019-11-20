@@ -9,7 +9,7 @@ namespace idk
 {
 	template<typename T>
 	class BypassImporter
-		: Importer
+		: public Importer
 	{
 	public:
 		MetaBundle Import(PathHandle path, const MetaBundle& old_meta)
@@ -18,8 +18,8 @@ namespace idk
 			auto guid = serialized_meta ? serialized_meta->guid : Guid::Make();
 
 			auto stream = path.Open(FS_PERMISSIONS::READ);
-			auto new_val = Core::GetResourceManager().Create(guid);
-			parse_text(*new_val, stringify(stream));
+			auto new_val = Core::GetResourceManager().Create<T>(guid);
+			parse_text(stringify(stream), *new_val);
 
 			MetaBundle retval;
 			retval.Add(new_val);

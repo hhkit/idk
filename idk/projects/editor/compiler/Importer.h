@@ -9,5 +9,6 @@ namespace idk
 	{
 	public:
 		virtual MetaBundle Import(PathHandle path, const MetaBundle& old_meta) = 0;
+		virtual ~Importer();
 	};
 }

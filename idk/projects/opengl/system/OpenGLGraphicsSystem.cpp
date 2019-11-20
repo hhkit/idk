@@ -6,7 +6,6 @@
 #include <res/EasyFactory.h>
 #include <gfx/MeshRenderer.h>
 #include <gfx/ShaderTemplateFactory.h>
-#include <gfx/ShaderTemplateLoader.h>
 #include <gfx/MaterialInstance.h>
 #include <gfx/MaterialFactory.h>
 
@@ -19,12 +18,9 @@
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLMeshFactory.h>
 #include <opengl/resource/OpenGLTextureFactory.h>
-#include <opengl/resource/OpenGLRenderTargetLoader.h>
-#include <opengl/program/GLSLLoader.h>
 #include <opengl/program/ProgramFactory.h>
 #include <opengl/system/OpenGLState.h>
 #include <opengl/resource/OpenGLFontAtlasFactory.h>
-#include <opengl/resource/OpenGLFontAtlasLoader.h>
 
 
 #include "OpenGLGraphicsSystem.h"
