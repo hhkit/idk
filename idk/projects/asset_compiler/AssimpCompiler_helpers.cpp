@@ -1,3 +1,4 @@
+#include <scene/Scene.h>
 #include "AssimpCompiler_helpers.h"
 #include "AssimpCompiler.h"
 #include <math/matrix_decomposition.h>
@@ -168,134 +169,126 @@ namespace idk::ai_helpers
 		return ret_val;
 	}
 
-	CompiledMesh Scene::CompileMesh(const MeshData& mesh_buffers) const
+	CompiledMesh ai_helpers::Scene::CompileMesh(const MeshData& buffer) const
 	{
-		auto mesh_data{ BuildMeshBuffers() };
-		vector<CompiledMesh> ret_val;
-		ret_val.reserve(mesh_data.size());
-		for (auto& buffer : mesh_data)
+		CompiledMesh mesh;
+		if (!buffer.positions.empty())
 		{
-			CompiledMesh mesh;
-			if (!buffer.positions.empty())
-			{
-				vtx::Descriptor descriptor{
-					.attrib = vtx::Attrib::Position,
-					.stride = sizeof(vec3),
-					.offset = 0,
-				};
+			vtx::Descriptor descriptor{
+				.attrib = vtx::Attrib::Position,
+				.stride = sizeof(vec3),
+				.offset = 0,
+			};
 
-				CompiledBuffer buf{
-					{descriptor},
-					vector<unsigned char>{r_cast<unsigned char*>(buffer.positions.data()), r_cast<unsigned char*>(buffer.positions.data() + buffer.positions.size() * sizeof(vec3))}
-				};
-				mesh.buffers.emplace_back(buf);
-			}
-
-			if (!buffer.normals.empty())
-			{
-				vtx::Descriptor descriptor{
-					.attrib = vtx::Attrib::Normal,
-					.stride = sizeof(vec3),
-					.offset = 0,
-				};
-
-				CompiledBuffer buf{
-					{descriptor},
-					vector<unsigned char>{r_cast<unsigned char*>(buffer.normals.data()), r_cast<unsigned char*>(buffer.normals.data() + buffer.normals.size() * sizeof(vec3))}
-				};
-
-				mesh.buffers.emplace_back(buf);
-			}
-
-			if (!buffer.uvs.empty())
-			{
-				vtx::Descriptor descriptor{
-					.attrib = vtx::Attrib::UV,
-					.stride = sizeof(vec2),
-					.offset = 0,
-				};
-
-				CompiledBuffer buf{
-					{descriptor},
-					vector<unsigned char>{r_cast<unsigned char*>(buffer.uvs.data()), r_cast<unsigned char*>(buffer.uvs.data() + buffer.uvs.size() * sizeof(vec2))}
-				};
-
-				mesh.buffers.emplace_back(buf);
-			}
-
-			if (!buffer.tangents.empty())
-			{
-				vtx::Descriptor descriptor{
-					.attrib = vtx::Attrib::Tangent,
-					.stride = sizeof(vec3),
-					.offset = 0,
-				};
-
-
-				CompiledBuffer buf{
-					{descriptor},
-					vector<unsigned char>{r_cast<unsigned char*>(buffer.tangents.data()), r_cast<unsigned char*>(buffer.tangents.data() + buffer.tangents.size() * sizeof(vec3))}
-				};
-
-				mesh.buffers.emplace_back(buf);
-			}
-
-			if (!buffer.bi_tangents.empty())
-			{
-				vtx::Descriptor descriptor{
-					.attrib = vtx::Attrib::Bitangent,
-					.stride = sizeof(vec3),
-					.offset = 0,
-				};
-
-				CompiledBuffer buf{
-					{descriptor},
-					vector<unsigned char>{r_cast<unsigned char*>(buffer.bi_tangents.data()), r_cast<unsigned char*>(buffer.bi_tangents.data() + buffer.bi_tangents.size() * sizeof(vec3))}
-				};
-
-				mesh.buffers.emplace_back(buf);
-			}
-
-			if (!buffer.bone_ids.empty())
-			{
-				vtx::Descriptor descriptor{
-					.attrib = vtx::Attrib::BoneID,
-					.stride = sizeof(ivec4),
-					.offset = 0,
-				};
-
-				CompiledBuffer buf{
-								{descriptor},
-								vector<unsigned char>{r_cast<unsigned char*>(buffer.bone_ids.data()), r_cast<unsigned char*>(buffer.bone_ids.data() + buffer.bone_ids.size() * sizeof(ivec4))}
-				};
-
-				mesh.buffers.emplace_back(buf);
-			}
-
-			if (!buffer.bone_weights.empty())
-			{
-				vtx::Descriptor descriptor{
-					.attrib = vtx::Attrib::BoneWeight,
-					.stride = sizeof(vec4),
-					.offset = 0,
-				};
-
-				CompiledBuffer buf{
-					{descriptor},
-					vector<unsigned char>{r_cast<unsigned char*>(buffer.bone_weights.data()), r_cast<unsigned char*>(buffer.bone_weights.data() + buffer.bone_weights.size() * sizeof(vec4))}
-				};
-
-				mesh.buffers.emplace_back(buf);
-			}
-
-			// Compute ritters bounding volume
-			span<const vec3> pos{ buffer.positions };
-			mesh.bounding_volume = ritters(pos);
-
-			ret_val.emplace_back(std::move(mesh));
+			CompiledBuffer buf{
+				{descriptor},
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.positions.data()), r_cast<const unsigned char*>(buffer.positions.data() + buffer.positions.size() * sizeof(vec3))}
+			};
+			mesh.buffers.emplace_back(buf);
 		}
+
+		if (!buffer.normals.empty())
+		{
+			vtx::Descriptor descriptor{
+				.attrib = vtx::Attrib::Normal,
+				.stride = sizeof(vec3),
+				.offset = 0,
+			};
+
+			CompiledBuffer buf{
+				{descriptor},
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.normals.data()), r_cast<const unsigned char*>(buffer.normals.data() + buffer.normals.size() * sizeof(vec3))}
+			};
+
+			mesh.buffers.emplace_back(buf);
+		}
+
+		if (!buffer.uvs.empty())
+		{
+			vtx::Descriptor descriptor{
+				.attrib = vtx::Attrib::UV,
+				.stride = sizeof(vec2),
+				.offset = 0,
+			};
+
+			CompiledBuffer buf{
+				{descriptor},
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.uvs.data()), r_cast<const unsigned char*>(buffer.uvs.data() + buffer.uvs.size() * sizeof(vec2))}
+			};
+
+			mesh.buffers.emplace_back(buf);
+		}
+
+		if (!buffer.tangents.empty())
+		{
+			vtx::Descriptor descriptor{
+				.attrib = vtx::Attrib::Tangent,
+				.stride = sizeof(vec3),
+				.offset = 0,
+			};
+
+
+			CompiledBuffer buf{
+				{descriptor},
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.tangents.data()), r_cast<const unsigned char*>(buffer.tangents.data() + buffer.tangents.size() * sizeof(vec3))}
+			};
+
+			mesh.buffers.emplace_back(buf);
+		}
+
+		if (!buffer.bi_tangents.empty())
+		{
+			vtx::Descriptor descriptor{
+				.attrib = vtx::Attrib::Bitangent,
+				.stride = sizeof(vec3),
+				.offset = 0,
+			};
+
+			CompiledBuffer buf{
+				{descriptor},
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.bi_tangents.data()), r_cast<const unsigned char*>(buffer.bi_tangents.data() + buffer.bi_tangents.size() * sizeof(vec3))}
+			};
+
+			mesh.buffers.emplace_back(buf);
+		}
+
+		if (!buffer.bone_ids.empty())
+		{
+			vtx::Descriptor descriptor{
+				.attrib = vtx::Attrib::BoneID,
+				.stride = sizeof(ivec4),
+				.offset = 0,
+			};
+
+			CompiledBuffer buf{
+							{descriptor},
+							vector<unsigned char>{r_cast<const unsigned char*>(buffer.bone_ids.data()), r_cast<const unsigned char*>(buffer.bone_ids.data() + buffer.bone_ids.size() * sizeof(ivec4))}
+			};
+
+			mesh.buffers.emplace_back(buf);
+		}
+
+		if (!buffer.bone_weights.empty())
+		{
+			vtx::Descriptor descriptor{
+				.attrib = vtx::Attrib::BoneWeight,
+				.stride = sizeof(vec4),
+				.offset = 0,
+			};
+
+			CompiledBuffer buf{
+				{descriptor},
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.bone_weights.data()), r_cast<const unsigned char*>(buffer.bone_weights.data() + buffer.bone_weights.size() * sizeof(vec4))}
+			};
+
+			mesh.buffers.emplace_back(buf);
+		}
+
+		// Compute ritters bounding volume
+		span<const vec3> pos{ buffer.positions };
+		mesh.bounding_volume = ritters(pos);
 		
-		return ret_val;
+		return mesh;;
 	}
 
 #pragma region Compiling/Building Skeleton
@@ -682,6 +675,8 @@ namespace idk::ai_helpers
 
 			has_animation = true;
 		}
+		
+		return ret_val;
 	}
 
 	void Scene::BuildTranslateChannel(anim::AnimatedBone& anim_bone, aiNodeAnim* anim_channel)
