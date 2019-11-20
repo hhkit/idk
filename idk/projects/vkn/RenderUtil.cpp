@@ -290,10 +290,17 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 			//glDisable(GL_CULL_FACE); // vk::PipelineRasterizationStateCreateInfo
 			//glDisable(GL_DEPTH_TEST);// vk::PipelineDepthStencilStateCreateInfo{};
-
-			for (auto& [set, ds] : p_ro.descriptor_sets)
 			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Pipeline().PipelineLayout(), set, ds, {});
+				uint32_t set = 0;
+				for (auto& ods : p_ro.descriptor_sets)
+				{
+					if (ods)
+					{
+						auto& ds = *ods;
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Pipeline().PipelineLayout(), set, ds, {});
+					}
+					++set;
+				}
 			}
 
 			//cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.PipelineLayout(), mat4blk.first, mat4blk.second, {});
@@ -347,10 +354,17 @@ RscHandle<VknFrameBuffer> CubemapRenderer::NewFrameBuffer(RscHandle<CubeMap> dst
 
 			//glDisable(GL_CULL_FACE); // vk::PipelineRasterizationStateCreateInfo
 			//glDisable(GL_DEPTH_TEST);// vk::PipelineDepthStencilStateCreateInfo{};
-
-			for (auto& [set, ds] : p_ro.descriptor_sets)
 			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Pipeline().PipelineLayout(), set, ds, {});
+				uint32_t set = 0;
+				for (auto& ods : p_ro.descriptor_sets)
+				{
+					if (ods)
+					{
+						auto& ds = *ods;
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Pipeline().PipelineLayout(), set, ds, {});
+					}
+					++set;
+				}
 			}
 
 			//cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.PipelineLayout(), mat4blk.first, mat4blk.second, {});

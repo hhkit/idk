@@ -274,10 +274,10 @@ vec3 pbr(
 		float cos_alpha= dot(normalize((frag_to_light)),normalize(light_dir));
 	    float cos_phi  = light.cos_outer;
 	    float cos_theta  = light.cos_inner;
-		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),0.5),1);
-        spotlight_effect = (acos(cos_alpha)>acos(cos_phi))?0:spotlight_effect;
+		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),1),1);
+        spotlight_effect = (cos_alpha<cos_phi)?0:spotlight_effect;
 	}
-	if (light.type != 1) atten = (1.f/light.falloff)/(dist*dist);
+	if (light.type != 1) atten = pow(max(light.falloff-dist,0)/light.falloff,3);//atten = (1.f/light.falloff)/(dist*dist);
 	
 	atten = min(max(atten, 0),1);
 	
@@ -327,7 +327,7 @@ void main()
 	//__MATERIAL_CODE__;
 
 	// then compute color here 
-	
+
 	vec3 light_accum = vec3(0);
 	normal = normalize(normal);
 	

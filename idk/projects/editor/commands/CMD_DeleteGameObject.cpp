@@ -8,6 +8,7 @@
 
 #include "pch.h"
 #include <editor/commands/CMD_DeleteGameObject.h>
+#include <editor/commands/CMD_CallCommandAgain.h>
 #include <scene/SceneManager.h>
 #include <common/Name.h>
 #include <common/Transform.h>
@@ -33,6 +34,14 @@ namespace idk {
 			//Find and get all CMDs using Handle<GameObject>
 			commands_affected.clear();
 			for (const auto& i : editor.command_controller.undoStack) {
+				if (dynamic_cast<CMD_CallCommandAgain*>(i.get())) {
+					auto specialCommand = dynamic_cast<CMD_CallCommandAgain*>(i.get());
+					for (const auto& j : specialCommand->repeated_commands) {
+						if (j->game_object_handle == game_object_handle) {
+							commands_affected.push_back(i.get());
+						}
+					}
+				}
 				if (i->game_object_handle == game_object_handle) {
 					commands_affected.push_back(i.get());
 				}
@@ -71,6 +80,20 @@ namespace idk {
 		IDE& editor = Core::GetSystem<IDE>();
 		for (const auto& i : commands_affected) {
 			for (const auto& j : editor.command_controller.undoStack) {
+				bool shouldbreak = false;
+				if (dynamic_cast<CMD_CallCommandAgain*>(j.get())) {
+					auto specialCommand = dynamic_cast<CMD_CallCommandAgain*>(j.get());
+					for (const auto& j : specialCommand->repeated_commands) {
+						if (j->game_object_handle == game_object_handle) {
+							shouldbreak = true;
+							break;
+						}
+					}
+				}
+
+				if (shouldbreak)
+					break;
+
 				if (i == j.get()) { //If this unique pointer matches with the commands_affected
 					j->game_object_handle = game_object_handle;
 					break;

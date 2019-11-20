@@ -129,6 +129,9 @@
     <ClInclude Include="widgets\DragRect.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_CallCommandAgain.h">
+      <Filter>commands</Filter>
+    </ClInclude>
     <ClInclude Include="compiler\IDEAssetImporter.h" />
     <ClInclude Include="compiler\BypassImporter.h" />
     <ClInclude Include="compiler\Importer.h" />
@@ -239,6 +242,9 @@
     </ClCompile>
     <ClCompile Include="widgets\DragRect.cpp">
       <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_CallCommandAgain.cpp">
+      <Filter>commands</Filter>
     </ClCompile>
     <ClCompile Include="compiler\IDEAssetImporter.cpp" />
   </ItemGroup>

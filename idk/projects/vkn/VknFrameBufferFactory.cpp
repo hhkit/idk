@@ -289,6 +289,7 @@ namespace idk::vkn
 			tci.image_usage |= vk::ImageUsageFlagBits::eTransferSrc| vk::ImageUsageFlagBits::eTransferDst;
 			opt.internal_format = info.internal_format;
 			opt.filter_mode = info.filter_mode;
+			tci.internal_format = MapFormat(opt.internal_format);
 			loader.LoadTexture(*tex, allocator, fence, opt, tci, {});
 		}
 		out->own_buffer = !preset;

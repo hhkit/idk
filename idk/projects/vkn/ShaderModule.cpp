@@ -4,6 +4,9 @@
 #include <spirv_cross/spirv_reflect.hpp>
 #include <gfx/pipeline_config.h>
 #include <vkn/GfxConverters.h>
+
+#include <vkn/vulkan_enum_info.h>
+
 namespace idk::vkn
 {
 	namespace spx = spirv_cross;
@@ -207,7 +210,7 @@ namespace idk::vkn
 	}
 	void CreateLayouts(
 		hash_table<string, UboInfo>& ubo_info,
-		hash_table<uint32_t, vk::UniqueDescriptorSetLayout>& layouts,
+		ShaderModule::LayoutTable& layouts,
 		VulkanView& view)
 	{
 
@@ -245,7 +248,12 @@ namespace idk::vkn
 					,hlp::arr_count(bindings)
 					,hlp::arr_count(bindings) ? std::data(bindings) : nullptr
 				};
-				layouts[set_idx] = view.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, view.Dispatcher());
+				auto& info = layouts[set_idx] = DsLayoutInfo{ view.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, view.Dispatcher()) };
+				
+				for (auto& binding : bindings)
+				{
+					info.entry_counts[EnumInfo::DescriptorTypeI::map(binding.descriptorType)] += binding.descriptorCount;
+				}
 			}
 		}
 		for ([[maybe_unused]] auto& [set_name, info] : ubo_info)
@@ -342,12 +350,12 @@ hash_table<string, UboInfo>::const_iterator ShaderModule::InfoEnd() const
 	return Current().ubo_info.cend();
 }
 
-hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator ShaderModule::LayoutsBegin() const
+ShaderModule::LayoutTable::const_iterator ShaderModule::LayoutsBegin() const
 {
 	return Current().layouts.cbegin();;
 }
 
-hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator ShaderModule::LayoutsEnd() const
+ShaderModule::LayoutTable::const_iterator ShaderModule::LayoutsEnd() const
 {
 	return Current().layouts.cend();
 }

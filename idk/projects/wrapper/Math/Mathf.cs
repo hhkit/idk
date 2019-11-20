@@ -3,6 +3,7 @@
     public class Mathf
     {
         public static float PI { get { return 3.14159265358979f; } }
+        public static float Tau { get { return 6.28318530717958f; } }
         public static float Epsilon { get { return 1e-6f; } }
         public static float DegToRad { get { return PI / 180; } }
         public static float RadToDeg { get { return 180 / PI; } }
@@ -63,6 +64,14 @@
         public static float Cos(float val)
         {
             return (float)System.Math.Cos(val);
+        }
+        public static float Tan(float val)
+        {
+            return (float)System.Math.Tan(val);
+        }
+        public static float Atan(float val)
+        {
+            return (float)System.Math.Atan(val);
         }
         public static float Atan2(float y, float x)
         {

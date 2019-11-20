@@ -38,6 +38,7 @@ namespace idk::vkn
 		void PostRenderGraphicsStates(const vector<GraphicsState>& state, uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 		SharedGraphicsState shared_graphics_state;
+		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
 	private:
 		struct VertexUniformConfig;
 		using ProcessedRO=vkn::ProcessedRO;
@@ -63,14 +64,14 @@ namespace idk::vkn
 		private:
 			FrameRenderer* _renderer;
 		};
+		class ThreadedRender;
 
 		void GrowStates(vector<RenderStateV2>& states, size_t new_min_size);
 
 		PipelineThingy ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
-		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
 		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs ,ivec2 vp_pos, ivec2 vp_size);
 
-		void PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+		void PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index);
 
 		VulkanView& View()const { return *_view; }
 		vk::RenderPass GetRenderPass(const GraphicsState& state, VulkanView& view);

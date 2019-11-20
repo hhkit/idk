@@ -22,8 +22,9 @@ namespace idk::vkn
 		{
 			uint32_t first_binding {};
 			uint32_t offset        {};
+			vk::Buffer buffer      {};
 			Binding() = default;
-			Binding(uint32_t fb, uint32_t o) : first_binding{ fb }, offset{ o }{}
+			Binding(uint32_t fb, uint32_t o, vk::Buffer b) : first_binding{ fb }, offset{ o }, buffer{ b }{}
 		};
 
 		vector<uniform_binding> uniforms      {};

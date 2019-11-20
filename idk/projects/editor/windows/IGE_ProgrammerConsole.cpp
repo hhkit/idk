@@ -14,7 +14,7 @@ namespace idk
 		window_flags = ImGuiWindowFlags_MenuBar;
 		for (unsigned i = 0; i < s_cast<unsigned>(LogPool::COUNT); ++i)
 		{
-			LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
+			registered_signals[i]=LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
 				[this, i](LogLevel level, time_point time, string_view preface, string_view message)
 			{
 				constexpr auto format_time = [](time_point t) -> string
@@ -98,6 +98,15 @@ namespace idk
 		if (new_message_received) {
 			ImGui::SetScrollHereY(1.0f);
 			new_message_received = false;
+		}
+	}
+
+	IGE_ProgrammerConsole::~IGE_ProgrammerConsole()
+	{
+		size_t i = 0;
+		for (auto& reg_signal : registered_signals)
+		{
+			LogSingleton::Get().SignalFor(s_cast<LogPool>(i++)).Unlisten(reg_signal);
 		}
 	}
 

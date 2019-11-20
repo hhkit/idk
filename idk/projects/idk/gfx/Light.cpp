@@ -128,8 +128,10 @@ namespace idk
 					const PointLight& point_light = light_variant;
 					retval.light_color = point_light.light_color * point_light.intensity;
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
+					retval.v_dir = vec3(0.f);
 					retval.intensity = point_light.intensity;
 					retval.cos_inner = cos(point_light.fov);
+					retval.cos_outer = 1;
 					retval.falloff = (point_light.use_inv_sq_atten) ? point_light.attenuation_radius : (1.f / (point_light.attenuation_radius * point_light.attenuation_radius));
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
@@ -142,6 +144,9 @@ namespace idk
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
 					retval.intensity = dir_light.intensity;
+					retval.cos_inner = 0;
+					retval.cos_outer = 1.f;
+					retval.falloff = 1.f;
 				}
 
 				if constexpr (std::is_same_v<T, SpotLight>)

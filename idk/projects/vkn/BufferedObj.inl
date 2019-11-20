@@ -10,9 +10,13 @@ namespace idk::vkn
 	{
 		if (curr_index == _cycle && _old)
 			_old.reset();
-		if (!_old)
+
+		if (_back)
 		{
-			_old = std::move(_current);
+			if (!_old)
+			{
+				_old = std::move(_current);
+			}
 			_current = std::move(_back);
 			_back.reset();
 			_cycle = curr_index;

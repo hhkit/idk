@@ -26,6 +26,7 @@ namespace idk::vkn
 		return LessChain(lhs.guid.Data1, rhs.guid.Data1, lhs.guid.Data2, rhs.guid.Data2, lhs.guid.Data3, rhs.guid.Data3, lhs.guid.Data4, rhs.guid.Data4);
 			   //LessChain(lhs.guid.Data1,rhs.guid.Data1,lhs.guid.Data2 , rhs.guid.Data2)|| && lhs.guid.Data3 < rhs.guid.Data3 && reinterpret_cast<uint64_t>(lhs.guid.Data4) < reinterpret_cast<uint64_t>(rhs.guid.Data4);
 	}
+//#pragma optimize("",off)
 	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<vk::RenderPass> render_pass, bool has_depth_stencil)
 	{
 		std::optional<handle_t> prev{};
@@ -73,9 +74,11 @@ namespace idk::vkn
 			obj.Create(View(),frame_index);
 
 			//TODO threadsafe lock here
+			//while (!creating.compare_exchange_strong(curr_expected_val, true));
 			auto handle = pipelines.add(std::move(obj));
 			prog_to_pipe2.emplace(combi,handle);
 			prev = handle;
+			//creating.store(false);
 		}
 		return pipelines.get(*prev).pipeline;
 	}
@@ -166,6 +169,8 @@ namespace idk::vkn
 				{
 					module.UpdateCurrent(frame_index);
 				}
+
+				module.NewlyLoaded(false);
 			}
 			{
 				//Recreate pipeline in back_pipeline
@@ -173,7 +178,7 @@ namespace idk::vkn
 				pipelines[handle].Create(View(), frame_index);
 			}
 		}
-		
+		pipelines.reserve(100 + pipelines.size() * 2);
 	}
 
 	//PipelineObject() = default;

@@ -5,6 +5,7 @@
 #include <gfx/buffer_desc.h>
 #include <gfx/pipeline_config.h>
 #include <vkn/BufferedObj.h>
+#include <vkn/DescriptorCountArray.h>
 namespace idk::vkn
 {
 
@@ -21,10 +22,37 @@ namespace idk::vkn
 		//	config.uniform_layouts[info.set].bindings.emplace_back(uniform_layout_t::bindings_t{ info.binding,1,{info.stage},info.type });
 		//}
 	};
+	struct DsLayoutInfo
+	{
+		vk::UniqueDescriptorSetLayout layout;
+		DsCountArray entry_counts;
+		operator vk::UniqueDescriptorSetLayout& ()
+		{
+			return layout;
+		}
+		vk::DescriptorSetLayout& operator*()
+		{
+			return *layout;
+		}
+		vk::UniqueDescriptorSetLayout& operator->()
+		{
+			return layout;
+		}
+
+		const vk::DescriptorSetLayout& operator*()const
+		{
+			return *layout;
+		}
+		const vk::UniqueDescriptorSetLayout& operator->()const
+		{
+			return layout;
+		}
+	};
 
 	class ShaderModule :public ShaderProgram, public IBufferedObj
 	{
 	public:
+		using LayoutTable = hash_table<uint32_t, DsLayoutInfo>;
 
 
 		operator bool()const { return buf_obj.HasCurrent(); }
@@ -39,8 +67,8 @@ namespace idk::vkn
 		hash_table<string, UboInfo>::const_iterator InfoBegin()const;
 		hash_table<string, UboInfo>::const_iterator InfoEnd()const;
 
-		hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator LayoutsBegin()const;
-		hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator LayoutsEnd()const;
+		LayoutTable::const_iterator LayoutsBegin()const;
+		LayoutTable::const_iterator LayoutsEnd()const;
 		//UboInfo& GetLayout(string uniform_name);
 		const UboInfo& GetLayout(const string& uniform_name)const;
 		bool NeedUpdate()const { return buf_obj.HasUpdate(); }
@@ -65,7 +93,7 @@ namespace idk::vkn
 		{
 			vk::ShaderStageFlagBits stage;
 			hash_table<string, UboInfo> ubo_info;
-			hash_table<uint32_t, vk::UniqueDescriptorSetLayout> layouts;
+			LayoutTable layouts;
 			vector<buffer_desc> attrib_descriptions;
 			hash_table<uint32_t, uint32_t> loc_to_bind;
 			std::optional<uint32_t> GetBinding(uint32_t location)const;

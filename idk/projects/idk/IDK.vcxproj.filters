@@ -878,6 +878,12 @@
     <ClInclude Include="ui\RectTransform.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="multithread_control.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\stl_hack.h">
+      <Filter>meta</Filter>
+    </ClInclude>
     <ClInclude Include="res\ResourceExt.h" />
     <ClInclude Include="res\compiler\AssetImporter.h" />
     <ClInclude Include="res\compiler\CompiledAssetLoader.h" />
