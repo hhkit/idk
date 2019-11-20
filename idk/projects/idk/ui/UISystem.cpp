@@ -92,7 +92,7 @@ namespace idk
         {
             auto& canvas_rt = *canvas->GetGameObject()->GetComponent<RectTransform>();
             canvas_rt._local_rect = rect{ vec2{0,0}, vec2{screen_size} };
-            canvas_rt._matrix = mat4{ scale(vec3(1.0f / screen_size.x, 1.0f / screen_size.y, 1.0f)) };
+            canvas_rt._matrix = mat4{ scale(vec3(2.0f / screen_size.x, 2.0f / screen_size.y, 1.0f)) };
         }
         
 
@@ -126,10 +126,12 @@ namespace idk
             rt._local_rect.position = min - parent_pivot;
             rt._local_rect.size = max - min;
 
+            vec2 pivot_pt = rt._local_rect.position + rt.pivot * rt._local_rect.size;
             rt._matrix = parent_rt._matrix *
-                translate(vec3(rt._local_rect.position + rt.pivot * rt._local_rect.size, 1.0f)) *
+                translate(vec3(pivot_pt, 0)) *
                 mat4 { quat_cast<mat3>(t.rotation) *
-                scale(t.scale) };
+                scale(t.scale) } *
+                translate(vec3(rt._local_rect.position + vec2(0.5f) * rt._local_rect.size - pivot_pt, 0));
 
             return true;
         });

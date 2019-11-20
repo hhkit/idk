@@ -723,7 +723,7 @@ namespace idk::ogl
                         // bind shader
                         pipeline.PushProgram(elem.material->material->_shader_program);
                         pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
-                        pipeline.SetUniform("PerUI.color", elem.color);
+                        pipeline.SetUniform("PerUI.color", vec4{ elem.color });
                         pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
                         fsq->BindAndDraw(
                             renderer_attributes{ {

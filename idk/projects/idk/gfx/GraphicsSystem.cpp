@@ -493,8 +493,10 @@ namespace idk
             
             auto& render_data = result.ui_render.emplace_back();
 
-            render_data.transform = rt._matrix * mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+            render_data.transform = rt._matrix *
+                mat4{ scale(vec3{rt._local_rect.size, 1.0f}) };
             render_data.material = im.material;
+            render_data.color = im.tint;
             render_data.data = ImageData{ im.texture };
         }
 
