@@ -711,6 +711,7 @@ namespace idk::ogl
 
             //RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
             glBindVertexArray(font_vao_id);
+            pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::VUi]);
             auto ui_render_data = curr_object_buffer.ui_render;
             for (auto& elem : ui_render_data)
             {

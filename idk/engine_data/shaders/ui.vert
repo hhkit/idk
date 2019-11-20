@@ -29,6 +29,6 @@ void main()
 {
 	vs_out.position = vec3(ObjectMat4s.object_transform * vec4(position.xy, 0, 1.0));
 	vs_out.uv       = uv;
-	vs_out.color    = PerFont.color;
-    gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
+	vs_out.color    = PerUI.color;
+    gl_Position     = vec4(vs_out.position.xy, 0, 1.0);
 }
