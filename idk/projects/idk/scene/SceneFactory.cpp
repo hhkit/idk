@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SceneFactory.h"
 #include <res/MetaBundle.h>
+#include <scene/SceneManager.h>
 
 namespace idk
 {
@@ -18,6 +19,7 @@ namespace idk
 
 	unique_ptr<Scene> SceneFactory::Create(PathHandle h) noexcept
 	{
+		Core::GetGameState().ActivateScene(0);
 		return std::make_unique<Scene>();
 	}
 }

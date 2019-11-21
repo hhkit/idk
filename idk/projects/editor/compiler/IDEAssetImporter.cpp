@@ -21,7 +21,7 @@ namespace idk
 				{
 					[]([[maybe_unused]] EditorAssetImporter* editor)
 					{
-						if constexpr (has_extension_v<Ts>)
+						if constexpr (has_extension_v<Ts> && !std::is_same_v<Ts, Scene>)
 							editor->RegisterImporter<BypassImporter<Ts>>(Ts::ext);
 					}
 					...

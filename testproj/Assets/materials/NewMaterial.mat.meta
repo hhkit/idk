@@ -1,5 +1,5 @@
 metadatas: 
-- guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615
-  metadata: '{blend: !BlendMode Opaque, domain: !MaterialDomain Surface, model: !ShadingModel DefaultLit}'
+- guid: 4d25ba45-a891-40de-b82f-ba3d8eb09bcb
+  metadata: ""
   name: ""
-  t_hash: Material
+  t_hash: ShaderGraph

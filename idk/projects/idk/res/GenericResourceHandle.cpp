@@ -24,7 +24,8 @@ namespace idk
 		static const auto LUT = detail::GenericResourceLut<Resources>::GenHandleLUT();
 		auto itr = LUT.find(typehash == "ShaderGraph" ? "Material" : typehash);
 		
-		IDK_ASSERT(itr != LUT.end());
+		if (itr == LUT.end())
+			return;
 		*this = itr->second(guid);
 	}
 	Guid GenericResourceHandle::guid() const
