@@ -148,10 +148,10 @@ namespace idk {
         // COMPONENTS
 
         ImGui::BeginChild("_inspector_inner");
-        Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
-        if (c_transform) {
-            DisplayComponent(c_transform);
-        }
+        if (const auto rect_transform = gos[0]->GetComponent<RectTransform>())
+            DisplayComponent(rect_transform);
+        else
+            DisplayComponent(gos[0]->GetComponent<Transform>());
 
         if (gameObjectsCount == 1)
         {
@@ -160,7 +160,8 @@ namespace idk {
             for (auto& component : componentSpan) {
 
                 //Skip Name and Transform and PrefabInstance
-				if (component == c_transform ||
+				if (component.is_type<Transform>() ||
+					component.is_type<RectTransform>() ||
 					component.is_type<PrefabInstance>() ||
 					component.is_type<Name>() ||
 					component.is_type<Tag>() ||
@@ -590,6 +591,140 @@ namespace idk {
 			//isBeingModified = false;
 		}
 	}
+
+
+    template<>
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<RectTransform> c_rt)
+    {
+        if (c_rt->GetGameObject()->HasComponent<Canvas>())
+        {
+            ImGuidk::PushDisabled();
+            ImGui::Text("Values driven by Canvas.");
+            ImGuidk::PopDisabled();
+            return;
+        }
+
+        const float region_width = ImGui::GetWindowContentRegionWidth();
+        
+        const auto w = region_width * 0.3f;
+        ImGui::PushItemWidth(w);
+
+        if (c_rt->anchor_min.y != c_rt->anchor_max.y)
+        {
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("T").x * 0.5f);
+            ImGui::Text("T");
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            ImGui::DragFloat("##top", &c_rt->offset_max.y);
+        }
+        else
+        {
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("Y").x * 0.5f);
+            ImGui::Text("Y");
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
+            const auto& parent_rect = c_rt->GetGameObject()->Parent()->GetComponent<RectTransform>()->_local_rect;
+            const float anchor_ref_y = parent_rect.position.y + c_rt->anchor_min.y * parent_rect.size.y;
+            float pos_y = pivot_y - anchor_ref_y;
+            if (ImGui::DragFloat("##pos_y", &pos_y))
+            {
+                float dy = pos_y - (pivot_y - anchor_ref_y);
+                c_rt->offset_min.y += dy;
+                c_rt->offset_max.y += dy;
+            }
+        }
+
+        if (c_rt->anchor_min.x != c_rt->anchor_max.x)
+        {
+            ImGui::SetCursorPosX(region_width * 0.35f - w * 0.75f - ImGui::CalcTextSize("L").x - ImGui::GetStyle().ItemSpacing.x);
+            ImGui::Text("L");
+            ImGui::SameLine();
+            ImGui::DragFloat("##left", &c_rt->offset_min.x);
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(region_width * 0.35f + w * 0.75f);
+            ImGui::DragFloat("##right", &c_rt->offset_max.x);
+            ImGui::SameLine();
+            ImGui::Text("R");
+        }
+        else
+        {
+            ImGui::SetCursorPosX(region_width * 0.35f - w * 0.75f - ImGui::CalcTextSize("X").x - ImGui::GetStyle().ItemSpacing.x);
+            ImGui::Text("X");
+            ImGui::SameLine();
+            
+            const float pivot_x = c_rt->_local_rect.position.x + c_rt->pivot.x * c_rt->_local_rect.size.x;
+            const auto& parent_rect = c_rt->GetGameObject()->Parent()->GetComponent<RectTransform>()->_local_rect;
+            const float anchor_ref_x = parent_rect.position.x + c_rt->anchor_min.x * parent_rect.size.x;
+            float pos_x = pivot_x - anchor_ref_x;
+            if (ImGui::DragFloat("##pos_x", &pos_x))
+            {
+                float dx = pos_x - (pivot_x - anchor_ref_x);
+                c_rt->offset_min.x += dx;
+                c_rt->offset_max.x += dx;
+            }
+            ImGui::SameLine();
+
+            float width = c_rt->_local_rect.size.x;
+            ImGui::SetCursorPosX(region_width * 0.35f + w * 0.75f);
+            if (ImGui::DragFloat("##width", &width))
+            {
+                c_rt->offset_min.x = pos_x - c_rt->pivot.x * width;
+                c_rt->offset_max.x = pos_x + (1.0f - c_rt->pivot.x) * width;
+            }
+            ImGui::SameLine();
+            ImGui::Text("W");
+        }
+
+        if (c_rt->anchor_min.y != c_rt->anchor_max.y)
+        {
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            ImGui::DragFloat("##bot", &c_rt->offset_min.y);
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
+            ImGui::Text("B");
+        }
+        else
+        {
+            float height = c_rt->_local_rect.size.y;
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            if (ImGui::DragFloat("##height", &height))
+            {
+                const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
+                const auto& parent_rect = c_rt->GetGameObject()->Parent()->GetComponent<RectTransform>()->_local_rect;
+                const float anchor_ref_y = parent_rect.position.y + c_rt->anchor_min.y * parent_rect.size.y;
+                const float pos_y = pivot_y - anchor_ref_y;
+                c_rt->offset_min.y = pos_y - c_rt->pivot.y * height;
+                c_rt->offset_max.y = pos_y + (1.0f - c_rt->pivot.y) * height;
+            }
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
+            ImGui::Text("H");
+        }
+
+
+        ImGui::PopItemWidth();
+
+        const float item_width = region_width * item_width_ratio;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+        ImGui::PushItemWidth(-4.0f);
+
+        ImGui::Text("Anchor Min");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(region_width - item_width);
+        ImGuidk::DragVec2("##anchor_min", &c_rt->anchor_min);
+
+        ImGui::Text("Anchor Max");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(region_width - item_width);
+        ImGuidk::DragVec2("##anchor_max", &c_rt->anchor_max);
+
+        ImGui::Text("Pivot");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(region_width - item_width);
+        ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
+
+        ImGui::PopItemWidth();
+
+        displayVal(*c_rt->GetGameObject()->GetComponent<Transform>());
+    }
+
 
     template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Animator> c_anim)
@@ -1061,7 +1196,7 @@ namespace idk {
         ImGui::PopFont();
     }
 
-	void IGE_InspectorWindow::DisplayComponent(GenericHandle& component)
+	void IGE_InspectorWindow::DisplayComponent(GenericHandle component)
 	{
 		//COMPONENT DISPLAY
         ImGui::PushID(component.type);

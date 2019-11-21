@@ -72,6 +72,7 @@ namespace idk
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&GamepadSystem::Update,                "Update gamepad states");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&FileSystem::Update,                   "Check for file changes");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AudioSystem::Update,                  "Update listeners and sources");
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&UISystem::Update,                     "Update UI");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
@@ -92,8 +93,9 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");
 		}
 
-		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::SortCameras        ,  "Sort Cameras"           );
-		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::PrepareLights      ,   "Prepare Lights"        );
+        _scheduler->SchedulePass      <UpdatePhase::PreRender> (&UISystem::FinalizeMatrices,           "Finalize UI Matrices");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::SortCameras,          "Sort Cameras");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::PrepareLights,        "Prepare Lights");
 		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::BufferGraphicsState,  "Buffer graphics objects");
 
 		_scheduler->SchedulePass      <UpdatePhase::Render>    (&GraphicsSystem::Prerender,            "Prerender");
@@ -106,6 +108,8 @@ namespace idk
 		// main loop
 		_scheduler->Setup();
 		auto& app = Core::GetSystem<Application>();
+
+        Core::GetSystem<SceneManager>().BuildSceneGraph(Core::GetGameState().GetObjectsOfType<const GameObject>());
 
 		if (editor)
 		{

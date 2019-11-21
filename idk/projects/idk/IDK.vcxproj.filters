@@ -1305,9 +1305,6 @@
     <ClCompile Include="ui\UISystem.cpp">
       <Filter>ui</Filter>
     </ClCompile>
-    <ClCompile Include="ui\RectTransform.cpp">
-      <Filter>ui</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
