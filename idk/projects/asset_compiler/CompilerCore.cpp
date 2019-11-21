@@ -27,7 +27,7 @@ namespace idk
 		auto exe_dir = string{ buffer };
 		exe_dir = exe_dir.substr(0, exe_dir.find_last_of("\\"));
 
-		fs::current_path((exe_dir.data());
+		fs::current_path(exe_dir.data());
 	}
 	void CompilerCore::SetDestination(string_view dest)
 	{

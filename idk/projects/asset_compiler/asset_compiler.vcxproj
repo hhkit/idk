@@ -87,7 +87,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)compiler\</OutDir>
-    <IntDir>$(SolutionDir)build\compiler\</IntDir>
+    <IntDir>$(SolutionDir)build\compiler\$(Configuration)\</IntDir>
     <TargetName>idcD</TargetName>
     <IncludePath>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dep\lib;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>

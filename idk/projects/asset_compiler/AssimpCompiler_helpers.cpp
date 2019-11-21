@@ -182,7 +182,7 @@ namespace idk::ai_helpers
 
 			CompiledBuffer buf{
 				{descriptor},
-				vector<unsigned char>{r_cast<const unsigned char*>(buffer.positions.data()), r_cast<const unsigned char*>(buffer.positions.data() + buffer.positions.size() * sizeof(vec3))}
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.positions.data()), r_cast<const unsigned char*>(buffer.positions.data() + buffer.positions.size())}
 			};
 			mesh.buffers.emplace_back(buf);
 		}
@@ -197,7 +197,7 @@ namespace idk::ai_helpers
 
 			CompiledBuffer buf{
 				{descriptor},
-				vector<unsigned char>{r_cast<const unsigned char*>(buffer.normals.data()), r_cast<const unsigned char*>(buffer.normals.data() + buffer.normals.size() * sizeof(vec3))}
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.normals.data()), r_cast<const unsigned char*>(buffer.normals.data() + buffer.normals.size())}
 			};
 
 			mesh.buffers.emplace_back(buf);
@@ -213,7 +213,7 @@ namespace idk::ai_helpers
 
 			CompiledBuffer buf{
 				{descriptor},
-				vector<unsigned char>{r_cast<const unsigned char*>(buffer.uvs.data()), r_cast<const unsigned char*>(buffer.uvs.data() + buffer.uvs.size() * sizeof(vec2))}
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.uvs.data()), r_cast<const unsigned char*>(buffer.uvs.data() + buffer.uvs.size())}
 			};
 
 			mesh.buffers.emplace_back(buf);
@@ -230,7 +230,7 @@ namespace idk::ai_helpers
 
 			CompiledBuffer buf{
 				{descriptor},
-				vector<unsigned char>{r_cast<const unsigned char*>(buffer.tangents.data()), r_cast<const unsigned char*>(buffer.tangents.data() + buffer.tangents.size() * sizeof(vec3))}
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.tangents.data()), r_cast<const unsigned char*>(buffer.tangents.data() + buffer.tangents.size())}
 			};
 
 			mesh.buffers.emplace_back(buf);
@@ -246,7 +246,7 @@ namespace idk::ai_helpers
 
 			CompiledBuffer buf{
 				{descriptor},
-				vector<unsigned char>{r_cast<const unsigned char*>(buffer.bi_tangents.data()), r_cast<const unsigned char*>(buffer.bi_tangents.data() + buffer.bi_tangents.size() * sizeof(vec3))}
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.bi_tangents.data()), r_cast<const unsigned char*>(buffer.bi_tangents.data() + buffer.bi_tangents.size())}
 			};
 
 			mesh.buffers.emplace_back(buf);
@@ -262,7 +262,7 @@ namespace idk::ai_helpers
 
 			CompiledBuffer buf{
 							{descriptor},
-							vector<unsigned char>{r_cast<const unsigned char*>(buffer.bone_ids.data()), r_cast<const unsigned char*>(buffer.bone_ids.data() + buffer.bone_ids.size() * sizeof(ivec4))}
+							vector<unsigned char>{r_cast<const unsigned char*>(buffer.bone_ids.data()), r_cast<const unsigned char*>(buffer.bone_ids.data() + buffer.bone_ids.size())}
 			};
 
 			mesh.buffers.emplace_back(buf);
@@ -278,7 +278,7 @@ namespace idk::ai_helpers
 
 			CompiledBuffer buf{
 				{descriptor},
-				vector<unsigned char>{r_cast<const unsigned char*>(buffer.bone_weights.data()), r_cast<const unsigned char*>(buffer.bone_weights.data() + buffer.bone_weights.size() * sizeof(vec4))}
+				vector<unsigned char>{r_cast<const unsigned char*>(buffer.bone_weights.data()), r_cast<const unsigned char*>(buffer.bone_weights.data() + buffer.bone_weights.size())}
 			};
 
 			mesh.buffers.emplace_back(buf);

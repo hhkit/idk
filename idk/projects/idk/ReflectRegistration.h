@@ -7,6 +7,7 @@
 #include <IncludeSystems.h>
 #include <res/MetaBundle.h>
 
+#include <gfx/CompiledMesh.h>
 #include <gfx/CompiledTexture.h>
 
 /* 
@@ -111,6 +112,18 @@ REFLECT_CTOR(float)
 REFLECT_VARS(value)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::box, "box")
+REFLECT_VARS(center, extents, rotation)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::sphere, "sphere")
+REFLECT_VARS(center, radius)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::capsule, "capsule")
+REFLECT_VARS(center, radius, height, dir)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::rect, "rect")
 REFLECT_VARS(position, size)
 REFLECT_END()
@@ -213,6 +226,29 @@ REFLECT_BEGIN(idk::CompiledTexture, "CompiledTexture")
 REFLECT_VARS(internal_format, uv_mode, filter_mode, size, is_srgb, pixel_buffer)
 REFLECT_END()
 
+REFLECT_ENUM(idk::vtx::Attrib, "Attributes")
+
+REFLECT_BEGIN(idk::vtx::Descriptor, "Descriptor")
+REFLECT_VARS(attrib, stride, offset)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::vtx::Descriptor>, "DescriptorList")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::CompiledBuffer, "CompiledBuffer")
+REFLECT_VARS(attribs, data_buffer)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::CompiledBuffer>, "GfxBufferlist")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<unsigned>, "unsignedList")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::CompiledMesh, "CompiledMesh")
+REFLECT_VARS(buffers, element_buffer)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::RenderTarget, "RenderTarget")
 REFLECT_VARS(size, is_world_renderer, render_debug,color_tex,depth_tex)
 REFLECT_END()
@@ -291,13 +327,26 @@ REFLECT_VARS(bone_name, translate_track)
 REFLECT_END()
 
 
-REFLECT_BEGIN(decltype(idk::anim::Animation::_animated_bones), "hash_table<string, AnimatedBone>")
+REFLECT_BEGIN(decltype(idk::anim::Animation::_animated_bones), "hash_table<string,AnimatedBone>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::anim::Animation, "Animation")
 REFLECT_VARS(_animated_bones, _fps, _duration, _num_ticks)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::anim::BoneData, "BoneData")
+REFLECT_VARS(_name, _parent, _global_inverse_bind_pose, pre_rotation, post_rotation, _local_bind_pose)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::anim::Skeleton::_bones), "BoneList")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::hash_table<idk::string, size_t>{}), "hash_table<string,size_t>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::Skeleton, "idk::anim::Skeleton")
+REFLECT_VARS(_global_inverse, _bone_table, _bones)
+REFLECT_END()
 
 // shader graph
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
@@ -435,18 +484,6 @@ REFLECT_BEGIN(idk::Collider, "Collider")
 REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_friction)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::box, "box")
-REFLECT_VARS(center, extents, rotation)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::sphere, "sphere")
-REFLECT_VARS(center, radius)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::capsule, "capsule")
-REFLECT_VARS(center, radius, height, dir)
-REFLECT_END()
-
 // GRAPHICS
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, material_instance, cast_shadows, receive_shadows)
@@ -534,9 +571,6 @@ REFLECT_VARS(_bone_name, _bone_index)
 REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::Animator::animation_table), "hash_table<string,AnimationState>")
-REFLECT_END()
-
-REFLECT_BEGIN(decltype(idk::Animator::layer_table), "hash_table<string,size_t>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")

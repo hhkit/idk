@@ -136,7 +136,7 @@ namespace idk
 
 	void EditorAssetImporter::LateInit()
 	{
-		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL))
+		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::ALL))
 			ImportFile(elem);
 	}
 

@@ -124,6 +124,7 @@ namespace idk
 		auto exe_dir = string{ fs.GetExeDir() };
 
         fs.Mount(exe_dir + "/engine_data", "/engine_data");
+		std::filesystem::create_directory(exe_dir + "/build");
 		fs.Mount(exe_dir + "/build", "/build");
 	}
 
