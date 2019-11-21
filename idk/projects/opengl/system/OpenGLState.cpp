@@ -970,6 +970,7 @@ namespace idk::ogl
 			pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
 			pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
 			pipeline.SetUniform(lightblk + "intensity", light.intensity);
+			pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
 			if (light.light_map)
 			{
