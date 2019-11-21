@@ -61,6 +61,8 @@
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
     <ClInclude Include="meta\comparator.h" />
+    <ClInclude Include="meta\stl_hack.h" />
+    <ClInclude Include="multithread_control.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h" />

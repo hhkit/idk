@@ -376,7 +376,8 @@ namespace idk
 		for (auto& elem : lights)
 		{
 			//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
-			result.lights.emplace_back(elem.GenerateLightData());
+			if(elem.GetGameObject()->ActiveSelf())
+				result.lights.emplace_back(elem.GenerateLightData());
 		}
 
 		hash_table<Handle<Animator>, size_t> skeleton_indices;
@@ -458,7 +459,6 @@ namespace idk
 
 		std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
 		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
-
 		for (auto& camera : result.camera)
 		{
 			RenderRange range{ camera };
@@ -474,7 +474,25 @@ namespace idk
 			//	range.inst_mesh_render_end = end_index;
 			//}
 		}
-
+		size_t i = 0;
+		for (auto& light : result.lights)
+		{
+			CameraData camera{};
+			camera.view_matrix = { light.v };
+			camera.projection_matrix = { light.p };
+			LightRenderRange range{ ++i };
+			{
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+				range.inst_mesh_render_begin = start_index;
+				range.inst_mesh_render_end = end_index;
+			}
+			result.culled_light_render_range.emplace_back(range);
+			//{
+			//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);
+			//	range.inst_mesh_render_begin = start_index;
+			//	range.inst_mesh_render_end = end_index;
+			//}
+		}
 
 
 		for (auto& f : fonts)

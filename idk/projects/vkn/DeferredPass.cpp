@@ -411,11 +411,18 @@ namespace idk::vkn
 			//TODO Grab everything and render them
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			auto& mesh = obj.mesh.as<VulkanMesh>();
-			for (auto& [set, ds] : p_ro.descriptor_sets)
 			{
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+				uint32_t set = 0;
+				for (auto& ods : p_ro.descriptor_sets)
+				{
+					if (ods)
+					{
+						auto& ds = *ods;
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+					}
+					++set;
+				}
 			}
-
 			auto& renderer_req = *obj.renderer_req;
 
 			for (auto&& [attrib, location] : renderer_req.mesh_requirements)
@@ -433,7 +440,7 @@ namespace idk::vkn
 			if (oidx)
 			{
 				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), (uint32_t)p_ro.num_instances, 0, 0, (uint32_t)p_ro.inst_offset, vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 			}
 		}
 		return rendered;

@@ -18,6 +18,8 @@
 #include <vkn/VknFrameBufferFactory.h>
 #include <vkn/VulkanCbmLoader.h>
 #include <vkn/VulkanCubemapFactory.h>
+#include <vkn/VulkanTtfLoader.h>
+#include <vkn/VulkanFontAtlasFactory.h>
 #include <vkn/VknRenderTargetLoader.h>
 namespace idk::vkn
 {
@@ -34,6 +36,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterFactory<VknRenderTargetFactory>();
 	Core::GetResourceManager().RegisterFactory<VknFrameBufferFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanCubemapFactory>();
+	Core::GetResourceManager().RegisterFactory<VulkanFontAtlasFactory>();
 
 	//Core::GetResourceManager().RegisterFactory<
 	//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
@@ -55,6 +58,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterLoader<VknRenderTargetLoader>(RenderTarget::ext);
 	Core::GetResourceManager().RegisterLoader<DdsLoader>(".dds");
 	Core::GetResourceManager().RegisterLoader<CbmLoader>(".cbm");
+	Core::GetResourceManager().RegisterLoader<TtfLoader>(".ttf");
 }
 
 }

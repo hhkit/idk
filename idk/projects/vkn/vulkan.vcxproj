@@ -184,7 +184,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\;$(SolutionDir)dep\include\</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26495</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
@@ -219,8 +219,10 @@
     <ClInclude Include="BufferedObj.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DeferredPass.h" />
+    <ClInclude Include="DescriptorCountArray.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
+    <ClInclude Include="DescriptorUpdateData.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
@@ -230,6 +232,7 @@
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderStateV2.h" />
     <ClInclude Include="RenderUtil.h" />
     <ClInclude Include="SpinLock.h" />
@@ -247,6 +250,7 @@
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
+    <ClInclude Include="VulkanFontAtlasFactory.h" />
     <ClInclude Include="VknFontAtlasLoader.h" />
     <ClInclude Include="VknFrameBuffer.h" />
     <ClInclude Include="VknFramebufferFactory.h" />
@@ -291,6 +295,7 @@
     <ClCompile Include="DeferredPass.cpp" />
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
+    <ClCompile Include="DescriptorUpdateData.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
@@ -305,6 +310,7 @@
     <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />
     <ClCompile Include="UboManager.cpp" />

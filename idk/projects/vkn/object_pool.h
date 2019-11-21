@@ -42,6 +42,10 @@ public:
 	using citerator = iterator_t<typename container_t::const_iterator>;
 	using riterator = iterator_t<typename container_t::reverse_iterator>;
 
+	void reserve(size_t num_elems)
+	{
+		objects.reserve(num_elems);
+	}
 
 	template<typename...Args>
 	handle_t add(Args&& ... args)

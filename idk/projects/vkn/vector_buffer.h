@@ -17,7 +17,8 @@ namespace idk::vkn::hlp
 		// modifiers
 		void resize(vk::PhysicalDevice& pdevice, vk::Device& device, size_t num_bytes, bool force_downsize = false);
 		void resize(size_t num_bytes, bool force_downsize = false);
-		void update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& buffer, const unsigned char * data); 
+		void update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& buffer, const unsigned char* data);
+		inline void update(vk::DeviceSize offset, vk::DeviceSize len, vk::CommandBuffer& buffer, const char* data) { update(offset, len, buffer, r_cast<const unsigned char*>(data)); }
 		
 		template<typename T>
 		void update(vk::DeviceSize offset, vk::ArrayProxy<T> arr, vk::CommandBuffer& buffer) { update(offset, hlp::buffer_size(arr), buffer, reinterpret_cast<unsigned char const*>(arr.data())); }

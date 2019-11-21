@@ -539,7 +539,7 @@ namespace idk
 					else
 						if constexpr (std::is_same_v<RShape, capsule>)
 							return phys::collide_ray_capsule(
-								r, shape);
+								r, rShape);
 					else
 						return phys::raycast_failure{};
 				}, c.shape);
@@ -587,7 +587,7 @@ namespace idk
 				else
 					if constexpr (std::is_same_v<RShape, capsule>)
 						return phys::collide_ray_capsule(
-							r, shape);
+							r, rShape);
 				else
 					return phys::raycast_failure{};
 			}, c.shape);
@@ -637,7 +637,7 @@ namespace idk
 					else
 						if constexpr (std::is_same_v<RShape, capsule>)
 							return phys::collide_ray_capsule(
-								r, shape);
+								r, rShape);
 					else
 						return phys::raycast_failure{};
 				}, c.shape);

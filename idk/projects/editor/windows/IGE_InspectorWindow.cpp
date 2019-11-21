@@ -295,10 +295,15 @@ namespace idk {
 
                 if (ImGui::MenuItem(displayName.c_str())) {
                     //Add component
+					int execute_counter = 0;
+					CommandController& commandController = Core::GetSystem<IDE>().command_controller;
                     for (Handle<GameObject> i : gos)
                     {
-                        Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+                        commandController.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+						++execute_counter;
                     }
+
+					commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
                 }
             }
             ImGui::EndPopup();
@@ -310,12 +315,17 @@ namespace idk {
 				ImGui::Text("Scripts not loaded!");
 
 			span componentNames = script_env->GetBehaviorList();
+			int execute_counter = 0;
 			for (const char* name : componentNames) {
 				if (ImGui::MenuItem(name)) {
-					for (Handle<GameObject> i : gos)
+					for (Handle<GameObject> i : gos) {
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
+						++execute_counter;
+					}
 				}
 			}
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 			ImGui::EndPopup();
 		}
 
@@ -341,6 +351,7 @@ namespace idk {
             ImGuidk::PushDisabled();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
+			int execute_counter = 0;
 			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
 				string outputString = stringBuf;
 				if (i > 0) {
@@ -350,7 +361,10 @@ namespace idk {
 				}
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>,
                     GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
+				++execute_counter;
 			}
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 		}
         if (game_object.scene == Scene::prefab)
             ImGuidk::PopDisabled();
@@ -563,11 +577,14 @@ namespace idk {
         ImGui::PopItemWidth();
 
 		if (hasChanged) {
+			int execute_counter = 0;
 			for (int i = 0; i < editor.selected_gameObjects.size();++i) {
 				mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
-					
+				++execute_counter;
 			}
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 			//Refresh the new matrix values
 			editor.RefreshSelectedMatrix();
 			hasChanged		= false;
@@ -1180,8 +1197,13 @@ namespace idk {
                 Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
 			}
 			else {
-				for (Handle<GameObject> gameObject : editor.selected_gameObjects)
+				int execute_counter = 0;
+				for (Handle<GameObject> gameObject : editor.selected_gameObjects) {
 					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+					++execute_counter;
+				}
+				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 			}
 		}
 	}
@@ -1203,6 +1225,7 @@ namespace idk {
 			bool isTransformValuesEdited = false;
 			editor.RefreshSelectedMatrix();
 
+			int execute_counter = 0;
 			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
 				auto& gameObject = editor.selected_gameObjects[i];
 
@@ -1222,21 +1245,24 @@ namespace idk {
 
 						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
-
+						++execute_counter;
 					}
 					else {
 						//Mark to remove Component
 						string compName = string((*componentToMod).type.name());
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, compName));
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component)); //Remember commands are flushed at end of each update!
+						execute_counter += 2;
 					}
 				}
 				else {
 					//Add component
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component));
+					++execute_counter;
 				}
 			}
-
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 			if (isTransformValuesEdited)
 				//Refresh the new matrix values
 				editor.RefreshSelectedMatrix();

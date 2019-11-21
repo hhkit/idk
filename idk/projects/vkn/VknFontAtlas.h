@@ -4,27 +4,22 @@
 #include "idk.h"
 //#include "gfx/Texture.h"
 #include <vkn/MemoryAllocator.h>
+#include <vkn/VknTexture.h>
 namespace idk::vkn {
 	class VknFontAtlas
 		:public FontAtlas
 	{
-		ivec2					size{};
-		vk::DeviceSize			sizeOnDevice{};
-		void* rawData{};
-		string					path{ "" };
-		vk::UniqueImage			image{ nullptr };
-		vk::Format				format{};
-		vk::ImageAspectFlags    img_aspect;
-		vk::UniqueDeviceMemory  mem{ nullptr };
-		hlp::UniqueAlloc        mem_alloc{};
-		vk::UniqueImageView     imageView{ nullptr };
-		vk::UniqueSampler       sampler{ nullptr };
+	public:
+
+		RscHandle<VknTexture>   texture;
 
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
+		
+		RscHandle<Texture> Tex()const noexcept;
 		opt<vk::DescriptorSet>	descriptorSet{};
-		vk::Sampler Sampler()const { return *sampler; }
-		vk::Image Image()const { return *image; }
-		vk::ImageView ImageView()const { return *imageView; }
+		vk::Sampler Sampler()const { return texture->Sampler(); }
+		vk::Image Image()const { return texture->Image(); }
+		vk::ImageView ImageView()const { return texture->ImageView(); }
 		vk::ImageAspectFlags ImageAspects();
 		VknFontAtlas() = default;
 		~VknFontAtlas();

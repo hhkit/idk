@@ -8,6 +8,8 @@
 #include <vkn/ShaderModule.h>
 #include <forward_list>
 
+#include <vkn/DescriptorUpdateData.h>
+
 namespace idk::vkn
 {
 	VulkanView& View();
@@ -72,6 +74,7 @@ namespace idk::vkn
 		}
 		dsw.resize(insert_itr - dsw.begin());
 	}
+	/*
 	void UpdateUniformDS(
 		vk::Device& device,
 		vk::DescriptorSet& dset,
@@ -115,6 +118,52 @@ namespace idk::vkn
 		CondenseDSW(descriptorWrite);
 		device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
 	}
+
+	*/
+	void UpdateUniformDS(
+		vk::DescriptorSet& dset,
+		vector<ProcessedRO::BindingInfo> bindings,
+		DescriptorUpdateData& out
+	)
+	{
+		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos = out.scratch_buffer_infos;
+		vector<vector<vk::DescriptorImageInfo>>& image_infos = out.scratch_image_info;
+		vector<vk::WriteDescriptorSet> &descriptorWrite = out.scratch_descriptorWrite;
+		uint32_t max_binding = 0;
+		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
+		vk::DescriptorImageInfo default_img
+		{
+			def.Sampler(),def.ImageView(),vk::ImageLayout::eGeneral,
+		};
+
+		for (auto& binding : bindings)
+		{
+			max_binding = std::max(binding.binding + 1, max_binding);
+			if (max_binding > descriptorWrite.size())
+			{
+				descriptorWrite.resize(max_binding, vk::WriteDescriptorSet{});
+				image_infos.resize(max_binding);
+			}
+			auto& curr = descriptorWrite[binding.binding];
+			if (binding.IsImage())
+			{
+				image_infos[binding.binding].resize(binding.size, default_img);
+				curr.descriptorCount = static_cast<uint32_t>(binding.size);
+			}
+			curr.dstSet = dset;
+			curr.dstBinding = binding.binding;
+			curr.dstArrayElement = 0;
+		}
+		//TODO: Handle Other DSes as well
+		for (auto& binding : bindings)
+		{
+			DSUpdater updater{ buffer_infos,image_infos,binding,dset,descriptorWrite[binding.binding] };
+			std::visit(updater, binding.ubuffer);
+		}
+		CondenseDSW(descriptorWrite);
+		out.AbsorbFromScratch();
+	}
+
 
 	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index, const VknTexture& val)
 	{
@@ -192,7 +241,7 @@ namespace idk::vkn
 						curr_bindings[set];
 						b_itr = curr_bindings.find(set);
 					}
-					b_itr->second.SetLayout(*layout);
+					b_itr->second.SetLayout(*layout,layout.entry_counts);
 				}
 				for (auto& set : curr_bindings)
 				{
@@ -308,13 +357,96 @@ namespace idk::vkn
 				}(bindings);
 				auto& ds = dsl.find(layout)->second.GetNext();
 				vk::Device device = *View().Device();
-				UpdateUniformDS(device, ds, bindings);
-				p_ro.descriptor_sets[set]=ds;
+				UpdateUniformDS( ds, bindings,dud);
+				p_ro.SetDescriptorSet(set,ds);
 			}
 		}
+		dud.SendUpdates();
 	}
 	void PipelineThingy::UpdateUboBuffers()
 	{
 		ref.ubo_manager.UpdateAllBuffers();
+	}
+	//reserves an extra size chunk
+	void PipelineThingy::reserve(size_t size)
+	{
+		draw_calls.reserve(draw_calls.size()+size);
+	}
+	void PipelineThingy::set_bindings::SetLayout(vk::DescriptorSetLayout new_layout, const DsCountArray& total_descriptors, bool clear_bindings)
+	{
+		//If the layouts are different, the bindings are not compatible, clear it.
+		//or we just want the bindings to be cleared, so clear it.
+		if (new_layout != layout || clear_bindings)
+		{
+			total_desc = total_descriptors;
+			bindings.clear();
+		}
+		layout = new_layout;
+	}
+	void PipelineThingy::set_bindings::Bind(ProcessedRO::BindingInfo info)
+	{
+		//if (bindings.size() <= info.binding)
+		//	bindings.resize(static_cast<size_t>(info.binding) + 1);
+		auto& vec = bindings[info.binding];
+		if (vec.size() <= info.arr_index)
+			vec.resize(info.arr_index + 1);
+		vec[info.arr_index] = std::move(info);
+		dirty = true;
+	}
+	void PipelineThingy::set_bindings::Unbind(uint32_t binding)
+	{
+		bindings.erase(binding);
+	}
+	monadic::result<vector<ProcessedRO::BindingInfo>, string> PipelineThingy::set_bindings::FinalizeDC(CollatedLayouts_t& collated_layouts)
+	{
+		monadic::result< vector<ProcessedRO::BindingInfo>, string> result{};
+
+		string err_msg;
+		vector<ProcessedRO::BindingInfo>& set_bindings = scratch_out;
+		set_bindings.clear();
+		uint32_t type_count[DescriptorTypeI::size()] = {};
+		bool failed = false;
+		if (dirty)
+		{
+			size_t max_size = 0;
+			for (auto& binding : bindings)
+			{
+				max_size += binding.second.size();
+			}
+			set_bindings.reserve(max_size);
+			for (auto& [binding_index, binding] : bindings)
+			{
+				//if (!bindings[i])
+				//{
+				//	failed = true;
+				//	err_msg += "Binding [" + std::to_string(i) + "] is missing\n";
+				//}
+				for (auto& elem : binding)
+				{
+					if (elem)
+					{
+						auto& binding_elem = set_bindings.emplace_back(*elem);
+						type_count[binding_elem.IsImage() ?
+							desc_type_index<vk::DescriptorType::eCombinedImageSampler>
+							:
+							desc_type_index<vk::DescriptorType::eUniformBuffer>]++;
+					}
+				}
+			}
+			if (failed)
+				result = std::move(err_msg);
+			else
+			{
+				auto& cl = collated_layouts[layout];
+				cl.first++;
+				for (size_t i = 0; i < std::size(total_desc); ++i)
+				{
+					cl.second[i] = total_desc[i];
+				}
+				result = std::move(set_bindings);
+				dirty = false;
+			}
+		}
+		return std::move(result);
 	}
 }

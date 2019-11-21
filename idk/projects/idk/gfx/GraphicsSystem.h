@@ -62,6 +62,12 @@ namespace idk
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
+		struct LightRenderRange
+		{
+			size_t light_index;
+			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
+			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
+		};
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
@@ -146,6 +152,7 @@ namespace idk
 			//vector<AnimatedInstancedData> inst_skinned_mesh_render_buffer;
 
 			vector<RenderRange> culled_render_range;
+			vector<LightRenderRange> culled_light_render_range;
 
 			//RscHandle<ShaderProgram> mesh_vtx;
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;

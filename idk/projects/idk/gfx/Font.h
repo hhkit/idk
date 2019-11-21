@@ -33,5 +33,11 @@ namespace idk {
 
 		//A useless function
 		void UpdateFontSize();
+
+		void SetText(const string& t) { text = t; }
+		string GetText() const { return text; }
+
+		void SetColor(const color& c) { colour = c; }
+		color GetColor() const { return colour; }
 	};
 }
