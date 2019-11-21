@@ -1,17 +1,5 @@
 _shader_program: {guid: 5b6ef3e0-e6c8-41f4-9488-e4292d468029}
 links: 
-- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
-  node_out: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
-  slot_in: 1
-  slot_out: 0
-- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
-  node_out: 9d40ef6d-0b8d-409f-af98-b2fec6f67472
-  slot_in: 3
-  slot_out: 0
-- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
-  node_out: 1bd680de-07ae-4d0f-8915-ab1330429283
-  slot_in: 2
-  slot_out: 0
 - node_in: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
   node_out: 8cde6425-134a-42bf-ac3f-91f6caeedf62
   slot_in: 0
@@ -32,11 +20,23 @@ links:
   node_out: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
   slot_in: 2
   slot_out: 5
-- node_in: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
   node_out: eb496af1-5e71-4429-bacb-2f8ab7bd8154
   slot_in: 0
   slot_out: 3
-master_node: 9550e80c-4d2f-4e84-8d65-9a29295b539c
+- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+  node_out: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
+  slot_in: 1
+  slot_out: 0
+- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+  node_out: 1bd680de-07ae-4d0f-8915-ab1330429283
+  slot_in: 2
+  slot_out: 0
+- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+  node_out: 9d40ef6d-0b8d-409f-af98-b2fec6f67472
+  slot_in: 3
+  slot_out: 0
+master_node: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
 nodes: 
   1bd680de-07ae-4d0f-8915-ab1330429283: 
     control_values: ""
@@ -62,18 +62,6 @@ nodes:
     output_slots: 
     - {type: SAMPLER2D, value: ""}
     position: {x: 83, y: 59}
-  9550e80c-4d2f-4e84-8d65-9a29295b539c: 
-    control_values: ""
-    guid: 9550e80c-4d2f-4e84-8d65-9a29295b539c
-    input_slots: 
-    - {type: VEC3, value: ""}
-    - {type: VEC3, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: 0}
-    name: master\PBR
-    output_slots: []
-    position: {x: 539, y: 150}
   9d40ef6d-0b8d-409f-af98-b2fec6f67472: 
     control_values: ""
     guid: 9d40ef6d-0b8d-409f-af98-b2fec6f67472
@@ -104,18 +92,30 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     position: {x: 234, y: 31}
+  e00c7250-f9b8-47f6-9fd9-10d69380fc5a: 
+    control_values: ""
+    guid: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: 0}
+    name: master\PBR Specular
+    output_slots: []
+    position: {x: 539, y: 150}
   eb496af1-5e71-4429-bacb-2f8ab7bd8154: 
     control_values: ""
     guid: eb496af1-5e71-4429-bacb-2f8ab7bd8154
     input_slots: 
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 0}
     name: input\basic\Vec3
     output_slots: 
     - {type: VEC3, value: ""}
     position: {x: 429, y: 52}
 parameters: 
-- {default_value: 0, name: Metallic, type: FLOAT}
+- {default_value: 0, name: Specular, type: FLOAT}
 - {default_value: 0, name: Roughness, type: FLOAT}
 - {default_value: a73c0ad6-a313-4419-a869-100f0eb1a237, name: Texture, type: SAMPLER2D}

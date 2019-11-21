@@ -19,7 +19,8 @@ namespace idk
 
 	ENUM(ShadingModel, char,
 		Unlit,
-		DefaultLit)
+		DefaultLit,
+		Specular)
 
 
 	class Material
