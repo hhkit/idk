@@ -266,12 +266,12 @@ namespace idk::vkn
 		texture.Size(ptr->Size(ivec2{ load_info.width,load_info.height }));
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = vfa::CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = vfa::CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -305,14 +305,15 @@ namespace idk::vkn
 		const void* rgba = rgba32;
 		auto format = MapFormat(pixel_format);
 		auto ptr = texture.texture;
+
 		auto&& [image, alloc, aspect] = vkn::LoadFontAtlas(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
