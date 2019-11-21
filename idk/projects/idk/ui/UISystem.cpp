@@ -70,7 +70,6 @@ namespace idk
                 return false;
 
             auto& rt = *rt_handle;
-            const auto& t = *child->Transform();
 
             vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
             vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
@@ -128,7 +127,7 @@ namespace idk
 
             vec2 pivot_pt = rt._local_rect.position + rt.pivot * rt._local_rect.size;
             rt._matrix = parent_rt._matrix *
-                translate(vec3(pivot_pt, 0)) *
+                translate(vec3(pivot_pt, t.position.z)) *
                 mat4 { quat_cast<mat3>(t.rotation) *
                 scale(t.scale) } *
                 translate(vec3(rt._local_rect.position + vec2(0.5f) * rt._local_rect.size - pivot_pt, 0));

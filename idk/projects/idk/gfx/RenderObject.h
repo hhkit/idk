@@ -136,6 +136,7 @@ namespace idk
         color color;
         RscHandle<MaterialInstance> material;
         variant<ImageData, TextData> data;
+        unsigned depth; // in scene graph
     };
 
 }

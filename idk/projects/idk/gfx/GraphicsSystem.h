@@ -135,7 +135,7 @@ namespace idk
 			vector<SkeletonTransforms> skeleton_transforms;
             vector<ParticleRenderData> particle_render_data;
 			vector<FontData> font_render_data;
-			vector<UIRenderObject> ui_render;
+			hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
 
 			size_t curr_scene_camera_index;
 

@@ -486,18 +486,32 @@ namespace idk
 			render_data = f.fontData;
 		}
 
+        auto& ui = Core::GetSystem<UISystem>();
         for (auto& im : images)
         {
-            const auto& go = *im.GetGameObject();
-            const auto& rt = *go.GetComponent<RectTransform>();
+            const auto& go = im.GetGameObject();
+            const auto& rt = *go->GetComponent<RectTransform>();
             
-            auto& render_data = result.ui_render.emplace_back();
+            auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
             render_data.transform = rt._matrix *
                 mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
             render_data.material = im.material;
             render_data.color = im.tint;
             render_data.data = ImageData{ im.texture };
+            render_data.depth = go->Transform()->Depth();
+        }
+
+        // sort ui render by depth then z pos
+        for (auto& [canvas, vec] : result.ui_render_per_canvas)
+        {
+            std::stable_sort(vec.begin(), vec.end(),
+                [](const UIRenderObject& a, const UIRenderObject& b) {
+                    return a.depth == b.depth ?
+                        a.transform[3].z < b.transform[3].z :
+                        a.depth < b.depth;
+                }
+            );
         }
 
 
