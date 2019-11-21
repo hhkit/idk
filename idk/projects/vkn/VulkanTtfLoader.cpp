@@ -108,7 +108,7 @@ namespace idk::vkn
 		
 		fontAtlas->reload_path = handle;
 
-		FT_GlyphSlot g = face->glyph;
+		FT_GlyphSlot glyph = face->glyph;
 		unsigned w = 0;
 		unsigned h = 0;
 		unsigned mw = 0;
@@ -122,15 +122,15 @@ namespace idk::vkn
 				fprintf(stderr, "Loading character %c failed!\n", i);
 				continue;
 			}
-			if (mw + g->bitmap.width + 1 >= MAXWIDTH) {
+			if (mw + glyph->bitmap.width + 1 >= MAXWIDTH) {
 				w = std::max(w, mw);
 				h += mh;
 				mw = 0;
 				mh = 0;
 			}
 
-			mw += g->bitmap.width + 1;
-			mh = std::max(mh, g->bitmap.rows);
+			mw += glyph->bitmap.width + 1;
+			mh = std::max(mh, glyph->bitmap.rows);
 		}
 
 		/* you might as well save this value as it is needed later on */
@@ -142,8 +142,8 @@ namespace idk::vkn
 		int x = 0, y = 0;
 		mh = 0;
 
-		char* raw = (char *)malloc(w*h*sizeof(unsigned));
-		unsigned stride = sizeof(unsigned);
+		char* raw = (char *)malloc(w*h * sizeof(unsigned));
+		unsigned stride = sizeof(unsigned char);
 
 		vector<CharacterCreateInfo> sadList;
 
@@ -151,32 +151,60 @@ namespace idk::vkn
 			if (FT_Load_Char(face, i, FT_LOAD_RENDER))
 				continue;
 
-			if (x + g->bitmap.width + 1 >= MAXWIDTH) {
+			if (x + glyph->bitmap.width + 1 >= MAXWIDTH) {
 				y += mh;
 				mh = 0;
 				x = 0;
 			}
 
 			//glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, g->bitmap.width, g->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer);
-			for(unsigned row = (unsigned)y; row < g->bitmap.rows; ++row)
-				memcpy_s((raw + (row*stride*w) + (x*stride)), g->bitmap.width, g->bitmap.buffer, g->bitmap.width);
+			//for(unsigned row = (unsigned)y; row < g->bitmap.rows; ++row)
+			//	memcpy_s((raw + (row*stride*w) + (x*stride)), g->bitmap.width, g->bitmap.buffer, g->bitmap.width);
+			sadList.emplace_back(CharacterCreateInfo{x,y,glyph->bitmap.width,glyph->bitmap.rows});
+			/*for (unsigned row = x, p =0; row < (x+g->bitmap.width); ++row, ++p)
+				for (unsigned col = y, q = 0; col < (y + g->bitmap.rows); ++col, ++q)
+				{
+					if (row < 0 || col < 0 ||
+						row >= w || col >= h)
+						continue;
+
+					raw[col * (x + g->bitmap.width) + row] |= g->bitmap.buffer[q * g->bitmap.width + p];
+				}*/
+
+			//for (unsigned row = x, p = 0; row < (x + g->bitmap.rows); ++row, ++p)
+			for (unsigned row = y, p = 0; row < (y + glyph->bitmap.rows); ++row, ++p)
+			{
+				auto* src = glyph->bitmap.buffer + p * glyph->bitmap.width;
+				auto* dst = raw + (row * w + x);
+
+				for (unsigned i = 0; i < glyph->bitmap.width; ++i)
+					volatile auto val = *src;
+
+				memcpy_s(dst, w * h* sizeof(unsigned), src, glyph->bitmap.width);
+			}
+			//char* m_copy = (char*) malloc(g->bitmap.rows* g->bitmap.width);
+			//memcpy_s(m_copy, g->bitmap.rows * g->bitmap.width, g->bitmap.buffer, g->bitmap.rows* g->bitmap.width);
+
+			//memcpy_s(raw + y*w+g->bitmap.rows * g->bitmap.width* stride * sizeof(char), w* h * sizeof(unsigned), m_copy, g->bitmap.rows * g->bitmap.width);
+
+			//free(m_copy);
 
 
-			fontAtlas->c[i].advance.x = s_cast<float>(g->advance.x >> 6);
-			fontAtlas->c[i].advance.y = s_cast<float>(g->advance.y >> 6);
+			fontAtlas->c[i].advance.x = s_cast<float>(glyph->advance.x >> 6);
+			fontAtlas->c[i].advance.y = s_cast<float>(glyph->advance.y >> 6);
 
-			fontAtlas->c[i].glyph_size.x = (float)g->bitmap.width;
-			fontAtlas->c[i].glyph_size.y = (float)g->bitmap.rows;
+			fontAtlas->c[i].glyph_size.x = (float)glyph->bitmap.width;
+			fontAtlas->c[i].glyph_size.y = (float)glyph->bitmap.rows;
 
-			fontAtlas->c[i].bearing.x = (float)g->bitmap_left;
-			fontAtlas->c[i].bearing.y = (float)g->bitmap_top;
+			fontAtlas->c[i].bearing.x = (float)glyph->bitmap_left;
+			fontAtlas->c[i].bearing.y = (float)glyph->bitmap_top;
 
 			fontAtlas->c[i].tex_offset.x = x / (float)w;
 			fontAtlas->c[i].tex_offset.y = y / (float)h;
 
-			mh = std::max(mh, g->bitmap.rows);
+			mh = std::max(mh, glyph->bitmap.rows);
 			//mh = g->bitmap.rows;
-			x += g->bitmap.width + 1;
+			x += glyph->bitmap.width + 1;
 		}
 
 		FontAtlasLoader loader;
@@ -196,7 +224,7 @@ namespace idk::vkn
 		if (def.is_srgb)
 			tci.internal_format = ToSrgb(tci.internal_format);
 		//TODO detect SRGB and load set format accordingly
-		InputFAInfo iti{ r_cast<const char*>(raw),s_cast<size_t>(size.x * size.y * 4),def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
+		InputFAInfo iti{ r_cast<const char*>(raw),s_cast<size_t>(size.x * size.y * 4),sadList,glyph->bitmap.buffer,def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
 		if (tm)
 			to = *tm;
 		loader.LoadFontAtlas(*fontAtlas, allocator, *fence, to, tci, iti);

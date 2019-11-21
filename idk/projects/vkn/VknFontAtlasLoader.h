@@ -28,16 +28,19 @@ namespace idk::vkn
 	{
 		const void* data{};
 		size_t len{}; 
-		vector<char*> characterMemList{};
+		vector<CharacterCreateInfo> characterMemList{};
+		unsigned char* bitmapBuffer;
 		vk::Format format{};
 		InputFAInfo(
 			const void* d = nullptr,
 			size_t l = 0,
-			//vector<char*> vList = {},
+			vector<CharacterCreateInfo> vList = {},
+			unsigned char* b = nullptr,
 			vk::Format f = {}) noexcept 
 			:data{ d }, 
 			len{ l }, 
-			//characterMemList{vList}, 
+			characterMemList{vList}, 
+			bitmapBuffer{b},
 			format{ f }{}
 	};
 	struct FACreateInfo
