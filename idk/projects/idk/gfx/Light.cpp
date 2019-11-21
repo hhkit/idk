@@ -132,7 +132,7 @@ namespace idk
 					retval.intensity = point_light.intensity;
 					retval.cos_inner = cos(point_light.fov);
 					retval.cos_outer = 1;
-					retval.falloff = (point_light.use_inv_sq_atten) ? point_light.attenuation_radius : (1.f / (point_light.attenuation_radius * point_light.attenuation_radius));
+					retval.falloff = (point_light.use_inv_sq_atten) ? (1.f / (point_light.attenuation_radius * point_light.attenuation_radius)): point_light.attenuation_radius;
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 
@@ -158,7 +158,7 @@ namespace idk
 					retval.v_dir = tfm->Forward();
 					retval.cos_inner = cos(spotlight.inner_angle);
 					retval.cos_outer = cos(spotlight.outer_angle);
-					retval.falloff = (spotlight.use_inv_sq_atten) ? spotlight.attenuation_radius : (1.f / (spotlight.attenuation_radius * spotlight.attenuation_radius));
+					retval.falloff = (spotlight.use_inv_sq_atten) ? (1.f / (spotlight.attenuation_radius * spotlight.attenuation_radius)) : spotlight.attenuation_radius;
 					
 					retval.intensity = spotlight.intensity;
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
