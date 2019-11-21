@@ -347,7 +347,7 @@ namespace idk {
 
                 if (path.IsDir())
                 {
-                    static auto folder_icon = Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
+                    static auto folder_icon = Core::GetSystem<AssetImporter>().Get<Texture>("/editor_data/icons/folder.png");
                     id = folder_icon->ID();
                 }
                 else
@@ -363,12 +363,12 @@ namespace idk {
                             return h;
                         else if constexpr (std::is_same_v<T, Material> || std::is_same_v<T, shadergraph::Graph>)
                         {
-                            static auto material_icon = Core::GetResourceManager().Load<Texture>("/editor_data/icons/material.png");
+                            static auto material_icon = Core::GetSystem<AssetImporter>().Get<Texture>("/editor_data/icons/material.png");
                             return material_icon;
                         }
                         else if constexpr (std::is_same_v<T, MaterialInstance>)
                         {
-                            static auto material_icon = Core::GetResourceManager().Load<Texture>("/editor_data/icons/matinst.png");
+                            static auto material_icon = Core::GetSystem<AssetImporter>().Get<Texture>("/editor_data/icons/matinst.png");
                             return material_icon;
                         }
                         else

@@ -81,6 +81,19 @@ namespace idk
 					...
 				};
 			}
+
+			constexpr static auto GenerateSignalTable()
+			{
+				return array<void(*)(ResourceManager*), sizeof...(Rs)>
+				{
+					[](ResourceManager* rm)
+					{
+						rm->_created_signals[BaseResourceID<Rs>] = std::make_shared<Signal<RscHandle<Rs>>>();
+						rm->_destroying_signals[BaseResourceID<Rs>] = std::make_shared<Signal<RscHandle<Rs>>>();
+					}
+						...
+				};
+			}
 		};
 
 		using ResourceHelper = ResourceManager_detail<Resources>;
@@ -100,8 +113,12 @@ namespace idk
 
 	void ResourceManager::Init()
 	{
+		constexpr static auto signal_table = detail::ResourceHelper::GenerateSignalTable();
 		instance = this;
 		_resource_table = detail::ResourceHelper::GenResourceTables();
+
+		for (auto& func : signal_table)
+			func(this);
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };

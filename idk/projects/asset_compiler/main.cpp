@@ -1,6 +1,7 @@
 // asset_compiler.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <iostream>
+#include <filesystem>
 
 #include <idk.h>
 #include <res/ResourceHandle.h>
@@ -12,6 +13,8 @@
 #include "CompilerCore.h"
 #include "CompilerList.h"
 
+namespace fs = std::filesystem;
+
 /*
 	Usage: 
 	- arg[0] is executable name
@@ -22,19 +25,31 @@ int main(int argc, const char* argv[])
 {
 	using namespace idk;
 
-	if (argc < 3)
+	if (argc < 2)
 	{
 		std::cout << "Proper usage:\n";
 		std::cout << "   compiler.exe: [input_file] [output_file]\n";
 		return -1;
 	}
+	auto src = fs::absolute(fs::path{ argv[1] });
+	auto dest = fs::absolute(argc >= 3 ? fs::path{ argv[2] } : fs::path{ argv[1] }.parent_path());
+
+	std::cout << "compiling " << src.generic_string();
+	std::cout << " -> " << dest.generic_string();
+	std::cout << std::endl;
 
 	CompilerCore c;
+	c.SetDestination(dest.generic_string());
 	c.RegisterCompiler<DDSCompiler>(".dds");
 	c.RegisterCompiler<TextureCompiler>(".tga");
+	c.RegisterCompiler<TextureCompiler>(".png");
+	c.RegisterCompiler<TextureCompiler>(".gif");
+	c.RegisterCompiler<AssimpCompiler>(".fbx");
+	c.RegisterCompiler<AssimpCompiler>(".obj");
+	c.RegisterCompiler<AssimpCompiler>(".ma");
 
-	c.Compile(argv[1]);
-
+	c.Compile(src.generic_string());
+	
 	return 0;
 }
 

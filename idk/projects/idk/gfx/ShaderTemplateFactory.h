@@ -9,5 +9,6 @@ namespace idk
 	{
 	public:
 		unique_ptr<ShaderTemplate> GenerateDefaultResource() override;
+		unique_ptr<ShaderTemplate> Create(PathHandle h) override;
 	};
 }

@@ -76,7 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	switch (HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL)
 	{
-	case GraphicsAPI::Vulkan: c->AddSystem<vkn::VulkanWin32GraphicsSystem>(); break;
+	//case GraphicsAPI::Vulkan: c->AddSystem<vkn::VulkanWin32GraphicsSystem>(); break;
 	case GraphicsAPI::OpenGL: c->AddSystem<ogl::Win32GraphicsSystem>();       break;
 	default: break;
 	}

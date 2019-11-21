@@ -204,8 +204,8 @@ namespace idk::ogl
 		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<anim::Animation, anim::Animation>>();
 		Core::GetResourceManager().RegisterFactory<ProgramFactory>();
 		Core::GetResourceManager().RegisterFactory<CompiledAssetLoader<OpenGLTexture, CompiledTexture>>();
-		//Core::GetResourceManager().RegisterFactory<OpenGLRenderTargetFactory>();
-		//Core::GetResourceManager().RegisterFactory<OpenGLFrameBufferFactory>();
+		Core::GetResourceManager().RegisterFactory<OpenGLRenderTargetFactory>();
+		Core::GetResourceManager().RegisterFactory<OpenGLFrameBufferFactory>();
 		//Core::GetResourceManager().RegisterFactory<OpenGLFontAtlasFactory>();
 
 		// register extensions

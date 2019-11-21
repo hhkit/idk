@@ -30,7 +30,7 @@ namespace idk
 			auto parsed = parse_binary<CompiledAsset>(stringify(stream));
 
 			if (parsed)
-				return std::make_unique<EngineResource>(*parsed);
+				return std::make_unique<EngineResource>(std::move(*parsed));
 			else
 				return unique_ptr<EngineResource>();
 		}

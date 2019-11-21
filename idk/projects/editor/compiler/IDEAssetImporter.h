@@ -88,6 +88,10 @@ namespace idk
 			// then let resource manager handle the reimport
 		}
 	}
+	template<typename Res, typename>
+	inline void EditorAssetImporter::Rename(RscHandle<Res> handle, string_view mount_path)
+	{
+	}
 	template<typename ImporterType>
 	inline void EditorAssetImporter::RegisterImporter(string_view ext)
 	{

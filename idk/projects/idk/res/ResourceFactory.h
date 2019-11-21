@@ -10,7 +10,7 @@ namespace idk
 	class ResourceFactory
 	{
 	public:
-		using Resource = Res;
+		using Resource = typename Res::BaseResource;
 
 		virtual void Init() {};                                     // initialize factory, create default resources
 		virtual unique_ptr<Resource> GenerateDefaultResource() = 0;	// generate default resource - the fallback resource if a handle fails

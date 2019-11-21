@@ -61,7 +61,7 @@ namespace idk
 	{
 		auto& factory = GetFactoryRes<Res>();
 		assert(&factory);
-		return Emplace(guid, factory.Create(), replace);
+		return RscHandle<Res>{Emplace(guid, factory.Create(), replace)};
 	}
 
 	template<typename Res>
@@ -89,7 +89,7 @@ namespace idk
 	{
 		auto& factory = GetFactoryRes<Res>();
 		assert(&factory);
-		return Emplace(Guid{ h.GetStem() }, factory.Create(h), reload);
+		return RscHandle<Res>{Emplace(Guid{ h.GetStem() }, factory.Create(h), reload)};
 	}
 
 	template<typename Factory>

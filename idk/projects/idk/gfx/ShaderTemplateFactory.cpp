@@ -22,4 +22,9 @@ namespace idk
 	{
 		return std::make_unique<ShaderTemplate>(default_template);
 	}
+	unique_ptr<ShaderTemplate> ShaderTemplateFactory::Create(PathHandle h)
+	{
+		auto stream = h.Open(FS_PERMISSIONS::READ);
+		return std::make_unique<ShaderTemplate>(stringify(stream));
+	}
 }

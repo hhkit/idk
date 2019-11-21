@@ -10,12 +10,15 @@ namespace idk
 	public:
 		CompilerCore();
 
+		void SetDestination(string_view dest);
+
 		template<typename T, typename ... Args>
 		void RegisterCompiler(string_view ext, Args&& ...);
 
 		void Compile(string_view full_path);
 	private:
 		hash_table<string_view, unique_ptr<IAssetCompiler>> _loaders;
+		string destination = "build";
 	};
 
 	template<typename T, typename ...Args>

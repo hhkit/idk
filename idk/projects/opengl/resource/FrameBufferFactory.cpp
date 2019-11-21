@@ -51,6 +51,10 @@ namespace idk::ogl
 	{
 		return std::make_unique<OpenGLFrameBuffer>();
 	}
+	unique_ptr<FrameBuffer> OpenGLFrameBufferFactory::Create(PathHandle h)
+	{
+		return unique_ptr<FrameBuffer>();
+	}
 	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
 	{
 		type;

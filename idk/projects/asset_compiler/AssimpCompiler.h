@@ -5,7 +5,7 @@
 namespace idk
 {
 	class AssimpCompiler
-		: public DDSCompiler
+		: public IAssetCompiler
 	{
 	public:
 		opt<AssetBundle> LoadAsset(string_view full_path, const MetaBundle& bundle) override;

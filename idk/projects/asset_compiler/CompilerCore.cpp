@@ -20,6 +20,18 @@ namespace idk
 {
 	CompilerCore::CompilerCore()
 	{
+		char buffer[MAX_PATH] = { 0 };
+
+		// Get the program directory
+		int bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+		auto exe_dir = string{ buffer };
+		exe_dir = exe_dir.substr(0, exe_dir.find_last_of("\\"));
+
+		fs::current_path((exe_dir.data());
+	}
+	void CompilerCore::SetDestination(string_view dest)
+	{
+		destination = string{ dest };
 	}
 	void CompilerCore::Compile(string_view full_path)
 	{
@@ -64,7 +76,7 @@ namespace idk
 								if constexpr (has_extension_v<T>)
 								{
 									static_assert(T::ext[0] == '.', "Extension must begin with a .");
-									std::ofstream resource_stream{ string{guid} +string{T::ext} };
+									std::ofstream resource_stream{ destination + "/" + string{guid} + string{T::ext} };
 									resource_stream << serialize_binary(elem);
 									return true;
 								}

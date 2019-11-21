@@ -27,7 +27,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <proj/ProjectManager.h>
 #include <common/TagManager.h>
 #include <PauseConfigurations.h>
-#include <vkn/VulkanWin32GraphicsSystem.h>
+//#include <vkn/VulkanWin32GraphicsSystem.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 #include <scene/SceneManager.h>
@@ -110,7 +110,7 @@ namespace idk
 			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
 			break;
 		case GraphicsAPI::Vulkan:
-			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
+			//_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
 			break;
 		default:
 			break;
@@ -423,7 +423,7 @@ namespace idk
 			camHandle->render_target = editor_view;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-				camHandle->clear = Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
+			//	camHandle->clear = Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
 			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		}
