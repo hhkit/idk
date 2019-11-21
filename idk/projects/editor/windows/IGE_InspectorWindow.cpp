@@ -148,10 +148,10 @@ namespace idk {
         // COMPONENTS
 
         ImGui::BeginChild("_inspector_inner");
-        Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
-        if (c_transform) {
-            DisplayComponent(c_transform);
-        }
+        if (const auto rect_transform = gos[0]->GetComponent<RectTransform>())
+            DisplayComponent(rect_transform);
+        else
+            DisplayComponent(gos[0]->GetComponent<Transform>());
 
         if (gameObjectsCount == 1)
         {
@@ -160,7 +160,8 @@ namespace idk {
             for (auto& component : componentSpan) {
 
                 //Skip Name and Transform and PrefabInstance
-				if (component == c_transform ||
+				if (component.is_type<Transform>() ||
+					component.is_type<RectTransform>() ||
 					component.is_type<PrefabInstance>() ||
 					component.is_type<Name>() ||
 					component.is_type<Tag>() ||
@@ -573,6 +574,15 @@ namespace idk {
 			//isBeingModified = false;
 		}
 	}
+
+
+    template<>
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<RectTransform> c_rt)
+    {
+        displayVal(*c_rt);
+        displayVal(*c_rt->GetGameObject()->GetComponent<Transform>());
+    }
+
 
     template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Animator> c_anim)
@@ -1044,7 +1054,7 @@ namespace idk {
         ImGui::PopFont();
     }
 
-	void IGE_InspectorWindow::DisplayComponent(GenericHandle& component)
+	void IGE_InspectorWindow::DisplayComponent(GenericHandle component)
 	{
 		//COMPONENT DISPLAY
         ImGui::PushID(component.type);
