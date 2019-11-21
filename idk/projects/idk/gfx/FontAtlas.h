@@ -10,7 +10,7 @@ namespace idk {
 	{
 		string font_name = {};
 		UVMode      uv_mode = UVMode::ClampToBorder;
-		ColorFormat internal_format = ColorFormat::R_16;
+		ColorFormat internal_format = ColorFormat::R_8;
 		InputChannels format = InputChannels::RED;   //Remove, loader determines this
 		FilterMode  filter_mode = FilterMode::Linear;
 		bool is_srgb{ true };
