@@ -20,6 +20,7 @@
 #include <gfx/FramebufferFactory.h>
 #include <gfx/FontAtlas.h>
 #include <opengl/resource/OpenGLFontAtlas.h>
+#include <ui/Canvas.h>
 
 #include <editor/IDE.h>
 #include <gfx/ViewportUtil.h>
@@ -657,6 +658,10 @@ namespace idk::ogl
 
 			glBindVertexArray(0);
 
+
+
+            // PARTICLE SYSTEM DRAW
+
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
             const vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
@@ -704,9 +709,47 @@ namespace idk::ogl
 
 			glDisable(GL_BLEND);
 
+
 		} // for each culled camera
 
 		glBindVertexArray(0);
+
+
+
+        // UI DRAW
+        glDisable(GL_DEPTH_TEST);
+
+        RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
+        glBindVertexArray(font_vao_id);
+        pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::VUi]);
+        auto ui_render_per_canvas = curr_object_buffer.ui_render_per_canvas;
+        for (auto& [canvas, ui_render_data] : ui_render_per_canvas)
+        {
+            fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{canvas->render_target});
+            for (auto& elem : ui_render_data)
+            {
+                std::visit([&](const auto& data)
+                {
+                    using T = std::decay_t<decltype(data)>;
+                    if constexpr (std::is_same_v<T, ImageData>)
+                    {
+                        // bind shader
+                        pipeline.PushProgram(elem.material->material->_shader_program);
+                        pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
+                        pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+                        pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+                        fsq->BindAndDraw(
+                            renderer_attributes{ {
+                                { vtx::Attrib::Position, 0 },
+                                { vtx::Attrib::UV, 1 },
+                            } }
+                        );
+                    }
+                }, elem.data);
+            }
+        }
+
+
 
 		fb_man.ResetFramebuffer();
 

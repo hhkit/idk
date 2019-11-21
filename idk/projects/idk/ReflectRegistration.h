@@ -590,9 +590,14 @@ REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime,
 REFLECT_END()
 
 // UI
-REFLECT_BEGIN(idk::Canvas, "Canvas")
-REFLECT_END()
-
 REFLECT_BEGIN(idk::RectTransform, "RectTransform")
 REFLECT_VARS(anchor_min, anchor_max, offset_min, offset_max, pivot)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Canvas, "Canvas")
+REFLECT_VARS(render_target)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Image, "Image")
+REFLECT_VARS(texture, tint, material)
 REFLECT_END()

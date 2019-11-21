@@ -15,12 +15,14 @@ namespace idk
 				{
 				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
 				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Specular:   return *Core::GetResourceManager().Load<ShaderTemplate>(Core::GetSystem<GraphicsSystem>().is_deferred() ? "/engine_data/shaders/pbr_specular.tmpt" : "/engine_data/shaders/pbr_specular.tmpt");
 				}
 			case BlendMode::Masked:
 				switch (model)
 				{
 				case ShadingModel::DefaultLit: return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
 				case ShadingModel::Unlit:      return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Specular:   return *Core::GetResourceManager().Load<ShaderTemplate>("/engine_data/shaders/pbr_specular.tmpt");
 				}
 			}
 		}

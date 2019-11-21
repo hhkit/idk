@@ -7,5 +7,7 @@ namespace idk
     class Canvas
         : public Component<Canvas>
     {
+    public:
+        RscHandle<RenderTarget> render_target;
     };
 }

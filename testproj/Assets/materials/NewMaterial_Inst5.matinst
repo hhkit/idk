@@ -1,5 +1,5 @@
 material: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
 uniforms: 
-  Metallic: !float 0.5
   Roughness: !float 0.5
+  Specular: !float 0.5
   Texture: !<Texture> {guid: 1704ca64-2ab1-4f6d-a270-a24aa089debb}
