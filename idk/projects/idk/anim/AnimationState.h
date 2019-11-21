@@ -34,7 +34,7 @@ namespace idk
 	struct AnimationState
 	{
 		// Serializables
-		string name{};
+		string name{"Empty"};
 		
 		bool valid = false;
 		bool loop = true;

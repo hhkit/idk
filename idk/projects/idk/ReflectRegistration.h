@@ -574,7 +574,7 @@ REFLECT_VARS(skeleton, layer_table, layers, int_vars, float_vars, bool_vars, tri
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Bone, "Bone")
-REFLECT_VARS(_bone_name, _bone_index)
+REFLECT_VARS(bone_name, bone_index)
 REFLECT_END()
 
 // PARTICLE SYSTEM

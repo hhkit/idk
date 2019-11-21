@@ -37,7 +37,6 @@ namespace idk
 		void Reset();
 		void ResetToDefault();
 		void OnPreview();
-		
 
 		// Script Functions
 		void Play(string_view animation_name, float offset = 0.0f);

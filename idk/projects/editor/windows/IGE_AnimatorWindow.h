@@ -40,25 +40,28 @@ namespace idk {
 		ImVec4 _selectable_hovered_col;
 
 		ImVec4 _blend_prog_col;
-		ImVec2 _layer_selectable_display_size;
-		ImVec2 _state_selectable_display_size;
-		ImVec2 _selectable_offset;
+		// ImVec2 _layer_selectable_display_size;
+		size_t _layer_selectable_num_items;
+		size_t _state_selectable_num_items;
 
 		float align_right(float width_avail, float size);
-		void separator();
 
 		void drawLeftCol();
-		
 		void drawCanvas();
-		
-		void drawBlendTreeCanvas();
 		void drawAnimatorInspector();
 
 		void drawLayersTab();
+		void drawLayersContextMenu();
 		void drawParamsTab();
 		void drawStatesTab();
+		void drawBoneMaskTab();
 
 		bool canvasContextMenu();
+
+		void inspectLayer(size_t layer_index);
+		void inspectState(size_t layer_index, size_t state_index);
+		void inspectTransition(size_t layer_index, size_t state_index, size_t transition_index);
+
 		bool drawConnection(ImVec2 p1, ImVec2 p2);
 
 		void resetSelection();

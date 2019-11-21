@@ -63,6 +63,9 @@ namespace idk
 		new_layer.prev_poses.resize(skeleton->data().size());
 		new_layer.blend_source.resize(skeleton->data().size());
 
+		// All bones are initialized to be unmasked the start
+		std::fill(new_layer.bone_mask.begin(), new_layer.bone_mask.end(), true);
+
 		layer_table.emplace(new_layer.name, layers.size());
 		layers.push_back(new_layer);
 	}
@@ -605,7 +608,7 @@ namespace idk
 		// 		auto c_bone = c_go->GetComponent<Bone>();
 		// 		if (c_bone)
 		// 		{
-		// 			child_objects[c_bone->_bone_index] = c_go;
+		// 			child_objects[c_bone->bone_index] = c_go;
 		// 		}
 		// 	};
 		// 

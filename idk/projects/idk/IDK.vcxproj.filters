@@ -869,6 +869,9 @@
     <ClInclude Include="anim\AnimationTypes.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationBoneMask.h">
+      <Filter>anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimationBoneMask.h" />
     <ClInclude Include="anim\Animation.h" />
     <ClInclude Include="anim\AnimationLayer.h" />
     <ClInclude Include="anim\AnimationState.h" />

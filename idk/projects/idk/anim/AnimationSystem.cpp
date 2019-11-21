@@ -220,7 +220,7 @@ namespace idk
 		const float ticks = std::min(state.normalized_time, 1.0f) * anim_data->motion->GetNumTicks();
 
 		// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
-		const anim::AnimatedBone* animated_bone = anim_data->motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
+		const anim::AnimatedBone* animated_bone = anim_data->motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->bone_name);
 		if (animated_bone == nullptr)
 			return result;
 
@@ -320,7 +320,7 @@ namespace idk
 			curr_pose.rotation = quat{};
 
 			// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
-			const anim::AnimatedBone* animated_bone = blend_motion.motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
+			const anim::AnimatedBone* animated_bone = blend_motion.motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->bone_name);
 			if (animated_bone != nullptr)
 			{
 				// Interpolate from the found keyframe to the next keyframe and store the result.
@@ -671,7 +671,7 @@ namespace idk
 				if (!curr_go)
 					continue;
 
-				const auto parent_index = skeleton[i]._parent;
+				const auto parent_index = skeleton[i].parent;
 				if (parent_index >= 0)
 				{
 					const mat4& p_transform = animator.pre_global_transforms[parent_index];
@@ -682,7 +682,7 @@ namespace idk
 					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
 
-				animator.final_bone_transforms[i] = global_inverse * animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+				animator.final_bone_transforms[i] = global_inverse * animator.pre_global_transforms[i] * curr_bone.global_inverse_bind_pose;
 
 			}
 		}
@@ -695,7 +695,7 @@ namespace idk
 
 				if (!curr_go)
 					continue;
-				const auto parent_index = skeleton[i]._parent;
+				const auto parent_index = skeleton[i].parent;
 				if (parent_index >= 0)
 				{
 					// If we have the parent, we push in the parent.global * child.local
@@ -708,7 +708,7 @@ namespace idk
 					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
 				//const auto test = decompose(_pre_global_transforms[i]);
-				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone.global_inverse_bind_pose;
 			}
 		}
 
@@ -825,7 +825,7 @@ namespace idk
 				auto c_bone = c_go->GetComponent<Bone>();
 				if (c_bone)
 				{
-					child_objects[c_bone->_bone_index] = c_go;
+					child_objects[c_bone->bone_index] = c_go;
 				}
 			};
 
@@ -869,24 +869,24 @@ namespace idk
 			auto& curr_bone = bones[i];
 
 			auto obj = scene->CreateGameObject();
-			// auto transform = curr_bone._global_inverse_bind_pose.inverse();
+			// auto transform = curr_bone.global_inverse_bind_pose.inverse();
 
-			// mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
-			obj->Name(curr_bone._name);
-			obj->GetComponent<Transform>()->position = curr_bone._local_bind_pose.position;
-			obj->GetComponent<Transform>()->rotation = curr_bone._local_bind_pose.rotation;
-			obj->GetComponent<Transform>()->scale = curr_bone._local_bind_pose.scale;
+			// mat4 local_bind_pose = curr_bone.local_bind_pose.recompose();
+			obj->Name(curr_bone.name);
+			obj->GetComponent<Transform>()->position = curr_bone.local_bind_pose.position;
+			obj->GetComponent<Transform>()->rotation = curr_bone.local_bind_pose.rotation;
+			obj->GetComponent<Transform>()->scale = curr_bone.local_bind_pose.scale;
 
 			auto c_bone = obj->AddComponent<Bone>();
-			c_bone->_bone_name = curr_bone._name;
-			c_bone->_bone_index = s_cast<int>(i);
+			c_bone->bone_name = curr_bone.name;
+			c_bone->bone_index = s_cast<int>(i);
 
-			if (curr_bone._parent >= 0)
-				obj->GetComponent<Transform>()->SetParent(animator._child_objects[curr_bone._parent], false);
+			if (curr_bone.parent >= 0)
+				obj->GetComponent<Transform>()->SetParent(animator._child_objects[curr_bone.parent], false);
 			else
 				obj->GetComponent<Transform>()->SetParent(animator.GetGameObject(), false);
 
-			animator._bind_pose[i] = curr_bone._local_bind_pose;
+			animator._bind_pose[i] = curr_bone.local_bind_pose;
 			animator._child_objects[i] = obj;
 		}
 
@@ -921,7 +921,7 @@ namespace idk
 			if (!animator._child_objects[i])
 				continue;
 
-			auto local_bind_pose = bones[i]._local_bind_pose;
+			auto local_bind_pose = bones[i].local_bind_pose;
 			auto local_bind_pose_mat = local_bind_pose.recompose();
 
 			animator._child_objects[i]->Transform()->position = local_bind_pose.position;
@@ -929,7 +929,7 @@ namespace idk
 			animator._child_objects[i]->Transform()->scale = local_bind_pose.scale;
 
 			// compute the bone_transform for the bind pose
-			const auto parent_index = animator.skeleton->data()[i]._parent;
+			const auto parent_index = animator.skeleton->data()[i].parent;
 			if (parent_index >= 0)
 			{
 				// If we have the parent, we push in the parent.global * child.local

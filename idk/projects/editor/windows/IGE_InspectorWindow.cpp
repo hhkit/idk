@@ -834,8 +834,8 @@ namespace idk {
 		//Draw All your custom variables here.
 		ImGui::Text("Bone Name: ");
 		ImGui::SameLine();
-		ImGui::Text(c_bone->_bone_name.c_str());
-		ImGui::Text("Bone Index: %d", c_bone->_bone_index);
+		ImGui::Text(c_bone->bone_name.c_str());
+		ImGui::Text("Bone Index: %d", c_bone->bone_index);
 	}
 
 	template<>
