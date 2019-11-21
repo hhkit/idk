@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AnimationBoneMask.h" />
     <ClInclude Include="anim\Animation.h" />
     <ClInclude Include="anim\AnimationLayer.h" />
     <ClInclude Include="anim\AnimationState.h" />
@@ -411,7 +410,7 @@
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="anim\Animator_detail.inl" />
+    <None Include="anim\Animator.inl" />
     <None Include="core\Scheduler.inl" />
     <None Include="core\Core.inl" />
     <None Include="core\GameObject.inl" />

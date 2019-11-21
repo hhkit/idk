@@ -33,6 +33,30 @@ namespace idk
 		bool RenameAnimation(string_view from, string_view to);
 		void RemoveAnimation(string_view name);
 
+		template<typename T>
+		hash_table<string, T>& GetParamTable();
+
+		template<typename T>
+		const hash_table<string, T>& GetParamTable() const;
+
+		template<typename T>
+		T& GetParam(string_view name);
+
+		template<typename T>
+		const T& GetParam(string_view name) const;
+
+		template<typename T>
+		void AddParam(string_view name);
+
+		template<typename ParamType, typename ValueType>
+		bool SetParam(string_view name, ValueType val, bool def_val = false);
+
+		template<typename T>
+		bool RemoveParam(string_view name);
+
+		template<typename T>
+		bool RenameParam(string_view from, string_view to);
+
 		// Editor Functionality
 		void Reset();
 		void ResetToDefault();
@@ -62,25 +86,25 @@ namespace idk
 		void StopAllLayers();
 		
 		// Script Getters
-		string DefaultStateName() const;
-		string CurrentStateName() const;
-		string BlendStateName() const;
-
-		bool IsPlaying() const;
-		bool IsBlending() const;
-		bool HasCurrAnimEnded() const;
-		bool HasState(string_view name) const;
-
 		int GetInt(string_view name) const;
 		float GetFloat(string_view name) const;
 		bool GetBool(string_view name) const;
 		bool GetTrigger(string_view name) const;
 
+		string DefaultStateName() const;
+		string CurrentStateName() const;
+		string BlendStateName() const;
+		bool HasState(string_view name) const;
+
+		bool IsPlaying() const;
+		bool IsBlending() const;
+		bool HasCurrAnimEnded() const;
+
 		// Script Setters
-		bool SetInt(string_view name, int val, bool set = false, bool def_val = false);
-		bool SetFloat(string_view name, float val, bool set = false, bool def_val = false);
-		bool SetBool(string_view name, bool val, bool set = false, bool def_val = false);
-		bool SetTrigger(string_view name, bool val, bool set = false, bool def_val = false);
+		bool SetInt(string_view name, int val);
+		bool SetFloat(string_view name, float val);
+		bool SetBool(string_view name, bool val);
+		bool SetTrigger(string_view name, bool val);
 
 		void ResetTriggers();
 
@@ -95,16 +119,12 @@ namespace idk
 		hash_table<string, size_t> layer_table{};
 		vector<AnimationLayer> layers{};
 
-		// Scripting variables
-		hash_table<string, anim::AnimationParam<int>> int_vars;
-		hash_table<string, anim::AnimationParam<float>> float_vars;
-		hash_table<string, anim::AnimationParam<bool>> bool_vars;
-		hash_table<string, anim::AnimationParam<bool>> trigger_vars;
+		// Scripting variables (Ideally should type erase them)
+		hash_table<string, anim::IntParam>		int_vars;
+		hash_table<string, anim::FloatParam>	float_vars;
+		hash_table<string, anim::BoolParam>		bool_vars;
+		hash_table<string, anim::TriggerParam>	trigger_vars;
 		
-		// Precomputation step
-		vector<mat4> pre_global_transforms{ mat4{} };
-		// This is what we send to the graphics system.
-		vector<mat4> final_bone_transforms{ mat4{} };
 		bool preview_playback = false;
 	private:
 		friend class AnimationSystem;
@@ -113,6 +133,13 @@ namespace idk
 		vector<Handle<GameObject>> _child_objects;
 		vector<matrix_decomposition<real>> _bind_pose;
 		
-		inline static AnimationState null_state{};
+		// Precomputation step
+		vector<mat4> pre_global_transforms{ mat4{} };
+		// This is what we send to the graphics system.
+		vector<mat4> final_bone_transforms{ mat4{} };
+
+		
 	};
 }
+
+#include "Animator.inl"

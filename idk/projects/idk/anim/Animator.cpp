@@ -48,10 +48,10 @@ namespace idk
 
 	void Animator::AddLayer()
 	{
-		string name = "New Layer ";
-		string append = "0";
+		string name = "New Layer";
+		string append = "";
 		// Check if name exists
-		int count = 1;
+		int count = 0;
 		while (layer_table.find(name + append) != layer_table.end())
 		{
 			// Generate a unique name
@@ -187,6 +187,8 @@ namespace idk
 			{
 				layers[i].Play(layers[i].curr_state.index);
 			}
+
+			layers[0].weight = 1.0f;
 		}
 		else
 		{
@@ -354,187 +356,42 @@ namespace idk
 
 	int Animator::GetInt(string_view name) const
 	{
-		auto res = int_vars.find(name.data());
-		if (res != int_vars.end())
-			return res->second.val;
-
-		return 0;
+		return GetParam<anim::IntParam>(name).val;
 	}
 
 	float Animator::GetFloat(string_view name) const
 	{
-		auto res = float_vars.find(name.data());
-		if (res != float_vars.end())
-			return res->second.val;
-
-		return 0.0f;
+		return GetParam<anim::FloatParam>(name).val;
 	}
 
 	bool Animator::GetBool(string_view name) const
 	{
-		auto res = bool_vars.find(name.data());
-		if (res != bool_vars.end())
-			return res->second.val;
-
-		return false;
+		return GetParam<anim::BoolParam>(name).val;
 	}
 
 	bool Animator::GetTrigger(string_view name) const
 	{
-		auto res = trigger_vars.find(name.data());
-		if (res != trigger_vars.end())
-			return res->second.val;
-
-		return false;
+		return GetParam<anim::TriggerParam>(name).val;
 	}
 
-	bool Animator::SetInt(string_view name, int val, bool set, bool def_val)
+	bool Animator::SetInt(string_view name, int val)
 	{
-		auto res = int_vars.find(name.data());
-		bool found = false;
-
-		if (set)
-		{
-			anim::AnimationParam<int> param;
-			param.name = name.data();
-			int count = -1;
-			while (res != int_vars.end())
-			{
-				++count;
-				res = int_vars.find(param.name + std::to_string(count));
-			}
-
-			if (count >= 0)
-				param.name += std::to_string(count);
-
-			param.def_val = val;
-			param.val = val;
-
-			int_vars.emplace(param.name, param);
-		}
-		else if (res != int_vars.end())
-		{
-			if (def_val)
-				res->second.def_val = val;
-
-			res->second.val = val;
-			found = true;
-		}
-
-		return found;
+		return SetParam<anim::IntParam>(name, val);
 	}
 
-	bool Animator::SetFloat(string_view name, float val, bool set, bool def_val)
+	bool Animator::SetFloat(string_view name, float val)
 	{
-		auto res = float_vars.find(name.data());
-		bool found = false;
-
-		if (set)
-		{
-			anim::AnimationParam<float> param;
-			param.name = name.data();
-
-			int count = -1;
-			while (res != float_vars.end())
-			{
-				++count;
-				res = float_vars.find(param.name + std::to_string(count));
-			}
-
-			if (count >= 0)
-				param.name += std::to_string(count);
-			
-			param.def_val = val;
-			param.val = val;
-
-			float_vars.emplace(param.name, param);
-		}
-		else if (res != float_vars.end())
-		{
-			if(def_val)
-				res->second.def_val = val;
-
-			res->second.val = val;
-			found = true;
-		}
-
-		return found;
+		return SetParam<anim::FloatParam>(name, val);
 	}
 
-	bool Animator::SetBool(string_view name, bool val, bool set, bool def_val)
+	bool Animator::SetBool(string_view name, bool val)
 	{
-		auto res = bool_vars.find(name.data());
-		bool found = false;
-
-		if (set)
-		{
-			anim::AnimationParam<bool> param;
-			param.name = name.data();
-
-			int count = -1;
-			while (res != bool_vars.end())
-			{
-				++count;
-				res = bool_vars.find(param.name + std::to_string(count));
-			}
-
-			if (count >= 0)
-				param.name += std::to_string(count);
-
-			param.def_val = val;
-			param.val = val;
-
-			bool_vars.emplace(param.name, param);
-			found = true;
-		}
-		else if (res != bool_vars.end())
-		{
-			if (def_val)
-				res->second.def_val = val;
-
-			res->second.val = val;
-			found = true;
-		} 
-		
-		return found;
+		return SetParam<anim::BoolParam>(name, val);
 	}
 
-	bool Animator::SetTrigger(string_view name, bool val, bool set, bool def_val)
+	bool Animator::SetTrigger(string_view name, bool val)
 	{
-		auto res = trigger_vars.find(name.data());
-		bool found = false;
-
-		if (set)
-		{
-			anim::AnimationParam<bool> param;
-			param.name = name.data();
-
-			int count = -1;
-			while (res != trigger_vars.end())
-			{
-				++count;
-				res = trigger_vars.find(param.name + std::to_string(count));
-			}
-
-			if (count >= 0)
-				param.name += std::to_string(count);
-
-			param.def_val = val;
-			param.val = val;
-
-			trigger_vars.emplace(param.name, param);
-			found = true;
-		}
-		else if (res != trigger_vars.end())
-		{
-			if (def_val)
-				res->second.def_val = val;
-
-			res->second.val = val;
-			found = true;
-		}
-
-		return found;
+		return SetParam<anim::TriggerParam>(name, val);
 	}
 
 	bool Animator::HasState(string_view name) const

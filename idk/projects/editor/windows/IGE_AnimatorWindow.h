@@ -32,6 +32,10 @@ namespace idk {
 		size_t _selected_layer = 0;
 		size_t _selected_state = 0;
 		size_t _selected_transition = 0;
+
+		anim::AnimDataType _selected_param_type = anim::AnimDataType::NONE;
+		string _selected_param;
+
 		bool _show_transition = false;
 		
 		// Colors for all the widgets
@@ -53,7 +57,9 @@ namespace idk {
 		void drawLayersTab();
 		void drawLayersContextMenu();
 		void drawParamsTab();
+		void drawParamsContextMenu();
 		void drawStatesTab();
+		void drawStatesContextMenu();
 		void drawBoneMaskTab();
 
 		bool canvasContextMenu();

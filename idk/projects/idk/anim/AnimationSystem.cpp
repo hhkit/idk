@@ -142,7 +142,7 @@ namespace idk
 				// Pass this child through all the layers to get the final transformation of the bone
 				// Find the last fully weighted bone layer
 				size_t start_layer = 0;
-				for (size_t k = 0; k < animator.layers.size(); ++k)
+				for (size_t k = 1; k < animator.layers.size(); ++k)
 				{
 					const auto& layer = animator.layers[k];
 					if (layer.bone_mask[child_index] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
@@ -450,26 +450,26 @@ namespace idk
 					{
 					case anim::AnimDataType::INT:
 					{
-						int param = animator.GetInt(cond.param_name);
-						transit &= anim::condition_ops_int[cond.op_index](param, cond.val_i);
+						auto& param = animator.GetParam<anim::IntParam>(cond.param_name);
+						transit &= param.valid ? anim::condition_ops_int[cond.op_index](param.val, cond.val_i) : false;
 						break;
 					}
 					case anim::AnimDataType::FLOAT:
 					{
-						float param = animator.GetFloat(cond.param_name);
-						transit &= anim::condition_ops_float[cond.op_index](param, cond.val_f);
+						auto& param = animator.GetParam<anim::FloatParam>(cond.param_name);
+						transit &= param.valid ? anim::condition_ops_float[cond.op_index](param.val, cond.val_f) : false;
 						break;
 					}
 					case anim::AnimDataType::BOOL:
 					{
-						bool param = animator.GetBool(cond.param_name);
-						transit &= anim::condition_ops_bool[cond.op_index](param, cond.val_t);
+						auto& param = animator.GetParam<anim::BoolParam>(cond.param_name);
+						transit &= param.valid ? anim::condition_ops_bool[cond.op_index](param.val, cond.val_b) : false;
 						break;
 					}
 					case anim::AnimDataType::TRIGGER:
 					{
-						bool param = animator.GetBool(cond.param_name);
-						transit &= anim::condition_ops_bool[cond.op_index](param, cond.val_t);
+						auto& param = animator.GetParam<anim::TriggerParam>(cond.param_name);
+						transit &= param.valid ? anim::condition_ops_bool[cond.op_index](param.val, cond.val_t) : false;
 						break;
 					}
 					case anim::AnimDataType::NONE:
