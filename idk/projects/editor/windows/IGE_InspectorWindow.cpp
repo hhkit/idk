@@ -622,12 +622,10 @@ namespace idk {
             ImGui::Text("Y");
             ImGui::SetCursorPosX(region_width * 0.35f);
             const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
-            const auto& parent_rect = c_rt->GetGameObject()->Parent()->GetComponent<RectTransform>()->_local_rect;
-            const float anchor_ref_y = parent_rect.position.y + c_rt->anchor_min.y * parent_rect.size.y;
-            float pos_y = pivot_y - anchor_ref_y;
+            float pos_y = pivot_y;
             if (ImGui::DragFloat("##pos_y", &pos_y))
             {
-                float dy = pos_y - (pivot_y - anchor_ref_y);
+                float dy = pos_y - pivot_y;
                 c_rt->offset_min.y += dy;
                 c_rt->offset_max.y += dy;
             }
@@ -652,12 +650,10 @@ namespace idk {
             ImGui::SameLine();
             
             const float pivot_x = c_rt->_local_rect.position.x + c_rt->pivot.x * c_rt->_local_rect.size.x;
-            const auto& parent_rect = c_rt->GetGameObject()->Parent()->GetComponent<RectTransform>()->_local_rect;
-            const float anchor_ref_x = parent_rect.position.x + c_rt->anchor_min.x * parent_rect.size.x;
-            float pos_x = pivot_x - anchor_ref_x;
+            float pos_x = pivot_x;
             if (ImGui::DragFloat("##pos_x", &pos_x))
             {
-                float dx = pos_x - (pivot_x - anchor_ref_x);
+                float dx = pos_x - pivot_x;
                 c_rt->offset_min.x += dx;
                 c_rt->offset_max.x += dx;
             }
@@ -688,11 +684,8 @@ namespace idk {
             if (ImGui::DragFloat("##height", &height))
             {
                 const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
-                const auto& parent_rect = c_rt->GetGameObject()->Parent()->GetComponent<RectTransform>()->_local_rect;
-                const float anchor_ref_y = parent_rect.position.y + c_rt->anchor_min.y * parent_rect.size.y;
-                const float pos_y = pivot_y - anchor_ref_y;
-                c_rt->offset_min.y = pos_y - c_rt->pivot.y * height;
-                c_rt->offset_max.y = pos_y + (1.0f - c_rt->pivot.y) * height;
+                c_rt->offset_min.y = pivot_y - c_rt->pivot.y * height;
+                c_rt->offset_max.y = pivot_y + (1.0f - c_rt->pivot.y) * height;
             }
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
             ImGui::Text("H");
