@@ -202,6 +202,18 @@ namespace idk
 							just_rename = true;
 						}
 					}
+
+					if (layer.default_index == 0)
+					{
+						ImGui::SameLine();
+						ImGui::TextColored(ImVec4{ 1,0,0,1 }, " (!)");
+						if (ImGui::IsItemHovered() && ImGui::IsWindowHovered())
+						{
+							ImGui::BeginTooltip();
+							ImGui::Text("No default state selected!");
+							ImGui::EndTooltip();
+						}
+					}
 					
 					float align_edit = ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("...").x - ImGui::GetStyle().FramePadding.x * 2;
 					align_edit = std::max(align_edit, 0.0f);
@@ -242,7 +254,7 @@ namespace idk
 					//ImGui::PopItemWidth();
 
 					ImGui::NewLine();
-					const ImVec2 prog_size = ImVec2(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().FramePadding.x * 2, 3);
+					const ImVec2 prog_size = ImVec2(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().FramePadding.x, 3);
 					if (layer.IsPlaying())
 						ImGui::ProgressBar(layer.weight, ImVec4{ 0.5, 0.5, 0.5, 1.0 }, prog_size, nullptr);
 					else
@@ -324,7 +336,7 @@ namespace idk
 			auto& curr_weight = curr_layer.IsPlaying() ? curr_layer.weight : curr_layer.default_weight;
 			ImGui::SameLine(offset);
 			ImGui::PushItemWidth(item_width);
-			ImGui::DragFloat("##weight", &curr_weight, 0.01f, 0.0f, 1.0f, "%.2f");
+			ImGui::SliderFloat("##weight", &curr_weight, 0.0f, 1.0f, "%.2f");
 			ImGui::PopItemWidth();
 
 			ImGui::Text("Blending");
@@ -464,7 +476,6 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
 					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_PressedOnClick, selectable_size))
 					{
-						LOG("SELECTABLE");
 						_show_transition = true;
 						_display_mode = AnimatorDisplayMode::State;
 							
@@ -473,9 +484,7 @@ namespace idk
 					}
 					
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-					{
-						LOG("DOUBLE CLICK");
-						
+					{	
 						_show_transition = false;
 						_display_mode = AnimatorDisplayMode::Transition;
 					}

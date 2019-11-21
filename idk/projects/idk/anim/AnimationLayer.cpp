@@ -199,6 +199,12 @@ namespace idk
 		state.state_data = variant<BasicAnimationState, BlendTree>{ BasicAnimationState{ anim_rsc } };
 		anim_state_table.emplace(anim_name, anim_states.size());
 		anim_states.emplace_back(state);
+
+		if (anim_state_table.size() == 1)
+		{
+			default_index = anim_states.size() - 1;
+			curr_state.index = default_index;
+		}
 	}
 
 	bool AnimationLayer::RenameAnimation(string_view from, string_view to)
