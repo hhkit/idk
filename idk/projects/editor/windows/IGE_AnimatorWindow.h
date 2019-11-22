@@ -49,6 +49,7 @@ namespace idk {
 		size_t _state_selectable_num_items;
 
 		float align_right(float width_avail, float size);
+		void arrow();
 
 		void drawLeftCol();
 		void drawCanvas();

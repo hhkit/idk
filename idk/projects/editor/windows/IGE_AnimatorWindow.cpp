@@ -95,6 +95,12 @@ namespace idk
 	{
 	}
 
+	void IGE_AnimatorWindow::arrow()
+	{
+		const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x, ImGui::GetCurrentWindowRead()->DC.CursorPos.y + ImGui::GetFontSize() * 0.3f };
+		ImGui::RenderArrow(arrow_pos, ImGuiDir_Right, 0.7f);
+	}
+
 	void IGE_AnimatorWindow::drawLeftCol()
 	{
 		// ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
@@ -376,8 +382,13 @@ namespace idk
 			if (_curr_animator_component)
 			{
 				static char buf[50];
+				bool rename_now = false;
+				string rename_to = "";
+
 				static bool just_rename = false;
 				static string rename_param = "";
+				
+				
 				static const ImVec2 selectable_offset{ 0, ImGui::GetStyle().FramePadding.y };
 
 				if (ImGui::Button("Add"))
@@ -462,17 +473,17 @@ namespace idk
 					ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() * 0.5f);
 					if (rename_param == param.name)
 					{
-						if (ImGui::InputText("##rename_param", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
+						const bool renamed = ImGui::InputText("##rename_param", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue);
+						if (renamed)
 						{
-							_curr_animator_component->RenameParam<T>(param.name, buf);
-							rename_param.clear();
+							rename_to = buf;
 						}
 						if (just_rename)
 						{
 							ImGui::SetKeyboardFocusHere(-1);
 							just_rename = false;
 						}
-						else if (ImGui::IsItemDeactivated())
+						else if (ImGui::IsItemDeactivated() && !renamed)
 							rename_param.clear();
 					}
 					else
@@ -540,6 +551,14 @@ namespace idk
 							_selected_param = param.second.name;
 						}
 					}
+					
+					// Rename outside the loop
+					if (!rename_to.empty())
+					{
+						_curr_animator_component->RenameParam<anim::IntParam>(rename_param, rename_to);
+						rename_param.clear();
+						rename_to.clear();
+					}
 				}
 
 				ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Once);
@@ -556,6 +575,14 @@ namespace idk
 							_selected_param_type = anim::AnimDataType::FLOAT;
 							_selected_param = param.second.name;
 						}
+					}
+
+					// Rename outside the loop
+					if (!rename_to.empty())
+					{
+						_curr_animator_component->RenameParam<anim::FloatParam>(rename_param, rename_to);
+						rename_param.clear();
+						rename_to.clear();
 					}
 				}
 
@@ -574,6 +601,14 @@ namespace idk
 							_selected_param = param.second.name;
 						}
 					}
+
+					// Rename outside the loop
+					if (!rename_to.empty())
+					{
+						_curr_animator_component->RenameParam<anim::BoolParam>(rename_param, rename_to);
+						rename_param.clear();
+						rename_to.clear();
+					}
 				}
 				
 				ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Once);
@@ -590,6 +625,14 @@ namespace idk
 							_selected_param_type = anim::AnimDataType::TRIGGER;
 							_selected_param = param.second.name;
 						}
+					}
+
+					// Rename outside the loop
+					if (!rename_to.empty())
+					{
+						_curr_animator_component->RenameParam<anim::TriggerParam>(rename_param, rename_to);
+						rename_param.clear();
+						rename_to.clear();
 					}
 				}
 				ImGui::Separator(false);
@@ -692,8 +735,7 @@ namespace idk
 					// Display transition name
 					ImGui::Text(transition_from.data());
 					ImGui::SameLine();
-					const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x, ImGui::GetCurrentWindowRead()->DC.CursorPos.y - ImGui::GetStyle().FramePadding.y };
-					ImGui::RenderArrow(arrow_pos, ImGuiDir_Right);
+					arrow();
 					ImGui::SameLine(0.0f, ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2);
 					ImGui::Text(transition_to.data());
 
@@ -984,8 +1026,7 @@ namespace idk
 					const float align_text = ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize(transition_to.data()).x - ImGui::GetStyle().FramePadding.x;
 
 					ImGui::SameLine(align_arrow);
-					const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x, ImGui::GetCurrentWindowRead()->DC.CursorPos.y - ImGui::GetStyle().FramePadding.y };
-					ImGui::RenderArrow(arrow_pos, ImGuiDir_Right);
+					arrow();
 
 					ImGui::SameLine(align_text);
 					ImGui::Text(transition_to.data());
@@ -1047,8 +1088,7 @@ namespace idk
 			_selected_state = curr_transition.transition_from_index;
 		}
 		ImGui::SameLine();
-		const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x, ImGui::GetCurrentWindowRead()->DC.CursorPos.y - ImGui::GetStyle().FramePadding.y };
-		ImGui::RenderArrow(arrow_pos, ImGuiDir_Right);
+		arrow();
 		ImGui::SameLine(0.0f, ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 3);
 		if (transition_to_state.valid)
 		{
