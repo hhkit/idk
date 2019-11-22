@@ -42,8 +42,9 @@ namespace idk {
         vec2 draw_rect_offset;
         vec2 draw_rect_size;
 
-		bool is_controlling_WASDcam = false;
-		bool is_controlling_Pancam = false;
+		bool is_controlling_WASDcam   = false;
+		bool is_controlling_Pancam	  = false;
+		bool is_controlling_ALTscroll = false;
 
 		const float yaw_rotation_multiplier		= 0.1f; //When you hold right click and move mouse sideways
 		const float pitch_rotation_multiplier	= 0.05f; //When you hold right click and move mouse up/downwards
@@ -74,8 +75,9 @@ namespace idk {
 
 
 		void UpdateWASDMouseControl();
-		void UpdatePanMouseControl();
-		void UpdateScrollMouseControl();
+		void UpdatePanMouseControl(); //MiddleMouse
+		void UpdateScrollMouseControl(); //Scroll
+		void UpdateScrollMouseControl2(); //Alt + RightMouse
 
 		void UpdateGizmoControl();
 
