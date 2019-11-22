@@ -626,7 +626,7 @@ namespace idk::ogl
 			{
 				if (elem.coords.size())
 				{
-					auto& atlas = elem.fontAtlas.as<OpenGLFontAtlas>();
+					auto& atlas = elem.atlas.as<OpenGLFontAtlas>();
 
 					glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
 					/* Use the texture containing the atlas */
@@ -646,7 +646,7 @@ namespace idk::ogl
 					glEnableVertexAttribArray(0);
 					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0);
 					//GL_CHECK();
-					glDrawArrays(GL_TRIANGLES, 0, elem.n_size);
+					glDrawArrays(GL_TRIANGLES, 0, elem.coords.size());
 
 					glDisableVertexAttribArray(0);
 

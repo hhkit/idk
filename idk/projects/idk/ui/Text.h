@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <ui/UISystem.h>
-#include <ui/TextAnchor.h>
+#include <gfx/TextAnchor.h>
 #include <gfx/FontAtlas.h>
 
 namespace idk

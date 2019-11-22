@@ -500,8 +500,10 @@ namespace idk
 			auto& render_data = result.font_render_data.emplace_back();
 			//if (!f.textureAtlas)
 				//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
-			f.RenderText();
-			render_data = f.fontData;
+            render_data.coords = FontData::Generate(f.text, f.textureAtlas, f.fontSize, f.tracking, f.lineSpacing, TextAlignment::Left, 0).coords;
+            render_data.color = f.color;
+            render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+            render_data.atlas = f.textureAtlas;
 		}
 
         auto& ui = Core::GetSystem<UISystem>();

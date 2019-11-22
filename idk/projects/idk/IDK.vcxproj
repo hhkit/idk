@@ -56,6 +56,7 @@
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
+    <ClInclude Include="gfx\TextAlignment.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
@@ -242,7 +243,7 @@
     <ClInclude Include="ui\Image.h" />
     <ClInclude Include="ui\RectTransform.h" />
     <ClInclude Include="ui\Text.h" />
-    <ClInclude Include="ui\TextAnchor.h" />
+    <ClInclude Include="gfx\TextAnchor.h" />
     <ClInclude Include="ui\UISystem.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\easing.h" />
@@ -299,6 +300,7 @@
     <ClCompile Include="gfx\Font.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />
     <ClCompile Include="gfx\FontAtlasFactory.cpp" />
+    <ClCompile Include="gfx\FontData.cpp" />
     <ClCompile Include="gfx\Framebuffer.cpp" />
     <ClCompile Include="gfx\FramebufferFactory.cpp" />
     <ClCompile Include="gfx\Light.cpp" />

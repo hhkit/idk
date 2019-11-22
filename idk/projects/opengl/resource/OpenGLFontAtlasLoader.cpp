@@ -55,11 +55,9 @@ namespace idk {
 
 			auto tm = font_handle->GetMeta();
 
-			tm.font_name = path_to_resource.GetFileName();
-
 			font_handle->SetMeta(tm);
 
-			if (FT_Set_Pixel_Sizes(face, 0, tm.fontSize))
+			if (FT_Set_Pixel_Sizes(face, 0, tm.font_size))
 			{
 				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
@@ -188,11 +186,9 @@ namespace idk {
 
 			auto tm = font_handle->GetMeta();
 
-			tm.font_name = path_to_resource.GetFileName();
-
 			font_handle->SetMeta(tm);
 
-			if (FT_Set_Pixel_Sizes(face, 0, tm.fontSize))
+			if (FT_Set_Pixel_Sizes(face, 0, tm.font_size))
 			{
 				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");

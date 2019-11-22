@@ -8,13 +8,12 @@ namespace idk {
 
 	struct FontAtlasMeta
 	{
-		string font_name = {};
-		UVMode      uv_mode = UVMode::ClampToBorder;
+		UVMode uv_mode = UVMode::ClampToBorder;
 		ColorFormat internal_format = ColorFormat::R_8;
 		InputChannels format = InputChannels::RED;   //Remove, loader determines this
-		FilterMode  filter_mode = FilterMode::Linear;
-		bool is_srgb{ true };
-		int  fontSize = 48;
+		FilterMode filter_mode = FilterMode::Linear;
+        bool is_srgb = true;
+		unsigned font_size = 48;
 	};
 
 	class FontAtlas
@@ -22,32 +21,20 @@ namespace idk {
 		, public MetaTag<FontAtlasMeta>
 	{
 	public:
-
 		static constexpr RscHandle<FontAtlas> defaults[FontDefault::count] =
 		{
 			{ Guid{0x382A438E, 0xADC8, 0x4283, 0xA8D0E339F7D34159} }, // SourceSansPro
 		};
-		struct character_info {
-			
-			//advance
+
+		struct character_info
+        {
 			vec2 advance;
-
-			//Size of glyph	
-			//x = width, y = rows
-			vec2 glyph_size;
-
-			//Bearing		
-			//x = left, y = top
-			vec2 bearing;
-
+			vec2 glyph_size; // w, h
+			vec2 bearing; // left, top
 			vec2 tex_offset; // x offset of glyph in texture coordinates
 		} c[128];
 
-		FontAtlas() = default;
-		virtual void* ID() const { return 0; };
-
-		//Dtor
-		virtual ~FontAtlas() = default;
+        PathHandle reload_path;
 
 		// accessors
 		float AspectRatio() const;
@@ -56,11 +43,10 @@ namespace idk {
 		// modifiers
 		virtual void Size(ivec2 newsize);
 
-		PathHandle reload_path{};
+        virtual void* ID() const { return 0; };
 
 	protected:
-		//Size for each texture in the cubemap
 		ivec2 _size{};
-		void OnMetaUpdate(const FontAtlasMeta&) {};
+		void OnMetaUpdate(const FontAtlasMeta&) override {};
 	};
 }

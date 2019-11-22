@@ -893,9 +893,10 @@
     <ClInclude Include="ui\Text.h">
       <Filter>ui</Filter>
     </ClInclude>
-    <ClInclude Include="ui\TextAnchor.h">
-      <Filter>ui</Filter>
+    <ClInclude Include="gfx\TextAnchor.h">
+      <Filter>gfx\Font</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\TextAlignment.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1314,6 +1315,7 @@
     <ClCompile Include="prefab\PrefabInstance.cpp">
       <Filter>prefab</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\FontData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

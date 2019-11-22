@@ -1069,7 +1069,6 @@ namespace idk {
             _curr_property_stack.push_back("fontSize"); display.GroupBegin(); display.Label("Font Size"); display.ItemBegin(true);
             if (ImGui::DragInt("", &c_font->fontSize))
             {
-                c_font->UpdateFontSize();
                 changed = true;
             }
             display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
@@ -1083,7 +1082,7 @@ namespace idk {
             display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 
             _curr_property_stack.push_back("color"); display.GroupBegin(); display.Label("Color"); display.ItemBegin(true);
-            changed = ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
+            changed = ImGui::ColorEdit4("##fontColor", &c_font->color[0]);
             display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 		}
 	}

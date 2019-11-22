@@ -16,28 +16,13 @@ namespace idk {
 		real tracking = 1.f;
 		real spacing = 10.f;
 		real padding = 1.f;
-		color colour = {1.f,1.f,1.f,1.f};
+		color color = {1.f,1.f,1.f,1.f};
 		int  fontSize = 48;
 		RscHandle<FontAtlas> textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
 
 		string text;
 
-		FontData fontData;
-
+    private:
 		virtual void* ID() const { return 0; };
-
-		//Dtor
-		virtual ~Font() = default;
-
-		void RenderText();
-
-		//A useless function
-		void UpdateFontSize();
-
-		void SetText(const string& t) { text = t; }
-		string GetText() const { return text; }
-
-		void SetColor(const color& c) { colour = c; }
-		color GetColor() const { return colour; }
 	};
 }
