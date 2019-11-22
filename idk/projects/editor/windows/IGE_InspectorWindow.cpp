@@ -973,7 +973,7 @@ namespace idk {
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
 	{
 		//Just a check to prevent vulkan from crashing because vulkan got no font yet
-		if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
+		//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
 		{
 			const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
 			const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
