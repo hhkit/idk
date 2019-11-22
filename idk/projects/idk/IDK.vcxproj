@@ -241,6 +241,8 @@
     <ClInclude Include="ui\Canvas.h" />
     <ClInclude Include="ui\Image.h" />
     <ClInclude Include="ui\RectTransform.h" />
+    <ClInclude Include="ui\Text.h" />
+    <ClInclude Include="ui\TextAnchor.h" />
     <ClInclude Include="ui\UISystem.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\easing.h" />
