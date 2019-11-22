@@ -136,7 +136,6 @@ namespace idk
     {
         vector<FontPoint> coords;
         RscHandle<FontAtlas> atlas;
-        int n_size;
     };
     struct UIRenderObject
     {

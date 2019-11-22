@@ -8,6 +8,7 @@
 #include <particle/ParticleSystem.h>
 #include <gfx/Font.h>
 #include <ui/Image.h>
+#include <ui/Text.h>
 #include <ui/RectTransform.h>
 #include <ui/Canvas.h>
 #include <common/Transform.h>
@@ -281,6 +282,7 @@ namespace idk
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
         span<ParticleSystem> ps,
 		span<Font> fonts,
+		span<Text> texts,
         span<Image> images,
 		span<const class Transform>, 
 		span<const Camera> cameras, 
@@ -519,6 +521,23 @@ namespace idk
             render_data.material = im.material;
             render_data.color = im.tint;
             render_data.data = ImageData{ im.texture };
+            render_data.depth = go->Transform()->Depth();
+        }
+        for (auto& text : texts)
+        {
+            const auto& go = text.GetGameObject();
+            const auto& rt = *go->GetComponent<RectTransform>();
+
+            auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+
+            render_data.transform = rt._matrix *
+                mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+            render_data.material = text.material;
+            render_data.color = text.color;
+            render_data.data = TextData{
+                FontData::Generate(text.text, text.font,
+                    text.font_size, text.letter_spacing, text.line_spacing, TextAlignment::Left, 0).coords,
+                text.font };
             render_data.depth = go->Transform()->Depth();
         }
 

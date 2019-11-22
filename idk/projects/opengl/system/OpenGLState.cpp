@@ -707,9 +707,6 @@ namespace idk::ogl
                 fsq->DrawInstanced(elem.particles.size());
             }
 
-			glDisable(GL_BLEND);
-
-
 		} // for each culled camera
 
 		glBindVertexArray(0);
@@ -744,6 +741,40 @@ namespace idk::ogl
                                 { vtx::Attrib::UV, 1 },
                             } }
                         );
+                    }
+                    else
+                    {
+                        if (data.coords.size())
+                        {
+                            pipeline.PushProgram(elem.material->material->_shader_program);
+
+                            auto& atlas = data.atlas.as<OpenGLFontAtlas>();
+
+                            glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
+                            /* Use the texture containing the atlas */
+                            atlas.BindToUnit(0);
+                            pipeline.SetUniform("tex", 0);
+
+                            pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+                            pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+                            GL_CHECK();
+
+                            //pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+
+                            /* Draw all the character on the screen in one go */
+
+                            glBufferData(GL_ARRAY_BUFFER, data.coords.size() * sizeof(FontPoint), std::data(data.coords), GL_DYNAMIC_DRAW);
+                            //GL_CHECK();
+                            glEnableVertexAttribArray(0);
+                            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0);
+                            //GL_CHECK();
+                            glDrawArrays(GL_TRIANGLES, 0, data.coords.size());
+
+                            glDisableVertexAttribArray(0);
+
+                            glBindBuffer(GL_ARRAY_BUFFER, 0);
+                        }
+                        GL_CHECK();
                     }
                 }, elem.data);
             }

@@ -89,6 +89,7 @@ namespace idk
 			span<SkinnedMeshRenderer> skinned_mesh_renderers,
             span<class ParticleSystem>,
 			span<class Font>,
+			span<class Text>,
             span<class Image>,
 			span<const class Transform>, 
 			span<const Camera> camera, 

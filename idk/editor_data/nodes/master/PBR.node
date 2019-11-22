@@ -1,7 +1,8 @@
-vec3,vec3,float,float,float->
-Albedo,Normal,Metallic,Roughness,Ambient Occlusion
+vec3,vec3,float,float,float,vec3->
+Albedo,Normal,Metallic,Roughness,Ambient Occlusion,Emissive
 albedo    = {0};
 normal    = {1};
 metallic  = {2};
 roughness = {3};
 ambient_o = {4};
+emissive  = {5};
