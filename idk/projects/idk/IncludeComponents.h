@@ -17,6 +17,7 @@
 #include <ui/Canvas.h>
 #include <ui/RectTransform.h>
 #include <ui/Image.h>
+#include <ui/Text.h>
 
 #include <particle/ParticleSystem.h>
 

@@ -890,6 +890,12 @@
     <ClInclude Include="meta\stl_hack.h">
       <Filter>meta</Filter>
     </ClInclude>
+    <ClInclude Include="ui\Text.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\TextAnchor.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1304,6 +1310,9 @@
     </ClCompile>
     <ClCompile Include="ui\UISystem.cpp">
       <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabInstance.cpp">
+      <Filter>prefab</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

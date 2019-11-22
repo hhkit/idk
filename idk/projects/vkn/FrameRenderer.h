@@ -13,6 +13,8 @@
 #include <vkn/RenderUtil.h>
 #include <vkn/PipelineThingy.h>
 
+#include <vkn/CubemapRenderer.h>
+
 #include <vkn/GraphicsState.h>
 
 namespace idk

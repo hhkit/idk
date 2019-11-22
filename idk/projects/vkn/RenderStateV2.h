@@ -4,6 +4,7 @@
 #include <vkn/DescriptorsManager.h>
 #include <vkn/utils/PresentationSignals.h>
 #include <vkn/RenderUtil.h>
+#include <vkn/CubemapRenderer.h>
 #include <vkn/DeferredPass.h>
 #include <meta/stl_hack.h>
 

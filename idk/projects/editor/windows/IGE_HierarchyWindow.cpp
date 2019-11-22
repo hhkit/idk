@@ -101,6 +101,14 @@ namespace idk {
 
 			ImGui::EndPopup();
 		}
+		if (ImGui::Button("...##AdditionalStuff")) {
+			ImGui::OpenPopup("OpenAdditionalStuff");
+
+		}
+		if (ImGui::BeginPopup("OpenAdditionalStuff")) {
+			ImGui::Checkbox("Show Editor Objects", &show_editor_objects);
+			ImGui::EndPopup();
+		}
 
 
 		ImGui::SameLine();
@@ -121,13 +129,13 @@ namespace idk {
 
 		ImGui::EndMenuBar();
 
-        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
+        //ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
-		ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
+		//ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
 		
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();
