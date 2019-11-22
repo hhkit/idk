@@ -554,15 +554,8 @@ namespace idk {
 			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
 				int execute_counter = 0;
 				//Move the gizmo away before deleting
-				CameraControls&		main_camera = editor._interface->Inputs()->main_camera;
-				Handle<Camera>		currCamera = main_camera.current_camera;
-				Handle<Transform>	tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-				const auto			view_mtx = currCamera->ViewMatrix();
-				const float*		viewMatrix = view_mtx.data();
-				const auto			pers_mtx = currCamera->ProjectionMatrix();
-				const float*		projectionMatrix = pers_mtx.data();
-				float				gizmo_matrix[16]{0};
-				ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, gizmo_matrix, NULL, NULL);
+				float				fake_matrix[16]{ 0 }; 
+				ImGuizmo::Manipulate(fake_matrix, fake_matrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, fake_matrix, NULL, NULL);
 
 
 
