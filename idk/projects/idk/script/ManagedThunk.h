@@ -35,7 +35,7 @@ namespace idk::mono
 			auto method = std::get<1>(idk->GetMethod("PrintException", 1));
 			void* args[] = { exc, 0 };
 			mono_runtime_invoke(method, nullptr, args, nullptr);
-			mono_print_unhandled_exception(exc);
+			//mono_print_unhandled_exception(exc);
 			return Ret{};
 		}
 		return retval;

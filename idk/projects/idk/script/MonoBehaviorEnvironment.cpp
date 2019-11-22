@@ -113,6 +113,8 @@ namespace idk::mono
 						LOG_TO(LogPool::MONO, string{ "Found function " } +string{ fn_name });
 				};
 
+				//type.CacheMessages();
+				
 				find_method(type, "Clone");
 				find_method(type, "Awake");
 				find_method(type, "Start");
@@ -124,8 +126,9 @@ namespace idk::mono
 				find_method(type, "OnCollisionStay", 1);
 				find_method(type, "OnCollisionExit", 1);
 				find_method(type, "Update");
+				find_method(type, "PausedUpdate");
 				find_method(type, "UpdateCoroutines");
-
+				
 
 				//if (!Core::GetSystem<ScriptSystem>().Environment().IsAbstract(mono_class_get_type(type.Raw())))
 					mono_behaviors.emplace(class_name, &type);

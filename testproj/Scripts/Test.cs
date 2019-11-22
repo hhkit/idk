@@ -72,7 +72,7 @@ namespace TestAndSeek
             {
                 Debug.Log("minst:" + minst);
                 Debug.Log("rend: " + gameObject.GetComponentInChildren<Renderer>());
-                //gameObject.GetComponent<Renderer>().materialInstance = minst;
+                gameObject.GetComponentInChildren<Renderer>().materialInstance = minst;
             }
             if (rb)
             {
@@ -122,6 +122,11 @@ namespace TestAndSeek
             if (Input.GetKey(KeyCode.X))
                 transform.forward = Quaternion.AngleAxis(+3.14f / 6 * Time.deltaTime, Vector3.up) * transform.forward;
 
+        }
+
+        void PausedUpdate()
+        {
+            Debug.Log("oh boi");
         }
 
         public void OnCollisionEnter(Collision c)

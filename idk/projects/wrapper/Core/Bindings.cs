@@ -437,16 +437,27 @@ namespace idk
          * Time
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetTimeScale();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TimeSetTimeScale(float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetFixedDelta();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetDelta();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetUnscaledFixedDelta();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetUnscaledDelta();
 
         /*
          * Debug
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float DebugLog(string preface, string message);
-
     }
 }

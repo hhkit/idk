@@ -31,6 +31,23 @@ namespace idk::mono
 		return type;
 	}
 
+	void ManagedType::CacheMessages()
+	{
+		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
+		auto terminate = envi.Type("Object")->Raw();
+
+		auto klass = type;
+		while (klass != terminate)
+		{
+			for (void* iter = nullptr; auto method = mono_class_get_methods(klass, &iter);)
+				thunks.emplace(mono_method_get_name(method), ManagedThunk{ method });
+			klass = mono_class_get_parent(klass);
+		}	
+		for (void* iter = nullptr; auto method = mono_class_get_methods(klass, &iter);)
+			thunks.emplace(mono_method_get_name(method), ManagedThunk{ method });
+
+	}
+
 	bool ManagedType::CacheThunk(string_view method_name, int param_count)
 	{
 		auto method = FindMethod(method_name, param_count);

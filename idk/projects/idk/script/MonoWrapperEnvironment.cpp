@@ -10,6 +10,7 @@
 #include <mono/utils/mono-logger.h>
 #include <mono/metadata/reflection.h>
 
+#include <core/Scheduler.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
@@ -1256,16 +1257,40 @@ namespace idk::mono
 			}
 		BIND_END();
 
+		BIND_START("idk.Bindings::TimeGetTimeScale", float)
+		{
+			return Core::GetScheduler().time_scale;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeSetTimeScale", void, float ts)
+		{
+			Core::GetScheduler().time_scale = ts;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::TimeGetFixedDelta",  float)
 			{
-				return Core::GetDT().count();
+				return Core::GetScheduler().time_scale * Core::GetDT().count();
 			}
 		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetDelta",  float)
 			{
-				return Core::GetRealDT().count();
+				return Core::GetScheduler().time_scale * Core::GetRealDT().count();
 			}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeGetUnscaledFixedDelta", float)
+		{
+			return Core::GetDT().count();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeGetUnscaledDelta", float)
+		{
+			return Core::GetRealDT().count();
+		}
 		BIND_END();
 	}
 }

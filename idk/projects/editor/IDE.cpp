@@ -312,7 +312,7 @@ namespace idk
         }
 
 		SetupEditorScene();
-		
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 	}
 
 	void IDE::Shutdown()

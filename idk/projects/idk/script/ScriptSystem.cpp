@@ -122,6 +122,7 @@ namespace idk::mono
 	}
 	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
 	{
+		IDK_ASSERT(run_scripts);
 		for (auto& elem : behaviors)
 			if (elem.enabled)
 				elem.FixedUpdate();
@@ -129,9 +130,17 @@ namespace idk::mono
 
 	void ScriptSystem::ScriptUpdate(span<Behavior> behaviors)
 	{
+		IDK_ASSERT(run_scripts);
 		for (auto& elem : behaviors)
 			if (elem.enabled)
 				elem.Update();
+	}
+
+	void ScriptSystem::ScriptPausedUpdate(span<Behavior> behaviors)
+	{
+		if (run_scripts)
+			for (auto& elem : behaviors)
+				elem.FireMessage("PausedUpdate");
 	}
 
 	void ScriptSystem::ScriptUpdateCoroutines(span<Behavior> behaviors)
