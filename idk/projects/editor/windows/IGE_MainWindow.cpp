@@ -416,7 +416,7 @@ namespace idk {
 				// 	if (i->window_name != "Game")
 				// 		i->is_open = false;
 				// editor.currentCamera().current_camera->enabled = false;
-				SaveSceneTemporarily();
+				HotReloadDLL();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;

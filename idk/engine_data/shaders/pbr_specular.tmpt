@@ -19,7 +19,7 @@ layout(location=1) in VS_OUT
   vec2 uv;
   vec3 normal;
   vec3 tangent;
-  vec3 world_pos;
+  vec3 color;
 } fs_in;
 
 // lighting 
@@ -322,6 +322,7 @@ void main()
 	float specular  = 0.5;
 	float roughness = 1.0;
 	float ambient_o = 0;
+	vec3  emissive  = vec3(0);
 	
 	vec3 view_dir = -normalize(view_pos);
 
@@ -373,7 +374,7 @@ void main()
 	//vec3 ambient = (kD * diffuse + specular_color) * vec3(0.01);
 	vec3 ambient = vec3(0.03) * albedo;
 	
-	vec3 color = light_accum + ambient;
+	vec3 color = light_accum + ambient + emissive;
 	color = color / (color + vec3(1.0)); // hdr 
 	//color = pow(color, vec3(1.0/2.2)); // gamma correction
 	//out_color = vec4(vec3(roughness),1);

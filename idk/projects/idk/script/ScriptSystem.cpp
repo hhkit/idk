@@ -25,6 +25,7 @@ namespace idk::mono
 	{
 		path_to_used_dll = string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/" + std::filesystem::path{ GetConfig().path_to_game_dll }.stem().string() + ".dll";
 
+		
 		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{
 			// copy dll to .exe location
@@ -32,10 +33,11 @@ namespace idk::mono
 			std::ofstream dst_file;
 			dst_file.open(path_to_used_dll, std::ios::binary | std::ios::out);
 			dst_file << src_file.rdbuf();
+			dst_file.flush();
 		}
 		else
 			LOG_CRASH("Could not detect game dll!");
-
+		
 		if (Core::GetSystem<FileSystem>().ExistsFull(path_to_used_dll))
 		{
 			script_environment = std::make_unique<MonoBehaviorEnvironment>(path_to_used_dll);
@@ -48,6 +50,9 @@ namespace idk::mono
 	void ScriptSystem::UnloadGameScripts()
 	{
 		script_environment = nullptr;
+		const auto max_gen = mono_gc_max_generation();
+		for (int i = 0; i < max_gen; ++i)
+			mono_gc_collect(i);
 	}
 
 	void ScriptSystem::Init()

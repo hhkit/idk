@@ -25,9 +25,9 @@ namespace idk::mono
 	template<typename Ret, typename ...Args>
 	inline Ret ManagedThunk::Invoke(Args&& ... args) const
 	{
-		using FuncType = Ret (*)(decltype(box(args))..., MonoException**);
+		using FuncType = Ret (__stdcall*)(decltype(box(args))..., MonoObject**);
 		const auto invoker = s_cast<FuncType>(thunk);
-		MonoException* exc{};
+		MonoObject* exc{};
 		auto retval = invoker(box(args)..., &exc);
 		if (exc)
 		{
@@ -35,7 +35,7 @@ namespace idk::mono
 			auto method = std::get<1>(idk->GetMethod("PrintException", 1));
 			void* args[] = { exc, 0 };
 			mono_runtime_invoke(method, nullptr, args, nullptr);
-			mono_print_unhandled_exception(r_cast<MonoObject*>(exc));
+			mono_print_unhandled_exception(exc);
 			return Ret{};
 		}
 		return retval;

@@ -12,6 +12,10 @@
                 inst.guid = guid;
                 return inst;
             }
+            set
+            {
+                Bindings.RendererSetMaterialInstance(handle, (object)value != null ? value.guid : new System.Guid());
+            }
         }
 
         public bool enabled

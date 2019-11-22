@@ -17,6 +17,7 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior[] ObjectGetObjectsOfType(string type);
 
+
         /**
          * Game Object
          */
@@ -369,6 +370,9 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid RendererGetMaterialInstance(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void RendererSetMaterialInstance(ulong handle, Guid guid);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool RendererGetActive(ulong id);

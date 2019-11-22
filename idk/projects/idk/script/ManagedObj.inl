@@ -194,6 +194,7 @@ namespace idk::mono
 				MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
 				MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
 
+				MONO_RESOURCE_TYPE(MaterialInstance);
 				MONO_RESOURCE_TYPE(Prefab);
 
 				{
@@ -222,7 +223,8 @@ namespace idk::mono
 							auto reflect = reflect::dynamic{ new_val };
 							reflect.visit(functor);
 						}
-						last_children = 0;
+						else
+							last_children = 0;
 
 						if (new_val != old_val)
 						{
@@ -290,6 +292,7 @@ namespace idk::mono
 			MONO_BASE_TYPE_CONST(vec3, envi.Type("Vector3")->Raw());
 			MONO_BASE_TYPE_CONST(vec4, envi.Type("Vector4")->Raw());
 
+			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);
 
 			auto csharpcore = mono_get_corlib();

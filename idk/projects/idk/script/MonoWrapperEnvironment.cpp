@@ -163,7 +163,15 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::GameObjectGetEngineComponent",  uint64_t, Handle<GameObject> go, MonoString* component) // note: return value optimization
 			{
-				return go->GetComponent(string_view{ unbox(component).get() }).id;
+				auto query = unbox(component);
+				auto str = string_view{ query.get() };
+				if (str == "Renderer")
+				{
+					auto mrend = go->GetComponent<MeshRenderer>();
+					return mrend ? mrend.id : go->GetComponent<SkinnedMeshRenderer>().id;
+				}
+
+				return go->GetComponent(str).id;
 			}
 		BIND_END();
 
@@ -826,6 +834,17 @@ namespace idk::mono
             }
         }
         BIND_END();
+
+		BIND_START("idk.Bindings::RendererSetMaterialInstance", void, GenericHandle renderer, Guid guid)
+		{
+			switch (renderer.type)
+			{
+			case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid };
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid };
+			default: return;
+			}
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::RendererGetActive", bool, GenericHandle renderer)
 		{

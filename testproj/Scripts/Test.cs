@@ -11,10 +11,14 @@ namespace TestAndSeek
         public Vector3 movement;
         public Prefab prefab;
         public GameObject go;
+        public MaterialInstance minst;
+
         public int i2;
 
         private RigidBody rb;
         private TestShou ts;
+
+        //static int static_i = 0;
 
         public Test()
         {
@@ -31,6 +35,7 @@ namespace TestAndSeek
         {
             rb = gameObject.GetComponent<RigidBody>();
             ts = gameObject.GetComponent<TestShou>();
+            //Debug.Log("static_i " + ++static_i);
             if (rb)
                 Debug.Log("found rigidbody");
 
@@ -63,6 +68,12 @@ namespace TestAndSeek
 
         void FixedUpdate()
         {
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                Debug.Log("minst:" + minst);
+                Debug.Log("rend: " + gameObject.GetComponentInChildren<Renderer>());
+                //gameObject.GetComponent<Renderer>().materialInstance = minst;
+            }
             if (rb)
             {
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
