@@ -1,5 +1,5 @@
 metadatas: 
 - guid: e3c020b4-80b1-40d0-8d34-036ed16505b3
-  metadata: '{internal_format: R_16, uv_mode: ClampToBorder}'
+  metadata: '{internal_format: R_8, uv_mode: ClampToBorder}'
   name: ""
   t_hash: idk::FontAtlas

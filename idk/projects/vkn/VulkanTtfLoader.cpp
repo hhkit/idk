@@ -41,36 +41,6 @@ namespace idk::vkn
 #pragma optimize("",off)
 	ResourceBundle TtfLoader::LoadFile(PathHandle handle, RscHandle<FontAtlas> font_handle, const FontAtlasMeta* tm)
 	{
-		//VknTexture& tex = rtex.as<VknTexture>();
-		//auto file = handle.Open(FS_PERMISSIONS::READ, true);
-		//std::stringstream ss;
-		//ss << file.rdbuf();
-		//auto data = ss.str();
-		//ivec2 size{};
-		//int num_channels{};
-		//auto tex_data = stbi_load_from_memory(r_cast<const stbi_uc*>(data.data()), s_cast<int>(data.size()), &size.x, &size.y, &num_channels, 4);
-		//TextureLoader loader;
-		//TextureOptions def{};
-		//std::optional<TextureOptions> to{};
-		//if (tm)
-		//	def = *(to = *tm);
-		//TexCreateInfo tci;
-		//tci.width = size.x;
-		//tci.height = size.y;
-		//tci.layout = vk::ImageLayout::eGeneral;
-		//tci.mipmap_level = 0;
-		//tci.sampled(true);
-		//tci.aspect = vk::ImageAspectFlagBits::eColor;
-		//tci.internal_format = MapFormat(def.internal_format);
-		//if (def.is_srgb)
-		//	tci.internal_format = ToSrgb(tci.internal_format);
-		////TODO detect SRGB and load set format accordingly
-		//InputTexInfo iti{ r_cast<const char*>(tex_data),s_cast<size_t>(size.x * size.y * 4),def.is_srgb ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm };
-		//if (tm)
-		//	to = *tm;
-		//loader.LoadTexture(tex, allocator, *fence, to, tci, iti);
-		//stbi_image_free(tex_data);
-		//return rtex;
 
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft))
@@ -96,7 +66,9 @@ namespace idk::vkn
 
 			if (tm)
 			{
-				fontAtlas->SetMeta(*tm);
+				FontAtlasMeta new_tm = *tm;
+				new_tm.font_name = handle.GetFileName();
+				fontAtlas->SetMeta(new_tm);
 				//tm->font_name = handle.GetFileName();
 
 				if (FT_Set_Pixel_Sizes(face, 0, tm->fontSize))
@@ -109,7 +81,8 @@ namespace idk::vkn
 		}
 		else
 		{
-			FontAtlasMeta new_tm = font_handle->GetMeta();
+			fontAtlas = font_handle.guid;
+			FontAtlasMeta new_tm = fontAtlas->GetMeta();
 
 			new_tm.font_name = handle.GetFileName();
 			fontAtlas->SetMeta(new_tm);
@@ -165,7 +138,7 @@ namespace idk::vkn
 		unsigned stride = sizeof(unsigned char);
 		string_view fml{ raw,len };
 
-		vector<CharacterCreateInfo> sadList;
+		//vector<CharacterCreateInfo> sadList;
 
 		for (int i = 32; i < 128; ++i) {
 			if (FT_Load_Char(face, i, FT_LOAD_RENDER))
@@ -177,21 +150,9 @@ namespace idk::vkn
 				x = 0;
 			}
 
-			sadList.emplace_back(CharacterCreateInfo{x,y,glyph->bitmap.width,glyph->bitmap.rows});
+			//sadList.emplace_back(CharacterCreateInfo{x,y,glyph->bitmap.width,glyph->bitmap.rows});
 
-			//for (unsigned row = x, p = 0; row < (x + g->bitmap.rows); ++row, ++p)
-			//for (unsigned row = y, p = 0; row < (y + glyph->bitmap.rows); ++row, ++p)
-			//{
-			//	auto* src = glyph->bitmap.buffer + p * glyph->bitmap.width;
-			//	auto* dst = raw + (row * w + x);
-			//
-			//	for (unsigned i = 0; i < glyph->bitmap.width; ++i)
-			//		volatile auto val = *src;
-			//
-			//	memcpy_s(dst, w * h* sizeof(unsigned), src, glyph->bitmap.width);
-			//}
-			(CopyCharacter(glyph, raw, x, y, w* pixel_bytes));
-				//break;
+			CopyCharacter(glyph, raw, x, y, w* pixel_bytes);
 
 			fontAtlas->c[i].advance.x = s_cast<float>(glyph->advance.x >> 6);
 			fontAtlas->c[i].advance.y = s_cast<float>(glyph->advance.y >> 6);
@@ -207,7 +168,7 @@ namespace idk::vkn
 
 			mh = std::max(mh, glyph->bitmap.rows);
 			//mh = g->bitmap.rows;
-			x += glyph->bitmap.width + spacing;
+			x += int(glyph->bitmap.width + spacing);
 		}
 
 		FontAtlasLoader loader;
@@ -227,7 +188,7 @@ namespace idk::vkn
 		if (def.is_srgb)
 			tci.internal_format = ToSrgb(tci.internal_format);
 		//TODO detect SRGB and load set format accordingly
-		InputFAInfo iti{ r_cast<const char*>(raw),s_cast<size_t>(size.x * size.y *pixel_bytes),sadList,glyph->bitmap.buffer,def.is_srgb ? vk::Format::eR8Srgb : vk::Format::eR8Uint };
+		InputFAInfo iti{ r_cast<const char*>(raw),s_cast<size_t>(size.x * size.y *pixel_bytes),def.is_srgb ? vk::Format::eR8Srgb : vk::Format::eR8Uint };
 		if (tm)
 			to = *tm;
 		loader.LoadFontAtlas(*fontAtlas, allocator, *fence, to, tci, iti);
