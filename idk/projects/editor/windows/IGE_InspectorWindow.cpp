@@ -131,6 +131,7 @@ namespace idk {
             {
                 if (prefab_inst->object_index == 0)
                     DisplayPrefabInstanceControls(prefab_inst);
+                _prefab_inst = prefab_inst;
             }
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
