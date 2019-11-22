@@ -29,6 +29,7 @@ of the editor.
 #include <PauseConfigurations.h>
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
+#include <imgui/ImGuizmo.h>
 
 namespace idk {
 
@@ -552,6 +553,19 @@ namespace idk {
 			//DEL = Delete
 			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
 				int execute_counter = 0;
+				//Move the gizmo away before deleting
+				CameraControls&		main_camera = editor._interface->Inputs()->main_camera;
+				Handle<Camera>		currCamera = main_camera.current_camera;
+				Handle<Transform>	tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+				const auto			view_mtx = currCamera->ViewMatrix();
+				const float*		viewMatrix = view_mtx.data();
+				const auto			pers_mtx = currCamera->ProjectionMatrix();
+				const float*		projectionMatrix = pers_mtx.data();
+				float				gizmo_matrix[16]{0};
+				ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, gizmo_matrix, NULL, NULL);
+
+
+
 				while (!editor.selected_gameObjects.empty()) {
 					Handle<GameObject> i = editor.selected_gameObjects.front();
 					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
