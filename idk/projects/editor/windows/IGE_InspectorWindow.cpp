@@ -1051,7 +1051,7 @@ namespace idk {
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
 	{
 		//Just a check to prevent vulkan from crashing because vulkan got no font yet
-		if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
+		//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
 		{
 			//ImGui::Text("State Type: Font Type");
 
