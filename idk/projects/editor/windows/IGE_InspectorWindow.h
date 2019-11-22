@@ -33,8 +33,25 @@ namespace idk {
 
 
 	private:
+        constexpr static float default_item_width_ratio = 0.6f;
 
-        constexpr static float item_width_ratio = 0.6f;
+        struct DisplayStack
+        {
+            IGE_InspectorWindow& self;
+            float item_width_ratio;
+            string curr_prop_path;
+            bool has_override;
+
+            DisplayStack(IGE_InspectorWindow& self, float item_width_ratio = default_item_width_ratio)
+                : self{ self }, item_width_ratio{ item_width_ratio }
+            {}
+            void GroupBegin();
+            void Label(const char* key);
+            void ItemBegin(bool align = false);
+            void ItemEnd();
+            void GroupEnd(bool changed);
+        };
+
 
         bool _debug_mode = false;
 
@@ -58,7 +75,7 @@ namespace idk {
 
         //If multiple objects are selected, this will only display the first gameObject.
         void DisplayComponent(GenericHandle component);
-        template<typename T> void DisplayComponentInner(Handle<T> component) { displayVal(*component); }
+        template<typename T> void DisplayComponentInner(Handle<T> component) { DisplayVal(*component); }
         template<> void DisplayComponentInner(Handle<Transform> c_transform);
         template<> void DisplayComponentInner(Handle<RectTransform> c_rt);
         template<> void DisplayComponentInner(Handle<Animator> c_anim);	
@@ -80,10 +97,11 @@ namespace idk {
         template<> void DisplayAsset(RscHandle<Texture> texture);
 		template<> void DisplayAsset(RscHandle<FontAtlas> fontAtlas);
 
+
         // when curr property is key, draws using CustomDrawFn
         using CustomDrawFn = bool(*)(const reflect::dynamic& dyn);
         using InjectDrawTable = hash_table<string_view, CustomDrawFn>;
-        bool displayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table = nullptr);
+        bool DisplayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table = nullptr);
 
 	};
 

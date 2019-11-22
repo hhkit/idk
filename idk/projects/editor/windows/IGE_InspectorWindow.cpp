@@ -609,12 +609,20 @@ namespace idk {
         const auto w = region_width * 0.3f;
         ImGui::PushItemWidth(w);
 
+        bool has_override = _prefab_inst &&
+            (_prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_min", 0) ||
+             _prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_max", 0));
+
+        bool changed = false;
+
+        ImGui::BeginGroup();
+
         if (c_rt->anchor_min.y != c_rt->anchor_max.y)
         {
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("T").x * 0.5f);
             ImGui::Text("T");
             ImGui::SetCursorPosX(region_width * 0.35f);
-            ImGui::DragFloat("##top", &c_rt->offset_max.y);
+            changed |= ImGui::DragFloat("##top", &c_rt->offset_max.y);
         }
         else
         {
@@ -628,6 +636,7 @@ namespace idk {
                 float dy = pos_y - pivot_y;
                 c_rt->offset_min.y += dy;
                 c_rt->offset_max.y += dy;
+                changed = true;
             }
         }
 
@@ -636,10 +645,10 @@ namespace idk {
             ImGui::SetCursorPosX(region_width * 0.35f - w * 0.75f - ImGui::CalcTextSize("L").x - ImGui::GetStyle().ItemSpacing.x);
             ImGui::Text("L");
             ImGui::SameLine();
-            ImGui::DragFloat("##left", &c_rt->offset_min.x);
+            changed |= ImGui::DragFloat("##left", &c_rt->offset_min.x);
             ImGui::SameLine();
             ImGui::SetCursorPosX(region_width * 0.35f + w * 0.75f);
-            ImGui::DragFloat("##right", &c_rt->offset_max.x);
+            changed |= ImGui::DragFloat("##right", &c_rt->offset_max.x);
             ImGui::SameLine();
             ImGui::Text("R");
         }
@@ -656,6 +665,7 @@ namespace idk {
                 float dx = pos_x - pivot_x;
                 c_rt->offset_min.x += dx;
                 c_rt->offset_max.x += dx;
+                changed = true;
             }
             ImGui::SameLine();
 
@@ -665,6 +675,7 @@ namespace idk {
             {
                 c_rt->offset_min.x = pos_x - c_rt->pivot.x * width;
                 c_rt->offset_max.x = pos_x + (1.0f - c_rt->pivot.x) * width;
+                changed = true;
             }
             ImGui::SameLine();
             ImGui::Text("W");
@@ -673,7 +684,7 @@ namespace idk {
         if (c_rt->anchor_min.y != c_rt->anchor_max.y)
         {
             ImGui::SetCursorPosX(region_width * 0.35f);
-            ImGui::DragFloat("##bot", &c_rt->offset_min.y);
+            changed |= ImGui::DragFloat("##bot", &c_rt->offset_min.y);
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
             ImGui::Text("B");
         }
@@ -686,36 +697,103 @@ namespace idk {
                 const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
                 c_rt->offset_min.y = pivot_y - c_rt->pivot.y * height;
                 c_rt->offset_max.y = pivot_y + (1.0f - c_rt->pivot.y) * height;
+                changed = true;
             }
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
             ImGui::Text("H");
         }
 
-
         ImGui::PopItemWidth();
 
-        const float item_width = region_width * item_width_ratio;
+        ImGui::EndGroup();
+
+        if (has_override && ImGui::BeginPopupContextItem("__context"))
+        {
+            if (ImGui::MenuItem("Apply Property"))
+            {
+                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                ov.property_path = "offset_max";
+                PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+            }
+            if (ImGui::MenuItem("Revert Property"))
+            {
+                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                ov.property_path = "offset_max";
+                PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+            }
+            ImGui::EndPopup();
+        }
+
+        if (changed && _prefab_inst)
+        {
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_min");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_max");
+        }
+
+        if (has_override)
+        {
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0),
+                ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0) + ImVec2(4.0f, ImGui::GetItemRectSize().y),
+                ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
+
+
+
+        DisplayStack display(*this);
+
+        _curr_property_stack.push_back("anchor_min"); display.GroupBegin(); display.Label("Anchor Min"); display.ItemBegin(true);
+        changed = ImGuidk::DragVec2("##anchor_min", &c_rt->anchor_min);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+
+        _curr_property_stack.push_back("anchor_max"); display.GroupBegin(); display.Label("Anchor Max"); display.ItemBegin(true);
+        changed = ImGuidk::DragVec2("##anchor_max", &c_rt->anchor_max);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+
+        _curr_property_stack.push_back("pivot"); display.GroupBegin(); display.Label("Pivot"); display.ItemBegin(true);
+        changed = ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+
+        
+
+        // z, scale, rot
+        IDE& editor = Core::GetSystem<IDE>();
+        auto& c = *c_rt->GetGameObject()->Transform();
+
+        const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
+
         ImGui::PushItemWidth(-4.0f);
 
-        ImGui::Text("Anchor Min");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(region_width - item_width);
-        ImGuidk::DragVec2("##anchor_min", &c_rt->anchor_min);
+        _prefab_curr_component = c.GetHandle();
+        _prefab_curr_component_nth = 0;
+        _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
+        display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
+        changed = ImGui::DragFloat("##pos_z", &c.position.z);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back(); _curr_property_stack.pop_back();
 
-        ImGui::Text("Anchor Max");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(region_width - item_width);
-        ImGuidk::DragVec2("##anchor_max", &c_rt->anchor_max);
+        changed = false;
+        _curr_property_stack.push_back("rotation");
+        display.GroupBegin(); display.Label("Rotation"); display.ItemBegin(true);
+        if (ImGuidk::DragQuat("##rot", &c.rotation))
+        {
+            changed = true;
+            for (Handle<GameObject> i : editor.selected_gameObjects)
+                i->GetComponent<Transform>()->rotation = c.rotation;
+        }
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 
-        ImGui::Text("Pivot");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(region_width - item_width);
-        ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
-
-        ImGui::PopItemWidth();
-
-        displayVal(*c_rt->GetGameObject()->GetComponent<Transform>());
+        changed = false;
+        _curr_property_stack.push_back("scale");
+        display.GroupBegin(); display.Label("Scale"); display.ItemBegin(true);
+        if (ImGuidk::DragVec3("##scl", &c.scale))
+        {
+            changed = true;
+            for (Handle<GameObject> i : editor.selected_gameObjects)
+                i->GetComponent<Transform>()->rotation = c.rotation;
+        }
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
     }
 
 
@@ -975,37 +1053,37 @@ namespace idk {
 		//Just a check to prevent vulkan from crashing because vulkan got no font yet
 		if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
 		{
-			const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
-			const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
-			{
-				colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(drag_pos);
-			};
+			//ImGui::Text("State Type: Font Type");
 
+            DisplayStack display(*this);
+            _curr_property_stack.push_back("textureAtlas"); display.GroupBegin(); display.Label("Atlas"); display.ItemBegin(true);
+            bool changed = ImGuidk::InputResource("", &c_font->textureAtlas);
+            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 
-			ImGui::Text("State Type: Font Type");
-			const bool has_valid_atlas = s_cast<bool>(c_font->textureAtlas);
-			display_name_align("Atlas", !has_valid_atlas);
-			ImGuidk::InputResource(("##atlas" + string(c_font->textureAtlas->Name().data())).c_str(), &c_font->textureAtlas);
+            _curr_property_stack.push_back("text"); display.GroupBegin(); display.Label("Text"); display.ItemBegin(true);
+            changed = ImGui::InputTextMultiline("", &c_font->text);
+            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 
-			display_name_align("Text");
-			ImGui::InputTextMultiline("##InputText", &c_font->text);
+            changed = false;
+            _curr_property_stack.push_back("fontSize"); display.GroupBegin(); display.Label("Font Size"); display.ItemBegin(true);
+            if (ImGui::DragInt("", &c_font->fontSize))
+            {
+                c_font->UpdateFontSize();
+                changed = true;
+            }
+            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 
-			display_name_align("Font Size");
-			if (ImGui::DragInt("##fontsize", &c_font->fontSize))
-			{
-				c_font->UpdateFontSize();
-			}
+            _curr_property_stack.push_back("spacing"); display.GroupBegin(); display.Label("Spacing"); display.ItemBegin(true);
+            changed = ImGui::DragFloat("", &c_font->spacing);
+            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 
-			display_name_align("Spacing");
-			ImGui::DragFloat("##fontspacing", &c_font->spacing);
+            _curr_property_stack.push_back("track"); display.GroupBegin(); display.Label("Track"); display.ItemBegin(true);
+            changed = ImGui::DragFloat("", &c_font->tracking);
+            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 
-			display_name_align("Track");
-			ImGui::DragFloat("##fonttrack", &c_font->tracking);
-
-			display_name_align("Color");
-			ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
+            _curr_property_stack.push_back("color"); display.GroupBegin(); display.Label("Color"); display.ItemBegin(true);
+            changed = ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
+            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
 		}
 	}
 
@@ -1066,7 +1144,7 @@ namespace idk {
 			{ "audio_clip_list", draw_audio_list }
 		};
 
-		displayVal(*c_audiosource, &table);
+		DisplayVal(*c_audiosource, &table);
 
 	}
 
@@ -1096,7 +1174,7 @@ namespace idk {
         ImGuidk::PushFont(FontType::Smaller);
 
         _curr_property_stack.push_back("main");
-        displayVal(c_ps->main);
+        DisplayVal(c_ps->main);
         _curr_property_stack.pop_back();
 
         const auto display = [&](const char* title, reflect::dynamic dyn, InjectDrawTable* inject = nullptr)
@@ -1118,7 +1196,7 @@ namespace idk {
             if (open)
             {
                 _curr_property_stack.push_back(title);
-                displayVal(std::move(dyn), inject);
+                DisplayVal(std::move(dyn), inject);
                 _curr_property_stack.pop_back();
             }
 
@@ -1388,10 +1466,10 @@ namespace idk {
 	}
 
 
+
     // when curr property is key, draws using CustomDrawFn
-    bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table)
+    bool IGE_InspectorWindow::DisplayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table)
     {
-        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
         bool outer_changed = false;
@@ -1422,52 +1500,14 @@ namespace idk {
                 return false;
             }
 
-            string curr_prop_path;
-            for (const auto& prop : _curr_property_stack)
-            {
-                if (prop.empty())
-                    continue;
-                curr_prop_path += prop;
-                curr_prop_path += '/';
-            }
-            curr_prop_path.pop_back();
-
-            bool has_override = false;
-            if (_prefab_inst)
-            {
-                for (const auto& ov : _prefab_inst->overrides)
-                {
-                    if (ov.component_name == (*_prefab_curr_component).type.name() &&
-                        ov.property_path == curr_prop_path &&
-                        ov.component_nth == _prefab_curr_component_nth)
-                    {
-                        has_override = true;
-                        break;
-                    }
-                }
-            }
-
-            ImGui::BeginGroup();
+            DisplayStack display(*this);
+            display.GroupBegin();
 
             ImGui::SetCursorPosY(currentHeight + pad_y);
-            if (has_override)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-                ImGui::Text(keyName.c_str());
-                ImGui::PopStyleColor();
-                ImGui::SameLine(-ImGui::GetStyle().IndentSpacing);
-                ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetCursorScreenPos(),
-                                                          ImGui::GetCursorScreenPos() + ImVec2(4.0f, ImGui::GetFrameHeight()),
-                                                          ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-            }
-            else
-                ImGui::Text(keyName.c_str());
+            display.Label(keyName.c_str());
 
             ImGui::SetCursorPosY(currentHeight);
-            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-
-            ImGui::PushID(("##" + curr_prop_path).c_str());
-            ImGui::PushItemWidth(-4.0f);
+            display.ItemBegin(true);
 
             bool indent = false;
             bool recurse = false;
@@ -1478,7 +1518,7 @@ namespace idk {
             bool draw_injected = false;
             if (inject_draw_table)
             {
-                if (const auto iter = inject_draw_table->find(curr_prop_path); iter != inject_draw_table->end())
+                if (const auto iter = inject_draw_table->find(display.curr_prop_path); iter != inject_draw_table->end())
                 {
                     changed |= iter->second(val);
                     draw_injected = true;
@@ -1593,7 +1633,7 @@ namespace idk {
                     ImGui::Indent();
                     for (auto dyn : cont)
                     {
-                        displayVal(dyn);
+                        DisplayVal(dyn);
                     }
                     ImGui::Unindent();
                 }
@@ -1606,7 +1646,7 @@ namespace idk {
                     for (auto dyn : cont)
                     {
                         auto pair = dyn.unpack();
-                        displayVal(pair[0]);
+                        DisplayVal(pair[0]);
                     }
                     ImGui::Unindent();*/
                 }
@@ -1632,29 +1672,10 @@ namespace idk {
                 }
             }
 
-            ImGui::EndGroup();
-
-            if (has_override && ImGui::BeginPopupContextItem("__context"))
-            {
-                if (ImGui::MenuItem("Apply Property"))
-                {
-                    PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
-                    PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                }
-                if (ImGui::MenuItem("Revert Property"))
-                {
-                    PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
-                    PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                }
-                ImGui::EndPopup();
-            }
+            display.ItemEnd();
 
             outer_changed |= changed;
-            if (changed && _prefab_inst)
-                PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
-
-            ImGui::PopItemWidth();
-            ImGui::PopID();
+            display.GroupEnd(changed);
 
             indent_stack.push_back(indent);
             if (indent)
@@ -1709,5 +1730,85 @@ namespace idk {
 		}
 	}
 
+
+    void IGE_InspectorWindow::DisplayStack::ItemBegin(bool align)
+    {
+        if (align)
+        {
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * (1.0f - item_width_ratio));
+        }
+        ImGui::PushID(("##" + curr_prop_path).c_str());
+        ImGui::PushItemWidth(-4.0f);
+    }
+
+    void IGE_InspectorWindow::DisplayStack::ItemEnd()
+    {
+        ImGui::PopItemWidth();
+        ImGui::PopID();
+    }
+
+    void IGE_InspectorWindow::DisplayStack::GroupBegin()
+    {
+        curr_prop_path.clear();
+        for (const auto& prop : self._curr_property_stack)
+        {
+            if (prop.empty())
+                continue;
+            curr_prop_path += prop;
+            curr_prop_path += '/';
+        }
+        curr_prop_path.pop_back();
+        
+        has_override = false;
+        if (self._prefab_inst && self._curr_property_stack.back().size())
+            has_override = self._prefab_inst->HasOverride(
+                (*self._prefab_curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
+
+        ImGui::BeginGroup();
+    }
+
+    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed)
+    {
+        ImGui::EndGroup();
+
+        if (has_override && ImGui::BeginPopupContextItem("__context"))
+        {
+            if (ImGui::MenuItem("Apply Property"))
+            {
+                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
+            }
+            if (ImGui::MenuItem("Revert Property"))
+            {
+                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
+            }
+            ImGui::EndPopup();
+        }
+
+        if (changed && self._prefab_inst)
+            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._prefab_curr_component, curr_prop_path);
+
+        if (has_override)
+        {
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0),
+                ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0) + ImVec2(4.0f, ImGui::GetItemRectSize().y),
+                ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
+    }
+
+    void IGE_InspectorWindow::DisplayStack::Label(const char* key)
+    {
+        if (has_override)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+            ImGui::Text(key);
+            ImGui::PopStyleColor();
+        }
+        else
+            ImGui::Text(key);
+        ImGui::SameLine();
+    }
 
 }

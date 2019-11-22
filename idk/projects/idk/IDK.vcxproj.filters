@@ -1305,6 +1305,9 @@
     <ClCompile Include="ui\UISystem.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="prefab\PrefabInstance.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
