@@ -1582,6 +1582,10 @@ namespace idk {
                 {
                     changed |= ImGui::SliderAngle("", val.data());
                 }
+                else if constexpr (std::is_same_v<T, string>)
+                {
+                    changed |= ImGui::InputText("", &val);
+                }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {
                     changed |= ImGuidk::InputResource("", &val);
