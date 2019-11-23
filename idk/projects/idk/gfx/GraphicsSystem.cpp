@@ -530,8 +530,7 @@ namespace idk
 
             auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
-            render_data.transform = rt._matrix *
-                mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+            render_data.transform = rt._matrix;
             render_data.material = text.material;
             render_data.color = text.color;
             render_data.data = TextData{
