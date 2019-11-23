@@ -706,15 +706,9 @@ namespace idk::vkn
 
 			auto& renderer_req = *obj.renderer_req;
 
-			for (auto&& [attrib, location] : renderer_req.mesh_requirements)
+			for (auto&& [location, attrib] : p_ro.attrib_buffers)
 			{
-				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
-			}
-			if (is_mesh_renderer)
-			{
-				uint32_t obj_trf_loc = 4;
-				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(obj_trf_loc), shared_state.inst_mesh_render_buffer.buffer(), { 0 }, vk::DispatchLoaderDefault{});
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 			}
 			auto& oidx = mesh.GetIndexBuffer();
 			if (oidx)
@@ -1270,19 +1264,9 @@ namespace idk::vkn
 			
 				for (auto& [location, attrib] : p_ro.attrib_buffers)
 				{
-					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
-				}
-
-				//for (auto&& [attrib, location] : renderer_req.mesh_requirements)
-				//{
-				//	auto& attrib_buffer = mesh.Get(attrib);
-				//	cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
-				//}
-
-				if (is_mesh_renderer)
-				{
-					uint32_t obj_trf_loc = 4;
-					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(obj_trf_loc), state.shared_gfx_state->inst_mesh_render_buffer.buffer(), { 0 }, vk::DispatchLoaderDefault{});
+					auto opt = pipeline.GetBinding(location);
+					if (opt)
+						cmd_buffer.bindVertexBuffers(*opt, attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 				}
 				auto& oidx = mesh.GetIndexBuffer();
 				if (oidx)
