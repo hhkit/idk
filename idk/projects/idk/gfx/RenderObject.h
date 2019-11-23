@@ -120,6 +120,14 @@ namespace idk
         RscHandle<MaterialInstance> material_instance;
     };
 
+    struct FontRenderData
+    {
+        vector<FontPoint> coords;
+        RscHandle<FontAtlas> atlas;
+        color color;
+        mat4 transform;
+    };
+
     struct ImageData
     {
         RscHandle<Texture> texture;
@@ -128,7 +136,6 @@ namespace idk
     {
         vector<FontPoint> coords;
         RscHandle<FontAtlas> atlas;
-        int n_size;
     };
     struct UIRenderObject
     {

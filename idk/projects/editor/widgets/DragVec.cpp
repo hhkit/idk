@@ -28,7 +28,7 @@ namespace idk::ImGuidk
 
         PushID(0);
         SetCursorPosY(y + g.Style.FramePadding.y);
-        Text("X");
+        ImGui::Text("X");
         SameLine(axis_char_width + g.Style.ItemInnerSpacing.x);
         SetCursorPosY(y);
         changed |= DragFloat("", &vec->x, speed, min, max);
@@ -36,7 +36,7 @@ namespace idk::ImGuidk
         PopID();
 
         PushID(1);
-        Text("Y");
+        ImGui::Text("Y");
         SameLine(axis_char_width * 2 + g.Style.ItemInnerSpacing.x * 3 + drag_float_width);
         SetCursorPosY(y);
         changed |= DragFloat("", &vec->y, speed, min, max);
@@ -73,7 +73,7 @@ namespace idk::ImGuidk
 
         PushID(0);
         SetCursorPosY(y + g.Style.FramePadding.y);
-        Text("X");
+        ImGui::Text("X");
         SameLine(axis_char_width + g.Style.ItemInnerSpacing.x);
         SetCursorPosY(y);
         changed |= DragFloat("", &vec->x, speed, min, max);
@@ -81,7 +81,7 @@ namespace idk::ImGuidk
         PopID();
 
         PushID(1);
-        Text("Y");
+        ImGui::Text("Y");
         SameLine(axis_char_width * 2 + g.Style.ItemInnerSpacing.x * 3 + drag_float_width);
         SetCursorPosY(y);
         changed |= DragFloat("", &vec->y, speed, min, max);
@@ -89,7 +89,7 @@ namespace idk::ImGuidk
         PopID();
 
         PushID(2);
-        Text("Z");
+        ImGui::Text("Z");
         SameLine(axis_char_width * 3 + g.Style.ItemInnerSpacing.x * 5 + drag_float_width * 2);
         SetCursorPosY(y);
         changed |= DragFloat("", &vec->z, speed, min, max);

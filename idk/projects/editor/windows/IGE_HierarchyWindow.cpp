@@ -67,8 +67,6 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		//Tool bar
 
-		ImGui::SetCursorPos(ImVec2{ 0.0f,ImGui::GetFrameHeight() });
-
 
 		//Toolbar
 		//const ImVec2 toolBarSize{ window_size.x, 18.0f };

@@ -67,11 +67,9 @@ namespace idk::vkn
 			if (tm)
 			{
 				FontAtlasMeta new_tm = *tm;
-				new_tm.font_name = handle.GetFileName();
 				fontAtlas->SetMeta(new_tm);
-				//tm->font_name = handle.GetFileName();
 
-				if (FT_Set_Pixel_Sizes(face, 0, tm->fontSize))
+				if (FT_Set_Pixel_Sizes(face, 0, tm->font_size))
 				{
 					std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 					LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
@@ -83,11 +81,9 @@ namespace idk::vkn
 		{
 			fontAtlas = font_handle.guid;
 			FontAtlasMeta new_tm = fontAtlas->GetMeta();
-
-			new_tm.font_name = handle.GetFileName();
 			fontAtlas->SetMeta(new_tm);
 
-			if (FT_Set_Pixel_Sizes(face, 0, new_tm.fontSize))
+			if (FT_Set_Pixel_Sizes(face, 0, new_tm.font_size))
 			{
 				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");

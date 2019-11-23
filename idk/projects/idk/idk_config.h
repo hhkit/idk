@@ -30,7 +30,6 @@ namespace idk
 		,   class SkinnedMeshRenderer
 		,	class Light
 		,   class Font
-		,   class Image
 
         /// PARTICLE
         ,   class ParticleSystem
@@ -42,6 +41,8 @@ namespace idk
         /// UI
         ,   class Canvas
         ,   class RectTransform
+        ,   class Image
+        ,   class Text
 
 		/// SCRIPTING
 		,	class mono::Behavior

@@ -119,14 +119,14 @@
     <Filter Include="gfx\shadergraph">
       <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gfx\Font">
-      <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
     </Filter>
     <Filter Include="ui">
       <UniqueIdentifier>{241cb65f-5a4a-4fab-adc2-43995a1f3b84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\font">
+      <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -837,13 +837,13 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="gfx\FontAtlas.h">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="gfx\Font.h">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="gfx\FontData.h">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="util\easing.h">
       <Filter>util</Filter>
@@ -889,6 +889,15 @@
     </ClInclude>
     <ClInclude Include="meta\stl_hack.h">
       <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Text.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextAnchor.h">
+      <Filter>gfx\font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextAlignment.h">
+      <Filter>gfx\font</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1276,10 +1285,10 @@
     </ClCompile>
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClCompile>
     <ClCompile Include="gfx\Font.cpp">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClCompile>
     <ClCompile Include="gfx\FontAtlasFactory.cpp">
       <Filter>gfx\object</Filter>
@@ -1304,6 +1313,12 @@
     </ClCompile>
     <ClCompile Include="ui\UISystem.cpp">
       <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabInstance.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\FontData.cpp">
+      <Filter>gfx\font</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

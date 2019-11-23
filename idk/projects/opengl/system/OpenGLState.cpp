@@ -626,7 +626,7 @@ namespace idk::ogl
 			{
 				if (elem.coords.size())
 				{
-					auto& atlas = elem.fontAtlas.as<OpenGLFontAtlas>();
+					auto& atlas = elem.atlas.as<OpenGLFontAtlas>();
 
 					glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
 					/* Use the texture containing the atlas */
@@ -646,7 +646,7 @@ namespace idk::ogl
 					glEnableVertexAttribArray(0);
 					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0);
 					//GL_CHECK();
-					glDrawArrays(GL_TRIANGLES, 0, elem.n_size);
+					glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(elem.coords.size()));
 
 					glDisableVertexAttribArray(0);
 
@@ -707,9 +707,6 @@ namespace idk::ogl
                 fsq->DrawInstanced(elem.particles.size());
             }
 
-			glDisable(GL_BLEND);
-
-
 		} // for each culled camera
 
 		glBindVertexArray(0);
@@ -737,13 +734,56 @@ namespace idk::ogl
                         pipeline.PushProgram(elem.material->material->_shader_program);
                         pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
                         pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+                        pipeline.SetUniform("PerUI.is_font", false);
                         pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
-                        fsq->BindAndDraw(
+
+                        fsq->Bind(
                             renderer_attributes{ {
-                                { vtx::Attrib::Position, 0 },
                                 { vtx::Attrib::UV, 1 },
+                                { vtx::Attrib::Position, 0 }
                             } }
                         );
+                        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(real), 0);
+
+                        fsq->Draw();
+                    }
+                    else
+                    {
+                        if (data.coords.size())
+                        {
+                            pipeline.PushProgram(elem.material->material->_shader_program);
+
+                            auto& atlas = data.atlas.as<OpenGLFontAtlas>();
+
+                            glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
+                            /* Use the texture containing the atlas */
+                            atlas.BindToUnit(0);
+                            pipeline.SetUniform("tex", 0);
+
+                            pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+                            pipeline.SetUniform("PerUI.is_font", true);
+                            pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+                            GL_CHECK();
+
+                            //pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+
+                            /* Draw all the character on the screen in one go */
+
+                            glBufferData(GL_ARRAY_BUFFER, data.coords.size() * sizeof(FontPoint), std::data(data.coords), GL_DYNAMIC_DRAW);
+                            //GL_CHECK();
+                            glEnableVertexAttribArray(0);
+                            glEnableVertexAttribArray(1);
+                            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0); // pos
+                            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), r_cast<void*>(2 * sizeof(real))); // uv
+                            //GL_CHECK();
+                            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(data.coords.size()));
+
+                            glDisableVertexAttribArray(0);
+                            glDisableVertexAttribArray(1);
+
+                            glBindBuffer(GL_ARRAY_BUFFER, 0);
+                        }
+                        GL_CHECK();
                     }
                 }, elem.data);
             }

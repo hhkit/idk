@@ -159,7 +159,7 @@ namespace idk {
 
 		ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
-
+		//printf("MsRls:%d,Hov:%d,GzmOvr:%d,GzmUse:%d\n", ImGui::IsMouseReleased(0), ImGui::IsWindowHovered(),!ImGuizmo::IsOver(), !ImGuizmo::IsUsing());
 		//Raycast Selection
 		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing()) {
 
@@ -251,7 +251,23 @@ namespace idk {
 			is_controlling_Pancam = false;
 		}
 
-		if (is_controlling_WASDcam) {
+		//ALT-RightClick Scroll
+		if (ImGui::IsKeyDown(static_cast<int>(Key::Alt)) && ImGui::IsMouseDown(1)) {
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
+				cachedMouseScreenPos = currMouseScreenPos;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				ImGui::SetWindowFocus();
+				is_controlling_ALTscroll = true;
+			}
+		}
+		else {
+			is_controlling_ALTscroll = false;
+		}
+
+		if (is_controlling_ALTscroll) { //Alt controls take priority
+			UpdateScrollMouseControl2();
+		}
+		else if (is_controlling_WASDcam) {
 			UpdateWASDMouseControl();
 		}
 		else if (is_controlling_Pancam) {
@@ -510,8 +526,8 @@ namespace idk {
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY = tfm->Up()* delta.y*pan_multiplier		* editor.scroll_max* 0.5f; //Amount to move in localy axis
-		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_max* 0.5f; //Amount to move in localx axis
+		vec3 localY =  tfm->Up()	* delta.y*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localy axis
+		vec3 localX = -tfm->Right()	* delta.x*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
 
@@ -536,6 +552,25 @@ namespace idk {
 		//std::cout << scroll << "\n";
 		//else
 			//editor.scroll_multiplier = 2.f;
+
+	}
+
+	void IGE_SceneView::UpdateScrollMouseControl2()
+	{
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+
+		//vec2 delta{ static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) , static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) };
+
+		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+
+
+		tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x)*0.5f);
+
+
+		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
+		currMouseScreenPos = cachedMouseScreenPos;
 
 	}
 
@@ -615,6 +650,7 @@ namespace idk {
 
 
 		}
+
 	}
 
 	void IGE_SceneView::MoveMouseToWindow()

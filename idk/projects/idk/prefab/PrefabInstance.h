@@ -15,5 +15,7 @@ namespace idk
         RscHandle<Prefab> prefab;
         vector<PropertyOverride> overrides;
         int object_index;
+
+        bool HasOverride(string_view component_name, string_view property_path, int component_nth) const;
     };
 }

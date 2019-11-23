@@ -470,7 +470,7 @@ REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Font, "Font")
-REFLECT_VARS(tracking, spacing, padding, colour, fontSize, textureAtlas, text)
+REFLECT_VARS(tracking, spacing, padding, color, fontSize, textureAtlas, text)
 REFLECT_END()
 
 // CAMERA
@@ -600,4 +600,11 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::Image, "Image")
 REFLECT_VARS(texture, tint, material)
+REFLECT_END()
+
+REFLECT_ENUM(idk::TextAlignment, "TextAlignment")
+REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
+
+REFLECT_BEGIN(idk::Text, "Text")
+REFLECT_VARS(text, font, font_size, letter_spacing, line_spacing, alignment, wrap, color, material)
 REFLECT_END()
