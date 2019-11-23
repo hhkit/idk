@@ -134,7 +134,7 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 			spirv_out = vector<unsigned int>{ result.begin(),result.end() };
 		else
 			DoNothing();
-		hlp::cerr() << result.GetErrorMessage() << std::endl;
+		LOG_TO(LogPool::GFX, "%s",result.GetErrorMessage().c_str());
 	}
 	return spirv_out;
 }
