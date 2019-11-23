@@ -328,23 +328,27 @@ namespace idk::vkn
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
 		const vector<InstRenderObjects>* inst_ro;
 		std::variant<GraphicsSystem::RenderRange, GraphicsSystem::LightRenderRange> range;
+		const SharedGraphicsState* shared_state = {};
 		GraphicsStateInterface() = default;
-		GraphicsStateInterface(const GraphicsState& state)
+
+		GraphicsStateInterface(const CoreGraphicsState& state)
+		{
+			mesh_render = &state.mesh_render;
+			skinned_mesh_render = &state.skinned_mesh_render;
+			shared_state = state.shared_gfx_state;
+			inst_ro = state.shared_gfx_state->instanced_ros;
+
+		}
+		GraphicsStateInterface(const GraphicsState& state) : GraphicsStateInterface{static_cast<const CoreGraphicsState&>(state)}
 		{
 			renderer_vertex_shaders = state.renderer_vertex_shaders;
 			renderer_fragment_shaders = state.renderer_fragment_shaders;
-			mesh_render = &state.mesh_render;
-			skinned_mesh_render = &state.skinned_mesh_render;
-			inst_ro = state.shared_gfx_state->instanced_ros;
 			range = state.range;
 		}
-		GraphicsStateInterface(const PreRenderData& state)
+		GraphicsStateInterface(const PreRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
 		{
 			renderer_vertex_shaders = state.renderer_vertex_shaders;
 			renderer_fragment_shaders = state.renderer_fragment_shaders;
-			mesh_render = &state.mesh_render;
-			skinned_mesh_render = &state.skinned_mesh_render;
-			inst_ro = state.shared_gfx_state->instanced_ros;
 		}
 	};
 
@@ -379,7 +383,8 @@ namespace idk::vkn
 					if (mat_inst.material)
 					{
 						binders.Bind(the_interface, dc);
-
+						the_interface.BindMeshBuffers(dc);
+						the_interface.BindAttrib(4,state.shared_state->inst_mesh_render_buffer.buffer(),0);
 						the_interface.FinalizeDrawCall(dc, dc.num_instances, dc.instanced_index);
 					}
 				}
@@ -397,7 +402,7 @@ namespace idk::vkn
 				if (mat_inst.material)
 				{
 					binders.Bind(the_interface, dc);
-
+					the_interface.BindMeshBuffers(dc);
 					the_interface.FinalizeDrawCall(dc);
 
 				}
@@ -1261,13 +1266,18 @@ namespace idk::vkn
 						++set;
 					}
 				}
-				auto& renderer_req = *obj.renderer_req;
+				//auto& renderer_req = *obj.renderer_req;
 			
-				for (auto&& [attrib, location] : renderer_req.mesh_requirements)
+				for (auto& [location, attrib] : p_ro.attrib_buffers)
 				{
-					auto& attrib_buffer = mesh.Get(attrib);
-					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 				}
+
+				//for (auto&& [attrib, location] : renderer_req.mesh_requirements)
+				//{
+				//	auto& attrib_buffer = mesh.Get(attrib);
+				//	cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
+				//}
 
 				if (is_mesh_renderer)
 				{
