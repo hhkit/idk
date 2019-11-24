@@ -32,5 +32,11 @@ namespace idk
 
 		// All conditions must be met before the transition occurs. This includes exit time if applicable.
 		vector<AnimationCondition> conditions;
+
+		void RemoveCondition(size_t index) noexcept
+		{
+			if (index < conditions.size())
+				conditions.erase(conditions.begin() + index);
+		}
 	};
 }

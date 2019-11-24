@@ -50,9 +50,11 @@ namespace idk
 		// Functions
 		BasicAnimationState* GetBasicState();
 		BlendTree* GetBlendTree();
-		void AddTransition(size_t from, size_t to);
 		AnimationTransition& GetTransition(size_t index);
 		bool IsBlendTree() const;
+
+		void AddTransition(size_t from, size_t to);
+		void RemoveTransition(size_t index);
 	};
 
 	struct AnimationLayerState

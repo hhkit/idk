@@ -16,6 +16,13 @@ namespace idk {
 		new_transition.transition_to_index = to;
 		transitions.push_back(new_transition);
 	}
+
+	void AnimationState::RemoveTransition(size_t index)
+	{
+		if (index != 0 && index < transitions.size())
+			transitions.erase(transitions.begin() + index);
+	}
+
 	AnimationTransition& AnimationState::GetTransition(size_t index)
 	{
 		if (index >= transitions.size())

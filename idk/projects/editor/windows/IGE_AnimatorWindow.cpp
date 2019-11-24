@@ -77,17 +77,17 @@ namespace idk
 		if (ImGui::IsWindowAppearing())
 			ImGui::SetColumnWidth(-1, window_size.x * 0.25f);
 		
-		drawLeftCol();
+		layersAndParams();
 		ImGui::NextColumn();
 
 		if (ImGui::IsWindowAppearing())
 			ImGui::SetColumnWidth(-1, window_size.x * 0.375f);
 
-		drawCanvas();
+		statesAndBoneMask();
 
 		ImGui::NextColumn();
 
-		drawAnimatorInspector();
+		animatorInspector();
 		// if (ImGui::IsWindowAppearing())
 		// 	ImGui::SetColumnWidth(-1, 400);
 	}
@@ -97,11 +97,12 @@ namespace idk
 
 	void IGE_AnimatorWindow::arrow()
 	{
-		const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x, ImGui::GetCurrentWindowRead()->DC.CursorPos.y + ImGui::GetFontSize() * 0.3f };
+		const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x, 
+									   ImGui::GetCurrentWindowRead()->DC.CursorPos.y + ImGui::GetFontSize() * 0.25f };
 		ImGui::RenderArrow(arrow_pos, ImGuiDir_Right, 0.7f);
 	}
 
-	void IGE_AnimatorWindow::drawLeftCol()
+	void IGE_AnimatorWindow::layersAndParams()
 	{
 		// ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
@@ -126,7 +127,7 @@ namespace idk
 
 		ImGui::EndChild();
 	}
-	void IGE_AnimatorWindow::drawCanvas()
+	void IGE_AnimatorWindow::statesAndBoneMask()
 	{
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
@@ -171,6 +172,7 @@ namespace idk
 				if (ImGui::Button("Delete"))
 				{
 					_curr_animator_component->RemoveLayer(_selected_layer);
+					_selected_layer = std::max(size_t{ 0 }, _selected_layer - 1);
 				}
 
 				if (_curr_animator_component->layers.size() <= 1)
@@ -194,9 +196,7 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
 					if (ImGui::Selectable("##layer_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, selectable_size))
 					{
-						resetSelection();
-						_selected_layer = i;
-						_display_mode = AnimatorDisplayMode::Layer;
+						selectLayer(i);
 					}
 					ImGui::PopStyleColor(3);
 					ImGui::Separator(false);
@@ -253,9 +253,7 @@ namespace idk
 					if (ImGui::Button("..."))
 					{
 						ImGui::OpenPopup("layers_context_menu");
-						resetSelection();
-						_selected_layer = i;
-						_display_mode = AnimatorDisplayMode::Layer;
+						selectLayer(i);
 					}
 					drawLayersContextMenu();
 
@@ -382,7 +380,6 @@ namespace idk
 			if (_curr_animator_component)
 			{
 				static char buf[50];
-				bool rename_now = false;
 				string rename_to = "";
 
 				static bool just_rename = false;
@@ -706,19 +703,16 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
 					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_PressedOnClick, selectable_size))
 					{
+						selectTransition(_selected_layer, _selected_state, transition_index);
 						_show_transition = true;
 						_display_mode = AnimatorDisplayMode::State;
-							
-						_selected_state = state_index;
-						_selected_transition = transition_index;
 					}
 	
 					if (ImGui::IsItemHovered() && ImGui::IsWindowHovered())
 					{
 						if(ImGui::IsMouseDoubleClicked(0))
 						{
-							_show_transition = false;
-							_display_mode = AnimatorDisplayMode::Transition;
+							selectTransition(_selected_layer, _selected_state, _selected_transition);
 						}
 						else if( ImGui::IsMouseClicked(1))
 						{
@@ -770,6 +764,7 @@ namespace idk
 				if (ImGui::Button("Delete"))
 				{
 					curr_layer.RemoveAnimation(_selected_state);
+					_selected_state = std::max(size_t{ 0 }, _selected_state - 1);
 				}
 				if (!can_remove)
 					ImGuidk::PopDisabled();
@@ -792,11 +787,7 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
 					if (ImGui::Selectable("##state_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap, selectable_size))
 					{
-						const size_t curr_selected_layer = _selected_layer;
-						resetSelection();
-						_selected_layer = curr_selected_layer;
-						_selected_state = i;
-						_display_mode = AnimatorDisplayMode::State;
+						selectState(_selected_layer, i);
 					}
 					ImGui::PopStyleColor(3);
 					ImGui::Separator(false);
@@ -860,65 +851,37 @@ namespace idk
 	}
 	void IGE_AnimatorWindow::drawStatesContextMenu()
 	{
-		if (ImGui::IsPopupOpen("states_context_menu"))
-		{
-			ImGui::SetNextWindowSizeConstraints(ImVec2{ 300, 80 }, ImVec2{ 300, 80 });
-
-		}
-		if (ImGui::BeginPopup("layers_context_menu", ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize))
+		if (ImGui::BeginPopup("states_context_menu", ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize))
 		{
 			auto& curr_layer = _curr_animator_component->layers[_selected_layer];
-			auto& curr_def_state = curr_layer.GetAnimationState(curr_layer.default_index);
+			auto& curr_state = curr_layer.GetAnimationState(_selected_state);
 
-			const float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Entry State").x);
-			const float item_width = width_avail * 0.8f;
-			const float offset = ImGui::GetContentRegionAvailWidth() - item_width;
-
-			const bool valid = curr_def_state.valid;
-			valid ? ImGui::Text("Entry State") : ImGui::TextColored(ImVec4{ 1,0,0,1 }, "Entry State ");
-
-			ImGui::SameLine(offset);
-			ImGui::PushItemWidth(item_width);
-			if (ImGui::BeginCombo("##entry_state", curr_def_state.name.c_str()))
+			if (ImGui::Selectable("Set Entry State"))
 			{
-				for (size_t i = 1; i < curr_layer.anim_states.size(); ++i)
-				{
-					auto& state = curr_layer.anim_states[i];
+				curr_layer.default_index = _selected_state;
+				curr_layer.curr_state.Reset();
+				curr_layer.ResetBlend();
 
-					if (ImGui::Selectable(state.name.data(), i == curr_layer.default_index))
-					{
-						curr_layer.default_index = i;
-						curr_layer.curr_state.index = i;
-					}
-				}
-				ImGui::EndCombo();
+				curr_layer.curr_state.index = _selected_state;
 			}
-			ImGui::PopItemWidth();
+			const bool is_blend_tree = curr_state.IsBlendTree();
 
-			if (_selected_layer == 0)
+			if (is_blend_tree)
 				ImGuidk::PushDisabled();
-
-			ImGui::Text("Weight ");
-			auto& curr_weight = curr_layer.IsPlaying() ? curr_layer.weight : curr_layer.default_weight;
-			ImGui::SameLine(offset);
-			ImGui::PushItemWidth(item_width);
-			ImGui::SliderFloat("##weight", &curr_weight, 0.0f, 1.0f, "%.2f");
-			ImGui::PopItemWidth();
-
-			ImGui::Text("Blending");
-			ImGui::SameLine(offset);
-			ImGui::PushItemWidth(item_width);
-			if (ImGui::BeginCombo("##layer_blend_mode", curr_layer.blend_type.to_string().data()))
+			if (ImGui::Selectable("Convert to Blend Tree"))
 			{
-				if (ImGui::Selectable("Override", curr_layer.blend_type == AnimLayerBlend::Override_Blend))
-					curr_layer.blend_type = AnimLayerBlend::Override_Blend;
-				if (ImGui::Selectable("Additive (Not supported)", curr_layer.blend_type == AnimLayerBlend::Additive_Blend))
-					curr_layer.blend_type = AnimLayerBlend::Override_Blend;
-				ImGui::EndCombo();
-			}
-			ImGui::PopItemWidth();
 
-			if (_selected_layer == 0)
+			}
+			if (is_blend_tree)
+				ImGuidk::PopDisabled();
+
+			if (!is_blend_tree)
+				ImGuidk::PushDisabled();
+			if (ImGui::Selectable("Convert to Basic State"))
+			{
+
+			}
+			if (!is_blend_tree)
 				ImGuidk::PopDisabled();
 
 			ImGui::EndPopup();
@@ -927,14 +890,11 @@ namespace idk
 	void IGE_AnimatorWindow::drawBoneMaskTab()
 	{
 	}
-	bool IGE_AnimatorWindow::canvasContextMenu()
-	{
-		return false;
-	}
 
 	void IGE_AnimatorWindow::inspectLayer(size_t layer_index)
 	{
-		auto& curr_layer = _curr_animator_component->layers[layer_index];
+		UNREFERENCED_PARAMETER(layer_index);
+		//auto& curr_layer = _curr_animator_component->layers[layer_index];
 	}
 
 	void IGE_AnimatorWindow::inspectState(size_t layer_index, size_t state_index)
@@ -1011,9 +971,16 @@ namespace idk
 				const auto curr_pos = ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding;
 				if(ImGui::Selectable("##transition_display", selected, ImGuiSelectableFlags_AllowItemOverlap))
 				{
+					selectTransition(_selected_layer, _selected_state, i);
 					_show_transition = true;
-					_selected_transition = i;
+					_display_mode = State;
 				}
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+				{
+					selectTransition(_selected_layer, _selected_state, i);
+				}
+
 				const auto next_pos = ImGui::GetCursorPos();
 				ImGui::SetCursorPos(curr_pos);
 
@@ -1035,11 +1002,7 @@ namespace idk
 
 				ImGui::SetCursorPos(next_pos);
 
-				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-				{
-					_display_mode = AnimatorDisplayMode::Transition;
-					_selected_transition = i;
-				}
+				
 				ImGui::PopID();
 			}
 
@@ -1047,10 +1010,27 @@ namespace idk
 		}
 		ImGui::PopItemWidth();
 
-		if (ImGui::Button("+"))
+		if (ImGui::Button("Add"))
 		{
 			curr_state.AddTransition(_selected_state, 0);
 		}
+		ImGui::SameLine();
+
+		const bool can_remove = _selected_transition > 0 || _selected_transition < curr_state.transitions.size();
+		if (!can_remove)
+			ImGuidk::PushDisabled();
+
+		if (ImGui::Button("Delete"))
+		{
+			curr_state.RemoveTransition(_selected_transition);
+			const bool showing_transition = _show_transition;
+			selectTransition(_selected_layer, _selected_state, std::max(size_t{ 0 }, _selected_transition - 1));
+			if (_selected_transition > 0)
+				_show_transition = showing_transition;
+		}
+
+		if (!can_remove)
+			ImGuidk::PopDisabled();
 
 		if (!has_valid_clip)
 			ImGuidk::PopDisabled();
@@ -1084,9 +1064,9 @@ namespace idk
 
 		if (ImGui::Selectable(transition_from_state.name.data(), false, ImGuiSelectableFlags_None, ImGui::CalcTextSize(transition_from_state.name.data())))
 		{
-			_display_mode = AnimatorDisplayMode::State;
-			_selected_state = curr_transition.transition_from_index;
+			selectState(_selected_layer, curr_transition.transition_from_index);
 		}
+
 		ImGui::SameLine();
 		arrow();
 		ImGui::SameLine(0.0f, ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 3);
@@ -1094,8 +1074,7 @@ namespace idk
 		{
 			if (ImGui::Selectable(transition_to_state.name.data(), false, ImGuiSelectableFlags_None, ImGui::CalcTextSize(transition_to_state.name.data())))
 			{
-				_display_mode = AnimatorDisplayMode::State;
-				_selected_state = curr_transition.transition_to_index;
+				selectState(_selected_layer, curr_transition.transition_to_index);
 			}
 		}
 		else
@@ -1165,7 +1144,58 @@ namespace idk
 		ImGui::PopID();
 	}
 
-	void IGE_AnimatorWindow::drawAnimatorInspector()
+	void IGE_AnimatorWindow::displayConditions(size_t layer_index, size_t state_index, size_t transition_index)
+	{
+		auto& curr_layer = _curr_animator_component->layers[layer_index];
+		auto& curr_state = curr_layer.GetAnimationState(state_index);
+		auto& curr_transition = curr_state.GetTransition(transition_index);
+		
+		ImGui::Text("Conditions");
+		ImGui::PushItemWidth(-1);
+		auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
+		bg_col.w = bg_col.w * 0.4f;
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, bg_col);
+		const bool list_is_open = ImGui::ListBoxHeader("##conditions", curr_transition.conditions.size(), 5);
+		ImGui::PopStyleColor();
+
+		if (list_is_open)
+		{
+			for (size_t i = 0; i < curr_transition.conditions.size(); ++i)
+			{
+				ImGui::PushID(i);
+				auto& condition = curr_transition.conditions[i];
+				
+				const bool selected = _selected_condition == i;
+				
+				const auto curr_pos = ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding;
+				if (ImGui::Selectable("##conditions_display", selected, ImGuiSelectableFlags_AllowItemOverlap))
+				{
+					_selected_condition = i;
+				}
+
+				const auto next_pos = ImGui::GetCursorPos();
+				ImGui::SetCursorPos(curr_pos);
+
+				// Render text
+				ImGui::BeginGroup();
+				{
+					
+					//ImGui::BeginCombo()
+				}
+				ImGui::EndGroup();
+
+				ImGui::SetCursorPos(next_pos);
+
+
+				ImGui::PopID();
+			}
+
+			ImGui::ListBoxFooter();
+		}
+		ImGui::PopItemWidth();
+	}
+
+	void IGE_AnimatorWindow::animatorInspector()
 	{
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
@@ -1216,6 +1246,31 @@ namespace idk
 		_selected_layer = 0;
 		_selected_state = 0;
 		_selected_transition = 0;
+		_selected_condition = -1;
 		_show_transition = false;
+	}
+
+	void IGE_AnimatorWindow::selectLayer(size_t layer_index)
+	{
+		resetSelection();
+		_selected_layer = layer_index;
+		_display_mode = Layer;
+	}
+
+	void IGE_AnimatorWindow::selectState(size_t layer_index, size_t state_index)
+	{
+		resetSelection();
+		_selected_layer = layer_index;
+		_selected_state = state_index;
+		_display_mode = State;
+	}
+
+	void IGE_AnimatorWindow::selectTransition(size_t layer_index, size_t state_index, size_t transition_index)
+	{
+		resetSelection();
+		_selected_layer = layer_index;
+		_selected_state = state_index;
+		_selected_transition = transition_index;
+		_display_mode = Transition;
 	}
 }

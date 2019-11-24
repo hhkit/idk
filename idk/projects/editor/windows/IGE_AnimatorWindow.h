@@ -32,6 +32,7 @@ namespace idk {
 		size_t _selected_layer = 0;
 		size_t _selected_state = 0;
 		size_t _selected_transition = 0;
+		int _selected_condition = -1;
 
 		anim::AnimDataType _selected_param_type = anim::AnimDataType::NONE;
 		string _selected_param;
@@ -48,12 +49,11 @@ namespace idk {
 		size_t _layer_selectable_num_items;
 		size_t _state_selectable_num_items;
 
-		float align_right(float width_avail, float size);
 		void arrow();
 
-		void drawLeftCol();
-		void drawCanvas();
-		void drawAnimatorInspector();
+		void layersAndParams();
+		void statesAndBoneMask();
+		void animatorInspector();
 
 		void drawLayersTab();
 		void drawLayersContextMenu();
@@ -63,15 +63,15 @@ namespace idk {
 		void drawStatesContextMenu();
 		void drawBoneMaskTab();
 
-		bool canvasContextMenu();
-
 		void inspectLayer(size_t layer_index);
 		void inspectState(size_t layer_index, size_t state_index);
 		void inspectTransition(size_t layer_index, size_t state_index, size_t transition_index);
-
-		bool drawConnection(ImVec2 p1, ImVec2 p2);
+		void displayConditions(size_t layer_index, size_t state_index, size_t transition_index);
 
 		void resetSelection();
-		
+
+		void selectLayer(size_t layer_index);
+		void selectState(size_t layer_index, size_t state_index);
+		void selectTransition(size_t layer_index, size_t state_index, size_t transition_index);
 	};
 }

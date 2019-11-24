@@ -85,6 +85,15 @@
           transition_offset: 0
           transition_to_index: 0
           valid: 0
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 1
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 1
         valid: 1
       blend_type: Override_Blend
       bone_mask: 
