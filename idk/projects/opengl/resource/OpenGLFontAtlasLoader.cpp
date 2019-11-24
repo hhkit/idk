@@ -96,7 +96,8 @@ namespace idk {
 			h += mh;
 			font_handle->Size(ivec2(w, h));
 
-            font_handle->line_height = face->height / s_cast<float>(face->units_per_EM) * tm.font_size;
+            font_handle->ascender = face->ascender / s_cast<float>(face->units_per_EM) * tm.font_size;
+            font_handle->descender = face->descender / s_cast<float>(face->units_per_EM) * tm.font_size;
 
 			//////////////////////////////////Custom Buffer//////////////////////////////////////////
 			glActiveTexture(GL_TEXTURE0);

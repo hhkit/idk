@@ -1066,7 +1066,12 @@ namespace idk {
         {
             return ImGui::InputTextMultiline("", &val.get<string>());
         };
-        InjectDrawTable table{ { "text", draw_text } };
+        constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
+        {
+            auto& anchor = val.get<TextAnchor>();
+            return ImGuidk::EnumCombo("", &anchor);
+        };
+        InjectDrawTable table{ { "text", draw_text }, { "alignment", draw_alignment } };
         DisplayVal(*c_text, &table);
     }
 

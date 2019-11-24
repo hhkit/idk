@@ -470,7 +470,7 @@ REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Font, "Font")
-REFLECT_VARS(tracking, spacing, padding, color, fontSize, textureAtlas, text)
+REFLECT_VARS(text, letter_spacing, line_height, color, font_size, font)
 REFLECT_END()
 
 // CAMERA

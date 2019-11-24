@@ -14,6 +14,8 @@ namespace idk
 	struct FontData
     {
 		vector<FontPoint> coords;
+        real width;
+        real height;
 
         static FontData Generate(string_view text, RscHandle<FontAtlas> font_atlas,
                                  unsigned font_size, real tracking, real line_spacing,
