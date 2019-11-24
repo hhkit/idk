@@ -502,7 +502,7 @@ namespace idk
 			auto& render_data = result.font_render_data.emplace_back();
 			//if (!f.textureAtlas)
 				//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
-            render_data.coords = FontData::Generate(f.text, f.textureAtlas, f.fontSize, f.tracking, f.lineSpacing, TextAlignment::Left, 0).coords;
+            render_data.coords = FontData::Generate(f.text, f.textureAtlas, f.fontSize, f.tracking, f.textureAtlas->line_height + f.lineSpacing, TextAlignment::Left, 0).coords;
             render_data.color = f.color;
             render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
             render_data.atlas = f.textureAtlas;
@@ -535,7 +535,7 @@ namespace idk
             render_data.color = text.color;
             render_data.data = TextData{
                 FontData::Generate(text.text, text.font,
-                    text.font_size, text.letter_spacing, text.line_spacing, TextAlignment::Left, 0).coords,
+                    text.font_size, text.letter_spacing, text.font->line_height * text.line_height, TextAlignment::Left, 0).coords,
                 text.font };
             render_data.depth = go->Transform()->Depth();
         }

@@ -606,5 +606,5 @@ REFLECT_ENUM(idk::TextAlignment, "TextAlignment")
 REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
 
 REFLECT_BEGIN(idk::Text, "Text")
-REFLECT_VARS(text, font, font_size, letter_spacing, line_spacing, alignment, wrap, color, material)
+REFLECT_VARS(text, font, font_size, letter_spacing, line_height, alignment, wrap, best_fit, color, material)
 REFLECT_END()

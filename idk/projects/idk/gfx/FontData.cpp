@@ -6,7 +6,7 @@ namespace idk
 {
 
     FontData FontData::Generate(string_view text, RscHandle<FontAtlas> font_atlas,
-                                unsigned font_size, real tracking, real line_spacing,
+                                unsigned font_size, real tracking, real line_height,
                                 TextAlignment alignment, real wrap_width)
     {
         if (!font_atlas)
@@ -27,26 +27,20 @@ namespace idk
 
         const auto& c = font_atlas->c;
 
-        const real newLine_size = atlas_font_size;
-
         for (char ch : text)
         {
-            real x2 = x + c[ch].bearing.x;
-            real y2 = -y - c[ch].bearing.y;
-            real w = c[ch].glyph_size.x;
-            real h = c[ch].glyph_size.y;
-            x2 *= s;
-            y2 *= s;
-            w *= s;
-            h *= s;
+            real x2 = x + c[ch].bearing.x * s;
+            real y2 = -y - c[ch].bearing.y * s;
+            real w = c[ch].glyph_size.x * s;
+            real h = c[ch].glyph_size.y * s;
 
             // Advance the cursor to the start of the next character
-            x += c[ch].advance.x + tracking;
-            y += c[ch].advance.y;
+            x += (c[ch].advance.x + tracking) * s;
+            y += c[ch].advance.y * s;
 
             if (ch == '\n')
             {
-                y += c[ch].advance.y - newLine_size - line_spacing;
+                y -= line_height * s;
                 x = 0;
             }
 
