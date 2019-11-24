@@ -60,7 +60,7 @@ namespace idk
 		{
 			CameraData camera;
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
-			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
+			size_t inst_particle_begin{}, inst_particle_end{};
 		};
 		struct LightRenderRange
 		{
@@ -141,6 +141,8 @@ namespace idk
 			vector<AnimatedRenderObject> skinned_mesh_render;
 			vector<SkeletonTransforms> skeleton_transforms;
             vector<ParticleRenderData> particle_render_data;
+			vector<ParticleObj>        particle_buffer;
+			vector<ParticleRange>      particle_range;
 			vector<FontRenderData> font_render_data;
 			hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
 

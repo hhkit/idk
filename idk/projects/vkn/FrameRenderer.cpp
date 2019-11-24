@@ -474,6 +474,7 @@ namespace idk::vkn
 			Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPBRConvolute],
 			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube]
 		);
+		_particle_renderer.InitConfig();
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -515,6 +516,14 @@ namespace idk::vkn
 					}
 				}
 			}
+			if (state.shared_gfx_state->particle_data && state.shared_gfx_state->particle_data->size())
+			{
+				auto& particle_data = *state.shared_gfx_state->particle_data;
+				auto& buffer = state.shared_gfx_state->particle_buffer;
+				buffer.resize(hlp::buffer_size(particle_data));
+				buffer.update<const ParticleObj>(0, particle_data, cmd_buffer);
+			}
+
 			cmd_buffer.end();
 			//copy_state.FlagRendered();//Don't flag, we want to submit this separately.
 
@@ -1057,88 +1066,7 @@ namespace idk::vkn
 		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
 	}
-	struct ParticleRenderer
-	{
-		RenderObject particle_ro;
-		vector<RenderObject> particle_ro_inst;
-		shared_ptr<pipeline_config> particle_pipeline = std::make_shared<pipeline_config>();
-
-		renderer_attributes particle_vertex_req = renderer_attributes{ {
-							{ vtx::Attrib::Position, 0 },
-							{ vtx::Attrib::UV, 1 },
-						}
-		};
-		void InitConfig()
-		{
-			particle_pipeline->buffer_descriptions.emplace_back(
-				buffer_desc{ 
-					buffer_desc::binding_info{{},sizeof(ParticleObj),VertexRate::eInstance}, 
-					{
-						buffer_desc::attribute_info
-						{
-							AttribFormat::eSVec3,2,offsetof(ParticleObj,ParticleObj::position)
-						},
-						buffer_desc::attribute_info
-						{
-							AttribFormat::eSVec1,3,offsetof(ParticleObj,ParticleObj::rotation)
-						},
-						buffer_desc::attribute_info
-						{
-							AttribFormat::eSVec1,4,offsetof(ParticleObj,ParticleObj::size)
-						},
-						buffer_desc::attribute_info
-						{
-							AttribFormat::eSVec4,5,offsetof(ParticleObj,ParticleObj::color)
-						},
-					}
-				});
-		}
-
-		void DrawParticles(PipelineThingy& the_interface, const GraphicsState& state, RenderStateV2& rs)
-		{
-			auto& shared_state = *state.shared_gfx_state;
-			StandardMaterialBindings mat_bind;
-			mat_bind.SetState(state);
-			if (shared_state.particle_render_data)
-			{
-				auto& cam = state.camera;
-				the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VParticle]);
-				const vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
-				const vec3 cam_pos = cam.view_matrix[3];
-				auto& particle_render_data = shared_state.particle_range;
-				particle_ro.config = particle_pipeline;
-				particle_ro_inst.clear();
-				particle_ro_inst.reserve(particle_render_data.size());
-				for (auto& elem : particle_render_data)
-				{
-					//done outside.
-					//std::sort(elem.particles.begin(), elem.particles.end(),
-					//	[cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) {
-					//		return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
-					//
-
-					RenderObject part_ro{ particle_ro };
-
-					const auto material = elem.material_instance->material;
-					part_ro.material_instance = elem.material_instance;
-					part_ro.mesh = Mesh::defaults[MeshType::FSQ];
-					part_ro.renderer_req = &particle_vertex_req;
-					// bind shader
-					the_interface.BindShader(ShaderStage::Fragment,material->_shader_program);
-					//TODO bind materials
-					mat_bind.Bind(the_interface,part_ro);
-
-					the_interface.BindMeshBuffers(part_ro);
-					the_interface.BindAttrib(2,shared_state.particle_buffer.buffer(),0);
-					
-
-					the_interface.FinalizeDrawCall(particle_ro_inst.emplace_back(std::move(part_ro)), elem.num_elems, elem.elem_offset);
-
-				}
-			}
-		}
-	};
-	
+#pragma optimize("",off)
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
@@ -1174,9 +1102,7 @@ namespace idk::vkn
 		//TODO make ProcessRoUniforms only render forward pass stuff.
 		auto&& the_interface = (is_deferred)?PipelineThingy{}:
 			ProcessRoUniforms(state, rs.ubo_manager);
-		ParticleRenderer pr;
-		pr.InitConfig();
-		pr.DrawParticles(the_interface, state, rs);
+		_particle_renderer.DrawParticles(the_interface, state, rs);
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
@@ -1301,9 +1227,13 @@ namespace idk::vkn
 
 		if (processed_ro.size()>0)
 		{
+			bool is_particle_renderer = false;
 			for (auto& p_ro : processed_ro)
 			{
 				bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
+				is_particle_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
+				if (is_particle_renderer)
+					continue;
 				auto& obj = p_ro.Object();
 				if (p_ro.rebind_shaders)
 				{
@@ -1360,6 +1290,76 @@ namespace idk::vkn
 				{
 					cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
 					cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+				}
+			}
+			if (is_particle_renderer)
+			{
+				is_particle_renderer = false;
+				for (auto& p_ro : processed_ro)
+				{
+					bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
+					is_particle_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
+					if (!is_particle_renderer)
+						continue;
+					auto& obj = p_ro.Object();
+					if (p_ro.rebind_shaders)
+					{
+						shaders.resize(0);
+						if (p_ro.frag_shader)
+							shaders.emplace_back(*p_ro.frag_shader);
+						if (p_ro.vertex_shader)
+							shaders.emplace_back(*p_ro.vertex_shader);
+						if (p_ro.geom_shader)
+							shaders.emplace_back(*p_ro.geom_shader);
+
+						auto config = ConfigWithVP(*obj.config, camera, offset, size);
+						if (is_mesh_renderer)
+							config.buffer_descriptions.emplace_back(
+								buffer_desc
+								{
+									buffer_desc::binding_info{ std::nullopt,sizeof(mat4) * 2,VertexRate::eInstance},
+									{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true},
+									 buffer_desc::attribute_info{AttribFormat::eMat4,8,sizeof(mat4),true}
+									 }
+								}
+						);
+						auto& pipeline = GetPipeline(config, shaders);
+						pipeline.Bind(cmd_buffer, view);
+						SetViewport(cmd_buffer, offset, size);
+						prev_pipeline = &pipeline;
+					}
+					cmd_buffer.endRenderPass();
+					cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+					auto& pipeline = *prev_pipeline;
+					//TODO Grab everything and render them
+					//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
+					auto& mesh = obj.mesh.as<VulkanMesh>();
+					{
+						uint32_t set = 0;
+						for (auto& ods : p_ro.descriptor_sets)
+						{
+							if (ods)
+							{
+								auto& ds = *ods;
+								cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+							}
+							++set;
+						}
+					}
+					//auto& renderer_req = *obj.renderer_req;
+
+					for (auto& [location, attrib] : p_ro.attrib_buffers)
+					{
+						auto opt = pipeline.GetBinding(location);
+						if (opt)
+							cmd_buffer.bindVertexBuffers(*opt, attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
+					}
+					auto& oidx = mesh.GetIndexBuffer();
+					if (oidx)
+					{
+						cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
+						cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+					}
 				}
 			}
 		}

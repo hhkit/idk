@@ -265,6 +265,8 @@ namespace idk::vkn
 		auto& lights = curr_buffer.lights;
 		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);
 		shared_graphics_state.BrdfLookupTable = _pimpl->BrdfLookupTable;
+		shared_graphics_state.particle_data = &curr_buffer.particle_buffer;
+		shared_graphics_state.particle_range = &curr_buffer.particle_range;
 
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;

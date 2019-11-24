@@ -47,13 +47,6 @@ namespace idk::vkn
 		void Draw(vk::CommandBuffer cmd_buffer)const;
 	};
 
-	struct ParticleRange
-	{
-		RscHandle<MaterialInstance> material_instance;
-		size_t elem_offset;
-		size_t num_elems;
-	};
-
 	using shadow_map_t = std::variant<RscHandle<Texture>, RscHandle<CubeMap>>;
 
 	struct SharedGraphicsState
@@ -63,8 +56,8 @@ namespace idk::vkn
 		const vector<LightData>* lights;
 		hlp::vector_buffer inst_mesh_render_buffer;
 		const vector<InstRenderObjects>* instanced_ros;
-		const vector<ParticleRenderData>* particle_render_data{};
-		vector<ParticleRange>             particle_range;
+		const vector<ParticleObj>*        particle_data{};
+		vector<ParticleRange>*            particle_range;
 		hlp::vector_buffer                particle_buffer;
 		//vector<shadow_map_t> shadow_maps;
 

@@ -119,6 +119,13 @@ namespace idk
         vector<ParticleObj> particles;
         RscHandle<MaterialInstance> material_instance;
     };
+	struct ParticleRange
+	{
+		RscHandle<MaterialInstance> material_instance;
+		size_t elem_offset;
+		size_t num_elems;
+	};
+
 
     struct FontRenderData
     {
