@@ -515,7 +515,7 @@ namespace idk
 		{
 			{
 				auto layer = c.GetGameObject()->GetComponent<Layer>();
-				auto mask = layer ? layer->mask() : 1 << 0;
+				auto mask = layer ? layer->mask() : LayerMask{ 1 << 0 };
 				if (!(mask & layer_mask))
 					continue;
 			}
@@ -659,7 +659,7 @@ namespace idk
 
     bool PhysicsSystem::AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const
     {
-        return GetConfig().matrix[a] & (1 << b);
+        return GetConfig().matrix[a] & LayerMask(1 << b);
     }
 
 

@@ -322,6 +322,7 @@ namespace idk::vkn
 	{
 		//RscHandle<ShaderProgram>             mesh_vtx;
 		//RscHandle<ShaderProgram>             skinned_mesh_vtx;
+		LayerMask mask = ~(LayerMask{});
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		const vector<const RenderObject*>*         mesh_render;
@@ -337,13 +338,14 @@ namespace idk::vkn
 			skinned_mesh_render = &state.skinned_mesh_render;
 			shared_state = state.shared_gfx_state;
 			inst_ro = state.shared_gfx_state->instanced_ros;
-
 		}
 		GraphicsStateInterface(const GraphicsState& state) : GraphicsStateInterface{static_cast<const CoreGraphicsState&>(state)}
 		{
 			renderer_vertex_shaders = state.renderer_vertex_shaders;
 			renderer_fragment_shaders = state.renderer_fragment_shaders;
 			range = state.range;
+
+			mask = state.camera.culling_flags;
 		}
 		GraphicsStateInterface(const PreRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
 		{
@@ -399,7 +401,7 @@ namespace idk::vkn
 			{
 				auto& dc = *ptr_dc;
 				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material)
+				if (mat_inst.material && dc.layer_mask&state.mask)
 				{
 					binders.Bind(the_interface, dc);
 					the_interface.BindMeshBuffers(dc);
@@ -731,7 +733,7 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
-		auto cam = CameraData{ GenericHandle {}, 0xFFFFFFFF,light.v,light.p };
+		auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.p};
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
 			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -1066,7 +1068,6 @@ namespace idk::vkn
 		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
 	}
-#pragma optimize("",off)
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
@@ -1109,9 +1110,7 @@ namespace idk::vkn
 		auto deferred_interface = (is_deferred) ? rs.deferred_pass.ProcessDrawCalls(state, rs) : PipelineThingy{};
 		if(is_deferred)
 			deferred_interface.GenerateDS(rs.dpools, false);
-
-		//TODO move ParticleRenderer out
-
+		
 		//rs.ubo_manager.UpdateAllBuffers();
 		std::array<float, 4> a{};
 

@@ -5,6 +5,6 @@ namespace idk
 {
 	LayerMask Layer::mask() const
 	{
-		return 1 << index;
+		return LayerMask{ 1 << index };
 	}
 }

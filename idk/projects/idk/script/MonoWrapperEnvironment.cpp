@@ -431,7 +431,7 @@ namespace idk::mono
 		};
 		BIND_START("idk.Bindings::PhysicsRaycast", ManagedRaycast, vec3 origin, vec3 direction, float max_dist, int mask, bool hit_triggers)
 		{
-			auto res = Core::GetSystem<PhysicsSystem>().Raycast(ray{ .origin = origin,.velocity = direction }, mask, hit_triggers);
+			auto res = Core::GetSystem<PhysicsSystem>().Raycast(ray{ .origin = origin,.velocity = direction }, LayerMask{ mask }, hit_triggers);
 			if (res.size())
 			{
 				auto& first = res.front();

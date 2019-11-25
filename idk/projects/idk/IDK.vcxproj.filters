@@ -899,6 +899,7 @@
     <ClInclude Include="gfx\TextAlignment.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
+    <ClInclude Include="util\LayerMask.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

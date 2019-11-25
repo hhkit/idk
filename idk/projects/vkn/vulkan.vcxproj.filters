@@ -208,7 +208,6 @@
     <ClInclude Include="DescriptorCountArray.h">
       <Filter>descriptor_sets</Filter>
     </ClInclude>
-    <ClInclude Include="utils\Flags.h" />
     <ClInclude Include="FrameRenderer.h">
       <Filter>render\renderers</Filter>
     </ClInclude>
@@ -220,6 +219,9 @@
     </ClInclude>
     <ClInclude Include="ParticleRenderer.h">
       <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Flags.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -384,7 +386,6 @@
     <ClCompile Include="VknTextureRenderMeta.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="DescriptorUpdateData.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
@@ -403,7 +404,12 @@
     <ClCompile Include="CubemapRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleRenderer.cpp" />
+    <ClCompile Include="ParticleRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorUpdateData.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
