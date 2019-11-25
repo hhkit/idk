@@ -18,6 +18,7 @@ namespace idk
 
 		size_t default_index = 0;
 		AnimationLayerState curr_state, blend_state;
+		size_t transition_index = 0;
 
 		// Run time values
 		// layer weight and blend type (currently only have override blend)
@@ -29,7 +30,7 @@ namespace idk
 		// Controls blending to different states in run-time
 		float blend_duration = 0.0f;
 		bool playing_before_pause = false, blending_before_pause = false;
-		bool blend_interruptible = false, blend_this_frame = false, blend_interrupt = false;
+		bool blend_this_frame = false, blend_interrupt = false;
 
 		// Caching
 		vector<matrix_decomposition<real>> prev_poses;
@@ -64,6 +65,8 @@ namespace idk
 
 		bool IsPlaying() const;
 		bool IsBlending() const;
+		bool IsInTransition() const;
+		bool IsTransitionInterruptible() const;
 		bool HasCurrAnimEnded() const;
 		bool HasState(string_view name) const;
 		

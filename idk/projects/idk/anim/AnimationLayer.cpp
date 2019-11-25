@@ -40,7 +40,7 @@ namespace idk
 
 	bool AnimationLayer::BlendTo(size_t index, float blend_time)
 	{
-		if (IsBlending() && !blend_interruptible)
+		if (IsInTransition() && !IsTransitionInterruptible())
 			return false;
 
 		if (blend_time < 0.00001f)
@@ -75,10 +75,11 @@ namespace idk
 
 		blend_state.index = index;
 		blend_state.normalized_time = 0.0f;
+		blend_state.elapsed_time = 0.0f;
 		blend_state.is_playing = true;
 		blend_this_frame = true;
 		blend_duration = blend_time;
-		blend_interruptible = false;
+		transition_index = 0;
 		return true;
 	}
 
@@ -289,6 +290,24 @@ namespace idk
 		return blend_state.is_playing;
 	}
 
+	bool AnimationLayer::IsInTransition() const
+	{
+		return IsBlending() && transition_index > 0;
+	}
+
+	bool AnimationLayer::IsTransitionInterruptible() const
+	{
+		if (!IsInTransition())
+			return false;
+		auto& anim_state = GetAnimationState(curr_state.index);
+		if (anim_state.valid)
+		{
+			auto& transition = anim_state.transitions[transition_index];
+			return transition.valid && transition.interruptible;
+		}
+		return false;
+	}
+
 	bool AnimationLayer::HasCurrAnimEnded() const
 	{
 		return curr_state.normalized_time >= 1.0f;
@@ -322,6 +341,6 @@ namespace idk
 		blend_interrupt = false;
 		playing_before_pause = false;
 		blending_before_pause = false;
-		blend_interruptible = false;
+		transition_index = 0;
 	}
 }

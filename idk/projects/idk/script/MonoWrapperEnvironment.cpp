@@ -575,9 +575,9 @@ namespace idk::mono
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorStop",  void, Handle<Animator> animator)
-			{
-				animator->Stop();
-			}
+		{
+			animator->Stop();
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorDefaultStateName", MonoString*, Handle<Animator> animator)
@@ -624,6 +624,61 @@ namespace idk::mono
 			}
 		BIND_END();
 
+		BIND_START("idk.Bindings::AnimatorGetInt", int, Handle<Animator> animator, MonoString* name)
+		{
+			auto s = unbox(name);
+			return animator->GetInt(s.get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorGetFloat", float, Handle<Animator> animator, MonoString* name)
+		{
+			auto s = unbox(name);
+			return animator->GetFloat(s.get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorGetBool", bool, Handle<Animator> animator, MonoString* name)
+		{
+			auto s = unbox(name);
+			return animator->GetBool(s.get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorGetTrigger", bool, Handle<Animator> animator, MonoString* name)
+		{
+			auto s = unbox(name);
+			return animator->GetTrigger(s.get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorSetInt", bool, Handle<Animator> animator, MonoString* name, int val)
+		{
+			auto s = unbox(name);
+			return animator->SetInt(s.get(), val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorSetFloat", bool, Handle<Animator> animator, MonoString* name, float val)
+		{
+			auto s = unbox(name);
+			return animator->SetFloat(s.get(), val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorSetBool", bool, Handle<Animator> animator, MonoString* name, bool val)
+		{
+			auto s = unbox(name);
+			return animator->SetBool(s.get(), val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorSetTrigger", bool, Handle<Animator> animator, MonoString* name, bool val)
+		{
+			auto s = unbox(name);
+			return animator->SetTrigger(s.get(), val);
+		}
+		BIND_END();
 
 		//AudioSource
 		//----------------------------------------------------------------------------------------------------

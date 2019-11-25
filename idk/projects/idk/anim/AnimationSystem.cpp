@@ -385,7 +385,7 @@ namespace idk
 				layer.blend_state.normalized_time = 0.0f;
 				layer.blend_state.elapsed_time = 0.0f;
 				layer.blend_interrupt = false;
-				layer.blend_interruptible = false;
+				layer.transition_index = 0;
 				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + std::to_string(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
@@ -421,14 +421,18 @@ namespace idk
 				return;
 
 			// if we are in a transition and cannot be interrupted, we do not evaluate conditions/exit time
-			if (layer.IsBlending() && !layer.blend_interruptible)
+			if (layer.IsInTransition() && !layer.IsTransitionInterruptible())
+			{
 				return;
+			}
+				
 			
 			for (size_t i = 1; i < anim_state.transitions.size(); ++i)
 			{
 				// Skip invalid transitions
 				auto& curr_transition = anim_state.GetTransition(i);
-				if (!curr_transition.valid)
+				// dont bother evaluating transition if the same transition is alr happening
+				if (!curr_transition.valid || i == layer.transition_index)
 					continue;
 
 				bool transit = false;
@@ -463,13 +467,13 @@ namespace idk
 					case anim::AnimDataType::BOOL:
 					{
 						auto& param = animator.GetParam<anim::BoolParam>(cond.param_name);
-						transit &= param.valid ? anim::condition_ops_bool[cond.op_index](param.val, cond.val_b) : false;
+						transit &= param.valid ? param.val == cond.val_b : false;
 						break;
 					}
 					case anim::AnimDataType::TRIGGER:
 					{
 						auto& param = animator.GetParam<anim::TriggerParam>(cond.param_name);
-						transit &= param.valid ? anim::condition_ops_bool[cond.op_index](param.val, cond.val_t) : false;
+						transit &= param.valid ? param.val == cond.val_t : false;
 						break;
 					}
 					case anim::AnimDataType::NONE:
@@ -489,7 +493,7 @@ namespace idk
 					{
 						LOG("TRANSITION HIT");
 						layer.blend_state.normalized_time = curr_transition.transition_offset;
-						layer.blend_interruptible = curr_transition.interruptible;
+						layer.transition_index = i;
 					}
 					break;
 				}

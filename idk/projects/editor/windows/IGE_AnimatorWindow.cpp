@@ -141,7 +141,7 @@ namespace idk
 		if (ImGui::BeginTabBar("States & Bone Mask", tab_flags))
 		{
 			drawStatesTab();
-			
+			drawBoneMaskTab();
 			ImGui::EndTabBar();
 		};
 		ImGui::EndChild();
@@ -166,7 +166,8 @@ namespace idk
 				}
 				ImGui::SameLine();
 
-				if (_curr_animator_component->layers.size() <= 1)
+				const bool can_remove = _curr_animator_component->layers.size() > 1;
+				if (!can_remove)
 					ImGuidk::PushDisabled();
 
 				if (ImGui::Button("Delete"))
@@ -175,7 +176,7 @@ namespace idk
 					_selected_layer = std::max(size_t{ 0 }, _selected_layer - 1);
 				}
 
-				if (_curr_animator_component->layers.size() <= 1)
+				if (!can_remove)
 					ImGuidk::PopDisabled();
 
 				//ImGui::NewLine();
@@ -257,31 +258,6 @@ namespace idk
 					}
 					drawLayersContextMenu();
 
-					//const float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Blending").x);
-					//const float item_width = width_avail * 0.8f;
-					//const float offset = ImGui::CalcTextSize("Blending").x + width_avail - item_width;
-					//ImGui::Text("Blending");
-					//ImGui::SameLine(offset);
-					//ImGui::PushItemWidth(item_width);
-					//if (ImGui::BeginCombo("##layer_blend_mode", layer.blend_type.to_string().data()))
-					//{
-					//	if (ImGui::Selectable("Override", layer.blend_type == AnimLayerBlend::Override_Blend))
-					//		layer.blend_type = AnimLayerBlend::Override_Blend;
-					//	if (ImGui::Selectable("Additive (Not supported)", layer.blend_type == AnimLayerBlend::Additive_Blend))
-					//		layer.blend_type = AnimLayerBlend::Override_Blend;
-					//	ImGui::EndCombo();
-					//}
-					//ImGui::PopItemWidth();
-					//
-					//ImGui::Text("Weight");
-					//ImGui::SameLine(offset);
-					//ImGui::PushItemWidth(item_width);
-					//if (layer.IsPlaying())
-					//	ImGui::DragFloat("##def weight", &layer.weight, 0.01f, 0.0f, 1.0f, "%.2f");
-					//else
-					//	ImGui::DragFloat("##def weight", &layer.default_weight, 0.01f, 0.0f, 1.0f, "%.2f");
-					//ImGui::PopItemWidth();
-
 					ImGui::NewLine();
 					const ImVec2 prog_size = ImVec2(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().FramePadding.x, 3);
 					if (layer.IsPlaying())
@@ -296,12 +272,9 @@ namespace idk
 					ImGui::PopID();
 					
 				}
-
-
 			}
 			ImGui::EndTabItem();
 		}
-		
 	}
 
 	void IGE_AnimatorWindow::drawLayersContextMenu()
@@ -346,10 +319,22 @@ namespace idk
 
 			ImGui::Text("Weight ");
 			static float no_edit_weight = 1.0f;
-			auto& curr_weight = curr_layer.IsPlaying() ? curr_layer.weight : curr_layer.default_weight;
 			ImGui::SameLine(offset);
 			ImGui::PushItemWidth(item_width);
-			ImGui::SliderFloat("##weight", _selected_layer == 0 ? &no_edit_weight : &curr_weight, 0.0f, 1.0f, "%.2f");
+			if (_selected_layer == 0)
+			{
+				ImGui::SliderFloat("##weight", &no_edit_weight, 0.0f, 1.0f, "%.2f");
+			}
+			else if(!curr_layer.IsPlaying())
+			{
+				if (ImGui::SliderFloat("##weight", &curr_layer.default_weight, 0.0f, 1.0f, "%.2f"))
+					curr_layer.weight = curr_layer.default_weight;
+			}
+			else
+			{
+				ImGui::SliderFloat("##weight", &curr_layer.weight, 0.0f, 1.0f, "%.2f");
+			}
+
 			ImGui::PopItemWidth();
 
 			ImGui::Text("Blending");
@@ -703,7 +688,7 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
 					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_PressedOnClick, selectable_size))
 					{
-						selectTransition(_selected_layer, _selected_state, transition_index);
+						selectTransition(_selected_layer, state_index, transition_index);
 						_show_transition = true;
 						_display_mode = AnimatorDisplayMode::State;
 					}
@@ -726,14 +711,20 @@ namespace idk
 					const auto new_cursor_pos = ImGui::GetCursorPos();
 					ImGui::SetCursorPos(prev_cursor_pos + selectable_offset);
 					
-					// Display transition name
+					// Display transition name					
+					if(layer.transition_index == transition_index)
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0,1,0,1 });
+					
 					ImGui::Text(transition_from.data());
+
 					ImGui::SameLine();
 					arrow();
 					ImGui::SameLine(0.0f, ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2);
 					ImGui::Text(transition_to.data());
-
-					ImGui::ProgressBar(0.0f, ImVec2(-1, 3), nullptr);
+					if (layer.transition_index == transition_index)
+						ImGui::PopStyleColor(1);
+					float weight = layer.transition_index == transition_index ? layer.blend_state.elapsed_time / layer.blend_duration : 0.0f;
+					ImGui::ProgressBar(weight, ImVec2(-1, 3), nullptr);
 
 					ImGui::EndGroup();
 					ImGui::Unindent();
@@ -1024,7 +1015,9 @@ namespace idk
 		{
 			curr_state.RemoveTransition(_selected_transition);
 			const bool showing_transition = _show_transition;
+			const auto displaying_as = _display_mode;
 			selectTransition(_selected_layer, _selected_state, std::max(size_t{ 0 }, _selected_transition - 1));
+			_display_mode = displaying_as;
 			if (_selected_transition > 0)
 				_show_transition = showing_transition;
 		}
@@ -1092,7 +1085,7 @@ namespace idk
 		{
 			for (size_t i = 0; i < curr_layer.anim_states.size(); ++i)
 			{
-				if (i == transition_index)
+				if (i == curr_transition.transition_from_index)
 					continue;
 
 				auto& s = curr_layer.anim_states[i];
@@ -1135,6 +1128,10 @@ namespace idk
 		if (ImGui::InputFloat("##transition_offset", &curr_transition.transition_offset))
 			curr_transition.transition_offset = max(curr_transition.transition_offset, 0.0f);
 		ImGui::PopItemWidth();
+
+		ImGui::Text("Interruptible");
+		ImGui::SameLine(offset);
+		ImGui::Checkbox("##interruptible", &curr_transition.interruptible);
 
 		if (!transition_to_state.valid)
 			ImGuidk::PopDisabled();
@@ -1207,27 +1204,9 @@ namespace idk
 				ImGui::PushID(i);
 				auto& condition = curr_transition.conditions[i];
 				
-				// const bool selected = _selected_condition == i;
-				// ImGui::PushStyleColor(ImGuiCol_Header, _selectable_bg_col);
-				// ImGui::PushStyleColor(ImGuiCol_HeaderActive, _selectable_active_col);
-				// if (selected)
-				// 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
-				// else
-				// 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
-				// auto curr_pos = ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding;
-				// curr_pos.y += ImGui::GetStyle().FramePadding.y;
-				// 
-				// if (ImGui::Selectable("##conditions_display", selected, ImGuiSelectableFlags_AllowItemOverlap))
-				// {
-				// 	_selected_condition = i;
-				// }
-				// ImGui::PopStyleColor(3);
-				// 
-				// const auto next_pos = ImGui::GetCursorPos();
-				// ImGui::SetCursorPos(curr_pos);
-
 				const float widget_size = ImGui::GetContentRegionAvailWidth() * 0.25f;
-				ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() * 0.27f);
+				const float delete_button_offset = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Delete").x - ImGui::GetStyle().FramePadding.x;
+				ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() * 0.3f);
 				if(ImGui::BeginCombo("##condition_param_selection", condition.param_name.data()))
 				{
 					if (!_curr_animator_component->GetParamTable<anim::IntParam>().empty()) param_selection("Int", condition, anim::IntParam{});
@@ -1241,7 +1220,7 @@ namespace idk
 				// Render text
 				ImGui::SameLine();
 				static constexpr const char* bool_alpha[2]{ "False", "True" };
-				static constexpr const char* opt_index[4]{ "Equal", "Not Equal", "Greater", "Less" };
+				static constexpr const char* opt_index[4]{ "Greater", "Less", "Equal", "Not Equal" };
 				ImGui::BeginGroup();
 				{
 					ImGui::PushItemWidth(widget_size);
@@ -1251,14 +1230,14 @@ namespace idk
 					{
 						if (ImGui::BeginCombo("##int_op_select", opt_index[condition.op_index]))
 						{
-							if (ImGui::Selectable("Equal", condition.op_index == 0))
-								condition.op_index = anim::ConditionIndex::EQUALS;
-							if (ImGui::Selectable("Not Equal", condition.op_index == 1))
-								condition.op_index = anim::ConditionIndex::NOT_EQUALS;
-							if (ImGui::Selectable("Greater", condition.op_index == 2))
+							if (ImGui::Selectable("Greater", condition.op_index == 0))
 								condition.op_index = anim::ConditionIndex::GREATER;
-							if (ImGui::Selectable("Less", condition.op_index == 3))
+							if (ImGui::Selectable("Less", condition.op_index == 1))
 								condition.op_index = anim::ConditionIndex::LESS;
+							if (ImGui::Selectable("Equal", condition.op_index == 2))
+								condition.op_index = anim::ConditionIndex::EQUALS;
+							if (ImGui::Selectable("Not Equal", condition.op_index == 3))
+								condition.op_index = anim::ConditionIndex::NOT_EQUALS;
 							
 							ImGui::EndCombo();
 						}
@@ -1270,9 +1249,9 @@ namespace idk
 					{
 						if (ImGui::BeginCombo("##float_op_select", opt_index[condition.op_index]))
 						{
-							if (ImGui::Selectable("Greater", condition.op_index == 2))
+							if (ImGui::Selectable("Greater", condition.op_index == 0))
 								condition.op_index = anim::ConditionIndex::GREATER;
-							if (ImGui::Selectable("Less", condition.op_index == 3))
+							if (ImGui::Selectable("Less", condition.op_index == 1))
 								condition.op_index = anim::ConditionIndex::LESS;
 							ImGui::EndCombo();
 						}
@@ -1282,29 +1261,22 @@ namespace idk
 					}
 					case anim::AnimDataType::BOOL:
 					{
-						ImGui::SameLine(0.0f, widget_size +  ImGui::GetStyle().ItemSpacing.x * 2);
+						ImGui::PushItemWidth(widget_size * 2 + ImGui::GetStyle().ItemSpacing.x);
 						if (ImGui::BeginCombo("##bool_edit", bool_alpha[condition.val_b]))
 						{
-							if (ImGui::Selectable("True"))
+							if (ImGui::Selectable("true"))
 								condition.val_b = true;
-							if (ImGui::Selectable("False"))
+							if (ImGui::Selectable("false"))
 								condition.val_b = false;
 							ImGui::EndCombo();
 						}
+						ImGui::PopItemWidth();
+					
 						break;
 
 					}
 					case anim::AnimDataType::TRIGGER:
 					{
-						ImGui::SameLine(0.0f, widget_size + ImGui::GetStyle().ItemSpacing.x * 2);
-						if (ImGui::BeginCombo("##trigger_edit", bool_alpha[condition.val_t]))
-						{
-							if (ImGui::Selectable("True"))
-								condition.val_t = true;
-							if (ImGui::Selectable("False"))
-								condition.val_t = false;
-							ImGui::EndCombo();
-						}
 						break;
 					}
 					}
@@ -1312,16 +1284,13 @@ namespace idk
 				}
 				ImGui::PopItemWidth();
 				ImGui::SameLine();
+				ImGui::SetCursorPosX(delete_button_offset);
 				if (ImGui::Button("Delete"))
 				{
 					to_delete = i;
 				}
 
 				ImGui::EndGroup();
-				//ImGui::PopItemWidth();
-
-				// ImGui::SetCursorPos(next_pos);
-
 
 				ImGui::PopID();
 			}
@@ -1334,7 +1303,9 @@ namespace idk
 			curr_transition.conditions.emplace_back(AnimationCondition{});
 		}
 		if (to_delete >= 0)
+		{
 			curr_transition.RemoveCondition(s_cast<size_t>(to_delete));
+		}
 	}
 
 	void IGE_AnimatorWindow::animatorInspector()
