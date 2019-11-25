@@ -14,6 +14,7 @@ namespace idk::mono
 		ManagedType* GetBehaviorMetadata(string_view name);
 		span<const char* const> GetBehaviorList();
 	private:
+		string assembly_data;
 		vector<const char*> name_list;
 		hash_table<string, ManagedType*> mono_behaviors;
 		void FindMonoBehaviors();

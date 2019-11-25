@@ -19,12 +19,20 @@
 #include <script/ValueBoxer.h>
 #include <script/MonoBinder.h>
 
+#include <util/ioutils.h>
 namespace idk::mono
 {
 	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)
 	{
 		_domain = mono_jit_init("MasterDomain");
-		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+		std::ifstream file{ full_path_to_game_dll, std::ios::binary };
+		assembly_data = stringify(file);
+		//_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+		mono_domain_set(_domain, true);
+		MonoImageOpenStatus status;
+		auto img = mono_image_open_from_data(assembly_data.data(), assembly_data.size(), true, &status);
+		//_assembly = mono_image_get_assembly(img);
+		_assembly = mono_assembly_load_from(img, full_path_to_game_dll.data(), &status);
 		BindCoreFunctions();
 		IDK_ASSERT_MSG(_assembly, "cannot load idk.dll");
 	}

@@ -85,11 +85,10 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto t = Core::GetSystem<ScriptSystem>().Environment().Type("MonoBehavior");
-			
-			auto method = t->GetMethod("UpdateCoroutines");
-			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(script_data.Raw());
+			auto thunk = script_data.Type()->GetThunk("UpdateCoroutines");
+
+			if (thunk)
+				thunk->Invoke(script_data.Raw());
 		}
 	}
 	

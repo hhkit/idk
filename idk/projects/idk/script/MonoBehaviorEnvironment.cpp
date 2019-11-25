@@ -19,6 +19,7 @@
 
 #include <core/GameObject.h>
 #include <scene/SceneManager.h>
+#include <util/ioutils.h>
 
 namespace idk::mono
 {
@@ -27,19 +28,27 @@ namespace idk::mono
 	{
 		char domain_name[] = "ScriptDomain";
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
-		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+		std::ifstream file{ full_path_to_game_dll, std::ios::binary };
+		assembly_data = stringify(file);
+		mono_domain_set(_domain, true);
+		MonoImageOpenStatus status;
+
+		auto img = mono_image_open_from_data(assembly_data.data(), assembly_data.size(), true, &status);
+		//_assembly = mono_image_get_assembly(img);
+		_assembly = mono_assembly_load_from(img, full_path_to_game_dll.data(), &status);
+		//_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
 
 		ScanTypes();
+		if (!mono_domain_set(_domain, true))
+			throw;
 	}
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()
 	{
-		try
-		{
-			MonoObject* obj = nullptr;
-			mono_domain_try_unload(_domain, &obj); // try things
-			IDK_ASSERT(obj == nullptr);
-		}
-		catch (...) {}
+		MonoObject* obj = nullptr;
+		if(!mono_domain_set(Core::GetSystem<ScriptSystem>().Environment().Domain(), true))
+			throw;
+		mono_domain_try_unload(_domain, &obj); // try things
+		IDK_ASSERT(obj == nullptr);
 
 		_domain = nullptr;
 		_assembly = nullptr;
@@ -91,6 +100,8 @@ namespace idk::mono
 
 				do
 				{
+					if (mono_class_get_name(check_parent) == string_view{ "MonoBehavior" })
+						return true;
 					if (check_parent == monobehavior)
 						return true;
 					check_parent = mono_class_get_parent(check_parent);
