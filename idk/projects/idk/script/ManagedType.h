@@ -24,7 +24,10 @@ namespace idk::mono
 
 		template<typename ... Args> 
 		ManagedObject Construct(Args&&...) const;
+
+		void CacheMessages();
 		bool CacheThunk(string_view method_name, int param_count = 0);
+
 		std::variant <ManagedThunk, MonoMethod*, std::nullopt_t> GetMethod(string_view method_name, int param_count = 0) const;
 		opt<ManagedThunk> GetThunk(string_view method_name, int param_count = 0) const;
 	private:

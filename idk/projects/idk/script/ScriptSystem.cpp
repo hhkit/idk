@@ -19,26 +19,35 @@
 #include <script/MonoBehaviorEnvironment.h>
 #include <script/MonoWrapperEnvironment.h>
 
+#include <process.h>
+
 namespace idk::mono
 {
 	void ScriptSystem::LoadGameScripts()
 	{
 		path_to_used_dll = string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/" + std::filesystem::path{ GetConfig().path_to_game_dll }.stem().string() + ".dll";
 
+		if(0)
 		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{
-			// copy dll to .exe location
+			// recompile
+			//auto stem = PathHandle{ GetConfig().path_to_game_dll }.GetStem();
+			//auto path_to_sln = PathHandle{ string{"/scripts/"} + string{stem} + ".sln" };
+			//_spawnl("")
+			//system((string{ "\"" } +string{ PathHandle{"/tools/build.bat"}.GetFullPath() } +string{ "\"" }).data());
+			//// copy dll to .exe location
 			auto src_file = Core::GetSystem<FileSystem>().Open(GetConfig().path_to_game_dll, FS_PERMISSIONS::READ, true);
 			std::ofstream dst_file;
 			dst_file.open(path_to_used_dll, std::ios::binary | std::ios::out);
 			dst_file << src_file.rdbuf();
+			dst_file.flush();
 		}
 		else
 			LOG_CRASH("Could not detect game dll!");
-
-		if (Core::GetSystem<FileSystem>().ExistsFull(path_to_used_dll))
+		
+		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{
-			script_environment = std::make_unique<MonoBehaviorEnvironment>(path_to_used_dll);
+			script_environment = std::make_unique<MonoBehaviorEnvironment>(PathHandle{ GetConfig().path_to_game_dll }.GetFullPath());
 			script_environment->Init();
 		}
 		else
@@ -47,6 +56,9 @@ namespace idk::mono
 
 	void ScriptSystem::UnloadGameScripts()
 	{
+		const auto max_gen = mono_gc_max_generation();
+		for (int i = 0; i < max_gen; ++i)
+			mono_gc_collect(i);
 		script_environment = nullptr;
 	}
 
@@ -112,27 +124,38 @@ namespace idk::mono
 			elem.Awake();
 
 		for (auto& elem : behaviors)
-			if (elem.enabled)
+			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
 				elem.Start();
 	}
 	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
 	{
+		IDK_ASSERT(run_scripts);
 		for (auto& elem : behaviors)
-			if (elem.enabled)
+			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
 				elem.FixedUpdate();
 	}
 
 	void ScriptSystem::ScriptUpdate(span<Behavior> behaviors)
 	{
+		IDK_ASSERT(run_scripts);
 		for (auto& elem : behaviors)
-			if (elem.enabled)
+			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
 				elem.Update();
+	}
+
+	void ScriptSystem::ScriptPausedUpdate(span<Behavior> behaviors)
+	{
+		if (run_scripts)
+			for (auto& elem : behaviors)
+				if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
+					elem.FireMessage("PausedUpdate");
 	}
 
 	void ScriptSystem::ScriptUpdateCoroutines(span<Behavior> behaviors)
 	{
 		for (auto& elem : behaviors)
-			elem.UpdateCoroutines();
+			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
+				elem.UpdateCoroutines();
 	}
 
 	void ScriptSystem::ScriptLateUpdate([[maybe_unused]] span<Behavior> behaviors)

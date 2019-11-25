@@ -32,6 +32,13 @@ namespace idk::mono
 		script_data = {};
 	}
 
+	void Behavior::FireMessage(string_view msg, void* args[])
+	{
+		auto thunk = script_data.Type()->GetThunk(msg);
+		if (thunk)
+			thunk->Invoke(script_data.Raw()); // handle args?
+	}
+
 	void Behavior::Awake()
 	{
 		if (!_awake && script_data)
@@ -78,11 +85,10 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto t = Core::GetSystem<ScriptSystem>().Environment().Type("MonoBehavior");
-			
-			auto method = t->GetMethod("UpdateCoroutines");
-			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(script_data.Raw());
+			auto thunk = script_data.Type()->GetThunk("UpdateCoroutines");
+
+			if (thunk)
+				thunk->Invoke(script_data.Raw());
 		}
 	}
 	

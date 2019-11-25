@@ -17,9 +17,9 @@
 namespace idk {
 
 
-	CMD_CreateGameObject::CMD_CreateGameObject(Handle<GameObject> go)
+	CMD_CreateGameObject::CMD_CreateGameObject(Handle<GameObject> go, string name, vector<string> initial_components)
+        : parenting_gameobject{ go }, name{ name }, initial_components{ initial_components }
 	{
-		parenting_gameobject = go;
 	}
 
 	CMD_CreateGameObject::CMD_CreateGameObject(vector<RecursiveObjects> recursiveObj) : copied_object{recursiveObj}
@@ -33,9 +33,13 @@ namespace idk {
 
 			if (parenting_gameobject) {
 				game_object_handle->GetComponent<Transform>()->SetParent(parenting_gameobject, false);
+                if (name.size())
+                    game_object_handle->Name(name);
+                for (const auto& str : initial_components)
+                    game_object_handle->AddComponent(string_view{ str });
 			}
 
-			return game_object_handle ? true : false; //Return true if create gameobject is successful
+			return bool(game_object_handle); //Return true if create gameobject is successful
 		}
 		else {
 			try {

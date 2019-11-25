@@ -40,7 +40,7 @@ layout(location = 1) out VS_OUT
   vec2 uv;
   vec3 normal;
   vec3 tangent;
-  vec3 world_pos;
+  vec4 color;
 } vs_out;
 
 layout(location = 0) out gl_PerVertex
@@ -54,5 +54,6 @@ void main()
 	vs_out.normal   = vec3(normal_transform * vec4(normal, 0.0));
 	vs_out.tangent  = vec3(normal_transform * vec4(tangent, 0.0));
 	vs_out.uv       = uv;
+	vs_out.color    = vec4(1);
     gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
 }

@@ -140,9 +140,9 @@ namespace idk::mono
 		auto class_stack = [&]()
 		{
 			std::stack<MonoClass*> classes;
-			auto terminate_class = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Object")->Raw();
+			//auto terminate_class = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Object")->Raw();
 			auto curr_class = mono_object_get_class(Raw());
-			while (curr_class != terminate_class)
+			while (mono_class_get_name(curr_class) != string_view{"Object"})
 			{
 				classes.push(curr_class);
 				curr_class = mono_class_get_parent(curr_class);
@@ -177,8 +177,16 @@ namespace idk::mono
 
 				if (klass == mono_get_string_class())
 				{
-					auto unboxed = unbox((MonoString*)obj);
-					auto old_val = string{ unboxed.get() };
+					auto old_val = [&]()
+					{
+						if (obj)
+						{
+							auto unboxed = unbox((MonoString*)obj);
+							return string{ unboxed.get() };
+						}
+						else 
+							return string{};
+					}();
 					auto new_val = old_val;
 
 					functor(field_name.data(), new_val, depth);
@@ -194,6 +202,7 @@ namespace idk::mono
 				MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
 				MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
 
+				MONO_RESOURCE_TYPE(MaterialInstance);
 				MONO_RESOURCE_TYPE(Prefab);
 
 				{
@@ -222,7 +231,8 @@ namespace idk::mono
 							auto reflect = reflect::dynamic{ new_val };
 							reflect.visit(functor);
 						}
-						last_children = 0;
+						else
+							last_children = 0;
 
 						if (new_val != old_val)
 						{
@@ -276,8 +286,16 @@ namespace idk::mono
 
 			if (klass == mono_get_string_class())
 			{
-				auto unboxed = unbox((MonoString*)obj);
-				auto old_val = string{ unboxed.get() };
+				auto old_val = [&]()
+				{
+					if (obj)
+					{
+						auto unboxed = unbox((MonoString*)obj);
+						return string{ unboxed.get() };
+					}
+					else
+						return string{};
+				}();
 
 				functor(field_name.data(), old_val, depth);
 
@@ -290,6 +308,7 @@ namespace idk::mono
 			MONO_BASE_TYPE_CONST(vec3, envi.Type("Vector3")->Raw());
 			MONO_BASE_TYPE_CONST(vec4, envi.Type("Vector4")->Raw());
 
+			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);
 
 			auto csharpcore = mono_get_corlib();

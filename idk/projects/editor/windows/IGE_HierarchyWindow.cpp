@@ -90,12 +90,29 @@ namespace idk {
 		}
 
 		if (ImGui::BeginPopup("CreatePopup")) {
+            IDE& editor = Core::GetSystem<IDE>();
+
 			if (ImGui::MenuItem("Create Empty")) {
-				IDE& editor = Core::GetSystem<IDE>();
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-
-
 			}
+            if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
+                if (editor.selected_gameObjects.size()) {
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.selected_gameObjects.front()));
+                }
+                else {
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+                }
+            }
+            if (ImGui::BeginMenu("UI")) {
+                const auto go = editor.selected_gameObjects.front();
+                if (ImGui::MenuItem("Canvas"))
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
+                if (ImGui::MenuItem("Image"))
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Image", vector<string>{ "RectTransform", "Image" }));
+                if (ImGui::MenuItem("Text"))
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Text", vector<string>{ "RectTransform", "Text" }));
+                ImGui::EndMenu();
+            }
 
 			ImGui::EndPopup();
 		}
@@ -127,7 +144,7 @@ namespace idk {
 
 		ImGui::EndMenuBar();
 
-        //ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
+        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();

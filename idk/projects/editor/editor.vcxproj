@@ -211,6 +211,7 @@
     <ClInclude Include="windows\IGE_AnimatorWindow.h" />
     <ClInclude Include="windows\IGE_Console.h" />
     <ClInclude Include="windows\IGE_GameView.h" />
+    <ClInclude Include="windows\IGE_HelpWindow.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
     <ClInclude Include="windows\IGE_ProgrammerConsole.h" />
     <ClInclude Include="windows\IGE_ProjectSettings.h" />
@@ -265,6 +266,7 @@
     <ClCompile Include="windows\IGE_AnimatorWindow.cpp" />
     <ClCompile Include="windows\IGE_Console.cpp" />
     <ClCompile Include="windows\IGE_GameView.cpp" />
+    <ClCompile Include="windows\IGE_HelpWindow.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
     <ClCompile Include="windows\IGE_ProgrammerConsole.cpp" />

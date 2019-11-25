@@ -10,6 +10,7 @@
 #include <mono/utils/mono-logger.h>
 #include <mono/metadata/reflection.h>
 
+#include <core/Scheduler.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
@@ -18,12 +19,20 @@
 #include <script/ValueBoxer.h>
 #include <script/MonoBinder.h>
 
+#include <util/ioutils.h>
 namespace idk::mono
 {
 	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)
 	{
 		_domain = mono_jit_init("MasterDomain");
-		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+		std::ifstream file{ full_path_to_game_dll, std::ios::binary };
+		assembly_data = stringify(file);
+		//_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+		mono_domain_set(_domain, true);
+		MonoImageOpenStatus status;
+		auto img = mono_image_open_from_data(assembly_data.data(), assembly_data.size(), true, &status);
+		//_assembly = mono_image_get_assembly(img);
+		_assembly = mono_assembly_load_from(img, "idk.dll", &status);
 		BindCoreFunctions();
 		IDK_ASSERT_MSG(_assembly, "cannot load idk.dll");
 	}
@@ -163,7 +172,15 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::GameObjectGetEngineComponent",  uint64_t, Handle<GameObject> go, MonoString* component) // note: return value optimization
 			{
-				return go->GetComponent(string_view{ unbox(component).get() }).id;
+				auto query = unbox(component);
+				auto str = string_view{ query.get() };
+				if (str == "Renderer")
+				{
+					auto mrend = go->GetComponent<MeshRenderer>();
+					return mrend ? mrend.id : go->GetComponent<SkinnedMeshRenderer>().id;
+				}
+
+				return go->GetComponent(str).id;
 			}
 		BIND_END();
 
@@ -827,6 +844,17 @@ namespace idk::mono
         }
         BIND_END();
 
+		BIND_START("idk.Bindings::RendererSetMaterialInstance", void, GenericHandle renderer, Guid guid)
+		{
+			switch (renderer.type)
+			{
+			case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid };
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid };
+			default: return;
+			}
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::RendererGetActive", bool, GenericHandle renderer)
 		{
 			switch (renderer.type)
@@ -981,27 +1009,27 @@ namespace idk::mono
         }
 		BIND_END();
 
-		// //////Font///////////////
-		BIND_START("idk.Bindings::FontGetText", MonoString*, Handle<Font> h)
+		// //////TextMesh///////////////
+		BIND_START("idk.Bindings::TextMeshGetText", MonoString*, Handle<TextMesh> h)
 		{
             return mono_string_new(mono_domain_get(), h->text.c_str());
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::FontSetText", void, Handle<Font> h, MonoString* str)
+		BIND_START("idk.Bindings::TextMeshSetText", void, Handle<TextMesh> h, MonoString* str)
 		{
             auto s = unbox(str);
 			h->text = s.get();
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::FontGetColor", color, Handle<Font> h)
+		BIND_START("idk.Bindings::TextMeshGetColor", color, Handle<TextMesh> h)
 		{
 			return h->color;
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::FontSetColor", void, Handle<Font> h, color r)
+		BIND_START("idk.Bindings::TextMeshSetColor", void, Handle<TextMesh> h, color r)
 		{
 			h->color = r;
 		}
@@ -1206,48 +1234,221 @@ namespace idk::mono
 		}
 		BIND_END();
 
+
 		// Input
+
 		BIND_START("idk.Bindings::InputGetKeyDown",  bool, int code)
-			{
-				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonDown((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
-				else
-					return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
-			}
+		{
+			if (code & 0xFFFF0000)
+				return Core::GetSystem<GamepadSystem>().GetButtonDown((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+			else
+				return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
+		}
 		BIND_END();
+
 		BIND_START("idk.Bindings::InputGetKeyUp",  bool, int code)
-			{
-				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonUp((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
-				else
-				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
-			}
+		{
+			if (code & 0xFFFF0000)
+				return Core::GetSystem<GamepadSystem>().GetButtonUp((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+			else
+			return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
+		}
 		BIND_END();
+
 		BIND_START("idk.Bindings::InputGetKey",  bool, int code)
-			{
-				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButton((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
-				else
-				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
-			}
+		{
+			if (code & 0xFFFF0000)
+				return Core::GetSystem<GamepadSystem>().GetButton((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+			else
+			return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::InputGetAxis",  float, char code, int axis)
-			{
-				return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
-			}
+		{
+			return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
+		}
+		BIND_END();
+
+
+        // Time
+
+		BIND_START("idk.Bindings::TimeGetTimeScale", float)
+		{
+			return Core::GetScheduler().time_scale;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeSetTimeScale", void, float ts)
+		{
+			Core::GetScheduler().time_scale = ts;
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetFixedDelta",  float)
 			{
-				return Core::GetDT().count();
+				return Core::GetScheduler().time_scale * Core::GetDT().count();
 			}
 		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetDelta",  float)
 			{
-				return Core::GetRealDT().count();
+				return Core::GetScheduler().time_scale * Core::GetRealDT().count();
 			}
 		BIND_END();
+
+		BIND_START("idk.Bindings::TimeGetUnscaledFixedDelta", float)
+		{
+			return Core::GetDT().count();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeGetUnscaledDelta", float)
+		{
+			return Core::GetRealDT().count();
+		}
+		BIND_END();
+
+
+
+        // RectTransform
+
+        BIND_START("idk.Bindings::RectTransformGetOffsetMin", vec2, Handle<RectTransform> h)
+        {
+            return h->offset_min;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetOffsetMin", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->offset_min = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetOffsetMax", vec2, Handle<RectTransform> h)
+        {
+            return h->offset_max;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetOffsetMax", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->offset_max = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetAnchorMin", vec2, Handle<RectTransform> h)
+        {
+            return h->anchor_min;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetAnchorMin", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->anchor_min = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetAnchorMax", vec2, Handle<RectTransform> h)
+        {
+            return h->anchor_max;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetAnchorMax", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->anchor_max = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetPivot", vec2, Handle<RectTransform> h)
+        {
+            return h->pivot;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetPivot", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->pivot = v;
+        }
+        BIND_END();
+
+
+        // Image
+
+        BIND_START("idk.Bindings::ImageGetTexture", Guid, Handle<idk::Image> h)
+        {
+            return h->texture.guid;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageSetTexture", void, Handle<idk::Image> h, Guid guid)
+        {
+            h->texture = RscHandle<Texture>{ guid };
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageGetMaterialInstance", Guid, Handle<idk::Image> h)
+        {
+            return h->material.guid;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageSetMaterialInstance", void, Handle<idk::Image> h, Guid guid)
+        {
+            h->material = RscHandle<MaterialInstance>{ guid };
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageGetColor", color, Handle<idk::Image> h)
+        {
+            return h->tint;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageSetColor", void, Handle<idk::Image> h, color v)
+        {
+            h->tint = v;
+        }
+        BIND_END();
+
+
+        // Text
+
+        BIND_START("idk.Bindings::TextGetText", MonoString*, Handle<idk::Text> h)
+        {
+            return mono_string_new(mono_domain_get(), h->text.c_str());
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetText", void, Handle<idk::Text> h, MonoString* s)
+        {
+            h->text = unbox(s).get();
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextGetMaterialInstance", Guid, Handle<idk::Text> h)
+        {
+            return h->material.guid;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetMaterialInstance", void, Handle<idk::Text> h, Guid guid)
+        {
+            h->material = RscHandle<MaterialInstance>{ guid };
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextGetColor", color, Handle<idk::Text> h)
+        {
+            return h->color;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetColor", void, Handle<idk::Text> h, color v)
+        {
+            h->color = v;
+        }
+        BIND_END();
 	}
 }
