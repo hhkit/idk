@@ -138,6 +138,9 @@
     <ClInclude Include="commands\CMD_CallCommandAgain.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="windows\IGE_HelpWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -254,6 +257,9 @@
     </ClCompile>
     <ClCompile Include="commands\CMD_CallCommandAgain.cpp">
       <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_HelpWindow.cpp">
+      <Filter>windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

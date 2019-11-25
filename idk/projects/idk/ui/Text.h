@@ -15,11 +15,12 @@ namespace idk
         RscHandle<FontAtlas> font = FontAtlas::defaults[FontDefault::SourceSansPro];
         RscHandle<MaterialInstance> material{ UISystem::default_material_inst };
 
-        unsigned font_size = 16;
-        real letter_spacing = 1.f;
-        real line_spacing = 10.f;
+        unsigned font_size = 48;
+        real letter_spacing = 0;
+        real line_height = 1.0f;
         color color{ 1.0f, 1.0f, 1.0f, 1.0f };
         TextAnchor alignment = TextAnchor::MiddleCenter;
         bool wrap = false;
+        bool best_fit = false;
     };
 }

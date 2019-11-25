@@ -91,7 +91,7 @@ namespace idk
 	{	
 		return CameraData{
 			GetGameObject(),
-			0xFFFFFFF,
+			layer_mask,
 			ViewMatrix(),
 			ProjectionMatrix(),
 			render_target,

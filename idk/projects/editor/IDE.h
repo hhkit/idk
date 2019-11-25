@@ -77,6 +77,9 @@ namespace idk
 
 		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
 
+
+		void ApplyDefaultColors();
+
 	private:
 		friend class IGE_MainWindow;
 		friend class IGE_SceneView;
@@ -115,7 +118,6 @@ namespace idk
 
 		void FocusOnSelectedGameObjects();
 
-		vec3 focused_vector{}; //Updated everytime FocusOnSelectedGameObjects is called. For Scroll Vector WIP
 
 		//Scrolling
 		float		scroll_multiplier			= 2.0f;			//AFfects pan and scrolling intensity

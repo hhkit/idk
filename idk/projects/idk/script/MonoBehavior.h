@@ -23,6 +23,8 @@ namespace idk::mono
 		ManagedObject& GetObject() { return script_data; };
 		const ManagedObject& GetObject() const { return script_data; };
 
+		void FireMessage(string_view msg, void* args[] = { nullptr });
+
 		void Awake();
 		void Start();
 		void FixedUpdate();

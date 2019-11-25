@@ -14,6 +14,7 @@ namespace idk::mono
 		~MonoWrapperEnvironment();
 	private:
 		MonoMethod* main = nullptr;
+		string assembly_data;
 		void BindCoreFunctions();
 	};
 

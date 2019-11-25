@@ -210,6 +210,7 @@ namespace idk::vkn
 			thingy.BindUniformBuffer("CameraBlock", 0, mat4block);
 
 			thingy.BindSampler("sb", 0, src.as<VknCubemap>());
+			thingy.BindMeshBuffers(ro.mesh, req);
 			thingy.FinalizeDrawCall(ro);
 		}
 	}
@@ -232,6 +233,7 @@ namespace idk::vkn
 		frame_buffers.emplace_back(citr->second);
 
 		thingy.BindSampler(EpName(), 0, src.as<VknCubemap>());
+		thingy.BindMeshBuffers(ro.mesh, req);
 		thingy.FinalizeDrawCall(ro);
 	}
 

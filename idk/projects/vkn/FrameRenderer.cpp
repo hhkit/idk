@@ -322,29 +322,35 @@ namespace idk::vkn
 	{
 		//RscHandle<ShaderProgram>             mesh_vtx;
 		//RscHandle<ShaderProgram>             skinned_mesh_vtx;
+		LayerMask mask = ~(LayerMask{});
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		const vector<const RenderObject*>*         mesh_render;
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
 		const vector<InstRenderObjects>* inst_ro;
 		std::variant<GraphicsSystem::RenderRange, GraphicsSystem::LightRenderRange> range;
+		const SharedGraphicsState* shared_state = {};
 		GraphicsStateInterface() = default;
-		GraphicsStateInterface(const GraphicsState& state)
+
+		GraphicsStateInterface(const CoreGraphicsState& state)
 		{
-			renderer_vertex_shaders = state.renderer_vertex_shaders;
-			renderer_fragment_shaders = state.renderer_fragment_shaders;
 			mesh_render = &state.mesh_render;
 			skinned_mesh_render = &state.skinned_mesh_render;
+			shared_state = state.shared_gfx_state;
 			inst_ro = state.shared_gfx_state->instanced_ros;
-			range = state.range;
 		}
-		GraphicsStateInterface(const PreRenderData& state)
+		GraphicsStateInterface(const GraphicsState& state) : GraphicsStateInterface{static_cast<const CoreGraphicsState&>(state)}
 		{
 			renderer_vertex_shaders = state.renderer_vertex_shaders;
 			renderer_fragment_shaders = state.renderer_fragment_shaders;
-			mesh_render = &state.mesh_render;
-			skinned_mesh_render = &state.skinned_mesh_render;
-			inst_ro = state.shared_gfx_state->instanced_ros;
+			range = state.range;
+
+			mask = state.camera.culling_flags;
+		}
+		GraphicsStateInterface(const PreRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
+		{
+			renderer_vertex_shaders = state.renderer_vertex_shaders;
+			renderer_fragment_shaders = state.renderer_fragment_shaders;
 		}
 	};
 
@@ -379,7 +385,8 @@ namespace idk::vkn
 					if (mat_inst.material)
 					{
 						binders.Bind(the_interface, dc);
-
+						the_interface.BindMeshBuffers(dc);
+						the_interface.BindAttrib(4,state.shared_state->inst_mesh_render_buffer.buffer(),0);
 						the_interface.FinalizeDrawCall(dc, dc.num_instances, dc.instanced_index);
 					}
 				}
@@ -394,10 +401,10 @@ namespace idk::vkn
 			{
 				auto& dc = *ptr_dc;
 				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material)
+				if (mat_inst.material && dc.layer_mask&state.mask)
 				{
 					binders.Bind(the_interface, dc);
-
+					the_interface.BindMeshBuffers(dc);
 					the_interface.FinalizeDrawCall(dc);
 
 				}
@@ -469,6 +476,7 @@ namespace idk::vkn
 			Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPBRConvolute],
 			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube]
 		);
+		_particle_renderer.InitConfig();
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -510,6 +518,14 @@ namespace idk::vkn
 					}
 				}
 			}
+			if (state.shared_gfx_state->particle_data && state.shared_gfx_state->particle_data->size())
+			{
+				auto& particle_data = *state.shared_gfx_state->particle_data;
+				auto& buffer = state.shared_gfx_state->particle_buffer;
+				buffer.resize(hlp::buffer_size(particle_data));
+				buffer.update<const ParticleObj>(0, particle_data, cmd_buffer);
+			}
+
 			cmd_buffer.end();
 			//copy_state.FlagRendered();//Don't flag, we want to submit this separately.
 
@@ -701,15 +717,9 @@ namespace idk::vkn
 
 			auto& renderer_req = *obj.renderer_req;
 
-			for (auto&& [attrib, location] : renderer_req.mesh_requirements)
+			for (auto&& [location, attrib] : p_ro.attrib_buffers)
 			{
-				auto& attrib_buffer = mesh.Get(attrib);
-				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
-			}
-			if (is_mesh_renderer)
-			{
-				uint32_t obj_trf_loc = 4;
-				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(obj_trf_loc), shared_state.inst_mesh_render_buffer.buffer(), { 0 }, vk::DispatchLoaderDefault{});
+				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 			}
 			auto& oidx = mesh.GetIndexBuffer();
 			if (oidx)
@@ -723,7 +733,7 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
-		auto cam = CameraData{ GenericHandle {}, 0xFFFFFFFF,light.v,light.p };
+		auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.p};
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
 			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -1058,7 +1068,6 @@ namespace idk::vkn
 		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
 	}
-	
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
@@ -1094,12 +1103,14 @@ namespace idk::vkn
 		//TODO make ProcessRoUniforms only render forward pass stuff.
 		auto&& the_interface = (is_deferred)?PipelineThingy{}:
 			ProcessRoUniforms(state, rs.ubo_manager);
+		_particle_renderer.DrawParticles(the_interface, state, rs);
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
 		auto deferred_interface = (is_deferred) ? rs.deferred_pass.ProcessDrawCalls(state, rs) : PipelineThingy{};
 		if(is_deferred)
 			deferred_interface.GenerateDS(rs.dpools, false);
+		
 		//rs.ubo_manager.UpdateAllBuffers();
 		std::array<float, 4> a{};
 
@@ -1215,9 +1226,11 @@ namespace idk::vkn
 
 		if (processed_ro.size()>0)
 		{
+			bool is_particle_renderer = false;
 			for (auto& p_ro : processed_ro)
 			{
 				bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
+				is_particle_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
 				auto& obj = p_ro.Object();
 				if (p_ro.rebind_shaders)
 				{
@@ -1261,18 +1274,13 @@ namespace idk::vkn
 						++set;
 					}
 				}
-				auto& renderer_req = *obj.renderer_req;
+				//auto& renderer_req = *obj.renderer_req;
 			
-				for (auto&& [attrib, location] : renderer_req.mesh_requirements)
+				for (auto& [location, attrib] : p_ro.attrib_buffers)
 				{
-					auto& attrib_buffer = mesh.Get(attrib);
-					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), *attrib_buffer.buffer(), vk::DeviceSize{ attrib_buffer.offset }, vk::DispatchLoaderDefault{});
-				}
-
-				if (is_mesh_renderer)
-				{
-					uint32_t obj_trf_loc = 4;
-					cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(obj_trf_loc), state.shared_gfx_state->inst_mesh_render_buffer.buffer(), { 0 }, vk::DispatchLoaderDefault{});
+					auto opt = pipeline.GetBinding(location);
+					if (opt)
+						cmd_buffer.bindVertexBuffers(*opt, attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 				}
 				auto& oidx = mesh.GetIndexBuffer();
 				if (oidx)

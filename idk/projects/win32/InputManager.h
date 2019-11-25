@@ -16,6 +16,7 @@ namespace idk::win
 		ivec2 GetMouseScroll() const;
 
 		void SwapBuffers();
+		void FlushCurrentBuffer();
 		
 		bool GetKeyDown  (int);
 		bool GetKey      (int);
@@ -24,7 +25,7 @@ namespace idk::win
 		bool GetMouseUp  (int);
 		char GetChar();
 	private:
-		using BufType = array<bool, 0xFF>;
+		using BufType = array<unsigned char, 0xFF>;
 		BufType _input_buffers[2]{ {}, {} };
 		bool    _curr_buffer{};
 		char    _last_char{};

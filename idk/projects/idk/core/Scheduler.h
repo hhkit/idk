@@ -26,6 +26,8 @@ namespace idk
 	class Scheduler
 	{
 	public:
+		real time_scale = 1.f;
+
 		class Pass;
 
 		Scheduler();

@@ -6,7 +6,6 @@
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
 #include <res/MetaBundle.h>
-
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -469,8 +468,8 @@ REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::Font, "Font")
-REFLECT_VARS(tracking, spacing, padding, color, fontSize, textureAtlas, text)
+REFLECT_BEGIN(idk::TextMesh, "TextMesh")
+REFLECT_VARS(text, letter_spacing, line_height, color, font_size, font)
 REFLECT_END()
 
 // CAMERA
@@ -479,8 +478,12 @@ REFLECT_END()
 REFLECT_BEGIN(idk::DepthOnly, "DepthOnly")
 REFLECT_END()
 
+REFLECT_BEGIN(idk::LayerMask, "LayerMask")
+REFLECT_VARS(mask)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target)
+REFLECT_VARS(enabled,layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target)
 REFLECT_END()
 
 // ANIMATION
@@ -606,5 +609,5 @@ REFLECT_ENUM(idk::TextAlignment, "TextAlignment")
 REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
 
 REFLECT_BEGIN(idk::Text, "Text")
-REFLECT_VARS(text, font, font_size, letter_spacing, line_spacing, alignment, wrap, color, material)
+REFLECT_VARS(text, font, font_size, letter_spacing, line_height, alignment, wrap, best_fit, color, material)
 REFLECT_END()

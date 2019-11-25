@@ -6,7 +6,7 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 #include <particle/ParticleSystem.h>
-#include <gfx/Font.h>
+#include <gfx/TextMesh.h>
 #include <ui/Image.h>
 #include <ui/Text.h>
 #include <ui/RectTransform.h>
@@ -223,7 +223,7 @@ namespace idk
 		for (auto itr = ro.begin(); itr < ro.end(); ++itr)
 		{
 			const auto bv = itr->mesh->bounding_volume* itr->transform;
-			if (frust.contains(bv))
+			if ((itr->layer_mask&camera.culling_flags) &&frust.contains(bv))
 			{
 				if (!oprev || ![](auto& itr, auto& prev) {
 					return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
@@ -235,7 +235,7 @@ namespace idk
 					oprev = itr;
 				}
 				//Keep track of the number of instances to be render for this frustum
-					auto tfm = camera.view_matrix * itr->transform;
+				auto tfm = camera.view_matrix * itr->transform;
 				instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
 				inst_itr->num_instances++;
 			}
@@ -275,13 +275,38 @@ namespace idk
 		std::swap(dst, src);
 	}
 
+	void ProcessParticles(
+		const vector<ParticleRenderData>& unique_particles,
+		vector<ParticleObj>& particle_buffer,
+		vector<ParticleRange>& particle_render_data,
+		GraphicsSystem::RenderRange& range
+	)
+	{
+		auto& cam = range.camera;
+		const vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
+		const vec3 cam_pos = cam.view_matrix[3];
+		range.inst_particle_begin = particle_render_data.size();
+		for (auto& elem : unique_particles)
+		{
+			ParticleRange p_range{ elem.material_instance,particle_buffer.size(),static_cast<size_t>(std::distance(elem.particles.begin(), elem.particles.end())) };
+
+			particle_buffer.insert(particle_buffer.end(), elem.particles.begin(),elem.particles.end());
+				
+			std::sort(particle_buffer.begin()+p_range.elem_offset, particle_buffer.begin() + p_range.elem_offset+p_range.num_elems,
+				[cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) {
+					return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
+				
+			particle_render_data.emplace_back(p_range);
+		}
+		range.inst_particle_end = particle_render_data.size();
+	}
 
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
         span<ParticleSystem> ps,
-		span<Font> fonts,
+		span<TextMesh> fonts,
 		span<Text> texts,
         span<Image> images,
 		span<const class Transform>, 
@@ -424,9 +449,8 @@ namespace idk
 			}
 		}
 
-
-		result.renderer_vertex_shaders[VSkinnedMesh] = renderer_vertex_shaders[VSkinnedMesh];
-		result.renderer_vertex_shaders[VNormalMesh] = renderer_vertex_shaders[VNormalMesh];
+		result.renderer_vertex_shaders = renderer_vertex_shaders;
+		result.renderer_fragment_shaders = renderer_fragment_shaders;
 
 
         for (auto& elem : ps)
@@ -458,6 +482,14 @@ namespace idk
             }
         }
 
+		{
+			auto& unique_particles = result.particle_render_data;
+			const size_t avg_particle_count = 100;
+			const auto size = cameras.size() * unique_particles.size();
+			result.particle_range.reserve(result.particle_range.size() + size);
+			result.particle_buffer.reserve(result.particle_buffer.size() + size * avg_particle_count);
+		}
+
 
 		std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
 		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
@@ -468,6 +500,7 @@ namespace idk
 				const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, result.instanced_mesh_render,result.inst_mesh_render_buffer);
 				range.inst_mesh_render_begin = start_index;
 				range.inst_mesh_render_end = end_index;
+				ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range,range);
 			}
 			result.culled_render_range.emplace_back(range);
 			//{
@@ -502,10 +535,10 @@ namespace idk
 			auto& render_data = result.font_render_data.emplace_back();
 			//if (!f.textureAtlas)
 				//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
-            render_data.coords = FontData::Generate(f.text, f.textureAtlas, f.fontSize, f.tracking, f.lineSpacing, TextAlignment::Left, 0).coords;
+            render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
             render_data.color = f.color;
-            render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
-            render_data.atlas = f.textureAtlas;
+            render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * mat4 { scale(vec3{ 0.1f, 0.1f, 1.0f }) };
+            render_data.atlas = f.font;
 		}
 
         auto& ui = Core::GetSystem<UISystem>();
@@ -514,7 +547,14 @@ namespace idk
             const auto& go = im.GetGameObject();
             const auto& rt = *go->GetComponent<RectTransform>();
             
-            auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+            const auto canvas = ui.FindCanvas(go);
+            if (!canvas)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
+                continue;
+            }
+
+            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
 
             render_data.transform = rt._matrix *
                 mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
@@ -528,16 +568,74 @@ namespace idk
             const auto& go = text.GetGameObject();
             const auto& rt = *go->GetComponent<RectTransform>();
 
-            auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+            const auto canvas = ui.FindCanvas(go);
+            if (!canvas)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
+                continue;
+            }
 
-            render_data.transform = rt._matrix;
+            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
+
+            constexpr auto anchor_to_alignment = [](TextAnchor anchor)
+            {
+                switch (anchor)
+                {
+                case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft: 
+                    return TextAlignment::Left;
+                case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+                    return TextAlignment::Center;
+                case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+                    return TextAlignment::Right;
+                }
+                return TextAlignment::Left;
+            };
+
+            const float sx = rt._local_rect.size.x;
+            const float sy = rt._local_rect.size.y;
+
+            const auto font_data = FontData::Generate(
+                text.text, text.font,
+                text.best_fit ? 0 : text.font_size,
+                text.letter_spacing,
+                text.line_height,
+                anchor_to_alignment(text.alignment),
+                text.wrap ? sx : 0);
+
+            float tw = font_data.width;
+            float th = font_data.height;
+
             render_data.material = text.material;
             render_data.color = text.color;
-            render_data.data = TextData{
-                FontData::Generate(text.text, text.font,
-                    text.font_size, text.letter_spacing, text.line_spacing, TextAlignment::Left, 0).coords,
-                text.font };
+            render_data.data = TextData{ font_data.coords, text.font };
             render_data.depth = go->Transform()->Depth();
+
+            float s = 1.0f;
+
+            if (text.best_fit)
+            {
+                const float sw = sx / tw;
+                const float sh = sy / th;
+                s = sw > sh ? sh : sw;
+                tw *= s;
+                th *= s;
+            }
+
+            switch (text.alignment)
+            {
+            case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
+            case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
+            case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
+            case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
+            case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
+            case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
+            case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
+            case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
+            case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
+            }
+
+            if (text.best_fit)
+                render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
         }
 
         // sort ui render by depth then z pos
@@ -562,6 +660,7 @@ namespace idk
 		///////////////////////Load vertex shaders
 		//renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert",false);
 		renderer_vertex_shaders[VNormalMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert",false);
+		renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert",false);
 		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert", false);
 		renderer_vertex_shaders[VSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert", false);
 		renderer_vertex_shaders[VPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert", false);
@@ -569,6 +668,11 @@ namespace idk
 		renderer_vertex_shaders[VFont] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/font.vert", false);
 		renderer_vertex_shaders[VUi] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.vert", false);
 
+
+		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
+		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
+		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/shadow.frag");
+		renderer_fragment_shaders[FPicking] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/picking.frag");
 		////////////////////Load fragment Shaders
 		//renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
 		renderer_fragment_shaders[FPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);

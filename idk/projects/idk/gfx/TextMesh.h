@@ -6,19 +6,15 @@
 #include <gfx/FontData.h>
 
 namespace idk {
-	class Font
-		: public Component<Font>
+	class TextMesh
+		: public Component<TextMesh>
 	{
 	public:
-
-		real lineSpacing = 0.1f;
-		//ASCII STARTOFFSET
-		real tracking = 1.f;
-		real spacing = 10.f;
-		real padding = 1.f;
+		real letter_spacing = 0;
+		real line_height = 1.f; // multiplier
 		color color = {1.f,1.f,1.f,1.f};
-		int  fontSize = 48;
-		RscHandle<FontAtlas> textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
+		unsigned font_size = 48;
+		RscHandle<FontAtlas> font = FontAtlas::defaults[FontDefault::SourceSansPro];
 
 		string text;
 

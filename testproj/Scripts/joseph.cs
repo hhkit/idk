@@ -25,13 +25,15 @@ namespace TestAndSeek
 
         void Start()
         {
+            /*
             anim = gameObject.GetComponent<Animator>();
             Quaternion q = new Quaternion();
             q.eulerAngles = new Vector3(0, 0, 0);
             gameObject.GetComponent<Transform>().localRotation = q;
-            
-            if (anim)
+            */
+            //if (anim)
                 Debug.Log("found animator");
+             
         }
 
 

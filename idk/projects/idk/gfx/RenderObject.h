@@ -7,7 +7,7 @@
 #include <gfx/CubeMap.h>
 #include <math/rect.h>
 #include <gfx/FontData.h>
-
+#include <util/LayerMask.h>
 namespace idk
 {
 	class Mesh;
@@ -37,7 +37,13 @@ namespace idk
 		const renderer_attributes* renderer_req;
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<pipeline_config> config{};
+		LayerMask layer_mask = LayerMask{ 0xFFFFFFFF };
 	};
+	inline LayerMask layer_to_mask(char mask)
+	{
+		return LayerMask{ 1ui32 << mask };
+	}
+
 	//template<typename InstancedData>
 	struct GenericInstancedRenderObjects :RenderObject
 	{
@@ -94,7 +100,7 @@ namespace idk
 	struct CameraData
 	{
 		GenericHandle obj_id{};
-		unsigned  culling_flags = 0xFFFFFFFF;
+		LayerMask  culling_flags = LayerMask{ 0xFFFFFFFFi32 };
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
 		RscHandle<RenderTarget> render_target{};
@@ -119,6 +125,13 @@ namespace idk
         vector<ParticleObj> particles;
         RscHandle<MaterialInstance> material_instance;
     };
+	struct ParticleRange
+	{
+		RscHandle<MaterialInstance> material_instance;
+		size_t elem_offset;
+		size_t num_elems;
+	};
+
 
     struct FontRenderData
     {

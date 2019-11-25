@@ -19,7 +19,7 @@ layout(location=1) in VS_OUT
   vec2 uv;
   vec3 normal;
   vec3 tangent;
-  vec3 world_pos;
+  vec4 color;
 } fs_in;
 
 // lighting 
@@ -321,7 +321,7 @@ void main()
 	float metallic  = 0.5;
 	float roughness = 1.0;
 	float ambient_o = 0;
-	vec3  emissive = vec3(0);
+	vec3  emissive  = vec3(0);
 	
 	vec3 view_dir = -normalize(view_pos);
 
@@ -375,7 +375,9 @@ void main()
 	
 	vec3 color = light_accum + ambient + emissive;
 	color = color / (color + vec3(1.0));
+	#ifndef VULKAN
 	color = pow(color, vec3(1.0/2.2)); 
+	#endif
 	out_color = vec4(color,1);
 	
 }
