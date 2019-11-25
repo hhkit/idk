@@ -1382,9 +1382,21 @@ namespace idk::mono
         }
         BIND_END();
 
+        BIND_START("idk.Bindings::ImageSetTexture", void, Handle<idk::Image> h, Guid guid)
+        {
+            h->texture = RscHandle<Texture>{ guid };
+        }
+        BIND_END();
+
         BIND_START("idk.Bindings::ImageGetMaterialInstance", Guid, Handle<idk::Image> h)
         {
             return h->material.guid;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageSetMaterialInstance", void, Handle<idk::Image> h, Guid guid)
+        {
+            h->material = RscHandle<MaterialInstance>{ guid };
         }
         BIND_END();
 
@@ -1397,6 +1409,45 @@ namespace idk::mono
         BIND_START("idk.Bindings::ImageSetColor", void, Handle<idk::Image> h, color v)
         {
             h->tint = v;
+        }
+        BIND_END();
+
+
+        // Text
+
+        BIND_START("idk.Bindings::TextGetText", MonoString*, Handle<idk::Text> h)
+        {
+            return mono_string_new(mono_domain_get(), h->text.c_str());
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetText", void, Handle<idk::Text> h, MonoString* s)
+        {
+            h->text = unbox(s).get();
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextGetMaterialInstance", Guid, Handle<idk::Text> h)
+        {
+            return h->material.guid;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetMaterialInstance", void, Handle<idk::Text> h, Guid guid)
+        {
+            h->material = RscHandle<MaterialInstance>{ guid };
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextGetColor", color, Handle<idk::Text> h)
+        {
+            return h->color;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetColor", void, Handle<idk::Text> h, color v)
+        {
+            h->color = v;
         }
         BIND_END();
 	}

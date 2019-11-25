@@ -58,6 +58,7 @@
     <Compile Include="Components\Collider.cs" />
     <Compile Include="Components\Image.cs" />
     <Compile Include="Components\RectTransform.cs" />
+    <Compile Include="Components\Text.cs" />
     <Compile Include="Components\TextMesh.cs" />
     <Compile Include="Components\Light.cs" />
     <Compile Include="Components\MeshRenderer.cs" />

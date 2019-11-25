@@ -12,6 +12,7 @@
                 inst.guid = guid;
                 return inst;
             }
+            set => Bindings.ImageSetTexture(handle, (object)value != null ? value.guid : new System.Guid());
         }
         public MaterialInstance materialInstance
         {
@@ -22,6 +23,7 @@
                 inst.guid = guid;
                 return inst;
             }
+            set => Bindings.ImageSetMaterialInstance(handle, (object)value != null ? value.guid : new System.Guid());
         }
         public Color color
         {

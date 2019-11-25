@@ -411,11 +411,32 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid ImageGetTexture(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetTexture(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid ImageGetMaterialInstance(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetMaterialInstance(ulong id, Guid guid);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Color ImageGetColor(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ImageSetColor(ulong id, Color color);
+
+        /*
+         * Text
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string TextGetText(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetText(ulong id, string c);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid TextGetMaterialInstance(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetMaterialInstance(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color TextGetColor(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetColor(ulong id, Color color);
 
         /*
          * Resource
