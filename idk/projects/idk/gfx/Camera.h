@@ -6,7 +6,8 @@
 #include <gfx/CameraFrustum.h>
 #include <gfx/CameraClear.h>
 #include <math/rect.h>
-#include <util/LayerMask.h>
+#include <common/LayerMask.h>
+
 namespace idk
 {
 
@@ -33,7 +34,7 @@ namespace idk
 		CameraClear clear;
 		rect viewport;
 
-		LayerMask layer_mask = LayerMask{0xFFFFFFFFi32};
+        LayerMask layer_mask{ 0xFFFFFFFF };
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 

@@ -7,7 +7,8 @@
 #include <gfx/CubeMap.h>
 #include <math/rect.h>
 #include <gfx/FontData.h>
-#include <util/LayerMask.h>
+#include <common/LayerMask.h>
+
 namespace idk
 {
 	class Mesh;
@@ -37,7 +38,7 @@ namespace idk
 		const renderer_attributes* renderer_req;
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<pipeline_config> config{};
-		LayerMask layer_mask = LayerMask{ 0xFFFFFFFF };
+		LayerMask layer_mask{ 0xFFFFFFFF };
 	};
 	inline LayerMask layer_to_mask(char mask)
 	{
@@ -100,7 +101,7 @@ namespace idk
 	struct CameraData
 	{
 		GenericHandle obj_id{};
-		LayerMask  culling_flags = LayerMask{ 0xFFFFFFFFi32 };
+		LayerMask culling_flags{ 0xFFFFFFFF };
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
 		RscHandle<RenderTarget> render_target{};

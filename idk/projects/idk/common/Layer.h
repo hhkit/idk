@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/Component.h>
-#include <util/LayerMask.h>
+#include <common/LayerMask.h>
 
 namespace idk
 {

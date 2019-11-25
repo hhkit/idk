@@ -141,6 +141,9 @@
     <ClInclude Include="windows\IGE_HelpWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\LayerMaskCombo.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -260,6 +263,9 @@
     </ClCompile>
     <ClCompile Include="windows\IGE_HelpWindow.cpp">
       <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\LayerMaskCombo.cpp">
+      <Filter>widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

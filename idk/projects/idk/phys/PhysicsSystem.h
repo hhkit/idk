@@ -17,7 +17,7 @@ namespace idk
     struct PhysicsConfig
     {
         std::array<LayerMask, LayerManager::num_layers> matrix;
-		PhysicsConfig() { matrix.fill(LayerMask{ 0xffffffffi32 }); }
+		PhysicsConfig() { matrix.fill(LayerMask{ 0xFFFFFFFF }); }
         PhysicsConfig(const PhysicsConfig&) = default;
         PhysicsConfig(PhysicsConfig&&) = default;
         PhysicsConfig& operator=(const PhysicsConfig&) = default;

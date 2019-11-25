@@ -198,6 +198,7 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="widgets\LayerMaskCombo.h" />
     <ClInclude Include="loading\AssimpImporter.h" />
     <ClInclude Include="loading\AssimpImporter_helpers.h" />
     <ClInclude Include="SceneManagement.h" />
@@ -251,6 +252,7 @@
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
     <ClCompile Include="imguidk.cpp" />
+    <ClCompile Include="widgets\LayerMaskCombo.cpp" />
     <ClCompile Include="loading\AssimpImporter.cpp" />
     <ClCompile Include="loading\AssimpImporter_helpers.cpp" />
     <ClCompile Include="loading\GraphFactory.cpp" />
