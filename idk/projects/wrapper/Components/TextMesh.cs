@@ -3,13 +3,13 @@
     public class TextMesh
         : Component
     {
-        public string Text
+        public string text
         {
             get => Bindings.TextMeshGetText(handle);
             set => Bindings.TextMeshSetText(handle, value);
         }
 
-        public Color Color
+        public Color color
         {
             get => Bindings.TextMeshGetColor(handle);
             set => Bindings.TextMeshSetColor(handle, value);

@@ -1206,48 +1206,146 @@ namespace idk::mono
 		}
 		BIND_END();
 
+
 		// Input
+
 		BIND_START("idk.Bindings::InputGetKeyDown",  bool, int code)
-			{
-				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonDown((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
-				else
-					return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
-			}
+		{
+			if (code & 0xFFFF0000)
+				return Core::GetSystem<GamepadSystem>().GetButtonDown((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+			else
+				return Core::GetSystem<Application>().GetKeyDown(s_cast<idk::Key>(code));
+		}
 		BIND_END();
+
 		BIND_START("idk.Bindings::InputGetKeyUp",  bool, int code)
-			{
-				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButtonUp((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
-				else
-				return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
-			}
+		{
+			if (code & 0xFFFF0000)
+				return Core::GetSystem<GamepadSystem>().GetButtonUp((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+			else
+			return Core::GetSystem<Application>().GetKeyUp(s_cast<idk::Key>(code));
+		}
 		BIND_END();
+
 		BIND_START("idk.Bindings::InputGetKey",  bool, int code)
-			{
-				if (code & 0xFFFF0000)
-					return Core::GetSystem<GamepadSystem>().GetButton((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
-				else
-				return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
-			}
+		{
+			if (code & 0xFFFF0000)
+				return Core::GetSystem<GamepadSystem>().GetButton((code >> 8) & 0xFF, s_cast<GamepadButton>(code >> 16));
+			else
+			return Core::GetSystem<Application>().GetKey(s_cast<idk::Key>(code));
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::InputGetAxis",  float, char code, int axis)
-			{
-				return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
-			}
+		{
+			return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
+		}
 		BIND_END();
 
+
+        // Time
+
 		BIND_START("idk.Bindings::TimeGetFixedDelta",  float)
-			{
-				return Core::GetDT().count();
-			}
+		{
+			return Core::GetDT().count();
+		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetDelta",  float)
-			{
-				return Core::GetRealDT().count();
-			}
+		{
+			return Core::GetRealDT().count();
+		}
 		BIND_END();
+
+
+
+        // RectTransform
+
+        BIND_START("idk.Bindings::RectTransformGetOffsetMin", vec2, Handle<RectTransform> h)
+        {
+            return h->offset_min;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetOffsetMin", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->offset_min = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetOffsetMax", vec2, Handle<RectTransform> h)
+        {
+            return h->offset_max;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetOffsetMax", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->offset_max = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetAnchorMin", vec2, Handle<RectTransform> h)
+        {
+            return h->anchor_min;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetAnchorMin", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->anchor_min = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetAnchorMax", vec2, Handle<RectTransform> h)
+        {
+            return h->anchor_max;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetAnchorMax", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->anchor_max = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformGetPivot", vec2, Handle<RectTransform> h)
+        {
+            return h->pivot;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::RectTransformSetPivot", void, Handle<RectTransform> h, vec2 v)
+        {
+            h->pivot = v;
+        }
+        BIND_END();
+
+
+        // Image
+
+        BIND_START("idk.Bindings::ImageGetTexture", Guid, Handle<idk::Image> h)
+        {
+            return h->texture.guid;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageGetMaterialInstance", Guid, Handle<idk::Image> h)
+        {
+            return h->material.guid;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageGetColor", color, Handle<idk::Image> h)
+        {
+            return h->tint;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::ImageSetColor", void, Handle<idk::Image> h, color v)
+        {
+            h->tint = v;
+        }
+        BIND_END();
 	}
 }
