@@ -52,7 +52,7 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
-    <ClInclude Include="gfx\Font.h" />
+    <ClInclude Include="gfx\TextMesh.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
@@ -297,7 +297,6 @@
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
-    <ClCompile Include="gfx\Font.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />
     <ClCompile Include="gfx\FontAtlasFactory.cpp" />
     <ClCompile Include="gfx\FontData.cpp" />

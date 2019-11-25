@@ -6,8 +6,8 @@
 #include <gfx/FontData.h>
 
 namespace idk {
-	class Font
-		: public Component<Font>
+	class TextMesh
+		: public Component<TextMesh>
 	{
 	public:
 		real letter_spacing = 0;

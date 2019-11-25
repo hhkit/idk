@@ -469,7 +469,7 @@ REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::Font, "Font")
+REFLECT_BEGIN(idk::TextMesh, "TextMesh")
 REFLECT_VARS(text, letter_spacing, line_height, color, font_size, font)
 REFLECT_END()
 

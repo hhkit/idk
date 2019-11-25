@@ -81,7 +81,7 @@ namespace idk {
         template<> void DisplayComponentInner(Handle<Animator> c_anim);	
         template<> void DisplayComponentInner(Handle<Bone> c_bone);		
         template<> void DisplayComponentInner(Handle<AudioSource> c_audio);	
-		template<> void DisplayComponentInner(Handle<Font> c_font);	
+		template<> void DisplayComponentInner(Handle<TextMesh> c_font);	
 		template<> void DisplayComponentInner(Handle<Text> c_text);	
         template<> void DisplayComponentInner(Handle<ParticleSystem> c_ps);
 

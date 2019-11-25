@@ -839,9 +839,6 @@
     <ClInclude Include="gfx\FontAtlas.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Font.h">
-      <Filter>gfx\font</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\FontData.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
@@ -897,6 +894,9 @@
       <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="gfx\TextAlignment.h">
+      <Filter>gfx\font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1285,9 +1285,6 @@
     </ClCompile>
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp">
-      <Filter>gfx\font</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\Font.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
     <ClCompile Include="gfx\FontAtlasFactory.cpp">

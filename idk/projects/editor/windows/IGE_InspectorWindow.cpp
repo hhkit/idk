@@ -1049,7 +1049,7 @@ namespace idk {
 	}
 
 	template<>
-	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
+	void IGE_InspectorWindow::DisplayComponentInner(Handle<TextMesh> c_font)
 	{
         constexpr CustomDrawFn draw_text = [](const reflect::dynamic& val)
         {

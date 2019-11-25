@@ -6,7 +6,7 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 #include <particle/ParticleSystem.h>
-#include <gfx/Font.h>
+#include <gfx/TextMesh.h>
 #include <ui/Image.h>
 #include <ui/Text.h>
 #include <ui/RectTransform.h>
@@ -306,7 +306,7 @@ namespace idk
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
         span<ParticleSystem> ps,
-		span<Font> fonts,
+		span<TextMesh> fonts,
 		span<Text> texts,
         span<Image> images,
 		span<const class Transform>, 
@@ -537,7 +537,7 @@ namespace idk
 				//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
             render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
             render_data.color = f.color;
-            render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+            render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * mat4 { scale(vec3{ 0.1f, 0.1f, 1.0f }) };
             render_data.atlas = f.font;
 		}
 
@@ -547,7 +547,14 @@ namespace idk
             const auto& go = im.GetGameObject();
             const auto& rt = *go->GetComponent<RectTransform>();
             
-            auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+            const auto canvas = ui.FindCanvas(go);
+            if (!canvas)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
+                continue;
+            }
+
+            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
 
             render_data.transform = rt._matrix *
                 mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
@@ -561,7 +568,14 @@ namespace idk
             const auto& go = text.GetGameObject();
             const auto& rt = *go->GetComponent<RectTransform>();
 
-            auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+            const auto canvas = ui.FindCanvas(go);
+            if (!canvas)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
+                continue;
+            }
+
+            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
 
             constexpr auto anchor_to_alignment = [](TextAnchor anchor)
             {
