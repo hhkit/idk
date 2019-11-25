@@ -16,6 +16,7 @@ namespace idk
 
         void Update(span<class Canvas>);
         void FinalizeMatrices(span<class Canvas>);
+        void RecalculateRects(Handle<class RectTransform>);
 
         Handle<class Canvas> FindCanvas(Handle<GameObject> go) const;
 

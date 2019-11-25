@@ -174,7 +174,6 @@ namespace idk
         /*
          * Animator
          */
-
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AnimatorPlay(ulong id, string name);
 
@@ -210,8 +209,6 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorHasState(ulong id, string name);
-
-
 
         /*
          * AudioSource
@@ -260,9 +257,10 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int AddAudioClip(ulong id, string name);
+
         /*
-       * TextMesh
-       */
+        * TextMesh
+        */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string TextMeshGetText(ulong id);
 
@@ -274,6 +272,7 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TextMeshSetColor(ulong id, Color c);
+
         /*
         * Camera
         */
@@ -306,6 +305,7 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void CameraSetEnabledState(ulong id, bool c);
+
         /*
         * Light
         */
@@ -350,6 +350,7 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void LightSetIsInverseSqAtt(ulong id, bool i);
+
         /*
          * Collider
          */
@@ -379,6 +380,64 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RendererSetActive(ulong id, bool active);
+
+        /*
+         * RectTransform
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetOffsetMin(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetOffsetMin(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetOffsetMax(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetOffsetMax(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetAnchorMin(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetAnchorMin(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetAnchorMax(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetAnchorMax(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetPivot(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetPivot(ulong id, Vector2 value);
+
+        /*
+         * Image
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid ImageGetTexture(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetTexture(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid ImageGetMaterialInstance(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetMaterialInstance(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color ImageGetColor(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetColor(ulong id, Color color);
+
+        /*
+         * Text
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string TextGetText(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetText(ulong id, string c);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid TextGetMaterialInstance(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetMaterialInstance(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color TextGetColor(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetColor(ulong id, Color color);
+
         /*
          * Resource
          */
