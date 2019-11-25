@@ -32,6 +32,7 @@ namespace idk {
 		size_t _selected_layer = 0;
 		size_t _selected_state = 0;
 		size_t _selected_transition = 0;
+
 		int _selected_condition = -1;
 
 		anim::AnimDataType _selected_param_type = anim::AnimDataType::NONE;

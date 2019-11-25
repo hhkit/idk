@@ -1142,6 +1142,8 @@ namespace idk
 		ImGui::NewLine();
 		ImGui::Separator(false);
 		ImGui::PopID();
+
+		displayConditions(layer_index, state_index, transition_index);
 	}
 
 	void IGE_AnimatorWindow::displayConditions(size_t layer_index, size_t state_index, size_t transition_index)
@@ -1149,6 +1151,46 @@ namespace idk
 		auto& curr_layer = _curr_animator_component->layers[layer_index];
 		auto& curr_state = curr_layer.GetAnimationState(state_index);
 		auto& curr_transition = curr_state.GetTransition(transition_index);
+
+		const auto param_selection = [&](string_view title, AnimationCondition& condition, auto&& type) -> bool
+		{
+			using ParamType = std::decay_t<decltype(type)>;
+			bool ret_val = false;
+			anim::AnimDataType param_type = anim::AnimDataType::NONE;
+			if constexpr (std::is_same_v<ParamType, anim::IntParam>) param_type = anim::AnimDataType::INT;
+			else if constexpr (std::is_same_v <ParamType, anim::FloatParam>) param_type = anim::AnimDataType::FLOAT;
+			else if constexpr (std::is_same_v <ParamType, anim::BoolParam>) param_type = anim::AnimDataType::BOOL;
+			else if constexpr (std::is_same_v <ParamType, anim::TriggerParam>) param_type = anim::AnimDataType::TRIGGER;
+
+			// ImGui::Text(title.data());
+			// ImGui::Separator(false);
+			{
+				auto& param_table = _curr_animator_component->GetParamTable<ParamType>();
+				for (auto& param : param_table)
+				{
+					bool param_selected = condition.type == param_type && param.first == condition.param_name;
+					if (ImGui::Selectable(param.first.data(), param_selected))
+					{
+						condition.param_name = param.first;
+						condition.type = param_type;
+						ret_val = true;
+					}
+
+					if (ImGui::IsItemHovered())
+					{
+						ImGui::BeginTooltip();
+						auto& val = param.second.val;
+						if constexpr (std::is_same_v<ParamType, anim::IntParam>) ImGui::Text("%d", val);
+						else if constexpr (std::is_same_v <ParamType, anim::FloatParam>) ImGui::Text("%.2f", val);
+						else if constexpr (std::is_same_v <ParamType, anim::BoolParam>) val ? ImGui::Text("True") : ImGui::Text("False");
+						else if constexpr (std::is_same_v <ParamType, anim::TriggerParam>) val ? ImGui::Text("True") : ImGui::Text("False");
+						ImGui::EndTooltip();
+					}
+				}
+			}
+
+			return ret_val;
+		};
 		
 		ImGui::Text("Conditions");
 		ImGui::PushItemWidth(-1);
@@ -1157,7 +1199,7 @@ namespace idk
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, bg_col);
 		const bool list_is_open = ImGui::ListBoxHeader("##conditions", curr_transition.conditions.size(), 5);
 		ImGui::PopStyleColor();
-
+		int to_delete = -1;
 		if (list_is_open)
 		{
 			for (size_t i = 0; i < curr_transition.conditions.size(); ++i)
@@ -1165,34 +1207,134 @@ namespace idk
 				ImGui::PushID(i);
 				auto& condition = curr_transition.conditions[i];
 				
-				const bool selected = _selected_condition == i;
-				
-				const auto curr_pos = ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding;
-				if (ImGui::Selectable("##conditions_display", selected, ImGuiSelectableFlags_AllowItemOverlap))
+				// const bool selected = _selected_condition == i;
+				// ImGui::PushStyleColor(ImGuiCol_Header, _selectable_bg_col);
+				// ImGui::PushStyleColor(ImGuiCol_HeaderActive, _selectable_active_col);
+				// if (selected)
+				// 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
+				// else
+				// 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
+				// auto curr_pos = ImGui::GetCursorPos() + ImGui::GetStyle().FramePadding;
+				// curr_pos.y += ImGui::GetStyle().FramePadding.y;
+				// 
+				// if (ImGui::Selectable("##conditions_display", selected, ImGuiSelectableFlags_AllowItemOverlap))
+				// {
+				// 	_selected_condition = i;
+				// }
+				// ImGui::PopStyleColor(3);
+				// 
+				// const auto next_pos = ImGui::GetCursorPos();
+				// ImGui::SetCursorPos(curr_pos);
+
+				const float widget_size = ImGui::GetContentRegionAvailWidth() * 0.25f;
+				ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() * 0.27f);
+				if(ImGui::BeginCombo("##condition_param_selection", condition.param_name.data()))
 				{
-					_selected_condition = i;
+					if (!_curr_animator_component->GetParamTable<anim::IntParam>().empty()) param_selection("Int", condition, anim::IntParam{});
+					if (!_curr_animator_component->GetParamTable<anim::FloatParam>().empty()) param_selection("Float", condition, anim::FloatParam{});
+					if (!_curr_animator_component->GetParamTable<anim::BoolParam>().empty()) param_selection("Bool", condition, anim::BoolParam{});
+					if (!_curr_animator_component->GetParamTable<anim::TriggerParam>().empty()) param_selection("Trigger", condition, anim::TriggerParam{});
+
+					ImGui::EndCombo();
 				}
-
-				const auto next_pos = ImGui::GetCursorPos();
-				ImGui::SetCursorPos(curr_pos);
-
+				ImGui::PopItemWidth();
 				// Render text
+				ImGui::SameLine();
+				static constexpr const char* bool_alpha[2]{ "False", "True" };
+				static constexpr const char* opt_index[4]{ "Equal", "Not Equal", "Greater", "Less" };
 				ImGui::BeginGroup();
 				{
-					
-					//ImGui::BeginCombo()
-				}
-				ImGui::EndGroup();
+					ImGui::PushItemWidth(widget_size);
+					switch (condition.type)
+					{
+					case anim::AnimDataType::INT:
+					{
+						if (ImGui::BeginCombo("##int_op_select", opt_index[condition.op_index]))
+						{
+							if (ImGui::Selectable("Equal", condition.op_index == 0))
+								condition.op_index = anim::ConditionIndex::EQUALS;
+							if (ImGui::Selectable("Not Equal", condition.op_index == 1))
+								condition.op_index = anim::ConditionIndex::NOT_EQUALS;
+							if (ImGui::Selectable("Greater", condition.op_index == 2))
+								condition.op_index = anim::ConditionIndex::GREATER;
+							if (ImGui::Selectable("Less", condition.op_index == 3))
+								condition.op_index = anim::ConditionIndex::LESS;
+							
+							ImGui::EndCombo();
+						}
+						ImGui::SameLine();
+						ImGui::DragInt("##int_edit", &condition.val_i);
+						break;
+					}
+					case anim::AnimDataType::FLOAT:
+					{
+						if (ImGui::BeginCombo("##float_op_select", opt_index[condition.op_index]))
+						{
+							if (ImGui::Selectable("Greater", condition.op_index == 2))
+								condition.op_index = anim::ConditionIndex::GREATER;
+							if (ImGui::Selectable("Less", condition.op_index == 3))
+								condition.op_index = anim::ConditionIndex::LESS;
+							ImGui::EndCombo();
+						}
+						ImGui::SameLine();
+						ImGui::DragFloat("##float_edit", &condition.val_f, 0.01f);
+						break;
+					}
+					case anim::AnimDataType::BOOL:
+					{
+						ImGui::SameLine(0.0f, widget_size +  ImGui::GetStyle().ItemSpacing.x * 2);
+						if (ImGui::BeginCombo("##bool_edit", bool_alpha[condition.val_b]))
+						{
+							if (ImGui::Selectable("True"))
+								condition.val_b = true;
+							if (ImGui::Selectable("False"))
+								condition.val_b = false;
+							ImGui::EndCombo();
+						}
+						break;
 
-				ImGui::SetCursorPos(next_pos);
+					}
+					case anim::AnimDataType::TRIGGER:
+					{
+						ImGui::SameLine(0.0f, widget_size + ImGui::GetStyle().ItemSpacing.x * 2);
+						if (ImGui::BeginCombo("##trigger_edit", bool_alpha[condition.val_t]))
+						{
+							if (ImGui::Selectable("True"))
+								condition.val_t = true;
+							if (ImGui::Selectable("False"))
+								condition.val_t = false;
+							ImGui::EndCombo();
+						}
+						break;
+					}
+					}
+					
+				}
+				ImGui::PopItemWidth();
+				ImGui::SameLine();
+				if (ImGui::Button("Delete"))
+				{
+					to_delete = i;
+				}
+
+				ImGui::EndGroup();
+				//ImGui::PopItemWidth();
+
+				// ImGui::SetCursorPos(next_pos);
 
 
 				ImGui::PopID();
 			}
-
 			ImGui::ListBoxFooter();
 		}
 		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Add"))
+		{
+			curr_transition.conditions.emplace_back(AnimationCondition{});
+		}
+		if (to_delete >= 0)
+			curr_transition.RemoveCondition(s_cast<size_t>(to_delete));
 	}
 
 	void IGE_AnimatorWindow::animatorInspector()
