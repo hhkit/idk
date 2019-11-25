@@ -21,7 +21,7 @@ namespace idk
 
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
-		_accumulated_dt += std::min(_real_dt, dt_limit);
+		_accumulated_dt += std::min(_real_dt, dt_limit) * time_scale;
 
 		constexpr auto execute_pass = [](auto& pass_vector)
 		{

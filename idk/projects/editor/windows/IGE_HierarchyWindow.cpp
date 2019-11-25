@@ -144,7 +144,7 @@ namespace idk {
 
 		ImGui::EndMenuBar();
 
-        //ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
+        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
