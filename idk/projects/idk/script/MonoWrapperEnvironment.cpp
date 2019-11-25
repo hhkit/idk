@@ -1009,28 +1009,29 @@ namespace idk::mono
         }
 		BIND_END();
 
-		// //////Font///////////////
-		BIND_START("idk.Bindings::FontGetText", string, Handle<Font> h)
+		// //////TextMesh///////////////
+		BIND_START("idk.Bindings::TextMeshGetText", MonoString*, Handle<TextMesh> h)
 		{
-			return h->GetText();
+            return mono_string_new(mono_domain_get(), h->text.c_str());
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::FontSetText", void, Handle<Font> h, string r)
+		BIND_START("idk.Bindings::TextMeshSetText", void, Handle<TextMesh> h, MonoString* str)
 		{
-			h->SetText(r);
+            auto s = unbox(str);
+			h->text = s.get();
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::FontGetColor", color, Handle<Font> h)
+		BIND_START("idk.Bindings::TextMeshGetColor", color, Handle<TextMesh> h)
 		{
-			return h->GetColor();
+			return h->color;
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::FontSetColor", void, Handle<Font> h, color r)
+		BIND_START("idk.Bindings::TextMeshSetColor", void, Handle<TextMesh> h, color r)
 		{
-			h->SetColor(r);
+			h->color = r;
 		}
 		BIND_END();
 

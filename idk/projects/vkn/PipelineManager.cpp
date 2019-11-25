@@ -42,7 +42,8 @@ namespace idk::vkn
 		}
 		for (size_t i = 0; i < modules.size(); ++i)
 		{
-			combi += modules[arr[i]].guid.operator idk::string();
+			auto module = modules[arr[i]].as<ShaderModule>().Module().operator VkShaderModule();
+			combi.append(r_cast<const char*>(&module),sizeof(module));
 		}
 
 		vk::RenderPass rp = View().BasicRenderPass(config.render_pass_type);

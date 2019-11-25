@@ -119,6 +119,21 @@ namespace idk
         vector<ParticleObj> particles;
         RscHandle<MaterialInstance> material_instance;
     };
+	struct ParticleRange
+	{
+		RscHandle<MaterialInstance> material_instance;
+		size_t elem_offset;
+		size_t num_elems;
+	};
+
+
+    struct FontRenderData
+    {
+        vector<FontPoint> coords;
+        RscHandle<FontAtlas> atlas;
+        color color;
+        mat4 transform;
+    };
 
     struct ImageData
     {
@@ -128,7 +143,6 @@ namespace idk
     {
         vector<FontPoint> coords;
         RscHandle<FontAtlas> atlas;
-        int n_size;
     };
     struct UIRenderObject
     {

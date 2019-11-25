@@ -4,16 +4,21 @@ layout(location = 1) in VS_OUT
 {
   vec3 position;
   vec2 uv;
-  vec4 color;
 } fs_in;
 
 layout(location = 0) out vec4 FragColor;
 
 S_LAYOUT(3, 0) uniform sampler2D tex;
+U_LAYOUT(4, 1) uniform BLOCK(UIBlock)
+{
+	vec4 color;
+	bool is_font;
+} PerUI;
 
 void main()
 {
-	FragColor = texture(tex, fs_in.uv) * fs_in.color;
+	vec4 s = texture(tex, fs_in.uv);
+	FragColor = mix(s * PerUI.color, vec4(1, 1, 1, s.r) * PerUI.color, PerUI.is_font);
 	
 	if(FragColor.a < 0.001176)
 		discard;

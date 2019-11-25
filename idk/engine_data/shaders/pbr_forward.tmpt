@@ -375,7 +375,9 @@ void main()
 	
 	vec3 color = light_accum + ambient + emissive;
 	color = color / (color + vec3(1.0));
+	#ifndef VULKAN
 	color = pow(color, vec3(1.0/2.2)); 
+	#endif
 	out_color = vec4(color,1);
 	
 }

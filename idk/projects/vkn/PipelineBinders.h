@@ -65,6 +65,18 @@ namespace idk
 			void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc)override;
 
 		};
+
+		struct ParticleVertexBindings : StandardBindings
+		{
+			//const GraphicsState* _state;
+			//const GraphicsState& State();
+			mat4 view_trf, proj_trf;
+			void SetState(const GraphicsState& vstate);
+			void SetState(const CameraData& camera);
+
+			void Bind(PipelineThingy& the_interface)override;
+
+		};
 		struct PbrFwdBindings : StandardBindings
 		{
 			const GraphicsState* _state;

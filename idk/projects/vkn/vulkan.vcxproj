@@ -229,6 +229,7 @@
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
+    <ClInclude Include="ParticleRenderer.h" />
     <ClInclude Include="PipelineBinders.h" />
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
@@ -303,6 +304,7 @@
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
+    <ClCompile Include="ParticleRenderer.cpp" />
     <ClCompile Include="PipelineBinders.cpp" />
     <ClCompile Include="PipelineManager.cpp" />
     <ClCompile Include="PipelineThingy.cpp" />

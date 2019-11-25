@@ -218,6 +218,9 @@
     <ClInclude Include="CubemapRenderer.h">
       <Filter>render\renderers</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -400,6 +403,7 @@
     <ClCompile Include="CubemapRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

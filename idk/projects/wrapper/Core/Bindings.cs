@@ -261,19 +261,19 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int AddAudioClip(ulong id, string name);
         /*
-       * Font
+       * TextMesh
        */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string FontGetText(ulong id);
+        public extern static string TextMeshGetText(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void FontSetText(ulong id, string c);
+        public extern static void TextMeshSetText(ulong id, string c);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Color FontGetColor(ulong id);
+        public extern static Color TextMeshGetColor(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void FontSetColor(ulong id, Color c);
+        public extern static void TextMeshSetColor(ulong id, Color c);
         /*
         * Camera
         */

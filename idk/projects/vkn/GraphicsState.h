@@ -56,6 +56,9 @@ namespace idk::vkn
 		const vector<LightData>* lights;
 		hlp::vector_buffer inst_mesh_render_buffer;
 		const vector<InstRenderObjects>* instanced_ros;
+		const vector<ParticleObj>*        particle_data{};
+		vector<ParticleRange>*            particle_range;
+		hlp::vector_buffer                particle_buffer;
 		//vector<shadow_map_t> shadow_maps;
 
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);

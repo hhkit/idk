@@ -33,6 +33,12 @@ namespace idk {
 
 		vec2 GetMousePosInWindow();
 		vec2 GetMousePosInWindowNormalized();
+
+
+		vec3 focused_vector{}; //Updated everytime FocusOnSelectedGameObjects is called. For orbiting
+		float distance_to_focused_vector;	//When WASD control is activated, this is used to move the focused_vector! Only used for WASD control
+
+
 	protected:
 
 
@@ -42,8 +48,10 @@ namespace idk {
         vec2 draw_rect_offset;
         vec2 draw_rect_size;
 
-		bool is_controlling_WASDcam = false;
-		bool is_controlling_Pancam = false;
+		bool is_controlling_WASDcam   = false;
+		bool is_controlling_Pancam	  = false;
+		bool is_controlling_ALTscroll = false;
+		bool is_controlling_ALTorbit  = false;
 
 		const float yaw_rotation_multiplier		= 0.1f; //When you hold right click and move mouse sideways
 		const float pitch_rotation_multiplier	= 0.05f; //When you hold right click and move mouse up/downwards
@@ -66,6 +74,7 @@ namespace idk {
 		const vector<float> scale_snap_type			= { 0,0.5f,0.25f,0.125f,0.0625f };
 
 		void DrawSnapControl();
+		void DrawGlobalAxes();
 
 
 		std::pair<Handle<GameObject>, phys::raycast_result> GetClosestGameObjectFromCamera(vector<Handle<GameObject>>& refVector, vector<phys::raycast_result>& rayResult);
@@ -74,9 +83,11 @@ namespace idk {
 
 
 		void UpdateWASDMouseControl();
-		void UpdatePanMouseControl();
-		void UpdateScrollMouseControl();
-
+		void UpdatePanMouseControl(); //MiddleMouse
+		void UpdateScrollMouseControl(); //Scroll
+		void UpdateScrollMouseControl2(); //Alt + RightMouse
+		void UpdateOrbitControl(); //Alt + LeftMouse
+		
 		void UpdateGizmoControl();
 
 		void MoveMouseToWindow(); //Moves the mouse to the middle of the sceneView

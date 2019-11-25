@@ -17,6 +17,8 @@
 
 #include <vkn/GraphicsState.h>
 
+#include <vkn/ParticleRenderer.h>
+
 namespace idk
 {
 	struct RenderObject;
@@ -100,6 +102,7 @@ namespace idk::vkn
 		CubemapRenderer _convoluter;
 		CubemapRenderer _skybox;
 
+		ParticleRenderer _particle_renderer;
 
 		//VknFrameBufferManager   fb_man{};
 	};
