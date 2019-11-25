@@ -26,21 +26,21 @@ namespace idk::mono
 	MonoBehaviorEnvironment::MonoBehaviorEnvironment(string_view full_path_to_game_dll)
 		: MonoEnvironment{}
 	{
+		// setup
 		char domain_name[] = "ScriptDomain";
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
+
+		// open file
 		std::ifstream file{ full_path_to_game_dll, std::ios::binary };
 		assembly_data = stringify(file);
+
+		// load assembly
 		mono_domain_set(_domain, true);
 		MonoImageOpenStatus status;
-
-		auto img = mono_image_open_from_data(assembly_data.data(), assembly_data.size(), true, &status);
-		//_assembly = mono_image_get_assembly(img);
+		auto img = mono_image_open_from_data(assembly_data.data(), (uint32_t) assembly_data.size(), true, &status);
 		_assembly = mono_assembly_load_from(img, full_path_to_game_dll.data(), &status);
-		//_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
 
 		ScanTypes();
-		if (!mono_domain_set(_domain, true))
-			throw;
 	}
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()
 	{
