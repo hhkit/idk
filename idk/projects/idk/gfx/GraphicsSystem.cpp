@@ -535,10 +535,10 @@ namespace idk
 			auto& render_data = result.font_render_data.emplace_back();
 			//if (!f.textureAtlas)
 				//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
-            render_data.coords = FontData::Generate(f.text, f.textureAtlas, f.fontSize, f.tracking, f.lineSpacing, TextAlignment::Left, 0).coords;
+            render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
             render_data.color = f.color;
             render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
-            render_data.atlas = f.textureAtlas;
+            render_data.atlas = f.font;
 		}
 
         auto& ui = Core::GetSystem<UISystem>();
@@ -563,14 +563,65 @@ namespace idk
 
             auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
-            render_data.transform = rt._matrix;
+            constexpr auto anchor_to_alignment = [](TextAnchor anchor)
+            {
+                switch (anchor)
+                {
+                case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft: 
+                    return TextAlignment::Left;
+                case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+                    return TextAlignment::Center;
+                case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+                    return TextAlignment::Right;
+                }
+                return TextAlignment::Left;
+            };
+
+            const float sx = rt._local_rect.size.x;
+            const float sy = rt._local_rect.size.y;
+
+            const auto font_data = FontData::Generate(
+                text.text, text.font,
+                text.best_fit ? 0 : text.font_size,
+                text.letter_spacing,
+                text.line_height,
+                anchor_to_alignment(text.alignment),
+                text.wrap ? sx : 0);
+
+            float tw = font_data.width;
+            float th = font_data.height;
+
             render_data.material = text.material;
             render_data.color = text.color;
-            render_data.data = TextData{
-                FontData::Generate(text.text, text.font,
-                    text.font_size, text.letter_spacing, text.line_spacing, TextAlignment::Left, 0).coords,
-                text.font };
+            render_data.data = TextData{ font_data.coords, text.font };
             render_data.depth = go->Transform()->Depth();
+
+            float s = 1.0f;
+
+            if (text.best_fit)
+            {
+                const float sw = sx / tw;
+                const float sh = sy / th;
+                s = sw > sh ? sh : sw;
+                tw *= s;
+                th *= s;
+            }
+
+            switch (text.alignment)
+            {
+            case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
+            case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
+            case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
+            case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
+            case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
+            case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
+            case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
+            case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
+            case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
+            }
+
+            if (text.best_fit)
+                render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
         }
 
         // sort ui render by depth then z pos

@@ -163,68 +163,7 @@ namespace idk
         style.FrameRounding = 1.0f;
         style.CurveTessellationTol = 0.5f;
 
-        auto* colors = style.Colors;
-        ImGui::StyleColorsDark();
-
-        colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
-
-        // grays
-        colors[ImGuiCol_WindowBg] =
-            ImColor(29, 34, 41).Value;
-        colors[ImGuiCol_PopupBg] =
-        colors[ImGuiCol_ScrollbarBg] =
-            ImColor(43, 49, 56, 240).Value;
-        colors[ImGuiCol_Border] =
-        colors[ImGuiCol_Separator] =
-        colors[ImGuiCol_ScrollbarGrab] =
-            ImColor(63, 70, 77).Value;
-            //ImColor(106, 118, 129).Value;
-
-        colors[ImGuiCol_MenuBarBg] =
-            ImColor(36, 58, 74).Value;
-        colors[ImGuiCol_ScrollbarBg].w = 0.5f;
-
-        // main accent - 2
-        colors[ImGuiCol_TitleBg] =
-            ImColor(5, 30, 51).Value;
-
-        // main accent - 1
-        colors[ImGuiCol_TitleBgActive] =
-        colors[ImGuiCol_TabUnfocused] =
-            ImColor(11, 54, 79).Value;
-
-        // main accent
-        colors[ImGuiCol_Tab] =
-        colors[ImGuiCol_TabUnfocusedActive] =
-        colors[ImGuiCol_FrameBg] =
-        colors[ImGuiCol_Button] =
-        colors[ImGuiCol_Header] =
-        colors[ImGuiCol_SeparatorHovered] =
-        colors[ImGuiCol_ScrollbarGrabHovered] =
-            ImColor(23, 75, 111).Value;
-
-        // main accent + 1
-        colors[ImGuiCol_TabHovered] =
-        colors[ImGuiCol_TabActive] =
-        colors[ImGuiCol_ButtonHovered] =
-        colors[ImGuiCol_FrameBgHovered] =
-        colors[ImGuiCol_HeaderHovered] =
-        colors[ImGuiCol_SeparatorActive] =
-        colors[ImGuiCol_ScrollbarGrabActive] =
-            ImColor(46, 115, 143).Value;
-
-        // main accent + 2
-        colors[ImGuiCol_TextSelectedBg] =
-        colors[ImGuiCol_ButtonActive] =
-        colors[ImGuiCol_FrameBgActive] =
-        colors[ImGuiCol_HeaderActive] =
-            ImColor(65, 153, 163).Value;
-
-        // complement accent
-        colors[ImGuiCol_PlotLinesHovered] =
-            ImColor(222, 116, 35).Value;
-        //style.Colors[ImGuiCol_PlotLinesHovered]
-        // ImColor(
+		ApplyDefaultColors();
 
         // font config
         ImFontConfig config;
@@ -410,6 +349,74 @@ namespace idk
 		return "/tmp/tmp_scene.ids";
 	}
 
+	void IDE::ApplyDefaultColors()
+	{
+		auto& style = ImGui::GetStyle();
+		auto* colors = style.Colors;
+		ImGui::StyleColorsDark();
+
+		colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
+
+		// grays
+		colors[ImGuiCol_WindowBg] =
+			ImColor(29, 34, 41).Value;
+		colors[ImGuiCol_PopupBg] =
+			colors[ImGuiCol_ScrollbarBg] =
+			ImColor(43, 49, 56, 240).Value;
+		colors[ImGuiCol_Border] =
+			colors[ImGuiCol_Separator] =
+			colors[ImGuiCol_ScrollbarGrab] =
+			ImColor(63, 70, 77).Value;
+		//ImColor(106, 118, 129).Value;
+
+		colors[ImGuiCol_MenuBarBg] =
+			ImColor(36, 58, 74).Value;
+		colors[ImGuiCol_ScrollbarBg].w = 0.5f;
+
+		// main accent - 2
+		colors[ImGuiCol_TitleBg] =
+			ImColor(5, 30, 51).Value;
+
+		// main accent - 1
+		colors[ImGuiCol_TitleBgActive] =
+			colors[ImGuiCol_TabUnfocused] =
+			ImColor(11, 54, 79).Value;
+
+		// main accent
+		colors[ImGuiCol_Tab] =
+			colors[ImGuiCol_TabUnfocusedActive] =
+			colors[ImGuiCol_FrameBg] =
+			colors[ImGuiCol_Button] =
+			colors[ImGuiCol_Header] =
+			colors[ImGuiCol_SeparatorHovered] =
+			colors[ImGuiCol_ScrollbarGrabHovered] =
+			ImColor(23, 75, 111).Value;
+
+		// main accent + 1
+		colors[ImGuiCol_TabHovered] =
+			colors[ImGuiCol_TabActive] =
+			colors[ImGuiCol_ButtonHovered] =
+			colors[ImGuiCol_FrameBgHovered] =
+			colors[ImGuiCol_HeaderHovered] =
+			colors[ImGuiCol_SeparatorActive] =
+			colors[ImGuiCol_ScrollbarGrabActive] =
+			ImColor(46, 115, 143).Value;
+
+		// main accent + 2
+		colors[ImGuiCol_TextSelectedBg] =
+			colors[ImGuiCol_ButtonActive] =
+			colors[ImGuiCol_FrameBgActive] =
+			colors[ImGuiCol_HeaderActive] =
+			ImColor(65, 153, 163).Value;
+
+		// complement accent
+		colors[ImGuiCol_PlotLinesHovered] =
+			ImColor(222, 116, 35).Value;
+		//style.Colors[ImGuiCol_PlotLinesHovered]
+		// ImColor(
+
+	}
+
 	void IDE::RefreshSelectedMatrix()
 	{
 		//Refresh the new matrix values
@@ -460,13 +467,20 @@ namespace idk
 
             finalCamPos /= static_cast<float>(selected_gameObjects.size());
 
-			const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
+			/*
+			Needs to find how much space the object pixels takes on screen, then this distance is based on that.
+			If single object, object pixels should take 50% of screen.
+			If multiple objects, the ends of each object pixels on screen plus some padding should be used as anchor points to determine distance.
+			But this is lazy method. 20.
+			*/
+			const float distanceFromObject = 20; 
 
 			const CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 			const Handle<Camera> currCamera = main_camera.current_camera;
 			const Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
 			camTransform->position = finalCamPos;
-			focused_vector = finalCamPos;
+			if (auto* sceneViewPtr = FindWindow<IGE_SceneView>())
+				sceneViewPtr->focused_vector = finalCamPos;
 			scroll_multiplier = default_scroll_multiplier;
 			camTransform->position -= camTransform->Forward() * distanceFromObject;
 		}

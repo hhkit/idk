@@ -33,6 +33,10 @@ namespace idk {
 			vec2 bearing; // left, top
 			vec2 tex_offset; // x offset of glyph in texture coordinates
 		} c[128];
+        // max y above baseline
+        float ascender;
+        // max y below baseline
+        float descender;
 
         PathHandle reload_path;
 

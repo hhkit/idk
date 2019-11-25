@@ -1051,41 +1051,29 @@ namespace idk {
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
 	{
-		//Just a check to prevent vulkan from crashing because vulkan got no font yet
-		//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
-		{
-			//ImGui::Text("State Type: Font Type");
-
-            DisplayStack display(*this);
-            _curr_property_stack.push_back("textureAtlas"); display.GroupBegin(); display.Label("Atlas"); display.ItemBegin(true);
-            bool changed = ImGuidk::InputResource("", &c_font->textureAtlas);
-            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
-
-            _curr_property_stack.push_back("text"); display.GroupBegin(); display.Label("Text"); display.ItemBegin(true);
-            changed = ImGui::InputTextMultiline("", &c_font->text);
-            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
-
-            changed = false;
-            _curr_property_stack.push_back("fontSize"); display.GroupBegin(); display.Label("Font Size"); display.ItemBegin(true);
-            if (ImGui::DragInt("", &c_font->fontSize))
-            {
-                changed = true;
-            }
-            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
-
-            _curr_property_stack.push_back("spacing"); display.GroupBegin(); display.Label("Spacing"); display.ItemBegin(true);
-            changed = ImGui::DragFloat("", &c_font->spacing);
-            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
-
-            _curr_property_stack.push_back("track"); display.GroupBegin(); display.Label("Track"); display.ItemBegin(true);
-            changed = ImGui::DragFloat("", &c_font->tracking);
-            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
-
-            _curr_property_stack.push_back("color"); display.GroupBegin(); display.Label("Color"); display.ItemBegin(true);
-            changed = ImGui::ColorEdit4("##fontColor", &c_font->color[0]);
-            display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
-		}
+        constexpr CustomDrawFn draw_text = [](const reflect::dynamic& val)
+        {
+            return ImGui::InputTextMultiline("", &val.get<string>());
+        };
+        InjectDrawTable table{ { "text", draw_text } };
+        DisplayVal(*c_font, &table);
 	}
+
+    template<>
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<Text> c_text)
+    {
+        constexpr CustomDrawFn draw_text = [](const reflect::dynamic& val)
+        {
+            return ImGui::InputTextMultiline("", &val.get<string>());
+        };
+        constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
+        {
+            auto& anchor = val.get<TextAnchor>();
+            return ImGuidk::EnumCombo("", &anchor);
+        };
+        InjectDrawTable table{ { "text", draw_text }, { "alignment", draw_alignment } };
+        DisplayVal(*c_text, &table);
+    }
 
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<AudioSource> c_audiosource)

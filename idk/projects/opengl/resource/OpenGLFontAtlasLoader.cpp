@@ -96,6 +96,8 @@ namespace idk {
 			h += mh;
 			font_handle->Size(ivec2(w, h));
 
+            font_handle->ascender = face->ascender / s_cast<float>(face->units_per_EM) * tm.font_size;
+            font_handle->descender = face->descender / s_cast<float>(face->units_per_EM) * tm.font_size;
 
 			//////////////////////////////////Custom Buffer//////////////////////////////////////////
 			glActiveTexture(GL_TEXTURE0);
@@ -146,7 +148,6 @@ namespace idk {
 				mh = std::max(mh, g->bitmap.rows);
 				//mh = g->bitmap.rows;
 				x += g->bitmap.width + 1;
-
 
 				//ERROR IN HERE
 				GL_CHECK();
