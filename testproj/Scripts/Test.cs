@@ -12,6 +12,8 @@ namespace TestAndSeek
         public Prefab prefab;
         public GameObject go;
         public MaterialInstance minst;
+        public string nama;
+        public string namae_o;
 
         public int i2;
 

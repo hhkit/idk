@@ -32,7 +32,7 @@ namespace idk::mono
 		MonoImageOpenStatus status;
 		auto img = mono_image_open_from_data(assembly_data.data(), assembly_data.size(), true, &status);
 		//_assembly = mono_image_get_assembly(img);
-		_assembly = mono_assembly_load_from(img, full_path_to_game_dll.data(), &status);
+		_assembly = mono_assembly_load_from(img, "idk.dll", &status);
 		BindCoreFunctions();
 		IDK_ASSERT_MSG(_assembly, "cannot load idk.dll");
 	}

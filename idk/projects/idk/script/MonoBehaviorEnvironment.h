@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <script/MonoEnvironment.h>
 
 namespace idk::mono
@@ -16,7 +17,7 @@ namespace idk::mono
 	private:
 		string assembly_data;
 		vector<const char*> name_list;
-		hash_table<string, ManagedType*> mono_behaviors;
+		std::map<string, ManagedType*> mono_behaviors;
 		void FindMonoBehaviors();
 	};
 }

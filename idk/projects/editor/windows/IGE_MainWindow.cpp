@@ -453,8 +453,6 @@ namespace idk {
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
 			}
-			ImGui::SameLine(0,0);
-			ImGui::DragFloat("", &Core::GetScheduler().time_scale, 0.05f, 0.0f, 2.f, "Time Scale: %.3f");
 		}
 
 		
