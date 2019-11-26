@@ -56,6 +56,7 @@ namespace idk::vkn
 		void BindMeshBuffers(const RenderObject& ro);
 		void BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs);
 		void BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs);
+		void SetVertexCount(uint32_t vertex_count);
 
 		std::optional<UboInfo> GetUniform(const string& uniform_name) const;
 
@@ -82,6 +83,9 @@ namespace idk::vkn
 	private:
 
 		hash_table<uint32_t, BoundVertexBuffer> attrib_buffers;
+		std::optional<BoundIndexBuffer> index_buffer{};
+		size_t num_vertices{};
+
 		DescriptorUpdateData dud{};
 		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
 		vector<ProcessedRO> draw_calls;

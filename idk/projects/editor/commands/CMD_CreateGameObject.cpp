@@ -33,11 +33,11 @@ namespace idk {
 
 			if (parenting_gameobject) {
 				game_object_handle->GetComponent<Transform>()->SetParent(parenting_gameobject, false);
-                if (name.size())
-                    game_object_handle->Name(name);
-                for (const auto& str : initial_components)
-                    game_object_handle->AddComponent(string_view{ str });
 			}
+			if (name.size())
+				game_object_handle->Name(name);
+			for (const auto& str : initial_components)
+				game_object_handle->AddComponent(string_view{ str });
 
 			return bool(game_object_handle); //Return true if create gameobject is successful
 		}

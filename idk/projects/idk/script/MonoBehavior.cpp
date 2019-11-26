@@ -5,6 +5,8 @@
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <script/MonoFunctionInvoker.h>
+
+#include <concurrent_queue.h>
 namespace idk::mono
 {
 	string_view Behavior::TypeName() const

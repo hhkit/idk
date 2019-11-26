@@ -19,6 +19,8 @@
 
 #include <vkn/ParticleRenderer.h>
 
+#include <vkn/FontRenderer.h>
+
 namespace idk
 {
 	struct RenderObject;
@@ -103,6 +105,8 @@ namespace idk::vkn
 		CubemapRenderer _skybox;
 
 		ParticleRenderer _particle_renderer;
+
+		FontRenderer   _font_renderer;
 
 		//VknFrameBufferManager   fb_man{};
 	};

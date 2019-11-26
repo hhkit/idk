@@ -104,14 +104,15 @@ namespace idk {
                 }
             }
             if (ImGui::BeginMenu("UI")) {
-                const auto go = editor.selected_gameObjects.front();
-                if (ImGui::MenuItem("Canvas"))
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
-                if (ImGui::MenuItem("Image"))
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Image", vector<string>{ "RectTransform", "Image" }));
-                if (ImGui::MenuItem("Text"))
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Text", vector<string>{ "RectTransform", "Text" }));
-                ImGui::EndMenu();
+				const auto go = editor.selected_gameObjects.empty()? Handle<GameObject>() :editor.selected_gameObjects.front();
+				if (ImGui::MenuItem("Canvas"))
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
+				if (ImGui::MenuItem("Image"))
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Image", vector<string>{ "RectTransform", "Image" }));
+				if (ImGui::MenuItem("Text"))
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Text", vector<string>{ "RectTransform", "Text" }));
+				
+				ImGui::EndMenu();
             }
 
 			ImGui::EndPopup();

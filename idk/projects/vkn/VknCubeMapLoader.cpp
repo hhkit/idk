@@ -34,6 +34,10 @@ namespace idk::vkn {
 		eMin,
 		eMag
 	};
+	bool IsDepthStencil(vk::Format format)
+	{
+		return format == vk::Format::eD16Unorm || format == vk::Format::eD32Sfloat || format == vk::Format::eD16UnormS8Uint || format == vk::Format::eD32SfloatS8Uint || format == vk::Format::eD24UnormS8Uint;
+	}
 
 	vk::SamplerAddressMode GetRepeatMode(CubemapOptions options, [[maybe_unused]] UvAxis axis)
 	{
@@ -542,7 +546,7 @@ namespace idk::vkn {
 
 		size_t num_bytes = len;
 
-		vk::ImageUsageFlags attachment_type = (format == vk::Format::eD16Unorm) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
+		vk::ImageUsageFlags attachment_type = (IsDepthStencil(format)) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
 		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
 		std::optional<vk::ImageSubresourceRange> range{};
 
@@ -586,7 +590,7 @@ namespace idk::vkn {
 			next_layout = layout = attachment_layout;
 		}
 		vk::ImageAspectFlagBits img_aspect = vk::ImageAspectFlagBits::eColor;
-		if ((format == vk::Format::eD16Unorm))
+		if (IsDepthStencil(format))
 			img_aspect = vk::ImageAspectFlagBits::eDepth;
 		result.aspect = img_aspect;
 

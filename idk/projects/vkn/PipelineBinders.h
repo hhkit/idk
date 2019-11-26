@@ -47,6 +47,9 @@ namespace idk
 			virtual void Bind(PipelineThingy& the_interface, const AnimatedRenderObject& dc);
 			//Stuff that needs to be bound only for animated renderobject.
 			virtual void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc);
+
+			//Stuff that needs to be bound only for font renderobject
+			virtual void BindFont(PipelineThingy& the_interface, const FontArrayData& dc);
 		};
 
 		//Standard binding for vertex stuff
@@ -75,6 +78,20 @@ namespace idk
 			void SetState(const CameraData& camera);
 
 			void Bind(PipelineThingy& the_interface)override;
+
+		};
+		struct FontVertexBindings : StandardBindings
+		{
+			//const GraphicsState* _state;
+			//const GraphicsState& State();
+			mat4 view_trf, proj_trf, obj_trf;
+			vec4 color;
+			void SetState(const GraphicsState& vstate);
+			void SetState(const CameraData& camera);
+
+			void Bind(PipelineThingy& the_interface)override;
+			void BindFont(PipelineThingy& the_interface, const FontArrayData& dc)override;
+
 
 		};
 		struct PbrFwdBindings : StandardBindings

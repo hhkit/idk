@@ -61,6 +61,7 @@ namespace idk
 			CameraData camera;
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t inst_particle_begin{}, inst_particle_end{};
+			size_t inst_font_begin{}, inst_font_end{};
 		};
 		struct LightRenderRange
 		{
@@ -143,7 +144,10 @@ namespace idk
             vector<ParticleRenderData> particle_render_data;
 			vector<ParticleObj>        particle_buffer;
 			vector<ParticleRange>      particle_range;
-			vector<FontRenderData> font_render_data;
+			vector<FontRenderData>	 font_render_data;
+			vector<FontArrayData>    font_array_data;
+			vector<CharacterObj>     font_buffer;
+			vector<FontRange>      font_range;
 			hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
 
 			size_t curr_scene_camera_index;

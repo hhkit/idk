@@ -12,7 +12,7 @@ Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 #version 450
 
-layout(location = 1) in VS_OUT
+layout(location = 2) in VS_OUT
 {
   vec3 position;
   vec2 uv;

@@ -11,7 +11,6 @@
 
 #include "pch.h"
 #include <editor/windows/IGE_HelpWindow.h>
-
 namespace idk {
 
 
@@ -30,7 +29,7 @@ namespace idk {
 
 	void IGE_HelpWindow::Update() {
 
-		ImGui::Text("SHORTCUTS");
+		ImGui::Text("SHORTCUTS (V1.0)");
 		const ImVec4 color = { 0,0.7f,0.1f,1.0f };
 		auto cursorPos = ImGui::GetCursorPos();
 		const auto XOffset = 100.0f;
@@ -60,7 +59,6 @@ namespace idk {
 		}
 
 	}
-
 
 
 

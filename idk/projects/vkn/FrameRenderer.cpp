@@ -477,6 +477,7 @@ namespace idk::vkn
 			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube]
 		);
 		_particle_renderer.InitConfig();
+		_font_renderer.InitConfig();
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -524,6 +525,14 @@ namespace idk::vkn
 				auto& buffer = state.shared_gfx_state->particle_buffer;
 				buffer.resize(hlp::buffer_size(particle_data));
 				buffer.update<const ParticleObj>(0, particle_data, cmd_buffer);
+			}
+
+			if (state.shared_gfx_state->characters_data && state.shared_gfx_state->characters_data->size())
+			{
+				auto& font_data = *state.shared_gfx_state->characters_data;
+				auto& buffer = state.shared_gfx_state->font_buffer;
+				buffer.resize(hlp::buffer_size(font_data));
+				buffer.update<const CharacterObj>(0, font_data, cmd_buffer);
 			}
 
 			cmd_buffer.end();
@@ -1103,7 +1112,12 @@ namespace idk::vkn
 		//TODO make ProcessRoUniforms only render forward pass stuff.
 		auto&& the_interface = (is_deferred)?PipelineThingy{}:
 			ProcessRoUniforms(state, rs.ubo_manager);
+		
+		
 		_particle_renderer.DrawParticles(the_interface, state, rs);
+		_font_renderer.DrawFont(the_interface,state,rs);
+
+
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
@@ -1261,7 +1275,7 @@ namespace idk::vkn
 				auto& pipeline = *prev_pipeline;
 				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-				auto& mesh = obj.mesh.as<VulkanMesh>();
+				//auto& mesh = obj.mesh.as<VulkanMesh>();
 				{
 					uint32_t set = 0;
 					for (auto& ods : p_ro.descriptor_sets)
@@ -1282,11 +1296,15 @@ namespace idk::vkn
 					if (opt)
 						cmd_buffer.bindVertexBuffers(*opt, attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 				}
-				auto& oidx = mesh.GetIndexBuffer();
+				auto& oidx = p_ro.index_buffer;
 				if (oidx)
 				{
-					cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-					cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+					cmd_buffer.bindIndexBuffer(oidx->buffer, oidx->offset, oidx->index_type, vk::DispatchLoaderDefault{});
+					cmd_buffer.drawIndexed(p_ro.num_vertices, static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+				}
+				else
+				{
+					cmd_buffer.draw(p_ro.num_vertices, static_cast<uint32_t>(p_ro.num_instances), 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 			}
 		}

@@ -900,6 +900,9 @@
       <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="common\LayerMask.h" />
+    <ClInclude Include="parallel\HazardPointerDL.h" />
+    <ClInclude Include="parallel\queue.h" />
+    <ClInclude Include="parallel\ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1318,6 +1321,7 @@
     <ClCompile Include="gfx\FontData.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
+    <ClCompile Include="parallel\ThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
