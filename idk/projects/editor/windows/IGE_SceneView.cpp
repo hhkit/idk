@@ -233,7 +233,7 @@ namespace idk {
 
 
 		//Middle Mouse Pan control
-		if (ImGui::IsMouseDown(2) && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {
+		if (ImGui::IsMouseDown(2)) { //Doesnt matter if you hold alt or not!
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
 				// GetCursorPos(&prevMouseScreenPos);
@@ -630,7 +630,7 @@ namespace idk {
 
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
-		if (editor.selected_gameObjects.size()) {
+		if (editor.selected_gameObjects.size() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
 			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->Transform(); 
 
 
