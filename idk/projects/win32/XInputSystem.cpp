@@ -70,24 +70,24 @@ namespace idk::win
         }
     }
 
-    bool XInputSystem::GetButtonDown(char player, GamepadButton button)
+    bool XInputSystem::GetButtonDown(char player, GamepadButton button) const
     {
         return (_prev_buf()[player].buttons & static_cast<unsigned short>(button)) == 0 &&
                (_curr_buf()[player].buttons & static_cast<unsigned short>(button)) != 0;
     }
 
-    bool XInputSystem::GetButtonUp(char player, GamepadButton button)
+    bool XInputSystem::GetButtonUp(char player, GamepadButton button) const
     {
         return (_prev_buf()[player].buttons & static_cast<unsigned short>(button)) != 0 &&
                (_curr_buf()[player].buttons & static_cast<unsigned short>(button)) == 0;
     }
 
-    bool XInputSystem::GetButton(char player, GamepadButton button)
+    bool XInputSystem::GetButton(char player, GamepadButton button) const
     {
         return (_curr_buf()[player].buttons & static_cast<unsigned short>(button)) != 0;
     }
 
-    float XInputSystem::GetAxis(char player, GamepadAxis axis)
+    float XInputSystem::GetAxis(char player, GamepadAxis axis) const
     {
         switch (axis)
         {
@@ -111,6 +111,11 @@ namespace idk::win
         vibration.wLeftMotorSpeed = static_cast<WORD>(std::clamp(low_freq, 0.0f, 1.0f) * 0xffff);
         vibration.wRightMotorSpeed = static_cast<WORD>(std::clamp(high_freq, 0.0f, 1.0f) * 0xffff);
         XInputSetState(player, &vibration);
+    }
+
+    char XInputSystem::GetConnectedPlayers() const
+    {
+        return _connected_users;
     }
 
     static vec2 thumbstick_deadzone_filter(short x, short y, short deadzone)
