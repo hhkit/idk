@@ -96,7 +96,7 @@ namespace idk
 	{
 		auto& param_table = GetParamTable<T>();
 		auto res = param_table.find(name.data());
-		T param{name.data(), true};
+		T param{name, true};
 
 		int count = -1;
 		while (res != param_table.end())
@@ -148,6 +148,13 @@ namespace idk
 							if (condition.param_name == from_str)
 								condition.param_name = to_str;
 						}
+					}
+
+					BlendTree* blend_tree = state.GetBlendTree();
+					if (blend_tree)
+					{
+						if (blend_tree->params[0] == from_str)
+							blend_tree->params[0] = to_str;
 					}
 				}
 			}

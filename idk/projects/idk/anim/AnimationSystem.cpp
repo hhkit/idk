@@ -32,7 +32,7 @@ namespace idk
 		{
 			for (auto& elem : animators)
 			{
-				elem.Reset();
+				elem.ResetToDefault();
 				// SaveBindPose(elem);
 				for (auto& layer : elem.layers)
 				{
@@ -108,7 +108,7 @@ namespace idk
 		{
 			for (auto& elem : animators)
 			{
-				elem.Reset();
+				elem.ResetToDefault();
 				RestoreBindPose(elem);
 			}
 			_was_paused = true;
@@ -258,48 +258,15 @@ namespace idk
 
 
 		auto& motions = anim_data->motions;
-		float curr_val = anim_data->def_data[0];
+		float param_val = anim_data->def_data[0];
 		auto res = animator.float_vars.find(anim_data->params[0]);
 		if (res != animator.float_vars.end())
-			curr_val = res->second.val;
+			param_val = res->second.val;
 
 		// First compute the weights
 		if (!anim_data->weights_cached)
 		{
-			float sum = 0.0f;
-			
-			size_t motions_sz = motions.size();
-			if (motions_sz < 1)
-			{
-				for (size_t i = 0; i < motions_sz; ++i)
-				{
-					motions[i].weight = 1.0f;
-				}
-			}
-			else
-			{
-				for (size_t i = 0; i < motions_sz; ++i)
-				{
-
-					const float curr_threshold = motions[i].thresholds[0];
-					float prev_threshold = curr_threshold;
-					float next_threshold = curr_threshold;
-
-					if (i != 0)
-						prev_threshold = motions[i - 1].thresholds[0];
-
-					if (i + 1 < motions_sz)
-						next_threshold = motions[i + 1].thresholds[0];
-
-					motions[i].weight = idk::anim::piecewise_linear(prev_threshold, curr_threshold, next_threshold, curr_val);
-
-					sum += motions[i].weight;
-				}
-
-				// Normalize the weights
-				for (auto& blend_motion : anim_data->motions)
-					blend_motion.weight /= sum;
-			}
+			anim_data->ComputeWeights(param_val);
 			anim_data->weights_cached = true;
 		}
 		
@@ -435,19 +402,22 @@ namespace idk
 				if (!curr_transition.valid || i == layer.transition_index)
 					continue;
 
-				bool transit = false;
+				
 				// Evaluate exit time first
 				if (curr_transition.has_exit_time)
 				{
+					bool exit_time_reached = false;
 					if (curr_transition.exit_time <= 1.0f)
-						transit = curr_state.normalized_time >= curr_transition.exit_time;
+						exit_time_reached = curr_state.normalized_time >= curr_transition.exit_time;
 					else
-						transit = curr_state.elapsed_time >= curr_transition.exit_time;
+						exit_time_reached = curr_state.elapsed_time >= curr_transition.exit_time;
+
+					// Do not transit if the exit time has not been reached (early out)
+					if (exit_time_reached == false)
+						continue;
 				}
 				
-				if (transit == false)
-					continue;
-
+				bool transit = true;
 				for (auto& cond : curr_transition.conditions)
 				{
 					switch (cond.type)
@@ -473,7 +443,7 @@ namespace idk
 					case anim::AnimDataType::TRIGGER:
 					{
 						auto& param = animator.GetParam<anim::TriggerParam>(cond.param_name);
-						transit &= param.valid ? param.val == cond.val_t : false;
+						transit &= param.valid ? param.val : false;
 						break;
 					}
 					case anim::AnimDataType::NONE:
@@ -491,7 +461,6 @@ namespace idk
 					const bool blend_to_succeeded = layer.BlendTo(curr_transition.transition_to_index, curr_transition.transition_duration);
 					if (blend_to_succeeded && layer.blend_state.is_playing)
 					{
-						LOG("TRANSITION HIT");
 						layer.blend_state.normalized_time = curr_transition.transition_offset;
 						layer.transition_index = i;
 					}
@@ -652,8 +621,8 @@ namespace idk
 		// Don't do anything if the sizes dont match.
 		if (skeleton.size() != animator._child_objects.size())
 		{
-			std::cout << "[Animation System] Error: " << "Skeleton size of " << skeleton.size() << 
-				" and game object hierarchy of size " << animator._child_objects.size() << " don't match.\n";
+			LOG_WARNING_TO(LogPool::ANIM, "[Animation System] Error: Skeleton size of " + std::to_string(skeleton.size()) +
+				" and game object hierarchy of size " + std::to_string(animator._child_objects.size()) + " don't match.");
 
 			for (auto& layer : animator.layers)
 			{

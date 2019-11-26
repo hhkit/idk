@@ -9,6 +9,14 @@ namespace TestAndSeek
         private Animator anim;
         //private Transform t;
         private bool blend_next = false;
+        public float elapsed = 0.0f;
+        public bool w_pressed = false;
+        public int Int = 0;
+        public float Float = 0.0f;
+        public bool Bool = false;
+        public bool Trigger = false;
+        public float Speed = 0.0f;
+
         public AnimationTest()
         {
             Debug.Log("AnimationTest is constructed");
@@ -29,9 +37,15 @@ namespace TestAndSeek
             Quaternion q = new Quaternion();
             q.eulerAngles = new Vector3(0, 0, 0);
             gameObject.GetComponent<Transform>().localRotation = q;
-            
+
             if (anim)
+            {
                 Debug.Log("found animator");
+                Int = anim.GetInt("int");
+                Float = anim.GetFloat("float");
+                Bool = anim.GetBool("bool");
+                Trigger = anim.GetTrigger("trigger");
+            }
         }
 
 
@@ -39,19 +53,49 @@ namespace TestAndSeek
         {
             if (anim)
             {
-                if (Input.GetKey(KeyCode.A))
-                    PlayOrBlend("idle");
-                else if (Input.GetKey(KeyCode.S))
-                    PlayOrBlend("walk");
-                else if (Input.GetKey(KeyCode.D))
-                    PlayOrBlend("test");
-                else if (Input.GetKey(KeyCode.F))
-                    PlayOrBlend("test2");
-                else if (Input.GetKey(KeyCode.G))
-                    PlayOrBlend("BLAH");
-
-                else if (Input.GetKey(KeyCode.B))
-                    blend_next = !blend_next;
+                // if (Input.GetKey(KeyCode.A))
+                // {
+                //     anim.SetInt("int", Int >= 0 ? 1 : 0);
+                // }
+                // else if (Input.GetKey(KeyCode.S))
+                // {
+                //     anim.SetFloat("float", Float >= 0.0f ? 0.6f : 0.0f);
+                // }
+                // else if (Input.GetKey(KeyCode.D))
+                // {
+                //     anim.SetBool("bool", !Bool);
+                // }
+                if (Input.GetKey(KeyCode.F))
+                {
+                    anim.SetTrigger("trigger", true);
+                }
+                // else if (Input.GetKey(KeyCode.G))
+                // {
+                //     anim.CrossFade("test2");
+                // }
+                
+                if (Input.GetKey(KeyCode.W))
+                {
+                    if (!w_pressed)
+                        elapsed = 0.0f;
+                    Speed = Mathf.Lerp(Speed, 1.0f, elapsed);
+                    anim.SetFloat("speed", Speed);
+                    elapsed += 0.02f;
+                    w_pressed = true;
+                }
+                else if (Speed > 0.0f)
+                {
+                    if (w_pressed)
+                        elapsed = 0.0f;
+                    Speed = Mathf.Lerp(Speed, 0.0f, elapsed);
+                    anim.SetFloat("speed", Speed);
+                    elapsed += 0.02f;
+                    w_pressed = false;
+                }
+                Int = anim.GetInt("int");
+                Float = anim.GetFloat("float");
+                Bool = anim.GetBool("bool");
+                Trigger = anim.GetTrigger("trigger");
             }
         }
     }

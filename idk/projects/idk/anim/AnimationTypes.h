@@ -6,25 +6,43 @@ namespace idk::anim
 	template<typename T>
 	struct AnimationParam
 	{
+		explicit AnimationParam(string_view n = "", bool v = false, const T& d_val = T{ 0 }, const T& c_val = T{ 0 })
+			:name{ n }, valid{ v }, def_val{ d_val }, val{ c_val }
+		{
+		}
+
 		string name{};
 		bool valid = false;
 
-		T def_val{};
-		T val{};
+		T def_val{0};
+		T val{0};
 
 
-		void ResetToDefault() { val = def_val; }
+		virtual void ResetToDefault() { val = def_val; }
 	};
 
-	struct IntParam : public AnimationParam<int> {};
-	struct FloatParam : public AnimationParam<float> {};
-	struct BoolParam : public AnimationParam<bool> {};
-	struct TriggerParam : public AnimationParam<bool> {};
+	struct IntParam : public AnimationParam<int> {
+		using base = AnimationParam<int>;
+		using base::base;
+	};
+	struct FloatParam : public AnimationParam<float> {
+		using base = AnimationParam<float>;
+		using base::base;
+	};
+	struct BoolParam : public AnimationParam<bool> {
+		using base = AnimationParam<bool>;
+		using base::base;
+	};
+	struct TriggerParam : public AnimationParam<bool> {
+		using base = AnimationParam<bool>;
+		using base::base;
+		virtual void ResetToDefault() override { val = def_val = false; }
+	};
 
-	inline static IntParam null_int_param{ "", false, 0, 0 };
-	inline static FloatParam null_float_param{ "", false, 0, 0 };
-	inline static BoolParam null_bool_param{ "", false, false, false };
-	inline static TriggerParam null_trigger_param{ "", false, false, false };
+	inline static IntParam null_int_param{  };
+	inline static FloatParam null_float_param{  };
+	inline static BoolParam null_bool_param{  };
+	inline static TriggerParam null_trigger_param{  };
 
 	template<typename T>
 	static inline T& null_param()

@@ -66,6 +66,8 @@ namespace idk {
 
 		void inspectLayer(size_t layer_index);
 		void inspectState(size_t layer_index, size_t state_index);
+		void inspectBasicState(size_t layer_index, size_t state_index);
+		void inspectBlendTree(size_t layer_index, size_t state_index);
 		void inspectTransition(size_t layer_index, size_t state_index, size_t transition_index);
 		void displayConditions(size_t layer_index, size_t state_index, size_t transition_index);
 

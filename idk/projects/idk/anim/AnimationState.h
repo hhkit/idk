@@ -28,6 +28,8 @@ namespace idk
 		anim::BlendTreeType blend_tree_type = anim::BlendTreeType::BlendTree_1D;
 		bool weights_cached = false;
 
+		void ComputeWeights(float param_val);
+
 		float def_data[2];
 	};
 
@@ -53,6 +55,7 @@ namespace idk
 		AnimationTransition& GetTransition(size_t index);
 		bool IsBlendTree() const;
 
+		void ConvertToBlendTree();
 		void AddTransition(size_t from, size_t to);
 		void RemoveTransition(size_t index);
 	};
