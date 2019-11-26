@@ -10,6 +10,7 @@
 #include <phys/collidable_shapes.h>
 #include <particle/MinMax.h>
 #include <math/rect.h>
+#include <common/LayerMask.h>
 
 namespace idk::reflect
 {
@@ -72,5 +73,6 @@ namespace idk::reflect
         , MinMax<float>
         , MinMax<vec3>
         , MinMax<color>
+        , LayerMask
 	>;
 }

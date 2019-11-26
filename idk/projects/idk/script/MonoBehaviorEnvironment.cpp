@@ -19,27 +19,36 @@
 
 #include <core/GameObject.h>
 #include <scene/SceneManager.h>
+#include <util/ioutils.h>
 
 namespace idk::mono
 {
 	MonoBehaviorEnvironment::MonoBehaviorEnvironment(string_view full_path_to_game_dll)
 		: MonoEnvironment{}
 	{
+		// setup
 		char domain_name[] = "ScriptDomain";
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
-		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+
+		// open file
+		std::ifstream file{ full_path_to_game_dll, std::ios::binary };
+		assembly_data = stringify(file);
+
+		// load assembly
+		mono_domain_set(_domain, true);
+		MonoImageOpenStatus status;
+		auto img = mono_image_open_from_data(assembly_data.data(), (uint32_t) assembly_data.size(), true, &status);
+		_assembly = mono_assembly_load_from(img, full_path_to_game_dll.data(), &status);
 
 		ScanTypes();
 	}
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()
 	{
-		try
-		{
-			MonoObject* obj = nullptr;
-			mono_domain_try_unload(_domain, &obj); // try things
-			IDK_ASSERT(obj == nullptr);
-		}
-		catch (...) {}
+		MonoObject* obj = nullptr;
+		if(!mono_domain_set(Core::GetSystem<ScriptSystem>().Environment().Domain(), true))
+			throw;
+		mono_domain_try_unload(_domain, &obj); // try things
+		IDK_ASSERT(obj == nullptr);
 
 		_domain = nullptr;
 		_assembly = nullptr;
@@ -91,6 +100,8 @@ namespace idk::mono
 
 				do
 				{
+					if (mono_class_get_name(check_parent) == string_view{ "MonoBehavior" })
+						return true;
 					if (check_parent == monobehavior)
 						return true;
 					check_parent = mono_class_get_parent(check_parent);
@@ -113,6 +124,8 @@ namespace idk::mono
 						LOG_TO(LogPool::MONO, string{ "Found function " } +string{ fn_name });
 				};
 
+				//type.CacheMessages();
+				
 				find_method(type, "Clone");
 				find_method(type, "Awake");
 				find_method(type, "Start");
@@ -124,8 +137,9 @@ namespace idk::mono
 				find_method(type, "OnCollisionStay", 1);
 				find_method(type, "OnCollisionExit", 1);
 				find_method(type, "Update");
+				find_method(type, "PausedUpdate");
 				find_method(type, "UpdateCoroutines");
-
+				
 
 				//if (!Core::GetSystem<ScriptSystem>().Environment().IsAbstract(mono_class_get_type(type.Raw())))
 					mono_behaviors.emplace(class_name, &type);

@@ -198,6 +198,7 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="widgets\LayerMaskCombo.h" />
     <ClInclude Include="loading\AssimpImporter.h" />
     <ClInclude Include="loading\AssimpImporter_helpers.h" />
     <ClInclude Include="SceneManagement.h" />
@@ -211,6 +212,7 @@
     <ClInclude Include="windows\IGE_AnimatorWindow.h" />
     <ClInclude Include="windows\IGE_Console.h" />
     <ClInclude Include="windows\IGE_GameView.h" />
+    <ClInclude Include="windows\IGE_HelpWindow.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
     <ClInclude Include="windows\IGE_ProgrammerConsole.h" />
     <ClInclude Include="windows\IGE_ProjectSettings.h" />
@@ -250,6 +252,7 @@
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
     <ClCompile Include="imguidk.cpp" />
+    <ClCompile Include="widgets\LayerMaskCombo.cpp" />
     <ClCompile Include="loading\AssimpImporter.cpp" />
     <ClCompile Include="loading\AssimpImporter_helpers.cpp" />
     <ClCompile Include="loading\GraphFactory.cpp" />
@@ -265,6 +268,7 @@
     <ClCompile Include="windows\IGE_AnimatorWindow.cpp" />
     <ClCompile Include="windows\IGE_Console.cpp" />
     <ClCompile Include="windows\IGE_GameView.cpp" />
+    <ClCompile Include="windows\IGE_HelpWindow.cpp" />
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
     <ClCompile Include="windows\IGE_ProgrammerConsole.cpp" />

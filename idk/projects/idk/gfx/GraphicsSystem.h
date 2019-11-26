@@ -89,7 +89,7 @@ namespace idk
 			span<Animator> animators,
 			span<SkinnedMeshRenderer> skinned_mesh_renderers,
             span<class ParticleSystem>,
-			span<class Font>,
+			span<class TextMesh>,
 			span<class Text>,
             span<class Image>,
 			span<const class Transform>, 

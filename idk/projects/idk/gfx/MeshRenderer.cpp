@@ -17,20 +17,20 @@ namespace idk
 	{
 		//auto tfm = GetGameObject()->GetComponent<Transform>()->GlobalMatrix();
 		return RenderObject{
-			.obj_id = GetGameObject(),
-			.mesh = mesh,
+			.obj_id            = GetGameObject(),
+			.mesh              = mesh,
 			.material_instance = material_instance,
 
-			.velocity = vec3{},
+			.velocity  = vec3{},
 			.transform = GetGameObject()->GetComponent<Transform>()->GlobalMatrix(),
 
-			.cast_shadows = cast_shadows,
+			.cast_shadows    = cast_shadows,
 			.receive_shadows = receive_shadows,
 
 			//.bounding_volume = mesh->bounding_volume,
 
 			.renderer_req = &GetRequiredAttributes(),
-
+			.layer_mask = layer_to_mask(this->GetGameObject()->Layer())
 			//{
 			//	{0,vtx::Attrib::Position},
 			//	{1,vtx::Attrib::Normal},

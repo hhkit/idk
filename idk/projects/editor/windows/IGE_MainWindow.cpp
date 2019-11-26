@@ -416,10 +416,11 @@ namespace idk {
 				// 	if (i->window_name != "Game")
 				// 		i->is_open = false;
 				// editor.currentCamera().current_camera->enabled = false;
-				SaveSceneTemporarily();
+				HotReloadDLL();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
+				Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
 				Core::GetSystem<PhysicsSystem>().Reset();
 			}
 			ImGui::SameLine(0, 0);
@@ -448,6 +449,7 @@ namespace idk {
 			if (ImGui::Button("Stop", toolButtonSize))
 			{
 				RestoreFromTemporaryScene();
+				Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
 			}
@@ -455,6 +457,7 @@ namespace idk {
 
 		
 		ImGui::PopStyleVar();
+
 
         ImGui::SameLine(ImGui::GetWindowContentRegionWidth() -
             ImGui::CalcTextSize("Draw All Colliders").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);

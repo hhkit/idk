@@ -6,7 +6,7 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/RenderObject.h>
 #include <particle/ParticleSystem.h>
-#include <gfx/Font.h>
+#include <gfx/TextMesh.h>
 #include <ui/Image.h>
 #include <ui/Text.h>
 #include <ui/RectTransform.h>
@@ -223,7 +223,7 @@ namespace idk
 		for (auto itr = ro.begin(); itr < ro.end(); ++itr)
 		{
 			const auto bv = itr->mesh->bounding_volume* itr->transform;
-			if (frust.contains(bv))
+			if ((itr->layer_mask&camera.culling_flags) &&frust.contains(bv))
 			{
 				if (!oprev || ![](auto& itr, auto& prev) {
 					return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
@@ -235,7 +235,7 @@ namespace idk
 					oprev = itr;
 				}
 				//Keep track of the number of instances to be render for this frustum
-					auto tfm = camera.view_matrix * itr->transform;
+				auto tfm = camera.view_matrix * itr->transform;
 				instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
 				inst_itr->num_instances++;
 			}
@@ -288,7 +288,7 @@ namespace idk
 		range.inst_particle_begin = particle_render_data.size();
 		for (auto& elem : unique_particles)
 		{
-			ParticleRange p_range{ elem.material_instance,particle_buffer.size(),std::distance(elem.particles.begin(), elem.particles.end()) };
+			ParticleRange p_range{ elem.material_instance,particle_buffer.size(),static_cast<size_t>(std::distance(elem.particles.begin(), elem.particles.end())) };
 
 			particle_buffer.insert(particle_buffer.end(), elem.particles.begin(),elem.particles.end());
 				
@@ -324,7 +324,7 @@ namespace idk
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
         span<ParticleSystem> ps,
-		span<Font> fonts,
+		span<TextMesh> fonts,
 		span<Text> texts,
         span<Image> images,
 		span<const class Transform>, 
@@ -552,6 +552,13 @@ namespace idk
 			const auto& go = im.GetGameObject();
 			const auto& rt = *go->GetComponent<RectTransform>();
 
+			const auto canvas = ui.FindCanvas(go);
+			if (!canvas)
+			{
+				LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
+				continue;
+			}
+
 			auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
 			render_data.transform = rt._matrix *
@@ -566,7 +573,14 @@ namespace idk
 			const auto& go = text.GetGameObject();
 			const auto& rt = *go->GetComponent<RectTransform>();
 
-			auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+            const auto canvas = ui.FindCanvas(go);
+            if (!canvas)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
+                continue;
+            }
+
+            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
 
 			constexpr auto anchor_to_alignment = [](TextAnchor anchor)
 			{

@@ -14,14 +14,18 @@
   - !Light 
     casts_shadows: 1
     light: !DirectionalLight 
-      height: 5
+      bottom: -5
+      far: 5
       intensity: 1
+      left: -5
       light_color: 
         a: 1
         b: 1
         g: 1
         r: 1
-      width: 5
+      near: -5
+      right: 5
+      top: 5
     shadow_bias: 1.1920929e-07
 - !4295098368 
   - active: 1
@@ -153,6 +157,17 @@
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
   - !MonoBehavior 
     {enabled: 1, script_data: !TestSetForward ~}
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !Test 
+      f: 0
+      go: {id: 0}
+      i: 0
+      i2: 0
+      jump_force: 0
+      minst: {guid: 00000000-0000-0000-0000-000000000000}
+      movement: {x: 0, y: 0, z: 0}
+      prefab: {guid: 00000000-0000-0000-0000-000000000000}
 - !8590000128 
   - active: 1
   - !Transform 

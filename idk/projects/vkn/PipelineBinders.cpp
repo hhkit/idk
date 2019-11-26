@@ -300,11 +300,12 @@ namespace idk::vkn
 	void ParticleVertexBindings::Bind(PipelineThingy& the_interface)
 	{
 		//map back into z: (0,1)
-		mat4 projection_trf = mat4{ 1,0,0,0,
+		mat4 projection_trf = /*mat4{ 1,0,0,0,
 							0,1,0,0,
 							0,0,0.5f,0.5f,
 							0,0,0,1
-		}*proj_trf;//map back into z: (0,1)
+		} * */
+			proj_trf;//map back into z: (0,1)
 		mat4 block[] = { projection_trf,view_trf };
 		the_interface.BindUniformBuffer("CameraBlock", 0,block);
 	}

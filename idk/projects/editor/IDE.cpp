@@ -194,6 +194,7 @@ namespace idk
 		ADD_WINDOW(IGE_AnimatorWindow);
 		ADD_WINDOW(IGE_ProfilerWindow);
 		ADD_WINDOW(IGE_ProjectSettings);	
+		ADD_WINDOW(IGE_HelpWindow);	
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();
@@ -251,7 +252,7 @@ namespace idk
         }
 
 		SetupEditorScene();
-		
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 	}
 
 	void IDE::Shutdown()
@@ -460,7 +461,7 @@ namespace idk
 
 				const auto transform = i->GetComponent<Transform>();
 				if (transform) {
-					finalCamPos += transform->position;
+					finalCamPos += transform->GlobalPosition();
 				}
 
 			}

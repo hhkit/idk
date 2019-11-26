@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "InputManager.h"
-
+#include <Windows.h>
 namespace idk::win
 {
 	void InputManager::SetKeyDown(int index)
@@ -43,6 +43,12 @@ namespace idk::win
 		_curr_buffer = !_curr_buffer;
 		_last_char = '\0';
 		_curr_mouse_scroll = ivec2{};
+	}
+
+	void InputManager::FlushCurrentBuffer()
+	{
+		for (auto& elem : prev_buf())
+			elem = false;
 	}
 
 	bool InputManager::GetKeyDown(int index)

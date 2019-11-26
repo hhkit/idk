@@ -23,6 +23,8 @@ namespace idk::mono
 		: public ConfigurableSystem<ScriptSystemConfig>
 	{
 	public:
+		bool run_scripts = true;
+
 		ScriptSystem();
 		ScriptSystem(const ScriptSystem&);
 		~ScriptSystem();
@@ -31,6 +33,7 @@ namespace idk::mono
 		void ScriptStart(span<Behavior>);
 		void ScriptFixedUpdate(span<Behavior>);
 		void ScriptUpdate(span<Behavior>);
+		void ScriptPausedUpdate(span<Behavior>);
 		void ScriptUpdateCoroutines(span<Behavior>);
 		void ScriptLateUpdate(span<Behavior>);
 

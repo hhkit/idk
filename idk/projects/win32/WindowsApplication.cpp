@@ -273,6 +273,13 @@ namespace idk::win
 			OnScreenSizeChanged.Fire(ivec2{ ptr->cx, ptr->cy });
 		}
 		break;
+		case WM_SETFOCUS:
+			OnFocusGain.Fire();
+			break;
+		case WM_KILLFOCUS:
+			OnFocusLost.Fire();
+			_input_manager->FlushCurrentBuffer();
+			break;
 		case WM_SIZE:
 			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
 			break;

@@ -45,7 +45,6 @@ namespace idk::vkn
 			test
 		};
 	}
-#pragma optimize("",off)
 	void ParticleRenderer::DrawParticles(PipelineThingy& the_interface, const GraphicsState& state, RenderStateV2& rs)
 	{
 		auto& shared_state = *state.shared_gfx_state;

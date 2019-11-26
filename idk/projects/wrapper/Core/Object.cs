@@ -10,18 +10,18 @@ namespace idk
 
         public static implicit operator bool(Object o)
         {
-            if ((object) o == null)
+            if ((object)o == null)
                 return false;
 
             return Bindings.ObjectValidate(o.handle);
         }
 
-        public static bool operator == (Object lhs, Object rhs)
+        public static bool operator ==(Object lhs, Object rhs)
         {
             if (lhs && rhs)
                 return lhs.handle == rhs.handle;
             else
-                return (object)lhs == null && (object) rhs == null;
+                return (object)lhs == null && (object)rhs == null;
         }
 
         public static bool operator !=(Object lhs, Object rhs)
@@ -71,18 +71,23 @@ namespace idk
 
         public Object Clone()
         {
-            return (Object) MemberwiseClone();
+            return (Object)MemberwiseClone();
         }
 
         public static T[] FindObjectsOfType<T>() where T : MonoBehavior
         {
-            return (T[]) Bindings.ObjectGetObjectsOfType(typeof(T).Name);
+            return (T[])Bindings.ObjectGetObjectsOfType(typeof(T).Name);
         }
 
         public static T FindObjectOfType<T>() where T : MonoBehavior
         {
             var search = FindObjectsOfType<T>();
             return search.Length > 0 ? search[0] : null;
+        }
+
+        public override string ToString()
+        {
+            return GetType().Name + "{" + handle.ToString("X8") + "}";
         }
     }
 }
