@@ -46,11 +46,17 @@ namespace idk
 		static bool fire = false;
 		if (app_sys.GetKey(Key::I) )
 		{
-			for (unsigned i =0; i < std::thread::hardware_concurrency(); ++i)
-				Core::GetThreadPool().Post([i]()
+			const int jobs = rand() % 70 + 10;
+			std::cout << "jobs: " << jobs << "\n";
+			vector<mt::ThreadPool::Future<void>> futures(jobs);
+			for (unsigned i =0; i < jobs; ++i)
+				futures[i] = Core::GetThreadPool().Post([i]()
 				{
 					std::cout << "hello from " + std::to_string(mt::thread_id()) + " with index " + std::to_string(i) + "\n";
 				});
+			for (auto& elem : futures)
+				elem.get();
+			std::cout << "all printed\n";
 			fire = true;
 		}
 		for (auto& elem : comps)

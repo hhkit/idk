@@ -15,7 +15,7 @@ namespace idk::mt
 	{
 	public:
 		template<typename T>
-		struct Future;
+		class Future;
 
 		ThreadPool(const int threads = std::thread::hardware_concurrency());
 		~ThreadPool();
@@ -27,6 +27,18 @@ namespace idk::mt
 	private:
 		std::vector<std::thread> threads;
 		queue<std::function<void()>> jobs;
+	};
+
+	template<typename T>
+	class ThreadPool::Future
+	{
+	public:
+		Future() = default;
+		Future(ThreadPool* in_pool, std::future<T>&& in_fut) : pool{ in_pool }, future{ std::move(in_fut) }{}
+		T get();
+	private:
+		ThreadPool* pool = nullptr;
+		std::future<T> future;
 	};
 	
 	template<typename T, typename ... Args>
@@ -51,6 +63,14 @@ namespace idk::mt
 				promise->set_value(std::apply(fn, tuple));
 		});
 		
-		return future;
+		return Future{ this, std::move(future) };
+	}
+	template<typename T>
+	T ThreadPool::Future<T>::get()
+	{
+		IDK_ASSERT(pool);
+		while (future.wait_for(std::chrono::seconds{}) != std::future_status::ready)
+			pool->ExecuteJob(thread_id());
+		return future.get();
 	}
 }
