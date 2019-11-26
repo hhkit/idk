@@ -301,6 +301,24 @@ namespace idk
 		range.inst_particle_end = particle_render_data.size();
 	}
 
+	void ProcessFonts(
+		const vector<FontArrayData>& unique_fonts,
+		vector<CharacterObj>& font_buffer,
+		vector<FontRange>& font_render_data,
+		GraphicsSystem::RenderRange& range
+	)
+	{
+		range.inst_font_begin = font_render_data.size();
+		for (auto& elem : unique_fonts)
+		{
+			FontRange f_range{ font_buffer.size(),(size_t)std::distance(elem.characters.begin(), elem.characters.end()) };
+			font_buffer.insert(font_buffer.end(), elem.characters.begin(), elem.characters.end());
+
+		    font_render_data.emplace_back(f_range);
+		}
+		range.inst_font_end = font_render_data.size();
+	}
+
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -380,6 +398,8 @@ namespace idk
 			std::swap(tmp, rb); //reinitialize the stuff that don't need to be swapped.
 			ClearSwap(rb.camera                         ,tmp.camera                         );//clear then swap the stuff back into rb
 			ClearSwap(rb.font_render_data               ,tmp.font_render_data               );//clear then swap the stuff back into rb
+			ClearSwap(rb.font_array_data				, tmp.font_array_data);//clear then swap the stuff back into rb
+
 			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
 			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
 			ClearSwap(rb.inst_mesh_render_buffer        ,tmp.inst_mesh_render_buffer        );//clear then swap the stuff back into rb
@@ -490,9 +510,152 @@ namespace idk
 			result.particle_buffer.reserve(result.particle_buffer.size() + size * avg_particle_count);
 		}
 
+		{
+			auto& unique_fonts = result.font_array_data;
+			const size_t avg_font_count = 100;
+			const auto size = cameras.size() * unique_fonts.size();
+			result.font_range.reserve(result.font_range.size() + size);
+			result.font_buffer.reserve(result.font_buffer.size() + size * avg_font_count);
+		}
+
 
 		std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
 		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
+		
+		for (auto& f : fonts)
+		{
+			if (f.text != "" && f.font)
+			{
+				auto& render_data = result.font_render_data.emplace_back();
+				auto& render_pos_data = result.font_array_data.emplace_back();
+				//if (!f.textureAtlas)
+					//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
+				render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
+
+				render_data.color = f.color;
+				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+				render_data.atlas = f.font;
+
+				for (auto& elem : render_data.coords)
+					render_pos_data.characters.emplace_back(CharacterObj{ elem.ConvertToVec4() });
+
+				render_pos_data.color = f.color;
+				render_pos_data.transform = render_data.transform;
+				render_pos_data.atlas = f.font;
+
+			}
+		}
+
+		auto& ui = Core::GetSystem<UISystem>();
+		for (auto& im : images)
+		{
+			const auto& go = im.GetGameObject();
+			const auto& rt = *go->GetComponent<RectTransform>();
+
+			const auto canvas = ui.FindCanvas(go);
+			if (!canvas)
+			{
+				LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
+				continue;
+			}
+
+			auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+
+			render_data.transform = rt._matrix *
+				mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+			render_data.material = im.material;
+			render_data.color = im.tint;
+			render_data.data = ImageData{ im.texture };
+			render_data.depth = go->Transform()->Depth();
+		}
+		for (auto& text : texts)
+		{
+			const auto& go = text.GetGameObject();
+			const auto& rt = *go->GetComponent<RectTransform>();
+
+            const auto canvas = ui.FindCanvas(go);
+            if (!canvas)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
+                continue;
+            }
+
+            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
+
+			constexpr auto anchor_to_alignment = [](TextAnchor anchor)
+			{
+				switch (anchor)
+				{
+				case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft:
+					return TextAlignment::Left;
+				case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+					return TextAlignment::Center;
+				case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+					return TextAlignment::Right;
+				}
+				return TextAlignment::Left;
+			};
+
+			const float sx = rt._local_rect.size.x;
+			const float sy = rt._local_rect.size.y;
+
+			const auto font_data = FontData::Generate(
+				text.text, text.font,
+				text.best_fit ? 0 : text.font_size,
+				text.letter_spacing,
+				text.line_height,
+				anchor_to_alignment(text.alignment),
+				text.wrap ? sx : 0);
+
+			float tw = font_data.width;
+			float th = font_data.height;
+
+			render_data.material = text.material;
+			render_data.color = text.color;
+			render_data.data = TextData{ font_data.coords, text.font };
+			render_data.depth = go->Transform()->Depth();
+
+			float s = 1.0f;
+
+			if (text.best_fit)
+			{
+				const float sw = sx / tw;
+				const float sh = sy / th;
+				s = sw > sh ? sh : sw;
+				tw *= s;
+				th *= s;
+			}
+
+			switch (text.alignment)
+			{
+			case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
+			case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
+			case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
+			case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
+			case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
+			case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
+			case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
+			case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
+			case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
+			}
+
+			if (text.best_fit)
+				render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
+		}
+
+		// sort ui render by depth then z pos
+		for (auto& [canvas, vec] : result.ui_render_per_canvas)
+		{
+			std::stable_sort(vec.begin(), vec.end(),
+				[](const UIRenderObject& a, const UIRenderObject& b) {
+				return a.depth == b.depth ?
+					a.transform[3].z < b.transform[3].z :
+					a.depth < b.depth;
+			}
+			);
+		}
+		
+
 		for (auto& camera : result.camera)
 		{
 			RenderRange range{ camera };
@@ -501,6 +664,7 @@ namespace idk
 				range.inst_mesh_render_begin = start_index;
 				range.inst_mesh_render_end = end_index;
 				ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range,range);
+				ProcessFonts(result.font_array_data,result.font_buffer,result.font_range,range);
 			}
 			result.culled_render_range.emplace_back(range);
 			//{
@@ -528,127 +692,6 @@ namespace idk
 			//	range.inst_mesh_render_end = end_index;
 			//}
 		}
-
-
-		for (auto& f : fonts)
-		{
-			auto& render_data = result.font_render_data.emplace_back();
-			//if (!f.textureAtlas)
-				//f.textureAtlas = FontAtlas::defaults[FontDefault::SourceSansPro];
-            render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
-            render_data.color = f.color;
-            render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * mat4 { scale(vec3{ 0.1f, 0.1f, 1.0f }) };
-            render_data.atlas = f.font;
-		}
-
-        auto& ui = Core::GetSystem<UISystem>();
-        for (auto& im : images)
-        {
-            const auto& go = im.GetGameObject();
-            const auto& rt = *go->GetComponent<RectTransform>();
-            
-            const auto canvas = ui.FindCanvas(go);
-            if (!canvas)
-            {
-                LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
-                continue;
-            }
-
-            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
-
-            render_data.transform = rt._matrix *
-                mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
-            render_data.material = im.material;
-            render_data.color = im.tint;
-            render_data.data = ImageData{ im.texture };
-            render_data.depth = go->Transform()->Depth();
-        }
-        for (auto& text : texts)
-        {
-            const auto& go = text.GetGameObject();
-            const auto& rt = *go->GetComponent<RectTransform>();
-
-            const auto canvas = ui.FindCanvas(go);
-            if (!canvas)
-            {
-                LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
-                continue;
-            }
-
-            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
-
-            constexpr auto anchor_to_alignment = [](TextAnchor anchor)
-            {
-                switch (anchor)
-                {
-                case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft: 
-                    return TextAlignment::Left;
-                case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
-                    return TextAlignment::Center;
-                case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
-                    return TextAlignment::Right;
-                }
-                return TextAlignment::Left;
-            };
-
-            const float sx = rt._local_rect.size.x;
-            const float sy = rt._local_rect.size.y;
-
-            const auto font_data = FontData::Generate(
-                text.text, text.font,
-                text.best_fit ? 0 : text.font_size,
-                text.letter_spacing,
-                text.line_height,
-                anchor_to_alignment(text.alignment),
-                text.wrap ? sx : 0);
-
-            float tw = font_data.width;
-            float th = font_data.height;
-
-            render_data.material = text.material;
-            render_data.color = text.color;
-            render_data.data = TextData{ font_data.coords, text.font };
-            render_data.depth = go->Transform()->Depth();
-
-            float s = 1.0f;
-
-            if (text.best_fit)
-            {
-                const float sw = sx / tw;
-                const float sh = sy / th;
-                s = sw > sh ? sh : sw;
-                tw *= s;
-                th *= s;
-            }
-
-            switch (text.alignment)
-            {
-            case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
-            case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
-            case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
-            case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
-            case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
-            case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
-            case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
-            case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
-            case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
-            }
-
-            if (text.best_fit)
-                render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
-        }
-
-        // sort ui render by depth then z pos
-        for (auto& [canvas, vec] : result.ui_render_per_canvas)
-        {
-            std::stable_sort(vec.begin(), vec.end(),
-                [](const UIRenderObject& a, const UIRenderObject& b) {
-                    return a.depth == b.depth ?
-                        a.transform[3].z < b.transform[3].z :
-                        a.depth < b.depth;
-                }
-            );
-        }
 
 
 		//SubmitBuffers(std::move(result));

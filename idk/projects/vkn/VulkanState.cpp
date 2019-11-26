@@ -571,7 +571,7 @@ namespace idk::vkn
 		vk::AttachmentDescription depthAttachment
 		{
 			vk::AttachmentDescriptionFlags{}
-			,vk::Format::eD16Unorm
+			,vk::Format::eD32Sfloat
 			,vk::SampleCountFlagBits::e1
 			,vk::AttachmentLoadOp::eClear
 			,vk::AttachmentStoreOp::eStore

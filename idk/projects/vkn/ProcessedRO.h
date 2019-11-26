@@ -16,6 +16,12 @@ namespace idk::vkn
 		vk::Buffer buffer;
 		size_t offset;
 	};
+	struct BoundIndexBuffer
+	{
+		vk::Buffer buffer{};
+		size_t offset{};
+		vk::IndexType index_type{};
+	};
 	struct ProcessedRO
 	{
 #pragma region Type declarations
@@ -80,6 +86,8 @@ namespace idk::vkn
 
 		//location, vertex buffer
 		hash_table<uint32_t, BoundVertexBuffer> attrib_buffers;
+		std::optional<BoundIndexBuffer> index_buffer{};
+		size_t num_vertices{};
 				
 		hash_table<uint32_t, vector<BindingInfo>> bindings; //Deprecate this
 		shared_ptr<pipeline_config> config;
