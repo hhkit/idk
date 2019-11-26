@@ -11,6 +11,7 @@
 #include <gfx/MaterialInstance.h>
 
 #include <vkn/VknCubemap.h>
+#include <vkn/VknFontAtlas.h>
 
 #include <vkn/utils/utils.inl>
 
@@ -57,6 +58,8 @@ namespace idk::vkn
 	}
 
 	void StandardBindings::BindAni(PipelineThingy& , const AnimatedRenderObject& ) {}
+
+	void StandardBindings::BindFont(PipelineThingy&, const FontArrayData&) {}
 
 	//const GraphicsState& StandardVertexBindings::State() { return *_state; }
 
@@ -304,6 +307,50 @@ namespace idk::vkn
 		}*proj_trf;//map back into z: (0,1)
 		mat4 block[] = { projection_trf,view_trf };
 		the_interface.BindUniformBuffer("CameraBlock", 0,block);
+	}
+
+	void FontVertexBindings::SetState(const GraphicsState& vstate)
+	{
+		auto& cam = vstate.camera;
+		SetState(cam);
+	}
+
+	void FontVertexBindings::SetState(const CameraData& cam)
+	{
+		view_trf = cam.view_matrix;
+		proj_trf = cam.projection_matrix;
+	}
+
+	void FontVertexBindings::Bind(PipelineThingy& the_interface)
+	{
+		//map back into z: (0,1)
+		mat4 projection_trf = mat4{ 1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+							0,0,0,1
+		}*proj_trf;//map back into z: (0,1)
+		mat4 block[] = { projection_trf,view_trf };
+		the_interface.BindUniformBuffer("CameraBlock", 0, block);
+	}
+
+	void FontVertexBindings::BindFont(PipelineThingy& the_interface, const FontArrayData& dc)
+	{
+		//map back into z: (0,1)
+		mat4 projection_trf = mat4{ 1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+							0,0,0,1
+		}*proj_trf;//map back into z: (0,1)
+		mat4 block[] = { projection_trf,view_trf };
+		the_interface.BindUniformBuffer("CameraBlock", 0, block);
+
+		mat4 obj_trf = view_trf * dc.transform;
+		mat4 obj_ivt = obj_trf.inverse().transpose();
+		mat4 block2[] = { obj_trf,obj_ivt };
+		the_interface.BindUniformBuffer("ObjectMat4Block",0,block2);
+		vec4 block3[] = { dc.color.as_vec4};
+		the_interface.BindUniformBuffer("FontBlock", 0, block3);
+		the_interface.BindSampler("tex", 0, *dc.atlas.as<VknFontAtlas>().texture);
 	}
 
 }

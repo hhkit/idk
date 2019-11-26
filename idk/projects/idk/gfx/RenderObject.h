@@ -126,7 +126,6 @@ namespace idk
 		size_t num_elems;
 	};
 
-
     struct FontRenderData
     {
         vector<FontPoint> coords;
@@ -134,6 +133,43 @@ namespace idk
         color color;
         mat4 transform;
     };
+
+	struct CharacterObj
+	{
+		vec4 coords{};
+	};
+
+	struct FontArrayData
+	{
+		vector<CharacterObj> characters;
+		RscHandle<FontAtlas> atlas;
+		color color;
+		mat4 transform;
+
+		FontArrayData& operator()(const FontRenderData& rhs)
+		{
+			ConvertFontPointToCharacterObject(rhs.coords);
+			atlas = rhs.atlas;
+			color = rhs.color;
+			transform = rhs.transform;
+
+			return *this;
+		}
+
+		void ConvertFontPointToCharacterObject(const vector<FontPoint>& toCopy)
+		{
+			characters.resize(toCopy.size());
+			for (int i = 0; i < toCopy.size(); ++i)
+				characters[i].coords = toCopy[i].ConvertToVec4();
+			
+		}
+	};
+
+	struct FontRange
+	{
+		size_t elem_offset;
+		size_t num_elems;
+	};
 
     struct ImageData
     {

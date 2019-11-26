@@ -9,6 +9,21 @@ namespace idk
 	struct FontPoint
     {
         real x, y, s, t;
+
+
+		FontPoint& operator()(const vec4& rhs)
+		{
+			x = rhs.x;
+			y = rhs.y;
+			s = rhs.z;
+			t = rhs.w;
+			return *this;
+		}
+
+		vec4 ConvertToVec4() const
+		{
+			return vec4{x,y,s,t};
+		}
 	};
 
 	struct FontData

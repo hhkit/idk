@@ -61,6 +61,11 @@ namespace idk::vkn
 		hlp::vector_buffer                particle_buffer;
 		//vector<shadow_map_t> shadow_maps;
 
+		hlp::vector_buffer                font_buffer;
+		vector<FontRange>*				  font_range;
+		const vector<CharacterObj>*       characters_data;
+		const vector<FontArrayData>*	  fonts_data;
+
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);
 
 		void Reset();
@@ -102,7 +107,7 @@ namespace idk::vkn
 
 	struct GraphicsState : CoreGraphicsState
 	{
-		CameraData camera; 
+		CameraData camera;
 		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
 		vector<RscHandle<Texture>> shadow_maps_2d  ;

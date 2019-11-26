@@ -221,6 +221,9 @@
     <ClInclude Include="ParticleRenderer.h">
       <Filter>render\renderers</Filter>
     </ClInclude>
+    <ClInclude Include="FontRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -403,7 +406,12 @@
     <ClCompile Include="CubemapRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleRenderer.cpp" />
+    <ClCompile Include="FontRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

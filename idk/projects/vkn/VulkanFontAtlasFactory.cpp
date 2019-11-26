@@ -41,6 +41,6 @@ namespace idk::vkn
 	}
 	unique_ptr<FontAtlas> VulkanFontAtlasFactory::Create()
 	{
-		return std::make_unique<VknFontAtlas>();
+		return GenerateDefaultResource();
 	}
 }
