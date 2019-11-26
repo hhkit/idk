@@ -223,6 +223,9 @@
     <ClInclude Include="utils\Flags.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="FontRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -409,6 +412,12 @@
     </ClCompile>
     <ClCompile Include="DescriptorUpdateData.cpp">
       <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="FontRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleRenderer.cpp">
+      <Filter>render\renderers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

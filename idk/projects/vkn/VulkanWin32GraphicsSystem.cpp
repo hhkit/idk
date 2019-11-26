@@ -268,6 +268,10 @@ namespace idk::vkn
 		shared_graphics_state.particle_data = &curr_buffer.particle_buffer;
 		shared_graphics_state.particle_range = &curr_buffer.particle_range;
 
+		shared_graphics_state.characters_data = &curr_buffer.font_buffer;
+		shared_graphics_state.fonts_data = &curr_buffer.font_array_data;
+		shared_graphics_state.font_range = &curr_buffer.font_range;
+
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
 		pre_render_data.active_lights.resize(lights.size());
@@ -316,9 +320,11 @@ namespace idk::vkn
 		bool will_draw_debug = true;
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
-			auto& curr_state = curr_states[i];
+			auto& curr_state = curr_states[i];		
 			auto& curr_range = curr_buffer.culled_render_range[i];
 			auto& curr_cam = curr_range.camera;
+
+			//Init render datas (range for instanced data, followed by render datas for other passes)
 			curr_state.Init(curr_range, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
 			//const bool new_rt = 

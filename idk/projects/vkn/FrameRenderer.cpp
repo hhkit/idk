@@ -477,6 +477,7 @@ namespace idk::vkn
 			Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GSinglePassCube]
 		);
 		_particle_renderer.InitConfig();
+		_font_renderer.InitConfig();
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -524,6 +525,14 @@ namespace idk::vkn
 				auto& buffer = state.shared_gfx_state->particle_buffer;
 				buffer.resize(hlp::buffer_size(particle_data));
 				buffer.update<const ParticleObj>(0, particle_data, cmd_buffer);
+			}
+
+			if (state.shared_gfx_state->characters_data && state.shared_gfx_state->characters_data->size())
+			{
+				auto& font_data = *state.shared_gfx_state->characters_data;
+				auto& buffer = state.shared_gfx_state->font_buffer;
+				buffer.resize(hlp::buffer_size(font_data));
+				buffer.update<const CharacterObj>(0, font_data, cmd_buffer);
 			}
 
 			cmd_buffer.end();
@@ -1103,7 +1112,12 @@ namespace idk::vkn
 		//TODO make ProcessRoUniforms only render forward pass stuff.
 		auto&& the_interface = (is_deferred)?PipelineThingy{}:
 			ProcessRoUniforms(state, rs.ubo_manager);
+		
+		
 		_particle_renderer.DrawParticles(the_interface, state, rs);
+		_font_renderer.DrawFont(the_interface,state,rs);
+
+
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);

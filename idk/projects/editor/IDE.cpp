@@ -461,7 +461,7 @@ namespace idk
 
 				const auto transform = i->GetComponent<Transform>();
 				if (transform) {
-					finalCamPos += transform->position;
+					finalCamPos += transform->GlobalPosition();
 				}
 
 			}

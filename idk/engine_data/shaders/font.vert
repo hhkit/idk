@@ -29,7 +29,7 @@ U_LAYOUT(8, 0) uniform BLOCK(FontBlock)
 	vec4 color;
 } PerFont;
 
-layout(location = 1) out VS_OUT
+layout(location = 2) out VS_OUT
 {
   vec3 position;
   vec2 uv;

@@ -3,13 +3,15 @@
 #include <idk.h>
 #include <Windows.h>
 #include <Xinput.h>
+#include <core/Core.h>
+
 #undef max
 
 namespace idk::win
 {
 
     // number of seconds between each check for new player
-    constexpr static auto check_for_new_gamepad_delay = 3.0f;
+    constexpr static auto check_for_new_connection_delay = 3.0f;
 
     void XInputSystem::Init()
     {
@@ -33,8 +35,11 @@ namespace idk::win
             else
             {
                 // Controller is not connected 
+                _connected_users &= ~(1 << i);
             }
         }
+
+        _new_connection_check_timer = check_for_new_connection_delay;
     }
 
     void XInputSystem::Shutdown()
@@ -45,11 +50,19 @@ namespace idk::win
     {
         _swap_bufs();
 
+        _new_connection_check_timer -= Core::GetRealDT().count();
+        const bool check_for_new_connection = _new_connection_check_timer <= 0;
+        if (check_for_new_connection)
+            _new_connection_check_timer = check_for_new_connection_delay;
+
         DWORD dwResult;
         for (DWORD i = 0; i < XUSER_MAX_COUNT; i++)
         {
-            if ((_connected_users & (1 << i)) == 0)
-                continue;
+            if (!check_for_new_connection)
+            {
+                if ((_connected_users & (1 << i)) == 0)
+                    continue;
+            }
 
             XINPUT_STATE state;
             ZeroMemory(&state, sizeof(XINPUT_STATE));
@@ -70,24 +83,24 @@ namespace idk::win
         }
     }
 
-    bool XInputSystem::GetButtonDown(char player, GamepadButton button)
+    bool XInputSystem::GetButtonDown(char player, GamepadButton button) const
     {
         return (_prev_buf()[player].buttons & static_cast<unsigned short>(button)) == 0 &&
                (_curr_buf()[player].buttons & static_cast<unsigned short>(button)) != 0;
     }
 
-    bool XInputSystem::GetButtonUp(char player, GamepadButton button)
+    bool XInputSystem::GetButtonUp(char player, GamepadButton button) const
     {
         return (_prev_buf()[player].buttons & static_cast<unsigned short>(button)) != 0 &&
                (_curr_buf()[player].buttons & static_cast<unsigned short>(button)) == 0;
     }
 
-    bool XInputSystem::GetButton(char player, GamepadButton button)
+    bool XInputSystem::GetButton(char player, GamepadButton button) const
     {
         return (_curr_buf()[player].buttons & static_cast<unsigned short>(button)) != 0;
     }
 
-    float XInputSystem::GetAxis(char player, GamepadAxis axis)
+    float XInputSystem::GetAxis(char player, GamepadAxis axis) const
     {
         switch (axis)
         {
@@ -111,6 +124,11 @@ namespace idk::win
         vibration.wLeftMotorSpeed = static_cast<WORD>(std::clamp(low_freq, 0.0f, 1.0f) * 0xffff);
         vibration.wRightMotorSpeed = static_cast<WORD>(std::clamp(high_freq, 0.0f, 1.0f) * 0xffff);
         XInputSetState(player, &vibration);
+    }
+
+    char XInputSystem::GetConnectedPlayers() const
+    {
+        return _connected_users;
     }
 
     static vec2 thumbstick_deadzone_filter(short x, short y, short deadzone)

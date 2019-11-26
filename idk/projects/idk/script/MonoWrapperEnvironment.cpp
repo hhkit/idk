@@ -1275,6 +1275,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+        BIND_START("idk.Bindings::InputGetConnectedPlayers", char)
+        {
+            return Core::GetSystem<GamepadSystem>().GetConnectedPlayers();
+        }
+        BIND_END();
+
 
         // Time
 
