@@ -17,7 +17,7 @@
 #include <PauseConfigurations.h>
 #include <file/FileSystem.h>
 #include <gfx/ShaderGraph.h>
-
+#include <parallel/ThreadPool.h>
 namespace idk
 {
 	void TestSystem::Init()
@@ -43,7 +43,16 @@ namespace idk
 		t += Core::GetDT().count();
 		auto& app_sys = Core::GetSystem<Application>();
 		auto& gamepad = Core::GetSystem<GamepadSystem>();
-
+		static bool fire = false;
+		if (app_sys.GetKeyDown(Key::I) )
+		{
+			for (unsigned i =0; i < std::thread::hardware_concurrency(); ++i)
+				Core::GetThreadPool().Post([i]()
+				{
+					std::cout << "hello from " + std::to_string(mt::thread_id) + " with index " + std::to_string(i) + "\n";
+				});
+			fire = true;
+		}
 		for (auto& elem : comps)
 		{
 			if (app_sys.GetKey(Key::J)) elem.GetGameObject()->Transform()->position += vec3{ +0.016, 0.0, 0.0 };

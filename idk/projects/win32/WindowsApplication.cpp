@@ -25,7 +25,7 @@ namespace idk::win
 		//LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 		//LoadStringW(hInstance, IDC_GAME, szWindowClass, MAX_LOADSTRING);
 
-		#ifdef _DEBUG
+		//#ifdef _DEBUG
 		{
 			AllocConsole();
 			AttachConsole(GetCurrentProcessId());
@@ -34,7 +34,7 @@ namespace idk::win
 			freopen_s(&pCout, "conout$", "w", stderr); //returns 0
 			SetConsoleTitle(L"IDK 0.1a");
 		}
-		#endif
+		//#endif
 
 		MyRegisterClass();
 

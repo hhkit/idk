@@ -65,6 +65,9 @@
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="multithread_control.h" />
+    <ClInclude Include="parallel\HazardPointerDL.h" />
+    <ClInclude Include="parallel\queue.h" />
+    <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h" />
@@ -322,6 +325,7 @@
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />
     <ClCompile Include="math\shapes\halfspace.cpp" />
+    <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
     <ClCompile Include="particle\ParticleSystemModules.cpp" />

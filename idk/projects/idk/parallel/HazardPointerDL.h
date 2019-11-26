@@ -4,13 +4,15 @@
 #include <array>
 #include <atomic>
 
+#include <machine.h>
+
+#pragma warning(disable:4324)
+
 namespace idk::mt
 {
-	static constexpr auto cache_line_sz = 64;
-
 	// wraps a struct such that it is aligned to the cache line
 	template<typename T>
-	alignas(cache_line_sz) struct cache_aligned_wrapper
+	struct alignas(machine::cache_line_sz) cache_aligned_wrapper
 	{
 		T value;
 	};
@@ -28,8 +30,8 @@ namespace idk::mt
 	private:
 		static constexpr size_t free_threshold = 4; 
 		
-		std::array<cache_aligned_wrapper<std::atomic<T*>, MaxThds> hazard_ptrs;
-		std::array<cache_aligned_wrapper<std::vector<T*>, MaxThds> retire_list;
+		std::array<cache_aligned_wrapper<std::atomic<T*>>, MaxThds> hazard_ptrs;
+		std::array<cache_aligned_wrapper<std::vector<T*>>, MaxThds> retire_list;
 	};
 	
 	template<typename T, size_t MaxThds>
@@ -64,13 +66,15 @@ namespace idk::mt
 	void HazardPointerDL<T, MaxThds>::free(T* ptr, T* tail, const int id)
 	{
 		auto& curr_list = retire_list[id].value;
+		for (auto& elem : curr_list)
+			IDK_ASSERT(elem != ptr);
 		curr_list.push_back(ptr);
-		if (retire_list[id].size() < free_threshold)
+		if (curr_list.size() < free_threshold)
 			return;
 			
 		for (unsigned i = 0; i < curr_list.size();)
 		{
-			auto freeme = curr_list.value[i];
+			auto freeme = curr_list[i];
 			if (freeme->next.load() == tail)
 			{
 				// can't delete the node before the current tail
@@ -87,7 +91,7 @@ namespace idk::mt
 				//	3. the next of a protected ptr 
 				// we cannot free the ptr 
 				
-				if (curr_hazard_ptr == ptr || curr_hazard_ptr->next.load() == ptr || ptr->prev == curr_hazard_ptr)
+				if (curr_hazard_ptr == ptr || ptr->next.load() == curr_hazard_ptr|| ptr->prev == curr_hazard_ptr)
 				{
 					canDelete = false;
 					break;
@@ -96,7 +100,7 @@ namespace idk::mt
 			if (canDelete)
 			{
 				curr_list.erase(curr_list.begin() + i);
-				delete curr_hazard_ptr;
+				delete freeme;
 				continue;
 			}
 			++i;
