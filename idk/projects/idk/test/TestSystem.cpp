@@ -44,12 +44,12 @@ namespace idk
 		auto& app_sys = Core::GetSystem<Application>();
 		auto& gamepad = Core::GetSystem<GamepadSystem>();
 		static bool fire = false;
-		if (app_sys.GetKeyDown(Key::I) )
+		if (app_sys.GetKey(Key::I) )
 		{
 			for (unsigned i =0; i < std::thread::hardware_concurrency(); ++i)
 				Core::GetThreadPool().Post([i]()
 				{
-					std::cout << "hello from " + std::to_string(mt::thread_id) + " with index " + std::to_string(i) + "\n";
+					std::cout << "hello from " + std::to_string(mt::thread_id()) + " with index " + std::to_string(i) + "\n";
 				});
 			fire = true;
 		}

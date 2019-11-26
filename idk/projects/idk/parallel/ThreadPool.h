@@ -9,7 +9,7 @@
 
 namespace idk::mt
 {
-	extern thread_local int thread_id;
+	int thread_id();
 
 	class ThreadPool
 	{
@@ -36,7 +36,7 @@ namespace idk::mt
 		auto promise = std::make_shared<std::promise<Retval>>();
 		auto future = promise->get_future();
 		
-		jobs.emplace_back(mt::thread_id, 
+		jobs.emplace_back(mt::thread_id(), 
 			[ fn = func
 			, tuple = std::make_tuple(std::forward<Args>(args)...)
 			, promise

@@ -3,16 +3,21 @@
 #include <iostream>
 namespace idk::mt
 {
-	thread_local int thread_id = 0;
+	thread_local int _thread_id = 0;
+
+	int thread_id()
+	{
+		return _thread_id;
+	}
 
 	void thread_main(ThreadPool* pool, int thid)
 	{
 		std::cout << "spawned thread " + std::to_string(thid) + "\n";
-		thread_id = thid;
+		_thread_id = thid;
 
 		// busy wait
 		while (Core::IsRunning())
-			pool->ExecuteJob(thread_id);
+			pool->ExecuteJob(thread_id());
 	}
 
 	ThreadPool::ThreadPool(const int thread_count)
