@@ -1261,7 +1261,7 @@ namespace idk::vkn
 				auto& pipeline = *prev_pipeline;
 				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-				auto& mesh = obj.mesh.as<VulkanMesh>();
+				//auto& mesh = obj.mesh.as<VulkanMesh>();
 				{
 					uint32_t set = 0;
 					for (auto& ods : p_ro.descriptor_sets)
@@ -1282,11 +1282,15 @@ namespace idk::vkn
 					if (opt)
 						cmd_buffer.bindVertexBuffers(*opt, attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 				}
-				auto& oidx = mesh.GetIndexBuffer();
+				auto& oidx = p_ro.index_buffer;
 				if (oidx)
 				{
-					cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-					cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+					cmd_buffer.bindIndexBuffer(oidx->buffer, oidx->offset, oidx->index_type, vk::DispatchLoaderDefault{});
+					cmd_buffer.drawIndexed(p_ro.num_vertices, static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+				}
+				else
+				{
+					cmd_buffer.draw(p_ro.num_vertices, static_cast<uint32_t>(p_ro.num_instances), 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 			}
 		}
