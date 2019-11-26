@@ -14,6 +14,8 @@ namespace idk
 	public:
 		~LogSystem();
 		static constexpr size_t log_buffer_size = 2048;
+        void SetLogDir(string_view dir);
+
 	private:
 		struct LogHandle
 		{
@@ -25,5 +27,6 @@ namespace idk
 		void Init() override;
 		void Shutdown() override {}
 		array<LogHandle, s_cast<size_t>(LogPool::COUNT)> log_files;
+        string _log_dir;
 	};
 }

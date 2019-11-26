@@ -95,6 +95,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->AddSystem<IDE>();
 
+    namespace fs = std::filesystem;
+
+    fs::path idk_app_data = Core::GetSystem<Application>().GetAppData();
+    idk_app_data /= "idk";
+    if (!fs::exists(idk_app_data))
+        fs::create_directory(idk_app_data);
+    Core::GetSystem<LogSystem>().SetLogDir(idk_app_data.string());
+
 	c->Setup();
 
 	//LogSingleton::Get().PipeToCout(LogPool::GAME, true);

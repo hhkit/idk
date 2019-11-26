@@ -43,6 +43,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 // editor setup
 #include <gfx/RenderTarget.h>
 #include <editor/SceneManagement.h>
+#include <editor/ProjectManagement.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
@@ -60,49 +61,17 @@ namespace idk
 
 	void IDE::Init()
 	{
-        // project load
-        {
-            auto& proj_manager = Core::GetSystem<ProjectManager>();
-            const auto recent_proj = []() -> string
-            {
-                fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-                recent_path /= "idk";
-                recent_path /= ".recent";
-                if (!fs::exists(recent_path))
-                    return "";
-                std::ifstream recent_file{ recent_path };
-                fs::path proj = stringify(recent_file);
-                if (!fs::exists(proj))
-                    return "";
-                return proj.string();
-            }();
+        fs::path idk_app_data = Core::GetSystem<FileSystem>().GetAppDataDir();
+        idk_app_data /= "idk";
+        Core::GetSystem<FileSystem>().Mount(idk_app_data.string(), path_idk_app_data, false);
 
-            if (recent_proj.empty())
-            {
-                const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
-                auto proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                while (!proj)
-                    proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                proj_manager.LoadProject(*proj);
-            }
-            else
-                proj_manager.LoadProject(recent_proj);
+		auto tmp_path = idk_app_data / "tmp";
+		if (!fs::exists(tmp_path))
+			fs::create_directory(tmp_path);
+		Core::GetSystem<FileSystem>().Mount(tmp_path.string(), path_tmp, false);
 
-            fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-            recent_path /= "idk";
-            if (!fs::exists(recent_path))
-                fs::create_directory(recent_path);
-            _editor_app_data = recent_path.string();
+        LoadRecentProject();
 
-            recent_path /= ".recent";
-            std::ofstream recent_file{ recent_path };
-            recent_file << proj_manager.GetProjectFullPath();
-
-			auto tmp_path = _editor_app_data + "/tmp";
-			if (!fs::exists(tmp_path))
-				fs::create_directory(tmp_path);
-			Core::GetSystem<FileSystem>().Mount(tmp_path, "/tmp", false);
-        }
 
 		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
 		{
@@ -146,7 +115,7 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
         io.IniFilename = NULL;
-        ImGui::LoadIniSettingsFromDisk((_editor_app_data + "/imgui.ini").c_str());
+        ImGui::LoadIniSettingsFromDisk((Core::GetSystem<FileSystem>().GetFullPath(path_idk_app_data) + "/imgui.ini").c_str());
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
@@ -257,7 +226,7 @@ namespace idk
 
 	void IDE::Shutdown()
 	{
-        ImGui::SaveIniSettingsToDisk((_editor_app_data + "/imgui.ini").c_str());
+        ImGui::SaveIniSettingsToDisk((Core::GetSystem<FileSystem>().GetFullPath(path_idk_app_data) + "/imgui.ini").c_str());
         Core::GetSystem<ProjectManager>().SaveConfigs();
         ige_windows.clear();
 		_interface->Shutdown();
