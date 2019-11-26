@@ -37,6 +37,7 @@ namespace idk::win
         Buffer _buffers[2];
         char _curr_buffer_index = 0;
         char _connected_users = 0;
+        float _new_connection_check_timer = 0;
 
         Buffer& _curr_buf() { return _buffers[_curr_buffer_index]; }
         const Buffer& _curr_buf() const { return _buffers[_curr_buffer_index]; }
