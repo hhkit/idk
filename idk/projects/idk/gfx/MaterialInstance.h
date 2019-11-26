@@ -14,7 +14,7 @@ namespace idk
 	{
 	public:
 		RscHandle<Material> material;
-		hash_table<string, UniformInstanceValue> uniforms;
+		std::map<string, UniformInstanceValue> uniforms;
 
 		bool IsImageBlock(const string& name)const;
 		vector<RscHandle<Texture>> GetImageBlock(const string& name)const;
