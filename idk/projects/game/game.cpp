@@ -101,6 +101,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     idk_app_data /= "idk";
     if (!fs::exists(idk_app_data))
         fs::create_directory(idk_app_data);
+
+    idk_app_data /= "logs";
+    if (!fs::exists(idk_app_data))
+        fs::create_directory(idk_app_data);
     Core::GetSystem<LogSystem>().SetLogDir(idk_app_data.string());
 
 	c->Setup();
