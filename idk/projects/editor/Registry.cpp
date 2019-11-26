@@ -20,7 +20,7 @@ namespace idk
         std::ifstream recent_file{ recent_path };
         const auto str = stringify(recent_file);
         auto res = yaml::load(str);
-        return res ? *res : yaml::node{};
+        return res ? ((*res).is_mapping() ? *res : yaml::node{}) : yaml::node{};
     }
 
     string Registry::get(string_view key)
