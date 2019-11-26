@@ -8,7 +8,7 @@
 #include <vkn/VulkanMesh.h>
 #include <gfx/GraphicsSystem.h>
 
-#include <gfx/Font.h>
+#include <gfx/TextMesh.h>
 
 #include <vkn/PipelineThingy.h>
 #include <gfx/FramebufferFactory.h>
