@@ -43,6 +43,7 @@ namespace idk
 		t += Core::GetDT().count();
 		auto& app_sys = Core::GetSystem<Application>();
 		auto& gamepad = Core::GetSystem<GamepadSystem>();
+		
 		static bool fire = false;
 		if (app_sys.GetKey(Key::I) )
 		{
@@ -59,6 +60,7 @@ namespace idk
 			std::cout << "all printed\n";
 			fire = true;
 		}
+		
 		for (auto& elem : comps)
 		{
 			if (app_sys.GetKey(Key::J)) elem.GetGameObject()->Transform()->position += vec3{ +0.016, 0.0, 0.0 };

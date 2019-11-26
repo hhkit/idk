@@ -9,7 +9,7 @@ namespace idk
         std::uint32_t mask = 0;
 
 		LayerMask() noexcept = default;
-		explicit LayerMask(int32_t m) noexcept : mask{ *reinterpret_cast<uint32_t*>(reinterpret_cast<std::byte*>(m)) } {}
+		explicit LayerMask(int32_t m) noexcept : mask{ reinterpret_cast<uint32_t&>(m) } {}
 		explicit LayerMask(uint32_t m) noexcept : mask{ m } {}
 
 		operator bool() const noexcept { return mask; }

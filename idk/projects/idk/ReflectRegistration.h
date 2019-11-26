@@ -369,7 +369,7 @@ REFLECT_BEGIN(decltype(idk::PhysicsConfig::matrix), "PhysicsLayerMatrix")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PhysicsConfig, "PhysicsConfig")
-REFLECT_VARS(matrix)
+REFLECT_VARS(matrix, batch_size)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PhysicsSystem, "PhysicsSystem")

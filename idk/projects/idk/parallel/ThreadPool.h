@@ -73,4 +73,7 @@ namespace idk::mt
 			pool->ExecuteJob(thread_id());
 		return future.get();
 	}
+
+	template<typename T>
+	using Future = ThreadPool::Future<T>;
 }
