@@ -900,6 +900,10 @@
       <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="common\LayerMask.h" />
+    <ClInclude Include="gfx\ShaderIncluder.h" />
+    <ClInclude Include="gfx\ShaderSnippet.h" />
+    <ClInclude Include="gfx\ShaderSnippetLoader.h" />
+    <ClInclude Include="gfx\ShaderSnippetFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1318,6 +1322,7 @@
     <ClCompile Include="gfx\FontData.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\ShaderIncluder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

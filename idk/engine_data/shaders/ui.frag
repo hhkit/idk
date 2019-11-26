@@ -18,7 +18,8 @@ U_LAYOUT(4, 1) uniform BLOCK(UIBlock)
 void main()
 {
 	vec4 s = texture(tex, fs_in.uv);
-	FragColor = mix(s * PerUI.color, vec4(1, 1, 1, s.r) * PerUI.color, PerUI.is_font);
+	vec4 huh = PerUI.is_font? vec4(1):vec4(0);
+	FragColor = mix(s * PerUI.color, vec4(1, 1, 1, s.r) * PerUI.color, huh);
 	
 	if(FragColor.a < 0.001176)
 		discard;

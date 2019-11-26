@@ -52,6 +52,10 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
+    <ClInclude Include="gfx\ShaderIncluder.h" />
+    <ClInclude Include="gfx\ShaderSnippet.h" />
+    <ClInclude Include="gfx\ShaderSnippetFactory.h" />
+    <ClInclude Include="gfx\ShaderSnippetLoader.h" />
     <ClInclude Include="gfx\TextMesh.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />
@@ -314,6 +318,7 @@
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
     <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
+    <ClCompile Include="gfx\ShaderIncluder.cpp" />
     <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
