@@ -87,11 +87,10 @@ namespace idk::mt
 				T* curr_hazard_ptr = hazard_ptrs[thd].value.load();
 				// if we are trying to free a ptr that is
 				// 	1. protected
-				//	2. the prev of a protected ptr or 
 				//	3. the next of a protected ptr 
 				// we cannot free the ptr 
 				
-				if (curr_hazard_ptr == ptr || ptr->next.load() == curr_hazard_ptr|| ptr->prev == curr_hazard_ptr)
+				if (curr_hazard_ptr == ptr || ptr->next.load() == curr_hazard_ptr)
 				{
 					canDelete = false;
 					break;
