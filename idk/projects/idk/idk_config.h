@@ -30,6 +30,7 @@ namespace idk
 		,   class SkinnedMeshRenderer
 		,	class Light
 		,   class Font
+		,   class Image
 
         /// PARTICLE
         ,   class ParticleSystem
@@ -37,6 +38,10 @@ namespace idk
 		/// ANIMATION
 		,	class Animator
 		,	struct Bone
+
+        /// UI
+        ,   class Canvas
+        ,   class RectTransform
 
 		/// SCRIPTING
 		,	class mono::Behavior
@@ -63,11 +68,16 @@ namespace idk
 		,	class PhysicsSystem
 		,	class AnimationSystem
 
+        // particle
         ,   class ParticleSystemUpdater
 
 		// gfx
 		,	class GraphicsSystem
 		,   class DebugRenderer
+
+        // ui
+        ,   class UISystem
+
 		// audio
 		,	class AudioSystem
 		

@@ -132,6 +132,9 @@
     <ClInclude Include="widgets\VerticalText.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="widgets\DragRect.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -241,6 +244,9 @@
       <Filter>commands</Filter>
     </ClCompile>
     <ClCompile Include="widgets\VerticalText.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\DragRect.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
   </ItemGroup>

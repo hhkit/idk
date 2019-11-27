@@ -46,7 +46,7 @@ namespace idk::vkn
 		vk::Rect2D vp{ vk::Offset2D{vp_pos.x,vp_pos.y},vk::Extent2D{s_cast<uint32_t>(vp_size.x),s_cast<uint32_t>(vp_size.y)} };
 		cmd_buffer.setScissor(0, vp);
 	}
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const Viewport& vp)
+	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
 		auto& [offset, size] = pair;
@@ -512,7 +512,7 @@ namespace idk::vkn
 
 	void FrameRenderer::PreRenderShadow(const LightData& light, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
-		auto cam = CameraData{ GenericHandle {},false, 0xFFFFFFFF,light.v,light.p };
+        auto cam = CameraData{ {}, 0xFFFFFFFF, light.v, light.p };
 		ShadowBinding shadow_binding;
 		shadow_binding.for_each_binder<has_setstate>(
 			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -883,13 +883,13 @@ namespace idk::vkn
 		auto& clear_data = state.camera.clear_data;
 		switch (clear_data.index())
 		{
-		case index_in_variant_v<color, CameraData::ClearData_t>:
+		case index_in_variant_v<color, CameraClear>:
 			clear_col = std::get<color>(clear_data);
 			break;
-		case index_in_variant_v<RscHandle<CubeMap>, CameraData::ClearData_t>:
+		case index_in_variant_v<RscHandle<CubeMap>, CameraClear>:
 			sb_cm = std::get<RscHandle<CubeMap>>(clear_data);
 			break;
-		case index_in_variant_v<DontClear, CameraData::ClearData_t>:
+		case index_in_variant_v<DontClear, CameraClear>:
 			//TODO: set dont clear settings.
 			break;
 		}
@@ -978,7 +978,7 @@ namespace idk::vkn
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
-		bool still_rendering = (processed_ro.size() > 0) || camera.overlay_debug_draw;
+		bool still_rendering = (processed_ro.size() > 0) || camera.render_target->RenderDebug();
 		if (still_rendering)
 		{
 			TransitionFrameBuffer(camera, cmd_buffer, view);
@@ -1047,7 +1047,7 @@ namespace idk::vkn
 				}
 			}
 		}
-		if (camera.overlay_debug_draw)
+		if (camera.render_target->RenderDebug())
 		{
 			RenderDebugStuff(state, rs, offset, size);
 		}

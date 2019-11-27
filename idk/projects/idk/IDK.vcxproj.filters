@@ -128,6 +128,9 @@
     <Filter Include="anim\detail">
       <UniqueIdentifier>{5f3cf2cf-2fa4-43f8-bffe-cbd22c94da10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{241cb65f-5a4a-4fab-adc2-43995a1f3b84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -785,9 +788,6 @@
     <ClInclude Include="proj\ProjectManager.h">
       <Filter>proj</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Viewport.h">
-      <Filter>gfx\camera</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Buffer.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -865,6 +865,27 @@
     </ClInclude>
     <ClInclude Include="meta\comparator.h">
       <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="math\rect.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule_box.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Image.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Canvas.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\UISystem.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\RectTransform.h">
+      <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="anim\AnimationTransition.h">
       <Filter>anim</Filter>
@@ -1277,6 +1298,18 @@
     </ClCompile>
     <ClCompile Include="gfx\FramebufferFactory.cpp">
       <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\UISystem.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\RectTransform.cpp">
+      <Filter>ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

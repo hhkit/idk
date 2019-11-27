@@ -547,6 +547,101 @@ namespace idk::mono
 		}
 		BIND_END();
 
+
+		// BIND_START("idk.Bindings::ColliderGetShape", MonoObject*, Handle<Collider> col)
+		// {
+		// 	return std::visit([&](auto& elem) -> MonoObject *
+		// 		{
+		// 			using T = std::decay_t<decltype(elem)>;
+		// 			
+		// 			if constexpr (std::is_same_v<T, idk::box>)
+		// 			{
+		// 				idk::box& shape = elem;
+		// 				auto box_klass = Core::GetSystem<ScriptSystem>().Environment().Type("Box");
+		// 				IDK_ASSERT(box_klass);
+		// 				auto box_obj = box_klass->Construct();
+		// 				box_obj.Visit([](const auto& key, auto& val, int depth)
+		// 					{
+		// 						using T = std::decay_t<decltype(val)>;
+		// 						if constexpr (std::is_same_v<T, vec3>)
+		// 						{
+		// 							if (key == "center")
+		// 								val = shape.center;
+		// 							if (key == "extents")
+		// 								val = shape.extents;
+		// 						}
+		// 					});
+		// 				return box_obj.Raw();
+		// 			}
+		// 
+		// 			if constexpr (std::is_same_v<T, idk::sphere>)
+		// 			{
+		// 				idk::sphere& shape = elem;
+		// 				auto sphere_klass = Core::GetSystem<ScriptSystem>().Environment().Type("Sphere");
+		// 				IDK_ASSERT(sphere_klass);
+		// 				auto sphere_obj = sphere_klass->Construct();
+		// 				sphere_obj.Visit([](const auto& key, auto& val, int depth)
+		// 					{
+		// 						using T = std::decay_t<decltype(val)>;
+		// 						if constexpr (std::is_same_v<T, vec3>)
+		// 						{
+		// 							if (key == "center")
+		// 								val = shape.center;
+		// 						}
+		// 						if constexpr (std::is_same_v<T, idk::real>)
+		// 						{
+		// 							if (key == "radius")
+		// 								val = shape.radius;
+		// 						}
+		// 					});
+		// 				return sphere_obj.Raw();
+		// 			}
+		// 		}, col->shape);
+		// }
+		// BIND_END();
+		// 
+		// BIND_START("idk.Bindings::ColliderSetShape", void, Handle<Collider> col, MonoObject* obj)
+		// {
+		// 	ManagedObject managed_shape{ obj };
+		// 	if (managed_shape.TypeName() == "Box")
+		// 	{
+		// 		idk::box box_obj;
+		// 		managed_shape.Visit([](const auto& key, auto& val, int depth)
+		// 			{
+		// 				using T = std::decay_t<decltype(val)>;
+		// 				if constexpr (std::is_same_v<T, vec3>)
+		// 				{
+		// 					if (key == "center")
+		// 						box_obj.center = val;
+		// 					if (key == "extents")
+		// 						box_obj.extents = val;
+		// 				}
+		// 			});
+		// 		col->shape = box_obj;
+		// 	}
+		// 
+		// 	if (managed_shape.TypeName() == "Sphere")
+		// 	{
+		// 		idk::sphere sphere_obj;
+		// 		managed_shape.Visit([](const auto& key, auto& val, int depth)
+		// 			{
+		// 				using T = std::decay_t<decltype(val)>;
+		// 				if constexpr (std::is_same_v<T, vec3>)
+		// 				{
+		// 					if (key == "center")
+		// 						sphere_obj.center = val;
+		// 				}
+		// 				if constexpr (std::is_same_v<T, idk::real>)
+		// 				{
+		// 					if (key == "radius")
+		// 						sphere_obj.radius = val;
+		// 				}
+		// 			});
+		// 		col->shape = sphere_obj;
+		// 	}
+		// }
+		// BIND_END();
+
 		// Animator
 		BIND_START("idk.Bindings::AnimatorPlay",  void, Handle<Animator> animator, MonoString* name)
 		{

@@ -131,11 +131,11 @@ namespace idk::vkn
 		vector<RscHandle<CubeMap>> cube_maps[PbrCubeMapVarsInfo::size()] = {};
 		//TODO: actually bind something.
 		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = {
-			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraClear,RscHandle<CubeMap>>::value)
 			? RscHandle<CubeMap>{std::get<RscHandle<CubeMap>>(vstate.camera.clear_data).as<VknCubemap>().GetConvoluted() } : RscHandle <CubeMap>{}
 		};
 		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eEnvironmentProbe>()] = {
-			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraClear,RscHandle<CubeMap>>::value)
 			? std::get<RscHandle<CubeMap>>(vstate.camera.clear_data) : RscHandle < CubeMap>{}
 		};
 		AddCubeMaps(PbrCubeMapVars::eIrradiance, get_span(cube_maps[PbrCubeMapVarsInfo::map(PbrCubeMapVars::eIrradiance)]));

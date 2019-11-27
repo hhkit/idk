@@ -85,6 +85,9 @@
         <Item Name="[mono::Behavior]"      Condition="type == idk::natvis::monoBehaviorID"       >*((idk::Handle&lt;idk::mono::Behavior&gt;*)(&amp;id))</Item>
         <Item Name="[AudioSource]"         Condition="type == idk::natvis::AudioSourceID"        >*((idk::Handle&lt;idk::AudioSource&gt;*)(&amp;id))</Item>
         <Item Name="[AudioListener]"       Condition="type == idk::natvis::AudioListenerID"      >*((idk::Handle&lt;idk::AudioListener&gt;*)(&amp;id))</Item>
+        <Item Name="[ParticleSystem]"      Condition="type == idk::natvis::ParticleSystemID"     >*((idk::Handle&lt;idk::ParticleSystem&gt;*)(&amp;id))</Item>
+        <Item Name="[Canvas]"              Condition="type == idk::natvis::CanvasID"             >*((idk::Handle&lt;idk::Canvas&gt;*)(&amp;id))</Item>
+        <Item Name="[RectTransform]"       Condition="type == idk::natvis::RectTransformID"      >*((idk::Handle&lt;idk::RectTransform&gt;*)(&amp;id))</Item>
       </CustomListItems>
     </Expand>
   </Type>

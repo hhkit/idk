@@ -37,6 +37,8 @@ namespace idk::phys
 	raycast_result collide_ray_aabb(const ray& lhs, const aabb& bb);
 
 	raycast_result collide_ray_sphere(const ray& lhs, const sphere& s);
+
+	raycast_result collide_ray_capsule(const ray& lhs, const capsule& c);
 }
 
 #include "collision_raycast.inl"
