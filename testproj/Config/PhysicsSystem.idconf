@@ -1,3 +1,4 @@
+batch_size: 64
 matrix: 
 - mask: 4294967295
 - mask: 4294967295

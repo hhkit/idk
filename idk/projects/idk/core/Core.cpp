@@ -37,7 +37,6 @@ namespace idk
 		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{ true }
 	{
 		_instance = this;
-		_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 	}
 
 	Core::~Core()
@@ -115,6 +114,7 @@ namespace idk
 	
 		// main loop
 		_scheduler->Setup();
+		_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 		auto& app = Core::GetSystem<Application>();
 
         Core::GetSystem<SceneManager>().BuildSceneGraph(Core::GetGameState().GetObjectsOfType<const GameObject>());

@@ -63,9 +63,13 @@ namespace idk::win
 		ivec2	  screendel;
 		vec2	  ndc_screendel;
 
+		bool _dragging{ false };
+		bool _focused{ true };
+		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
+		unique_ptr<InputManager> _input_manager;
+
 		static inline Windows* instance = nullptr;
 
-		unique_ptr<InputManager> _input_manager;
 
 		ATOM MyRegisterClass();
 		BOOL InitInstance(int nCmdShow);
@@ -75,9 +79,6 @@ namespace idk::win
 
 		friend LRESULT CALLBACK ::WndProc(HWND, UINT, WPARAM, LPARAM);
 
-		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
-
-		bool _dragging{false};
 	};
 }
 

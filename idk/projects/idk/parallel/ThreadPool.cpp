@@ -1,6 +1,12 @@
 #include "stdafx.h"
-#include "ThreadPool.h"
 #include <iostream>
+
+#include "ThreadPool.h"
+#include <mono/metadata/threads.h>
+#include <script/ScriptSystem.h>
+#include <parallel/circular_buffer.h>
+//#include <Windows.h>
+
 namespace idk::mt
 {
 	thread_local int _thread_id = 0;
@@ -23,9 +29,12 @@ namespace idk::mt
 	ThreadPool::ThreadPool(const int thread_count)
 	{
 		LOG_TO(LogPool::SYS, "spawning %d threads\n", thread_count);
-		//int i = 1;
+		//SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+		
 		for (int i = 1; i <= std::max(0, thread_count); ++i)
+		{
 			threads.emplace_back(std::thread{ &thread_main, this, i });
+		}
 	}
 
 	ThreadPool::~ThreadPool()
@@ -34,13 +43,11 @@ namespace idk::mt
 			elem.join();
 	}
 
-	void ThreadPool::ExecuteJob(const int thid)
+	void ThreadPool::ExecuteJob([[maybe_unused]] const int thid)
 	{
-		static int i = 0;
-		auto job = jobs.pop_front(thid);
+		auto job = jobs.pop_front();
 		if (job)
 		{
-			++i;
 			IDK_ASSERT(*job);
 			(*job)();
 		}

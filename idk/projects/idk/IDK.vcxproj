@@ -65,6 +65,8 @@
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="multithread_control.h" />
+    <ClInclude Include="parallel\cache_aligned_wrapper.h" />
+    <ClInclude Include="parallel\circular_buffer.h" />
     <ClInclude Include="parallel\HazardPointerDL.h" />
     <ClInclude Include="parallel\queue.h" />
     <ClInclude Include="parallel\ThreadPool.h" />

@@ -215,7 +215,9 @@ namespace idk::win
 		{
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:
-			_input_manager->SetKeyDown((int)wParam);
+
+			if (_focused)
+				_input_manager->SetKeyDown((int)wParam);
 			break;
 		case WM_KEYUP:
 		case WM_SYSKEYUP:
@@ -227,19 +229,22 @@ namespace idk::win
 		case WM_MBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::MButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::MButton);
 
 			break;
 		case WM_LBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::LButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::LButton);
 
 			break;
 		case WM_RBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::RButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::RButton);
 
 			break;
 		case WM_LBUTTONUP:
@@ -275,9 +280,11 @@ namespace idk::win
 		break;
 		case WM_SETFOCUS:
 			OnFocusGain.Fire();
+			_focused = true;
 			break;
 		case WM_KILLFOCUS:
 			OnFocusLost.Fire();
+			_focused = false;
 			_input_manager->FlushCurrentBuffer();
 			break;
 		case WM_SIZE:
