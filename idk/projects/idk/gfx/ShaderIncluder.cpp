@@ -234,21 +234,21 @@ namespace idk
 			if (included.emplace(include.include_name).second)
 			{
 				//Debug annotation
-				result.append("\n/*");
+				result.append("\n/* ");
 				result.append(include.include_name);
-				result.append("begin*/\n");
+				result.append("begin */\n");
 				//End Debug annotation
 				auto str_view = GetIncluded(include.include_name);
-				result.append("\n/*");
-				result.append(include.include_name);
-				result.append("end*/\n");
 				result.append(str_view);
+				result.append("\n/* ");
+				result.append(include.include_name);
+				result.append("end */\n");
 			}
 			else
 			{
-				result.append("\n/*");
+				result.append("\n/* ");
 				result.append(include.include_name);
-				result.append(" has already been included before.*/\n");
+				result.append(" has already been included before. */\n");
 			}
 			prev_end = glsl_code.data() + include.start + include.len;//forward seek pos
 		}
