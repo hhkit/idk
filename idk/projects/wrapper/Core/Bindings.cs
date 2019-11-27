@@ -210,6 +210,32 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorHasState(ulong id, string name);
 
+        // Parameter Getters
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int AnimatorGetInt(ulong id, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AnimatorGetFloat(ulong id, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorGetBool(ulong id, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorGetTrigger(ulong id, string name);
+
+        // Parameter Setters
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetInt(ulong id, string name, int val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetFloat(ulong id, string name, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetBool(ulong id, string name, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetTrigger(ulong id, string name, bool val);
+
         /*
          * AudioSource
          */

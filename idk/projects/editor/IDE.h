@@ -35,6 +35,7 @@ namespace idk
 	class IGE_ProjectWindow;
 	class IGE_HierarchyWindow;
 	class IGE_InspectorWindow;
+	class IGE_AnimatorWindow;
 
 	class CameraControls;
 
@@ -90,6 +91,7 @@ namespace idk
 		friend class IGE_ProjectWindow;
 		friend class IGE_HierarchyWindow;
 		friend class IGE_InspectorWindow;
+		friend class IGE_AnimatorWindow;
 		friend class CMD_DeleteGameObject;
 		friend class CMD_CreateGameObject;
 		friend class CMD_CallCommandAgain;

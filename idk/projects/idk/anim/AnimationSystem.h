@@ -39,6 +39,8 @@ namespace idk
 		BonePose AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
 		// BonePose BlendingPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
 		BonePose BlendPose(const BonePose& from, const BonePose& to, float delta);
+
+		void EvaluateTransitions(Animator& animator, AnimationLayer& layer);
 		size_t LayersPass(Animator& animator);
 		void AdvanceLayers(Animator& animator);
 		void AdvanceBlendTree(AnimationLayerState& layer_state, AnimationState& state) const;
