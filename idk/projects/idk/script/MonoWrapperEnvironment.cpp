@@ -33,10 +33,21 @@ namespace idk::mono
 
 		// load assembly
 		mono_domain_set(_domain, true);
+		struct version
+		{
+			uint16_t num[4];
+		} ver, ver2;
+
+		//*
+		_assembly = mono_domain_assembly_open(_domain, full_path_to_game_dll.data());
+		/*/
 		MonoImageOpenStatus status;
 		auto img = mono_image_open_from_data(assembly_data.data(), assembly_data.size(), true, &status);
 		_assembly = mono_assembly_load_from(img, "idk.dll", &status);
-
+		//*/
+		
+		//auto name = mono_assembly_get_name(_assembly);
+		//auto stringified = mono_stringify_assembly_name(name);
 		// bind functions
 		BindCoreFunctions();
 		IDK_ASSERT_MSG(_assembly, "cannot load idk.dll");
