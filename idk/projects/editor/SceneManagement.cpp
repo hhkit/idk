@@ -18,6 +18,8 @@ namespace idk
 {
 	void NewScene()
 	{
+        Core::GetSystem<IDE>().ClearScene();
+
 		if (Core::GetSystem<SceneManager>().GetActiveScene())
 			Core::GetSystem<SceneManager>().GetActiveScene()->Deactivate();
 		Core::GetSystem<SceneManager>().SetActiveScene(Core::GetResourceManager().Create<Scene>());
@@ -31,36 +33,47 @@ namespace idk
 			light->Transform()->rotation = quat{ vec3{1,0,0}, deg{-90} };
 			light->AddComponent<Light>()->light = DirectionalLight{};
 		}
-		//{
-		//	auto camera = active_scene->CreateGameObject();
-		//	camera->Name("Camera");
-		//	camera->AddComponent<Camera>();
-		//}
+		{
+			auto camera = active_scene->CreateGameObject();
+			camera->Name("Camera");
+		}
 
-		Core::GetSystem<IDE>().ClearScene();
+        Core::GetSystem<IDE>().reg_scene.set("scene", string{ active_scene.guid });
 	}
+
 	bool OpenScene()
 	{
-		if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
+		if (const auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
 		{
-			auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-			auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
-			auto hnd = *scene_res;
-			auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-			if (hnd != active_scene)
-			{
-				if (active_scene)
-					active_scene->Deactivate();
-
-				Core::GetSystem<SceneManager>().SetActiveScene(hnd);
-				hnd->LoadFromResourcePath();
-
-				Core::GetSystem<IDE>().ClearScene();
-				return true;
-			}
+            const auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
+            const auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
+            return OpenScene(*scene_res);
 		}
 		return false;
 	}
+
+    bool OpenScene(RscHandle<Scene> scene)
+    {
+        if (!scene)
+            return false;
+
+        auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+        if (scene != active_scene)
+        {
+            if (active_scene)
+                active_scene->Deactivate();
+            Core::GetSystem<SceneManager>().SetActiveScene(scene);
+            scene->LoadFromResourcePath();
+
+            Core::GetSystem<IDE>().ClearScene();
+            Core::GetSystem<IDE>().reg_scene.set("scene", string{ scene.guid });
+
+            return true;
+        }
+
+        return false;
+    }
+
 	void SaveScene()
 	{
 		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
@@ -89,6 +102,7 @@ namespace idk
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}
+
 	void SaveSceneAs()
 	{
 		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();

@@ -355,7 +355,7 @@ REFLECT_VARS(layers)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
-REFLECT_VARS(_startup_scene, _active_scene)
+REFLECT_VARS(_startup_scene)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::mono::ScriptSystemConfig, "ScriptConfig")

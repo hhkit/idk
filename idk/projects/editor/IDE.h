@@ -19,6 +19,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/IEditor.h>
 #include <editor/ImGui_Interface.h>
 #include <editor/commands/CommandController.h>
+#include <editor/Registry.h>
 
 #undef FindWindow
 
@@ -54,11 +55,14 @@ namespace idk
 	class IDE : public IEditor
 	{
 	public:
+        constexpr static auto path_tmp = "/tmp";
+        constexpr static auto path_idk_app_data = "/idk";
 		
 		IDE();
 
 		void Init() override;
 		void LateInit() override;
+		void EarlyShutdown() override;
 		void Shutdown() override;
 		void EditorUpdate() override;
 		void EditorDraw() override;
@@ -76,9 +80,9 @@ namespace idk
         }
 
 		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
-
-
 		void ApplyDefaultColors();
+
+        Registry reg_scene{ "/user/LastScene.yaml" };
 
 	private:
 		friend class IGE_MainWindow;
@@ -92,7 +96,6 @@ namespace idk
 		friend class CommandController;
 
 		unique_ptr<edt::I_Interface> _interface;
-        string _editor_app_data;
 
 		// Editor Scene
 		bool game_running = false;

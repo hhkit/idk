@@ -144,6 +144,10 @@
     <ClInclude Include="widgets\LayerMaskCombo.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="ProjectManagement.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -267,6 +271,8 @@
     <ClCompile Include="widgets\LayerMaskCombo.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
+    <ClCompile Include="ProjectManagement.cpp" />
+    <ClCompile Include="Registry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
