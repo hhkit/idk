@@ -30,7 +30,7 @@ namespace idk::vkn
 		for (size_t src_row = 0; src_row < bitmap.rows; ++src_row)
 		{
 			size_t src_row_offset = src_row * bitmap.pitch;
-			size_t dst_row_offset = (offset_y+(bitmap.rows-1-src_row)) * output_pitch;
+			size_t dst_row_offset = (offset_y+(src_row)) * output_pitch;
 			size_t dst_col_offset = offset_x;
 
 			memcpy_s(output_buffer+dst_row_offset+dst_col_offset, output_pitch - offset_x, bitmap.buffer+src_row_offset, bitmap.width);
