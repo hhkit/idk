@@ -532,7 +532,7 @@ namespace idk::vkn
 				auto& font_data = *state.shared_gfx_state->characters_data;
 				auto& buffer = state.shared_gfx_state->font_buffer;
 				buffer.resize(hlp::buffer_size(font_data));
-				buffer.update<const CharacterObj>(0, font_data, cmd_buffer);
+				buffer.update<const FontPoint>(0, font_data, cmd_buffer);
 			}
 
 			cmd_buffer.end();
@@ -1300,11 +1300,11 @@ namespace idk::vkn
 				if (oidx)
 				{
 					cmd_buffer.bindIndexBuffer(oidx->buffer, oidx->offset, oidx->index_type, vk::DispatchLoaderDefault{});
-					cmd_buffer.drawIndexed(p_ro.num_vertices, static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+					cmd_buffer.drawIndexed(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 				else
 				{
-					cmd_buffer.draw(p_ro.num_vertices, static_cast<uint32_t>(p_ro.num_instances), 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+					cmd_buffer.draw(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 			}
 		}

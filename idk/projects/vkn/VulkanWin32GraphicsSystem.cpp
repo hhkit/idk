@@ -269,7 +269,7 @@ namespace idk::vkn
 		shared_graphics_state.particle_range = &curr_buffer.particle_range;
 
 		shared_graphics_state.characters_data = &curr_buffer.font_buffer;
-		shared_graphics_state.fonts_data = &curr_buffer.font_array_data;
+		shared_graphics_state.fonts_data = &curr_buffer.font_render_data;
 		shared_graphics_state.font_range = &curr_buffer.font_range;
 
 		PreRenderData pre_render_data;

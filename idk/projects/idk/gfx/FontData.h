@@ -8,9 +8,10 @@ namespace idk
 {
 	struct FontPoint
     {
-        real x, y, s, t;
-
-
+        //real x, y, s, t;
+		vec4 position;
+		
+		/*
 		FontPoint& operator()(const vec4& rhs)
 		{
 			x = rhs.x;
@@ -24,6 +25,7 @@ namespace idk
 		{
 			return vec4{x,y,s,t};
 		}
+		*/
 	};
 
 	struct FontData

@@ -146,31 +146,31 @@ namespace idk
 		vec4 coords{};
 	};
 
-	struct FontArrayData
-	{
-		vector<CharacterObj> characters;
-		RscHandle<FontAtlas> atlas;
-		color color;
-		mat4 transform;
+	//struct FontArrayData
+	//{
+	//	vector<FontPoint> coords;
+	//	RscHandle<FontAtlas> atlas;
+	//	color color;
+	//	mat4 transform;
 
-		FontArrayData& operator()(const FontRenderData& rhs)
-		{
-			ConvertFontPointToCharacterObject(rhs.coords);
-			atlas = rhs.atlas;
-			color = rhs.color;
-			transform = rhs.transform;
+	//	FontArrayData& operator()(const FontRenderData& rhs)
+	//	{
+	//		ConvertFontPointToCharacterObject(rhs.coords);
+	//		atlas = rhs.atlas;
+	//		color = rhs.color;
+	//		transform = rhs.transform;
 
-			return *this;
-		}
+	//		return *this;
+	//	}
 
-		void ConvertFontPointToCharacterObject(const vector<FontPoint>& toCopy)
-		{
-			characters.resize(toCopy.size());
-			for (int i = 0; i < toCopy.size(); ++i)
-				characters[i].coords = toCopy[i].ConvertToVec4();
-			
-		}
-	};
+	//	void ConvertFontPointToCharacterObject(const vector<FontPoint>& toCopy)
+	//	{
+	//		//characters.resize(toCopy.size());
+	//		coords = toCopy;
+	//		//for (int i = 0; i < toCopy.size(); ++i)
+	//		//	characters[i].coords = toCopy[i].ConvertToVec4();		
+	//	}
+	//};
 
 	struct FontRange
 	{

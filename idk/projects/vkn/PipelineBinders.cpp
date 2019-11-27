@@ -59,7 +59,7 @@ namespace idk::vkn
 
 	void StandardBindings::BindAni(PipelineThingy& , const AnimatedRenderObject& ) {}
 
-	void StandardBindings::BindFont(PipelineThingy&, const FontArrayData&) {}
+	void StandardBindings::BindFont(PipelineThingy&, const FontRenderData&) {}
 
 	//const GraphicsState& StandardVertexBindings::State() { return *_state; }
 
@@ -334,7 +334,7 @@ namespace idk::vkn
 		the_interface.BindUniformBuffer("CameraBlock", 0, block);
 	}
 
-	void FontVertexBindings::BindFont(PipelineThingy& the_interface, const FontArrayData& dc)
+	void FontVertexBindings::BindFont(PipelineThingy& the_interface, const FontRenderData& dc)
 	{
 		//map back into z: (0,1)
 		mat4 projection_trf = mat4{ 1,0,0,0,

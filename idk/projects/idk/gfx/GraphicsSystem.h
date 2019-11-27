@@ -145,8 +145,8 @@ namespace idk
 			vector<ParticleObj>        particle_buffer;
 			vector<ParticleRange>      particle_range;
 			vector<FontRenderData>	 font_render_data;
-			vector<FontArrayData>    font_array_data;
-			vector<CharacterObj>     font_buffer;
+			//vector<FontArrayData>    font_array_data;
+			vector<FontPoint>     font_buffer;
 			vector<FontRange>      font_range;
 			hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
 
