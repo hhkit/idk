@@ -3,6 +3,8 @@
 #include "Program.h"
 #include <gfx/IShaderProgramFactory.h>
 
+#include <gfx/ShaderIncluder.h>
+
 constexpr auto replacer = R"(
 #ifdef OGL
 #define U_LAYOUT(SET, BIND) 
@@ -25,7 +27,11 @@ namespace idk::ogl
 		const auto version_pos = shader_code.find("#version");
 		const auto version_end = shader_code.find("\n", version_pos);
 
-		const char* const arr[] = { shader_code.substr(version_pos).data(), "#define OGL\n", replacer, shader_code.substr(version_end).data() } ;
+		const string_view the_rest = shader_code.substr(version_end);
+
+		const auto processed_code = ProcessIncludes(the_rest);
+
+		const char* const arr[] = { shader_code.substr(version_pos).data(), "#define OGL\n", replacer, processed_code.c_str() } ;
 		const GLint lengths[] = { (GLint)(version_end - version_pos + 1), -1, -1, -1};
 
 		glShaderSource(_shader_id, sizeof(arr) / sizeof(*arr), arr, lengths);
