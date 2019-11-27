@@ -1,3 +1,5 @@
+import /engine_data/shaders/pbr_utils.glsl
+
 
 vec3 fresnel(float cos_theta, vec3 f0)
 {
@@ -236,4 +238,75 @@ vec3 pbr_metallic(
 	
 	//return vec3(cos_alpha*0.5 +0.5);
 	return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+
+
+
+vec3 pbr_specular(
+	Light light
+,	vec3  view_pos
+,	vec3  normal
+,   vec3  reflected
+,	vec3  albedo
+,	float specular
+,	float roughness
+,	float ambient_o
+)
+{
+	albedo = pow(albedo, vec3(2.2));
+	//specular = pow(specular, 2.2);
+// temporary light code
+	
+	vec3  frag_to_light = (vec4(light.v_pos,1)).xyz - view_pos;
+	vec3  light_dir =	frag_to_light;
+
+	
+	
+	float dist      =  length(frag_to_light); 
+	
+	if (light.type != 0) light_dir = -light.v_dir;
+	if (light.type != 1) light_dir /= dist;
+
+	
+	vec3  view_dir  = -normalize(view_pos); // camera is at 0
+	vec3  half_vec  =  normalize(view_dir + light_dir);
+	
+	float atten = 1;
+	
+	float spotlight_effect =1;
+	
+	if(light.type==2)
+	{
+	
+		float cos_alpha= dot(normalize((frag_to_light)),normalize(light_dir));
+	    float cos_phi  = light.cos_outer;
+	    float cos_theta  = light.cos_inner;
+		spotlight_effect = min(pow(((cos_alpha - cos_phi)/(cos_theta - cos_phi)),0.5),1);
+        spotlight_effect = (acos(cos_alpha)>acos(cos_phi))?0:spotlight_effect;
+	}
+	if (light.type != 1) atten = (1/light.falloff)/(dist*dist);
+	
+	atten = min(max(atten, 0),1);
+	
+	vec3 radiance = light.color.rgb * atten * spotlight_effect;
+	
+	//const vec3 f0 = vec3(0.04);
+	//vec3 F = fresnel(min(max(dot(half_vec, view_dir), 0.0),1), mix(f0, albedo, specular));
+	vec3 f0 = vec3(specular);
+	vec3 F = fresnel(min(max(dot(half_vec, view_dir), 0.0),1), mix(f0, albedo, 0.5));
+	//vec3 F = f0;
+	
+	float ndf = DistributionGGX(normal, half_vec, roughness);
+	float G   = GeometrySmith(normal, view_dir, light_dir, roughness);
+	
+	vec3  numer = ndf * G * F;
+	float denom = 4.0 * max(dot(normal, view_dir), 0.0) * max(dot(normal, light_dir), 0.0);
+	vec3 specular_color = numer / max(denom, 1e-10);
+	
+	float kD = 1.0 - specular;
+	
+	float NdotL = max(dot(normal, light_dir), 0.0);
+	
+	return (kD * albedo + specular_color) * radiance * NdotL;
 }
