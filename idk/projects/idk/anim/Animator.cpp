@@ -25,23 +25,6 @@ namespace idk
 	}
 
 #pragma region Engine Getters/Setters
-	AnimationState& Animator::GetAnimationState(string_view name)
-	{
-		auto res = animation_table.find(name.data());
-		if (res != animation_table.end())
-			return res->second;
-
-		return null_state;
-	}
-
-	const AnimationState& Animator::GetAnimationState(string_view name) const
-	{
-		auto res = animation_table.find(name.data());
-		if (res != animation_table.end())
-			return res->second;
-
-		return null_state;
-	}
 
 	const vector<mat4>& Animator::BoneTransforms()const
 	{
@@ -50,101 +33,29 @@ namespace idk
 
 	void Animator::AddAnimation(RscHandle<anim::Animation> anim_rsc)
 	{
-		if (anim_rsc)
-		{
-			string name = anim_rsc->Name().data();
-			// Check if name exists
-			if (animation_table.find(name) != animation_table.end())
-			{
-				string append = " 0";
-				int count = 1;
-				while (animation_table.find(name + append) != animation_table.end())
-				{
-					// Generate a unique name
-					append = " " + std::to_string(count);
-				}
-				name += append;
-			}
-			AnimationState state{ name, true };
-			state.state_data = variant<BasicAnimationState, BlendTree>{ BasicAnimationState{ anim_rsc } };
-			animation_table.emplace(name, state);
-			animation_display_order.emplace_back(name);
-		}
-		else
-		{
-			string name = "New State ";
-			string append = "0";
-			// Check if name exists
-			int count = 1;
-			while (animation_table.find(name + append) != animation_table.end())
-			{
-				// Generate a unique name
-				append = " " + std::to_string(count);
-			}
-			name += append;
-			animation_table.emplace(name, AnimationState{ name, true });
-			animation_display_order.emplace_back(name);
-		}
+		layers[0].AddAnimation(anim_rsc);
 	}
 
 	bool Animator::RenameAnimation(string_view from, string_view to)
 	{
-		string from_str{ from };
-		string to_str{ to };
-		auto res = animation_table.find(from_str);
-		if (res == animation_table.end())
-		{
-			LOG_TO(LogPool::ANIM, string{ "[Animator] Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
-			return false;
-		}
+		return layers[0].RenameAnimation(from, to);
+	}
 
-		auto found_dest = animation_table.find(to_str);
-		if (found_dest != animation_table.end())
-		{
-			LOG_TO(LogPool::ANIM, string{ "[Animator] Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
-			return false;
-		}
-
-		AnimationState copy{ res->second };
-		copy.name = to_str;
-
-		animation_table.erase(res);
-		animation_table.emplace(to_str, copy);
-
-		// find the corresponding string in the display order and rename it.
-		for (auto& it : animation_display_order)
-		{
-			if (it == from_str)
-			{
-				it = to_str;
-				break;
-			}
-		}
-				
-		for (auto& layer : layers)
-		{
-			if (layer.default_state == from_str)
-			{
-				layer.default_state = to_str;
-				layer.curr_state.name = to_str;
-			}
-			if (layer.curr_state.name == from_str)
-				layer.curr_state.name = to_str;
-		}
-
-		return true;
+	void Animator::RemoveAnimation(string_view name)
+	{
+		layers[0].RemoveAnimation(name);
 	}
 
 	void Animator::AddLayer()
 	{
-		string name = "New Layer ";
-		string append = "0";
+		string name = "New Layer";
+		string append = "";
 		// Check if name exists
-		int count = 1;
+		int count = 0;
 		while (layer_table.find(name + append) != layer_table.end())
 		{
 			// Generate a unique name
-			append = " " + std::to_string(count);
+			append = " " + std::to_string(count++);
 		}
 
 		AnimationLayer new_layer{};
@@ -152,35 +63,78 @@ namespace idk
 		new_layer.prev_poses.resize(skeleton->data().size());
 		new_layer.blend_source.resize(skeleton->data().size());
 
+		// All bones are initialized to be unmasked the start
+		std::fill(new_layer.bone_mask.begin(), new_layer.bone_mask.end(), true);
+
 		layer_table.emplace(new_layer.name, layers.size());
 		layers.push_back(new_layer);
 	}
 
-	void Animator::RemoveAnimation(string_view name)
+	bool Animator::RenameLayer(string_view from, string_view to)
 	{
-		string name_str{ name };
-		auto found_clip = animation_table.find(name_str);
-		if (found_clip == animation_table.end())
+		string from_str{ from };
+		string to_str{ to };
+		auto res = layer_table.find(from_str);
+		if (res == layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation layer (" } +from.data() + ") to (" + to.data() + ").");
+			return false;
+		}
+
+		auto found_dest = layer_table.find(to_str);
+		if (found_dest != layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation layer (" } +from.data() + ") to (" + to.data() + ").");
+			return false;
+		}
+
+
+		auto copy = res->second;
+
+		layer_table.erase(res);
+		layer_table.emplace(to_str, copy);
+
+		layers[copy].name = to_str;
+
+		return true;
+	}
+
+	void Animator::RemoveLayer(string_view name)
+	{
+		auto res = layer_table.find(name.data());
+		if (res == layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + name.data() + ".");
 			return;
-
-		for (auto& layer : layers)
-		{
-			if (layer.curr_state.name == found_clip->second.name)
-				layer.curr_state = AnimationLayerState{};
-			if (layer.default_state == found_clip->second.name)
-				layer.default_state = string{};
 		}
 
-		auto end_it = animation_display_order.end();
-		for (auto it = animation_display_order.begin(); it != end_it; ++it)
+		if (res->second >= layers.size())
 		{
-			if (*it == name_str)
-			{
-				animation_display_order.erase(it);
-				break;
-			}
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + name.data() + ".");
+			return;
 		}
-		animation_table.erase(found_clip);
+
+		layers.erase(layers.begin() + res->second);
+		layer_table.erase(res);
+	}
+
+	void Animator::RemoveLayer(size_t index)
+	{
+		if(index >= layers.size())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + std::to_string(index) + ".");
+			return;
+		}
+
+		auto res = layer_table.find(layers[index].name.data());
+		if (res == layer_table.end())
+		{
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + layers[index].name.data() + ".");
+			return;
+		}
+
+		layer_table.erase(res);
+		layers.erase(layers.begin() + index);
 	}
 
 #pragma endregion
@@ -191,6 +145,38 @@ namespace idk
 		preview_playback = false;
 		for(auto& layer : layers)
 			layer.Reset();
+
+		for (auto& p : int_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : float_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : bool_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : trigger_vars)
+			p.second.ResetToDefault();
+	}
+
+	void Animator::ResetToDefault()
+	{
+		for (size_t i = 0; i < layers.size(); ++i)
+		{
+			layers[i].ResetToDefault();
+		}
+
+		for (auto& p : int_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : float_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : bool_vars)
+			p.second.ResetToDefault();
+
+		for (auto& p : trigger_vars)
+			p.second.ResetToDefault();
 	}
 
 	void Animator::OnPreview()
@@ -199,15 +185,14 @@ namespace idk
 		{
 			for (size_t i = 0; i < layers.size(); ++i)
 			{
-				Play(layers[i].curr_state.name, i);
+				layers[i].Play(layers[i].curr_state.index);
 			}
+
+			layers[0].weight = 1.0f;
 		}
 		else
 		{
-			for (size_t i = 0; i < layers.size(); ++i)
-			{
-				layers[i].Reset();
-			}
+			ResetToDefault();
 			Core::GetSystem<AnimationSystem>().RestoreBindPose(*this);
 		}
 	}
@@ -250,7 +235,13 @@ namespace idk
 	void Animator::BlendTo(string_view animation_name, float time)
 	{
 		// Cap blend duration to 1.0f
-		layers[0].BlendTo(animation_name, std::min(time, 1.0f));
+		time = std::min(abs(time), 1.0f);
+
+		// If time is 0.0, we just call play cos its the same.
+		if(time < 0.00001f)
+			layers[0].Play(animation_name);
+		else
+			layers[0].BlendTo(animation_name, time);
 	}
 
 	void Animator::Resume()
@@ -357,27 +348,55 @@ namespace idk
 		preview_playback = false;
 	}
 
-	int Animator::GetInt(string_view name) const
+	void Animator::ResetTriggers()
 	{
-		UNREFERENCED_PARAMETER(name);
-		return false;
+		for (auto& trigger : trigger_vars)
+			trigger.second.val = false;
 	}
 
-	bool Animator::GetBool(string_view name) const
+	int Animator::GetInt(string_view name) const
 	{
-		UNREFERENCED_PARAMETER(name);
-		return false;
+		return GetParam<anim::IntParam>(name).val;
 	}
 
 	float Animator::GetFloat(string_view name) const
 	{
-		UNREFERENCED_PARAMETER(name);
-		return false;
+		return GetParam<anim::FloatParam>(name).val;
+	}
+
+	bool Animator::GetBool(string_view name) const
+	{
+		return GetParam<anim::BoolParam>(name).val;
+	}
+
+	bool Animator::GetTrigger(string_view name) const
+	{
+		return GetParam<anim::TriggerParam>(name).val;
+	}
+
+	bool Animator::SetInt(string_view name, int val)
+	{
+		return SetParam<anim::IntParam>(name, val);
+	}
+
+	bool Animator::SetFloat(string_view name, float val)
+	{
+		return SetParam<anim::FloatParam>(name, val);
+	}
+
+	bool Animator::SetBool(string_view name, bool val)
+	{
+		return SetParam<anim::BoolParam>(name, val);
+	}
+
+	bool Animator::SetTrigger(string_view name, bool val)
+	{
+		return SetParam<anim::TriggerParam>(name, val);
 	}
 
 	bool Animator::HasState(string_view name) const
 	{
-		return animation_table.find(string{ name }) != animation_table.end();
+		return layers[0].HasState(name);
 	}
 
 	bool Animator::IsPlaying() const
@@ -387,59 +406,39 @@ namespace idk
 
 	bool Animator::IsBlending() const
 	{
-		return layers[0].blend_state.is_playing;
+		return layers[0].IsBlending();
 	}
 
 	bool Animator::HasCurrAnimEnded() const
 	{
-		return layers[0].curr_state.normalized_time >= 1.0f;
+		return layers[0].HasCurrAnimEnded();
 	}
 
 	string Animator::DefaultStateName() const
 	{
-		return layers[0].default_state;
+		return layers[0].DefaultStateName();
 	}
 
 	string Animator::CurrentStateName() const
 	{
-		return layers[0].curr_state.name;
+		return layers[0].CurrentStateName();
 	}
 
 	string Animator::BlendStateName() const
 	{
-		return layers[0].blend_state.name;
+		return layers[0].BlendStateName();
 	}
 
-	bool Animator::SetInt(string_view name, int val)
-	{
-		UNREFERENCED_PARAMETER(name);
-		UNREFERENCED_PARAMETER(val);
-		return false;
-	}
 
-	bool Animator::SetBool(string_view name, bool val)
+	void Animator::SetEntryState(string_view , float)
 	{
-		UNREFERENCED_PARAMETER(name);
-		UNREFERENCED_PARAMETER(val);
-		return false;
-	}
-
-	bool Animator::SetFloat(string_view name, float val)
-	{
-		UNREFERENCED_PARAMETER(name);
-		UNREFERENCED_PARAMETER(val);
-		return false;
-	}
-
-	void Animator::SetEntryState(string_view name, float)
-	{
-		auto res = animation_table.find(name.data());
-		if (res == animation_table.end())
-		{
-			return;
-		}
-
-		layers[0].default_state = name;
+		// auto res = animation_table.find(name.data());
+		// if (res == animation_table.end())
+		// {
+		// 	return;
+		// }
+		// 
+		// layers[0].default_index = name;
 	}
 #pragma endregion
 
@@ -466,7 +465,7 @@ namespace idk
 		// 		auto c_bone = c_go->GetComponent<Bone>();
 		// 		if (c_bone)
 		// 		{
-		// 			child_objects[c_bone->_bone_index] = c_go;
+		// 			child_objects[c_bone->bone_index] = c_go;
 		// 		}
 		// 	};
 		// 
@@ -475,7 +474,7 @@ namespace idk
 		// 
 		// for (auto& layer : layers)
 		// {
-		// 	layer.curr_state = layer.default_state;
+		// 	layer.playing_index = layer.default_index;
 		// 	layer.weight = layer.default_weight;
 		// }
 	}

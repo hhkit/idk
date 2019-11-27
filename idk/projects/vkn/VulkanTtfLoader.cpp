@@ -30,7 +30,7 @@ namespace idk::vkn
 		for (size_t src_row = 0; src_row < bitmap.rows; ++src_row)
 		{
 			size_t src_row_offset = src_row * bitmap.pitch;
-			size_t dst_row_offset = (offset_y+(bitmap.rows-1-src_row)) * output_pitch;
+			size_t dst_row_offset = (offset_y+(src_row)) * output_pitch;
 			size_t dst_col_offset = offset_x;
 
 			memcpy_s(output_buffer+dst_row_offset+dst_col_offset, output_pitch - offset_x, bitmap.buffer+src_row_offset, bitmap.width);
@@ -59,36 +59,28 @@ namespace idk::vkn
 		}
 		RscHandle<VknFontAtlas> fontAtlas;
 		
+		FontAtlasMeta new_tm;
 		if (!font_handle)
 		{
 			const auto font = FontAtlas::defaults[FontDefault::SourceSansPro];
 			fontAtlas = Core::GetResourceManager().LoaderEmplaceResource<VknFontAtlas>(font.guid);
 
 			if (tm)
-			{
-				FontAtlasMeta new_tm = *tm;
-				fontAtlas->SetMeta(new_tm);
-
-				if (FT_Set_Pixel_Sizes(face, 0, tm->font_size))
-				{
-					std::cout << "Font atlas loading generation failed. Crash may happen.\n";
-					LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
-					return fontAtlas;
-				}
-			}
+				new_tm = *tm;
 		}
 		else
 		{
 			fontAtlas = font_handle.guid;
-			FontAtlasMeta new_tm = fontAtlas->GetMeta();
-			fontAtlas->SetMeta(new_tm);
+			new_tm = fontAtlas->GetMeta();
+		}
 
-			if (FT_Set_Pixel_Sizes(face, 0, new_tm.font_size))
-			{
-				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
-				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
-				return fontAtlas;
-			}
+		fontAtlas->SetMeta(new_tm);
+
+		if (FT_Set_Pixel_Sizes(face, 0, new_tm.font_size))
+		{
+			std::cout << "Font atlas loading generation failed. Crash may happen.\n";
+			LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
+			return fontAtlas;
 		}
 		
 		fontAtlas->reload_path = handle;
@@ -123,6 +115,9 @@ namespace idk::vkn
 		h += mh;
 		font_handle->Size(ivec2(w, h));
 		size = ivec2{w,h};
+
+		font_handle->ascender = face->ascender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
+		font_handle->descender = face->descender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
 
 		int x = 0, y = 0;
 		mh = 0;

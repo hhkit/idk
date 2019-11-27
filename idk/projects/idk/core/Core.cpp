@@ -5,6 +5,7 @@
 #include <res/ResourceManager.h>
 #include <prefab/PrefabFactory.h>
 #include <gfx/GfxDbgTest.h>
+#include <parallel/ThreadPool.h>
 
 namespace idk
 {
@@ -21,6 +22,11 @@ namespace idk
 	{
 		return *_instance->_scheduler;
 	}
+
+	mt::ThreadPool& Core::GetThreadPool()
+	{
+		return *_instance->_thread_pool;
+	}
 	
 	ResourceManager& Core::GetResourceManager()
 	{
@@ -28,9 +34,10 @@ namespace idk
 	}
 
 	Core::Core()
-		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{true}
+		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{ true }
 	{
 		_instance = this;
+		_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 	}
 
 	Core::~Core()
@@ -63,11 +70,11 @@ namespace idk
 		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 
 		_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
-		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,                 "Test system until scripts are up");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")
 			                                      .IfPausedThen(&PhysicsSystem::DebugDrawColliders);
 		_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&PhysicsSystem::FirePhysicsEvents,     "Trigger and Collision Events");
-		
+
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&TestSystem::TestSpan, "Test system until scripts are up");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&Application::PollEvents,              "Poll OS Events");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&GamepadSystem::Update,                "Update gamepad states");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&FileSystem::Update,                   "Check for file changes");

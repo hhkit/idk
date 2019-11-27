@@ -122,6 +122,9 @@
     <Filter Include="util">
       <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
     </Filter>
+    <Filter Include="anim\detail">
+      <UniqueIdentifier>{5f3cf2cf-2fa4-43f8-bffe-cbd22c94da10}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ui">
       <UniqueIdentifier>{241cb65f-5a4a-4fab-adc2-43995a1f3b84}</UniqueIdentifier>
     </Filter>
@@ -900,6 +903,15 @@
       <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="common\LayerMask.h" />
+    <ClInclude Include="parallel\HazardPointerDL.h" />
+    <ClInclude Include="parallel\queue.h" />
+    <ClInclude Include="parallel\ThreadPool.h" />
+    <ClInclude Include="anim\AnimationTransition.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationTypes.h">
+      <Filter>anim</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\ShaderSnippetLoader.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -1330,6 +1342,7 @@
     <ClCompile Include="gfx\FontData.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
+    <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="gfx\ShaderIncluder.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
@@ -1520,6 +1533,9 @@
     </None>
     <None Include="meta\comparator.inl">
       <Filter>meta</Filter>
+    </None>
+    <None Include="anim\Animator.inl">
+      <Filter>anim\detail</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

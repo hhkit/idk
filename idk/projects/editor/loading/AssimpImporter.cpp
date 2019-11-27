@@ -113,7 +113,7 @@ namespace idk
 			// initializing the handle
 			// RscHandle<anim::Skeleton> skeleton_handle;
 			{
-				auto search_res = meta_bundle.FetchMeta<anim::Skeleton>(importer_scene.final_skeleton[0]._name);
+				auto search_res = meta_bundle.FetchMeta<anim::Skeleton>(importer_scene.final_skeleton[0].name);
 				if (search_res)
 					skeleton_handle = Core::GetResourceManager().LoaderEmplaceResource<anim::Skeleton>(search_res->guid);
 				else
@@ -122,7 +122,7 @@ namespace idk
 			auto& skeleton = *skeleton_handle;
 
 			skeleton = anim::Skeleton{ importer_scene.final_skeleton, importer_scene.final_skeleton_table };
-			skeleton.Name(importer_scene.final_skeleton[0]._name);
+			skeleton.Name(importer_scene.final_skeleton[0].name);
 
 			ret_val.Add(skeleton_handle);
 		}

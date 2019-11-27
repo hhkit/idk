@@ -216,7 +216,8 @@ namespace idk
                 }
             }
         }
-
+		const size_t min = 1;
+		changed |= ImGui::DragScalar("Batch Size", ImGuiDataType_::ImGuiDataType_U64, &config.batch_size, 2.f, &min);
         ImGui::Unindent();
 
         if (changed)

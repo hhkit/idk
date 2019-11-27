@@ -17,6 +17,7 @@ namespace idk
     struct PhysicsConfig
     {
         std::array<LayerMask, LayerManager::num_layers> matrix;
+		size_t batch_size = 64;
 		PhysicsConfig() { matrix.fill(LayerMask{ 0xFFFFFFFF }); }
         PhysicsConfig(const PhysicsConfig&) = default;
         PhysicsConfig(PhysicsConfig&&) = default;

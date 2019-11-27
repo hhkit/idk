@@ -89,6 +89,7 @@ namespace idk::vkn
 
 					//the_interface.BindMeshBuffers(f_ro);
 					the_interface.BindAttrib(0, shared_state.font_buffer.buffer(), 0);
+					the_interface.SetVertexCount(s_cast<uint32_t>(raw_elem.num_elems));
 
 					the_interface.FinalizeDrawCall(font_ro_inst.emplace_back(std::move(f_ro)), raw_elem.num_elems, raw_elem.elem_offset);
 				}

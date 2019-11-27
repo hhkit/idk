@@ -22,7 +22,6 @@ namespace idk::vkn
 
 	struct FontRenderer
 	{
-		FontData font_data;
 		RenderObject font_ro;
 		vector<RenderObject> font_ro_inst;
 		shared_ptr<pipeline_config> font_pipeline = std::make_shared<pipeline_config>();

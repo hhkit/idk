@@ -38,7 +38,9 @@ namespace idk::mono
 		mono_domain_set(_domain, true);
 		MonoImageOpenStatus status;
 		auto img = mono_image_open_from_data(assembly_data.data(), (uint32_t) assembly_data.size(), true, &status);
+		mono_assembly_setrootdir(Core::GetSystem<FileSystem>().GetExeDir().data());
 		_assembly = mono_assembly_load_from(img, full_path_to_game_dll.data(), &status);
+		Core::GetSystem<ScriptSystem>().Environment().Image();
 
 		ScanTypes();
 	}
@@ -76,6 +78,7 @@ namespace idk::mono
 	{
 		auto script_image = mono_assembly_get_image(_assembly);
 		auto lib_image = Core::GetSystem<ScriptSystem>().Environment().Image();
+		Core::GetSystem<ScriptSystem>().Environment().ScanTypes();
 
 		auto monobehavior = mono_class_from_name(lib_image, "idk", "MonoBehavior");
 
@@ -95,11 +98,17 @@ namespace idk::mono
 			if (class_name == std::string("<Module>") || class_ptr == nullptr)
 				continue;
 
+			LOG_TO(LogPool::MONO, "SEARCHING %s:%s @ %p", name_space, class_name, class_ptr);
+
 			const auto is_monobehavior = [&]() {
 				auto check_parent = class_ptr;
 
 				do
 				{
+					
+					LOG_TO(LogPool::MONO, "  CHECKING %s:%s @ %p", mono_class_get_namespace(check_parent), mono_class_get_name(check_parent), check_parent);
+					auto my_img = mono_class_get_image(check_parent);
+					LOG_TO(LogPool::MONO, "    IMAGE: %s @ %p - %s", mono_image_get_name(my_img), my_img, mono_image_get_filename(my_img));
 					if (mono_class_get_name(check_parent) == string_view{ "MonoBehavior" })
 						return true;
 					if (check_parent == monobehavior)
@@ -116,7 +125,7 @@ namespace idk::mono
 				IDK_ASSERT(itr != _types.end());
 				auto& type = itr->second;
 
-				LOG_TO(LogPool::MONO, string{ "Investigating " } +class_name);
+				//LOG_TO(LogPool::MONO, string{ "Investigating " } +class_name);
 				constexpr auto find_method = [](ManagedType& type, string_view fn_name, int param_count = 0)
 				{
 					auto res = type.CacheThunk(fn_name, param_count);
@@ -146,6 +155,7 @@ namespace idk::mono
 			}
 		}
 
+		LOG_CRASH_TO(LogPool::MONO, "hack");
 		name_list.clear();
 		for (auto& [name, type] : mono_behaviors)
 			name_list.emplace_back(name.data());

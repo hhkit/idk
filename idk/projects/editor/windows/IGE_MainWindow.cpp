@@ -407,6 +407,7 @@ namespace idk {
 
         ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
+		ImGui::PushID(1337);
 		if (Core::GetSystem<IDE>().game_running == false)
 		{
 			if (ImGui::Button("Play", toolButtonSize))
@@ -454,7 +455,7 @@ namespace idk {
 				Core::GetSystem<IDE>().game_running = false;
 			}
 		}
-
+		ImGui::PopID();
 		
 		ImGui::PopStyleVar();
 

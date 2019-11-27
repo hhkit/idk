@@ -63,8 +63,8 @@ namespace idk::vkn
 
 		hlp::vector_buffer                font_buffer;
 		vector<FontRange>*				  font_range;
-		const vector<CharacterObj>*       characters_data;
-		const vector<FontArrayData>*	  fonts_data;
+		const vector<FontPoint>*          characters_data;
+		const vector<FontRenderData>*	  fonts_data;
 
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);
 

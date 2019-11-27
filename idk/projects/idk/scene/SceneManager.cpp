@@ -23,12 +23,6 @@ namespace idk
 		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
 			Core::GetResourceManager().Load(elem);
 		
-		if (_active_scene)
-		{
-			_active_scene->LoadFromResourcePath();
-			OnSceneChange.Fire(_active_scene);
-		}
-
 		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(Scene::prefab);
 		_prefab_scene->Activate();
 	}

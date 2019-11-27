@@ -17,7 +17,7 @@
 #include <PauseConfigurations.h>
 #include <file/FileSystem.h>
 #include <gfx/ShaderGraph.h>
-
+#include <parallel/ThreadPool.h>
 namespace idk
 {
 	void TestSystem::Init()
@@ -43,7 +43,24 @@ namespace idk
 		t += Core::GetDT().count();
 		auto& app_sys = Core::GetSystem<Application>();
 		auto& gamepad = Core::GetSystem<GamepadSystem>();
-
+		
+		static bool fire = false;
+		if (app_sys.GetKey(Key::I) )
+		{
+			const int jobs = rand() % 70 + 10;
+			std::cout << "jobs: " << jobs << "\n";
+			vector<mt::ThreadPool::Future<void>> futures(jobs);
+			for (int i =0; i < jobs; ++i)
+				futures[i] = Core::GetThreadPool().Post([i]()
+				{
+					std::cout << "hello from " + std::to_string(mt::thread_id()) + " with index " + std::to_string(i) + "\n";
+				});
+			for (auto& elem : futures)
+				elem.get();
+			std::cout << "all printed\n";
+			fire = true;
+		}
+		
 		for (auto& elem : comps)
 		{
 			if (app_sys.GetKey(Key::J)) elem.GetGameObject()->Transform()->position += vec3{ +0.016, 0.0, 0.0 };

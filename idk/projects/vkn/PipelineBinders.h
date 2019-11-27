@@ -49,7 +49,7 @@ namespace idk
 			virtual void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc);
 
 			//Stuff that needs to be bound only for font renderobject
-			virtual void BindFont(PipelineThingy& the_interface, const FontArrayData& dc);
+			virtual void BindFont(PipelineThingy& the_interface, const FontRenderData& dc);
 		};
 
 		//Standard binding for vertex stuff
@@ -90,7 +90,7 @@ namespace idk
 			void SetState(const CameraData& camera);
 
 			void Bind(PipelineThingy& the_interface)override;
-			void BindFont(PipelineThingy& the_interface, const FontArrayData& dc)override;
+			void BindFont(PipelineThingy& the_interface, const FontRenderData& dc)override;
 
 
 		};

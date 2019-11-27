@@ -21,7 +21,7 @@ if (klass == MONO_CLASS)                                        \
 }
 
 #define MONO_COMPLEX_TYPE(REAL_TYPE, MONO_CLASS)                \
-if (klass == MONO_CLASS)                                        \
+if (klass == MONO_CLASS)      \
 {                                                               \
 	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
 	auto new_val = old_val;								        \
@@ -40,7 +40,7 @@ if (klass == MONO_CLASS)                                        \
 }
 
 #define MONO_BASE_TYPE_CONST(REAL_TYPE, MONO_CLASS)                   \
-if (klass == MONO_CLASS)                                              \
+if (mono_class_get_name(klass) == string_view{MONO_CLASS})      \
 {                                                                     \
 	auto old_val = *s_cast<const REAL_TYPE*>(mono_object_unbox(obj)); \
 	functor(field_name.data(), old_val, depth);				          \
@@ -50,9 +50,9 @@ if (klass == MONO_CLASS)                                              \
 #define MONO_RESOURCE_TYPE(RES_TYPE)\
 {																													\
 	auto resource_klass = envi.Type(#RES_TYPE);																		\
-	if (klass == resource_klass->Raw()) 																			\
+	if (mono_class_get_name(klass) == string_view{#RES_TYPE}) 														\
 	{																												\
-		auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
+		auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");							\
 		auto old_val = [&]()->RscHandle<RES_TYPE>																	\
 		{																											\
 			if (obj == nullptr)																						\
@@ -87,9 +87,9 @@ if (klass == MONO_CLASS)                                              \
 #define MONO_RESOURCE_TYPE_CONST(RES_TYPE)\
 {																													\
 	auto resource_klass = envi.Type(#RES_TYPE);																		\
-	if (klass == resource_klass->Raw()) 																			\
+	if (mono_class_get_name(klass) == string_view{#RES_TYPE}) 														\
 	{																												\
-		auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");								\
+		auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");							\
 		auto old_val = [&]()->RscHandle<RES_TYPE>																	\
 		{																											\
 			if (obj == nullptr)																						\
@@ -195,7 +195,7 @@ namespace idk::mono
 
 					continue;
 				}
-
+				
 				auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 
 				MONO_COMPLEX_TYPE(vec2, envi.Type("Vector2")->Raw());
@@ -304,9 +304,9 @@ namespace idk::mono
 
 			auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 
-			MONO_BASE_TYPE_CONST(vec2, envi.Type("Vector2")->Raw());
-			MONO_BASE_TYPE_CONST(vec3, envi.Type("Vector3")->Raw());
-			MONO_BASE_TYPE_CONST(vec4, envi.Type("Vector4")->Raw());
+			MONO_BASE_TYPE_CONST(vec2, "Vector2");
+			MONO_BASE_TYPE_CONST(vec3, "Vector3");
+			MONO_BASE_TYPE_CONST(vec4, "Vector4");
 
 			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);

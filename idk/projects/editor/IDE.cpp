@@ -45,6 +45,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 // editor setup
 #include <gfx/RenderTarget.h>
 #include <editor/SceneManagement.h>
+#include <editor/ProjectManagement.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
@@ -62,49 +63,16 @@ namespace idk
 
 	void IDE::Init()
 	{
-        // project load
-        {
-            auto& proj_manager = Core::GetSystem<ProjectManager>();
-            const auto recent_proj = []() -> string
-            {
-                fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-                recent_path /= "idk";
-                recent_path /= ".recent";
-                if (!fs::exists(recent_path))
-                    return "";
-                std::ifstream recent_file{ recent_path };
-                fs::path proj = stringify(recent_file);
-                if (!fs::exists(proj))
-                    return "";
-                return proj.string();
-            }();
+        fs::path idk_app_data = Core::GetSystem<FileSystem>().GetAppDataDir();
+        idk_app_data /= "idk";
+        Core::GetSystem<FileSystem>().Mount(idk_app_data.string(), path_idk_app_data, false);
 
-            if (recent_proj.empty())
-            {
-                const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
-                auto proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                while (!proj)
-                    proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                proj_manager.LoadProject(*proj);
-            }
-            else
-                proj_manager.LoadProject(recent_proj);
+		auto tmp_path = idk_app_data / "tmp";
+		if (!fs::exists(tmp_path))
+			fs::create_directory(tmp_path);
+		Core::GetSystem<FileSystem>().Mount(tmp_path.string(), path_tmp, false);
 
-            fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-            recent_path /= "idk";
-            if (!fs::exists(recent_path))
-                fs::create_directory(recent_path);
-            _editor_app_data = recent_path.string();
-
-            recent_path /= ".recent";
-            std::ofstream recent_file{ recent_path };
-            recent_file << proj_manager.GetProjectFullPath();
-
-			auto tmp_path = _editor_app_data + "/tmp";
-			if (!fs::exists(tmp_path))
-				fs::create_directory(tmp_path);
-			Core::GetSystem<FileSystem>().Mount(tmp_path, "/tmp", false);
-        }
+        LoadRecentProject();
 
 		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
 		{
@@ -155,7 +123,7 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
         io.IniFilename = NULL;
-        ImGui::LoadIniSettingsFromDisk((_editor_app_data + "/imgui.ini").c_str());
+        ImGui::LoadIniSettingsFromDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
@@ -234,19 +202,7 @@ namespace idk
         FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked += [](GenericResourceHandle h)
         {
             if (h.index() == BaseResourceID<Scene>)
-            {
-                auto scene = h.AsHandle<Scene>();
-                auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-                if (scene != active_scene)
-                {
-                    if (active_scene)
-                        active_scene->Deactivate();
-                    Core::GetSystem<SceneManager>().SetActiveScene(scene);
-                    scene->LoadFromResourcePath();
-
-                    Core::GetSystem<IDE>().ClearScene();
-                }
-            }
+                OpenScene(h.AsHandle<Scene>());
         };
 	}
 
@@ -262,15 +218,52 @@ namespace idk
 
 		SetupEditorScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
+
+        { // try load recent scene / camera
+            auto last_scene = reg_scene.get("scene");
+            if (last_scene.size())
+            {
+                RscHandle<Scene> h{ Guid(last_scene) };
+                if (!h)
+                {
+                    NewScene();
+                    return;
+                }
+
+                OpenScene(h);
+
+                auto cam = reg_scene.get("camera");
+                if (cam.size())
+                {
+                    auto& t = *currentCamera().current_camera->GetGameObject()->Transform();
+                    auto res = parse_text<Transform>(cam);
+                    if (res)
+                    {
+                        auto last_t = *res;
+                        t.position = last_t.position;
+                        t.rotation = last_t.rotation;
+                        t.scale = last_t.scale;
+                    }
+                }
+            }
+            else
+                NewScene(); 
+        }
 	}
+
+    void IDE::EarlyShutdown()
+    {
+        reg_scene.set("camera", serialize_text(*currentCamera().current_camera->GetGameObject()->Transform()));
+
+        ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
+        Core::GetSystem<ProjectManager>().SaveConfigs();
+        ige_windows.clear();
+        _interface->Shutdown();
+        _interface.reset();
+    }
 
 	void IDE::Shutdown()
 	{
-        ImGui::SaveIniSettingsToDisk((_editor_app_data + "/imgui.ini").c_str());
-        Core::GetSystem<ProjectManager>().SaveConfigs();
-        ige_windows.clear();
-		_interface->Shutdown();
-		_interface.reset();
 	}
 
 	void IDE::EditorUpdate()
