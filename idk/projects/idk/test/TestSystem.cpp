@@ -65,13 +65,25 @@ namespace idk
 			//if (rb)
 			//	rb->AddForce(vec3{ 1, 0, 0 } * sin(rad{t / 0.01f}));
 		}
-
-		for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			if (file.GetExtension() == ".tmpt")
+		{
+			bool recompile_graph = false;
+			for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
 			{
+				switch (string_hash(file.GetExtension()))
+				{
+				case string_hash(".glsl"):
+					Core::GetResourceManager().Load<ShaderSnippet>(file); //Update the shader snippet
+				case string_hash(".tmpt"):
+					recompile_graph = true;
+					break;
+				default:
+					break;
+				}
+			}
+			if(recompile_graph)
 				for (auto& elem : Core::GetResourceManager().GetAll<shadergraph::Graph>())
 					elem->Compile();
-			}
+		}
 
 		if (app_sys.GetKey(Key::Control) && app_sys.GetKeyDown(Key::S))
 			Core::GetSystem<ProjectManager>().SaveProject();

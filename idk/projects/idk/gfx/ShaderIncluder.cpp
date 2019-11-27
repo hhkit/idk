@@ -17,26 +17,17 @@ namespace idk
 	{
 
 		template<template<typename>typename TM, typename T>
-		struct IsAllocator : std::false_type
-		{
-
-		};
+		struct IsAllocator : std::false_type{};
 
 		template<template<typename>typename TM, typename T>
-		struct IsAllocator<TM, TM<T>> :std::true_type
-		{
-
-		};
+		struct IsAllocator<TM, TM<T>> :std::true_type{};
 
 	}
 
 	template<template<typename>typename TM, typename T>
-	struct IsAllocator : detail::IsAllocator<TM, std::decay_t<T>>
-	{
+	struct IsAllocator : detail::IsAllocator<TM, std::decay_t<T>>{};
 
-	};
-
-	//MUST BE POD, TRIVIAL DESTRUCTOR.
+	//MUST HAVE TRIVIAL DESTRUCTOR, we will not be destroying this. (Avoiding overhead of refcounting)
 	struct arena_block
 	{
 		unsigned char* arena{};
@@ -169,7 +160,6 @@ namespace idk
 		};
 	};
 
-#pragma optimize("",off)
 	IncludeEntry FindNextIncludes(string_view& str_view, size_t& offset) noexcept
 	{
 		IncludeEntry result;
@@ -190,7 +180,6 @@ namespace idk
 		}
 		return result;
 	}
-#pragma optimize("",off)
 	string_view GetIncluded(string_view mounted_dir)
 	{
 		auto file = Core::GetSystem<FileSystem>().Open(mounted_dir, FS_PERMISSIONS::READ);
