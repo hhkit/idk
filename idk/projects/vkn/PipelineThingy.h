@@ -53,9 +53,9 @@ namespace idk::vkn
 		void UnbindShader(ShaderStage stage);
 		void BindShader(ShaderStage stage, RscHandle<ShaderProgram> shader);
 		void BindAttrib(uint32_t location, vk::Buffer buffer, size_t offset);
-		void BindMeshBuffers(const RenderObject& ro);
-		void BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs);
-		void BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs);
+		bool BindMeshBuffers(const RenderObject& ro);
+		bool BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs);
+		bool BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs);
 		void SetVertexCount(uint32_t vertex_count);
 
 		std::optional<UboInfo> GetUniform(const string& uniform_name) const;

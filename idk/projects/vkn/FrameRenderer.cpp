@@ -404,7 +404,8 @@ namespace idk::vkn
 				if (mat_inst.material && dc.layer_mask&state.mask)
 				{
 					binders.Bind(the_interface, dc);
-					the_interface.BindMeshBuffers(dc);
+					if(!the_interface.BindMeshBuffers(dc))
+						continue;
 					the_interface.FinalizeDrawCall(dc);
 
 				}

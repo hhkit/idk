@@ -6,6 +6,7 @@
 #include <vkn/MemoryAllocator.h>
 
 #include <vkn/VulkanResourceManager.h>
+#include <editorstatic\imgui\imgui.h>
 
 namespace idk::vkn
 {
@@ -33,6 +34,7 @@ namespace idk::vkn
 	public:
 		using buffers_t = hash_table<attrib_index, MeshBuffer>;
 		const MeshBuffer& Get(attrib_index index)const;
+		bool Has(attrib_index index)const;
 		const buffers_t& Buffers()const { return buffers; }
 		int GetAttribs() const override;
 		const std::optional<MeshBuffer>& GetIndexBuffer()const { return index_buffer; }

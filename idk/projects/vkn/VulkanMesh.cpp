@@ -2,6 +2,7 @@
 #include "VulkanMesh.h"
 namespace idk::vkn
 {
+#pragma optimize("",off)
 	const MeshBuffer& VulkanMesh::Get(attrib_index index) const
 	{
 		auto itr = buffers.find(index);
@@ -9,6 +10,11 @@ namespace idk::vkn
 			return itr->second;
 		throw std::exception{ "Attempting to get invalid attrib index from vulkan mesh." };
 		//return MeshBuffer{};
+	}
+	bool VulkanMesh::Has(attrib_index index) const
+	{
+		auto itr = buffers.find(index);
+		return (itr != buffers.end());
 	}
 	int VulkanMesh::GetAttribs() const
 {

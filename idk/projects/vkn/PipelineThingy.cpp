@@ -259,19 +259,21 @@ namespace idk::vkn
 	{
 		attrib_buffers[location] = { buffer,offset };
 	}
-	void PipelineThingy::BindMeshBuffers(const RenderObject& ro)
+	bool PipelineThingy::BindMeshBuffers(const RenderObject& ro)
 	{
-		BindMeshBuffers(ro.mesh, *ro.renderer_req);
+		return BindMeshBuffers(ro.mesh, *ro.renderer_req);
 	}
-	void PipelineThingy::BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs)
+	bool PipelineThingy::BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs)
 	{
 		auto& vmesh = mesh.as<VulkanMesh>();
-		BindMeshBuffers(vmesh, attribs);
+		return BindMeshBuffers(vmesh, attribs);
 	}
-	void PipelineThingy::BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs)
+	bool PipelineThingy::BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs)
 	{
 		for (auto&& [attrib, location] : attribs.mesh_requirements)
 		{
+			if (!mesh.Has(attrib))
+				return false;
 			auto& attrib_buffer = mesh.Get(attrib);
 			BindAttrib(location, *attrib_buffer.buffer(), attrib_buffer.offset);
 		}
@@ -282,7 +284,7 @@ namespace idk::vkn
 			index_buffer = BoundIndexBuffer{ *idx_buffer->buffer(),idx_buffer->offset,vmesh.IndexType() };
 			num_vertices = vmesh.IndexCount();
 		};
-
+		return true;
 	}
 	void PipelineThingy::SetVertexCount(uint32_t vertex_count)
 	{
