@@ -781,15 +781,6 @@ namespace idk
 				continue;
 			}
 
-			if (animator->skeleton)
-			{
-				size_t num_bones = animator->skeleton->data().size();
-				animator->_bind_pose.resize(num_bones);
-				animator->_child_objects.resize(num_bones);
-				animator->pre_global_transforms.resize(num_bones);
-				animator->final_bone_transforms.resize(num_bones);
-			}
-
 			auto& child_objects = animator->_child_objects;
 			const auto initialize_children =
 				[&child_objects](Handle<GameObject> c_go, int)
@@ -797,17 +788,28 @@ namespace idk
 				auto c_bone = c_go->GetComponent<Bone>();
 				if (c_bone)
 				{
-					child_objects[c_bone->bone_index] = c_go;
+					const auto index = c_bone->bone_index;
+					if(index >= 0)
+						child_objects[index] = c_go;
 				}
 			};
 
-			sg->visit(initialize_children);
-			Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
-
-			for (auto& layer : animator->layers)
+			if (animator->skeleton)
 			{
-				layer.prev_poses.resize(animator->skeleton->data().size());
-				layer.blend_source.resize(animator->skeleton->data().size());
+				size_t num_bones = animator->skeleton->data().size();
+				animator->_bind_pose.resize(num_bones);
+				animator->_child_objects.resize(num_bones);
+				animator->pre_global_transforms.resize(num_bones);
+				animator->final_bone_transforms.resize(num_bones);
+
+				sg->visit(initialize_children);
+				Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
+
+				for (auto& layer : animator->layers)
+				{
+					layer.prev_poses.resize(animator->skeleton->data().size());
+					layer.blend_source.resize(animator->skeleton->data().size());
+				}
 			}
 
 			animator->ResetToDefault();
@@ -875,9 +877,12 @@ namespace idk
 		for (size_t i = 0; i < animator._child_objects.size(); ++i)
 		{
 			auto curr_go = animator._child_objects[i];
-			animator._bind_pose[i].position = curr_go->Transform()->position;
-			animator._bind_pose[i].rotation = curr_go->Transform()->rotation;
-			animator._bind_pose[i].scale = curr_go->Transform()->scale;
+			if (curr_go)
+			{
+				animator._bind_pose[i].position = curr_go->Transform()->position;
+				animator._bind_pose[i].rotation = curr_go->Transform()->rotation;
+				animator._bind_pose[i].scale = curr_go->Transform()->scale;
+			}
 		}
 	}
 

@@ -10,45 +10,10 @@
 
 namespace idk
 {
-	template<typename ParamType>
-	static const ParamType& paramter_combo_box(Handle<Animator> c_anim, string_view curr_param_name)
-	{
-		string ret_param;
-		anim::AnimDataType param_type = anim::AnimDataType::NONE;
-		if constexpr (std::is_same_v<ParamType, anim::IntParam>) param_type = anim::AnimDataType::INT;
-		else if constexpr (std::is_same_v <ParamType, anim::FloatParam>) param_type = anim::AnimDataType::FLOAT;
-		else if constexpr (std::is_same_v <ParamType, anim::BoolParam>) param_type = anim::AnimDataType::BOOL;
-		else if constexpr (std::is_same_v <ParamType, anim::TriggerParam>) param_type = anim::AnimDataType::TRIGGER;
-
-		auto& param_table = c_anim->GetParamTable<ParamType>();
-		for (auto& param : param_table)
-		{
-			bool param_selected = param.first == curr_param_name;
-			if (ImGui::Selectable(param.first.data(), param_selected))
-			{
-				ret_param = param.first;
-			}
-
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				auto& val = param.second.val;
-				if constexpr (std::is_same_v<ParamType, anim::IntParam>) ImGui::Text("%d", val);
-				else if constexpr (std::is_same_v <ParamType, anim::FloatParam>) ImGui::Text("%.2f", val);
-				else if constexpr (std::is_same_v <ParamType, anim::BoolParam>) val ? ImGui::Text("True") : ImGui::Text("False");
-				else if constexpr (std::is_same_v <ParamType, anim::TriggerParam>) val ? ImGui::Text("True") : ImGui::Text("False");
-				ImGui::EndTooltip();
-			}
-		}
-		if (ret_param.empty()) return ParamType{};
-
-		return param_table[ret_param];
-	}
-
 	IGE_AnimatorWindow::IGE_AnimatorWindow()
-		:IGE_IWindow{ "Animator##IGE_AnimatorWindow",true, ImVec2{ 900,600 }, ImVec2{ 0,0 } } 
+		:IGE_IWindow{ "Animator##IGE_AnimatorWindow",false, ImVec2{ 900,600 }, ImVec2{ 0,0 } } 
 	{		
-		// window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar;;
+		window_flags = ImGuiWindowFlags_MenuBar;;
 	}
 	void IGE_AnimatorWindow::BeginWindow()
 	{
@@ -768,7 +733,7 @@ namespace idk
 					if (layer.transition_index == transition_index)
 						ImGui::PopStyleColor(1);
 					float weight = layer.transition_index == transition_index ? layer.blend_state.elapsed_time / layer.blend_duration : 0.0f;
-					ImGui::ProgressBar(weight, ImVec2(-1, 3), nullptr);
+					ImGui::ProgressBar(weight, _blend_prog_col, ImVec2(-1, 3), nullptr);
 
 					ImGui::EndGroup();
 					ImGui::Unindent();
@@ -1179,7 +1144,6 @@ namespace idk
 			RscHandle<anim::Animation> animation;
 			bool sort = false;
 			int delete_index = -1;
-			static float threshold_buf = 0.0f;
 			static float threshold_buf = 0.0f;
 			for (size_t i = 0; i < state_data.motions.size(); ++i)
 			{

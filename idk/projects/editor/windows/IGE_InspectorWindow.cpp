@@ -20,8 +20,10 @@ of the editor.
 #include <gfx/ShaderGraph.h>
 #include <editor/commands/CommandList.h>
 #include <editor/imguidk.h>
+// #include <editor/IDE.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+#include <editor/windows/IGE_AnimatorWindow.h>
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/DragDropTypes.h>
 #include <editor/utils.h>
@@ -579,252 +581,17 @@ namespace idk {
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
-		const auto imgui_name = [&](string_view base, string_view added) -> string
+
+		if (ImGui::Button("OPEN ANIMATOR WINDOW"))
 		{
-			return string{ base } +"##" + added.data();
-		};
-
-		//ImGui::NewLine();
-		auto state_window_flags = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking;
-		auto state_window_width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-		constexpr float state_window_height = 130.0f;
-
-		auto& layer = c_anim->layers[0];
-		auto& anim_states = layer.anim_states;
-
-		if (anim_states.empty())
-		{
-			ImGui::TextColored(ImVec4{ 0,1,0,1 }, "Start by adding an animation state!");
-		}
-		else
-		{
-			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
-			if (ImGui::CollapsingHeader("Animation States", ImGuiTreeNodeFlags_AllowItemOverlap))
-			{
-				ImGui::Indent(5.0f);
-				// Start from 1 cos index 0 is nullstate
-				for (size_t state_index = 1; state_index < anim_states.size(); ++state_index)
-				{
-					static string rename_cache;
-
-					auto& curr_state = anim_states[state_index];
-					bool renamed = false;
-					bool to_remove = false;
-
-					if (!curr_state.valid)
-						ImGuidk::PushDisabled();
-
-					ImGui::PushID(state_index);
-
-					ImGui::Text("Animation State: ");
-					ImGui::PushItemWidth(200.0f);
-					
-					ImGui::SameLine();
-					renamed = ImGui::InputText("##Animation State", &curr_state.name, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue);
-					if (ImGui::IsItemActivated())
-					{
-						rename_cache = curr_state.name;
-					}
-					
-					ImGui::PopItemWidth();
-
-					if (ImGui::IsItemDeactivatedAfterEdit() && !renamed)
-						curr_state.name = rename_cache;
-					
-					// if (!playing_index.second.IsBlendTree())
-					// {
-					// 	ImGui::SameLine();
-					// 	if (ImGui::Button("Convert to Blend Tree"))
-					// 	{
-					// 		variant<BasicAnimationState, BlendTree> new_state{ BlendTree{} };
-					// 		playing_index.second.state_data = new_state;
-					// 	}
-					// }
-
-					if (ImGui::BeginChild("##window", ImVec2{ state_window_width, state_window_height }, true, state_window_flags))
-					{
-						if (curr_state.IsBlendTree())
-						{
-							ImGui::Text("State Type: Blend Tree");
-							auto& state_data = *curr_state.GetBlendTree();
-							for (size_t i = 0; i < state_data.motions.size(); ++i)
-							{
-								ImGui::PushID((int)i);
-								auto& blend_tree_motion = state_data.motions[i];
-								ImGuidk::InputResource("##clip", &blend_tree_motion.motion);
-								ImGui::InputFloat("##threshold", &blend_tree_motion.thresholds[0]);
-								ImGui::Text("Weight: %.2f", state_data.motions[i].weight);
-								ImGui::PopID();
-							}
-
-							RscHandle<anim::Animation> tmp{};
-							if (ImGuidk::InputResource("Add Motion Field##Add Motion Field", &tmp))
-							{
-								BlendTreeMotion new_motion{ };
-								new_motion.motion = tmp;
-								state_data.motions.push_back(new_motion);
-
-								std::sort(state_data.motions.begin(), state_data.motions.end(), 
-									[](const BlendTreeMotion& lhs, const BlendTreeMotion& rhs) 
-									{ 
-										return lhs.thresholds[0] < rhs.thresholds[0]; 
-									});
-							}
-
-							ImGui::DragFloat("TESTTTT", &state_data.def_data[0], 0.01f);
-						}
-						else
-						{
-							const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
-							const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
-							{
-								colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
-								ImGui::SameLine();
-								ImGui::SetCursorPosX(drag_pos);
-							};
-
-							auto& state_data = *curr_state.GetBasicState();
-							ImGui::Text("State Type: Basic Animation");
-							const bool has_valid_clip = s_cast<bool>(state_data.motion);
-							display_name_align("Clip", !has_valid_clip);
-							ImGuidk::InputResource("##clip", &state_data.motion);
-
-							if (!has_valid_clip)
-								ImGuidk::PushDisabled();
-							display_name_align("Speed");
-							ImGui::DragFloat("##speed", &curr_state.speed, 0.01f);
-
-							display_name_align("Loop");
-							ImGui::Checkbox("##loop", &curr_state.loop);
-							ImGui::NewLine();
-
-							if (!has_valid_clip)
-								ImGuidk::PopDisabled();
-
-							if (ImGui::Button("Delete State##del"))
-								to_remove = true;
-						}
-
-					}
-					ImGui::EndChild();
-					ImGui::NewLine();
-					if (!curr_state.valid)
-						ImGuidk::PopDisabled();
-
-					ImGui::PopID();
-					if (to_remove)
-					{
-						c_anim->RemoveAnimation(curr_state.name);
-						break;
-					}
-
-					if (renamed)
-					{
-						bool success = layer.RenameAnimation(rename_cache, curr_state.name);
-						if (!success)
-							curr_state.name = rename_cache;
-						break;
-					}
-				}
-				ImGui::Unindent(5.0f);
-			}
+			Core::GetSystem<IDE>().FindWindow<IGE_AnimatorWindow>()->is_open = true;
 		}
 
-		
-		
-		const ImVec2 add_animation_button_size{ 150.0f, 30.0f};
-		if (ImGui::Button("Add Animation State", add_animation_button_size))
-		{
-			layer.AddAnimation(RscHandle<anim::Animation>{});
-		}
-		
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
-			{
-				auto res_payload = DragDrop::GetResourcePayloadData();
-				GenericResourceHandle tmp{ RscHandle<anim::Animation>{} };
-				for (auto& h : res_payload)
-				{
-					if (h.resource_id() == tmp.resource_id())
-					{
-						if (payload->IsDelivery())
-						{
-							layer.AddAnimation(h.AsHandle<anim::Animation>());
-						}
-						break;
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::Text("Dragging an animation file to this button works too!");
-			ImGui::EndTooltip();
-		}
-		
-		ImGui::NewLine();
-
-		auto& def_anim_state = layer.GetAnimationState(layer.default_index);
-		auto& curr_anim_state = layer.GetAnimationState(layer.curr_state.index);
-		auto& blend_anim_state = layer.GetAnimationState(layer.blend_state.index);
-
-		if(layer.default_index == 0)
-			ImGui::TextColored(ImVec4{1,0,0,1}, "Default State");
-		else
-			ImGui::Text("Default State");
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(150.0f);
-		if (ImGui::BeginCombo(imgui_name("##def state", c_anim->layers[0].name).c_str(), def_anim_state.name.c_str()))
-		{
-			for (auto& anim_index : layer.anim_state_table)
-			{
-				string curr_name{ layer.anim_states[anim_index.second].name };
-				if (ImGui::Selectable(curr_name.data(), layer.default_index == anim_index.second))
-				{
-					// c_anim->Stop();
-					layer.default_index = anim_index.second;
-					layer.curr_state.index = anim_index.second;
-				}
-			}
-			ImGui::EndCombo();
-		}
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
 		ImGui::Text("Preview"); ImGui::SameLine();
-		if (ImGui::Checkbox(imgui_name("##preview", c_anim->layers[0].name).c_str(), &c_anim->preview_playback))
+		if (ImGui::Checkbox("##preview", &c_anim->preview_playback))
 		{
 			c_anim->OnPreview();
 		}
-		ImGui::NewLine();
-
-		const auto data_pos_x = ImGui::CalcTextSize("Blending To: ").x + ImGui::GetCursorPosX();
-		const ImVec4 playing_text__col = c_anim->IsPlaying() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
-		ImGui::TextColored(playing_text__col, "Playing: ");
-		ImGui::SameLine();
-
-		ImGui::SetCursorPosX(data_pos_x);
-		string display_name{ curr_anim_state.name };
-		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), layer.curr_state.normalized_time);
-		ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 10 }, nullptr);
-
-		const ImVec4 blend_col = c_anim->IsBlending() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
-		ImGui::TextColored(blend_col, "Blending To: ");
-		display_name = blend_anim_state.name;
-		ImGui::SameLine();
-
-		ImGui::SetCursorPosX(data_pos_x);
-		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), layer.blend_state.normalized_time);
-		static ImVec4 blend_prog_col{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
-		if (layer.blend_state.is_playing)
-			ImGui::ProgressBar(layer.blend_state.normalized_time / layer.blend_duration, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
-		else
-			ImGui::ProgressBar(0.0f, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
-
 		ImGui::NewLine();
 	}
 
