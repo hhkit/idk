@@ -256,22 +256,21 @@ namespace idk
 		if (anim_data->blend_tree_type != anim::BlendTreeType::BlendTree_1D)
 			return result;
 
-
-		auto& motions = anim_data->motions;
-		float param_val = anim_data->def_data[0];
-		auto res = animator.float_vars.find(anim_data->params[0]);
-		if (res != animator.float_vars.end())
-			param_val = res->second.val;
-
 		// First compute the weights
 		if (!anim_data->weights_cached)
 		{
+			float param_val = anim_data->def_data[0];
+			auto res = animator.float_vars.find(anim_data->params[0]);
+			if (res != animator.float_vars.end())
+				param_val = res->second.val;
+
 			anim_data->ComputeWeights(param_val);
 			anim_data->weights_cached = true;
 		}
 		
 		bool first_applied = false;
 		// Interpolate each of the animation motions based on the weights
+		auto& motions = anim_data->motions;
 		for (auto& blend_motion : motions)
 		{
 			// Ignore all blend motions without valid clip

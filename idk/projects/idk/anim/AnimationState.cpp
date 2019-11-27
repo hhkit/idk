@@ -53,7 +53,7 @@ namespace idk {
 		float sum = 0.0f;
 
 		size_t motions_sz = motions.size();
-		if (motions_sz < 1)
+		if (motions_sz <= 1)
 		{
 			for (size_t i = 0; i < motions_sz; ++i)
 			{
@@ -62,9 +62,9 @@ namespace idk {
 		}
 		else
 		{
+			param_val = std::clamp(param_val, motions.front().thresholds[0], motions.back().thresholds[0]);
 			for (size_t i = 0; i < motions_sz; ++i)
 			{
-
 				const float curr_threshold = motions[i].thresholds[0];
 				float prev_threshold = curr_threshold;
 				float next_threshold = curr_threshold;

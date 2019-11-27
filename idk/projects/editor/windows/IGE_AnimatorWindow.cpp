@@ -1108,12 +1108,12 @@ namespace idk
 
 		auto& state_data = *curr_state.GetBlendTree();
 
-		ImGui::PushID(_selected_state);
+		ImGui::PushID(state_index);
 		strcpy_s(buf, curr_state.name.data());
 
-		float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Blend Tree ").x);
-		float item_width = width_avail * 0.8f;
-		float offset = ImGui::CalcTextSize("Blend Tree ").x + width_avail - item_width;
+		const float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Blend Tree ").x);
+		const float item_width = width_avail * 0.8f;
+		const float offset = ImGui::CalcTextSize("Blend Tree ").x + width_avail - item_width;
 
 		ImGui::Text("Blend Tree ");
 
@@ -1148,9 +1148,25 @@ namespace idk
 			ImGui::EndCombo();
 		}
 		ImGui::PopItemWidth();
+		ImGui::NewLine();
 
 		const bool has_valid_clips = !state_data.motions.empty();
-		ImGui::Text("Clips");
+		const auto widget_size = ImGui::GetContentRegionAvailWidth() * 0.25f;
+
+		ImGui::BeginGroup();	// Text group. Titles for displaying blend tree stuff
+		{
+			const float text_offset = widget_size + ImGui::GetStyle().FramePadding.x * 2;
+			ImGui::Indent(ImGui::GetStyle().FramePadding.x);
+			ImGui::Text("Motion");
+			ImGui::SameLine(text_offset);
+			ImGui::Text("Threshold");
+			ImGui::SameLine(text_offset * 2);
+			ImGui::Text("Speed");
+			ImGui::Unindent(ImGui::GetStyle().FramePadding.x);
+		}
+		ImGui::EndGroup();
+		
+
 		ImGui::PushItemWidth(-1);
 		auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
 		bg_col.w = bg_col.w * 0.4f;
@@ -1163,36 +1179,37 @@ namespace idk
 			RscHandle<anim::Animation> animation;
 			bool sort = false;
 			int delete_index = -1;
-			const auto widget_size = ImGui::GetContentRegionAvailWidth() * 0.3f;
+			static float threshold_buf = 0.0f;
+			static float threshold_buf = 0.0f;
 			for (size_t i = 0; i < state_data.motions.size(); ++i)
 			{
 				auto& motion = state_data.motions[i];
-				ImGui::BeginGroup();
-				ImGui::PushMultiItemsWidths(3, widget_size);
 				ImGui::PushID(i);
+				ImGui::BeginGroup();
+				ImGui::PushItemWidth(widget_size);
 
 				ImGuidk::InputResource("##clip", &motion.motion);
-				ImGui::PopItemWidth();
 				ImGui::SameLine(); 
-
-				
-				if (ImGui::InputFloat("##threshold", &motion.thresholds[0]))
+				threshold_buf = motion.thresholds[0];
+				ImGui::InputFloat("##threshold", &threshold_buf, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_AutoSelectAll);
+				if (ImGui::IsItemDeactivatedAfterEdit())
 				{
 					sort = true;
+					motion.thresholds[0] = threshold_buf;
 				}
-				ImGui::PopItemWidth();
-				ImGui::SameLine();
 
-				ImGui::InputFloat("##speed", &motion.speed);
-				ImGui::PopItemWidth();
+				ImGui::SameLine();
+				ImGui::InputFloat("##speed", &motion.speed, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_AutoSelectAll);
+				
 				ImGui::SameLine();
 
 				if (ImGui::Button("Delete"))
 				{
 					delete_index = i;
 				}
-				ImGui::PopID();
+				ImGui::PopItemWidth();
 				ImGui::EndGroup();
+				ImGui::PopID();
 			}
 
 			if (ImGuidk::InputResource("##add_clip", &animation))

@@ -73,29 +73,29 @@ namespace TestAndSeek
                 // {
                 //     anim.CrossFade("test2");
                 // }
-                
-                if (Input.GetKey(KeyCode.W))
-                {
-                    if (!w_pressed)
-                        elapsed = 0.0f;
-                    Speed = Mathf.Lerp(Speed, 1.0f, elapsed);
-                    anim.SetFloat("speed", Speed);
-                    elapsed += 0.02f;
-                    w_pressed = true;
-                }
-                else if (Speed > 0.0f)
-                {
-                    if (w_pressed)
-                        elapsed = 0.0f;
-                    Speed = Mathf.Lerp(Speed, 0.0f, elapsed);
-                    anim.SetFloat("speed", Speed);
-                    elapsed += 0.02f;
-                    w_pressed = false;
-                }
-                Int = anim.GetInt("int");
-                Float = anim.GetFloat("float");
-                Bool = anim.GetBool("bool");
-                Trigger = anim.GetTrigger("trigger");
+                anim.SetFloat("speed", Speed);
+                // if (Input.GetKey(KeyCode.W))
+                // {
+                //     if (!w_pressed)
+                //         elapsed = 0.0f;
+                //     Speed = Mathf.Lerp(Speed, 1.0f, elapsed);
+                //     anim.SetFloat("speed", Speed);
+                //     elapsed += 0.02f;
+                //     w_pressed = true;
+                // }
+                // else if (Speed > 0.0f)
+                // {
+                //     if (w_pressed)
+                //         elapsed = 0.0f;
+                //     Speed = Mathf.Lerp(Speed, 0.0f, elapsed);
+                //     anim.SetFloat("speed", Speed);
+                //     elapsed += 0.02f;
+                //     w_pressed = false;
+                // }
+                // Int = anim.GetInt("int");
+                // Float = anim.GetFloat("float");
+                // Bool = anim.GetBool("bool");
+                // Trigger = anim.GetTrigger("trigger");
             }
         }
     }
