@@ -20,16 +20,7 @@ namespace idk
 	}
 	void IGE_AnimatorWindow::Initialize()
 	{
-		_canvas.colors[ImNodes::ColNodeBg] = ImGui::GetColorU32(ImGuiCol_Border);
-		_canvas.colors[ImNodes::ColNodeBg].Value.w = 0.75f;
-		_canvas.colors[ImNodes::ColNodeActiveBg] = ImGui::GetColorU32(ImGuiCol_Border);
-		_canvas.colors[ImNodes::ColNodeActiveBg].Value.w = 0.75f;
-		_canvas.style.curve_thickness = 2.5f;
-		_canvas.drag_button = 2;
-		_canvas.scroll_to_move = false;
-		_canvas.no_ctrl_to_zoom = true;
-		_canvas.drag_zoom = false;
-
+		
 		_blend_prog_col = ImVec4{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
 		_layer_selectable_num_items = 3;
 		_state_selectable_num_items = 1;
@@ -51,13 +42,6 @@ namespace idk
 	}
 	void IGE_AnimatorWindow::Update()
 	{
-		if (!is_open || ImGui::IsWindowCollapsed())
-		{
-			ImNodes::BeginCanvas(&_canvas);
-			ImNodes::EndCanvas();
-			return;
-		}
-		
 		if (Core::GetSystem<IDE>().selected_gameObjects.empty())
 		{
 			_curr_animator_component = Handle<Animator>{};

@@ -25,7 +25,6 @@ namespace idk {
 			MAX
 		};
 
-		ImNodes::CanvasState _canvas;
 		// The current animator component being displayed
 		Handle<Animator> _curr_animator_component;
 		AnimatorDisplayMode _display_mode;
