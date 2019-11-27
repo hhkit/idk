@@ -72,7 +72,6 @@ namespace idk
 
         LoadRecentProject();
 
-
 		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
 		{
 			selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
@@ -115,7 +114,7 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
         io.IniFilename = NULL;
-        ImGui::LoadIniSettingsFromDisk((Core::GetSystem<FileSystem>().GetFullPath(path_idk_app_data) + "/imgui.ini").c_str());
+        ImGui::LoadIniSettingsFromDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
@@ -194,19 +193,7 @@ namespace idk
         FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked += [](GenericResourceHandle h)
         {
             if (h.index() == BaseResourceID<Scene>)
-            {
-                auto scene = h.AsHandle<Scene>();
-                auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-                if (scene != active_scene)
-                {
-                    if (active_scene)
-                        active_scene->Deactivate();
-                    Core::GetSystem<SceneManager>().SetActiveScene(scene);
-                    scene->LoadFromResourcePath();
-
-                    Core::GetSystem<IDE>().ClearScene();
-                }
-            }
+                OpenScene(h.AsHandle<Scene>());
         };
 	}
 
@@ -222,15 +209,52 @@ namespace idk
 
 		SetupEditorScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
+
+        { // try load recent scene / camera
+            auto last_scene = reg_scene.get("scene");
+            if (last_scene.size())
+            {
+                RscHandle<Scene> h{ Guid(last_scene) };
+                if (!h)
+                {
+                    NewScene();
+                    return;
+                }
+
+                OpenScene(h);
+
+                auto cam = reg_scene.get("camera");
+                if (cam.size())
+                {
+                    auto& t = *currentCamera().current_camera->GetGameObject()->Transform();
+                    auto res = parse_text<Transform>(cam);
+                    if (res)
+                    {
+                        auto last_t = *res;
+                        t.position = last_t.position;
+                        t.rotation = last_t.rotation;
+                        t.scale = last_t.scale;
+                    }
+                }
+            }
+            else
+                NewScene(); 
+        }
 	}
+
+    void IDE::EarlyShutdown()
+    {
+        reg_scene.set("camera", serialize_text(*currentCamera().current_camera->GetGameObject()->Transform()));
+
+        ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
+        Core::GetSystem<ProjectManager>().SaveConfigs();
+        ige_windows.clear();
+        _interface->Shutdown();
+        _interface.reset();
+    }
 
 	void IDE::Shutdown()
 	{
-        ImGui::SaveIniSettingsToDisk((Core::GetSystem<FileSystem>().GetFullPath(path_idk_app_data) + "/imgui.ini").c_str());
-        Core::GetSystem<ProjectManager>().SaveConfigs();
-        ige_windows.clear();
-		_interface->Shutdown();
-		_interface.reset();
 	}
 
 	void IDE::EditorUpdate()

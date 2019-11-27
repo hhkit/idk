@@ -62,6 +62,7 @@ namespace idk
 
 		void Init() override;
 		void LateInit() override;
+		void EarlyShutdown() override;
 		void Shutdown() override;
 		void EditorUpdate() override;
 		void EditorDraw() override;
@@ -79,10 +80,9 @@ namespace idk
         }
 
 		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
-
-
 		void ApplyDefaultColors();
-        Registry recent{ ".recent" };
+
+        Registry reg_scene{ "/user/LastScene.yaml" };
 
 	private:
 		friend class IGE_MainWindow;

@@ -5,6 +5,10 @@
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
 #include <editor/IDE.h>
+#include <editor/SceneManagement.h>
+#include <gfx/Camera.h>
+#include <core/GameObject.h>
+#include <common/Transform.h>
 
 namespace idk
 {
@@ -13,7 +17,7 @@ namespace idk
         namespace fs = std::filesystem;
 
         auto& proj_manager = Core::GetSystem<ProjectManager>();
-        auto& recent = Core::GetSystem<IDE>().recent;
+        Registry recent{ "/idk/.recent" };
         string proj_name = recent.get("project");
 
         if (proj_name.empty())
@@ -28,6 +32,14 @@ namespace idk
             proj_manager.LoadProject(proj_name);
 
         recent.set("project", string{ proj_manager.GetProjectFullPath() });
+
+        fs::path user_dir = proj_manager.GetProjectDir();
+        user_dir /= "User";
+        if (!fs::exists(user_dir))
+            fs::create_directory(user_dir);
+
+        Core::GetSystem<FileSystem>().Dismount("/user");
+        Core::GetSystem<FileSystem>().Mount(user_dir.string(), "/user", false);
     }
 
 }

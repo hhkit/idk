@@ -19,7 +19,7 @@ namespace idk
 
 		//real aspect = 16.f / 9.f;
 		real near_plane = 0.1f;
-		real far_plane = 10.f;
+		real far_plane = 100.f;
 
 		int  depth = 0;
 		RscHandle<RenderTarget> render_target;
