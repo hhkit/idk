@@ -3,7 +3,7 @@
 #include <res/Resource.h>
 namespace idk
 {
-	class ShaderSnippet : Resource<ShaderSnippet>
+	class ShaderSnippet : public Resource<ShaderSnippet>
 	{
 	public:
 		string snippet;

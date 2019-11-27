@@ -1323,6 +1323,7 @@
       <Filter>gfx\font</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderIncluder.cpp" />
+    <ClCompile Include="gfx\ShaderSnippetLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

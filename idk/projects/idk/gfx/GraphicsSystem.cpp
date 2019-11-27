@@ -700,6 +700,13 @@ namespace idk
 
 	void GraphicsSystem::LoadShaders()
 	{
+
+		auto dir = Core::GetSystem<FileSystem>().GetDir("/engine_data/shaders");
+		auto glsls = dir.GetFilesWithExtension(".glsl");
+		for (auto& glsl : glsls)
+		{
+			Core::GetResourceManager().Load<ShaderSnippet>(glsl, false);
+		}
 		///////////////////////Load vertex shaders
 		//renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert",false);
 		renderer_vertex_shaders[VNormalMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert",false);
@@ -726,6 +733,7 @@ namespace idk
 
 		////////////////////Load geometry Shaders
 		renderer_geometry_shaders[GSinglePassCube] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom", false);
+
 
 		LoadShaderImpl();
 	}

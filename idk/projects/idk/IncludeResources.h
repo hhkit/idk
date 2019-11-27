@@ -16,3 +16,4 @@
 #include <gfx/Framebuffer.h>
 #include <test/TestResource.h>
 #include <prefab/Prefab.h>
+#include <gfx/ShaderSnippet.h>

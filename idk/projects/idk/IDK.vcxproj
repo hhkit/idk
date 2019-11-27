@@ -320,6 +320,7 @@
     <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
     <ClCompile Include="gfx\ShaderIncluder.cpp" />
     <ClCompile Include="gfx\ShaderProgram.cpp" />
+    <ClCompile Include="gfx\ShaderSnippetLoader.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="math\ritters.cpp" />

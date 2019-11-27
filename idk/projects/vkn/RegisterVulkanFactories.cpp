@@ -5,7 +5,6 @@
 #include <vkn/VulkanMeshFactory.h>
 #include <vkn/VulkanShaderModuleFactory.h>
 #include <vkn/ShaderModule.h>
-#include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>
 #include <gfx/MaterialInstance.h>
@@ -21,6 +20,7 @@
 #include <vkn/VulkanTtfLoader.h>
 #include <vkn/VulkanFontAtlasFactory.h>
 #include <vkn/VknRenderTargetLoader.h>
+#include <vkn/VulkanGlslLoader.h>
 namespace idk::vkn
 {
 
@@ -47,12 +47,6 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpg");
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpeg");
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".tga");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".vert");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".frag");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".geom");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".tesc");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".tese");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".comp");
 	Core::GetResourceManager().RegisterLoader<VulkanSpvLoader>(".spv");
 	Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 	Core::GetResourceManager().RegisterLoader<VknRenderTargetLoader>(RenderTarget::ext);

@@ -316,7 +316,8 @@ namespace idk::shadergraph
 
 		auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
 		auto& program = *_shader_program;
-		program.Name(GetTemplate()->Name());
+		program.Name(string{ this->Name() }+"_" + string{ GetTemplate()->Name() });
+		
 		program.BuildShader(ShaderStage::Fragment, shader_template);
     }
 
