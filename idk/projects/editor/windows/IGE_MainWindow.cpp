@@ -26,6 +26,7 @@ of the editor.
 #include <editor/SceneManagement.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <core/Scheduler.h>
+#include <audio/AudioSystem.h> //AudioSystem
 #include <PauseConfigurations.h>
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
@@ -436,6 +437,7 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(EditorPause);
 					Core::GetSystem<IDE>().game_frozen = true;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(true);
 				}
 			}
 			else
@@ -444,6 +446,8 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(UnpauseAll); 
 					Core::GetSystem<IDE>().game_frozen = false;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+
 				}
 			}
 			ImGui::SameLine(0, 0);

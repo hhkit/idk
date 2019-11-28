@@ -146,6 +146,11 @@ namespace idk
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".ogg");
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".mp3");
 
+		Core::GetGameState().OnObjectDestroy<AudioSource>() += [&](Handle<AudioSource> dying_source) //Add a call back to stop all its sounds before changing scene
+		{
+			dying_source->StopAll();
+		};
+
 		// Create the FMOD Core System object.
 		ParseFMOD_RESULT(FMOD::System_Create(&_Core_System));
 
@@ -217,6 +222,7 @@ namespace idk
 
 	void AudioSystem::Update(span<AudioSource> audio_sources)
 	{
+
 		//Update all the audio source here too!
 		for (auto& elem : audio_sources)
 		{
@@ -249,6 +255,19 @@ namespace idk
 
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
+
+	}
+	void AudioSystem::SetSystemPaused(bool is_system_paused)
+	{
+		int numOfChannelsPlaying = 0;
+		_Core_System->getChannelsPlaying(&numOfChannelsPlaying);
+		for (int i = 0; i < numOfChannelsPlaying; ++i) {
+			FMOD::Channel* channel = nullptr;
+			_Core_System->getChannel(i, &channel);
+			if (channel != nullptr) {
+				channel->setPaused(is_system_paused);
+			}
+		}
 
 	}
 	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
