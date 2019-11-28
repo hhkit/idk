@@ -113,11 +113,11 @@ namespace idk::vkn
 		/* you might as well save this value as it is needed later on */
 		w = std::max(mw, w);
 		h += mh;
-		font_handle->Size(ivec2(w, h));
+		fontAtlas->Size(ivec2(w, h));
 		size = ivec2{w,h};
 
-		font_handle->ascender = face->ascender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
-		font_handle->descender = face->descender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
+		fontAtlas->ascender = face->ascender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
+		fontAtlas->descender = face->descender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
 
 		int x = 0, y = 0;
 		mh = 0;

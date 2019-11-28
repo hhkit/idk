@@ -912,6 +912,8 @@
     <ClInclude Include="anim\AnimationTypes.h">
       <Filter>anim</Filter>
     </ClInclude>
+    <ClInclude Include="parallel\circular_buffer.h" />
+    <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="gfx\ShaderSnippetLoader.h">
       <Filter>gfx</Filter>
     </ClInclude>

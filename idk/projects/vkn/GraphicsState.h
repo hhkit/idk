@@ -61,7 +61,8 @@ namespace idk::vkn
 		hlp::vector_buffer                particle_buffer;
 		//vector<shadow_map_t> shadow_maps;
 
-		hlp::vector_buffer                font_buffer;
+		vector<hlp::vector_buffer>        font_buffer;
+		//hlp::vector_buffer                font_buffer;
 		vector<FontRange>*				  font_range;
 		const vector<FontPoint>*          characters_data;
 		const vector<FontRenderData>*	  fonts_data;
@@ -136,6 +137,18 @@ namespace idk::vkn
 
 
 	struct PreRenderData :CoreGraphicsState
+	{
+		const vector<CameraData>* cameras;
+		const vector<InstancedData>* inst_mesh_buffer;
+		const vector<GraphicsSystem::LightRenderRange>* shadow_ranges;
+		//RscHandle<ShaderProgram> mesh_vtx;
+		//RscHandle<ShaderProgram> skinned_mesh_vtx;
+		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+		void Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms, const vector<InstancedData>& inst_mesh_render_buffer);
+	};
+
+	struct PostRenderData :CoreGraphicsState
 	{
 		const vector<CameraData>* cameras;
 		const vector<InstancedData>* inst_mesh_buffer;

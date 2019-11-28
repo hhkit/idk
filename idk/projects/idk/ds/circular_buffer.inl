@@ -1,4 +1,5 @@
 #include "circular_buffer.h"
+#include "..\parallel\circular_buffer.h"
 #pragma once
 
 namespace idk

@@ -20,7 +20,6 @@ of the editor.
 #include <gfx/ShaderGraph.h>
 #include <editor/commands/CommandList.h>
 #include <editor/imguidk.h>
-// #include <editor/IDE.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/windows/IGE_AnimatorWindow.h>
@@ -276,6 +275,31 @@ namespace idk {
 
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##component_textFilter", NULL, component_textFilter.InputBuf, IM_ARRAYSIZE(component_textFilter.InputBuf), ImVec2{100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				component_textFilter.Build();
+
+
+			
+			string deco_text = "Component";
+			if (component_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_component_textFilter"))
+					component_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
             span componentNames = GameState::GetComponentNames();
             for (const char* name : componentNames) {
                 string displayName = name;
@@ -294,6 +318,8 @@ namespace idk {
                 if (found != std::string::npos)
                     displayName.erase(found, fluffText.size());
 
+				if (!component_textFilter.PassFilter(displayName.c_str())) //skip if filtered
+					continue;
 
 
                 if (ImGui::MenuItem(displayName.c_str())) {
@@ -313,6 +339,34 @@ namespace idk {
         }
 
 		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) {
+
+
+
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##script_textFilter", NULL, script_textFilter.InputBuf, IM_ARRAYSIZE(script_textFilter.InputBuf), ImVec2{ 100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				script_textFilter.Build();
+
+
+
+			string deco_text = "Scripts";
+			if (script_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_script_textFilter"))
+					script_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
 			auto* script_env = &Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
 			if (script_env == nullptr)
 				ImGui::Text("Scripts not loaded!");
@@ -320,6 +374,10 @@ namespace idk {
 			span componentNames = script_env->GetBehaviorList();
 			int execute_counter = 0;
 			for (const char* name : componentNames) {
+
+				if (!component_textFilter.PassFilter(name)) //skip if filtered
+					continue;
+
 				if (ImGui::MenuItem(name)) {
 					for (Handle<GameObject> i : gos) {
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
@@ -327,8 +385,10 @@ namespace idk {
 					}
 				}
 			}
-			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			if (execute_counter > 0) {
+				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			}
 			ImGui::EndPopup();
 		}
 
@@ -362,8 +422,14 @@ namespace idk {
 					outputString.append(std::to_string(i));
 					outputString.append(")");
 				}
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>,
-                    GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
+				editor.command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty,
+                            GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() },
+                            "name",
+                            string{ editor.selected_gameObjects[i]->GetComponent<Name>()->name },
+                            string{ outputString })
+                );
+                editor.selected_gameObjects[i]->GetComponent<Name>()->name = outputString;
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
@@ -613,8 +679,8 @@ namespace idk {
         ImGui::PushItemWidth(w);
 
         bool has_override = _prefab_inst &&
-            (_prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_min", 0) ||
-             _prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_max", 0));
+            (_prefab_inst->HasOverride((*_curr_component).type.name(), "offset_min", 0) ||
+             _prefab_inst->HasOverride((*_curr_component).type.name(), "offset_max", 0));
 
         bool changed = false;
 
@@ -714,14 +780,14 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
                 ov.property_path = "offset_max";
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
                 PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
                 ov.property_path = "offset_max";
                 PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
@@ -731,8 +797,8 @@ namespace idk {
 
         if (changed && _prefab_inst)
         {
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_min");
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_max");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_min");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_max");
         }
 
         if (has_override)
@@ -769,7 +835,7 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
-        _prefab_curr_component = c.GetHandle();
+        _curr_component = c.GetHandle();
         _prefab_curr_component_nth = 0;
         _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
         display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
@@ -810,9 +876,9 @@ namespace idk {
 		{
 			Core::GetSystem<IDE>().FindWindow<IGE_AnimatorWindow>()->is_open = true;
 		}
-
+		
 		ImGui::Text("Preview"); ImGui::SameLine();
-		if (ImGui::Checkbox("##preview", &c_anim->preview_playback))
+		if (ImGui::Checkbox("##preview", &c_anim->preview_playback)) 
 		{
 			c_anim->OnPreview();
 		}
@@ -1055,9 +1121,9 @@ namespace idk {
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
+        _curr_component = component;
         if (_prefab_inst)
         {
-            _prefab_curr_component = component;
             _prefab_curr_component_nth = -1;
             const span comps = _prefab_inst->GetGameObject()->GetComponents();
             for (const auto& c : comps)
@@ -1241,6 +1307,7 @@ namespace idk {
     {
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
+        static reflect::dynamic original_value;
         bool outer_changed = false;
         vector<char> indent_stack;
 
@@ -1458,6 +1525,17 @@ namespace idk {
             if (indent)
                 ImGui::Indent();
 
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            {
+                original_value.swap(reflect::dynamic(val).copy());
+            }
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                original_value.swap(reflect::dynamic());
+            }
+
             return recurse;
         };
 
@@ -1540,7 +1618,7 @@ namespace idk {
         has_override = false;
         if (self._prefab_inst && self._curr_property_stack.back().size())
             has_override = self._prefab_inst->HasOverride(
-                (*self._prefab_curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
+                (*self._curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
 
         ImGui::BeginGroup();
     }
@@ -1553,19 +1631,19 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
                 PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
                 PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             ImGui::EndPopup();
         }
 
         if (changed && self._prefab_inst)
-            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._prefab_curr_component, curr_prop_path);
+            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
 
         if (has_override)
         {

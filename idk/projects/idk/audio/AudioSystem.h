@@ -61,6 +61,11 @@ namespace idk
 		void Update(span<AudioSource>);
 		void UpdateTestCaseOnly(); //Remove after test!
 
+
+		void SetSystemPaused(bool);
+		bool is_system_paused = false;
+
+
 		virtual void Shutdown() override;
 
 		//Optional. Must be called before Init()

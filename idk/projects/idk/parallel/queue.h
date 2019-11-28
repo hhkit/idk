@@ -72,7 +72,7 @@ namespace idk::mt
 			if (casTail(ltail, new_node))
 			{
 				// make sure that everyone knows the next tail is set
-				ltail->next.store(new_node, std::memory_order_release);
+				ltail->next.store(new_node, std::memory_order_seq_cst);
 				hazards.clear(tid);
 				return;
 			}
