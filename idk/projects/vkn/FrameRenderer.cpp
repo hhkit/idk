@@ -36,6 +36,8 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <parallel/ThreadPool.h>
+
 
 namespace idk::vkn
 {
@@ -113,115 +115,45 @@ namespace idk::vkn
 			begin = end = container.begin();
 		}
 	};*/
-	class RenderThread
+
+	static void RunFunc(FrameRenderer* _renderer, const GraphicsState* m, RenderStateV2* rs) noexcept
 	{
-	public:
-		void Start()
+		try
 		{
-			_running = true;
+			_renderer->RenderGraphicsState(*m, *rs);
 		}
-		void Add(const GraphicsState& state, RenderStateV2& rs)
-		{
-			job_lock.lock();
-			jobs.push(JobData{ &state ,&rs });
-			job_lock.unlock();
-			_is_complete = false;
-			job_count++;
-			job_semaphore.notify();
-		}
-		void Run()
+		catch (...)
 		{
 
-			while (Running())
-			{
-				//job_semaphore.wait();//will wake up when either running == false or hasjob. 
-				//if(HasJob())//Don't render if there's no job.
-				Render();
-			}
 		}
-		void Render() 
-		{
-			while (!jobs.empty()&&Running())
-			{
-				job_lock.lock();
-				auto job = jobs.front();
-				jobs.pop();
-				job_lock.unlock();
-				auto& rs = *job._rs;
-				auto& state = *job._state;
-				_renderer->RenderGraphicsState(state, rs);
-				job_count--;
-			}
-		}
-		bool HasJob()const noexcept
-		{
-			return !jobs.empty();
-		}
-#pragma optimize("",off)
-		bool Complete()const noexcept
-		{
-			return job_count==0;
-		}
-		bool Running()const noexcept
-		{
-			return _running;
-		}
-		FrameRenderer* _renderer;
-		void Stop()
-		{
-			_running = false;
-			job_semaphore.notify(); //wake the guy so that he can terminate.
-		}
-		~RenderThread()
-		{
-			Stop();
-		}
-	private:
-		Semaphore job_semaphore{0};
-		std::atomic_uint32_t job_count = {};
-		bool _running = true;
-		bool _is_complete=false;
-		bool _start = false;
-		struct JobData
-		{
-			const GraphicsState* _state = {};
-			RenderStateV2* _rs = {};
-		};
-		using job_list_t = std::queue<JobData>;
-		std::mutex job_lock;
-		job_list_t jobs;
-	};
-
+	}
+	void fml(FrameRenderer* _renderer, const GraphicsState* state, RenderStateV2* rs)
+	{
+		auto fuck_this = std::make_tuple(_renderer, state, rs);
+		std::apply(RunFunc, fuck_this);
+	}
 	class FrameRenderer::ThreadedRender : public FrameRenderer::IRenderThread
 	{
 	public:
-		static void ThreadRun(RenderThread* thread)
-		{
-			thread->Run();
-		}
+		using Future_t =decltype(Core::GetThreadPool().Post(&RunFunc, std::declval<FrameRenderer*>(), std::declval<const GraphicsState*>(), std::declval<RenderStateV2*>()));
 		void Init(FrameRenderer* renderer)
 		{
-			thread._renderer = renderer;
-			my_thread = std::thread(ThreadRun,&thread);
+			
+			_renderer = renderer;
 		}
 		void Render(const GraphicsState& state, RenderStateV2& rs)override
 		{
-			thread.Add(state, rs);
+			future = Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs);
 		}
 #pragma optimize("",off)
 		void Join() override
 		{
-			while (!thread.Complete());
-		}
-		~ThreadedRender()
-		{
-			thread.Stop();
-			if (my_thread.joinable())
-				my_thread.join();
+			future.get();
 		}
 	private:
+		FrameRenderer* _renderer;
+		Future_t future;
 		std::thread my_thread;
-		RenderThread thread;
 	};
 
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
@@ -466,7 +398,7 @@ namespace idk::vkn
 		//Temp
 		for (auto i = num_concurrent_states; i-- > 0;)
 		{
-			auto thread = std::make_unique<NonThreadedRender>();
+			auto thread = std::make_unique<ThreadedRender>();
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}
@@ -644,7 +576,7 @@ namespace idk::vkn
 		vk::CommandBuffer   cmd_buffer         , 
 		const vector<vec4>& clear_colors       ,
 		vk::Framebuffer     frame_buffer       ,
-		vk::RenderPass      rp                 ,
+		RenderPassObj       rp                 ,
 		bool                has_depth_stencil  ,
 		vk::Rect2D          render_area        ,
 		vk::Rect2D          viewport           ,
@@ -667,7 +599,7 @@ namespace idk::vkn
 
 		vk::RenderPassBeginInfo rpbi
 		{
-			rp, frame_buffer,
+			*rp, frame_buffer,
 			render_area,hlp::arr_count(clear_value),std::data(clear_value)
 		};
 
@@ -772,7 +704,7 @@ namespace idk::vkn
 		};
 		auto& rt = light.light_map.as<VknFrameBuffer>();
 		vk::Framebuffer fb = rt.GetFramebuffer();
-		vk::RenderPass  rp = rt.GetRenderPass ();
+		auto  rp = rt.GetRenderPass ();
 		rt.PrepareDraw(cmd_buffer);
 		vector<vec4> clear_colors
 		{
@@ -1228,7 +1160,7 @@ namespace idk::vkn
 			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface, camera, rt, rs);
 		}
 		//Subsequent passes shouldn't clear the buffer any more.
-		rpbi.renderPass = View().BasicRenderPass(rt.GetRenderPassType(),false,false);
+		rpbi.renderPass = *View().BasicRenderPass(rt.GetRenderPassType(),false,false);
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();

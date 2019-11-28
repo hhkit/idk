@@ -121,7 +121,7 @@ namespace idk::vkn
 	{
 		hlp::MemoryAllocator allocator;
 		vk::UniqueFence fence;
-		hash_table<rp_type_t, vk::UniqueRenderPass> render_passes;//probably should move this to a manager
+		hash_table<rp_type_t, RenderPassObj> render_passes;//probably should move this to a manager
 
 		vk::UniqueRenderPass CreateRenderPass(uint32_t num_col,const VknFrameBuffer& fb)
 		{
@@ -230,7 +230,7 @@ namespace idk::vkn
 			return View().Device()->createRenderPassUnique(renderPassInfo);
 		}
 		//Gets or the appropriate renderpass, initalizes if not-present.
-		vk::RenderPass GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
+		RenderPassObj GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
 		{
 			auto itr = render_passes.find(rp_type);
 			if (itr == render_passes.end())
@@ -241,7 +241,7 @@ namespace idk::vkn
 						fb
 					)).first;
 			}
-			return *itr->second;
+			return itr->second;
 		}
 		Pimpl() : allocator{*View().Device(), View().PDevice()}
 		{
@@ -319,7 +319,7 @@ namespace idk::vkn
 		rp_type_t rp_type = to_rp_type(fb);//(s_cast<uint64_t>(i))<<2 | (s_cast<uint32_t>(fb.depth_attachment)<<1) | s_cast<bool>(fb.stencil_attachment);
 
 		vk::FramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.renderPass = _pimpl->GetRenderPass(rp_type,fb);
+		framebufferInfo.renderPass = *_pimpl->GetRenderPass(rp_type,fb);
 		framebufferInfo.attachmentCount = hlp::arr_count(image_views);
 		framebufferInfo.pAttachments = std::data(image_views);
 		framebufferInfo.width  = s_cast<uint32_t>(fb.size.x);

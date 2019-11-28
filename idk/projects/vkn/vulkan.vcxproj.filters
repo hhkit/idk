@@ -226,6 +226,9 @@
     <ClInclude Include="FontRenderer.h">
       <Filter>render\renderers</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPassObj.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -419,6 +422,7 @@
     <ClCompile Include="ParticleRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPassObj.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

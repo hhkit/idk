@@ -7,6 +7,7 @@ namespace idk::vkn
 	class VulkanState;
 	class VulkanResourceManager;
 	struct RenderState;
+	struct RenderPassObj;
 	//Interface for the vulkan details. 
 	//Ideally we should move all of the vk:: related data and into VulkanDetail
 	//Effectively PIMPLing the vk stuff
@@ -47,7 +48,7 @@ namespace idk::vkn
 		PresentationSignals& GetCurrentSignals        ()const;
 		uint32_t				   CurrSemaphoreFrame ()const;
 		uint32_t				   AcquiredImageValue ()const;
-		vk::RenderPass             BasicRenderPass    (BasicRenderPasses type, bool clear_col = true, bool clear_depth = true)const;
+		const RenderPassObj&       BasicRenderPass    (BasicRenderPasses type, bool clear_col = true, bool clear_depth = true)const;
 		vk::Result&				AcquiredImageResult()const;
 		uint32_t				   MaxFrameInFlight()const;
 		uint32_t                   SwapchainImageCount()const;

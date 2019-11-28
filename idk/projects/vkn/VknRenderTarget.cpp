@@ -46,7 +46,7 @@ namespace idk::vkn
 			const vk::ImageView image_views[] = {color_texture->ImageView(),depth_texture->ImageView()};
 
 			vk::FramebufferCreateInfo framebufferInfo = {};
-			framebufferInfo.renderPass = vknView.BasicRenderPass(rp_type);
+			framebufferInfo.renderPass = *vknView.BasicRenderPass(rp_type);
 			framebufferInfo.attachmentCount = hlp::arr_count(image_views);
 			framebufferInfo.pAttachments = std::data(image_views);
 			framebufferInfo.width  = s_cast<uint32_t>(size.x);
@@ -71,8 +71,7 @@ namespace idk::vkn
 
 	vk::RenderPass VknRenderTarget::GetRenderPass(bool clear_col , bool clear_depth ) const
 	{
-		
-		return View().BasicRenderPass(rp_type,clear_col,clear_depth);
+		return *View().BasicRenderPass(rp_type,clear_col,clear_depth);
 	}
 
 	vk::Framebuffer VknRenderTarget::Buffer()

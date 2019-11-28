@@ -671,7 +671,7 @@ namespace idk::vkn
 
 		//TODO GFX PIPELINE:  add renderpass id into pipeline_config_t
 		//TODO GFX PIPELINE:  get renderpass using renderpass id in pipeline_config_t
-		return vulkan.BasicRenderPass(config.render_pass_type);
+		return *vulkan.BasicRenderPass(config.render_pass_type);
 	}
 	//may be deprecated
 

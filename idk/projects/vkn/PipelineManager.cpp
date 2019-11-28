@@ -27,7 +27,7 @@ namespace idk::vkn
 			   //LessChain(lhs.guid.Data1,rhs.guid.Data1,lhs.guid.Data2 , rhs.guid.Data2)|| && lhs.guid.Data3 < rhs.guid.Data3 && reinterpret_cast<uint64_t>(lhs.guid.Data4) < reinterpret_cast<uint64_t>(rhs.guid.Data4);
 	}
 //#pragma optimize("",off)
-	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<vk::RenderPass> render_pass, bool has_depth_stencil)
+	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass, bool has_depth_stencil)
 	{
 		std::optional<handle_t> prev{};
 		bool is_diff = prog_to_pipe2.empty();
@@ -46,7 +46,7 @@ namespace idk::vkn
 			combi.append(r_cast<const char*>(&module),sizeof(module));
 		}
 
-		vk::RenderPass rp = View().BasicRenderPass(config.render_pass_type);
+		RenderPassObj rp = View().BasicRenderPass(config.render_pass_type);
 		if (render_pass)
 			rp = *render_pass;
 		string_view str{ r_cast<const char*>(&rp),sizeof(rp) };
@@ -127,7 +127,9 @@ namespace idk::vkn
 	void PipelineManager::CheckForUpdates(uint32_t frame_index)
 	{
 		vector<decltype(pipelines)::iterator> pipelines_to_update;
+		hash_set<VulkanPipeline*> pipelines_to_destroy;
 		pipelines_to_update.reserve(pipelines.size() * 2);
+		pipelines_to_destroy.reserve(pipelines.size());
 
 		if (frame_index >= update_queue.size())
 		{
@@ -139,7 +141,19 @@ namespace idk::vkn
 		{
 			pipelines[handle].back_pipeline.Reset(); //Destroy old pipeline
 		}
-
+		//Remove invalid pipelines.
+		for (auto itr = pipelines.begin(); itr != pipelines.end(); ++itr)
+		{
+			if (itr->rp && !*itr->rp)
+			{
+				pipelines_to_destroy.emplace(&itr->pipeline);
+			}
+		}
+		for (auto& itr : pipelines_to_destroy)
+		{
+			RemovePipeline(itr);
+		}
+		//Update pipelines that need to be updated.
 		for (auto itr = pipelines.begin(); itr != pipelines.end(); ++itr)
 		{
 			auto& po = *itr;
@@ -256,8 +270,8 @@ namespace idk::vkn
 				config.vert_shader = module;
 		}
 		ApplyBufferDescOverrides();
-		if (rp)
-			pipeline.SetRenderPass(*rp, has_depth_stencil);
+		if (rp && *rp)
+			pipeline.SetRenderPass(**rp, has_depth_stencil);
 		else
 			pipeline.ClearRenderPass();
 		pipeline.Create(config, shader_handles, view);

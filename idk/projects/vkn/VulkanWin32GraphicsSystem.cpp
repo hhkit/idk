@@ -129,7 +129,7 @@ namespace idk::vkn
 		auto clear_val = vk::ClearValue{ vk::ClearColorValue{} };
 		vk::RenderPassBeginInfo rpbi
 		{
-			vfb.GetRenderPass(),vfb.GetFramebuffer(),
+			*vfb.GetRenderPass(),vfb.GetFramebuffer(),
 			vk::Rect2D
 			{
 				vk::Offset2D{},vk::Extent2D{s_cast<uint32_t>(vfb.Size().x),s_cast<uint32_t>(vfb.Size().y)}

@@ -904,9 +904,9 @@ namespace idk::vkn
 		return static_cast<ValHandler*>((pUserData) ? pUserData : &def)->processMsg(messageSeverity, messageType, pCallbackData);
 	}
 
-	vk::RenderPass VulkanState::BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth ) const
+	const RenderPassObj& VulkanState::BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth ) const
 	{
-		return *m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
+		return m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
 	}
 
 	vk::UniqueCommandPool VulkanState::CreateGfxCommandPool()

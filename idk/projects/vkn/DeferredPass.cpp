@@ -301,6 +301,7 @@ namespace idk::vkn
 		PipelineManager& pipeline_manager,
 		uint32_t frame_index,
 		const vk::RenderPassBeginInfo& rpbi,
+		RenderPassObj render_pass,
 		uint32_t num_attachments,
 		const GraphicsState* state = nullptr
 		)
@@ -341,7 +342,7 @@ namespace idk::vkn
 							 }
 						}
 				);
-				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, rpbi.renderPass, true);
+				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, render_pass, true);
 				
 				pipeline.Bind(cmd_buffer, view);
 				SetViewport(cmd_buffer, offset, size);
@@ -436,14 +437,15 @@ namespace idk::vkn
 				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
 			}
 		};
+		auto& rp = g_buffer.GetRenderPass();
 		vk::RenderPassBeginInfo rpbi
 		{
-			g_buffer.GetRenderPass(), frame_buffer,
+			*rp, frame_buffer,
 			render_area,hlp::arr_count(v),std::data(v)
 		};
 
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,static_cast<uint32_t>(g_buffer.NumColorAttachments()),&graphics_state))
+		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,rp,static_cast<uint32_t>(g_buffer.NumColorAttachments()),&graphics_state))
 			rs.FlagRendered();
 		cmd_buffer.endRenderPass();//End GBuffer pass
 		//GBufferBarrier(cmd_buffer, gbuffer);
@@ -468,9 +470,10 @@ namespace idk::vkn
 			vk::ClearColorValue{std::array<float,4>{0.0f,0.0f,0.0f,0.0f}},
 			vk::ClearDepthStencilValue{1,0},
 		};
+		const auto& rp = View().BasicRenderPass(rt.GetRenderPassType(), false, true);
 		vk::RenderPassBeginInfo rpbi
 		{
-			View().BasicRenderPass(rt.GetRenderPassType(),false,true), rt.Buffer(),
+			*rp, rt.Buffer(),
 			render_area,hlp::arr_count(v),std::data(v)
 		};
 
@@ -479,7 +482,7 @@ namespace idk::vkn
 		//Begin Depthless RT renderpass
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
 		//Draw FSQ
-		RenderProcessedDrawCalls(cmd_buffer, fsq_stuff.DrawCalls(), camera, pipeline_manager(), frame_index(),rpbi,1);
+		RenderProcessedDrawCalls(cmd_buffer, fsq_stuff.DrawCalls(), camera, pipeline_manager(), frame_index(),rpbi,rp,1);
 		//End Depthless RT renderpass
 		cmd_buffer.endRenderPass();
 		//Copy depth buffer to render target's depth buffer
