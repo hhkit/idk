@@ -25,6 +25,7 @@ namespace idk
 		
 		// Engine Setters
 		void AddLayer();
+		size_t FindLayerIndex(string_view name);
 		bool RenameLayer(string_view from, string_view to);
 		void RemoveLayer(string_view name);
 		void RemoveLayer(size_t index);
@@ -116,7 +117,7 @@ namespace idk
 		// ======================= Public Variables ========================
 		RscHandle<anim::Skeleton> skeleton;
 
-		hash_table<string, size_t> layer_table{};
+		// hash_table<string, size_t> layer_table{};
 		vector<AnimationLayer> layers{};
 
 		// Scripting variables (Ideally should type erase them)
