@@ -38,6 +38,7 @@ namespace idk::vkn
 		loader.LoadTexture(*color_texture, alloc, fence, {}, ctci, {});
 		auto depth_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetDepthBuffer().guid);
 		TexCreateInfo dtci = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+		dtci.image_usage |= vk::ImageUsageFlagBits::eTransferDst;
 		loader.LoadTexture(*depth_texture, alloc, fence, {}, dtci, {});
 
 		{ 

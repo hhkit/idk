@@ -97,9 +97,12 @@ namespace idk
 					break;
 				}
 			}
-			if(recompile_graph)
+			if (recompile_graph) 
+			{
 				for (auto& elem : Core::GetResourceManager().GetAll<shadergraph::Graph>())
 					elem->Compile();
+				Core::GetSystem<GraphicsSystem>().LoadShaders();
+			}
 		}
 
 		if (app_sys.GetKey(Key::Control) && app_sys.GetKeyDown(Key::S))

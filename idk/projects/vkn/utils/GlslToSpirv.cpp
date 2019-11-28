@@ -142,7 +142,9 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 		{
 			DoNothing();
 			string filename = "/"+string{ code_id }+std::to_string(string_hash(glsl));
-			LOG_TO(LogPool::GFX, "%s", result.GetErrorMessage().c_str());
+			auto err_m = result.GetErrorMessage(); 
+			auto err_msg = err_m.c_str();
+			LOG_TO(LogPool::GFX, "%s", err_msg);
 			try
 			{
 				auto path = string{ Core::GetSystem<FileSystem>().GetAppDataDir() } +"/idk";
@@ -154,6 +156,7 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 				auto out_file = path+filename;
 				std::ofstream out{ out_file };
 				out << val;
+				out << " /* Error Message: \n" << err_msg << "\n*/";
 				out.close();
 			}
 			catch (...)

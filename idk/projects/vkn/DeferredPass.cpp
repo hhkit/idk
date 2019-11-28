@@ -95,7 +95,7 @@ namespace idk::vkn
 			//GBufferBinding::eAlbedoAmbOcc
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_32,
+				ColorFormat::_enum::SRGBA,
 				FilterMode::_enum::Nearest
 				});
 			GBufferBinding::eNormal;
@@ -168,68 +168,6 @@ namespace idk::vkn
 		if (!fsq_ro.config)
 			fsq_ro.config = Core::GetSystem<GraphicsSystem>().MeshRenderConfig();
 	}
-#if 0
-
-	//Make sure to call this again if the framebuffer size changed.
-
-	void DeferredPass::BindGBuffers(const GraphicsState& graphics_state, RenderStateV2& rs)
-	{
-		auto& gbuffer = GBuffer();
-		auto& view = View();
-		//auto& swapchain = view.Swapchain();
-		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer& cmd_buffer = rs.cmd_buffer;
-		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-		cmd_buffer.begin(begin_info, dispatcher);
-
-		DrawToGBuffers(cmd_buffer, graphics_state, rs);
-		
-		auto& camera = graphics_state.camera;
-
-
-
-		
-		//////////////////Skybox rendering
-		if (sb_cm)
-		{
-			auto& vknCubeMap = sb_cm->as<VknCubemap>();
-			pipeline_config skybox_render_config;
-			DescriptorsManager skybox_ds_manager(view);
-			skybox_render_config.fill_type = FillType::eFill;
-			skybox_render_config.prim_top = PrimitiveTopology::eTriangleList;
-			auto config = ConfigWithVP(skybox_render_config, camera, offset, size);
-			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
-			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
-			config.cull_face = s_cast<uint32_t>(CullFace::eNone);
-			config.depth_test = false;
-			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
-
-			//No idea if this is expensive....if really so I will try shift up to init
-			rs.skyboxRenderer.Init(
-				Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox],
-				{},
-				Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox],
-				&config,
-				*camera.CubeMapMesh
-			);
-			rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, *sb_cm, camera.projection_matrix * camera.view_matrix);
-
-			/*cmd_buffer.begin(vk::CommandBufferBeginInfo
-				{
-					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-				});*/
-			rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
-		}
-
-		RenderGbufferToTarget(cmd_buffer,graphics_state,rs);
-
-		if (camera.overlay_debug_draw)
-			RenderDebugStuff(state, rs, offset, size);
-		rs.ubo_manager.UpdateAllBuffers();
-		cmd_buffer.endRenderPass();
-		cmd_buffer.end();
-	}
-#endif
 	struct DeferredPostBinder : StandardBindings
 	{
 		DeferredPass* deferred_pass;
@@ -404,6 +342,7 @@ namespace idk::vkn
 						}
 				);
 				auto& pipeline = pipeline_manager.GetPipeline(config, shaders, frame_index, rpbi.renderPass, true);
+				
 				pipeline.Bind(cmd_buffer, view);
 				SetViewport(cmd_buffer, offset, size);
 				prev_pipeline = &pipeline;

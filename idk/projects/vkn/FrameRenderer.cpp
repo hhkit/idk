@@ -1184,7 +1184,7 @@ namespace idk::vkn
 		//Begin Clear Pass
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 		SetViewport(cmd_buffer, offset, size);
-		SetScissor(cmd_buffer,  offset, size);
+		//SetScissor(cmd_buffer,  offset, size);
 		//////////////////Skybox rendering
 		if (sb_cm)
 		{
