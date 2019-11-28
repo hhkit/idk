@@ -222,11 +222,17 @@ namespace idk
 
 	void AudioSystem::Update(span<AudioSource> audio_sources)
 	{
+	
 
 		//Update all the audio source here too!
 		for (auto& elem : audio_sources)
 		{
+			
 			elem.UpdateAudioClips();
+
+			for (auto& audioChannel : elem.audio_clip_channels) {
+				audioChannel->setPaused(_system_paused);
+			}
 		}
 
 		//Only one listener component will update FMODs listener
@@ -259,15 +265,16 @@ namespace idk
 	}
 	void AudioSystem::SetSystemPaused(bool is_system_paused)
 	{
-		int numOfChannelsPlaying = 0;
-		_Core_System->getChannelsPlaying(&numOfChannelsPlaying);
-		for (int i = 0; i < numOfChannelsPlaying; ++i) {
-			FMOD::Channel* channel = nullptr;
-			_Core_System->getChannel(i, &channel);
-			if (channel != nullptr) {
-				channel->setPaused(is_system_paused);
-			}
-		}
+		_system_paused = is_system_paused;
+		//int numOfChannelsPlaying = 0;
+		//_Core_System->getChannelsPlaying(&numOfChannelsPlaying);
+		//for (int i = 0; i < numOfChannelsPlaying; ++i) {
+		//	FMOD::Channel* channel = nullptr;
+		//	_Core_System->getChannel(i, &channel);
+		//	if (channel != nullptr) {
+		//		channel->setPaused(is_system_paused);
+		//	}
+		//}
 
 	}
 	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)

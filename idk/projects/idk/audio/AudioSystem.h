@@ -121,7 +121,7 @@ namespace idk
 
 		FMOD::System*		_Core_System		{ nullptr };		//Is updated on init, destroyed and nulled on shutdown.
 		FMOD_RESULT			_result				{ FMOD_OK };		//Most recent result by the most recent FMOD function call.
-
+		bool				_system_paused		{ false };			//Sets audiosystem to update or not
 		int					_number_of_drivers			{ 0 };		//Updated on init. Describes the number of available sound driver that can play audio.
 		int					_current_driver				{ 0 };		//Updated on init. Describes the current running sound driver.
 		time_point			_time_it_was_initialized	{};			//Updated on Init()
