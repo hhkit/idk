@@ -104,6 +104,9 @@ namespace idk {
         using InjectDrawTable = hash_table<string_view, CustomDrawFn>;
         bool DisplayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table = nullptr);
 
+		ImGuiTextFilter component_textFilter{};
+		ImGuiTextFilter script_textFilter{};
+
 	};
 
 
