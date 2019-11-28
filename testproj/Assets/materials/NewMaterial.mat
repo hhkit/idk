@@ -20,24 +20,37 @@ links:
   node_out: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
   slot_in: 2
   slot_out: 5
-- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
   node_out: eb496af1-5e71-4429-bacb-2f8ab7bd8154
   slot_in: 0
   slot_out: 3
-- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
   node_out: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
   slot_in: 1
   slot_out: 0
-- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
   node_out: 1bd680de-07ae-4d0f-8915-ab1330429283
   slot_in: 2
   slot_out: 0
-- node_in: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
   node_out: 9d40ef6d-0b8d-409f-af98-b2fec6f67472
   slot_in: 3
   slot_out: 0
-master_node: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
+master_node: 12810f6a-0b1d-463c-b274-48ad7d82011e
 nodes: 
+  12810f6a-0b1d-463c-b274-48ad7d82011e: 
+    control_values: ""
+    guid: 12810f6a-0b1d-463c-b274-48ad7d82011e
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: 0}
+    - {type: VEC3, value: '0,0,0'}
+    name: master\PBR
+    output_slots: []
+    position: {x: 539, y: 150}
   1bd680de-07ae-4d0f-8915-ab1330429283: 
     control_values: ""
     guid: 1bd680de-07ae-4d0f-8915-ab1330429283
@@ -92,18 +105,6 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     position: {x: 234, y: 31}
-  e00c7250-f9b8-47f6-9fd9-10d69380fc5a: 
-    control_values: ""
-    guid: e00c7250-f9b8-47f6-9fd9-10d69380fc5a
-    input_slots: 
-    - {type: VEC3, value: ""}
-    - {type: VEC3, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: 0}
-    name: master\PBR Specular
-    output_slots: []
-    position: {x: 539, y: 150}
   eb496af1-5e71-4429-bacb-2f8ab7bd8154: 
     control_values: ""
     guid: eb496af1-5e71-4429-bacb-2f8ab7bd8154
