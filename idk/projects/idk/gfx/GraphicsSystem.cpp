@@ -400,6 +400,7 @@ namespace idk
 			ClearSwap(rb.font_render_data               ,tmp.font_render_data               );//clear then swap the stuff back into rb
 			ClearSwap(rb.font_range, tmp.font_range);
 			ClearSwap(rb.font_buffer, tmp.font_buffer);
+			ClearSwap(rb.ui_render_per_canvas           , tmp.ui_render_per_canvas);
 			ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
 			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
