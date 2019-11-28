@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace idk
 {
-    public class Rect
+    public struct Rect
     {
         public Vector2 position;
         public Vector2 size;

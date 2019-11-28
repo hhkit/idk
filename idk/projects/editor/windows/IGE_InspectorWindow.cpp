@@ -20,7 +20,6 @@ of the editor.
 #include <gfx/ShaderGraph.h>
 #include <editor/commands/CommandList.h>
 #include <editor/imguidk.h>
-// #include <editor/IDE.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
 #include <editor/windows/IGE_AnimatorWindow.h>
@@ -276,6 +275,31 @@ namespace idk {
 
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##component_textFilter", NULL, component_textFilter.InputBuf, IM_ARRAYSIZE(component_textFilter.InputBuf), ImVec2{100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				component_textFilter.Build();
+
+
+			
+			string deco_text = "Component";
+			if (component_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_component_textFilter"))
+					component_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
             span componentNames = GameState::GetComponentNames();
             for (const char* name : componentNames) {
                 string displayName = name;
@@ -294,6 +318,8 @@ namespace idk {
                 if (found != std::string::npos)
                     displayName.erase(found, fluffText.size());
 
+				if (!component_textFilter.PassFilter(displayName.c_str())) //skip if filtered
+					continue;
 
 
                 if (ImGui::MenuItem(displayName.c_str())) {
@@ -313,6 +339,34 @@ namespace idk {
         }
 
 		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) {
+
+
+
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##script_textFilter", NULL, script_textFilter.InputBuf, IM_ARRAYSIZE(script_textFilter.InputBuf), ImVec2{ 100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				script_textFilter.Build();
+
+
+
+			string deco_text = "Scripts";
+			if (script_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_script_textFilter"))
+					script_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
 			auto* script_env = &Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
 			if (script_env == nullptr)
 				ImGui::Text("Scripts not loaded!");
@@ -320,6 +374,10 @@ namespace idk {
 			span componentNames = script_env->GetBehaviorList();
 			int execute_counter = 0;
 			for (const char* name : componentNames) {
+
+				if (!component_textFilter.PassFilter(name)) //skip if filtered
+					continue;
+
 				if (ImGui::MenuItem(name)) {
 					for (Handle<GameObject> i : gos) {
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
@@ -327,8 +385,10 @@ namespace idk {
 					}
 				}
 			}
-			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			if (execute_counter > 0) {
+				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			}
 			ImGui::EndPopup();
 		}
 
@@ -810,9 +870,9 @@ namespace idk {
 		{
 			Core::GetSystem<IDE>().FindWindow<IGE_AnimatorWindow>()->is_open = true;
 		}
-
+		
 		ImGui::Text("Preview"); ImGui::SameLine();
-		if (ImGui::Checkbox("##preview", &c_anim->preview_playback))
+		if (ImGui::Checkbox("##preview", &c_anim->preview_playback)) 
 		{
 			c_anim->OnPreview();
 		}

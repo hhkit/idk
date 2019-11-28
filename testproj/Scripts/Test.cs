@@ -1,4 +1,5 @@
 ﻿using idk;
+using System.Collections.Generic;
 
 namespace TestAndSeek
 {
@@ -9,6 +10,7 @@ namespace TestAndSeek
         public float f;
         public float jump_force;
         public Vector3 movement;
+        
         public Prefab prefab;
         public GameObject go;
         public MaterialInstance minst;
@@ -19,6 +21,8 @@ namespace TestAndSeek
 
         private RigidBody rb;
         private TestShou ts;
+
+        List<Prefab> pfb;
 
         static int static_i = 0;
 
@@ -35,6 +39,7 @@ namespace TestAndSeek
 
         void Start()
         {
+            pfb.Add(prefab);
             rb = gameObject.GetComponent<RigidBody>();
             ts = gameObject.GetComponent<TestShou>();
             Debug.Log("static_i " + ++static_i);
