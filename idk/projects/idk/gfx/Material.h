@@ -3,6 +3,7 @@
 #include <res/Resource.h>
 #include <res/ResourceMeta.h>
 
+#include <map>
 namespace idk
 {
 	class ShaderTemplate;
@@ -17,7 +18,8 @@ namespace idk
 
 	ENUM(ShadingModel, char,
 		Unlit,
-		DefaultLit)
+		DefaultLit,
+		Specular)
 
 
 	class Material
@@ -27,7 +29,7 @@ namespace idk
 	public:
 		RscHandle<ShaderProgram>            _shader_program  ;
 		RscHandle<MaterialInstance>         _default_instance;
-        hash_table<string, UniformInstance> uniforms         ;
+        std::map<string, UniformInstance> uniforms         ;
         vector<UniformInstance>             hidden_uniforms  ;
 
 		MaterialDomain domain = MaterialDomain::Surface ;

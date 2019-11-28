@@ -39,6 +39,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 // editor setup
 #include <gfx/RenderTarget.h>
 #include <editor/SceneManagement.h>
+#include <editor/ProjectManagement.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
@@ -56,49 +57,16 @@ namespace idk
 
 	void IDE::Init()
 	{
-        // project load
-        {
-            auto& proj_manager = Core::GetSystem<ProjectManager>();
-            const auto recent_proj = []() -> string
-            {
-                fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-                recent_path /= "idk";
-                recent_path /= ".recent";
-                if (!fs::exists(recent_path))
-                    return "";
-                std::ifstream recent_file{ recent_path };
-                fs::path proj = stringify(recent_file);
-                if (!fs::exists(proj))
-                    return "";
-                return proj.string();
-            }();
+        fs::path idk_app_data = Core::GetSystem<FileSystem>().GetAppDataDir();
+        idk_app_data /= "idk";
+        Core::GetSystem<FileSystem>().Mount(idk_app_data.string(), path_idk_app_data, false);
 
-            if (recent_proj.empty())
-            {
-                const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
-                auto proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                while (!proj)
-                    proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                proj_manager.LoadProject(*proj);
-            }
-            else
-                proj_manager.LoadProject(recent_proj);
+		auto tmp_path = idk_app_data / "tmp";
+		if (!fs::exists(tmp_path))
+			fs::create_directory(tmp_path);
+		Core::GetSystem<FileSystem>().Mount(tmp_path.string(), path_tmp, false);
 
-            fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-            recent_path /= "idk";
-            if (!fs::exists(recent_path))
-                fs::create_directory(recent_path);
-            _editor_app_data = recent_path.string();
-
-            recent_path /= ".recent";
-            std::ofstream recent_file{ recent_path };
-            recent_file << proj_manager.GetProjectFullPath();
-
-			auto tmp_path = _editor_app_data + "/tmp";
-			if (!fs::exists(tmp_path))
-				fs::create_directory(tmp_path);
-			Core::GetSystem<FileSystem>().Mount(tmp_path, "/tmp", false);
-        }
+        LoadRecentProject();
 
 		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
 		{
@@ -130,7 +98,7 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
         io.IniFilename = NULL;
-        ImGui::LoadIniSettingsFromDisk((_editor_app_data + "/imgui.ini").c_str());
+        ImGui::LoadIniSettingsFromDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
@@ -147,68 +115,7 @@ namespace idk
         style.FrameRounding = 1.0f;
         style.CurveTessellationTol = 0.5f;
 
-        auto* colors = style.Colors;
-        ImGui::StyleColorsDark();
-
-        colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
-
-        // grays
-        colors[ImGuiCol_WindowBg] =
-            ImColor(29, 34, 41).Value;
-        colors[ImGuiCol_PopupBg] =
-        colors[ImGuiCol_ScrollbarBg] =
-            ImColor(43, 49, 56, 240).Value;
-        colors[ImGuiCol_Border] =
-        colors[ImGuiCol_Separator] =
-        colors[ImGuiCol_ScrollbarGrab] =
-            ImColor(63, 70, 77).Value;
-            //ImColor(106, 118, 129).Value;
-
-        colors[ImGuiCol_MenuBarBg] =
-            ImColor(36, 58, 74).Value;
-        colors[ImGuiCol_ScrollbarBg].w = 0.5f;
-
-        // main accent - 2
-        colors[ImGuiCol_TitleBg] =
-            ImColor(5, 30, 51).Value;
-
-        // main accent - 1
-        colors[ImGuiCol_TitleBgActive] =
-        colors[ImGuiCol_TabUnfocused] =
-            ImColor(11, 54, 79).Value;
-
-        // main accent
-        colors[ImGuiCol_Tab] =
-        colors[ImGuiCol_TabUnfocusedActive] =
-        colors[ImGuiCol_FrameBg] =
-        colors[ImGuiCol_Button] =
-        colors[ImGuiCol_Header] =
-        colors[ImGuiCol_SeparatorHovered] =
-        colors[ImGuiCol_ScrollbarGrabHovered] =
-            ImColor(23, 75, 111).Value;
-
-        // main accent + 1
-        colors[ImGuiCol_TabHovered] =
-        colors[ImGuiCol_TabActive] =
-        colors[ImGuiCol_ButtonHovered] =
-        colors[ImGuiCol_FrameBgHovered] =
-        colors[ImGuiCol_HeaderHovered] =
-        colors[ImGuiCol_SeparatorActive] =
-        colors[ImGuiCol_ScrollbarGrabActive] =
-            ImColor(46, 115, 143).Value;
-
-        // main accent + 2
-        colors[ImGuiCol_TextSelectedBg] =
-        colors[ImGuiCol_ButtonActive] =
-        colors[ImGuiCol_FrameBgActive] =
-        colors[ImGuiCol_HeaderActive] =
-            ImColor(65, 153, 163).Value;
-
-        // complement accent
-        colors[ImGuiCol_PlotLinesHovered] =
-            ImColor(222, 116, 35).Value;
-        //style.Colors[ImGuiCol_PlotLinesHovered]
-        // ImColor(
+		ApplyDefaultColors();
 
         // font config
         ImFontConfig config;
@@ -239,6 +146,7 @@ namespace idk
 		ADD_WINDOW(IGE_AnimatorWindow);
 		ADD_WINDOW(IGE_ProfilerWindow);
 		ADD_WINDOW(IGE_ProjectSettings);	
+		ADD_WINDOW(IGE_HelpWindow);	
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();
@@ -269,19 +177,7 @@ namespace idk
         FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked += [](GenericResourceHandle h)
         {
             if (h.index() == BaseResourceID<Scene>)
-            {
-                auto scene = h.AsHandle<Scene>();
-                auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-                if (scene != active_scene)
-                {
-                    if (active_scene)
-                        active_scene->Deactivate();
-                    Core::GetSystem<SceneManager>().SetActiveScene(scene);
-                    scene->LoadFromResourcePath();
-
-                    Core::GetSystem<IDE>().ClearScene();
-                }
-            }
+                OpenScene(h.AsHandle<Scene>());
         };
 	}
 
@@ -296,16 +192,53 @@ namespace idk
         }
 
 		SetupEditorScene();
-		
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
+
+        { // try load recent scene / camera
+            auto last_scene = reg_scene.get("scene");
+            if (last_scene.size())
+            {
+                RscHandle<Scene> h{ Guid(last_scene) };
+                if (!h)
+                {
+                    NewScene();
+                    return;
+                }
+
+                OpenScene(h);
+
+                auto cam = reg_scene.get("camera");
+                if (cam.size())
+                {
+                    auto& t = *currentCamera().current_camera->GetGameObject()->Transform();
+                    auto res = parse_text<Transform>(cam);
+                    if (res)
+                    {
+                        auto last_t = *res;
+                        t.position = last_t.position;
+                        t.rotation = last_t.rotation;
+                        t.scale = last_t.scale;
+                    }
+                }
+            }
+            else
+                NewScene(); 
+        }
 	}
+
+    void IDE::EarlyShutdown()
+    {
+        reg_scene.set("camera", serialize_text(*currentCamera().current_camera->GetGameObject()->Transform()));
+
+        ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
+        Core::GetSystem<ProjectManager>().SaveConfigs();
+        ige_windows.clear();
+        _interface->Shutdown();
+        _interface.reset();
+    }
 
 	void IDE::Shutdown()
 	{
-        ImGui::SaveIniSettingsToDisk((_editor_app_data + "/imgui.ini").c_str());
-        Core::GetSystem<ProjectManager>().SaveConfigs();
-        ige_windows.clear();
-		_interface->Shutdown();
-		_interface.reset();
 	}
 
 	void IDE::EditorUpdate()
@@ -394,6 +327,74 @@ namespace idk
 		return "/tmp/tmp_scene.ids";
 	}
 
+	void IDE::ApplyDefaultColors()
+	{
+		auto& style = ImGui::GetStyle();
+		auto* colors = style.Colors;
+		ImGui::StyleColorsDark();
+
+		colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
+
+		// grays
+		colors[ImGuiCol_WindowBg] =
+			ImColor(29, 34, 41).Value;
+		colors[ImGuiCol_PopupBg] =
+			colors[ImGuiCol_ScrollbarBg] =
+			ImColor(43, 49, 56, 240).Value;
+		colors[ImGuiCol_Border] =
+			colors[ImGuiCol_Separator] =
+			colors[ImGuiCol_ScrollbarGrab] =
+			ImColor(63, 70, 77).Value;
+		//ImColor(106, 118, 129).Value;
+
+		colors[ImGuiCol_MenuBarBg] =
+			ImColor(36, 58, 74).Value;
+		colors[ImGuiCol_ScrollbarBg].w = 0.5f;
+
+		// main accent - 2
+		colors[ImGuiCol_TitleBg] =
+			ImColor(5, 30, 51).Value;
+
+		// main accent - 1
+		colors[ImGuiCol_TitleBgActive] =
+			colors[ImGuiCol_TabUnfocused] =
+			ImColor(11, 54, 79).Value;
+
+		// main accent
+		colors[ImGuiCol_Tab] =
+			colors[ImGuiCol_TabUnfocusedActive] =
+			colors[ImGuiCol_FrameBg] =
+			colors[ImGuiCol_Button] =
+			colors[ImGuiCol_Header] =
+			colors[ImGuiCol_SeparatorHovered] =
+			colors[ImGuiCol_ScrollbarGrabHovered] =
+			ImColor(23, 75, 111).Value;
+
+		// main accent + 1
+		colors[ImGuiCol_TabHovered] =
+			colors[ImGuiCol_TabActive] =
+			colors[ImGuiCol_ButtonHovered] =
+			colors[ImGuiCol_FrameBgHovered] =
+			colors[ImGuiCol_HeaderHovered] =
+			colors[ImGuiCol_SeparatorActive] =
+			colors[ImGuiCol_ScrollbarGrabActive] =
+			ImColor(46, 115, 143).Value;
+
+		// main accent + 2
+		colors[ImGuiCol_TextSelectedBg] =
+			colors[ImGuiCol_ButtonActive] =
+			colors[ImGuiCol_FrameBgActive] =
+			colors[ImGuiCol_HeaderActive] =
+			ImColor(65, 153, 163).Value;
+
+		// complement accent
+		colors[ImGuiCol_PlotLinesHovered] =
+			ImColor(222, 116, 35).Value;
+		//style.Colors[ImGuiCol_PlotLinesHovered]
+		// ImColor(
+
+	}
+
 	void IDE::RefreshSelectedMatrix()
 	{
 		//Refresh the new matrix values
@@ -437,20 +438,27 @@ namespace idk
 
 				const auto transform = i->GetComponent<Transform>();
 				if (transform) {
-					finalCamPos += transform->position;
+					finalCamPos += transform->GlobalPosition();
 				}
 
 			}
 
             finalCamPos /= static_cast<float>(selected_gameObjects.size());
 
-			const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
+			/*
+			Needs to find how much space the object pixels takes on screen, then this distance is based on that.
+			If single object, object pixels should take 50% of screen.
+			If multiple objects, the ends of each object pixels on screen plus some padding should be used as anchor points to determine distance.
+			But this is lazy method. 20.
+			*/
+			const float distanceFromObject = 20; 
 
 			const CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 			const Handle<Camera> currCamera = main_camera.current_camera;
 			const Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
 			camTransform->position = finalCamPos;
-			focused_vector = finalCamPos;
+			if (auto* sceneViewPtr = FindWindow<IGE_SceneView>())
+				sceneViewPtr->focused_vector = finalCamPos;
 			scroll_multiplier = default_scroll_multiplier;
 			camTransform->position -= camTransform->Forward() * distanceFromObject;
 		}

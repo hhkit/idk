@@ -31,6 +31,11 @@ vk::DescriptorSetLayout ProcessedRO::BindingInfo::GetLayout() const
 	return layout;
 }
 
+const RenderObject& ProcessedRO::Object() const
+{
+	return *itr;
+}
+
 const std::optional<vk::DescriptorSet>& ProcessedRO::GetDescriptorSet(uint32_t set)const
 {
 	return descriptor_sets[set];

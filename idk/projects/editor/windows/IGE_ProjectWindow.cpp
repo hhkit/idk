@@ -371,6 +371,11 @@ namespace idk {
                             static auto material_icon = Core::GetSystem<AssetImporter>().Get<Texture>("/editor_data/icons/matinst.png");
                             return material_icon;
                         }
+                        else if constexpr (std::is_same_v<T, Scene>)
+                        {
+                            static auto scene_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/scene.png");
+                            return scene_icon;
+                        }
                         else
                             return RscHandle<Texture>();
                     }, handle);

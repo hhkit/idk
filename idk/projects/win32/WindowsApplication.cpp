@@ -26,7 +26,7 @@ namespace idk::win
 		//LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 		//LoadStringW(hInstance, IDC_GAME, szWindowClass, MAX_LOADSTRING);
 
-		#ifdef _DEBUG
+		//#ifdef _DEBUG
 		{
 			AllocConsole();
 			AttachConsole(GetCurrentProcessId());
@@ -35,7 +35,7 @@ namespace idk::win
 			freopen_s(&pCout, "conout$", "w", stderr); //returns 0
 			SetConsoleTitle(L"IDK 0.1a");
 		}
-		#endif
+		//#endif
 
 		MyRegisterClass();
 
@@ -227,7 +227,9 @@ namespace idk::win
 		{
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:
-			_input_manager->SetKeyDown((int)wParam);
+
+			if (_focused)
+				_input_manager->SetKeyDown((int)wParam);
 			break;
 		case WM_KEYUP:
 		case WM_SYSKEYUP:
@@ -239,19 +241,22 @@ namespace idk::win
 		case WM_MBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::MButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::MButton);
 
 			break;
 		case WM_LBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::LButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::LButton);
 
 			break;
 		case WM_RBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::RButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::RButton);
 
 			break;
 		case WM_LBUTTONUP:
@@ -285,6 +290,15 @@ namespace idk::win
 			OnScreenSizeChanged.Fire(ivec2{ ptr->cx, ptr->cy });
 		}
 		break;
+		case WM_SETFOCUS:
+			OnFocusGain.Fire();
+			_focused = true;
+			break;
+		case WM_KILLFOCUS:
+			OnFocusLost.Fire();
+			_focused = false;
+			_input_manager->FlushCurrentBuffer();
+			break;
 		case WM_SIZE:
 			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
 			break;

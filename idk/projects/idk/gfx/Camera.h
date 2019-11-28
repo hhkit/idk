@@ -6,6 +6,7 @@
 #include <gfx/CameraFrustum.h>
 #include <gfx/CameraClear.h>
 #include <math/rect.h>
+#include <common/LayerMask.h>
 
 namespace idk
 {
@@ -18,7 +19,7 @@ namespace idk
 
 		//real aspect = 16.f / 9.f;
 		real near_plane = 0.1f;
-		real far_plane = 10.f;
+		real far_plane = 100.f;
 
 		int  depth = 0;
 		RscHandle<RenderTarget> render_target;
@@ -32,6 +33,8 @@ namespace idk
 
 		CameraClear clear;
 		rect viewport;
+
+        LayerMask layer_mask{ 0xFFFFFFFF };
 
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 

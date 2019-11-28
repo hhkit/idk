@@ -78,6 +78,8 @@ namespace idk
                     }
                     else if (curr.type.is_template<std::variant>())
                         curr.swap(curr.get_variant_value().get_property(token).value);
+                    else
+                        curr.swap(obj.get_property(token).value);
                 }
                 else
                     curr.swap(obj.get_property(token).value);
@@ -273,6 +275,9 @@ namespace idk
             handle->Name(prefab->Name());
         else if (auto path = Core::GetResourceManager().GetPath(prefab))
             handle->Name(PathHandle(*path).GetStem());
+
+		for (auto& elem : game_objects)
+			Core::GetSystem<SceneManager>().InsertObject(elem);
 
         return handle;
     }

@@ -17,7 +17,7 @@ namespace idk::mono
 		auto terminate = envi.Type("Object")->Raw();
 		auto klass = Raw();
 
-		while (klass != terminate)
+		while (mono_class_get_name(klass) != string_view{"Object"})
 		{
 			if (mono_class_get_name(klass) == findme)
 				return true;
@@ -29,6 +29,23 @@ namespace idk::mono
 	MonoClass* ManagedType::Raw() const
 	{
 		return type;
+	}
+
+	void ManagedType::CacheMessages()
+	{
+		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
+		auto terminate = envi.Type("Object")->Raw();
+
+		auto klass = type;
+		while (klass != terminate)
+		{
+			for (void* iter = nullptr; auto method = mono_class_get_methods(klass, &iter);)
+				thunks.emplace(mono_method_get_name(method), ManagedThunk{ method });
+			klass = mono_class_get_parent(klass);
+		}	
+		for (void* iter = nullptr; auto method = mono_class_get_methods(klass, &iter);)
+			thunks.emplace(mono_method_get_name(method), ManagedThunk{ method });
+
 	}
 
 	bool ManagedType::CacheThunk(string_view method_name, int param_count)
@@ -72,7 +89,7 @@ namespace idk::mono
 		auto obj_type = Core::GetSystem<ScriptSystem>().Environment().Type("Object");
 		IDK_ASSERT(obj_type);
 		auto obj = obj_type->Raw();
-		while (find_class != obj)
+		while (mono_class_get_name(find_class) != string_view{"Object"})
 		{
 			auto retval = mono_class_get_method_from_name(find_class, method_name.data(), param_count);
 			if (retval)

@@ -5,6 +5,7 @@
 #include <res/ResourceManager.h>
 #include <prefab/PrefabFactory.h>
 #include <gfx/GfxDbgTest.h>
+#include <parallel/ThreadPool.h>
 
 namespace idk
 {
@@ -21,6 +22,11 @@ namespace idk
 	{
 		return *_instance->_scheduler;
 	}
+
+	mt::ThreadPool& Core::GetThreadPool()
+	{
+		return *_instance->_thread_pool;
+	}
 	
 	ResourceManager& Core::GetResourceManager()
 	{
@@ -28,7 +34,7 @@ namespace idk
 	}
 
 	Core::Core()
-		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{true}
+		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{ true }
 	{
 		_instance = this;
 	}
@@ -59,19 +65,22 @@ namespace idk
 		auto* editor = &GetSystem<IEditor>();
 
 		// setup loop
+		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 
 		_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
-		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&TestSystem::TestSpan,                 "Test system until scripts are up");
 		_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")
 			                                      .IfPausedThen(&PhysicsSystem::DebugDrawColliders);
 		_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&PhysicsSystem::FirePhysicsEvents,     "Trigger and Collision Events");
-		
+
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&TestSystem::TestSpan, "Test system until scripts are up");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&Application::PollEvents,              "Poll OS Events");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&GamepadSystem::Update,                "Update gamepad states");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&FileSystem::Update,                   "Check for file changes");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AudioSystem::Update,                  "Update listeners and sources");
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts");
+		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&UISystem::Update,                     "Update UI");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts")
+			                                      .IfPausedThen(&ScriptSystem::ScriptPausedUpdate);
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
 		_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
 												  .IfPausedThen(&AnimationSystem::UpdatePaused);
@@ -83,15 +92,17 @@ namespace idk
 
 		if (editor)
 		{
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchBuildDirectory,      "Watch files");
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&AssetImporter::CheckImportDirectory,  "Watch for new files");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchDirectory,      "Watch files");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&IEditor::EditorUpdate,                "Editor Update");
-		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects Again");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects Again");
 		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
+		_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");
 		}
 
-		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::SortCameras        ,  "Sort Cameras"           );
-		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::PrepareLights      ,  "Prepare Lights"        );
+        _scheduler->SchedulePass      <UpdatePhase::PreRender> (&UISystem::FinalizeMatrices,           "Finalize UI Matrices");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::SortCameras,          "Sort Cameras");
+		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::PrepareLights,        "Prepare Lights");
 		_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::BufferGraphicsState,  "Buffer graphics objects");
 
 		_scheduler->SchedulePass      <UpdatePhase::Render>    (&GraphicsSystem::Prerender,            "Prerender");
@@ -103,7 +114,10 @@ namespace idk
 	
 		// main loop
 		_scheduler->Setup();
+		_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 		auto& app = Core::GetSystem<Application>();
+
+        Core::GetSystem<SceneManager>().BuildSceneGraph(Core::GetGameState().GetObjectsOfType<const GameObject>());
 
 		if (editor)
 		{

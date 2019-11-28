@@ -29,8 +29,7 @@ namespace idk
 		,   class Camera
 		,   class SkinnedMeshRenderer
 		,	class Light
-		,   class Font
-		,   class Image
+		,   class TextMesh
 
         /// PARTICLE
         ,   class ParticleSystem
@@ -42,6 +41,8 @@ namespace idk
         /// UI
         ,   class Canvas
         ,   class RectTransform
+        ,   class Image
+        ,   class Text
 
 		/// SCRIPTING
 		,	class mono::Behavior
@@ -100,7 +101,7 @@ namespace idk
 			class Scene
 		,	class TestResource
 		,   class AudioClip
-		//,	class Font
+		//,	class TextMesh
 		,	class Prefab
 		,	class ShaderTemplate
 		,	class Mesh

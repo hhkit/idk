@@ -183,6 +183,23 @@ namespace idk::yaml
 
 	static void on_colon(parser_state& p)
 	{
+        if (p.token.size() >= 2 && (p.token[0] == '"' || p.token[0] == '\''))
+        {
+            auto copy = p.token;
+            strip_trailing_ws(copy);
+            if (copy.back() != copy.front()) // string not closed
+            {
+                p.token += *p;
+                ++p;
+                return;
+            }
+            else if (copy.front() == '"' && copy[copy.size() - 2] == '\\') // ended with \" (meaning not closed yet)
+            {
+                p.token += *p;
+                ++p;
+                return;
+            }
+        }
         if (p.mode() == flow_map && (p[1] == ' ' || p[1] == '\t' || p[1] == '\n' || p[1] == '\r'))
         {
             strip_trailing_ws(p.token);
@@ -276,7 +293,7 @@ namespace idk::yaml
                 ++p;
                 return;
             }
-            else if (copy.front() == '"' && copy[copy.size() - 2] != '\\') // did not end with \" (meaning not closed yet)
+            else if (copy.front() == '"' && copy[copy.size() - 2] == '\\') // ended with \" (meaning not closed yet)
             {
                 p.token += *p;
                 ++p;

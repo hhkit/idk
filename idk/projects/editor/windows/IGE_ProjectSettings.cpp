@@ -207,16 +207,17 @@ namespace idk
                     continue;
 
                 ImGui::SameLine(0, spacing_x);
-                bool checked = config.matrix[i] & (1 << layer_index);
+				bool checked = config.matrix[i] & LayerMask{ 1u << layer_index };
                 if (ImGui::Checkbox(("##matrix" + std::to_string(i * LayerManager::num_layers + j)).c_str(), &checked))
                 {
-                    config.matrix[i] = config.matrix[i] & ~(1 << layer_index) | (checked << layer_index);
-                    config.matrix[layer_index] = config.matrix[layer_index] & ~(1 << i) | (checked << i);
+					config.matrix[i] = config.matrix[i] & LayerMask{ ~(1u << layer_index) | (checked << layer_index) };
+                    config.matrix[layer_index] = config.matrix[layer_index] & LayerMask{~(1 << i) | (checked << i)};
                     changed = true;
                 }
             }
         }
-
+		const size_t min = 1;
+		changed |= ImGui::DragScalar("Batch Size", ImGuiDataType_::ImGuiDataType_U64, &config.batch_size, 2.f, &min);
         ImGui::Unindent();
 
         if (changed)

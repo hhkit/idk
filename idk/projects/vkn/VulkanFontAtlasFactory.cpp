@@ -34,12 +34,13 @@ namespace idk::vkn
 		};
 
 		auto ptr = std::make_unique<VknFontAtlas>();
+		ptr->texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
 		FontAtlasLoader loader;
 		loader.LoadFontAtlas(*ptr, TextureFormat::eRGBA32, {}, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, ivec2{ 2,2 }, allocator, *fence);
 		return std::move(ptr);
 	}
 	unique_ptr<FontAtlas> VulkanFontAtlasFactory::Create()
 	{
-		return std::make_unique<VknFontAtlas>();
+		return GenerateDefaultResource();
 	}
 }

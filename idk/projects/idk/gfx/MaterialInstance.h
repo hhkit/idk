@@ -6,35 +6,34 @@
 
 namespace idk
 {
+    RESOURCE_EXTENSION(MaterialInstance, ".matinst")
+
 	class MaterialInstance
 		: public Resource<MaterialInstance>
         , public Saveable<MaterialInstance>
 	{
 	public:
-		using UniformStorage = hash_table<string, UniformInstanceValue>;
+		RscHandle<Material> material;
+		std::map<string, UniformInstanceValue> uniforms;
+
+		bool IsImageBlock(const string& name)const;
+		vector<RscHandle<Texture>> GetImageBlock(const string& name)const;
+		std::optional<UniformInstanceValue> GetUniform(const string& name)const;
+		void SetUniform(const string& name, UniformInstanceValue value);
+		bool IsUniformBlock(string_view name)const;
+		string GetUniformBlock(const string& name)const;
+		using uniform_store_t = decltype(uniforms);
 		struct temp_store
 		{
-			UniformStorage uniforms;
+			uniform_store_t uniforms;
 
-			bool IsImageBlock(UniformStorage::iterator itr) const;
-			bool IsUniformBlock(UniformStorage::iterator itr) const;
-			vector<RscHandle<Texture>> GetImageBlock(UniformStorage::iterator itr) const;
-			string GetUniformBlock(UniformStorage::iterator itr) const;
+			bool IsImageBlock(uniform_store_t::iterator itr)const;
+			bool IsUniformBlock(uniform_store_t::iterator itr)const;
+			vector<RscHandle<Texture>> GetImageBlock(uniform_store_t::iterator itr)const;
+			string GetUniformBlock(uniform_store_t::iterator itr)const;
 		};
-
-		RscHandle<Material> material;
-		UniformStorage uniforms;
-
-		bool IsImageBlock(const string& name) const;
-		vector<RscHandle<Texture>> GetImageBlock(const string& name) const;
-		std::optional<UniformInstanceValue> GetUniform(const string& name) const;
-		void SetUniform(const string& name, UniformInstanceValue value);
-
-		bool IsUniformBlock(string_view name) const;
-		string GetUniformBlock(const string& name) const;
 
 		temp_store get_cache()const;
 
-		EXTENSION(".matinst");
 	};
 }

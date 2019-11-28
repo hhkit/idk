@@ -5,6 +5,8 @@
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <script/MonoFunctionInvoker.h>
+
+#include <concurrent_queue.h>
 namespace idk::mono
 {
 	string_view Behavior::TypeName() const
@@ -30,6 +32,13 @@ namespace idk::mono
 	void Behavior::DisposeMonoObject()
 	{
 		script_data = {};
+	}
+
+	void Behavior::FireMessage(string_view msg, void* args[])
+	{
+		auto thunk = script_data.Type()->GetThunk(msg);
+		if (thunk)
+			thunk->Invoke(script_data.Raw()); // handle args?
 	}
 
 	void Behavior::Awake()
@@ -78,11 +87,10 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto t = Core::GetSystem<ScriptSystem>().Environment().Type("MonoBehavior");
-			
-			auto method = t->GetMethod("UpdateCoroutines");
-			if (method.index() == 0)
-				std::get<ManagedThunk>(method).Invoke(script_data.Raw());
+			auto thunk = script_data.Type()->GetThunk("UpdateCoroutines");
+
+			if (thunk)
+				thunk->Invoke(script_data.Raw());
 		}
 	}
 	

@@ -81,7 +81,7 @@ namespace idk
     template<>
     void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material_inst)
     {
-        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+        const float item_width = ImGui::GetWindowContentRegionWidth() * default_item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
         bool changed = false;
@@ -198,7 +198,7 @@ namespace idk
     template<>
     void IGE_InspectorWindow::DisplayAsset(RscHandle<Material> material)
     {
-        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
+        const float item_width = ImGui::GetWindowContentRegionWidth() * default_item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
         auto graph = RscHandle<shadergraph::Graph>{ material };

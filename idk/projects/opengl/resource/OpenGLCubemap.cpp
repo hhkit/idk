@@ -13,7 +13,7 @@ namespace idk::ogl
 	OpenGLCubemap::OpenGLCubemap()
 	{
 		glGenTextures(1, &_id);
-		*texture = OpenGLTexture{ _id, _size, FilterMode::Linear, UVMode::ClampToBorder};
+		//*texture = OpenGLTexture{ _id, _size, FilterMode::Linear, UVMode::ClampToBorder};
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

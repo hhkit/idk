@@ -1,4 +1,5 @@
 ﻿using idk;
+using System.Collections.Generic;
 
 namespace TestAndSeek
 {
@@ -9,12 +10,21 @@ namespace TestAndSeek
         public float f;
         public float jump_force;
         public Vector3 movement;
+        
         public Prefab prefab;
         public GameObject go;
+        public MaterialInstance minst;
+        public string nama;
+        public string namae_o;
+
         public int i2;
 
         private RigidBody rb;
         private TestShou ts;
+
+        List<Prefab> pfb;
+
+        static int static_i = 0;
 
         public Test()
         {
@@ -29,8 +39,10 @@ namespace TestAndSeek
 
         void Start()
         {
+            pfb.Add(prefab);
             rb = gameObject.GetComponent<RigidBody>();
             ts = gameObject.GetComponent<TestShou>();
+            Debug.Log("static_i " + ++static_i);
             if (rb)
                 Debug.Log("found rigidbody");
 
@@ -63,6 +75,24 @@ namespace TestAndSeek
 
         void FixedUpdate()
         {
+            //Debug.Log("static_i " + ++static_i);
+
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                Debug.Log("spawning prefab");
+                var inst = prefab.Instantiate();
+                Debug.Log("spawned with " + inst.transform.GetChildren().Length + " children.");
+                //Debug.Log("minst:" + minst);
+                //Debug.Log("rend: " + gameObject.GetComponentInChildren<Renderer>());
+                //gameObject.GetComponentInChildren<Renderer>().materialInstance = minst;
+            }
+
+            if (Input.GetKeyDown(KeyCode.P))
+                Time.timeScale = 0f;
+
+            if (Input.GetKeyDown(KeyCode.U))
+                Time.timeScale = 1f;
+
             if (rb)
             {
                 System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
@@ -96,8 +126,8 @@ namespace TestAndSeek
         void Update()
         {
             //Debug.Log("Children" + transform.GetChildren().Length.ToString());
-            if (prefab)
-                Debug.Log(prefab.ToString());
+            //if (prefab)
+            //    Debug.Log(prefab.ToString());
 
             //if (Input.GetKeyDown(KeyCode.L))
             //    GetComponentInParent<TestShou>().PrintI();
@@ -111,6 +141,11 @@ namespace TestAndSeek
             if (Input.GetKey(KeyCode.X))
                 transform.forward = Quaternion.AngleAxis(+3.14f / 6 * Time.deltaTime, Vector3.up) * transform.forward;
 
+        }
+
+        void PausedUpdate()
+        {
+            Debug.Log("oh boi");
         }
 
         public void OnCollisionEnter(Collision c)

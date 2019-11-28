@@ -31,6 +31,7 @@ of the editor.
 #include <gfx/DebugRenderer.h>
 #include <win32/WindowsApplication.h>
 #include <sstream> //sstream
+#include <math/matrix_decomposition.h>
 
 
 #include <iostream>
@@ -159,12 +160,8 @@ namespace idk {
 
 		ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
-
 		//Raycast Selection
-		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing()) {
-
-			//Use this function to get
-			//std::cout << "MousePosInWindow: " << GetMousePosInWindowNormalized().x << "," << GetMousePosInWindowNormalized().y << "\n";
+		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {
 
 			//Select gameobject here!
 			currRay = GenerateRayFromCurrentScreen();
@@ -221,12 +218,11 @@ namespace idk {
 		GetCursorPos(&currMouseScreenPos);
 
 		//Right Mouse WASD control
-		if (ImGui::IsMouseDown(1)) {
+		if (ImGui::IsMouseDown(1) && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
-				// MoveMouseToWindow();
-
+				Handle<Transform> tfm = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera->GetGameObject()->GetComponent<Transform>();
+				distance_to_focused_vector = focused_vector.distance(tfm->position);
 				cachedMouseScreenPos = currMouseScreenPos;
-				// ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
 			}	
@@ -237,7 +233,7 @@ namespace idk {
 
 
 		//Middle Mouse Pan control
-		if (ImGui::IsMouseDown(2)) {
+		if (ImGui::IsMouseDown(2)) { //Doesnt matter if you hold alt or not!
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2)) { //Check if it is clicked here first!
 				// MoveMouseToWindow();
 				// GetCursorPos(&prevMouseScreenPos);
@@ -251,12 +247,45 @@ namespace idk {
 			is_controlling_Pancam = false;
 		}
 
-		if (is_controlling_WASDcam) {
+		//ALT-RightClick Scroll
+		if (ImGui::IsKeyDown(static_cast<int>(Key::Alt)) && ImGui::IsMouseDown(1)) {
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
+				cachedMouseScreenPos = currMouseScreenPos;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				ImGui::SetWindowFocus();
+				is_controlling_ALTscroll = true;
+			}
+		}
+		else {
+			is_controlling_ALTscroll = false;
+		}
+
+		//ALT-LeftClick Orbit
+		if (ImGui::IsKeyDown(static_cast<int>(Key::Alt)) && ImGui::IsMouseDown(0)) {
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0)) { //Check if it is clicked here first!
+				cachedMouseScreenPos = currMouseScreenPos;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				ImGui::SetWindowFocus();
+				is_controlling_ALTorbit = true;
+			}
+		}
+		else {
+			is_controlling_ALTorbit = false;
+		}
+
+
+
+		if (is_controlling_ALTscroll) { //Alt controls take priority
+			UpdateScrollMouseControl2();
+		}
+		else if (is_controlling_ALTorbit) {
+			UpdateOrbitControl();
+		}
+		else if (is_controlling_WASDcam) {
 			UpdateWASDMouseControl();
 		}
 		else if (is_controlling_Pancam) {
 			UpdatePanMouseControl();
-
 		}
 		else {
 			UpdateScrollMouseControl(); //Enable mouse control only if no WASD or Pan is in effect
@@ -270,26 +299,7 @@ namespace idk {
 		UpdateGizmoControl();
 
 		// draw current global axes
-		const auto bottom_right = vec2(ImGui::GetWindowPos()) + vec2(ImGui::GetWindowContentRegionMax()) - vec2(32.0f, 32.0f);
-		const float axis_len = 24.0f;
-		IDE& editor = Core::GetSystem<IDE>();
-		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
-		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		auto view = currCamera->ViewMatrix();
-
-		vec2 right = (view * vec4(1.0f, 0, 0, 0)).xy;
-		right.x *= -1;
-		vec2 up = (view * vec4(0, 1.0f, 0, 0)).xy;
-		vec3 forward = view * vec4(0, 0, 1.0f, 0);
-		forward.x *= -1;
-		vec2 forw = forward.xy;
-		if (forward.z < 0)
-			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
-		ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * right, 0xff0000ff, 2.0f);
-		ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * up, 0xff00ff00, 2.0f);
-		if (forward.z > 0)
-			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
+		DrawGlobalAxes();
 
 		DrawSnapControl();
 		//DrawGridControl();
@@ -408,6 +418,30 @@ namespace idk {
 		ImGui::SetCursorPos(originalCursorPos);
 	}
 
+	void IGE_SceneView::DrawGlobalAxes()
+	{
+		const auto bottom_right = vec2(ImGui::GetWindowPos()) + vec2(ImGui::GetWindowContentRegionMax()) - vec2(32.0f, 32.0f);
+		const float axis_len = 24.0f;
+		IDE& editor = Core::GetSystem<IDE>();
+		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		auto view = currCamera->ViewMatrix();
+
+		vec2 right = (view * vec4(1.0f, 0, 0, 0)).xy;
+		right.x *= -1;
+		vec2 up = (view * vec4(0, 1.0f, 0, 0)).xy;
+		vec3 forward = view * vec4(0, 0, 1.0f, 0);
+		forward.x *= -1;
+		vec2 forw = forward.xy;
+		if (forward.z < 0)
+			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
+		ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * right, 0xff0000ff, 2.0f);
+		ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * up, 0xff00ff00, 2.0f);
+		if (forward.z > 0)
+			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
+	}
+
 	std::pair<Handle<GameObject>, phys::raycast_result> IGE_SceneView::GetClosestGameObjectFromCamera(vector<Handle<GameObject>>& refVector, vector<phys::raycast_result>& rayResult)
 	{
 		std::pair<Handle<GameObject>, phys::raycast_result> output{};
@@ -483,6 +517,8 @@ namespace idk {
 		//MOUSE PITCH
 		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
+		focused_vector = tfm->position + tfm->Forward() * distance_to_focused_vector;
+
 		// MoveMouseToWindow();
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
 		currMouseScreenPos = cachedMouseScreenPos;
@@ -492,32 +528,21 @@ namespace idk {
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-		//vec2 delta = ImGui::GetMouseDragDelta(2,0.1f);
-		// GetCursorPos(&currMouseScreenPos);
-		//int drag_X{};
-		//int drag_Y{};
-		//drag_X = currPos.x - prevPos.x;
-		//drag_Y = currPos.y - prevPos.y;
-		//std::cout << "Drag:" << drag_X << "," << drag_Y << std::endl;
-
 		vec2 delta{};
 		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x);
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y);
-		//auto& app_sys = Core::GetSystem<Application>();
 		
 		IDE& editor = Core::GetSystem<IDE>();
 
 		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY = tfm->Up()* delta.y*pan_multiplier		* editor.scroll_max* 0.5f; //Amount to move in localy axis
-		vec3 localX = -tfm->Right()* delta.x* pan_multiplier* editor.scroll_max* 0.5f; //Amount to move in localx axis
+		vec3 localY =  tfm->Up()	* delta.y*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localy axis
+		vec3 localX = -tfm->Right()	* delta.x*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
-
-		//ImGui::ResetMouseDragDelta(2);
-
-		// MoveMouseToWindow();
+		focused_vector += localY;
+		focused_vector += localX;
 
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
 		currMouseScreenPos = cachedMouseScreenPos;
@@ -537,6 +562,51 @@ namespace idk {
 		//else
 			//editor.scroll_multiplier = 2.f;
 
+	}
+
+	void IGE_SceneView::UpdateScrollMouseControl2()
+	{
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+
+		//vec2 delta{ static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) , static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) };
+
+		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+
+		tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x)*0.5f);
+
+		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
+		currMouseScreenPos = cachedMouseScreenPos;
+
+	}
+
+	void IGE_SceneView::UpdateOrbitControl()
+	{
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+		const float orbit_strength = 0.5f;
+		vec2 delta{};
+		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) *  orbit_strength; //Global Y Axis
+		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) * -orbit_strength; //Local X Axis
+		//Getting camera datas
+		Handle<Camera>		currCamera		= Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+		Handle<Transform>	tfm				= currCamera->GetGameObject()->GetComponent<Transform>();
+		mat4				cam_matrix		= tfm->GlobalMatrix();
+
+
+		const vec3 cam_to_point_vector = tfm->position - focused_vector;
+		const mat3 rotation_mat3 = rotate(vec3{ 0,1,0 }, rad(deg{ delta.x })) * rotate(tfm->Right(), rad(deg{ delta.y }));
+		const mat4 rotation_mat4 = mat4{ rotation_mat3 };
+
+		const vec3 final_cam_pos = focused_vector + rotation_mat3* cam_to_point_vector;
+		const mat4 final_position_mat4 = mat4{ translate(final_cam_pos) };
+		const mat4 inverse_position_mat4 = mat4{ translate(tfm->position) }.inverse();
+		
+		cam_matrix = final_position_mat4 * rotation_mat4 * inverse_position_mat4 * cam_matrix;	//T*R*T^-1
+		tfm->GlobalMatrix(cam_matrix);
+
+		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
+		currMouseScreenPos = cachedMouseScreenPos;
 	}
 
 	void IGE_SceneView::UpdateGizmoControl()
@@ -560,7 +630,7 @@ namespace idk {
 
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
-		if (editor.selected_gameObjects.size()) {
+		if (editor.selected_gameObjects.size() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
 			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->Transform(); 
 
 
@@ -615,6 +685,7 @@ namespace idk {
 
 
 		}
+
 	}
 
 	void IGE_SceneView::MoveMouseToWindow()

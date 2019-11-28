@@ -19,6 +19,8 @@
 
 #include <math/matrix_decomposition.h>
 
+#include <parallel/ThreadPool.h>
+
 namespace idk
 {
 	constexpr float restitution_slop = 0.01f;
@@ -165,8 +167,8 @@ namespace idk
 		{
             struct CollisionInfo
             {
-                const ColliderInfo& a;
-                const ColliderInfo& b;
+                const ColliderInfo* a;
+                const ColliderInfo* b;
                 phys::col_success res;
             };
 			vector<CollisionInfo> collision_frame;
@@ -187,6 +189,15 @@ namespace idk
             // O(N^2) collision check
             // all objects confirmed to be active (but may be sleeping)
 
+			struct ColliderInfoPair
+			{
+				const ColliderInfo* lhs;
+				const ColliderInfo* rhs;
+			};
+
+			vector<ColliderInfoPair> info;
+			info.reserve(dynamic_info.size() * 4);
+
             // dynamic vs dynamic
             for (const auto& i : dynamic_info)
             {
@@ -204,12 +215,15 @@ namespace idk
                     if (!i.broad_phase.overlaps(j.broad_phase))
                         continue;
 
+					info.emplace_back(ColliderInfoPair{ &i, &j });
+					/*
                     const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
                     if (collision)
                     {
                         collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
                         collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
                     }
+					*/
                 }
             }
             // dynamic vs static
@@ -225,20 +239,65 @@ namespace idk
                         continue;
                     if (!i.broad_phase.overlaps(j.broad_phase))
                         continue;
-
+					info.emplace_back(ColliderInfoPair{ &i,&j });
+					/*
                     const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
                     if (collision)
                     {
                         collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
                         collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
                     }
+					*/
                 }
             }
 
+			using CollisionJobResult = std::tuple<vector<CollisionInfo>, CollisionList>;
+			vector<mt::Future<CollisionJobResult>> batches;
+
+			if (info.size())
+			{
+				const auto sz = info.size();
+				const auto batch_sz = GetConfig().batch_size;
+				batches.reserve(batch_sz / sz + batch_sz % sz ? 1 : 0);
+
+				for (size_t i = 0; i < sz; i += batch_sz)
+				{
+					batches.push_back(Core::GetThreadPool().Post(
+						[batch_sz, CollideShapes](ColliderInfoPair* begin_itr, ColliderInfoPair* end_itr) -> CollisionJobResult
+						{
+							vector<CollisionInfo> collision_frame;
+							CollisionList batch_collisions;
+							collision_frame.reserve(batch_sz);
+							batch_collisions.reserve(batch_sz);
+							while (begin_itr != end_itr)
+							{
+								auto& [i, j] = *begin_itr;
+								const auto collision = std::visit(CollideShapes, i->predicted_shape, j->predicted_shape);
+								if (collision)
+								{
+									collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+									batch_collisions.emplace(CollisionPair{ i->collider.GetHandle(), j->collider.GetHandle() }, collision.value());
+								}
+								++begin_itr;
+							}
+							return std::make_tuple(collision_frame, batch_collisions);
+						},
+						info.data() + i,
+						info.data() + std::min(i + batch_sz, sz)
+						));
+				}
+
+				for (auto& elem : batches)
+				{
+					auto [batch_frame, collision_list] = elem.get();
+					collision_frame.insert(collision_frame.end(), batch_frame.begin(), batch_frame.end());
+					collisions.merge(collision_list);
+				}
+			}
 			for (const auto& [i, j, result] : collision_frame)
 			{
-				const auto& lcollider = i.collider;
-				const auto& rcollider = j.collider;
+				const auto& lcollider = i->collider;
+				const auto& rcollider = j->collider;
 
 				auto lrigidbody = lcollider._rigidbody;
 				auto rrigidbody = rcollider._rigidbody;
@@ -515,7 +574,7 @@ namespace idk
 		{
 			{
 				auto layer = c.GetGameObject()->GetComponent<Layer>();
-				auto mask = layer ? layer->mask() : 1 << 0;
+				auto mask = layer ? layer->mask() : LayerMask{ 1 << 0 };
 				if (!(mask & layer_mask))
 					continue;
 			}
@@ -659,7 +718,7 @@ namespace idk
 
     bool PhysicsSystem::AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const
     {
-        return GetConfig().matrix[a] & (1 << b);
+        return GetConfig().matrix[a] & LayerMask(1 << b);
     }
 
 

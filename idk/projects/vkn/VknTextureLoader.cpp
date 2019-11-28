@@ -86,6 +86,9 @@ namespace idk::vkn
 	{
 		TextureOptions options{};
 		auto format = load_info.internal_format;
+		//auto nformat = NearestBlittableFormat(format, BlitCompatUsageMasks::eDst);
+		//if (nformat)
+		//	format = *nformat;
 
 		if (ooptions)
 		{
@@ -100,12 +103,12 @@ namespace idk::vkn
 		ptr->Size(ivec2{load_info.width,load_info.height});
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -142,12 +145,12 @@ namespace idk::vkn
 		auto ptr = &texture;
 		auto&& [image, alloc,aspect] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format,ptr->img_aspect);
+		ptr->imageView = CreateImageView2D(device, *ptr->image_, format,ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -287,7 +290,7 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.internal_format = vk::Format::eB8G8R8A8Unorm;
+		info.internal_format = vk::Format::eB8G8R8A8Srgb;
 		info.image_usage = vk::ImageUsageFlagBits::eColorAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eColor;
 		info.sampled(true);
@@ -299,7 +302,7 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.internal_format = vk::Format::eD16Unorm;
+		info.internal_format = vk::Format::eD32Sfloat;
 		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eDepth;
 		info.sampled(true);
@@ -528,7 +531,10 @@ namespace idk::vkn
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 	}
-	
+	bool fml = false;
+	bool IsDepthStencil(vk::Format format);
+	void Mark() { fml = true; }
+#pragma optimize("",off)
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
 		TextureResult result;
@@ -544,7 +550,7 @@ namespace idk::vkn
 
 		size_t num_bytes = len;
 
-		vk::ImageUsageFlags attachment_type = (format==vk::Format::eD16Unorm)? vk::ImageUsageFlagBits::eDepthStencilAttachment:vk::ImageUsageFlagBits::eColorAttachment;
+		vk::ImageUsageFlags attachment_type = IsDepthStencil(format)? vk::ImageUsageFlagBits::eDepthStencilAttachment:vk::ImageUsageFlagBits::eColorAttachment;
 		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
 		std::optional<vk::ImageSubresourceRange> range{};
 
@@ -586,7 +592,7 @@ namespace idk::vkn
 			next_layout = layout = attachment_layout;
 		}
 		vk::ImageAspectFlagBits img_aspect = vk::ImageAspectFlagBits::eColor;
-		if ((format == vk::Format::eD16Unorm))
+		if (IsDepthStencil(format ))
 			img_aspect = vk::ImageAspectFlagBits::eDepth;
 		result.aspect = img_aspect;
 		TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);

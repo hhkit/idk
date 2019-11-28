@@ -11,9 +11,20 @@ namespace idk
 }
 namespace idk::vkn
 {
-
+	struct BoundVertexBuffer
+	{
+		vk::Buffer buffer;
+		size_t offset;
+	};
+	struct BoundIndexBuffer
+	{
+		vk::Buffer buffer{};
+		size_t offset{};
+		vk::IndexType index_type{};
+	};
 	struct ProcessedRO
 	{
+#pragma region Type declarations
 		struct ImageBinding
 		{
 			vk::ImageView view;
@@ -69,8 +80,15 @@ namespace idk::vkn
 			bool IsImage()const;
 			vk::DescriptorSetLayout GetLayout()const;
 		};
+#pragma endregion
 		//set, update_instr
 		const RenderObject* itr=nullptr;
+
+		//location, vertex buffer
+		hash_table<uint32_t, BoundVertexBuffer> attrib_buffers;
+		std::optional<BoundIndexBuffer> index_buffer{};
+		size_t num_vertices{};
+				
 		hash_table<uint32_t, vector<BindingInfo>> bindings; //Deprecate this
 		shared_ptr<pipeline_config> config;
 
@@ -83,35 +101,8 @@ namespace idk::vkn
 		bool rebind_shaders = false;
 		size_t num_instances = 1;
 		size_t inst_offset   = 0;
-		/*
-		ProcessedRO(
-			//set, update_instr
-			const RenderObject* itr_                                 = nullptr,
-			hash_table<uint32_t, vector<BindingInfo>> bindings_      = {}, //Deprecate this
-			shared_ptr<pipeline_config> config_                      = {},
-
-			std::optional<RscHandle<ShaderProgram>> vertex_shader_   = {},
-			std::optional<RscHandle<ShaderProgram>> geom_shader_     = {},
-			std::optional<RscHandle<ShaderProgram>> frag_shader_     = {},
-
-			//set, ds
-			vector<std::optional<vk::DescriptorSet>> descriptor_sets = vector<std::optional<vk::DescriptorSet>>(8),
-			bool rebind_shaders_                                     = false,
-			size_t num_instances_                                    = 1,
-			size_t inst_offset_                                      = 0,
-		) = default;
-
-		*/
-		//ProcessedRO() = default;
-		//ProcessedRO(ProcessedRO&&)noexcept = default;
-		//ProcessedRO& operator=(ProcessedRO&&)noexcept = default;
-		//ProcessedRO(const ProcessedRO&) = default;
-		//ProcessedRO& operator=(const ProcessedRO&) = default;
-
-		const RenderObject& Object()const
-		{
-			return *itr;
-		}
+		
+		const RenderObject& Object()const;
 		const std::optional<vk::DescriptorSet>& GetDescriptorSet(uint32_t set)const;
 		void SetDescriptorSet(uint32_t set, vk::DescriptorSet ds);
 	};

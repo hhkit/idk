@@ -8,9 +8,6 @@
 #include <common/Transform.h>
 #include <IDE.h>
 #include <scene/SceneManager.h>
-#include <prefab/Prefab.h>
-#include <res/compiler/AssetImporter.h>
-#include <editor/compiler/IDEAssetImporter.h>
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
 #include <script/ScriptSystem.h>
@@ -21,6 +18,8 @@ namespace idk
 {
 	void NewScene()
 	{
+        Core::GetSystem<IDE>().ClearScene();
+
 		if (Core::GetSystem<SceneManager>().GetActiveScene())
 			Core::GetSystem<SceneManager>().GetActiveScene()->Deactivate();
 		Core::GetSystem<SceneManager>().SetActiveScene(Core::GetResourceManager().Create<Scene>());
@@ -34,35 +33,47 @@ namespace idk
 			light->Transform()->rotation = quat{ vec3{1,0,0}, deg{-90} };
 			light->AddComponent<Light>()->light = DirectionalLight{};
 		}
-		//{
-		//	auto camera = active_scene->CreateGameObject();
-		//	camera->Name("Camera");
-		//	camera->AddComponent<Camera>();
-		//}
+		{
+			auto camera = active_scene->CreateGameObject();
+			camera->Name("Camera");
+		}
 
-		Core::GetSystem<IDE>().ClearScene();
+        Core::GetSystem<IDE>().reg_scene.set("scene", string{ active_scene.guid });
 	}
+
 	bool OpenScene()
 	{
-		if (auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
+		if (const auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
 		{
-			auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-			auto hnd = Core::GetSystem<AssetImporter>().Get<Scene>(virtual_path);
-			auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-			if (hnd != active_scene)
-			{
-				if (active_scene)
-					active_scene->Deactivate();
-
-				Core::GetSystem<SceneManager>().SetActiveScene(hnd);
-				hnd->LoadFromResourcePath();
-
-				Core::GetSystem<IDE>().ClearScene();
-				return true;
-			}
+            const auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
+            const auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
+            return OpenScene(*scene_res);
 		}
 		return false;
 	}
+
+    bool OpenScene(RscHandle<Scene> scene)
+    {
+        if (!scene)
+            return false;
+
+        auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+        if (scene != active_scene)
+        {
+            if (active_scene)
+                active_scene->Deactivate();
+            Core::GetSystem<SceneManager>().SetActiveScene(scene);
+            scene->LoadFromResourcePath();
+
+            Core::GetSystem<IDE>().ClearScene();
+            Core::GetSystem<IDE>().reg_scene.set("scene", string{ scene.guid });
+
+            return true;
+        }
+
+        return false;
+    }
+
 	void SaveScene()
 	{
 		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
@@ -86,11 +97,12 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			Core::GetSystem<EditorAssetImporter>().Rename(curr_scene, p);
-			Core::GetSystem<EditorAssetImporter>().Save(curr_scene);
+			Core::GetResourceManager().Rename(curr_scene, p);
+			Core::GetResourceManager().Save(curr_scene);
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}
+
 	void SaveSceneAs()
 	{
 		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
@@ -109,12 +121,11 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			Core::GetSystem<EditorAssetImporter>().CopyTo(curr_scene, p);
-			auto res = Core::GetSystem<ResourceManager>().Load<Scene>(p);
+			auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
 			if (res)
 			{
 				curr_scene->Deactivate();
-				Core::GetSystem<SceneManager>().SetActiveScene(res);
+				Core::GetSystem<SceneManager>().SetActiveScene(res.value());
 				Core::GetSystem<SceneManager>().GetActiveScene()->LoadFromResourcePath();
 			}
 			Core::GetSystem<ProjectManager>().SaveProject();
@@ -153,8 +164,7 @@ namespace idk
 			prefab_scene->Deactivate();
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
-					for (auto& prefab : Core::GetSystem<AssetImporter>().Get(path).GetAll<Prefab>())
-						Core::GetResourceManager().Destroy(prefab);
+					Core::GetResourceManager().Unload(path);
 
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
 
@@ -163,7 +173,7 @@ namespace idk
 
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
-					Core::GetResourceManager().Load<Prefab>(path, true);
+					Core::GetResourceManager().Load(path, true);
 		}
 	}
 }

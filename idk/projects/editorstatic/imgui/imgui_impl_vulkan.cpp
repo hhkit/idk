@@ -491,6 +491,40 @@ static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkCommandBu
 	}
 }
 
+float SrgbToLinear(float srgb)
+{
+	constexpr float exp = 2.2f;
+	return std::pow(srgb, exp);
+}
+float LinearToSrgb(float linear)
+{
+	constexpr float exp = 1 / 2.2f;
+	return std::pow(linear, exp);
+}
+
+
+ImColor  SrgbToLinear(ImColor color)
+{
+	return ImColor{ 
+		SrgbToLinear(color.Value.x), 
+		SrgbToLinear(color.Value.y), 
+		SrgbToLinear(color.Value.z), 
+		SrgbToLinear(color.Value.w), 
+	};
+}
+
+void ConvertSrgbVertexColorsToLinear(ImDrawData* draw_data)
+{
+	for (auto i = draw_data->CmdListsCount; i-- > 0;)
+	{
+		auto& cmd_list = *draw_data->CmdLists[i];
+		for (auto& vtx : cmd_list.VtxBuffer)
+		{
+			vtx.col = SrgbToLinear(ImColor{ vtx.col });
+		}
+	}
+}
+
 // Render function
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
 void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer command_buffer)
@@ -529,6 +563,8 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
 		CreateOrResizeBuffer(rb->VertexBuffer, rb->VertexBufferMemory, rb->VertexBufferSize, vertex_size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	if (rb->IndexBuffer == VK_NULL_HANDLE || rb->IndexBufferSize < index_size)
 		CreateOrResizeBuffer(rb->IndexBuffer, rb->IndexBufferMemory, rb->IndexBufferSize, index_size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+	ConvertSrgbVertexColorsToLinear(draw_data);
 
 	// Upload vertex/index data into a single contiguous GPU buffer
 	{

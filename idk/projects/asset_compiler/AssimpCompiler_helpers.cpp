@@ -361,21 +361,21 @@ namespace idk::ai_helpers
 			}
 
 			anim::BoneData new_bone;
-			new_bone._name = curr_node.node->mName.data;
-			new_bone._parent = curr_node.parent;
+			new_bone.name = curr_node.node->mName.data;
+			new_bone.parent = curr_node.parent;
 
 			// Pre/Post rotations
 			new_bone.pre_rotation = GetPreRotations(curr_node.node);
 			new_bone.post_rotation = GetPostRotations(curr_node.node);
 
 			// World
-			aiMatrix4x4		ai_child_world_bind_pose;// = initMat4(curr_node.assimp_node->_global_inverse_bind_pose).Inverse();
+			aiMatrix4x4		ai_child_world_bind_pose;// = initMat4(curr_node.assimp_node->global_inverse_bind_pose).Inverse();
 			aiVector3D		child_world_pos;
 			aiVector3D		child_world_scale;
 			aiQuaternion	child_world_rot;
 
 			// Local
-			aiMatrix4x4		ai_child_local_bind_pose;// = b._parent >= 0 ? initMat4(bones_out[b._parent]._global_inverse_bind_pose) * ai_child_world_bind_pose : ai_child_world_bind_pose;
+			aiMatrix4x4		ai_child_local_bind_pose;// = b.parent >= 0 ? initMat4(bones_out[b.parent].global_inverse_bind_pose) * ai_child_world_bind_pose : ai_child_world_bind_pose;
 			aiVector3D		child_local_pos;
 			aiVector3D		child_local_scale;
 			aiQuaternion	child_local_rot;
@@ -398,10 +398,10 @@ namespace idk::ai_helpers
 				global_inverse.Inverse();
 
 				// Multiply the parent's inverse if its there
-				if (new_bone._parent >= 0)
+				if (new_bone.parent >= 0)
 				{
 					// My global inverse is P(inv) * C_local(inv)
-					global_inverse = to_aiMat4(final_skeleton[new_bone._parent]._global_inverse_bind_pose) * global_inverse;
+					global_inverse = to_aiMat4(final_skeleton[new_bone.parent].global_inverse_bind_pose) * global_inverse;
 				}
 
 				// Initialize child local/global pose
@@ -410,17 +410,17 @@ namespace idk::ai_helpers
 				// ai_child_world_bind_pose.Inverse();
 
 				// Initialize global inverse in bone
-				new_bone._global_inverse_bind_pose = to_mat4(global_inverse);
+				new_bone.global_inverse_bind_pose = to_mat4(global_inverse);
 			}
 			else
 			{
 				// Initialize child local/global pose
 				ai_child_world_bind_pose = bone_node->second->mOffsetMatrix;
 				ai_child_world_bind_pose.Inverse();
-				ai_child_local_bind_pose = new_bone._parent >= 0 ? to_aiMat4(final_skeleton[new_bone._parent]._global_inverse_bind_pose) * ai_child_world_bind_pose : ai_child_world_bind_pose;
+				ai_child_local_bind_pose = new_bone.parent >= 0 ? to_aiMat4(final_skeleton[new_bone.parent].global_inverse_bind_pose) * ai_child_world_bind_pose : ai_child_world_bind_pose;
 
 				// Initialize global inverse in bone
-				new_bone._global_inverse_bind_pose = to_mat4(bone_node->second->mOffsetMatrix);
+				new_bone.global_inverse_bind_pose = to_mat4(bone_node->second->mOffsetMatrix);
 			}
 
 			// World
@@ -430,14 +430,14 @@ namespace idk::ai_helpers
 			aiDecomposeMatrix(&ai_child_local_bind_pose, &child_local_scale, &child_local_rot, &child_local_pos);
 
 			// Setting local bind pose of both the new bone and the aiNode
-			new_bone._local_bind_pose.position = to_vec3(child_local_pos);
-			new_bone._local_bind_pose.rotation = to_quat(child_local_rot);
-			new_bone._local_bind_pose.scale = to_vec3(child_local_scale);
+			new_bone.local_bind_pose.position = to_vec3(child_local_pos);
+			new_bone.local_bind_pose.rotation = to_quat(child_local_rot);
+			new_bone.local_bind_pose.scale = to_vec3(child_local_scale);
 
 			curr_node.node->mTransformation = ai_child_local_bind_pose;
 
 			final_skeleton.emplace_back(new_bone);
-			final_skeleton_table.emplace(final_skeleton.back()._name, final_skeleton.size() - 1);
+			final_skeleton_table.emplace(final_skeleton.back().name, final_skeleton.size() - 1);
 
 			for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
 			{
@@ -447,10 +447,10 @@ namespace idk::ai_helpers
 
 		for (auto& bone : final_skeleton)
 		{
-			bone._global_inverse_bind_pose[3] *= 0.01f;
-			bone._global_inverse_bind_pose[3].w = 1.0f;
+			bone.global_inverse_bind_pose[3] *= 0.01f;
+			bone.global_inverse_bind_pose[3].w = 1.0f;
 
-			bone._local_bind_pose.position *= 0.01f;
+			bone.local_bind_pose.position *= 0.01f;
 		}
 	}
 
@@ -494,17 +494,17 @@ namespace idk::ai_helpers
 			}
 
 			anim::BoneData new_bone;
-			new_bone._name = curr_node.node->mName.data;
-			new_bone._parent = curr_node.parent;
+			new_bone.name = curr_node.node->mName.data;
+			new_bone.parent = curr_node.parent;
 
 			// World
-			aiMatrix4x4		ai_child_world_bind_pose;// = initMat4(curr_node.assimp_node->_global_inverse_bind_pose).Inverse();
+			aiMatrix4x4		ai_child_world_bind_pose;// = initMat4(curr_node.assimp_node->global_inverse_bind_pose).Inverse();
 			aiVector3D		child_world_pos;
 			aiVector3D		child_world_scale;
 			aiQuaternion	child_world_rot;
 
 			// Local
-			aiMatrix4x4		ai_child_local_bind_pose;// = b._parent >= 0 ? initMat4(bones_out[b._parent]._global_inverse_bind_pose) * ai_child_world_bind_pose : ai_child_world_bind_pose;
+			aiMatrix4x4		ai_child_local_bind_pose;// = b.parent >= 0 ? initMat4(bones_out[b.parent].global_inverse_bind_pose) * ai_child_world_bind_pose : ai_child_world_bind_pose;
 			aiVector3D		child_local_pos;
 			aiVector3D		child_local_scale;
 			aiQuaternion	child_local_rot;
@@ -514,10 +514,10 @@ namespace idk::ai_helpers
 			global_inverse.Inverse();
 
 			// Multiply the parent's inverse if its there
-			if (new_bone._parent >= 0)
+			if (new_bone.parent >= 0)
 			{
 				// My global inverse is P(inv) * C_local(inv)
-				global_inverse = to_aiMat4(skinless_skeleton[new_bone._parent]._global_inverse_bind_pose) * global_inverse;
+				global_inverse = to_aiMat4(skinless_skeleton[new_bone.parent].global_inverse_bind_pose) * global_inverse;
 			}
 
 			// Initialize child local/global pose
@@ -526,9 +526,9 @@ namespace idk::ai_helpers
 			ai_child_world_bind_pose.Inverse();
 
 			// Initialize global inverse in bone
-			new_bone._global_inverse_bind_pose = to_mat4(global_inverse);
-			new_bone._global_inverse_bind_pose[3] /= 100.0f;
-			new_bone._global_inverse_bind_pose[3].w = 1.0f;
+			new_bone.global_inverse_bind_pose = to_mat4(global_inverse);
+			new_bone.global_inverse_bind_pose[3] /= 100.0f;
+			new_bone.global_inverse_bind_pose[3].w = 1.0f;
 
 			// World
 			// aiDecomposeMatrix(&ai_child_world_bind_pose, &child_world_scale, &child_world_rot, &child_world_pos);
@@ -537,14 +537,14 @@ namespace idk::ai_helpers
 			aiDecomposeMatrix(&ai_child_local_bind_pose, &child_local_scale, &child_local_rot, &child_local_pos);
 
 			// Setting local bind pose of both the new bone and the aiNode
-			new_bone._local_bind_pose.position = to_vec3(child_local_pos) / 100.0f;
-			new_bone._local_bind_pose.rotation = to_quat(child_local_rot);
-			new_bone._local_bind_pose.scale = to_vec3(child_local_scale);
+			new_bone.local_bind_pose.position = to_vec3(child_local_pos) / 100.0f;
+			new_bone.local_bind_pose.rotation = to_quat(child_local_rot);
+			new_bone.local_bind_pose.scale = to_vec3(child_local_scale);
 
 			curr_node.node->mTransformation = ai_child_local_bind_pose;
 
 			skinless_skeleton.emplace_back(new_bone);
-			skinless_skeleton_table.emplace(skinless_skeleton.back()._name, skinless_skeleton.size() - 1);
+			skinless_skeleton_table.emplace(skinless_skeleton.back().name, skinless_skeleton.size() - 1);
 
 			for (size_t i = 0; i < curr_node.node->mNumChildren; ++i)
 			{
@@ -554,10 +554,10 @@ namespace idk::ai_helpers
 
 		for (auto& bone : skinless_skeleton)
 		{
-			bone._global_inverse_bind_pose[3] *= 0.01f;
-			bone._global_inverse_bind_pose[3].w = 1.0f;
+			bone.global_inverse_bind_pose[3] *= 0.01f;
+			bone.global_inverse_bind_pose[3].w = 1.0f;
 
-			bone._local_bind_pose.position *= 0.01f;
+			bone.local_bind_pose.position *= 0.01f;
 		}
 	}
 

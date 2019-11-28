@@ -217,6 +217,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BufferedObj.h" />
+    <ClInclude Include="CubemapRenderer.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DeferredPass.h" />
     <ClInclude Include="DescriptorCountArray.h" />
@@ -224,10 +225,12 @@
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="DescriptorUpdateData.h" />
     <ClInclude Include="draw_call.h" />
+    <ClInclude Include="FontRenderer.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
+    <ClInclude Include="ParticleRenderer.h" />
     <ClInclude Include="PipelineBinders.h" />
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
@@ -237,6 +240,7 @@
     <ClInclude Include="RenderUtil.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TmpTest.h" />
+    <ClInclude Include="utils\Flags.h" />
     <ClInclude Include="utils\FrameObjects.h" />
     <ClInclude Include="utils\GlslToSpirv.h" />
     <ClInclude Include="MemoryAllocator.h" />
@@ -291,15 +295,18 @@
     <ClInclude Include="vulkan_state_fwd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CubemapRenderer.cpp" />
     <ClCompile Include="DDSLoader.cpp" />
     <ClCompile Include="DeferredPass.cpp" />
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="DescriptorUpdateData.cpp" />
     <ClCompile Include="draw_call.cpp" />
+    <ClCompile Include="FontRenderer.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
+    <ClCompile Include="ParticleRenderer.cpp" />
     <ClCompile Include="PipelineBinders.cpp" />
     <ClCompile Include="PipelineManager.cpp" />
     <ClCompile Include="PipelineThingy.cpp" />

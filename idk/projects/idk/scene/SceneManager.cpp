@@ -15,21 +15,15 @@ namespace idk
 	void SceneManager::Init()
 	{
 		Core::GetResourceManager().RegisterFactory<SceneFactory>();
-		//Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
+		Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
 	}
 
 	void SceneManager::LateInit()
 	{
-		//for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
-		//	Core::GetResourceManager().Load<Scene>(elem);
+		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
+			Core::GetResourceManager().Load(elem);
 		
-		if (_active_scene)
-		{
-			_active_scene->LoadFromResourcePath();
-			OnSceneChange.Fire(_active_scene);
-		}
-
-		_prefab_scene = Core::GetResourceManager().Emplace(std::make_unique<Scene>(Scene::prefab));
+		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(Scene::prefab);
 		_prefab_scene->Activate();
 	}
 
@@ -118,6 +112,16 @@ namespace idk
 	SceneManager::SceneGraph* SceneManager::FetchSceneGraphFor(Handle<class GameObject> handle)
 	{
 		return _sg_builder.FetchSceneGraphFor(handle);
+	}
+
+	void SceneManager::ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent)
+	{
+		_sg_builder.ReparentObject(go, new_parent);
+	}
+
+	void SceneManager::InsertObject(Handle<class GameObject> go)
+	{
+		_sg_builder.InsertObject(go);
 	}
 
 }

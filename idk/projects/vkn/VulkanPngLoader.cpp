@@ -51,6 +51,9 @@ namespace idk::vkn
 		InputTexInfo iti{ r_cast<const char*>(tex_data),s_cast<size_t>(size.x * size.y * 4),def.is_srgb?vk::Format::eR8G8B8A8Srgb: vk::Format::eR8G8B8A8Unorm };
 		if(tm)
 			to= *tm;
+		auto blit_usage = BlitCompatUsageMasks::eDst;
+		if (!BlitCompatible(tci.internal_format,blit_usage))
+			tci.internal_format = *NearestBlittableFormat(tci.internal_format,blit_usage);
 		loader.LoadTexture(tex, allocator, *fence,to, tci, iti);
 		stbi_image_free(tex_data);
 		return rtex;
@@ -61,9 +64,13 @@ namespace idk::vkn
 		auto m = meta.FetchMeta<Texture>();
 		auto tex = m ? Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(m->guid)
 			: Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
-		auto met = m->GetMeta<Texture>();
-		auto meta_ptr = (met) ? &(*met) : nullptr;
-		return LoadFile(handle, RscHandle<Texture>{tex},meta_ptr);;
+		if (m)
+		{
+			auto met = m->GetMeta<Texture>();
+			auto meta_ptr = (met) ? &(*met) : nullptr;
+			return LoadFile(handle, RscHandle<Texture>{tex}, meta_ptr);;
+		}
+		return LoadFile(handle, RscHandle<Texture>{tex},nullptr);;
 	}
 
 }

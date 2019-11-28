@@ -8,6 +8,8 @@
 #include <vkn/ShaderModule.h>
 #include <forward_list>
 
+#include <vkn/VulkanMesh.h>
+
 #include <vkn/DescriptorUpdateData.h>
 
 namespace idk::vkn
@@ -253,6 +255,39 @@ namespace idk::vkn
 			}
 		}
 	}
+	void PipelineThingy::BindAttrib(uint32_t location, vk::Buffer buffer, size_t offset)
+	{
+		attrib_buffers[location] = { buffer,offset };
+	}
+	void PipelineThingy::BindMeshBuffers(const RenderObject& ro)
+	{
+		BindMeshBuffers(ro.mesh, *ro.renderer_req);
+	}
+	void PipelineThingy::BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs)
+	{
+		auto& vmesh = mesh.as<VulkanMesh>();
+		BindMeshBuffers(vmesh, attribs);
+	}
+	void PipelineThingy::BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs)
+	{
+		for (auto&& [attrib, location] : attribs.mesh_requirements)
+		{
+			auto& attrib_buffer = mesh.Get(attrib);
+			BindAttrib(location, *attrib_buffer.buffer(), attrib_buffer.offset);
+		}
+		auto& vmesh = mesh;
+		auto& idx_buffer = vmesh.GetIndexBuffer();
+		if (idx_buffer && idx_buffer->buffer())
+		{
+			index_buffer = BoundIndexBuffer{ *idx_buffer->buffer(),idx_buffer->offset,vmesh.IndexType() };
+			num_vertices = vmesh.IndexCount();
+		};
+
+	}
+	void PipelineThingy::SetVertexCount(uint32_t vertex_count)
+	{
+		num_vertices = vertex_count;
+	}
 	std::optional<UboInfo> PipelineThingy::GetUniform(const string& uniform_name) const
 	{
 		std::optional<UboInfo> result{};
@@ -322,8 +357,10 @@ namespace idk::vkn
 		{
 			prev_config = next_config = ro.config;
 		}
-		auto& p_ro = draw_calls.emplace_back(ProcessedRO{ &ro,std::move(sets),next_config,shaders[static_cast<size_t>(ShaderStage::Vertex)],shaders[static_cast<size_t>(ShaderStage::Geometry)],shaders[static_cast<size_t>(ShaderStage::Fragment)] });
+		auto& p_ro = draw_calls.emplace_back(ProcessedRO{ &ro,std::move(attrib_buffers), std::move(index_buffer),num_vertices,std::move(sets),next_config,shaders[static_cast<size_t>(ShaderStage::Vertex)],shaders[static_cast<size_t>(ShaderStage::Geometry)],shaders[static_cast<size_t>(ShaderStage::Fragment)] });
 		p_ro.rebind_shaders = shader_changed;
+		index_buffer = {};
+		num_vertices = 0;
 		shader_changed = false;
 	}
 	void PipelineThingy::FinalizeDrawCall(const RenderObject& ro, size_t num_inst, size_t inst_offset)
@@ -447,6 +484,7 @@ namespace idk::vkn
 				dirty = false;
 			}
 		}
+
 		return std::move(result);
 	}
 }

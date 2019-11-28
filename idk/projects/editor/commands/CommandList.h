@@ -20,6 +20,6 @@ Contains all commands
 #include <editor/commands/CMD_AddComponent.h>
 #include <editor/commands/CMD_AddBehavior.h>
 #include <editor/commands/CMD_DeleteComponent.h>
-#include <editor/commands/CMD_ModifyInput.h>
+#include <editor/commands/CMD_ModifyProperty.h>
 #include <editor/commands/CMD_InstantiatePrefab.h>
 #include <editor/commands/CMD_CallCommandAgain.h>

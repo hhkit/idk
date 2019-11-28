@@ -23,8 +23,8 @@ namespace idk
 	public:
 		Signal<ivec2> OnScreenSizeChanged;
 		Signal<>      OnClosed;
-	//	Signal<>      OnMinimize;
-	//	Signal<>      OnRestore;
+		Signal<>      OnFocusLost;
+		Signal<>      OnFocusGain;
 	//	Signal<>      OnFullscreen;
 	//	Signal<>      OnWindowed;
 		// app

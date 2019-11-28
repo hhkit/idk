@@ -52,12 +52,6 @@
     <ClInclude Include="windows\IGE_MaterialEditor.h">
       <Filter>windows</Filter>
     </ClInclude>
-    <ClInclude Include="commands\CMD_ModifyInput.h">
-      <Filter>commands</Filter>
-    </ClInclude>
-    <ClInclude Include="commands\CMD_ModifyInput.inl">
-      <Filter>commands</Filter>
-    </ClInclude>
     <ClInclude Include="widgets\InputResource.h">
       <Filter>widgets</Filter>
     </ClInclude>
@@ -130,6 +124,19 @@
       <Filter>widgets</Filter>
     </ClInclude>
     <ClInclude Include="commands\CMD_CallCommandAgain.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_HelpWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets\LayerMaskCombo.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectManagement.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.h" />
+    <ClInclude Include="commands\CMD_ModifyProperty.h">
       <Filter>commands</Filter>
     </ClInclude>
     <ClInclude Include="compiler\IDEAssetImporter.h" />
@@ -246,6 +253,15 @@
     <ClCompile Include="commands\CMD_CallCommandAgain.cpp">
       <Filter>commands</Filter>
     </ClCompile>
+    <ClCompile Include="windows\IGE_HelpWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\LayerMaskCombo.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectManagement.cpp" />
+    <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
     <ClCompile Include="compiler\IDEAssetImporter.cpp" />
   </ItemGroup>
   <ItemGroup>

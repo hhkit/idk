@@ -15,8 +15,6 @@
 #include <scene/SceneManager.h>
 #include <test/TestComponent.h>
 
-#include <editor/compiler/IDEAssetImporter.h>
-
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 
@@ -74,16 +72,97 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     c->AddSystem<Windows>(hInstance, nCmdShow);
     c->AddSystem<win::XInputSystem>();
 
-	switch (HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL)
+	GraphicsSystem* gSys = nullptr;
+	auto gfx_api = HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL;
+	switch (gfx_api)
 	{
-	//case GraphicsAPI::Vulkan: c->AddSystem<vkn::VulkanWin32GraphicsSystem>(); break;
-	case GraphicsAPI::OpenGL: c->AddSystem<ogl::Win32GraphicsSystem>();       break;
-	default: break;
+	case GraphicsAPI::Vulkan:
+		{
+			auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+			gSys = &sys;
+			if (HasArg(L"--validation", command_lines, num_args))
+				sys.Instance().EnableValidation();
+			break;
+		}
+	case GraphicsAPI::OpenGL: 
+		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
+		break;
+	default:
+		break;
+	
 	}
-	Core::GetSystem<GraphicsSystem>().is_deferred(HasArg(L"--deferred", command_lines, num_args));
+	gSys->is_deferred(HasArg(L"--deferred", command_lines, num_args));
 
 	c->AddSystem<IDE>();
-	c->AddSystem<EditorAssetImporter>();
+
+    namespace fs = std::filesystem;
+
+    fs::path idk_app_data = Core::GetSystem<Application>().GetAppData();
+    idk_app_data /= "idk";
+    if (!fs::exists(idk_app_data))
+        fs::create_directory(idk_app_data);
+
+    idk_app_data /= "logs";
+    if (!fs::exists(idk_app_data))
+        fs::create_directory(idk_app_data);
+    Core::GetSystem<LogSystem>().SetLogDir(idk_app_data.string());
+
+	c->Setup();
+
+	//LogSingleton::Get().PipeToCout(LogPool::GAME, true);
+	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
+
+	//gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
+	//gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
+
+    // auto scene = RscHandle<Scene>{};
+    // auto go = scene->CreateGameObject();
+    // go->AddComponent<ParticleSystem>();
+	
+	//auto scene = RscHandle<Scene>{};
+	//auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
+	//mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
+	//
+	//auto create_anim_obj = [&](vec3 pos, PathHandle path = PathHandle{ "/assets/models/YY_model.fbx" }) {
+	//	auto go = scene->CreateGameObject();
+
+	//	go->Name(path.GetStem());
+	//	go->GetComponent<Transform>()->position = pos;
+	//	//go->GetComponent<Transform>()->scale /= 100.0f;
+
+	//	auto model_resource = Core::GetResourceManager().Load(path);
+	//	string model_stem{ path.GetStem() };
+	//	auto animator = go->AddComponent<Animator>();
+	//	for (auto handle : model_resource->GetAll<Mesh>())
+	//	{
+	//		auto mesh_child_go = scene->CreateGameObject();
+
+	//		mesh_child_go->Name(handle->Name());
+	//		mesh_child_go->Transform()->parent = go;
+
+	//		auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
+	//		mesh_rend->mesh = handle;
+	//		mesh_rend->material_instance = mat_inst;
+	//	}
+
+	//	animator->skeleton = model_resource->Get<anim::Skeleton>();
+	//	Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
+
+	//	auto animation_resource = Core::GetResourceManager().Load("/assets/models/test.fbx");
+	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
+	//	animation_resource = Core::GetResourceManager().Load("/assets/models/test2.fbx");
+	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
+	//	animation_resource = Core::GetResourceManager().Load("/assets/models/walk.fbx");
+	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
+	//	animation_resource = Core::GetResourceManager().Load("/assets/models/idle.fbx");
+	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
+	//	
+	//	return go;
+	//};
+
+	//// @Joseph: Uncomment this when testing.
+	//create_anim_obj(vec3{ 0,0,0 });
+	
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }

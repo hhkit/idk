@@ -265,6 +265,12 @@ namespace idk::vkn
 		auto& lights = curr_buffer.lights;
 		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);
 		shared_graphics_state.BrdfLookupTable = _pimpl->BrdfLookupTable;
+		shared_graphics_state.particle_data = &curr_buffer.particle_buffer;
+		shared_graphics_state.particle_range = &curr_buffer.particle_range;
+
+		shared_graphics_state.characters_data = &curr_buffer.font_buffer;
+		shared_graphics_state.fonts_data = &curr_buffer.font_render_data;
+		shared_graphics_state.font_range = &curr_buffer.font_range;
 
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
@@ -314,13 +320,15 @@ namespace idk::vkn
 		bool will_draw_debug = true;
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
-			auto& curr_state = curr_states[i];
+			auto& curr_state = curr_states[i];		
 			auto& curr_range = curr_buffer.culled_render_range[i];
 			auto& curr_cam = curr_range.camera;
+
+			//Init render datas (range for instanced data, followed by render datas for other passes)
 			curr_state.Init(curr_range, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
-			//const bool new_rt = 
-				curr_state.clear_render_target = !IsDontClear(curr_cam);
+			
+			curr_state.clear_render_target = !IsDontClear(curr_cam);
 
 			if(itr==render_targets.end())
 				render_targets.emplace(curr_cam.render_target);
@@ -351,7 +359,6 @@ namespace idk::vkn
 			for (auto& [buffer, data] : _debug_renderer->BufferUpdateInfo())
 			{
 				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
-
 			}
 		}
 		for (auto& prt : render_targets)

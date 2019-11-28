@@ -266,12 +266,12 @@ namespace idk::vkn
 		texture.Size(ptr->Size(ivec2{ load_info.width,load_info.height }));
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = vfa::CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = vfa::CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -305,14 +305,15 @@ namespace idk::vkn
 		const void* rgba = rgba32;
 		auto format = MapFormat(pixel_format);
 		auto ptr = texture.texture;
+
 		auto&& [image, alloc, aspect] = vkn::LoadFontAtlas(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -519,6 +520,7 @@ namespace idk::vkn
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 	}
+	bool IsDepthStencil(vk::Format format);
 
 	FontAtlasResult LoadFontAtlas(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
@@ -535,7 +537,7 @@ namespace idk::vkn
 
 		size_t num_bytes = len;
 
-		vk::ImageUsageFlags attachment_type = (format == vk::Format::eD16Unorm) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
+		vk::ImageUsageFlags attachment_type = IsDepthStencil(format) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
 		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
 		std::optional<vk::ImageSubresourceRange> range{};
 
@@ -577,7 +579,7 @@ namespace idk::vkn
 			next_layout = layout = attachment_layout;
 		}
 		vk::ImageAspectFlagBits img_aspect = vk::ImageAspectFlagBits::eColor;
-		if ((format == vk::Format::eD16Unorm))
+		if (IsDepthStencil(vk::Format::eD16Unorm))
 			img_aspect = vk::ImageAspectFlagBits::eDepth;
 		result.aspect = img_aspect;
 		vfa::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);

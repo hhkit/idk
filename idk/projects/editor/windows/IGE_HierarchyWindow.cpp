@@ -67,8 +67,6 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		//Tool bar
 
-		ImGui::SetCursorPos(ImVec2{ 0.0f,ImGui::GetFrameHeight() });
-
 
 		//Toolbar
 		//const ImVec2 toolBarSize{ window_size.x, 18.0f };
@@ -92,13 +90,39 @@ namespace idk {
 		}
 
 		if (ImGui::BeginPopup("CreatePopup")) {
+            IDE& editor = Core::GetSystem<IDE>();
+
 			if (ImGui::MenuItem("Create Empty")) {
-				IDE& editor = Core::GetSystem<IDE>();
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-
-
 			}
+            if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
+                if (editor.selected_gameObjects.size()) {
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.selected_gameObjects.front()));
+                }
+                else {
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+                }
+            }
+            if (ImGui::BeginMenu("UI")) {
+				const auto go = editor.selected_gameObjects.empty()? Handle<GameObject>() :editor.selected_gameObjects.front();
+				if (ImGui::MenuItem("Canvas"))
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
+				if (ImGui::MenuItem("Image"))
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Image", vector<string>{ "RectTransform", "Image" }));
+				if (ImGui::MenuItem("Text"))
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Text", vector<string>{ "RectTransform", "Text" }));
+				
+				ImGui::EndMenu();
+            }
 
+			ImGui::EndPopup();
+		}
+		if (ImGui::Button("...##AdditionalStuff")) {
+			ImGui::OpenPopup("OpenAdditionalStuff");
+
+		}
+		if (ImGui::BeginPopup("OpenAdditionalStuff")) {
+			ImGui::Checkbox("Show Editor Objects", &show_editor_objects);
 			ImGui::EndPopup();
 		}
 
@@ -127,7 +151,7 @@ namespace idk {
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
-		ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
+		//ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
 		
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();

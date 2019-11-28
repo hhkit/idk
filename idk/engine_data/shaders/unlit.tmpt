@@ -1,0 +1,49 @@
+#version 460
+
+layout(location =1)in VS_OUT
+{
+  vec3 position;
+  vec2 uv;
+  vec3 normal;
+  vec3 tangent;
+  vec4 color;
+} fs_in;
+
+//__MATERIAL_UNIFORMS__;
+
+// declare output buffers here
+layout(location = 0) out vec4 outColor;
+
+vec3 Normal()
+{
+	return fs_in.normal;
+}
+vec3 Tangent()
+{
+	return fs_in.tangent;
+}
+
+//Helper functions begin
+vec3 unpack_normal(vec3 normal_in)
+{
+	vec3 T = Tangent();
+	vec3 N = Normal();
+	vec3 B = cross(N, T);
+	mat3 TBN = mat3(T,B,N);
+	normal_in -= vec3(0.5);
+	return normalize(TBN * normal_in);
+}
+
+void main()
+{
+	vec3  view_pos  = fs_in.position;
+	vec3  normal    = normalize(fs_in.normal);
+	vec3  tangent   = normalize(fs_in.tangent);
+	vec2  uv        = fs_in.uv;
+
+	// local scope here, graph will assign to this 
+	
+	vec3 view_dir = -normalize(view_pos);
+
+	//__MATERIAL_CODE__;
+}

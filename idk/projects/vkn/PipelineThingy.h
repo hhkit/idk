@@ -10,8 +10,13 @@
 #include <vkn/VulkanHashes.h>
 #include <vkn/DescriptorUpdateData.h>
 #include <vkn/DescriptorCountArray.h>
+namespace idk
+{
+	struct renderer_attributes;
+}
 namespace idk::vkn
 {
+	class VulkanMesh;
 	struct DescriptorUpdateData;
 	struct VknCubemap;
 	struct DescriptorsManager;
@@ -47,6 +52,11 @@ namespace idk::vkn
 		);
 		void UnbindShader(ShaderStage stage);
 		void BindShader(ShaderStage stage, RscHandle<ShaderProgram> shader);
+		void BindAttrib(uint32_t location, vk::Buffer buffer, size_t offset);
+		void BindMeshBuffers(const RenderObject& ro);
+		void BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs);
+		void BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs);
+		void SetVertexCount(uint32_t vertex_count);
 
 		std::optional<UboInfo> GetUniform(const string& uniform_name) const;
 
@@ -71,6 +81,11 @@ namespace idk::vkn
 		void reserve(size_t size);
 
 	private:
+
+		hash_table<uint32_t, BoundVertexBuffer> attrib_buffers;
+		std::optional<BoundIndexBuffer> index_buffer{};
+		size_t num_vertices{};
+
 		DescriptorUpdateData dud{};
 		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
 		vector<ProcessedRO> draw_calls;

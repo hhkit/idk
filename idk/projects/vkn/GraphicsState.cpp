@@ -82,6 +82,11 @@ namespace idk::vkn
 		{
 			AddMatInst(material_instances, &p_ro);
 		}
+		if(shared_gfx_state->particle_range)
+		for (auto& part_range : *shared_gfx_state->particle_range)
+		{
+			material_instances[part_range.material_instance] = ProcessedMaterial{ part_range.material_instance };
+		}
 	}
 
 void GraphicsState::CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects)

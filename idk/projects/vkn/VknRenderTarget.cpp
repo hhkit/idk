@@ -34,9 +34,11 @@ namespace idk::vkn
 
 		//TODO store a framebuffer instead.
 		auto color_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetColorBuffer().guid);
-		loader.LoadTexture(*color_texture, TextureFormat::eBGRA32, {}, nullptr, 0, size, alloc, fence, true);
+		auto ctci = ColorBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+		loader.LoadTexture(*color_texture, alloc, fence, {}, ctci, {});
 		auto depth_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetDepthBuffer().guid);
-		loader.LoadTexture(*depth_texture, TextureFormat::eD16Unorm, {}, nullptr, 0, size, alloc, fence, true);
+		TexCreateInfo dtci = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+		loader.LoadTexture(*depth_texture, alloc, fence, {}, dtci, {});
 
 		{ 
 			VulkanView& vknView = View();
@@ -57,7 +59,7 @@ namespace idk::vkn
 	
 	void TransitionTexture(vk::CommandBuffer cmd_buffer, vk::ImageLayout type, VknTexture& tex)
 	{
-		hlp::TransitionImageLayout(true, cmd_buffer, View().GraphicsQueue(), *tex.image, tex.format, vk::ImageLayout::eUndefined, type);
+		hlp::TransitionImageLayout(true, cmd_buffer, View().GraphicsQueue(), tex.Image(), tex.format, vk::ImageLayout::eUndefined, type);
 	}
 
 	void VknRenderTarget::PrepareDraw(vk::CommandBuffer& cmd_buffer)

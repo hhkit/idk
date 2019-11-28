@@ -26,9 +26,11 @@ of the editor.
 #include <editor/SceneManagement.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <core/Scheduler.h>
+#include <audio/AudioSystem.h> //AudioSystem
 #include <PauseConfigurations.h>
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
+#include <imgui/ImGuizmo.h>
 
 namespace idk {
 
@@ -406,6 +408,7 @@ namespace idk {
 
         ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
+		ImGui::PushID(1337);
 		if (Core::GetSystem<IDE>().game_running == false)
 		{
 			if (ImGui::Button("Play", toolButtonSize))
@@ -415,10 +418,11 @@ namespace idk {
 				// 	if (i->window_name != "Game")
 				// 		i->is_open = false;
 				// editor.currentCamera().current_camera->enabled = false;
-				SaveSceneTemporarily();
+				HotReloadDLL();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
+				Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
 				Core::GetSystem<PhysicsSystem>().Reset();
 			}
 			ImGui::SameLine(0, 0);
@@ -433,6 +437,7 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(EditorPause);
 					Core::GetSystem<IDE>().game_frozen = true;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(true);
 				}
 			}
 			else
@@ -441,19 +446,23 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(UnpauseAll); 
 					Core::GetSystem<IDE>().game_frozen = false;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+
 				}
 			}
 			ImGui::SameLine(0, 0);
 			if (ImGui::Button("Stop", toolButtonSize))
 			{
 				RestoreFromTemporaryScene();
+				Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
 			}
 		}
-
+		ImGui::PopID();
 		
 		ImGui::PopStyleVar();
+
 
         ImGui::SameLine(ImGui::GetWindowContentRegionWidth() -
             ImGui::CalcTextSize("Draw All Colliders").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
@@ -552,6 +561,12 @@ namespace idk {
 			//DEL = Delete
 			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
 				int execute_counter = 0;
+				//Move the gizmo away before deleting
+				float				fake_matrix[16]{ 0 }; 
+				ImGuizmo::Manipulate(fake_matrix, fake_matrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, fake_matrix, NULL, NULL);
+
+
+
 				while (!editor.selected_gameObjects.empty()) {
 					Handle<GameObject> i = editor.selected_gameObjects.front();
 					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());

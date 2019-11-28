@@ -20,14 +20,14 @@ namespace idk
         return -1;
     }
 
-    uint32_t LayerManager::GetMask(span<string_view> layers) const
+	LayerMask LayerManager::GetMask(span<string_view> layers) const
     {
-        uint32_t mask = 0;
+		LayerMask mask{ 0 };
         for (auto sv : layers)
         {
             auto index = NameToLayerIndex(sv);
             if (index >= 0)
-                mask |= 1 << index;
+				mask |= LayerMask{ 1 << index };
         }
         return mask;
     }

@@ -265,6 +265,7 @@ namespace idk::vkn
 		
 		binding.Bind(the_interface);
 		binding.Bind(the_interface, fsq_ro);
+		the_interface.BindMeshBuffers(fsq_ro);
 		//Draw Fullscreen Quad
 		the_interface.FinalizeDrawCall(fsq_ro);
 		//Insert Forward stuff here?

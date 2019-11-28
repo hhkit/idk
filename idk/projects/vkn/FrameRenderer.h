@@ -13,7 +13,13 @@
 #include <vkn/RenderUtil.h>
 #include <vkn/PipelineThingy.h>
 
+#include <vkn/CubemapRenderer.h>
+
 #include <vkn/GraphicsState.h>
+
+#include <vkn/ParticleRenderer.h>
+
+#include <vkn/FontRenderer.h>
 
 namespace idk
 {
@@ -35,7 +41,7 @@ namespace idk::vkn
 		void SetPipelineManager(PipelineManager& manager);
 		void PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index);
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
-		void PostRenderGraphicsStates(const vector<GraphicsState>& state, uint32_t frame_index);
+		//void PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 		SharedGraphicsState shared_graphics_state;
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
@@ -98,6 +104,9 @@ namespace idk::vkn
 		CubemapRenderer _convoluter;
 		CubemapRenderer _skybox;
 
+		ParticleRenderer _particle_renderer;
+
+		FontRenderer   _font_renderer;
 
 		//VknFrameBufferManager   fb_man{};
 	};

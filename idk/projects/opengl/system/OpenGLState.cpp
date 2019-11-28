@@ -20,6 +20,7 @@
 #include <gfx/FramebufferFactory.h>
 #include <gfx/FontAtlas.h>
 #include <opengl/resource/OpenGLFontAtlas.h>
+#include <ui/Canvas.h>
 
 #include <editor/IDE.h>
 #include <gfx/ViewportUtil.h>
@@ -625,7 +626,7 @@ namespace idk::ogl
 			{
 				if (elem.coords.size())
 				{
-					auto& atlas = elem.fontAtlas.as<OpenGLFontAtlas>();
+					auto& atlas = elem.atlas.as<OpenGLFontAtlas>();
 
 					glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
 					/* Use the texture containing the atlas */
@@ -645,7 +646,7 @@ namespace idk::ogl
 					glEnableVertexAttribArray(0);
 					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0);
 					//GL_CHECK();
-					glDrawArrays(GL_TRIANGLES, 0, elem.n_size);
+					glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(elem.coords.size()));
 
 					glDisableVertexAttribArray(0);
 
@@ -656,6 +657,10 @@ namespace idk::ogl
 			//glEnable(GL_CULL_FACE);
 
 			glBindVertexArray(0);
+
+
+
+            // PARTICLE SYSTEM DRAW
 
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
@@ -702,11 +707,89 @@ namespace idk::ogl
                 fsq->DrawInstanced(elem.particles.size());
             }
 
-			glDisable(GL_BLEND);
-
 		} // for each culled camera
 
 		glBindVertexArray(0);
+
+
+
+        // UI DRAW
+        glDisable(GL_DEPTH_TEST);
+
+        RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
+        glBindVertexArray(font_vao_id);
+        pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::VUi]);
+        auto ui_render_per_canvas = curr_object_buffer.ui_render_per_canvas;
+        for (auto& [canvas, ui_render_data] : ui_render_per_canvas)
+        {
+            fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{canvas->render_target});
+            for (auto& elem : ui_render_data)
+            {
+                std::visit([&](const auto& data)
+                {
+                    using T = std::decay_t<decltype(data)>;
+                    if constexpr (std::is_same_v<T, ImageData>)
+                    {
+                        // bind shader
+                        pipeline.PushProgram(elem.material->material->_shader_program);
+                        pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
+                        pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+                        pipeline.SetUniform("PerUI.is_font", false);
+                        pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+
+                        fsq->Bind(
+                            renderer_attributes{ {
+                                { vtx::Attrib::UV, 1 },
+                                { vtx::Attrib::Position, 0 }
+                            } }
+                        );
+                        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(real), 0);
+
+                        fsq->Draw();
+                    }
+                    else
+                    {
+                        if (data.coords.size())
+                        {
+                            pipeline.PushProgram(elem.material->material->_shader_program);
+
+                            auto& atlas = data.atlas.as<OpenGLFontAtlas>();
+
+                            glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
+                            /* Use the texture containing the atlas */
+                            atlas.BindToUnit(0);
+                            pipeline.SetUniform("tex", 0);
+
+                            pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+                            pipeline.SetUniform("PerUI.is_font", true);
+                            pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+                            GL_CHECK();
+
+                            //pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+
+                            /* Draw all the character on the screen in one go */
+
+                            glBufferData(GL_ARRAY_BUFFER, data.coords.size() * sizeof(FontPoint), std::data(data.coords), GL_DYNAMIC_DRAW);
+                            //GL_CHECK();
+                            glEnableVertexAttribArray(0);
+                            glEnableVertexAttribArray(1);
+                            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0); // pos
+                            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), r_cast<void*>(2 * sizeof(real))); // uv
+                            //GL_CHECK();
+                            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(data.coords.size()));
+
+                            glDisableVertexAttribArray(0);
+                            glDisableVertexAttribArray(1);
+
+                            glBindBuffer(GL_ARRAY_BUFFER, 0);
+                        }
+                        GL_CHECK();
+                    }
+                }, elem.data);
+            }
+        }
+
+
 
 		fb_man.ResetFramebuffer();
 
@@ -927,6 +1010,7 @@ namespace idk::ogl
 			pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
 			pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
 			pipeline.SetUniform(lightblk + "intensity", light.intensity);
+			pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
 			if (light.light_map)
 			{
