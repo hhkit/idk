@@ -269,7 +269,7 @@ namespace idk::vkn
 		shared_graphics_state.particle_range = &curr_buffer.particle_range;
 
 		shared_graphics_state.characters_data = &curr_buffer.font_buffer;
-		shared_graphics_state.fonts_data = &curr_buffer.font_array_data;
+		shared_graphics_state.fonts_data = &curr_buffer.font_render_data;
 		shared_graphics_state.font_range = &curr_buffer.font_range;
 
 		PreRenderData pre_render_data;
@@ -327,8 +327,8 @@ namespace idk::vkn
 			//Init render datas (range for instanced data, followed by render datas for other passes)
 			curr_state.Init(curr_range, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
-			//const bool new_rt = 
-				curr_state.clear_render_target = !IsDontClear(curr_cam);
+			
+			curr_state.clear_render_target = !IsDontClear(curr_cam);
 
 			if(itr==render_targets.end())
 				render_targets.emplace(curr_cam.render_target);
@@ -359,7 +359,6 @@ namespace idk::vkn
 			for (auto& [buffer, data] : _debug_renderer->BufferUpdateInfo())
 			{
 				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
-
 			}
 		}
 		for (auto& prt : render_targets)

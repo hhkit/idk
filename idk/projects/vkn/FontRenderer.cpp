@@ -70,29 +70,22 @@ namespace idk::vkn
 			vert_bind.Bind(the_interface);
 
 			//size_t i = state.range.inst_font_begin;
+			auto i = state.range.inst_font_begin;
 			for(auto& elem: font_render_info)
 			{
-				auto i = state.range.inst_font_begin;
-				//size_t list_start_size = i, character_list_size = list_start_size + (elem.characters.size());
-				//for (size_t j = state.range.inst_font_begin; j < state.range.inst_font_end; ++j)
-				{
-					auto& raw_elem = font_raw_data[i];
-					RenderObject f_ro{ font_ro };
+				auto& raw_elem = font_raw_data[i];
+				RenderObject f_ro{ font_ro };
 
-					//f_ro.mesh = Mesh::defaults[MeshType::FSQ];
-					//f_ro.renderer_req = &font_vertex_req;
-					// bind shader
+				// bind shader
 
-					//TODO bind materials
-					//mat_bind.Bind(the_interface, f_ro);
-					vert_bind.BindFont(the_interface, elem);
+				//TODO bind materials
+				vert_bind.BindFont(the_interface, elem);
 
-					//the_interface.BindMeshBuffers(f_ro);
-					the_interface.BindAttrib(0, shared_state.font_buffer.buffer(), 0);
-					the_interface.SetVertexCount(raw_elem.num_elems);
+				//the_interface.BindMeshBuffers(f_ro);
+				the_interface.BindAttrib(0, shared_state.font_buffer[i].buffer(), 0);
+				the_interface.SetVertexCount(s_cast<uint32_t>(elem.coords.size()));
 
-					the_interface.FinalizeDrawCall(font_ro_inst.emplace_back(std::move(f_ro)), raw_elem.num_elems, raw_elem.elem_offset);
-				}
+				the_interface.FinalizeDrawCall(font_ro_inst.emplace_back(std::move(f_ro)));
 
 				++i;
 			}

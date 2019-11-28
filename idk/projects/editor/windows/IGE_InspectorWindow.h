@@ -62,7 +62,7 @@ namespace idk {
         GenericResourceHandle _displayed_asset{ RscHandle<Texture>() }; // if false, show gameobject(s)
 
         Handle<PrefabInstance> _prefab_inst;
-        GenericHandle _prefab_curr_component;
+        GenericHandle _curr_component;
         int _prefab_curr_component_nth;
         vector<string> _curr_property_stack;
         // spawn prefab instances in prefab scene so prefab assets can be displayed.
@@ -103,6 +103,9 @@ namespace idk {
         using CustomDrawFn = bool(*)(const reflect::dynamic& dyn);
         using InjectDrawTable = hash_table<string_view, CustomDrawFn>;
         bool DisplayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table = nullptr);
+
+		ImGuiTextFilter component_textFilter{};
+		ImGuiTextFilter script_textFilter{};
 
 	};
 

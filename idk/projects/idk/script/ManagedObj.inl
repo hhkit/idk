@@ -21,7 +21,7 @@ if (klass == MONO_CLASS)                                        \
 }
 
 #define MONO_COMPLEX_TYPE(REAL_TYPE, MONO_CLASS)                \
-if (mono_class_get_name(klass) == string_view{MONO_CLASS})      \
+if (klass == MONO_CLASS)      \
 {                                                               \
 	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
 	auto new_val = old_val;								        \
@@ -198,9 +198,9 @@ namespace idk::mono
 				
 				auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 
-				MONO_COMPLEX_TYPE(vec2, "Vector2");
-				MONO_COMPLEX_TYPE(vec3, "Vector3");
-				MONO_COMPLEX_TYPE(vec4, "Vector4");
+				MONO_COMPLEX_TYPE(vec2, envi.Type("Vector2")->Raw());
+				MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
+				MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
 
 				MONO_RESOURCE_TYPE(MaterialInstance);
 				MONO_RESOURCE_TYPE(Prefab);

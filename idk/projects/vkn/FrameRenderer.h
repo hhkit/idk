@@ -41,7 +41,7 @@ namespace idk::vkn
 		void SetPipelineManager(PipelineManager& manager);
 		void PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index);
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
-		void PostRenderGraphicsStates(const vector<GraphicsState>& state, uint32_t frame_index);
+		//void PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index);
 		PresentationSignals& GetMainSignal();
 		SharedGraphicsState shared_graphics_state;
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);

@@ -22,6 +22,7 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+#include <editor/windows/IGE_AnimatorWindow.h>
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/DragDropTypes.h>
 #include <editor/utils.h>
@@ -274,6 +275,31 @@ namespace idk {
 
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##component_textFilter", NULL, component_textFilter.InputBuf, IM_ARRAYSIZE(component_textFilter.InputBuf), ImVec2{100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				component_textFilter.Build();
+
+
+			
+			string deco_text = "Component";
+			if (component_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_component_textFilter"))
+					component_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
             span componentNames = GameState::GetComponentNames();
             for (const char* name : componentNames) {
                 string displayName = name;
@@ -292,6 +318,8 @@ namespace idk {
                 if (found != std::string::npos)
                     displayName.erase(found, fluffText.size());
 
+				if (!component_textFilter.PassFilter(displayName.c_str())) //skip if filtered
+					continue;
 
 
                 if (ImGui::MenuItem(displayName.c_str())) {
@@ -311,6 +339,34 @@ namespace idk {
         }
 
 		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) {
+
+
+
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##script_textFilter", NULL, script_textFilter.InputBuf, IM_ARRAYSIZE(script_textFilter.InputBuf), ImVec2{ 100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				script_textFilter.Build();
+
+
+
+			string deco_text = "Scripts";
+			if (script_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_script_textFilter"))
+					script_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
 			auto* script_env = &Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
 			if (script_env == nullptr)
 				ImGui::Text("Scripts not loaded!");
@@ -318,6 +374,10 @@ namespace idk {
 			span componentNames = script_env->GetBehaviorList();
 			int execute_counter = 0;
 			for (const char* name : componentNames) {
+
+				if (!component_textFilter.PassFilter(name)) //skip if filtered
+					continue;
+
 				if (ImGui::MenuItem(name)) {
 					for (Handle<GameObject> i : gos) {
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
@@ -325,8 +385,10 @@ namespace idk {
 					}
 				}
 			}
-			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			if (execute_counter > 0) {
+				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			}
 			ImGui::EndPopup();
 		}
 
@@ -360,8 +422,14 @@ namespace idk {
 					outputString.append(std::to_string(i));
 					outputString.append(")");
 				}
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>,
-                    GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
+				editor.command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty,
+                            GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() },
+                            "name",
+                            string{ editor.selected_gameObjects[i]->GetComponent<Name>()->name },
+                            string{ outputString })
+                );
+                editor.selected_gameObjects[i]->GetComponent<Name>()->name = outputString;
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
@@ -611,8 +679,8 @@ namespace idk {
         ImGui::PushItemWidth(w);
 
         bool has_override = _prefab_inst &&
-            (_prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_min", 0) ||
-             _prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_max", 0));
+            (_prefab_inst->HasOverride((*_curr_component).type.name(), "offset_min", 0) ||
+             _prefab_inst->HasOverride((*_curr_component).type.name(), "offset_max", 0));
 
         bool changed = false;
 
@@ -712,14 +780,14 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
                 ov.property_path = "offset_max";
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
                 PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
                 ov.property_path = "offset_max";
                 PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
@@ -729,8 +797,8 @@ namespace idk {
 
         if (changed && _prefab_inst)
         {
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_min");
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_max");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_min");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_max");
         }
 
         if (has_override)
@@ -767,7 +835,7 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
-        _prefab_curr_component = c.GetHandle();
+        _curr_component = c.GetHandle();
         _prefab_curr_component_nth = 0;
         _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
         display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
@@ -803,238 +871,17 @@ namespace idk {
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
-		const auto imgui_name = [&](string_view base, string_view added) -> string
+
+		if (ImGui::Button("OPEN ANIMATOR WINDOW"))
 		{
-			return string{ base } +"##" + added.data();
-		};
-
-		//ImGui::NewLine();
-		auto state_window_flags = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking;
-		auto state_window_width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-		constexpr float state_window_height = 130.0f;
-		if (c_anim->animation_display_order.empty())
-		{
-			ImGui::TextColored(ImVec4{ 0,1,0,1 }, "Start by adding an animation state!");
-		}
-		else
-		{
-			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
-			if (ImGui::CollapsingHeader("Animation States", ImGuiTreeNodeFlags_AllowItemOverlap))
-			{
-				ImGui::Indent(5.0f);
-				for (auto& curr_state_key : c_anim->animation_display_order)
-				{
-					// Check if we can actually find the state
-					auto found_state = c_anim->animation_table.find(curr_state_key);
-					IDK_ASSERT(found_state != c_anim->animation_table.end());
-					auto& curr_state = *found_state;
-
-					bool renamed = false;
-					bool to_remove = false;
-
-					// Will change this to use something other than collapsing header. 
-					if (!curr_state.second.valid)
-						ImGuidk::PushDisabled();
-
-					ImGui::Text("Animation State: ");
-					ImGui::PushItemWidth(200.0f);
-					ImGui::SameLine();
-					renamed = ImGui::InputText(("##Animation State" + curr_state.first).c_str(), &curr_state.second.name, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue);
-					ImGui::PopItemWidth();
-
-					if (ImGui::IsItemDeactivatedAfterEdit() && !renamed)
-						curr_state.second.name = curr_state.first;
-					
-					// if (!curr_state.second.IsBlendTree())
-					// {
-					// 	ImGui::SameLine();
-					// 	if (ImGui::Button("Convert to Blend Tree"))
-					// 	{
-					// 		variant<BasicAnimationState, BlendTree> new_state{ BlendTree{} };
-					// 		curr_state.second.state_data = new_state;
-					// 	}
-					// }
-
-					if (ImGui::BeginChild(("##window" + curr_state.first).c_str(), ImVec2{ state_window_width, state_window_height }, true, state_window_flags))
-					{
-						if (curr_state.second.IsBlendTree())
-						{
-							ImGui::Text("State Type: Blend Tree");
-							auto& state_data = *curr_state.second.GetBlendTree();
-							for (size_t i = 0; i < state_data.motions.size(); ++i)
-							{
-								ImGui::PushID((int)i);
-								auto& blend_tree_motion = state_data.motions[i];
-								ImGuidk::InputResource(("##clip" + curr_state.first).c_str(), &blend_tree_motion.motion);
-								ImGui::InputFloat(("##threshold" + curr_state.first).c_str(), &blend_tree_motion.thresholds[0]);
-								ImGui::Text("Weight: %.2f", state_data.motions[i].weight);
-								ImGui::PopID();
-							}
-
-							RscHandle<anim::Animation> tmp{};
-							if (ImGuidk::InputResource(imgui_name("Add Motion Field", curr_state.first).c_str(), &tmp))
-							{
-								BlendTreeMotion new_motion{ };
-								new_motion.motion = tmp;
-								state_data.motions.push_back(new_motion);
-
-								std::sort(state_data.motions.begin(), state_data.motions.end(), 
-									[](const BlendTreeMotion& lhs, const BlendTreeMotion& rhs) 
-									{ 
-										return lhs.thresholds[0] < rhs.thresholds[0]; 
-									});
-							}
-
-							ImGui::DragFloat("TESTTTT", &state_data.def_data[0], 0.01f);
-						}
-						else
-						{
-							const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
-							const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
-							{
-								colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
-								ImGui::SameLine();
-								ImGui::SetCursorPosX(drag_pos);
-							};
-
-							auto& state_data = *curr_state.second.GetBasicState();
-							ImGui::Text("State Type: Basic Animation");
-							const bool has_valid_clip = s_cast<bool>(state_data.motion);
-							display_name_align("Clip", !has_valid_clip);
-							ImGuidk::InputResource(("##clip" + curr_state.first).c_str(), &state_data.motion);
-
-							if (!has_valid_clip)
-								ImGuidk::PushDisabled();
-							display_name_align("Speed");
-							ImGui::DragFloat(("##speed" + curr_state.first).c_str(), &curr_state.second.speed, 0.01f);
-
-							display_name_align("Loop");
-							ImGui::Checkbox(("##loop" + curr_state.first).c_str(), &curr_state.second.loop);
-							ImGui::NewLine();
-
-							if (!has_valid_clip)
-								ImGuidk::PopDisabled();
-
-							if (ImGui::Button(imgui_name("Delete State", curr_state.first).c_str()))
-								to_remove = true;
-						}
-
-					}
-					ImGui::EndChild();
-					ImGui::NewLine();
-					if (!curr_state.second.valid)
-						ImGuidk::PopDisabled();
-
-					if (to_remove)
-					{
-						c_anim->RemoveAnimation(curr_state.first);
-						break;
-					}
-
-					if (renamed)
-					{
-						bool success = c_anim->RenameAnimation(curr_state.first, curr_state.second.name);
-						if (!success)
-							curr_state.second.name = curr_state.first;
-						break;
-					}
-				}
-				ImGui::Unindent(5.0f);
-			}
-		}
-
-		
-		
-		const ImVec2 add_animation_button_size{ 150.0f, 30.0f};
-		if (ImGui::Button("Add Animation State", add_animation_button_size))
-		{
-			c_anim->AddAnimation(RscHandle<anim::Animation>{});
+			Core::GetSystem<IDE>().FindWindow<IGE_AnimatorWindow>()->is_open = true;
 		}
 		
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
-			{
-				auto res_payload = DragDrop::GetResourcePayloadData();
-				GenericResourceHandle tmp{ RscHandle<anim::Animation>{} };
-				for (auto& h : res_payload)
-				{
-					if (h.resource_id() == tmp.resource_id())
-					{
-						if (payload->IsDelivery())
-						{
-							c_anim->AddAnimation(h.AsHandle<anim::Animation>());
-						}
-						break;
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::Text("Dragging an animation file to this button works too!");
-			ImGui::EndTooltip();
-		}
-		
-		ImGui::NewLine();
-
-		auto found_default = c_anim->animation_table.find(c_anim->layers[0].default_state);
-		if(found_default == c_anim->animation_table.end() || !found_default->second.valid)
-			ImGui::TextColored(ImVec4{1,0,0,1}, "Default State");
-		else
-			ImGui::Text("Default State");
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(150.0f);
-		if (ImGui::BeginCombo(imgui_name("##def state", c_anim->layers[0].name).c_str(), c_anim->layers[0].default_state.c_str()))
-		{
-			for (auto& anim : c_anim->animation_table)
-			{
-				string_view curr_name = anim.second.name;
-				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].default_state == curr_name))
-				{
-					// c_anim->Stop();
-					c_anim->layers[0].default_state = curr_name;
-					c_anim->layers[0].curr_state.name = curr_name;
-				}
-			}
-			ImGui::EndCombo();
-		}
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
 		ImGui::Text("Preview"); ImGui::SameLine();
-		if (ImGui::Checkbox(imgui_name("##preview", c_anim->layers[0].name).c_str(), &c_anim->preview_playback))
+		if (ImGui::Checkbox("##preview", &c_anim->preview_playback)) 
 		{
 			c_anim->OnPreview();
 		}
-		ImGui::NewLine();
-
-		const auto data_pos_x = ImGui::CalcTextSize("Blending To: ").x + ImGui::GetCursorPosX();
-		const ImVec4 playing_text__col = c_anim->IsPlaying() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
-		ImGui::TextColored(playing_text__col, "Playing: ");
-		ImGui::SameLine();
-
-		ImGui::SetCursorPosX(data_pos_x);
-		string display_name = c_anim->layers[0].curr_state.name;
-		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), c_anim->layers[0].curr_state.normalized_time);
-		ImGui::ProgressBar(c_anim->layers[0].curr_state.normalized_time, ImVec2{ -1, 10 }, nullptr);
-
-		const ImVec4 blend_col = c_anim->IsBlending() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
-		ImGui::TextColored(blend_col, "Blending To: ");
-		display_name = c_anim->layers[0].blend_state.name;
-		ImGui::SameLine();
-
-		ImGui::SetCursorPosX(data_pos_x);
-		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), c_anim->layers[0].blend_state.normalized_time);
-		static ImVec4 blend_prog_col{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
-		if (c_anim->layers[0].blend_state.is_playing)
-			ImGui::ProgressBar(c_anim->layers[0].blend_state.normalized_time / c_anim->layers[0].blend_duration, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
-		else
-			ImGui::ProgressBar(0.0f, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
-
 		ImGui::NewLine();
 	}
 
@@ -1044,8 +891,8 @@ namespace idk {
 		//Draw All your custom variables here.
 		ImGui::Text("Bone Name: ");
 		ImGui::SameLine();
-		ImGui::Text(c_bone->_bone_name.c_str());
-		ImGui::Text("Bone Index: %d", c_bone->_bone_index);
+		ImGui::Text(c_bone->bone_name.c_str());
+		ImGui::Text("Bone Index: %d", c_bone->bone_index);
 	}
 
 	template<>
@@ -1274,9 +1121,9 @@ namespace idk {
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
+        _curr_component = component;
         if (_prefab_inst)
         {
-            _prefab_curr_component = component;
             _prefab_curr_component_nth = -1;
             const span comps = _prefab_inst->GetGameObject()->GetComponents();
             for (const auto& c : comps)
@@ -1460,6 +1307,7 @@ namespace idk {
     {
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
+        static reflect::dynamic original_value;
         bool outer_changed = false;
         vector<char> indent_stack;
 
@@ -1677,6 +1525,17 @@ namespace idk {
             if (indent)
                 ImGui::Indent();
 
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            {
+                original_value.swap(reflect::dynamic(val).copy());
+            }
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                original_value.swap(reflect::dynamic());
+            }
+
             return recurse;
         };
 
@@ -1759,7 +1618,7 @@ namespace idk {
         has_override = false;
         if (self._prefab_inst && self._curr_property_stack.back().size())
             has_override = self._prefab_inst->HasOverride(
-                (*self._prefab_curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
+                (*self._curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
 
         ImGui::BeginGroup();
     }
@@ -1772,19 +1631,19 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
                 PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
                 PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             ImGui::EndPopup();
         }
 
         if (changed && self._prefab_inst)
-            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._prefab_curr_component, curr_prop_path);
+            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
 
         if (has_override)
         {

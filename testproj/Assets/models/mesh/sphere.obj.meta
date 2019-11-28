@@ -1,0 +1,9 @@
+metadatas: 
+- guid: 9b994921-8483-4621-8ddc-db9bfdefe67b
+  metadata: ""
+  name: sphere
+  t_hash: Prefab
+- guid: c3542b8c-7fd5-41fb-8c83-d59da5ec7a7f
+  metadata: ""
+  name: pSphere1
+  t_hash: idk::Mesh

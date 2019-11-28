@@ -59,36 +59,28 @@ namespace idk::vkn
 		}
 		RscHandle<VknFontAtlas> fontAtlas;
 		
+		FontAtlasMeta new_tm;
 		if (!font_handle)
 		{
 			const auto font = FontAtlas::defaults[FontDefault::SourceSansPro];
 			fontAtlas = Core::GetResourceManager().LoaderEmplaceResource<VknFontAtlas>(font.guid);
 
 			if (tm)
-			{
-				FontAtlasMeta new_tm = *tm;
-				fontAtlas->SetMeta(new_tm);
-
-				if (FT_Set_Pixel_Sizes(face, 0, tm->font_size))
-				{
-					std::cout << "Font atlas loading generation failed. Crash may happen.\n";
-					LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
-					return fontAtlas;
-				}
-			}
+				new_tm = *tm;
 		}
 		else
 		{
 			fontAtlas = font_handle.guid;
-			FontAtlasMeta new_tm = fontAtlas->GetMeta();
-			fontAtlas->SetMeta(new_tm);
+			new_tm = fontAtlas->GetMeta();
+		}
 
-			if (FT_Set_Pixel_Sizes(face, 0, new_tm.font_size))
-			{
-				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
-				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
-				return fontAtlas;
-			}
+		fontAtlas->SetMeta(new_tm);
+
+		if (FT_Set_Pixel_Sizes(face, 0, new_tm.font_size))
+		{
+			std::cout << "Font atlas loading generation failed. Crash may happen.\n";
+			LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
+			return fontAtlas;
 		}
 		
 		fontAtlas->reload_path = handle;
@@ -121,8 +113,11 @@ namespace idk::vkn
 		/* you might as well save this value as it is needed later on */
 		w = std::max(mw, w);
 		h += mh;
-		font_handle->Size(ivec2(w, h));
+		fontAtlas->Size(ivec2(w, h));
 		size = ivec2{w,h};
+
+		fontAtlas->ascender = face->ascender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
+		fontAtlas->descender = face->descender / s_cast<float>(face->units_per_EM) * new_tm.font_size;
 
 		int x = 0, y = 0;
 		mh = 0;

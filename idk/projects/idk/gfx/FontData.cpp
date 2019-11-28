@@ -46,12 +46,12 @@ namespace idk
                 {
                     real d = x * 0.5f;
                     while (line_start_n < n)
-                        data.coords[line_start_n++].x -= d;
+                        data.coords[line_start_n++].position.x -= d;
                 }
                 else if (alignment == TextAlignment::Right)
                 {
                     while (line_start_n < n)
-                        data.coords[line_start_n++].x -= x;
+                        data.coords[line_start_n++].position.x -= x;
                 }
 
                 data.width = x > data.width ? x : data.width;
@@ -66,12 +66,12 @@ namespace idk
                 continue;
 
             //remember: each glyph occupies a different amount of vertical space
-            data.coords[n++] = { x2    , -y2    , c[ch].tex_offset.x                                   , c[ch].tex_offset.y };
-            data.coords[n++] = { x2    , -y2 - h, c[ch].tex_offset.x                                   , c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
-            data.coords[n++] = { x2 + w, -y2    , c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y };
-            data.coords[n++] = { x2 + w, -y2    , c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y };
-            data.coords[n++] = { x2    , -y2 - h, c[ch].tex_offset.x                                   , c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
-            data.coords[n++] = { x2 + w, -y2 - h, c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
+            data.coords[n++].position = vec4{ x2    , -y2    , c[ch].tex_offset.x                                   , c[ch].tex_offset.y };
+            data.coords[n++].position = vec4{ x2    , -y2 - h, c[ch].tex_offset.x                                   , c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
+            data.coords[n++].position = vec4{ x2 + w, -y2    , c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y };
+            data.coords[n++].position = vec4{ x2 + w, -y2    , c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y };
+            data.coords[n++].position = vec4{ x2    , -y2 - h, c[ch].tex_offset.x                                   , c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
+            data.coords[n++].position = vec4{ x2 + w, -y2 - h, c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
         }
 
         if(text.back() != '\n')
@@ -80,12 +80,12 @@ namespace idk
             {
                 real d = x * 0.5f;
                 while (line_start_n < n)
-                    data.coords[line_start_n++].x -= d;
+                    data.coords[line_start_n++].position.x -= d;
             }
             else if (alignment == TextAlignment::Right)
             {
                 while (line_start_n < n)
-                    data.coords[line_start_n++].x -= x;
+                    data.coords[line_start_n++].position.x -= x;
             }
             data.width = x > data.width ? x : data.width;
         }

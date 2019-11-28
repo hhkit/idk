@@ -5,6 +5,7 @@
 #include <anim/Animation.h>
 #include <anim/AnimationState.h>
 #include <anim/AnimationLayer.h>
+#include <anim/AnimationUtils.h>
 
 namespace idk
 {
@@ -23,14 +24,42 @@ namespace idk
 		const vector<mat4>& BoneTransforms()const;
 		
 		// Engine Setters
+		void AddLayer();
+		bool RenameLayer(string_view from, string_view to);
+		void RemoveLayer(string_view name);
+		void RemoveLayer(size_t index);
+
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
 		bool RenameAnimation(string_view from, string_view to);
 		void RemoveAnimation(string_view name);
-		void AddLayer();
-		
+
+		template<typename T>
+		hash_table<string, T>& GetParamTable();
+
+		template<typename T>
+		const hash_table<string, T>& GetParamTable() const;
+
+		template<typename T>
+		T& GetParam(string_view name);
+
+		template<typename T>
+		const T& GetParam(string_view name) const;
+
+		template<typename T>
+		void AddParam(string_view name);
+
+		template<typename ParamType, typename ValueType>
+		bool SetParam(string_view name, ValueType val, bool def_val = false);
+
+		template<typename T>
+		bool RemoveParam(string_view name);
+
+		template<typename T>
+		bool RenameParam(string_view from, string_view to);
 
 		// Editor Functionality
 		void Reset();
+		void ResetToDefault();
 		void OnPreview();
 
 		// Script Functions
@@ -55,25 +84,29 @@ namespace idk
 		// void ResumeAllLayers();
 		void PauseAllLayers();
 		void StopAllLayers();
-
+		
 		// Script Getters
+		int GetInt(string_view name) const;
+		float GetFloat(string_view name) const;
+		bool GetBool(string_view name) const;
+		bool GetTrigger(string_view name) const;
+
 		string DefaultStateName() const;
 		string CurrentStateName() const;
 		string BlendStateName() const;
+		bool HasState(string_view name) const;
 
 		bool IsPlaying() const;
 		bool IsBlending() const;
 		bool HasCurrAnimEnded() const;
-		bool HasState(string_view name) const;
-		
-		int GetInt(string_view name) const;
-		bool GetBool(string_view name) const;
-		float GetFloat(string_view name) const;
 
 		// Script Setters
 		bool SetInt(string_view name, int val);
-		bool SetBool(string_view name, bool val);
 		bool SetFloat(string_view name, float val);
+		bool SetBool(string_view name, bool val);
+		bool SetTrigger(string_view name, bool val);
+
+		void ResetTriggers();
 
 		void SetEntryState(string_view name, float offset = 0.0f);
 
@@ -82,21 +115,16 @@ namespace idk
 
 		// ======================= Public Variables ========================
 		RscHandle<anim::Skeleton> skeleton;
-		hash_table<string, AnimationState> animation_table;
-		vector<string> animation_display_order;
 
 		hash_table<string, size_t> layer_table{};
 		vector<AnimationLayer> layers{};
 
-		// Scripting variables
-		hash_table<string, int> int_vars;
-		hash_table<string, bool> bool_vars;
-		hash_table<string, float> float_vars;
+		// Scripting variables (Ideally should type erase them)
+		hash_table<string, anim::IntParam>		int_vars;
+		hash_table<string, anim::FloatParam>	float_vars;
+		hash_table<string, anim::BoolParam>		bool_vars;
+		hash_table<string, anim::TriggerParam>	trigger_vars;
 		
-		// Precomputation step
-		vector<mat4> pre_global_transforms{ mat4{} };
-		// This is what we send to the graphics system.
-		vector<mat4> final_bone_transforms{ mat4{} };
 		bool preview_playback = false;
 	private:
 		friend class AnimationSystem;
@@ -105,6 +133,13 @@ namespace idk
 		vector<Handle<GameObject>> _child_objects;
 		vector<matrix_decomposition<real>> _bind_pose;
 		
-		inline static AnimationState null_state{};
+		// Precomputation step
+		vector<mat4> pre_global_transforms{ mat4{} };
+		// This is what we send to the graphics system.
+		vector<mat4> final_bone_transforms{ mat4{} };
+
+		
 	};
 }
+
+#include "Animator.inl"

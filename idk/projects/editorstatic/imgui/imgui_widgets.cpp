@@ -1329,7 +1329,7 @@ void ImGui::SeparatorEx(ImGuiSeparatorFlags flags)
     }
 }
 
-void ImGui::Separator()
+void ImGui::Separator(bool span_cols)
 {
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
@@ -1337,8 +1337,10 @@ void ImGui::Separator()
         return;
 
     // Those flags should eventually be overridable by the user
-    ImGuiSeparatorFlags flags = (window->DC.LayoutType == ImGuiLayoutType_Horizontal) ? ImGuiSeparatorFlags_Vertical : ImGuiSeparatorFlags_Horizontal;
-    flags |= ImGuiSeparatorFlags_SpanAllColumns;
+	
+	ImGuiSeparatorFlags flags = (window->DC.LayoutType == ImGuiLayoutType_Horizontal) ? ImGuiSeparatorFlags_Vertical : ImGuiSeparatorFlags_Horizontal;
+	if(span_cols)
+		flags |= ImGuiSeparatorFlags_SpanAllColumns;
     SeparatorEx(flags);
 }
 
