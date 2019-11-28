@@ -225,17 +225,6 @@ namespace idk::vkn
 	};
 
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
-
-	/*void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size)
-	{
-		vk::Viewport vp{ s_cast<float>(vp_pos.x),s_cast<float>(vp_pos.y),s_cast<float>(vp_size.x),s_cast<float>(vp_size.y),0,1 };
-		cmd_buffer.setViewport(0, vp);
-	}*/
-	/*void SetScissor(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, ivec2 vp_size)
-	{
-		vk::Rect2D vp{ vk::Offset2D{vp_pos.x,vp_pos.y},vk::Extent2D{s_cast<uint32_t>(vp_size.x),s_cast<uint32_t>(vp_size.y)} };
-		cmd_buffer.setScissor(0, vp);
-	}*/
 	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
@@ -526,13 +515,19 @@ namespace idk::vkn
 				buffer.resize(hlp::buffer_size(particle_data));
 				buffer.update<const ParticleObj>(0, particle_data, cmd_buffer);
 			}
-
-			if (state.shared_gfx_state->characters_data && state.shared_gfx_state->characters_data->size())
+			if (state.shared_gfx_state->fonts_data && state.shared_gfx_state->fonts_data->size())
 			{
-				auto& font_data = *state.shared_gfx_state->characters_data;
+				auto& font_data = *state.shared_gfx_state->fonts_data;
 				auto& buffer = state.shared_gfx_state->font_buffer;
-				buffer.resize(hlp::buffer_size(font_data));
-				buffer.update<const FontPoint>(0, font_data, cmd_buffer);
+				
+				buffer.resize(font_data.size());
+				for (unsigned i = 0; i < font_data.size(); ++i)
+				{
+					auto& b = buffer[i];
+					b.resize(hlp::buffer_size(font_data[i].coords));
+					b.update<const FontPoint>(0, font_data[i].coords, cmd_buffer);
+				}
+				
 			}
 
 			cmd_buffer.end();
@@ -603,26 +598,12 @@ namespace idk::vkn
 				buffers.emplace_back(pre_state.CommandBuffer());
 		}
 
-
-		//auto& waitSemaphores = *current_signal.image_available;
-		//vk::Semaphore readySemaphores = {};///* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
-		//hash_set<vk::Semaphore> ready_semaphores;
-		//for (auto& state : gfx_states)
-		//{
-		//	auto semaphore = state.camera.render_target.as<VknRenderTarget>().ReadySignal();
-		//	if (semaphore)
-		//		ready_semaphores.emplace(semaphore);
-		//}
-		//Temp, get rid of this once the other parts no longer depend on render_finished
-		//ready_semaphores.emplace(readySemaphores);
 		vector<vk::Semaphore> arr_ready_sem{ *_pre_render_complete };
 		vector<vk::Semaphore> arr_wait_sem {};
 		if (copy_semaphore)
 			arr_wait_sem.emplace_back(*copy_semaphore);
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
 
-
-		
 
 		vk::SubmitInfo submit_info
 		{
@@ -909,6 +890,9 @@ namespace idk::vkn
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
+	//void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
+	//{
+	//}
 	PresentationSignals& FrameRenderer::GetMainSignal()
 	{
 		return _states[0].signal;
@@ -1110,8 +1094,7 @@ namespace idk::vkn
 
 		//Preprocess MeshRender's uniforms
 		//TODO make ProcessRoUniforms only render forward pass stuff.
-		auto&& the_interface = (is_deferred)?PipelineThingy{}:
-			ProcessRoUniforms(state, rs.ubo_manager);
+		auto&& the_interface = (is_deferred)?PipelineThingy{}:ProcessRoUniforms(state, rs.ubo_manager);
 		
 		
 		_particle_renderer.DrawParticles(the_interface, state, rs);

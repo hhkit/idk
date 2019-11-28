@@ -148,7 +148,10 @@ namespace idk
 			//vector<FontArrayData>    font_array_data;
 			vector<FontPoint>     font_buffer;
 			vector<FontRange>      font_range;
+
 			hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
+			vector<UITextRange>   ui_text_range;
+			vector<FontPoint>      ui_text_buffer;
 
 			size_t curr_scene_camera_index;
 

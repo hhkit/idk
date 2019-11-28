@@ -141,37 +141,6 @@ namespace idk
         mat4 transform;
     };
 
-	struct CharacterObj
-	{
-		vec4 coords{};
-	};
-
-	//struct FontArrayData
-	//{
-	//	vector<FontPoint> coords;
-	//	RscHandle<FontAtlas> atlas;
-	//	color color;
-	//	mat4 transform;
-
-	//	FontArrayData& operator()(const FontRenderData& rhs)
-	//	{
-	//		ConvertFontPointToCharacterObject(rhs.coords);
-	//		atlas = rhs.atlas;
-	//		color = rhs.color;
-	//		transform = rhs.transform;
-
-	//		return *this;
-	//	}
-
-	//	void ConvertFontPointToCharacterObject(const vector<FontPoint>& toCopy)
-	//	{
-	//		//characters.resize(toCopy.size());
-	//		coords = toCopy;
-	//		//for (int i = 0; i < toCopy.size(); ++i)
-	//		//	characters[i].coords = toCopy[i].ConvertToVec4();		
-	//	}
-	//};
-
 	struct FontRange
 	{
 		size_t elem_offset;
@@ -187,6 +156,12 @@ namespace idk
         vector<FontPoint> coords;
         RscHandle<FontAtlas> atlas;
     };
+
+	struct UITextRange
+	{
+		size_t elem_offset;
+		size_t num_elems;
+	};
     struct UIRenderObject
     {
         mat4 transform;
@@ -195,5 +170,7 @@ namespace idk
         variant<ImageData, TextData> data;
         unsigned depth; // in scene graph
     };
+
+
 
 }

@@ -398,8 +398,10 @@ namespace idk
 			std::swap(tmp, rb); //reinitialize the stuff that don't need to be swapped.
 			ClearSwap(rb.camera                         ,tmp.camera                         );//clear then swap the stuff back into rb
 			ClearSwap(rb.font_render_data               ,tmp.font_render_data               );//clear then swap the stuff back into rb
-			//ClearSwap(rb.font_array_data				, tmp.font_array_data);//clear then swap the stuff back into rb
-
+			ClearSwap(rb.font_range, tmp.font_range);
+			ClearSwap(rb.font_buffer, tmp.font_buffer);
+			ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
+			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
 			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
 			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
 			ClearSwap(rb.inst_mesh_render_buffer        ,tmp.inst_mesh_render_buffer        );//clear then swap the stuff back into rb
@@ -409,6 +411,8 @@ namespace idk
 			ClearSwap(rb.mesh_render                    ,tmp.mesh_render                    );//clear then swap the stuff back into rb
 			ClearSwap(rb.skinned_mesh_render            ,tmp.skinned_mesh_render            );//clear then swap the stuff back into rb
 			ClearSwap(rb.particle_render_data           ,tmp.particle_render_data           );//clear then swap the stuff back into rb
+			ClearSwap(rb.particle_buffer, tmp.particle_buffer);
+			ClearSwap(rb.particle_range, tmp.particle_range);
 			ClearSwap(rb.skeleton_transforms            ,tmp.skeleton_transforms            );//clear then swap the stuff back into rb
 		};
 
@@ -571,6 +575,17 @@ namespace idk
 			render_data.data = ImageData{ im.texture };
 			render_data.depth = go->Transform()->Depth();
 		}
+
+
+		//////For UI////////
+		{
+			auto& unique_fonts = texts;
+			const size_t avg_font_count = 100;
+			const auto size = result.ui_render_per_canvas.size() + unique_fonts.size();
+			result.ui_text_range.reserve(result.ui_text_range.size() + size);
+			result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+		}
+
 		for (auto& text : texts)
 		{
 			const auto& go = text.GetGameObject();
