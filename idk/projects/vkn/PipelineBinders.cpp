@@ -252,19 +252,21 @@ namespace idk::vkn
 		auto& mat = *mat_inst.material;
 		the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
 	}
-
+#pragma optimize("",off)
 	void StandardMaterialBindings::SetState(const GraphicsState& vstate) {
 		_state = &vstate;
 		State();
 	}
 
+#pragma optimize("",off)
 	//Assumes that the material is valid.
 	void StandardMaterialBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
 		//Bind the material uniforms
 		{
 			
-			auto& mat_inst = _state->material_instances.find(dc.material_instance)->second;
+			auto mat = _state->material_instances.find(dc.material_instance);
+			auto& mat_inst = mat->second;
 			//[[maybe_unused]]auto& mat = *mat_inst.material;
 			for (auto itr = mat_inst.ubo_table.begin(); itr != mat_inst.ubo_table.end(); ++itr)
 			{

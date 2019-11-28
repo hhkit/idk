@@ -116,26 +116,26 @@ namespace idk::vkn
 		}
 	};*/
 
-	static void RunFunc(FrameRenderer* _renderer, const GraphicsState* m, RenderStateV2* rs) noexcept
-	{
-		try
-		{
-			_renderer->RenderGraphicsState(*m, *rs);
-		}
-		catch (...)
-		{
+	template<typename RT, typename ...Args>
+	auto GetFuture(RT(*func)(Args...)) -> decltype(Core::GetThreadPool().Post(func, std::declval<Args>()...));
 
-		}
-	}
-	void fml(FrameRenderer* _renderer, const GraphicsState* state, RenderStateV2* rs)
-	{
-		auto fuck_this = std::make_tuple(_renderer, state, rs);
-		std::apply(RunFunc, fuck_this);
-	}
+
 	class FrameRenderer::ThreadedRender : public FrameRenderer::IRenderThread
 	{
 	public:
-		using Future_t =decltype(Core::GetThreadPool().Post(&RunFunc, std::declval<FrameRenderer*>(), std::declval<const GraphicsState*>(), std::declval<RenderStateV2*>()));
+		static void RunFunc(FrameRenderer* _renderer, const GraphicsState* m, RenderStateV2* rs,std::atomic<int>*counter) noexcept
+		{
+			try
+			{
+				(*counter)--;
+				_renderer->RenderGraphicsState(*m, *rs);
+			}
+			catch (...)
+			{
+
+			}
+		}
+		using Future_t =decltype(GetFuture(ThreadedRender::RunFunc));
 		void Init(FrameRenderer* renderer)
 		{
 			
@@ -143,16 +143,21 @@ namespace idk::vkn
 		}
 		void Render(const GraphicsState& state, RenderStateV2& rs)override
 		{
-			future = Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs);
+			counter++;
+			futures.emplace_back(Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs,&counter));
 		}
 #pragma optimize("",off)
 		void Join() override
 		{
-			future.get();
+			for(auto& future : futures)
+				future.get();
+			futures.clear();
 		}
 	private:
 		FrameRenderer* _renderer;
-		Future_t future;
+		std::atomic<int> counter{};
+		vector<Future_t> futures;
+		
 		std::thread my_thread;
 	};
 
@@ -387,7 +392,7 @@ namespace idk::vkn
 		//Temp
 		for (auto i = num_concurrent_states; i-- > 0;)
 		{
-			auto thread = std::make_unique<ThreadedRender>();
+			auto thread = std::make_unique<NonThreadedRender>();
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}

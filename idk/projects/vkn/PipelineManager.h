@@ -5,6 +5,7 @@
 #include <gfx/pipeline_config.h>
 #include <vkn/ShaderModule.h>
 #include <vkn/VulkanPipeline.h>
+#include <multithread_control.h>
 namespace idk::vkn
 {
 	class PipelineManager
@@ -44,7 +45,7 @@ namespace idk::vkn
 			void Swap();
 		};
 		container_t pipelines;
-
+		raynal_rw_lock _lock;
 		hash_table<string, handle_t> prog_to_pipe2;
 		hash_table<RscHandle<ShaderProgram>, handle_t> prog_to_pipe;
 		vector<vector<handle_t>> update_queue;

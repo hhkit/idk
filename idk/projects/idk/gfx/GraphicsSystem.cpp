@@ -419,8 +419,11 @@ namespace idk
 
 		// todo: scenegraph traversal
 		RenderBuffer& result=GetWriteBuffer();
+#if 0   //change to 0 to reduce reallocation count.
 		result = RenderBuffer{};
-		//reset_render_buffer(result); //change to this method to reduce reallocation count.
+#else
+		reset_render_buffer(result); 
+#endif
 		result.camera.reserve(cameras.size());
 
 		// memcpy the lights until there is a smarter implementation
@@ -532,25 +535,12 @@ namespace idk
 			if (f.text != "" && f.font)
 			{
 				auto& render_data = result.font_render_data.emplace_back();
-				//auto& render_pos_data = result.font_array_data.emplace_back();
 
-				//if(GetAPI() == GraphicsAPI::Vulkan)
-					//render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
-				//else
 				render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
 
 				render_data.color = f.color;
 				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
 				render_data.atlas = f.font;
-
-				//for (auto& elem : render_data.coords)
-					//render_pos_data.characters.emplace_back(CharacterObj{ elem.ConvertToVec4() });
-				//render_pos_data.coords = render_data.coords;
-
-				//render_pos_data.color = f.color;
-				//render_pos_data.transform = render_data.transform;
-				//render_pos_data.atlas = f.font;
-
 			}
 		}
 
@@ -703,9 +693,16 @@ namespace idk
 			camera.projection_matrix = { light.p };
 			LightRenderRange range{ ++i };
 			{
-				const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, result.instanced_mesh_render, result.inst_mesh_render_buffer);
-				range.inst_mesh_render_begin = start_index;
-				range.inst_mesh_render_end = end_index;
+				if (!light.cast_shadow)
+				{
+					range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+				}
+				else
+				{
+					const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+					range.inst_mesh_render_begin = start_index;
+					range.inst_mesh_render_end = end_index;
+				}
 			}
 			result.culled_light_render_range.emplace_back(range);
 			//{

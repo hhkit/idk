@@ -279,7 +279,8 @@ namespace idk::vkn
 
 		//TODO cull the unused lights
 		for (size_t i = 0; i < lights.size(); ++i)
-			pre_render_data.active_lights[i]=i;
+			if(lights[i].cast_shadow)
+				pre_render_data.active_lights[i]=i;
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;

@@ -39,6 +39,8 @@ namespace idk::vkn
 		RscHandle<ShaderProgram> fullscreen_quad_vert;
 		RscHandle<ShaderProgram> deferred_post_frag  ;
 
+		RenderPassObj rp_obj;
+
 		uint32_t _frame_index = 0;
 		uint32_t frame_index(uint32_t new_index){ return _frame_index = new_index; }
 		uint32_t frame_index()const { return _frame_index; }

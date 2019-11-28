@@ -19,6 +19,8 @@
 
 #include <vkn/VknTextureRenderMeta.h>
 
+#include <vkn/RenderPassInfo.h>
+
 #if 1
 namespace idk::vkn
 {
@@ -86,6 +88,109 @@ namespace idk::vkn
 	{
 		return *_render_complete;
 	}
+
+	RenderPassObj ConstructDeferredRenderPass(const FrameBufferInfo& gbuffer)
+	{
+		RenderPassInfo rp_info;
+		//Add all the attachments
+		auto met_alb_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc       ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto met_nor_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eNormal             ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto met_tan_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eTangent            ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto met_met_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eUvMetallicRoughness], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto met_vwp_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eViewPos            ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto met_dep_idx= rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+
+		auto spc_alb_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto spc_nor_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eNormal], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto spc_tan_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eTangent], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto spc_spc_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eUvMetallicRoughness], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto spc_vwp_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eViewPos], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto spc_dep_idx = rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		
+		auto unlit_color_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+		auto unlit_depth_idx = rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
+
+		auto combine_color_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc], vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+		auto combine_depth_idx = rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+
+
+		SubPassConfig first_metal_config{};
+		first_metal_config.AddOutputAttachment(met_alb_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_metal_config.AddOutputAttachment(met_nor_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_metal_config.AddOutputAttachment(met_tan_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_metal_config.AddOutputAttachment(met_met_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_metal_config.AddOutputAttachment(met_vwp_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_metal_config.SetDepthAttachment (met_dep_idx, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		SubPassConfig second_metal_config{};
+		second_metal_config.AddInputAttachment(met_alb_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_metal_config.AddInputAttachment(met_nor_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_metal_config.AddInputAttachment(met_tan_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_metal_config.AddInputAttachment(met_met_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_metal_config.AddInputAttachment(met_vwp_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_metal_config.AddInputAttachment(met_dep_idx, vk::ImageLayout::eDepthStencilReadOnlyOptimal);
+
+
+		SubPassConfig first_specular_config{};
+		first_specular_config.AddOutputAttachment(spc_alb_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_specular_config.AddOutputAttachment(spc_nor_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_specular_config.AddOutputAttachment(spc_tan_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_specular_config.AddOutputAttachment(spc_spc_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_specular_config.AddOutputAttachment(spc_vwp_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		first_specular_config.SetDepthAttachment(spc_dep_idx, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		SubPassConfig second_specular_config{};
+		second_specular_config.AddInputAttachment(spc_alb_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_specular_config.AddInputAttachment(spc_nor_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_specular_config.AddInputAttachment(spc_tan_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_specular_config.AddInputAttachment(spc_spc_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_specular_config.AddInputAttachment(spc_vwp_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		second_specular_config.AddInputAttachment(spc_dep_idx, vk::ImageLayout::eDepthStencilReadOnlyOptimal);
+
+		SubPassConfig unlit_config{};
+		unlit_config.AddOutputAttachment(met_vwp_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		unlit_config.SetDepthAttachment(met_dep_idx, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+
+		SubPassConfig combine_config{};
+		combine_config.AddOutputAttachment(met_vwp_idx, vk::ImageLayout::eColorAttachmentOptimal);
+		combine_config.SetDepthAttachment (met_dep_idx, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+		auto first_metal_pass = rp_info.RegisterSubpass(
+			std::move(first_metal_config)
+		);
+		auto second_metal_pass = rp_info.RegisterSubpass(
+			std::move(second_metal_config)
+		);
+
+		auto first_specular_pass = rp_info.RegisterSubpass(
+			std::move(first_specular_config)
+		);
+		auto second_specular_pass = rp_info.RegisterSubpass(
+			std::move(second_specular_config)
+		);
+
+
+		auto unlit_pass = rp_info.RegisterSubpass(
+			std::move(unlit_config)
+		);
+
+
+		auto combine_pass = rp_info.RegisterSubpass(
+			std::move(combine_config)
+		);
+		
+		rp_info.AddDependency(VK_SUBPASS_EXTERNAL , first_metal_pass );
+		rp_info.AddDependency(first_metal_pass    , second_metal_pass);
+		rp_info.AddDependency(VK_SUBPASS_EXTERNAL , first_specular_pass );
+		rp_info.AddDependency(first_specular_pass , second_specular_pass);
+		rp_info.AddDependency(VK_SUBPASS_EXTERNAL , unlit_pass          );
+		rp_info.AddDependency(unlit_pass          , combine_pass        );
+		rp_info.AddDependency(second_metal_pass   , combine_pass        );
+		rp_info.AddDependency(second_specular_pass, combine_pass        );
+
+		;
+
+		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
+	}
 	void DeferredGBuffer::Init(ivec2 size)
 	{
 		if (!gbuffer || gbuffer->Size()!=size)
@@ -128,7 +233,9 @@ namespace idk::vkn
 					ColorFormat::_enum::DEPTH_COMPONENT,
 					FilterMode::_enum::Nearest
 				});
-			auto new_buffer = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(fbf.End());
+			auto fb_info = fbf.End();
+			rp_obj = ConstructDeferredRenderPass(fb_info);
+			auto new_buffer = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(fb_info);
 			if (gbuffer)
 				Core::GetResourceManager().Release(gbuffer);
 			gbuffer = RscHandle<VknFrameBuffer>{ new_buffer };

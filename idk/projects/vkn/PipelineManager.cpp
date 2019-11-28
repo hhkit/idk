@@ -58,6 +58,7 @@ namespace idk::vkn
 			viewport_offset = *config.viewport_offset;
 		combi += string_view{ r_cast<const char*>(&viewport_offset), sizeof(viewport_offset) };
 		combi += string_view{ r_cast<const char*>(&viewport_size), sizeof(viewport_size)};
+		_lock.begin_read();
 		auto itr = prog_to_pipe2.find(combi);
 		if (itr != prog_to_pipe2.end())
 		{
@@ -67,7 +68,8 @@ namespace idk::vkn
 		{
 			is_diff = true;
 		}
-		
+		_lock.end_read();
+
 		if (is_diff)
 		{
 			PipelineObject obj{ config,render_pass,has_depth_stencil,modules };
@@ -76,12 +78,18 @@ namespace idk::vkn
 
 			//TODO threadsafe lock here
 			//while (!creating.compare_exchange_strong(curr_expected_val, true));
+			_lock.begin_write();
 			auto handle = pipelines.add(std::move(obj));
+			
 			prog_to_pipe2.emplace(combi,handle);
 			prev = handle;
+			_lock.end_write();
 			//creating.store(false);
 		}
-		return pipelines.get(*prev).pipeline;
+		_lock.begin_read();
+		auto& result = pipelines.get(*prev).pipeline;
+		_lock.end_read();
+		return result;
 	}
 	void PipelineManager::RemovePipeline(VulkanPipeline* pipeline)
 	{
@@ -124,6 +132,7 @@ namespace idk::vkn
 		}
 
 	}
+#pragma optimize("",off)
 	void PipelineManager::CheckForUpdates(uint32_t frame_index)
 	{
 		vector<decltype(pipelines)::iterator> pipelines_to_update;
