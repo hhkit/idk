@@ -15,15 +15,15 @@ namespace idk
 	void SceneManager::Init()
 	{
 		Core::GetResourceManager().RegisterFactory<SceneFactory>();
-		Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
+		//Core::GetResourceManager().RegisterLoader<SceneLoader>(Scene::ext);
 	}
 
 	void SceneManager::LateInit()
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().GetFilesWithExtension("/assets", Scene::ext, FS_FILTERS::ALL))
-			Core::GetResourceManager().Load(elem);
+			Core::GetResourceManager().Load<Scene>(elem);
 		
-		_prefab_scene = Core::GetResourceManager().LoaderEmplaceResource<Scene>(Scene::prefab);
+		_prefab_scene = Core::GetResourceManager().Emplace(std::make_unique<Scene>(Scene::prefab));
 		_prefab_scene->Activate();
 	}
 

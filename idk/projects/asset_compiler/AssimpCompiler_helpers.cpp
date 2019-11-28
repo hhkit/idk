@@ -565,7 +565,7 @@ namespace idk::ai_helpers
 	{
 		anim::Skeleton ret_val{ final_skeleton, final_skeleton_table };
 		if (!final_skeleton.empty())
-			ret_val.Name(final_skeleton[0]._name);
+			ret_val.Name(final_skeleton[0].name);
 		return ret_val;
 	}
 

@@ -27,6 +27,17 @@ namespace idk
 	}
 
 	template<typename Res>
+	inline vector<RscHandle<Res>> ResourceManager::GetAll()
+	{
+		auto& table = GetTable<Res>();
+		auto retval = vector<RscHandle<Res>>{};
+		retval.reserve(table.size());
+		for (auto& [key, value] : table)
+			retval.emplace_back(key);
+		return retval;
+	}
+
+	template<typename Res>
 	inline bool ResourceManager::Destroy(const RscHandle<Res>& handle)
 	{
 		auto& table = GetTable<Res>();

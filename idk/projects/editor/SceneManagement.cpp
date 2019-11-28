@@ -7,6 +7,7 @@
 #include <common/Tag.h>
 #include <common/Transform.h>
 #include <IDE.h>
+#include <prefab/Prefab.h>
 #include <scene/SceneManager.h>
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
@@ -46,8 +47,8 @@ namespace idk
 		if (const auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext }))
 		{
             const auto virtual_path = Core::GetSystem<FileSystem>().ConvertFullToVirtual(*dialog_result);
-            const auto scene_res = Core::GetResourceManager().Get<Scene>(virtual_path);
-            return OpenScene(*scene_res);
+            const auto scene_res = Core::GetResourceManager().Load<Scene>(virtual_path, false);
+            return OpenScene(scene_res);
 		}
 		return false;
 	}
@@ -97,8 +98,8 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			Core::GetResourceManager().Rename(curr_scene, p);
-			Core::GetResourceManager().Save(curr_scene);
+			//Core::GetResourceManager().Rename(curr_scene, p);
+			//Core::GetResourceManager().Save(curr_scene);
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}
@@ -121,13 +122,13 @@ namespace idk
 			if (p.find(Scene::ext) == std::string::npos)
 				p += Scene::ext;
 
-			auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
-			if (res)
-			{
-				curr_scene->Deactivate();
-				Core::GetSystem<SceneManager>().SetActiveScene(res.value());
-				Core::GetSystem<SceneManager>().GetActiveScene()->LoadFromResourcePath();
-			}
+			//auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
+			//if (res)
+			//{
+			//	curr_scene->Deactivate();
+			//	Core::GetSystem<SceneManager>().SetActiveScene(res.value());
+			//	Core::GetSystem<SceneManager>().GetActiveScene()->LoadFromResourcePath();
+			//}
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}
@@ -162,9 +163,8 @@ namespace idk
 			SaveSceneTemporarily();
 			active_scene->Deactivate();
 			prefab_scene->Deactivate();
-			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
-				if (path.GetExtension() == ".idp")
-					Core::GetResourceManager().Unload(path);
+			for (auto& elem : Core::GetResourceManager().GetAll<Prefab>())
+				Core::GetResourceManager().Destroy(elem);
 
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
 
@@ -173,7 +173,7 @@ namespace idk
 
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
-					Core::GetResourceManager().Load(path, true);
+					Core::GetResourceManager().Load<Prefab>(path, true);
 		}
 	}
 }

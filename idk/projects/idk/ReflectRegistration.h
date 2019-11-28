@@ -334,8 +334,11 @@ REFLECT_BEGIN(idk::anim::Animation, "Animation")
 REFLECT_VARS(_animated_bones, _fps, _duration, _num_ticks)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::vector<int>, "vector<int>")
+REFLECT_END()
+
 REFLECT_BEGIN(idk::anim::BoneData, "BoneData")
-REFLECT_VARS(_name, _parent, _global_inverse_bind_pose, pre_rotation, post_rotation, _local_bind_pose)
+REFLECT_VARS(name, parent, children, global_inverse_bind_pose, pre_rotation, post_rotation, local_bind_pose)
 REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::anim::Skeleton::_bones), "BoneList")
@@ -586,8 +589,8 @@ REFLECT_END()
 REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::AnimationLayer::anim_state_table), "hash_table<string,size_t>")
-REFLECT_END()
+//REFLECT_BEGIN(decltype(idk::AnimationLayer::anim_state_table), "hash_table<string,size_t>")
+//REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::AnimationLayer::anim_states), "vector<AnimationState>")
 REFLECT_END()

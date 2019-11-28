@@ -373,7 +373,7 @@ namespace idk {
                         }
                         else if constexpr (std::is_same_v<T, Scene>)
                         {
-                            static auto scene_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/scene.png");
+                            static auto scene_icon = Core::GetResourceManager().Load<Texture>("/editor_data/icons/scene.png");
                             return scene_icon;
                         }
                         else

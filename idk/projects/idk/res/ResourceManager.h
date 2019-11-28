@@ -24,12 +24,15 @@ namespace idk
 		template<typename Result, typename Err>
 		using result = monadic::result<Result, Err>;
 
+		~ResourceManager();
+
 		/* LOOPS */
 		void WatchBuildDirectory();
 
 		/* HANDLE CHECKING - related to handles */
 		template<typename Res> bool           Validate(const RscHandle<Res>&);
 		template<typename Res> Res&           Get     (const RscHandle<Res>&);
+		template<typename Res> vector<RscHandle<Res>> GetAll();
 		template<typename Res> RscHandle<Res> Create();
 		template<typename Res> RscHandle<Res> Create(Guid guid, bool replace = true);
 		template<typename Res> RscHandle<Res> Emplace(unique_ptr<Res> resource);

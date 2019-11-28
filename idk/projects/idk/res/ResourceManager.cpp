@@ -99,6 +99,8 @@ namespace idk
 		using ResourceHelper = ResourceManager_detail<Resources>;
 	}
 
+	ResourceManager::~ResourceManager() = default;
+
 	void ResourceManager::WatchBuildDirectory()
 	{
 		for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))

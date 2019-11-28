@@ -115,7 +115,7 @@ namespace idk::vkn
 			for (auto itr = unused.begin(); itr != unused.end(); ++itr)
 			{
 				cached.erase(itr->first);
-				Core::GetResourceManager().Release(itr->second);
+				Core::GetResourceManager().Destroy(itr->second);
 			}
 
 		}
@@ -180,7 +180,7 @@ namespace idk::vkn
 			for (auto itr = unused.begin(); itr != unused.end(); ++itr)
 			{
 				cached.erase(itr->first);
-				Core::GetResourceManager().Release(itr->second);
+				Core::GetResourceManager().Destroy(itr->second);
 			}
 
 		}
