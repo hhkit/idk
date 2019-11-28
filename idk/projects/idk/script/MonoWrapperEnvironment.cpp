@@ -396,6 +396,7 @@ namespace idk::mono
 		BIND_START("idk.Bindings::TransformSetParent",  void, Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
 			{
 				h->SetParent(parent_gameobject, preserve_global);
+				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), parent_gameobject);
 			}
 		BIND_END();
 

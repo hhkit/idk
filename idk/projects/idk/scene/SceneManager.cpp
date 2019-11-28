@@ -114,4 +114,14 @@ namespace idk
 		return _sg_builder.FetchSceneGraphFor(handle);
 	}
 
+	void SceneManager::ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent)
+	{
+		_sg_builder.ReparentObject(go, new_parent);
+	}
+
+	void SceneManager::InsertObject(Handle<class GameObject> go)
+	{
+		_sg_builder.InsertObject(go);
+	}
+
 }

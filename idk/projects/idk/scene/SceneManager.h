@@ -41,7 +41,8 @@ namespace idk
 		void BuildSceneGraph(span<const GameObject> objs);
 		SceneGraph& FetchSceneGraph();
 		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
-
+		void ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent);
+		void InsertObject(Handle<class GameObject> go);
 	private:
 		friend class Scene;
 		void Init() override;

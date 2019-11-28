@@ -276,6 +276,9 @@ namespace idk
         else if (auto path = Core::GetResourceManager().GetPath(prefab))
             handle->Name(PathHandle(*path).GetStem());
 
+		for (auto& elem : game_objects)
+			Core::GetSystem<SceneManager>().InsertObject(elem);
+
         return handle;
     }
 
