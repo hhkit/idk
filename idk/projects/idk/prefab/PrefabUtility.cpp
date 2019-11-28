@@ -78,6 +78,8 @@ namespace idk
                     }
                     else if (curr.type.is_template<std::variant>())
                         curr.swap(curr.get_variant_value().get_property(token).value);
+                    else
+                        curr.swap(obj.get_property(token).value);
                 }
                 else
                     curr.swap(obj.get_property(token).value);
