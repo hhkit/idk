@@ -422,8 +422,14 @@ namespace idk {
 					outputString.append(std::to_string(i));
 					outputString.append(")");
 				}
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>,
-                    GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
+				editor.command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty,
+                            GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() },
+                            "name",
+                            string{ editor.selected_gameObjects[i]->GetComponent<Name>()->name },
+                            string{ outputString })
+                );
+                editor.selected_gameObjects[i]->GetComponent<Name>()->name = outputString;
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
@@ -673,8 +679,8 @@ namespace idk {
         ImGui::PushItemWidth(w);
 
         bool has_override = _prefab_inst &&
-            (_prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_min", 0) ||
-             _prefab_inst->HasOverride((*_prefab_curr_component).type.name(), "offset_max", 0));
+            (_prefab_inst->HasOverride((*_curr_component).type.name(), "offset_min", 0) ||
+             _prefab_inst->HasOverride((*_curr_component).type.name(), "offset_max", 0));
 
         bool changed = false;
 
@@ -774,14 +780,14 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
                 ov.property_path = "offset_max";
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*_prefab_curr_component).type.name()), "offset_min", 0 };
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
                 PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
                 ov.property_path = "offset_max";
                 PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
@@ -791,8 +797,8 @@ namespace idk {
 
         if (changed && _prefab_inst)
         {
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_min");
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, "offset_max");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_min");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_max");
         }
 
         if (has_override)
@@ -829,7 +835,7 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
-        _prefab_curr_component = c.GetHandle();
+        _curr_component = c.GetHandle();
         _prefab_curr_component_nth = 0;
         _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
         display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
@@ -1115,9 +1121,9 @@ namespace idk {
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
+        _curr_component = component;
         if (_prefab_inst)
         {
-            _prefab_curr_component = component;
             _prefab_curr_component_nth = -1;
             const span comps = _prefab_inst->GetGameObject()->GetComponents();
             for (const auto& c : comps)
@@ -1301,6 +1307,7 @@ namespace idk {
     {
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
+        static reflect::dynamic original_value;
         bool outer_changed = false;
         vector<char> indent_stack;
 
@@ -1518,6 +1525,17 @@ namespace idk {
             if (indent)
                 ImGui::Indent();
 
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            {
+                original_value.swap(reflect::dynamic(val).copy());
+            }
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                original_value.swap(reflect::dynamic());
+            }
+
             return recurse;
         };
 
@@ -1600,7 +1618,7 @@ namespace idk {
         has_override = false;
         if (self._prefab_inst && self._curr_property_stack.back().size())
             has_override = self._prefab_inst->HasOverride(
-                (*self._prefab_curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
+                (*self._curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
 
         ImGui::BeginGroup();
     }
@@ -1613,19 +1631,19 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
                 PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*self._prefab_curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
                 PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             ImGui::EndPopup();
         }
 
         if (changed && self._prefab_inst)
-            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._prefab_curr_component, curr_prop_path);
+            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
 
         if (has_override)
         {

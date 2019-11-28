@@ -52,12 +52,6 @@
     <ClInclude Include="windows\IGE_MaterialEditor.h">
       <Filter>windows</Filter>
     </ClInclude>
-    <ClInclude Include="commands\CMD_ModifyInput.h">
-      <Filter>commands</Filter>
-    </ClInclude>
-    <ClInclude Include="commands\CMD_ModifyInput.inl">
-      <Filter>commands</Filter>
-    </ClInclude>
     <ClInclude Include="widgets\InputResource.h">
       <Filter>widgets</Filter>
     </ClInclude>
@@ -148,6 +142,9 @@
       <Filter>controls</Filter>
     </ClInclude>
     <ClInclude Include="Registry.h" />
+    <ClInclude Include="commands\CMD_ModifyProperty.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -273,6 +270,7 @@
     </ClCompile>
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
