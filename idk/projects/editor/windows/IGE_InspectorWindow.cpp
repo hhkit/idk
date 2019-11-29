@@ -1399,7 +1399,7 @@ namespace idk {
             bool indent = false;
             bool recurse = false;
             bool changed = false;
-            [[maybe_unused]] bool changed_and_deactivated = false;
+            bool changed_and_deactivated = false;
 
             //ALL THE TYPE STATEMENTS HERE
             bool draw_injected = false;
@@ -1475,11 +1475,23 @@ namespace idk {
                 }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputResource("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (std::is_same_v<T, Handle<GameObject>>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputGameObject("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (std::is_same_v<T, LayerMask>)
                 {
@@ -1569,23 +1581,27 @@ namespace idk {
 
             display.ItemEnd();
 
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+                original_value.swap(reflect::dynamic(val).copy());
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+                changed_and_deactivated = true;
+
+            if (!original_value.valid()) // no change?
+                changed_and_deactivated = false;
+
+            if (changed_and_deactivated)
+            {
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                original_value.swap(reflect::dynamic());
+            }
+
             outer_changed |= changed;
             display.GroupEnd(changed);
 
             indent_stack.push_back(indent);
             if (indent)
                 ImGui::Indent();
-
-            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
-            {
-                original_value.swap(reflect::dynamic(val).copy());
-            }
-            else if (ImGui::IsItemDeactivatedAfterEdit())
-            {
-                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
-                original_value.swap(reflect::dynamic());
-            }
 
             return recurse;
         };
@@ -1694,7 +1710,9 @@ namespace idk {
         }
 
         if (changed && self._prefab_inst)
+        {
             PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
+        }
 
         if (has_override)
         {
