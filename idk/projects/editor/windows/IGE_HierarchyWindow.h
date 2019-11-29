@@ -25,6 +25,8 @@ namespace idk {
 
 		virtual void BeginWindow() override;
 		virtual void Update() override;
+		void ScrollToGameObject(Handle<GameObject> gameObject); //When called, will scroll to gameobject. Check if tree is closed or not!
+
 
         Signal<> OnGameObjectSelectionChanged;
 	
@@ -34,6 +36,10 @@ namespace idk {
 	private:
 		ImGuiTextFilter textFilter{};
 		bool show_editor_objects{};
+
+		Handle<GameObject> gameobject_focus = {}; //This is >= 0 when scroll is called
+
+
 	};
 
 

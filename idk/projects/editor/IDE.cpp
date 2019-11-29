@@ -140,10 +140,26 @@ namespace idk
         config.RasterizerMultiply = 1.5f;
         auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
         auto fontpathbold = fs.GetFullPath("/editor_data/fonts/SourceSansPro-SemiBold.ttf");
+        auto iconfontpath = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAR);
+        auto iconfontpath2 = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAS);
         io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 15.0f, &config); // Default
-        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
-        io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
 
+        // merge in icons from MDI
+        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+        ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true; icons_config.GlyphMinAdvanceX = 12.0f;
+        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 12.0f, &icons_config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 12.0f, &icons_config, icons_ranges);
+
+        // smaller and bold style of default font
+        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
+        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 10.0f, &icons_config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 10.0f, &icons_config, icons_ranges);
+
+        io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
+        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 12.0f, &icons_config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 12.0f, &icons_config, icons_ranges);
+
+        io.Fonts->Build();
 
 
 		//Window Initializations

@@ -15,8 +15,9 @@ of the editor.
 
 #include "pch.h"
 #include <imgui/imgui.h>
-#include <imgui/ImGuizmo.h>
 #include <editor/windows/IGE_SceneView.h>
+#include <imgui/ImGuizmo.h>
+#include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/commands/CommandList.h>
 #include <editor/DragDropTypes.h>
 #include <IDE.h>
@@ -194,15 +195,18 @@ namespace idk {
 							break;
 						}
 					}
-					if (!hasSelected)
-						selected_gameObjects.insert(selected_gameObjects.begin(),closestGameObject);
-					Core::GetSystem<IDE>().RefreshSelectedMatrix();
+					if (!hasSelected) {
+						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
 
+					}
+					Core::GetSystem<IDE>().RefreshSelectedMatrix();
+					Core::GetSystem<IDE>().FindWindow<IGE_HierarchyWindow>()->ScrollToGameObject(closestGameObject);
 				}
 				else {
 					//Select as normal
 					selected_gameObjects.clear();
 					selected_gameObjects.push_back(closestGameObject);
+					Core::GetSystem<IDE>().FindWindow<IGE_HierarchyWindow>()->ScrollToGameObject(closestGameObject);
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
 				}
 

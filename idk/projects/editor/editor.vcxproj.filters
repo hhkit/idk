@@ -145,6 +145,8 @@
     <ClInclude Include="commands\CMD_ModifyProperty.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="IconsFontAwesome5_c.h" />
+    <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="windows\IGE_LightLister.h" />
   </ItemGroup>
   <ItemGroup>

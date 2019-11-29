@@ -371,7 +371,7 @@ namespace idk {
 
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Translate);
 		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Translate ? activeColor : inactiveColor);
-		if (ImGui::Button("Move##Tool", toolButtonSize)) {
+		if (ImGui::Button("##Tool", toolButtonSize)) {
 			gizmo_operation = GizmoOperation_Translate;
 		}
 		ImGui::PopItemFlag();
@@ -415,7 +415,7 @@ namespace idk {
 		ImGui::PushID(1337);
 		if (Core::GetSystem<IDE>().game_running == false)
 		{
-			if (ImGui::Button("Play", toolButtonSize))
+			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 			{
 				// IDE& editor = Core::GetSystem<IDE>();
 				// for (auto& i : editor.ige_windows)
