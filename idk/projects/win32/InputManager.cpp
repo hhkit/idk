@@ -42,6 +42,7 @@ namespace idk::win
 		prev_buf() = curr_buf();
 		_curr_buffer = !_curr_buffer;
 		_last_char = '\0';
+		GetKeyboardState(curr_buf().data());
 		_curr_mouse_scroll = ivec2{};
 	}
 

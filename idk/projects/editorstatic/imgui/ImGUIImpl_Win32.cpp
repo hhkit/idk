@@ -287,6 +287,10 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
 	case WM_DISPLAYCHANGE:
 		g_WantUpdateMonitors = true;
 		return 0;
+	case WM_KILLFOCUS:
+		memset(io.KeysDown, 0, IM_ARRAYSIZE(io.KeysDown));
+		memset(io.MouseDown, 0, IM_ARRAYSIZE(io.MouseDown));
+		return 0;
 	}
 	return 0;
 }
