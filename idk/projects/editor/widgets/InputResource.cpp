@@ -83,7 +83,7 @@ namespace idk
 
         if (label_size.x > 0)
             RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
-
+		ImGui::PushID(1337);
         if (IsItemClicked())
         {
             OpenPopup(label);
@@ -135,7 +135,7 @@ namespace idk
 					}
 				}
 		}, *handle);
-
+		ImGui::PopID();
         return dropped;
     }
 }

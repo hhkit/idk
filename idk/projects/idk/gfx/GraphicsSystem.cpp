@@ -427,8 +427,13 @@ namespace idk
 		result.lights.reserve(lights.size());
 		for (auto& elem : lights)
 		{
+			if (isolate)
+			{
+				if (!elem.isolate)
+					continue;
+			}
 			//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
-			if(elem.GetGameObject()->ActiveSelf())
+			if(elem.is_active_and_enabled())
 				result.lights.emplace_back(elem.GenerateLightData());
 		}
 
@@ -696,6 +701,7 @@ namespace idk
 			//}
 		}
 		size_t i = 0;
+		
 		for (auto& light : result.lights)
 		{
 			CameraData camera{};

@@ -37,8 +37,9 @@ namespace idk
 		LightVariant light;
 		real         shadow_bias   { epsilon };
 		bool         casts_shadows { true };
+		bool         isolate       { false };
 
-		bool is_active_and_enabled();
+		bool is_active_and_enabled() const;
 
 		void InitShadowMap();
 		RscHandle<FrameBuffer>& GetLightMap();

@@ -82,7 +82,7 @@ namespace idk
 		mat4 operator()(T&) { return mat4{}; }
 	};
 
-	bool Light::is_active_and_enabled()
+	bool Light::is_active_and_enabled() const
 	{
 		return enabled && GetGameObject()->ActiveInHierarchy();
 	}

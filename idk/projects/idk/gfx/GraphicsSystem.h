@@ -72,6 +72,7 @@ namespace idk
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
+		bool isolate = false;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;

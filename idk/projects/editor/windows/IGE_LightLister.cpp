@@ -6,7 +6,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <gfx/Light.h>
-
+#include <gfx/GraphicsSystem.h>
 namespace idk
 {
 	IGE_LightLister::IGE_LightLister()
@@ -27,11 +27,12 @@ namespace idk
 		{
 			{"On", 25},
 			{"Name", 125},
-			{"Color", 25},
+			{"Col", 25},
 			{"Intensity", -1},
-			{"Position", 125},
-			{"Rotation", 125},
+			{"Position", 250},
+			{"Rotation", 250},
 			{"Shadows", 25},
+			{"Isolate", -1}
 		};
 
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -50,10 +51,12 @@ namespace idk
 				ImVec2 textsize = ImGui::CalcTextSize(header, NULL, true);
 				offset += (textsize.x + 2 * style.ItemSpacing.x);
 			}
+			ImGui::Text(header);
 			ImGui::NextColumn();
 		}
-
 		ImGui::Separator();
+		bool isolate = false;
+
 		for (auto& light : Core::GetGameState().GetObjectsOfType<Light>())
 		{
 			ImGui::Columns(std::size(headers), "", true);
@@ -73,6 +76,11 @@ namespace idk
 				light.SetColor(color);
 			ImGui::NextColumn();
 
+			auto intens = light.GetLightIntensity();
+			if (ImGui::DragFloat((id + "intens").data(), &intens, 0.1, 0, 1500.f, "%.3f", 1.1f))
+				light.SetLightIntensity(intens);
+			ImGui::NextColumn();
+
 			auto pos = tfm->GlobalPosition();
 			if (ImGuidk::DragVec3((id + "tfm").data(), &pos))
 				tfm->GlobalPosition(pos);
@@ -83,15 +91,16 @@ namespace idk
 				tfm->GlobalRotation(rot);
 			ImGui::NextColumn();
 
-			auto intens = light.GetLightIntensity();
-			if (ImGui::DragFloat((id + "intens").data(), &intens, 0.1, 0, 1500.f, "%.3f", 1.1f))
-				light.SetLightIntensity(intens);
-			ImGui::NextColumn();
-
 			ImGui::Checkbox((id + "shad").data(), &light.casts_shadows);
 			ImGui::NextColumn();
 
+			ImGui::Checkbox((id + "isol").data(), &light.isolate);
+			ImGui::NextColumn();
+			isolate |= light.isolate;
+
 			ImGui::Separator();
 		}
+
+		Core::GetSystem<GraphicsSystem>().isolate = isolate;
 	}
 }
