@@ -15,7 +15,7 @@
 
 //Helper header from imgui for vulkan implementation
 #include <editorstatic/imgui/ImGui_impl_opengl3.h>
-#include <editorstatic/imgui/ImGUIImpl_Win32.h>
+#include <editorstatic/imgui/imgui_impl_win32.h>
 
 namespace idk
 {

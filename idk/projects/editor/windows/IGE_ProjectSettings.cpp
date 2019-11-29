@@ -40,7 +40,7 @@ namespace idk
         ImGui::PushItemWidth(item_width - btn_width - ImGui::GetStyle().ItemSpacing.x);
 
         ImGui::PushID("tags");
-        if (ImGui::TreeNodeEx("Tags", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen))
+        if (ImGui::TreeNodeEx("Tags", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen))
         {
             for (int i = 0; i < config.tags.size(); ++i)
             {
@@ -110,7 +110,7 @@ namespace idk
         ImGui::PushItemWidth(item_width);
 
         ImGui::PushID("layers");
-        if (ImGui::TreeNodeEx("Layers", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen))
+        if (ImGui::TreeNodeEx("Layers", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen))
         {
             for (int i = 0; i < config.layers.size(); ++i)
             {

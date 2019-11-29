@@ -191,7 +191,7 @@ namespace idk {
                         ImGui::PushID(i);
                         ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
                                           ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-                                          ImGuiTreeNodeFlags_SpanAllAvailWidth);
+                                          ImGuiTreeNodeFlags_SpanFullWidth);
 
                         if (ImGui::BeginPopupContextItem())
                         {
@@ -1173,7 +1173,7 @@ namespace idk {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
         bool open_header = ImGui::TreeNodeEx("",
             ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-            ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+            ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
         ImGui::PopStyleVar();
 
         if (ImGui::IsMouseReleased(1) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
