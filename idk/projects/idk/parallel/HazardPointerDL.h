@@ -5,17 +5,11 @@
 #include <atomic>
 
 #include <machine.h>
-
-#pragma warning(disable:4324)
+#include <parallel/cache_aligned_wrapper.h>
 
 namespace idk::mt
 {
 	// wraps a struct such that it is aligned to the cache line
-	template<typename T>
-	struct alignas(machine::cache_line_sz) cache_aligned_wrapper
-	{
-		T value;
-	};
 
 	template<typename T, size_t MaxThds = 128>
 	class HazardPointerDL

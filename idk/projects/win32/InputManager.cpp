@@ -47,7 +47,7 @@ namespace idk::win
 
 	void InputManager::FlushCurrentBuffer()
 	{
-		for (auto& elem : prev_buf())
+		for (auto& elem : curr_buf())
 			elem = false;
 	}
 

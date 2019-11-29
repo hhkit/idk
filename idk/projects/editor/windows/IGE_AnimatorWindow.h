@@ -26,6 +26,7 @@ namespace idk {
 		};
 
 		// The current animator component being displayed
+		Handle<PrefabInstance> _prefab_inst;
 		Handle<Animator> _curr_animator_component;
 		AnimatorDisplayMode _display_mode;
 		size_t _selected_layer = 0;
@@ -56,11 +57,11 @@ namespace idk {
 		void animatorInspector();
 
 		void drawLayersTab();
-		void drawLayersContextMenu();
+		bool drawLayersContextMenu();
 		void drawParamsTab();
-		void drawParamsContextMenu();
+		bool drawParamsContextMenu();
 		void drawStatesTab();
-		void drawStatesContextMenu();
+		bool drawStatesContextMenu();
 		void drawBoneMaskTab();
 
 		void inspectLayer(size_t layer_index);

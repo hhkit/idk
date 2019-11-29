@@ -7,6 +7,7 @@
 #include "IGE_AnimatorWindow.h"
 #include "IGE_InspectorWindow.h"
 #include "IDE.h"
+#include "prefab/PrefabUtility.h"
 
 namespace idk
 {
@@ -53,6 +54,7 @@ namespace idk
 			if (curr_obj_comp != _curr_animator_component)
 				resetSelection();
 			_curr_animator_component = curr_obj_comp;
+			_prefab_inst = curr_obj->GetComponent<PrefabInstance>();
 		}
 
 		// float window_size = ImGui::GetWindowWidth();
@@ -143,9 +145,11 @@ namespace idk
 		{
 			if (_curr_animator_component)
 			{
+				bool layers_changed = false;
 				if (ImGui::Button("Add"))
 				{
 					_curr_animator_component->AddLayer();
+					layers_changed = true;
 				}
 				ImGui::SameLine();
 
@@ -157,15 +161,15 @@ namespace idk
 				{
 					_curr_animator_component->RemoveLayer(_selected_layer);
 					_selected_layer = std::max(size_t{ 0 }, _selected_layer - 1);
+					layers_changed = true;
 				}
 
 				if (!can_remove)
 					ImGuidk::PopDisabled();
 
-				//ImGui::NewLine();
-
 				for (int i =0 ;i < _curr_animator_component->layers.size(); ++i)
 				{
+					bool curr_layer_changed = false;
 					auto& layer = _curr_animator_component->layers[i];
 					strcpy_s(buf, layer.name.data());
 					ImGui::PushID(i);
@@ -239,7 +243,7 @@ namespace idk
 						ImGui::OpenPopup("layers_context_menu");
 						selectLayer(i);
 					}
-					drawLayersContextMenu();
+					curr_layer_changed = drawLayersContextMenu();
 
 					ImGui::NewLine();
 					const ImVec2 prog_size = ImVec2(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().FramePadding.x, 3);
@@ -255,18 +259,25 @@ namespace idk
 					ImGui::PopID();
 					
 				}
+
+				if (layers_changed && _prefab_inst)
+				{
+					PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_animator_component, "layers");
+					// PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_animator_component, "layer_table");
+				}
 			}
 			ImGui::EndTabItem();
 		}
 	}
 
-	void IGE_AnimatorWindow::drawLayersContextMenu()
+	bool IGE_AnimatorWindow::drawLayersContextMenu()
 	{	
 		if (ImGui::IsPopupOpen("layers_context_menu"))
 		{
 			ImGui::SetNextWindowSizeConstraints(ImVec2{ 300, 80 }, ImVec2{ 300, 80 });
 			
 		}
+		bool changed = false;
 		if (ImGui::BeginPopup("layers_context_menu", ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize))
 		{
 			auto& curr_layer = _curr_animator_component->layers[_selected_layer];
@@ -291,6 +302,7 @@ namespace idk
 					{
 						curr_layer.default_index = i;
 						curr_layer.curr_state.index = i;
+						changed = true;
 					}
 				}
 				ImGui::EndCombo();
@@ -316,6 +328,8 @@ namespace idk
 			else
 			{
 				ImGui::SliderFloat("##weight", &curr_layer.weight, 0.0f, 1.0f, "%.2f");
+				if(ImGui::IsItemDeactivatedAfterEdit())
+					changed = true;
 			}
 
 			ImGui::PopItemWidth();
@@ -338,6 +352,8 @@ namespace idk
 
 			ImGui::EndPopup();
 		}
+
+		return changed;
 	}
 
 	void IGE_AnimatorWindow::drawParamsTab()
@@ -616,20 +632,34 @@ namespace idk
 			ImGui::EndTabItem();
 		}
 	}
-	void IGE_AnimatorWindow::drawParamsContextMenu()
+	bool IGE_AnimatorWindow::drawParamsContextMenu()
 	{
+		bool changed = false;
 		if (ImGui::BeginPopup("params_context_menu", ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize))
 		{
 			if (ImGui::Selectable("Int"))
+			{
 				_curr_animator_component->AddParam<anim::IntParam>("New Int");
+				changed = true;
+			}
 			if (ImGui::Selectable("Float"))
+			{
 				_curr_animator_component->AddParam<anim::FloatParam>("New Float");
+				changed = true;
+			}
 			if (ImGui::Selectable("Bool"))
+			{
 				_curr_animator_component->AddParam<anim::BoolParam>("New Bool");
+				changed = true;
+			}
 			if (ImGui::Selectable("Trigger"))
+			{
 				_curr_animator_component->AddParam<anim::TriggerParam>("New Trigger");
+				changed = true;
+			}
 			ImGui::EndPopup();
 		}
+		return changed;
 	}
 	void IGE_AnimatorWindow::drawStatesTab()
 	{
@@ -841,8 +871,9 @@ namespace idk
 			ImGui::EndTabItem();
 		}
 	}
-	void IGE_AnimatorWindow::drawStatesContextMenu()
+	bool IGE_AnimatorWindow::drawStatesContextMenu()
 	{
+		bool changed = false;
 		if (ImGui::BeginPopup("states_context_menu", ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize))
 		{
 			auto& curr_layer = _curr_animator_component->layers[_selected_layer];
@@ -855,6 +886,7 @@ namespace idk
 				curr_layer.ResetBlend();
 
 				curr_layer.curr_state.index = _selected_state;
+				changed = true;
 			}
 			const bool is_blend_tree = curr_state.IsBlendTree();
 
@@ -863,6 +895,7 @@ namespace idk
 			if (ImGui::Selectable("Convert to Blend Tree"))
 			{
 				curr_state.ConvertToBlendTree();
+				changed = true;
 			}
 			if (is_blend_tree)
 				ImGuidk::PopDisabled();
@@ -878,7 +911,9 @@ namespace idk
 
 			ImGui::EndPopup();
 		}
+		return changed;
 	}
+
 	void IGE_AnimatorWindow::drawBoneMaskTab()
 	{
 	}

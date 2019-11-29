@@ -15,7 +15,7 @@ namespace idk::win
 		void SetMouseScroll(const ivec2& scroll);
 		ivec2 GetMouseScroll() const;
 
-		void SwapBuffers();
+		__declspec(noinline) void SwapBuffers();
 		void FlushCurrentBuffer();
 		
 		bool GetKeyDown  (int);

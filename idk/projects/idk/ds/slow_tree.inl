@@ -96,12 +96,6 @@ namespace idk
 	template<typename T>
 	inline bool slow_tree<T>::pop_child(const T& removeme)
 	{
-		auto itr = std::find_if(_children.begin(), _children.end(), [](const auto& elem) { return elem.obj == removeme; });
-		if (itr != _children.end())
-		{
-			_children.erase(itr);
-			return true;
-		}
-		return false;
+		return _children.remove_if([&removeme](const auto& elem) { return elem.obj == removeme; });
 	}
 }

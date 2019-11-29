@@ -26,6 +26,8 @@ of the editor.
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/DragDropTypes.h>
 #include <editor/utils.h>
+#include <editor/ComponentIcons.h>
+
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
 #include <anim/AnimationSystem.h>
@@ -132,7 +134,8 @@ namespace idk {
             {
                 if (prefab_inst->object_index == 0)
                     DisplayPrefabInstanceControls(prefab_inst);
-                _prefab_inst = prefab_inst;
+				if (prefab_inst->prefab)
+					_prefab_inst = prefab_inst;
             }
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
@@ -190,7 +193,7 @@ namespace idk {
                         ImGui::PushID(i);
                         ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
                                           ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-                                          ImGuiTreeNodeFlags_SpanAllAvailWidth);
+                                          ImGuiTreeNodeFlags_SpanFullWidth);
 
                         if (ImGui::BeginPopupContextItem())
                         {
@@ -871,6 +874,39 @@ namespace idk {
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
+		DisplayStack display{*this};
+
+		// layers override check
+
+		_curr_property_stack.emplace_back("layers");
+		display.GroupBegin();
+		auto title_pos = ImGui::GetCursorPos();
+		bool tree_open = ImGui::CollapsingHeader("##animation_layers", ImGuiTreeNodeFlags_AllowItemOverlap);
+		// ImGui::SetCursorPos(title_pos);
+		ImGui::SameLine();
+		display.Label("Layers");
+		ImGui::NewLine();
+		if (tree_open)
+		{
+			ImGui::Indent();
+			for (auto& layer : c_anim->layers)
+			{
+				ImGui::Separator(false);
+				ImGui::PushID(&layer);
+				
+				ImGui::Text(layer.name.data());
+				ImGui::SameLine();
+				ImGui::Text("Current State: %s", c_anim->CurrentStateName().data());
+				ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 3 }, nullptr);
+				ImGui::ProgressBar(layer.IsBlending() ? layer.blend_state.elapsed_time / layer.blend_duration : 0.0f , ImVec2{ -1, 3 }, nullptr);
+				ImGui::PopID();
+				ImGui::Separator(false);
+			}
+			ImGui::Unindent();
+		}
+		
+		display.GroupEnd(false);
+		_curr_property_stack.pop_back();
 
 		if (ImGui::Button("OPEN ANIMATOR WINDOW"))
 		{
@@ -937,40 +973,43 @@ namespace idk {
 				changed = true;
 			}
 
-			ImGui::Text("AudioClips");
-			ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
+			ImGui::Separator();
+			if (!audio_clip_list.empty()) {
+				ImGui::Text("AudioClips");
+				ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
 
-			for (auto i = 0; i < audio_clip_list.size(); ++i) {
-				string txt = "[" + std::to_string(i) + "]";
-				if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
-					//Stop playing before switching sounds!
-					changed = true;
-				}
-				ImGui::SameLine();
-				ImGui::PushID(i);
-				if (ImGui::SmallButton("X")) {
-					static_audiosource->RemoveAudioClip(i);
+				for (auto i = 0; i < audio_clip_list.size(); ++i) {
+					string txt = "[" + std::to_string(i) + "]";
+					if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
+						//Stop playing before switching sounds!
+						changed = true;
+					}
+					ImGui::SameLine();
+					ImGui::PushID(i);
+					if (ImGui::SmallButton("X")) {
+						static_audiosource->RemoveAudioClip(i);
+						ImGui::PopID();
+						changed = true;
+						break;
+					}
+
+					ImGui::SameLine();
+					if (static_audiosource->IsAudioClipPlaying(i)) {
+						if (ImGui::SmallButton("||")) {
+							static_audiosource->Stop(i);
+						}
+					}
+					else {
+						if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
+							static_audiosource->Play(i);
+						}
+					}
 					ImGui::PopID();
-					changed = true;
-					break;
+
 				}
 
-				ImGui::SameLine();
-				if (static_audiosource->IsAudioClipPlaying(i)) {
-					if (ImGui::SmallButton("||")) {
-						static_audiosource->Stop(i);
-					}
-				}
-				else {
-					if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
-						static_audiosource->Play(i);
-					}
-				}
-				ImGui::PopID();
-
+				ImGui::EndChild();
 			}
-
-			ImGui::EndChild();
 
 			return changed;
 		};
@@ -1139,21 +1178,33 @@ namespace idk {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
         bool open_header = ImGui::TreeNodeEx("",
             ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-            ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+            ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
         ImGui::PopStyleVar();
 
         if (ImGui::IsMouseReleased(1) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
             ImGui::OpenPopup("AdditionalOptions");
 
         ImGui::SameLine();
+		ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
+		component.visit([](auto h) {
+			const auto i = ComponentIcon<std::decay_t<decltype(*h)>>;
+			if (*i != '\0')
+			{
+				ImGui::Text(i);
+				ImGui::SameLine();
+			}
+			else
+				ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + 12.0f + ImGui::GetStyle().ItemInnerSpacing.x * 2.0f);
+			});
+		auto cursor_x = ImGui::GetCursorPosX();
+
         if (auto f = (*component).get_property("enabled"); f.value.valid())
         {
-            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
             ImGui::Checkbox("##enabled", &f.value.get<bool>());
             ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
         }
         else
-            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + ImGui::GetStyle().ItemInnerSpacing.x +
+            ImGui::SetCursorPosX(cursor_x + ImGui::GetStyle().ItemInnerSpacing.x +
                 /* checkbox width: */ ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2);
 
         ImGuidk::PushFont(FontType::Bold);
@@ -1348,7 +1399,7 @@ namespace idk {
             bool indent = false;
             bool recurse = false;
             bool changed = false;
-            [[maybe_unused]] bool changed_and_deactivated = false;
+            bool changed_and_deactivated = false;
 
             //ALL THE TYPE STATEMENTS HERE
             bool draw_injected = false;
@@ -1424,11 +1475,23 @@ namespace idk {
                 }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputResource("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (std::is_same_v<T, Handle<GameObject>>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputGameObject("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (std::is_same_v<T, LayerMask>)
                 {
@@ -1518,23 +1581,27 @@ namespace idk {
 
             display.ItemEnd();
 
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+                original_value.swap(reflect::dynamic(val).copy());
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+                changed_and_deactivated = true;
+
+            if (!original_value.valid()) // no change?
+                changed_and_deactivated = false;
+
+            if (changed_and_deactivated)
+            {
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                original_value.swap(reflect::dynamic());
+            }
+
             outer_changed |= changed;
             display.GroupEnd(changed);
 
             indent_stack.push_back(indent);
             if (indent)
                 ImGui::Indent();
-
-            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
-            {
-                original_value.swap(reflect::dynamic(val).copy());
-            }
-            else if (ImGui::IsItemDeactivatedAfterEdit())
-            {
-                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
-                original_value.swap(reflect::dynamic());
-            }
 
             return recurse;
         };
@@ -1643,7 +1710,9 @@ namespace idk {
         }
 
         if (changed && self._prefab_inst)
+        {
             PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
+        }
 
         if (has_override)
         {

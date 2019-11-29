@@ -55,9 +55,6 @@ namespace idk {
 		ImGui::PopStyleVar(2);
 
 
-
-
-
 		ImGuiStyle& style = ImGui::GetStyle();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBgActive]);
@@ -65,19 +62,8 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		//Tool bar
-
-
-		//Toolbar
-		//const ImVec2 toolBarSize{ window_size.x, 18.0f };
-		//const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
-		//	| ImGuiWindowFlags_NoScrollbar
-		//	| ImGuiWindowFlags_NoResize
-		//	| ImGuiWindowFlags_NoSavedSettings
-		//	| ImGuiWindowFlags_NoMove
-		//	| ImGuiWindowFlags_NoDocking
-		//	| ImGuiWindowFlags_NoCollapse;
-		//ImGui::BeginChild("HierarchyToolBar", toolBarSize, false, childFlags);
+		
+		//MenuBar
         ImGui::BeginMenuBar();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(3);
@@ -86,9 +72,7 @@ namespace idk {
 		if (ImGui::Button("Create")) {
 			ImGui::OpenPopup("CreatePopup");
 
-
 		}
-
 		if (ImGui::BeginPopup("CreatePopup")) {
             IDE& editor = Core::GetSystem<IDE>();
 
@@ -145,9 +129,9 @@ namespace idk {
 		ImGui::SetCursorPosX(startPos.x+15);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-
+		const auto search_bar_offset_x = ImGui::GetCursorPosX() + 20;
 		//Can call textFilter.Draw(), but I want to use a custom inputText.
-		bool value_changed = ImGui::InputTextEx("##ToolBarSearchBar", NULL, textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImVec2{ window_size.x - 100,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None);
+		bool value_changed = ImGui::InputTextEx("##ToolBarSearchBar", NULL, textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImVec2{ window_size.x - search_bar_offset_x,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None);
 		if (value_changed)
 			textFilter.Build();
 
@@ -158,7 +142,8 @@ namespace idk {
 
 		ImGui::EndMenuBar();
 
-        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
+		
+
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
@@ -200,7 +185,7 @@ namespace idk {
 
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 
-			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding;
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			//Check if gameobject has been selected. Causes Big-O(n^2)
 			for (Handle<GameObject>& i : selected_gameObjects) {
@@ -238,7 +223,8 @@ namespace idk {
                 col.Value.w = 0.5f;
 
             ImGui::PushStyleColor(ImGuiCol_Text, col.Value);
-			
+
+
 			if (!textFilter.PassFilter(goName.c_str())) {
                 ImGui::PopStyleColor();
 				++selectedCounter; // counter here is for shift selecting
@@ -247,6 +233,15 @@ namespace idk {
 			
 			string idString = std::to_string(handle.id); //Use id string as id
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
+
+			if (gameobject_focus) {
+				if (gameobject_focus == handle) {
+					ImGui::SetItemDefaultFocus();
+					gameobject_focus = {};
+				}
+
+			}
+
             ImGui::PopStyleColor();
 
 			
@@ -353,6 +348,8 @@ namespace idk {
 
 		});
 
+
+
         ImGui::PopStyleVar();
 
 		//Shift Select logic
@@ -448,6 +445,92 @@ namespace idk {
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 
+
+		
+
+	}
+
+	void IGE_HierarchyWindow::ScrollToGameObject(Handle<GameObject> gameObject)
+	{
+
+		gameobject_focus = gameObject;
+
+		/*
+
+		//Hierarchy Display
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
+		float	objects_parsed = 0;						//Basically, the number of gameobjects displayed in hierarchy at the point in time
+		float	object_pos = 0;						//Basically, the number of gameobjects displayed in hierarchy at the point in time
+		bool	has_found_object = false;
+		vector<int> itemToSkipInGraph{};
+
+		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+			(void)depth;
+			if (!handle) //Ignore handle zero
+				return true;
+
+			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) { // ignore editor
+
+				return true;
+			}
+
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
+
+			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
+			if (children->size() == 0) {
+				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+			}
+
+
+			Handle<Name> c_name = handle->GetComponent<Name>();
+			string goName{};
+			if (c_name)
+				goName = c_name->name;
+
+			const bool isNameEmpty = goName.empty();
+			if (isNameEmpty) {
+				goName = "Unnamed (";
+				goName.append(std::to_string(handle.id));
+				goName.append(")");
+
+			}
+
+			if (!textFilter.PassFilter(goName.c_str())) {
+				return true;
+			}
+			string idString = std::to_string(handle.id); //Use id string as id
+			auto id = ImGui::GetID(idString.c_str());
+
+			bool isTreeOpen = ImGui::TreeNodeBehaviorIsOpen(id, nodeFlags); //Display obj
+			++objects_parsed;
+
+			if (!has_found_object) {
+				if (handle == gameObject) {
+					has_found_object = true;
+
+				}
+				else {
+					++object_pos;
+				}
+			}
+
+
+			if (isTreeOpen) {
+				return true;
+			}
+			else {
+				return false;
+			}
+
+			return true;
+
+		});
+
+		is_scroll_to_gameObject_called = (object_pos / objects_parsed);
+
+		*/
 	}
 
 

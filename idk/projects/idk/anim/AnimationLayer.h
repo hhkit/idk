@@ -36,7 +36,7 @@ namespace idk
 		vector<matrix_decomposition<real>> prev_poses;
 		vector<matrix_decomposition<real>> blend_source;
 
-		hash_table<string, size_t> anim_state_table;
+		// hash_table<string, size_t> anim_state_table;
 		vector<AnimationState> anim_states{ AnimationState{} };
 
 		bool Play(size_t index, float offset = 0.0f);
@@ -51,6 +51,7 @@ namespace idk
 		string CurrentStateName() const;
 		string BlendStateName() const;
 
+		size_t FindAnimationIndex(string_view name) const;
 		AnimationState& GetAnimationState(string_view name);
 		const AnimationState& GetAnimationState(string_view name) const;
 

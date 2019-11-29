@@ -11,11 +11,11 @@ namespace idk
 {
 	seconds Core::GetDT()
 	{
-		return _instance->_scheduler->GetDeltaTime();
+		return _instance->_scheduler->GetFixedDeltaTime();
 	}
 	seconds Core::GetRealDT()
 	{
-		return _instance->_scheduler->GetRealDeltaTime();
+		return _instance->_scheduler->GetDeltaTime();
 	}
 
 	Scheduler& Core::GetScheduler()
@@ -37,7 +37,6 @@ namespace idk
 		: _system_manager(), _scheduler(std::make_unique<Scheduler>()), _running{ true }
 	{
 		_instance = this;
-		_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 	}
 
 	Core::~Core()
@@ -66,6 +65,7 @@ namespace idk
 		auto* editor = &GetSystem<IEditor>();
 
 		// setup loop
+		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 
@@ -115,6 +115,7 @@ namespace idk
 	
 		// main loop
 		_scheduler->Setup();
+		_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 		auto& app = Core::GetSystem<Application>();
 
         Core::GetSystem<SceneManager>().BuildSceneGraph(Core::GetGameState().GetObjectsOfType<const GameObject>());

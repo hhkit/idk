@@ -26,6 +26,7 @@ of the editor.
 #include <editor/SceneManagement.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <core/Scheduler.h>
+#include <audio/AudioSystem.h> //AudioSystem
 #include <PauseConfigurations.h>
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
@@ -111,20 +112,24 @@ namespace idk {
 
             ImGui::Separator();
 
-			if (ImGui::MenuItem("New Scene", "CTRL+N"))
+			auto game_playing = Core::GetSystem<IDE>().game_running;
+
+			if (ImGui::MenuItem("New Scene", "CTRL+N", false, !game_playing))
 				NewScene();
 
-			if (ImGui::MenuItem("Open Scene", "CTRL+O"))
+			if (ImGui::MenuItem("Open Scene", "CTRL+O", false, !game_playing))
 				OpenScene();
 
 			ImGui::Separator();
 
-			if (ImGui::MenuItem("Save", "CTRL+S")) 
+
+
+			if (ImGui::MenuItem("Save", "CTRL+S", false, !game_playing))
 				SaveScene();
 
 
 
-			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S")) 
+			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !game_playing))
 				SaveSceneAs();
 
 			ImGui::Separator();
@@ -366,7 +371,7 @@ namespace idk {
 
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Translate);
 		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Translate ? activeColor : inactiveColor);
-		if (ImGui::Button("Move##Tool", toolButtonSize)) {
+		if (ImGui::Button("##Tool", toolButtonSize)) {
 			gizmo_operation = GizmoOperation_Translate;
 		}
 		ImGui::PopItemFlag();
@@ -410,7 +415,7 @@ namespace idk {
 		ImGui::PushID(1337);
 		if (Core::GetSystem<IDE>().game_running == false)
 		{
-			if (ImGui::Button("Play", toolButtonSize))
+			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 			{
 				// IDE& editor = Core::GetSystem<IDE>();
 				// for (auto& i : editor.ige_windows)
@@ -436,6 +441,7 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(EditorPause);
 					Core::GetSystem<IDE>().game_frozen = true;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(true);
 				}
 			}
 			else
@@ -444,6 +450,8 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(UnpauseAll); 
 					Core::GetSystem<IDE>().game_frozen = false;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+
 				}
 			}
 			ImGui::SameLine(0, 0);

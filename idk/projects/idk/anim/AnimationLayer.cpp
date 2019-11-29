@@ -24,18 +24,18 @@ namespace idk
 		return true;
 	}
 
-	bool AnimationLayer::Play(string_view animation_name, float offset)
+	bool AnimationLayer::Play(string_view anim_name, float offset)
 	{
 		// Reset the blend/interrupt state and the playing state
 		Reset();
 
-		const auto found_anim = anim_state_table.find(animation_name.data());
-		if (found_anim == anim_state_table.end())
+		auto found_anim = FindAnimationIndex(anim_name);
+		if (found_anim >= anim_states.size())
 		{
 			return false;
 		}
 
-		return Play(found_anim->second, offset);
+		return Play(found_anim, offset);
 	}
 
 	bool AnimationLayer::BlendTo(size_t index, float blend_time)
@@ -85,8 +85,8 @@ namespace idk
 
 	bool AnimationLayer::BlendTo(string_view anim_name, float blend_time)
 	{
-		auto found_anim = anim_state_table.find(anim_name.data());
-		if (found_anim == anim_state_table.end())
+		auto found_anim = FindAnimationIndex(anim_name);
+		if (found_anim >= anim_states.size())
 		{
 			blend_state.Reset();
 			blend_duration = 0.0f;
@@ -97,7 +97,7 @@ namespace idk
 			return false;
 		}
 
-		return BlendTo(found_anim->second, blend_time);
+		return BlendTo(found_anim, blend_time);
 		
 	}
 
@@ -147,24 +147,25 @@ namespace idk
 		return anim_states[blend_state.index].name;
 	}
 
+	size_t AnimationLayer::FindAnimationIndex(string_view layer_name) const
+	{
+		size_t index;
+		for (index = 0; index < anim_states.size(); ++index)
+			if (anim_states[index].name == layer_name)
+				break;
+		return index;
+	}
+
 	AnimationState& AnimationLayer::GetAnimationState(string_view anim_name)
 	{
-		auto res = anim_state_table.find(anim_name.data());
-		if (res != anim_state_table.end())
-			return anim_states[res->second];
-
-		// index 0 is the null state
-		return anim_states[0];
+		auto res = FindAnimationIndex(anim_name);
+		return GetAnimationState(res);
 	}
 
 	const AnimationState& AnimationLayer::GetAnimationState(string_view anim_name) const
 	{
-		auto res = anim_state_table.find(anim_name.data());
-		if (res != anim_state_table.end())
-			return GetAnimationState(res->second);
-
-		// index 0 is the null state
-		return anim_states[0];
+		auto res = FindAnimationIndex(anim_name);
+		return GetAnimationState(res);
 	}
 
 	AnimationState& AnimationLayer::GetAnimationState(size_t index)
@@ -185,23 +186,22 @@ namespace idk
 	{
 		string anim_name = anim_rsc ? anim_rsc->Name().data() : "New State" ;
 		// Check if name exists
-		if (anim_state_table.find(anim_name) != anim_state_table.end())
+		string append = "";
+		int count = 0;
+
+		while (FindAnimationIndex(anim_name + append) < anim_states.size())
 		{
-			string append = " 0";
-			int count = 1;
-			while (anim_state_table.find(anim_name + append) != anim_state_table.end())
-			{
-				// Generate a unique name
-				append = " " + std::to_string(count++);
-			}
-			anim_name += append;
+			// Generate a unique name
+			append = " " + std::to_string(count++);
 		}
+		anim_name += append;
+
 		AnimationState state{ anim_name, true };
 		state.state_data = variant<BasicAnimationState, BlendTree>{ BasicAnimationState{ anim_rsc } };
-		anim_state_table.emplace(anim_name, anim_states.size());
 		anim_states.emplace_back(state);
 
-		if (anim_state_table.size() == 1)
+		// [0] = null_state, [1] = new state <- set this to the def state
+		if (anim_states.size() == 2)
 		{
 			default_index = anim_states.size() - 1;
 			curr_state.index = default_index;
@@ -210,29 +210,21 @@ namespace idk
 
 	bool AnimationLayer::RenameAnimation(string_view from, string_view to)
 	{
-		string from_str{ from };
-		string to_str{ to };
-		auto res = anim_state_table.find(from_str);
-		if (res == anim_state_table.end())
+		auto src_found = FindAnimationIndex(from);
+		if (src_found >= anim_states.size())
 		{
 			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation state (" } +from.data() + ") to (" + to.data() + ").");
 			return false;
 		}
 
-		auto found_dest = anim_state_table.find(to_str);
-		if (found_dest != anim_state_table.end())
+		auto found_dest = FindAnimationIndex(to);
+		if (found_dest >= anim_states.size())
 		{
 			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation state (" } + from.data() + ") to (" + to.data() + ").");
 			return false;
 		}
 
-
-		auto copy = res->second;
-
-		anim_state_table.erase(res);
-		anim_state_table.emplace(to_str, copy);
-
-		anim_states[copy].name = to_str;
+		anim_states[src_found].name = to;
 
 		return true;
 	}
@@ -240,35 +232,31 @@ namespace idk
 	void AnimationLayer::RemoveAnimation(string_view anim_name)
 	{
 		string name_str{ anim_name };
-		const auto found_clip = anim_state_table.find(anim_name.data());
-		if (found_clip == anim_state_table.end() || found_clip->second >= anim_states.size())
+		const auto found_clip = FindAnimationIndex(anim_name);
+		if (found_clip >= anim_states.size())
 			return;
 
-		if (default_index == found_clip->second)
+		if (default_index == found_clip)
 			default_index = 0;
-		if (curr_state.index == found_clip->second)
+		if (curr_state.index == found_clip)
 			curr_state.Reset();
-		if (blend_state.index == found_clip->second)
+		if (blend_state.index == found_clip)
 			ResetToDefault();
 
-		const size_t removed_index = found_clip->second;
-		anim_states.erase(anim_states.begin() + removed_index);
-		anim_state_table.erase(found_clip);
+		anim_states.erase(anim_states.begin() + found_clip);
 
 		const size_t num_states = anim_states.size();
 		for (size_t i = 1; i < num_states; ++i)
 		{
 			auto& anim_state = anim_states[i];
-			const auto found = anim_state_table.find(anim_state.name);
-			found->second = i;
-
+			
 			// Check all transitions for the removed index
 			for (size_t k = 1; k < anim_state.transitions.size(); ++k)
 			{
 				auto& curr_transition = anim_state.transitions[k];
-
+		
 				// Set the transition to index to 0 if the state it is supposed to transition to is the one removed.
-				if (curr_transition.transition_to_index == removed_index)
+				if (curr_transition.transition_to_index == found_clip)
 					curr_transition.transition_to_index = 0;
 			}
 		}
@@ -315,7 +303,7 @@ namespace idk
 
 	bool AnimationLayer::HasState(string_view anim_name) const
 	{
-		return anim_state_table.find(anim_name.data()) != anim_state_table.end();
+		return FindAnimationIndex(anim_name) < anim_states.size();
 	}
 
 	void AnimationLayer::ResetToDefault()

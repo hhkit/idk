@@ -25,6 +25,8 @@ namespace idk
 		// rebuild scene graph
 		for (auto& elem : objs)
 		{
+			InsertObject(elem.GetHandle());
+			/*
 			auto key = elem.GetHandle();
 			const auto parent = elem.Parent();
 			assert(key);
@@ -35,6 +37,7 @@ namespace idk
 			}
 			else
 				sg_lookup.try_emplace(key, &scene_graphs.emplace_child(key));
+				*/
 		}
 
 		// we now have the rebuilt scene graph
@@ -51,6 +54,55 @@ namespace idk
 		if (itr == sg_lookup.end())
 			return nullptr;
 		return itr->second;
+	}
+
+	void SceneGraphBuilder::ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent)
+	{
+		auto curr_parent = go->Parent();
+
+		// remove from current parent
+		if (curr_parent)
+		{
+			const auto itr = sg_lookup.find(curr_parent);
+			IDK_ASSERT(itr != sg_lookup.end());
+			itr->second->pop_child(go);
+		}
+		else
+		{
+			scene_graphs.pop_child(go);
+		}
+
+		if (new_parent)
+		{
+			const auto itr = sg_lookup.find(new_parent);
+			IDK_ASSERT(itr != sg_lookup.end());
+			sg_lookup[go] = &itr->second->emplace_child(go);
+			
+		}
+		else
+		{
+			sg_lookup[go] = &scene_graphs.emplace_child(go);
+		}
+	}
+
+	void SceneGraphBuilder::InsertObject(Handle<class GameObject> go)
+	{
+		auto itr = sg_lookup.find(go);
+		if (itr == sg_lookup.end())
+		{
+			auto parent = go->Parent();
+			if (parent)
+			{
+				auto parent_sg = sg_lookup.find(parent);
+				if (parent_sg == sg_lookup.end())
+					InsertObject(parent);
+				sg_lookup[go] = &sg_lookup[parent]->emplace_child(go);
+			}
+			else
+			{
+				sg_lookup[go] = &scene_graphs.emplace_child(go);
+			}
+		}
 	}
 
 }

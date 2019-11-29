@@ -5,7 +5,7 @@
 #include <utility>
 
 #include <core/ISystem.h>
-#include "queue.h"
+#include "circular_buffer.h"
 
 namespace idk::mt
 {
@@ -26,7 +26,7 @@ namespace idk::mt
 		void ExecuteJob(const int thid);
 	private:
 		std::vector<std::thread> threads;
-		queue<std::function<void()>> jobs;
+		circular_buffer_lf<std::function<void()>> jobs;
 	};
 
 	template<typename T>
@@ -48,7 +48,7 @@ namespace idk::mt
 		auto promise = std::make_shared<std::promise<Retval>>();
 		auto future = promise->get_future();
 		
-		jobs.emplace_back(mt::thread_id(), 
+		while (!jobs.emplace_back(
 			[ fn = func
 			, tuple = std::make_tuple(std::forward<Args>(args)...)
 			, promise
@@ -61,7 +61,8 @@ namespace idk::mt
 			}
 			else
 				promise->set_value(std::apply(fn, tuple));
-		});
+		}))
+			ExecuteJob(thread_id());
 		
 		return Future{ this, std::move(future) };
 	}

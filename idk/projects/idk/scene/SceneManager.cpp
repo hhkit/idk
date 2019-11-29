@@ -79,6 +79,23 @@ namespace idk
 		return true;
 	}
 
+	void SceneManager::SetNextScene(RscHandle<Scene> s)
+	{
+		changing = true;
+		_next_scene = s;
+	}
+
+	void SceneManager::ChangeScene()
+	{
+		if (changing)
+		{
+			_active_scene->Deactivate();
+			_active_scene = _next_scene;
+			_active_scene->LoadFromResourcePath();
+			changing = false;
+		}
+	}
+
 	void SceneManager::DestroyQueuedObjects(span<GameObject> objs)
 	{
 		GameState::GetGameState().SortObjectsOfType<GameObject>(
@@ -112,6 +129,16 @@ namespace idk
 	SceneManager::SceneGraph* SceneManager::FetchSceneGraphFor(Handle<class GameObject> handle)
 	{
 		return _sg_builder.FetchSceneGraphFor(handle);
+	}
+
+	void SceneManager::ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent)
+	{
+		_sg_builder.ReparentObject(go, new_parent);
+	}
+
+	void SceneManager::InsertObject(Handle<class GameObject> go)
+	{
+		_sg_builder.InsertObject(go);
 	}
 
 }
