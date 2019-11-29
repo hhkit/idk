@@ -191,6 +191,7 @@
     <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
     <ClInclude Include="commands\CMD_ModifyProperty.h" />
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
+    <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="DragDropTypes.h" />
     <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="commands\CMD_AddComponent.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="commands\CommandController.h" />
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
+    <ClInclude Include="IconsFontAwesome5_c.h" />
     <ClInclude Include="ProjectManagement.h" />
     <ClInclude Include="Registry.h" />
     <ClInclude Include="widgets\LayerMaskCombo.h" />

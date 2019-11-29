@@ -26,6 +26,8 @@ of the editor.
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/DragDropTypes.h>
 #include <editor/utils.h>
+#include <editor/ComponentIcons.h>
+
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
 #include <anim/AnimationSystem.h>
@@ -1180,14 +1182,26 @@ namespace idk {
             ImGui::OpenPopup("AdditionalOptions");
 
         ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
+        component.visit([](auto h) {
+            const auto i = ComponentIcon<std::decay_t<decltype(*h)>>;
+            if (*i != '\0')
+            {
+                ImGui::Text(i);
+                ImGui::SameLine();
+            }
+            else
+                ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + 12.0f + ImGui::GetStyle().ItemInnerSpacing.x * 2.0f);
+        });
+        auto cursor_x = ImGui::GetCursorPosX();
+
         if (auto f = (*component).get_property("enabled"); f.value.valid())
         {
-            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
             ImGui::Checkbox("##enabled", &f.value.get<bool>());
             ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
         }
         else
-            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + ImGui::GetStyle().ItemInnerSpacing.x +
+            ImGui::SetCursorPosX(cursor_x + ImGui::GetStyle().ItemInnerSpacing.x +
                 /* checkbox width: */ ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2);
 
         ImGuidk::PushFont(FontType::Bold);

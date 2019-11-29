@@ -14,8 +14,8 @@ of the editor.
 
 
 #include "pch.h"
-#include <imgui/ImGuizmo.h>
 #include <editor/windows/IGE_SceneView.h>
+#include <imgui/ImGuizmo.h>
 #include <editor/commands/CommandList.h>
 #include <editor/DragDropTypes.h>
 #include <IDE.h>
