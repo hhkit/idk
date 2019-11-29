@@ -112,20 +112,24 @@ namespace idk {
 
             ImGui::Separator();
 
-			if (ImGui::MenuItem("New Scene", "CTRL+N"))
+			auto game_playing = Core::GetSystem<IDE>().game_running;
+
+			if (ImGui::MenuItem("New Scene", "CTRL+N", false, !game_playing))
 				NewScene();
 
-			if (ImGui::MenuItem("Open Scene", "CTRL+O"))
+			if (ImGui::MenuItem("Open Scene", "CTRL+O", false, !game_playing))
 				OpenScene();
 
 			ImGui::Separator();
 
-			if (ImGui::MenuItem("Save", "CTRL+S")) 
+
+
+			if (ImGui::MenuItem("Save", "CTRL+S", false, !game_playing))
 				SaveScene();
 
 
 
-			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S")) 
+			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !game_playing))
 				SaveSceneAs();
 
 			ImGui::Separator();

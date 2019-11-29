@@ -264,20 +264,21 @@ namespace idk
 
 		// scene controls
 		auto& app = Core::GetSystem<Application>();
-		if (app.GetKey(Key::Control))
-		{
-			if(app.GetKeyDown(Key::S))
+		if (!game_running)
+			if (app.GetKey(Key::Control))
 			{
-				if (app.GetKey(Key::Shift))
-					SaveSceneAs();
-				else
-					SaveScene();
+				if(app.GetKeyDown(Key::S))
+				{
+					if (app.GetKey(Key::Shift))
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
+				if (app.GetKeyDown(Key::N))
+					NewScene();
+				if (app.GetKeyDown(Key::O))
+					OpenScene();
 			}
-			if (app.GetKeyDown(Key::N))
-				NewScene();
-			if (app.GetKeyDown(Key::O))
-				OpenScene();
-		}
 
 		_interface->ImGuiFrameBegin();
 		ImGuizmo::BeginFrame();
