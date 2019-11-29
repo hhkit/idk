@@ -156,13 +156,10 @@ namespace idk::ogl
 
 		// set texture targets
 		vector<GLenum> buffers;
-		//auto& yolo = *meta.textures[0];
-		//for (int i = 0; i < std::size(meta.textures); ++i)
+
 		auto tex = target->GetColorBuffer();
-		auto& tex_ = tex.as<OpenGLTexture>();
-		tex_;
-		int i = 0;
-		{
+		if(tex){
+			auto& tex_ = tex.as<OpenGLTexture>();
 			TextureMeta mm = tex_.GetMeta();
 			if (mm.internal_format != ColorFormat::RGBAF_16)
 			{
@@ -171,17 +168,36 @@ namespace idk::ogl
 			}
 			tex_.Bind();
 			GL_CHECK();
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, s_cast<GLuint>(r_cast<intptr_t>(tex_.ID())), 0);
-			buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 , s_cast<GLuint>(r_cast<intptr_t>(tex_.ID())), 0);
+			buffers.push_back(GL_COLOR_ATTACHMENT0 );
 			GL_CHECK();
 		}
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
-		auto& depth_buffer = *meta.GetDepthBuffer();
+
 		GL_CHECK();
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(depth_buffer.ID())), 0);
+		auto dp = target->GetDepthBuffer();
+		if (dp)
+		{
+			auto& dp_ = dp.as<OpenGLTexture>();
+			dp_.Bind();
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(dp_.ID())), 0);
+		}
 		GL_CHECK();
-		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
+
+		GL_CHECK();
+
+		if (!tex)
+		{
+			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, target->Size().x);
+			GL_CHECK();
+			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
+			GL_CHECK();
+			glDrawBuffer(GL_NONE);
+			GL_CHECK();
+		}
+		else
+		{
+			glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
+		}
 
 		CheckFBStatus();
 

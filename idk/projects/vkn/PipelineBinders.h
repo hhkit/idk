@@ -50,6 +50,12 @@ namespace idk
 
 			//Stuff that needs to be bound only for font renderobject
 			virtual void BindFont(PipelineThingy& the_interface, const FontRenderData& dc);
+		
+			//Stuff that needs to be bound only for canvas renderobject
+			virtual void BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one);
+			virtual void BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one);
+
+		
 		};
 
 		//Standard binding for vertex stuff
@@ -93,6 +99,20 @@ namespace idk
 			void BindFont(PipelineThingy& the_interface, const FontRenderData& dc)override;
 
 
+		};
+
+		struct CanvasVertexBindings : StandardBindings
+		{
+			//const GraphicsState* _state;
+			//const GraphicsState& State();
+			mat4 view_trf, proj_trf, obj_trf;
+			vec4 color;
+			//void SetState(const PostRenderData& vstate);
+			void SetState(const CameraData& camera);
+
+			void Bind(PipelineThingy& the_interface)override;
+			void BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one)override;
+			void BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one)override;
 		};
 		struct PbrFwdBindings : StandardBindings
 		{

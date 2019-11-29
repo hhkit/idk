@@ -7,19 +7,19 @@ namespace idk
 	{
 		if constexpr (std::is_same_v<T, anim::IntParam>)
 		{
-			return int_vars;
+			return parameters.int_vars;
 		}
 		else if constexpr (std::is_same_v<T, anim::FloatParam>)
 		{
-			return float_vars;
+			return parameters.float_vars;
 		}
 		else if constexpr (std::is_same_v<T, anim::BoolParam>)
 		{
-			return bool_vars;
+			return parameters.bool_vars;
 		}
 		else if constexpr (std::is_same_v<T, anim::TriggerParam>)
 		{
-			return trigger_vars;
+			return parameters.trigger_vars;
 		}
 		else
 		{
@@ -32,19 +32,19 @@ namespace idk
 	{
 		if constexpr (std::is_same_v<T, anim::IntParam>)
 		{
-			return int_vars;
+			return parameters.int_vars;
 		}
 		else if constexpr (std::is_same_v<T, anim::FloatParam>)
 		{
-			return float_vars;
+			return parameters.float_vars;
 		}
 		else if constexpr (std::is_same_v<T, anim::BoolParam>)
 		{
-			return bool_vars;
+			return parameters.bool_vars;
 		}
 		else if constexpr (std::is_same_v<T, anim::TriggerParam>)
 		{
-			return trigger_vars;
+			return parameters.trigger_vars;
 		}
 		else
 		{
@@ -136,28 +136,28 @@ namespace idk
 		// from must be found, to must not be found
 		if (from_res != param_table.end() && to_res == param_table.end())
 		{
-			// Rename all params that every condition is using
-			for (auto& layer : layers)
-			{
-				for (auto& state : layer.anim_states)
-				{
-					for (auto& transition : state.transitions)
-					{
-						for (auto& condition : transition.conditions)
-						{
-							if (condition.param_name == from_str)
-								condition.param_name = to_str;
-						}
-					}
+		//	// Rename all params that every condition is using
+		//	for (auto& layer : layers)
+		//	{
+		//		for (auto& state : layer.anim_states)
+		//		{
+		//			for (auto& transition : state.transitions)
+		//			{
+		//				for (auto& condition : transition.conditions)
+		//				{
+		//					if (condition.param_name == from_str)
+		//						condition.param_name = to_str;
+		//				}
+		//			}
 
-					BlendTree* blend_tree = state.GetBlendTree();
-					if (blend_tree)
-					{
-						if (blend_tree->params[0] == from_str)
-							blend_tree->params[0] = to_str;
-					}
-				}
-			}
+		//			BlendTree* blend_tree = state.GetBlendTree();
+		//			if (blend_tree)
+		//			{
+		//				if (blend_tree->params[0] == from_str)
+		//					blend_tree->params[0] = to_str;
+		//			}
+		//		}
+		//	}
 
 			T copy = from_res->second;
 			copy.name = to_str;

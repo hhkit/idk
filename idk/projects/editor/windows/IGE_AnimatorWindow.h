@@ -32,13 +32,15 @@ namespace idk {
 		size_t _selected_layer = 0;
 		size_t _selected_state = 0;
 		size_t _selected_transition = 0;
-
 		int _selected_condition = -1;
 
 		anim::AnimDataType _selected_param_type = anim::AnimDataType::NONE;
 		string _selected_param;
 
 		bool _show_transition = false;
+
+		bool _layers_changed = false;
+		bool _params_changed = false;
 		
 		// Colors for all the widgets
 		ImVec4 _selectable_bg_col;
@@ -49,8 +51,6 @@ namespace idk {
 		// ImVec2 _layer_selectable_display_size;
 		size_t _layer_selectable_num_items;
 		size_t _state_selectable_num_items;
-
-		void arrow();
 
 		void layersAndParams();
 		void statesAndBoneMask();
@@ -76,5 +76,7 @@ namespace idk {
 		void selectLayer(size_t layer_index);
 		void selectState(size_t layer_index, size_t state_index);
 		void selectTransition(size_t layer_index, size_t state_index, size_t transition_index);
+
+		void arrow();
 	};
 }

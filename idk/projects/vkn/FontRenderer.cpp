@@ -9,28 +9,6 @@ namespace idk::vkn
 {
 	void FontRenderer::InitConfig()
 	{
-		//font_pipeline->buffer_descriptions.emplace_back(
-		//	buffer_desc{
-		//		buffer_desc::binding_info{ {},sizeof(ParticleObj),VertexRate::eInstance },
-		//				{
-		//					/*buffer_desc::attribute_info
-		//	{
-		//		AttribFormat::eSVec4,2,offsetof(ParticleObj,ParticleObj::position),true
-		//	},
-		//	buffer_desc::attribute_info
-		//	{
-		//		AttribFormat::eSVec1,3,offsetof(ParticleObj,ParticleObj::rotation),true
-		//	},
-		//	buffer_desc::attribute_info
-		//	{
-		//		AttribFormat::eSVec1,4,offsetof(ParticleObj,ParticleObj::size),true
-		//	},
-		//	buffer_desc::attribute_info
-		//	{
-		//		AttribFormat::eSVec4,5,offsetof(ParticleObj,ParticleObj::color),true
-		//	},*/
-		//				}
-		//	});
 		auto test = AttachmentBlendConfig{};
 		test.blend_enable = true;
 		test.alpha_blend_op = BlendOp::eAdd;
@@ -51,41 +29,40 @@ namespace idk::vkn
 		auto& shared_state = *state.shared_gfx_state;
 		
 		FontVertexBindings vert_bind;
-		//StandardMaterialBindings mat_bind;
-		//mat_bind.SetState(state);
 		vert_bind.SetState(state);
 		auto num_unique_inst = state.range.inst_font_end - state.range.inst_font_begin;
 
 		if (num_unique_inst)
 		{
-			auto& cam = state.camera;
 			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VFont]);
 			the_interface.BindShader(ShaderStage::Fragment, state.renderer_fragment_shaders[FragmentShaders::FFont]);
 			auto& character_render_info = *shared_state.characters_data;
 			auto& font_render_info = *shared_state.fonts_data;
-			auto& font_raw_data = *shared_state.font_range;
 			font_ro.config = font_pipeline;
+
+			//Reserve buffer size in characters
 			font_ro_inst.clear();
 			font_ro_inst.reserve(character_render_info.size());
+
+			//Bind camera block
 			vert_bind.Bind(the_interface);
 
-			//size_t i = state.range.inst_font_begin;
 			auto i = state.range.inst_font_begin;
 			for(auto& elem: font_render_info)
 			{
-				auto& raw_elem = font_raw_data[i];
-				RenderObject f_ro{ font_ro };
-
 				// bind shader
 
-				//TODO bind materials
+				//TODO bind font
 				vert_bind.BindFont(the_interface, elem);
 
-				//the_interface.BindMeshBuffers(f_ro);
+				//Bind Attribute
 				the_interface.BindAttrib(0, shared_state.font_buffer[i].buffer(), 0);
+
+				//Set vertex count
 				the_interface.SetVertexCount(s_cast<uint32_t>(elem.coords.size()));
 
-				the_interface.FinalizeDrawCall(font_ro_inst.emplace_back(std::move(f_ro)));
+				//Finalize draw call
+				the_interface.FinalizeDrawCall(font_ro_inst.emplace_back(std::move(RenderObject{font_ro})));
 
 				++i;
 			}

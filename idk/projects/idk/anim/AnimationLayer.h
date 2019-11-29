@@ -61,8 +61,8 @@ namespace idk
 		// Engine Setters
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
 		bool RenameAnimation(string_view from, string_view to);
-		void RemoveAnimation(string_view name);
-		void RemoveAnimation(size_t index);
+		bool RemoveAnimation(string_view name);
+		bool RemoveAnimation(size_t index);
 
 		bool IsPlaying() const;
 		bool IsBlending() const;

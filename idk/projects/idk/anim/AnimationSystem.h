@@ -48,7 +48,7 @@ namespace idk
 		void FinalPass(Animator& animator);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 
-		void InitializeAnimators();
+		void InitializeAnimators(bool play);
 
 		vector<Handle<Animator>> _creation_queue;
 	};

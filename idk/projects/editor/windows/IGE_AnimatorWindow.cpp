@@ -73,8 +73,20 @@ namespace idk
 		ImGui::NextColumn();
 
 		animatorInspector();
-		// if (ImGui::IsWindowAppearing())
-		// 	ImGui::SetColumnWidth(-1, 400);
+
+		if (_prefab_inst)
+		{
+			if (_layers_changed)
+			{
+				PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_animator_component, "layers");
+				_layers_changed = false;
+			}
+			if (_params_changed)
+			{
+				PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_animator_component, "parameters");
+				_params_changed = false;
+			}
+		}
 	}
 	IGE_AnimatorWindow::~IGE_AnimatorWindow()
 	{
@@ -144,12 +156,11 @@ namespace idk
 		if (ImGui::BeginTabItem("Layers", nullptr, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
 		{
 			if (_curr_animator_component)
-			{
-				bool layers_changed = false;
+			
 				if (ImGui::Button("Add"))
 				{
 					_curr_animator_component->AddLayer();
-					layers_changed = true;
+					_layers_changed = true;
 				}
 				ImGui::SameLine();
 
@@ -159,9 +170,9 @@ namespace idk
 
 				if (ImGui::Button("Delete"))
 				{
-					_curr_animator_component->RemoveLayer(_selected_layer);
-					_selected_layer = std::max(size_t{ 0 }, _selected_layer - 1);
-					layers_changed = true;
+					_layers_changed |= _curr_animator_component->RemoveLayer(_selected_layer);
+					if (_selected_layer != 0) --_selected_layer;
+					selectLayer(_selected_layer);
 				}
 
 				if (!can_remove)
@@ -169,7 +180,6 @@ namespace idk
 
 				for (int i =0 ;i < _curr_animator_component->layers.size(); ++i)
 				{
-					bool curr_layer_changed = false;
 					auto& layer = _curr_animator_component->layers[i];
 					strcpy_s(buf, layer.name.data());
 					ImGui::PushID(i);
@@ -201,7 +211,7 @@ namespace idk
 					{
 						if (ImGui::InputText("##rename", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
 						{
-							_curr_animator_component->RenameLayer(layer.name, buf);
+							_layers_changed |= _curr_animator_component->RenameLayer(layer.name, buf);
 							rename_index = -1;
 						}
 						if (just_rename)
@@ -243,7 +253,7 @@ namespace idk
 						ImGui::OpenPopup("layers_context_menu");
 						selectLayer(i);
 					}
-					curr_layer_changed = drawLayersContextMenu();
+					_layers_changed |= drawLayersContextMenu();
 
 					ImGui::NewLine();
 					const ImVec2 prog_size = ImVec2(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().FramePadding.x, 3);
@@ -259,16 +269,10 @@ namespace idk
 					ImGui::PopID();
 					
 				}
-
-				if (layers_changed && _prefab_inst)
-				{
-					PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_animator_component, "layers");
-					// PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_animator_component, "layer_table");
-				}
-			}
 			ImGui::EndTabItem();
 		}
 	}
+
 
 	bool IGE_AnimatorWindow::drawLayersContextMenu()
 	{	
@@ -323,13 +327,14 @@ namespace idk
 			else if(!curr_layer.IsPlaying())
 			{
 				if (ImGui::SliderFloat("##weight", &curr_layer.default_weight, 0.0f, 1.0f, "%.2f"))
+				{
 					curr_layer.weight = curr_layer.default_weight;
+					changed = true;
+				}
 			}
 			else
 			{
 				ImGui::SliderFloat("##weight", &curr_layer.weight, 0.0f, 1.0f, "%.2f");
-				if(ImGui::IsItemDeactivatedAfterEdit())
-					changed = true;
 			}
 
 			ImGui::PopItemWidth();
@@ -340,9 +345,15 @@ namespace idk
 			if (ImGui::BeginCombo("##layer_blend_mode", curr_layer.blend_type.to_string().data()))
 			{
 				if (ImGui::Selectable("Override", curr_layer.blend_type == AnimLayerBlend::Override_Blend))
+				{
+					changed = true;
 					curr_layer.blend_type = AnimLayerBlend::Override_Blend;
+				}
 				if (ImGui::Selectable("Additive (Not supported)", curr_layer.blend_type == AnimLayerBlend::Additive_Blend))
+				{
+					changed = true;
 					curr_layer.blend_type = AnimLayerBlend::Override_Blend;
+				}
 				ImGui::EndCombo();
 			}
 			ImGui::PopItemWidth();
@@ -377,7 +388,7 @@ namespace idk
 				{
 					ImGui::OpenPopup("params_context_menu");
 				}
-				drawParamsContextMenu();
+				_params_changed |= drawParamsContextMenu();
 
 				const bool can_delete = _selected_param_type != anim::AnimDataType::NONE || !_selected_param.empty();
 
@@ -391,22 +402,22 @@ namespace idk
 					{
 					case anim::AnimDataType::INT:
 					{
-						_curr_animator_component->RemoveParam<anim::IntParam>(_selected_param);
+						_params_changed |= _curr_animator_component->RemoveParam<anim::IntParam>(_selected_param);
 						break;
 					}
 					case anim::AnimDataType::FLOAT:
 					{
-						_curr_animator_component->RemoveParam<anim::FloatParam>(_selected_param);
+						_params_changed |= _curr_animator_component->RemoveParam<anim::FloatParam>(_selected_param);
 						break;
 					}
 					case anim::AnimDataType::BOOL:
 					{
-						_curr_animator_component->RemoveParam<anim::BoolParam>(_selected_param);
+						_params_changed |= _curr_animator_component->RemoveParam<anim::BoolParam>(_selected_param);
 						break;
 					}
 					case anim::AnimDataType::TRIGGER:
 					{
-						_curr_animator_component->RemoveParam<anim::TriggerParam>(_selected_param);
+						_params_changed |= _curr_animator_component->RemoveParam<anim::TriggerParam>(_selected_param);
 						break;
 					}
 					default:
@@ -442,7 +453,8 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
 					if (ImGui::Selectable("##param_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_DrawFillAvailWidth))
 					{
-						ret_val = true;
+						_selected_param_type = type;
+						_selected_param = param.name;
 					}
 
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
@@ -490,23 +502,24 @@ namespace idk
 					if constexpr (std::is_same_v <T, anim::IntParam>)
 					{
 						ImGui::PushItemWidth(widget_size);
-						ImGui::DragInt("##param_input", &val);
+						ret_val |= ImGui::DragInt("##param_input", &val);
 						ImGui::PopItemWidth();
 					}
 					else if constexpr (std::is_same_v < T, anim::FloatParam>)
 					{
 						ImGui::PushItemWidth(widget_size);
-						ImGui::DragFloat("##param_input", &val, 0.01f);
+						ret_val |= ImGui::DragFloat("##param_input", &val, 0.01f);
 						ImGui::PopItemWidth();
 					}
 					else if constexpr (std::is_same_v <T, anim::BoolParam>)
 					{
-						ImGui::Checkbox("##param_input", &val);
+						ret_val |= ImGui::Checkbox("##param_input", &val);
 					}
 					else if constexpr (std::is_same_v <T, anim::TriggerParam>)
 					{
 						if (ImGui::RadioButton("##param_input", val))
 						{
+							ret_val = true;
 							val = !val;
 						}
 					}
@@ -531,18 +544,15 @@ namespace idk
 					auto& param_table = _curr_animator_component->GetParamTable<anim::IntParam>();
 					for (auto& param : param_table)
 					{
-						const bool change = display_param(param.second, _selected_param_type == anim::AnimDataType::INT && _selected_param == param.second.name, anim::AnimDataType::INT);
-						if (change)
-						{
-							_selected_param_type = anim::AnimDataType::INT;
-							_selected_param = param.second.name;
-						}
+						_params_changed |= display_param(param.second, _selected_param_type == anim::AnimDataType::INT && _selected_param == param.second.name, anim::AnimDataType::INT);
 					}
 					
 					// Rename outside the loop
 					if (!rename_to.empty())
 					{
-						_curr_animator_component->RenameParam<anim::IntParam>(rename_param, rename_to);
+						const bool rename_res = _curr_animator_component->RenameParam<anim::IntParam>(rename_param, rename_to);
+						// _layers_changed |= rename_res;
+						_params_changed |= rename_res;
 						rename_param.clear();
 						rename_to.clear();
 						rename_param_type = anim::AnimDataType::NONE;
@@ -557,18 +567,15 @@ namespace idk
 					auto& param_table = _curr_animator_component->GetParamTable<anim::FloatParam>();
 					for (auto& param : param_table)
 					{
-						const bool change = display_param(param.second, _selected_param_type == anim::AnimDataType::FLOAT && _selected_param == param.second.name, anim::AnimDataType::FLOAT);
-						if (change)
-						{
-							_selected_param_type = anim::AnimDataType::FLOAT;
-							_selected_param = param.second.name;
-						}
+						_params_changed |= display_param(param.second, _selected_param_type == anim::AnimDataType::FLOAT && _selected_param == param.second.name, anim::AnimDataType::FLOAT);
 					}
 
 					// Rename outside the loop
 					if (!rename_to.empty())
 					{
-						_curr_animator_component->RenameParam<anim::FloatParam>(rename_param, rename_to);
+						const bool rename_res = _curr_animator_component->RenameParam<anim::FloatParam>(rename_param, rename_to);
+						// _layers_changed |= rename_res;
+						_params_changed |= rename_res;
 						rename_param.clear();
 						rename_to.clear();
 						rename_param_type = anim::AnimDataType::NONE;
@@ -583,18 +590,15 @@ namespace idk
 					auto& param_table = _curr_animator_component->GetParamTable<anim::BoolParam>();
 					for (auto& param : param_table)
 					{
-						const bool change = display_param(param.second, _selected_param_type == anim::AnimDataType::BOOL && _selected_param == param.second.name, anim::AnimDataType::BOOL);
-						if (change)
-						{
-							_selected_param_type = anim::AnimDataType::BOOL;
-							_selected_param = param.second.name;
-						}
+						_params_changed |= display_param(param.second, _selected_param_type == anim::AnimDataType::BOOL && _selected_param == param.second.name, anim::AnimDataType::BOOL);
 					}
 
 					// Rename outside the loop
 					if (!rename_to.empty())
 					{
-						_curr_animator_component->RenameParam<anim::BoolParam>(rename_param, rename_to);
+						const bool rename_res = _curr_animator_component->RenameParam<anim::BoolParam>(rename_param, rename_to);
+						// _layers_changed |= rename_res;
+						_params_changed |= rename_res;
 						rename_param.clear();
 						rename_to.clear();
 						rename_param_type = anim::AnimDataType::NONE;
@@ -609,18 +613,15 @@ namespace idk
 					auto& param_table = _curr_animator_component->GetParamTable<anim::TriggerParam>();
 					for (auto& param : param_table)
 					{
-						const bool change = display_param(param.second, _selected_param_type == anim::AnimDataType::TRIGGER && _selected_param == param.second.name, anim::AnimDataType::TRIGGER);
-						if (change)
-						{
-							_selected_param_type = anim::AnimDataType::TRIGGER;
-							_selected_param = param.second.name;
-						}
+						_params_changed |= display_param(param.second, _selected_param_type == anim::AnimDataType::TRIGGER && _selected_param == param.second.name, anim::AnimDataType::TRIGGER);
 					}
 
 					// Rename outside the loop
 					if (!rename_to.empty())
 					{
-						_curr_animator_component->RenameParam<anim::TriggerParam>(rename_param, rename_to);
+						const bool rename_res = _curr_animator_component->RenameParam<anim::TriggerParam>(rename_param, rename_to);
+						// _layers_changed |= rename_res;
+						_params_changed |= rename_res;
 						rename_param.clear();
 						rename_to.clear();
 						rename_param_type = anim::AnimDataType::NONE;
@@ -769,6 +770,7 @@ namespace idk
 				if (ImGui::Button("Add"))
 				{
 					curr_layer.AddAnimation(RscHandle<anim::Animation>{});
+					_layers_changed = true;
 				}
 				ImGui::SameLine();
 
@@ -777,8 +779,8 @@ namespace idk
 					ImGuidk::PushDisabled();
 				if (ImGui::Button("Delete"))
 				{
-					curr_layer.RemoveAnimation(_selected_state);
-					_selected_state = std::max(size_t{ 0 }, _selected_state - 1);
+					_layers_changed |= curr_layer.RemoveAnimation(_selected_state);
+					if(_selected_state != 0) --_selected_state;
 				}
 				if (!can_remove)
 					ImGuidk::PopDisabled();
@@ -809,7 +811,7 @@ namespace idk
 						selectState(_selected_layer, i);
 						ImGui::OpenPopup("states_context_menu");
 					}
-					drawStatesContextMenu();
+					_layers_changed |= drawStatesContextMenu();
 
 					ImGui::Separator(false);
 					
@@ -822,7 +824,7 @@ namespace idk
 					{
 						if (ImGui::InputText("##rename_state", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
 						{
-							curr_layer.RenameAnimation(state.name, buf);
+							_layers_changed |= curr_layer.RenameAnimation(state.name, buf);
 							rename_index = -1;
 						}
 						if (just_rename)
@@ -849,7 +851,6 @@ namespace idk
 					ImGui::SameLine();
 					ImGui::Checkbox("##transition_drop_down", &state.display_transitions_drop_down);
 					
-
 					float prog_bar = 0.0f;
 					if (curr_layer.curr_state.index == i)
 						prog_bar = curr_layer.curr_state.normalized_time;
@@ -1002,6 +1003,7 @@ namespace idk
 		if (ImGui::Button("Add"))
 		{
 			curr_state.AddTransition(_selected_state, 0);
+			_layers_changed = true;
 		}
 		ImGui::SameLine();
 
@@ -1011,10 +1013,10 @@ namespace idk
 
 		if (ImGui::Button("Delete"))
 		{
-			curr_state.RemoveTransition(_selected_transition);
+			_layers_changed |= curr_state.RemoveTransition(_selected_transition);
 			const bool showing_transition = _show_transition;
 			const auto displaying_as = _display_mode;
-			selectTransition(_selected_layer, _selected_state, std::max(size_t{ 0 }, _selected_transition - 1));
+			selectTransition(_selected_layer, _selected_state, _selected_transition ? _selected_transition - 1 : _selected_transition);
 			_display_mode = displaying_as;
 			if (_selected_transition > 0)
 				_show_transition = showing_transition;
@@ -1022,8 +1024,6 @@ namespace idk
 
 		if (!can_remove)
 			ImGuidk::PopDisabled();
-
-		
 
 		ImGui::NewLine();
 		ImGui::Separator(false);
@@ -1056,7 +1056,7 @@ namespace idk
 		ImGui::PushItemWidth(item_width);
 		if (ImGui::InputText("##name", buf, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
 		{
-			curr_layer.RenameAnimation(curr_state.name, buf);
+			_layers_changed |= curr_layer.RenameAnimation(curr_state.name, buf);
 		}
 		ImGui::PopItemWidth();
 
@@ -1065,7 +1065,7 @@ namespace idk
 
 		ImGui::SameLine(offset);
 		ImGui::PushItemWidth(item_width);
-		ImGuidk::InputResource("##clip", &state_data.motion);
+		_layers_changed |= ImGuidk::InputResource("##clip", &state_data.motion);
 		ImGui::PopItemWidth();
 		if (!has_valid_clip)
 			ImGuidk::PushDisabled();
@@ -1073,12 +1073,12 @@ namespace idk
 		ImGui::Text("Speed");
 		ImGui::SameLine(offset);
 		ImGui::PushItemWidth(item_width);
-		ImGui::DragFloat("##speed", &curr_state.speed, 0.01f);
+		_layers_changed |= ImGui::DragFloat("##speed", &curr_state.speed, 0.01f);
 		ImGui::PopItemWidth();
 
 		ImGui::Text("Loop");
 		ImGui::SameLine(offset);
-		ImGui::Checkbox("##loop", &curr_state.loop);
+		_layers_changed |= ImGui::Checkbox("##loop", &curr_state.loop);
 
 		if (!has_valid_clip)
 			ImGuidk::PopDisabled();
@@ -1105,7 +1105,7 @@ namespace idk
 		ImGui::PushItemWidth(item_width);
 		if (ImGui::InputText("##name", buf, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
 		{
-			curr_layer.RenameAnimation(curr_state.name, buf);
+			_layers_changed |= curr_layer.RenameAnimation(curr_state.name, buf);
 		}
 		ImGui::PopItemWidth();
 
@@ -1120,6 +1120,7 @@ namespace idk
 				if (ImGui::Selectable(param.first.data(), param.first == state_data.params[0]))
 				{
 					state_data.params[0] = param.first;
+					_layers_changed = true;
 				}
 
 				if (ImGui::IsItemHovered())
@@ -1149,7 +1150,6 @@ namespace idk
 			ImGui::Unindent(ImGui::GetStyle().FramePadding.x);
 		}
 		ImGui::EndGroup();
-		
 
 		ImGui::PushItemWidth(-1);
 		auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
@@ -1171,10 +1171,10 @@ namespace idk
 				ImGui::BeginGroup();
 				ImGui::PushItemWidth(widget_size);
 
-				ImGuidk::InputResource("##clip", &motion.motion);
+				_layers_changed |= ImGuidk::InputResource("##clip", &motion.motion);
 				ImGui::SameLine(); 
 				threshold_buf = motion.thresholds[0];
-				ImGui::InputFloat("##threshold", &threshold_buf, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_AutoSelectAll);
+				_layers_changed |= ImGui::InputFloat("##threshold", &threshold_buf, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_AutoSelectAll);
 				if (ImGui::IsItemDeactivatedAfterEdit())
 				{
 					sort = true;
@@ -1182,7 +1182,7 @@ namespace idk
 				}
 
 				ImGui::SameLine();
-				ImGui::InputFloat("##speed", &motion.speed, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_AutoSelectAll);
+				_layers_changed |= ImGui::InputFloat("##speed", &motion.speed, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_AutoSelectAll);
 				
 				ImGui::SameLine();
 
@@ -1204,11 +1204,13 @@ namespace idk
 				state_data.motions.emplace_back(BlendTreeMotion{});
 				state_data.motions.back().motion = animation;
 				state_data.motions.back().thresholds[0] = threshold;
+				_layers_changed = true;
 			}
 
 			if (delete_index >= 0)
 			{
 				state_data.motions.erase(state_data.motions.begin() + delete_index);
+				_layers_changed = true;
 				sort = true;
 			}
 			if (sort)
@@ -1224,12 +1226,12 @@ namespace idk
 		ImGui::Text("Speed");
 		ImGui::SameLine(offset);
 		ImGui::PushItemWidth(item_width);
-		ImGui::DragFloat("##speed", &curr_state.speed, 0.01f);
+		_layers_changed |= ImGui::DragFloat("##speed", &curr_state.speed, 0.01f);
 		ImGui::PopItemWidth();
 
 		ImGui::Text("Loop");
 		ImGui::SameLine(offset);
-		ImGui::Checkbox("##loop", &curr_state.loop);
+		_layers_changed |= ImGui::Checkbox("##loop", &curr_state.loop);
 	}
 
 	void IGE_AnimatorWindow::inspectTransition(size_t layer_index, size_t state_index, size_t transition_index)
@@ -1240,9 +1242,6 @@ namespace idk
 		auto& curr_transition = curr_state.GetTransition(transition_index);
 		auto& transition_from_state = curr_layer.GetAnimationState(curr_transition.transition_from_index);
 		auto& transition_to_state = curr_layer.GetAnimationState(curr_transition.transition_to_index);
-
-		if (!curr_transition.valid)
-			return;
 
 		if (!curr_transition.valid)
 			return;
@@ -1287,6 +1286,7 @@ namespace idk
 				if (ImGui::Selectable(s.name.data(), selected))
 				{
 					curr_transition.transition_to_index = i;
+					_layers_changed = true;
 				}
 			}
 
@@ -1298,14 +1298,17 @@ namespace idk
 			ImGuidk::PushDisabled();
 		ImGui::Text("Has Exit Time");
 		ImGui::SameLine(offset);
-		ImGui::Checkbox("##has_exit_time", &curr_transition.has_exit_time);
+		_layers_changed |= ImGui::Checkbox("##has_exit_time", &curr_transition.has_exit_time);
 
 		// Exit time must be positive
 		ImGui::Text("Exit Time");
 		ImGui::SameLine(offset);
 		ImGui::PushItemWidth(item_width);
 		if (ImGui::InputFloat("##exit_time", &curr_transition.exit_time))
+		{
 			curr_transition.exit_time = max(curr_transition.exit_time, 0.0f);
+			_layers_changed = true;
+		}
 		ImGui::PopItemWidth();
 		ImGui::NewLine();
 
@@ -1313,19 +1316,25 @@ namespace idk
 		ImGui::SameLine(offset);
 		ImGui::PushItemWidth(item_width);
 		if (ImGui::InputFloat("##transition_dur", &curr_transition.transition_duration))
+		{
 			curr_transition.transition_duration = max(curr_transition.transition_duration, 0.0f);
+			_layers_changed = true;
+		}
 		ImGui::PopItemWidth();
 
 		ImGui::Text("Transition Offset");
 		ImGui::SameLine(offset);
 		ImGui::PushItemWidth(item_width);
 		if (ImGui::InputFloat("##transition_offset", &curr_transition.transition_offset))
+		{
 			curr_transition.transition_offset = max(curr_transition.transition_offset, 0.0f);
+			_layers_changed = true;
+		}
 		ImGui::PopItemWidth();
 
 		ImGui::Text("Interruptible");
 		ImGui::SameLine(offset);
-		ImGui::Checkbox("##interruptible", &curr_transition.interruptible);
+		_layers_changed |= ImGui::Checkbox("##interruptible", &curr_transition.interruptible);
 
 		if (!transition_to_state.valid)
 			ImGuidk::PopDisabled();
@@ -1403,10 +1412,10 @@ namespace idk
 				ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() * 0.3f);
 				if(ImGui::BeginCombo("##condition_param_selection", condition.param_name.data()))
 				{
-					if (!_curr_animator_component->GetParamTable<anim::IntParam>().empty()) param_selection("Int", condition, anim::IntParam{});
-					if (!_curr_animator_component->GetParamTable<anim::FloatParam>().empty()) param_selection("Float", condition, anim::FloatParam{});
-					if (!_curr_animator_component->GetParamTable<anim::BoolParam>().empty()) param_selection("Bool", condition, anim::BoolParam{});
-					if (!_curr_animator_component->GetParamTable<anim::TriggerParam>().empty()) param_selection("Trigger", condition, anim::TriggerParam{});
+					if (!_curr_animator_component->GetParamTable<anim::IntParam>().empty()) _layers_changed |= param_selection("Int", condition, anim::IntParam{});
+					if (!_curr_animator_component->GetParamTable<anim::FloatParam>().empty()) _layers_changed |= param_selection("Float", condition, anim::FloatParam{});
+					if (!_curr_animator_component->GetParamTable<anim::BoolParam>().empty()) _layers_changed |= param_selection("Bool", condition, anim::BoolParam{});
+					if (!_curr_animator_component->GetParamTable<anim::TriggerParam>().empty()) _layers_changed |= param_selection("Trigger", condition, anim::TriggerParam{});
 
 					ImGui::EndCombo();
 				}
@@ -1425,18 +1434,30 @@ namespace idk
 						if (ImGui::BeginCombo("##int_op_select", opt_index[condition.op_index]))
 						{
 							if (ImGui::Selectable("Greater", condition.op_index == 0))
+							{
 								condition.op_index = anim::ConditionIndex::GREATER;
+								_layers_changed = true;
+							}
 							if (ImGui::Selectable("Less", condition.op_index == 1))
+							{
 								condition.op_index = anim::ConditionIndex::LESS;
+								_layers_changed = true;
+							}
 							if (ImGui::Selectable("Equal", condition.op_index == 2))
+							{
 								condition.op_index = anim::ConditionIndex::EQUALS;
+								_layers_changed = true;
+							}
 							if (ImGui::Selectable("Not Equal", condition.op_index == 3))
+							{
 								condition.op_index = anim::ConditionIndex::NOT_EQUALS;
+								_layers_changed = true;
+							}
 							
 							ImGui::EndCombo();
 						}
 						ImGui::SameLine();
-						ImGui::DragInt("##int_edit", &condition.val_i);
+						_layers_changed |= ImGui::DragInt("##int_edit", &condition.val_i);
 						break;
 					}
 					case anim::AnimDataType::FLOAT:
@@ -1444,13 +1465,19 @@ namespace idk
 						if (ImGui::BeginCombo("##float_op_select", opt_index[condition.op_index]))
 						{
 							if (ImGui::Selectable("Greater", condition.op_index == 0))
+							{
 								condition.op_index = anim::ConditionIndex::GREATER;
+								_layers_changed = true;
+							}
 							if (ImGui::Selectable("Less", condition.op_index == 1))
+							{
 								condition.op_index = anim::ConditionIndex::LESS;
+								_layers_changed = true;
+							}
 							ImGui::EndCombo();
 						}
 						ImGui::SameLine();
-						ImGui::DragFloat("##float_edit", &condition.val_f, 0.01f);
+						_layers_changed |= ImGui::DragFloat("##float_edit", &condition.val_f, 0.01f);
 						break;
 					}
 					case anim::AnimDataType::BOOL:
@@ -1459,9 +1486,15 @@ namespace idk
 						if (ImGui::BeginCombo("##bool_edit", bool_alpha[condition.val_b]))
 						{
 							if (ImGui::Selectable("true"))
+							{
 								condition.val_b = true;
+								_layers_changed = true;
+							}
 							if (ImGui::Selectable("false"))
+							{
 								condition.val_b = false;
+								_layers_changed = false;
+							}
 							ImGui::EndCombo();
 						}
 						ImGui::PopItemWidth();
@@ -1495,10 +1528,11 @@ namespace idk
 		if (ImGui::Button("Add"))
 		{
 			curr_transition.conditions.emplace_back(AnimationCondition{});
+			_layers_changed = true;
 		}
 		if (to_delete >= 0)
 		{
-			curr_transition.RemoveCondition(s_cast<size_t>(to_delete));
+			_layers_changed |= curr_transition.RemoveCondition(s_cast<size_t>(to_delete));
 		}
 	}
 

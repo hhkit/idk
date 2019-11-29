@@ -89,8 +89,21 @@ namespace idk {
             }
             if (ImGui::BeginMenu("UI")) {
 				const auto go = editor.selected_gameObjects.empty()? Handle<GameObject>() :editor.selected_gameObjects.front();
-				if (ImGui::MenuItem("Canvas"))
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
+
+				auto parent = go;
+				while (parent)
+				{
+					if (parent->GetComponent<Canvas>())
+						break;
+					parent = go->Parent();
+				}
+				if (!parent)
+				{
+					if (ImGui::MenuItem("Canvas"))
+					{
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
+					}
+				}
 				if (ImGui::MenuItem("Image"))
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Image", vector<string>{ "RectTransform", "Image" }));
 				if (ImGui::MenuItem("Text"))

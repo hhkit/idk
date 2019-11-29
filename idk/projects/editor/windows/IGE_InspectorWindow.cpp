@@ -876,7 +876,6 @@ namespace idk {
 		ImVec2 cursorPos2{};
 		DisplayStack display{*this};
 
-		// layers override check
 
 		_curr_property_stack.emplace_back("layers");
 		display.GroupBegin();
@@ -891,27 +890,138 @@ namespace idk {
 			ImGui::Indent();
 			for (auto& layer : c_anim->layers)
 			{
-				ImGui::Separator(false);
+				// ImGui::Separator(false);
 				ImGui::PushID(&layer);
 				
 				ImGui::Text(layer.name.data());
 				ImGui::SameLine();
-				ImGui::Text("Current State: %s", c_anim->CurrentStateName().data());
+				const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x,
+									   ImGui::GetCurrentWindowRead()->DC.CursorPos.y + ImGui::GetFontSize() * 0.25f };
+				ImGui::RenderArrow(arrow_pos, ImGuiDir_Right, 0.7f);
+				ImGui::SameLine(0.0f, ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2);
+				ImGui::Text(c_anim->CurrentStateName().data());
+
 				ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 3 }, nullptr);
-				ImGui::ProgressBar(layer.IsBlending() ? layer.blend_state.elapsed_time / layer.blend_duration : 0.0f , ImVec2{ -1, 3 }, nullptr);
 				ImGui::PopID();
 				ImGui::Separator(false);
 			}
 			ImGui::Unindent();
 		}
-		
 		display.GroupEnd(false);
 		_curr_property_stack.pop_back();
 
-		if (ImGui::Button("OPEN ANIMATOR WINDOW"))
+		static char buf[50];
+		const auto display_param = [&](auto& param) -> bool
+		{
+			using T = std::decay_t<decltype(param)>;
+			bool ret_val = false;
+
+			ImGui::PushID(&param);
+			strcpy_s(buf, param.name.data());
+			ImGui::BeginGroup();
+			const float align_widget = ImGui::GetContentRegionAvailWidth() * 0.7f;
+			const float widget_size = ImGui::GetContentRegionAvailWidth() * 0.3f;
+
+			ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() * 0.5f);
+			if (ImGui::InputText("##rename_param", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				ret_val |= c_anim->RenameParam<T>(param.name, buf);
+			}
+
+			ImGui::PopItemWidth();
+			ImGui::SameLine(align_widget);
+
+			auto& val = c_anim->IsPlaying() ? param.val : param.def_val;
+			if constexpr (std::is_same_v <T, anim::IntParam>)
+			{
+				ImGui::PushItemWidth(widget_size);
+				ret_val |= ImGui::DragInt("##param_input", &val) && !c_anim->IsPlaying();
+				ImGui::PopItemWidth();
+			}
+			else if constexpr (std::is_same_v < T, anim::FloatParam>)
+			{
+				ImGui::PushItemWidth(widget_size);
+				ret_val |= ImGui::DragFloat("##param_input", &val, 0.01f) && !c_anim->IsPlaying();
+				ImGui::PopItemWidth();
+			}
+			else if constexpr (std::is_same_v <T, anim::BoolParam>)
+			{
+				ret_val |= ImGui::Checkbox("##param_input", &val) && !c_anim->IsPlaying();
+			}
+			else if constexpr (std::is_same_v <T, anim::TriggerParam>)
+			{
+				if (ImGui::RadioButton("##param_input", val))
+				{
+					ret_val = true && !c_anim->IsPlaying();
+					val = !val;
+				}
+			}
+			else
+				throw("???");
+
+			ImGui::Separator(false);
+
+			ImGui::EndGroup();
+			ImGui::Unindent();
+			ImGui::PopID();
+
+			return ret_val;
+		};
+
+		_curr_property_stack.emplace_back("parameters");
+		bool params_changed = false;
+		display.GroupBegin();
+		title_pos = ImGui::GetCursorPos();
+		tree_open = ImGui::CollapsingHeader("##animation_params", ImGuiTreeNodeFlags_AllowItemOverlap);
+		// ImGui::SetCursorPos(title_pos);
+		ImGui::SameLine();
+		display.Label("Parameters");
+		ImGui::NewLine();
+
+		if (tree_open)
+		{
+			if (ImGui::CollapsingHeader("Int"))
+			{
+				for (auto& param : c_anim->GetParamTable<anim::IntParam>())
+				{
+					params_changed |= display_param(param.second);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Float"))
+			{
+				for (auto& param : c_anim->GetParamTable<anim::FloatParam>())
+				{
+					params_changed |= display_param(param.second);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Bool"))
+			{
+				for (auto& param : c_anim->GetParamTable<anim::BoolParam>())
+				{
+					params_changed |= display_param(param.second);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Trigger"))
+			{
+				for (auto& param : c_anim->GetParamTable<anim::TriggerParam>())
+				{
+					params_changed |= display_param(param.second);
+				}
+			}
+		}
+		ImGui::Separator(false);
+		display.GroupEnd(params_changed);
+		_curr_property_stack.pop_back();
+
+		// layers override check
+		if (ImGui::Button("Open Animator Window"))
 		{
 			Core::GetSystem<IDE>().FindWindow<IGE_AnimatorWindow>()->is_open = true;
 		}
+		//ImGui::SameLine(0.0f, 5.0f);
 		
 		ImGui::Text("Preview"); ImGui::SameLine();
 		if (ImGui::Checkbox("##preview", &c_anim->preview_playback)) 
@@ -1399,7 +1509,7 @@ namespace idk {
             bool indent = false;
             bool recurse = false;
             bool changed = false;
-            [[maybe_unused]] bool changed_and_deactivated = false;
+            bool changed_and_deactivated = false;
 
             //ALL THE TYPE STATEMENTS HERE
             bool draw_injected = false;
@@ -1475,11 +1585,23 @@ namespace idk {
                 }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputResource("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (std::is_same_v<T, Handle<GameObject>>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputGameObject("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (std::is_same_v<T, LayerMask>)
                 {
@@ -1569,23 +1691,27 @@ namespace idk {
 
             display.ItemEnd();
 
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+                original_value.swap(reflect::dynamic(val).copy());
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+                changed_and_deactivated = true;
+
+            if (!original_value.valid()) // no change?
+                changed_and_deactivated = false;
+
+            if (changed_and_deactivated)
+            {
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                original_value.swap(reflect::dynamic());
+            }
+
             outer_changed |= changed;
             display.GroupEnd(changed);
 
             indent_stack.push_back(indent);
             if (indent)
                 ImGui::Indent();
-
-            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
-            {
-                original_value.swap(reflect::dynamic(val).copy());
-            }
-            else if (ImGui::IsItemDeactivatedAfterEdit())
-            {
-                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
-                original_value.swap(reflect::dynamic());
-            }
 
             return recurse;
         };
@@ -1694,7 +1820,9 @@ namespace idk {
         }
 
         if (changed && self._prefab_inst)
+        {
             PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
+        }
 
         if (has_override)
         {

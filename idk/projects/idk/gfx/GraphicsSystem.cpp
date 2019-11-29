@@ -319,6 +319,39 @@ namespace idk
 		range.inst_font_end = font_render_data.size();
 	}
 
+	void ProcessCanvas(
+		const vector<FontPoint>& unique_canvas_font,
+		vector<UIAttriBlock>& font_buffer,
+		//vector<FontPoint>& font_buffer,
+		vector<UITextRange>& font_render_data,
+		size_t& total_num_of_text,
+		GraphicsSystem::CanvasRenderRange& range
+	)
+	{
+		range.inst_font_begin = font_render_data.size();
+		
+		vector<vec2> posList;
+		vector<vec2> uvList;
+		size_t count = 0;
+		for (auto& elem : unique_canvas_font)
+		{
+			auto res = elem.ConvertToPairs();
+			posList.insert(posList.end(),res.first);
+			uvList.insert(uvList.end(), res.second);
+			++count;
+		}
+		font_buffer.insert(font_buffer.end(), UIAttriBlock{ posList,uvList });
+		total_num_of_text += count;
+		UITextRange f_range{ font_buffer.size(),count };
+
+		//font_buffer.insert(font_buffer.end(), unique_canvas_font.begin(),unique_canvas_font.end());
+		
+		//UITextRange f_range{ font_buffer.size(),(size_t)std::distance(font_buffer.begin(), font_buffer.end()) };
+		font_render_data.emplace_back(f_range);
+		
+		range.inst_font_end = font_render_data.size();
+	}
+
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -401,7 +434,11 @@ namespace idk
 			ClearSwap(rb.font_range, tmp.font_range);
 			ClearSwap(rb.font_buffer, tmp.font_buffer);
 			ClearSwap(rb.ui_render_per_canvas           , tmp.ui_render_per_canvas);
+			ClearSwap(rb.ui_canvas, tmp.ui_canvas);
 			ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
+			//ClearSwap(rb.ui_text_buffer.pos1, tmp.ui_text_buffer.pos1);
+			//ClearSwap(rb.ui_text_buffer.uv1, tmp.ui_text_buffer.uv1);
+			//ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
 			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
 			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
@@ -529,6 +566,7 @@ namespace idk
 		}
 
 
+
 		std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
 		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
 		
@@ -537,25 +575,12 @@ namespace idk
 			if (f.text != "" && f.font)
 			{
 				auto& render_data = result.font_render_data.emplace_back();
-				//auto& render_pos_data = result.font_array_data.emplace_back();
 
-				//if(GetAPI() == GraphicsAPI::Vulkan)
-					//render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
-				//else
 				render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
 
 				render_data.color = f.color;
 				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
 				render_data.atlas = f.font;
-
-				//for (auto& elem : render_data.coords)
-					//render_pos_data.characters.emplace_back(CharacterObj{ elem.ConvertToVec4() });
-				//render_pos_data.coords = render_data.coords;
-
-				//render_pos_data.color = f.color;
-				//render_pos_data.transform = render_data.transform;
-				//render_pos_data.atlas = f.font;
-
 			}
 		}
 
@@ -587,44 +612,49 @@ namespace idk
 		{
 			auto& unique_fonts = texts;
 			const size_t avg_font_count = 100;
-			const auto size = result.ui_render_per_canvas.size() + unique_fonts.size();
+			const auto size = result.ui_canvas.size() + unique_fonts.size();
+			const auto size_2 = result.ui_render_per_canvas.size() + unique_fonts.size();
 			result.ui_text_range.reserve(result.ui_text_range.size() + size);
 			result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+			result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+			//result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 		}
 
 		for (auto& text : texts)
 		{
-			const auto& go = text.GetGameObject();
-			const auto& rt = *go->GetComponent<RectTransform>();
-
-            const auto canvas = ui.FindCanvas(go);
-            if (!canvas)
-            {
-                LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
-                continue;
-            }
-
-            auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
-
-			constexpr auto anchor_to_alignment = [](TextAnchor anchor)
-			{
-				switch (anchor)
-				{
-				case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft:
-					return TextAlignment::Left;
-				case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
-					return TextAlignment::Center;
-				case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
-					return TextAlignment::Right;
-				}
-				return TextAlignment::Left;
-			};
-
-			const float sx = rt._local_rect.size.x;
-			const float sy = rt._local_rect.size.y;
-
 			if (text.text != "" && text.font)
 			{
+				const auto& go = text.GetGameObject();
+				const auto& rt = *go->GetComponent<RectTransform>();
+
+				const auto canvas = ui.FindCanvas(go);
+				if (!canvas)
+				{
+					LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
+					continue;
+				}
+
+				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
+				++canvas->num_of_text;
+
+				constexpr auto anchor_to_alignment = [](TextAnchor anchor)
+				{
+					switch (anchor)
+					{
+					case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft:
+						return TextAlignment::Left;
+					case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+						return TextAlignment::Center;
+					case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+						return TextAlignment::Right;
+					}
+					return TextAlignment::Left;
+				};
+
+				const float sx = rt._local_rect.size.x;
+				const float sy = rt._local_rect.size.y;
+
+			
 				const auto font_data = FontData::Generate(
 					text.text, text.font,
 					text.best_fit ? 0 : text.font_size,
@@ -680,6 +710,31 @@ namespace idk
 					a.depth < b.depth;
 			}
 			);
+		}
+
+		//Push it into the char buffer when done
+		result.ui_total_num_of_text = 0;
+		for (auto& [canvas, vec] : result.ui_render_per_canvas)
+		{
+			//No need to cull, this is to find all the coords data and append them to one buffer
+			CanvasRenderRange range{};
+
+			auto& res = result.ui_canvas.emplace_back();
+			
+			res.num_of_text = canvas->num_of_text;
+			res.render_target = canvas->render_target;
+			res.ui_ro = vec;
+			for (auto& elem : vec)
+			{
+				auto& prog = elem.material->material->_shader_program;
+				std::visit([&](const auto& data)
+				{				
+					using T = std::decay_t<decltype(data)>;
+					if constexpr (!std::is_same_v<T, ImageData>)
+						ProcessCanvas(data.coords, result.ui_text_buffer,result.ui_text_range,result.ui_total_num_of_text,range);
+				}, elem.data);
+			}
+			result.canvas_render_range.emplace_back(range);
 		}
 		
 

@@ -63,7 +63,7 @@ namespace idk::mt
 			auto ltail = hazards.protect(tail.load(), tid);
 			if (ltail != tail.load())
 				continue;
-			auto prev = ltail->prev;
+			//auto prev = ltail->prev;
 			new_node->prev = ltail;
 			// if the previous enqueue is done
 			/*if (prev->next.load() == nullptr)

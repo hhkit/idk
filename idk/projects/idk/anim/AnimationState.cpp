@@ -23,10 +23,14 @@ namespace idk {
 		transitions.push_back(new_transition);
 	}
 
-	void AnimationState::RemoveTransition(size_t index)
+	bool AnimationState::RemoveTransition(size_t index)
 	{
 		if (index != 0 && index < transitions.size())
+		{
 			transitions.erase(transitions.begin() + index);
+			return true;
+		}
+		return false;
 	}
 
 	AnimationTransition& AnimationState::GetTransition(size_t index)

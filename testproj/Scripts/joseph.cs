@@ -16,7 +16,8 @@ namespace TestAndSeek
         public bool Bool = false;
         public bool Trigger = false;
         public float Speed = 0.0f;
-
+        public Prefab playerChar;
+        private int count = 0;
         public AnimationTest()
         {
             Debug.Log("AnimationTest is constructed");
@@ -65,9 +66,12 @@ namespace TestAndSeek
                 // {
                 //     anim.SetBool("bool", !Bool);
                 // }
-                if (Input.GetKey(KeyCode.F))
+                if (Input.GetKey(KeyCode.F) && count == 0)
                 {
-                    anim.SetTrigger("trigger", true);
+                    GameObject obj = playerChar.Instantiate();
+                    Animator anim = obj.GetComponent<Animator>();
+                    anim.Play(anim.DefaultStateName());
+                    ++count;
                 }
                 // else if (Input.GetKey(KeyCode.G))
                 // {
