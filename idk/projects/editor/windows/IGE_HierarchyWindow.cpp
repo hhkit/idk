@@ -76,7 +76,6 @@ namespace idk {
 			ImGui::OpenPopup("CreatePopup");
 
 		}
-
 		if (ImGui::BeginPopup("CreatePopup")) {
             IDE& editor = Core::GetSystem<IDE>();
 
@@ -132,8 +131,6 @@ namespace idk {
 		ImGui::PopStyleVar();
 
 		ImGui::EndMenuBar();
-
-        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
