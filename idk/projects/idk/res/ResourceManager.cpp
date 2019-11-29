@@ -314,7 +314,14 @@ namespace idk
 		for (auto& elem : bundle.GetAll())
 			std::visit([&](auto& handle) { new_meta.Add(handle);  }, elem);
 
-		itr->second.is_new = (new_meta != meta_bundle);
+		if (new_meta != meta_bundle)
+		{
+			for (auto& elem : bundle.GetAll())
+				std::visit([](auto& handle) { 
+				if constexpr (has_tag_v<std::decay_t<decltype(handle)>, MetaTag>) 
+					handle->DirtyMeta(); }, 
+				elem);
+		}
 
 		// set path
 		for (auto& elem : bundle.GetAll())
