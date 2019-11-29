@@ -522,7 +522,7 @@ namespace idk
             if (!ignore_filter && filter.PassFilter(item.name.c_str())) // if folder name filtered, pass all descendants
                 ignore_filter = true;
 
-            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth))
+            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth))
             {
                 stack.push_back(&item);
                 for (auto& inner_item : item.items)
@@ -545,7 +545,7 @@ namespace idk
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f });
 			ImGui::Unindent();
-            ImGui::TreeNodeEx(item.name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+            ImGui::TreeNodeEx(item.name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
 			ImGui::Indent();
 			if (ImGui::IsItemClicked())
 			{
