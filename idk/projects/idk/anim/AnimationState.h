@@ -57,7 +57,7 @@ namespace idk
 
 		void ConvertToBlendTree();
 		void AddTransition(size_t from, size_t to);
-		void RemoveTransition(size_t index);
+		bool RemoveTransition(size_t index);
 	};
 
 	struct AnimationLayerState

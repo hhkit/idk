@@ -29,7 +29,7 @@ namespace idk
 		// Reset the blend/interrupt state and the playing state
 		Reset();
 
-		auto found_anim = FindAnimationIndex(anim_name);
+		auto found_anim = anim_name.empty() ? default_index : FindAnimationIndex(anim_name);
 		if (found_anim >= anim_states.size())
 		{
 			return false;
@@ -218,7 +218,7 @@ namespace idk
 		}
 
 		auto found_dest = FindAnimationIndex(to);
-		if (found_dest >= anim_states.size())
+		if (found_dest < anim_states.size())
 		{
 			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation state (" } + from.data() + ") to (" + to.data() + ").");
 			return false;
@@ -229,43 +229,43 @@ namespace idk
 		return true;
 	}
 
-	void AnimationLayer::RemoveAnimation(string_view anim_name)
+	bool AnimationLayer::RemoveAnimation(string_view anim_name)
 	{
 		string name_str{ anim_name };
 		const auto found_clip = FindAnimationIndex(anim_name);
-		if (found_clip >= anim_states.size())
-			return;
+		return RemoveAnimation(found_clip);
+	}
 
-		if (default_index == found_clip)
+	bool AnimationLayer::RemoveAnimation(size_t index)
+	{
+		if (index >= anim_states.size())
+			return false;
+
+		if (default_index == index)
 			default_index = 0;
-		if (curr_state.index == found_clip)
+		if (curr_state.index == index)
 			curr_state.Reset();
-		if (blend_state.index == found_clip)
+		if (blend_state.index == index)
 			ResetToDefault();
 
-		anim_states.erase(anim_states.begin() + found_clip);
+		anim_states.erase(anim_states.begin() + index);
 
 		const size_t num_states = anim_states.size();
 		for (size_t i = 1; i < num_states; ++i)
 		{
 			auto& anim_state = anim_states[i];
-			
+
 			// Check all transitions for the removed index
 			for (size_t k = 1; k < anim_state.transitions.size(); ++k)
 			{
 				auto& curr_transition = anim_state.transitions[k];
-		
+
 				// Set the transition to index to 0 if the state it is supposed to transition to is the one removed.
-				if (curr_transition.transition_to_index == found_clip)
+				if (curr_transition.transition_to_index == index)
 					curr_transition.transition_to_index = 0;
 			}
 		}
-	}
-
-	void AnimationLayer::RemoveAnimation(size_t index)
-	{
-		auto state = anim_states.begin() + index;
-		RemoveAnimation(state->name);
+		return true;
 	}
 
 	bool AnimationLayer::IsPlaying() const

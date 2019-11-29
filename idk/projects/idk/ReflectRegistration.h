@@ -562,16 +562,20 @@ REFLECT_BEGIN(idk::anim::TriggerParam, "anim::TriggerParam")
 REFLECT_VARS(name, def_val, val, valid)
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::int_vars), "hash_table<string,anim::IntParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::int_vars), "hash_table<string,anim::IntParam>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::float_vars), "hash_table<string,anim::FloatParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::float_vars), "hash_table<string,anim::FloatParam>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::bool_vars), "hash_table<string,anim::BoolParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::bool_vars), "hash_table<string,anim::BoolParam>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::trigger_vars), "hash_table<string,anim::TriggerParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::trigger_vars), "hash_table<string,anim::TriggerParam>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Animator::AnimationParams, "parameters")
+REFLECT_VARS(int_vars, float_vars, bool_vars, trigger_vars)
 REFLECT_END()
 
 // Animator serialization
@@ -579,7 +583,7 @@ REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(skeleton, layers, int_vars, float_vars, bool_vars, trigger_vars)
+REFLECT_VARS(skeleton, layers, parameters)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Bone, "Bone")

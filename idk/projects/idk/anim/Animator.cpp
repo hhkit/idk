@@ -109,36 +109,22 @@ namespace idk
 		return true;
 	}
 
-	void Animator::RemoveLayer(string_view name)
+	bool Animator::RemoveLayer(string_view name)
 	{
 		auto res = FindLayerIndex(name);
-		if (res >= layers.size())
-		{
-			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + name.data() + ".");
-			return;
-		}
-
-		layers.erase(layers.begin() + res);
-		// layer_table.erase(res);
+		return RemoveLayer(res);
 	}
 
-	void Animator::RemoveLayer(size_t index)
+	bool Animator::RemoveLayer(size_t index)
 	{
 		if(index >= layers.size())
 		{
 			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + std::to_string(index) + ".");
-			return;
+			return false;
 		}
 
-		// auto res = layer_table.find(layers[index].name.data());
-		// if (res == layer_table.end())
-		// {
-		// 	LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + layers[index].name.data() + ".");
-		// 	return;
-		// }
-
-		// layer_table.erase(res);
 		layers.erase(layers.begin() + index);
+		return true;
 	}
 
 #pragma endregion
@@ -150,16 +136,16 @@ namespace idk
 		for(auto& layer : layers)
 			layer.Reset();
 
-		for (auto& p : int_vars)
+		for (auto& p : parameters.int_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : float_vars)
+		for (auto& p : parameters.float_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : bool_vars)
+		for (auto& p : parameters.bool_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : trigger_vars)
+		for (auto& p : parameters.trigger_vars)
 			p.second.ResetToDefault();
 	}
 
@@ -170,16 +156,16 @@ namespace idk
 			layers[i].ResetToDefault();
 		}
 
-		for (auto& p : int_vars)
+		for (auto& p : parameters.int_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : float_vars)
+		for (auto& p : parameters.float_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : bool_vars)
+		for (auto& p : parameters.bool_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : trigger_vars)
+		for (auto& p : parameters.trigger_vars)
 			p.second.ResetToDefault();
 	}
 
@@ -354,7 +340,7 @@ namespace idk
 
 	void Animator::ResetTriggers()
 	{
-		for (auto& trigger : trigger_vars)
+		for (auto& trigger : parameters.trigger_vars)
 			trigger.second.val = false;
 	}
 
