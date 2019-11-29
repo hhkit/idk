@@ -27,6 +27,7 @@
 #include <gfx/ViewportUtil.h>
 #include <vkn/VknCubeMapLoader.h>
 #include <vkn/VulkanCbmLoader.h>
+#include <ui/Canvas.h>
 
 #include <vkn/vector_buffer.h>
 
@@ -341,6 +342,11 @@ namespace idk::vkn
 			renderer_vertex_shaders = state.renderer_vertex_shaders;
 			renderer_fragment_shaders = state.renderer_fragment_shaders;
 		}
+		GraphicsStateInterface(const PostRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
+		{
+			renderer_vertex_shaders = state.renderer_vertex_shaders;
+			renderer_fragment_shaders = state.renderer_fragment_shaders;
+		}
 	};
 
 
@@ -459,6 +465,7 @@ namespace idk::vkn
 			_render_threads.emplace_back(std::move(thread));
 		}
 		_pre_render_complete = device.createSemaphoreUnique(vk::SemaphoreCreateInfo{});
+		_post_render_complete = device.createSemaphoreUnique(vk::SemaphoreCreateInfo{});
 		_convoluter.pipeline_manager(*_pipeline_manager);
 		_convoluter.Init(
 			Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VPBRConvolute],
@@ -467,6 +474,7 @@ namespace idk::vkn
 		);
 		_particle_renderer.InitConfig();
 		_font_renderer.InitConfig();
+		_canvas_renderer.InitConfig();
 	}
 	void FrameRenderer::SetPipelineManager(PipelineManager& manager)
 	{
@@ -546,7 +554,9 @@ namespace idk::vkn
 			auto queue = View().GraphicsQueue();
 			queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 		}
-		//Do the shadow pass here.
+
+		//Do post pass here
+		//Canvas pass
 		for (auto light_idx : state.active_lights)
 		{
 			auto& rs = _pre_states[curr_state++];
@@ -691,7 +701,7 @@ namespace idk::vkn
 			auto& pipeline = *prev_pipeline;
 			//TODO Grab everything and render them
 			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-			auto& mesh = obj.mesh.as<VulkanMesh>();
+			//auto& mesh = obj.mesh.as<VulkanMesh>();
 			{
 				uint32_t set = 0;
 				for (auto& ods : p_ro.descriptor_sets)
@@ -705,17 +715,21 @@ namespace idk::vkn
 				}
 			}
 
-			auto& renderer_req = *obj.renderer_req;
+			//auto& renderer_req = *obj.renderer_req;
 
 			for (auto&& [location, attrib] : p_ro.attrib_buffers)
 			{
 				cmd_buffer.bindVertexBuffers(*pipeline.GetBinding(location), attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
 			}
-			auto& oidx = mesh.GetIndexBuffer();
+			auto& oidx = p_ro.index_buffer;
 			if (oidx)
 			{
-				cmd_buffer.bindIndexBuffer(*(*oidx).buffer(), 0, mesh.IndexType(), vk::DispatchLoaderDefault{});
-				cmd_buffer.drawIndexed(mesh.IndexCount(), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+				cmd_buffer.bindIndexBuffer(oidx->buffer, 0, oidx->index_type, vk::DispatchLoaderDefault{});
+				cmd_buffer.drawIndexed(s_cast<uint32_t>(p_ro.num_vertices), static_cast<uint32_t>(p_ro.num_instances), 0, 0, static_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+			}
+			else
+			{
+				cmd_buffer.draw(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 			}
 		}
 	}
@@ -766,6 +780,52 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 
+	}
+
+	void FrameRenderer::PostRenderCanvas(RscHandle<RenderTarget> rr, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index)
+	{
+		auto& rt = rr.as<VknRenderTarget>();
+		//auto& swapchain = view.Swapchain();
+		auto dispatcher = vk::DispatchLoaderDefault{};
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+		GraphicsStateInterface gsi = { state };
+
+		//Generate this pipeline thingy
+		PipelineThingy the_interface{};
+		
+		the_interface.SetRef(rs.ubo_manager);
+		_canvas_renderer.DrawCanvas(the_interface, state, rs, canvas_data);
+		the_interface.GenerateDS(rs.dpools);
+
+		cmd_buffer.begin(begin_info, dispatcher);
+		//auto sz = light.light_map->DepthAttachment().buffer->Size();
+		//auto sz = wewew.DepthAttachment().buffer->Size();
+		
+		vk::Framebuffer fb = rt.Buffer();
+		vk::RenderPass  rp = rt.GetRenderPass(false, false);
+
+		rt.PrepareDraw(cmd_buffer);
+		
+		auto sz = rt.Size();
+		vk::Rect2D render_area
+		{
+			vk::Offset2D{0,0},
+			vk::Extent2D{s_cast<uint32_t>(rt.size.x),s_cast<uint32_t>(rt.size.y)}
+		};
+
+		vector<vec4> clear_colors
+		{
+			vec4{1},
+			vec4{0.f}
+		};
+		if (the_interface.DrawCalls().size())
+			rs.FlagRendered();
+		RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+
+		rs.ubo_manager.UpdateAllBuffers();
+		cmd_buffer.endRenderPass();
+		cmd_buffer.end();
 	}
 
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
@@ -823,8 +883,6 @@ namespace idk::vkn
 		{
 		};
 
-
-
 		vk::ImageSubresourceRange subResourceRange = {};
 		subResourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 		subResourceRange.baseMipLevel = 0;
@@ -857,7 +915,7 @@ namespace idk::vkn
 
 		vector<vk::Semaphore> waitSemaphores{ *current_signal.image_available, *_pre_render_complete };
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands,vk::PipelineStageFlagBits::eAllCommands };
-		vk::Semaphore readySemaphores =/* *current_signal.render_finished; // */ *_states[0].signal.render_finished;
+		vk::Semaphore readySemaphores =*_states[0].signal.render_finished;
 		hash_set<vk::Semaphore> ready_semaphores;
 		for (auto& state : gfx_states)
 		{
@@ -868,14 +926,8 @@ namespace idk::vkn
 		//Temp, get rid of this once the other parts no longer depend on render_finished
 		ready_semaphores.emplace(readySemaphores);
 		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
-		auto inflight_fence = /* *current_signal.inflight_fence;// */*_states[0].signal.inflight_fence;
+		auto inflight_fence = *_states[0].signal.inflight_fence;
 
-		//std::vector<vk::CommandBuffer> cmd_buffers;
-		//for (auto& state : curr_frame.states)
-		//{
-		//	cmd_buffers.emplace_back(state.cmd_buffer);
-		//}
-		//cmd_buffers.emplace_back(*pri_buffer);
 		vk::SubmitInfo submit_info
 		{
 			hlp::arr_count(waitSemaphores)
@@ -890,9 +942,121 @@ namespace idk::vkn
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
-	//void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
-	//{
-	//}
+	void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
+	{
+		//auto& lights = *state.shared_gfx_state->lights;
+
+		auto& canvas = *state.shared_gfx_state->ui_canvas;
+		size_t num_conv_states = 1;
+		size_t num_instanced_buffer_state = 1;
+		auto total_post_states = canvas.size() + num_conv_states + num_instanced_buffer_state;
+		GrowStates(_post_states, total_post_states);
+		for (auto& pos_state : _post_states)
+		{
+			pos_state.Reset();
+		}
+		size_t curr_state = 0;
+		std::optional<vk::Semaphore> copy_semaphore{};
+		{
+
+			auto copy_state_ind = curr_state++;
+			auto& copy_state = _post_states[copy_state_ind];
+
+			copy_semaphore = *copy_state.signal.render_finished;
+
+			auto cmd_buffer = copy_state.CommandBuffer();
+			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+
+			if (state.shared_gfx_state->ui_canvas && state.shared_gfx_state->ui_canvas->size())
+			{
+				//auto& canvas_data = canvas;
+				auto& pos_buffer = state.shared_gfx_state->ui_text_buffer_pos;
+				auto& uv_buffer = state.shared_gfx_state->ui_text_buffer_uv;
+				//auto& buffer = state.shared_gfx_state->ui_text_buffer;
+				auto& doto = state.shared_gfx_state->ui_text_data;
+				auto& t_size = state.shared_gfx_state->total_num_of_text;
+
+				unsigned k = 0, u=0;
+				pos_buffer.resize(t_size);
+				uv_buffer.resize(t_size);
+				for (auto& elem : canvas)
+				{
+					unsigned i = 0;
+					for (auto& elem : elem.ui_ro)
+					{
+						std::visit([&](const auto& data)
+						{
+							using T = std::decay_t<decltype(data)>;
+							if constexpr (!std::is_same_v<T, ImageData>)
+							{				
+								auto& b = pos_buffer[u];
+								b.resize(hlp::buffer_size(doto[k][i].pos));
+								b.update<const vec2>(0, doto[k][i].pos, cmd_buffer);
+								auto& b1 = uv_buffer[u];
+								b1.resize(hlp::buffer_size(doto[k][i].uv));
+								b1.update<const vec2>(0, doto[k][i].uv, cmd_buffer);
+								++i;
+								++u;
+							}
+						}, elem.data);
+					}
+					++k;
+				}
+				
+			}
+			cmd_buffer.end();
+			//copy_state.FlagRendered();//Don't flag, we want to submit this separately.
+
+			vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eTransfer };
+			vk::SubmitInfo submit_info
+			{
+				1
+				,&*_states[0].signal.render_finished
+				,waitStages
+				,1,&copy_state.CommandBuffer()
+				,1,&*copy_semaphore
+			};
+
+			auto queue = View().GraphicsQueue();
+			queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
+		}
+
+		//Do post pass here
+		//Canvas pass
+		for (auto& elem : canvas)
+		{
+			auto& rs = _post_states[curr_state++];
+			if(elem.render_target)
+				PostRenderCanvas(elem.render_target, elem.ui_ro, state, rs, frame_index);
+		}
+		//TODO: Submit the command buffers
+
+		vector<vk::CommandBuffer> buffers{};
+
+		for (auto& post_state : _post_states)
+		{
+			if (post_state.has_commands)
+				buffers.emplace_back(post_state.CommandBuffer());
+		}
+
+		vector<vk::Semaphore> arr_ready_sem{ *_post_render_complete };
+		vector<vk::Semaphore> arr_wait_sem{};
+		if (copy_semaphore)
+			arr_wait_sem.emplace_back(*copy_semaphore);
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eAllCommands };
+
+
+		vk::SubmitInfo submit_info
+		{
+			hlp::arr_count(arr_wait_sem) ,std::data(arr_wait_sem)
+			,waitStages
+			,hlp::arr_count(buffers),std::data(buffers)
+			,hlp::arr_count(arr_ready_sem) ,std::data(arr_ready_sem)
+		};
+
+		auto queue = View().GraphicsQueue();
+		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
+	}
 	PresentationSignals& FrameRenderer::GetMainSignal()
 	{
 		return _states[0].signal;

@@ -9,5 +9,6 @@ namespace idk
     {
     public:
         RscHandle<RenderTarget> render_target;
+		size_t num_of_text{ 0 };
     };
 }

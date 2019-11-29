@@ -579,7 +579,7 @@ namespace idk::vkn
 			next_layout = layout = attachment_layout;
 		}
 		vk::ImageAspectFlagBits img_aspect = vk::ImageAspectFlagBits::eColor;
-		if (IsDepthStencil(vk::Format::eD16Unorm))
+		if (IsDepthStencil(format))
 			img_aspect = vk::ImageAspectFlagBits::eDepth;
 		result.aspect = img_aspect;
 		vfa::TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);

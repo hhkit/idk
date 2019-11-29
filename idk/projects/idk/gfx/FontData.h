@@ -26,6 +26,10 @@ namespace idk
 			return vec4{x,y,s,t};
 		}
 		*/
+		std::pair<vec2, vec2> ConvertToPairs() const
+		{
+			return std::make_pair<vec2,vec2>(position.xy,position.zw);
+		}
 	};
 
 	struct FontData
