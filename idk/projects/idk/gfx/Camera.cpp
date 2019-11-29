@@ -103,6 +103,6 @@ namespace idk
 	}
 	float Camera::AspectRatio() const
 	{
-		return (render_target)? render_target->AspectRatio():(16.0f/9.0f);
+		return ((render_target)? render_target->AspectRatio():(16.0f/9.0f)) * ((float) viewport.size.x / viewport.size.y);
 	}
 }

@@ -247,6 +247,8 @@ vec3 pbr(
 ,	float ambient_o
 )
 {
+// gamma correction 
+	albedo = pow(albedo, vec3(2.2));
 // temporary light code
 	Light light = LightBlk.lights[i];
 	
