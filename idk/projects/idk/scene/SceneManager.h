@@ -35,9 +35,10 @@ namespace idk
 		RscHandle<Scene> GetActiveScene() const;
 		RscHandle<Scene> GetPrefabScene() const;
 		bool  SetActiveScene(RscHandle<Scene> s);
+		void  SetNextScene(RscHandle<Scene>);
 
+		void ChangeScene();
 		void DestroyQueuedObjects(span<GameObject> objs);
-
 		void BuildSceneGraph(span<const GameObject> objs);
 		SceneGraph& FetchSceneGraph();
 		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
@@ -53,6 +54,8 @@ namespace idk
 		GameState*         _gs { nullptr };
 		SceneGraphBuilder  _sg_builder;
 		RscHandle<Scene>   _prefab_scene;
+		bool changing = false;
+		RscHandle<Scene>   _next_scene;
 		array<RscHandle<Scene>, MaxScene> _scenes;
 	};
 }

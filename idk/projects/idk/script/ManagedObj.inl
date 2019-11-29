@@ -23,7 +23,7 @@ if (klass == MONO_CLASS)                                        \
 #define MONO_COMPLEX_TYPE(REAL_TYPE, MONO_CLASS)                \
 if (klass == MONO_CLASS)      \
 {                                                               \
-	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
+	auto old_val = s_cast<REAL_TYPE>(s_cast<float*>(mono_object_unbox(obj))); \
 	auto new_val = old_val;								        \
 	if (functor(field_name.data(), new_val, -last_children))	\
 	{                                                           \
@@ -42,7 +42,7 @@ if (klass == MONO_CLASS)      \
 #define MONO_BASE_TYPE_CONST(REAL_TYPE, MONO_CLASS)                   \
 if (mono_class_get_name(klass) == string_view{MONO_CLASS})      \
 {                                                                     \
-	auto old_val = *s_cast<const REAL_TYPE*>(mono_object_unbox(obj)); \
+	const auto old_val = s_cast<REAL_TYPE>(s_cast<float*>(mono_object_unbox(obj))); \
 	functor(field_name.data(), old_val, depth);				          \
 	continue;                                                         \
 }
@@ -167,6 +167,7 @@ namespace idk::mono
 				}
 				RSCHANDLE_ASSIGN(Prefab);
 				RSCHANDLE_ASSIGN(MaterialInstance);
+				RSCHANDLE_ASSIGN(Scene);
 #undef RSCHANDLE_ASSIGN
 			}
 		}
@@ -259,6 +260,7 @@ namespace idk::mono
 
 				MONO_RESOURCE_TYPE(MaterialInstance);
 				MONO_RESOURCE_TYPE(Prefab);
+				MONO_RESOURCE_TYPE(Scene);
 
 				{
 					using H_Type = GameObject;
@@ -365,6 +367,7 @@ namespace idk::mono
 
 			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);
+			MONO_RESOURCE_TYPE_CONST(Scene);
 
 			auto csharpcore = mono_get_corlib();
 			MONO_BASE_TYPE_CONST(Guid, mono_class_from_name(csharpcore, "System", "Guid"));

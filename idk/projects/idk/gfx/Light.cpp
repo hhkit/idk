@@ -82,6 +82,11 @@ namespace idk
 		mat4 operator()(T&) { return mat4{}; }
 	};
 
+	bool Light::is_active_and_enabled()
+	{
+		return enabled && GetGameObject()->ActiveInHierarchy();
+	}
+
 	void Light::InitShadowMap()
 	{
 		std::visit([&](auto& light_variant) 

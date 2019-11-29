@@ -145,6 +145,7 @@
     <ClInclude Include="commands\CMD_ModifyProperty.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="windows\IGE_LightLister.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -271,6 +272,7 @@
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
+    <ClCompile Include="windows\IGE_LightLister.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

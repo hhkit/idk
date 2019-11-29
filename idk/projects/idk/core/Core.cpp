@@ -11,11 +11,11 @@ namespace idk
 {
 	seconds Core::GetDT()
 	{
-		return _instance->_scheduler->GetDeltaTime();
+		return _instance->_scheduler->GetFixedDeltaTime();
 	}
 	seconds Core::GetRealDT()
 	{
-		return _instance->_scheduler->GetRealDeltaTime();
+		return _instance->_scheduler->GetDeltaTime();
 	}
 
 	Scheduler& Core::GetScheduler()
@@ -65,6 +65,7 @@ namespace idk
 		auto* editor = &GetSystem<IEditor>();
 
 		// setup loop
+		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 
