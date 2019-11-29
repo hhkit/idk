@@ -132,9 +132,9 @@ namespace idk {
 		ImGui::SetCursorPosX(startPos.x+15);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-
+		const auto search_bar_offset_x = ImGui::GetCursorPosX() + 20;
 		//Can call textFilter.Draw(), but I want to use a custom inputText.
-		bool value_changed = ImGui::InputTextEx("##ToolBarSearchBar", NULL, textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImVec2{ window_size.x - 100,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None);
+		bool value_changed = ImGui::InputTextEx("##ToolBarSearchBar", NULL, textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImVec2{ window_size.x - search_bar_offset_x,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None);
 		if (value_changed)
 			textFilter.Build();
 

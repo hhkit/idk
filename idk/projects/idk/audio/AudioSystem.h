@@ -63,7 +63,6 @@ namespace idk
 
 
 		void SetSystemPaused(bool);
-		bool is_system_paused = false;
 
 
 		virtual void Shutdown() override;
