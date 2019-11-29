@@ -130,7 +130,7 @@ namespace idk
 					if (hovered)
 					{
 						ImGui::BeginTooltip();
-						ImGui::Image(h->ID(), ImVec2{ 512, 512 }, ImVec2(0, 1), ImVec2(1, -1));
+						ImGui::Image(h->ID(), ImVec2{ 512, 512 }, ImVec2(0, 1), ImVec2(1, 0));
 						ImGui::EndTooltip();
 					}
 				}

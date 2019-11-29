@@ -19,6 +19,6 @@ data:
       Int: 0
       Speed: 0
       Trigger: 0
-      elapsed: 0.79
-      w_pressed: 1
+      elapsed: 0.78
+      w_pressed: 0
   parent_index: -1

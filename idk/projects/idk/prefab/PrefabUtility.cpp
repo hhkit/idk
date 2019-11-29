@@ -8,6 +8,7 @@
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
+#include <script/MonoBehavior.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 #include <script/ManagedObj.h>
@@ -160,6 +161,14 @@ namespace idk
 				const auto component_name = comp.type.name();
 				if (!has_override(prefab_inst, component_name, property_path, component_nth))
 				{
+					if (component_name == "MonoBehavior")
+					{
+						auto mb = handle_cast<mono::Behavior>(helpers::get_component(prefab_inst.GetGameObject(), component_name, component_nth));
+						auto& obj = mb->GetObject();
+							obj = mono::ManagedObject{ comp.get<mono::Behavior>().GetObject() };
+							obj.Assign("handle", mb.id);
+					}
+					else
 					resolve_property_path(*helpers::get_component(prefab_inst.GetGameObject(), component_name, component_nth), property_path) =
 						resolve_property_path(comp, property_path);
 				}
