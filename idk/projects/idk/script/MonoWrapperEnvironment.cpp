@@ -1528,5 +1528,17 @@ namespace idk::mono
             h->color = v;
         }
         BIND_END();
+
+        BIND_START("idk.Bindings::TextGetFontSize", unsigned, Handle<idk::Text> h)
+        {
+            return h->font_size;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetFontSize", void, Handle<idk::Text> h, unsigned v)
+        {
+            h->font_size = v;
+        }
+        BIND_END();
 	}
 }

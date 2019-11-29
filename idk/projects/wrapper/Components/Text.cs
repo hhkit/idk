@@ -24,5 +24,10 @@
             get => Bindings.TextGetColor(handle);
             set => Bindings.TextSetColor(handle, value);
         }
+        public uint font_size
+        {
+            get => Bindings.TextGetFontSize(handle);
+            set => Bindings.TextSetFontSize(handle, value);
+        }
     }
 }
