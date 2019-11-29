@@ -174,6 +174,7 @@ namespace idk
 		ADD_WINDOW(IGE_ProjectWindow);
 		ADD_WINDOW(IGE_HierarchyWindow);
 		ADD_WINDOW(IGE_InspectorWindow);
+		ADD_WINDOW(IGE_LightLister);
 		ADD_WINDOW(IGE_MaterialEditor);
 		ADD_WINDOW(IGE_AnimatorWindow);
 		ADD_WINDOW(IGE_ProfilerWindow);

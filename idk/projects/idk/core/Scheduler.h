@@ -43,8 +43,9 @@ namespace idk
 		void ParallelizedUpdate();
 		template<typename ... Ts>
 		void SetPauseState(PausedSystemConfig<Ts...>);
+		seconds GetFixedDeltaTime()noexcept;
 		seconds GetDeltaTime()noexcept;
-		seconds GetRealDeltaTime()noexcept;
+		seconds GetUnscaledDeltaTime() noexcept;
 		time_point GetProgramStart() noexcept;
 
 		span<Pass> GetPasses(UpdatePhase) noexcept;

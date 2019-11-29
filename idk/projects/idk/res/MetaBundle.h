@@ -1,4 +1,5 @@
 #pragma once
+#include <compare>
 #include <res/Guid.h>
 #include <res/ResourceMeta.h>
 
@@ -25,6 +26,8 @@ namespace idk
 
 		template<typename FullResType> RscHandle<FullResType> CreateResource() const;
 		template<typename FullResType> RscHandle<FullResType> CreateResource(string_view name) const;
+
+		auto operator<=>(const MetaBundle&) const = default;
 	};
 }
 

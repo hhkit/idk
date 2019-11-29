@@ -1,4 +1,5 @@
 #pragma once
+#include <compare>
 #include <idk.h>
 
 namespace idk
@@ -30,6 +31,8 @@ namespace idk
 
 		template<typename Res, typename = sfinae<has_tag_v<Res, MetaTag>>>
 		opt<typename Res::Metadata> GetMeta() const;
+
+		auto operator<=>(const SerializedMeta&) const = default;
 	};
 
 }

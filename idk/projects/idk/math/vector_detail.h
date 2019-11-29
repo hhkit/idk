@@ -1,9 +1,11 @@
 #pragma once
 #include "angle.h"
 #include "vector_swizzle.h"
+#include <machine.h>
+#include <xmmintrin.h>
 
-#pragma warning(disable:4201)
-
+#pragma warning(disable:4324) // padding
+#pragma warning(disable:4201) // unnamed struct
 
 namespace idk
 {
@@ -89,6 +91,23 @@ namespace idk
 			};
 
 			constexpr vector_base() : values{} {}
+			constexpr vector_base(T x, T y, T z, T w) : values{ x, y, z, w } {}
+		};
+
+		template<>
+		struct alignas(16) vector_base<float, 4>
+		{
+			using T = float;
+			union
+			{
+				T values[4];
+				struct { T x; T y; T z; T w; };
+				__m128 sse;
+				#include "swizzles/swizzle4"
+			};
+
+			constexpr vector_base() : values{} {}
+			constexpr explicit vector_base(__m128 packed) : sse{ packed } {}
 			constexpr vector_base(T x, T y, T z, T w) : values{ x, y, z, w } {}
 		};
 

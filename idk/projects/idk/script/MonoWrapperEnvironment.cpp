@@ -116,9 +116,45 @@ namespace idk::mono
 		return (MonoException*) exc_type->ConstructTemporary();
 	}
 
+	struct vec4
+	{
+		float val[4];
+		operator idk::vec4() const
+		{
+			return idk::vec4{ val[0], val[1], val[2], val[3] };
+		}
+	};
+
+	struct quat
+	{
+		float val[4];
+		operator idk::quat() const
+		{
+			return idk::quat{ val[0], val[1], val[2], val[3] };
+		}
+	};
+
+	struct color
+	{
+		float val[4];
+		operator idk::color() const
+		{
+			return idk::color{ val[0], val[1], val[2], val[3] };
+		}
+	};
+
+	template<typename Ret>
+	struct Retval { using T = Ret; };
+
+	template<> struct Retval<vec4> { using T = idk::vec4; };
+	template<> struct Retval<quat> { using T = idk::quat; };
+	template<> struct Retval<color> { using T = idk::color; };
+
 #define BIND_START(LABEL, RET, ...)\
-	{ using Ret = RET;\
-	mono_add_internal_call(LABEL, decay([] (__VA_ARGS__) -> Ret{try
+	{ using Ret = Retval<RET>::T;\
+	mono_add_internal_call(LABEL, decay([] (__VA_ARGS__) -> Ret{\
+	using idk::quat; using idk::vec4;\
+	try
 
 #define BIND_END() \
 	catch(NullHandleException ex) \
@@ -175,6 +211,13 @@ namespace idk::mono
 				mono_array_setref(retval, i, behaviors[i]->GetObject().Raw());
 
 			return retval;
+		}
+		BIND_END();
+
+		// scene
+		BIND_START("idk.Bindings::SceneChangeScene", void, Guid scene)
+		{
+			Core::GetSystem<SceneManager>().SetNextScene(RscHandle<Scene>{scene});
 		}
 		BIND_END();
 
@@ -1365,25 +1408,25 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TimeGetFixedDelta",  float)
 			{
-				return Core::GetScheduler().time_scale * Core::GetDT().count();
+				return Core::GetScheduler().GetFixedDeltaTime().count();
 			}
 		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetDelta",  float)
 			{
-				return Core::GetScheduler().time_scale * Core::GetRealDT().count();
+				return Core::GetScheduler().GetDeltaTime().count();
 			}
 		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetUnscaledFixedDelta", float)
 		{
-			return Core::GetDT().count();
+			return Core::GetScheduler().GetFixedDeltaTime().count();
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetUnscaledDelta", float)
 		{
-			return Core::GetRealDT().count();
+			return Core::GetScheduler().GetUnscaledDeltaTime().count();
 		}
 		BIND_END();
 
@@ -1526,6 +1569,18 @@ namespace idk::mono
         BIND_START("idk.Bindings::TextSetColor", void, Handle<idk::Text> h, color v)
         {
             h->color = v;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextGetFontSize", unsigned, Handle<idk::Text> h)
+        {
+            return h->font_size;
+        }
+        BIND_END();
+
+        BIND_START("idk.Bindings::TextSetFontSize", void, Handle<idk::Text> h, unsigned v)
+        {
+            h->font_size = v;
         }
         BIND_END();
 	}

@@ -58,25 +58,24 @@ namespace idk
             return false;
 
         auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-        if (scene != active_scene)
-        {
-            if (active_scene)
-                active_scene->Deactivate();
-            Core::GetSystem<SceneManager>().SetActiveScene(scene);
-            scene->LoadFromResourcePath();
 
-            Core::GetSystem<IDE>().ClearScene();
-            Core::GetSystem<IDE>().reg_scene.set("scene", string{ scene.guid });
+        if (active_scene)
+            active_scene->Deactivate();
+		Core::GetSystem<IDE>().curr_scene = scene;
+        Core::GetSystem<SceneManager>().SetActiveScene(scene);
+		scene->LoadFromResourcePath();
 
-            return true;
-        }
+        Core::GetSystem<IDE>().ClearScene();
+        Core::GetSystem<IDE>().reg_scene.set("scene", string{ scene.guid });
+
+        return true;
 
         return false;
     }
 
 	void SaveScene()
 	{
-		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		auto curr_scene = Core::GetSystem<IDE>().curr_scene;
 		auto path = [&]() -> opt<string>
 		{
 			if (auto path = Core::GetResourceManager().GetPath(curr_scene))
@@ -105,7 +104,7 @@ namespace idk
 
 	void SaveSceneAs()
 	{
-		auto curr_scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		auto curr_scene = Core::GetSystem<IDE>().curr_scene;
 		auto path = [&]() -> opt<string>
 		{
 			auto dialog_result = Core::GetSystem<Application>().OpenFileDialog({ "Scene", Scene::ext, DialogType::Save });
@@ -146,10 +145,12 @@ namespace idk
 		if (const auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene())
 		{
 			active_scene->Deactivate();
-			active_scene->Activate();
+			auto load_scene = Core::GetSystem<IDE>().curr_scene;
+			Core::GetSystem<SceneManager>().SetActiveScene(load_scene);
+			load_scene->Activate();
 			auto stream = Core::GetSystem<FileSystem>().Open(Core::GetSystem<IDE>().GetTmpSceneMountPath(), FS_PERMISSIONS::READ);
 			auto deser = stringify(stream);
-			parse_text(deser, *active_scene);
+			parse_text(deser, *load_scene);
 			Core::GetSystem<IDE>().ClearScene();
 		}
 	}
