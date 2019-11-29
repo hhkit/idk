@@ -152,18 +152,20 @@ namespace idk::mono
 				HACKY_ASSIGN(vec4);
 				HACKY_ASSIGN(Guid);
 #undef HACKY_ASSIGN
-#define RSCHANDLE_ASSIGN(TYPE)                                                  \
-				if (dyn.is<RscHandle<TYPE>>())									\
-				{																\
-					auto h = dyn.get<RscHandle<TYPE>>();						\
-					if (h)														\
-					{															\
-						auto csharp_handle = envi.Type(#TYPE)->Construct();	\
-						csharp_handle.Assign("guid", h.guid);					\
-						mono_field_set_value(me, field, csharp_handle.Raw());	\
-					}															\
-					else														\
-						mono_field_set_value(me, field, nullptr);				\
+#define RSCHANDLE_ASSIGN(TYPE)                                                                                \
+				if (dyn.is<RscHandle<TYPE>>())																  \
+				{																							  \
+					auto h = dyn.get<RscHandle<TYPE>>();													  \
+					if (h)																					  \
+					{																						  \
+						auto resource_klass = envi.Type(#TYPE);												  \
+						auto csharp_handle = resource_klass->ConstructTemporary();							  \
+						auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");	  \
+						mono_field_set_value(csharp_handle, handle_field, &h.guid);							  \
+						mono_field_set_value(me, field, csharp_handle);										  \
+					}																						  \
+					else																					  \
+						mono_field_set_value(me, field, nullptr);											  \
 				}
 				RSCHANDLE_ASSIGN(Prefab);
 				RSCHANDLE_ASSIGN(MaterialInstance);
