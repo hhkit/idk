@@ -871,6 +871,15 @@ namespace idk {
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
+		DisplayStack display{*this};
+
+		// layers override check
+
+		_curr_property_stack.emplace_back("layers");
+		display.GroupBegin();
+		display.Label("layers");
+		display.GroupEnd(false);
+		_curr_property_stack.pop_back();
 
 		if (ImGui::Button("OPEN ANIMATOR WINDOW"))
 		{
