@@ -310,7 +310,7 @@ namespace idk
 	GenericHandle GameState::CreateComponent(const Handle<GameObject>& gameobject, GenericHandle component_handle, reflect::dynamic dyn)
 	{
 		const auto id = GetTypeID(dyn.type);
-		if (id != component_handle.id)
+		if (id != component_handle.type)
 			return GenericHandle{};
 
 		constexpr auto create_dynamic_handle_jt = detail::TableGen::GenCreateDynamicHandleJt();

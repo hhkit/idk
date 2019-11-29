@@ -65,19 +65,8 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		//Tool bar
-
-
-		//Toolbar
-		//const ImVec2 toolBarSize{ window_size.x, 18.0f };
-		//const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
-		//	| ImGuiWindowFlags_NoScrollbar
-		//	| ImGuiWindowFlags_NoResize
-		//	| ImGuiWindowFlags_NoSavedSettings
-		//	| ImGuiWindowFlags_NoMove
-		//	| ImGuiWindowFlags_NoDocking
-		//	| ImGuiWindowFlags_NoCollapse;
-		//ImGui::BeginChild("HierarchyToolBar", toolBarSize, false, childFlags);
+		
+		//MenuBar
         ImGui::BeginMenuBar();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(3);
@@ -86,9 +75,7 @@ namespace idk {
 		if (ImGui::Button("Create")) {
 			ImGui::OpenPopup("CreatePopup");
 
-
 		}
-
 		if (ImGui::BeginPopup("CreatePopup")) {
             IDE& editor = Core::GetSystem<IDE>();
 
@@ -145,8 +132,6 @@ namespace idk {
 
 		ImGui::EndMenuBar();
 
-        ImGui::SetCursorPos(ImGui::GetWindowContentRegionMin());
-
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
@@ -187,7 +172,7 @@ namespace idk {
 
 			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 
-			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding;
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			//Check if gameobject has been selected. Causes Big-O(n^2)
 			for (Handle<GameObject>& i : selected_gameObjects) {

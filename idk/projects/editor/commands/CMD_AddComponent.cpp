@@ -30,17 +30,17 @@ namespace idk {
 		if (game_object_handle) {
 			if (!component_name.empty())
 			{
-				if (new_component_handle)
+				if (new_component_handle.id)
 					new_component_handle = game_object_handle->AddComponent(new_component_handle, reflect::get_type(component_name).create());
 				else
 					new_component_handle = game_object_handle->AddComponent(reflect::get_type(component_name));
 			}
 			//Find all Commands of similar objects in the controller and modify the handle to point to this!
 			else {
-				if (new_component_handle)
-					new_component_handle = game_object_handle->AddComponent(component_reflect);
-				else
+				if (new_component_handle.id)
 					new_component_handle = game_object_handle->AddComponent(new_component_handle, component_reflect);
+				else
+					new_component_handle = game_object_handle->AddComponent(component_reflect);
 			}
 			return true;
 		}
