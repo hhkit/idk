@@ -55,9 +55,6 @@ namespace idk {
 		ImGui::PopStyleVar(2);
 
 
-
-
-
 		ImGuiStyle& style = ImGui::GetStyle();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBgActive]);
@@ -131,6 +128,9 @@ namespace idk {
 		ImGui::PopStyleVar();
 
 		ImGui::EndMenuBar();
+
+		
+
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
@@ -210,7 +210,8 @@ namespace idk {
                 col.Value.w = 0.5f;
 
             ImGui::PushStyleColor(ImGuiCol_Text, col.Value);
-			
+
+
 			if (!textFilter.PassFilter(goName.c_str())) {
                 ImGui::PopStyleColor();
 				++selectedCounter; // counter here is for shift selecting
@@ -219,6 +220,15 @@ namespace idk {
 			
 			string idString = std::to_string(handle.id); //Use id string as id
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
+
+			if (gameobject_focus) {
+				if (gameobject_focus == handle) {
+					ImGui::SetItemDefaultFocus();
+					gameobject_focus = {};
+				}
+
+			}
+
             ImGui::PopStyleColor();
 
 			
@@ -325,6 +335,8 @@ namespace idk {
 
 		});
 
+
+
         ImGui::PopStyleVar();
 
 		//Shift Select logic
@@ -420,6 +432,92 @@ namespace idk {
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 
+
+		
+
+	}
+
+	void IGE_HierarchyWindow::ScrollToGameObject(Handle<GameObject> gameObject)
+	{
+
+		gameobject_focus = gameObject;
+
+		/*
+
+		//Hierarchy Display
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
+		float	objects_parsed = 0;						//Basically, the number of gameobjects displayed in hierarchy at the point in time
+		float	object_pos = 0;						//Basically, the number of gameobjects displayed in hierarchy at the point in time
+		bool	has_found_object = false;
+		vector<int> itemToSkipInGraph{};
+
+		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+			(void)depth;
+			if (!handle) //Ignore handle zero
+				return true;
+
+			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) { // ignore editor
+
+				return true;
+			}
+
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
+
+			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
+			if (children->size() == 0) {
+				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+			}
+
+
+			Handle<Name> c_name = handle->GetComponent<Name>();
+			string goName{};
+			if (c_name)
+				goName = c_name->name;
+
+			const bool isNameEmpty = goName.empty();
+			if (isNameEmpty) {
+				goName = "Unnamed (";
+				goName.append(std::to_string(handle.id));
+				goName.append(")");
+
+			}
+
+			if (!textFilter.PassFilter(goName.c_str())) {
+				return true;
+			}
+			string idString = std::to_string(handle.id); //Use id string as id
+			auto id = ImGui::GetID(idString.c_str());
+
+			bool isTreeOpen = ImGui::TreeNodeBehaviorIsOpen(id, nodeFlags); //Display obj
+			++objects_parsed;
+
+			if (!has_found_object) {
+				if (handle == gameObject) {
+					has_found_object = true;
+
+				}
+				else {
+					++object_pos;
+				}
+			}
+
+
+			if (isTreeOpen) {
+				return true;
+			}
+			else {
+				return false;
+			}
+
+			return true;
+
+		});
+
+		is_scroll_to_gameObject_called = (object_pos / objects_parsed);
+
+		*/
 	}
 
 

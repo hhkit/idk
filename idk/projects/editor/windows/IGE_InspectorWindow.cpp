@@ -973,40 +973,43 @@ namespace idk {
 				changed = true;
 			}
 
-			ImGui::Text("AudioClips");
-			ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
+			ImGui::Separator();
+			if (!audio_clip_list.empty()) {
+				ImGui::Text("AudioClips");
+				ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
 
-			for (auto i = 0; i < audio_clip_list.size(); ++i) {
-				string txt = "[" + std::to_string(i) + "]";
-				if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
-					//Stop playing before switching sounds!
-					changed = true;
-				}
-				ImGui::SameLine();
-				ImGui::PushID(i);
-				if (ImGui::SmallButton("X")) {
-					static_audiosource->RemoveAudioClip(i);
+				for (auto i = 0; i < audio_clip_list.size(); ++i) {
+					string txt = "[" + std::to_string(i) + "]";
+					if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
+						//Stop playing before switching sounds!
+						changed = true;
+					}
+					ImGui::SameLine();
+					ImGui::PushID(i);
+					if (ImGui::SmallButton("X")) {
+						static_audiosource->RemoveAudioClip(i);
+						ImGui::PopID();
+						changed = true;
+						break;
+					}
+
+					ImGui::SameLine();
+					if (static_audiosource->IsAudioClipPlaying(i)) {
+						if (ImGui::SmallButton("||")) {
+							static_audiosource->Stop(i);
+						}
+					}
+					else {
+						if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
+							static_audiosource->Play(i);
+						}
+					}
 					ImGui::PopID();
-					changed = true;
-					break;
+
 				}
 
-				ImGui::SameLine();
-				if (static_audiosource->IsAudioClipPlaying(i)) {
-					if (ImGui::SmallButton("||")) {
-						static_audiosource->Stop(i);
-					}
-				}
-				else {
-					if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
-						static_audiosource->Play(i);
-					}
-				}
-				ImGui::PopID();
-
+				ImGui::EndChild();
 			}
-
-			ImGui::EndChild();
 
 			return changed;
 		};
@@ -1182,18 +1185,18 @@ namespace idk {
             ImGui::OpenPopup("AdditionalOptions");
 
         ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
-        component.visit([](auto h) {
-            const auto i = ComponentIcon<std::decay_t<decltype(*h)>>;
-            if (*i != '\0')
-            {
-                ImGui::Text(i);
-                ImGui::SameLine();
-            }
-            else
-                ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + 12.0f + ImGui::GetStyle().ItemInnerSpacing.x * 2.0f);
-        });
-        auto cursor_x = ImGui::GetCursorPosX();
+		ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
+		component.visit([](auto h) {
+			const auto i = ComponentIcon<std::decay_t<decltype(*h)>>;
+			if (*i != '\0')
+			{
+				ImGui::Text(i);
+				ImGui::SameLine();
+			}
+			else
+				ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + 12.0f + ImGui::GetStyle().ItemInnerSpacing.x * 2.0f);
+			});
+		auto cursor_x = ImGui::GetCursorPosX();
 
         if (auto f = (*component).get_property("enabled"); f.value.valid())
         {
