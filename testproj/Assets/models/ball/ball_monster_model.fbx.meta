@@ -3,9 +3,9 @@ metadatas:
   metadata: ""
   name: ball_monster_model
   t_hash: Prefab
-- guid: 92b2afac-13b4-450b-99dc-bea8d7fda34d
+- guid: 55e37d7d-86ba-4bc6-b230-a86a250beaad
   metadata: ""
-  name: BallMonster
+  name: ballmonster_low
   t_hash: idk::Mesh
 - guid: f8493d59-b7fc-4b83-aaeb-f1bf545d7a8d
   metadata: ""

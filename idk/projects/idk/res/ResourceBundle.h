@@ -23,6 +23,9 @@ namespace idk
 		span<const GenericResourceHandle>    GetAll() const; // gets absolutely all resources
 
 		template<typename T> void Add(RscHandle<T> handle); // will reshuffle vector and invalidate span, but you shouldn't be accessing vector directly anyway so this is ok
+
+		bool operator!=(const ResourceBundle&) const;
+		bool operator==(const ResourceBundle&) const;
 	private:
 		struct sub_array { char index = 0, count = 0; };
 

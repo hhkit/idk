@@ -29,8 +29,8 @@ namespace idk
 			{"Name", 125},
 			{"Color", 25},
 			{"Intensity", -1},
-			{"Position", -1},
-			{"Rotation", -1},
+			{"Position", 125},
+			{"Rotation", 125},
 			{"Shadows", 25},
 		};
 
@@ -54,9 +54,9 @@ namespace idk
 		}
 
 		ImGui::Separator();
-
 		for (auto& light : Core::GetGameState().GetObjectsOfType<Light>())
 		{
+			ImGui::Columns(std::size(headers), "", true);
 			auto id = std::string{ "##LL" } +std::to_string(light.GetHandle().id);
 			auto go = light.GetGameObject();
 			auto name = go->Name();
@@ -83,7 +83,9 @@ namespace idk
 				tfm->GlobalRotation(rot);
 			ImGui::NextColumn();
 
-			ImGui::DragFloat((id + "intens").data(), color.as_vec3.data(), 0.1, 0, 100.f, "%.3f", 1.1f);
+			auto intens = light.GetLightIntensity();
+			if (ImGui::DragFloat((id + "intens").data(), &intens, 0.1, 0, 1500.f, "%.3f", 1.1f))
+				light.SetLightIntensity(intens);
 			ImGui::NextColumn();
 
 			ImGui::Checkbox((id + "shad").data(), &light.casts_shadows);
