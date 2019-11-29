@@ -25,4 +25,7 @@ namespace idk::natvis
     constexpr auto ParticleSystemID      = ComponentID<ParticleSystem     > + 1;
     constexpr auto CanvasID              = ComponentID<Canvas             > + 1;
     constexpr auto RectTransformID       = ComponentID<RectTransform      > + 1;
+    constexpr auto ImageID               = ComponentID<Image              > + 1;
+    constexpr auto TextID                = ComponentID<Text               > + 1;
+    constexpr auto TextMeshID            = ComponentID<TextMesh           > + 1;
 }
