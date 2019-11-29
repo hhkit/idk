@@ -12,7 +12,7 @@ if (klass == MONO_CLASS)                                        \
 {                                                               \
 	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
 	auto new_val = old_val;								        \
-	functor(field_name.data(), new_val, depth);				        \
+	functor(field_name.data(), new_val, -last_children);		\
 														        \
 	if (old_val != new_val)								        \
 		mono_field_set_value(Raw(), field, &new_val);	        \
@@ -117,6 +117,61 @@ if (mono_class_get_name(klass) == string_view{MONO_CLASS})      \
 
 namespace idk::mono
 {
+	template<typename T>
+	inline void ManagedObject::Assign(string_view fieldname, T& obj)
+	{
+		using Actual = std::decay_t<T>;
+
+		auto me = Raw();
+		auto field = Field(fieldname);
+
+		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
+
+		if (field)
+		{
+			if constexpr (!std::is_class_v<Actual>)
+			{
+				auto val = obj;
+				mono_field_set_value(me, field, &val);
+			}
+			if constexpr (std::is_same_v<Actual, reflect::dynamic>)
+			{
+				reflect::dynamic& dyn = obj;
+#define HACKY_ASSIGN(TYPE) if (dyn.is<TYPE>()) mono_field_set_value(me, field, &dyn.get<TYPE>());
+				HACKY_ASSIGN(bool);
+				HACKY_ASSIGN(short);
+				HACKY_ASSIGN(unsigned short);
+				HACKY_ASSIGN(int);
+				HACKY_ASSIGN(unsigned int);
+				HACKY_ASSIGN(int64_t);
+				HACKY_ASSIGN(uint64_t);
+				HACKY_ASSIGN(float);
+				HACKY_ASSIGN(double);
+				HACKY_ASSIGN(vec2);
+				HACKY_ASSIGN(vec3);
+				HACKY_ASSIGN(vec4);
+				HACKY_ASSIGN(Guid);
+#undef HACKY_ASSIGN
+#define RSCHANDLE_ASSIGN(TYPE)                                                  \
+				if (dyn.is<RscHandle<TYPE>>())									\
+				{																\
+					auto h = dyn.get<RscHandle<TYPE>>();						\
+					if (h)														\
+					{															\
+						auto csharp_handle = envi.Type(#TYPE)->Construct();	\
+						csharp_handle.Assign("guid", h.guid);					\
+						mono_field_set_value(me, field, csharp_handle.Raw());	\
+					}															\
+					else														\
+						mono_field_set_value(me, field, nullptr);				\
+				}
+				RSCHANDLE_ASSIGN(Prefab);
+				RSCHANDLE_ASSIGN(MaterialInstance);
+#undef RSCHANDLE_ASSIGN
+			}
+		}
+	}
+
 	template<typename T>
 	void ManagedObject::Visit(T&& functor, bool ignore_privacy)
 	{

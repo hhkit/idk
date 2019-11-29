@@ -271,8 +271,6 @@ namespace idk::ogl
 				using T = std::decay_t<decltype(obj)>;
 				if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
 				{
-                    if (!obj)
-                        return;
 					const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
 					opengl_handle->BindConvolutedToUnit(texture_units);
 					pipeline.SetUniform("irradiance_probe", texture_units++);

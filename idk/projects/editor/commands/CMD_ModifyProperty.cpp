@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CMD_ModifyProperty.h"
-
+#include <script/ManagedObj.h>
+#include <script/MonoBehavior.h>
 namespace idk
 {
 
@@ -24,6 +25,8 @@ namespace idk
 
             if (curr.valid())
             {
+				if (curr.type.is<mono::ManagedObject>())
+					return curr;
                 if (curr.type.is_container())
                 {
                     auto cont = curr.to_container();
@@ -52,13 +55,19 @@ namespace idk
 
     bool CMD_ModifyProperty::execute()
     {
-        resolve_property_path(*component, property_path) = new_value;
+		if (component.is_type<mono::Behavior>())
+			handle_cast<mono::Behavior>(component)->GetObject().Assign(string_view(property_path), new_value);
+		else
+			resolve_property_path(*component, property_path) = new_value;
         return true;
     }
 
     bool CMD_ModifyProperty::undo()
     {
-        resolve_property_path(*component, property_path) = old_value;
+		if (component.is_type<mono::Behavior>())
+			handle_cast<mono::Behavior>(component)->GetObject().Assign(string_view(property_path), old_value);
+		else
+			resolve_property_path(*component, property_path) = old_value;
         return true;
     }
 

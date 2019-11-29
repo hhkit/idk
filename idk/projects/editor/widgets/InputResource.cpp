@@ -122,6 +122,20 @@ namespace idk
             ImGui::EndPopup();
         }
 
+		std::visit([&](auto h)
+		{
+				using T = typename decltype(h)::Resource;
+				if constexpr (std::is_same_v<T, idk::Texture>)
+				{
+					if (hovered)
+					{
+						ImGui::BeginTooltip();
+						ImGui::Image(h->ID(), ImVec2{ 512, 512 }, ImVec2(0, 1), ImVec2(1, -1));
+						ImGui::EndTooltip();
+					}
+				}
+		}, *handle);
+
         return dropped;
     }
 }

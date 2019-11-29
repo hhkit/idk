@@ -29,10 +29,18 @@ namespace idk {
 	{
 		if (game_object_handle) {
 			if (!component_name.empty())
-				new_component_handle = game_object_handle->AddComponent(reflect::get_type(component_name));
+			{
+				if (new_component_handle)
+					new_component_handle = game_object_handle->AddComponent(new_component_handle, reflect::get_type(component_name).create());
+				else
+					new_component_handle = game_object_handle->AddComponent(reflect::get_type(component_name));
+			}
 			//Find all Commands of similar objects in the controller and modify the handle to point to this!
 			else {
-				new_component_handle = game_object_handle->AddComponent(component_reflect);
+				if (new_component_handle)
+					new_component_handle = game_object_handle->AddComponent(component_reflect);
+				else
+					new_component_handle = game_object_handle->AddComponent(new_component_handle, component_reflect);
 			}
 			return true;
 		}
@@ -47,7 +55,8 @@ namespace idk {
 				return true;
 			}
 			else if (game_object_handle->GetComponent(reflect::get_type(component_name))) { //This is when the gameObjectHandle has a different component handle due to DeleteGameObjectCMD
-				game_object_handle->RemoveComponent(game_object_handle->GetComponent(reflect::get_type(component_name)));
+				new_component_handle = game_object_handle->GetComponent(reflect::get_type(component_name));
+				game_object_handle->RemoveComponent(new_component_handle);
 				return true;
 			}
 			else {

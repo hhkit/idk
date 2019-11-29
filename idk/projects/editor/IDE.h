@@ -102,6 +102,7 @@ namespace idk
 		// Editor Scene
 		bool game_running = false;
 		bool game_frozen = true;
+		RscHandle<Scene> curr_scene;
 		RscHandle<RenderTarget> editor_view;
 		void SetupEditorScene();
 

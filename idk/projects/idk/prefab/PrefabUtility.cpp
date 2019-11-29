@@ -10,7 +10,7 @@
 #include <scene/SceneManager.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
-
+#include <script/ManagedObj.h>
 namespace idk
 {
 
@@ -65,6 +65,8 @@ namespace idk
 
                 if (curr.valid())
                 {
+					if (curr.type.is<mono::ManagedObject>())
+						return curr;
                     if (curr.type.is_container())
                     {
                         auto cont = curr.to_container();
