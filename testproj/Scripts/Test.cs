@@ -1,4 +1,5 @@
 ﻿using idk;
+using idk.SceneManagement;
 using System.Collections.Generic;
 
 namespace TestAndSeek
@@ -14,6 +15,7 @@ namespace TestAndSeek
         public Prefab prefab;
         public GameObject go;
         public MaterialInstance minst;
+        public Scene scene;
         public string nama;
         public string namae_o;
 
@@ -87,6 +89,7 @@ namespace TestAndSeek
                 //gameObject.GetComponentInChildren<Renderer>().materialInstance = minst;
             }
 
+
             if (Input.GetKeyDown(KeyCode.P))
                 Time.timeScale = 0f;
 
@@ -125,6 +128,8 @@ namespace TestAndSeek
 
         void Update()
         {
+            if (Input.GetKeyDown(KeyCode.C))
+                SceneManager.LoadScene(scene);
             //Debug.Log("Children" + transform.GetChildren().Length.ToString());
             //if (prefab)
             //    Debug.Log(prefab.ToString());

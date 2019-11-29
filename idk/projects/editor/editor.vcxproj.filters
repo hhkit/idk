@@ -147,6 +147,7 @@
     </ClInclude>
     <ClInclude Include="IconsFontAwesome5_c.h" />
     <ClInclude Include="ComponentIcons.h" />
+    <ClInclude Include="windows\IGE_LightLister.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -273,6 +274,7 @@
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
+    <ClCompile Include="windows\IGE_LightLister.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vulkan_ImGui_Interface.cpp" />

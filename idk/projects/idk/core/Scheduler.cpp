@@ -55,11 +55,15 @@ namespace idk
 
 		_last_frame = _this_frame;
 	}
-	seconds Scheduler::GetDeltaTime()noexcept
+	seconds Scheduler::GetFixedDeltaTime()noexcept
 	{
 		return _fixed_dt;
 	}
-	seconds Scheduler::GetRealDeltaTime()noexcept
+	seconds Scheduler::GetDeltaTime()noexcept
+	{
+		return _real_dt * time_scale;
+	}
+	seconds Scheduler::GetUnscaledDeltaTime() noexcept
 	{
 		return _real_dt;
 	}

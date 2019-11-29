@@ -79,6 +79,23 @@ namespace idk
 		return true;
 	}
 
+	void SceneManager::SetNextScene(RscHandle<Scene> s)
+	{
+		changing = true;
+		_next_scene = s;
+	}
+
+	void SceneManager::ChangeScene()
+	{
+		if (changing)
+		{
+			_active_scene->Deactivate();
+			_active_scene = _next_scene;
+			_active_scene->LoadFromResourcePath();
+			changing = false;
+		}
+	}
+
 	void SceneManager::DestroyQueuedObjects(span<GameObject> objs)
 	{
 		GameState::GetGameState().SortObjectsOfType<GameObject>(

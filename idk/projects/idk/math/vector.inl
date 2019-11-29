@@ -8,6 +8,21 @@
 
 namespace idk
 {
+	namespace detail
+	{
+		inline __m128 sse_dot(const tvec<float, 4> & me, const tvec<float, 4> & other)
+		{
+			const __m128& x = me.sse;
+			const __m128& y = other.sse;
+			const auto packed_mul = _mm_mul_ps(x, y);
+			const auto shuffle = _mm_shuffle_ps(packed_mul, packed_mul, _MM_SHUFFLE(2, 3, 0, 1));
+			const auto add0 = _mm_add_ps(packed_mul, shuffle);
+			const auto shuffle2 = _mm_shuffle_ps(add0, add0, _MM_SHUFFLE(0, 1, 2, 3));
+			const auto add1 = _mm_add_ps(add0, shuffle2);
+			return add1;
+		}
+	}
+
 	template<typename T, unsigned D>
 	inline constexpr tvec<T, D>::tvec(const T& fill)
 	{
@@ -71,10 +86,17 @@ namespace idk
 	template<typename T, unsigned D>
 	T tvec<T, D>::dot(const tvec& rhs) const
 	{
-		T accum{};
-		for (auto& elem : *this * rhs)
-			accum += elem;
-		return accum;
+		if constexpr (std::is_same_v<T, float> && D == 4)
+		{
+			return detail::sse_dot(*this, rhs).m128_f32[0];
+		}
+		else
+		{
+			T accum{};
+			for (auto& elem : *this* rhs)
+				accum += elem;
+			return accum;
+		}
 	}
 
 	template<typename T, unsigned D>

@@ -17,6 +17,12 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior[] ObjectGetObjectsOfType(string type);
 
+        /*
+         * Scene
+         */
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void SceneChangeScene(Guid guid);
 
         /**
          * Game Object

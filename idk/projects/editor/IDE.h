@@ -58,6 +58,9 @@ namespace idk
 	public:
         constexpr static auto path_tmp = "/tmp";
         constexpr static auto path_idk_app_data = "/idk";
+
+		RscHandle<Scene> curr_scene;
+		Registry reg_scene{ "/user/LastScene.yaml" };
 		
 		IDE();
 
@@ -83,7 +86,6 @@ namespace idk
 		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
 		void ApplyDefaultColors();
 
-        Registry reg_scene{ "/user/LastScene.yaml" };
 
 	private:
 		friend class IGE_MainWindow;
@@ -102,7 +104,6 @@ namespace idk
 		// Editor Scene
 		bool game_running = false;
 		bool game_frozen = true;
-		RscHandle<Scene> curr_scene;
 		RscHandle<RenderTarget> editor_view;
 		void SetupEditorScene();
 
