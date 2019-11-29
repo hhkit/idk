@@ -13,13 +13,12 @@
 #include <vkn/RenderUtil.h>
 #include <vkn/PipelineThingy.h>
 
-#include <vkn/CubemapRenderer.h>
-
 #include <vkn/GraphicsState.h>
 
+#include <vkn/CubemapRenderer.h>
 #include <vkn/ParticleRenderer.h>
-
 #include <vkn/FontRenderer.h>
+#include <vkn/CanvasRenderer.h>
 
 namespace idk
 {
@@ -41,7 +40,8 @@ namespace idk::vkn
 		void SetPipelineManager(PipelineManager& manager);
 		void PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index);
 		void RenderGraphicsStates(const vector<GraphicsState>& state,uint32_t frame_index);
-		//void PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index);
+		void PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index);
+		vk::UniqueSemaphore& GetPostRenderComplete() { return _post_render_complete; }
 		PresentationSignals& GetMainSignal();
 		SharedGraphicsState shared_graphics_state;
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
@@ -77,7 +77,12 @@ namespace idk::vkn
 		PipelineThingy ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
 		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs ,ivec2 vp_pos, ivec2 vp_size);
 
+		//PreRender
 		void PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+		
+		//PostRender
+		void PostRenderCanvas( RscHandle<RenderTarget> rt, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+
 
 		VulkanView& View()const { return *_view; }
 		vk::RenderPass GetRenderPass(const GraphicsState& state, VulkanView& view);
@@ -94,19 +99,24 @@ namespace idk::vkn
 		PipelineManager*                       _pipeline_manager           {};
 		vector<RenderStateV2>                  _states                     {};
 		vector<RenderStateV2>                  _pre_states                 {};
-		const vector<GraphicsState>*           _gfx_states                 {};
+		vector<RenderStateV2>                  _post_states                {};
+		const vector<GraphicsState>*           _gfx_states                 {};		
 		vector<vk::UniqueCommandBuffer>        _state_cmd_buffers          {};
 		vector<std::unique_ptr<IRenderThread>> _render_threads             {};
 		vk::UniqueSemaphore                    _pre_render_complete        {};
+		vk::UniqueSemaphore                    _post_render_complete       {};
 		vk::CommandPool         _cmd_pool{};
 		vk::UniqueCommandBuffer _pri_buffer{};
 		vk::UniqueCommandBuffer _transition_buffer{};
+		
+		
+		
+		////////Certain obj renderers///////
 		CubemapRenderer _convoluter;
-		CubemapRenderer _skybox;
-
+		CubemapRenderer _skybox;	
 		ParticleRenderer _particle_renderer;
-
 		FontRenderer   _font_renderer;
+		CanvasRenderer _canvas_renderer;
 
 		//VknFrameBufferManager   fb_man{};
 	};

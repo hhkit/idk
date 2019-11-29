@@ -156,6 +156,11 @@ namespace idk
         vector<FontPoint> coords;
         RscHandle<FontAtlas> atlas;
     };
+	struct UIAttriBlock
+	{
+		vector<vec2> pos;
+		vector<vec2> uv;
+	};
 
 	struct UITextRange
 	{
@@ -170,6 +175,19 @@ namespace idk
         variant<ImageData, TextData> data;
         unsigned depth; // in scene graph
     };
+
+	struct UIRenderObjectWithCanvas
+	{
+		vector<UIRenderObject>  ui_ro;
+		RscHandle<RenderTarget> render_target;
+		size_t num_of_text{ 0 };
+	};
+
+	struct alignas(32) UIBlockInfo {
+		vec4 color{};
+		size_t is_font { 0 };
+		size_t is_font2{ 0 };
+	};
 
 
 

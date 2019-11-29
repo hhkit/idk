@@ -359,6 +359,7 @@ namespace idk::vkn
 		}
 		auto& p_ro = draw_calls.emplace_back(ProcessedRO{ &ro,std::move(attrib_buffers), std::move(index_buffer),num_vertices,std::move(sets),next_config,shaders[static_cast<size_t>(ShaderStage::Vertex)],shaders[static_cast<size_t>(ShaderStage::Geometry)],shaders[static_cast<size_t>(ShaderStage::Fragment)] });
 		p_ro.rebind_shaders = shader_changed;
+		attrib_buffers = {};
 		index_buffer = {};
 		num_vertices = 0;
 		shader_changed = false;

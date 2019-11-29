@@ -61,6 +61,10 @@ namespace idk::vkn
 
 	void StandardBindings::BindFont(PipelineThingy&, const FontRenderData&) {}
 
+	void StandardBindings::BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one) {}
+	void StandardBindings::BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one) {}
+
+
 	//const GraphicsState& StandardVertexBindings::State() { return *_state; }
 
 	void StandardVertexBindings::SetState(const GraphicsState& vstate) {
@@ -300,11 +304,11 @@ namespace idk::vkn
 	void ParticleVertexBindings::Bind(PipelineThingy& the_interface)
 	{
 		//map back into z: (0,1)
-		mat4 projection_trf = /*mat4{ 1,0,0,0,
+		mat4 projection_trf = mat4{ 1,0,0,0,
 							0,1,0,0,
 							0,0,0.5f,0.5f,
 							0,0,0,1
-		} * */
+		} * 
 			proj_trf;//map back into z: (0,1)
 		mat4 block[] = { projection_trf,view_trf };
 		the_interface.BindUniformBuffer("CameraBlock", 0,block);
@@ -336,14 +340,14 @@ namespace idk::vkn
 
 	void FontVertexBindings::BindFont(PipelineThingy& the_interface, const FontRenderData& dc)
 	{
-		//map back into z: (0,1)
-		mat4 projection_trf = mat4{ 1,0,0,0,
-							0,1,0,0,
-							0,0,0.5f,0.5f,
-							0,0,0,1
-		}*proj_trf;//map back into z: (0,1)
-		mat4 block[] = { projection_trf,view_trf };
-		the_interface.BindUniformBuffer("CameraBlock", 0, block);
+		////map back into z: (0,1)
+		//mat4 projection_trf = mat4{ 1,0,0,0,
+		//					0,1,0,0,
+		//					0,0,0.5f,0.5f,
+		//					0,0,0,1
+		//}*proj_trf;//map back into z: (0,1)
+		//mat4 block[] = { projection_trf,view_trf };
+		//the_interface.BindUniformBuffer("CameraBlock", 0, block);
 
 		mat4 obj_trf = view_trf * dc.transform;
 		mat4 obj_ivt = obj_trf.inverse().transpose();
@@ -352,6 +356,51 @@ namespace idk::vkn
 		vec4 block3[] = { dc.color.as_vec4};
 		the_interface.BindUniformBuffer("FontBlock", 0, block3);
 		the_interface.BindSampler("tex", 0, *dc.atlas.as<VknFontAtlas>().texture);
+	}
+
+	/*void CanvasVertexBindings::SetState(const PostRenderData& vstate)
+	{
+		
+	}*/
+
+	void CanvasVertexBindings::SetState(const CameraData& cam)
+	{
+		view_trf = cam.view_matrix;
+		proj_trf = cam.projection_matrix;
+	}
+
+	void CanvasVertexBindings::Bind(PipelineThingy& the_interface)
+	{
+		//map back into z: (0,1)
+		mat4 projection_trf = mat4{ 1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+							0,0,0,1
+		}*proj_trf;//map back into z: (0,1)
+		mat4 block[] = { projection_trf,view_trf };
+		the_interface.BindUniformBuffer("CameraBlock", 0, block);
+	}
+	
+	void CanvasVertexBindings::BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one)
+	{
+		mat4 obj_trf = view_trf * dc_one.transform;
+		mat4 obj_ivt = obj_trf.inverse().transpose();
+		mat4 block2[] = { obj_trf,obj_ivt };
+		the_interface.BindUniformBuffer("ObjectMat4Block", 0, block2);
+		UIBlockInfo block3[] = { { dc_one.color.as_vec4, 1 } };
+		the_interface.BindUniformBuffer("UIBlock", 0, block3);
+		the_interface.BindSampler("tex", 0, *dc.atlas.as<VknFontAtlas>().texture);
+	}
+
+	void CanvasVertexBindings::BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one)
+	{
+		mat4 obj_trf = view_trf * dc_one.transform;
+		mat4 obj_ivt = obj_trf.inverse().transpose();
+		mat4 block2[] = { obj_trf,obj_ivt };
+		the_interface.BindUniformBuffer("ObjectMat4Block", 0, block2);
+		UIBlockInfo block3[] = { { dc_one.color.as_vec4, 0 } };
+		the_interface.BindUniformBuffer("UIBlock", 0, block3);
+		the_interface.BindSampler("tex", 0, dc.texture.as<VknTexture>());
 	}
 
 }

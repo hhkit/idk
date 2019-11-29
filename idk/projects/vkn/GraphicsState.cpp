@@ -8,57 +8,37 @@ namespace idk::vkn
 	{
 		return &shared_gfx_state->Lights()[light_index];
 	}
-	//template<typename tex_t>
-	//std::optional<tex_t> GetShadow(const SharedGraphicsState* shared_gfx_state, size_t light_index)
-	//{
-	//	std::optional<tex_t> result;
-	//	auto& shadows = shared_gfx_state->ShadowMaps();
-	//	auto& shadow = shadows[light_index];
-	//	if (shadow.index() == meta::IndexOf<shadow_map_t, tex_t>::value)
-	//	{
-	//		result = std::get<tex_t>(shadow);
-	//	}
-	//	return result;
-	//}
-	//std::optional<RscHandle<Texture>> GraphicsState::Shadow2D(size_t light_index) const
-	//{
-	//	return GetShadow< RscHandle<Texture>>(shared_gfx_state, light_index);
-	//}
-	//std::optional<RscHandle<CubeMap>> GraphicsState::ShadowCube(size_t light_index) const
-	//{
-	//	return GetShadow< RscHandle<CubeMap>>(shared_gfx_state, light_index);
-	//}
 	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
-{
-	camera = data.camera;
-	range = data;
-	lights = &lights_data;
-	mesh_render.clear();
-	skinned_mesh_render.clear();
 	{
-		size_t i = 0;
-		RscHandle<Texture> def_2d;
-		RscHandle<CubeMap> def_cube;
-
-		for (auto& light : lights_data)
+		camera = data.camera;
+		range = data;
+		lights = &lights_data;
+		mesh_render.clear();
+		skinned_mesh_render.clear();
 		{
-			active_lights.emplace_back(i);
-			if (light.index == 0)//point
+			size_t i = 0;
+			RscHandle<Texture> def_2d;
+			RscHandle<CubeMap> def_cube;
+
+			for (auto& light : lights_data)
 			{
-				shadow_maps_2d  .emplace_back(def_2d);
-				//shadow_maps_cube.emplace_back(light.light_map->GetDepthBuffer());
+				active_lights.emplace_back(i);
+				if (light.index == 0)//point
+				{
+					shadow_maps_2d  .emplace_back(def_2d);
+					//shadow_maps_cube.emplace_back(light.light_map->GetDepthBuffer());
+				}
+				else
+				{
+					shadow_maps_2d.emplace_back(s_cast<RscHandle<Texture>>(light.light_map->DepthAttachment()));
+					shadow_maps_cube.emplace_back(def_cube);
+				}
+				++i;
 			}
-			else
-			{
-				shadow_maps_2d.emplace_back(s_cast<RscHandle<Texture>>(light.light_map->DepthAttachment()));
-				shadow_maps_cube.emplace_back(def_cube);
-			}
-			++i;
 		}
+		skeleton_transforms = &s_transforms;
+		CullAndAdd(render_objects, skinned_render_objects);
 	}
-	skeleton_transforms = &s_transforms;
-	CullAndAdd(render_objects, skinned_render_objects);
-}
 
 	void CoreGraphicsState::ProcessMaterialInstances()
 	{
