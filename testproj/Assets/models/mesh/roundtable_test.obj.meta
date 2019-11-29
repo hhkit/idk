@@ -1,0 +1,9 @@
+metadatas: 
+- guid: 62114728-944b-4f74-a78f-558abc506363
+  metadata: ""
+  name: roundtable_test
+  t_hash: Prefab
+- guid: 178c1fab-997d-4578-8b03-223594df0d0e
+  metadata: ""
+  name: world_prop_roundtable
+  t_hash: idk::Mesh

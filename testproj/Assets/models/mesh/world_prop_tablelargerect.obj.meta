@@ -1,0 +1,9 @@
+metadatas: 
+- guid: ffa2833a-b871-462b-bf7b-1465fb1c7805
+  metadata: ""
+  name: world_prop_tablelargerect
+  t_hash: Prefab
+- guid: ad3c3ee2-fcba-4a48-857e-981ff29ba5d2
+  metadata: ""
+  name: world_prop_tablelargerect
+  t_hash: idk::Mesh

@@ -2,13 +2,13 @@ data:
 - components: 
   - !Transform 
     parent: {id: 0}
-    position: {x: -0.056934565, y: -0.3321173, z: -5.1943417}
+    position: {x: 1.0561581, y: -0.00025710464, z: 3.6539106}
     rotation: 
       w: 1
       x: 0
       y: 0
       z: 0
-    scale: {x: 1, y: 1, z: 1}
+    scale: {x: 1.16, y: 1, z: 1}
   - !Name 
     name: maid_model
   - !Animator 
@@ -139,6 +139,375 @@ data:
       default_index: 0
       default_weight: 1
       name: Base Layer
+    - anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      blend_type: Override_Blend
+      bone_mask: 
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      default_index: 0
+      default_weight: 1
+      name: New Layer
+    - anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      blend_type: Override_Blend
+      bone_mask: 
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      default_index: 0
+      default_weight: 1
+      name: New Layer 0
+    - anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      blend_type: Override_Blend
+      bone_mask: 
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      default_index: 0
+      default_weight: 1
+      name: New Layer 1
     skeleton: {guid: e25fabb0-38e0-45d8-9f67-a99f7c99b296}
     trigger_vars: {}
   parent_index: -1
@@ -157,7 +526,7 @@ data:
   - !PrefabInstance 
     object_index: 1
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: e3670c26-1801-42c8-bfea-0f4c8d8343f7}
@@ -177,7 +546,7 @@ data:
   - !PrefabInstance 
     object_index: 2
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 76cd9dd4-2d95-46c6-91f3-8b94f9523584}
@@ -197,7 +566,7 @@ data:
   - !PrefabInstance 
     object_index: 3
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 92d55fa1-ae89-4ce1-82aa-d0e91e9d25ce}
@@ -217,7 +586,7 @@ data:
   - !PrefabInstance 
     object_index: 4
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 4f6cd0cd-beaa-483c-9fe9-4419e39c9409}
@@ -237,7 +606,7 @@ data:
   - !PrefabInstance 
     object_index: 5
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 09f9e446-ac5e-44c6-b554-9f2535eda3ea}
@@ -257,7 +626,7 @@ data:
   - !PrefabInstance 
     object_index: 6
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 3883f314-c31e-49dc-8fbc-e68bb3a270df}
@@ -277,7 +646,7 @@ data:
   - !PrefabInstance 
     object_index: 7
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: a88fd80f-3f2a-47ca-9286-a8ebfd01f0f8}
@@ -297,7 +666,7 @@ data:
   - !PrefabInstance 
     object_index: 8
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 0c29b9b3-61cc-4798-90b1-98da73d3bd54}
@@ -317,7 +686,7 @@ data:
   - !PrefabInstance 
     object_index: 9
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: a47da5ce-77e8-40a0-98fa-9c12a17a107a}
@@ -337,7 +706,7 @@ data:
   - !PrefabInstance 
     object_index: 10
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 66c2014a-f420-46b2-a951-cad13a906f5c}
@@ -357,7 +726,7 @@ data:
   - !PrefabInstance 
     object_index: 11
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 3a2aae32-e5ea-4f42-9bac-28c1b064656c}
@@ -377,7 +746,7 @@ data:
   - !PrefabInstance 
     object_index: 12
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: cc477f6e-fc4f-48f1-8240-972ad6a3247d}
@@ -397,7 +766,7 @@ data:
   - !PrefabInstance 
     object_index: 13
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: cb43f1ff-04fa-4624-81c5-cfe6922dbf4d}
@@ -417,7 +786,7 @@ data:
   - !PrefabInstance 
     object_index: 14
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !SkinnedMeshRenderer 
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 1b394570-6882-4079-ae81-b1363e2907ce}
@@ -437,7 +806,7 @@ data:
   - !PrefabInstance 
     object_index: 15
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 0, bone_name: Maid_root_jnt}
   parent_index: 0
@@ -456,7 +825,7 @@ data:
   - !PrefabInstance 
     object_index: 16
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 1, bone_name: COG_jnt}
   parent_index: 15
@@ -475,7 +844,7 @@ data:
   - !PrefabInstance 
     object_index: 17
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 2, bone_name: spine_1_jnt}
   parent_index: 16
@@ -494,7 +863,7 @@ data:
   - !PrefabInstance 
     object_index: 18
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 3, bone_name: spine_2_jnt}
   parent_index: 17
@@ -513,7 +882,7 @@ data:
   - !PrefabInstance 
     object_index: 19
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 4, bone_name: L_hip_jnt}
   parent_index: 17
@@ -532,7 +901,7 @@ data:
   - !PrefabInstance 
     object_index: 20
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 5, bone_name: L_Ribbon_1_jnt}
   parent_index: 17
@@ -551,7 +920,7 @@ data:
   - !PrefabInstance 
     object_index: 21
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 6, bone_name: F_skirt_base_jnt}
   parent_index: 17
@@ -570,7 +939,7 @@ data:
   - !PrefabInstance 
     object_index: 22
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 7, bone_name: B_skirt_base_jnt}
   parent_index: 17
@@ -589,7 +958,7 @@ data:
   - !PrefabInstance 
     object_index: 23
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 8, bone_name: L_skirt_base_jnt}
   parent_index: 17
@@ -608,7 +977,7 @@ data:
   - !PrefabInstance 
     object_index: 24
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 9, bone_name: R_skirt_base_jnt}
   parent_index: 17
@@ -627,7 +996,7 @@ data:
   - !PrefabInstance 
     object_index: 25
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 10, bone_name: R_Ribbon_1_jnt}
   parent_index: 17
@@ -646,7 +1015,7 @@ data:
   - !PrefabInstance 
     object_index: 26
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 11, bone_name: R_hip_jnt}
   parent_index: 17
@@ -665,7 +1034,7 @@ data:
   - !PrefabInstance 
     object_index: 27
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 12, bone_name: spine_3_jnt}
   parent_index: 18
@@ -684,7 +1053,7 @@ data:
   - !PrefabInstance 
     object_index: 28
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 13, bone_name: L_knee_jnt}
   parent_index: 19
@@ -703,7 +1072,7 @@ data:
   - !PrefabInstance 
     object_index: 29
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 14, bone_name: L_Ribbon_2_jnt}
   parent_index: 20
@@ -722,7 +1091,7 @@ data:
   - !PrefabInstance 
     object_index: 30
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 15, bone_name: F_skirt_mid_jnt}
   parent_index: 21
@@ -741,7 +1110,7 @@ data:
   - !PrefabInstance 
     object_index: 31
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 16, bone_name: B_skirt_mid_jnt}
   parent_index: 22
@@ -760,7 +1129,7 @@ data:
   - !PrefabInstance 
     object_index: 32
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 17, bone_name: L_skirt_mid_jnt}
   parent_index: 23
@@ -779,7 +1148,7 @@ data:
   - !PrefabInstance 
     object_index: 33
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 18, bone_name: R_skirt_mid_jnt}
   parent_index: 24
@@ -798,7 +1167,7 @@ data:
   - !PrefabInstance 
     object_index: 34
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 19, bone_name: R_Ribbon_2_jnt}
   parent_index: 25
@@ -817,7 +1186,7 @@ data:
   - !PrefabInstance 
     object_index: 35
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 20, bone_name: R_knee_jnt}
   parent_index: 26
@@ -836,7 +1205,7 @@ data:
   - !PrefabInstance 
     object_index: 36
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 21, bone_name: spine_4_jnt}
   parent_index: 27
@@ -855,7 +1224,7 @@ data:
   - !PrefabInstance 
     object_index: 37
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 22, bone_name: L_ankle_jnt}
   parent_index: 28
@@ -874,7 +1243,7 @@ data:
   - !PrefabInstance 
     object_index: 38
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 23, bone_name: L_Ribbon_3_jnt}
   parent_index: 29
@@ -893,7 +1262,7 @@ data:
   - !PrefabInstance 
     object_index: 39
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 24, bone_name: F_skirt_tip_jnt}
   parent_index: 30
@@ -912,7 +1281,7 @@ data:
   - !PrefabInstance 
     object_index: 40
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 25, bone_name: B_skirt_tip_jnt}
   parent_index: 31
@@ -931,7 +1300,7 @@ data:
   - !PrefabInstance 
     object_index: 41
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 26, bone_name: L_skirt_tip_jnt}
   parent_index: 32
@@ -950,7 +1319,7 @@ data:
   - !PrefabInstance 
     object_index: 42
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 27, bone_name: R_skirt_tip_jnt}
   parent_index: 33
@@ -969,7 +1338,7 @@ data:
   - !PrefabInstance 
     object_index: 43
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 28, bone_name: R_Ribbon_3_jnt}
   parent_index: 34
@@ -988,7 +1357,7 @@ data:
   - !PrefabInstance 
     object_index: 44
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 29, bone_name: R_ankle_jnt}
   parent_index: 35
@@ -1007,7 +1376,7 @@ data:
   - !PrefabInstance 
     object_index: 45
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 30, bone_name: neck_jnt}
   parent_index: 36
@@ -1026,7 +1395,7 @@ data:
   - !PrefabInstance 
     object_index: 46
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 31, bone_name: L_clavicle_jnt}
   parent_index: 36
@@ -1045,7 +1414,7 @@ data:
   - !PrefabInstance 
     object_index: 47
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 32, bone_name: R_clavicle_jnt}
   parent_index: 36
@@ -1064,7 +1433,7 @@ data:
   - !PrefabInstance 
     object_index: 48
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 33, bone_name: L_ball_jnt}
   parent_index: 37
@@ -1083,7 +1452,7 @@ data:
   - !PrefabInstance 
     object_index: 49
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 34, bone_name: L_Ribbon_4_jnt}
   parent_index: 38
@@ -1102,7 +1471,7 @@ data:
   - !PrefabInstance 
     object_index: 50
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 35, bone_name: R_Ribbon_4_jnt}
   parent_index: 43
@@ -1121,7 +1490,7 @@ data:
   - !PrefabInstance 
     object_index: 51
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 36, bone_name: R_ball_jnt}
   parent_index: 44
@@ -1140,7 +1509,7 @@ data:
   - !PrefabInstance 
     object_index: 52
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 37, bone_name: head_jnt}
   parent_index: 45
@@ -1159,7 +1528,7 @@ data:
   - !PrefabInstance 
     object_index: 53
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 38, bone_name: L_shoulder_jnt}
   parent_index: 46
@@ -1178,7 +1547,7 @@ data:
   - !PrefabInstance 
     object_index: 54
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 39, bone_name: R_shoulder_jnt}
   parent_index: 47
@@ -1197,7 +1566,7 @@ data:
   - !PrefabInstance 
     object_index: 55
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 40, bone_name: L_toe_jnt}
   parent_index: 48
@@ -1216,7 +1585,7 @@ data:
   - !PrefabInstance 
     object_index: 56
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 41, bone_name: L_Ribbon_end_jnt}
   parent_index: 49
@@ -1235,7 +1604,7 @@ data:
   - !PrefabInstance 
     object_index: 57
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 42, bone_name: R_Ribbon_end_jnt}
   parent_index: 50
@@ -1254,7 +1623,7 @@ data:
   - !PrefabInstance 
     object_index: 58
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 43, bone_name: R_toe_jnt}
   parent_index: 51
@@ -1273,7 +1642,7 @@ data:
   - !PrefabInstance 
     object_index: 59
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 44, bone_name: hair_base_jnt}
   parent_index: 52
@@ -1292,7 +1661,7 @@ data:
   - !PrefabInstance 
     object_index: 60
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 45, bone_name: L_elbow_jnt}
   parent_index: 53
@@ -1311,7 +1680,7 @@ data:
   - !PrefabInstance 
     object_index: 61
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 46, bone_name: R_elbow_jnt}
   parent_index: 54
@@ -1330,7 +1699,7 @@ data:
   - !PrefabInstance 
     object_index: 62
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 47, bone_name: hair_mid_jnt}
   parent_index: 59
@@ -1349,7 +1718,7 @@ data:
   - !PrefabInstance 
     object_index: 63
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 48, bone_name: L_wrist_jnt}
   parent_index: 60
@@ -1368,7 +1737,7 @@ data:
   - !PrefabInstance 
     object_index: 64
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 49, bone_name: R_wrist_jnt}
   parent_index: 61
@@ -1387,7 +1756,7 @@ data:
   - !PrefabInstance 
     object_index: 65
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 50, bone_name: hair_tip_jnt}
   parent_index: 62
@@ -1406,7 +1775,7 @@ data:
   - !PrefabInstance 
     object_index: 66
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 51, bone_name: L_index_base_jnt}
   parent_index: 63
@@ -1425,7 +1794,7 @@ data:
   - !PrefabInstance 
     object_index: 67
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 52, bone_name: L_mid_base_jnt}
   parent_index: 63
@@ -1444,7 +1813,7 @@ data:
   - !PrefabInstance 
     object_index: 68
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 53, bone_name: L_ring_base_jnt}
   parent_index: 63
@@ -1463,7 +1832,7 @@ data:
   - !PrefabInstance 
     object_index: 69
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 54, bone_name: L_pinky_base_jnt}
   parent_index: 63
@@ -1482,7 +1851,7 @@ data:
   - !PrefabInstance 
     object_index: 70
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 55, bone_name: L_thumb_base_jnt}
   parent_index: 63
@@ -1501,7 +1870,7 @@ data:
   - !PrefabInstance 
     object_index: 71
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 56, bone_name: L_hand_jnt}
   parent_index: 63
@@ -1520,7 +1889,7 @@ data:
   - !PrefabInstance 
     object_index: 72
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 57, bone_name: R_index_base_jnt}
   parent_index: 64
@@ -1539,7 +1908,7 @@ data:
   - !PrefabInstance 
     object_index: 73
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 58, bone_name: R_mid_base_jnt}
   parent_index: 64
@@ -1558,7 +1927,7 @@ data:
   - !PrefabInstance 
     object_index: 74
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 59, bone_name: R_ring_base_jnt}
   parent_index: 64
@@ -1577,7 +1946,7 @@ data:
   - !PrefabInstance 
     object_index: 75
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 60, bone_name: R_pinky_base_jnt}
   parent_index: 64
@@ -1596,7 +1965,7 @@ data:
   - !PrefabInstance 
     object_index: 76
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 61, bone_name: R_thumb_base_jnt}
   parent_index: 64
@@ -1615,7 +1984,7 @@ data:
   - !PrefabInstance 
     object_index: 77
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 62, bone_name: L_hand_jnt1}
   parent_index: 64
@@ -1634,7 +2003,7 @@ data:
   - !PrefabInstance 
     object_index: 78
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 63, bone_name: hair_end_jnt}
   parent_index: 65
@@ -1653,7 +2022,7 @@ data:
   - !PrefabInstance 
     object_index: 79
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 64, bone_name: L_index_mid_jnt}
   parent_index: 66
@@ -1672,7 +2041,7 @@ data:
   - !PrefabInstance 
     object_index: 80
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 65, bone_name: L_mid_mid_jnt}
   parent_index: 67
@@ -1691,7 +2060,7 @@ data:
   - !PrefabInstance 
     object_index: 81
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 66, bone_name: L_ring_mid_jnt}
   parent_index: 68
@@ -1710,7 +2079,7 @@ data:
   - !PrefabInstance 
     object_index: 82
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 67, bone_name: L_pinky_mid_jnt}
   parent_index: 69
@@ -1729,7 +2098,7 @@ data:
   - !PrefabInstance 
     object_index: 83
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 68, bone_name: L_thumb_mid_jnt}
   parent_index: 70
@@ -1748,7 +2117,7 @@ data:
   - !PrefabInstance 
     object_index: 84
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 69, bone_name: R_index_mid_jnt}
   parent_index: 72
@@ -1767,7 +2136,7 @@ data:
   - !PrefabInstance 
     object_index: 85
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 70, bone_name: R_mid_mid_jnt}
   parent_index: 73
@@ -1786,7 +2155,7 @@ data:
   - !PrefabInstance 
     object_index: 86
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 71, bone_name: R_ring_mid_jnt}
   parent_index: 74
@@ -1805,7 +2174,7 @@ data:
   - !PrefabInstance 
     object_index: 87
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 72, bone_name: R_pinky_mid_jnt}
   parent_index: 75
@@ -1824,7 +2193,7 @@ data:
   - !PrefabInstance 
     object_index: 88
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 73, bone_name: R_thumb_mid_jnt}
   parent_index: 76
@@ -1843,7 +2212,7 @@ data:
   - !PrefabInstance 
     object_index: 89
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 74, bone_name: L_index_tip_jnt}
   parent_index: 79
@@ -1862,7 +2231,7 @@ data:
   - !PrefabInstance 
     object_index: 90
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 75, bone_name: L_mid_tip_jnt}
   parent_index: 80
@@ -1881,7 +2250,7 @@ data:
   - !PrefabInstance 
     object_index: 91
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 76, bone_name: L_ring_tip_jnt}
   parent_index: 81
@@ -1900,7 +2269,7 @@ data:
   - !PrefabInstance 
     object_index: 92
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 77, bone_name: L_pinky_tip_jnt}
   parent_index: 82
@@ -1919,7 +2288,7 @@ data:
   - !PrefabInstance 
     object_index: 93
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 78, bone_name: L_thumb_tip_jnt}
   parent_index: 83
@@ -1938,7 +2307,7 @@ data:
   - !PrefabInstance 
     object_index: 94
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 79, bone_name: R_index_tip_jnt}
   parent_index: 84
@@ -1957,7 +2326,7 @@ data:
   - !PrefabInstance 
     object_index: 95
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 80, bone_name: R_mid_tip_jnt}
   parent_index: 85
@@ -1976,7 +2345,7 @@ data:
   - !PrefabInstance 
     object_index: 96
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 81, bone_name: R_ring_tip_jnt}
   parent_index: 86
@@ -1995,7 +2364,7 @@ data:
   - !PrefabInstance 
     object_index: 97
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 82, bone_name: R_pinky_tip_jnt}
   parent_index: 87
@@ -2014,7 +2383,7 @@ data:
   - !PrefabInstance 
     object_index: 98
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 83, bone_name: R_thumb_tip_jnt}
   parent_index: 88
@@ -2033,7 +2402,7 @@ data:
   - !PrefabInstance 
     object_index: 99
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 84, bone_name: L_index_end_jnt}
   parent_index: 89
@@ -2052,7 +2421,7 @@ data:
   - !PrefabInstance 
     object_index: 100
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 85, bone_name: L_mid_end_jnt}
   parent_index: 90
@@ -2071,7 +2440,7 @@ data:
   - !PrefabInstance 
     object_index: 101
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 86, bone_name: L_ring_end_jnt}
   parent_index: 91
@@ -2090,7 +2459,7 @@ data:
   - !PrefabInstance 
     object_index: 102
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 87, bone_name: L_pinky_end_jnt}
   parent_index: 92
@@ -2109,7 +2478,7 @@ data:
   - !PrefabInstance 
     object_index: 103
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 88, bone_name: L_thumb_tip_jnt001}
   parent_index: 93
@@ -2128,7 +2497,7 @@ data:
   - !PrefabInstance 
     object_index: 104
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 89, bone_name: R_index_end_jnt}
   parent_index: 94
@@ -2147,7 +2516,7 @@ data:
   - !PrefabInstance 
     object_index: 105
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 90, bone_name: R_mid_end_jnt}
   parent_index: 95
@@ -2166,7 +2535,7 @@ data:
   - !PrefabInstance 
     object_index: 106
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 91, bone_name: R_ring_end_jnt}
   parent_index: 96
@@ -2185,7 +2554,7 @@ data:
   - !PrefabInstance 
     object_index: 107
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 92, bone_name: R_pinky_end_jnt}
   parent_index: 97
@@ -2204,7 +2573,7 @@ data:
   - !PrefabInstance 
     object_index: 108
     overrides: []
-    prefab: {guid: c87fa924-05e7-4ef5-8772-2a6abb08c878}
+    prefab: {guid: 1bfd797b-ea96-4709-ac8c-df413c68730e}
   - !Bone 
     {bone_index: 93, bone_name: R_thumb_tip_jnt001}
   parent_index: 98

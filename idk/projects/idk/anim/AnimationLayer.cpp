@@ -243,27 +243,23 @@ namespace idk
 		if (blend_state.index == found_clip)
 			ResetToDefault();
 
-		// const size_t removed_index = found_clip;
-		// anim_states.erase(anim_states.begin() + removed_index);
-		// anim_state_table.erase(found_clip);
+		anim_states.erase(anim_states.begin() + found_clip);
 
-		// const size_t num_states = anim_states.size();
-		// for (size_t i = 1; i < num_states; ++i)
-		// {
-		// 	auto& anim_state = anim_states[i];
-		// 	const auto found = anim_state_table.find(anim_state.name);
-		// 	found->second = i;
-		// 
-		// 	// Check all transitions for the removed index
-		// 	for (size_t k = 1; k < anim_state.transitions.size(); ++k)
-		// 	{
-		// 		auto& curr_transition = anim_state.transitions[k];
-		// 
-		// 		// Set the transition to index to 0 if the state it is supposed to transition to is the one removed.
-		// 		if (curr_transition.transition_to_index == removed_index)
-		// 			curr_transition.transition_to_index = 0;
-		// 	}
-		// }
+		const size_t num_states = anim_states.size();
+		for (size_t i = 1; i < num_states; ++i)
+		{
+			auto& anim_state = anim_states[i];
+			
+			// Check all transitions for the removed index
+			for (size_t k = 1; k < anim_state.transitions.size(); ++k)
+			{
+				auto& curr_transition = anim_state.transitions[k];
+		
+				// Set the transition to index to 0 if the state it is supposed to transition to is the one removed.
+				if (curr_transition.transition_to_index == found_clip)
+					curr_transition.transition_to_index = 0;
+			}
+		}
 	}
 
 	void AnimationLayer::RemoveAnimation(size_t index)

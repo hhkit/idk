@@ -132,7 +132,8 @@ namespace idk {
             {
                 if (prefab_inst->object_index == 0)
                     DisplayPrefabInstanceControls(prefab_inst);
-                _prefab_inst = prefab_inst;
+				if (prefab_inst->prefab)
+					_prefab_inst = prefab_inst;
             }
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
@@ -877,7 +878,31 @@ namespace idk {
 
 		_curr_property_stack.emplace_back("layers");
 		display.GroupBegin();
-		display.Label("layers");
+		auto title_pos = ImGui::GetCursorPos();
+		bool tree_open = ImGui::CollapsingHeader("##animation_layers", ImGuiTreeNodeFlags_AllowItemOverlap);
+		// ImGui::SetCursorPos(title_pos);
+		ImGui::SameLine();
+		display.Label("Layers");
+		ImGui::NewLine();
+		if (tree_open)
+		{
+			ImGui::Indent();
+			for (auto& layer : c_anim->layers)
+			{
+				ImGui::Separator(false);
+				ImGui::PushID(&layer);
+				
+				ImGui::Text(layer.name.data());
+				ImGui::SameLine();
+				ImGui::Text("Current State: %s", c_anim->CurrentStateName().data());
+				ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 3 }, nullptr);
+				ImGui::ProgressBar(layer.IsBlending() ? layer.blend_state.elapsed_time / layer.blend_duration : 0.0f , ImVec2{ -1, 3 }, nullptr);
+				ImGui::PopID();
+				ImGui::Separator(false);
+			}
+			ImGui::Unindent();
+		}
+		
 		display.GroupEnd(false);
 		_curr_property_stack.pop_back();
 
