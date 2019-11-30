@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "IGE_LightLister.h"
-#include <editor/widgets/DragVec.h>
-#include <editor/widgets/DragQuat.h>
+#include <editor/imguidk.h>
 #include <core/Core.h>
 #include <core/GameObject.h>
 #include <editor/IDE.h>
@@ -103,6 +102,7 @@ namespace idk
 			ImGui::Checkbox("##isol", &light.isolate);
 			ImGui::NextColumn();
 
+			ImGuidk::IconCheckbox((id + "isol").data(), ICON_FA_SUN, &light.isolate);
 			if (ImGui::Button("Focus"))
 			{
 				Core::GetSystem<IDE>().selected_gameObjects.clear();

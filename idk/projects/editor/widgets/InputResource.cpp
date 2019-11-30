@@ -62,15 +62,12 @@ namespace idk
         {
             text = std::visit([](auto h) -> string
             {
-                if (h)
-                {
-                    auto name = h->Name();
-                    auto path = Core::GetResourceManager().GetPath(h);
-                    if (!name.empty())
-                        return string{ name };
-                    else if (path)
-                        return string{ PathHandle{ *path }.GetStem() };
-                }
+                auto name = h->Name();
+                auto path = Core::GetResourceManager().GetPath(h);
+                if (!name.empty())
+                    return string{ name };
+                else if (path)
+                    return string{ PathHandle{ *path }.GetStem() };
                 return "";
             }, *handle);
         }
@@ -104,11 +101,15 @@ namespace idk
                     auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
                     table.emplace(str, handle_i);
                 }
-                if (MenuItem("None"))
+
+                const T& default_res = *RscHandle<T>();
+
+                if (MenuItem(default_res.Name().size() ? default_res.Name().data() : "None"))
                 {
                     *handle = RscHandle<T>{};
                     dropped = true;
                 }
+
                 for (auto& [name, handle_i] : table)
                 {
                     if (MenuItem(name.c_str()))

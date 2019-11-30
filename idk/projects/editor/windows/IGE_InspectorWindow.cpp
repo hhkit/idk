@@ -1770,7 +1770,7 @@ namespace idk {
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * (1.0f - item_width_ratio));
         }
-        ImGui::PushID(("##" + curr_prop_path).c_str());
+        ImGui::PushID(curr_prop_path.c_str());
         ImGui::PushItemWidth(-4.0f);
     }
 

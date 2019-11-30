@@ -181,6 +181,13 @@ namespace idk::ogl
 			dp_.Bind();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(dp_.ID())), 0);
 		}
+		else
+		{
+			dp = Core::GetResourceManager().Create<OpenGLTexture>();
+			auto& dp_ = dp.as<OpenGLTexture>();
+			dp_.Bind();
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(dp_.ID())), 0);
+		}
 		GL_CHECK();
 
 		GL_CHECK();
