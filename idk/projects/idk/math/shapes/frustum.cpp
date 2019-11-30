@@ -27,23 +27,24 @@ namespace idk
 		return true;
 	}
 
-	array<vec3, 8> camera_vp_to_extremes(const mat4 & vp_matrix)
+	array<vec4, 8> camera_vp_to_extremes(const mat4 & vp_matrix)
 	{
-		array<vec3, 8> retval
+		array<vec4, 8> retval
 		{
-			vec3{ +1,+1,+1 },
-			vec3{ +1,-1,+1 },
-			vec3{ +1,+1,-1 },
-			vec3{ +1,-1,-1 },
-			vec3{ -1,+1,+1 },
-			vec3{ -1,-1,+1 },
-			vec3{ -1,+1,-1 },
-			vec3{ -1,-1,-1 },
+			vec4{ +1,+1,+1, 1 },
+			vec4{ +1,-1,+1, 1 },
+			vec4{ +1,+1,-1, 1 },
+			vec4{ +1,-1,-1, 1 },
+			vec4{ -1,+1,+1, 1 },
+			vec4{ -1,-1,+1, 1 },
+			vec4{ -1,+1,-1, 1 },
+			vec4{ -1,-1,-1, 1 },
 		};
+		auto inv = vp_matrix.inverse();
 		for (auto& elem : retval)
 		{
-			auto result = vp_matrix.inverse() * vec4(elem, 1);
-			elem = vec3(result.xyz) / result.w;
+			elem = inv * elem;
+			elem /= elem.w;
 		}
 		return retval;
 	}

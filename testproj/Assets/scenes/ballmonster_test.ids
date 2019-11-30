@@ -58,9 +58,6 @@
     overrides: []
     prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
   - !Animator 
-    bool_vars: {}
-    float_vars: {}
-    int_vars: {}
     layers: 
     - anim_states: 
       - loop: 1
@@ -185,8 +182,31 @@
       default_index: 0
       default_weight: 1
       name: Base Layer
+    parameters: 
+      bool_vars: {}
+      float_vars: {}
+      int_vars: {}
+      trigger_vars: {}
     skeleton: {guid: f8493d59-b7fc-4b83-aaeb-f1bf545d7a8d}
-    trigger_vars: {}
+- !240518234112 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -3.0227365, y: -11.893028, z: -7.5811653}
+    rotation: 
+      w: -0.7071067
+      x: 0.7071068
+      y: 0
+      z: 0
+    scale: {x: 17.3719, y: 17.371908, z: 17.371908}
+  - !Name 
+    name: ""
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
+    mesh: {guid: f66bd34d-11e9-47a5-b4f1-4ad706dda0ec}
+    receive_shadows: 1
 - !12885032960 
   - active: 1
   - !Transform 
@@ -202,10 +222,11 @@
     name: ballmonster_low
   - !PrefabInstance 
     object_index: 1
-    overrides: []
+    overrides: 
+    - {component_name: SkinnedMeshRenderer, component_nth: 0, property_path: material_instance}
     prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
   - !SkinnedMeshRenderer 
-    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
     mesh: {guid: 55e37d7d-86ba-4bc6-b230-a86a250beaad}
 - !17180000256 
   - active: 1
