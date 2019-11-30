@@ -26,6 +26,27 @@ namespace idk
 		}
 		return true;
 	}
+
+	array<vec3, 8> camera_vp_to_extremes(const mat4 & vp_matrix)
+	{
+		array<vec3, 8> retval
+		{
+			vec3{ +1,+1,+1 },
+			vec3{ +1,-1,+1 },
+			vec3{ +1,+1,-1 },
+			vec3{ +1,-1,-1 },
+			vec3{ -1,+1,+1 },
+			vec3{ -1,-1,+1 },
+			vec3{ -1,+1,-1 },
+			vec3{ -1,-1,-1 },
+		};
+		for (auto& elem : retval)
+		{
+			auto result = vp_matrix.inverse() * vec4(elem, 1);
+			elem = vec3(result.xyz) / result.w;
+		}
+		return retval;
+	}
 	frustum camera_vp_to_frustum(const mat4& view_projection_matrix)
 	{
 		frustum result{};

@@ -158,7 +158,6 @@ namespace idk::ogl
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
-		//auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		auto& font_render_data = curr_object_buffer.font_render_data;
 
 		for (auto& cam : curr_object_buffer.camera)
@@ -284,12 +283,6 @@ namespace idk::ogl
 			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 		};
 
-		/*static const mat4 biasMatrix(
-			0.5, 0.0, 0.0, 0.0,
-			0.0, 0.5, 0.0, 0.0,
-			0.0, 0.0, 0.5, 0.0,
-			0.5, 0.5, 0.5, 1.0
-		);*/
 
 		for (const auto& elem : curr_object_buffer.lights)
 		{
@@ -457,29 +450,6 @@ namespace idk::ogl
 			pipeline.Use();
 			pipeline.PopAllPrograms();
 			glBindVertexArray(vao_id);
-			
-				
-			/*auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);*/
-
-			//vec3 offset{ 0.2f,0,0 };
-			//for (auto& side : frust.sides)
-			//{
-			//	box b;
-			//	/*mat3 a;
-			//	aabb a;
-			//	a[2] = side.normal.cross(vec3{ 0,1,0 }).get_normalized();
-			//	a[1] = side.normal.get_normalized();
-			//	a[0] = a[2].cross(side.normal).get_normalized();*/
-			//	//b.axes() = mat3{a};
-			//	b.extents = vec3{ 0.5f, 0.1f, 0.5f };
-			//	b.center = vec3{ 0,0,0 } +offset;
-			//	offset += offset;
-			//	Core::GetSystem<DebugRenderer>().Draw(b);
-			//}
-
-			//auto aabb = camera_vp_to_bounding_box(cam.projection_matrix * cam.view_matrix);
-
-			//Core::GetSystem<DebugRenderer>().Draw(aabb, color(1.f, 0.f, 0.5f, 1.f));
 
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
@@ -538,36 +508,6 @@ namespace idk::ogl
 					}
 				}
 			}
-			//
-			//for (auto& elem : curr_object_buffer.mesh_render)
-			//{
-			//	// Do culling here
-			//	sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
-			//
-			//	// We only draw if the frustrum contains the mesh
-			//	if (!frust.contains(transformed_bounds))
-			//		continue;
-			//
-			//	/*
-			//	// bind shader
-			//	const auto material = elem.material_instance->material;
-			//	pipeline.PushProgram(material->_shader_program);
-			//
-			//	// set probe
-			//	GLuint texture_units = 0;
-			//	//SetPBRUniforms     (cam, inv_view_tfm, texture_units);
-			//	//SetLightUniforms   (span<LightData>{lights}, texture_units);
-			//	//SetMaterialUniforms(elem.material_instance, texture_units);
-			//	//SetObjectUniforms  (elem, cam.view_matrix);
-			//	//
-			//	//RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
-			//	*/
-			//	PushMaterialInstance(elem.material_instance);
-			//	PushMesh(RscHandle<OpenGLMesh>{elem.mesh});
-			//	PushObjectTransform(elem.transform);
-			//}
-			//
-			//FlushObjectTransforms();
 
 			curr_mat = {};
 			curr_mat_inst = {};
@@ -577,21 +517,9 @@ namespace idk::ogl
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
-				// Do culling here
-				//sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
-
-				// We only draw if the frustrum contains the mesh
-				//if (!frust.contains(transformed_bounds))
-				//	continue;
-
 				// bind shader
 				const auto material = elem.material_instance->material;
 				pipeline.PushProgram(material->_shader_program);
-
-				//PushMaterialInstance(elem.material_instance);
-				//SetSkeletons(elem.skeleton_index);
-				//PushMesh(RscHandle<OpenGLMesh>{elem.mesh});
-				//PushObjectTransform(elem.transform);
 
 				GLuint texture_units = 0;
 				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
@@ -633,26 +561,17 @@ namespace idk::ogl
 
 					SetObjectUniforms(elem, cam.view_matrix);
 					pipeline.SetUniform("PerFont.color", elem.color.as_vec4);
-					GL_CHECK();
-
-					//pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
 					/* Draw all the character on the screen in one go */
 				
 					glBufferData(GL_ARRAY_BUFFER, elem.coords.size() * sizeof(FontPoint), std::data(elem.coords), GL_DYNAMIC_DRAW);
-					//GL_CHECK();
 					glEnableVertexAttribArray(0);
 					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0);
-					//GL_CHECK();
 					glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(elem.coords.size()));
-
 					glDisableVertexAttribArray(0);
-
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}
-				GL_CHECK();
 			}
-			//glEnable(GL_CULL_FACE);
 
 			glBindVertexArray(0);
 
@@ -766,9 +685,6 @@ namespace idk::ogl
 								pipeline.SetUniform("PerUI.color", vec4{ elem.color });
 								pipeline.SetUniform("PerUI.is_font", true);
 								pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
-								GL_CHECK();
-
-								//pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
 								/* Draw all the character on the screen in one go */
 
@@ -786,24 +702,17 @@ namespace idk::ogl
 
 								glBindBuffer(GL_ARRAY_BUFFER, 0);
 							}
-							GL_CHECK();
 						}
 					}, elem.data);
 				}
 			}
         }
 
-
-
 		fb_man.ResetFramebuffer();
-
-
 
 		//////////////////////////////////For PICKING/////////////////////////////////
 		// set main scene camera
 		
-		//vector<OpenGLTexture> addMainBuffer;
-		//addMainBuffer.emplace_back(cBufferPickingTexture);
 		if(0)
 		{		
 			auto cam = curr_object_buffer.camera[curr_object_buffer.curr_scene_camera_index];
