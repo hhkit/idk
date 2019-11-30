@@ -316,6 +316,7 @@ namespace idk::vkn
 	void VknFrameBufferFactory::PreReset(FrameBuffer& )
 	{
 	}
+#pragma optimize("",off)
 	void VknFrameBufferFactory::Finalize(FrameBuffer& h_fb, SpecializedInfo* specialized_info)
 	{
 		auto* spec_info = static_cast<VknSpecializedInfo*>(specialized_info);

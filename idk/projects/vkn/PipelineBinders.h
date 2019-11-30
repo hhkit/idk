@@ -35,6 +35,7 @@ namespace idk
 
 		struct StandardBindings
 		{
+			virtual bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) { return false; }
 			//Stuff that should be bound at the start, before the renderobject/animated renderobject loop.
 			virtual void Bind(PipelineThingy& the_interface);
 			//Stuff that needs to be bound with every renderobject/animated renderobject
@@ -174,6 +175,7 @@ namespace idk
 		struct CombinedBindings :StandardBindings
 		{
 			std::tuple<Args...> binders;
+			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override { return (std::get<Args>(binders).Skip(the_interface,dc) | ...); }
 			//for each binder, execute f(binder,FArgs...) if cond<decltype(binder)> is true.
 			template<template<typename...>typename cond = meta::always_true_va, typename Fn, typename ...FArgs >
 			void for_each_binder(Fn&& f, FArgs& ...args);

@@ -2,7 +2,7 @@
 #include "VulkanMesh.h"
 namespace idk::vkn
 {
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	const MeshBuffer& VulkanMesh::Get(attrib_index index) const
 	{
 		auto itr = buffers.find(index);

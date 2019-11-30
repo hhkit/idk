@@ -45,7 +45,7 @@ void SubPassConfig::BuildSubpass()
 		auto& [index, att_config] = *depth;
 		depth_attachment_ref =
 			vk::AttachmentReference{
-			num_col
+			static_cast<uint32_t>(index)
 			,att_config.use
 		};
 		pdepth_ref = &depth_attachment_ref;
@@ -155,6 +155,7 @@ vk::RenderPassCreateInfo RenderPassInfo::BuildRenderPass()
 {
 	for (auto& subpass : subpasses)
 	{
+		subpass.BuildSubpass();
 		sub.emplace_back(subpass.data.subpass);
 	}
 

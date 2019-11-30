@@ -130,7 +130,7 @@ namespace idk::vkn
 		}
 		return result;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void GetLayouts(const RscHandle<ShaderProgram>& hshader, hash_table<uint32_t, vk::DescriptorSetLayout>& out)
 	{
 		if (hshader)

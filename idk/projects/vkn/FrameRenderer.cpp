@@ -147,7 +147,7 @@ namespace idk::vkn
 			counter++;
 			futures.emplace_back(Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs,&counter));
 		}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 		void Join() override
 		{
 			for(auto& future : futures)
@@ -314,7 +314,7 @@ namespace idk::vkn
 				{
 					auto& dc = *itr;
 					auto& mat_inst = *dc.material_instance;
-					if (mat_inst.material)
+					if (mat_inst.material || !binders.Skip(the_interface,dc))
 					{
 						binders.Bind(the_interface, dc);
 						the_interface.BindMeshBuffers(dc);
@@ -333,7 +333,7 @@ namespace idk::vkn
 			{
 				auto& dc = *ptr_dc;
 				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material && dc.layer_mask&state.mask)
+				if (mat_inst.material && dc.layer_mask&state.mask || !binders.Skip(the_interface, dc))
 				{
 					binders.Bind(the_interface, dc);
 					if(!the_interface.BindMeshBuffers(dc))
@@ -781,6 +781,19 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
+		for (auto i = gfx_states.size(); i-- > 0;)
+		{
+			if (Core::GetSystem<GraphicsSystem>().is_deferred())
+			{
+				auto& camera = gfx_states[i].camera;
+				auto& deferred_pass=_states[i].deferred_pass;
+				deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
+				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eMetallic)] = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
+				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eSpecular)]= Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostSpecular];
+				deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
+				deferred_pass.Init(camera.render_target.as<VknRenderTarget>());
+			}
+		}
 		bool rendered = false;
 		{
 			;
@@ -800,11 +813,6 @@ namespace idk::vkn
 				}
 			}
 
-			//Wait here
-			for (size_t j = 0; j < _render_threads.size(); ++j) {
-				auto& thread = _render_threads[j];
-				thread->Join();
-			}
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
@@ -828,7 +836,7 @@ namespace idk::vkn
 		subResourceRange.baseArrayLayer = 0;
 		subResourceRange.layerCount = 1;
 
-		if (!rendered)
+		//if (!rendered)
 		{
 			vk::ImageMemoryBarrier presentToClearBarrier = {};
 			presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
@@ -848,7 +856,13 @@ namespace idk::vkn
 		}
 		pri_buffer->end();
 
-		buffers.emplace_back(*pri_buffer);
+		//Join with all the threads
+		for (size_t j = 0; j < _render_threads.size(); ++j) {
+			auto& thread = _render_threads[j];
+			thread->Join();
+		}
+		if (!rendered)
+			buffers.emplace_back(*pri_buffer);
 		auto& current_signal = View().CurrPresentationSignals();
 
 		vector<vk::Semaphore> waitSemaphores{ *current_signal.image_available, *_pre_render_complete };
@@ -865,6 +879,8 @@ namespace idk::vkn
 		ready_semaphores.emplace(readySemaphores);
 		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
 		auto inflight_fence = *_states[0].signal.inflight_fence;
+
+
 
 		vk::SubmitInfo submit_info
 		{
@@ -1184,12 +1200,6 @@ namespace idk::vkn
 		auto& deferred_pass = rs.deferred_pass;
 		if (is_deferred)
 		{
-
-			deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
-			deferred_pass.deferred_post_frag = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
-			deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
-			deferred_pass.Init(size,camera.render_target.as<VknRenderTarget>());
-			deferred_pass.hdr_frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
 			deferred_pass.pipeline_manager(GetPipelineManager());
 			deferred_pass.frame_index(_current_frame_index);
 			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
@@ -1208,24 +1218,28 @@ namespace idk::vkn
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
-		PipelineThingy deferred_interface_light{};
+		PipelineThingy deferred_interface_light[EGBufferType::size()]{};
 		PipelineThingy deferred_interface_hdr  {};
 		if (is_deferred)
 		{
-
-			size_t max_lights = 7;
-			auto deferred_interface = PipelineThingy{};
-			deferred_interface.SetRef(rs.ubo_manager);
-			rs.deferred_pass.LightPass(deferred_interface, state, rs, std::make_pair(0, 0),true);
-			for (size_t i = 0; i < state.active_lights.size(); )
+			GBufferType types[] = { GBufferType::eMetallic,GBufferType::eSpecular };
+			for (auto& type : types)
 			{
-				auto num = std::min(max_lights, state.active_lights.size() - i);
-				rs.deferred_pass.LightPass(deferred_interface,state, rs, std::make_pair(i, i+num),false);
-				i += num;
+				const size_t max_lights = 7;
+				auto deferred_interface = PipelineThingy{};
+				deferred_interface.SetRef(rs.ubo_manager);
+				rs.deferred_pass.LightPass(type,deferred_interface, state, rs, std::make_pair(0, 0), true);
+				for (size_t i = 0; i < state.active_lights.size(); )
+				{
+					auto num = std::min(max_lights, state.active_lights.size() - i);
+					rs.deferred_pass.LightPass(type,deferred_interface,state, rs, std::make_pair(i, i+num),false);
+					i += num;
+				}
+				deferred_interface.GenerateDS(rs.dpools, false);
+				deferred_interface_light[EGBufferType::map(type)].~PipelineThingy();
+				new (&deferred_interface_light[EGBufferType::map(type)]) PipelineThingy{ std::move(deferred_interface) };
+
 			}
-			deferred_interface.GenerateDS(rs.dpools, false);
-			deferred_interface_light.~PipelineThingy();
-			new (&deferred_interface_light) PipelineThingy{ std::move(deferred_interface) };
 			deferred_interface_hdr.~PipelineThingy();
 			auto& hdr_interface = *(new (&deferred_interface_hdr) PipelineThingy{ rs.deferred_pass.HdrPass(state, rs) });
 			hdr_interface.GenerateDS(rs.dpools, false);

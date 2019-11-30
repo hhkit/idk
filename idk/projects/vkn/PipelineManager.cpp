@@ -132,7 +132,7 @@ namespace idk::vkn
 		}
 
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void PipelineManager::CheckForUpdates(uint32_t frame_index)
 	{
 		vector<decltype(pipelines)::iterator> pipelines_to_update;

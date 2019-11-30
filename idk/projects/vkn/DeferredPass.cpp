@@ -352,21 +352,7 @@ namespace idk::vkn
 		return inited;
 	}
 
-	vk::UniqueRenderPass BuildGbufferRenderPass(VknFrameBuffer& fb)
-	{
-		RenderPassInfo rp_info;
-		//Output
-		for(size_t i=0; i<EGBufferBinding::size();++i)
-			rp_info.RegisterAttachment(fb.GetAttachment(i), vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		rp_info.RegisterAttachment(fb.DepthAttachment(), vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
 
-		rp_info.AddDependency(VK_SUBPASS_EXTERNAL, 0);
-		SubPassConfig spc{};
-		spc.AddOutputAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
-		spc.BuildSubpass();
-		rp_info.RegisterSubpass(spc);
-		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
-	}
 	vk::UniqueRenderPass BuildAccumRenderPass(VknFrameBuffer& fb)
 	{
 		RenderPassInfo rp_info;
@@ -380,47 +366,55 @@ namespace idk::vkn
 		rp_info.AddDependency(VK_SUBPASS_EXTERNAL, 0);
 		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
 	}
-	vk::UniqueRenderPass BuildHdrRenderPass(const FrameBufferInfo& hdr_out, RscHandle<Texture> accum_tex, RscHandle<Texture> depth)
+#pragma optimize("",off)
+	vk::UniqueRenderPass BuildHdrRenderPass(const FrameBufferInfo& hdr_out)
 	{
 		RenderPassInfo rp_info;
 
-		auto accum = idk::AttachmentInfo{
-			LoadOp::eLoad,StoreOp::eDontCare,
-			ColorFormat::_enum::SRGB,
-			FilterMode::_enum::Nearest,false,
-			accum_tex
-			};
-		auto depth_att = idk::AttachmentInfo{
-			LoadOp::eLoad,StoreOp::eDontCare,
-			ColorFormat::_enum::DEPTH_COMPONENT,
-			FilterMode::_enum::Nearest,false,
-			depth
-		};
+	
 
 		//Output
-		rp_info.RegisterAttachment(hdr_out.attachments[0], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eColorAttachmentOptimal);
-		rp_info.RegisterAttachment(hdr_out.attachments[1],     vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
-		rp_info.RegisterAttachment(hdr_out.attachments[2], vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+		int i = 0;
+		SubPassConfig spc{};
+		spc.AddOutputAttachment(i, vk::ImageLayout::eColorAttachmentOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eColorAttachmentOptimal);
+
+		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+		spc.SetDepthAttachment(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		rp_info.RegisterAttachment(*hdr_out.depth_attachment, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+		//SubPassConfig test{};
+		//test.SetDepthAttachment(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 		//Input light accum
 		//rp_info.RegisterAttachment(accum.GetAttachment(0), vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eGeneral);
 		//Input depth (for discard check)
 		//rp_info.RegisterAttachment(, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eGeneral);
 
-		SubPassConfig spc{};
-		spc.AddOutputAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
-		spc.AddInputAttachment(1, vk::ImageLayout::eShaderReadOnlyOptimal);
-		spc.AddInputAttachment(2, vk::ImageLayout::eShaderReadOnlyOptimal);
 		spc.BuildSubpass();
+		//test.BuildSubpass();
 
 		
 		rp_info.RegisterSubpass(spc);
-		rp_info.AddDependency(VK_SUBPASS_EXTERNAL,0,
-			vk::AccessFlagBits::eColorAttachmentWrite| vk::AccessFlagBits::eDepthStencilAttachmentWrite, 
-			vk::AccessFlagBits::eShaderRead, vk::PipelineStageFlagBits::eColorAttachmentOutput| vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader );
-		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
+		//rp_info.RegisterSubpass(test);
+		rp_info.AddDependency(VK_SUBPASS_EXTERNAL, 0,
+			vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+			vk::AccessFlagBits::eShaderRead, vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader);
+		//rp_info.AddDependency(0, 1,
+		//	vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+		//	vk::AccessFlags{}, vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlags{});
+		auto create_info = rp_info.BuildRenderPass();
+		return View().Device()->createRenderPassUnique(create_info);
 	}
-#pragma optimize("",off)
-	void DeferredPass::Init(ivec2 size, VknRenderTarget& rt) 
+//#pragma optimize("",off)
+	void DeferredPass::Init(VknRenderTarget& rt) 
 	{
 		const static renderer_attributes fsq_requirements = 
 		{
@@ -429,11 +423,17 @@ namespace idk::vkn
 				{vtx::Attrib::UV,1},
 			}
 		};
-		
-		if (_gbuffer.Init(rt.Size()))
 		{
-
-
+			if (!hdr_frag)
+			{
+				auto frag_opt = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
+				if (frag_opt)
+					hdr_frag = *frag_opt;
+			}
+		}
+		if (_gbuffer[0].Init(rt.Size()))
+		{
+			_gbuffer[1].Init(rt.Size());
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 			FrameBufferBuilder fbf;
 			fbf.Begin(rt.Size());
@@ -443,24 +443,39 @@ namespace idk::vkn
 				FilterMode::_enum::Nearest,false,
 				rt.GetColorBuffer()
 				});
-			auto& buffer = *_gbuffer.accum_buffer; 
-			auto accum_att = idk::AttachmentInfo{
-				LoadOp::eLoad,StoreOp::eDontCare,
-				ColorFormat::_enum::SRGB,
-				FilterMode::_enum::Nearest,false,
-				buffer.GetAttachment(0).buffer
+
+			
+			auto add_src = [](FrameBufferBuilder& fbf, auto& gbuffer) {
+				auto& buffer = *gbuffer.accum_buffer;
+				auto accum_att = idk::AttachmentInfo{
+					LoadOp::eLoad,StoreOp::eDontCare,
+					ColorFormat::_enum::SRGB,
+					FilterMode::_enum::Nearest,false,
+					buffer.GetAttachment(0).buffer
+				};
+				accum_att.is_input_att = true;
+				fbf.AddAttachment(accum_att);
+				auto depth_att = idk::AttachmentInfo{
+					LoadOp::eLoad,StoreOp::eDontCare,
+					ColorFormat::_enum::DEPTH_COMPONENT,
+					FilterMode::_enum::Nearest,false,
+					gbuffer.gbuffer->DepthAttachment().buffer
+				}; 
+				depth_att.override_as_depth = true;
+				depth_att.is_input_att = true;
+				fbf.AddAttachment(depth_att);
 			};
-			accum_att.is_input_att = true;
-			fbf.AddAttachment(accum_att);
+			for(auto& gbuffer : _gbuffer)
+				add_src(fbf, gbuffer);
+
 			auto depth_att = idk::AttachmentInfo{
-				LoadOp::eLoad,StoreOp::eDontCare,
+				LoadOp::eDontCare,StoreOp::eStore,
 				ColorFormat::_enum::DEPTH_COMPONENT,
 				FilterMode::_enum::Nearest,false,
-				_gbuffer.gbuffer->DepthAttachment().buffer
+				rt.GetDepthBuffer()//GetColorBuffer()
 			};
-			depth_att.override_as_depth = true;
-			depth_att.is_input_att = true;
-			fbf.AddAttachment(depth_att);
+			fbf.SetDepthAttachment(depth_att);
+
 			if (hdr_buffer)
 				Core::GetResourceManager().Release(hdr_buffer);
 			auto hdr_info = fbf.End();
@@ -501,8 +516,8 @@ namespace idk::vkn
 				fsq_light_ro.config = light_config;
 				fsq_amb_ro.config = ambient_config;
 
-				accum_pass = BuildAccumRenderPass(_gbuffer.accum_buffer.as<VknFrameBuffer>());
-				hdr_pass = BuildHdrRenderPass(hdr_info, buffer.GetAttachment(0).buffer,_gbuffer.gbuffer->DepthAttachment().buffer);
+				accum_pass = BuildAccumRenderPass(_gbuffer[0].accum_buffer.as<VknFrameBuffer>());
+				hdr_pass = BuildHdrRenderPass(hdr_info);
 				//auto test = AttachmentBlendConfig{};
 				//test.blend_enable = true;
 				//test.alpha_blend_op = BlendOp::eAdd;
@@ -522,6 +537,7 @@ namespace idk::vkn
 	struct DeferredPostBinder : StandardBindings
 	{
 		bool is_ambient = false;
+		GBufferType type;
 		DeferredPass* deferred_pass;
 		void SetDeferredPass(DeferredPass& pass)
 		{
@@ -530,12 +546,12 @@ namespace idk::vkn
 		void Bind(PipelineThingy& the_interface) override
 		{
 			RscHandle<ShaderProgram> fsq_vert = deferred_pass->fullscreen_quad_vert;
-			RscHandle<ShaderProgram> deferred_post_frag = deferred_pass->deferred_post_frag;
+			RscHandle<ShaderProgram> deferred_post_frag = deferred_pass->deferred_post_frag[EGBufferType::map(type)];
 			RscHandle<ShaderProgram> deferred_post_ambient = deferred_pass->deferred_post_ambient;
 
 			the_interface.BindShader(ShaderStage::Vertex, fsq_vert);
 			the_interface.BindShader(ShaderStage::Fragment, (is_ambient)? deferred_post_ambient:deferred_post_frag);
-			auto& gbuffer_fb = deferred_pass->GBuffer().gbuffer;
+			auto& gbuffer_fb = deferred_pass->GBuffer(type).gbuffer;
 			for (uint32_t i = 0; i < EGBufferBinding::size(); ++i)
 				the_interface.BindSampler("gbuffers", i, gbuffer_fb->GetAttachment(i).buffer.as<VknTexture>());
 			the_interface.BindSampler("gbuffers", static_cast<uint32_t>(EGBufferBinding::size()), gbuffer_fb->DepthAttachment().buffer.as<VknTexture>(),false,vk::ImageLayout::eGeneral);
@@ -563,11 +579,12 @@ namespace idk::vkn
 
 	using PbrDeferredPostBinding = CombinedBindings<DeferredPostBinder, PbrFwdBindings>;
 
-	void DeferredPass::LightPass(PipelineThingy& the_interface, const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>> light_range,bool is_ambient)
+	void DeferredPass::LightPass(GBufferType type, PipelineThingy& the_interface, const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>> light_range,bool is_ambient)
 	{
 		//TODO: Prepare FSQ draw call + Forward Draw Calls
 		PbrDeferredPostBinding binding;
 		auto& def_bind = std::get<DeferredPostBinder>(binding.binders);
+		def_bind.type = type;
 		def_bind.SetDeferredPass(*this);
 		def_bind.is_ambient = is_ambient;
 		auto& pbr_fwd_binding = std::get<PbrFwdBindings>(binding.binders);
@@ -586,7 +603,14 @@ namespace idk::vkn
 		//Insert Forward stuff here?
 
 	}
-
+	static std::pair<const char*,vk::ImageLayout> hdr_attachment_info[]
+		=
+	{
+		{"metallic_light_accum_input" , vk::ImageLayout::eShaderReadOnlyOptimal},
+		{"metallic_depth_input"		  , vk::ImageLayout::eShaderReadOnlyOptimal              },
+		{"specular_light_accum_input" , vk::ImageLayout::eShaderReadOnlyOptimal},
+		{"specular_depth_input"       , vk::ImageLayout::eGeneral              },
+	};
 	PipelineThingy DeferredPass::HdrPass(const GraphicsState& graphics_state, RenderStateV2& rs)
 	{
 		PipelineThingy the_interface{};
@@ -601,9 +625,14 @@ namespace idk::vkn
 
 		binding.Bind(the_interface);
 		auto& buffer = *hdr_buffer;
-		auto& gbuffer = _gbuffer.gbuffer.as<VknFrameBuffer>();
-		the_interface.BindAttachment("light_accum_input", 0, buffer.GetAttachment(1).buffer.as<VknTexture>(), false, vk::ImageLayout::eShaderReadOnlyOptimal);
-		the_interface.BindAttachment("depth_input", 0, buffer.GetAttachment(2).buffer.as<VknTexture>(),false,vk::ImageLayout::eGeneral);
+		for (auto& g_buffer : _gbuffer)
+		{
+			auto& gbuffer = g_buffer.gbuffer.as<VknFrameBuffer>();
+
+		}
+		int i = 1;
+		for (auto& [name, layout]:hdr_attachment_info )
+			the_interface.BindAttachment(name, 0, buffer.GetAttachment(i++).buffer.as<VknTexture>(), false, layout);
 		the_interface.BindMeshBuffers(fsq_ro);
 
 		//Draw Fullscreen Quad
@@ -802,107 +831,140 @@ namespace idk::vkn
 		}
 		return rendered;
 	}
+
+	struct TypeCheck : StandardBindings
+	{
+		ShadingModel model;
+		bool Skip(PipelineThingy& the_interface, const  RenderObject& dc)  
+		{ 
+			if (dc.material_instance)
+			{
+				auto& mat_inst = *dc.material_instance;
+				if (mat_inst.material)
+				{
+					auto& mat = *mat_inst.material;
+					return mat.blend != BlendMode::Opaque || mat.model != model;
+				}
+			}
+			return true;
+		}
+	};
 	
+	using PbrDeferredGbufferBinding = CombinedBindings<TypeCheck, StandardVertexBindings, StandardMaterialFragBindings, PbrFwdBindings, StandardMaterialBindings>;
+
+	static ShadingModel gbuffer_type_to_model[] = {ShadingModel::DefaultLit,ShadingModel::Specular};
+
 	void DeferredPass::DrawToGBuffers(vk::CommandBuffer cmd_buffer,const GraphicsState& graphics_state,RenderStateV2& rs)
 	{
-		auto& gbuffer = GBuffer();
-		//Bind the material uniforms
-		PbrFwdMaterialBinding binder;
-		binder.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) { binder.SetState(state); }, graphics_state);
-
-		//Preprocess MeshRender's uniforms
-		auto&& the_interface = ProcessRoUniforms(graphics_state, rs.ubo_manager, binder);
-		the_interface.GenerateDS(rs.dpools,false);
-
-
-
-		std::array<float, 4> a{};
-
-		//auto& cd = std::get<vec4>(state.camera.clear_data);
-		//TODO grab the appropriate framebuffer and begin renderpass
-
-		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
-
-		auto& camera = graphics_state.camera;
-		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto& g_buffer = *gbuffer.gbuffer;
-		auto frame_buffer = g_buffer.GetFramebuffer();
-		//TransitionFrameBuffer(camera, cmd_buffer, view);
-
-		auto sz = g_buffer.Size();
-		rect viewport = graphics_state.camera.viewport;
-		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
-
-		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
-		std::array<float, 4> g_clear{ 0.0f,0.0f ,0.0f ,0.0f };
-
-		vk::ClearValue v[EGBufferBinding::size()+1]{};
-		for(auto& value : v)
+		int i = 0; 
+		for (auto& gbuffer : _gbuffer)
 		{
-			value = vk::ClearValue{ g_clear };
-		};
-		v[EGBufferBinding::size()] =vk::ClearValue{ vk::ClearColorValue{ depth_clear } };
+			//Bind the material uniforms
+			PbrDeferredGbufferBinding binder;
+			binder.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) { binder.SetState(state); }, graphics_state);
 
-		vk::Rect2D render_area
-		{
-			vk::Offset2D
+			auto& type_checker = std::get<TypeCheck>(binder.binders);
+			type_checker.model = gbuffer_type_to_model[i];
+			//Preprocess MeshRender's uniforms
+			auto&& the_interface = ProcessRoUniforms(graphics_state, rs.ubo_manager, binder);
+			the_interface.GenerateDS(rs.dpools,false);
+
+
+
+			std::array<float, 4> a{};
+
+			//auto& cd = std::get<vec4>(state.camera.clear_data);
+			//TODO grab the appropriate framebuffer and begin renderpass
+
+			//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
+
+			auto& camera = graphics_state.camera;
+			//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
+			auto& g_buffer = *gbuffer.gbuffer;
+			auto frame_buffer = g_buffer.GetFramebuffer();
+			//TransitionFrameBuffer(camera, cmd_buffer, view);
+
+			auto sz = g_buffer.Size();
+			rect viewport = graphics_state.camera.viewport;
+			auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
+
+			std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
+			std::array<float, 4> g_clear{ 0.0f,0.0f ,0.0f ,0.0f };
+
+			vk::ClearValue v[EGBufferBinding::size()+1]{};
+			for(auto& value : v)
 			{
-				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
-			},vk::Extent2D
+				value = vk::ClearValue{ g_clear };
+			};
+			v[EGBufferBinding::size()] =vk::ClearValue{ vk::ClearColorValue{ depth_clear } };
+
+			vk::Rect2D render_area
 			{
-				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
-			}
-		};
-		auto& rp = g_buffer.GetRenderPass();
-		vk::RenderPassBeginInfo rpbi
-		{
-			*rp, frame_buffer,
-			render_area,hlp::arr_count(v),std::data(v)
-		};
-		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,rp,static_cast<uint32_t>(g_buffer.NumColorAttachments()),&graphics_state))
-			rs.FlagRendered();
-		cmd_buffer.endRenderPass();//End GBuffer pass
+				vk::Offset2D
+				{
+					s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
+				},vk::Extent2D
+				{
+					s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
+				}
+			};
+			auto& rp = g_buffer.GetRenderPass();
+			vk::RenderPassBeginInfo rpbi
+			{
+				*rp, frame_buffer,
+				render_area,hlp::arr_count(v),std::data(v)
+			};
+			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+			if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,rp,static_cast<uint32_t>(g_buffer.NumColorAttachments()),&graphics_state))
+				rs.FlagRendered();
+			cmd_buffer.endRenderPass();//End GBuffer pass
+
+
+		}
 		//GBufferBarrier(cmd_buffer, gbuffer);
 	}
 
-	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy& accum_stuff, const CameraData& camera, RenderStateV2& rs)
+	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy(&accum_stuff)[EGBufferType::size()], const CameraData& camera, RenderStateV2& rs)
 	{
-		auto sz = camera.render_target->Size();
-		auto viewport = rect{};// camera.viewport;
-		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
-		vk::Rect2D render_area
+		int i = 0;
+		for (auto& gbuffer : _gbuffer)
 		{
-			vk::Offset2D
+			auto sz = camera.render_target->Size();
+			auto viewport = rect{};// camera.viewport;
+			auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
+			vk::Rect2D render_area
 			{
-				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
-			},vk::Extent2D
+				vk::Offset2D
+				{
+					s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
+				},vk::Extent2D
+				{
+					s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
+				}
+			};
+			vk::ClearValue v[2]
 			{
-				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
-			}
-		};
-		vk::ClearValue v[2]
-		{
-			vk::ClearColorValue{std::array<float,4>{0.0f,0.0f,0.0f,0.0f}},
-			vk::ClearDepthStencilValue{1,0},
-		};
+				vk::ClearColorValue{std::array<float,4>{0.0f,0.0f,0.0f,0.0f}},
+				vk::ClearDepthStencilValue{1,0},
+			};
 
-		const auto& rp = accum_pass;
-		vk::RenderPassBeginInfo rpbi
-		{
-			*rp, _gbuffer.accum_buffer.as<VknFrameBuffer>().GetFramebuffer(),
-			render_area,hlp::arr_count(v),std::data(v)
-		};
+			const auto& rp = accum_pass;
+			vk::RenderPassBeginInfo rpbi
+			{
+				*rp, gbuffer.accum_buffer.as<VknFrameBuffer>().GetFramebuffer(),
+				render_area,hlp::arr_count(v),std::data(v)
+			};
 
-		//Transit depth buffer to general for sampling
+			//Transit depth buffer to general for sampling
 
 
-		//Begin Depthless RT renderpass
-		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		//Draw FSQ
-		RenderProcessedDrawCalls(cmd_buffer, accum_stuff.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi, rp, 1);
-		//End Depthless RT renderpass
-		cmd_buffer.endRenderPass();
+			//Begin Depthless RT renderpass
+			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+			//Draw FSQ
+			RenderProcessedDrawCalls(cmd_buffer, accum_stuff[i].DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi, rp, 1);
+			//End Depthless RT renderpass
+			cmd_buffer.endRenderPass();
+		}
 		//Copy depth buffer to render target's depth buffer
 
 	}
@@ -943,8 +1005,9 @@ namespace idk::vkn
 		//End Depthless RT renderpass
 		cmd_buffer.endRenderPass();
 		//Copy depth buffer to render target's depth buffer
-		auto gbuffer_depth_img = GBuffer().gbuffer->DepthAttachment()->as<VknTexture>().Image();
-		PostRenderCopy(cmd_buffer, ivec2{ s_cast<int>(render_area.extent.width),s_cast<int>(render_area.extent.height) },rt.GetDepthBuffer().as<VknTexture>().Image(), gbuffer_depth_img);
+		//auto gbuffer_depth_img = GBuffer().gbuffer->DepthAttachment()->as<VknTexture>().Image();
+		//PostRenderCopy(cmd_buffer, ivec2{ s_cast<int>(render_area.extent.width),s_cast<int>(render_area.extent.height) },rt.GetDepthBuffer().as<VknTexture>().Image(), gbuffer_depth_img);
+
 	}
 }
 #endif

@@ -22,6 +22,16 @@ namespace idk::vkn
 		eNormal             ,
 		eTangent            ,
 	};
+	enum class GBufferType
+	{
+		eMetallic,
+		eSpecular
+	};
+
+	using EGBufferType = meta::enum_info<GBufferType, meta::enum_pack<GBufferType,
+		GBufferType::eMetallic,
+		GBufferType::eSpecular
+		>>;
 
 	struct DeferredGBuffer
 	{
@@ -36,13 +46,13 @@ namespace idk::vkn
 
 	struct DeferredPass
 	{
-		DeferredGBuffer _gbuffer;
+		DeferredGBuffer _gbuffer[EGBufferType::size()];
 		PipelineManager* _pipeline_manager;
 		RenderObject fsq_amb_ro, fsq_light_ro;
 		shared_ptr<pipeline_config> ambient_config;
 		shared_ptr<pipeline_config> light_config;
 		RscHandle<ShaderProgram> fullscreen_quad_vert;
-		RscHandle<ShaderProgram> deferred_post_frag;
+		RscHandle<ShaderProgram> deferred_post_frag[EGBufferType::size()];
 		RscHandle<ShaderProgram> deferred_post_ambient  ;
 		RscHandle<ShaderProgram> hdr_frag;
 
@@ -58,18 +68,18 @@ namespace idk::vkn
 		{
 			return *_pipeline_manager;
 		}
-		DeferredGBuffer& GBuffer() {
-			return _gbuffer;
+		DeferredGBuffer& GBuffer(GBufferType type) {
+			return _gbuffer[EGBufferType::map(type)];
 		};
 		//Make sure to call this again if the framebuffer size changed.
-		void Init(ivec2 size, VknRenderTarget& rt);
+		void Init(VknRenderTarget& rt);
 		//void RenderGbufferToTarget(vk::CommandBuffer cmd_buffer, const GraphicsState& graphics_state, RenderStateV2& rs);
 
-		void LightPass(PipelineThingy& the_interface,const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>>light_range,bool is_ambient);
+		void LightPass(GBufferType type,PipelineThingy& the_interface, const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>>light_range, bool is_ambient);
 		PipelineThingy HdrPass(const GraphicsState& graphics_state, RenderStateV2& rs);
 		//PipelineThingy ProcessDrawCalls(const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t ,size_t>>light_range);
 		void DrawToGBuffers(vk::CommandBuffer cmd_buffer, const GraphicsState& graphics_state, RenderStateV2& rs);
-		void DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy& accum_stuff, const CameraData& camera, RenderStateV2& rs);
+		void DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy  (&accum_stuff)[EGBufferType::size()], const CameraData& camera, RenderStateV2& rs);
 		void DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff, const CameraData& camera, VknRenderTarget& rt, RenderStateV2& rs);
 	};
 
