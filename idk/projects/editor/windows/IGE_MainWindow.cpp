@@ -648,6 +648,7 @@ namespace idk {
 			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_SceneView>()->window_name, main);
 			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_Console>()->window_name, bottom_left);
 			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProgrammerConsole>()->window_name, bottom_left);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_LightLister>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProjectWindow>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_HierarchyWindow>()->window_name, left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_InspectorWindow>()->window_name, right);

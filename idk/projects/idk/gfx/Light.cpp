@@ -266,13 +266,11 @@ namespace idk
 	}
 	color Light::GetColor() const
 	{
-		std::visit([&](auto& light_variant)
+		return std::visit([&](auto& light_variant)
 		{
 			return light_variant.light_color;
 		}
 		, light);
-
-		return color{};
 	}
 	void Light::SetColor(const color& c)
 	{
@@ -284,13 +282,11 @@ namespace idk
 	}
 	real Light::GetLightIntensity() const
 	{
-		std::visit([&](auto& light_variant)
+		return std::visit([&](auto& light_variant)
 		{
 			return light_variant.intensity;
 		}
 		, light);
-
-		return 0.f;
 	}
 	void Light::SetLightIntensity(const real& i)
 	{
