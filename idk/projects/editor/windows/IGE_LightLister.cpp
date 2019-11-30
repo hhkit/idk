@@ -4,6 +4,7 @@
 #include <editor/widgets/DragQuat.h>
 #include <core/Core.h>
 #include <core/GameObject.h>
+#include <editor/IDE.h>
 #include <common/Transform.h>
 #include <gfx/Light.h>
 #include <gfx/GraphicsSystem.h>
@@ -25,14 +26,15 @@ namespace idk
 		};
 		ColumnHeader headers[]=
 		{
-			{"On", 25},
+			{"On", -1},
 			{"Name", 125},
-			{"Col", 25},
+			{"Col", -1},
 			{"Intensity", -1},
 			{"Position", 250},
 			{"Rotation", 250},
-			{"Shadows", 25},
-			{"Isolate", -1}
+			{"Shadows", -1},
+			{"Isolate", -1},
+			{"Focus", -1}
 		};
 
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -60,45 +62,58 @@ namespace idk
 		for (auto& light : Core::GetGameState().GetObjectsOfType<Light>())
 		{
 			ImGui::Columns(std::size(headers), "", true);
-			auto id = std::string{ "##LL" } +std::to_string(light.GetHandle().id);
+			ImGui::PushID((std::string{ "##LL" } +std::to_string(light.GetHandle().id)).data());
 			auto go = light.GetGameObject();
 			auto name = go->Name();
 			auto tfm = go->Transform();
 
-			ImGui::Checkbox((id + "en").data(), &light.enabled);
+			ImGui::Checkbox("##en", &light.enabled);
 			ImGui::NextColumn();
 
-			ImGui::Text(name.data());
+			if (ImGui::Selectable(name.data()))
+			{
+				Core::GetSystem<IDE>().selected_gameObjects.clear();
+				Core::GetSystem<IDE>().selected_gameObjects.emplace_back(go);
+			}
 			ImGui::NextColumn();
 
 			auto color = light.GetColor();
-			if (ImGui::ColorEdit3((id + "col").data(), color.as_vec3.data(), ImGuiColorEditFlags_NoInputs))
+			if (ImGui::ColorEdit3("##col", color.as_vec3.data(), ImGuiColorEditFlags_NoInputs))
 				light.SetColor(color);
 			ImGui::NextColumn();
 
 			auto intens = light.GetLightIntensity();
-			if (ImGui::DragFloat((id + "intens").data(), &intens, 0.1, 0, 1500.f, "%.3f", 1.1f))
+			if (ImGui::DragFloat("##intens", &intens, 0.1, 0, 1500.f, "%.3f", 1.1f))
 				light.SetLightIntensity(intens);
 			ImGui::NextColumn();
 
 			auto pos = tfm->GlobalPosition();
-			if (ImGuidk::DragVec3((id + "tfm").data(), &pos))
+			if (ImGuidk::DragVec3("##tfm", &pos))
 				tfm->GlobalPosition(pos);
 			ImGui::NextColumn();
 
 			auto rot = tfm->GlobalRotation();
-			if (ImGuidk::DragQuat((id + "rot").data(), &rot))
+			if (ImGuidk::DragQuat("##rot", &rot))
 				tfm->GlobalRotation(rot);
 			ImGui::NextColumn();
 
-			ImGui::Checkbox((id + "shad").data(), &light.casts_shadows);
+			ImGui::Checkbox("##shad", &light.casts_shadows);
 			ImGui::NextColumn();
 
-			ImGui::Checkbox((id + "isol").data(), &light.isolate);
+			ImGui::Checkbox("##isol", &light.isolate);
 			ImGui::NextColumn();
+
+			if (ImGui::Button("Focus"))
+			{
+				Core::GetSystem<IDE>().selected_gameObjects.clear();
+				Core::GetSystem<IDE>().selected_gameObjects.emplace_back(go);
+				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+			}
+			ImGui::NextColumn();
+
 			isolate |= light.isolate;
-
 			ImGui::Separator();
+			ImGui::PopID();
 		}
 
 		Core::GetSystem<GraphicsSystem>().isolate = isolate;
