@@ -51,7 +51,7 @@ namespace idk::vkn
 		{
 			//auto& dset = ds2[i++];
 			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
-			bufferInfo[binding.arr_index-curr.dstArrayElement]=(
+			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
 				  ,ubuffer.view
@@ -60,6 +60,20 @@ namespace idk::vkn
 			);
 			curr.pImageInfo = std::data(bufferInfo);
 			curr.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+		}
+		void operator()(ProcessedRO::AttachmentBinding ubuffer)
+		{
+			//auto& dset = ds2[i++];
+			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
+				vk::DescriptorImageInfo{
+				  ubuffer.sampler
+				  ,ubuffer.view
+				  ,ubuffer.layout
+				}
+			);
+			curr.pImageInfo = std::data(bufferInfo);
+			curr.descriptorType = vk::DescriptorType::eInputAttachment;
 		}
 	};
 	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw)
@@ -147,7 +161,7 @@ namespace idk::vkn
 				image_infos.resize(max_binding);
 			}
 			auto& curr = descriptorWrite[binding.binding];
-			if (binding.IsImage())
+			if (binding.IsImage() || binding.IsAttachment())
 			{
 				image_infos[binding.binding].resize(binding.size, default_img);
 				curr.descriptorCount = static_cast<uint32_t>(binding.size);
@@ -166,15 +180,14 @@ namespace idk::vkn
 		out.AbsorbFromScratch();
 	}
 
-
-	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index, const VknTexture& val)
+	ProcessedRO::BindingInfo CreateBindingInfoAtt(const UboInfo& obj_uni, uint32_t arr_index, const VknTexture& val, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal)
 	{
 		//collated_layouts[obj_uni.layout][desc_type_index<vk::DescriptorType::eCombinedImageSampler>]++;
 		//collated_bindings[obj_uni.set].emplace_back(
 		return ProcessedRO::BindingInfo
 		{
 			obj_uni.binding,
-			ProcessedRO::ImageBinding{ val.ImageView(),*val.sampler,vk::ImageLayout::eGeneral },
+			ProcessedRO::AttachmentBinding{ val.ImageView(),val.Sampler(),layout},
 			0,
 			arr_index,
 			obj_uni.size,
@@ -183,14 +196,31 @@ namespace idk::vkn
 		//);
 	}
 
-	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index, const VknCubemap& val)
+
+	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index, const VknTexture& val, vk::ImageLayout layout = vk::ImageLayout::eGeneral)
 	{
 		//collated_layouts[obj_uni.layout][desc_type_index<vk::DescriptorType::eCombinedImageSampler>]++;
 		//collated_bindings[obj_uni.set].emplace_back(
 		return ProcessedRO::BindingInfo
 		{
 			obj_uni.binding,
-			ProcessedRO::ImageBinding{ val.ImageView(),val.Sampler(),vk::ImageLayout::eGeneral },
+			ProcessedRO::ImageBinding{ val.ImageView(),*val.sampler,layout },
+			0,
+			arr_index,
+			obj_uni.size,
+			obj_uni.layout
+		};
+		//);
+	}
+
+	ProcessedRO::BindingInfo CreateBindingInfo(const UboInfo& obj_uni, uint32_t arr_index, const VknCubemap& val, vk::ImageLayout layout = vk::ImageLayout::eGeneral)
+	{
+		//collated_layouts[obj_uni.layout][desc_type_index<vk::DescriptorType::eCombinedImageSampler>]++;
+		//collated_bindings[obj_uni.set].emplace_back(
+		return ProcessedRO::BindingInfo
+		{
+			obj_uni.binding,
+			ProcessedRO::ImageBinding{ val.ImageView(),val.Sampler(),layout },
 			0,
 			arr_index,
 			obj_uni.size,
@@ -316,25 +346,36 @@ namespace idk::vkn
 		return  itr != bindings.end() && itr->second.size() > array_index && itr->second[array_index];
 	}
 	}
-	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound)
+	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
 		auto info = GetUniform(uniform_name);
 		if (info)
 		{
 			auto itr = curr_bindings.find(info->set);
 			if (!skip_if_bound || itr == curr_bindings.end() || !detail::is_bound(itr->second,info->binding,array_index))
-				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture));
+				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture,layout));
 		}
 		return s_cast<bool>(info);
 	}
-	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound)
+	bool PipelineThingy::BindAttachment(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
 		auto info = GetUniform(uniform_name);
 		if (info)
 		{
 			auto itr = curr_bindings.find(info->set);
 			if (!skip_if_bound || itr == curr_bindings.end() || !detail::is_bound(itr->second, info->binding, array_index))
-				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture));
+				curr_bindings[info->set].Bind(CreateBindingInfoAtt(*info, array_index, texture,layout));
+		}
+		return s_cast<bool>(info);
+	}
+	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound, vk::ImageLayout layout )
+	{
+		auto info = GetUniform(uniform_name);
+		if (info)
+		{
+			auto itr = curr_bindings.find(info->set);
+			if (!skip_if_bound || itr == curr_bindings.end() || !detail::is_bound(itr->second, info->binding, array_index))
+				curr_bindings[info->set].Bind(CreateBindingInfo(*info, array_index, texture,layout));
 		}
 		return s_cast<bool>(info);
 	}

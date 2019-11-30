@@ -101,6 +101,11 @@ namespace idk
 			const GraphicsState& State();
 			string light_block;
 			mat4 view_trf, pbr_trf, proj_trf;
+			bool rebind_light = false;
+
+			std::optional<std::pair<size_t, size_t>> light_range;
+
+			vector<RscHandle<Texture>> shadow_maps;
 
 			string                     pbr_cube_map_names[PbrCubeMapVarsInfo::size()];
 			vector<RscHandle<CubeMap>> pbr_cube_maps;

@@ -38,7 +38,6 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 	Light lights[MAX_LIGHTS];
 } LightBlk;
 
-S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
 // lighting functions 
 
@@ -62,7 +61,6 @@ layout(location = 0)out vec4 out_color;
 
 void main()
 {
-
 	// declare initial values here
 	if(texture(gbuffers[eDepth],fs_in.uv).r==1)
 		discard;
@@ -81,35 +79,9 @@ void main()
 	vec3 view_dir = -normalize(view_pos);
 
 	vec3 light_accum = vec3(0);
+
 	normal = normalize(normal);
 	
-	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
-	
-	vec4 world_pos = 
-		PerCamera.inverse_view_transform *
-		vec4(view_pos,1);
-	
-	for (int i = 0; i < LightBlk.light_count; ++i)
-	{
-		vec3 result = pbr_metallic(LightBlk.lights[i], view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
-		
-		if (LightBlk.lights[i].type == 1)
-		{
-			if(LightBlk.lights[i].cast_shadow!=0)
-				result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
-			//vvvp = LightBlk.lights[i].vp;
-		}
-		if (LightBlk.lights[i].type == 2)
-		{
-			if(LightBlk.lights[i].cast_shadow!=0)
-				result *= (vec3(1-ShadowCalculation(LightBlk.lights[i],shadow_maps[i],LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
-		}
-		
-		light_accum += result;
-	}
-	vec3 F = mix(vec3(0.04), albedo, metallic);
-	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
-	vec3 kD = 1.0 - kS;
-	kD *= 1.0 - metallic;
 import /engine_data/shaders/pbr_end.glsl
+	out_color = vec4(ambient,1);
 }

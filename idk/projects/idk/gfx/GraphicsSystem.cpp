@@ -750,6 +750,7 @@ namespace idk
 		renderer_fragment_shaders[FBrdf] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag");
 		renderer_fragment_shaders[FFont] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/font.frag");
 		renderer_fragment_shaders[FDeferredPost] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_post.frag");
+		renderer_fragment_shaders[FDeferredPostAmbient] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_post_ambient.frag");
 
 		////////////////////Load geometry Shaders
 		renderer_geometry_shaders[GSinglePassCube] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom");

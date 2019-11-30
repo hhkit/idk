@@ -1023,7 +1023,9 @@ namespace idk::vkn
 
 			deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
 			deferred_pass.deferred_post_frag = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
-			deferred_pass.Init(size);
+			deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
+			deferred_pass.Init(size,camera.render_target.as<VknRenderTarget>());
+			deferred_pass.hdr_frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
 			deferred_pass.pipeline_manager(GetPipelineManager());
 			deferred_pass.frame_index(_current_frame_index);
 			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
@@ -1042,9 +1044,29 @@ namespace idk::vkn
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
-		auto deferred_interface = (is_deferred) ? rs.deferred_pass.ProcessDrawCalls(state, rs) : PipelineThingy{};
-		if(is_deferred)
+		PipelineThingy deferred_interface_light{};
+		PipelineThingy deferred_interface_hdr  {};
+		if (is_deferred)
+		{
+
+			size_t max_lights = 7;
+			auto deferred_interface = PipelineThingy{};
+			deferred_interface.SetRef(rs.ubo_manager);
+			rs.deferred_pass.LightPass(deferred_interface, state, rs, std::make_pair(0, 0),true);
+			for (size_t i = 0; i < state.active_lights.size(); )
+			{
+				auto num = std::min(max_lights, state.active_lights.size() - i);
+				rs.deferred_pass.LightPass(deferred_interface,state, rs, std::make_pair(i, i+num),false);
+				i += num;
+			}
 			deferred_interface.GenerateDS(rs.dpools, false);
+			deferred_interface_light.~PipelineThingy();
+			new (&deferred_interface_light) PipelineThingy{ std::move(deferred_interface) };
+			deferred_interface_hdr.~PipelineThingy();
+			auto& hdr_interface = *(new (&deferred_interface_hdr) PipelineThingy{ rs.deferred_pass.HdrPass(state, rs) });
+			hdr_interface.GenerateDS(rs.dpools, false);
+
+		}
 		
 		//rs.ubo_manager.UpdateAllBuffers();
 		std::array<float, 4> a{};
@@ -1145,7 +1167,11 @@ namespace idk::vkn
 		if (is_deferred)
 		{
 			TransitionFrameBuffer(camera, cmd_buffer, view);
-			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface, camera, rt, rs);
+			//for(auto& deferred_interface : deferred_interfaces)
+			//Accumulator
+			deferred_pass.DrawToAccum(cmd_buffer, deferred_interface_light, camera, rs);
+			//HDR
+			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface_hdr, camera, rt, rs);
 		}
 		//Subsequent passes shouldn't clear the buffer any more.
 		rpbi.renderPass = *View().BasicRenderPass(rt.GetRenderPassType(),false,false);

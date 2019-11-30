@@ -7,6 +7,8 @@ namespace idk::vkn
 {
 	struct VknAttachment : idk::Attachment
 	{
+		bool override_as_depth = false;
+		bool is_input_att = false;
 	};
 	class VknFrameBuffer: public FrameBuffer
 	{

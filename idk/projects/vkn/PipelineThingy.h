@@ -63,8 +63,9 @@ namespace idk::vkn
 
 		template<typename T>
 		bool BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+		bool BindAttachment(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 
 		void FinalizeDrawCall(const RenderObject& ro);
 		void FinalizeDrawCall(const RenderObject& ro,size_t num_inst,size_t inst_offset);

@@ -22,11 +22,15 @@ namespace idk::vkn
 		eNormal             ,
 		eTangent            ,
 	};
+
 	struct DeferredGBuffer
 	{
 		RscHandle<VknFrameBuffer> gbuffer;
+		RscHandle<VknFrameBuffer> accum_buffer; //
 		vk::Semaphore RenderCompleteSignal();
 		void Init(ivec2 size);
+
+		RenderPassObj rp_obj;
 	private:
 		vk::UniqueSemaphore _render_complete;
 	};
@@ -35,11 +39,17 @@ namespace idk::vkn
 	{
 		DeferredGBuffer _gbuffer;
 		PipelineManager* _pipeline_manager;
-		RenderObject fsq_ro;
+		RenderObject fsq_amb_ro, fsq_light_ro;
+		shared_ptr<pipeline_config> ambient_config;
+		shared_ptr<pipeline_config> light_config;
 		RscHandle<ShaderProgram> fullscreen_quad_vert;
-		RscHandle<ShaderProgram> deferred_post_frag  ;
+		RscHandle<ShaderProgram> deferred_post_frag;
+		RscHandle<ShaderProgram> deferred_post_ambient  ;
+		RscHandle<ShaderProgram> hdr_frag;
 
-		RenderPassObj rp_obj;
+		RscHandle<VknFrameBuffer> hdr_buffer;
+
+		RenderPassObj accum_pass, hdr_pass;
 
 		uint32_t _frame_index = 0;
 		uint32_t frame_index(uint32_t new_index){ return _frame_index = new_index; }
@@ -53,11 +63,14 @@ namespace idk::vkn
 			return _gbuffer;
 		};
 		//Make sure to call this again if the framebuffer size changed.
-		void Init(ivec2 size);
+		void Init(ivec2 size, VknRenderTarget& rt);
 		//void RenderGbufferToTarget(vk::CommandBuffer cmd_buffer, const GraphicsState& graphics_state, RenderStateV2& rs);
 
-		PipelineThingy ProcessDrawCalls(const GraphicsState& graphics_state, RenderStateV2& rs);
+		void LightPass(PipelineThingy& the_interface,const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>>light_range,bool is_ambient);
+		PipelineThingy HdrPass(const GraphicsState& graphics_state, RenderStateV2& rs);
+		//PipelineThingy ProcessDrawCalls(const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t ,size_t>>light_range);
 		void DrawToGBuffers(vk::CommandBuffer cmd_buffer, const GraphicsState& graphics_state, RenderStateV2& rs);
+		void DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy& accum_stuff, const CameraData& camera, RenderStateV2& rs);
 		void DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff, const CameraData& camera, VknRenderTarget& rt, RenderStateV2& rs);
 	};
 

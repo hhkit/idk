@@ -31,10 +31,16 @@ namespace idk::vkn
 			vk::Sampler sampler;
 			vk::ImageLayout layout;
 		};
+		struct AttachmentBinding
+		{
+			vk::ImageView view;
+			vk::Sampler sampler;
+			vk::ImageLayout layout;
+		};
 		using image_t = ImageBinding;
 		struct BindingInfo
 		{
-			using data_t =variant<vk::Buffer, image_t>;
+			using data_t =variant<vk::Buffer, image_t, AttachmentBinding>;
 			uint32_t binding;
 			data_t ubuffer;
 			uint32_t buffer_offset;
@@ -74,10 +80,28 @@ namespace idk::vkn
 				layout{ layout_ }
 			{
 			}
+			BindingInfo(
+				uint32_t binding_,
+				AttachmentBinding ubuffer_,
+				uint32_t buffer_offset_,
+				uint32_t arr_index_,
+				size_t size_,
+				vk::DescriptorSetLayout layout_
+			) :
+				binding{ binding_ },
+				ubuffer{ ubuffer_ },
+				buffer_offset{ buffer_offset_ },
+				arr_index{ arr_index_ },
+				size{ size_ },
+				layout{ layout_ }
+			{
+			}
 			BindingInfo() = default;
 			std::optional<vk::Buffer> GetBuffer()const;
 			std::optional<image_t> GetImage()const;
+			std::optional<AttachmentBinding> GetAttachment()const;
 			bool IsImage()const;
+			bool IsAttachment()const;
 			vk::DescriptorSetLayout GetLayout()const;
 		};
 #pragma endregion

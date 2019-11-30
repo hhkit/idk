@@ -35,10 +35,11 @@ namespace idk::vkn
 		//TODO store a framebuffer instead.
 		auto color_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetColorBuffer().guid);
 		auto ctci = ColorBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+		ctci.image_usage |= vk::ImageUsageFlagBits::eInputAttachment;
 		loader.LoadTexture(*color_texture, alloc, fence, {}, ctci, {});
 		auto depth_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetDepthBuffer().guid);
 		TexCreateInfo dtci = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
-		dtci.image_usage |= vk::ImageUsageFlagBits::eTransferDst;
+		dtci.image_usage |= vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eInputAttachment;
 		loader.LoadTexture(*depth_texture, alloc, fence, {}, dtci, {});
 
 		{ 

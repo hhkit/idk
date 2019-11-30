@@ -71,17 +71,25 @@ namespace idk::vkn
 
 
 		index_t RegisterAttachment(AttachmentInfo attachment, vk::ImageLayout in, vk::ImageLayout out);
+		void SetAttachment(index_t index,AttachmentInfo attachment, vk::ImageLayout in, vk::ImageLayout out);
 		RenderPassFbInfo RegisterFrameBuffer(const FrameBufferInfo& fb_info);
 
 
 		uint32_t  RegisterSubpass(SubPassConfig config);
 
 
-		void AddDependency(uint32_t src, uint32_t dest);
+		void AddDependency(uint32_t src, uint32_t dest,
+			vk::AccessFlags src_acc = {},
+			vk::AccessFlags dst_acc = {},
+			vk::PipelineStageFlags src_stg={},
+			vk::PipelineStageFlags dst_stg={}
+			);
 
 		vk::RenderPassCreateInfo BuildRenderPass();
 	private:
 		static void AddAttachment(AttachmentInfo attachment,
+			vector<vk::AttachmentDescription>& attachment_desc, vk::ImageLayout in, vk::ImageLayout out);
+		static void SetAttachment(index_t index,AttachmentInfo attachment,
 			vector<vk::AttachmentDescription>& attachment_desc, vk::ImageLayout in, vk::ImageLayout out);
 	};
 

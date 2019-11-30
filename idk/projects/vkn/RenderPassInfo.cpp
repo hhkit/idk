@@ -19,7 +19,7 @@ void SubPassConfig::AddInputAttachment(index_t attachment_index, vk::ImageLayout
 
 void SubPassConfig::AddOutputAttachment(index_t attachment_index, vk::ImageLayout use)
 {
-	inputs.emplace_back(attachment_t{ attachment_index, Attachment{ use } });
+	output.emplace_back(attachment_t{ attachment_index, Attachment{ use } });
 }
 
 void SubPassConfig::BuildSubpass()
@@ -112,6 +112,17 @@ index_t RenderPassInfo::RegisterAttachment(AttachmentInfo attachment, vk::ImageL
 	return index;
 }
 
+void RenderPassInfo::SetAttachment(index_t index, AttachmentInfo attachment, vk::ImageLayout in, vk::ImageLayout out)
+{
+	if (attachments.size() <= index)
+	{
+		attachments.reserve(std::max(attachments.size()*2, index + 1));
+		attachments.resize(index + 1);
+		attachments[index] = attachment;
+		SetAttachment(index, attachment, attachment_desc, in, out);
+	}
+}
+
 uint32_t RenderPassInfo::RegisterSubpass(SubPassConfig config)
 {
 	config.BuildSubpass();
@@ -120,19 +131,23 @@ uint32_t RenderPassInfo::RegisterSubpass(SubPassConfig config)
 	return size;
 }
 
-void RenderPassInfo::AddDependency(uint32_t src, uint32_t dest)
+void RenderPassInfo::AddDependency(uint32_t src, uint32_t dest,
+	vk::AccessFlags        src_acc ,
+	vk::AccessFlags        dst_acc ,
+	vk::PipelineStageFlags src_stg ,
+	vk::PipelineStageFlags dst_stg )
 {
-	auto [src_access_flag, src_mask] = subpasses[src].GetDep();
+	auto [src_access_flag, src_mask] = [](uint32_t src, auto& subpasses) {  return (src != VK_SUBPASS_EXTERNAL) ? subpasses[src].GetDep() : std::pair<vk::AccessFlags, vk::PipelineStageFlags>{ {},vk::PipelineStageFlagBits::eBottomOfPipe }; }(src, subpasses);
 	auto [dest_access_flag, dest_mask] = subpasses[dest].GetDep();
 	dependencies.emplace_back(
 		vk::SubpassDependency
 		{
 			src                   //src
 			,dest				   //dest
-		, src_mask
-		, dest_mask
-		, src_access_flag
-		, dest_access_flag
+		, src_mask          | src_stg
+		, dest_mask			| dst_stg
+		, src_access_flag	| src_acc
+		, dest_access_flag	| dst_acc
 		});
 }
 
@@ -159,7 +174,7 @@ void RenderPassInfo::AddAttachment(AttachmentInfo attachment, vector<vk::Attachm
 
 	attachment_desc.emplace_back(vk::AttachmentDescription{
 		vk::AttachmentDescriptionFlags{}
-		, MapFormat(vk_att.internal_format)
+		, (attachment.buffer)? attachment.buffer->as<VknTexture>().format:MapFormat(vk_att.internal_format)
 		, vk::SampleCountFlagBits::e1
 		, MapLoadOp(vk_att.load_op)
 		, MapStoreOp(vk_att.store_op)
@@ -168,6 +183,28 @@ void RenderPassInfo::AddAttachment(AttachmentInfo attachment, vector<vk::Attachm
 		, in
 		, out
 		});
+}
+
+void RenderPassInfo::SetAttachment(index_t index, AttachmentInfo attachment, vector<vk::AttachmentDescription>& attachment_desc, vk::ImageLayout in, vk::ImageLayout out)
+{
+	auto& col_attachment = attachment;
+	auto& vk_att = col_attachment;
+	if (attachment_desc.size() <= index) 
+	{
+		attachment_desc.reserve(std::max(attachment_desc.size()*2,index+1));
+		attachment_desc.resize(index + 1);
+	}
+	attachment_desc[index] = vk::AttachmentDescription{
+		vk::AttachmentDescriptionFlags{}
+		, MapFormat(vk_att.internal_format)
+		, vk::SampleCountFlagBits::e1
+		, MapLoadOp(vk_att.load_op)
+		, MapStoreOp(vk_att.store_op)
+		, vk::AttachmentLoadOp::eDontCare//MapLoadOp (vk_att.stencil_load_op )
+		, vk::AttachmentStoreOp::eDontCare//MapStoreOp(vk_att.stencil_store_op)
+		, in
+		, out
+		};
 }
 
 }

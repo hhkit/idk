@@ -43,6 +43,8 @@ namespace idk
 		FBrdf,
 		FFont,
 		FDeferredPost,
+		FDeferredPostSpecular,
+		FDeferredPostAmbient,
 		FMax
 	};
 	enum GeometryShaders

@@ -20,9 +20,24 @@ std::optional<ProcessedRO::image_t> ProcessedRO::BindingInfo::GetImage() const
 	return ret;
 }
 
+std::optional<ProcessedRO::AttachmentBinding> ProcessedRO::BindingInfo::GetAttachment() const
+{
+	using Type = AttachmentBinding;
+	std::optional<Type> ret;
+	if (IsImage())
+		ret = std::get<Type>(ubuffer);
+	return ret;
+}
+
 bool ProcessedRO::BindingInfo::IsImage() const
 {
 	using Type = image_t;
+	return ubuffer.index() == meta::IndexOf<data_t, Type>::value;
+}
+
+bool ProcessedRO::BindingInfo::IsAttachment() const
+{
+	using Type = AttachmentBinding;
 	return ubuffer.index() == meta::IndexOf<data_t, Type>::value;
 }
 

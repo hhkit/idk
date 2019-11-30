@@ -280,7 +280,7 @@ namespace idk::vkn
 			vk::ClearValue clear{ vk::ClearColorValue{} };
 			vk::RenderPassBeginInfo info
 			{
-				dst->GetRenderPass(),dst->GetFramebuffer(),
+				*dst->GetRenderPass(),dst->GetFramebuffer(),
 				vk::Rect2D
 			{
 				vk::Offset2D{ 0,0 },vk::Extent2D{ s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y) }

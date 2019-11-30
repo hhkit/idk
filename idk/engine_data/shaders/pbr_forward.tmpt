@@ -73,7 +73,7 @@ void main()
 		PerCamera.inverse_view_transform *
 		vec4(view_pos,1);
 	
-	for (int i = 0; i < LightBlk.light_count; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		vec3 result = pbr_metallic(LightBlk.lights[i], view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		
