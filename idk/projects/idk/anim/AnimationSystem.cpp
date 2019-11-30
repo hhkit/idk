@@ -27,7 +27,7 @@ namespace idk
 
 	void AnimationSystem::Update(span<Animator> animators)
 	{
-		InitializeAnimators();
+		InitializeAnimators(true);
 		if (_was_paused)
 		{
 			for (auto& elem : animators)
@@ -45,6 +45,9 @@ namespace idk
 		}
 		for (auto& animator : animators)
 		{
+			if (!animator._initialized)
+				continue;
+
 			// Update the layer logic first. 
 			const size_t num_layers_playing = LayersPass(animator);
 
@@ -103,7 +106,7 @@ namespace idk
 
 	void AnimationSystem::UpdatePaused(span<Animator> animators)
 	{
-		InitializeAnimators();
+		InitializeAnimators(false);
 		if (!_was_paused)
 		{
 			for (auto& elem : animators)
@@ -115,6 +118,9 @@ namespace idk
 		}
 		for (auto& animator : animators)
 		{
+			if (!animator._initialized)
+				continue;
+
 			if (!animator.preview_playback)
 			{
 				FinalPass(animator);
@@ -260,9 +266,9 @@ namespace idk
 		if (!anim_data->weights_cached)
 		{
 			float param_val = anim_data->def_data[0];
-			auto res = animator.float_vars.find(anim_data->params[0]);
-			if (res != animator.float_vars.end())
-				param_val = res->second.val;
+			auto res = animator.GetParam<anim::FloatParam>(anim_data->params[0]);
+			if (res.valid)
+				param_val = res.val;
 
 			anim_data->ComputeWeights(param_val);
 			anim_data->weights_cached = true;
@@ -623,11 +629,11 @@ namespace idk
 			LOG_WARNING_TO(LogPool::ANIM, "[Animation System] Error: Skeleton size of " + std::to_string(skeleton.size()) +
 				" and game object hierarchy of size " + std::to_string(animator._child_objects.size()) + " don't match.");
 
-			for (auto& layer : animator.layers)
-			{
-				layer.curr_state.is_playing = false;
-				layer.blend_state = AnimationLayerState{};
-			}
+			// for (auto& layer : animator.layers)
+			// {
+			// 	layer.curr_state.is_playing = false;
+			// 	layer.blend_state = AnimationLayerState{};
+			// }
 			
 			// animator.layers[0].is_playing = false;
 			return;
@@ -758,7 +764,7 @@ namespace idk
 		}
 	}
 
-	void AnimationSystem::InitializeAnimators()
+	void AnimationSystem::InitializeAnimators(bool play)
 	{
 		// only remove from queue if the animator was created successfully
 		if (_creation_queue.empty())
@@ -769,7 +775,13 @@ namespace idk
 
 		vector<Handle<Animator>> uncreated;
 		uncreated.reserve(_creation_queue.size());
-
+		const auto add_to_uncreated = [&](auto& animator)
+		{
+			++animator->_intialize_count;
+			// Only try initializing 60 frames
+			if (animator->_intialize_count <= 60)
+				uncreated.push_back(animator);
+		};
 		for(auto& animator : _creation_queue)
 		{
 			const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator->GetHandle().scene);
@@ -777,7 +789,7 @@ namespace idk
 
 			if (!sg)
 			{
-				uncreated.push_back(animator);
+				add_to_uncreated(animator);
 				continue;
 			}
 
@@ -810,9 +822,18 @@ namespace idk
 					layer.prev_poses.resize(animator->skeleton->data().size());
 					layer.blend_source.resize(animator->skeleton->data().size());
 				}
-			}
 
-			animator->ResetToDefault();
+				animator->ResetToDefault();
+				if (play)
+					for (auto& layer : animator->layers)
+						layer.Play("");
+
+				animator->_initialized = true;
+			}
+			else 
+			{
+				add_to_uncreated(animator);
+			}
 		}
 
 		_creation_queue = std::move(uncreated);

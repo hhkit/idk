@@ -226,6 +226,9 @@
     <ClInclude Include="FontRenderer.h">
       <Filter>render\renderers</Filter>
     </ClInclude>
+    <ClInclude Include="CanvasRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
     <ClInclude Include="RenderPassObj.h">
       <Filter>render\objects</Filter>
     </ClInclude>
@@ -427,6 +430,9 @@
     </ClCompile>
     <ClCompile Include="RenderPassObj.cpp" />
     <ClCompile Include="RenderPassInfo.cpp" />
+    <ClCompile Include="CanvasRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

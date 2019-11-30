@@ -70,9 +70,9 @@ namespace idk::vkn
 		TransitionTexture(cmd_buffer, vk::ImageLayout::eDepthStencilAttachmentOptimal, GetDepthBuffer().as<VknTexture>());
 	}
 
-	vk::RenderPass VknRenderTarget::GetRenderPass(bool clear_col , bool clear_depth ) const
+	RenderPassObj VknRenderTarget::GetRenderPass(bool clear_col , bool clear_depth ) const
 	{
-		return *View().BasicRenderPass(rp_type,clear_col,clear_depth);
+		return View().BasicRenderPass(rp_type,clear_col,clear_depth);
 	}
 
 	vk::Framebuffer VknRenderTarget::Buffer()

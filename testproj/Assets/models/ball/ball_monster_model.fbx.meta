@@ -1,13 +1,13 @@
 metadatas: 
-- guid: 7125bb8c-2dae-46a0-a0e2-4679615faa8e
+- guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3
   metadata: ""
   name: ball_monster_model
   t_hash: Prefab
-- guid: 6a4ecb83-3db5-47ad-9eae-4acda7a1266a
+- guid: 55e37d7d-86ba-4bc6-b230-a86a250beaad
   metadata: ""
-  name: BallMonster
+  name: ballmonster_low
   t_hash: idk::Mesh
-- guid: dfb502f9-126f-4c50-880e-de0a8bcb0e1d
+- guid: f8493d59-b7fc-4b83-aaeb-f1bf545d7a8d
   metadata: ""
   name: BallMonster_root_jnt
   t_hash: idk::anim::Skeleton

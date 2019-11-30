@@ -4,9 +4,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
-    <ClInclude Include="Vulkan_ImGui_Interface.h" />
-    <ClInclude Include="ImGui_Interface.h" />
-    <ClInclude Include="OpenGL_ImGui_Interface.h" />
     <ClInclude Include="EditorInputs.h">
       <Filter>controls</Filter>
     </ClInclude>
@@ -145,12 +142,23 @@
     <ClInclude Include="commands\CMD_ModifyProperty.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="OpenGL_ImGui_Interface.h">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui_Interface.h">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan_ImGui_Interface.h">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="IconsFontAwesome5_c.h" />
+    <ClInclude Include="ComponentIcons.h" />
+    <ClInclude Include="windows\IGE_LightLister.h" />
+    <ClInclude Include="widgets\IconCheckbox.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="IDE.cpp" />
-    <ClCompile Include="ImGui_Interface.cpp" />
-    <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
     <ClCompile Include="EditorInputs.cpp">
       <Filter>controls</Filter>
     </ClCompile>
@@ -271,9 +279,19 @@
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
+    <ClCompile Include="OpenGL_ImGui_Interface.cpp">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui_Interface.cpp">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Vulkan_ImGui_Interface.cpp">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_LightLister.cpp" />
+    <ClCompile Include="widgets\IconCheckbox.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
     <Filter Include="loader">
       <UniqueIdentifier>{6736b34e-82f1-486c-a938-0e50208db3da}</UniqueIdentifier>
     </Filter>
@@ -296,6 +314,9 @@
     </Filter>
     <Filter Include="loader\assimp\legacy">
       <UniqueIdentifier>{a523f331-efa6-40ea-baf4-8b8ae83a148c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphicsAPI_interface">
+      <UniqueIdentifier>{29a158a9-636a-4f64-8b46-b9975259c5bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

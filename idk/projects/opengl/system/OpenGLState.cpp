@@ -143,9 +143,11 @@ namespace idk::ogl
 		auto& curr_object_buffer = object_buffer[curr_draw_buffer];
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
-		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
+		//auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		auto& font_render_data = curr_object_buffer.font_render_data;
 
+		if (RscHandle<RenderTarget>{}->NeedsFinalizing())
+			RscHandle<RenderTarget>{}->Finalize();
 		for (auto& cam : curr_object_buffer.camera)
 		{
 			auto& rt = *cam.render_target;
@@ -256,8 +258,6 @@ namespace idk::ogl
 				using T = std::decay_t<decltype(obj)>;
 				if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
 				{
-                    if (!obj)
-                        return;
 					const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
 					opengl_handle->BindConvolutedToUnit(texture_units);
 					pipeline.SetUniform("irradiance_probe", texture_units++);
@@ -707,71 +707,77 @@ namespace idk::ogl
         auto ui_render_per_canvas = curr_object_buffer.ui_render_per_canvas;
         for (auto& [canvas, ui_render_data] : ui_render_per_canvas)
         {
-            fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{canvas->render_target});
-            for (auto& elem : ui_render_data)
-            {
-                std::visit([&](const auto& data)
-                {
-                    using T = std::decay_t<decltype(data)>;
-                    if constexpr (std::is_same_v<T, ImageData>)
-                    {
-                        // bind shader
-                        pipeline.PushProgram(elem.material->material->_shader_program);
-                        pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
-                        pipeline.SetUniform("PerUI.color", vec4{ elem.color });
-                        pipeline.SetUniform("PerUI.is_font", false);
-                        pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+			//if (canvas->render_target)
+			{
+				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{canvas->render_target});
+				for (auto& elem : ui_render_data)
+				{
+					std::visit([&](const auto& data)
+					{
+						using T = std::decay_t<decltype(data)>;
+						if constexpr (std::is_same_v<T, ImageData>)
+						{
+							if (data.texture)
+							{
+								// bind shader
+								pipeline.PushProgram(elem.material->material->_shader_program);
+								pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
+								pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+								pipeline.SetUniform("PerUI.is_font", false);
+								pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
 
-                        fsq->Bind(
-                            renderer_attributes{ {
-                                { vtx::Attrib::UV, 1 },
-                                { vtx::Attrib::Position, 0 }
-                            } }
-                        );
-                        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(real), 0);
+								fsq->Bind(
+									renderer_attributes{ {
+										{ vtx::Attrib::UV, 1 },
+										{ vtx::Attrib::Position, 0 }
+									} }
+								);
+								glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(real), 0);
 
-                        fsq->Draw();
-                    }
-                    else
-                    {
-                        if (data.coords.size())
-                        {
-                            pipeline.PushProgram(elem.material->material->_shader_program);
+								fsq->Draw();
+							}
+						}
+						else
+						{
+							if (data.coords.size())
+							{
+								pipeline.PushProgram(elem.material->material->_shader_program);
 
-                            auto& atlas = data.atlas.as<OpenGLFontAtlas>();
+								auto& atlas = data.atlas.as<OpenGLFontAtlas>();
 
-                            glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
-                            /* Use the texture containing the atlas */
-                            atlas.BindToUnit(0);
-                            pipeline.SetUniform("tex", 0);
+								glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
+								/* Use the texture containing the atlas */
+								atlas.BindToUnit(0);
+								pipeline.SetUniform("tex", 0);
 
-                            pipeline.SetUniform("PerUI.color", vec4{ elem.color });
-                            pipeline.SetUniform("PerUI.is_font", true);
-                            pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
-                            GL_CHECK();
+								pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+								pipeline.SetUniform("PerUI.is_font", true);
+								pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+								GL_CHECK();
 
-                            //pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
+								//pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
-                            /* Draw all the character on the screen in one go */
+								/* Draw all the character on the screen in one go */
 
-                            glBufferData(GL_ARRAY_BUFFER, data.coords.size() * sizeof(FontPoint), std::data(data.coords), GL_DYNAMIC_DRAW);
-                            //GL_CHECK();
-                            glEnableVertexAttribArray(0);
-                            glEnableVertexAttribArray(1);
-                            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0); // pos
-                            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), r_cast<void*>(2 * sizeof(real))); // uv
-                            //GL_CHECK();
-                            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(data.coords.size()));
+								glBufferData(GL_ARRAY_BUFFER, data.coords.size() * sizeof(FontPoint), std::data(data.coords), GL_DYNAMIC_DRAW);
+								//GL_CHECK();
+								glEnableVertexAttribArray(0);
+								glEnableVertexAttribArray(1);
+								glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0); // pos
+								glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), r_cast<void*>(2 * sizeof(real))); // uv
+								//GL_CHECK();
+								glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(data.coords.size()));
 
-                            glDisableVertexAttribArray(0);
-                            glDisableVertexAttribArray(1);
+								glDisableVertexAttribArray(0);
+								glDisableVertexAttribArray(1);
 
-                            glBindBuffer(GL_ARRAY_BUFFER, 0);
-                        }
-                        GL_CHECK();
-                    }
-                }, elem.data);
-            }
+								glBindBuffer(GL_ARRAY_BUFFER, 0);
+							}
+							GL_CHECK();
+						}
+					}, elem.data);
+				}
+			}
         }
 
 

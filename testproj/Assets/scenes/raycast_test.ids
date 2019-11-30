@@ -14,43 +14,20 @@
   - !Light 
     casts_shadows: 1
     light: !DirectionalLight 
-      height: 5
-      intensity: 0.5
+      bottom: -5
+      far: 5
+      intensity: 1
+      left: -5
       light_color: 
         a: 1
         b: 1
         g: 1
         r: 1
-      width: 5
+      near: -5
+      right: 5
+      top: 5
     shadow_bias: 1.1920929e-07
 - !4295032832 
-  - active: 1
-  - !Transform 
-    parent: {id: 0}
-    position: {x: 0, y: -2.5664325, z: 0}
-    rotation: 
-      w: 1
-      x: 0
-      y: 0
-      z: 0
-    scale: {x: 11.1756, y: 0.14454843, z: 11.1756}
-  - !Name 
-    name: floor
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-      rotation: 
-        w: 1
-        x: 0
-        y: 0
-        z: 0
-    static_friction: 0.6
-- !8590000128 
   - active: 1
   - !Transform 
     parent: {id: 0}
@@ -62,14 +39,12 @@
       z: 0
     scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: raycaster
-  - !MonoBehavior 
-    {enabled: 1, script_data: !RaycastTest ~}
-- !12885032960 
+    name: Camera
+- !8590000128 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: -1.1948845, y: -1.4705983, z: 0.24488163}
+    position: {x: -2.1666582, y: -3.0840807, z: -7.988461}
     rotation: 
       w: 1
       x: 0
@@ -77,35 +52,146 @@
       z: 0
     scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: block_a
+    name: ball_monster_model
   - !PrefabInstance 
     object_index: 0
     overrides: []
-    prefab: {guid: 8a3daf3f-8228-44c8-8fa1-503a2cb19215}
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    use_gravity: 1
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-      rotation: 
-        w: 1
-        x: 0
-        y: 0
-        z: 0
-    static_friction: 0.6
-- !17180000256 
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Animator 
+    bool_vars: {}
+    float_vars: {}
+    int_vars: {}
+    layers: 
+    - anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      blend_type: Override_Blend
+      bone_mask: 
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      default_index: 0
+      default_weight: 1
+      name: Base Layer
+    skeleton: {guid: f8493d59-b7fc-4b83-aaeb-f1bf545d7a8d}
+    trigger_vars: {}
+- !12884967424 
   - active: 1
   - !Transform 
-    parent: {id: 0}
-    position: {x: 1.9531254, y: -2.2491663, z: -0.30265284}
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
     rotation: 
       w: 1
       x: 0
@@ -113,35 +199,38 @@
       z: 0
     scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: block_a
+    name: ballmonster_low
   - !PrefabInstance 
-    object_index: 0
+    object_index: 1
     overrides: []
-    prefab: {guid: 8a3daf3f-8228-44c8-8fa1-503a2cb19215}
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    use_gravity: 1
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-      rotation: 
-        w: 1
-        x: 0
-        y: 0
-        z: 0
-    static_friction: 0.6
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: f222ae41-60b0-425a-8778-e8d89df472bd}
+- !17179934720 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: BallMonster_root_jnt
+  - !PrefabInstance 
+    object_index: 2
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 0, bone_name: BallMonster_root_jnt}
 - !21474902016 
   - active: 1
   - !Transform 
-    parent: {id: 0}
-    position: {x: -2.6647906, y: -1.1824138, z: 0}
+    parent: {id: 17179934720}
+    position: {x: 0, y: 0.895877, z: 0.0740755}
     rotation: 
       w: 1
       x: 0
@@ -149,27 +238,960 @@
       z: 0
     scale: {x: 1, y: 1, z: 1}
   - !Name 
-    name: block_a
+    name: COG_jnt
   - !PrefabInstance 
-    object_index: 0
+    object_index: 3
     overrides: []
-    prefab: {guid: 8a3daf3f-8228-44c8-8fa1-503a2cb19215}
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    use_gravity: 1
-  - !Collider 
-    bounciness: 0
-    dynamic_friction: 0.6
-    enabled: 1
-    is_trigger: 0
-    shape: !box 
-      center: {x: 0, y: 0, z: 0}
-      extents: {x: 1, y: 1, z: 1}
-      rotation: 
-        w: 1
-        x: 0
-        y: 0
-        z: 0
-    static_friction: 0.6
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 1, bone_name: COG_jnt}
+- !25769869312 
+  - active: 1
+  - !Transform 
+    parent: {id: 21474902016}
+    position: {x: 0, y: 0.1400067, z: 0.16516972}
+    rotation: 
+      w: 0.7015388
+      x: -0.088562585
+      y: 0.7015388
+      z: -0.088562585
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: torso_jnt
+  - !PrefabInstance 
+    object_index: 4
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 2, bone_name: torso_jnt}
+- !30064836608 
+  - active: 1
+  - !Transform 
+    parent: {id: 21474902016}
+    position: {x: 3.1554436e-32, y: 0.14000665, z: 0.16516967}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: torso_splineik_jnt
+  - !PrefabInstance 
+    object_index: 5
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 3, bone_name: torso_splineik_jnt}
+- !34359803904 
+  - active: 1
+  - !Transform 
+    parent: {id: 21474902016}
+    position: {x: -4.1095587e-16, y: -0.0076727197, z: -0.7802052}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: pelvis_splineik_jnt
+  - !PrefabInstance 
+    object_index: 6
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 4, bone_name: pelvis_splineik_jnt}
+- !38654771200 
+  - active: 1
+  - !Transform 
+    parent: {id: 25769869312}
+    position: {x: 0.35597134, y: -7.6293944e-08, z: -5.416988e-18}
+    rotation: 
+      w: 0.9993263
+      x: 6.466705e-27
+      y: 2.247297e-18
+      z: 0.036701135
+    scale: {x: 0.9999999, y: 0.9999999, z: 1}
+  - !Name 
+    name: spine2_jnt
+  - !PrefabInstance 
+    object_index: 7
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 5, bone_name: spine2_jnt}
+- !42949738496 
+  - active: 1
+  - !Transform 
+    parent: {id: 25769869312}
+    position: {x: -0.32626715, y: -0.074171826, z: 5.1074556e-18}
+    rotation: 
+      w: -1.6124465e-16
+      x: -0.33375198
+      y: 0.9426609
+      z: -1.7775701e-17
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: head_jnt
+  - !PrefabInstance 
+    object_index: 8
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 6, bone_name: head_jnt}
+- !47244705792 
+  - active: 1
+  - !Transform 
+    parent: {id: 25769869312}
+    position: {x: 0.022669792, y: 0.39838156, z: 0.36956438}
+    rotation: 
+      w: 0.01585277
+      x: 0.7066907
+      y: -0.62002647
+      z: 0.340447
+    scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  - !Name 
+    name: L_scapula_jnt
+  - !PrefabInstance 
+    object_index: 9
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 7, bone_name: L_scapula_jnt}
+- !51539673088 
+  - active: 1
+  - !Transform 
+    parent: {id: 25769869312}
+    position: {x: 0.022670211, y: 0.39837867, z: -0.36956406}
+    rotation: 
+      w: -0.340447
+      x: 0.62002647
+      y: 0.7066907
+      z: 0.01585277
+    scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  - !Name 
+    name: R_scapula_jnt
+  - !PrefabInstance 
+    object_index: 10
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 8, bone_name: R_scapula_jnt}
+- !55834640384 
+  - active: 1
+  - !Transform 
+    parent: {id: 38654771200}
+    position: {x: 0.31195244, y: 7.6293944e-08, z: -2.2112424e-16}
+    rotation: 
+      w: 0.9966519
+      x: -2.593623e-26
+      y: 5.0064896e-18
+      z: 0.081762165
+    scale: {x: 1.0000001, y: 1.0000001, z: 1}
+  - !Name 
+    name: spine1_jnt
+  - !PrefabInstance 
+    object_index: 11
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 9, bone_name: spine1_jnt}
+- !60129607680 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.11272209, y: 7.6293944e-08, z: -2.3887236e-17}
+    rotation: 
+      w: 2.4675102e-16
+      x: -0.35841104
+      y: 0.9335639
+      z: 2.2160628e-16
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: jaw_jnt
+  - !PrefabInstance 
+    object_index: 12
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 10, bone_name: jaw_jnt}
+- !64424574976 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.41141236, y: 0.27391493, z: -0.17555325}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_upperlip1_jnt
+  - !PrefabInstance 
+    object_index: 13
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 11, bone_name: L_upperlip1_jnt}
+- !68719542272 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.38007674, y: 0.14682373, z: -0.31825542}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_upperlip2_jnt
+  - !PrefabInstance 
+    object_index: 14
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 12, bone_name: L_upperlip2_jnt}
+- !73014509568 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.39373383, y: 0.037949447, z: -0.3794375}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_lipcorner_jnt
+  - !PrefabInstance 
+    object_index: 15
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 13, bone_name: L_lipcorner_jnt}
+- !77309476864 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.22738437, y: 0.10442047, z: -0.43436554}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_cheek_jnt
+  - !PrefabInstance 
+    object_index: 16
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 14, bone_name: L_cheek_jnt}
+- !81604444160 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.1767762, y: 0.40936095, z: -0.16754699}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_brow_jnt
+  - !PrefabInstance 
+    object_index: 17
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 15, bone_name: L_brow_jnt}
+- !85899411456 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.20661347, y: 0.42273405, z: -2.1775688e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: browmid_jnt
+  - !PrefabInstance 
+    object_index: 18
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 16, bone_name: browmid_jnt}
+- !90194378752 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: -0.14183763, y: 0.43275955, z: 0.04491623}
+    rotation: 
+      w: 0.6693423
+      x: -0.11872527
+      y: -0.32502756
+      z: 0.6574514
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: fluffbase_jnt
+  - !PrefabInstance 
+    object_index: 19
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 17, bone_name: fluffbase_jnt}
+- !94489346048 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.17677628, y: 0.40936035, z: 0.16754699}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_brow_jnt
+  - !PrefabInstance 
+    object_index: 20
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 18, bone_name: R_brow_jnt}
+- !98784313344 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.22738262, y: 0.104424894, z: 0.434365}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_cheek_jnt
+  - !PrefabInstance 
+    object_index: 21
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 19, bone_name: R_cheek_jnt}
+- !103079280640 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.41141388, y: 0.27391067, z: 0.17555301}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_upperlip1_jnt
+  - !PrefabInstance 
+    object_index: 22
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 20, bone_name: R_upperlip1_jnt}
+- !107374247936 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.3800756, y: 0.14682555, z: 0.318255}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_upperlip2_jnt
+  - !PrefabInstance 
+    object_index: 23
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 21, bone_name: R_upperlip2_jnt}
+- !111669215232 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.3937335, y: 0.037949067, z: 0.379438}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_lipcorner_jnt
+  - !PrefabInstance 
+    object_index: 24
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 22, bone_name: R_lipcorner_jnt}
+- !115964182528 
+  - active: 1
+  - !Transform 
+    parent: {id: 42949738496}
+    position: {x: 0.41795927, y: 0.3035516, z: -3.909311e-18}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: upperlip_jnt
+  - !PrefabInstance 
+    object_index: 25
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 23, bone_name: upperlip_jnt}
+- !120259149824 
+  - active: 1
+  - !Transform 
+    parent: {id: 47244705792}
+    position: {x: 0.8507881, y: 3.8146972e-08, z: -7.6293944e-08}
+    rotation: 
+      w: 0.8934062
+      x: 0.17760146
+      y: -0.31947592
+      z: 0.26118618
+    scale: {x: 1, y: 1, z: 1.0000001}
+  - !Name 
+    name: L_F_shoulder_jnt
+  - !PrefabInstance 
+    object_index: 26
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 24, bone_name: L_F_shoulder_jnt}
+- !124554117120 
+  - active: 1
+  - !Transform 
+    parent: {id: 51539673088}
+    position: {x: -0.8507861, y: 7.867813e-07, z: 1.5258788e-06}
+    rotation: 
+      w: 0.89340633
+      x: 0.17760068
+      y: -0.31947622
+      z: 0.26118594
+    scale: {x: 1, y: 1, z: 0.9999999}
+  - !Name 
+    name: R_F_shoulder_jnt
+  - !PrefabInstance 
+    object_index: 27
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 25, bone_name: R_F_shoulder_jnt}
+- !128849084416 
+  - active: 1
+  - !Transform 
+    parent: {id: 55834640384}
+    position: {x: 0.29203507, y: 0, z: -1.934596e-16}
+    rotation: 
+      w: 0.98411006
+      x: 0
+      y: -1.0872386e-17
+      z: -0.17755954
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: pelvis_jnt
+  - !PrefabInstance 
+    object_index: 28
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 26, bone_name: pelvis_jnt}
+- !133144051712 
+  - active: 1
+  - !Transform 
+    parent: {id: 60129607680}
+    position: {x: 0.31965998, y: -7.6293944e-08, z: 2.3782177e-17}
+    rotation: 
+      w: -5.5545935e-10
+      x: -0.261901
+      y: 0.9650948
+      z: 2.0468462e-09
+    scale: {x: 0.9999998, y: 0.9999998, z: 1}
+  - !Name 
+    name: tonguebase_jnt
+  - !PrefabInstance 
+    object_index: 29
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 27, bone_name: tonguebase_jnt}
+- !137439019008 
+  - active: 1
+  - !Transform 
+    parent: {id: 60129607680}
+    position: {x: -0.1822995, y: -0.27625722, z: 0.385378}
+    rotation: 
+      w: 1
+      x: 0
+      y: 6.617445e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_lowerlip2_jnt
+  - !PrefabInstance 
+    object_index: 30
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 28, bone_name: L_lowerlip2_jnt}
+- !141733986304 
+  - active: 1
+  - !Transform 
+    parent: {id: 60129607680}
+    position: {x: -0.22725677, y: -0.43185467, z: 0.22048107}
+    rotation: 
+      w: 1
+      x: 0
+      y: 6.617445e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_lowerlip1_jnt
+  - !PrefabInstance 
+    object_index: 31
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 29, bone_name: L_lowerlip1_jnt}
+- !146028953600 
+  - active: 1
+  - !Transform 
+    parent: {id: 60129607680}
+    position: {x: -0.28115273, y: -0.46876395, z: -1.3324919e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 6.617445e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: lowerlip
+  - !PrefabInstance 
+    object_index: 32
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 30, bone_name: lowerlip}
+- !150323920896 
+  - active: 1
+  - !Transform 
+    parent: {id: 60129607680}
+    position: {x: -0.18229927, y: -0.27625677, z: -0.385378}
+    rotation: 
+      w: 0
+      x: 1.8312942e-17
+      y: -5.842975e-17
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_lowerlip2_jnt
+  - !PrefabInstance 
+    object_index: 33
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 31, bone_name: R_lowerlip2_jnt}
+- !154618888192 
+  - active: 1
+  - !Transform 
+    parent: {id: 60129607680}
+    position: {x: -0.22725776, y: -0.4318554, z: -0.220481}
+    rotation: 
+      w: 0
+      x: 1.8312942e-17
+      y: -5.842975e-17
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_lowerlip1_jnt
+  - !PrefabInstance 
+    object_index: 34
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 32, bone_name: R_lowerlip1_jnt}
+- !158913855488 
+  - active: 1
+  - !Transform 
+    parent: {id: 90194378752}
+    position: {x: 0.28116974, y: -5.7220458e-08, z: -3.8146972e-08}
+    rotation: 
+      w: 1
+      x: 0
+      y: 7.450581e-09
+      z: -7.450581e-09
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: flufftip_jnt
+  - !PrefabInstance 
+    object_index: 35
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 33, bone_name: flufftip_jnt}
+- !163208822784 
+  - active: 1
+  - !Transform 
+    parent: {id: 120259149824}
+    position: {x: 0.5138839, y: 3.8146972e-08, z: 7.6293944e-08}
+    rotation: 
+      w: 0.94987184
+      x: -0.19200042
+      y: 0.13908298
+      z: 0.2038022
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_F_elbow_jnt
+  - !PrefabInstance 
+    object_index: 36
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 34, bone_name: L_F_elbow_jnt}
+- !167503790080 
+  - active: 1
+  - !Transform 
+    parent: {id: 124554117120}
+    position: {x: -0.5138837, y: -2.2888183e-07, z: 7.6293944e-08}
+    rotation: 
+      w: 0.9498718
+      x: -0.19200042
+      y: 0.139083
+      z: 0.20380214
+    scale: {x: 1.0000001, y: 1.0000001, z: 1.0000002}
+  - !Name 
+    name: R_F_elbow_jnt
+  - !PrefabInstance 
+    object_index: 37
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 35, bone_name: R_F_elbow_jnt}
+- !171798757376 
+  - active: 1
+  - !Transform 
+    parent: {id: 128849084416}
+    position: {x: 0.20966789, y: -7.6293944e-08, z: -4.785448e-17}
+    rotation: 
+      w: 0.9903051
+      x: 5.220491e-26
+      y: 8.505739e-18
+      z: 0.13890925
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: tailbase_jnt
+  - !PrefabInstance 
+    object_index: 38
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 36, bone_name: tailbase_jnt}
+- !176093724672 
+  - active: 1
+  - !Transform 
+    parent: {id: 128849084416}
+    position: {x: 0.029421082, y: -0.16990837, z: 0.33694798}
+    rotation: 
+      w: 0.1621844
+      x: 0.80666786
+      y: -0.56562525
+      z: -0.055238582
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_B_hip_jnt
+  - !PrefabInstance 
+    object_index: 39
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 37, bone_name: L_B_hip_jnt}
+- !180388691968 
+  - active: 1
+  - !Transform 
+    parent: {id: 128849084416}
+    position: {x: 0.029421424, y: -0.1699076, z: -0.33694792}
+    rotation: 
+      w: 0.055238433
+      x: 0.56562525
+      y: 0.806668
+      z: 0.16218396
+    scale: {x: 0.99999976, y: 0.9999998, z: 0.9999998}
+  - !Name 
+    name: R_B_hip_jnt
+  - !PrefabInstance 
+    object_index: 40
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 38, bone_name: R_B_hip_jnt}
+- !184683659264 
+  - active: 1
+  - !Transform 
+    parent: {id: 133144051712}
+    position: {x: 0.24872068, y: 0, z: -3.1977907e-09}
+    rotation: 
+      w: 0.9991985
+      x: -1.04166914e-16
+      y: 0
+      z: 0.04003077
+    scale: {x: 0.99999994, y: 0.99999994, z: 1}
+  - !Name 
+    name: tonguemid_jnt
+  - !PrefabInstance 
+    object_index: 41
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 39, bone_name: tonguemid_jnt}
+- !188978626560 
+  - active: 1
+  - !Transform 
+    parent: {id: 163208822784}
+    position: {x: 0.28109115, y: 0, z: 0}
+    rotation: 
+      w: 0.9610569
+      x: -0.0054454594
+      y: 0.049407776
+      z: 0.27184355
+    scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  - !Name 
+    name: L_F_ankle_jnt
+  - !PrefabInstance 
+    object_index: 42
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 40, bone_name: L_F_ankle_jnt}
+- !193273593856 
+  - active: 1
+  - !Transform 
+    parent: {id: 167503790080}
+    position: {x: -0.28109145, y: -3.2424927e-07, z: 3.0517577e-07}
+    rotation: 
+      w: 0.9610569
+      x: -0.0054446706
+      y: 0.049407218
+      z: 0.27184373
+    scale: {x: 0.9999999, y: 0.9999999, z: 0.99999994}
+  - !Name 
+    name: R_F_ankle_jnt
+  - !PrefabInstance 
+    object_index: 43
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 41, bone_name: R_F_ankle_jnt}
+- !197568561152 
+  - active: 1
+  - !Transform 
+    parent: {id: 171798757376}
+    position: {x: 0.2250654, y: 2.4205764e-16, z: -5.121417e-17}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: tail_jnt
+  - !PrefabInstance 
+    object_index: 44
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 42, bone_name: tail_jnt}
+- !201863528448 
+  - active: 1
+  - !Transform 
+    parent: {id: 176093724672}
+    position: {x: 0.463368, y: -3.8146972e-08, z: 3.8146972e-08}
+    rotation: 
+      w: 0.84291106
+      x: 0.15176453
+      y: 0.022018477
+      z: -0.515736
+    scale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
+  - !Name 
+    name: L_B_knee_jnt
+  - !PrefabInstance 
+    object_index: 45
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 43, bone_name: L_B_knee_jnt}
+- !206158495744 
+  - active: 1
+  - !Transform 
+    parent: {id: 180388691968}
+    position: {x: -0.46336806, y: -4.196167e-07, z: -1.9073485e-07}
+    rotation: 
+      w: 0.84291106
+      x: 0.15176454
+      y: 0.02201847
+      z: -0.51573604
+    scale: {x: 1.0000001, y: 1.0000001, z: 1}
+  - !Name 
+    name: R_B_knee_jnt
+  - !PrefabInstance 
+    object_index: 46
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 44, bone_name: R_B_knee_jnt}
+- !210453463040 
+  - active: 1
+  - !Transform 
+    parent: {id: 184683659264}
+    position: {x: 0.24302654, y: -1.5258789e-07, z: 3.7085137e-09}
+    rotation: 
+      w: 1
+      x: 3.4694503e-18
+      y: 0
+      z: -7.4505815e-09
+    scale: {x: 0.99999994, y: 0.99999994, z: 1}
+  - !Name 
+    name: tonguetip_jnt
+  - !PrefabInstance 
+    object_index: 47
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 45, bone_name: tonguetip_jnt}
+- !214748430336 
+  - active: 1
+  - !Transform 
+    parent: {id: 188978626560}
+    position: {x: 0.25232744, y: -9.499088e-17, z: 1.5611552e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_F_toe_jnt
+  - !PrefabInstance 
+    object_index: 48
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 46, bone_name: L_F_toe_jnt}
+- !219043397632 
+  - active: 1
+  - !Transform 
+    parent: {id: 193273593856}
+    position: {x: -0.25232676, y: 6.3773925e-08, z: -5.80696e-07}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_F_toe_jnt
+  - !PrefabInstance 
+    object_index: 49
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 47, bone_name: R_F_toe_jnt}
+- !223338364928 
+  - active: 1
+  - !Transform 
+    parent: {id: 201863528448}
+    position: {x: 0.19586703, y: -3.8146972e-08, z: -3.8146972e-08}
+    rotation: 
+      w: 0.6924765
+      x: -0.068453185
+      y: -0.009202836
+      z: 0.7181266
+    scale: {x: 0.99999994, y: 0.9999999, z: 0.99999994}
+  - !Name 
+    name: L_B_ankle_jnt
+  - !PrefabInstance 
+    object_index: 50
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 48, bone_name: L_B_ankle_jnt}
+- !227633332224 
+  - active: 1
+  - !Transform 
+    parent: {id: 206158495744}
+    position: {x: -0.19586761, y: -4.5776366e-07, z: -2.2888183e-07}
+    rotation: 
+      w: 0.69247633
+      x: -0.06845436
+      y: -0.009202796
+      z: 0.71812665
+    scale: {x: 1.0000001, y: 1, z: 1.0000001}
+  - !Name 
+    name: R_B_ankle_jnt
+  - !PrefabInstance 
+    object_index: 51
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 49, bone_name: R_B_ankle_jnt}
+- !231928299520 
+  - active: 1
+  - !Transform 
+    parent: {id: 223338364928}
+    position: {x: 0.19266212, y: -4.2779588e-17, z: -1.3328504e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_B_toe_jnt
+  - !PrefabInstance 
+    object_index: 52
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 50, bone_name: L_B_toe_jnt}
+- !236223266816 
+  - active: 1
+  - !Transform 
+    parent: {id: 227633332224}
+    position: {x: -0.19266184, y: -1.4150768e-07, z: -3.0973806e-07}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_B_toe_jnt
+  - !PrefabInstance 
+    object_index: 53
+    overrides: []
+    prefab: {guid: d1b54a2f-6e5c-42ba-ab91-f78f0c3f76a3}
+  - !Bone 
+    {bone_index: 51, bone_name: R_B_toe_jnt}

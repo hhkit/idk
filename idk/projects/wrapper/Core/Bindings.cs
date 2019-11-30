@@ -17,6 +17,12 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior[] ObjectGetObjectsOfType(string type);
 
+        /*
+         * Scene
+         */
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void SceneChangeScene(Guid guid);
 
         /**
          * Game Object
@@ -463,6 +469,10 @@ namespace idk
         public extern static Color TextGetColor(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TextSetColor(ulong id, Color color);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static uint TextGetFontSize(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetFontSize(ulong id, uint value);
 
         /*
          * Resource

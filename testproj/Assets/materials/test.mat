@@ -64,23 +64,31 @@ links:
   node_out: 8c49899c-678c-4a61-98c9-3ba8abd616f7
   slot_in: 1
   slot_out: 0
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
-  slot_in: 4
-  slot_out: 3
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 53bbc36e-5863-4a99-a091-93f5aef049dc
-  slot_in: 0
-  slot_out: 3
 - node_in: 53bbc36e-5863-4a99-a091-93f5aef049dc
   node_out: 99e9f376-1e36-40ee-aaed-f1b22ed73ad6
   slot_in: 1
   slot_out: 4
-- node_in: d5084548-0ebd-44fb-b98c-94bd0951100a
-  node_out: 1ec37a89-4780-4966-ae2c-a20c435e7c94
+- node_in: 20bab60e-9a2f-429e-9796-ee7306bae3b9
+  node_out: e149b4ec-f809-4059-93cb-a0f7d3aeb0b5
   slot_in: 1
-  slot_out: 0
-master_node: d5084548-0ebd-44fb-b98c-94bd0951100a
+  slot_out: 1
+- node_in: 20bab60e-9a2f-429e-9796-ee7306bae3b9
+  node_out: 53bbc36e-5863-4a99-a091-93f5aef049dc
+  slot_in: 0
+  slot_out: 3
+- node_in: 20bab60e-9a2f-429e-9796-ee7306bae3b9
+  node_out: 30eda6ea-765f-45e8-a622-c9c3a3b7d971
+  slot_in: 4
+  slot_out: 3
+- node_in: 20bab60e-9a2f-429e-9796-ee7306bae3b9
+  node_out: cea7d69a-a98d-4c41-9e2f-54240890c5db
+  slot_in: 3
+  slot_out: 3
+- node_in: 20bab60e-9a2f-429e-9796-ee7306bae3b9
+  node_out: 7b47c039-a436-4ee7-82de-ce3b7758ff84
+  slot_in: 2
+  slot_out: 3
+master_node: 20bab60e-9a2f-429e-9796-ee7306bae3b9
 nodes: 
   1ec37a89-4780-4966-ae2c-a20c435e7c94: 
     control_values: ""
@@ -90,6 +98,19 @@ nodes:
     output_slots: 
     - {type: VEC3, value: ""}
     position: {x: 342, y: 205}
+  20bab60e-9a2f-429e-9796-ee7306bae3b9: 
+    control_values: ""
+    guid: 20bab60e-9a2f-429e-9796-ee7306bae3b9
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: ""}
+    - {type: VEC3, value: '0,0,0'}
+    name: master\PBR
+    output_slots: []
+    position: {x: 724.70087, y: 224.66518}
   2d67e13d-4f70-472f-83e8-f57ddc178edb: 
     control_values: ""
     guid: 2d67e13d-4f70-472f-83e8-f57ddc178edb
@@ -151,7 +172,7 @@ nodes:
     guid: 53bbc36e-5863-4a99-a091-93f5aef049dc
     input_slots: 
     - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: ""}
+    - {type: FLOAT, value: 0}
     - {type: FLOAT, value: ""}
     name: input\basic\Vec3
     output_slots: 
@@ -239,18 +260,6 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     position: {x: -244.34998, y: 608.99255}
-  d5084548-0ebd-44fb-b98c-94bd0951100a: 
-    control_values: ""
-    guid: d5084548-0ebd-44fb-b98c-94bd0951100a
-    input_slots: 
-    - {type: VEC3, value: ""}
-    - {type: VEC3, value: ""}
-    - {type: FLOAT, value: 0}
-    - {type: FLOAT, value: 0}
-    - {type: FLOAT, value: ""}
-    name: master\PBR
-    output_slots: []
-    position: {x: 724.70087, y: 224.66518}
   e149b4ec-f809-4059-93cb-a0f7d3aeb0b5: 
     control_values: ""
     guid: e149b4ec-f809-4059-93cb-a0f7d3aeb0b5

@@ -1,4 +1,5 @@
 ﻿using idk;
+using idk.SceneManagement;
 using System.Collections.Generic;
 
 namespace TestAndSeek
@@ -14,6 +15,7 @@ namespace TestAndSeek
         public Prefab prefab;
         public GameObject go;
         public MaterialInstance minst;
+        public Scene scene;
         public string nama;
         public string namae_o;
 
@@ -75,14 +77,18 @@ namespace TestAndSeek
 
         void FixedUpdate()
         {
-            Debug.Log("static_i " + ++static_i);
+            //Debug.Log("static_i " + ++static_i);
 
             if (Input.GetKeyDown(KeyCode.I))
             {
-                Debug.Log("minst:" + minst);
-                Debug.Log("rend: " + gameObject.GetComponentInChildren<Renderer>());
-                gameObject.GetComponentInChildren<Renderer>().materialInstance = minst;
+                Debug.Log("spawning prefab");
+                var inst = prefab.Instantiate();
+                Debug.Log("spawned with " + inst.transform.GetChildren().Length + " children.");
+                //Debug.Log("minst:" + minst);
+                //Debug.Log("rend: " + gameObject.GetComponentInChildren<Renderer>());
+                //gameObject.GetComponentInChildren<Renderer>().materialInstance = minst;
             }
+
 
             if (Input.GetKeyDown(KeyCode.P))
                 Time.timeScale = 0f;
@@ -122,9 +128,11 @@ namespace TestAndSeek
 
         void Update()
         {
+            if (Input.GetKeyDown(KeyCode.C))
+                SceneManager.LoadScene(scene);
             //Debug.Log("Children" + transform.GetChildren().Length.ToString());
-            if (prefab)
-                Debug.Log(prefab.ToString());
+            //if (prefab)
+            //    Debug.Log(prefab.ToString());
 
             //if (Input.GetKeyDown(KeyCode.L))
             //    GetComponentInParent<TestShou>().PrintI();

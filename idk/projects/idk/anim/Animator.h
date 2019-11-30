@@ -25,9 +25,10 @@ namespace idk
 		
 		// Engine Setters
 		void AddLayer();
+		size_t FindLayerIndex(string_view name);
 		bool RenameLayer(string_view from, string_view to);
-		void RemoveLayer(string_view name);
-		void RemoveLayer(size_t index);
+		bool RemoveLayer(string_view name);
+		bool RemoveLayer(size_t index);
 
 		void AddAnimation(RscHandle<anim::Animation> anim_rsc);
 		bool RenameAnimation(string_view from, string_view to);
@@ -63,7 +64,7 @@ namespace idk
 		void OnPreview();
 
 		// Script Functions
-		void Play(string_view animation_name, float offset = 0.0f);
+		void Play(string_view animation_name = "", float offset = 0.0f);
 		void Play(string_view animation_name, string_view layer_name, float offset = 0.0f);
 		void Play(string_view animation_name, size_t layer_index, float offset = 0.0f);
 
@@ -116,14 +117,17 @@ namespace idk
 		// ======================= Public Variables ========================
 		RscHandle<anim::Skeleton> skeleton;
 
-		hash_table<string, size_t> layer_table{};
+		// hash_table<string, size_t> layer_table{};
 		vector<AnimationLayer> layers{};
 
 		// Scripting variables (Ideally should type erase them)
-		hash_table<string, anim::IntParam>		int_vars;
-		hash_table<string, anim::FloatParam>	float_vars;
-		hash_table<string, anim::BoolParam>		bool_vars;
-		hash_table<string, anim::TriggerParam>	trigger_vars;
+		struct AnimationParams 
+		{
+			hash_table<string, anim::IntParam>		int_vars;
+			hash_table<string, anim::FloatParam>	float_vars;
+			hash_table<string, anim::BoolParam>		bool_vars;
+			hash_table<string, anim::TriggerParam>	trigger_vars;
+		}parameters{};
 		
 		bool preview_playback = false;
 	private:
@@ -138,7 +142,8 @@ namespace idk
 		// This is what we send to the graphics system.
 		vector<mat4> final_bone_transforms{ mat4{} };
 
-		
+		bool _initialized = false;
+		size_t _intialize_count = 0;
 	};
 }
 

@@ -1029,7 +1029,7 @@ namespace idk::vkn
 			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{
-				vkn_fb.GetRenderPass()
+				*vkn_fb.GetRenderPass()
 				,frame_buffer
 				,vk::Rect2D{ vk::Offset2D{}, vk::Extent2D(s_cast<uint32_t>(vkn_fb.Size().x),s_cast<uint32_t>(vkn_fb.Size().y)) }
 				,s_cast<uint32_t>(std::size(clearcolor))

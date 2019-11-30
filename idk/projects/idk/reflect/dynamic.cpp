@@ -87,9 +87,22 @@ namespace idk::reflect
 			using fn_getset_t = std::decay_t<decltype(fn_getset)>;
 			using T = ::property::vartype_from_functiongetset<fn_getset_t>;
 			void* offsetted = ::property::details::HandleBasePointer(_ptr->get(), entry.m_Offset);
-			T& value = *reinterpret_cast<T*>(offsetted);
-			val.swap(value);
 			name = type._context->table.m_pEntry[index].m_pName;
+
+			using fn_getsettype = std::decay_t<decltype(fn_getset)>;
+			if constexpr (std::is_same_v<fn_getsettype, std::optional<std::tuple<const detail::table&, void*>>(*)(void*, std::uint64_t) noexcept>)
+			{
+				std::tuple<const detail::table&, void*> tup = fn_getset(offsetted, 0).value();
+				auto name = std::get<0>(tup).m_pName;
+				void* value = std::get<1>(tup);
+				val.swap(dynamic{ get_type(name), value });
+			}
+			else
+			{
+				using T = ::property::vartype_from_functiongetset<fn_getset_t>;
+				T& value = *reinterpret_cast<T*>(offsetted);
+				val.swap(value);
+			}
 
 		}, entry.m_FunctionTypeGetSet);
 

@@ -71,9 +71,14 @@ namespace idk
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
+		struct CanvasRenderRange
+		{
+			size_t inst_font_begin{}, inst_font_end{};
+		};
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
+		bool isolate = false;
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
@@ -153,8 +158,11 @@ namespace idk
 			vector<FontRange>      font_range;
 
 			hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
+			vector<UIRenderObjectWithCanvas> ui_canvas;
 			vector<UITextRange>   ui_text_range;
-			vector<FontPoint>      ui_text_buffer;
+			vector<UIAttriBlock>   ui_text_buffer;
+			size_t  ui_total_num_of_text{ 0 };
+			//vector<FontPoint>     ui_text_buffer;
 
 			size_t curr_scene_camera_index;
 
@@ -166,6 +174,7 @@ namespace idk
 
 			vector<RenderRange> culled_render_range;
 			vector<LightRenderRange> culled_light_render_range;
+			vector<CanvasRenderRange> canvas_render_range;
 
 			//RscHandle<ShaderProgram> mesh_vtx;
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;

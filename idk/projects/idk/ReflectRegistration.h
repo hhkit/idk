@@ -539,14 +539,11 @@ REFLECT_END()
 REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::AnimationLayer::anim_state_table), "hash_table<string,size_t>")
-REFLECT_END()
-
 REFLECT_BEGIN(decltype(idk::AnimationLayer::anim_states), "vector<AnimationState>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
-REFLECT_VARS(name, default_index, default_weight, anim_states, anim_state_table, bone_mask, blend_type)
+REFLECT_VARS(name, default_index, default_weight, anim_states, bone_mask, blend_type)
 REFLECT_END()
 // Animation parameters
 REFLECT_BEGIN(idk::anim::IntParam, "anim::IntParam")
@@ -565,16 +562,20 @@ REFLECT_BEGIN(idk::anim::TriggerParam, "anim::TriggerParam")
 REFLECT_VARS(name, def_val, val, valid)
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::int_vars), "hash_table<string,anim::IntParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::int_vars), "hash_table<string,anim::IntParam>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::float_vars), "hash_table<string,anim::FloatParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::float_vars), "hash_table<string,anim::FloatParam>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::bool_vars), "hash_table<string,anim::BoolParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::bool_vars), "hash_table<string,anim::BoolParam>")
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::trigger_vars), "hash_table<string,anim::TriggerParam>")
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::trigger_vars), "hash_table<string,anim::TriggerParam>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Animator::AnimationParams, "parameters")
+REFLECT_VARS(int_vars, float_vars, bool_vars, trigger_vars)
 REFLECT_END()
 
 // Animator serialization
@@ -582,7 +583,7 @@ REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(skeleton, layer_table, layers, int_vars, float_vars, bool_vars, trigger_vars)
+REFLECT_VARS(skeleton, layers, parameters)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Bone, "Bone")

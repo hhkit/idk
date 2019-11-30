@@ -20,7 +20,7 @@ namespace idk
 		base_layer.name = "Base Layer";
 		std::fill(base_layer.bone_mask.begin(), base_layer.bone_mask.end(), true);
 		
-		layer_table.emplace("Base Layer", 0);
+		// layer_table.emplace("Base Layer", 0);
 		layers.push_back(base_layer);
 	}
 
@@ -52,7 +52,7 @@ namespace idk
 		string append = "";
 		// Check if name exists
 		int count = 0;
-		while (layer_table.find(name + append) != layer_table.end())
+		while (FindLayerIndex(name + append) < layers.size())
 		{
 			// Generate a unique name
 			append = " " + std::to_string(count++);
@@ -66,75 +66,65 @@ namespace idk
 		// All bones are initialized to be unmasked the start
 		std::fill(new_layer.bone_mask.begin(), new_layer.bone_mask.end(), true);
 
-		layer_table.emplace(new_layer.name, layers.size());
 		layers.push_back(new_layer);
+	}
+
+	size_t Animator::FindLayerIndex(string_view name)
+	{
+		size_t index;
+		for (index = 0; index < layers.size(); ++index)
+		{
+			if (layers[index].name == name)
+				break;
+		}
+		return index;
 	}
 
 	bool Animator::RenameLayer(string_view from, string_view to)
 	{
 		string from_str{ from };
 		string to_str{ to };
-		auto res = layer_table.find(from_str);
-		if (res == layer_table.end())
+		auto found_src = FindLayerIndex(from_str);
+		if (found_src >= layers.size())
 		{
 			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation layer (" } +from.data() + ") to (" + to.data() + ").");
 			return false;
 		}
 
-		auto found_dest = layer_table.find(to_str);
-		if (found_dest != layer_table.end())
+		auto found_dest = FindLayerIndex(to_str);
+		if (found_dest < layers.size())
 		{
 			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation layer (" } +from.data() + ") to (" + to.data() + ").");
 			return false;
 		}
 
 
-		auto copy = res->second;
+		// auto copy = res->second;
+		// 
+		// layer_table.erase(res);
+		// layer_table.emplace(to_str, copy);
 
-		layer_table.erase(res);
-		layer_table.emplace(to_str, copy);
-
-		layers[copy].name = to_str;
+		layers[found_src].name = to_str;
 
 		return true;
 	}
 
-	void Animator::RemoveLayer(string_view name)
+	bool Animator::RemoveLayer(string_view name)
 	{
-		auto res = layer_table.find(name.data());
-		if (res == layer_table.end())
-		{
-			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + name.data() + ".");
-			return;
-		}
-
-		if (res->second >= layers.size())
-		{
-			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + name.data() + ".");
-			return;
-		}
-
-		layers.erase(layers.begin() + res->second);
-		layer_table.erase(res);
+		auto res = FindLayerIndex(name);
+		return RemoveLayer(res);
 	}
 
-	void Animator::RemoveLayer(size_t index)
+	bool Animator::RemoveLayer(size_t index)
 	{
 		if(index >= layers.size())
 		{
 			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + std::to_string(index) + ".");
-			return;
+			return false;
 		}
 
-		auto res = layer_table.find(layers[index].name.data());
-		if (res == layer_table.end())
-		{
-			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + layers[index].name.data() + ".");
-			return;
-		}
-
-		layer_table.erase(res);
 		layers.erase(layers.begin() + index);
+		return true;
 	}
 
 #pragma endregion
@@ -146,16 +136,16 @@ namespace idk
 		for(auto& layer : layers)
 			layer.Reset();
 
-		for (auto& p : int_vars)
+		for (auto& p : parameters.int_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : float_vars)
+		for (auto& p : parameters.float_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : bool_vars)
+		for (auto& p : parameters.bool_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : trigger_vars)
+		for (auto& p : parameters.trigger_vars)
 			p.second.ResetToDefault();
 	}
 
@@ -166,16 +156,16 @@ namespace idk
 			layers[i].ResetToDefault();
 		}
 
-		for (auto& p : int_vars)
+		for (auto& p : parameters.int_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : float_vars)
+		for (auto& p : parameters.float_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : bool_vars)
+		for (auto& p : parameters.bool_vars)
 			p.second.ResetToDefault();
 
-		for (auto& p : trigger_vars)
+		for (auto& p : parameters.trigger_vars)
 			p.second.ResetToDefault();
 	}
 
@@ -209,14 +199,14 @@ namespace idk
 	void Animator::Play(string_view animation_name, string_view layer_name, float offset)
 	{
 		// bool valid = true;
-		auto layer_res = layer_table.find(layer_name.data());
-		if (layer_res == layer_table.end())
+		auto layer_res = FindLayerIndex(layer_name);
+		if (layer_res >= layers.size())
 		{
 			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
 			return;
 		}
 
-		layers[layer_res->second].Play(animation_name, offset);
+		layers[layer_res].Play(animation_name, offset);
 	}
 
 	void Animator::Play(string_view animation_name, size_t layer_index, float offset)
@@ -251,14 +241,14 @@ namespace idk
 
 	void Animator::Resume(string_view layer_name)
 	{
-		auto layer_res = layer_table.find(layer_name.data());
-		if (layer_res == layer_table.end())
+		auto layer_res = FindLayerIndex(layer_name);
+		if (layer_res >= layers.size())
 		{
 			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
 			return;
 		}
 
-		layers[layer_res->second].Resume();
+		layers[layer_res].Resume();
 	}
 
 	void Animator::Resume(size_t layer_index)
@@ -280,14 +270,14 @@ namespace idk
 
 	void Animator::Pause(string_view layer_name)
 	{
-		auto layer_res = layer_table.find(layer_name.data());
-		if (layer_res == layer_table.end())
+		auto layer_res = FindLayerIndex(layer_name);
+		if (layer_res >= layers.size())
 		{
 			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
 			return;
 		}
 
-		layers[layer_res->second].Pause();
+		layers[layer_res].Pause();
 	}
 
 	void Animator::Pause(int layer_index)
@@ -308,14 +298,14 @@ namespace idk
 
 	void Animator::Stop(string_view layer_name)
 	{
-		auto layer_res = layer_table.find(layer_name.data());
-		if (layer_res == layer_table.end())
+		auto layer_res = FindLayerIndex(layer_name);
+		if (layer_res >= layers.size())
 		{
 			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
 			return;
 		}
 
-		layers[layer_res->second].Stop();
+		layers[layer_res].Stop();
 	}
 
 	void Animator::Stop(int layer_index)
@@ -350,7 +340,7 @@ namespace idk
 
 	void Animator::ResetTriggers()
 	{
-		for (auto& trigger : trigger_vars)
+		for (auto& trigger : parameters.trigger_vars)
 			trigger.second.val = false;
 	}
 

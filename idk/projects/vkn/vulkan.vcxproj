@@ -106,10 +106,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>%VULKAN_SDK%\Include\;$(SolutionDir)projects\idk\;$(SolutionDir)projects\win32\;$(SolutionDir)projects\;$(SolutionDir)dep\include\</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26495</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
@@ -181,7 +181,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -217,6 +217,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BufferedObj.h" />
+    <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CubemapRenderer.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DeferredPass.h" />
@@ -297,6 +298,7 @@
     <ClInclude Include="vulkan_state_fwd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
     <ClCompile Include="DDSLoader.cpp" />
     <ClCompile Include="DeferredPass.cpp" />

@@ -33,9 +33,13 @@ namespace idk
 		: public Component<Light>
 	{
 	public:
+		bool         enabled       { true };
 		LightVariant light;
 		real         shadow_bias   { epsilon };
 		bool         casts_shadows { true };
+		bool         isolate       { false };
+
+		bool is_active_and_enabled() const;
 
 		void InitShadowMap();
 		RscHandle<FrameBuffer>& GetLightMap();

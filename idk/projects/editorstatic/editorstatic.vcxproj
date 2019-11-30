@@ -23,11 +23,11 @@
     <ClCompile Include="imgui\ImCurveEdit.cpp" />
     <ClCompile Include="imgui\ImGradient.cpp" />
     <ClCompile Include="imgui\ImGuizmo.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_stl.cpp" />
     <ClCompile Include="imgui\imnodes\ImNodes.cpp" />
     <ClCompile Include="imgui\ImSequencer.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\ImGUIImpl_Win32.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
@@ -39,12 +39,12 @@
     <ClInclude Include="imgui\ImCurveEdit.h" />
     <ClInclude Include="imgui\ImGradient.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="imgui\imgui_impl_win32.h" />
     <ClInclude Include="imgui\imgui_stl.h" />
     <ClInclude Include="imgui\imnodes\ImNodes.h" />
     <ClInclude Include="imgui\ImSequencer.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\ImGUIImpl_Win32.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\imgui_impl_vulkan.h" />
     <ClInclude Include="imgui\imgui_internal.h" />

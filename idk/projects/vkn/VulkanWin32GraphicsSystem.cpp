@@ -198,46 +198,7 @@ namespace idk::vkn
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
-	/*
-	vector<IBufferedObj*> GetBufferedResources(vector<GraphicsState>& states)
-	{
-		hash_set<RscHandle<Texture>> textures;
-		hash_set<RscHandle<Mesh>> meshes;
-		for (auto& state : states)
-		{
-			for (auto& mesh_render : state.mesh_render)
-			{
-				meshes.emplace(mesh_render->mesh);
-				auto& m_inst = mesh_render->material_instance;
-				for (auto& uniform : m_inst.uniforms)
-				{
-					if (m_inst.IsImageBlock(uniform.first))
-					{
-						for (auto& tex : m_inst.GetImageBlock(uniform.first))
-						{
-							textures.emplace(tex.second);
-						}
-					}
-				}	
-			}
-		}
-
-		//Transform the result sets into buffered object vector
-		vector<IBufferedObj*> objs;
-		for (auto& mesh : meshes)
-		{
-
-		}
-	}
 	
-	void UpdateResources(uint32_t frame_index, const vector<IBufferedObj*>& buffered_objects)
-	{
-		for (auto p_obj : buffered_objects)
-		{
-			p_obj->UpdateCurrent(frame_index);
-		}
-	}
-	*/
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		try
@@ -250,11 +211,6 @@ namespace idk::vkn
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
-
-
-		//auto copy_cams = curr_buffer.light_camera_data;
-		//std::copy(curr_buffer.camera.begin(), curr_buffer.camera.end(), std::back_inserter(copy_cams));
-		//std::swap(copy_cams, curr_buffer.camera);
 
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
 
@@ -272,6 +228,12 @@ namespace idk::vkn
 		shared_graphics_state.fonts_data = &curr_buffer.font_render_data;
 		shared_graphics_state.font_range = &curr_buffer.font_range;
 
+		shared_graphics_state.ui_render_per_canvas = &curr_buffer.ui_render_per_canvas;
+		shared_graphics_state.ui_canvas = &curr_buffer.ui_canvas;
+		shared_graphics_state.ui_text_data = &curr_buffer.ui_text_buffer;
+		shared_graphics_state.ui_text_range = &curr_buffer.ui_text_range;
+		shared_graphics_state.total_num_of_text = curr_buffer.ui_total_num_of_text;
+
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
 		pre_render_data.active_lights.resize(lights.size());
@@ -284,10 +246,19 @@ namespace idk::vkn
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
-		//pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
-		//pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
+
 		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
 		pre_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
+
+		PostRenderData post_render_data;
+		post_render_data.shared_gfx_state = &shared_graphics_state;
+		post_render_data.cameras = &curr_buffer.camera;
+		post_render_data.canvas_render_range = &curr_buffer.canvas_render_range;
+		//post_render_data.Init();
+
+		post_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
+		post_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
+
 		hash_set<RscHandle<RenderTarget>> render_targets;
 
 		auto IsDontClear = [](const CameraData& camera)
@@ -370,7 +341,8 @@ namespace idk::vkn
 		// */
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
-		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
+		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
+		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(),*curr_signal.render_finished);
 
 		}
 		catch (vk::SystemError& err)

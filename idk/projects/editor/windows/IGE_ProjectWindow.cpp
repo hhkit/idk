@@ -63,7 +63,7 @@ namespace idk {
         bool selected = dir == current_dir;
         if (!dirContainsDir(dir))
         {
-            auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth;
+            auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
             if (selected) flags |= ImGuiTreeNodeFlags_Selected;
             ImGui::TreeNodeEx(dir.GetFileName().data(), flags);
             if (ImGui::IsItemClicked())
@@ -72,7 +72,7 @@ namespace idk {
         else
         {
             auto open = ImGui::TreeNodeEx(dir.GetFileName().data(),
-                                          ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllAvailWidth |
+                                          ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth |
                                           ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
             if (ImGui::IsItemClicked())
                 current_dir = dir;

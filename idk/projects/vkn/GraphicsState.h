@@ -62,10 +62,19 @@ namespace idk::vkn
 		//vector<shadow_map_t> shadow_maps;
 
 		vector<hlp::vector_buffer>        font_buffer;
-		//hlp::vector_buffer                font_buffer;
 		vector<FontRange>*				  font_range;
 		const vector<FontPoint>*          characters_data;
 		const vector<FontRenderData>*	  fonts_data;
+
+		//vector<hlp::vector_buffer>        ui_text_buffer;
+		vector<hlp::vector_buffer>        ui_text_buffer_pos;
+		vector<hlp::vector_buffer>        ui_text_buffer_uv;
+		hash_table<Handle<Canvas>, vector<UIRenderObject>>* ui_render_per_canvas;
+		vector<UIRenderObjectWithCanvas>* ui_canvas;
+		vector<UITextRange>*   ui_text_range;
+		vector<UIAttriBlock>*      ui_text_data;
+		size_t total_num_of_text{ 0 };
+		//vector<FontPoint>* ui_text_data;
 
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);
 
@@ -97,6 +106,7 @@ namespace idk::vkn
 	{
 		SharedGraphicsState* shared_gfx_state;
 		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
+		vector<size_t> active_canvas;
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;
 		hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> material_instances;
@@ -151,13 +161,16 @@ namespace idk::vkn
 	struct PostRenderData :CoreGraphicsState
 	{
 		const vector<CameraData>* cameras;
-		const vector<InstancedData>* inst_mesh_buffer;
-		const vector<GraphicsSystem::LightRenderRange>* shadow_ranges;
+		//const vector<InstancedData>* inst_mesh_buffer;
+		//const vector<GraphicsSystem::LightRenderRange>* shadow_ranges;
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
+		//hash_table<Handle<Canvas>, vector<UIRenderObject>>* ui_render_per_canvas;
+		const vector<GraphicsSystem::CanvasRenderRange>* canvas_render_range;
+
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
-		void Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms, const vector<InstancedData>& inst_mesh_render_buffer);
+		void Init();
 	};
 
 	//Doesn't seem feasible, but might make for some kind of reference in the future

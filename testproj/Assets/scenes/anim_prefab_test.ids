@@ -1,0 +1,2255 @@
+- !65536 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.70710677
+      x: -0.70710677
+      y: -0
+      z: -0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Directional Light
+  - !Light 
+    casts_shadows: 1
+    light: !DirectionalLight 
+      bottom: -5
+      far: 5
+      intensity: 1
+      left: -5
+      light_color: 
+        a: 1
+        b: 1
+        g: 1
+        r: 1
+      near: -5
+      right: 5
+      top: 5
+    shadow_bias: 1.1920929e-07
+- !4295032832 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Camera
+- !8590000128 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -0.024933089, y: -0.38230443, z: -5.192744}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: maid_model
+  - !PrefabInstance 
+    object_index: 0
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Animator 
+    bool_vars: {}
+    float_vars: {}
+    int_vars: {}
+    layers: 
+    - anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      blend_type: Override_Blend
+      bone_mask: 
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      default_index: 0
+      default_weight: 1
+      name: Base Layer
+    skeleton: {guid: e25fabb0-38e0-45d8-9f67-a99f7c99b296}
+    trigger_vars: {}
+- !12884967424 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: BindSkirt_geo
+  - !PrefabInstance 
+    object_index: 1
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: e3670c26-1801-42c8-bfea-0f4c8d8343f7}
+- !17179934720 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: SkirtFrills_low1
+  - !PrefabInstance 
+    object_index: 2
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 76cd9dd4-2d95-46c6-91f3-8b94f9523584}
+- !21474902016 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: RibbonTopLower_low1
+  - !PrefabInstance 
+    object_index: 3
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 92d55fa1-ae89-4ce1-82aa-d0e91e9d25ce}
+- !25769869312 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: RibbonKnotLower_low1
+  - !PrefabInstance 
+    object_index: 4
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 4f6cd0cd-beaa-483c-9fe9-4419e39c9409}
+- !30064836608 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: BackString_low1
+  - !PrefabInstance 
+    object_index: 5
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 09f9e446-ac5e-44c6-b554-9f2535eda3ea}
+- !34359803904 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: HairSides_low1
+  - !PrefabInstance 
+    object_index: 6
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 3883f314-c31e-49dc-8fbc-e68bb3a270df}
+- !38654771200 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: HairTie_low1
+  - !PrefabInstance 
+    object_index: 7
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: a88fd80f-3f2a-47ca-9286-a8ebfd01f0f8}
+- !42949738496 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: RibbonTop_low1
+  - !PrefabInstance 
+    object_index: 8
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 0c29b9b3-61cc-4798-90b1-98da73d3bd54}
+- !47244705792 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: RibbonKnot_low1
+  - !PrefabInstance 
+    object_index: 9
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: a47da5ce-77e8-40a0-98fa-9c12a17a107a}
+- !51539673088 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: HairBun_low1
+  - !PrefabInstance 
+    object_index: 10
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 66c2014a-f420-46b2-a951-cad13a906f5c}
+- !55834640384 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: polySurface2
+  - !PrefabInstance 
+    object_index: 11
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 3a2aae32-e5ea-4f42-9bac-28c1b064656c}
+- !60129607680 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: polySurface1
+  - !PrefabInstance 
+    object_index: 12
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: cc477f6e-fc4f-48f1-8240-972ad6a3247d}
+- !64424574976 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: AnkleBrace_low1
+  - !PrefabInstance 
+    object_index: 13
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: cb43f1ff-04fa-4624-81c5-cfe6922dbf4d}
+- !68719542272 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Hair_low
+  - !PrefabInstance 
+    object_index: 14
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 1b394570-6882-4079-ae81-b1363e2907ce}
+- !73014509568 
+  - active: 1
+  - !Transform 
+    parent: {id: 8590000128}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Maid_root_jnt
+  - !PrefabInstance 
+    object_index: 15
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 0, bone_name: Maid_root_jnt}
+- !77309476864 
+  - active: 1
+  - !Transform 
+    parent: {id: 73014509568}
+    position: {x: 0, y: 1.0164558, z: 0.05533203}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: COG_jnt
+  - !PrefabInstance 
+    object_index: 16
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 1, bone_name: COG_jnt}
+- !81604444160 
+  - active: 1
+  - !Transform 
+    parent: {id: 77309476864}
+    position: {x: 0, y: -0.04653671, z: -0.05709008}
+    rotation: 
+      w: 1
+      x: -0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: spine_1_jnt
+  - !PrefabInstance 
+    object_index: 17
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 2, bone_name: spine_1_jnt}
+- !85899411456 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: 0, y: 0.11536499, z: 0.042781413}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: spine_2_jnt
+  - !PrefabInstance 
+    object_index: 18
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 3, bone_name: spine_2_jnt}
+- !90194378752 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: 0.099999994, y: -0.049076155, z: 0.0066747526}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_hip_jnt
+  - !PrefabInstance 
+    object_index: 19
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 4, bone_name: L_hip_jnt}
+- !94489346048 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: 0.0423984, y: 0.03213402, z: -0.097804084}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_Ribbon_1_jnt
+  - !PrefabInstance 
+    object_index: 20
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 5, bone_name: L_Ribbon_1_jnt}
+- !98784313344 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: 0, y: -0.006606674, z: 0.13484801}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: F_skirt_base_jnt
+  - !PrefabInstance 
+    object_index: 21
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 6, bone_name: F_skirt_base_jnt}
+- !103079280640 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: 0, y: 0.039849166, z: -0.06302737}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: B_skirt_base_jnt
+  - !PrefabInstance 
+    object_index: 22
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 7, bone_name: B_skirt_base_jnt}
+- !107374247936 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: 0.10465197, y: 0.03101776, z: 0.061472602}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_skirt_base_jnt
+  - !PrefabInstance 
+    object_index: 23
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 8, bone_name: L_skirt_base_jnt}
+- !111669215232 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: -0.104652, y: 0.031020965, z: 0.061472546}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_skirt_base_jnt
+  - !PrefabInstance 
+    object_index: 24
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 9, bone_name: R_skirt_base_jnt}
+- !115964182528 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: -0.0423984, y: 0.032130964, z: -0.09780405}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_Ribbon_1_jnt
+  - !PrefabInstance 
+    object_index: 25
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 10, bone_name: R_Ribbon_1_jnt}
+- !120259149824 
+  - active: 1
+  - !Transform 
+    parent: {id: 81604444160}
+    position: {x: -0.099999994, y: -0.04907608, z: 0.006674752}
+    rotation: 
+      w: -6.123234e-17
+      x: 1
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_hip_jnt
+  - !PrefabInstance 
+    object_index: 26
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 11, bone_name: R_hip_jnt}
+- !124554117120 
+  - active: 1
+  - !Transform 
+    parent: {id: 85899411456}
+    position: {x: 0, y: 0.11333557, z: -0.025346078}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: spine_3_jnt
+  - !PrefabInstance 
+    object_index: 27
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 12, bone_name: spine_3_jnt}
+- !128849084416 
+  - active: 1
+  - !Transform 
+    parent: {id: 90194378752}
+    position: {x: 0.037527, y: -0.43561926, z: 0.007215258}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_knee_jnt
+  - !PrefabInstance 
+    object_index: 28
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 13, bone_name: L_knee_jnt}
+- !133144051712 
+  - active: 1
+  - !Transform 
+    parent: {id: 94489346048}
+    position: {x: 0.0630054, y: -0.05385681, z: -0.11199408}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_Ribbon_2_jnt
+  - !PrefabInstance 
+    object_index: 29
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 14, bone_name: L_Ribbon_2_jnt}
+- !137439019008 
+  - active: 1
+  - !Transform 
+    parent: {id: 98784313344}
+    position: {x: 0, y: -0.20258461, z: 0.13544811}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: F_skirt_mid_jnt
+  - !PrefabInstance 
+    object_index: 30
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 15, bone_name: F_skirt_mid_jnt}
+- !141733986304 
+  - active: 1
+  - !Transform 
+    parent: {id: 103079280640}
+    position: {x: 0, y: -0.17089729, z: -0.21472038}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: B_skirt_mid_jnt
+  - !PrefabInstance 
+    object_index: 31
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 16, bone_name: B_skirt_mid_jnt}
+- !146028953600 
+  - active: 1
+  - !Transform 
+    parent: {id: 107374247936}
+    position: {x: 0.2050088, y: -0.22128296, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_skirt_mid_jnt
+  - !PrefabInstance 
+    object_index: 32
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 17, bone_name: L_skirt_mid_jnt}
+- !150323920896 
+  - active: 1
+  - !Transform 
+    parent: {id: 111669215232}
+    position: {x: -0.205009, y: -0.221286, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_skirt_mid_jnt
+  - !PrefabInstance 
+    object_index: 33
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 18, bone_name: R_skirt_mid_jnt}
+- !154618888192 
+  - active: 1
+  - !Transform 
+    parent: {id: 115964182528}
+    position: {x: -0.0630056, y: -0.05385399, z: -0.111993894}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_Ribbon_2_jnt
+  - !PrefabInstance 
+    object_index: 34
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 19, bone_name: R_Ribbon_2_jnt}
+- !158913855488 
+  - active: 1
+  - !Transform 
+    parent: {id: 120259149824}
+    position: {x: -0.037527, y: 0.43561897, z: -0.0072152996}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_knee_jnt
+  - !PrefabInstance 
+    object_index: 35
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 20, bone_name: R_knee_jnt}
+- !163208822784 
+  - active: 1
+  - !Transform 
+    parent: {id: 124554117120}
+    position: {x: 0, y: 0.06480644, z: -0.027381625}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: spine_4_jnt
+  - !PrefabInstance 
+    object_index: 36
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 21, bone_name: spine_4_jnt}
+- !167503790080 
+  - active: 1
+  - !Transform 
+    parent: {id: 128849084416}
+    position: {x: 0.028295182, y: -0.3458116, z: -0.038317077}
+    rotation: 
+      w: 0.87771523
+      x: 0.47146946
+      y: 0.07543587
+      z: 0.04052078
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_ankle_jnt
+  - !PrefabInstance 
+    object_index: 37
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 22, bone_name: L_ankle_jnt}
+- !171798757376 
+  - active: 1
+  - !Transform 
+    parent: {id: 133144051712}
+    position: {x: 0.026969127, y: -0.08076187, z: -0.1040735}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_Ribbon_3_jnt
+  - !PrefabInstance 
+    object_index: 38
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 23, bone_name: L_Ribbon_3_jnt}
+- !176093724672 
+  - active: 1
+  - !Transform 
+    parent: {id: 137439019008}
+    position: {x: 0, y: -0.3459136, z: 0.06459833}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: F_skirt_tip_jnt
+  - !PrefabInstance 
+    object_index: 39
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 24, bone_name: F_skirt_tip_jnt}
+- !180388691968 
+  - active: 1
+  - !Transform 
+    parent: {id: 141733986304}
+    position: {x: 0, y: -0.31257254, z: -0.09793937}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: B_skirt_tip_jnt
+  - !PrefabInstance 
+    object_index: 40
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 25, bone_name: B_skirt_tip_jnt}
+- !184683659264 
+  - active: 1
+  - !Transform 
+    parent: {id: 146028953600}
+    position: {x: 0.062354904, y: -0.3096608, z: 3.5527136e-17}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_skirt_tip_jnt
+  - !PrefabInstance 
+    object_index: 41
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 26, bone_name: L_skirt_tip_jnt}
+- !188978626560 
+  - active: 1
+  - !Transform 
+    parent: {id: 150323920896}
+    position: {x: -0.062354997, y: -0.309661, z: -7.105427e-17}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_skirt_tip_jnt
+  - !PrefabInstance 
+    object_index: 42
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 27, bone_name: R_skirt_tip_jnt}
+- !193273593856 
+  - active: 1
+  - !Transform 
+    parent: {id: 154618888192}
+    position: {x: -0.026969003, y: -0.08076202, z: -0.104074}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_Ribbon_3_jnt
+  - !PrefabInstance 
+    object_index: 43
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 28, bone_name: R_Ribbon_3_jnt}
+- !197568561152 
+  - active: 1
+  - !Transform 
+    parent: {id: 158913855488}
+    position: {x: -0.028294992, y: 0.345812, z: 0.038317107}
+    rotation: 
+      w: 0.87771523
+      x: 0.47146946
+      y: 0.07543587
+      z: 0.04052078
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_ankle_jnt
+  - !PrefabInstance 
+    object_index: 44
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 29, bone_name: R_ankle_jnt}
+- !201863528448 
+  - active: 1
+  - !Transform 
+    parent: {id: 163208822784}
+    position: {x: 0, y: 0.06610489, z: 0.0035764766}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: neck_jnt
+  - !PrefabInstance 
+    object_index: 45
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 30, bone_name: neck_jnt}
+- !206158495744 
+  - active: 1
+  - !Transform 
+    parent: {id: 163208822784}
+    position: {x: 0.065746896, y: -0.03615608, z: -0.017484903}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_clavicle_jnt
+  - !PrefabInstance 
+    object_index: 46
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 31, bone_name: L_clavicle_jnt}
+- !210453463040 
+  - active: 1
+  - !Transform 
+    parent: {id: 163208822784}
+    position: {x: -0.065746896, y: -0.03615608, z: -0.01748486}
+    rotation: 
+      w: -6.123234e-17
+      x: 1
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_clavicle_jnt
+  - !PrefabInstance 
+    object_index: 47
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 32, bone_name: R_clavicle_jnt}
+- !214748430336 
+  - active: 1
+  - !Transform 
+    parent: {id: 167503790080}
+    position: {x: 0, y: -4.7683715e-09, z: 0.14458318}
+    rotation: 
+      w: 0.87751067
+      x: -0.45731825
+      y: 0.077779025
+      z: -0.12159531
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_ball_jnt
+  - !PrefabInstance 
+    object_index: 48
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 33, bone_name: L_ball_jnt}
+- !219043397632 
+  - active: 1
+  - !Transform 
+    parent: {id: 171798757376}
+    position: {x: 0.06615137, y: -0.2261357, z: -0.2275608}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_Ribbon_4_jnt
+  - !PrefabInstance 
+    object_index: 49
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 34, bone_name: L_Ribbon_4_jnt}
+- !223338364928 
+  - active: 1
+  - !Transform 
+    parent: {id: 193273593856}
+    position: {x: -0.066151, y: -0.22613502, z: -0.227561}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_Ribbon_4_jnt
+  - !PrefabInstance 
+    object_index: 50
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 35, bone_name: R_Ribbon_4_jnt}
+- !227633332224 
+  - active: 1
+  - !Transform 
+    parent: {id: 197568561152}
+    position: {x: -6.29425e-07, y: 9.059906e-08, z: -0.1445833}
+    rotation: 
+      w: 0.87751067
+      x: -0.45731825
+      y: 0.077779025
+      z: -0.12159531
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_ball_jnt
+  - !PrefabInstance 
+    object_index: 51
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 36, bone_name: R_ball_jnt}
+- !231928299520 
+  - active: 1
+  - !Transform 
+    parent: {id: 201863528448}
+    position: {x: 0, y: 0.1620459, z: 0.013576662}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: head_jnt
+  - !PrefabInstance 
+    object_index: 52
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 37, bone_name: head_jnt}
+- !236223266816 
+  - active: 1
+  - !Transform 
+    parent: {id: 206158495744}
+    position: {x: 0.084918156, y: 0.03615608, z: 0.022149162}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_shoulder_jnt
+  - !PrefabInstance 
+    object_index: 53
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 38, bone_name: L_shoulder_jnt}
+- !240518234112 
+  - active: 1
+  - !Transform 
+    parent: {id: 210453463040}
+    position: {x: -0.0849181, y: -0.036160048, z: -0.02214912}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_shoulder_jnt
+  - !PrefabInstance 
+    object_index: 54
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 39, bone_name: R_shoulder_jnt}
+- !244813201408 
+  - active: 1
+  - !Transform 
+    parent: {id: 214748430336}
+    position: {x: -1.9073486e-08, y: 0, z: 0.066071264}
+    rotation: 
+      w: 1
+      x: -2.646978e-23
+      y: 0
+      z: 1.323489e-23
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_toe_jnt
+  - !PrefabInstance 
+    object_index: 55
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 40, bone_name: L_toe_jnt}
+- !249108168704 
+  - active: 1
+  - !Transform 
+    parent: {id: 219043397632}
+    position: {x: 0.09091024, y: -0.17103621, z: -0.2261322}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_Ribbon_end_jnt
+  - !PrefabInstance 
+    object_index: 56
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 41, bone_name: L_Ribbon_end_jnt}
+- !253403136000 
+  - active: 1
+  - !Transform 
+    parent: {id: 223338364928}
+    position: {x: -0.09091101, y: -0.17103699, z: -0.22613198}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_Ribbon_end_jnt
+  - !PrefabInstance 
+    object_index: 57
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 42, bone_name: R_Ribbon_end_jnt}
+- !257698103296 
+  - active: 1
+  - !Transform 
+    parent: {id: 227633332224}
+    position: {x: 8.392334e-07, y: 0, z: -0.066070974}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_toe_jnt
+  - !PrefabInstance 
+    object_index: 58
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 43, bone_name: R_toe_jnt}
+- !261993070592 
+  - active: 1
+  - !Transform 
+    parent: {id: 231928299520}
+    position: {x: 0, y: 0.15417725, z: -0.12518947}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: hair_base_jnt
+  - !PrefabInstance 
+    object_index: 59
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 44, bone_name: hair_base_jnt}
+- !266288037888 
+  - active: 1
+  - !Transform 
+    parent: {id: 236223266816}
+    position: {x: 0.08992912, y: -0.09188728, z: -0.015568666}
+    rotation: 
+      w: -5.583961e-17
+      x: 0.91193
+      y: 0.4103457
+      z: -2.5126427e-17
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_elbow_jnt
+  - !PrefabInstance 
+    object_index: 60
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 45, bone_name: L_elbow_jnt}
+- !270583005184 
+  - active: 1
+  - !Transform 
+    parent: {id: 240518234112}
+    position: {x: -0.08992902, y: 0.091889955, z: 0.01556862}
+    rotation: 
+      w: 9.608745e-09
+      x: 0.91193
+      y: 0.4103457
+      z: 4.323695e-09
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_elbow_jnt
+  - !PrefabInstance 
+    object_index: 61
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 46, bone_name: R_elbow_jnt}
+- !274877972480 
+  - active: 1
+  - !Transform 
+    parent: {id: 261993070592}
+    position: {x: 0, y: -0.093701325, z: -0.06412623}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: hair_mid_jnt
+  - !PrefabInstance 
+    object_index: 62
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 47, bone_name: hair_mid_jnt}
+- !279172939776 
+  - active: 1
+  - !Transform 
+    parent: {id: 266288037888}
+    position: {x: -0.00719223, y: 0.34948653, z: -0.015568667}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_wrist_jnt
+  - !PrefabInstance 
+    object_index: 63
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 48, bone_name: L_wrist_jnt}
+- !283467907072 
+  - active: 1
+  - !Transform 
+    parent: {id: 270583005184}
+    position: {x: 0.007193298, y: -0.3494873, z: 0.015568614}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_wrist_jnt
+  - !PrefabInstance 
+    object_index: 64
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 49, bone_name: R_wrist_jnt}
+- !287762874368 
+  - active: 1
+  - !Transform 
+    parent: {id: 274877972480}
+    position: {x: 0, y: -0.30321082, z: -0.17607106}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: hair_tip_jnt
+  - !PrefabInstance 
+    object_index: 65
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 50, bone_name: hair_tip_jnt}
+- !292057841664 
+  - active: 1
+  - !Transform 
+    parent: {id: 279172939776}
+    position: {x: 0.0018527984, y: 0.15453297, z: -0.08714592}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_index_base_jnt
+  - !PrefabInstance 
+    object_index: 66
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 51, bone_name: L_index_base_jnt}
+- !296352808960 
+  - active: 1
+  - !Transform 
+    parent: {id: 279172939776}
+    position: {x: 0.015793076, y: 0.15839458, z: -0.030431824}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_mid_base_jnt
+  - !PrefabInstance 
+    object_index: 67
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 52, bone_name: L_mid_base_jnt}
+- !300647776256 
+  - active: 1
+  - !Transform 
+    parent: {id: 279172939776}
+    position: {x: -0.0020952607, y: 0.15390155, z: 0.034804452}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_ring_base_jnt
+  - !PrefabInstance 
+    object_index: 68
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 53, bone_name: L_ring_base_jnt}
+- !304942743552 
+  - active: 1
+  - !Transform 
+    parent: {id: 279172939776}
+    position: {x: -0.028675003, y: 0.14096504, z: 0.07963787}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_pinky_base_jnt
+  - !PrefabInstance 
+    object_index: 69
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 54, bone_name: L_pinky_base_jnt}
+- !309237710848 
+  - active: 1
+  - !Transform 
+    parent: {id: 279172939776}
+    position: {x: -0.030804519, y: 0.034975316, z: -0.08358608}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_thumb_base_jnt
+  - !PrefabInstance 
+    object_index: 70
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 55, bone_name: L_thumb_base_jnt}
+- !313532678144 
+  - active: 1
+  - !Transform 
+    parent: {id: 279172939776}
+    position: {x: -0.005396944, y: 0.117971905, z: -0.008562809}
+    rotation: 
+      w: 1.0307475e-06
+      x: 0.91193
+      y: 0.41034573
+      z: 2.541459e-06
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_hand_jnt
+  - !PrefabInstance 
+    object_index: 71
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 56, bone_name: L_hand_jnt}
+- !317827645440 
+  - active: 1
+  - !Transform 
+    parent: {id: 283467907072}
+    position: {x: -0.001852951, y: -0.15453376, z: 0.08714588}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_index_base_jnt
+  - !PrefabInstance 
+    object_index: 72
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 57, bone_name: R_index_base_jnt}
+- !322122612736 
+  - active: 1
+  - !Transform 
+    parent: {id: 283467907072}
+    position: {x: -0.015793532, y: -0.15839545, z: 0.030431775}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_mid_base_jnt
+  - !PrefabInstance 
+    object_index: 73
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 58, bone_name: R_mid_base_jnt}
+- !326417580032 
+  - active: 1
+  - !Transform 
+    parent: {id: 283467907072}
+    position: {x: 0.002095108, y: -0.1539022, z: -0.034804426}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_ring_base_jnt
+  - !PrefabInstance 
+    object_index: 74
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 59, bone_name: R_ring_base_jnt}
+- !330712547328 
+  - active: 1
+  - !Transform 
+    parent: {id: 283467907072}
+    position: {x: 0.028674698, y: -0.14096488, z: -0.079637825}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_pinky_base_jnt
+  - !PrefabInstance 
+    object_index: 75
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 60, bone_name: R_pinky_base_jnt}
+- !335007514624 
+  - active: 1
+  - !Transform 
+    parent: {id: 283467907072}
+    position: {x: 0.03080391, y: -0.034975547, z: 0.083586074}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_thumb_base_jnt
+  - !PrefabInstance 
+    object_index: 76
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 61, bone_name: R_thumb_base_jnt}
+- !339302481920 
+  - active: 1
+  - !Transform 
+    parent: {id: 283467907072}
+    position: {x: 0, y: -0.12207912, z: 0.008562786}
+    rotation: 
+      w: 0.91193
+      x: -1.0111801e-06
+      y: -2.496995e-06
+      z: 0.41034573
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_hand_jnt1
+  - !PrefabInstance 
+    object_index: 77
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 62, bone_name: L_hand_jnt1}
+- !343597449216 
+  - active: 1
+  - !Transform 
+    parent: {id: 287762874368}
+    position: {x: -0.0029881063, y: -0.24733514, z: -0.19797488}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: hair_end_jnt
+  - !PrefabInstance 
+    object_index: 78
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 63, bone_name: hair_end_jnt}
+- !347892416512 
+  - active: 1
+  - !Transform 
+    parent: {id: 292057841664}
+    position: {x: -0.051244352, y: 0.10937839, z: -0.012141857}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_index_mid_jnt
+  - !PrefabInstance 
+    object_index: 79
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 64, bone_name: L_index_mid_jnt}
+- !352187383808 
+  - active: 1
+  - !Transform 
+    parent: {id: 296352808960}
+    position: {x: -0.06610603, y: 0.12542363, z: -0.002838521}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_mid_mid_jnt
+  - !PrefabInstance 
+    object_index: 80
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 65, bone_name: L_mid_mid_jnt}
+- !356482351104 
+  - active: 1
+  - !Transform 
+    parent: {id: 300647776256}
+    position: {x: -0.05493973, y: 0.10667793, z: 0.0009989691}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_ring_mid_jnt
+  - !PrefabInstance 
+    object_index: 81
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 66, bone_name: L_ring_mid_jnt}
+- !360777318400 
+  - active: 1
+  - !Transform 
+    parent: {id: 304942743552}
+    position: {x: -0.043354034, y: 0.079116285, z: 0.013165207}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_pinky_mid_jnt
+  - !PrefabInstance 
+    object_index: 82
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 67, bone_name: L_pinky_mid_jnt}
+- !365072285696 
+  - active: 1
+  - !Transform 
+    parent: {id: 309237710848}
+    position: {x: -0.04189621, y: 0.044304047, z: -0.0554265}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_thumb_mid_jnt
+  - !PrefabInstance 
+    object_index: 83
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 68, bone_name: L_thumb_mid_jnt}
+- !369367252992 
+  - active: 1
+  - !Transform 
+    parent: {id: 317827645440}
+    position: {x: 0.0512442, y: -0.109377936, z: 0.012141885}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_index_mid_jnt
+  - !PrefabInstance 
+    object_index: 84
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 69, bone_name: R_index_mid_jnt}
+- !373662220288 
+  - active: 1
+  - !Transform 
+    parent: {id: 322122612736}
+    position: {x: 0.06610565, y: -0.12542324, z: 0.0028385997}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_mid_mid_jnt
+  - !PrefabInstance 
+    object_index: 85
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 70, bone_name: R_mid_mid_jnt}
+- !377957187584 
+  - active: 1
+  - !Transform 
+    parent: {id: 326417580032}
+    position: {x: 0.05494003, y: -0.106677815, z: -0.0009990025}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_ring_mid_jnt
+  - !PrefabInstance 
+    object_index: 86
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 71, bone_name: R_ring_mid_jnt}
+- !382252154880 
+  - active: 1
+  - !Transform 
+    parent: {id: 330712547328}
+    position: {x: 0.043354414, y: -0.07911686, z: -0.013165283}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_pinky_mid_jnt
+  - !PrefabInstance 
+    object_index: 87
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 72, bone_name: R_pinky_mid_jnt}
+- !386547122176 
+  - active: 1
+  - !Transform 
+    parent: {id: 335007514624}
+    position: {x: 0.04189636, y: -0.044304542, z: 0.055425994}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_thumb_mid_jnt
+  - !PrefabInstance 
+    object_index: 88
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 73, bone_name: R_thumb_mid_jnt}
+- !390842089472 
+  - active: 1
+  - !Transform 
+    parent: {id: 347892416512}
+    position: {x: -0.022083815, y: 0.05884323, z: -0.003977499}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_index_tip_jnt
+  - !PrefabInstance 
+    object_index: 89
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 74, bone_name: L_index_tip_jnt}
+- !395137056768 
+  - active: 1
+  - !Transform 
+    parent: {id: 352187383808}
+    position: {x: -0.026285857, y: 0.06403209, z: 0.0010689545}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_mid_tip_jnt
+  - !PrefabInstance 
+    object_index: 90
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 75, bone_name: L_mid_tip_jnt}
+- !399432024064 
+  - active: 1
+  - !Transform 
+    parent: {id: 356482351104}
+    position: {x: -0.02472, y: 0.06151512, z: 0.0037968205}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_ring_tip_jnt
+  - !PrefabInstance 
+    object_index: 91
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 76, bone_name: L_ring_tip_jnt}
+- !403726991360 
+  - active: 1
+  - !Transform 
+    parent: {id: 360777318400}
+    position: {x: -0.022835387, y: 0.049221877, z: 0.009761333}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_pinky_tip_jnt
+  - !PrefabInstance 
+    object_index: 92
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 77, bone_name: L_pinky_tip_jnt}
+- !408021958656 
+  - active: 1
+  - !Transform 
+    parent: {id: 365072285696}
+    position: {x: -0.051916197, y: 0.053260915, z: -0.020983562}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_thumb_tip_jnt
+  - !PrefabInstance 
+    object_index: 93
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 78, bone_name: L_thumb_tip_jnt}
+- !412316925952 
+  - active: 1
+  - !Transform 
+    parent: {id: 369367252992}
+    position: {x: 0.022084503, y: -0.058843307, z: 0.003977518}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_index_tip_jnt
+  - !PrefabInstance 
+    object_index: 94
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 79, bone_name: R_index_tip_jnt}
+- !416611893248 
+  - active: 1
+  - !Transform 
+    parent: {id: 373662220288}
+    position: {x: 0.026286468, y: -0.06403148, z: -0.0010690021}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_mid_tip_jnt
+  - !PrefabInstance 
+    object_index: 95
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 80, bone_name: R_mid_tip_jnt}
+- !420906860544 
+  - active: 1
+  - !Transform 
+    parent: {id: 377957187584}
+    position: {x: 0.024719315, y: -0.061515007, z: -0.0037968014}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_ring_tip_jnt
+  - !PrefabInstance 
+    object_index: 96
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 81, bone_name: R_ring_tip_jnt}
+- !425201827840 
+  - active: 1
+  - !Transform 
+    parent: {id: 382252154880}
+    position: {x: 0.022834854, y: -0.049221303, z: -0.009760809}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_pinky_tip_jnt
+  - !PrefabInstance 
+    object_index: 97
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 82, bone_name: R_pinky_tip_jnt}
+- !429496795136 
+  - active: 1
+  - !Transform 
+    parent: {id: 386547122176}
+    position: {x: 0.051916502, y: -0.053260267, z: 0.020984001}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_thumb_tip_jnt
+  - !PrefabInstance 
+    object_index: 98
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 83, bone_name: R_thumb_tip_jnt}
+- !433791762432 
+  - active: 1
+  - !Transform 
+    parent: {id: 390842089472}
+    position: {x: -0.011801605, y: 0.052582625, z: -0.0032810115}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_index_end_jnt
+  - !PrefabInstance 
+    object_index: 99
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 84, bone_name: L_index_end_jnt}
+- !438086729728 
+  - active: 1
+  - !Transform 
+    parent: {id: 395137056768}
+    position: {x: -0.01201889, y: 0.057111204, z: 0.003091216}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_mid_end_jnt
+  - !PrefabInstance 
+    object_index: 100
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 85, bone_name: L_mid_end_jnt}
+- !442381697024 
+  - active: 1
+  - !Transform 
+    parent: {id: 399432024064}
+    position: {x: -0.010937048, y: 0.046418075, z: 0.0042434577}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_ring_end_jnt
+  - !PrefabInstance 
+    object_index: 101
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 86, bone_name: L_ring_end_jnt}
+- !446676664320 
+  - active: 1
+  - !Transform 
+    parent: {id: 403726991360}
+    position: {x: -0.010370559, y: 0.03590023, z: 0.007541151}
+    rotation: 
+      w: 1
+      x: 0
+      y: -1.6543612e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_pinky_end_jnt
+  - !PrefabInstance 
+    object_index: 102
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 87, bone_name: L_pinky_end_jnt}
+- !450971631616 
+  - active: 1
+  - !Transform 
+    parent: {id: 408021958656}
+    position: {x: -0.04003158, y: 0.036053453, z: -0.040168498}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_thumb_tip_jnt001
+  - !PrefabInstance 
+    object_index: 103
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 88, bone_name: L_thumb_tip_jnt001}
+- !455266598912 
+  - active: 1
+  - !Transform 
+    parent: {id: 412316925952}
+    position: {x: 0.011801147, y: -0.052583158, z: 0.0032809828}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_index_end_jnt
+  - !PrefabInstance 
+    object_index: 104
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 89, bone_name: R_index_end_jnt}
+- !459561566208 
+  - active: 1
+  - !Transform 
+    parent: {id: 416611893248}
+    position: {x: 0.012018439, y: -0.057111535, z: -0.0030912012}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_mid_end_jnt
+  - !PrefabInstance 
+    object_index: 105
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 90, bone_name: R_mid_end_jnt}
+- !463856533504 
+  - active: 1
+  - !Transform 
+    parent: {id: 420906860544}
+    position: {x: 0.010937542, y: -0.046418387, z: -0.004243501}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_ring_end_jnt
+  - !PrefabInstance 
+    object_index: 106
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 91, bone_name: R_ring_end_jnt}
+- !468151500800 
+  - active: 1
+  - !Transform 
+    parent: {id: 425201827840}
+    position: {x: 0.0103708645, y: -0.035900377, z: -0.00754199}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: -4.67924e-24
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_pinky_end_jnt
+  - !PrefabInstance 
+    object_index: 107
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 92, bone_name: R_pinky_end_jnt}
+- !472446468096 
+  - active: 1
+  - !Transform 
+    parent: {id: 429496795136}
+    position: {x: 0.040031333, y: -0.03605374, z: 0.040169}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_thumb_tip_jnt001
+  - !PrefabInstance 
+    object_index: 108
+    overrides: []
+    prefab: {guid: 544b2ca9-4e94-43c5-a09e-37c2b35c7edc}
+  - !Bone 
+    {bone_index: 93, bone_name: R_thumb_tip_jnt001}

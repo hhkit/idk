@@ -12,7 +12,7 @@ if (klass == MONO_CLASS)                                        \
 {                                                               \
 	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
 	auto new_val = old_val;								        \
-	functor(field_name.data(), new_val, depth);				        \
+	functor(field_name.data(), new_val, -last_children);		\
 														        \
 	if (old_val != new_val)								        \
 		mono_field_set_value(Raw(), field, &new_val);	        \
@@ -23,7 +23,7 @@ if (klass == MONO_CLASS)                                        \
 #define MONO_COMPLEX_TYPE(REAL_TYPE, MONO_CLASS)                \
 if (klass == MONO_CLASS)      \
 {                                                               \
-	auto old_val = *s_cast<REAL_TYPE*>(mono_object_unbox(obj)); \
+	auto old_val = s_cast<REAL_TYPE>(s_cast<float*>(mono_object_unbox(obj))); \
 	auto new_val = old_val;								        \
 	if (functor(field_name.data(), new_val, -last_children))	\
 	{                                                           \
@@ -42,7 +42,7 @@ if (klass == MONO_CLASS)      \
 #define MONO_BASE_TYPE_CONST(REAL_TYPE, MONO_CLASS)                   \
 if (mono_class_get_name(klass) == string_view{MONO_CLASS})      \
 {                                                                     \
-	auto old_val = *s_cast<const REAL_TYPE*>(mono_object_unbox(obj)); \
+	const auto old_val = s_cast<REAL_TYPE>(s_cast<float*>(mono_object_unbox(obj))); \
 	functor(field_name.data(), old_val, depth);				          \
 	continue;                                                         \
 }
@@ -117,6 +117,64 @@ if (mono_class_get_name(klass) == string_view{MONO_CLASS})      \
 
 namespace idk::mono
 {
+	template<typename T>
+	inline void ManagedObject::Assign(string_view fieldname, T& obj)
+	{
+		using Actual = std::decay_t<T>;
+
+		auto me = Raw();
+		auto field = Field(fieldname);
+
+		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
+
+		if (field)
+		{
+			if constexpr (!std::is_class_v<Actual>)
+			{
+				auto val = obj;
+				mono_field_set_value(me, field, &val);
+			}
+			if constexpr (std::is_same_v<Actual, reflect::dynamic>)
+			{
+				reflect::dynamic& dyn = obj;
+#define HACKY_ASSIGN(TYPE) if (dyn.is<TYPE>()) mono_field_set_value(me, field, &dyn.get<TYPE>());
+				HACKY_ASSIGN(bool);
+				HACKY_ASSIGN(short);
+				HACKY_ASSIGN(unsigned short);
+				HACKY_ASSIGN(int);
+				HACKY_ASSIGN(unsigned int);
+				HACKY_ASSIGN(int64_t);
+				HACKY_ASSIGN(uint64_t);
+				HACKY_ASSIGN(float);
+				HACKY_ASSIGN(double);
+				HACKY_ASSIGN(vec2);
+				HACKY_ASSIGN(vec3);
+				HACKY_ASSIGN(vec4);
+				HACKY_ASSIGN(Guid);
+#undef HACKY_ASSIGN
+#define RSCHANDLE_ASSIGN(TYPE)                                                                                \
+				if (dyn.is<RscHandle<TYPE>>())																  \
+				{																							  \
+					auto h = dyn.get<RscHandle<TYPE>>();													  \
+					if (h)																					  \
+					{																						  \
+						auto resource_klass = envi.Type(#TYPE);												  \
+						auto csharp_handle = resource_klass->ConstructTemporary();							  \
+						auto handle_field = mono_class_get_field_from_name(resource_klass->Raw(), "guid");	  \
+						mono_field_set_value(csharp_handle, handle_field, &h.guid);							  \
+						mono_field_set_value(me, field, csharp_handle);										  \
+					}																						  \
+					else																					  \
+						mono_field_set_value(me, field, nullptr);											  \
+				}
+				RSCHANDLE_ASSIGN(Prefab);
+				RSCHANDLE_ASSIGN(MaterialInstance);
+				RSCHANDLE_ASSIGN(Scene);
+#undef RSCHANDLE_ASSIGN
+			}
+		}
+	}
+
 	template<typename T>
 	void ManagedObject::Visit(T&& functor, bool ignore_privacy)
 	{
@@ -204,6 +262,7 @@ namespace idk::mono
 
 				MONO_RESOURCE_TYPE(MaterialInstance);
 				MONO_RESOURCE_TYPE(Prefab);
+				MONO_RESOURCE_TYPE(Scene);
 
 				{
 					using H_Type = GameObject;
@@ -310,6 +369,7 @@ namespace idk::mono
 
 			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);
+			MONO_RESOURCE_TYPE_CONST(Scene);
 
 			auto csharpcore = mono_get_corlib();
 			MONO_BASE_TYPE_CONST(Guid, mono_class_from_name(csharpcore, "System", "Guid"));

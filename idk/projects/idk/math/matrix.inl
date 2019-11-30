@@ -15,7 +15,24 @@ namespace idk
 		template<typename T, unsigned R, unsigned C, size_t ... Indexes>
 		tvec<T, R> MatrixVectorMult(const tmat<T, R, C>& lhs, const tvec<T, C>& rhs, std::index_sequence<Indexes...>)
 		{
-			return ((lhs[Indexes] * rhs[Indexes]) + ...);
+			if constexpr (std::is_same_v<T, float> && R == 4 && C == 4)
+			{
+				const tvec<float, 4> & vec = rhs;
+				const tmat<float, 4, 4> mat = lhs;
+				const __m128& v = vec.sse;
+				
+				__m128 v0 = _mm_shuffle_ps(v, v, _MM_SHUFFLE(0, 0, 0, 0));
+				__m128 v1 = _mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1));
+				__m128 v2 = _mm_shuffle_ps(v, v, _MM_SHUFFLE(2, 2, 2, 2));
+				__m128 v3 = _mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 3));
+
+				__m128 a0 = _mm_add_ps(_mm_mul_ps(mat[0].sse, v0), _mm_mul_ps(mat[1].sse, v1));
+				__m128 a1 = _mm_add_ps(_mm_mul_ps(mat[2].sse, v2), _mm_mul_ps(mat[3].sse, v3));
+
+				return tvec<float, 4>{_mm_add_ps(a0, a1)};
+			}
+			else
+				return ((lhs[Indexes] * rhs[Indexes]) + ...);
 		}
 
 		template<typename T, unsigned O, unsigned M, unsigned I, size_t ... Indexes>
