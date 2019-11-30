@@ -19,7 +19,8 @@ namespace idk
 		// Engine Getters
 		AnimationState& GetAnimationState(string_view name);
 		const AnimationState& GetAnimationState(string_view name) const;
-		// RscHandle<anim::Animation> GetAnimationRsc(string_view name) const;
+		
+		const vector<Handle<GameObject>>& GetChildObjects() const { return _child_objects; };
 
 		const vector<mat4>& BoneTransforms()const;
 		

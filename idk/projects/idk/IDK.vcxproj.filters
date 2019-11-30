@@ -926,6 +926,9 @@
     <ClInclude Include="gfx\ShaderSnippetFactory.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\RenderRequest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

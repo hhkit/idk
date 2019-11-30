@@ -9,5 +9,6 @@ namespace idk
 	{
 		string bone_name;
 		int bone_index = -1;
+		vector<int> children;
 	};
 }

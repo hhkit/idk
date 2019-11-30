@@ -72,7 +72,7 @@ namespace idk
 				for (size_t k = 0; k < animator.layers.size(); ++k)
 				{
 					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -151,7 +151,7 @@ namespace idk
 				for (size_t k = 1; k < animator.layers.size(); ++k)
 				{
 					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -163,7 +163,7 @@ namespace idk
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
-					if (curr_layer.bone_mask[child_index] == true)
+					if (curr_layer.bone_mask[child_index])
 					{
 						if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
 						{
@@ -333,6 +333,10 @@ namespace idk
 		
 		BonePose result = animator._bind_pose[bone_index];
 		result.rotation = quat{};
+		if (!layer.bone_mask[bone_index])
+		{
+			return result;
+		}
 
 		if (layer.curr_state.is_playing && !layer.blend_interrupt)
 		{
@@ -814,13 +818,32 @@ namespace idk
 				animator->pre_global_transforms.resize(num_bones);
 				animator->final_bone_transforms.resize(num_bones);
 
+				// Init child objects
 				sg->visit(initialize_children);
+
+				// Init bone component's children vector
+				auto& skeleton_data = animator->skeleton->data();
+				for (size_t i = 0; i < skeleton_data.size(); ++i)
+				{
+					auto& bone = skeleton_data[i];
+					if (bone.parent >= 0)
+					{
+						// Put the current index into my parent's children vector.
+						child_objects[bone.parent]->GetComponent<Bone>()->children.emplace_back(s_cast<uint8_t>(i));
+					}
+				}
+
+				// Save the bind pose here
 				Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
 
 				for (auto& layer : animator->layers)
 				{
 					layer.prev_poses.resize(animator->skeleton->data().size());
 					layer.blend_source.resize(animator->skeleton->data().size());
+					if (layer.bone_mask.size() != animator->skeleton->data().size())
+					{
+						layer.bone_mask.resize(animator->skeleton->data().size(), 1);
+					}
 				}
 
 				animator->ResetToDefault();

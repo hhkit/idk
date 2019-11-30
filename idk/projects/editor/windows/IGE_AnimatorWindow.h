@@ -33,6 +33,7 @@ namespace idk {
 		size_t _selected_state = 0;
 		size_t _selected_transition = 0;
 		int _selected_condition = -1;
+		size_t _selected_bone_mask_index = 0;
 
 		anim::AnimDataType _selected_param_type = anim::AnimDataType::NONE;
 		string _selected_param;
@@ -63,6 +64,8 @@ namespace idk {
 		void drawStatesTab();
 		bool drawStatesContextMenu();
 		void drawBoneMaskTab();
+		bool bone_mask_recurse(const vector<Handle<GameObject>>& child_objects, vector<uint8_t>& bone_mask, size_t index, bool highlight);
+		void bone_mask_set_children(const vector<Handle<GameObject>>& child_objects, vector<uint8_t>& bone_mask, size_t index, uint8_t val);
 
 		void inspectLayer(size_t layer_index);
 		void inspectState(size_t layer_index, size_t state_index);
