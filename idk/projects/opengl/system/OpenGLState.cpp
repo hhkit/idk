@@ -161,6 +161,8 @@ namespace idk::ogl
 		//auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		auto& font_render_data = curr_object_buffer.font_render_data;
 
+		if (RscHandle<RenderTarget>{}->NeedsFinalizing())
+			RscHandle<RenderTarget>{}->Finalize();
 		for (auto& cam : curr_object_buffer.camera)
 		{
 			auto& rt = *cam.render_target;
@@ -720,7 +722,7 @@ namespace idk::ogl
         auto ui_render_per_canvas = curr_object_buffer.ui_render_per_canvas;
         for (auto& [canvas, ui_render_data] : ui_render_per_canvas)
         {
-			if (canvas->render_target)
+			//if (canvas->render_target)
 			{
 				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{canvas->render_target});
 				for (auto& elem : ui_render_data)
