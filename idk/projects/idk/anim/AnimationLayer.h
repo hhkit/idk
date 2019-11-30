@@ -25,7 +25,7 @@ namespace idk
 		float default_weight = 1.0f;
 		float weight = 1.0f;
 		AnimLayerBlend blend_type = AnimLayerBlend::Override_Blend;
-		std::array<bool, 100> bone_mask{ false };
+		vector<uint8_t> bone_mask{ 0 };
 
 		// Controls blending to different states in run-time
 		float blend_duration = 0.0f;

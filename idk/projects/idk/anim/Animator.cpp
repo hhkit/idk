@@ -64,8 +64,8 @@ namespace idk
 		new_layer.blend_source.resize(skeleton->data().size());
 
 		// All bones are initialized to be unmasked the start
-		std::fill(new_layer.bone_mask.begin(), new_layer.bone_mask.end(), true);
-
+		new_layer.bone_mask.resize(skeleton->data().size(), 1);
+		
 		layers.push_back(new_layer);
 	}
 
@@ -97,12 +97,6 @@ namespace idk
 			LOG_TO(LogPool::ANIM, string{ "Cannot rename animation layer (" } +from.data() + ") to (" + to.data() + ").");
 			return false;
 		}
-
-
-		// auto copy = res->second;
-		// 
-		// layer_table.erase(res);
-		// layer_table.emplace(to_str, copy);
 
 		layers[found_src].name = to_str;
 
