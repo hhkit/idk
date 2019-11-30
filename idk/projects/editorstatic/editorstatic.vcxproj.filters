@@ -105,6 +105,5 @@
     <None Include="DescriptorPoolManager.inl">
       <Filter>VulkanUtils</Filter>
     </None>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

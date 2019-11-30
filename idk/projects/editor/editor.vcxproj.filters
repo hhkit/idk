@@ -154,6 +154,7 @@
     <ClInclude Include="IconsFontAwesome5_c.h" />
     <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="windows\IGE_LightLister.h" />
+    <ClInclude Include="widgets\IconCheckbox.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -288,6 +289,7 @@
       <Filter>graphicsAPI_interface</Filter>
     </ClCompile>
     <ClCompile Include="windows\IGE_LightLister.cpp" />
+    <ClCompile Include="widgets\IconCheckbox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

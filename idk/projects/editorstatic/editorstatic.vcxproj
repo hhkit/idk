@@ -53,7 +53,6 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
     <None Include="DescriptorPoolManager.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -36,6 +36,7 @@ namespace idk
 		{
 			auto camera = active_scene->CreateGameObject();
 			camera->Name("Camera");
+            camera->AddComponent<Camera>();
 		}
 
         Core::GetSystem<IDE>().reg_scene.set("scene", string{ active_scene.guid });
