@@ -13,6 +13,7 @@ namespace idk
 		, Circle
 		, Plane
 		, FSQ
+		, INV_FSQ
 	); // FSQ stands for Full Screen Quad
 
 	class Mesh
@@ -28,6 +29,7 @@ namespace idk
             { Guid{0xBE85068A, 0x10FE, 0x43FA, 0xA59ABC2F552DA7F3} }, // Circle
             { Guid{0x5EACF9F1, 0x9036, 0x40DA, 0xA7356B51E5294654} }, // Plane
             { Guid{0x5D6C8AD5, 0x927D, 0x49F7, 0x9B619AE892A96A3F} }, // FSQ
+			{ Guid{0xDCC694FE, 0x4284, 0x4273, 0x80041523C5805BEE} }  // INV_FSQ
 		};
 		sphere bounding_volume;
 		virtual int GetAttribs() const = 0;

@@ -481,7 +481,7 @@ namespace idk::vkn
 				loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
 			}*/
 
-			fsq_light_ro.mesh         = fsq_amb_ro.mesh = Mesh::defaults[MeshType::FSQ];
+			fsq_light_ro.mesh         = fsq_amb_ro.mesh = Mesh::defaults[MeshType::INV_FSQ];
 			fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
 			if (!fsq_light_ro.config)
 			{
@@ -830,7 +830,7 @@ namespace idk::vkn
 		//TransitionFrameBuffer(camera, cmd_buffer, view);
 
 		auto sz = g_buffer.Size();
-		rect viewport{};
+		rect viewport = graphics_state.camera.viewport;
 		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
 
 		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
@@ -869,7 +869,8 @@ namespace idk::vkn
 	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy& accum_stuff, const CameraData& camera, RenderStateV2& rs)
 	{
 		auto sz = camera.render_target->Size();
-		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+		auto viewport = rect{};// camera.viewport;
+		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
 		vk::Rect2D render_area
 		{
 			vk::Offset2D
