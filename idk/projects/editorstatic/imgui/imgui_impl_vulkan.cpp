@@ -824,7 +824,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
         use_barrier[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         use_barrier[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
         use_barrier[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        use_barrier[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        use_barrier[0].newLayout = VK_IMAGE_LAYOUT_GENERAL;
         use_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         use_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         use_barrier[0].image = g_FontImage;
@@ -835,7 +835,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
     }
 
     // Store our identifier
-    io.Fonts->TexID = (ImTextureID)(intptr_t)g_FontImage;
+    io.Fonts->TexID = (ImTextureID)(intptr_t)g_FontView;
 
     return true;
 }
@@ -1529,10 +1529,6 @@ void ImGui_ImplVulkanH_DestroyWindowRenderBuffers(VkDevice device, ImGui_ImplVul
 {
     for (uint32_t n = 0; n < buffers->Count; n++)
         ImGui_ImplVulkanH_DestroyFrameRenderBuffers(device, &buffers->FrameRenderBuffers[n], allocator);
-	for (auto i = buffers->Count; i-- > 0; )
-	{
-		(buffers->FrameRenderBuffers +i)->~ImGui_ImplVulkanH_FrameRenderBuffers();
-	}
     IM_FREE(buffers->FrameRenderBuffers);
     buffers->FrameRenderBuffers = NULL;
     buffers->Index = 0;
