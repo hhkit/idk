@@ -28,8 +28,7 @@ namespace idk::vkn
 		RscHandle<VknFrameBuffer> gbuffer;
 		RscHandle<VknFrameBuffer> accum_buffer; //
 		vk::Semaphore RenderCompleteSignal();
-		void Init(ivec2 size);
-
+		bool Init(ivec2 size);
 		RenderPassObj rp_obj;
 	private:
 		vk::UniqueSemaphore _render_complete;

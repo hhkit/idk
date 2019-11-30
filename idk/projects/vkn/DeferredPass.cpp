@@ -284,10 +284,12 @@ namespace idk::vkn
 
 		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
 	}
-	void DeferredGBuffer::Init(ivec2 size)
+	bool DeferredGBuffer::Init(ivec2 size)
 	{
+		bool inited = false;
 		if (!gbuffer || gbuffer->Size()!=size)
 		{
+			inited = true;
 			FrameBufferBuilder fbf;
 			fbf.Begin(size);
 			//GBufferBinding::eAlbedoAmbOcc
@@ -347,6 +349,7 @@ namespace idk::vkn
 		
 			_render_complete = View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{});
 		}
+		return inited;
 	}
 
 	vk::UniqueRenderPass BuildGbufferRenderPass(VknFrameBuffer& fb)
@@ -427,90 +430,94 @@ namespace idk::vkn
 			}
 		};
 		
-		_gbuffer.Init(rt.Size());
-
-		auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
-		FrameBufferBuilder fbf;
-		fbf.Begin(rt.Size());
-		fbf.AddAttachment(idk::AttachmentInfo{
-			LoadOp::eLoad,StoreOp::eStore,
-			ColorFormat::_enum::SRGBA,
-			FilterMode::_enum::Nearest,false,
-			rt.GetColorBuffer()
-			});
-		auto& buffer = *_gbuffer.accum_buffer; 
-		auto accum_att = idk::AttachmentInfo{
-			LoadOp::eLoad,StoreOp::eDontCare,
-			ColorFormat::_enum::SRGB,
-			FilterMode::_enum::Nearest,false,
-			buffer.GetAttachment(0).buffer
-		};
-		accum_att.is_input_att = true;
-		fbf.AddAttachment(accum_att);
-		auto depth_att = idk::AttachmentInfo{
-			LoadOp::eLoad,StoreOp::eDontCare,
-			ColorFormat::_enum::DEPTH_COMPONENT,
-			FilterMode::_enum::Nearest,false,
-			_gbuffer.gbuffer->DepthAttachment().buffer
-		};
-		depth_att.override_as_depth = true;
-		depth_att.is_input_att = true;
-		fbf.AddAttachment(depth_att);
-		if (hdr_buffer)
-			Core::GetResourceManager().Release(hdr_buffer);
-		auto hdr_info = fbf.End();
-
-/*
-		auto& rsm = Core::GetResourceManager();
-		if (!depth_sample_tex)
-			depth_sample_tex = rsm.Create<VknTexture>();
-		if (depth_sample_tex->Size() != size)
+		if (_gbuffer.Init(rt.Size()))
 		{
-			TextureLoader loader;
-			auto& tex_factory = Core::GetResourceManager().GetFactory<VulkanTextureFactory>();
 
-			TextureOptions tex_opt{};
-			tex_opt.internal_format = ColorFormat::_enum::DEPTH_COMPONENT;
-			tex_opt.is_srgb = false;
-			auto tex_info = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
-			loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
-		}*/
 
-		fsq_light_ro.mesh         = fsq_amb_ro.mesh = Mesh::defaults[MeshType::FSQ];
-		fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
-		if (!fsq_light_ro.config)
-		{
-			ambient_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
-			light_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
+			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
+			FrameBufferBuilder fbf;
+			fbf.Begin(rt.Size());
+			fbf.AddAttachment(idk::AttachmentInfo{
+				LoadOp::eLoad,StoreOp::eStore,
+				ColorFormat::_enum::SRGBA,
+				FilterMode::_enum::Nearest,false,
+				rt.GetColorBuffer()
+				});
+			auto& buffer = *_gbuffer.accum_buffer; 
+			auto accum_att = idk::AttachmentInfo{
+				LoadOp::eLoad,StoreOp::eDontCare,
+				ColorFormat::_enum::SRGB,
+				FilterMode::_enum::Nearest,false,
+				buffer.GetAttachment(0).buffer
+			};
+			accum_att.is_input_att = true;
+			fbf.AddAttachment(accum_att);
+			auto depth_att = idk::AttachmentInfo{
+				LoadOp::eLoad,StoreOp::eDontCare,
+				ColorFormat::_enum::DEPTH_COMPONENT,
+				FilterMode::_enum::Nearest,false,
+				_gbuffer.gbuffer->DepthAttachment().buffer
+			};
+			depth_att.override_as_depth = true;
+			depth_att.is_input_att = true;
+			fbf.AddAttachment(depth_att);
+			if (hdr_buffer)
+				Core::GetResourceManager().Release(hdr_buffer);
+			auto hdr_info = fbf.End();
 
-			light_config->attachment_configs.resize(1);
-			auto& blend = light_config->attachment_configs[0];
-			blend.blend_enable = true;
-			blend.dst_color_blend_factor = BlendFactor::eOne;
-			blend.src_color_blend_factor = BlendFactor::eOne;
-			blend.color_blend_op = BlendOp::eAdd;
-			blend.alpha_blend_op = BlendOp::eMax;
-			blend.dst_alpha_blend_factor = BlendFactor::eOne;
-			blend.src_alpha_blend_factor = BlendFactor::eOne;
-			light_config->depth_test = false;
-			fsq_light_ro.config = light_config;
-			fsq_amb_ro.config = ambient_config;
+	/*
+			auto& rsm = Core::GetResourceManager();
+			if (!depth_sample_tex)
+				depth_sample_tex = rsm.Create<VknTexture>();
+			if (depth_sample_tex->Size() != size)
+			{
+				TextureLoader loader;
+				auto& tex_factory = Core::GetResourceManager().GetFactory<VulkanTextureFactory>();
 
-			accum_pass = BuildAccumRenderPass(_gbuffer.accum_buffer.as<VknFrameBuffer>());
-			hdr_pass = BuildHdrRenderPass(hdr_info, buffer.GetAttachment(0).buffer,_gbuffer.gbuffer->DepthAttachment().buffer);
-			//auto test = AttachmentBlendConfig{};
-			//test.blend_enable = true;
-			//test.alpha_blend_op = BlendOp::eAdd;
-			//test.color_blend_op = BlendOp::eAdd;
-			//test.src_color_blend_factor = BlendFactor::eSrcAlpha;
-			//test.dst_color_blend_factor = BlendFactor::eOneMinusSrcAlpha;
-			//test.src_alpha_blend_factor = BlendFactor::eOne;
-			//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
-			//blend = test;
-		}
+				TextureOptions tex_opt{};
+				tex_opt.internal_format = ColorFormat::_enum::DEPTH_COMPONENT;
+				tex_opt.is_srgb = false;
+				auto tex_info = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+				loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
+			}*/
+
+			fsq_light_ro.mesh         = fsq_amb_ro.mesh = Mesh::defaults[MeshType::FSQ];
+			fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
+			if (!fsq_light_ro.config)
+			{
+				ambient_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
+				light_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
+
+				light_config->attachment_configs.resize(1);
+				auto& blend = light_config->attachment_configs[0];
+				blend.blend_enable = true;
+				blend.dst_color_blend_factor = BlendFactor::eOne;
+				blend.src_color_blend_factor = BlendFactor::eOne;
+				blend.color_blend_op = BlendOp::eAdd;
+				blend.alpha_blend_op = BlendOp::eMax;
+				blend.dst_alpha_blend_factor = BlendFactor::eOne;
+				blend.src_alpha_blend_factor = BlendFactor::eOne;
+				light_config->depth_test = false;
+				fsq_light_ro.config = light_config;
+				fsq_amb_ro.config = ambient_config;
+
+				accum_pass = BuildAccumRenderPass(_gbuffer.accum_buffer.as<VknFrameBuffer>());
+				hdr_pass = BuildHdrRenderPass(hdr_info, buffer.GetAttachment(0).buffer,_gbuffer.gbuffer->DepthAttachment().buffer);
+				//auto test = AttachmentBlendConfig{};
+				//test.blend_enable = true;
+				//test.alpha_blend_op = BlendOp::eAdd;
+				//test.color_blend_op = BlendOp::eAdd;
+				//test.src_color_blend_factor = BlendFactor::eSrcAlpha;
+				//test.dst_color_blend_factor = BlendFactor::eOneMinusSrcAlpha;
+				//test.src_alpha_blend_factor = BlendFactor::eOne;
+				//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
+				//blend = test;
+			}
 		
-		auto tmp = VknSpecializedInfo{ hdr_pass };
-		hdr_buffer = RscHandle<VknFrameBuffer>{ fb_factory.Create(hdr_info,&tmp) };
+			auto tmp = VknSpecializedInfo{ hdr_pass };
+			hdr_buffer = RscHandle<VknFrameBuffer>{ fb_factory.Create(hdr_info,&tmp) };
+
+		}
 	}
 	struct DeferredPostBinder : StandardBindings
 	{
