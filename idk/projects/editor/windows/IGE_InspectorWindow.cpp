@@ -917,6 +917,7 @@ namespace idk {
 			bool ret_val = false;
 
 			ImGui::PushID(&param);
+			ImGui::Indent();
 			strcpy_s(buf, param.name.data());
 			ImGui::BeginGroup();
 			const float align_widget = ImGui::GetContentRegionAvailWidth() * 0.7f;
@@ -977,7 +978,7 @@ namespace idk {
 		ImGui::SameLine();
 		display.Label("Parameters");
 		ImGui::NewLine();
-
+		ImGui::Indent();
 		if (tree_open)
 		{
 			if (ImGui::CollapsingHeader("Int"))
@@ -1012,11 +1013,12 @@ namespace idk {
 				}
 			}
 		}
-		ImGui::Separator(false);
+		ImGui::Unindent();
+		// ImGui::Separator(false);
 		display.GroupEnd(params_changed);
 		_curr_property_stack.pop_back();
 
-		// layers override check
+		ImGui::NewLine();
 		if (ImGui::Button("Open Animator Window"))
 		{
 			Core::GetSystem<IDE>().FindWindow<IGE_AnimatorWindow>()->is_open = true;

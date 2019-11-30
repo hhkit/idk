@@ -914,6 +914,9 @@
     </ClInclude>
     <ClInclude Include="parallel\circular_buffer.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
+    <ClInclude Include="gfx\RenderRequest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

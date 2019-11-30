@@ -54,6 +54,7 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
+    <ClInclude Include="gfx\RenderRequest.h" />
     <ClInclude Include="gfx\TextMesh.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />
