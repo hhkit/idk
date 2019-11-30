@@ -156,7 +156,7 @@ namespace idk
 		if (ImGui::BeginTabItem("Layers", nullptr, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
 		{
 			if (_curr_animator_component)
-			
+			{
 				if (ImGui::Button("Add"))
 				{
 					_curr_animator_component->AddLayer();
@@ -178,17 +178,17 @@ namespace idk
 				if (!can_remove)
 					ImGuidk::PopDisabled();
 
-				for (int i =0 ;i < _curr_animator_component->layers.size(); ++i)
+				for (int i = 0; i < _curr_animator_component->layers.size(); ++i)
 				{
 					auto& layer = _curr_animator_component->layers[i];
 					strcpy_s(buf, layer.name.data());
 					ImGui::PushID(i);
-					
+
 					auto prev_cursor_pos = ImGui::GetCursorPos();
 					const bool selected = i == _selected_layer;
 					ImGui::PushStyleColor(ImGuiCol_Header, _selectable_bg_col);
 					ImGui::PushStyleColor(ImGuiCol_HeaderActive, _selectable_active_col);
-					if(selected)
+					if (selected)
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
 					else
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
@@ -243,7 +243,7 @@ namespace idk
 							ImGui::EndTooltip();
 						}
 					}
-					
+
 					float align_edit = ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("...").x - ImGui::GetStyle().FramePadding.x * 2;
 					align_edit = std::max(align_edit, 0.0f);
 					ImGui::SameLine(align_edit);
@@ -265,10 +265,11 @@ namespace idk
 					ImGui::Unindent(ImGui::GetStyle().FramePadding.x);
 
 					ImGui::SetCursorPos(new_cursor_pos);
-					
+
 					ImGui::PopID();
-					
+
 				}
+			}
 			ImGui::EndTabItem();
 		}
 	}
@@ -915,9 +916,111 @@ namespace idk
 		return changed;
 	}
 
+	bool IGE_AnimatorWindow::bone_mask_recurse(const vector<Handle<GameObject>>& child_objects, vector<uint8_t>& bone_mask, size_t index, bool highlight)
+	{
+		bool changed = false;
+		const auto& child_object = child_objects[index];
+		const auto bone_comp = child_object->GetComponent<Bone>();
+
+		ImGui::PushID(index);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+
+		auto tree_flags = ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick| ImGuiTreeNodeFlags_OpenOnArrow |
+							 ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
+		if (index == _selected_bone_mask_index)
+		{
+			tree_flags |= ImGuiTreeNodeFlags_Selected;
+			highlight = true;
+		}
+
+		if (bone_comp->children.empty())
+		{
+			tree_flags |= ImGuiTreeNodeFlags_Leaf;
+			ImGui::Indent();
+		}
+
+		bool open_header = ImGui::TreeNodeEx("##bone_display", tree_flags);
+		ImGui::PopStyleVar();
+
+		if (ImGui::IsItemClicked())
+		{
+			_selected_bone_mask_index = index;
+		}
+
+		ImGui::SameLine();
+		bool is_masked = s_cast<bool>(bone_mask[index]);
+		if (ImGui::Checkbox("##masked?", &is_masked))
+		{
+			bone_mask[index] = s_cast<uint8_t>(is_masked);
+			bone_mask_set_children(child_objects, bone_mask, index, bone_mask[index]);
+			changed = true;
+
+			_selected_bone_mask_index = index;
+		}
+		ImGui::SameLine();
+		if (bone_mask[index] == 0)
+			ImGui::TextDisabled(child_object->Name().data());
+		else
+		{
+			ImGuidk::PushFont(FontType::Bold);
+			if(highlight)
+				ImGui::TextColored(ImVec4{0,1,0,1}, child_object->Name().data());
+			else
+				ImGui::Text(child_object->Name().data());
+			ImGui::PopFont();
+		}
+
+		if (open_header)
+		{
+			for (auto& child_index : bone_comp->children)
+				changed |= bone_mask_recurse(child_objects, bone_mask, child_index, highlight);
+			ImGui::TreePop();
+		}
+
+		if (bone_comp->children.empty())
+		{
+			ImGui::Unindent();
+		}
+
+		ImGui::PopID();
+
+		return changed;
+	}
+
+	void IGE_AnimatorWindow::bone_mask_set_children(const vector<Handle<GameObject>>& child_objects, vector<uint8_t>& bone_mask, size_t index, uint8_t val)
+	{
+		const auto& child_object = child_objects[index];
+		const auto bone_comp = child_object->GetComponent<Bone>();
+
+		for (auto& child_index : bone_comp->children)
+		{
+			bone_mask[child_index] = val;
+			bone_mask_set_children(child_objects, bone_mask, child_index, val);
+		}
+	}
+
 	void IGE_AnimatorWindow::drawBoneMaskTab()
 	{
+		if (ImGui::BeginTabItem("Bone Mask", nullptr, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
+		{
+			if (_curr_animator_component)
+			{
+				auto& curr_layer = _curr_animator_component->layers[_selected_layer];
+				const auto& child_objects = _curr_animator_component->GetChildObjects();
+				auto& bone_mask = curr_layer.bone_mask;
+
+				ImGui::PushID(&curr_layer.bone_mask);
+				
+				_layers_changed |= bone_mask_recurse(child_objects, bone_mask, 0, _selected_bone_mask_index == 0);
+
+				ImGui::PopID();
+			}
+			ImGui::EndTabItem();
+		}
+		
 	}
+
+	
 
 	void IGE_AnimatorWindow::inspectLayer(size_t layer_index)
 	{
@@ -1588,6 +1691,7 @@ namespace idk
 		_selected_state = 0;
 		_selected_transition = 0;
 		_selected_condition = -1;
+		_selected_bone_mask_index = 0;
 		_show_transition = false;
 	}
 

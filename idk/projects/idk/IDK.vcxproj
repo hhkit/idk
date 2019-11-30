@@ -58,6 +58,7 @@
     <ClInclude Include="gfx\ShaderSnippet.h" />
     <ClInclude Include="gfx\ShaderSnippetFactory.h" />
     <ClInclude Include="gfx\ShaderSnippetLoader.h" />
+    <ClInclude Include="gfx\RenderRequest.h" />
     <ClInclude Include="gfx\TextMesh.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />

@@ -94,6 +94,7 @@ namespace idk
 		friend class IGE_HierarchyWindow;
 		friend class IGE_InspectorWindow;
 		friend class IGE_AnimatorWindow;
+		friend class IGE_LightLister;
 		friend class CMD_DeleteGameObject;
 		friend class CMD_CreateGameObject;
 		friend class CMD_CallCommandAgain;

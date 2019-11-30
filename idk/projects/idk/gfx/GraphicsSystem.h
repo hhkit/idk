@@ -8,6 +8,7 @@
 #include <gfx/Light.h>
 #include <particle/ParticleData.h>
 #include <gfx/FontData.h>
+#include <gfx/RenderRequest.h>
 
 namespace idk
 {
