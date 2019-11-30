@@ -46,6 +46,28 @@ void _check_gl_error(const char* file, int line) {
 
 namespace idk::ogl
 {
+
+	struct MaterialVisitor
+	{
+		PipelineProgram& pipeline;
+		GLuint& texture_units;
+		string_view uniform_id;
+
+		template<typename T> auto operator()(const T& elem) const
+		{
+			if constexpr (std::is_same_v<T, RscHandle<Texture>>)
+			{
+				auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
+				texture->BindToUnit(texture_units);
+				pipeline.SetUniform(uniform_id, texture_units);
+
+				++texture_units;
+			}
+			else
+				pipeline.SetUniform(uniform_id, elem);
+		}
+	};
+
 	void OpenGLState::Setup()
 	{
 		sys = &Core::GetSystem<Win32GraphicsSystem>();
@@ -88,50 +110,31 @@ namespace idk::ogl
 		////fb_man.cBufferPickingTexture->Buffer(nullptr, main_buffer->GetMeta().size, pickMeta.format, pickMeta.internal_format);
 		//fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
 
-		FrameBufferBuilder builder;
-		builder.Begin(ivec2{ 512,512 });
-		builder.AddAttachment(
-			AttachmentInfo
-			{
-				LoadOp::eClear,
-				StoreOp::eStore,
-				idk::ColorFormat::RGBF_32,
-				FilterMode::_enum::Linear
-			}
-		);
-		builder.SetDepthAttachment(
-			AttachmentInfo
-			{
-				LoadOp::eClear,
-				StoreOp::eStore,
-				idk::ColorFormat::DEPTH_COMPONENT,
-				FilterMode::_enum::Linear
-			}
-		);
-
-		fb_man.pickingBuffer = { Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End()).guid };
-	}
-
-	struct MaterialVisitor
-	{
-		PipelineProgram& pipeline;
-		GLuint& texture_units;
-		string_view uniform_id;
-
-		template<typename T> auto operator()(const T& elem) const
 		{
-			if constexpr (std::is_same_v<T, RscHandle<Texture>>)
-			{
-				auto texture = RscHandle<ogl::OpenGLTexture>{ elem };
-				texture->BindToUnit(texture_units);
-				pipeline.SetUniform(uniform_id, texture_units);
+			FrameBufferBuilder builder;
+			builder.Begin(ivec2{ 512,512 });
+			builder.AddAttachment(
+				AttachmentInfo
+				{
+					LoadOp::eClear,
+					StoreOp::eStore,
+					idk::ColorFormat::RGBF_32,
+					FilterMode::_enum::Linear
+				}
+			);
+			builder.SetDepthAttachment(
+				AttachmentInfo
+				{
+					LoadOp::eClear,
+					StoreOp::eStore,
+					idk::ColorFormat::DEPTH_COMPONENT,
+					FilterMode::_enum::Linear
+				}
+			);
 
-				++texture_units;
-			}
-			else
-				pipeline.SetUniform(uniform_id, elem);
+			fb_man.pickingBuffer = { Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End()).guid };
 		}
-	};
+	}
 
 
 	void OpenGLState::RenderDrawBuffer()
@@ -457,6 +460,10 @@ namespace idk::ogl
 
 			// If we only use proj_matrix, frustrum will be in view space.
 			// If we use proj * view, frustrum will be in model space
+
+			fb_man.SetRenderTarget(
+				RscHandle<OpenGLFrameBuffer>{RscHandle<OpenGLRenderTarget>{cam.render_target}->DeferredBufferPBRMetallic()}
+			);
 
 			auto c_mat = curr_mat = {};
 			auto c_mat_inst = curr_mat_inst = {};

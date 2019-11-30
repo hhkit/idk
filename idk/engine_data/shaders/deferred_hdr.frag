@@ -1,4 +1,4 @@
-#version 460
+#version 450
 
 layout (input_attachment_index=1, set=2, binding=0) uniform subpassInput light_accum_input;
 layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput depth_input;

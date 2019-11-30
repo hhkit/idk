@@ -13,8 +13,12 @@ namespace idk::ogl
 		void OnFinalize() override;
 
 		GLuint DepthBuffer() const;
+
+		RscHandle<FrameBuffer> DeferredBufferPBRMetallic() const;
 	private:
 		GLuint depthbuffer = 0;
+
+		RscHandle<FrameBuffer> pbr_metallic_gbuffer;
 	};
 
 	struct OpenGLAttachment :Attachment {};
