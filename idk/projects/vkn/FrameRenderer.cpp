@@ -911,34 +911,23 @@ namespace idk::vkn
 				auto& pos_buffer = state.shared_gfx_state->ui_text_buffer_pos;
 				auto& uv_buffer = state.shared_gfx_state->ui_text_buffer_uv;
 				//auto& buffer = state.shared_gfx_state->ui_text_buffer;
-				auto& doto = state.shared_gfx_state->ui_text_data;
+				auto& doto = *state.shared_gfx_state->ui_text_data;
 				auto& t_size = state.shared_gfx_state->total_num_of_text;
 
-				unsigned k = 0, u=0;
+				unsigned k = 0, u = 0;
 				pos_buffer.resize(t_size);
 				uv_buffer.resize(t_size);
-				for (auto& elem : canvas)
+
+				unsigned i = 0;
+				for (auto& elem : doto)
 				{
-					unsigned i = 0;
-					for (auto& elem : elem.ui_ro)
-					{
-						std::visit([&](const auto& data)
-						{
-							using T = std::decay_t<decltype(data)>;
-							if constexpr (!std::is_same_v<T, ImageData>)
-							{				
-								auto& b = pos_buffer[u];
-								b.resize(hlp::buffer_size(doto[k][i].pos));
-								b.update<const vec2>(0, doto[k][i].pos, cmd_buffer);
-								auto& b1 = uv_buffer[u];
-								b1.resize(hlp::buffer_size(doto[k][i].uv));
-								b1.update<const vec2>(0, doto[k][i].uv, cmd_buffer);
-								++i;
-								++u;
-							}
-						}, elem.data);
-					}
-					++k;
+					auto& b = pos_buffer[u];
+					b.resize(hlp::buffer_size(doto[i].pos));
+					b.update<const vec2>(0, doto[i].pos, cmd_buffer);
+					auto& b1 = uv_buffer[u];
+					b1.resize(hlp::buffer_size(doto[i].uv));
+					b1.update<const vec2>(0, doto[i].uv, cmd_buffer);
+					++i;
 				}
 				
 			}

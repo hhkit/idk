@@ -36,7 +36,7 @@ namespace idk::vkn
 		};
 	}
 #pragma optimize("",off)
-	void CanvasRenderer::DrawCanvas(PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
+	void CanvasRenderer::DrawCanvas(PipelineThingy& the_interface,  const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
 	{
 		auto& shared_state = *state.shared_gfx_state;
 
@@ -45,6 +45,7 @@ namespace idk::vkn
 		if (canvas_data.size())
 		{
 			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VUi]);
+			
 			auto& character_render_info = *shared_state.ui_text_data;
 			auto& font_render_info = shared_state.ui_text_buffer_pos;
 			auto& font_uv_info = shared_state.ui_text_buffer_uv;
@@ -52,21 +53,23 @@ namespace idk::vkn
 			canvas_ro_inst.clear();
 			canvas_ro_inst.reserve(canvas_data.size());
 
+			canvas_ro_inst2.clear();
+			canvas_ro_inst2.reserve(font_render_info.size());
+
 			//size_t i = state.range.inst_font_begin;
 			auto i = 0;
 			
 			for (auto& ui_canvas : canvas_data)
 			{
 				RenderObject canvas_ui_ro;
-
-				the_interface.BindShader(ShaderStage::Fragment, ui_canvas.material->material->_shader_program);	
 				
 				std::visit([&](const auto& data)
 				{
 					using T = std::decay_t<decltype(data)>;
 					if constexpr (std::is_same_v<T, ImageData>)
 					{
-						
+						the_interface.BindShader(ShaderStage::Fragment, ui_canvas.material->material->_shader_program);
+
 						canvas_ui_ro.config = canvas_pipeline;
 						canvas_ui_ro.material_instance = ui_canvas.material;
 						canvas_ui_ro.mesh = Mesh::defaults[MeshType::FSQ];
@@ -80,12 +83,12 @@ namespace idk::vkn
 					}
 					else
 					{
+						the_interface.BindShader(ShaderStage::Fragment, ui_canvas.material->material->_shader_program);
+
 						canvas_ui_ro.config = canvas_pipeline2;
+						canvas_ui_ro.material_instance = ui_canvas.material;
 						auto& elem = font_render_info[i];
 						auto& uv = font_uv_info[i];
-
-						//canvas_ui_ro.renderer_req = &canvas_vertex_req;
-						canvas_ui_ro.material_instance = ui_canvas.material;
 
 						//TODO bind materials
 						vert_bind.BindCanvas(the_interface, data, ui_canvas);
@@ -96,10 +99,9 @@ namespace idk::vkn
 
 						the_interface.SetVertexCount(s_cast<uint32_t>(data.coords.size()));
 
-						the_interface.FinalizeDrawCall(canvas_ro_inst.emplace_back(std::move(canvas_ui_ro)));
+						the_interface.FinalizeDrawCall(canvas_ro_inst2.emplace_back(std::move(canvas_ui_ro)));
 
-						++i;
-						
+						++i;				
 					}
 				}, ui_canvas.data);
 			}

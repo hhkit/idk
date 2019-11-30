@@ -42,12 +42,12 @@ namespace idk::vkn
 
 			//Reserve buffer size in characters
 			font_ro_inst.clear();
-			font_ro_inst.reserve(character_render_info.size());
+			font_ro_inst.reserve(font_render_info.size());
 
 			//Bind camera block
 			vert_bind.Bind(the_interface);
 
-			auto i = state.range.inst_font_begin;
+			auto i = 0;
 			for(auto& elem: font_render_info)
 			{
 				// bind shader
