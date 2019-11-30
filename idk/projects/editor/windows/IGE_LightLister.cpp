@@ -99,10 +99,9 @@ namespace idk
 			ImGui::Checkbox("##shad", &light.casts_shadows);
 			ImGui::NextColumn();
 
-			ImGui::Checkbox("##isol", &light.isolate);
+			ImGuidk::IconCheckbox("##isol", ICON_FA_SUN, &light.isolate);
 			ImGui::NextColumn();
 
-			ImGuidk::IconCheckbox((id + "isol").data(), ICON_FA_SUN, &light.isolate);
 			if (ImGui::Button("Focus"))
 			{
 				Core::GetSystem<IDE>().selected_gameObjects.clear();
