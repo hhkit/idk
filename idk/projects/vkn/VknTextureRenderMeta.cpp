@@ -38,6 +38,7 @@ namespace idk::vkn {
 		{ ColorFormat::_enum::RGBAF_16, vk::Format::eR16G16B16A16Sfloat },
 		{ ColorFormat::_enum::RGBAF_32, vk::Format::eR32G32B32A32Sfloat },
 		{ ColorFormat::_enum::BGRA_8,   vk::Format::eB8G8R8A8Unorm },
+		{ ColorFormat::_enum::SRGB_BGRA_8,   vk::Format::eB8G8R8A8Srgb },
 		{ ColorFormat::_enum::SRGB ,   vk::Format::eR8G8B8Srgb },
 		{ ColorFormat::_enum::SRGBA,   vk::Format::eR8G8B8A8Srgb },
 		{ ColorFormat::_enum::DXT1,vk::Format::eBc1RgbUnormBlock },

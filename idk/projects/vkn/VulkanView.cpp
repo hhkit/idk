@@ -113,7 +113,7 @@ namespace idk::vkn
 		{
 			return vulkan().rv;
 		}
-		vk::RenderPass VulkanView::BasicRenderPass(BasicRenderPasses type, bool clear_col, bool clear_depth ) const
+		const RenderPassObj& VulkanView::BasicRenderPass(BasicRenderPasses type, bool clear_col, bool clear_depth ) const
 		{
 			return this->vulkan_->BasicRenderPass(type,clear_col,clear_depth);
 		}

@@ -76,7 +76,8 @@ namespace idk::vkn
 				//TODO bind materials
 				mat_bind.Bind(the_interface, part_ro);
 
-				the_interface.BindMeshBuffers(part_ro);
+				if(!the_interface.BindMeshBuffers(part_ro))
+					continue;
 				the_interface.BindAttrib(2, shared_state.particle_buffer.buffer(), 0);
 
 

@@ -30,6 +30,7 @@ namespace idk::ogl
 
 		PixelData SelectObjViewport(const vec2& vp_pos);
 	private:
+		void LoadShaderImpl()override;
 		HDC   _windows_context;
 		HGLRC _opengl_context;
 		unique_ptr<OpenGLState> _opengl;

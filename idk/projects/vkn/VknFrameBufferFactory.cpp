@@ -121,14 +121,15 @@ namespace idk::vkn
 	{
 		hlp::MemoryAllocator allocator;
 		vk::UniqueFence fence;
-		hash_table<rp_type_t, vk::UniqueRenderPass> render_passes;//probably should move this to a manager
+		hash_table<rp_type_t, RenderPassObj> render_passes;//probably should move this to a manager
 
 		vk::UniqueRenderPass CreateRenderPass(uint32_t num_col,const VknFrameBuffer& fb)
 		{
 			//uint32_t num_col = fb.attachments.size();
 			const vector<unique_ptr<Attachment>>& col_attachments = fb.attachments;
 			vector< vk::AttachmentDescription> attachments_desc(num_col);
-			vector< vk::AttachmentReference>   attachments_ref (num_col);
+			vector< vk::AttachmentReference>   attachments_ref;
+			vector< vk::AttachmentReference>   in_ref;
 
 			vk::AttachmentDescription depth_attachment_desc;
 			vk::AttachmentDescription stencil_attachment_desc;
@@ -142,11 +143,22 @@ namespace idk::vkn
 				auto& col_attachment = col_attachments[i];
 				auto& vk_att = static_cast<const VknAttachment&>(*col_attachment);
 				auto& vk_tex = vk_att.buffer.as<VknTexture>();
-				attachments_ref[i] =
-				vk::AttachmentReference{
-					i
-					,vk::ImageLayout::eColorAttachmentOptimal
-				};
+				if (vk_att.is_input_att)
+				{
+					in_ref.emplace_back(
+						vk::AttachmentReference{
+							i
+							,(vk_att.override_as_depth)? vk::ImageLayout::eShaderReadOnlyOptimal:vk::ImageLayout::eShaderReadOnlyOptimal
+						});
+				}
+				else
+				{
+					attachments_ref.emplace_back(
+						vk::AttachmentReference{
+							i
+							,vk::ImageLayout::eColorAttachmentOptimal
+						});
+				}
 				attachments_desc[i] =
 				vk::AttachmentDescription{
 						vk::AttachmentDescriptionFlags{}
@@ -156,7 +168,7 @@ namespace idk::vkn
 						, MapStoreOp(vk_att.store_op)
 						, MapLoadOp (vk_att.stencil_load_op)
 						, MapStoreOp(vk_att.stencil_store_op)
-						, vk::ImageLayout::eUndefined
+						, (vk_att.load_op==LoadOp::eLoad)? vk::ImageLayout::eGeneral :vk::ImageLayout::eUndefined
 						, vk::ImageLayout::eGeneral
 				};
 			}
@@ -191,15 +203,15 @@ namespace idk::vkn
 			{
 				vk::SubpassDescriptionFlags{}
 				,vk::PipelineBindPoint::eGraphics
-				,0,nullptr
-				,hlp::arr_count(col_attachments),(hlp::arr_count(col_attachments))?std::data(attachments_ref):nullptr
+				,hlp::arr_count(in_ref),(hlp::arr_count(in_ref)) ? std::data(in_ref) : nullptr
+				,hlp::arr_count(attachments_ref),(hlp::arr_count(attachments_ref))?std::data(attachments_ref):nullptr
 				,nullptr
 				,pdepth_ref
 			};
 			vk::PipelineStageFlags src_mask  = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 			vk::PipelineStageFlags dest_mask{};
 			vk::AccessFlags access_flag = {};
-			if (hlp::arr_count(col_attachments))
+			if (hlp::arr_count(attachments_ref))
 			{
 				dest_mask |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
 				access_flag = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
@@ -230,7 +242,7 @@ namespace idk::vkn
 			return View().Device()->createRenderPassUnique(renderPassInfo);
 		}
 		//Gets or the appropriate renderpass, initalizes if not-present.
-		vk::RenderPass GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
+		RenderPassObj GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
 		{
 			auto itr = render_passes.find(rp_type);
 			if (itr == render_passes.end())
@@ -241,7 +253,7 @@ namespace idk::vkn
 						fb
 					)).first;
 			}
-			return *itr->second;
+			return itr->second;
 		}
 		Pimpl() : allocator{*View().Device(), View().PDevice()}
 		{
@@ -281,16 +293,22 @@ namespace idk::vkn
 		
 		auto preset = static_cast<bool>(info.buffer);
 		RscHandle<VknTexture> tex = (preset) ? RscHandle<VknTexture>{*info.buffer} : Core::GetResourceManager().Create<VknTexture>();
+		auto& vout = static_cast<VknAttachment&>(*out);
+		vout.override_as_depth = info.override_as_depth;
+		vout.is_input_att = info.is_input_att;
+		type = (info.override_as_depth) ? AttachmentType::eDepth: type;
 		if(!preset )
 		{
+			auto& t = *tex;
 			TextureLoader loader;
-			TextureOptions opt;
+			TextureOptions opt{t.GetMeta()};
 			TexCreateInfo tci = cr8_funcs[type](size.x,size.y);
-			tci.image_usage |= vk::ImageUsageFlagBits::eTransferSrc| vk::ImageUsageFlagBits::eTransferDst;
+			tci.image_usage |= vk::ImageUsageFlagBits::eTransferSrc| vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eInputAttachment;
 			opt.internal_format = info.internal_format;
 			opt.filter_mode = info.filter_mode;
 			tci.internal_format = MapFormat(opt.internal_format);
-			loader.LoadTexture(*tex, allocator, fence, opt, tci, {});
+			loader.LoadTexture(t, allocator, fence, opt, tci, {});
+			t.SetMeta(opt);
 		}
 		out->own_buffer = !preset;
 		out->buffer = tex;
@@ -298,8 +316,9 @@ namespace idk::vkn
 	void VknFrameBufferFactory::PreReset(FrameBuffer& )
 	{
 	}
-	void VknFrameBufferFactory::Finalize(FrameBuffer& h_fb)
+	void VknFrameBufferFactory::Finalize(FrameBuffer& h_fb, SpecializedInfo* specialized_info)
 	{
+		auto* spec_info = static_cast<VknSpecializedInfo*>(specialized_info);
 		VknFrameBuffer& fb = static_cast<VknFrameBuffer&>(h_fb);
 		VulkanView& vknView = View();
 		vector<vk::ImageView> image_views(fb.NumAttachments());
@@ -319,13 +338,14 @@ namespace idk::vkn
 		rp_type_t rp_type = to_rp_type(fb);//(s_cast<uint64_t>(i))<<2 | (s_cast<uint32_t>(fb.depth_attachment)<<1) | s_cast<bool>(fb.stencil_attachment);
 
 		vk::FramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.renderPass = _pimpl->GetRenderPass(rp_type,fb);
+		framebufferInfo.renderPass = *((spec_info)?spec_info->render_pass:_pimpl->GetRenderPass(rp_type,fb));
 		framebufferInfo.attachmentCount = hlp::arr_count(image_views);
 		framebufferInfo.pAttachments = std::data(image_views);
 		framebufferInfo.width  = s_cast<uint32_t>(fb.size.x);
 		framebufferInfo.height = s_cast<uint32_t>(fb.size.y);
 		framebufferInfo.layers = fb.NumLayers();
 
-		fb.SetFramebuffer(vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher()), _pimpl->GetRenderPass(rp_type, fb));
+
+		fb.SetFramebuffer(vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher()), (spec_info)? spec_info->render_pass:_pimpl->GetRenderPass(rp_type, fb));
 	}
 }

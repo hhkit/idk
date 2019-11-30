@@ -23,6 +23,6 @@ namespace idk::ogl
 		void CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out) override;
 		void PreReset(FrameBuffer& framebuffer) override;//resets the framebuffer (queue resource for destruction)
 		
-		void Finalize(FrameBuffer& h_fb) override;
+		void Finalize(FrameBuffer& h_fb,SpecializedInfo* info=nullptr) override;
 	};
 }

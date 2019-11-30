@@ -2,13 +2,13 @@
 #include "FramebufferFactory.h"
 namespace idk
 {
-	RscHandle<FrameBuffer> FrameBufferFactory::Create(const FrameBufferInfo& info)
+	RscHandle<FrameBuffer> FrameBufferFactory::Create(const FrameBufferInfo& info, SpecializedInfo* specialized_info)
 	{
 		auto handle = Core::GetResourceManager().Create<FrameBuffer>();
-		Update(info, handle);
+		Update(info, handle,specialized_info);
 		return handle;
 	}
-	void FrameBufferFactory::Update(const FrameBufferInfo& info, RscHandle<FrameBuffer> h_fb)
+	void FrameBufferFactory::Update(const FrameBufferInfo& info, RscHandle<FrameBuffer> h_fb, SpecializedInfo* specialized_info)
 	{
 		auto& fb = *h_fb;
 		Reset(fb);
@@ -28,7 +28,7 @@ namespace idk
 		}
 		if (info.stencil_attachment)
 			CreateAttachment(AttachmentType::eStencil, *info.stencil_attachment, fb.size, h_fb->stencil_attachment);
-		Finalize(fb);
+		Finalize(fb,specialized_info);
 	}
 
 	//resets the framebuffer (queue resource for destruction)

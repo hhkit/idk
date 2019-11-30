@@ -37,6 +37,8 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <parallel/ThreadPool.h>
+
 
 namespace idk::vkn
 {
@@ -114,115 +116,50 @@ namespace idk::vkn
 			begin = end = container.begin();
 		}
 	};*/
-	class RenderThread
-	{
-	public:
-		void Start()
-		{
-			_running = true;
-		}
-		void Add(const GraphicsState& state, RenderStateV2& rs)
-		{
-			job_lock.lock();
-			jobs.push(JobData{ &state ,&rs });
-			job_lock.unlock();
-			_is_complete = false;
-			job_count++;
-			job_semaphore.notify();
-		}
-		void Run()
-		{
 
-			while (Running())
-			{
-				//job_semaphore.wait();//will wake up when either running == false or hasjob. 
-				//if(HasJob())//Don't render if there's no job.
-				Render();
-			}
-		}
-		void Render() 
-		{
-			while (!jobs.empty()&&Running())
-			{
-				job_lock.lock();
-				auto job = jobs.front();
-				jobs.pop();
-				job_lock.unlock();
-				auto& rs = *job._rs;
-				auto& state = *job._state;
-				_renderer->RenderGraphicsState(state, rs);
-				job_count--;
-			}
-		}
-		bool HasJob()const noexcept
-		{
-			return !jobs.empty();
-		}
-#pragma optimize("",off)
-		bool Complete()const noexcept
-		{
-			return job_count==0;
-		}
-		bool Running()const noexcept
-		{
-			return _running;
-		}
-		FrameRenderer* _renderer;
-		void Stop()
-		{
-			_running = false;
-			job_semaphore.notify(); //wake the guy so that he can terminate.
-		}
-		~RenderThread()
-		{
-			Stop();
-		}
-	private:
-		Semaphore job_semaphore{0};
-		std::atomic_uint32_t job_count = {};
-		bool _running = true;
-		bool _is_complete=false;
-		bool _start = false;
-		struct JobData
-		{
-			const GraphicsState* _state = {};
-			RenderStateV2* _rs = {};
-		};
-		using job_list_t = std::queue<JobData>;
-		std::mutex job_lock;
-		job_list_t jobs;
-	};
+	template<typename RT, typename ...Args>
+	auto GetFuture(RT(*func)(Args...)) -> decltype(Core::GetThreadPool().Post(func, std::declval<Args>()...));
+
 
 	class FrameRenderer::ThreadedRender : public FrameRenderer::IRenderThread
 	{
 	public:
-		static void ThreadRun(RenderThread* thread)
+		static void RunFunc(FrameRenderer* _renderer, const GraphicsState* m, RenderStateV2* rs,std::atomic<int>*counter) noexcept
 		{
-			thread->Run();
+			try
+			{
+				(*counter)--;
+				_renderer->RenderGraphicsState(*m, *rs);
+			}
+			catch (...)
+			{
+
+			}
 		}
+		using Future_t =decltype(GetFuture(ThreadedRender::RunFunc));
 		void Init(FrameRenderer* renderer)
 		{
-			thread._renderer = renderer;
-			my_thread = std::thread(ThreadRun,&thread);
+			
+			_renderer = renderer;
 		}
 		void Render(const GraphicsState& state, RenderStateV2& rs)override
 		{
-			thread.Add(state, rs);
+			counter++;
+			futures.emplace_back(Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs,&counter));
 		}
 #pragma optimize("",off)
 		void Join() override
 		{
-			while (!thread.Complete());
-		}
-		~ThreadedRender()
-		{
-			thread.Stop();
-			if (my_thread.joinable())
-				my_thread.join();
+			for(auto& future : futures)
+				future.get();
+			futures.clear();
 		}
 	private:
+		FrameRenderer* _renderer;
+		std::atomic<int> counter{};
+		vector<Future_t> futures;
+		
 		std::thread my_thread;
-		RenderThread thread;
 	};
 
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
@@ -399,7 +336,8 @@ namespace idk::vkn
 				if (mat_inst.material && dc.layer_mask&state.mask)
 				{
 					binders.Bind(the_interface, dc);
-					the_interface.BindMeshBuffers(dc);
+					if(!the_interface.BindMeshBuffers(dc))
+						continue;
 					the_interface.FinalizeDrawCall(dc);
 
 				}
@@ -634,7 +572,7 @@ namespace idk::vkn
 		vk::CommandBuffer   cmd_buffer         , 
 		const vector<vec4>& clear_colors       ,
 		vk::Framebuffer     frame_buffer       ,
-		vk::RenderPass      rp                 ,
+		RenderPassObj       rp                 ,
 		bool                has_depth_stencil  ,
 		vk::Rect2D          render_area        ,
 		vk::Rect2D          viewport           ,
@@ -657,7 +595,7 @@ namespace idk::vkn
 
 		vk::RenderPassBeginInfo rpbi
 		{
-			rp, frame_buffer,
+			*rp, frame_buffer,
 			render_area,hlp::arr_count(clear_value),std::data(clear_value)
 		};
 
@@ -766,7 +704,7 @@ namespace idk::vkn
 		};
 		auto& rt = light.light_map.as<VknFrameBuffer>();
 		vk::Framebuffer fb = rt.GetFramebuffer();
-		vk::RenderPass  rp = rt.GetRenderPass ();
+		auto  rp = rt.GetRenderPass ();
 		rt.PrepareDraw(cmd_buffer);
 		vector<vec4> clear_colors
 		{
@@ -803,7 +741,7 @@ namespace idk::vkn
 		//auto sz = wewew.DepthAttachment().buffer->Size();
 		
 		vk::Framebuffer fb = rt.Buffer();
-		vk::RenderPass  rp = rt.GetRenderPass(false, false);
+		auto  rp = rt.GetRenderPass(false, false);
 
 		rt.PrepareDraw(cmd_buffer);
 		
@@ -1146,7 +1084,7 @@ namespace idk::vkn
 		//vk::RenderPass result = view.BasicRenderPass(BasicRenderPasses::eRgbaColorDepth);
 		//if (state.camera.is_shadow)
 		//	result = view.BasicRenderPass(BasicRenderPasses::eDepthOnly);
-		return state.camera.render_target.as<VknRenderTarget>().GetRenderPass(state.clear_render_target && state.camera.clear_data.index() != meta::IndexOf <std::remove_const_t<decltype(state.camera.clear_data)>,DontClear>::value);
+		return *state.camera.render_target.as<VknRenderTarget>().GetRenderPass(state.clear_render_target && state.camera.clear_data.index() != meta::IndexOf <std::remove_const_t<decltype(state.camera.clear_data)>,DontClear>::value);
 	}
 
 
@@ -1249,7 +1187,9 @@ namespace idk::vkn
 
 			deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
 			deferred_pass.deferred_post_frag = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
-			deferred_pass.Init(size);
+			deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
+			deferred_pass.Init(size,camera.render_target.as<VknRenderTarget>());
+			deferred_pass.hdr_frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
 			deferred_pass.pipeline_manager(GetPipelineManager());
 			deferred_pass.frame_index(_current_frame_index);
 			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
@@ -1268,9 +1208,29 @@ namespace idk::vkn
 		if(!is_deferred)
 			the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
-		auto deferred_interface = (is_deferred) ? rs.deferred_pass.ProcessDrawCalls(state, rs) : PipelineThingy{};
-		if(is_deferred)
+		PipelineThingy deferred_interface_light{};
+		PipelineThingy deferred_interface_hdr  {};
+		if (is_deferred)
+		{
+
+			size_t max_lights = 7;
+			auto deferred_interface = PipelineThingy{};
+			deferred_interface.SetRef(rs.ubo_manager);
+			rs.deferred_pass.LightPass(deferred_interface, state, rs, std::make_pair(0, 0),true);
+			for (size_t i = 0; i < state.active_lights.size(); )
+			{
+				auto num = std::min(max_lights, state.active_lights.size() - i);
+				rs.deferred_pass.LightPass(deferred_interface,state, rs, std::make_pair(i, i+num),false);
+				i += num;
+			}
 			deferred_interface.GenerateDS(rs.dpools, false);
+			deferred_interface_light.~PipelineThingy();
+			new (&deferred_interface_light) PipelineThingy{ std::move(deferred_interface) };
+			deferred_interface_hdr.~PipelineThingy();
+			auto& hdr_interface = *(new (&deferred_interface_hdr) PipelineThingy{ rs.deferred_pass.HdrPass(state, rs) });
+			hdr_interface.GenerateDS(rs.dpools, false);
+
+		}
 		
 		//rs.ubo_manager.UpdateAllBuffers();
 		std::array<float, 4> a{};
@@ -1330,7 +1290,7 @@ namespace idk::vkn
 		//Begin Clear Pass
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
 		SetViewport(cmd_buffer, offset, size);
-		SetScissor(cmd_buffer,  offset, size);
+		//SetScissor(cmd_buffer,  offset, size);
 		//////////////////Skybox rendering
 		if (sb_cm)
 		{
@@ -1371,10 +1331,14 @@ namespace idk::vkn
 		if (is_deferred)
 		{
 			TransitionFrameBuffer(camera, cmd_buffer, view);
-			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface, camera, rt, rs);
+			//for(auto& deferred_interface : deferred_interfaces)
+			//Accumulator
+			deferred_pass.DrawToAccum(cmd_buffer, deferred_interface_light, camera, rs);
+			//HDR
+			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface_hdr, camera, rt, rs);
 		}
 		//Subsequent passes shouldn't clear the buffer any more.
-		rpbi.renderPass = View().BasicRenderPass(rt.GetRenderPassType(),false,false);
+		rpbi.renderPass = *View().BasicRenderPass(rt.GetRenderPassType(),false,false);
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();

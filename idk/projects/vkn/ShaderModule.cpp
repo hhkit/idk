@@ -99,6 +99,7 @@ namespace idk::vkn
 		//location
 		hash_table<uint32_t,buffer_desc> extracted_desc;
 	};
+#pragma optimize("",off)
 	ExtractedMisc extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
 	{
 		ExtractedMisc result{};
@@ -167,6 +168,21 @@ namespace idk::vkn
 			}
 			ubo_info[ub.name] = std::move(info);
 		}
+
+
+		for (auto& ub : resources.subpass_inputs)
+		{
+			UboInfo info;
+			auto type = code_reflector.get_type(ub.type_id);
+			info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
+			info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
+			info.stage = StageToUniformStage(single_stage);
+			info.size = (type.array.size()) ? type.array.back() : 1;
+			info.type = uniform_layout_t::UniformType::eAttachment;
+
+			ubo_info[ub.name] = std::move(info);
+		}
+
 		//for (auto& ub : cs)
 		//{
 		//	UboInfo info;
@@ -189,6 +205,7 @@ namespace idk::vkn
 		{
 			{uniform_layout_t::UniformType::eBuffer,vk::DescriptorType::eUniformBuffer},
 			{uniform_layout_t::UniformType::eSampler,vk::DescriptorType::eCombinedImageSampler},
+			{uniform_layout_t::UniformType::eAttachment,vk::DescriptorType::eInputAttachment},
 		};
 		return map[type];
 	}
@@ -208,6 +225,7 @@ namespace idk::vkn
 		}
 		return result;
 	}
+#pragma optimize("",off)
 	void CreateLayouts(
 		hash_table<string, UboInfo>& ubo_info,
 		ShaderModule::LayoutTable& layouts,

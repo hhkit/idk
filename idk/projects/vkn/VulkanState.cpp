@@ -904,9 +904,9 @@ namespace idk::vkn
 		return static_cast<ValHandler*>((pUserData) ? pUserData : &def)->processMsg(messageSeverity, messageType, pCallbackData);
 	}
 
-	vk::RenderPass VulkanState::BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth ) const
+	const RenderPassObj& VulkanState::BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth ) const
 	{
-		return *m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
+		return m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
 	}
 
 	vk::UniqueCommandPool VulkanState::CreateGfxCommandPool()
@@ -1029,7 +1029,7 @@ namespace idk::vkn
 			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{
-				vkn_fb.GetRenderPass()
+				*vkn_fb.GetRenderPass()
 				,frame_buffer
 				,vk::Rect2D{ vk::Offset2D{}, vk::Extent2D(s_cast<uint32_t>(vkn_fb.Size().x),s_cast<uint32_t>(vkn_fb.Size().y)) }
 				,s_cast<uint32_t>(std::size(clearcolor))

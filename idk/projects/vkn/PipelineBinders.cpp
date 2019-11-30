@@ -14,6 +14,7 @@
 #include <vkn/VknFontAtlas.h>
 
 #include <vkn/utils/utils.inl>
+#include <vkn/VknFrameBuffer.h>
 
 namespace idk::vkn
 {
@@ -116,7 +117,24 @@ namespace idk::vkn
 		_state = &vstate;
 		auto& state = State();
 		cam = state.camera;
-		light_block = PrepareLightBlock(cam, *state.lights);
+		auto& all_lights = *state.lights;
+		vector<LightData> lights;
+		size_t i = 0,end = vstate.active_lights.size();
+		if (light_range)
+		{
+			auto& [start, _end] = *light_range;
+			i = start;
+			end = _end;
+		}
+
+		for (;i<end;++i)
+		{
+			auto active_index = vstate.active_lights[i];
+			auto& light = all_lights[active_index];
+			lights.emplace_back(light);
+			shadow_maps.emplace_back(light.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+		}
+		light_block = PrepareLightBlock(cam, lights);
 		view_trf = cam.view_matrix;
 		pbr_trf = view_trf.inverse();
 		LoadStuff(vstate);
@@ -200,7 +218,7 @@ namespace idk::vkn
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
 	{
 		auto& state = State();
-		the_interface.BindUniformBuffer("LightBlock", 0, light_block,true);//skip if pbr is already bound(not per instance)
+		the_interface.BindUniformBuffer("LightBlock", 0, light_block,!rebind_light);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
 
 		{
@@ -214,8 +232,9 @@ namespace idk::vkn
 			else
 			{
 				//Bind the shadow maps
-				for (auto& shadow_map : state.shadow_maps_2d)
+				for (auto& shadow_map : shadow_maps)
 				{
+					
 					auto& sm_uni = shadow_map;
 					{
 						auto& depth_tex = sm_uni.as<VknTexture>();
@@ -256,19 +275,21 @@ namespace idk::vkn
 		auto& mat = *mat_inst.material;
 		the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
 	}
-
+#pragma optimize("",off)
 	void StandardMaterialBindings::SetState(const GraphicsState& vstate) {
 		_state = &vstate;
 		State();
 	}
 
+#pragma optimize("",off)
 	//Assumes that the material is valid.
 	void StandardMaterialBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
 		//Bind the material uniforms
 		{
 			
-			auto& mat_inst = _state->material_instances.find(dc.material_instance)->second;
+			auto mat = _state->material_instances.find(dc.material_instance);
+			auto& mat_inst = mat->second;
 			//[[maybe_unused]]auto& mat = *mat_inst.material;
 			for (auto itr = mat_inst.ubo_table.begin(); itr != mat_inst.ubo_table.end(); ++itr)
 			{

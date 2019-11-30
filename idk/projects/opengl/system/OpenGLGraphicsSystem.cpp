@@ -55,8 +55,8 @@ namespace idk::ogl
 
 	void Win32GraphicsSystem::LateInit()
 	{
-		_opengl->GenResources();
 		GraphicsSystem::LateInit();
+		_opengl->GenResources();
 	}
 
 	void Win32GraphicsSystem::Shutdown()
@@ -93,6 +93,10 @@ namespace idk::ogl
 		_opengl->IsPicking();
 		//get pixeldata
 		return _opengl->PickData(vp_pos);
+	}
+	void Win32GraphicsSystem::LoadShaderImpl()
+	{
+		_opengl->LoadShaderImpl();
 	}
 	OpenGLState& Win32GraphicsSystem::Instance()
 	{
