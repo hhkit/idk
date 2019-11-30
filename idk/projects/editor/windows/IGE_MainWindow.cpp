@@ -371,7 +371,7 @@ namespace idk {
 
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Translate);
 		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Translate ? activeColor : inactiveColor);
-		if (ImGui::Button("##Tool", toolButtonSize)) {
+		if (ImGui::Button("Move##Tool", toolButtonSize)) {
 			gizmo_operation = GizmoOperation_Translate;
 		}
 		ImGui::PopItemFlag();

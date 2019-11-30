@@ -20,7 +20,7 @@ namespace idk::vkn
 
 		void PrepareDraw(vk::CommandBuffer& cmd_buffer);
 
-		vk::RenderPass GetRenderPass(bool clear_col=true,bool clear_depth =true)const;
+		RenderPassObj GetRenderPass(bool clear_col=true,bool clear_depth =true)const;
 
 		vk::Framebuffer Buffer();
 

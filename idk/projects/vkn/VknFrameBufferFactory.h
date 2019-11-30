@@ -1,7 +1,14 @@
 #pragma once
 #include <gfx/FramebufferFactory.h>
+#include <vkn/RenderPassObj.h>
 namespace idk::vkn
 {
+	struct  VknSpecializedInfo :SpecializedInfo
+	{
+		RenderPassObj render_pass;
+		VknSpecializedInfo(RenderPassObj obj):render_pass{obj}{}
+	};
+
 	class VknFrameBufferFactory : public FrameBufferFactory
 	{
 	public:
@@ -15,6 +22,6 @@ namespace idk::vkn
 		void CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out) override;
 		void PreReset(FrameBuffer& framebuffer) override;//resets the framebuffer (queue resource for destruction)
 		
-		virtual void Finalize(FrameBuffer& h_fb) override;
+		virtual void Finalize(FrameBuffer& h_fb, SpecializedInfo* specialized_info) override;
 	};
 }

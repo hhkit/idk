@@ -44,6 +44,8 @@ namespace idk
 		FBrdf,
 		FFont,
 		FDeferredPost,
+		FDeferredPostSpecular,
+		FDeferredPostAmbient,
 		FMax
 	};
 	enum GeometryShaders
@@ -123,6 +125,7 @@ namespace idk
 		shared_ptr<pipeline_config> MeshRenderConfig()const { return mesh_render_config; }
 
 		virtual GraphicsAPI GetAPI() = 0;
+		void LoadShaders();
 	protected:
 		struct SpecialRenderBuffer
 		{
@@ -190,7 +193,6 @@ namespace idk
 
 		shared_ptr<pipeline_config> mesh_render_config{nullptr};
 
-		void LoadShaders();
 		virtual void LoadShaderImpl() {}
 	private:
 

@@ -13,6 +13,8 @@ namespace idk
 		FilterMode  filter_mode = FilterMode::Linear;
 		std::optional<RscHandle<Texture>> buffer;
 		bool isCubeMap = false;
+		bool override_as_depth = false;
+		bool is_input_att = false;
 		AttachmentInfo() = default;
 		AttachmentInfo(
 			LoadOp  load_op_,
@@ -29,7 +31,19 @@ namespace idk
 			isCubeMap{ isCubeMap_},
 			buffer{ buffer_ }
 		{};
+		AttachmentInfo(const Attachment& attachment)
+			: load_op{ attachment.load_op }
+			, store_op{ attachment.store_op }
+			, internal_format{ attachment.buffer->GetMeta().internal_format }
+			, filter_mode{ attachment.buffer->GetMeta().filter_mode }
+			, buffer{attachment.buffer}
+		{
+		}
 	};
+
+
+	struct SpecializedInfo {};
+
 	struct FrameBufferInfo
 	{
 		vector<AttachmentInfo> attachments;
@@ -50,13 +64,13 @@ namespace idk
 
 	struct FrameBufferFactory : ResourceFactory<FrameBuffer>
 	{
-		RscHandle<FrameBuffer> Create(const FrameBufferInfo& info);
-		void Update(const FrameBufferInfo& info, RscHandle<FrameBuffer> h_fb);
+		RscHandle<FrameBuffer> Create(const FrameBufferInfo& info, SpecializedInfo* specialized_info=nullptr);
+		void Update(const FrameBufferInfo& info, RscHandle<FrameBuffer> h_fb, SpecializedInfo* specialized_info);
 	protected:
 		//out must be assigned a make unique of the implementation version of attachment
 		virtual void CreateAttachment(AttachmentType type,const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out) = 0;
 		virtual void PreReset(FrameBuffer& framebuffer) = 0;//resets the framebuffer (queue resource for destruction)
 		void Reset(FrameBuffer& framebuffer);
-		virtual void Finalize(FrameBuffer& h_fb) = 0;
+		virtual void Finalize(FrameBuffer& h_fb, SpecializedInfo* specialized_info) = 0;
 	};
 }

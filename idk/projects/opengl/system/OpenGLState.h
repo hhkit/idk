@@ -32,8 +32,8 @@ namespace idk::ogl
 		PixelData PickData(const vec2& pos);
 		void IsPicking();
 
+		void LoadShaderImpl();
 	private:
-
 		Win32GraphicsSystem* sys{};
 		// variables
 		PipelineProgram          pipeline;

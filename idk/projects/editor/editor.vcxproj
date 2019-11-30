@@ -202,6 +202,7 @@
     <ClInclude Include="IconsFontAwesome5_c.h" />
     <ClInclude Include="ProjectManagement.h" />
     <ClInclude Include="Registry.h" />
+    <ClInclude Include="widgets\IconCheckbox.h" />
     <ClInclude Include="widgets\LayerMaskCombo.h" />
     <ClInclude Include="loading\AssimpImporter.h" />
     <ClInclude Include="loading\AssimpImporter_helpers.h" />
@@ -257,6 +258,7 @@
     <ClCompile Include="imguidk.cpp" />
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="widgets\IconCheckbox.cpp" />
     <ClCompile Include="widgets\LayerMaskCombo.cpp" />
     <ClCompile Include="loading\AssimpImporter.cpp" />
     <ClCompile Include="loading\AssimpImporter_helpers.cpp" />

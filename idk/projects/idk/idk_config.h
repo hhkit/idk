@@ -114,6 +114,7 @@ namespace idk
 		,   class FrameBuffer
 		,	anim::Animation
 		,	anim::Skeleton
+		,   class ShaderSnippet
 		//,	class Level
 	>;
 

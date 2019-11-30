@@ -53,9 +53,9 @@ namespace idk::vkn
 		void UnbindShader(ShaderStage stage);
 		void BindShader(ShaderStage stage, RscHandle<ShaderProgram> shader);
 		void BindAttrib(uint32_t location, vk::Buffer buffer, size_t offset);
-		void BindMeshBuffers(const RenderObject& ro);
-		void BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs);
-		void BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs);
+		bool BindMeshBuffers(const RenderObject& ro);
+		bool BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs);
+		bool BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs);
 		void SetVertexCount(uint32_t vertex_count);
 
 		std::optional<UboInfo> GetUniform(const string& uniform_name) const;
@@ -63,8 +63,9 @@ namespace idk::vkn
 
 		template<typename T>
 		bool BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+		bool BindAttachment(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 
 		void FinalizeDrawCall(const RenderObject& ro);
 		void FinalizeDrawCall(const RenderObject& ro,size_t num_inst,size_t inst_offset);

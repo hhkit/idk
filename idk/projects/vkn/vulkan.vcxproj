@@ -236,7 +236,9 @@
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderPassInfo.h" />
     <ClInclude Include="RenderPassManager.h" />
+    <ClInclude Include="RenderPassObj.h" />
     <ClInclude Include="RenderStateV2.h" />
     <ClInclude Include="RenderUtil.h" />
     <ClInclude Include="SpinLock.h" />
@@ -314,6 +316,8 @@
     <ClCompile Include="PipelineThingy.cpp" />
     <ClCompile Include="ProcessedRO.cpp" />
     <ClCompile Include="RegisterVulkanFactories.cpp" />
+    <ClCompile Include="RenderPassInfo.cpp" />
+    <ClCompile Include="RenderPassObj.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="RenderStateV2.cpp" />
     <ClCompile Include="RenderUtil.cpp" />

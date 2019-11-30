@@ -71,21 +71,6 @@ namespace idk::ogl
 
 	void OpenGLState::GenResources()
 	{
-		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
-		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
-		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
-		renderer_geometry_shaders;
-
-		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
-		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
-		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-        renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
-		renderer_vertex_shaders[VSkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
-
-		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
-		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
-		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/shadow.frag");
-		renderer_fragment_shaders[FPicking] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/picking.frag");
 
 		brdf_texture = Core::GetResourceManager().Create<OpenGLTexture>();
 		brdf_texture->Bind();
@@ -161,6 +146,8 @@ namespace idk::ogl
 		//auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		auto& font_render_data = curr_object_buffer.font_render_data;
 
+		if (RscHandle<RenderTarget>{}->NeedsFinalizing())
+			RscHandle<RenderTarget>{}->Finalize();
 		for (auto& cam : curr_object_buffer.camera)
 		{
 			auto& rt = *cam.render_target;
@@ -720,7 +707,7 @@ namespace idk::ogl
         auto ui_render_per_canvas = curr_object_buffer.ui_render_per_canvas;
         for (auto& [canvas, ui_render_data] : ui_render_per_canvas)
         {
-			if (canvas->render_target)
+			//if (canvas->render_target)
 			{
 				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{canvas->render_target});
 				for (auto& elem : ui_render_data)
@@ -967,6 +954,18 @@ namespace idk::ogl
 	void OpenGLState::IsPicking()
 	{
 		is_picking = true;
+	}
+
+	void OpenGLState::LoadShaderImpl()
+	{
+		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
+		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
+		renderer_geometry_shaders;
+
+		// If your shader is used by both vulkan and opengl, put it in GraphicsSystem.cpp's LoadShaders
+		renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
+
 	}
 
 	void OpenGLState::BindMaterial(const RscHandle<Material>& mat)

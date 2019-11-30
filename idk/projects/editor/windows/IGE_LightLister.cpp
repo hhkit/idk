@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "IGE_LightLister.h"
-#include <editor/widgets/DragVec.h>
-#include <editor/widgets/DragQuat.h>
+#include <editor/imguidk.h>
 #include <core/Core.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
@@ -94,7 +93,7 @@ namespace idk
 			ImGui::Checkbox((id + "shad").data(), &light.casts_shadows);
 			ImGui::NextColumn();
 
-			ImGui::Checkbox((id + "isol").data(), &light.isolate);
+			ImGuidk::IconCheckbox((id + "isol").data(), ICON_FA_SUN, &light.isolate);
 			ImGui::NextColumn();
 			isolate |= light.isolate;
 

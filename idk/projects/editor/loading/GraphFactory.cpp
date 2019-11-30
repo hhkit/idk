@@ -66,7 +66,7 @@ namespace idk
 		
         mat->_default_instance = Core::GetResourceManager().LoaderEmplaceResource<MaterialInstance>(mat.guid);
         mat->_default_instance->material = mat;
-
+		mat->Name(p.GetFileName());
         mat->Compile();
 
         ResourceBundle b;
