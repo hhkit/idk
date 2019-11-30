@@ -185,8 +185,9 @@ vec3 pbr_metallic(
 )
 {
 //Gamma uncorrection
+#ifndef VULKAN
 	albedo = pow(albedo, vec3(2.2));
-
+#endif
 // temporary light code
 	
 	vec3  frag_to_light = (vec4(light.v_pos,1)).xyz - view_pos;
@@ -257,7 +258,9 @@ vec3 pbr_specular(
 ,	float ambient_o
 )
 {
+#ifndef VULKAN
 	albedo = pow(albedo, vec3(2.2));
+#endif
 	//specular = pow(specular, 2.2);
 // temporary light code
 	
