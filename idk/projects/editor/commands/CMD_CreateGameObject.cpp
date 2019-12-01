@@ -8,6 +8,7 @@
 
 #include "pch.h"
 #include <editor/commands/CMD_CreateGameObject.h>
+#include <editor/windows/IGE_HierarchyWindow.h>
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
@@ -38,7 +39,10 @@ namespace idk {
 				game_object_handle->Name(name);
 			for (const auto& str : initial_components)
 				game_object_handle->AddComponent(string_view{ str });
-
+			Core::GetSystem<IDE>().selected_gameObjects.clear();
+			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
+			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
+			Core::GetSystem<IDE>().RefreshSelectedMatrix();
 			return bool(game_object_handle); //Return true if create gameobject is successful
 		}
 		else {
@@ -48,6 +52,10 @@ namespace idk {
 			catch (const bool fail) {
 				return fail;
 			}
+			Core::GetSystem<IDE>().selected_gameObjects.clear();
+			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
+			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
+			Core::GetSystem<IDE>().RefreshSelectedMatrix();
 			return true;
 		}
 	}

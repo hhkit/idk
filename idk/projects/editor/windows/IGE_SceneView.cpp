@@ -14,9 +14,8 @@ of the editor.
 
 
 #include "pch.h"
-#include <imgui/imgui.h>
-#include <editor/windows/IGE_SceneView.h>
 #include <imgui/ImGuizmo.h>
+#include <editor/windows/IGE_SceneView.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/commands/CommandList.h>
 #include <editor/DragDropTypes.h>
@@ -197,16 +196,17 @@ namespace idk {
 					}
 					if (!hasSelected) {
 						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
-
+						editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 					}
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
-					Core::GetSystem<IDE>().FindWindow<IGE_HierarchyWindow>()->ScrollToGameObject(closestGameObject);
+
 				}
 				else {
 					//Select as normal
 					selected_gameObjects.clear();
 					selected_gameObjects.push_back(closestGameObject);
-					Core::GetSystem<IDE>().FindWindow<IGE_HierarchyWindow>()->ScrollToGameObject(closestGameObject);
+					editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
+
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
 				}
 
@@ -677,15 +677,12 @@ namespace idk {
 			if (is_being_modified) {
 				if (!ImGuizmo::IsUsing()) {
 					vector<mat4>& originalMatrix = editor.selected_matrix;
-					int execute_counter = 0;
 					for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
 						mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
-						++execute_counter;
 					}
 					//Refresh the new matrix values
 					editor.RefreshSelectedMatrix();
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
 
 					is_being_modified = false;
 				}
@@ -748,5 +745,7 @@ namespace idk {
 
 		return main_camera.WindowsPointToRay(GetMousePosInWindowNormalized());
 	}
+
+	
 
 }
