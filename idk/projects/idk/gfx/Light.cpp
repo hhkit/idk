@@ -68,7 +68,7 @@ namespace idk
 	{
 		mat4 operator()(PointLight pointlight)
 		{
-			return perspective(pointlight.fov, 1.0f, pointlight.near,pointlight.far);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+			return perspective(deg{ 90 }, 1.0f, 0.1f, 100.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
 		mat4 operator()(SpotLight spotlight)
 		{
@@ -135,9 +135,9 @@ namespace idk
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
 					retval.v_dir = vec3(0.f);
 					retval.intensity = point_light.intensity;
-					retval.cos_inner = cos(point_light.fov);
+					retval.cos_inner = 1;
 					retval.cos_outer = 1;
-					retval.falloff = (point_light.use_inv_sq_atten) ? (1.f / (point_light.attenuation_radius * point_light.attenuation_radius)): point_light.attenuation_radius;
+					retval.falloff = (point_light.use_inv_sq_atten) ? (point_light.attenuation_radius * point_light.attenuation_radius): point_light.attenuation_radius;
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 

@@ -24,6 +24,8 @@
 
 #include <math/shapes/frustum.h>
 
+#include <parallel/ThreadPool.h>
+
 struct guid_64
 {
 	uint64_t mem1;
@@ -414,6 +416,7 @@ namespace idk
 
 		// todo: scenegraph traversal
 		RenderBuffer& result=GetWriteBuffer();
+		vector<mt::Future<void>> futures;
 #if 0   //change to 0 to reduce reallocation count.
 		result = RenderBuffer{};
 #else
@@ -423,23 +426,31 @@ namespace idk
 
 		// memcpy the lights until there is a smarter implementation
 		result.lights.reserve(lights.size());
-		for (auto& elem : lights)
-		{
-			if (isolate)
+#define POST() futures.emplace_back(Core::GetThreadPool().Post([&](){
+#define POST_END() }));
+
+		POST()
+			for (auto& elem : lights)
 			{
-				if (!elem.isolate)
-					continue;
+				if (isolate)
+				{
+					if (!elem.isolate)
+						continue;
+				}
+				//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
+				if (elem.is_active_and_enabled())
+					result.lights.emplace_back(elem.GenerateLightData());
 			}
-			//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
-			if(elem.is_active_and_enabled())
-				result.lights.emplace_back(elem.GenerateLightData());
-		}
+		POST_END();
 
 		hash_table<Handle<Animator>, size_t> skeleton_indices;
 
+		POST()
 		for (auto& elem : animators)
 			PrepareSkeletonTransform(elem, result.skeleton_transforms, skeleton_indices);
+		POST_END();
 
+		POST()
 		for (auto& elem : skinned_mesh_renderers)
 		{
 			if (elem.GetHandle().scene == Scene::prefab)
@@ -448,7 +459,9 @@ namespace idk
 			if (ro)
 				result.skinned_mesh_render.emplace_back(std::move(*ro));
 		}
+		POST_END();
 
+		POST()
 		for (auto& camera : cameras)
 		{
 			if (camera.GetHandle().scene == Scene::prefab)
@@ -462,7 +475,9 @@ namespace idk
 			else if (camera.enabled)
 				result.camera.emplace_back(camera.GenerateCameraData());
 		}
+		POST_END();
 
+		POST()
 		for (auto& elem : mesh_renderers)
 		{
 			if (elem.GetHandle().scene == Scene::prefab)
@@ -476,11 +491,13 @@ namespace idk
 				result.mesh_render.emplace_back(std::move(render_obj));
 			}
 		}
+		POST_END();
+
 
 		result.renderer_vertex_shaders = renderer_vertex_shaders;
 		result.renderer_fragment_shaders = renderer_fragment_shaders;
 
-
+		POST()
         for (auto& elem : ps)
         {
             if (elem.renderer.enabled && elem.data.num_alive)
@@ -509,7 +526,10 @@ namespace idk
                 render_data.material_instance = elem.renderer.material;
             }
         }
-
+		POST_END();
+		for (auto& elem : futures)
+			elem.get();
+		futures.clear();
 		{
 			auto& unique_particles = result.particle_render_data;
 			const size_t avg_particle_count = 100;
@@ -567,7 +587,6 @@ namespace idk
 			render_data.data = ImageData{ im.texture };
 			render_data.depth = go->Transform()->Depth();
 		}
-
 
 		//////For UI////////
 		{
@@ -697,7 +716,6 @@ namespace idk
 			}
 			result.canvas_render_range.emplace_back(range);
 		}
-		
 
 		for (auto& camera : result.camera)
 		{
@@ -744,6 +762,8 @@ namespace idk
 			//}
 		}
 
+		for (auto& elem : futures)
+			elem.get();
 
 		//SubmitBuffers(std::move(result));
 		SwapWritingBuffer();
@@ -762,6 +782,7 @@ namespace idk
 		///////////////////////Load vertex shaders
 		//renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
+		renderer_vertex_shaders[VNormalMeshPicker] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh_noinstance.vert");
 		renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
 		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
 		renderer_vertex_shaders[VSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");

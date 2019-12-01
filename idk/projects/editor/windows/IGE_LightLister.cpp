@@ -7,6 +7,7 @@
 #include <common/Transform.h>
 #include <gfx/Light.h>
 #include <gfx/GraphicsSystem.h>
+#include <scene/SceneManager.h>
 namespace idk
 {
 	IGE_LightLister::IGE_LightLister()
@@ -18,6 +19,33 @@ namespace idk
 	}
 	void IGE_LightLister::Update()
 	{
+		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+		ImGui::Text("Create:"); 
+		ImGui::SameLine();
+
+		if (ImGui::Button("Point"))
+		{
+			auto go = scene->CreateGameObject();
+			auto light = go->AddComponent<Light>();
+			light->light = PointLight{};
+		}
+		ImGui::SameLine();
+
+		if (ImGui::Button("Directional"))
+		{
+			auto go = scene->CreateGameObject();
+			auto light = go->AddComponent<Light>();
+			light->light = DirectionalLight{};
+		}
+		ImGui::SameLine();
+
+		if (ImGui::Button("SpotLight"))
+		{
+			auto go = scene->CreateGameObject();
+			auto light = go->AddComponent<Light>();
+			light->light = SpotLight{};
+		}
+
 		struct ColumnHeader
 		{
 			const char* label;
@@ -99,7 +127,8 @@ namespace idk
 			ImGui::Checkbox("##shad", &light.casts_shadows);
 			ImGui::NextColumn();
 
-			ImGuidk::IconCheckbox("##isol", ICON_FA_SUN, &light.isolate);
+			//ImGuidk::IconCheckbox("##isol", ICON_FA_SUN, &light.isolate);
+			ImGui::Checkbox("##isolate", &light.isolate);
 			ImGui::NextColumn();
 
 			if (ImGui::Button("Focus"))

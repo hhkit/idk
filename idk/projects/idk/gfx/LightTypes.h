@@ -13,10 +13,7 @@ namespace idk
 	{
 		real  intensity          { 1.f } ;
 		color light_color        { 1.f } ;
-		rad   fov				 {90.f};
 		real  attenuation_radius { 1.f } ;
-		real  near{ -5.0f };
-		real  far{ +5.0f };
 		bool  use_inv_sq_atten{ true };
 
 		RscHandle<FrameBuffer> light_map;
@@ -24,8 +21,6 @@ namespace idk
 		const void* unique_id() const noexcept;
 		RscHandle<FrameBuffer> InitShadowMap();
 		
-		rad GetFOV() const { return fov; }
-		void SetFOV(const rad& val) { fov = val; }
 		real GetAttenuationRadius() const { return attenuation_radius; }
 		void SetAttenuationRadius(const real& val) { attenuation_radius = val; }
 		bool GetInvSqAtten() const { return use_inv_sq_atten; }

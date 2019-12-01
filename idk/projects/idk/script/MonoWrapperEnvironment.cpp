@@ -214,6 +214,14 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		// app
+		BIND_START("idk.Bindings::EngineKill", void)
+		{
+			if (&Core::GetSystem<IEditor>())
+				Core::Shutdown();
+		}
+		BIND_END();
+
 		// scene
 		BIND_START("idk.Bindings::SceneChangeScene", void, Guid scene)
 		{
@@ -1258,32 +1266,6 @@ namespace idk::mono
 		BIND_START("idk.Bindings::LightSetIntensity", void, Handle<Light> h, real i)
 		{
 			h->SetLightIntensity(i);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::LightGetFOV", rad, Handle<Light> h)
-		{
-			return std::visit([&](auto& light_variant)-> const rad
-			{
-				using T = std::decay_t<decltype(light_variant)>;
-				if constexpr (std::is_same_v<T, PointLight>)
-					return light_variant.GetFOV();
-				else
-					return rad{};
-			}
-			, h->light);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::LightSetFOV", void, Handle<Light> h, rad i)
-		{
-			std::visit([&, val = i](auto& light_variant)
-			{
-				using T = std::decay_t<decltype(light_variant)>;
-				if constexpr (std::is_same_v<T, PointLight>)
-					light_variant.SetFOV(val);
-			}
-			, h->light);
 		}
 		BIND_END();
 

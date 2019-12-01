@@ -423,6 +423,7 @@ namespace idk {
 				// 		i->is_open = false;
 				// editor.currentCamera().current_camera->enabled = false;
 				HotReloadDLL();
+				Core::GetSystem<IDE>().FindWindow<IGE_InspectorWindow>()->Reset();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;

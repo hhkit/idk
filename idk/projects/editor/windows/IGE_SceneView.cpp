@@ -34,7 +34,8 @@ of the editor.
 #include <sstream> //sstream
 #include <math/matrix_decomposition.h>
 
-
+#include <opengl/system/OpenGLGraphicsSystem.h>
+#include <opengl/PixelData.h>
 #include <iostream>
 
 namespace idk {
@@ -161,9 +162,15 @@ namespace idk {
 
 		ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
-		//Raycast Selection
-		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {
+		Core::GetSystem<GraphicsSystem>().enable_picking = ImGui::IsMouseDown(0);
 
+
+		//Raycast Selection
+		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
+		{
+			auto ray = Core::GetSystem<ogl::Win32GraphicsSystem>().SelectObjViewport(GetMousePosInWindowNormalized());
+
+			LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
 			//Select gameobject here!
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
