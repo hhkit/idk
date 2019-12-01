@@ -25,11 +25,10 @@ namespace idk {
 
 		virtual void BeginWindow() override;
 		virtual void Update() override;
-		void ScrollToGameObject(Handle<GameObject> gameObject); //When called, will scroll to gameobject. Check if tree is closed or not!
+		void ScrollToSelectedInHierarchy(Handle<GameObject> gameObject);
+        
+		Signal<> OnGameObjectSelectionChanged;
 
-
-        Signal<> OnGameObjectSelectionChanged;
-	
 	protected:
 
 
@@ -37,9 +36,7 @@ namespace idk {
 		ImGuiTextFilter textFilter{};
 		bool show_editor_objects{};
 
-		Handle<GameObject> gameobject_focus = {}; //This is >= 0 when scroll is called
-
-
+		Handle<GameObject> scroll_focused_gameObject;		//This checks when user raycast selects. When this is not null, it will focus in the scenegraph.visit. It will then be nulled there.
 	};
 
 

@@ -62,7 +62,7 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		
+
 		//MenuBar
         ImGui::BeginMenuBar();
 		ImGui::PopStyleColor();
@@ -142,9 +142,6 @@ namespace idk {
 
 		ImGui::EndMenuBar();
 
-		
-
-
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
@@ -158,12 +155,16 @@ namespace idk {
 		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
 		bool isShiftSelectCalled = false;
 		bool hasSelected_GameobjectsModified = false;
+		int focused_gameobject_position =  0 ; //If it is -1, it means the ScrollToGameObjectInHierarchy is not called.
+		int total_gameobjects_displayed = 0; //This is for the focused thing.
+		bool is_scroll_focused_gameObject_found = false;
 		vector<int> itemToSkipInGraph{};
 		//Refer to TestSystemManager.cpp
 
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
 
+		//Display gameobjects
 		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
 
 			if (depth > 0) {
@@ -223,8 +224,7 @@ namespace idk {
                 col.Value.w = 0.5f;
 
             ImGui::PushStyleColor(ImGuiCol_Text, col.Value);
-
-
+			
 			if (!textFilter.PassFilter(goName.c_str())) {
                 ImGui::PopStyleColor();
 				++selectedCounter; // counter here is for shift selecting
@@ -233,15 +233,6 @@ namespace idk {
 			
 			string idString = std::to_string(handle.id); //Use id string as id
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
-
-			if (gameobject_focus) {
-				if (gameobject_focus == handle) {
-					ImGui::SetItemDefaultFocus();
-					gameobject_focus = {};
-				}
-
-			}
-
             ImGui::PopStyleColor();
 
 			
@@ -289,7 +280,6 @@ namespace idk {
 					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
 				}
 			}
-
 			
 			//If the drag drops target on to the handle...
 			if (ImGui::BeginDragDropTarget()) {
@@ -334,6 +324,20 @@ namespace idk {
 				ImGui::Text("Drag to parent to unparent.");
 				ImGui::EndDragDropSource();
 			}
+
+			++total_gameobjects_displayed;
+			if (scroll_focused_gameObject) {
+				if (!is_scroll_focused_gameObject_found) {
+					if (scroll_focused_gameObject == handle) {
+						is_scroll_focused_gameObject_found = true;
+					}
+					else {
+						++focused_gameobject_position;
+					}
+				}
+			}
+
+
 			if (isTreeOpen) {
 
 				ImGui::TreePop();
@@ -341,14 +345,15 @@ namespace idk {
 			}
 			else {
 				itemToSkipInGraph.push_back(selectedCounter);
-				return false;
+				return false; //Skip children
 			}
 
-			return true;
+			return true; //Go to next in visit. Does not skip children
+
+
+
 
 		});
-
-
 
         ImGui::PopStyleVar();
 
@@ -446,93 +451,31 @@ namespace idk {
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 
 
-		
+		if (scroll_focused_gameObject) { //If this was called by sceneview. scroll the hierarchy to this position then null this.
+
+			if (is_scroll_focused_gameObject_found) {
+				const int clamp_val = 5;
+				if (focused_gameobject_position < clamp_val)
+					focused_gameobject_position = 0;
+				else if ((total_gameobjects_displayed-focused_gameobject_position) < clamp_val)
+					focused_gameobject_position = total_gameobjects_displayed;
+				const float pos = static_cast<float>(focused_gameobject_position) / static_cast<float>(total_gameobjects_displayed);
+				printf("SetScroll: %.2f", pos);
+				ImGui::SetScrollY(ImGui::GetScrollMaxY() * pos); //sceneGraph will always be 1 or more
+			}
+
+
+
+			scroll_focused_gameObject = {};
+		}
+
 
 	}
 
-	void IGE_HierarchyWindow::ScrollToGameObject(Handle<GameObject> gameObject)
+	void IGE_HierarchyWindow::ScrollToSelectedInHierarchy(Handle<GameObject> gameObject)
 	{
-
-		gameobject_focus = gameObject;
-
-		/*
-
-		//Hierarchy Display
-		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
-		float	objects_parsed = 0;						//Basically, the number of gameobjects displayed in hierarchy at the point in time
-		float	object_pos = 0;						//Basically, the number of gameobjects displayed in hierarchy at the point in time
-		bool	has_found_object = false;
-		vector<int> itemToSkipInGraph{};
-
-		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
-			(void)depth;
-			if (!handle) //Ignore handle zero
-				return true;
-
-			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) { // ignore editor
-
-				return true;
-			}
-
-			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
-
-			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
-			if (children->size() == 0) {
-				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
-			}
-
-
-			Handle<Name> c_name = handle->GetComponent<Name>();
-			string goName{};
-			if (c_name)
-				goName = c_name->name;
-
-			const bool isNameEmpty = goName.empty();
-			if (isNameEmpty) {
-				goName = "Unnamed (";
-				goName.append(std::to_string(handle.id));
-				goName.append(")");
-
-			}
-
-			if (!textFilter.PassFilter(goName.c_str())) {
-				return true;
-			}
-			string idString = std::to_string(handle.id); //Use id string as id
-			auto id = ImGui::GetID(idString.c_str());
-
-			bool isTreeOpen = ImGui::TreeNodeBehaviorIsOpen(id, nodeFlags); //Display obj
-			++objects_parsed;
-
-			if (!has_found_object) {
-				if (handle == gameObject) {
-					has_found_object = true;
-
-				}
-				else {
-					++object_pos;
-				}
-			}
-
-
-			if (isTreeOpen) {
-				return true;
-			}
-			else {
-				return false;
-			}
-
-			return true;
-
-		});
-
-		is_scroll_to_gameObject_called = (object_pos / objects_parsed);
-
-		*/
+		//Find the position of the object in the hierarchy
+		scroll_focused_gameObject = gameObject;
 	}
-
-
 
 }
