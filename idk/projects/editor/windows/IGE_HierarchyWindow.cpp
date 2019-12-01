@@ -19,7 +19,6 @@ of the editor.
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <editor/DragDropTypes.h>
 #include <app/Application.h>
-#include <scene/SceneManager.h>
 #include <core/GameObject.h>
 #include <common/Name.h>
 #include <common/Transform.h>
@@ -190,20 +189,26 @@ namespace idk {
 
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
-			//Check if gameobject has been selected. Causes Big-O(n^2)
-			for (Handle<GameObject>& i : selected_gameObjects) {
-				if (handle == i) {
-					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-					break;
-				}
-			}
-
 			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
 			if (children->size() == 0) {
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
 			}
 
+			bool is_its_child_been_selected = false;
+			//Check if gameobject has been selected. Causes Big-O(n^2)
+			for (Handle<GameObject>& i : selected_gameObjects) {
+				if (handle == i) {
+					nodeFlags |= ImGuiTreeNodeFlags_Selected;
+					break;
+				}
+				else if (CheckIfChildrenIsSelected(children, i)) {
+					is_its_child_been_selected = true;
+					nodeFlags |= ImGuiTreeNodeFlags_Selected;
+
+				}
+
+			}
 
 			Handle<Name> c_name = handle->GetComponent<Name>();
 			string goName{};
@@ -234,7 +239,15 @@ namespace idk {
 			}
 			
 			string idString = std::to_string(handle.id); //Use id string as id
+			if (is_its_child_been_selected)
+				ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.75f, 0.75f, 0.0f, 0.4f));
+
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
+
+			if (is_its_child_been_selected)
+				ImGui::PopStyleColor();
+				
+
             ImGui::PopStyleColor();
 
 			
@@ -477,6 +490,32 @@ namespace idk {
 	{
 		//Find the position of the object in the hierarchy
 		scroll_focused_gameObject = gameObject;
+	}
+
+	bool IGE_HierarchyWindow::CheckIfChildrenIsSelected(SceneManager::SceneGraph* childrenGraph, Handle<GameObject> comparingGameObject)
+	{
+		if (!childrenGraph)
+			return false;
+		if (childrenGraph->size() == 0)
+			return false;
+
+		bool is_child_selected = false;
+		for (auto j = childrenGraph->begin(); j != childrenGraph->end(); ++j) {
+			if ((*j).obj == comparingGameObject) {
+				is_child_selected = true;
+			}
+			else {
+				SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+				is_child_selected = CheckIfChildrenIsSelected(sceneManager.FetchSceneGraphFor((*j).obj), comparingGameObject);
+			}
+
+			if (is_child_selected)
+				break;
+		}
+
+		return is_child_selected;
+
+
 	}
 
 }
