@@ -398,7 +398,7 @@ namespace idk::vkn
 		//Temp
 		for (auto i = num_concurrent_states; i-- > 0;)
 		{
-			auto thread = std::make_unique<NonThreadedRender>();
+			auto thread = std::make_unique<ThreadedRender>();
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}
@@ -814,6 +814,11 @@ namespace idk::vkn
 			}
 
 		}
+		//Join with all the threads
+		for (size_t j = 0; j < _render_threads.size(); ++j) {
+			auto& thread = _render_threads[j];
+			thread->Join();
+		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
 		vector<vk::CommandBuffer> buffers{};
@@ -856,11 +861,6 @@ namespace idk::vkn
 		}
 		pri_buffer->end();
 
-		//Join with all the threads
-		for (size_t j = 0; j < _render_threads.size(); ++j) {
-			auto& thread = _render_threads[j];
-			thread->Join();
-		}
 		if (!rendered)
 			buffers.emplace_back(*pri_buffer);
 		auto& current_signal = View().CurrPresentationSignals();
@@ -1199,13 +1199,14 @@ namespace idk::vkn
 		//TODO make ProcessRoUniforms only render forward pass stuff.
 		auto&& the_interface = (is_deferred)?PipelineThingy{}:ProcessRoUniforms(state, rs.ubo_manager);
 		
+		the_interface.SetRef(rs.ubo_manager);
 		
 		_particle_renderer.DrawParticles(the_interface, state, rs);
 		_font_renderer.DrawFont(the_interface,state,rs);
 
 
-		if(!is_deferred)
-			the_interface.GenerateDS(rs.dpools, false);//*/
+		//if(!is_deferred)
+		the_interface.GenerateDS(rs.dpools, false);//*/
 		the_interface.SetRef(rs.ubo_manager);
 		PipelineThingy deferred_interface_light[EGBufferType::size()]{};
 		PipelineThingy deferred_interface_hdr  {};

@@ -301,25 +301,25 @@ namespace idk::vkn
 			GBufferBinding::eNormal;
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_32,
+				ColorFormat::_enum::RGBAF_16,
 				FilterMode::_enum::Nearest
 				});
 			GBufferBinding::eTangent;
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_32,
+				ColorFormat::_enum::RGBAF_16,
 				FilterMode::_enum::Nearest
 				});
 			GBufferBinding::eUvMetallicRoughness;
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_32,
+				ColorFormat::_enum::RGBAF_16,
 				FilterMode::_enum::Nearest
 				});
 			GBufferBinding::eViewPos;
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_32,
+				ColorFormat::_enum::RGBAF_16,
 				FilterMode::_enum::Nearest
 				});
 			fbf.SetDepthAttachment(
@@ -336,7 +336,7 @@ namespace idk::vkn
 			fbf.Begin(size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_32,
+				ColorFormat::_enum::RGBAF_16,
 				FilterMode::_enum::Nearest
 				});
 			if (accum_buffer)
