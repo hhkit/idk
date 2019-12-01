@@ -76,7 +76,7 @@ namespace idk {
 		if (ImGui::BeginPopup("CreatePopup")) {
             IDE& editor = Core::GetSystem<IDE>();
 
-			if (ImGui::MenuItem("Create Empty")) {
+			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N")) {
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
 			}
             if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
@@ -86,6 +86,8 @@ namespace idk {
                 else {
                     editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
                 }
+
+
             }
             if (ImGui::BeginMenu("UI")) {
 				const auto go = editor.selected_gameObjects.empty()? Handle<GameObject>() :editor.selected_gameObjects.front();
@@ -460,7 +462,6 @@ namespace idk {
 				else if ((total_gameobjects_displayed-focused_gameobject_position) < clamp_val)
 					focused_gameobject_position = total_gameobjects_displayed;
 				const float pos = static_cast<float>(focused_gameobject_position) / static_cast<float>(total_gameobjects_displayed);
-				printf("SetScroll: %.2f", pos);
 				ImGui::SetScrollY(ImGui::GetScrollMaxY() * pos); //sceneGraph will always be 1 or more
 			}
 
