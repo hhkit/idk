@@ -1,13 +1,13 @@
 #pragma once
-#include <compare>
 #include <res/Guid.h>
 #include <res/ResourceMeta.h>
-
+#include <meta/comparator.h>
 namespace idk
 {
 	struct ResourceBundle;
 
 	struct MetaBundle
+		: comparable<MetaBundle>
 	{
 		vector<SerializedMeta> metadatas;
 
@@ -27,7 +27,7 @@ namespace idk
 		template<typename FullResType> RscHandle<FullResType> CreateResource() const;
 		template<typename FullResType> RscHandle<FullResType> CreateResource(string_view name) const;
 
-		auto operator<=>(const MetaBundle&) const = default;
+		bool operator<(const MetaBundle&) const;
 	};
 }
 

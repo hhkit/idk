@@ -13,10 +13,12 @@ namespace idk
 			&Data4[4], &Data4[5], &Data4[6], &Data4[7]);
 	}
 
+	/*
 	bool Guid::operator==(const Guid& other) const noexcept
 	{
 		return std::memcmp(this, &other, sizeof(GUID)) == 0;
 	}
+	*/
 
 	Guid::operator string() const
 	{

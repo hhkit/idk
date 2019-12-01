@@ -162,9 +162,30 @@ namespace idk
 	template<typename T, unsigned R, unsigned C>
 	inline tmat<T, C, R> tmat<T, R, C>::transpose() const
 	{
-		return detail::MatrixTranspose(*this, std::make_index_sequence<R>{});
+		if constexpr (std::is_same_v<float, T> && R == 4 && C == 4)
+		{
+			const tmat<float, 4, 4> & me = *this;
+			__m128 tmp0 = _mm_shuffle_ps(me[0].sse, me[1].sse, 0x44);
+			__m128 tmp2 = _mm_shuffle_ps(me[0].sse, me[1].sse, 0xEE);
+			__m128 tmp1 = _mm_shuffle_ps(me[2].sse, me[3].sse, 0x44);
+			__m128 tmp3 = _mm_shuffle_ps(me[2].sse, me[3].sse, 0xEE);
+
+			return tmat<float, 4, 4>
+			{
+				tvec<float, 4>{_mm_shuffle_ps(tmp0, tmp1, 0x88)},
+					tvec<float, 4>{_mm_shuffle_ps(tmp0, tmp1, 0xDD)},
+					tvec<float, 4>{_mm_shuffle_ps(tmp2, tmp3, 0x88)},
+					tvec<float, 4>{_mm_shuffle_ps(tmp2, tmp3, 0xDD)}
+			};
+		}
+		else
+			return detail::MatrixTranspose(*this, std::make_index_sequence<R>{});
 	}
 
+	namespace detail
+	{
+		tmat<float, 4, 4> sse_invert(const tmat<float, 4, 4>&);
+	}
 	template<typename T, unsigned R, unsigned C>
 	inline tmat<T, C, R> tmat<T, R, C>::inverse() const
 	{
@@ -195,61 +216,7 @@ namespace idk
 		else
 		if constexpr(R == 4)
 		{
-			// This is adapted from the glm library. It uses Laplace Computation but made more efficient. 
-			auto& m = *this;
-			T s00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
-			T s01 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
-			T s02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
-			T s03 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
-			T s04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
-			T s05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
-			T s06 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
-			T s07 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
-			T s08 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
-			T s09 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
-			T s10 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
-			T s11 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
-			T s12 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
-			T s13 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
-			T s14 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
-			T s15 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
-			T s16 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
-			T s17 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
-			T s18 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
-
-			tmat<T, C, R> retval;
-			retval[0][0] = +(m[1][1] * s00 - m[1][2] * s01 + m[1][3] * s02);
-			retval[1][0] = -(m[1][0] * s00 - m[1][2] * s03 + m[1][3] * s04);
-			retval[2][0] = +(m[1][0] * s01 - m[1][1] * s03 + m[1][3] * s05);
-			retval[3][0] = -(m[1][0] * s02 - m[1][1] * s04 + m[1][2] * s05);
-
-			retval[0][1] = -(m[0][1] * s00 - m[0][2] * s01 + m[0][3] * s02);
-			retval[1][1] = +(m[0][0] * s00 - m[0][2] * s03 + m[0][3] * s04);
-			retval[2][1] = -(m[0][0] * s01 - m[0][1] * s03 + m[0][3] * s05);
-			retval[3][1] = +(m[0][0] * s02 - m[0][1] * s04 + m[0][2] * s05);
-
-			retval[0][2] = +(m[0][1] * s06 - m[0][2] * s07 + m[0][3] * s08);
-			retval[1][2] = -(m[0][0] * s06 - m[0][2] * s09 + m[0][3] * s10);
-			retval[2][2] = +(m[0][0] * s11 - m[0][1] * s09 + m[0][3] * s12);
-			retval[3][2] = -(m[0][0] * s08 - m[0][1] * s10 + m[0][2] * s12);
-
-			retval[0][3] = -(m[0][1] * s13 - m[0][2] * s14 + m[0][3] * s15);
-			retval[1][3] = +(m[0][0] * s13 - m[0][2] * s16 + m[0][3] * s17);
-			retval[2][3] = -(m[0][0] * s14 - m[0][1] * s16 + m[0][3] * s18);
-			retval[3][3] = +(m[0][0] * s15 - m[0][1] * s17 + m[0][2] * s18);
-
-			const auto det =   m[0][0] * retval[0][0]
-						+ m[0][1] * retval[1][0]
-						+ m[0][2] * retval[2][0]
-						+ m[0][3] * retval[3][0];
-
-			// not invertible
-			if (fabs(det) <= constants::epsilon<T>())
-				return tmat<T, C, R>();
-
-			retval /= det;
-
-			return retval;
+			return detail::sse_invert(*this);
 		}
 		else
 		return tmat<T, C, R>();
