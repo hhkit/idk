@@ -125,7 +125,7 @@ namespace idk
 		int					_current_driver				{ 0 };		//Updated on init. Describes the current running sound driver.
 		time_point			_time_it_was_initialized	{};			//Updated on Init()
 		unsigned            _destroy_slot{};
-
+		const int			_max_channels				{ 512 };
 		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details{};			//Describes each driver.
 
 		//Useable after calling Init().
