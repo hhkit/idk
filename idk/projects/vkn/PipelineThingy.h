@@ -91,7 +91,7 @@ namespace idk::vkn
 		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
 		vector<ProcessedRO> draw_calls;
 
-		shared_ptr<pipeline_config> prev_config;
+		shared_ptr<const pipeline_config> prev_config;
 
 		bool shader_changed = false;
 		hash_table<set_t, set_bindings> curr_bindings;

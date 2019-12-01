@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PipelineManager.h"
+#include <memory/ArenaAllocator.inl>
 namespace idk::vkn
 {
 	void PipelineManager::View(VulkanView& view)
@@ -26,12 +27,16 @@ namespace idk::vkn
 		return LessChain(lhs.guid.Data1, rhs.guid.Data1, lhs.guid.Data2, rhs.guid.Data2, lhs.guid.Data3, rhs.guid.Data3, lhs.guid.Data4, rhs.guid.Data4);
 			   //LessChain(lhs.guid.Data1,rhs.guid.Data1,lhs.guid.Data2 , rhs.guid.Data2)|| && lhs.guid.Data3 < rhs.guid.Data3 && reinterpret_cast<uint64_t>(lhs.guid.Data4) < reinterpret_cast<uint64_t>(rhs.guid.Data4);
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass, bool has_depth_stencil)
 	{
 		std::optional<handle_t> prev{};
 		bool is_diff = prog_to_pipe2.empty();
-		string combi;
+
+		char buffer[16384] = {};
+
+		ArenaAllocator<char> allocator{buffer};
+		std::basic_string<char, std::char_traits<char>, ArenaAllocator<char>> combi{ allocator };
 		size_t arr[16] = {};
 		for (size_t i = 0; i < modules.size(); ++i)
 		{
@@ -58,8 +63,12 @@ namespace idk::vkn
 			viewport_offset = *config.viewport_offset;
 		combi += string_view{ r_cast<const char*>(&viewport_offset), sizeof(viewport_offset) };
 		combi += string_view{ r_cast<const char*>(&viewport_size), sizeof(viewport_size)};
+		for (auto& desc : config.buffer_descriptions)
+			combi += desc.GenString();
+
+		auto completed_combi = string{ combi.data(),combi.size() };
 		_lock.begin_read();
-		auto itr = prog_to_pipe2.find(combi);
+		auto itr = prog_to_pipe2.find(completed_combi);
 		if (itr != prog_to_pipe2.end())
 		{
 			prev = itr->second;
@@ -81,7 +90,7 @@ namespace idk::vkn
 			_lock.begin_write();
 			auto handle = pipelines.add(std::move(obj));
 			
-			prog_to_pipe2.emplace(combi,handle);
+			prog_to_pipe2.emplace(completed_combi,handle);
 			prev = handle;
 			_lock.end_write();
 			//creating.store(false);

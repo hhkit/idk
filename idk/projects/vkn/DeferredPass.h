@@ -46,7 +46,7 @@ namespace idk::vkn
 
 	struct DeferredPass
 	{
-		DeferredGBuffer _gbuffer[EGBufferType::size()];
+		DeferredGBuffer (*_gbuffer)[EGBufferType::size()];
 		PipelineManager* _pipeline_manager;
 		RenderObject fsq_amb_ro, fsq_light_ro;
 		shared_ptr<pipeline_config> ambient_config;
@@ -69,10 +69,15 @@ namespace idk::vkn
 			return *_pipeline_manager;
 		}
 		DeferredGBuffer& GBuffer(GBufferType type) {
-			return _gbuffer[EGBufferType::map(type)];
+			return (*_gbuffer)[EGBufferType::map(type)];
 		};
+		auto& GBuffers()
+		{
+			return *_gbuffer;
+		}
 		//Make sure to call this again if the framebuffer size changed.
 		void Init(VknRenderTarget& rt);
+		void Init(VknRenderTarget& rt, DeferredGBuffer (&gbuf)[EGBufferType::size()]);
 		//void RenderGbufferToTarget(vk::CommandBuffer cmd_buffer, const GraphicsState& graphics_state, RenderStateV2& rs);
 
 		void LightPass(GBufferType type,PipelineThingy& the_interface, const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>>light_range, bool is_ambient);

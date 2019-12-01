@@ -10,7 +10,7 @@ namespace idk::vkn
 
 	struct ParticleRenderer
 	{
-		RenderObject particle_ro;
+		//RenderObject particle_ro;
 		vector<RenderObject> particle_ro_inst;
 		shared_ptr<pipeline_config> particle_pipeline = std::make_shared<pipeline_config>();
 
@@ -21,6 +21,6 @@ namespace idk::vkn
 		};
 		void InitConfig();
 
-		void DrawParticles(PipelineThingy& the_interface, const GraphicsState& state, RenderStateV2& rs);
+		void DrawParticles(PipelineThingy& the_interface, const GraphicsState& state, RenderStateV2& rs)const;
 	};
 }

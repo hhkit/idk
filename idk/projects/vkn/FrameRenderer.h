@@ -118,6 +118,8 @@ namespace idk::vkn
 		FontRenderer   _font_renderer;
 		CanvasRenderer _canvas_renderer;
 
+		DeferredGBuffer _gbuffers[EGBufferType::size()];
+		ivec2 _gbuffer_size{};
 		//VknFrameBufferManager   fb_man{};
 	};
 }

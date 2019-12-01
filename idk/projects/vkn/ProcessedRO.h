@@ -114,7 +114,7 @@ namespace idk::vkn
 		size_t num_vertices{};
 				
 		hash_table<uint32_t, vector<BindingInfo>> bindings; //Deprecate this
-		shared_ptr<pipeline_config> config;
+		shared_ptr<const pipeline_config> config;
 
 		std::optional<RscHandle<ShaderProgram>> vertex_shader;
 		std::optional<RscHandle<ShaderProgram>> geom_shader;

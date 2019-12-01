@@ -395,7 +395,7 @@ namespace idk::vkn
 			//	hlp::cerr() << "Failed to bind set[" << set << "]: {" << result.error() << "}\n";
 			//}
 		}
-		shared_ptr<pipeline_config> next_config{};
+		shared_ptr<const pipeline_config> next_config{};
 		if (ro.config != prev_config)
 		{
 			prev_config = next_config = ro.config;

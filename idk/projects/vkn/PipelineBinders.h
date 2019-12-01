@@ -162,6 +162,7 @@ namespace idk
 		{
 			const GraphicsState* _state;
 			const GraphicsState& State() { return *_state; }
+			RscHandle<MaterialInstance> prev_material_inst{};
 			void SetState(const GraphicsState& vstate);
 
 			//Assumes that the material is valid.

@@ -287,21 +287,25 @@ namespace idk::vkn
 	{
 		//Bind the material uniforms
 		{
-			
-			auto mat = _state->material_instances.find(dc.material_instance);
-			auto& mat_inst = mat->second;
-			//[[maybe_unused]]auto& mat = *mat_inst.material;
-			for (auto itr = mat_inst.ubo_table.begin(); itr != mat_inst.ubo_table.end(); ++itr)
+			if (dc.material_instance != prev_material_inst)
 			{
-				the_interface.BindUniformBuffer(itr->first, 0, itr->second);
-			}
-			for (auto& [name, tex_array] : mat_inst.tex_table)
-			{
-				uint32_t i = 0;
-				for (auto& img : tex_array)
+				prev_material_inst = dc.material_instance;
+				auto mat = _state->material_instances.find(dc.material_instance);
+				auto& mat_inst = mat->second;
+				//[[maybe_unused]]auto& mat = *mat_inst.material;
+				for (auto itr = mat_inst.ubo_table.begin(); itr != mat_inst.ubo_table.end(); ++itr)
 				{
-					the_interface.BindSampler(name, i++, img.as<VknTexture>());
+					the_interface.BindUniformBuffer(itr->first, 0, itr->second);
 				}
+				for (auto& [name, tex_array] : mat_inst.tex_table)
+				{
+					uint32_t i = 0;
+					for (auto& img : tex_array)
+					{
+						the_interface.BindSampler(name, i++, img.as<VknTexture>());
+					}
+				}
+
 			}
 		}
 	}

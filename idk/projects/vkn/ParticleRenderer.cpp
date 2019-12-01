@@ -45,7 +45,7 @@ namespace idk::vkn
 			test
 		};
 	}
-	void ParticleRenderer::DrawParticles(PipelineThingy& the_interface, const GraphicsState& state, RenderStateV2& rs)
+	void ParticleRenderer::DrawParticles(PipelineThingy& the_interface, const GraphicsState& state, RenderStateV2& rs)const
 	{
 		auto& shared_state = *state.shared_gfx_state;
 		ParticleVertexBindings vert_bind;
@@ -55,12 +55,13 @@ namespace idk::vkn
 		auto num_unique_inst = state.range.inst_particle_end - state.range.inst_particle_begin;
 		if (num_unique_inst)
 		{
+			RenderObject particle_ro;
 			auto& cam = state.camera;
 			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VParticle]);
 			auto& particle_render_data = *shared_state.particle_range;
 			particle_ro.config = particle_pipeline;
-			particle_ro_inst.clear();
-			particle_ro_inst.reserve(particle_render_data.size());
+			//particle_ro_inst.clear();
+			//particle_ro_inst.reserve(particle_render_data.size());
 			vert_bind.Bind(the_interface);
 			for (auto i = state.range.inst_particle_begin;i< state.range.inst_particle_end;++i)
 			{
@@ -81,7 +82,7 @@ namespace idk::vkn
 				the_interface.BindAttrib(2, shared_state.particle_buffer.buffer(), 0);
 
 
-				the_interface.FinalizeDrawCall(particle_ro_inst.emplace_back(std::move(part_ro)), elem.num_elems, elem.elem_offset);
+				the_interface.FinalizeDrawCall(std::move(part_ro), elem.num_elems, elem.elem_offset);
 
 			}
 		}

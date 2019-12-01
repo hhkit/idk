@@ -37,7 +37,7 @@ namespace idk
 		//binding,attrib
 		const renderer_attributes* renderer_req;
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
-		shared_ptr<pipeline_config> config{};
+		shared_ptr<const pipeline_config> config{};
 		LayerMask layer_mask{ 0xFFFFFFFF };
 	};
 	inline LayerMask layer_to_mask(char mask)

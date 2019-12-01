@@ -414,9 +414,13 @@ namespace idk::vkn
 		return View().Device()->createRenderPassUnique(create_info);
 	}
 //#pragma optimize("",off)
-	void DeferredPass::Init(VknRenderTarget& rt) 
+	void DeferredPass::Init(VknRenderTarget& ) 
 	{
-		const static renderer_attributes fsq_requirements = 
+	}
+	void DeferredPass::Init(VknRenderTarget& rt,  DeferredGBuffer(&gbuf)[EGBufferType::size()])
+	{
+		_gbuffer = &gbuf;
+		const static renderer_attributes fsq_requirements =
 		{
 			{
 				{vtx::Attrib::Position,0},
@@ -431,9 +435,8 @@ namespace idk::vkn
 					hdr_frag = *frag_opt;
 			}
 		}
-		if (_gbuffer[0].Init(rt.Size()))
+		if (hdr_buffer->Size() != rt.Size())
 		{
-			_gbuffer[1].Init(rt.Size());
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 			FrameBufferBuilder fbf;
 			fbf.Begin(rt.Size());
@@ -444,7 +447,7 @@ namespace idk::vkn
 				rt.GetColorBuffer()
 				});
 
-			
+
 			auto add_src = [](FrameBufferBuilder& fbf, auto& gbuffer) {
 				auto& buffer = *gbuffer.accum_buffer;
 				auto accum_att = idk::AttachmentInfo{
@@ -460,12 +463,12 @@ namespace idk::vkn
 					ColorFormat::_enum::DEPTH_COMPONENT,
 					FilterMode::_enum::Nearest,false,
 					gbuffer.gbuffer->DepthAttachment().buffer
-				}; 
+				};
 				depth_att.override_as_depth = true;
 				depth_att.is_input_att = true;
 				fbf.AddAttachment(depth_att);
 			};
-			for(auto& gbuffer : _gbuffer)
+			for (auto& gbuffer : GBuffers())
 				add_src(fbf, gbuffer);
 
 			auto depth_att = idk::AttachmentInfo{
@@ -480,23 +483,23 @@ namespace idk::vkn
 				Core::GetResourceManager().Release(hdr_buffer);
 			auto hdr_info = fbf.End();
 
-	/*
-			auto& rsm = Core::GetResourceManager();
-			if (!depth_sample_tex)
-				depth_sample_tex = rsm.Create<VknTexture>();
-			if (depth_sample_tex->Size() != size)
-			{
-				TextureLoader loader;
-				auto& tex_factory = Core::GetResourceManager().GetFactory<VulkanTextureFactory>();
+			/*
+					auto& rsm = Core::GetResourceManager();
+					if (!depth_sample_tex)
+						depth_sample_tex = rsm.Create<VknTexture>();
+					if (depth_sample_tex->Size() != size)
+					{
+						TextureLoader loader;
+						auto& tex_factory = Core::GetResourceManager().GetFactory<VulkanTextureFactory>();
 
-				TextureOptions tex_opt{};
-				tex_opt.internal_format = ColorFormat::_enum::DEPTH_COMPONENT;
-				tex_opt.is_srgb = false;
-				auto tex_info = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
-				loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
-			}*/
+						TextureOptions tex_opt{};
+						tex_opt.internal_format = ColorFormat::_enum::DEPTH_COMPONENT;
+						tex_opt.is_srgb = false;
+						auto tex_info = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+						loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
+					}*/
 
-			fsq_light_ro.mesh         = fsq_amb_ro.mesh = Mesh::defaults[MeshType::INV_FSQ];
+			fsq_light_ro.mesh = fsq_amb_ro.mesh = Mesh::defaults[MeshType::INV_FSQ];
 			fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
 			if (!fsq_light_ro.config)
 			{
@@ -516,7 +519,7 @@ namespace idk::vkn
 				fsq_light_ro.config = light_config;
 				fsq_amb_ro.config = ambient_config;
 
-				accum_pass = BuildAccumRenderPass(_gbuffer[0].accum_buffer.as<VknFrameBuffer>());
+				accum_pass = BuildAccumRenderPass(GBuffers()[0].accum_buffer.as<VknFrameBuffer>());
 				hdr_pass = BuildHdrRenderPass(hdr_info);
 				//auto test = AttachmentBlendConfig{};
 				//test.blend_enable = true;
@@ -528,7 +531,7 @@ namespace idk::vkn
 				//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
 				//blend = test;
 			}
-		
+
 			auto tmp = VknSpecializedInfo{ hdr_pass };
 			hdr_buffer = RscHandle<VknFrameBuffer>{ fb_factory.Create(hdr_info,&tmp) };
 
@@ -625,7 +628,7 @@ namespace idk::vkn
 
 		binding.Bind(the_interface);
 		auto& buffer = *hdr_buffer;
-		for (auto& g_buffer : _gbuffer)
+		for (auto& g_buffer : GBuffers())
 		{
 			auto& gbuffer = g_buffer.gbuffer.as<VknFrameBuffer>();
 
@@ -857,7 +860,7 @@ namespace idk::vkn
 	void DeferredPass::DrawToGBuffers(vk::CommandBuffer cmd_buffer,const GraphicsState& graphics_state,RenderStateV2& rs)
 	{
 		int i = 0; 
-		for (auto& gbuffer : _gbuffer)
+		for (auto& gbuffer : GBuffers())
 		{
 			//Bind the material uniforms
 			PbrDeferredGbufferBinding binder;
@@ -927,7 +930,7 @@ namespace idk::vkn
 	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy(&accum_stuff)[EGBufferType::size()], const CameraData& camera, RenderStateV2& rs)
 	{
 		int i = 0;
-		for (auto& gbuffer : _gbuffer)
+		for (auto& gbuffer : GBuffers())
 		{
 			auto sz = camera.render_target->Size();
 			auto viewport = rect{};// camera.viewport;

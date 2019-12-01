@@ -565,6 +565,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
+#pragma optimize("",off)
 	void RenderPipelineThingy(
 		const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -603,11 +604,12 @@ namespace idk::vkn
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
 
 		auto& processed_ro = the_interface.DrawCalls();
+		shared_ptr<pipeline_config> prev_config{};
 		for (auto& p_ro : processed_ro)
 		{
 			bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 			auto& obj = p_ro.Object();
-			if (p_ro.rebind_shaders)
+			if (p_ro.rebind_shaders||prev_config!=obj.config)
 			{
 				shaders.resize(0);
 				if (p_ro.frag_shader)
@@ -771,7 +773,7 @@ namespace idk::vkn
 		_current_frame_index = frame_index;
 		//Update all the resources that need to be updated.
 		auto& curr_frame = *this;
-		GrowStates(_states,gfx_states.size());
+		GrowStates(_states, gfx_states.size());
 		size_t num_concurrent = curr_frame._render_threads.size();
 		auto& pri_buffer = curr_frame._pri_buffer;
 		auto& transition_buffer = curr_frame._transition_buffer;
@@ -780,6 +782,20 @@ namespace idk::vkn
 		for (auto& state : curr_frame._states)
 		{
 			state.Reset();
+		}
+		ivec2 max_size{};
+		for (auto& gfx_state : gfx_states)
+		{
+			auto sz = gfx_state.camera.render_target->Size();
+			max_size.x = std::max(sz.x, max_size.x);
+			max_size.y = std::max(sz.y, max_size.y);
+		}
+		if (max_size.x > _gbuffer_size.x || max_size.y > _gbuffer_size.y)
+		{
+			for (auto& gbuffer : _gbuffers)
+			{
+				gbuffer.Init(max_size);
+			}
 		}
 		for (auto i = gfx_states.size(); i-- > 0;)
 		{
@@ -791,7 +807,7 @@ namespace idk::vkn
 				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eMetallic)] = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
 				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eSpecular)]= Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostSpecular];
 				deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
-				deferred_pass.Init(camera.render_target.as<VknRenderTarget>());
+				deferred_pass.Init(camera.render_target.as<VknRenderTarget>(),_gbuffers);
 			}
 		}
 		bool rendered = false;
@@ -896,6 +912,7 @@ namespace idk::vkn
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
+#pragma optimize ("",off)
 	void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
 	{
 		//auto& lights = *state.shared_gfx_state->lights;
@@ -944,6 +961,7 @@ namespace idk::vkn
 					b1.resize(hlp::buffer_size(doto[i].uv));
 					b1.update<const vec2>(0, doto[i].uv, cmd_buffer);
 					++i;
+					++u;
 				}
 				
 			}
@@ -969,8 +987,8 @@ namespace idk::vkn
 		for (auto& elem : canvas)
 		{
 			auto& rs = _post_states[curr_state++];
-			if(elem.render_target)
-				PostRenderCanvas(elem.render_target, elem.ui_ro, state, rs, frame_index);
+			//if(elem.render_target) //Default render target is null. Don't ignore it.
+			PostRenderCanvas(elem.render_target, elem.ui_ro, state, rs, frame_index);
 		}
 		//TODO: Submit the command buffers
 
@@ -1371,7 +1389,7 @@ namespace idk::vkn
 					if(p_ro.geom_shader)
 						shaders.emplace_back(*p_ro.geom_shader);
 
-					auto config = ConfigWithVP(*obj.config, camera, offset, size);
+					auto config = ConfigWithVP(*p_ro.config, camera, offset, size);
 					if (is_mesh_renderer)
 						config.buffer_descriptions.emplace_back(
 							buffer_desc

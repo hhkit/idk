@@ -30,12 +30,12 @@ namespace idk::vkn
 		test.src_alpha_blend_factor = BlendFactor::eOne;
 		test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
 
-		canvas_pipeline2->attachment_configs =
+		canvas_pipeline->attachment_configs =
 		{
 			test
 		};
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void CanvasRenderer::DrawCanvas(PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
 	{
 		auto& shared_state = *state.shared_gfx_state;
@@ -89,15 +89,15 @@ namespace idk::vkn
 						canvas_ui_ro.material_instance = ui_canvas.material;
 						auto& elem = font_render_info[i];
 						auto& uv = font_uv_info[i];
-
+						auto& range = font_raw_data[i];
 						//TODO bind materials
 						vert_bind.BindCanvas(the_interface, data, ui_canvas);
 
 						//the_interface.BindMeshBuffers(f_ro);
 						the_interface.BindAttrib(0, elem.buffer(), 0);
-						the_interface.BindAttrib(1, uv.buffer(), 0);
+						the_interface.BindAttrib(1, uv.buffer()  , 0);
 
-						the_interface.SetVertexCount(s_cast<uint32_t>(data.coords.size()));
+						the_interface.SetVertexCount(s_cast<uint32_t>(range.num_elems));
 
 						the_interface.FinalizeDrawCall(canvas_ro_inst2.emplace_back(std::move(canvas_ui_ro)));
 
