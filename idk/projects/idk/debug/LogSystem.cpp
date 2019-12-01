@@ -88,8 +88,7 @@ namespace idk
 
 				moved += sprintf_s(buf + moved, sizeof(buf) - moved, "%d:%.2d:%.2d.%.3d: ", h, m, s, ms);
 				moved += sprintf_s(buf + moved, sizeof(buf) - moved, preface.data());
-				sprintf_s(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
-
+				snprintf(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
 				stream << buf;
 				if (level == LogLevel::FATAL)
 					stream << std::flush;

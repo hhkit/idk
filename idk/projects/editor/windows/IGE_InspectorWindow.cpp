@@ -194,6 +194,7 @@ namespace idk {
 					continue;
 
                 //COMPONENT DISPLAY
+				ImGui::Text("id: %lld", component.id);
                 DisplayComponent(component);
             }
 
