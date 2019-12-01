@@ -69,6 +69,7 @@
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="memory\ArenaAllocator.h" />
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="multithread_control.h" />
@@ -458,6 +459,7 @@
     <None Include="math\comparable.inl" />
     <None Include="math\linear.inl" />
     <None Include="math\matrix_decomposition.inl" />
+    <None Include="memory\ArenaAllocator.inl" />
     <None Include="meta\comparator.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
@@ -547,7 +549,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>

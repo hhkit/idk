@@ -929,6 +929,7 @@
     <ClInclude Include="gfx\RenderRequest.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="memory\ArenaAllocator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1542,6 +1543,7 @@
     <None Include="anim\Animator.inl">
       <Filter>anim\detail</Filter>
     </None>
+    <None Include="memory\ArenaAllocator.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
