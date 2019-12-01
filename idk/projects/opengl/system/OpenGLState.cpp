@@ -700,19 +700,10 @@ namespace idk::ogl
 		//////////////////////////////////For PICKING/////////////////////////////////
 		// set main scene camera
 		
-		if(0)
+		if(Core::GetSystem<GraphicsSystem>().enable_picking)
 		{		
 			auto cam = curr_object_buffer.camera[curr_object_buffer.curr_scene_camera_index];
 			{
-				const auto inv_view_tfm = invert_rotation(cam.view_matrix);
-				// calculate lights for this camera
-				auto lights = curr_object_buffer.lights;
-				for (auto& elem : lights)
-				{
-					elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
-					elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
-				}
-
 				{
 					fb_man.SetRenderTarget(fb_man.pickingBuffer);
 				}
@@ -724,20 +715,9 @@ namespace idk::ogl
 
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FPicking]);
-				// render debug
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				if (cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
-					for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
-					{
-						SetObjectUniforms(elem, cam.view_matrix);
-						pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
-						pipeline.SetUniform("obj_index", cam.obj_id);
-
-						RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
-					}
 
 				// per mesh render
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMeshPicker], cam.projection_matrix, cam.view_matrix);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 				for (auto& elem : curr_object_buffer.mesh_render)
@@ -748,9 +728,6 @@ namespace idk::ogl
 
 					// set probe
 					GLuint texture_units = 0;
-					SetPBRUniforms(cam, inv_view_tfm, texture_units);
-					SetLightUniforms(span<LightData>{lights}, texture_units);
-					SetMaterialUniforms(elem.material_instance, texture_units);
 					SetObjectUniforms(elem, cam.view_matrix);
 
 					pipeline.SetUniform("obj_index", elem.obj_id);
@@ -766,10 +743,7 @@ namespace idk::ogl
 					pipeline.PushProgram(material->_shader_program);
 
 					GLuint texture_units = 0;
-					SetPBRUniforms(cam, inv_view_tfm, texture_units);
-					SetLightUniforms(span<LightData>{lights}, texture_units);
 					SetSkeletons(elem.skeleton_index);
-					SetMaterialUniforms(elem.material_instance, texture_units);
 					SetObjectUniforms(elem, cam.view_matrix);
 
 					pipeline.SetUniform("obj_index", elem.obj_id);

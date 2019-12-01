@@ -10,6 +10,8 @@
 #include <gfx/FontData.h>
 #include <gfx/RenderRequest.h>
 
+#include <machine.h>
+
 namespace idk
 {
 
@@ -25,6 +27,7 @@ namespace idk
 	{
 		VDebug,
 		VNormalMesh,
+		VNormalMeshPicker,
 		VSkinnedMesh,
         VParticle,
 		VSkyBox,
@@ -80,6 +83,8 @@ namespace idk
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
 		bool isolate = false;
+		bool enable_picking = false;
+
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
@@ -144,43 +149,43 @@ namespace idk
 
 		struct RenderBuffer
 		{
-			vector<CameraData>   camera;
-			vector<LightData>    lights;
-			vector<CameraData>   light_camera_data;
-			vector<RenderObject> mesh_render;
-			vector<AnimatedRenderObject> skinned_mesh_render;
-			vector<SkeletonTransforms> skeleton_transforms;
-            vector<ParticleRenderData> particle_render_data;
-			vector<ParticleObj>        particle_buffer;
-			vector<ParticleRange>      particle_range;
-			vector<FontRenderData>	 font_render_data;
+			alignas(machine::cache_line_sz) vector<CameraData>   camera;
+			alignas(machine::cache_line_sz) vector<LightData>    lights;
+			alignas(machine::cache_line_sz) vector<CameraData>   light_camera_data;
+			alignas(machine::cache_line_sz) vector<RenderObject> mesh_render;
+			alignas(machine::cache_line_sz) vector<AnimatedRenderObject> skinned_mesh_render;
+			alignas(machine::cache_line_sz) vector<SkeletonTransforms> skeleton_transforms;
+            alignas(machine::cache_line_sz) vector<ParticleRenderData> particle_render_data;
+			alignas(machine::cache_line_sz) vector<ParticleObj>        particle_buffer;
+			alignas(machine::cache_line_sz) vector<ParticleRange>      particle_range;
+			alignas(machine::cache_line_sz) vector<FontRenderData>	 font_render_data;
 			//vector<FontArrayData>    font_array_data;
-			vector<FontPoint>     font_buffer;
-			vector<FontRange>      font_range;
+			alignas(machine::cache_line_sz) vector<FontPoint>     font_buffer;
+			alignas(machine::cache_line_sz) vector<FontRange>      font_range;
 
-			hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
-			vector<UIRenderObjectWithCanvas> ui_canvas;
-			vector<UITextRange>   ui_text_range;
-			vector<UIAttriBlock>   ui_text_buffer;
-			size_t  ui_total_num_of_text{ 0 };
+			alignas(machine::cache_line_sz) hash_table<Handle<Canvas>, vector<UIRenderObject>> ui_render_per_canvas;
+			alignas(machine::cache_line_sz) vector<UIRenderObjectWithCanvas> ui_canvas;
+			alignas(machine::cache_line_sz) vector<UITextRange>   ui_text_range;
+			alignas(machine::cache_line_sz) vector<UIAttriBlock>   ui_text_buffer;
+			alignas(machine::cache_line_sz) size_t  ui_total_num_of_text{ 0 };
 			//vector<FontPoint>     ui_text_buffer;
 
-			size_t curr_scene_camera_index;
+			alignas(machine::cache_line_sz) size_t curr_scene_camera_index;
 
-			vector<InstRenderObjects> instanced_mesh_render;
+			alignas(machine::cache_line_sz) vector<InstRenderObjects> instanced_mesh_render;
 			//vector<InstAnimatedRenderObjects> instanced_skinned_mesh_render;
 
-			vector<InstancedData> inst_mesh_render_buffer;
+			alignas(machine::cache_line_sz) vector<InstancedData> inst_mesh_render_buffer;
 			//vector<AnimatedInstancedData> inst_skinned_mesh_render_buffer;
 
-			vector<RenderRange> culled_render_range;
-			vector<LightRenderRange> culled_light_render_range;
-			vector<CanvasRenderRange> canvas_render_range;
+			alignas(machine::cache_line_sz) vector<RenderRange> culled_render_range;
+			alignas(machine::cache_line_sz) vector<LightRenderRange> culled_light_render_range;
+			alignas(machine::cache_line_sz) vector<CanvasRenderRange> canvas_render_range;
 
 			//RscHandle<ShaderProgram> mesh_vtx;
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
-			array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
-			array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;

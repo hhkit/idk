@@ -146,7 +146,7 @@ namespace idk
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".ogg");
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".mp3");
 
-		Core::GetGameState().OnObjectDestroy<AudioSource>() += [&](Handle<AudioSource> dying_source) //Add a call back to stop all its sounds before changing scene
+		_destroy_slot = Core::GetGameState().OnObjectDestroy<AudioSource>() += [&](Handle<AudioSource> dying_source) //Add a call back to stop all its sounds before changing scene
 		{
 			dying_source->StopAll();
 		};
@@ -291,6 +291,8 @@ namespace idk
 
 	void AudioSystem::Shutdown()
 	{
+		Core::GetGameState().OnObjectDestroy<AudioSource>() -= _destroy_slot;
+
 		int numChannelsPlaying{};
 		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numChannelsPlaying));
 		for (int i = 0; i < numChannelsPlaying; ++i) {

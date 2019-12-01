@@ -124,6 +124,7 @@ namespace idk
 		int					_number_of_drivers			{ 0 };		//Updated on init. Describes the number of available sound driver that can play audio.
 		int					_current_driver				{ 0 };		//Updated on init. Describes the current running sound driver.
 		time_point			_time_it_was_initialized	{};			//Updated on Init()
+		unsigned            _destroy_slot{};
 
 		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details{};			//Describes each driver.
 

@@ -92,6 +92,7 @@ namespace idk
 			_active_scene->Deactivate();
 			_active_scene = _next_scene;
 			_active_scene->LoadFromResourcePath();
+			BuildSceneGraph(Core::GetGameState().GetObjectsOfType<const GameObject>());
 			changing = false;
 		}
 	}

@@ -27,6 +27,7 @@ namespace idk {
         virtual void Initialize() override;
 		virtual void BeginWindow() override;
 		virtual void Update() override;
+		void Reset();
 
 	
 	protected:
