@@ -299,7 +299,7 @@ namespace idk
 			++count;
 		}
 		font_buffer.insert(font_buffer.end(), UIAttriBlock{ posList,uvList });
-		total_num_of_text += count;
+		++total_num_of_text;
 		UITextRange f_range{ font_buffer.size(),count };
 
 		//font_buffer.insert(font_buffer.end(), unique_canvas_font.begin(),unique_canvas_font.end());

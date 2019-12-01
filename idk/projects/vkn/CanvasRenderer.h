@@ -27,6 +27,7 @@ namespace idk::vkn
 	struct CanvasRenderer
 	{
 		vector<RenderObject> canvas_ro_inst;
+		vector<RenderObject> canvas_ro_inst2;
 		shared_ptr<pipeline_config> canvas_pipeline = std::make_shared<pipeline_config>();
 		shared_ptr<pipeline_config> canvas_pipeline2 = std::make_shared<pipeline_config>();
 
@@ -35,8 +36,9 @@ namespace idk::vkn
 							{ vtx::Attrib::UV, 1 }
 						}
 		};
+
 		void InitConfig();
 
-		void DrawCanvas(PipelineThingy& the_interface,  const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data);
+		void DrawCanvas(PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data);
 	};
 }
