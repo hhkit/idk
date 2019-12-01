@@ -155,7 +155,7 @@ namespace idk
 		ParseFMOD_RESULT(FMOD::System_Create(&_Core_System));
 
 		// Initializes FMOD Core
-		ParseFMOD_RESULT(_Core_System->init(512, FMOD_INIT_NORMAL, 0)); //1024 = number of channels that can be played on
+		ParseFMOD_RESULT(_Core_System->init(_max_channels, FMOD_INIT_NORMAL, 0)); //1024 = number of channels that can be played on
 		
 		//Channel Group Setup
 		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_MUSIC",		&_soundGroup_MUSIC		));
@@ -266,15 +266,6 @@ namespace idk
 	void AudioSystem::SetSystemPaused(bool is_system_paused)
 	{
 		_system_paused = is_system_paused;
-		//int numOfChannelsPlaying = 0;
-		//_Core_System->getChannelsPlaying(&numOfChannelsPlaying);
-		//for (int i = 0; i < numOfChannelsPlaying; ++i) {
-		//	FMOD::Channel* channel = nullptr;
-		//	_Core_System->getChannel(i, &channel);
-		//	if (channel != nullptr) {
-		//		channel->setPaused(is_system_paused);
-		//	}
-		//}
 
 	}
 	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
@@ -295,10 +286,13 @@ namespace idk
 
 		int numChannelsPlaying{};
 		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numChannelsPlaying));
-		for (int i = 0; i < numChannelsPlaying; ++i) {
+		for (int i = 0; i < _max_channels; ++i) {
 			FMOD::Channel* channelPtr;
-			ParseFMOD_RESULT(_Core_System->getChannel(i, &channelPtr));
-			ParseFMOD_RESULT(channelPtr->stop());
+			_result = _Core_System->getChannel(i, &channelPtr);
+
+			if (_result == FMOD_OK && channelPtr) {
+				ParseFMOD_RESULT(channelPtr->stop());
+			}
 		}
 			
 		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
