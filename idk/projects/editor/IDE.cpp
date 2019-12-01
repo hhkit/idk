@@ -15,6 +15,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 
 #include "pch.h"
+#define HACKING_TO_THE_GATE
 #include <IDE.h>
 
 #include <filesystem>
@@ -236,6 +237,19 @@ namespace idk
 		SetupEditorScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 
+#ifdef HACKING_TO_THE_GATE
+
+		if (!RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }})
+			throw;
+		OpenScene(RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }});
+		Core::GetScheduler().SetPauseState(UnpauseAll);
+		Core::GetSystem<IDE>().game_running = true;
+		Core::GetSystem<IDE>().game_frozen = false;
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
+		Core::GetSystem<PhysicsSystem>().Reset();
+		return;
+#endif
+
         { // try load recent scene / camera
             auto last_scene = reg_scene.get("scene");
             if (last_scene.size())
@@ -307,6 +321,40 @@ namespace idk
 			}
 
 		_interface->ImGuiFrameBegin();
+#ifdef HACKING_TO_THE_GATE
+		auto buf = RscHandle<RenderTarget>()->GetColorBuffer();
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		//ImGui::SetNextWindowPos(viewport->Pos);
+		auto window_size = viewport->Size;
+
+		if (ImGui::Begin("HACK", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration))
+		{
+			if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::Vulkan)
+				ImGui::Image(buf->ID(), ImVec2{ buf->Size() });
+			else
+				ImGui::Image(buf->ID(), ImVec2{ buf->Size() }, ImVec2{ 0, 1 }, ImVec2{ 1,0 });
+			ImGui::End();
+		}
+
+		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+
+		if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+		{
+			ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+			ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_CentralNode); // Add empty node
+			ImGui::DockBuilderSetNodeSize(dockspace_id, buf->Size());
+
+			ImGuiID main = dockspace_id;
+
+			auto& ide = Core::GetSystem<IDE>();
+			ImGui::DockBuilderDockWindow("HACK", main);
+			ImGui::DockBuilderFinish(dockspace_id);
+		}
+
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - (ImGui::GetFrameHeight() * 2)), ImGuiDockNodeFlags_PassthruCentralNode);
+#else
 		ImGuizmo::BeginFrame();
 
 
@@ -329,9 +377,7 @@ namespace idk
 
 		if (bool_demo_window)
 			ImGui::ShowDemoWindow(&bool_demo_window);
-		
-
-
+#endif
 		_interface->ImGuiFrameEnd();
 
 		command_controller.FlushCommands();
