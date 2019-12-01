@@ -1,4 +1,5 @@
 #pragma once
+#include <compare>
 #include <objbase.h>
 #include <idk.h>
 #include <util/hash_combine.h>
@@ -17,12 +18,14 @@ namespace idk
 		constexpr Guid() noexcept;
 		explicit  Guid(const std::string_view& str) noexcept;
 		constexpr Guid(unsigned int a, unsigned short b, unsigned short c, unsigned long long d);
-		bool operator==(const Guid& other) const noexcept;
+		auto operator<=>(const Guid&) const noexcept = default;
+		//bool operator==(const Guid& other) const noexcept;
 
 		explicit operator string() const;
 		// is valid?
 		explicit operator bool() const noexcept;
 		static inline Guid Make();
+
 
 	private:
 		struct Natvis

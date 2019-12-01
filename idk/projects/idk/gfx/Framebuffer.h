@@ -66,6 +66,11 @@ namespace idk
 
 		ivec2 size{};
 		size_t num_layers{};
+
+		FrameBuffer() = default;
+		FrameBuffer(FrameBuffer&&) = default;
+		FrameBuffer& operator=(FrameBuffer&&) = default;
+		virtual ~FrameBuffer() = default;
 	};
 
 }

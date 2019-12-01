@@ -504,15 +504,26 @@ namespace idk::ogl
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
+				SetSkeletons(elem.skeleton_index);
 				// bind shader
 				const auto material = elem.material_instance->material;
-				pipeline.PushProgram(material->_shader_program);
+				if (curr_mat != material)
+				{
+					pipeline.PushProgram(material->_shader_program);
 
-				GLuint texture_units = 0;
-				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
-				SetLightUniforms   (span<LightData>{lights}, texture_units);
-				SetSkeletons(elem.skeleton_index);
-				SetMaterialUniforms(elem.material_instance, texture_units);
+					// material 
+					material_texture_uniforms = 0;
+					SetPBRUniforms(cam, inv_view_tfm, material_texture_uniforms);
+					SetLightUniforms(span<LightData>{lights}, material_texture_uniforms);
+					curr_mat = material;
+					curr_mat_inst = {};
+				}
+				// material instance
+				if (curr_mat_inst != elem.material_instance)
+				{
+					SetMaterialUniforms(elem.material_instance, material_texture_uniforms);
+					curr_mat_inst = elem.material_instance;
+				}
 				SetObjectUniforms  (elem, cam.view_matrix);
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
@@ -829,8 +840,9 @@ namespace idk::ogl
 	PixelData OpenGLState::PickData(const vec2& pos)
 	{
 		PixelData pd;
+		fb_man.SetRenderTarget(fb_man.cBufferPickingTexture);
 		glReadPixels((GLint)pos.x, (GLint)pos.y, fb_man.pickingBuffer->size.x, fb_man.pickingBuffer->size.y, GL_RGB32F, GL_UNSIGNED_BYTE, &pd);
-
+		GL_CHECK();
 		return std::move(pd);
 	}
 

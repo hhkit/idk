@@ -159,7 +159,7 @@ namespace idk::mono
 #define BIND_END() \
 	catch(NullHandleException ex) \
 	{ \
-		LOG_TO(LogPool::GAME, "Null reference at %lld", ex.GetHandle().id);\
+		LOG_TO(LogPool::GAME, "Null reference at %lld {%llx}", ex.GetHandle().id, ex.GetHandle().id);\
 		mono_raise_exception(make_nullref_exception());\
 		return default_val<Ret>::ret(); }\
 	}));}
@@ -971,8 +971,8 @@ namespace idk::mono
 		{
 			switch (renderer.type)
 			{
-			case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid };
-			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid };
+			case index_in_tuple_v<MeshRenderer, Handleables>: handle_cast<MeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid }; return;
+			case index_in_tuple_v<SkinnedMeshRenderer, Handleables>: handle_cast<SkinnedMeshRenderer>(renderer)->material_instance = RscHandle<MaterialInstance>{ guid }; return;
 			default: return;
 			}
 		}

@@ -302,11 +302,8 @@ namespace idk
 		}
 		font_buffer.insert(font_buffer.end(), UIAttriBlock{ posList,uvList });
 		++total_num_of_text;
-		UITextRange f_range{ font_buffer.size(),count };
+		UITextRange f_range{ posList.size(),count };
 
-		//font_buffer.insert(font_buffer.end(), unique_canvas_font.begin(),unique_canvas_font.end());
-		
-		//UITextRange f_range{ font_buffer.size(),(size_t)std::distance(font_buffer.begin(), font_buffer.end()) };
 		font_render_data.emplace_back(f_range);
 		
 		range.inst_font_end = font_render_data.size();

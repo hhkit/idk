@@ -58,7 +58,7 @@ namespace idk {
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
         window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
-		Core::GetGameState().OnObjectDestroy<GameObject>() += [this](Handle<GameObject> go)
+		/*Core::GetGameState().OnObjectDestroy<GameObject>() += [this](Handle<GameObject> go)
 		{
 			bool die = false;
 			for (auto& elem : _prefab_store)
@@ -71,7 +71,7 @@ namespace idk {
 			}
 			if (die)
 				_prefab_store.clear();
-		};
+		};*/
 	}
 
     void IGE_InspectorWindow::Initialize()
@@ -194,6 +194,7 @@ namespace idk {
 					continue;
 
                 //COMPONENT DISPLAY
+				ImGui::Text("id: %lld", component.id);
                 DisplayComponent(component);
             }
 

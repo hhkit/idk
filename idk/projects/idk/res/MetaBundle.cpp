@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <algorithm>
 #include "MetaBundle.h"
 
 namespace idk
@@ -14,5 +15,9 @@ namespace idk
 	MetaBundle::operator bool() const
 	{
 		return metadatas.size();
+	}
+	bool MetaBundle::operator<(const MetaBundle& rhs) const
+	{
+		return std::lexicographical_compare(this->metadatas.begin(), this->metadatas.end(), rhs.metadatas.begin(), rhs.metadatas.end());
 	}
 }
