@@ -327,7 +327,6 @@ namespace idk
 			stringStream << "FMOD error! (" << _result << ") " << FMOD_ErrorString(_result) << std::endl; //Puts string into stream
 			EXCEPTION_AudioSystem exception;
 			exception.exceptionDetails = stringStream.str();
-			throw exception;
 		}
 	}
 

@@ -329,31 +329,52 @@ namespace idk
 		//ImGui::SetNextWindowPos(viewport->Pos);
 		auto window_size = viewport->Size;
 
-		if (ImGui::Begin("HACK", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration))
+		auto size_condition_flags = ImGuiCond_Always;
+		auto pos_condition_flags = ImGuiCond_Always;
+		auto window_pivot = ImVec2{ 0,0 };
+		auto window_position = ImVec2{ 0,0 };
+
+		ImGui::SetNextWindowPos(window_position, pos_condition_flags, window_pivot);
+		ImGui::SetNextWindowSize(window_size, size_condition_flags);
+
+		if (ImGui::Begin("HACK", 0, ImGuiWindowFlags_NoDocking
+			| ImGuiWindowFlags_NoTitleBar
+			| ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_NoSavedSettings
+			| ImGuiWindowFlags_NoNavFocus
+			| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoBackground))
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::Vulkan)
-				ImGui::Image(buf->ID(), ImVec2{ buf->Size() });
+				ImGui::Image(buf->ID(), ImVec2{ window_size });
 			else
-				ImGui::Image(buf->ID(), ImVec2{ buf->Size() }, ImVec2{ 0, 1 }, ImVec2{ 1,0 });
+				ImGui::Image(buf->ID(), ImVec2{ window_size }, ImVec2{ 0, 1 }, ImVec2{ 1,0 });
+			ImGui::PopStyleVar();
+
+			ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+			if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+			{
+				ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+				ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_CentralNode); // Add empty node
+				ImGui::DockBuilderSetNodeSize(dockspace_id, buf->Size());
+
+				ImGuiID main = dockspace_id;
+
+				auto& ide = Core::GetSystem<IDE>();
+				ImGui::DockBuilderDockWindow("HACK", main);
+				ImGui::DockBuilderFinish(dockspace_id);
+			}
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - (ImGui::GetFrameHeight() * 2)), ImGuiDockNodeFlags_PassthruCentralNode);
 			ImGui::End();
 		}
 
-		ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+		
 
-		if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
-		{
-			ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
-			ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_CentralNode); // Add empty node
-			ImGui::DockBuilderSetNodeSize(dockspace_id, buf->Size());
-
-			ImGuiID main = dockspace_id;
-
-			auto& ide = Core::GetSystem<IDE>();
-			ImGui::DockBuilderDockWindow("HACK", main);
-			ImGui::DockBuilderFinish(dockspace_id);
-		}
-
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - (ImGui::GetFrameHeight() * 2)), ImGuiDockNodeFlags_PassthruCentralNode);
 #else
 		ImGuizmo::BeginFrame();
 
