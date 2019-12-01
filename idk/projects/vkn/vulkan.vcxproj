@@ -249,6 +249,7 @@
       <DisableSpecificWarnings>26495</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
