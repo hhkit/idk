@@ -352,15 +352,15 @@ namespace idk::win
 
 	BOOL Windows::InitInstance(int nCmdShow)
 	{
-		hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+		hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_POPUP,
+			1920, 0, 1080, 0, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)
 		{
 			return FALSE;
 		}
 
-		ShowWindow(hWnd, nCmdShow);
+		ShowWindow(hWnd, SW_MAXIMIZE);
 		UpdateWindow(hWnd);
 
 		return TRUE;

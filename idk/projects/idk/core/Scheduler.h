@@ -46,6 +46,7 @@ namespace idk
 		seconds GetFixedDeltaTime()noexcept;
 		seconds GetDeltaTime()noexcept;
 		seconds GetUnscaledDeltaTime() noexcept;
+		seconds GetRemainingTime() noexcept;
 		time_point GetProgramStart() noexcept;
 
 		span<Pass> GetPasses(UpdatePhase) noexcept;
