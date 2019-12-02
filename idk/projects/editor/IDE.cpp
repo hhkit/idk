@@ -302,8 +302,12 @@ namespace idk
         if (closing)
             return;
 
+        auto& app = Core::GetSystem<Application>();
+
+        if (ImGui::IsKeyPressed(static_cast<int>(Key::F)) && ImGui::IsKeyDown(static_cast<int>(Key::Control)))
+            app.SetFullscreen(true);
+
 		// scene controls
-		auto& app = Core::GetSystem<Application>();
 		if (!game_running)
 			if (app.GetKey(Key::Control))
 			{
