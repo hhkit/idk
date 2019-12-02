@@ -41,6 +41,7 @@ namespace idk {
 		bool				is_open				{ false };		//This is used by InGameEditor
 		bool				is_mouse_hovered	{ false };		//Is mouse hovering on this window?
 		bool				is_window_collapsed { false };		//Is this window collapsed or not?
+		bool				is_window_displayed { false };		//Is this window currently displaying, or clipped/closed/collapsed?
 		ImVec2				window_size			{  };			//This is updated by EndWindow()
 		ImVec2				window_position		{  };			//This is updated by EndWindow()
 		ImVec2				window_pivot		{  };

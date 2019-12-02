@@ -69,7 +69,16 @@ namespace idk {
 
 	void IGE_SceneView::Update()
 	{
-		ImGui::PopStyleVar(3);
+        ImGui::PopStyleVar(3);
+
+        if (!is_window_displayed)
+        {
+            Core::GetSystem<IDE>().currentCamera().current_camera->enabled = false;
+            Core::GetSystem<GraphicsSystem>().enable_picking = false;
+            return;
+        }
+        else
+            Core::GetSystem<IDE>().currentCamera().current_camera->enabled = true;
 
         if (ImGui::BeginMenuBar())
         {

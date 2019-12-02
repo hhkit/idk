@@ -155,7 +155,7 @@ namespace idk {
 
 		ImGui::SetNextWindowPos(window_position, pos_condition_flags, window_pivot);
 		ImGui::SetNextWindowSize(window_size, size_condition_flags);
-		ImGui::Begin(window_name, &is_open, window_flags);
+		is_window_displayed = ImGui::Begin(window_name, &is_open, window_flags);
 	}
 
 	void IGE_IWindow::EndWindow_V()
