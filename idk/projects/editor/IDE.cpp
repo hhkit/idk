@@ -304,8 +304,9 @@ namespace idk
 
         auto& app = Core::GetSystem<Application>();
 
+        static auto fullscreen = false;
         if (ImGui::IsKeyPressed(static_cast<int>(Key::F)) && ImGui::IsKeyDown(static_cast<int>(Key::Control)))
-            app.SetFullscreen(true);
+            app.SetFullscreen(fullscreen = !fullscreen);
 
 		// scene controls
 		if (!game_running)

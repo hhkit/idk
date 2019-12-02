@@ -411,8 +411,8 @@ namespace idk::win
 
 	BOOL Windows::InitInstance(int nCmdShow)
 	{
-		hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", NULL,
-			1920, 0, 1080, 0, nullptr, nullptr, hInstance, nullptr);
+        hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
+                             CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)
 		{
