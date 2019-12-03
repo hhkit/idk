@@ -29,9 +29,34 @@ namespace idk::vkn
 		the_interface.BindUniformBuffer("CameraBlock", 0, projection_trf);
 	}
 
+
+	template<typename T>
+	struct FakeMat4
+	{
+		static constexpr unsigned N = 4;
+		tvec<T, N> data[N];
+
+		FakeMat4() = default;
+		FakeMat4(const tmat<T, N, N>& m)
+		{
+			for (uint32_t i = 0; i < N; ++i)
+			{
+				data[i] = m[i];
+			}
+		}
+	};
+
+	struct ShaderLightData : BaseLightData
+	{
+		FakeMat4<float> vp;
+		ShaderLightData() = default;
+		ShaderLightData(const LightData& data) : BaseLightData{ data }, vp{ data.vp }{}
+	};
+
+
 	string PrepareLightBlock(const CameraData& cam, const vector<LightData>& lights)
 	{
-		vector<BaseLightData> tmp_light(lights.size());
+		vector<ShaderLightData> tmp_light(lights.size());
 		for (size_t i = 0; i < tmp_light.size(); ++i)
 		{
 			auto& light = tmp_light[i] = (lights)[i];

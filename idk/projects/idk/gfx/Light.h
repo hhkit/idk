@@ -20,10 +20,10 @@ namespace idk
 		real  shadow_bias{ epsilon };						  //80
 		real  intensity{ 1.f };							  //84
 		int cast_shadow{ true };						  //88 ->96
-		alignas(16) mat4  vp {};						  //160
 	};
 	struct LightData :BaseLightData
 	{
+		alignas(16) mat4  vp {};						  //160
 		alignas(16) mat4  v {};							  //
 		alignas(16) mat4  p{};							  //
 		RscHandle<FrameBuffer> light_map;				  //
