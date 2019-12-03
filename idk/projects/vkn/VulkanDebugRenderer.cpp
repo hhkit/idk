@@ -209,43 +209,6 @@ namespace idk::vkn
 		this->impl.reset();
 	}
 
-	void VulkanDebugRenderer::Render(const mat4& view, const mat4& proj, GraphicsState& )
-	{
-		/*
-		auto& detail = impl->detail;
-		auto& pipeline = impl->pipeline;
-		draw_call dc;
-		dc.pipeline = &pipeline;
-		auto extent = detail.Swapchain().extent;
-		dc.uniforms.emplace_back(0, 0, view);
-		dc.uniforms.emplace_back(0, 1, proj);
-		size_t total_size = 0;
-		for ([[maybe_unused]] auto& [shape, buffer] : info->render_info)
-		{
-			dc.vtx_binding.emplace_back(dbg_vert_layout::vertex_binding, 0,);
-			dc.vtx_binding.emplace_back(dbg_vert_layout::instance_binding, total_size, vk::Buffer{});
-			total_size += hlp::buffer_size<uint32_t>(buffer);
-		}
-		for (auto& [shape, buffer] : info->render_info)
-		{
-			auto&& shape_buffer = impl->shape_buffers.find(shape)->second.vertices;
-			auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
-
-			//Bind vtx buffers
-			auto instance_buffer = impl->inst_buffer.resize();
-			detail.AddToMasterBuffer(std::data(buffer), );
-			auto vertex_buffer = detail.AddToMasterBuffer(s_cast<const void*>(std::data(shape_buffer_proxy)), hlp::buffer_size<uint32_t>(shape_buffer_proxy));
-			dc.instance_count = hlp::arr_count(buffer);
-			dc.vertex_count = hlp::arr_count(shape_buffer);
-			dc.vtx_binding.emplace_back(dbg_vert_layout::vertex_binding, vertex_buffer);
-			dc.vtx_binding.emplace_back(dbg_vert_layout::instance_binding, instance_buffer);
-
-			detail.CurrRenderState().AddDrawCall(dc);
-		}
-		info->render_info.clear();
-		info->render_info2.clear();
-		*/
-	}
 
 	const VulkanDebugRenderer::buffer_update_info_t &VulkanDebugRenderer::BufferUpdateInfo()
 	{

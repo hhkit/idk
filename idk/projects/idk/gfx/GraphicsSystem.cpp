@@ -708,7 +708,6 @@ namespace idk
 			res.ui_ro = vec;
 			for (auto& elem : vec)
 			{
-				auto& prog = elem.material->material->_shader_program;
 				std::visit([&](const auto& data)
 				{				
 					using T = std::decay_t<decltype(data)>;

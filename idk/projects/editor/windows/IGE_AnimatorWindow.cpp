@@ -689,7 +689,7 @@ namespace idk
 						continue;
 
 					// Use pointer value as ID
-					ImGui::PushID(r_cast<size_t>(&curr_transition));
+					ImGui::PushID(s_cast<int>(r_cast<size_t>(&curr_transition)));
 
 					// ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_FramePadding;
 					const bool selected = (state_index == _selected_state) && (_selected_transition == transition_index);
@@ -922,7 +922,7 @@ namespace idk
 		const auto& child_object = child_objects[index];
 		const auto bone_comp = child_object->GetComponent<Bone>();
 
-		ImGui::PushID(index);
+		ImGui::PushID(static_cast<int>(index));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
 		auto tree_flags = ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick| ImGuiTreeNodeFlags_OpenOnArrow |

@@ -47,8 +47,8 @@ namespace idk::mono
 	MonoBehaviorEnvironment::~MonoBehaviorEnvironment()
 	{
 		MonoObject* obj = nullptr;
-		if(!mono_domain_set(Core::GetSystem<ScriptSystem>().Environment().Domain(), true))
-			throw;
+		if (!mono_domain_set(Core::GetSystem<ScriptSystem>().Environment().Domain(), true))
+			LOG_CRASH("Failed to set domain.");
 		mono_domain_try_unload(_domain, &obj); // try things
 		IDK_ASSERT(obj == nullptr);
 

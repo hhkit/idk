@@ -66,7 +66,7 @@ namespace idk
 	};
 	struct LightCameraProj
 	{
-		mat4 operator()(PointLight pointlight)
+		mat4 operator()([[maybe_unused]] PointLight pointlight)
 		{
 			return perspective(deg{ 90 }, 1.0f, 0.1f, 100.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}

@@ -7,7 +7,7 @@ namespace idk
 
     FontData FontData::Generate(string_view text, RscHandle<FontAtlas> font_atlas,
                                 unsigned font_size, real tracking, real line_spacing,
-                                TextAlignment alignment, real wrap_width)
+                                TextAlignment alignment, [[maybe_unused]]real wrap_width)
     {
         if (!font_atlas || text.empty())
             return {};
