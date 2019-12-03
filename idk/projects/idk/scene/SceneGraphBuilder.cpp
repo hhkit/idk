@@ -14,9 +14,11 @@ namespace idk
 		GameState::GetGameState().SortObjectsOfType<GameObject>(
 			[](const auto& lhs, const auto& rhs)
 			{
-				return lhs.Transform()->Depth() == rhs.Transform()->Depth()
+				const auto ldepth = lhs.Transform()->Depth();
+				const auto rdepth = rhs.Transform()->Depth();
+				return ldepth == rdepth
 					?  lhs.GetHandle().id < rhs.GetHandle().id
-					:  lhs.Transform()->Depth() < rhs.Transform()->Depth();
+					:  ldepth < rdepth;
 			}
 		);
 
