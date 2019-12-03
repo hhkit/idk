@@ -435,7 +435,7 @@ namespace idk::vkn
 					hdr_frag = *frag_opt;
 			}
 		}
-		if (hdr_buffer->Size() != rt.Size())
+		if (!hdr_buffer ||(hdr_buffer->Size() != rt.Size() ||  hdr_buffer->attachments[0]->buffer!=rt.GetColorBuffer()))
 		{
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 			FrameBufferBuilder fbf;
@@ -499,44 +499,65 @@ namespace idk::vkn
 						loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
 					}*/
 
-			fsq_light_ro.mesh = fsq_amb_ro.mesh = Mesh::defaults[MeshType::INV_FSQ];
-			fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
-			if (!fsq_light_ro.config)
-			{
-				ambient_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
-				light_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
 
-				light_config->attachment_configs.resize(1);
-				auto& blend = light_config->attachment_configs[0];
-				blend.blend_enable = true;
-				blend.dst_color_blend_factor = BlendFactor::eOne;
-				blend.src_color_blend_factor = BlendFactor::eOne;
-				blend.color_blend_op = BlendOp::eAdd;
-				blend.alpha_blend_op = BlendOp::eMax;
-				blend.dst_alpha_blend_factor = BlendFactor::eOne;
-				blend.src_alpha_blend_factor = BlendFactor::eOne;
-				light_config->depth_test = false;
-				fsq_light_ro.config = light_config;
-				fsq_amb_ro.config = ambient_config;
-
-				accum_pass = BuildAccumRenderPass(GBuffers()[0].accum_buffer.as<VknFrameBuffer>());
-				hdr_pass = BuildHdrRenderPass(hdr_info);
-				//auto test = AttachmentBlendConfig{};
-				//test.blend_enable = true;
-				//test.alpha_blend_op = BlendOp::eAdd;
-				//test.color_blend_op = BlendOp::eAdd;
-				//test.src_color_blend_factor = BlendFactor::eSrcAlpha;
-				//test.dst_color_blend_factor = BlendFactor::eOneMinusSrcAlpha;
-				//test.src_alpha_blend_factor = BlendFactor::eOne;
-				//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
-				//blend = test;
-			}
-
+			hdr_pass = BuildHdrRenderPass(hdr_info);
 			auto tmp = VknSpecializedInfo{ hdr_pass };
 			hdr_buffer = RscHandle<VknFrameBuffer>{ fb_factory.Create(hdr_info,&tmp) };
 
 		}
+		if(!accum_pass)
+			accum_pass = BuildAccumRenderPass(GBuffers()[0].accum_buffer.as<VknFrameBuffer>());
+		if(!hdr_pass)
+			hdr_pass = hdr_buffer->GetRenderPass();
+		fsq_light_ro.mesh = fsq_amb_ro.mesh = Mesh::defaults[MeshType::INV_FSQ];
+		fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
+		if (!fsq_light_ro.config)
+		{
+			ambient_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
+			light_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
+
+			light_config->attachment_configs.resize(1);
+			auto& blend = light_config->attachment_configs[0];
+			blend.blend_enable = true;
+			blend.dst_color_blend_factor = BlendFactor::eOne;
+			blend.src_color_blend_factor = BlendFactor::eOne;
+			blend.color_blend_op = BlendOp::eAdd;
+			blend.alpha_blend_op = BlendOp::eMax;
+			blend.dst_alpha_blend_factor = BlendFactor::eOne;
+			blend.src_alpha_blend_factor = BlendFactor::eOne;
+			light_config->depth_test = false;
+			fsq_light_ro.config = light_config;
+			fsq_amb_ro.config = ambient_config;
+
+			//auto test = AttachmentBlendConfig{};
+			//test.blend_enable = true;
+			//test.alpha_blend_op = BlendOp::eAdd;
+			//test.color_blend_op = BlendOp::eAdd;
+			//test.src_color_blend_factor = BlendFactor::eSrcAlpha;
+			//test.dst_color_blend_factor = BlendFactor::eOneMinusSrcAlpha;
+			//test.src_alpha_blend_factor = BlendFactor::eOne;
+			//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
+			//blend = test;
+		}
 	}
+
+	GBufferType MapToGBufferType(ShadingModel model)noexcept
+	{
+		switch (model)
+		{
+		case ShadingModel::_enum::Specular:
+			return GBufferType::eSpecular;
+			break;
+		case ShadingModel::_enum::DefaultLit:
+			return GBufferType::eMetallic;
+			break;
+		default:
+			LOG_TO(LogPool::GFX, "GBufferType doesn't support %s yet. Defaulting to eMetallic", model.to_string().data());
+			return GBufferType::eMetallic;
+			break;
+		}
+	}
+
 	struct DeferredPostBinder : StandardBindings
 	{
 		bool is_ambient = false;
@@ -545,6 +566,10 @@ namespace idk::vkn
 		void SetDeferredPass(DeferredPass& pass)
 		{
 			deferred_pass = &pass;
+		}
+		bool Skip(PipelineThingy&, const  RenderObject& dc)
+		{
+			return MapToGBufferType(dc.material_instance->material->model) != type;
 		}
 		void Bind(PipelineThingy& the_interface) override
 		{
@@ -838,7 +863,7 @@ namespace idk::vkn
 	struct TypeCheck : StandardBindings
 	{
 		ShadingModel model;
-		bool Skip(PipelineThingy& the_interface, const  RenderObject& dc)  
+		bool Skip(PipelineThingy& the_interface, const  RenderObject& dc)  override
 		{ 
 			if (dc.material_instance)
 			{
@@ -921,7 +946,7 @@ namespace idk::vkn
 			if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,rp,static_cast<uint32_t>(g_buffer.NumColorAttachments()),&graphics_state))
 				rs.FlagRendered();
 			cmd_buffer.endRenderPass();//End GBuffer pass
-
+			++i;
 
 		}
 		//GBufferBarrier(cmd_buffer, gbuffer);
