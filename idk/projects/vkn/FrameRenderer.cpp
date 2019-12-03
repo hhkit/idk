@@ -946,7 +946,7 @@ namespace idk::vkn
 				//auto& buffer = state.shared_gfx_state->ui_text_buffer;
 				auto& doto = *state.shared_gfx_state->ui_text_data;
 				auto& t_size = state.shared_gfx_state->total_num_of_text;
-				auto& canvas_range_data = *state.shared_gfx_state->ui_canvas_range;
+				//auto& canvas_range_data = *state.shared_gfx_state->ui_canvas_range;
 
 				pos_buffer.resize(t_size);
 				uv_buffer.resize(t_size);
@@ -963,10 +963,10 @@ namespace idk::vkn
 					b1.resize(hlp::buffer_size(doto[i].uv));
 					b1.update<const vec2>(0, doto[i].uv, cmd_buffer);
 
-					range = hlp::buffer_size(doto[i].pos);
+					//range = hlp::buffer_size(doto[i].pos);
 
-					canvas_range_data.emplace_back(CanvasRenderRange{offset_size,offset_size + range});
-					offset_size += range;
+					//canvas_range_data.emplace_back(CanvasRenderRange{offset_size,offset_size + range});
+					//offset_size += range;
 
 					++i;
 				}

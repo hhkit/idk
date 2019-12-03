@@ -73,7 +73,7 @@ namespace idk::vkn
 		vector<UIRenderObjectWithCanvas>* ui_canvas;
 		vector<UITextRange>*   ui_text_range;
 		vector<UIAttriBlock>*      ui_text_data;
-		vector<CanvasRenderRange>* ui_canvas_range;
+		//vector<CanvasRenderRange>* ui_canvas_range;
 		size_t total_num_of_text{ 0 };
 		//vector<FontPoint>* ui_text_data;
 
