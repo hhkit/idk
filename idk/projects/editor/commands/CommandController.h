@@ -49,7 +49,7 @@ namespace idk {
 		friend class IDE;
 		friend class CMD_DeleteGameObject;
 		friend class CMD_DeleteComponent;
-		friend class CMD_CallCommandAgain; //When this is called, it will remove from undoStack, collates repeated commands into its own CMD and push itself into the undoStack
+		friend class CMD_CollateCommands; //When this is called, it will remove from undoStack, collates repeated commands into its own CMD and push itself into the undoStack
 
 		//FlushCommand gathers all command call and this pollstack executes all at once at the end of IDE frame.
 		void FlushCommands();

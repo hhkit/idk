@@ -22,4 +22,4 @@ Contains all commands
 #include <editor/commands/CMD_DeleteComponent.h>
 #include <editor/commands/CMD_ModifyProperty.h>
 #include <editor/commands/CMD_InstantiatePrefab.h>
-#include <editor/commands/CMD_CallCommandAgain.h>
+#include <editor/commands/CMD_CollateCommands.h>

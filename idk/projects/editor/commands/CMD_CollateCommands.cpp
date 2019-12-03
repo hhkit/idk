@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-//@file		CMD_CallCommandAgain.cpp
+//@file		CMD_CollateCommands.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		18 NOV 2019
@@ -17,19 +17,19 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#include <editor/commands/CMD_CallCommandAgain.h>
+#include <editor/commands/CMD_CollateCommands.h>
 #include <IDE.h>
 
 namespace idk {
 
 
-	CMD_CallCommandAgain::CMD_CallCommandAgain(int counts) : num_of_times_to_repeat{ counts }
+	CMD_CollateCommands::CMD_CollateCommands(int counts) : num_of_times_to_repeat{ counts }
 	{
 		
 	}
 
 
-	bool CMD_CallCommandAgain::execute()
+	bool CMD_CollateCommands::execute()
 	{
 
 		if (num_of_times_to_repeat < 2)
@@ -58,7 +58,7 @@ namespace idk {
 		return true;
 	}
 	
-	bool CMD_CallCommandAgain::undo()
+	bool CMD_CollateCommands::undo()
 	{
 		//Front to back
 		for (auto i = repeated_commands.begin(); i != repeated_commands.end(); ++i) {
