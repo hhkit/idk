@@ -34,6 +34,16 @@ namespace idk::vkn
 		{
 			test
 		};
+		canvas_pipeline->depth_write = false;
+		canvas_pipeline->depth_test = false;
+
+		canvas_pipeline2->attachment_configs =
+		{
+			test
+		};
+
+		canvas_pipeline2->depth_write = false;
+		canvas_pipeline2->depth_test = false;
 	}
 #pragma optimize("",off)
 	void CanvasRenderer::DrawCanvas(size_t& canvas_count,PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
