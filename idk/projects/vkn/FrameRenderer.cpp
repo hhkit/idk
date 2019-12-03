@@ -722,7 +722,7 @@ namespace idk::vkn
 
 	}
 
-	void FrameRenderer::PostRenderCanvas(RscHandle<RenderTarget> rr, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index)
+	void FrameRenderer::PostRenderCanvas(size_t& canvas_count,RscHandle<RenderTarget> rr, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
 		auto& rt = rr.as<VknRenderTarget>();
 		//auto& swapchain = view.Swapchain();
@@ -735,7 +735,7 @@ namespace idk::vkn
 		PipelineThingy the_interface{};
 		
 		the_interface.SetRef(rs.ubo_manager);
-		_canvas_renderer.DrawCanvas(the_interface, state, rs, canvas_data);
+		_canvas_renderer.DrawCanvas(canvas_count,the_interface, state, rs, canvas_data);
 		the_interface.GenerateDS(rs.dpools);
 
 		cmd_buffer.begin(begin_info, dispatcher);
@@ -946,22 +946,29 @@ namespace idk::vkn
 				//auto& buffer = state.shared_gfx_state->ui_text_buffer;
 				auto& doto = *state.shared_gfx_state->ui_text_data;
 				auto& t_size = state.shared_gfx_state->total_num_of_text;
+				auto& canvas_range_data = *state.shared_gfx_state->ui_canvas_range;
 
-				unsigned k = 0, u = 0;
 				pos_buffer.resize(t_size);
 				uv_buffer.resize(t_size);
 
 				unsigned i = 0;
+				size_t offset_size = 0;
+				size_t range = 0;
 				for (auto& elem : doto)
 				{
-					auto& b = pos_buffer[u];
+					auto& b = pos_buffer[i];
 					b.resize(hlp::buffer_size(doto[i].pos));
 					b.update<const vec2>(0, doto[i].pos, cmd_buffer);
-					auto& b1 = uv_buffer[u];
+					auto& b1 = uv_buffer[i];
 					b1.resize(hlp::buffer_size(doto[i].uv));
 					b1.update<const vec2>(0, doto[i].uv, cmd_buffer);
+
+					range = hlp::buffer_size(doto[i].pos);
+
+					canvas_range_data.emplace_back(CanvasRenderRange{offset_size,offset_size + range});
+					offset_size += range;
+
 					++i;
-					++u;
 				}
 				
 			}
@@ -984,11 +991,12 @@ namespace idk::vkn
 
 		//Do post pass here
 		//Canvas pass
+		size_t i = 0;
 		for (auto& elem : canvas)
 		{
 			auto& rs = _post_states[curr_state++];
 			//if(elem.render_target) //Default render target is null. Don't ignore it.
-			PostRenderCanvas(elem.render_target, elem.ui_ro, state, rs, frame_index);
+			PostRenderCanvas(i,elem.render_target, elem.ui_ro, state, rs, frame_index);
 		}
 		//TODO: Submit the command buffers
 

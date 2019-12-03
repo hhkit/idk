@@ -39,6 +39,6 @@ namespace idk::vkn
 
 		void InitConfig();
 
-		void DrawCanvas(PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data);
+		void DrawCanvas(size_t& canvas_count,PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data);
 	};
 }
