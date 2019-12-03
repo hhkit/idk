@@ -776,6 +776,8 @@ namespace idk::ogl
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			glViewport(0, 0, screen_sz.x, screen_sz.y);
 			glBlitFramebuffer(0, 0, outbuf_sz.x, outbuf_sz.y, 0, 0, screen_sz.x, screen_sz.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		}
 	}
 
