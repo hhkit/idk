@@ -276,6 +276,7 @@ namespace idk
 
 		    font_render_data.emplace_back(f_range);
 		}
+		
 		range.inst_font_end = font_render_data.size();
 	}
 
@@ -284,29 +285,32 @@ namespace idk
 		vector<UIAttriBlock>& font_buffer,
 		//vector<FontPoint>& font_buffer,
 		vector<UITextRange>& font_render_data,
-		size_t& total_num_of_text,
-		GraphicsSystem::CanvasRenderRange& range
+		size_t& total_num_of_text
 	)
 	{
-		range.inst_font_begin = font_render_data.size();
+		//range.inst_font_begin = font_render_data.size();
 		
-		vector<vec2> posList;
-		vector<vec2> uvList;
-		size_t count = 0;
-		for (auto& elem : unique_canvas_font)
+		if (unique_canvas_font.size())
 		{
-			auto res = elem.ConvertToPairs();
-			posList.insert(posList.end(),res.first);
-			uvList.insert(uvList.end(), res.second);
-			++count;
-		}
-		font_buffer.insert(font_buffer.end(), UIAttriBlock{ posList,uvList });
-		++total_num_of_text;
-		UITextRange f_range{ posList.size(),count };
+			vector<vec2> posList;
+			vector<vec2> uvList;
+			size_t count = 0;
+			for (auto& elem : unique_canvas_font)
+			{
+				auto res = elem.ConvertToPairs();
+				posList.insert(posList.end(), res.first);
+				uvList.insert(uvList.end(), res.second);
+				++count;
+			}
+			auto start = posList.size();
+			font_buffer.insert(font_buffer.end(), UIAttriBlock{ posList,uvList });
+			++total_num_of_text;
 
-		font_render_data.emplace_back(f_range);
-		
-		range.inst_font_end = font_render_data.size();
+			UITextRange f_range{ start,count };
+			font_render_data.emplace_back(f_range);
+
+		}
+		//range.inst_font_end = font_render_data.size();
 	}
 
 	void GraphicsSystem::BufferGraphicsState(
@@ -397,6 +401,7 @@ namespace idk
 			//ClearSwap(rb.ui_text_buffer.uv1, tmp.ui_text_buffer.uv1);
 			//ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
+			//ClearSwap(rb.ui_canvas_range, tmp.ui_canvas_range);
 			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
 			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
 			ClearSwap(rb.inst_mesh_render_buffer        ,tmp.inst_mesh_render_buffer        );//clear then swap the stuff back into rb
@@ -676,6 +681,7 @@ namespace idk
             result.ui_text_range.reserve(result.ui_text_range.size() + size);
             result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
             result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+			//result.ui_canvas_range.reserve(result.ui_text_buffer.size() + size * avg_font_count);
             //result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
         }
 
@@ -696,7 +702,7 @@ namespace idk
 		for (auto& [canvas, vec] : result.ui_render_per_canvas)
 		{
 			//No need to cull, this is to find all the coords data and append them to one buffer
-			CanvasRenderRange range{};
+			//CanvasRenderRange range{};
 
 			auto& res = result.ui_canvas.emplace_back();
 			
@@ -709,10 +715,15 @@ namespace idk
 				{				
 					using T = std::decay_t<decltype(data)>;
 					if constexpr (!std::is_same_v<T, ImageData>)
-						ProcessCanvas(data.coords, result.ui_text_buffer,result.ui_text_range,result.ui_total_num_of_text,range);
+					{
+						ProcessCanvas(data.coords, result.ui_text_buffer, result.ui_text_range, result.ui_total_num_of_text);
+						//result.canvas_render_range.emplace_back(range);
+					}
+
 				}, elem.data);
 			}
-			result.canvas_render_range.emplace_back(range);
+			
+			
 		}
         POST_END()
 

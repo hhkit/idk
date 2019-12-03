@@ -86,7 +86,7 @@ namespace idk::vkn
 		void PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index);
 		
 		//PostRender
-		void PostRenderCanvas( RscHandle<RenderTarget> rt, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+		void PostRenderCanvas(size_t& canvas_count, RscHandle<RenderTarget> rt, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index);
 
 
 		VulkanView& View()const { return *_view; }

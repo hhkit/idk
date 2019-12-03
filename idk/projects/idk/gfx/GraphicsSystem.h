@@ -75,10 +75,6 @@ namespace idk
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
-		struct CanvasRenderRange
-		{
-			size_t inst_font_begin{}, inst_font_end{};
-		};
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
@@ -167,6 +163,7 @@ namespace idk
 			alignas(machine::cache_line_sz) vector<UIRenderObjectWithCanvas> ui_canvas;
 			alignas(machine::cache_line_sz) vector<UITextRange>   ui_text_range;
 			alignas(machine::cache_line_sz) vector<UIAttriBlock>   ui_text_buffer;
+			//alignas(machine::cache_line_sz) vector<CanvasRenderRange>   ui_canvas_range;
 			alignas(machine::cache_line_sz) size_t  ui_total_num_of_text{ 0 };
 			//vector<FontPoint>     ui_text_buffer;
 
