@@ -98,7 +98,7 @@ void SubPassConfig::ProcessAttachments(uint32_t num, vector<attachment_t>& outpu
 		auto& [index, att_config] = output[i];
 		attachment_refs[i] =
 			vk::AttachmentReference{
-			i
+			static_cast<uint32_t>(index)
 			,att_config.use
 		};
 	}

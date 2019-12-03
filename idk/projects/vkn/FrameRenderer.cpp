@@ -612,13 +612,14 @@ namespace idk::vkn
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
 
 		auto& processed_ro = the_interface.DrawCalls();
-		shared_ptr<pipeline_config> prev_config{};
+		shared_ptr<const pipeline_config> prev_config{};
 		for (auto& p_ro : processed_ro)
 		{
 			bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 			auto& obj = p_ro.Object();
 			if (p_ro.rebind_shaders||prev_config!=obj.config)
 			{
+				prev_config = obj.config;
 				shaders.resize(0);
 				if (p_ro.frag_shader)
 					shaders.emplace_back(*p_ro.frag_shader);
@@ -933,7 +934,6 @@ namespace idk::vkn
 //#pragma optimize ("",off)
 	void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
 	{
-		return;
 		//auto& lights = *state.shared_gfx_state->lights;
 
 		auto& canvas = *state.shared_gfx_state->ui_canvas;
@@ -1383,7 +1383,7 @@ namespace idk::vkn
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
-		bool still_rendering = (processed_ro.size() > 0);//|| camera.render_target->RenderDebug();
+		bool still_rendering = (processed_ro.size() > 0) ||  camera.render_target->RenderDebug();
 		if (still_rendering)
 		{
 			TransitionFrameBuffer(camera, cmd_buffer, view);

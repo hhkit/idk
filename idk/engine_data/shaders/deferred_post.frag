@@ -2,15 +2,20 @@
 
 #define MAX_LIGHTS 8
 
-const int eAlbedoAmbOcc        = 0       ;
-const int eUvMetallicRoughness = 1       ;
-const int eViewPos             = 2       ;
-const int eNormal              = 3       ;
-const int eTangent             = 4       ;
-const int eDepth               = 5       ;
+const int eAlbedoAmbOcc        = 1       ;
+const int eUvMetallicRoughness = 2       ;
+const int eViewPos             = 3       ;
+const int eNormal              = 4       ;
+const int eTangent             = 5       ;
+const int eDepth               = 6       ;
 const int eGBufferSize         = eDepth+1;
 
-S_LAYOUT(2, 0) uniform sampler2D gbuffers[eGBufferSize];
+layout(input_attachment_index = eAlbedoAmbOcc       ,set=2, binding=0) uniform subpassInput gAlbAmbOcc;
+layout(input_attachment_index = eUvMetallicRoughness,set=2, binding=1) uniform subpassInput gUvMetRough;
+layout(input_attachment_index = eViewPos            ,set=2, binding=2) uniform subpassInput gViewPos;
+layout(input_attachment_index = eNormal             ,set=2, binding=3) uniform subpassInput gNormal;
+layout(input_attachment_index = eTangent            ,set=2, binding=4) uniform subpassInput gTangent;
+layout(input_attachment_index = eDepth              ,set=2, binding=5) uniform subpassInput gDepth;
 
 U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 {
@@ -40,15 +45,20 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
-// lighting functions 
+
+vec4 Load(subpassInput input_att)
+{
+	return subpassLoad(input_att);
+}
+
 
 vec3 Normal()
 {
-	return normalize(texture(gbuffers[eNormal] ,fs_in.uv).rgb );
+	return normalize(Load(gNormal).rgb );
 }
 vec3 Tangent()
 {
-	return normalize(texture(gbuffers[eTangent] ,fs_in.uv).rgb);
+	return normalize(Load(gTangent).rgb);
 }
 #define FRAG_NORMAL Normal()
 #define FRAG_TANGENT Tangent()
@@ -64,13 +74,13 @@ void main()
 {
 
 	// declare initial values here
-	if(texture(gbuffers[eDepth],fs_in.uv).r==1)
+	if(Load(gDepth).r==1)
 		discard;
-	vec3  view_pos  = texture(gbuffers[eViewPos],fs_in.uv).rgb;
+	vec3  view_pos  = Load(gViewPos).rgb;
 	vec3  normal    = Normal();
 	vec3  tangent   = Tangent();
-	vec4 uv_met_rou = texture(gbuffers[eUvMetallicRoughness] ,fs_in.uv);
-	vec4 alb_amb_occ= texture(gbuffers[eAlbedoAmbOcc] ,fs_in.uv);
+	vec4 uv_met_rou = Load(gUvMetRough);
+	vec4 alb_amb_occ= Load(gAlbAmbOcc );
 	vec2  uv        = uv_met_rou.xy;
 	
 	vec3  albedo    = alb_amb_occ.rgb;
