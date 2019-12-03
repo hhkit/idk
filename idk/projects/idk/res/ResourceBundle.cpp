@@ -13,7 +13,7 @@ namespace idk
 	}
 	bool ResourceBundle::operator!=(const ResourceBundle& rhs) const
 	{
-		return false;
+		return !operator==(rhs);
 	}
 	bool ResourceBundle::operator==(const ResourceBundle& rhs) const
 	{
@@ -25,9 +25,11 @@ namespace idk
 
 		for (auto& elem : lspan)
 		{
-			
+			auto itr = std::find(rhs.handles.begin(), rhs.handles.end(), elem);
+			if (itr == rhs.handles.end())
+				return false;
 		}
 
-		return false;
+		return true;
 	}
 }
