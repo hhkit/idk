@@ -142,7 +142,7 @@ namespace idk::vkn
 		vector<const DbgDrawCall*> dbg_render;
 		const VulkanPipeline* dbg_pipeline;
 
-		void Init(const GraphicsSystem::RenderRange& data, const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
+		void Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights,const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
 		void CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects);
 	};
 

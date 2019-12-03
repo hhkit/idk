@@ -4,16 +4,16 @@
 
 namespace idk
 {
-	static const vector<vec3> frustumVertList
+	static const array<vec3,8> frustumVertList
 	{
-		{-1.f,1.f,-1.f}, //top left-near
-		{1.f,1.f,-1.f},  //top right-near
-		{-1.f,-1.f,-1.f}, //bottom left-near
-		{1.f,-1.f,-1.f}, //bottom right-near
-		{-1.f,1.f,1.f},  //top left-far
-		{1.f,1.f,1.f},   //top right-far
-		{-1.f,-1.f,1.f}, //bottom left-far
-		{1.f,-1.f,1.f}  //bottom right-far
+		vec3{-1.f,1.f,-1.f}, //top left-near
+		vec3{1.f,1.f,-1.f},  //top right-near
+		vec3{-1.f,-1.f,-1.f}, //bottom left-near
+		vec3{1.f,-1.f,-1.f}, //bottom right-near
+		vec3{-1.f,1.f,1.f},  //top left-far
+		vec3{1.f,1.f,1.f},   //top right-far
+		vec3{-1.f,-1.f,1.f}, //bottom left-far
+		vec3{1.f,-1.f,1.f}  //bottom right-far
 	};
 	class Frustum
 	{

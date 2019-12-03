@@ -57,6 +57,7 @@ namespace idk
 			{"Name", 125},
 			{"Col", -1},
 			{"Intensity", -1},
+			{"Atten", -1},
 			{"Position", 250},
 			{"Rotation", 250},
 			{"Shadows", -1},
@@ -113,6 +114,16 @@ namespace idk
 			if (ImGui::DragFloat("##intens", &intens, 0.1, 0, 1500.f, "%.3f", 1.1f))
 				light.SetLightIntensity(intens);
 			ImGui::NextColumn();
+
+			std::visit([](auto& light) 
+				{
+					if constexpr (!std::is_same_v<std::decay_t<decltype(light)>, DirectionalLight>)
+					{
+						ImGui::DragFloat("##atten", &light.attenuation_radius, 0.1, 0, 1500.f, "%.3f", 1.1f);
+					}
+					ImGui::NextColumn();
+				}, light.light);
+			
 
 			auto pos = tfm->GlobalPosition();
 			if (ImGuidk::DragVec3("##tfm", &pos))

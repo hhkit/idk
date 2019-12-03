@@ -68,6 +68,7 @@ namespace idk
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t inst_particle_begin{}, inst_particle_end{};
 			size_t inst_font_begin{}, inst_font_end{};
+			size_t light_begin{}, light_end{};
 		};
 		struct LightRenderRange
 		{
@@ -147,6 +148,7 @@ namespace idk
 		{
 			alignas(machine::cache_line_sz) vector<CameraData>   camera;
 			alignas(machine::cache_line_sz) vector<LightData>    lights;
+			alignas(machine::cache_line_sz) vector<size_t>       active_light_buffer;
 			alignas(machine::cache_line_sz) vector<CameraData>   light_camera_data;
 			alignas(machine::cache_line_sz) vector<RenderObject> mesh_render;
 			alignas(machine::cache_line_sz) vector<AnimatedRenderObject> skinned_mesh_render;

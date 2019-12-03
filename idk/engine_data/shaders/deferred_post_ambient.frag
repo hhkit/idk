@@ -65,6 +65,7 @@ vec3 Tangent()
 #define FRAG_TANGENT Tangent()
 import /engine_data/shaders/utils.glsl
 import /engine_data/shaders/pbr_utils.glsl
+import /engine_data/shaders/deferred_utils.glsl
 
 
 // forward shading only cares about color!
@@ -74,19 +75,7 @@ layout(location = 0)out vec4 out_color;
 void main()
 {
 	// declare initial values here
-	if(Load(gDepth).r==1)
-		discard;
-	vec3  view_pos  = Load(gViewPos).rgb;
-	vec3  normal    = Normal();
-	vec3  tangent   = Tangent();
-	vec4 uv_met_rou = Load(gUvMetRough);
-	vec4 alb_amb_occ= Load(gAlbAmbOcc );
-	vec2  uv        = uv_met_rou.xy;
-	
-	vec3  albedo    = alb_amb_occ.rgb;
-	float metallic  = uv_met_rou.z;
-	float roughness = uv_met_rou.w;
-	float ambient_o = alb_amb_occ.a;
+	LoadGBuffers(view_pos, normal, tangent, metallic, roughness, albedo,ambient_o, uv, emissive);
 	
 	vec3 view_dir = -normalize(view_pos);
 
@@ -95,5 +84,5 @@ void main()
 	normal = normalize(normal);
 	
 import /engine_data/shaders/pbr_end.glsl
-	out_color = vec4(ambient,1);
+	out_color = vec4(ambient+emissive,1);
 }

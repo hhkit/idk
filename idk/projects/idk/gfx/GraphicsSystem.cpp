@@ -26,6 +26,8 @@
 
 #include <parallel/ThreadPool.h>
 
+#include <meta/meta.inl>
+
 struct guid_64
 {
 	uint64_t mem1;
@@ -311,6 +313,58 @@ namespace idk
 
 		}
 		//range.inst_font_end = font_render_data.size();
+	}
+
+	sphere bounding_box_to_loose_sphere(const aabb& box)
+	{
+		auto e = box.extents();
+		float d = 0;
+		for (auto axis_aligned_len : e)
+		{
+			d = std::max(0.0f, axis_aligned_len);
+		}
+		sphere result{ box.center(),d / 2 };
+		return result;
+	}
+
+	void CullLights(const CameraData& camera,const vector<LightData>& lights, vector<size_t>& active_light_buffer,GraphicsSystem::RenderRange& range)
+	{
+		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
+		range.light_begin = active_light_buffer.size();
+		for (size_t i = 0; i < lights.size(); ++i)
+		{
+			auto& light = lights[i];
+			switch (light.index)
+			{
+			case index_in_variant_v<PointLight, LightVariant>:
+				{
+					sphere sphere{ invert_rotation(light.v)[3],light.falloff };
+					if(frustum.contains(sphere))
+						active_light_buffer.emplace_back(i);
+				}
+				break;
+			case index_in_variant_v<SpotLight, LightVariant>:
+			{
+				auto bounding_box = camera_vp_to_bounding_box(light.vp);
+				auto sphere = bounding_box_to_loose_sphere(bounding_box);
+				if (frustum.contains(sphere))
+				{
+					active_light_buffer.emplace_back(i);
+				}
+			}
+				break;
+			case index_in_variant_v<DirectionalLight, LightVariant>:
+				active_light_buffer.emplace_back(i);
+				break;
+			}
+			if (light.index == index_in_variant_v<DirectionalLight, LightVariant>)
+			{
+				active_light_buffer.emplace_back(i);
+				continue; //SKIP
+			}
+
+		}
+		range.light_end = active_light_buffer.size();
 	}
 
 	void GraphicsSystem::BufferGraphicsState(
@@ -730,6 +784,7 @@ namespace idk
         for (auto& elem : futures)
             elem.get();
 
+		result.active_light_buffer.reserve(result.camera.size()* result.lights.size());
 		for (auto& camera : result.camera)
 		{
 			RenderRange range{ camera };
@@ -739,7 +794,11 @@ namespace idk
 				range.inst_mesh_render_end = end_index;
 				ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range,range);
 				ProcessFonts(result.font_render_data,result.font_buffer,result.font_range,range);
+
+				CullLights(camera,result.lights, result.active_light_buffer,range);
+
 			}
+			
 			result.culled_render_range.emplace_back(range);
 			//{
 			//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);
