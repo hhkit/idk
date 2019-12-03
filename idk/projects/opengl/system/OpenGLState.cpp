@@ -840,7 +840,7 @@ namespace idk::ogl
 	PixelData OpenGLState::PickData(const vec2& pos)
 	{
 		PixelData pd;
-		fb_man.SetRenderTarget(fb_man.cBufferPickingTexture);
+		fb_man.SetRenderTarget(fb_man.pickingBuffer);
 		glReadPixels((GLint)pos.x, (GLint)pos.y, fb_man.pickingBuffer->size.x, fb_man.pickingBuffer->size.y, GL_RGB32F, GL_UNSIGNED_BYTE, &pd);
 		GL_CHECK();
 		return std::move(pd);

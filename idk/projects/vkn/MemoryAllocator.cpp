@@ -91,6 +91,7 @@ namespace idk::vkn::hlp
 				if (new_range)
 					free_list.emplace(new_range);
 				result = { result_range->start,Aligned(result_range->start,alignment) };
+				break;
 			}
 		}
 		if (!result)
