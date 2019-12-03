@@ -534,7 +534,7 @@ namespace idk::vkn
 	bool fml = false;
 	bool IsDepthStencil(vk::Format format);
 	void Mark() { fml = true; }
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
 		TextureResult result;

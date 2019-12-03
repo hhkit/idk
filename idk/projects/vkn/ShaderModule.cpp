@@ -99,7 +99,7 @@ namespace idk::vkn
 		//location
 		hash_table<uint32_t,buffer_desc> extracted_desc;
 	};
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	ExtractedMisc extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
 	{
 		ExtractedMisc result{};
@@ -225,7 +225,7 @@ namespace idk::vkn
 		}
 		return result;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void CreateLayouts(
 		hash_table<string, UboInfo>& ubo_info,
 		ShaderModule::LayoutTable& layouts,

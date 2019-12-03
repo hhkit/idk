@@ -565,7 +565,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void RenderPipelineThingy(
 		const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -912,7 +912,7 @@ namespace idk::vkn
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
-#pragma optimize ("",off)
+//#pragma optimize ("",off)
 	void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
 	{
 		//auto& lights = *state.shared_gfx_state->lights;
@@ -1379,6 +1379,8 @@ namespace idk::vkn
 				bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 				is_particle_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
 				auto& obj = p_ro.Object();
+				if (!p_ro.config)
+					continue;
 				if (p_ro.rebind_shaders)
 				{
 					shaders.resize(0);
