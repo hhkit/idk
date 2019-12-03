@@ -933,6 +933,7 @@
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="res\ResourceExtension.h" />
     <ClInclude Include="res\CompiledAssets.h" />
+    <ClInclude Include="gfx\CompiledTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

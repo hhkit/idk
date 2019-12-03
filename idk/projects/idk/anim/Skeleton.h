@@ -20,6 +20,10 @@ namespace idk::anim
 		: public Resource<Skeleton>
 	{
 	public:
+		mat4 _global_inverse;
+		hash_table<string, size_t> _bone_table;
+		vector<BoneData> _bones;
+
 		Skeleton() = default;
 		Skeleton(const vector<BoneData>& bones, const hash_table<string, size_t>& bone_table);
 
@@ -31,11 +35,6 @@ namespace idk::anim
 		void AddBone(string_view name, BoneData b);
 		void SetSkeletonTransform(const mat4& mat) { _global_inverse = mat; }
 
-		EXTENSION(".idanim")
-	private:
-		mat4 _global_inverse;
-
-		hash_table<string, size_t> _bone_table;
-		vector<BoneData> _bones;
+		EXTENSION(".idsktn")
 	};
 }

@@ -867,26 +867,35 @@ namespace idk
 		if (!animator.skeleton)
 			return;
 		
+		GenerateSkeletonTree(animator, *animator.skeleton);
+	}
+
+	void AnimationSystem::GenerateSkeletonTree(Animator& animator, anim::Skeleton& skeleton)
+	{
 		// We also need to generate all the game objects here.
 		// The game object's transform is the inverse of bone_offset.
-		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator.GetHandle().scene);
+		auto CreateGameObject = [scene_index = animator.GetHandle().scene]()
+		{
+			return GameState::GetGameState().CreateObject<GameObject>(scene_index);
+		};
+		//const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator.GetHandle().scene);
 
 		// Reset the animator
 		HardReset(animator);
 
 		// Resize all data
-		const auto& bones = animator.skeleton->data();
+		const auto& bones = skeleton.data();
 		animator._bind_pose.resize(bones.size());
 		animator._child_objects.resize(bones.size());
 		animator.pre_global_transforms.resize(bones.size());
 		animator.final_bone_transforms.resize(bones.size());
-		
-		
+
+
 		for (size_t i = 0; i < bones.size(); ++i)
 		{
 			auto& curr_bone = bones[i];
 
-			auto obj = scene->CreateGameObject();
+			auto obj = CreateGameObject();
 			// auto transform = curr_bone.global_inverse_bind_pose.inverse();
 
 			// mat4 local_bind_pose = curr_bone.local_bind_pose.recompose();
@@ -910,8 +919,8 @@ namespace idk
 
 		for (auto& layer : animator.layers)
 		{
-			layer.prev_poses.resize(animator.skeleton->data().size());
-			layer.blend_source.resize(animator.skeleton->data().size());
+			layer.prev_poses.resize(skeleton.data().size());
+			layer.blend_source.resize(skeleton.data().size());
 		}
 	}
 
@@ -965,12 +974,8 @@ namespace idk
 
 	void AnimationSystem::HardReset(Animator& animator)
 	{
-		const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator.GetGameObject().scene);
-
 		for (auto& obj : animator._child_objects)
-		{
-			scene->DestroyGameObject(obj);
-		}
+			Core::GetGameState().DestroyObject(obj);
 
 		animator._child_objects.clear();
 		animator.pre_global_transforms.clear();

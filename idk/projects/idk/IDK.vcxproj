@@ -63,6 +63,7 @@
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\CompiledMesh.h" />
+    <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\ShaderIncluder.h" />
     <ClInclude Include="gfx\ShaderSnippet.h" />
     <ClInclude Include="gfx\ShaderSnippetFactory.h" />

@@ -77,7 +77,10 @@ namespace idk
 								{
 									static_assert(T::ext[0] == '.', "Extension must begin with a .");
 									std::ofstream resource_stream{ destination + "/" + string{guid} + string{T::ext} };
-									resource_stream << serialize_binary(elem);
+									if constexpr (has_tag_v<T, Saveable>)
+										resource_stream << serialize_text(elem);
+									else
+										resource_stream << serialize_binary(elem);
 									return true;
 								}
 								else

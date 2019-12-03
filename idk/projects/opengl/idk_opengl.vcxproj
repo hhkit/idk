@@ -158,7 +158,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;win32.lib;core.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;win32.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -185,7 +185,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;win32.lib;core.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;win32.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -223,7 +223,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;win32D.lib;coreD.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;win32D.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
