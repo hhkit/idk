@@ -113,61 +113,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     Core::GetSystem<LogSystem>().SetLogDir(idk_app_data.string());
 
 	c->Setup();
-
-	//LogSingleton::Get().PipeToCout(LogPool::GAME, true);
-	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
-
-	//gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
-	//gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
-
-    // auto scene = RscHandle<Scene>{};
-    // auto go = scene->CreateGameObject();
-    // go->AddComponent<ParticleSystem>();
-	
-	//auto scene = RscHandle<Scene>{};
-	//auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
-	//mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
-	//
-	//auto create_anim_obj = [&](vec3 pos, PathHandle path = PathHandle{ "/assets/models/YY_model.fbx" }) {
-	//	auto go = scene->CreateGameObject();
-
-	//	go->Name(path.GetStem());
-	//	go->GetComponent<Transform>()->position = pos;
-	//	//go->GetComponent<Transform>()->scale /= 100.0f;
-
-	//	auto model_resource = Core::GetResourceManager().Load(path);
-	//	string model_stem{ path.GetStem() };
-	//	auto animator = go->AddComponent<Animator>();
-	//	for (auto handle : model_resource->GetAll<Mesh>())
-	//	{
-	//		auto mesh_child_go = scene->CreateGameObject();
-
-	//		mesh_child_go->Name(handle->Name());
-	//		mesh_child_go->Transform()->parent = go;
-
-	//		auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
-	//		mesh_rend->mesh = handle;
-	//		mesh_rend->material_instance = mat_inst;
-	//	}
-
-	//	animator->skeleton = model_resource->Get<anim::Skeleton>();
-	//	Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
-
-	//	auto animation_resource = Core::GetResourceManager().Load("/assets/models/test.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	animation_resource = Core::GetResourceManager().Load("/assets/models/test2.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	animation_resource = Core::GetResourceManager().Load("/assets/models/walk.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	animation_resource = Core::GetResourceManager().Load("/assets/models/idle.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	
-	//	return go;
-	//};
-
-	//// @Joseph: Uncomment this when testing.
-	//create_anim_obj(vec3{ 0,0,0 });
-	
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }
