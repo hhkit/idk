@@ -612,19 +612,18 @@ namespace idk {
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 		const float orbit_strength = 0.5f;
 		vec2 delta{};
-		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) *  orbit_strength; //Global Y Axis
+		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) * orbit_strength; //Global Y Axis
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) * -orbit_strength; //Local X Axis
 		//Getting camera datas
-		Handle<Camera>		currCamera		= Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
-		Handle<Transform>	tfm				= currCamera->GetGameObject()->GetComponent<Transform>();
-		mat4				cam_matrix		= tfm->GlobalMatrix();
+		Handle<Camera>		currCamera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+		Handle<Transform>	tfm = currCamera->GetGameObject()->GetComponent<Transform>();
+		mat4				cam_matrix = tfm->GlobalMatrix();
 
 
 		const vec3 cam_to_point_vector = tfm->position - focused_vector;
-		const mat3 rotation_mat3 = rotate(vec3{ 0,1,0 }, rad(deg{ delta.x })) * rotate(tfm->Right(), rad(deg{ delta.y }));
-		const mat4 rotation_mat4 = mat4{ rotation_mat3 };
+		const mat4 rotation_mat4 = rotate(vec3{ 0,1,0 }, rad(deg{ delta.x })) * rotate(tfm->Right(), rad(deg{ delta.y }));
 
-		const vec3 final_cam_pos = focused_vector + rotation_mat3* cam_to_point_vector;
+		const vec3 final_cam_pos = focused_vector + vec3{ rotation_mat4 * vec4{ cam_to_point_vector, 0 } };
 		const mat4 final_position_mat4 = mat4{ translate(final_cam_pos) };
 		const mat4 inverse_position_mat4 = mat4{ translate(tfm->position) }.inverse();
 		

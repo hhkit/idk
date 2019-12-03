@@ -62,6 +62,8 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
+    <ClInclude Include="gfx\CompiledMesh.h" />
+    <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\ShaderIncluder.h" />
     <ClInclude Include="gfx\ShaderSnippet.h" />
     <ClInclude Include="gfx\ShaderSnippetFactory.h" />
@@ -124,12 +126,14 @@
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="res\CompiledAssets.h" />
     <ClInclude Include="res\EasyFactory.h" />
     <ClInclude Include="res\FileLoader.h" />
     <ClInclude Include="res\GenericResourceHandle.h" />
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
     <ClInclude Include="res\MetaBundle.h" />
     <ClInclude Include="res\ResourceBundle.h" />
+    <ClInclude Include="res\ResourceExtension.h" />
     <ClInclude Include="res\ResourceUtils.h" />
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceLoader.h" />

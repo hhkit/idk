@@ -10,8 +10,6 @@ namespace idk
 	class GameObject;
 	class Scene;
 
-	RESOURCE_EXTENSION(Scene, ".ids")
-
 	enum class SceneLoadResult
 	{
 		Ok = 0,
@@ -48,6 +46,8 @@ namespace idk
 
 		iterator begin() const;
 		iterator end() const;
+
+		EXTENSION(".ids");
 	private:
 		friend class ProjectManager;
 		friend class GameState;

@@ -49,6 +49,13 @@ namespace idk
 			float, // particle rot
             float  // particle size
 		>;
+
+		struct Descriptor
+		{
+			vtx::Attrib attrib;
+			unsigned stride;
+			unsigned offset;
+		};
 	}
 }
 

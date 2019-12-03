@@ -1,7 +1,7 @@
 #pragma once
 #include <res/ResourceMeta.h>
 #include <res/SaveableResource.h>
-
+#include <res/ResourceExtension.h>
 namespace idk
 {
 	struct TestMeta
@@ -9,8 +9,6 @@ namespace idk
 		int i;
 		int j;
 	};
-
-RESOURCE_EXTENSION(TestResource, ".test")
 
 	class TestResource
 		: public Resource<TestResource>
@@ -20,6 +18,9 @@ RESOURCE_EXTENSION(TestResource, ".test")
 	public:
         int k = 0;
 		string yolo = "haha";
+
+
 		void OnMetaUpdate(const TestMeta& newmeta) override { (newmeta); k = meta.i * meta.j; }
+		EXTENSION(".test")
 	};
 }

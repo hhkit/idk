@@ -6,8 +6,6 @@
 
 namespace idk
 {
-    RESOURCE_EXTENSION(MaterialInstance, ".matinst")
-
 	class MaterialInstance
 		: public Resource<MaterialInstance>
         , public Saveable<MaterialInstance>
@@ -35,5 +33,6 @@ namespace idk
 
 		temp_store get_cache()const;
 
+		EXTENSION(".matinst");
 	};
 }

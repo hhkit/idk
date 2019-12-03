@@ -5,6 +5,12 @@
 
 namespace idk
 {
+	namespace detail
+	{
+		template <typename T, unsigned R, unsigned C> struct mtx_align { static constexpr auto value = alignof(T); };
+		template <> struct mtx_align<float, 4, 4> { static constexpr auto value = 64; };
+	}
+
 	struct col_major {};
 
 	// matrix is column order
@@ -12,14 +18,14 @@ namespace idk
 	struct tmat
 	{
 		using column_t = tvec<T, R>;
-		column_t intern[C]{};
+		alignas(detail::mtx_align<T,R,C>::value) column_t intern[C]{};
 
 		// constructors
 		tmat();
 		
 		// column-major constructor
 		template<typename ... U,
-			typename = std::enable_if_t<(std::is_same_v<U, T> && ...)>
+			typename = std::enable_if_t<(std::is_same_v<U, T> && ...) && sizeof...(U) == C>
 		>
 		explicit tmat(const tvec<U, R>& ... vectors);
 

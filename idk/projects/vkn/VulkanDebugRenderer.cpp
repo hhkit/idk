@@ -342,7 +342,7 @@ namespace idk::vkn
 	}
 	void VulkanDebugRenderer::Draw(const box& box, const color& color)
 	{
-		const mat4 tfm = translate(box.center) * mat4 { box.axes() * scale(box.extents) };
+		const mat4 tfm = translate(box.center) * mat4 { box.axes() } *scale(box.extents);
 		DrawShape(MeshType::Box, tfm, color);
 	}
 	void VulkanDebugRenderer::Draw(const aabb& box, const color& color)
@@ -425,8 +425,7 @@ namespace idk::vkn
 		{
 			concat(
 			Transform(GetSquareFace(),[](const vec3& v) {
-					mat3 r3 = rotate(vec3{0,1.0f,0},rad{pi * 0.0f   });
-					mat4 r{r3};
+					mat4 r{ rotate(vec3{0,1.0f,0},rad{pi * 0.0f   }) };
 					return r * (translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),
 			Transform(GetSquareFace(),[](const vec3& v) { return mat4{rotate(vec3{0,1.0f,0},rad{pi * 0.5f})} *(translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),
 			Transform(GetSquareFace(),[](const vec3& v) { return mat4{rotate(vec3{0,1.0f,0},rad{pi * 1.0f})} *(translate(vec3{0,0,0.5f}) * vec4 { v,1.0f }); }),

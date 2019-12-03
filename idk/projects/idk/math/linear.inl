@@ -1,70 +1,123 @@
 #pragma once
+#include <xmmintrin.h>
+
 #include <ds/zip.h>
 #include <meta/casts.h>
 #include "linear.h"
 namespace idk
 {
+	template<typename T, unsigned D>
+	struct tvec;
+
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator+=(const Vector& rvec)
 	{
-		auto itr = me().begin();
-		const auto end = me().end();
-		auto rtr = rvec.begin();
-		while (itr != end)
-			* itr++ += *rtr++;
+		if constexpr (std::is_same_v<Vector, tvec<float, 4>>)
+		{
+			tvec<float, 4> & as_sse = me();
+			as_sse.sse = _mm_add_ps(as_sse.sse, rvec.sse);
+		}
+		else
+		{
+			auto itr = me().begin();
+			const auto end = me().end();
+			auto rtr = rvec.begin();
+			while (itr != end)
+				* itr++ += *rtr++;
+		}
 		return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator-=(const Vector& rvec)
 	{
-        auto itr = me().begin();
-        const auto end = me().end();
-        auto rtr = rvec.begin();
-        while (itr != end)
-            *itr++ -= *rtr++;
+		if constexpr (std::is_same_v<Vector, tvec<float, 4>>)
+		{
+			tvec<float, 4> & as_sse = me();
+			as_sse.sse = _mm_sub_ps(as_sse.sse, rvec.sse);
+		}
+		else
+		{
+			auto itr = me().begin();
+			const auto end = me().end();
+			auto rtr = rvec.begin();
+			while (itr != end)
+				* itr++ -= *rtr++;
+		}
         return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator*=(Field scalar)
 	{
-        auto itr = me().begin();
-        const auto* end = me().end();
-        while (itr != end)
-            *itr++ *= scalar;
-        return me();
+		if constexpr (std::is_same_v<Vector, tvec<float, 4>>)
+		{
+			tvec<float, 4> & as_sse = me();
+			as_sse.sse = _mm_mul_ps(as_sse.sse, _mm_set1_ps(scalar));
+		}
+		else
+		{
+			auto itr = me().begin();
+			const auto* end = me().end();
+			while (itr != end)
+				* itr++ *= scalar;
+		}
+		return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator/=(Field scalar)
 	{
-        auto itr = me().begin();
-        const auto end = me().end();
-        while (itr != end)
-            *itr++ /= scalar;
+		if constexpr (std::is_same_v<Vector, tvec<float, 4>>)
+		{
+			tvec<float, 4> & as_sse = me();
+			as_sse.sse = _mm_div_ps(as_sse.sse, _mm_set1_ps(scalar));
+		}
+		else
+		{
+			auto itr = me().begin();
+			const auto end = me().end();
+			while (itr != end)
+				* itr++ /= scalar;
+		}
         return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator*=(const Vector& rvec)
 	{
-		auto itr = me().begin();
-		const auto end = me().end();
-		auto rtr = rvec.begin();
-		while (itr != end)
-			*itr++ *= *rtr++;
+		if constexpr (std::is_same_v<Vector, tvec<float, 4>>)
+		{
+			tvec<float, 4> & as_sse = me();
+			as_sse.sse = _mm_mul_ps(as_sse.sse, rvec.sse);
+		}
+		else
+		{
+			auto itr = me().begin();
+			const auto end = me().end();
+			auto rtr = rvec.begin();
+			while (itr != end)
+				* itr++ *= *rtr++;
+		}
 		return me();
 	}
 
 	template<typename Vector, typename Field>
 	constexpr Vector& linear<Vector, Field>::operator/=(const Vector& rvec)
 	{
-        auto itr = me().begin();
-        const auto end = me().end();
-        auto rtr = rvec.begin();
-        while (itr != end)
-            *itr++ /= *rtr++;
+		if constexpr (std::is_same_v<Vector, tvec<float, 4>>)
+		{
+			tvec<float, 4> & as_sse = me();
+			as_sse.sse = _mm_div_ps(as_sse.sse, rvec.sse);
+		}
+		else
+		{
+			auto itr = me().begin();
+			const auto end = me().end();
+			auto rtr = rvec.begin();
+			while (itr != end)
+				* itr++ /= *rtr++;
+		}
         return me();
 	}
 

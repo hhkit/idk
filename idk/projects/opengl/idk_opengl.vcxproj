@@ -105,7 +105,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)engine\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\opengl\$(Configuration)\</IntDir>
     <TargetName>idk_opengl</TargetName>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -124,7 +124,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)engine\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\opengl\$(Configuration)\</IntDir>
     <TargetName>idk_openglD</TargetName>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -158,7 +158,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;win32.lib;core.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;win32.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -185,7 +185,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;win32.lib;core.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;win32.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -223,7 +223,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;win32D.lib;coreD.lib;</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;win32D.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)engine\</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>

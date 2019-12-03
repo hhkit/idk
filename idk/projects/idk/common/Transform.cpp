@@ -42,7 +42,7 @@ namespace idk
 
 	mat4 Transform::LocalMatrix() const
 	{
-		return translate(position) * mat4 { quat_cast<mat3>(rotation)* idk::scale(scale) };
+		return translate(position) * quat_cast<mat4>(rotation)* idk::scale(scale);
 	}
 
 	mat4 Transform::GlobalMatrix() const
