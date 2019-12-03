@@ -2,7 +2,7 @@
 //@file		IGE_HierarchyWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		27 SEPT 2019
+//@date		03 DEC 2019
 //@brief	
 
 /*
@@ -271,6 +271,8 @@ namespace idk {
 					}
 					else {
 						selected_gameObjects.push_back(handle);
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
+
 					}
 					hasSelected_GameobjectsModified = true;
 
@@ -288,6 +290,8 @@ namespace idk {
 					//Select as normal
 					selected_gameObjects.clear();
 					selected_gameObjects.push_back(handle);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
+
 					hasSelected_GameobjectsModified = true;
 				}
 
@@ -430,6 +434,7 @@ namespace idk {
 
 			selected_gameObjects.clear();
 			counter = 0;
+			int execute_counter = 0;
 			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
 				
 				depth;
@@ -443,6 +448,8 @@ namespace idk {
 
 				if (counter >= minMax[0] && counter <= minMax[1]) {
 					selected_gameObjects.push_back(handle);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
+					++execute_counter;
 					hasSelected_GameobjectsModified = true;
 				}
 				//Skips similar to closed trees
@@ -453,6 +460,9 @@ namespace idk {
 				}
 				return true;
 			});
+
+			Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+
 			//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
 
 			//Refresh the new matrix values

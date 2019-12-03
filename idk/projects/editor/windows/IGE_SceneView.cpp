@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		21 OCT 2019
+//@date		03 DEC 2019
 //@brief	
 
 /*
@@ -215,6 +215,7 @@ namespace idk {
 					}
 					if (!hasSelected) {
 						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
 						editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 					}
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
@@ -224,6 +225,7 @@ namespace idk {
 					//Select as normal
 					selected_gameObjects.clear();
 					selected_gameObjects.push_back(closestGameObject);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
 					editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
