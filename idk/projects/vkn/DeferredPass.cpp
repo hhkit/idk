@@ -332,39 +332,77 @@ namespace idk::vkn
 			//rp_obj = ConstructDeferredRenderPass(fb_info);
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 
+			if (gbuffer)
+				Core::GetResourceManager().Release(gbuffer);
 			auto new_buffer = fb_factory.Create(fb_info);
+			gbuffer = RscHandle<VknFrameBuffer>{ new_buffer };
+
 			fbf.Begin(size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
 				ColorFormat::_enum::RGBAF_16,
 				FilterMode::_enum::Nearest
 				});
+			uint32_t i = 0;
+			for (i = 0; i < EGBufferBinding::size(); ++i)
+			{
+				auto att = idk::AttachmentInfo{
+					LoadOp::eLoad,StoreOp::eDontCare,
+					ColorFormat::_enum::RGBAF_16,
+					FilterMode::_enum::Nearest,
+					false,
+					gbuffer->GetAttachment(i).buffer
+				};
+				att.is_input_att = true;
+				fbf.AddAttachment(att);
+			}
+			auto vkn_att = idk::AttachmentInfo{
+				LoadOp::eLoad,StoreOp::eDontCare,
+				ColorFormat::_enum::RGBAF_16,
+				FilterMode::_enum::Nearest,
+				false,
+				gbuffer->DepthAttachment().buffer
+			};
+			vkn_att.override_as_depth = true;
+			vkn_att.is_input_att = true;
+			fbf.AddAttachment(vkn_att);
 			if (accum_buffer)
 				Core::GetResourceManager().Release(accum_buffer);
 			accum_buffer = RscHandle<VknFrameBuffer>{ fb_factory.Create(fbf.End()) };
 			
-			if (gbuffer)
-				Core::GetResourceManager().Release(gbuffer);
-			gbuffer = RscHandle<VknFrameBuffer>{ new_buffer };
 		
 			_render_complete = View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{});
 		}
 		return inited;
 	}
 
-
+#pragma optimize("",off)
 	vk::UniqueRenderPass BuildAccumRenderPass(VknFrameBuffer& fb)
 	{
 		RenderPassInfo rp_info;
-		//Output
-		rp_info.RegisterAttachment(fb.GetAttachment(0), vk::ImageLayout::eUndefined, vk::ImageLayout::eColorAttachmentOptimal);
 
 		SubPassConfig spc{};
+		//Output
 		spc.AddOutputAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
+		rp_info.RegisterAttachment(fb.GetAttachment(0), vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal);
+		uint32_t i = 0;
+		for (i = 0; i < EGBufferBinding::size(); ++i)
+		{
+			spc.AddInputAttachment(1+i, vk::ImageLayout::eShaderReadOnlyOptimal);
+			rp_info.RegisterAttachment(fb.GetAttachment(1 + i), vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+		}
+		spc.AddInputAttachment(1+i, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(fb.GetAttachment(1 + i), vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+
 		spc.BuildSubpass();
 		rp_info.RegisterSubpass(spc);
-		rp_info.AddDependency(VK_SUBPASS_EXTERNAL, 0);
-		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
+		rp_info.AddDependency(VK_SUBPASS_EXTERNAL, 0,
+			{},vk::AccessFlagBits::eColorAttachmentRead,
+			vk::PipelineStageFlagBits::eTopOfPipe,
+			vk::PipelineStageFlagBits::eFragmentShader
+		);
+		auto tmp = rp_info.BuildRenderPass();
+		return View().Device()->createRenderPassUnique(tmp);
 	}
 //#pragma optimize("",off)
 	vk::UniqueRenderPass BuildHdrRenderPass(const FrameBufferInfo& hdr_out)
@@ -380,14 +418,14 @@ namespace idk::vkn
 		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eColorAttachmentOptimal);
 
 		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
-		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
-		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 
 		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
-		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
-		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eGeneral, vk::ImageLayout::eShaderReadOnlyOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 		spc.SetDepthAttachment(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 		rp_info.RegisterAttachment(*hdr_out.depth_attachment, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
@@ -435,7 +473,7 @@ namespace idk::vkn
 					hdr_frag = *frag_opt;
 			}
 		}
-		if (hdr_buffer->Size() != rt.Size())
+		if (!hdr_buffer ||(hdr_buffer->Size() != rt.Size() ||  hdr_buffer->attachments[0]->buffer!=rt.GetColorBuffer()))
 		{
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 			FrameBufferBuilder fbf;
@@ -499,44 +537,79 @@ namespace idk::vkn
 						loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
 					}*/
 
-			fsq_light_ro.mesh = fsq_amb_ro.mesh = Mesh::defaults[MeshType::INV_FSQ];
-			fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
-			if (!fsq_light_ro.config)
-			{
-				ambient_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
-				light_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
 
-				light_config->attachment_configs.resize(1);
-				auto& blend = light_config->attachment_configs[0];
-				blend.blend_enable = true;
-				blend.dst_color_blend_factor = BlendFactor::eOne;
-				blend.src_color_blend_factor = BlendFactor::eOne;
-				blend.color_blend_op = BlendOp::eAdd;
-				blend.alpha_blend_op = BlendOp::eMax;
-				blend.dst_alpha_blend_factor = BlendFactor::eOne;
-				blend.src_alpha_blend_factor = BlendFactor::eOne;
-				light_config->depth_test = false;
-				fsq_light_ro.config = light_config;
-				fsq_amb_ro.config = ambient_config;
-
-				accum_pass = BuildAccumRenderPass(GBuffers()[0].accum_buffer.as<VknFrameBuffer>());
-				hdr_pass = BuildHdrRenderPass(hdr_info);
-				//auto test = AttachmentBlendConfig{};
-				//test.blend_enable = true;
-				//test.alpha_blend_op = BlendOp::eAdd;
-				//test.color_blend_op = BlendOp::eAdd;
-				//test.src_color_blend_factor = BlendFactor::eSrcAlpha;
-				//test.dst_color_blend_factor = BlendFactor::eOneMinusSrcAlpha;
-				//test.src_alpha_blend_factor = BlendFactor::eOne;
-				//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
-				//blend = test;
-			}
-
+			hdr_pass = BuildHdrRenderPass(hdr_info);
 			auto tmp = VknSpecializedInfo{ hdr_pass };
 			hdr_buffer = RscHandle<VknFrameBuffer>{ fb_factory.Create(hdr_info,&tmp) };
 
 		}
+		if(!accum_pass)
+			accum_pass = BuildAccumRenderPass(GBuffers()[0].accum_buffer.as<VknFrameBuffer>());
+		if(!hdr_pass)
+			hdr_pass = hdr_buffer->GetRenderPass();
+		fsq_light_ro.mesh = fsq_amb_ro.mesh = Mesh::defaults[MeshType::INV_FSQ];
+		fsq_light_ro.renderer_req = fsq_amb_ro.renderer_req = &fsq_requirements;
+		if (!fsq_light_ro.config)
+		{
+			ambient_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
+			light_config = std::make_shared<pipeline_config>(*Core::GetSystem<GraphicsSystem>().MeshRenderConfig());
+
+			light_config->attachment_configs.resize(1);
+			auto& blend = light_config->attachment_configs[0];
+			blend.blend_enable = true;
+			blend.dst_color_blend_factor = BlendFactor::eOne;
+			blend.src_color_blend_factor = BlendFactor::eOne;
+			blend.color_blend_op = BlendOp::eAdd;
+			blend.alpha_blend_op = BlendOp::eMax;
+			blend.dst_alpha_blend_factor = BlendFactor::eOne;
+			blend.src_alpha_blend_factor = BlendFactor::eOne;
+			light_config->depth_test = false;
+			fsq_light_ro.config = light_config;
+			fsq_amb_ro.config = ambient_config;
+
+			//auto test = AttachmentBlendConfig{};
+			//test.blend_enable = true;
+			//test.alpha_blend_op = BlendOp::eAdd;
+			//test.color_blend_op = BlendOp::eAdd;
+			//test.src_color_blend_factor = BlendFactor::eSrcAlpha;
+			//test.dst_color_blend_factor = BlendFactor::eOneMinusSrcAlpha;
+			//test.src_alpha_blend_factor = BlendFactor::eOne;
+			//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
+			//blend = test;
+		}
 	}
+
+	GBufferType MapToGBufferType(ShadingModel model)noexcept
+	{
+		switch (model)
+		{
+		case ShadingModel::_enum::Specular:
+			return GBufferType::eSpecular;
+			break;
+		case ShadingModel::_enum::DefaultLit:
+			return GBufferType::eMetallic;
+			break;
+		default:
+			LOG_TO(LogPool::GFX, "GBufferType doesn't support %s yet. Defaulting to eMetallic", model.to_string().data());
+			return GBufferType::eMetallic;
+			break;
+		}
+	}
+
+	static auto& PopulateGbufferNames()
+	{
+		static const char* gbuffer_names[EGBufferBinding::size()];
+		gbuffer_names[EGBufferBinding::map(GBufferBinding::eAlbedoAmbOcc)] = "gAlbAmbOcc";
+		gbuffer_names[EGBufferBinding::map(GBufferBinding::eViewPos)] = "gViewPos";
+		gbuffer_names[EGBufferBinding::map(GBufferBinding::eNormal)] = "gNormal";
+		gbuffer_names[EGBufferBinding::map(GBufferBinding::eTangent)] = "gTangent";
+		gbuffer_names[EGBufferBinding::map(GBufferBinding::eUvMetallicRoughness)] = "gUvMetRough";
+		gbuffer_names[EGBufferBinding::size()] = "gDepth";
+		return gbuffer_names;
+	}
+
+	static const char* (&gbuffer_names)[EGBufferBinding::size()] = PopulateGbufferNames();
+
 	struct DeferredPostBinder : StandardBindings
 	{
 		bool is_ambient = false;
@@ -545,6 +618,10 @@ namespace idk::vkn
 		void SetDeferredPass(DeferredPass& pass)
 		{
 			deferred_pass = &pass;
+		}
+		bool Skip(PipelineThingy&, const  RenderObject& dc)
+		{
+			return MapToGBufferType(dc.material_instance->material->model) != type;
 		}
 		void Bind(PipelineThingy& the_interface) override
 		{
@@ -556,8 +633,8 @@ namespace idk::vkn
 			the_interface.BindShader(ShaderStage::Fragment, (is_ambient)? deferred_post_ambient:deferred_post_frag);
 			auto& gbuffer_fb = deferred_pass->GBuffer(type).gbuffer;
 			for (uint32_t i = 0; i < EGBufferBinding::size(); ++i)
-				the_interface.BindSampler("gbuffers", i, gbuffer_fb->GetAttachment(i).buffer.as<VknTexture>());
-			the_interface.BindSampler("gbuffers", static_cast<uint32_t>(EGBufferBinding::size()), gbuffer_fb->DepthAttachment().buffer.as<VknTexture>(),false,vk::ImageLayout::eGeneral);
+				the_interface.BindAttachment(gbuffer_names[i], 0, gbuffer_fb->GetAttachment(i).buffer.as<VknTexture>(),true,vk::ImageLayout::eShaderReadOnlyOptimal);
+			the_interface.BindAttachment(gbuffer_names[static_cast<uint32_t>(EGBufferBinding::size())], 0, gbuffer_fb->DepthAttachment().buffer.as<VknTexture>(),false, vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
 	};
 
@@ -612,7 +689,7 @@ namespace idk::vkn
 		{"metallic_light_accum_input" , vk::ImageLayout::eShaderReadOnlyOptimal},
 		{"metallic_depth_input"		  , vk::ImageLayout::eShaderReadOnlyOptimal              },
 		{"specular_light_accum_input" , vk::ImageLayout::eShaderReadOnlyOptimal},
-		{"specular_depth_input"       , vk::ImageLayout::eGeneral              },
+		{"specular_depth_input"       , vk::ImageLayout::eShaderReadOnlyOptimal              },
 	};
 	PipelineThingy DeferredPass::HdrPass(const GraphicsState& graphics_state, RenderStateV2& rs)
 	{
@@ -643,33 +720,7 @@ namespace idk::vkn
 
 		return the_interface;
 	}
-
-	//
-	/*
-	PipelineThingy DeferredPass::ProcessDrawCalls(const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>>light_range)
-	{
-		//TODO: Prepare FSQ draw call + Forward Draw Calls
-		PipelineThingy the_interface{};
-		the_interface.SetRef(rs.ubo_manager);
-		PbrDeferredPostBinding binding;
-		std::get<DeferredPostBinder>(binding.binders).SetDeferredPass(*this);
-		auto& pbr_fwd_binding = std::get<PbrFwdBindings>(binding.binders); 
-		pbr_fwd_binding.light_range = light_range;
-		pbr_fwd_binding.SetState(graphics_state);
-
-		auto& fsq_ro = fsq_amb_ro ;
-		
-		binding.Bind(the_interface);
-		binding.Bind(the_interface, fsq_ro);
-		the_interface.BindMeshBuffers(fsq_ro);
-		//Draw Fullscreen Quad
-		the_interface.FinalizeDrawCall(fsq_ro);
-		//Insert Forward stuff here?
-
-		return the_interface;
-	}
-	*/
-
+	
 	void PostRenderCopy(vk::CommandBuffer cmd_buffer,ivec2 size, vk::Image render_target_depth, vk::Image gbuffer_depth)
 	{
 		//Transit RTD -> Transfer
@@ -838,7 +889,7 @@ namespace idk::vkn
 	struct TypeCheck : StandardBindings
 	{
 		ShadingModel model;
-		bool Skip(PipelineThingy& the_interface, const  RenderObject& dc)  
+		bool Skip(PipelineThingy& the_interface, const  RenderObject& dc)  override
 		{ 
 			if (dc.material_instance)
 			{
@@ -921,7 +972,7 @@ namespace idk::vkn
 			if (RenderProcessedDrawCalls(cmd_buffer, the_interface.DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi,rp,static_cast<uint32_t>(g_buffer.NumColorAttachments()),&graphics_state))
 				rs.FlagRendered();
 			cmd_buffer.endRenderPass();//End GBuffer pass
-
+			++i;
 
 		}
 		//GBufferBarrier(cmd_buffer, gbuffer);

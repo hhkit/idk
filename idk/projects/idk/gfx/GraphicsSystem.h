@@ -163,7 +163,7 @@ namespace idk
 			alignas(machine::cache_line_sz) vector<UIRenderObjectWithCanvas> ui_canvas;
 			alignas(machine::cache_line_sz) vector<UITextRange>   ui_text_range;
 			alignas(machine::cache_line_sz) vector<UIAttriBlock>   ui_text_buffer;
-			alignas(machine::cache_line_sz) vector<CanvasRenderRange>   ui_canvas_range;
+			//alignas(machine::cache_line_sz) vector<CanvasRenderRange>   ui_canvas_range;
 			alignas(machine::cache_line_sz) size_t  ui_total_num_of_text{ 0 };
 			//vector<FontPoint>     ui_text_buffer;
 

@@ -42,6 +42,13 @@
 
 namespace idk::vkn
 {
+#define CreateRenderThread() std::make_unique<ThreadedRender>()
+
+	struct FrameRenderer::PImpl
+	{
+		hash_table<RscHandle<Texture>, RscHandle<VknFrameBuffer>> deferred_buffers;
+	};
+
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
 	class Semaphore {
 	public:
@@ -314,7 +321,7 @@ namespace idk::vkn
 				{
 					auto& dc = *itr;
 					auto& mat_inst = *dc.material_instance;
-					if (mat_inst.material || !binders.Skip(the_interface,dc))
+					if (mat_inst.material && !binders.Skip(the_interface,dc))
 					{
 						binders.Bind(the_interface, dc);
 						the_interface.BindMeshBuffers(dc);
@@ -379,6 +386,7 @@ namespace idk::vkn
 		return *Core::GetResourceManager().Load<ShaderProgram>(filename, false);
 	}
 	void FrameRenderer::Init(VulkanView* view, vk::CommandPool cmd_pool) {
+		_pimpl = std::make_shared<PImpl>();
 		//Todo: Initialize the stuff
 		_view = view;
 		//Do only the stuff per frame
@@ -398,7 +406,7 @@ namespace idk::vkn
 		//Temp
 		for (auto i = num_concurrent_states; i-- > 0;)
 		{
-			auto thread = std::make_unique<ThreadedRender>();
+			auto thread = CreateRenderThread();
 			thread->Init(this);
 			_render_threads.emplace_back(std::move(thread));
 		}
@@ -604,13 +612,14 @@ namespace idk::vkn
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
 
 		auto& processed_ro = the_interface.DrawCalls();
-		shared_ptr<pipeline_config> prev_config{};
+		shared_ptr<const pipeline_config> prev_config{};
 		for (auto& p_ro : processed_ro)
 		{
 			bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 			auto& obj = p_ro.Object();
 			if (p_ro.rebind_shaders||prev_config!=obj.config)
 			{
+				prev_config = obj.config;
 				shaders.resize(0);
 				if (p_ro.frag_shader)
 					shaders.emplace_back(*p_ro.frag_shader);
@@ -767,7 +776,7 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 	}
-
+//#pragma optimize("",off)
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_current_frame_index = frame_index;
@@ -794,7 +803,8 @@ namespace idk::vkn
 		{
 			for (auto& gbuffer : _gbuffers)
 			{
-				gbuffer.Init(max_size);
+				if(gbuffer.Init(max_size))
+					_pimpl->deferred_buffers.clear();
 			}
 		}
 		for (auto i = gfx_states.size(); i-- > 0;)
@@ -807,7 +817,16 @@ namespace idk::vkn
 				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eMetallic)] = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
 				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eSpecular)]= Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostSpecular];
 				deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
-				deferred_pass.Init(camera.render_target.as<VknRenderTarget>(),_gbuffers);
+				auto& rt = camera.render_target.as<VknRenderTarget>();
+				auto& deferred_buffers = _pimpl->deferred_buffers;
+				auto color_buffer = rt.GetColorBuffer();
+				auto hdr_itr = deferred_buffers.find(color_buffer);
+				if (hdr_itr != deferred_buffers.end())
+				{
+					deferred_pass.hdr_buffer = hdr_itr->second;
+				}
+				deferred_pass.Init(rt,_gbuffers);
+				deferred_buffers[color_buffer] = deferred_pass.hdr_buffer;
 			}
 		}
 		bool rendered = false;
@@ -836,13 +855,13 @@ namespace idk::vkn
 			thread->Join();
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
-		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
 		vector<vk::CommandBuffer> buffers{};
 		for (auto& state : curr_frame._states)
 		{
 			if (state.has_commands)
 				buffers.emplace_back(state.CommandBuffer());
 		}
+		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit };
 		pri_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
 		//if(buffers.size())
 		//	pri_buffer->executeCommands(buffers, vk::DispatchLoaderDefault{});
@@ -946,7 +965,7 @@ namespace idk::vkn
 				//auto& buffer = state.shared_gfx_state->ui_text_buffer;
 				auto& doto = *state.shared_gfx_state->ui_text_data;
 				auto& t_size = state.shared_gfx_state->total_num_of_text;
-				auto& canvas_range_data = *state.shared_gfx_state->ui_canvas_range;
+				//auto& canvas_range_data = *state.shared_gfx_state->ui_canvas_range;
 
 				pos_buffer.resize(t_size);
 				uv_buffer.resize(t_size);
@@ -963,10 +982,10 @@ namespace idk::vkn
 					b1.resize(hlp::buffer_size(doto[i].uv));
 					b1.update<const vec2>(0, doto[i].uv, cmd_buffer);
 
-					range = hlp::buffer_size(doto[i].pos);
+					//range = hlp::buffer_size(doto[i].pos);
 
-					canvas_range_data.emplace_back(CanvasRenderRange{offset_size,offset_size + range});
-					offset_size += range;
+					//canvas_range_data.emplace_back(CanvasRenderRange{offset_size,offset_size + range});
+					//offset_size += range;
 
 					++i;
 				}
@@ -1372,7 +1391,7 @@ namespace idk::vkn
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
-		bool still_rendering = (processed_ro.size() > 0) || camera.render_target->RenderDebug();
+		bool still_rendering = (processed_ro.size() > 0) ||  camera.render_target->RenderDebug();
 		if (still_rendering)
 		{
 			TransitionFrameBuffer(camera, cmd_buffer, view);
@@ -1463,6 +1482,10 @@ namespace idk::vkn
 		cmd_buffer.end();
 		Track(0);
 	}
+
+	FrameRenderer::FrameRenderer(FrameRenderer&&)= default;
+
+	FrameRenderer::~FrameRenderer() {}
 
 	PipelineManager& FrameRenderer::GetPipelineManager()
 	{

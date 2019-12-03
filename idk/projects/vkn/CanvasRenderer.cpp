@@ -56,11 +56,9 @@ namespace idk::vkn
 		{
 			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VUi]);
 			
-			auto& character_render_info = *shared_state.ui_text_data;
 			auto& font_render_info = shared_state.ui_text_buffer_pos;
 			auto& font_uv_info = shared_state.ui_text_buffer_uv;
 			auto& font_raw_data = *shared_state.ui_text_range;
-			auto& canvas_range_data = *shared_state.ui_canvas_range;
 			canvas_ro_inst.clear();
 			canvas_ro_inst.reserve(canvas_data.size());
 
@@ -101,7 +99,6 @@ namespace idk::vkn
 						canvas_ui_ro.material_instance = ui_canvas.material;
 						auto& elem = font_render_info[i];
 						auto& uv = font_uv_info[i];
-						auto& range = canvas_range_data[i];
 						auto& v_size = font_raw_data[i];
 						//TODO bind materials
 						vert_bind.BindCanvas(the_interface, data, ui_canvas);

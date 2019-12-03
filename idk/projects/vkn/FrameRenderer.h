@@ -45,6 +45,11 @@ namespace idk::vkn
 		PresentationSignals& GetMainSignal();
 		SharedGraphicsState shared_graphics_state;
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
+		
+		FrameRenderer() = default;
+		FrameRenderer(const FrameRenderer&)= delete;
+		FrameRenderer(FrameRenderer&&);
+		~FrameRenderer();
 	private:
 		struct VertexUniformConfig;
 		using ProcessedRO=vkn::ProcessedRO;
@@ -120,6 +125,10 @@ namespace idk::vkn
 
 		DeferredGBuffer _gbuffers[EGBufferType::size()];
 		ivec2 _gbuffer_size{};
+
+		struct PImpl;
+		shared_ptr<PImpl> _pimpl;
+
 		//VknFrameBufferManager   fb_man{};
 	};
 }

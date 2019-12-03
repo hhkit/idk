@@ -401,7 +401,7 @@ namespace idk
 			//ClearSwap(rb.ui_text_buffer.uv1, tmp.ui_text_buffer.uv1);
 			//ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
-			ClearSwap(rb.ui_canvas_range, tmp.ui_canvas_range);
+			//ClearSwap(rb.ui_canvas_range, tmp.ui_canvas_range);
 			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
 			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
 			ClearSwap(rb.inst_mesh_render_buffer        ,tmp.inst_mesh_render_buffer        );//clear then swap the stuff back into rb
@@ -681,7 +681,7 @@ namespace idk
             result.ui_text_range.reserve(result.ui_text_range.size() + size);
             result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
             result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
-			result.ui_canvas_range.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+			//result.ui_canvas_range.reserve(result.ui_text_buffer.size() + size * avg_font_count);
             //result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
         }
 

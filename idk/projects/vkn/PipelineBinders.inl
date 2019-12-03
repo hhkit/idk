@@ -27,6 +27,11 @@ namespace idk::vkn
 		, f, args...);
 	}
 	template<typename ...Args>
+	inline bool CombinedBindings<Args...>::Skip(PipelineThingy& the_interface, const RenderObject& dc)
+	{
+ 		return (std::get<Args>(binders).Skip(the_interface, dc) | ...);
+	}
+	template<typename ...Args>
 	void CombinedBindings<Args...>::Bind(PipelineThingy& the_interface)
 	{
 		meta::for_each_tuple_element(binders, [](StandardBindings& binder, auto& the_interface)

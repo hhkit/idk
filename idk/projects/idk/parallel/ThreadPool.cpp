@@ -43,7 +43,7 @@ namespace idk::mt
 			elem.join();
 	}
 
-	static auto idle_threshold = std::chrono::microseconds{ 5 };
+	static auto idle_threshold = std::chrono::microseconds{ 2 };
 	thread_local std::chrono::time_point<std::chrono::high_resolution_clock> idle_start{};
 
 	void ThreadPool::ExecuteJob([[maybe_unused]] const int thid)  
