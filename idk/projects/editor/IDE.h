@@ -97,7 +97,8 @@ namespace idk
 		friend class IGE_LightLister;
 		friend class CMD_DeleteGameObject;
 		friend class CMD_CreateGameObject;
-		friend class CMD_CallCommandAgain;
+		friend class CMD_CollateCommands;
+		friend class CMD_SelectGameObject;
 		friend class CommandController;
 
 		unique_ptr<edt::I_Interface> _interface;

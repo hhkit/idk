@@ -2,7 +2,7 @@
 //@file		CommandList.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		16 SEPT 2019
+//@date		03 DEC 2019
 //@brief	
 
 /*
@@ -22,4 +22,5 @@ Contains all commands
 #include <editor/commands/CMD_DeleteComponent.h>
 #include <editor/commands/CMD_ModifyProperty.h>
 #include <editor/commands/CMD_InstantiatePrefab.h>
-#include <editor/commands/CMD_CallCommandAgain.h>
+#include <editor/commands/CMD_CollateCommands.h>
+#include <editor/commands/CMD_SelectGameObject.h>

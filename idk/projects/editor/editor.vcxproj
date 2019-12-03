@@ -274,11 +274,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="commands\CMD_AddBehavior.h" />
-    <ClInclude Include="commands\CMD_CallCommandAgain.h" />
+    <ClInclude Include="commands\CMD_CollateCommands.h" />
     <ClInclude Include="commands\CMD_DeleteComponent.h" />
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
     <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
     <ClInclude Include="commands\CMD_ModifyProperty.h" />
+    <ClInclude Include="commands\CMD_SelectGameObject.h" />
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
     <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="DragDropTypes.h" />
@@ -333,11 +334,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="commands\CMD_AddBehavior.cpp" />
-    <ClCompile Include="commands\CMD_CallCommandAgain.cpp" />
+    <ClCompile Include="commands\CMD_CollateCommands.cpp" />
     <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
     <ClCompile Include="commands\CMD_InstantiatePrefab.cpp" />
     <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
+    <ClCompile Include="commands\CMD_SelectGameObject.cpp" />
     <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="EditorInputs.cpp" />

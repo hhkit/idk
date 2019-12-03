@@ -355,7 +355,7 @@ namespace idk {
 						++execute_counter;
                     }
 
-					commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+					commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
                 }
             }
             ImGui::EndPopup();
@@ -410,7 +410,7 @@ namespace idk {
 			}
 			if (execute_counter > 0) {
 				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 			ImGui::EndPopup();
 		}
@@ -456,7 +456,7 @@ namespace idk {
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 		}
         if (game_object.scene == Scene::prefab)
             ImGuidk::PopDisabled();
@@ -676,7 +676,7 @@ namespace idk {
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			//Refresh the new matrix values
 			editor.RefreshSelectedMatrix();
 			hasChanged		= false;
@@ -1417,7 +1417,7 @@ namespace idk {
 					++execute_counter;
 				}
 				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 		}
 	}
@@ -1476,7 +1476,7 @@ namespace idk {
 				}
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			if (isTransformValuesEdited)
 				//Refresh the new matrix values
 				editor.RefreshSelectedMatrix();

@@ -126,9 +126,6 @@
     <ClInclude Include="widgets\DragRect.h">
       <Filter>widgets</Filter>
     </ClInclude>
-    <ClInclude Include="commands\CMD_CallCommandAgain.h">
-      <Filter>commands</Filter>
-    </ClInclude>
     <ClInclude Include="windows\IGE_HelpWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
@@ -155,6 +152,12 @@
     <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="windows\IGE_LightLister.h" />
     <ClInclude Include="widgets\IconCheckbox.h" />
+    <ClInclude Include="commands\CMD_CollateCommands.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\CMD_SelectGameObject.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -267,9 +270,6 @@
     <ClCompile Include="widgets\DragRect.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
-    <ClCompile Include="commands\CMD_CallCommandAgain.cpp">
-      <Filter>commands</Filter>
-    </ClCompile>
     <ClCompile Include="windows\IGE_HelpWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
@@ -290,6 +290,12 @@
     </ClCompile>
     <ClCompile Include="windows\IGE_LightLister.cpp" />
     <ClCompile Include="widgets\IconCheckbox.cpp" />
+    <ClCompile Include="commands\CMD_CollateCommands.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_SelectGameObject.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

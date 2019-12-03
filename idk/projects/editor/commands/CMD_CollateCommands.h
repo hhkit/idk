@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-//@file		CMD_CallCommandAgain.h
+//@file		CMD_CollateCommands.h
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
 //@date		18 NOV 2019
@@ -22,9 +22,9 @@
 
 namespace idk {
 
-	class CMD_CallCommandAgain : public ICommand { //serialize/deserialize use text.h
+	class CMD_CollateCommands : public ICommand { //serialize/deserialize use text.h
 	public:
-		CMD_CallCommandAgain(int counts); //Create empty on parented
+		CMD_CollateCommands(int counts); //Create empty on parented
 
 		virtual bool execute() override;
 

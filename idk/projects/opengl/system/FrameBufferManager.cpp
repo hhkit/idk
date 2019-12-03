@@ -290,6 +290,11 @@ namespace idk::ogl
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	GLuint FrameBufferManager::ID() const
+	{
+		return _fbo_id;
+	}
+
 	void FrameBufferManager::CheckFBStatus()
 	{
 		const auto fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

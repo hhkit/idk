@@ -20,7 +20,7 @@ namespace idk
         Registry recent{ "/idk/.recent" };
         string proj_name = recent.get("project");
 
-        if (proj_name.empty())
+        if (proj_name.empty() || !Core::GetSystem<FileSystem>().ExistsFull(proj_name))
         {
             const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
             auto proj = Core::GetSystem<Application>().OpenFileDialog(dialog);

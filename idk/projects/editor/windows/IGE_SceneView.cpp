@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		21 OCT 2019
+//@date		03 DEC 2019
 //@brief	
 
 /*
@@ -171,18 +171,18 @@ namespace idk {
 
 		ImVec2 currPos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
-		Core::GetSystem<GraphicsSystem>().enable_picking = ImGui::IsMouseDown(0);
+		//Core::GetSystem<GraphicsSystem>().enable_picking = ImGui::IsMouseDown(0);
 
 
 		//Raycast Selection
 		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
 		{
-			if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
-			{
-				auto ray = Core::GetSystem<ogl::Win32GraphicsSystem>().SelectObjViewport(GetMousePosInWindowNormalized());
-
-				LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
-			}
+			//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
+			//{
+			//	auto ray = Core::GetSystem<ogl::Win32GraphicsSystem>().SelectObjViewport(GetMousePosInWindowNormalized());
+			//
+			//	LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
+			//}
 			//Select gameobject here!
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
@@ -215,6 +215,7 @@ namespace idk {
 					}
 					if (!hasSelected) {
 						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
 						editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 					}
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
@@ -224,6 +225,7 @@ namespace idk {
 					//Select as normal
 					selected_gameObjects.clear();
 					selected_gameObjects.push_back(closestGameObject);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
 					editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
@@ -696,12 +698,16 @@ namespace idk {
 			if (is_being_modified) {
 				if (!ImGuizmo::IsUsing()) {
 					vector<mat4>& originalMatrix = editor.selected_matrix;
+					int execute_counter = 0;
 					for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
 						mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+						++execute_counter;
 					}
 					//Refresh the new matrix values
 					editor.RefreshSelectedMatrix();
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+
 
 					is_being_modified = false;
 				}

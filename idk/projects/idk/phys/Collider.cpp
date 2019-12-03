@@ -10,12 +10,13 @@ namespace idk
 	{
 		//if (!_rigidbody)
 		//{
-			auto search_go = GetGameObject();
-			while (search_go && !_rigidbody)
-			{
-				_rigidbody = search_go->GetComponent<RigidBody>();
-				search_go = search_go->Parent();
-			}
+		_rigidbody = {};
+		auto search_go = GetGameObject();
+		while (search_go && !_rigidbody)
+		{
+			_rigidbody = search_go->GetComponent<RigidBody>();
+			search_go = search_go->Parent();
+		}
 		//}
 		_static_cache = !_rigidbody;
 	}
