@@ -25,8 +25,9 @@ namespace idk
 		// rebuild scene graph
 		for (auto& elem : objs)
 		{
+			/*/
 			InsertObject(elem.GetHandle());
-			/*
+			/*/
 			auto key = elem.GetHandle();
 			const auto parent = elem.Parent();
 			assert(key);
@@ -37,7 +38,7 @@ namespace idk
 			}
 			else
 				sg_lookup.try_emplace(key, &scene_graphs.emplace_child(key));
-				*/
+			//*/
 		}
 
 		// we now have the rebuilt scene graph

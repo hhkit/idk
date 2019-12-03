@@ -24,6 +24,8 @@ namespace idk::win
 		Windows(HINSTANCE hInstance, int nCmdShow);
 		~Windows();
 		void PollEvents() override;
+		void Exec(string_view path, span<const char*> argv, bool wait) override;
+
 		int GetReturnVal();
 		void Init() override {}
 		ivec2 GetScreenSize() override;

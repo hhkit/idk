@@ -12,36 +12,38 @@ namespace idk
 		return T();
 	}
 	template<typename T, unsigned D>
-	constexpr tmat<T, D, D> scale(const tvec<T, D>& rhs)
+	constexpr tmat<T, D+1, D+1> scale(const tvec<T, D>& rhs)
 	{
-		tmat<T, D, D> retval;
+		tmat<T, D+1, D+1> retval;
 		for (auto [row, scale, n] : zip(retval, rhs, range<D>()))
 			row[n] = scale;
 		return retval;
 	}
 
 	template<typename T>
-	tmat<T, 3, 3> rotate(const tvec<T, 3> & axis, trad<T> angle)
+	tmat<T, 4, 4> rotate(const tvec<T, 3> & axis, trad<T> angle)
 	{
-		using ret_t = tmat<T, 3, 3>;
+		using ret_t = tmat<T, 4, 4>;
 		const auto n = axis.get_normalized();
 		const auto c = cos(angle);
 		const auto s = sin(angle);
 
 		const auto crosspdt = ret_t{
-			 0.f, -n.z,  n.y,
-			 n.z,  0.f, -n.x,
-			-n.y,  n.x,  0.f
+			 0.f, -n.z,  n.y, 0.f,
+			 n.z,  0.f, -n.x, 0.f,
+			-n.y,  n.x,  0.f, 0.f,
+			 0.f,  0.f,  0.f, 1.f
 		};
 		
 		const auto skew_symmetric = ret_t{
-			n.x * n.x,  n.x * n.y, n.x * n.z,
-			n.y * n.x,  n.y * n.y, n.y * n.z,
-			n.z * n.x,  n.z * n.y, n.z * n.z,
+			n.x * n.x,  n.x * n.y, n.x * n.z, 0.f,
+			n.y * n.x,  n.y * n.y, n.y * n.z, 0.f,
+			n.z * n.x,  n.z * n.y, n.z * n.z, 0.f,
+			0.f      ,  0.f      , 0.f      , 1.f
 		};
 
 		return c * ret_t{}
-		+ s * crosspdt
+		+s * crosspdt
 		+ (1 - c) * skew_symmetric;
 	}
 
@@ -107,11 +109,11 @@ namespace idk
 	}
 
 	template<typename T>
-	tmat<T, 3, 3> orient(const tvec<T, 3> & z_prime)
+	tmat<T, 4, 4> orient(const tvec<T, 3> & z_prime)
 	{
 		const auto axis = tvec<T, 3>{0, 0, 1}.cross(z_prime);
 		const auto angle = asin(axis.length());
-		return rotate(axis, angle);
+		return tmat<T, 4, 4>{rotate(axis, angle)};
 	}
 
 	template<typename T, unsigned D>

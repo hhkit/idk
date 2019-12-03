@@ -77,9 +77,9 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)compiler\</OutDir>
     <IntDir>$(SolutionDir)build\compiler\</IntDir>
-    <TargetName>idcompiler</TargetName>
+    <TargetName>idc</TargetName>
     <IncludePath>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(SolutionDir)Dep\lib;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -87,10 +87,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)compiler\</OutDir>
-    <IntDir>$(SolutionDir)build\compiler\</IntDir>
-    <TargetName>idcompiler</TargetName>
+    <IntDir>$(SolutionDir)build\compiler\$(Configuration)\</IntDir>
+    <TargetName>idcD</TargetName>
     <IncludePath>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(SolutionDir)Dep\lib;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -108,13 +108,14 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>core.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mt.lib;core.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
@@ -154,11 +155,12 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>core.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mt.lib;coreD.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy  /i /f /d /c /y "$(SolutionDir)dep\dll" "$(OutDir)"
@@ -192,7 +194,22 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="asset_compiler.cpp" />
+    <ClCompile Include="AssimpCompiler.cpp" />
+    <ClCompile Include="AssimpCompiler_helpers.cpp" />
+    <ClCompile Include="IAssetLoader.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="CompilerCore.cpp" />
+    <ClCompile Include="DDSCompiler.cpp" />
+    <ClCompile Include="TextureCompiler.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AssimpCompiler.h" />
+    <ClInclude Include="AssimpCompiler_helpers.h" />
+    <ClInclude Include="CompilerCore.h" />
+    <ClInclude Include="CompilerList.h" />
+    <ClInclude Include="DDSCompiler.h" />
+    <ClInclude Include="IAssetLoader.h" />
+    <ClInclude Include="TextureCompiler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
