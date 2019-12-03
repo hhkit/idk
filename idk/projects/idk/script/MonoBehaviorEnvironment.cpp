@@ -38,7 +38,7 @@ namespace idk::mono
 		mono_domain_set(_domain, true);
 		MonoImageOpenStatus status;
 		auto img = mono_image_open_from_data(assembly_data.data(), (uint32_t) assembly_data.size(), true, &status);
-		mono_assembly_setrootdir(Core::GetSystem<FileSystem>().GetExeDir().data());
+		mono_assembly_setrootdir((string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/engine_data").data());
 		_assembly = mono_assembly_load_from(img, full_path_to_game_dll.data(), &status);
 		Core::GetSystem<ScriptSystem>().Environment().Image();
 

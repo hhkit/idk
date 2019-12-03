@@ -766,6 +766,17 @@ namespace idk::ogl
 			fb_man.ResetFramebuffer();
 		}
 		
+		if (&Core::GetSystem<IEditor>() == nullptr)
+		{
+			auto outbuf_sz = RscHandle<OpenGLRenderTarget>{}->size;
+			auto screen_sz = Core::GetSystem<Application>().GetScreenSize();
+			fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{});
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_man.ID());
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glViewport(0, 0, screen_sz.x, screen_sz.y);
+			glBlitFramebuffer(0, 0, outbuf_sz.x, outbuf_sz.y, 0, 0, screen_sz.x, screen_sz.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	}
 
 	void OpenGLState::ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle)

@@ -28,6 +28,7 @@ namespace idk::ogl
 		void SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<rect>& viewport = std::nullopt);
 		void SetRenderTarget(RscHandle<OpenGLFrameBuffer> target , const std::optional<rect>& viewport = std::nullopt, bool clear=true);
 		void ResetFramebuffer();
+		GLuint ID() const;
 		
 		RscHandle<OpenGLTexture> cBufferPickingTexture;
 		RscHandle<OpenGLFrameBuffer> pickingBuffer;

@@ -153,7 +153,7 @@ namespace idk::mono
 #define BIND_START(LABEL, RET, ...)\
 	{ using Ret = Retval<RET>::T;\
 	mono_add_internal_call(LABEL, decay([] (__VA_ARGS__) -> Ret{\
-	using idk::quat; using idk::vec4;\
+	using idk::quat; using idk::vec4; using idk::color;\
 	try
 
 #define BIND_END() \

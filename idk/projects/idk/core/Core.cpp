@@ -48,12 +48,22 @@ namespace idk
 		}
 	}
 
-	void Core::Setup()
+	void Core::Init()
 	{
 		_system_manager.InitSystems();
-        GetResourceManager().RegisterFactory<PrefabFactory>();
+	}
+
+	void Core::LateInit()
+	{
+		GetResourceManager().RegisterFactory<PrefabFactory>();
 		_system_manager.LateInitSystems();
 		_setup = true;
+	}
+
+	void Core::Setup()
+	{
+		Init();
+		LateInit();
 	}
 
 	void Core::Run()

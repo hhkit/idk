@@ -84,9 +84,9 @@ namespace idk::mono
 					LOG_TO(LogPool::MONO, message);
 			}
 		, nullptr);
-		if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/idk.dll"))
+		if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/engine_data/idk.dll"))
 		{
-			main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/idk.dll");
+			main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/engine_data/idk.dll");
 			main_environment->Init();
 		}
 	}

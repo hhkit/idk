@@ -113,7 +113,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)engine\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\opengl\$(Configuration)\</IntDir>
     <TargetName>idk_opengl</TargetName>
     <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>

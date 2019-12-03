@@ -24,6 +24,8 @@ namespace idk
 
 		Core();
 		~Core();
+		void Init();
+		void LateInit();
 		void Setup();
 		void Run();
 	private:
