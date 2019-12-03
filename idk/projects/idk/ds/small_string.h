@@ -40,9 +40,9 @@ namespace idk
 		~small_string();
 
 		small_string(const small_string&);
-		small_string(small_string&&);
+		small_string(small_string&&) noexcept;
 		small_string& operator=(const small_string&);
-		small_string& operator=(small_string&&);
+		small_string& operator=(small_string&&) noexcept;
 
 		allocator_type get_allocator() const;
 
@@ -88,11 +88,11 @@ namespace idk
 		size_type find_first_not_of(const CharT* cstr, size_type pos = 0) const;
 		size_type find_first_not_of(CharT c, size_type pos = 0) const;
 		size_type find_last_of(const CharT* cstr, size_type pos, size_type count) const;
-		size_type find_last_of(const CharT* cstr, size_type pos = 0) const;
-		size_type find_last_of(CharT c, size_type pos = 0) const;
+		size_type find_last_of(const CharT* cstr, size_type pos = npos) const;
+		size_type find_last_of(CharT c, size_type pos = npos) const;
 		size_type find_last_not_of(const CharT* cstr, size_type pos, size_type count) const;
-		size_type find_last_not_of(const CharT* cstr, size_type pos = 0) const;
-		size_type find_last_not_of(CharT c, size_type pos = 0) const;
+		size_type find_last_not_of(const CharT* cstr, size_type pos = npos) const;
+		size_type find_last_not_of(CharT c, size_type pos = npos) const;
 
 		// iterators
 		iterator       begin();

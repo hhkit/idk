@@ -151,7 +151,7 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	small_string<CharT, Traits, Allocator>::small_string(small_string&& other)
+	small_string<CharT, Traits, Allocator>::small_string(small_string&& other) noexcept
 		: _rep{ other._rep }
 	{
 		// flag it as "using sso" so ptr is not deallocated
@@ -167,7 +167,7 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator=(small_string&& other)
+	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator=(small_string&& other) noexcept
 	{
 		std::swap(_rep, other._rep);
 		return *this;
@@ -496,16 +496,18 @@ namespace idk
 	auto small_string<CharT, Traits, Allocator>::find_last_of(const CharT* cstr, size_type pos, size_type count) const -> size_type
 	{
 		const auto _data = data();
-		const auto sz = size();
-		if (count == 0)
-			return npos;
-		if (pos > sz)
-			pos = sz - 1;
-		do
-		{
-			if (traits_type::find(cstr, sz, _data[pos]))
-				return pos;
-		} while (pos-- > 0);
+		auto sz = size();
+        if (sz && count)
+        {
+            if (--sz > pos)
+                sz = pos;
+            do
+            {
+                if (traits_type::find(cstr, count, _data[sz]))
+                    return sz;
+            }
+            while (sz-- != 0);
+        }
 		return npos;
 	}
 

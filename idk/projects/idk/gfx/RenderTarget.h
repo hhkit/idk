@@ -16,7 +16,7 @@ namespace idk
 
 	class RenderTarget
 		: public Resource<RenderTarget>
-		, public virtual Saveable<RenderTarget, false_type>
+		, public Saveable<RenderTarget, false_type>
 	{
 	public:
 		using Saveable_t = Saveable<RenderTarget, false_type>;

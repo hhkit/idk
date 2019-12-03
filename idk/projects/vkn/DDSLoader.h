@@ -58,7 +58,7 @@ namespace idk::vkn
 	struct DdsFile
 	{
 		DdsFile() =default;
-		DdsFile(std::string file) :_memory{ std::move(file) }, _view{ *_memory }, file{ r_cast<const DdsFileInternal*>(_view.data()) }{}
+		DdsFile(string file) :_memory{ std::move(file) }, _view{ *_memory }, file{ r_cast<const DdsFileInternal*>(_view.data()) }{}
 		DdsFile(string_view file)noexcept :_view{ file }, file{ r_cast<const DdsFileInternal*>(_view.data()) }{}
 
 		DdsFile(const DdsFile& file) = default;

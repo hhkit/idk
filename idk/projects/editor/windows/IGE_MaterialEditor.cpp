@@ -628,8 +628,8 @@ namespace idk
             fs::path path;
             // build path
             for (auto iter = stack.begin() + 1; iter != stack.end(); ++iter)
-                path /= (*iter)->name;
-            path /= item->name;
+                path /= (*iter)->name.sv();
+            path /= item->name.sv();
 
             return path.string();
         }

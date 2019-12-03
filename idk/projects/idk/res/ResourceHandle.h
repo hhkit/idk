@@ -1,4 +1,5 @@
 #pragma once
+#include <math/comparable.h>
 #include <res/Guid.h>
 #include <res/ResourceUtils.h>
 
@@ -15,6 +16,7 @@ namespace idk
 
 	template<typename Res>
 	struct RscHandle
+        : comparable<RscHandle<Res>>
 	{
 		using Resource = Res;
 
@@ -39,8 +41,7 @@ namespace idk
 		Res& operator*() const;
 		Res* operator->() const;
 
-		bool operator==(const RscHandle& rhs) const;
-		bool operator!=(const RscHandle& rhs) const;
+        bool operator<(const RscHandle& rhs) const;
 	};
 }
 

@@ -22,15 +22,11 @@ namespace idk
 		return &Core::GetResourceManager().Get(*this);
 	}
 	template<typename Res>
-	inline bool RscHandle<Res>::operator==(const RscHandle& rhs) const
+	inline bool RscHandle<Res>::operator<(const RscHandle& rhs) const
 	{
-		return guid == rhs.guid;
+		return guid < rhs.guid;
 	}
-	template<typename Res>
-	inline bool RscHandle<Res>::operator!=(const RscHandle& rhs) const
-	{
-		return !operator==(rhs);
-	}
+
 	template<typename Res>
 	inline void RscHandle<Res>::Set(const idk::Resource<Res>& g)
 	{
