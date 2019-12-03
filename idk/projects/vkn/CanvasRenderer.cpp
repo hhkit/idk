@@ -35,8 +35,8 @@ namespace idk::vkn
 			test
 		};
 	}
-//#pragma optimize("",off)
-	void CanvasRenderer::DrawCanvas(PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
+#pragma optimize("",off)
+	void CanvasRenderer::DrawCanvas(size_t& canvas_count,PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
 	{
 		auto& shared_state = *state.shared_gfx_state;
 
@@ -50,6 +50,7 @@ namespace idk::vkn
 			auto& font_render_info = shared_state.ui_text_buffer_pos;
 			auto& font_uv_info = shared_state.ui_text_buffer_uv;
 			auto& font_raw_data = *shared_state.ui_text_range;
+			auto& canvas_range_data = *shared_state.ui_canvas_range;
 			canvas_ro_inst.clear();
 			canvas_ro_inst.reserve(canvas_data.size());
 
@@ -57,12 +58,13 @@ namespace idk::vkn
 			canvas_ro_inst2.reserve(font_render_info.size());
 
 			//size_t i = state.range.inst_font_begin;
-			auto i = 0;
-			
+			size_t accum_size = 0;
+			//auto& canvas_range = canvas_range_data[canvas_count];
+			//auto i = canvas_range.inst_font_begin;
+			auto& i = canvas_count;
 			for (auto& ui_canvas : canvas_data)
 			{
 				RenderObject canvas_ui_ro;
-				
 				std::visit([&](const auto& data)
 				{
 					using T = std::decay_t<decltype(data)>;
@@ -89,15 +91,16 @@ namespace idk::vkn
 						canvas_ui_ro.material_instance = ui_canvas.material;
 						auto& elem = font_render_info[i];
 						auto& uv = font_uv_info[i];
-						auto& range = font_raw_data[i];
+						auto& range = canvas_range_data[i];
+						auto& v_size = font_raw_data[i];
 						//TODO bind materials
 						vert_bind.BindCanvas(the_interface, data, ui_canvas);
-
+						
 						//the_interface.BindMeshBuffers(f_ro);
 						the_interface.BindAttrib(0, elem.buffer(), 0);
 						the_interface.BindAttrib(1, uv.buffer()  , 0);
 
-						the_interface.SetVertexCount(s_cast<uint32_t>(range.num_elems));
+						the_interface.SetVertexCount(s_cast<uint32_t>(v_size.num_elems));
 
 						the_interface.FinalizeDrawCall(canvas_ro_inst2.emplace_back(std::move(canvas_ui_ro)));
 

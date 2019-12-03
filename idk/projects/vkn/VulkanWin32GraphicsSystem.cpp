@@ -234,6 +234,7 @@ namespace idk::vkn
 		shared_graphics_state.ui_text_data = &curr_buffer.ui_text_buffer;
 		shared_graphics_state.ui_text_range = &curr_buffer.ui_text_range;
 		shared_graphics_state.total_num_of_text = curr_buffer.ui_total_num_of_text;
+		shared_graphics_state.ui_canvas_range = &curr_buffer.ui_canvas_range;
 
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
@@ -254,7 +255,7 @@ namespace idk::vkn
 		PostRenderData post_render_data;
 		post_render_data.shared_gfx_state = &shared_graphics_state;
 		post_render_data.cameras = &curr_buffer.camera;
-		post_render_data.canvas_render_range = &curr_buffer.canvas_render_range;
+		//post_render_data.canvas_render_range = &curr_buffer.canvas_render_range;
 		//post_render_data.Init();
 
 		post_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
