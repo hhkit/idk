@@ -45,4 +45,10 @@ buffer_desc buffer_desc::Process(uint32_t location_offset) const
 	}
 	return transformed;
 }
+string buffer_desc::GenString() const
+{
+	string result = string{ r_cast<const char*>(&binding),sizeof(binding) };
+	result.append(r_cast<const char*>(attributes.data()), sizeof(attributes[0]) * attributes.size());
+	return result;
+}
 }

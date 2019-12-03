@@ -49,6 +49,7 @@ namespace idk {
 		friend class IDE;
 		friend class CMD_DeleteGameObject;
 		friend class CMD_DeleteComponent;
+		friend class CMD_CollateCommands; //When this is called, it will remove from undoStack, collates repeated commands into its own CMD and push itself into the undoStack
 
 		//FlushCommand gathers all command call and this pollstack executes all at once at the end of IDE frame.
 		void FlushCommands();
@@ -67,8 +68,9 @@ namespace idk {
 
 		std::queue<unique_ptr<ICommand>> pollStack{}; //ExecuteCommand gathers all command call and this pollstack executes all at once at the end of IDE frame.
 
-		size_t undoLimit			{ 512 }; //By default it is 512
+		size_t undoLimit			{ 1024 }; //By default it is 1024
 
+;
 	};
 
 }

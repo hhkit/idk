@@ -14,12 +14,17 @@ namespace idk
 		real  intensity          { 1.f } ;
 		color light_color        { 1.f } ;
 		real  attenuation_radius { 1.f } ;
-		bool  use_inv_sq_atten   { true };
+		bool  use_inv_sq_atten{ true };
 
 		RscHandle<FrameBuffer> light_map;
 
 		const void* unique_id() const noexcept;
 		RscHandle<FrameBuffer> InitShadowMap();
+		
+		real GetAttenuationRadius() const { return attenuation_radius; }
+		void SetAttenuationRadius(const real& val) { attenuation_radius = val; }
+		bool GetInvSqAtten() const { return use_inv_sq_atten; }
+		void SetInvSqAtten(const bool& val) { use_inv_sq_atten = val; }
 	};
 
 	struct DirectionalLight
@@ -50,6 +55,11 @@ namespace idk
 		RscHandle<FrameBuffer> light_map;
 		RscHandle<FrameBuffer> InitShadowMap();
 		const void* unique_id()const noexcept;
+
+		real GetAttenuationRadius() const { return attenuation_radius; }
+		void SetAttenuationRadius(const real& val) { attenuation_radius = val; }
+		bool GetInvSqAtten() const { return use_inv_sq_atten; }
+		void SetInvSqAtten(const bool& val) { use_inv_sq_atten = val; }
 	};
 
 	bool NeedShadowMap(const PointLight&);

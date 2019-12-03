@@ -9,6 +9,9 @@
 #include <sstream>
 //#include <glslang/SpvTools.h>
 #include <shaderc/shaderc.hpp>
+#include <gfx/ShaderIncluder.h>
+#include <file/FileSystem.h>
+#include <core/core.h>
 namespace idk::vkn
 {
 	constexpr auto replacer = R"(
@@ -81,6 +84,9 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 {
 	string val = static_cast<string>(glsl);
 	string shader_code = val;
+
+	shader_code = ProcessIncludes(shader_code);
+
 	auto version_pos = shader_code.find("#version");
 	auto version_end = shader_code.find("\n", version_pos);
 
@@ -133,8 +139,31 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 		if (result.GetCompilationStatus() == shaderc_compilation_status::shaderc_compilation_status_success)
 			spirv_out = vector<unsigned int>{ result.begin(),result.end() };
 		else
+		{
 			DoNothing();
-		hlp::cerr() << result.GetErrorMessage() << std::endl;
+			string filename = "/"+string{ code_id }+std::to_string(string_hash(glsl));
+			auto err_m = result.GetErrorMessage(); 
+			auto err_msg = err_m.c_str();
+			LOG_TO(LogPool::GFX, "%s", err_msg);
+			try
+			{
+				auto path = string{ Core::GetSystem<FileSystem>().GetAppDataDir() } +"/idk";
+				if (!std::filesystem::exists(std::filesystem::path{ path }))
+					std::filesystem::create_directory(path);
+				path += "/shader_err";
+				if (!std::filesystem::exists(std::filesystem::path{ path }))
+					std::filesystem::create_directory(path);
+				auto out_file = path+filename;
+				std::ofstream out{ out_file };
+				out << val;
+				out << " /* Error Message: \n" << err_msg << "\n*/";
+				out.close();
+			}
+			catch (...)
+			{
+				LOG_TO(LogPool::GFX, "Failed to output glsl [%s] that generated the above error.", filename.c_str());
+			}
+		}
 	}
 	return spirv_out;
 }

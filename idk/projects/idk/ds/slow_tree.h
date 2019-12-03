@@ -47,7 +47,7 @@ namespace idk
 		slow_tree& emplace_child(Args&& ...);
 
 		bool pop_child(const T& removeme);
-		template<typename Pred> int pop_child(Pred&& predicate);
+		template<typename Pred, typename = sfinae<std::is_invocable_v<Pred, T>>> int pop_child(Pred&& predicate);
 	private:
 		std::forward_list<slow_tree> _children;
 

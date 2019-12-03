@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <opengl/resource/OpenGLCubemap.h>
 #include <opengl/resource/OpenGLTexture.h>
-#include <gfx/Viewport.h>
+#include <math/rect.h>
 
 namespace idk
 {
@@ -24,10 +24,11 @@ namespace idk::ogl
 		~FrameBufferManager();
 
 		void SetRenderTarget(const RscHandle<OpenGLCubemap>& target, bool for_convolution = false);
-		void SetRenderTarget(RscHandle<OpenGLTexture> target     , const std::optional<Viewport>& viewport = std::nullopt, bool clear=true);
-		void SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<Viewport>& viewport = std::nullopt);
-		void SetRenderTarget(RscHandle<OpenGLFrameBuffer> target , const std::optional<Viewport>& viewport = std::nullopt, bool clear=true);
+		void SetRenderTarget(RscHandle<OpenGLTexture> target     , const std::optional<rect>& viewport = std::nullopt, bool clear=true);
+		void SetRenderTarget(RscHandle<OpenGLRenderTarget> target, const std::optional<rect>& viewport = std::nullopt);
+		void SetRenderTarget(RscHandle<OpenGLFrameBuffer> target , const std::optional<rect>& viewport = std::nullopt, bool clear=true);
 		void ResetFramebuffer();
+		GLuint ID() const;
 		
 		RscHandle<OpenGLTexture> cBufferPickingTexture;
 		RscHandle<OpenGLFrameBuffer> pickingBuffer;

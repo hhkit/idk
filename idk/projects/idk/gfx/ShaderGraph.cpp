@@ -220,7 +220,6 @@ namespace idk::shadergraph
     }
 
 
-
 	static UniformInstanceValue to_uniform_instance_value(const Parameter& param)
 	{
 		switch (param.type)
@@ -318,9 +317,10 @@ namespace idk::shadergraph
         }
 
 		auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
+		auto& program = *_shader_program;
+		program.Name(string{ this->Name() }+"_" + string{ GetTemplate()->Name() });
 		
-		_shader_program->Name(GetTemplate()->Name());
-		_shader_program->BuildShader(ShaderStage::Fragment, shader_template);
+		program.BuildShader(ShaderStage::Fragment, shader_template);
     }
 
 }

@@ -4,6 +4,7 @@
 #include <opengl/program/Program.h>
 #include <opengl/program/PipelineProgram.h>
 #include <opengl/system/FrameBufferManager.h>
+#include <opengl/resource/OpenGLBuffer.h>
 
 #include <opengl/PixelData.h>
 
@@ -31,8 +32,8 @@ namespace idk::ogl
 		PixelData PickData(const vec2& pos);
 		void IsPicking();
 
+		void LoadShaderImpl();
 	private:
-
 		Win32GraphicsSystem* sys{};
 		// variables
 		PipelineProgram          pipeline;
@@ -58,6 +59,12 @@ namespace idk::ogl
 		GLuint material_texture_uniforms = 0;
 		CameraData curr_cam;
 		span<LightData> curr_lights;
+        OpenGLBuffer particle_buf{ GL_ARRAY_BUFFER, {
+            { vtx::Attrib::ParticlePosition, sizeof(ParticleObj), offsetof(ParticleObj, position) },
+            { vtx::Attrib::ParticleRotation, sizeof(ParticleObj), offsetof(ParticleObj, rotation) },
+            { vtx::Attrib::ParticleSize, sizeof(ParticleObj), offsetof(ParticleObj, size) },
+            { vtx::Attrib::Color, sizeof(ParticleObj), offsetof(ParticleObj, color) }
+        } };
 
 		void BindMaterial(const RscHandle<Material>& mat);
 		void PushMaterial(const RscHandle<Material>& mat);

@@ -5,7 +5,9 @@
 #include <gfx/vertex_descriptor.h>
 #include <gfx/pipeline_config.h>
 #include <gfx/CubeMap.h>
-#include <gfx/Viewport.h>
+#include <math/rect.h>
+#include <gfx/FontData.h>
+#include <common/LayerMask.h>
 
 namespace idk
 {
@@ -35,8 +37,14 @@ namespace idk
 		//binding,attrib
 		const renderer_attributes* renderer_req;
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
-		shared_ptr<pipeline_config> config{};
+		shared_ptr<const pipeline_config> config{};
+		LayerMask layer_mask{ 0xFFFFFFFF };
 	};
+	inline LayerMask layer_to_mask(char mask)
+	{
+		return LayerMask{ 1ui32 << mask };
+	}
+
 	//template<typename InstancedData>
 	struct GenericInstancedRenderObjects :RenderObject
 	{
@@ -92,20 +100,17 @@ namespace idk
 
 	struct CameraData
 	{
-		using ClearData_t =CameraClear;//variant<DontClear, vec4, RscHandle<CubeMap>>;
 		GenericHandle obj_id{};
-		bool is_scene_camera = false;
-		unsigned  culling_flags = 0xFFFFFFFF;
+		LayerMask culling_flags{ 0xFFFFFFFF };
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
 		RscHandle<RenderTarget> render_target{};
-		bool overlay_debug_draw{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
 		bool is_shadow = false;
-		ClearData_t clear_data;
+        CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
-		Viewport viewport;
+		rect viewport;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 
@@ -121,4 +126,69 @@ namespace idk
         vector<ParticleObj> particles;
         RscHandle<MaterialInstance> material_instance;
     };
+	struct ParticleRange
+	{
+		RscHandle<MaterialInstance> material_instance;
+		size_t elem_offset;
+		size_t num_elems;
+	};
+
+    struct FontRenderData
+    {
+        vector<FontPoint> coords;
+        RscHandle<FontAtlas> atlas;
+        color color;
+        mat4 transform;
+    };
+
+	struct FontRange
+	{
+		size_t elem_offset;
+		size_t num_elems;
+	};
+
+    struct ImageData
+    {
+        RscHandle<Texture> texture;
+    };
+    struct TextData
+    {
+        vector<FontPoint> coords;
+        RscHandle<FontAtlas> atlas;
+    };
+	struct UIAttriBlock
+	{
+		vector<vec2> pos;
+		vector<vec2> uv;
+	};
+
+	struct UITextRange
+	{
+		size_t elem_offset;
+		size_t num_elems;
+	};
+    struct UIRenderObject
+    {
+        mat4 transform;
+        color color;
+        RscHandle<MaterialInstance> material;
+        variant<ImageData, TextData> data;
+        unsigned depth; // in scene graph
+    };
+
+	struct UIRenderObjectWithCanvas
+	{
+		vector<UIRenderObject>  ui_ro;
+		RscHandle<RenderTarget> render_target;
+		size_t num_of_text{ 0 };
+	};
+
+	struct alignas(32) UIBlockInfo {
+		vec4 color{};
+		size_t is_font { 0 };
+		size_t is_font2{ 0 };
+	};
+
+
+
 }

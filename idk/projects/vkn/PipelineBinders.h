@@ -35,6 +35,7 @@ namespace idk
 
 		struct StandardBindings
 		{
+			virtual bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) { return false; }
 			//Stuff that should be bound at the start, before the renderobject/animated renderobject loop.
 			virtual void Bind(PipelineThingy& the_interface);
 			//Stuff that needs to be bound with every renderobject/animated renderobject
@@ -47,6 +48,15 @@ namespace idk
 			virtual void Bind(PipelineThingy& the_interface, const AnimatedRenderObject& dc);
 			//Stuff that needs to be bound only for animated renderobject.
 			virtual void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc);
+
+			//Stuff that needs to be bound only for font renderobject
+			virtual void BindFont(PipelineThingy& the_interface, const FontRenderData& dc);
+		
+			//Stuff that needs to be bound only for canvas renderobject
+			virtual void BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one);
+			virtual void BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one);
+
+		
 		};
 
 		//Standard binding for vertex stuff
@@ -65,6 +75,46 @@ namespace idk
 			void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc)override;
 
 		};
+
+		struct ParticleVertexBindings : StandardBindings
+		{
+			//const GraphicsState* _state;
+			//const GraphicsState& State();
+			mat4 view_trf, proj_trf;
+			void SetState(const GraphicsState& vstate);
+			void SetState(const CameraData& camera);
+
+			void Bind(PipelineThingy& the_interface)override;
+
+		};
+		struct FontVertexBindings : StandardBindings
+		{
+			//const GraphicsState* _state;
+			//const GraphicsState& State();
+			mat4 view_trf, proj_trf, obj_trf;
+			vec4 color;
+			void SetState(const GraphicsState& vstate);
+			void SetState(const CameraData& camera);
+
+			void Bind(PipelineThingy& the_interface)override;
+			void BindFont(PipelineThingy& the_interface, const FontRenderData& dc)override;
+
+
+		};
+
+		struct CanvasVertexBindings : StandardBindings
+		{
+			//const GraphicsState* _state;
+			//const GraphicsState& State();
+			mat4 view_trf, proj_trf, obj_trf;
+			vec4 color;
+			//void SetState(const PostRenderData& vstate);
+			void SetState(const CameraData& camera);
+
+			void Bind(PipelineThingy& the_interface)override;
+			void BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one)override;
+			void BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one)override;
+		};
 		struct PbrFwdBindings : StandardBindings
 		{
 			const GraphicsState* _state;
@@ -72,6 +122,11 @@ namespace idk
 			const GraphicsState& State();
 			string light_block;
 			mat4 view_trf, pbr_trf, proj_trf;
+			bool rebind_light = false;
+
+			std::optional<std::pair<size_t, size_t>> light_range;
+
+			vector<RscHandle<Texture>> shadow_maps;
 
 			string                     pbr_cube_map_names[PbrCubeMapVarsInfo::size()];
 			vector<RscHandle<CubeMap>> pbr_cube_maps;
@@ -107,6 +162,7 @@ namespace idk
 		{
 			const GraphicsState* _state;
 			const GraphicsState& State() { return *_state; }
+			RscHandle<MaterialInstance> prev_material_inst{};
 			void SetState(const GraphicsState& vstate);
 
 			//Assumes that the material is valid.
@@ -120,6 +176,7 @@ namespace idk
 		struct CombinedBindings :StandardBindings
 		{
 			std::tuple<Args...> binders;
+			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override { return (std::get<Args>(binders).Skip(the_interface,dc) | ...); }
 			//for each binder, execute f(binder,FArgs...) if cond<decltype(binder)> is true.
 			template<template<typename...>typename cond = meta::always_true_va, typename Fn, typename ...FArgs >
 			void for_each_binder(Fn&& f, FArgs& ...args);

@@ -11,8 +11,10 @@
 #include <gfx/MaterialInstance.h>
 
 #include <vkn/VknCubemap.h>
+#include <vkn/VknFontAtlas.h>
 
 #include <vkn/utils/utils.inl>
+#include <vkn/VknFrameBuffer.h>
 
 namespace idk::vkn
 {
@@ -57,6 +59,12 @@ namespace idk::vkn
 	}
 
 	void StandardBindings::BindAni(PipelineThingy& , const AnimatedRenderObject& ) {}
+
+	void StandardBindings::BindFont(PipelineThingy&, const FontRenderData&) {}
+
+	void StandardBindings::BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one) {}
+	void StandardBindings::BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one) {}
+
 
 	//const GraphicsState& StandardVertexBindings::State() { return *_state; }
 
@@ -109,7 +117,24 @@ namespace idk::vkn
 		_state = &vstate;
 		auto& state = State();
 		cam = state.camera;
-		light_block = PrepareLightBlock(cam, *state.lights);
+		auto& all_lights = *state.lights;
+		vector<LightData> lights;
+		size_t i = 0,end = vstate.active_lights.size();
+		if (light_range)
+		{
+			auto& [start, _end] = *light_range;
+			i = start;
+			end = _end;
+		}
+
+		for (;i<end;++i)
+		{
+			auto active_index = vstate.active_lights[i];
+			auto& light = all_lights[active_index];
+			lights.emplace_back(light);
+			shadow_maps.emplace_back(light.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+		}
+		light_block = PrepareLightBlock(cam, lights);
 		view_trf = cam.view_matrix;
 		pbr_trf = view_trf.inverse();
 		LoadStuff(vstate);
@@ -131,11 +156,11 @@ namespace idk::vkn
 		vector<RscHandle<CubeMap>> cube_maps[PbrCubeMapVarsInfo::size()] = {};
 		//TODO: actually bind something.
 		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eIrradiance>()] = {
-			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraClear,RscHandle<CubeMap>>::value)
 			? RscHandle<CubeMap>{std::get<RscHandle<CubeMap>>(vstate.camera.clear_data).as<VknCubemap>().GetConvoluted() } : RscHandle <CubeMap>{}
 		};
 		cube_maps[PbrCubeMapVarsInfo::map< PbrCubeMapVars::eEnvironmentProbe>()] = {
-			(vstate.camera.clear_data.index() == meta::IndexOf<CameraData::ClearData_t,RscHandle<CubeMap>>::value)
+			(vstate.camera.clear_data.index() == meta::IndexOf<CameraClear,RscHandle<CubeMap>>::value)
 			? std::get<RscHandle<CubeMap>>(vstate.camera.clear_data) : RscHandle < CubeMap>{}
 		};
 		AddCubeMaps(PbrCubeMapVars::eIrradiance, get_span(cube_maps[PbrCubeMapVarsInfo::map(PbrCubeMapVars::eIrradiance)]));
@@ -193,8 +218,8 @@ namespace idk::vkn
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
 	{
 		auto& state = State();
-		the_interface.BindUniformBuffer("LightBlock", 0, light_block);//skip if pbr is already bound(not per instance)
-		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf);//skip if pbr is already bound(not per instance)
+		the_interface.BindUniformBuffer("LightBlock", 0, light_block,!rebind_light);//skip if pbr is already bound(not per instance)
+		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
 
 		{
 			uint32_t i = 0;
@@ -202,17 +227,18 @@ namespace idk::vkn
 			{
 				//Make sure that it's there.
 				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
-				the_interface.BindSampler("shadow_maps", 0, tex);
+				the_interface.BindSampler("shadow_maps", 0, tex,true);
 			}
 			else
 			{
 				//Bind the shadow maps
-				for (auto& shadow_map : state.shadow_maps_2d)
+				for (auto& shadow_map : shadow_maps)
 				{
+					
 					auto& sm_uni = shadow_map;
 					{
 						auto& depth_tex = sm_uni.as<VknTexture>();
-						the_interface.BindSampler("shadow_maps", i++, depth_tex);
+						the_interface.BindSampler("shadow_maps", i++, depth_tex, true);
 					}
 				}
 			}
@@ -249,42 +275,157 @@ namespace idk::vkn
 		auto& mat = *mat_inst.material;
 		the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
 	}
-
+//#pragma optimize("",off)
 	void StandardMaterialBindings::SetState(const GraphicsState& vstate) {
 		_state = &vstate;
 		State();
 	}
 
+//#pragma optimize("",off)
 	//Assumes that the material is valid.
-
 	void StandardMaterialBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
 		//Bind the material uniforms
 		{
-			auto& mat_inst = *dc.material_instance;
-			[[maybe_unused]]auto& mat = *mat_inst.material;
-			auto mat_cache = mat_inst.get_cache();
-			for (auto itr = mat_cache.uniforms.begin(); itr != mat_cache.uniforms.end(); ++itr)
+			if (dc.material_instance != prev_material_inst)
 			{
-				if (mat_cache.IsUniformBlock(itr))
+				prev_material_inst = dc.material_instance;
+				auto mat = _state->material_instances.find(dc.material_instance);
+				auto& mat_inst = mat->second;
+				//[[maybe_unused]]auto& mat = *mat_inst.material;
+				for (auto itr = mat_inst.ubo_table.begin(); itr != mat_inst.ubo_table.end(); ++itr)
 				{
-					the_interface.BindUniformBuffer(itr->first, 0, mat_cache.GetUniformBlock(itr));
+					the_interface.BindUniformBuffer(itr->first, 0, itr->second);
 				}
-				else if (mat_cache.IsImageBlock(itr))
+				for (auto& [name, tex_array] : mat_inst.tex_table)
 				{
-					auto img_block = mat_cache.GetImageBlock(itr);
 					uint32_t i = 0;
-					for (auto& img : img_block)
+					for (auto& img : tex_array)
 					{
-						the_interface.BindSampler(itr->first.substr(0, itr->first.find_first_of('[')), i++, img.as<VknTexture>());
+						the_interface.BindSampler(name, i++, img.as<VknTexture>());
 					}
 				}
+
 			}
 		}
 	}
 
 	void StandardMaterialBindings::BindAni(PipelineThingy& , const AnimatedRenderObject& )
 	{
+	}
+
+	void ParticleVertexBindings::SetState(const GraphicsState& vstate)
+	{
+		auto& cam = vstate.camera;
+		SetState(cam);
+	}
+
+	void ParticleVertexBindings::SetState(const CameraData& cam)
+	{
+		view_trf = cam.view_matrix;
+		proj_trf = cam.projection_matrix;
+	}
+
+	void ParticleVertexBindings::Bind(PipelineThingy& the_interface)
+	{
+		//map back into z: (0,1)
+		mat4 projection_trf = mat4{ 1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+							0,0,0,1
+		} * 
+			proj_trf;//map back into z: (0,1)
+		mat4 block[] = { projection_trf,view_trf };
+		the_interface.BindUniformBuffer("CameraBlock", 0,block);
+	}
+
+	void FontVertexBindings::SetState(const GraphicsState& vstate)
+	{
+		auto& cam = vstate.camera;
+		SetState(cam);
+	}
+
+	void FontVertexBindings::SetState(const CameraData& cam)
+	{
+		view_trf = cam.view_matrix;
+		proj_trf = cam.projection_matrix;
+	}
+
+	void FontVertexBindings::Bind(PipelineThingy& the_interface)
+	{
+		//map back into z: (0,1)
+		mat4 projection_trf = mat4{ 1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+							0,0,0,1
+		}*proj_trf;//map back into z: (0,1)
+		mat4 block[] = { projection_trf,view_trf };
+		the_interface.BindUniformBuffer("CameraBlock", 0, block);
+	}
+
+	void FontVertexBindings::BindFont(PipelineThingy& the_interface, const FontRenderData& dc)
+	{
+		////map back into z: (0,1)
+		//mat4 projection_trf = mat4{ 1,0,0,0,
+		//					0,1,0,0,
+		//					0,0,0.5f,0.5f,
+		//					0,0,0,1
+		//}*proj_trf;//map back into z: (0,1)
+		//mat4 block[] = { projection_trf,view_trf };
+		//the_interface.BindUniformBuffer("CameraBlock", 0, block);
+
+		mat4 obj_trf = view_trf * dc.transform;
+		mat4 obj_ivt = obj_trf.inverse().transpose();
+		mat4 block2[] = { obj_trf,obj_ivt };
+		the_interface.BindUniformBuffer("ObjectMat4Block",0,block2);
+		vec4 block3[] = { dc.color.as_vec4};
+		the_interface.BindUniformBuffer("FontBlock", 0, block3);
+		the_interface.BindSampler("tex", 0, *dc.atlas.as<VknFontAtlas>().texture);
+	}
+
+	/*void CanvasVertexBindings::SetState(const PostRenderData& vstate)
+	{
+		
+	}*/
+
+	void CanvasVertexBindings::SetState(const CameraData& cam)
+	{
+		view_trf = cam.view_matrix;
+		proj_trf = cam.projection_matrix;
+	}
+
+	void CanvasVertexBindings::Bind(PipelineThingy& the_interface)
+	{
+		//map back into z: (0,1)
+		mat4 projection_trf = mat4{ 1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+							0,0,0,1
+		}*proj_trf;//map back into z: (0,1)
+		mat4 block[] = { projection_trf,view_trf };
+		the_interface.BindUniformBuffer("CameraBlock", 0, block);
+	}
+	
+	void CanvasVertexBindings::BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one)
+	{
+		mat4 obj_trf = view_trf * dc_one.transform;
+		mat4 obj_ivt = obj_trf.inverse().transpose();
+		mat4 block2[] = { obj_trf,obj_ivt };
+		the_interface.BindUniformBuffer("ObjectMat4Block", 0, block2);
+		UIBlockInfo block3[] = { { dc_one.color.as_vec4, 1 } };
+		the_interface.BindUniformBuffer("UIBlock", 0, block3);
+		the_interface.BindSampler("tex", 0, *dc.atlas.as<VknFontAtlas>().texture);
+	}
+
+	void CanvasVertexBindings::BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one)
+	{
+		mat4 obj_trf = view_trf * dc_one.transform;
+		mat4 obj_ivt = obj_trf.inverse().transpose();
+		mat4 block2[] = { obj_trf,obj_ivt };
+		the_interface.BindUniformBuffer("ObjectMat4Block", 0, block2);
+		UIBlockInfo block3[] = { { dc_one.color.as_vec4, 0 } };
+		the_interface.BindUniformBuffer("UIBlock", 0, block3);
+		the_interface.BindSampler("tex", 0, dc.texture.as<VknTexture>());
 	}
 
 }

@@ -25,7 +25,7 @@ namespace idk::win
 		//LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 		//LoadStringW(hInstance, IDC_GAME, szWindowClass, MAX_LOADSTRING);
 
-		#ifdef _DEBUG
+		//#ifdef _DEBUG
 		{
 			AllocConsole();
 			AttachConsole(GetCurrentProcessId());
@@ -34,7 +34,7 @@ namespace idk::win
 			freopen_s(&pCout, "conout$", "w", stderr); //returns 0
 			SetConsoleTitle(L"IDK 0.1a");
 		}
-		#endif
+		//#endif
 
 		MyRegisterClass();
 
@@ -115,6 +115,65 @@ namespace idk::win
 	{
 		return _input_manager->GetChar();
 	}
+
+    bool Windows::SetFullscreen(bool fullscreen)
+    {
+        // stolen from chromium
+
+        if (!_fullscreen)
+        {
+            // Save current window information.  We force the window into restored mode
+            // before going fullscreen because Windows doesn't seem to hide the
+            // taskbar if the window is in the maximized state.
+            _saved_win_info.maximized = !!::IsZoomed(hWnd);
+            if (_saved_win_info.maximized)
+                ::SendMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+            _saved_win_info.style = GetWindowLong(hWnd, GWL_STYLE);
+            _saved_win_info.ex_style = GetWindowLong(hWnd, GWL_EXSTYLE);
+            GetWindowRect(hWnd, &_saved_win_info.window_rect);
+        }
+
+        _fullscreen = fullscreen;
+
+        if (_fullscreen)
+        {
+            // Set new window style and size.
+            SetWindowLong(hWnd, GWL_STYLE,
+                          _saved_win_info.style & ~(WS_CAPTION | WS_THICKFRAME));
+            SetWindowLong(hWnd, GWL_EXSTYLE,
+                          _saved_win_info.ex_style & ~(WS_EX_DLGMODALFRAME |
+                                                       WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+            // On expand, if we're given a window_rect, grow to it, otherwise do
+            // not resize.
+            MONITORINFO monitor_info;
+            monitor_info.cbSize = sizeof(monitor_info);
+            GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST),
+                            &monitor_info);
+            const auto& rect = monitor_info.rcMonitor;
+            SetWindowPos(hWnd, NULL, rect.left, rect.top,
+                         rect.right - rect.left, rect.bottom - rect.top,
+                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        }
+        else
+        {
+            // Reset original window style and size.  The multiple window size/moves
+            // here are ugly, but if SetWindowPos() doesn't redraw, the taskbar won't be
+            // repainted.  Better-looking methods welcome.
+            SetWindowLong(hWnd, GWL_STYLE, _saved_win_info.style);
+            SetWindowLong(hWnd, GWL_EXSTYLE, _saved_win_info.ex_style);
+
+                // On restore, resize to the previous saved rect size.
+            const auto& rect = _saved_win_info.window_rect;
+            SetWindowPos(hWnd, NULL, rect.left, rect.top,
+                         rect.right - rect.left, rect.bottom - rect.top,
+                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+            if (_saved_win_info.maximized)
+                ::SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+        }
+
+        return true;
+    }
 	
 	void Windows::SetTitle(string_view new_title)
 	{
@@ -215,7 +274,9 @@ namespace idk::win
 		{
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:
-			_input_manager->SetKeyDown((int)wParam);
+
+			if (_focused)
+				_input_manager->SetKeyDown((int)wParam);
 			break;
 		case WM_KEYUP:
 		case WM_SYSKEYUP:
@@ -227,19 +288,22 @@ namespace idk::win
 		case WM_MBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::MButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::MButton);
 
 			break;
 		case WM_LBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::LButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::LButton);
 
 			break;
 		case WM_RBUTTONDOWN:
 			grabScreenCoordinates(lParam);
 
-			_input_manager->SetMouseDown((int)Key::RButton);
+			if (_focused)
+				_input_manager->SetMouseDown((int)Key::RButton);
 
 			break;
 		case WM_LBUTTONUP:
@@ -273,6 +337,15 @@ namespace idk::win
 			OnScreenSizeChanged.Fire(ivec2{ ptr->cx, ptr->cy });
 		}
 		break;
+		case WM_SETFOCUS:
+			OnFocusGain.Fire();
+			_focused = true;
+			break;
+		case WM_KILLFOCUS:
+			OnFocusLost.Fire();
+			_focused = false;
+			_input_manager->FlushCurrentBuffer();
+			break;
 		case WM_SIZE:
 			OnScreenSizeChanged.Fire(ivec2{ LOWORD(lParam), HIWORD(lParam) });
 			break;
@@ -338,15 +411,15 @@ namespace idk::win
 
 	BOOL Windows::InitInstance(int nCmdShow)
 	{
-		hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+        hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
+                             CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)
 		{
 			return FALSE;
 		}
 
-		ShowWindow(hWnd, nCmdShow);
+		ShowWindow(hWnd, SW_MAXIMIZE);
 		UpdateWindow(hWnd);
 
 		return TRUE;

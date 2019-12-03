@@ -1,5 +1,6 @@
 #pragma once
 #include <idk.h>
+#include <meta/comparator.h>
 
 namespace idk
 {
@@ -22,14 +23,19 @@ namespace idk
 	};
 
 	struct SerializedMeta
+		: comparable<SerializedMeta>
 	{
 		Guid   guid;
 		string name;
 		string t_hash{};
 		string metadata;
 
+		explicit SerializedMeta(Guid guid = Guid{}, string_view name = "", string_view t_hash = "", string_view metadata = "");
+
 		template<typename Res, typename = sfinae<has_tag_v<Res, MetaTag>>>
 		opt<typename Res::Metadata> GetMeta() const;
+
+		bool operator<(const SerializedMeta&) const noexcept;
 	};
 
 }

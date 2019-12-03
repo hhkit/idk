@@ -19,6 +19,7 @@ Takes in a NEW Commands and handles its delete internally
 #include "CommandController.h"
 #include <editor/commands/CMD_DeleteGameObject.h>
 #include <editor/commands/CMD_DeleteComponent.h>
+#include <editor/commands/CMD_CollateCommands.h>
 #include <IDE.h>
 
 namespace idk {
@@ -59,7 +60,8 @@ namespace idk {
 					break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
 				if (dynamic_cast<CMD_DeleteComponent*>(undoStack.back().get()))
 					break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
-
+				if (dynamic_cast<CMD_CollateCommands*>(undoStack.back().get()))
+					break;
 			}
 		}
 	}

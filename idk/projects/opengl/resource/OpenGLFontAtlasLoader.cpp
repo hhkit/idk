@@ -55,11 +55,9 @@ namespace idk {
 
 			auto tm = font_handle->GetMeta();
 
-			tm.font_name = path_to_resource.GetFileName();
-
 			font_handle->SetMeta(tm);
 
-			if (FT_Set_Pixel_Sizes(face, 0, tm.fontSize))
+			if (FT_Set_Pixel_Sizes(face, 0, tm.font_size))
 			{
 				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
@@ -98,6 +96,8 @@ namespace idk {
 			h += mh;
 			font_handle->Size(ivec2(w, h));
 
+            font_handle->ascender = face->ascender / s_cast<float>(face->units_per_EM) * tm.font_size;
+            font_handle->descender = face->descender / s_cast<float>(face->units_per_EM) * tm.font_size;
 
 			//////////////////////////////////Custom Buffer//////////////////////////////////////////
 			glActiveTexture(GL_TEXTURE0);
@@ -149,7 +149,6 @@ namespace idk {
 				//mh = g->bitmap.rows;
 				x += g->bitmap.width + 1;
 
-
 				//ERROR IN HERE
 				GL_CHECK();
 			}
@@ -188,11 +187,9 @@ namespace idk {
 
 			auto tm = font_handle->GetMeta();
 
-			tm.font_name = path_to_resource.GetFileName();
-
 			font_handle->SetMeta(tm);
 
-			if (FT_Set_Pixel_Sizes(face, 0, tm.fontSize))
+			if (FT_Set_Pixel_Sizes(face, 0, tm.font_size))
 			{
 				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");

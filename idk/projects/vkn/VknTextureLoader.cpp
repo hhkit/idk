@@ -68,36 +68,13 @@ namespace idk::vkn
 	{
 		FilterMode filter_mode = (type == FilterType::eMin) ? options.min_filter : options.mag_filter;
 		vk::Filter mode = vk::Filter::eLinear;
-		static const hash_table<FilterMode, vk::Filter> map
+		static const hash_table<FilterMode::_enum, vk::Filter> map
 		{
-			{FilterMode::Nearest,vk::Filter::eNearest},
-			{FilterMode::Linear ,vk::Filter::eLinear},
-			{FilterMode::Cubic  ,vk::Filter::eCubicIMG},
+			{FilterMode::_enum::Nearest,vk::Filter::eNearest},
+			{FilterMode::_enum::Linear ,vk::Filter::eLinear},
+			{FilterMode::_enum::Cubic  ,vk::Filter::eCubicIMG},
 		};
 		auto itr = map.find(filter_mode);
-		if (itr != map.end())
-			mode = itr->second;
-
-		return mode;
-	}
-
-
-
-	vk::CompareOp MapCompareOp(CompareOp compare_op)
-	{
-		vk::CompareOp mode = vk::CompareOp::eNever;
-		static const hash_table<CompareOp, vk::CompareOp> map
-		{
-			{CompareOp::eNever,			  vk::CompareOp::eNever          },
-			{CompareOp::eLess,			  vk::CompareOp::eLess           },
-			{CompareOp::eEqual ,		  vk::CompareOp::eEqual          },
-			{CompareOp::eLessOrEqual ,	  vk::CompareOp::eLessOrEqual    },
-			{CompareOp::eGreater ,		  vk::CompareOp::eGreater        },
-			{CompareOp::eNotEqual,		  vk::CompareOp::eNotEqual       },
-			{CompareOp::eGreaterOrEqual , vk::CompareOp::eGreaterOrEqual },
-			{CompareOp::eAlways,          vk::CompareOp::eAlways         },
-		};
-		auto itr = map.find(compare_op);
 		if (itr != map.end())
 			mode = itr->second;
 
@@ -109,6 +86,9 @@ namespace idk::vkn
 	{
 		TextureOptions options{};
 		auto format = load_info.internal_format;
+		//auto nformat = NearestBlittableFormat(format, BlitCompatUsageMasks::eDst);
+		//if (nformat)
+		//	format = *nformat;
 
 		if (ooptions)
 		{
@@ -123,12 +103,12 @@ namespace idk::vkn
 		ptr->Size(ivec2{load_info.width,load_info.height});
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format, ptr->img_aspect);
+		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -165,12 +145,12 @@ namespace idk::vkn
 		auto ptr = &texture;
 		auto&& [image, alloc,aspect] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 		ptr->img_aspect = aspect;
-		ptr->image = std::move(image);
+		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, *ptr->image, format,ptr->img_aspect);
+		ptr->imageView = CreateImageView2D(device, *ptr->image_, format,ptr->img_aspect);
 
 		vk::SamplerCreateInfo sampler_info
 		{
@@ -310,7 +290,7 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.internal_format = vk::Format::eB8G8R8A8Unorm;
+		info.internal_format = vk::Format::eB8G8R8A8Srgb;
 		info.image_usage = vk::ImageUsageFlagBits::eColorAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eColor;
 		info.sampled(true);
@@ -322,7 +302,7 @@ namespace idk::vkn
 		TexCreateInfo info{};
 		info.width = width;
 		info.height = height;
-		info.internal_format = vk::Format::eD16Unorm;
+		info.internal_format = vk::Format::eD32Sfloat;
 		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eDepth;
 		info.sampled(true);
@@ -544,14 +524,17 @@ namespace idk::vkn
 		device.resetFences(fence);
 		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
 		uint64_t wait_for_milli_seconds = 1;
-		[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 1000;
+		[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
 		//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
 		while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
 		result.first = std::move(image);
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 	}
-	
+	bool fml = false;
+	bool IsDepthStencil(vk::Format format);
+	void Mark() { fml = true; }
+//#pragma optimize("",off)
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool is_render_target)
 	{
 		TextureResult result;
@@ -567,7 +550,7 @@ namespace idk::vkn
 
 		size_t num_bytes = len;
 
-		vk::ImageUsageFlags attachment_type = (format==vk::Format::eD16Unorm)? vk::ImageUsageFlagBits::eDepthStencilAttachment:vk::ImageUsageFlagBits::eColorAttachment;
+		vk::ImageUsageFlags attachment_type = IsDepthStencil(format)? vk::ImageUsageFlagBits::eDepthStencilAttachment:vk::ImageUsageFlagBits::eColorAttachment;
 		vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
 		std::optional<vk::ImageSubresourceRange> range{};
 
@@ -609,7 +592,7 @@ namespace idk::vkn
 			next_layout = layout = attachment_layout;
 		}
 		vk::ImageAspectFlagBits img_aspect = vk::ImageAspectFlagBits::eColor;
-		if ((format == vk::Format::eD16Unorm))
+		if (IsDepthStencil(format ))
 			img_aspect = vk::ImageAspectFlagBits::eDepth;
 		result.aspect = img_aspect;
 		TransitionImageLayout(cmd_buffer, src_flags, src_stages, dst_flags, dst_stages, vk::ImageLayout::eUndefined, next_layout, *image, img_aspect);
@@ -650,134 +633,5 @@ namespace idk::vkn
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 
-	}
-
-	hash_table<TextureFormat, vk::Format> FormatMap()
-	{
-		return hash_table<TextureFormat, vk::Format>
-		{
-			{TextureFormat::eD16Unorm, vk::Format::eD16Unorm},
-			{TextureFormat::eRGBA32, vk::Format::eR8G8B8A8Unorm},
-			{ TextureFormat::eBGRA32, vk::Format::eB8G8R8A8Unorm },
-			{ TextureFormat::eBC1,vk::Format::eBc1RgbaSrgbBlock },//Auto srgb
-			{ TextureFormat::eBC2,vk::Format::eBc2SrgbBlock },	  //Auto srgb
-			{ TextureFormat::eBC3,vk::Format::eBc3SrgbBlock },	  //Auto srgb
-			{ TextureFormat::eBC4,vk::Format::eBc4UnormBlock },
-			{ TextureFormat::eBC5,vk::Format::eBc5UnormBlock },
-
-		};
-
-	}
-
-	hash_table<ColorFormat::_enum, vk::Format> CFormatMap()
-	{
-		return hash_table<ColorFormat::_enum, vk::Format>
-		{
-			{ ColorFormat::_enum::DEPTH_COMPONENT, vk::Format::eD16Unorm},
-			{ ColorFormat::_enum::R_8, vk::Format::eR8Unorm },
-			{ ColorFormat::_enum::R_16, vk::Format::eR16Unorm },
-			{ ColorFormat::_enum::R_32F, vk::Format::eR32Sfloat },
-			{ ColorFormat::_enum::R_64F, vk::Format::eR64Sfloat },
-			{ ColorFormat::_enum::Rint_8, vk::Format::eR8Uint },
-			{ ColorFormat::_enum::Rint_16, vk::Format::eR16Uint },
-			{ ColorFormat::_enum::Rint_32, vk::Format::eR32Uint },
-			{ ColorFormat::_enum::Rint_64, vk::Format::eR64Uint },
-			{ ColorFormat::_enum::RG_8, vk::Format::eR8G8Unorm },
-			{ ColorFormat::_enum::RGF_16, vk::Format::eR16G16Sfloat },
-			{ ColorFormat::_enum::RGB_8, vk::Format::eR8G8B8Unorm },
-			{ ColorFormat::_enum::RGBF_16, vk::Format::eR16G16B16Sfloat },
-			{ ColorFormat::_enum::RGBF_32, vk::Format::eR32G32B32Sfloat },
-			{ ColorFormat::_enum::RGBA_8, vk::Format::eR8G8B8A8Unorm },
-			{ ColorFormat::_enum::RGBAF_16, vk::Format::eR16G16B16A16Sfloat },
-			{ ColorFormat::_enum::RGBAF_32, vk::Format::eR32G32B32A32Sfloat },
-			{ ColorFormat::_enum::BGRA_8,   vk::Format::eB8G8R8A8Unorm },
-			{ ColorFormat::_enum::SRGB ,   vk::Format::eR8G8B8Srgb },
-			{ ColorFormat::_enum::SRGBA,   vk::Format::eR8G8B8A8Srgb },
-			{ ColorFormat::_enum::DXT1,vk::Format::eBc1RgbUnormBlock },
-			{ ColorFormat::_enum::DXT3,vk::Format::eBc2UnormBlock },
-			{ ColorFormat::_enum::DXT5,vk::Format::eBc3UnormBlock },
-			{ ColorFormat::_enum::DXT1_A,vk::Format::eBc1RgbaUnormBlock },
-			{ ColorFormat::_enum::SRGB_DXT1,vk::Format::eBc1RgbSrgbBlock },
-			{ ColorFormat::_enum::SRGB_DXT3,vk::Format::eBc2SrgbBlock },
-			{ ColorFormat::_enum::SRGB_DXT5,vk::Format::eBc3SrgbBlock },
-			{ ColorFormat::_enum::SRGBA_DXT1,vk::Format::eBc1RgbaSrgbBlock},
-		};
-
-	}
-	VulkanView& View();
-	void PrintFormatBlitCompatibility()
-	{
-		auto map = CFormatMap();
-		auto pdevice = View().PDevice();
-		for (auto& [ecf, format] : map)
-		{
-			ColorFormat cf = ecf;
-			auto prop = pdevice.getFormatProperties(format);
-			
-			std::cout << cf.to_string() << std::endl;
-			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
-				std::cout << "\tLinear tiling has eBlitDst\n";
-			else
-				std::cout << "\tLinear tiling does not have eBlitDst\n";
-			if (prop.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
-				std::cout << "\toptimal tiling has eBlitDst\n";
-			else
-				std::cout << "\toptimal tiling does not have eBlitDst\n";
-			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
-				std::cout << "\tLinear tiling has eBlitSrc\n";
-			else
-				std::cout << "\tLinear tiling does not have eBlitSrc\n";
-			if (prop.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
-				std::cout << "\toptimal tiling has eBlitSrc\n";
-			else
-				std::cout << "\toptimal tiling does not have eBlitSrc\n";
-		}
-	}
-	hash_table<vk::Format, vk::Format> UnSrgbMap()
-	{
-		return hash_table<vk::Format, vk::Format>
-		{
-			{ vk::Format::eR8G8B8Srgb       ,vk::Format::eR8G8B8Unorm       },
-			{ vk::Format::eR8G8B8A8Srgb     ,vk::Format::eR8G8B8A8Unorm     },
-			{ vk::Format::eBc1RgbSrgbBlock  ,vk::Format::eBc1RgbUnormBlock  },
-			{ vk::Format::eBc2SrgbBlock     ,vk::Format::eBc2UnormBlock     },
-			{ vk::Format::eBc3SrgbBlock     ,vk::Format::eBc3UnormBlock     },
-			{ vk::Format::eBc1RgbaSrgbBlock ,vk::Format::eBc1RgbaUnormBlock },
-		};
-
-	}
-	vk::Format UnSrgb(vk::Format f)
-	{
-		static const auto map = UnSrgbMap();
-		vk::Format result=f;
-		auto itr = map.find(f);
-		if (itr != map.end())
-			result = itr->second;
-		return result;
-	}
-	vk::Format ToSrgb(vk::Format f)
-	{
-		static const auto map = hlp::ReverseMap(UnSrgbMap());
-		vk::Format result = f;
-		auto itr = map.find(f);
-		if (itr != map.end())
-			result = itr->second;
-		return result;
-	}
-
-	vk::Format MapFormat(TextureFormat tf)
-	{
-		static const auto map = FormatMap();
-		return map.find(tf)->second;
-	}
-	vk::Format MapFormat(ColorFormat tf)
-	{
-		static const auto map = CFormatMap();
-		return map.find(tf)->second;
-	}
-	TextureFormat MapFormat(vk::Format tf)
-	{
-		static const auto map = hlp::ReverseMap(FormatMap());
-		return map.find(tf)->second;
 	}
 }

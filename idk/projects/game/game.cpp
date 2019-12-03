@@ -48,7 +48,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	int num_args = 0;
 	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(102284); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	//_CrtSetBreakAlloc(343170); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	//_CrtSetBreakAlloc(895766); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	//_CrtSetBreakAlloc(884500); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	//_CrtSetBreakAlloc(884499); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	//_CrtSetBreakAlloc(895231); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -77,8 +82,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
-		gSys = &c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-		break;
+		{
+			auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+			gSys = &sys;
+			if (HasArg(L"--validation", command_lines, num_args))
+				sys.Instance().EnableValidation();
+			break;
+		}
 	case GraphicsAPI::OpenGL: 
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		break;
@@ -90,62 +100,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	c->AddSystem<IDE>();
 
+    namespace fs = std::filesystem;
+
+    fs::path idk_app_data = Core::GetSystem<Application>().GetAppData();
+    idk_app_data /= "idk";
+    if (!fs::exists(idk_app_data))
+        fs::create_directory(idk_app_data);
+
+    idk_app_data /= "logs";
+    if (!fs::exists(idk_app_data))
+        fs::create_directory(idk_app_data);
+    Core::GetSystem<LogSystem>().SetLogDir(idk_app_data.string());
+
 	c->Setup();
-
-	//LogSingleton::Get().PipeToCout(LogPool::GAME, true);
-	//Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Execute();
-
-	//gSys->brdf = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag", false);
-	//gSys->convoluter = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag", false);
-
-    // auto scene = RscHandle<Scene>{};
-    // auto go = scene->CreateGameObject();
-    // go->AddComponent<ParticleSystem>();
-	
-	//auto scene = RscHandle<Scene>{};
-	//auto mat_inst = Core::GetResourceManager().Create<MaterialInstance>();
-	//mat_inst->material = Core::GetResourceManager().Load<shadergraph::Graph>("/assets/materials/test.mat", false).value();
-	//
-	//auto create_anim_obj = [&](vec3 pos, PathHandle path = PathHandle{ "/assets/models/YY_model.fbx" }) {
-	//	auto go = scene->CreateGameObject();
-
-	//	go->Name(path.GetStem());
-	//	go->GetComponent<Transform>()->position = pos;
-	//	//go->GetComponent<Transform>()->scale /= 100.0f;
-
-	//	auto model_resource = Core::GetResourceManager().Load(path);
-	//	string model_stem{ path.GetStem() };
-	//	auto animator = go->AddComponent<Animator>();
-	//	for (auto handle : model_resource->GetAll<Mesh>())
-	//	{
-	//		auto mesh_child_go = scene->CreateGameObject();
-
-	//		mesh_child_go->Name(handle->Name());
-	//		mesh_child_go->Transform()->parent = go;
-
-	//		auto mesh_rend = mesh_child_go->AddComponent<SkinnedMeshRenderer>();
-	//		mesh_rend->mesh = handle;
-	//		mesh_rend->material_instance = mat_inst;
-	//	}
-
-	//	animator->skeleton = model_resource->Get<anim::Skeleton>();
-	//	Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
-
-	//	auto animation_resource = Core::GetResourceManager().Load("/assets/models/test.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	animation_resource = Core::GetResourceManager().Load("/assets/models/test2.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	animation_resource = Core::GetResourceManager().Load("/assets/models/walk.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	animation_resource = Core::GetResourceManager().Load("/assets/models/idle.fbx");
-	//	animator->AddAnimation(animation_resource->Get<anim::Animation>());
-	//	
-	//	return go;
-	//};
-
-	//// @Joseph: Uncomment this when testing.
-	//create_anim_obj(vec3{ 0,0,0 });
-	
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }

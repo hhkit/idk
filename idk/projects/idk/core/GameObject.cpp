@@ -113,14 +113,14 @@ namespace idk
         }
     }
 
-    uint8_t GameObject::Layer() const
+    char GameObject::Layer() const
     {
         if (const auto layer = GetComponent<class Layer>())
             return layer->index;
         return 0;
     }
 
-    void GameObject::Layer(uint8_t layer)
+    void GameObject::Layer(char layer)
     {
         AddComponent<class Layer>()->index = layer;
     }

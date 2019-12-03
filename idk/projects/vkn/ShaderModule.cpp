@@ -4,6 +4,9 @@
 #include <spirv_cross/spirv_reflect.hpp>
 #include <gfx/pipeline_config.h>
 #include <vkn/GfxConverters.h>
+
+#include <vkn/vulkan_enum_info.h>
+
 namespace idk::vkn
 {
 	namespace spx = spirv_cross;
@@ -96,6 +99,7 @@ namespace idk::vkn
 		//location
 		hash_table<uint32_t,buffer_desc> extracted_desc;
 	};
+//#pragma optimize("",off)
 	ExtractedMisc extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
 	{
 		ExtractedMisc result{};
@@ -164,6 +168,21 @@ namespace idk::vkn
 			}
 			ubo_info[ub.name] = std::move(info);
 		}
+
+
+		for (auto& ub : resources.subpass_inputs)
+		{
+			UboInfo info;
+			auto type = code_reflector.get_type(ub.type_id);
+			info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
+			info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
+			info.stage = StageToUniformStage(single_stage);
+			info.size = (type.array.size()) ? type.array.back() : 1;
+			info.type = uniform_layout_t::UniformType::eAttachment;
+
+			ubo_info[ub.name] = std::move(info);
+		}
+
 		//for (auto& ub : cs)
 		//{
 		//	UboInfo info;
@@ -186,6 +205,7 @@ namespace idk::vkn
 		{
 			{uniform_layout_t::UniformType::eBuffer,vk::DescriptorType::eUniformBuffer},
 			{uniform_layout_t::UniformType::eSampler,vk::DescriptorType::eCombinedImageSampler},
+			{uniform_layout_t::UniformType::eAttachment,vk::DescriptorType::eInputAttachment},
 		};
 		return map[type];
 	}
@@ -205,9 +225,10 @@ namespace idk::vkn
 		}
 		return result;
 	}
+//#pragma optimize("",off)
 	void CreateLayouts(
 		hash_table<string, UboInfo>& ubo_info,
-		hash_table<uint32_t, vk::UniqueDescriptorSetLayout>& layouts,
+		ShaderModule::LayoutTable& layouts,
 		VulkanView& view)
 	{
 
@@ -245,7 +266,12 @@ namespace idk::vkn
 					,hlp::arr_count(bindings)
 					,hlp::arr_count(bindings) ? std::data(bindings) : nullptr
 				};
-				layouts[set_idx] = view.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, view.Dispatcher());
+				auto& info = layouts[set_idx] = DsLayoutInfo{ view.Device()->createDescriptorSetLayoutUnique(layout_info, nullptr, view.Dispatcher()) };
+				
+				for (auto& binding : bindings)
+				{
+					info.entry_counts[EnumInfo::DescriptorTypeI::map(binding.descriptorType)] += binding.descriptorCount;
+				}
 			}
 		}
 		for ([[maybe_unused]] auto& [set_name, info] : ubo_info)
@@ -342,12 +368,12 @@ hash_table<string, UboInfo>::const_iterator ShaderModule::InfoEnd() const
 	return Current().ubo_info.cend();
 }
 
-hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator ShaderModule::LayoutsBegin() const
+ShaderModule::LayoutTable::const_iterator ShaderModule::LayoutsBegin() const
 {
 	return Current().layouts.cbegin();;
 }
 
-hash_table<uint32_t, vk::UniqueDescriptorSetLayout>::const_iterator ShaderModule::LayoutsEnd() const
+ShaderModule::LayoutTable::const_iterator ShaderModule::LayoutsEnd() const
 {
 	return Current().layouts.cend();
 }

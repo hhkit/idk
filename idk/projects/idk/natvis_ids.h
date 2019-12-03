@@ -22,4 +22,10 @@ namespace idk::natvis
     constexpr auto monoBehaviorID        = ComponentID<mono::Behavior     > + 1;
     constexpr auto AudioSourceID         = ComponentID<AudioSource        > + 1;
     constexpr auto AudioListenerID       = ComponentID<AudioListener      > + 1;
+    constexpr auto ParticleSystemID      = ComponentID<ParticleSystem     > + 1;
+    constexpr auto CanvasID              = ComponentID<Canvas             > + 1;
+    constexpr auto RectTransformID       = ComponentID<RectTransform      > + 1;
+    constexpr auto ImageID               = ComponentID<Image              > + 1;
+    constexpr auto TextID                = ComponentID<Text               > + 1;
+    constexpr auto TextMeshID            = ComponentID<TextMesh           > + 1;
 }

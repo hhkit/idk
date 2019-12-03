@@ -15,6 +15,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 
 #include "pch.h"
+//#define HACKING_TO_THE_GATE
 #include <IDE.h>
 
 #include <filesystem>
@@ -39,10 +40,13 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
 #include <opengl/resource/OpenGLFontAtlasLoader.h>
+#include <vkn/VulkanGlslLoader.h>
+#include <gfx/ShaderSnippetLoader.h>
 
 // editor setup
 #include <gfx/RenderTarget.h>
 #include <editor/SceneManagement.h>
+#include <editor/ProjectManagement.h>
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
@@ -60,54 +64,22 @@ namespace idk
 
 	void IDE::Init()
 	{
-        // project load
-        {
-            auto& proj_manager = Core::GetSystem<ProjectManager>();
-            const auto recent_proj = []() -> string
-            {
-                fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-                recent_path /= "idk";
-                recent_path /= ".recent";
-                if (!fs::exists(recent_path))
-                    return "";
-                std::ifstream recent_file{ recent_path };
-                fs::path proj = stringify(recent_file);
-                if (!fs::exists(proj))
-                    return "";
-                return proj.string();
-            }();
+        fs::path idk_app_data = Core::GetSystem<FileSystem>().GetAppDataDir();
+        idk_app_data /= "idk";
+        Core::GetSystem<FileSystem>().Mount(idk_app_data.string(), path_idk_app_data, false);
 
-            if (recent_proj.empty())
-            {
-                const DialogOptions dialog{ "IDK Project", ProjectManager::ext };
-                auto proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                while (!proj)
-                    proj = Core::GetSystem<Application>().OpenFileDialog(dialog);
-                proj_manager.LoadProject(*proj);
-            }
-            else
-                proj_manager.LoadProject(recent_proj);
+		auto tmp_path = idk_app_data / "tmp";
+		if (!fs::exists(tmp_path))
+			fs::create_directory(tmp_path);
+		Core::GetSystem<FileSystem>().Mount(tmp_path.string(), path_tmp, false);
 
-            fs::path recent_path = Core::GetSystem<FileSystem>().GetAppDataDir();
-            recent_path /= "idk";
-            if (!fs::exists(recent_path))
-                fs::create_directory(recent_path);
-            _editor_app_data = recent_path.string();
-
-            recent_path /= ".recent";
-            std::ofstream recent_file{ recent_path };
-            recent_file << proj_manager.GetProjectFullPath();
-
-			auto tmp_path = _editor_app_data + "/tmp";
-			if (!fs::exists(tmp_path))
-				fs::create_directory(tmp_path);
-			Core::GetSystem<FileSystem>().Mount(tmp_path, "/tmp", false);
-        }
+        LoadRecentProject();
 
 		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
 		{
 			selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
 		});
+		Core::GetResourceManager().RegisterLoader<ShaderSnippetLoader>(".glsl");
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::OpenGL:
@@ -122,12 +94,18 @@ namespace idk
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
+
+			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".vert");
+			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".frag");
+			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".geom");
+			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".tesc");
+			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".tese");
+			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".comp");
 			break;
 		default:
 			break;
 		}
-
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
+		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
         Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
         Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
         Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
@@ -146,7 +124,7 @@ namespace idk
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_DockingEnable;
         io.IniFilename = NULL;
-        ImGui::LoadIniSettingsFromDisk((_editor_app_data + "/imgui.ini").c_str());
+        ImGui::LoadIniSettingsFromDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
 
         //Imgui Style
         auto& style = ImGui::GetStyle();
@@ -163,68 +141,7 @@ namespace idk
         style.FrameRounding = 1.0f;
         style.CurveTessellationTol = 0.5f;
 
-        auto* colors = style.Colors;
-        ImGui::StyleColorsDark();
-
-        colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
-
-        // grays
-        colors[ImGuiCol_WindowBg] =
-            ImColor(29, 34, 41).Value;
-        colors[ImGuiCol_PopupBg] =
-        colors[ImGuiCol_ScrollbarBg] =
-            ImColor(43, 49, 56, 240).Value;
-        colors[ImGuiCol_Border] =
-        colors[ImGuiCol_Separator] =
-        colors[ImGuiCol_ScrollbarGrab] =
-            ImColor(63, 70, 77).Value;
-            //ImColor(106, 118, 129).Value;
-
-        colors[ImGuiCol_MenuBarBg] =
-            ImColor(36, 58, 74).Value;
-        colors[ImGuiCol_ScrollbarBg].w = 0.5f;
-
-        // main accent - 2
-        colors[ImGuiCol_TitleBg] =
-            ImColor(5, 30, 51).Value;
-
-        // main accent - 1
-        colors[ImGuiCol_TitleBgActive] =
-        colors[ImGuiCol_TabUnfocused] =
-            ImColor(11, 54, 79).Value;
-
-        // main accent
-        colors[ImGuiCol_Tab] =
-        colors[ImGuiCol_TabUnfocusedActive] =
-        colors[ImGuiCol_FrameBg] =
-        colors[ImGuiCol_Button] =
-        colors[ImGuiCol_Header] =
-        colors[ImGuiCol_SeparatorHovered] =
-        colors[ImGuiCol_ScrollbarGrabHovered] =
-            ImColor(23, 75, 111).Value;
-
-        // main accent + 1
-        colors[ImGuiCol_TabHovered] =
-        colors[ImGuiCol_TabActive] =
-        colors[ImGuiCol_ButtonHovered] =
-        colors[ImGuiCol_FrameBgHovered] =
-        colors[ImGuiCol_HeaderHovered] =
-        colors[ImGuiCol_SeparatorActive] =
-        colors[ImGuiCol_ScrollbarGrabActive] =
-            ImColor(46, 115, 143).Value;
-
-        // main accent + 2
-        colors[ImGuiCol_TextSelectedBg] =
-        colors[ImGuiCol_ButtonActive] =
-        colors[ImGuiCol_FrameBgActive] =
-        colors[ImGuiCol_HeaderActive] =
-            ImColor(65, 153, 163).Value;
-
-        // complement accent
-        colors[ImGuiCol_PlotLinesHovered] =
-            ImColor(222, 116, 35).Value;
-        //style.Colors[ImGuiCol_PlotLinesHovered]
-        // ImColor(
+		ApplyDefaultColors();
 
         // font config
         ImFontConfig config;
@@ -233,10 +150,26 @@ namespace idk
         config.RasterizerMultiply = 1.5f;
         auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
         auto fontpathbold = fs.GetFullPath("/editor_data/fonts/SourceSansPro-SemiBold.ttf");
+        auto iconfontpath = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAR);
+        auto iconfontpath2 = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAS);
         io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 15.0f, &config); // Default
-        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
-        io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
 
+        // merge in icons from MDI
+        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+        ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true; icons_config.GlyphMinAdvanceX = 14.0f; icons_config.GlyphOffset.y = 1.0f;
+        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
+
+        // smaller and bold style of default font
+        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
+        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 12.0f, &icons_config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 12.0f, &icons_config, icons_ranges);
+
+        io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
+        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
+
+        io.Fonts->Build();
 
 
 		//Window Initializations
@@ -251,10 +184,12 @@ namespace idk
 		ADD_WINDOW(IGE_ProjectWindow);
 		ADD_WINDOW(IGE_HierarchyWindow);
 		ADD_WINDOW(IGE_InspectorWindow);
+		ADD_WINDOW(IGE_LightLister);
 		ADD_WINDOW(IGE_MaterialEditor);
 		ADD_WINDOW(IGE_AnimatorWindow);
 		ADD_WINDOW(IGE_ProfilerWindow);
 		ADD_WINDOW(IGE_ProjectSettings);	
+		ADD_WINDOW(IGE_HelpWindow);	
 #undef ADD_WINDOW
 
 		ige_main_window->Initialize();
@@ -285,19 +220,7 @@ namespace idk
         FindWindow<IGE_ProjectWindow>()->OnAssetDoubleClicked += [](GenericResourceHandle h)
         {
             if (h.index() == BaseResourceID<Scene>)
-            {
-                auto scene = h.AsHandle<Scene>();
-                auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-                if (scene != active_scene)
-                {
-                    if (active_scene)
-                        active_scene->Deactivate();
-                    Core::GetSystem<SceneManager>().SetActiveScene(scene);
-                    scene->LoadFromResourcePath();
-
-                    Core::GetSystem<IDE>().ClearScene();
-                }
-            }
+                OpenScene(h.AsHandle<Scene>());
         };
 	}
 
@@ -312,16 +235,66 @@ namespace idk
         }
 
 		SetupEditorScene();
-		
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
+
+#ifdef HACKING_TO_THE_GATE
+
+		if (!RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }})
+			throw;
+		OpenScene(RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }});
+		Core::GetScheduler().SetPauseState(UnpauseAll);
+		Core::GetSystem<IDE>().game_running = true;
+		Core::GetSystem<IDE>().game_frozen = false;
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
+		Core::GetSystem<PhysicsSystem>().Reset();
+		return;
+#endif
+
+        { // try load recent scene / camera
+            auto last_scene = reg_scene.get("scene");
+            if (last_scene.size())
+            {
+                RscHandle<Scene> h{ Guid(last_scene) };
+                if (!h)
+                {
+                    NewScene();
+                    return;
+                }
+
+                OpenScene(h);
+
+                auto cam = reg_scene.get("camera");
+                if (cam.size())
+                {
+                    auto& t = *currentCamera().current_camera->GetGameObject()->Transform();
+                    auto res = parse_text<Transform>(cam);
+                    if (res)
+                    {
+                        auto last_t = *res;
+                        t.position = last_t.position;
+                        t.rotation = last_t.rotation;
+                        t.scale = last_t.scale;
+                    }
+                }
+            }
+            else
+                NewScene(); 
+        }
 	}
+
+    void IDE::EarlyShutdown()
+    {
+        reg_scene.set("camera", serialize_text(*currentCamera().current_camera->GetGameObject()->Transform()));
+
+        ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
+        Core::GetSystem<ProjectManager>().SaveConfigs();
+        ige_windows.clear();
+        _interface->Shutdown();
+        _interface.reset();
+    }
 
 	void IDE::Shutdown()
 	{
-        ImGui::SaveIniSettingsToDisk((_editor_app_data + "/imgui.ini").c_str());
-        Core::GetSystem<ProjectManager>().SaveConfigs();
-        ige_windows.clear();
-		_interface->Shutdown();
-		_interface.reset();
 	}
 
 	void IDE::EditorUpdate()
@@ -329,26 +302,93 @@ namespace idk
         if (closing)
             return;
 
+        auto& app = Core::GetSystem<Application>();
+
+        static auto fullscreen = false;
+        if (ImGui::IsKeyPressed(static_cast<int>(Key::F)) && ImGui::IsKeyDown(static_cast<int>(Key::Control)))
+            app.SetFullscreen(fullscreen = !fullscreen);
+
 		// scene controls
-		auto& app = Core::GetSystem<Application>();
-		if (app.GetKey(Key::Control))
-		{
-			if(app.GetKeyDown(Key::S))
+		if (!game_running)
+			if (app.GetKey(Key::Control))
 			{
-				if (app.GetKey(Key::Shift))
-					SaveSceneAs();
-				else
-					SaveScene();
+				if(app.GetKeyDown(Key::S))
+				{
+					if (app.GetKey(Key::Shift))
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
+				if (app.GetKeyDown(Key::N))
+					NewScene();
+				if (app.GetKeyDown(Key::O))
+					OpenScene();
 			}
-			if (app.GetKeyDown(Key::N))
-				NewScene();
-			if (app.GetKeyDown(Key::O))
-				OpenScene();
-		}
 
 		_interface->ImGuiFrameBegin();
+#ifdef HACKING_TO_THE_GATE
+		auto buf = RscHandle<RenderTarget>()->GetColorBuffer();
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		//ImGui::SetNextWindowPos(viewport->Pos);
+		auto window_size = viewport->Size;
+
+		auto size_condition_flags = ImGuiCond_Always;
+		auto pos_condition_flags = ImGuiCond_Always;
+		auto window_pivot = ImVec2{ 0,0 };
+		auto window_position = ImVec2{ 0,0 };
+
+		ImGui::SetNextWindowPos(window_position, pos_condition_flags, window_pivot);
+		ImGui::SetNextWindowSize(window_size, size_condition_flags);
+
+		if (ImGui::Begin("HACK", 0, ImGuiWindowFlags_NoDocking
+			| ImGuiWindowFlags_NoTitleBar
+			| ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_NoSavedSettings
+			| ImGuiWindowFlags_NoNavFocus
+			| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoBackground))
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+			if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::Vulkan)
+				ImGui::Image(buf->ID(), ImVec2{ window_size });
+			else
+				ImGui::Image(buf->ID(), ImVec2{ window_size }, ImVec2{ 0, 1 }, ImVec2{ 1,0 });
+			ImGui::PopStyleVar();
+
+			ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
+			if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+			{
+				ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
+				ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_CentralNode); // Add empty node
+				ImGui::DockBuilderSetNodeSize(dockspace_id, buf->Size());
+
+				ImGuiID main = dockspace_id;
+
+				auto& ide = Core::GetSystem<IDE>();
+				ImGui::DockBuilderDockWindow("HACK", main);
+				ImGui::DockBuilderFinish(dockspace_id);
+			}
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - (ImGui::GetFrameHeight() * 2)), ImGuiDockNodeFlags_PassthruCentralNode);
+			ImGui::End();
+		}
+
+		
+
+#else
 		ImGuizmo::BeginFrame();
 
+
+        for (const auto go : selected_gameObjects)
+        {
+            if (const auto col = go->GetComponent<Collider>())
+                Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
+        }
 
 
 		ige_main_window->DrawWindow();
@@ -363,14 +403,8 @@ namespace idk
 
 		if (bool_demo_window)
 			ImGui::ShowDemoWindow(&bool_demo_window);
-
-
-		//_interface->Inputs()->Update(); //Moved to SceneView.cpp
-		//_interface->ImGuiFrameUpdate();
-		
-		
+#endif
 		_interface->ImGuiFrameEnd();
-
 
 		command_controller.FlushCommands();
 	}
@@ -408,6 +442,74 @@ namespace idk
 		return "/tmp/tmp_scene.ids";
 	}
 
+	void IDE::ApplyDefaultColors()
+	{
+		auto& style = ImGui::GetStyle();
+		auto* colors = style.Colors;
+		ImGui::StyleColorsDark();
+
+		colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
+
+		// grays
+		colors[ImGuiCol_WindowBg] =
+			ImColor(29, 34, 41).Value;
+		colors[ImGuiCol_PopupBg] =
+			colors[ImGuiCol_ScrollbarBg] =
+			ImColor(43, 49, 56, 240).Value;
+		colors[ImGuiCol_Border] =
+			colors[ImGuiCol_Separator] =
+			colors[ImGuiCol_ScrollbarGrab] =
+			ImColor(63, 70, 77).Value;
+		//ImColor(106, 118, 129).Value;
+
+		colors[ImGuiCol_MenuBarBg] =
+			ImColor(36, 58, 74).Value;
+		colors[ImGuiCol_ScrollbarBg].w = 0.5f;
+
+		// main accent - 2
+		colors[ImGuiCol_TitleBg] =
+			ImColor(5, 30, 51).Value;
+
+		// main accent - 1
+		colors[ImGuiCol_TitleBgActive] =
+			colors[ImGuiCol_TabUnfocused] =
+			ImColor(11, 54, 79).Value;
+
+		// main accent
+		colors[ImGuiCol_Tab] =
+			colors[ImGuiCol_TabUnfocusedActive] =
+			colors[ImGuiCol_FrameBg] =
+			colors[ImGuiCol_Button] =
+			colors[ImGuiCol_Header] =
+			colors[ImGuiCol_SeparatorHovered] =
+			colors[ImGuiCol_ScrollbarGrabHovered] =
+			ImColor(23, 75, 111).Value;
+
+		// main accent + 1
+		colors[ImGuiCol_TabHovered] =
+			colors[ImGuiCol_TabActive] =
+			colors[ImGuiCol_ButtonHovered] =
+			colors[ImGuiCol_FrameBgHovered] =
+			colors[ImGuiCol_HeaderHovered] =
+			colors[ImGuiCol_SeparatorActive] =
+			colors[ImGuiCol_ScrollbarGrabActive] =
+			ImColor(46, 115, 143).Value;
+
+		// main accent + 2
+		colors[ImGuiCol_TextSelectedBg] =
+			colors[ImGuiCol_ButtonActive] =
+			colors[ImGuiCol_FrameBgActive] =
+			colors[ImGuiCol_HeaderActive] =
+			ImColor(65, 153, 163).Value;
+
+		// complement accent
+		colors[ImGuiCol_PlotLinesHovered] =
+			ImColor(222, 116, 35).Value;
+		//style.Colors[ImGuiCol_PlotLinesHovered]
+		// ImColor(
+
+	}
+
 	void IDE::RefreshSelectedMatrix()
 	{
 		//Refresh the new matrix values
@@ -435,7 +537,6 @@ namespace idk
 			camera->Transform()->position = vec3{ 0, 0, 5 };
 			camHandle->far_plane = 100.f;
 			camHandle->render_target = editor_view;
-			camHandle->is_scene_camera = true;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
@@ -452,20 +553,27 @@ namespace idk
 
 				const auto transform = i->GetComponent<Transform>();
 				if (transform) {
-					finalCamPos += transform->position;
+					finalCamPos += transform->GlobalPosition();
 				}
 
 			}
 
             finalCamPos /= static_cast<float>(selected_gameObjects.size());
 
-			const float distanceFromObject = 10; //Needs to be dependent of spacing of objects
+			/*
+			Needs to find how much space the object pixels takes on screen, then this distance is based on that.
+			If single object, object pixels should take 50% of screen.
+			If multiple objects, the ends of each object pixels on screen plus some padding should be used as anchor points to determine distance.
+			But this is lazy method. 20.
+			*/
+			const float distanceFromObject = 20; 
 
 			const CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 			const Handle<Camera> currCamera = main_camera.current_camera;
 			const Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
 			camTransform->position = finalCamPos;
-			focused_vector = finalCamPos;
+			if (auto* sceneViewPtr = FindWindow<IGE_SceneView>())
+				sceneViewPtr->focused_vector = finalCamPos;
 			scroll_multiplier = default_scroll_multiplier;
 			camTransform->position -= camTransform->Forward() * distanceFromObject;
 		}

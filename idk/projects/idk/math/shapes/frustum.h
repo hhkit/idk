@@ -24,5 +24,14 @@ namespace idk
 		bool contains(const sphere& s) const;
 	};
 
+	struct cascadingFrustum {
+		real cascadingEnd[3];
+		aabb projBox[3];
+	};
+
+
+	array<vec4, 8> camera_vp_to_extremes(const mat4& vp_matrix);
 	frustum camera_vp_to_frustum(const mat4& view_projection_matrix);
+	aabb	camera_vp_to_bounding_box(const mat4& view_projection_matrix);
+	cascadingFrustum camera_vp_to_tight_bound(const mat4& view_projection_matrix);
 }

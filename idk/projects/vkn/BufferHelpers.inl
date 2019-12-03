@@ -19,7 +19,7 @@ namespace idk::vkn::hlp
 	}
 
 	template<typename T, typename Dispatcher>
-	vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, T* const begin, T* const end, const Dispatcher& dispatcher)
+	vk::UniqueBuffer CreateVertexBuffer(vk::Device device, T* const begin, T* const end, const Dispatcher& dispatcher)
 	{
 		return CreateBuffer(device, buffer_size(begin, end), vk::BufferUsageFlagBits::eVertexBuffer, dispatcher);
 	}
@@ -27,13 +27,13 @@ namespace idk::vkn::hlp
 
 
 	template<typename T, typename Dispatcher>
-	vk::UniqueBuffer CreateVertexBuffer(vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher)
+	vk::UniqueBuffer CreateVertexBuffer(vk::Device device, std::vector<T> const& vertices, const Dispatcher& dispatcher)
 	{
 		return CreateVertexBuffer(device, vertices.data(), vertices.data() + vertices.size(), dispatcher);
 	}
 	template<typename Dispatcher>
 	vk::UniqueDeviceMemory AllocateBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device, vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags, Dispatcher const& dispatcher)
+		vk::PhysicalDevice pdevice, vk::Device device, vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags, Dispatcher const& dispatcher)
 	{
 		vk::MemoryRequirements req = device.getBufferMemoryRequirements(buffer, dispatcher);
 
@@ -52,7 +52,7 @@ namespace idk::vkn::hlp
 	}
 	template<typename Dispatcher>
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device,
+		vk::PhysicalDevice pdevice, vk::Device device,
 		vk::DeviceSize buffer_size,
 		vk::BufferUsageFlags buffer_usage,
 		vk::MemoryPropertyFlags memory_flags,
@@ -66,7 +66,7 @@ namespace idk::vkn::hlp
 	}
 	template<typename Dispatcher>
 	std::pair<vk::UniqueBuffer, UniqueAlloc> CreateAllocBindBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device,
+		vk::PhysicalDevice pdevice, vk::Device device,
 		vk::DeviceSize buffer_size,
 		vk::BufferUsageFlags buffer_usage,
 		vk::MemoryPropertyFlags memory_flags,
@@ -81,7 +81,7 @@ namespace idk::vkn::hlp
 	}
 	template<typename T, typename Dispatcher>
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device, T const* vertices, T const* vertices_end, const Dispatcher& dispatcher
+		vk::PhysicalDevice pdevice, vk::Device device, T const* vertices, T const* vertices_end, const Dispatcher& dispatcher
 	)
 	{
 
@@ -89,7 +89,7 @@ namespace idk::vkn::hlp
 	}
 	template<typename T, typename Dispatcher>
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> CreateAllocBindVertexBuffer(
-		vk::PhysicalDevice& pdevice, vk::Device& device, std::vector<T> const& vertices, const Dispatcher& dispatcher
+		vk::PhysicalDevice pdevice, vk::Device device, std::vector<T> const& vertices, const Dispatcher& dispatcher
 	)
 	{
 		return CreateAllocBindVertexBuffer(pdevice, device, vertices.data(), vertices.data() + vertices.size(), dispatcher);

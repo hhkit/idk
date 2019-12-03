@@ -2,7 +2,7 @@
 //@file		IGE_MainWindow.cpp
 //@author	Muhammad Izha B Rahim
 //@param	Email : izha95\@hotmail.com
-//@date		10 SEPT 2019
+//@date		18 NOV 2019
 //@brief	
 
 /*
@@ -16,7 +16,7 @@ of the editor.
 #include "pch.h"
 #include <editor/windows/IGE_MainWindow.h>
 #include <editorstatic/imgui/imgui_internal.h> //DockBuilderDockNode
-#include <editor/commands/CommandList.h> //DockBuilderDockNode
+#include <editor/commands/CommandList.h> //Commands
 #include <common/Transform.h> //DockBuilderDockNode
 #include <common/TagManager.h>
 #include <gfx/Camera.h> //DockBuilderDockNode
@@ -26,9 +26,11 @@ of the editor.
 #include <editor/SceneManagement.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <core/Scheduler.h>
+#include <audio/AudioSystem.h> //AudioSystem
 #include <PauseConfigurations.h>
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
+#include <imgui/ImGuizmo.h>
 
 namespace idk {
 
@@ -110,20 +112,24 @@ namespace idk {
 
             ImGui::Separator();
 
-			if (ImGui::MenuItem("New Scene", "CTRL+N"))
+			auto game_playing = Core::GetSystem<IDE>().game_running;
+
+			if (ImGui::MenuItem("New Scene", "CTRL+N", false, !game_playing))
 				NewScene();
 
-			if (ImGui::MenuItem("Open Scene", "CTRL+O"))
+			if (ImGui::MenuItem("Open Scene", "CTRL+O", false, !game_playing))
 				OpenScene();
 
 			ImGui::Separator();
 
-			if (ImGui::MenuItem("Save", "CTRL+S")) 
+
+
+			if (ImGui::MenuItem("Save", "CTRL+S", false, !game_playing))
 				SaveScene();
 
 
 
-			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S")) 
+			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !game_playing))
 				SaveSceneAs();
 
 			ImGui::Separator();
@@ -172,10 +178,14 @@ namespace idk {
 			} 
 			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
 				IDE& editor = Core::GetSystem<IDE>();
+				int execute_counter = 0;
+
 				for (auto& i : editor.copied_gameobjects) {
 					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject, i));
+					++execute_counter;
 				}
 
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 
 			}
 
@@ -188,11 +198,15 @@ namespace idk {
 			if (ImGui::MenuItem("Delete")) {
 				vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
 				IDE& editor = Core::GetSystem<IDE>();
+				int execute_counter = 0;
 				while (!editor.selected_gameObjects.empty()) {
 					Handle<GameObject> i = editor.selected_gameObjects.front();
 					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
 					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+					++execute_counter;
 				}
+
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 
 				selected_gameObjects.clear();
 
@@ -266,8 +280,14 @@ namespace idk {
 
 				if (ImGui::MenuItem(displayName.c_str(),nullptr,nullptr,canSelect)) {
 					//Add component
-					for (Handle<GameObject> i : editor.selected_gameObjects)
+					int execute_counter = 0;
+					for (Handle<GameObject> i : editor.selected_gameObjects) {
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+						++execute_counter;
+					}
+
+					CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+					commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 				}
 			}
 			//Each button is disabled if gameobject is not selected!
@@ -392,19 +412,22 @@ namespace idk {
 
         ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
+		ImGui::PushID(1337);
 		if (Core::GetSystem<IDE>().game_running == false)
 		{
-			if (ImGui::Button("Play", toolButtonSize))
+			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 			{
 				// IDE& editor = Core::GetSystem<IDE>();
 				// for (auto& i : editor.ige_windows)
 				// 	if (i->window_name != "Game")
 				// 		i->is_open = false;
 				// editor.currentCamera().current_camera->enabled = false;
-				SaveSceneTemporarily();
+				HotReloadDLL();
+				Core::GetSystem<IDE>().FindWindow<IGE_InspectorWindow>()->Reset();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
 				Core::GetSystem<IDE>().game_running = true;
 				Core::GetSystem<IDE>().game_frozen = false;
+				Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
 				Core::GetSystem<PhysicsSystem>().Reset();
 			}
 			ImGui::SameLine(0, 0);
@@ -419,6 +442,7 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(EditorPause);
 					Core::GetSystem<IDE>().game_frozen = true;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(true);
 				}
 			}
 			else
@@ -427,23 +451,28 @@ namespace idk {
 				{
 					Core::GetScheduler().SetPauseState(UnpauseAll); 
 					Core::GetSystem<IDE>().game_frozen = false;
+					Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+
 				}
 			}
 			ImGui::SameLine(0, 0);
 			if (ImGui::Button("Stop", toolButtonSize))
 			{
 				RestoreFromTemporaryScene();
+				Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
 			}
 		}
-
+		ImGui::PopID();
 		
 		ImGui::PopStyleVar();
 
+
         ImGui::SameLine(ImGui::GetWindowContentRegionWidth() -
-            ImGui::CalcTextSize("Debug Draw").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
-        ImGui::Checkbox("Debug Draw", &Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera->overlay_debug_draw);
+            ImGui::CalcTextSize("Draw All Colliders").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
+
+        ImGui::Checkbox("Draw All Colliders", &Core::GetSystem<PhysicsSystem>().debug_draw_colliders);
 
 		ImGui::EndChild();
 
@@ -506,9 +535,13 @@ namespace idk {
 
 			//CTRL + V
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
+				int execute_counter = 0;
 				for (auto& i : editor.copied_gameobjects) {
 					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject,i));
+					++execute_counter;
 				}
+
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 
 
@@ -532,11 +565,21 @@ namespace idk {
 			
 			//DEL = Delete
 			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
+				int execute_counter = 0;
+				//Move the gizmo away before deleting
+				float				fake_matrix[16]{ 0 }; 
+				ImGuizmo::Manipulate(fake_matrix, fake_matrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, fake_matrix, NULL, NULL);
+
+
+
 				while (!editor.selected_gameObjects.empty()) {
 					Handle<GameObject> i = editor.selected_gameObjects.front();
 					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
 					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+					++execute_counter;
 				}
+
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 
 			//F = Focus on GameObject
@@ -606,6 +649,7 @@ namespace idk {
 			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_SceneView>()->window_name, main);
 			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_Console>()->window_name, bottom_left);
 			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProgrammerConsole>()->window_name, bottom_left);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_LightLister>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProjectWindow>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_HierarchyWindow>()->window_name, left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_InspectorWindow>()->window_name, right);

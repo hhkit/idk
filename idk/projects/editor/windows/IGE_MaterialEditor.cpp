@@ -9,6 +9,7 @@
 #include <gfx/ShaderGraph.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <gfx/MaterialInstance.h>
+#include <gfx/GraphicsSystem.h>
 #include <regex>
 #include <filesystem>
 
@@ -521,7 +522,7 @@ namespace idk
             if (!ignore_filter && filter.PassFilter(item.name.c_str())) // if folder name filtered, pass all descendants
                 ignore_filter = true;
 
-            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth))
+            if (stack.empty() || ImGui::TreeNodeEx(folder_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth))
             {
                 stack.push_back(&item);
                 for (auto& inner_item : item.items)
@@ -544,7 +545,7 @@ namespace idk
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f });
 			ImGui::Unindent();
-            ImGui::TreeNodeEx(item.name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+            ImGui::TreeNodeEx(item.name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth);
 			ImGui::Indent();
 			if (ImGui::IsItemClicked())
 			{
@@ -935,21 +936,20 @@ namespace idk
             changed = changed || ImGuidk::EnumCombo("Model", &meta.model);
             if (changed)
             {
-                //_graph->SetMeta(meta);
-
-                //auto master_node = _graph->nodes[_graph->master_node];
-                //auto new_master_node_name = master_node.name;
-                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::DefaultLit)
-                //    new_master_node_name = "master\\PBR";
-                //if (meta.domain == MaterialDomain::Surface && meta.blend == BlendMode::Opaque && meta.model == ShadingModel::Unlit)
-                //    new_master_node_name = "master\\Unlit";
-
-                //if (master_node.name != new_master_node_name)
-                //{
-                //    auto pos = master_node.position;
-                //    removeNode(master_node);
-                //    _graph->master_node = addNode(new_master_node_name, pos).guid;
-                //}
+                auto master_node = _graph->nodes[_graph->master_node];
+                auto new_master_node_name = master_node.name;
+				switch (meta.model)
+				{
+				case ShadingModel::DefaultLit: new_master_node_name = "master\\PBR";          break;
+				case ShadingModel::Unlit:      new_master_node_name = "master\\Unlit";        break;
+				case ShadingModel::Specular:   new_master_node_name = "master\\PBR Specular"; break;
+				}
+                if (master_node.name != new_master_node_name)
+                {
+                    auto pos = master_node.position;
+                    removeNode(master_node);
+                    _graph->master_node = addNode(new_master_node_name, pos).guid;
+                }
             }
         }
 

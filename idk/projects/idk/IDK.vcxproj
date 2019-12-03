@@ -5,6 +5,14 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Deploy|Win32">
+      <Configuration>Deploy</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Deploy|x64">
+      <Configuration>Deploy</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -22,6 +30,8 @@
     <ClInclude Include="anim\Animation.h" />
     <ClInclude Include="anim\AnimationLayer.h" />
     <ClInclude Include="anim\AnimationState.h" />
+    <ClInclude Include="anim\AnimationTransition.h" />
+    <ClInclude Include="anim\AnimationTypes.h" />
     <ClInclude Include="anim\AnimationUtils.h" />
     <ClInclude Include="anim\Animator.h" />
     <ClInclude Include="anim\AnimationSystem.h" />
@@ -52,16 +62,33 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
-    <ClInclude Include="gfx\Font.h" />
+    <ClInclude Include="gfx\ShaderIncluder.h" />
+    <ClInclude Include="gfx\ShaderSnippet.h" />
+    <ClInclude Include="gfx\ShaderSnippetFactory.h" />
+    <ClInclude Include="gfx\ShaderSnippetLoader.h" />
+    <ClInclude Include="gfx\RenderRequest.h" />
+    <ClInclude Include="gfx\TextMesh.h" />
     <ClInclude Include="gfx\FontAtlas.h" />
     <ClInclude Include="gfx\FontAtlasFactory.h" />
     <ClInclude Include="gfx\FontData.h" />
+    <ClInclude Include="common\LayerMask.h" />
+    <ClInclude Include="gfx\TextAlignment.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
-    <ClInclude Include="gfx\Viewport.h" />
+    <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
+    <ClInclude Include="memory\ArenaAllocator.h" />
     <ClInclude Include="meta\comparator.h" />
+    <ClInclude Include="meta\stl_hack.h" />
+    <ClInclude Include="multithread_control.h" />
+    <ClInclude Include="parallel\cache_aligned_wrapper.h" />
+    <ClInclude Include="parallel\circular_buffer.h" />
+    <ClInclude Include="parallel\HazardPointerDL.h" />
+    <ClInclude Include="parallel\queue.h" />
+    <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
+    <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
+    <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h" />
     <ClInclude Include="phys\collision_detection\ManagedCollision.h" />
     <ClInclude Include="math\ritters.h" />
     <ClInclude Include="particle\MinMax.h" />
@@ -234,6 +261,12 @@
     <ClInclude Include="math\shapes\box.h" />
     <ClInclude Include="math\shapes\ray.h" />
     <ClInclude Include="math\shapes\sphere.h" />
+    <ClInclude Include="ui\Canvas.h" />
+    <ClInclude Include="ui\Image.h" />
+    <ClInclude Include="ui\RectTransform.h" />
+    <ClInclude Include="ui\Text.h" />
+    <ClInclude Include="gfx\TextAnchor.h" />
+    <ClInclude Include="ui\UISystem.h" />
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
@@ -286,9 +319,9 @@
     <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
-    <ClCompile Include="gfx\Font.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />
     <ClCompile Include="gfx\FontAtlasFactory.cpp" />
+    <ClCompile Include="gfx\FontData.cpp" />
     <ClCompile Include="gfx\Framebuffer.cpp" />
     <ClCompile Include="gfx\FramebufferFactory.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
@@ -302,7 +335,9 @@
     <ClCompile Include="gfx\ShaderGraph.cpp" />
     <ClCompile Include="gfx\ShaderGraph_data.cpp" />
     <ClCompile Include="gfx\ShaderGraph_helpers.cpp" />
+    <ClCompile Include="gfx\ShaderIncluder.cpp" />
     <ClCompile Include="gfx\ShaderProgram.cpp" />
+    <ClCompile Include="gfx\ShaderSnippetLoader.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="math\ritters.cpp" />
@@ -310,6 +345,7 @@
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />
     <ClCompile Include="math\shapes\halfspace.cpp" />
+    <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
     <ClCompile Include="particle\ParticleSystemModules.cpp" />
@@ -318,16 +354,20 @@
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp" />
+    <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp" />
     <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />
     <ClCompile Include="phys\PhysicsSystem.cpp" />
     <ClCompile Include="phys\RigidBody.cpp" />
+    <ClCompile Include="prefab\PrefabInstance.cpp" />
     <ClCompile Include="res\GenericResourceHandle.cpp" />
     <ClCompile Include="res\Guid.cpp" />
     <ClCompile Include="res\MetaBundle.cpp" />
     <ClCompile Include="res\ResourceBundle.cpp" />
     <ClCompile Include="proj\ProjectManager.cpp" />
+    <ClCompile Include="res\ResourceMeta.cpp" />
     <ClCompile Include="scene\SceneGraphBuilder.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
@@ -367,6 +407,7 @@
     <ClCompile Include="serialize\text_serialize.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
@@ -387,16 +428,19 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="reflect\dynamic.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="reflect\reflect.cpp" />
     <ClCompile Include="reflect\type.cpp" />
     <ClCompile Include="res\ResourceManager.cpp" />
     <ClCompile Include="serialize\text_parse.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="math\shapes\aabb.cpp" />
@@ -404,10 +448,12 @@
     <ClCompile Include="math\shapes\ray.cpp" />
     <ClCompile Include="math\shapes\sphere.cpp" />
     <ClCompile Include="serialize\yaml_load.cpp" />
+    <ClCompile Include="ui\UISystem.cpp" />
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="anim\Animator.inl" />
     <None Include="core\Scheduler.inl" />
     <None Include="core\Core.inl" />
     <None Include="core\GameObject.inl" />
@@ -426,6 +472,7 @@
     <None Include="math\comparable.inl" />
     <None Include="math\linear.inl" />
     <None Include="math\matrix_decomposition.inl" />
+    <None Include="memory\ArenaAllocator.inl" />
     <None Include="meta\comparator.inl" />
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
@@ -504,6 +551,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -512,6 +566,14 @@
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -530,10 +592,16 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -558,7 +626,22 @@
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)engine\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)engine\</OutDir>
+    <IntDir>$(SolutionDir)build\core\$(Configuration)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+    <TargetName>core</TargetName>
+    <SourcePath>$(VC_SourcePath);</SourcePath>
+    <CodeAnalysisRuleSet>..\idk.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)engine\</OutDir>
     <IntDir>$(SolutionDir)build\core\$(Configuration)\</IntDir>
@@ -589,7 +672,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -627,6 +710,25 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -635,7 +737,37 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4201; 4505;4702</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)dep\include\;%VULKAN_SDK%\Include\</AdditionalIncludeDirectories>
+      <EnablePREfast>false</EnablePREfast>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;freetype.lib;fmod_vc.lib;</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

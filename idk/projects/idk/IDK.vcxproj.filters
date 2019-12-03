@@ -119,11 +119,17 @@
     <Filter Include="gfx\shadergraph">
       <UniqueIdentifier>{ecae51a5-a7c1-4b0c-b1ea-b4304be8526b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gfx\Font">
-      <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{f17c41f6-99d2-4166-9856-059caddc0284}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="anim\detail">
+      <UniqueIdentifier>{5f3cf2cf-2fa4-43f8-bffe-cbd22c94da10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{241cb65f-5a4a-4fab-adc2-43995a1f3b84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gfx\font">
+      <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -782,9 +788,6 @@
     <ClInclude Include="proj\ProjectManager.h">
       <Filter>proj</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\Viewport.h">
-      <Filter>gfx\camera</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Buffer.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -837,13 +840,10 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="gfx\FontAtlas.h">
-      <Filter>gfx\Font</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\Font.h">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="gfx\FontData.h">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClInclude>
     <ClInclude Include="util\easing.h">
       <Filter>util</Filter>
@@ -857,10 +857,79 @@
     <ClInclude Include="phys\collision_detection\collision_capsule.h">
       <Filter>phys\collision</Filter>
     </ClInclude>
-    <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="meta\comparator.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="math\rect.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule_box.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h">
+      <Filter>phys\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Image.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Canvas.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\UISystem.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\RectTransform.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="multithread_control.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\stl_hack.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Text.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextAnchor.h">
+      <Filter>gfx\font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextAlignment.h">
+      <Filter>gfx\font</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextMesh.h">
+      <Filter>gfx\font</Filter>
+    </ClInclude>
+    <ClInclude Include="common\LayerMask.h" />
+    <ClInclude Include="parallel\HazardPointerDL.h" />
+    <ClInclude Include="parallel\queue.h" />
+    <ClInclude Include="parallel\ThreadPool.h" />
+    <ClInclude Include="anim\AnimationTransition.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="anim\AnimationTypes.h">
+      <Filter>anim</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\circular_buffer.h" />
+    <ClInclude Include="parallel\cache_aligned_wrapper.h" />
+    <ClInclude Include="gfx\ShaderSnippetLoader.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderIncluder.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderSnippet.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShaderSnippetFactory.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderRequest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\ArenaAllocator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1247,10 +1316,7 @@
     </ClCompile>
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp">
-      <Filter>gfx\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\Font.cpp">
-      <Filter>gfx\Font</Filter>
+      <Filter>gfx\font</Filter>
     </ClCompile>
     <ClCompile Include="gfx\FontAtlasFactory.cpp">
       <Filter>gfx\object</Filter>
@@ -1264,7 +1330,32 @@
     <ClCompile Include="anim\AnimationUtils.cpp">
       <Filter>anim\utils</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\FramebufferFactory.cpp" />
+    <ClCompile Include="gfx\FramebufferFactory.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp">
+      <Filter>phys\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\UISystem.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="prefab\PrefabInstance.cpp">
+      <Filter>prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\FontData.cpp">
+      <Filter>gfx\font</Filter>
+    </ClCompile>
+    <ClCompile Include="parallel\ThreadPool.cpp" />
+    <ClCompile Include="gfx\ShaderIncluder.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShaderSnippetLoader.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="res\ResourceMeta.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1447,7 +1538,13 @@
     <None Include="script\ManagedObj.inl">
       <Filter>script</Filter>
     </None>
-    <None Include="meta\comparator.inl" />
+    <None Include="meta\comparator.inl">
+      <Filter>meta</Filter>
+    </None>
+    <None Include="anim\Animator.inl">
+      <Filter>anim\detail</Filter>
+    </None>
+    <None Include="memory\ArenaAllocator.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

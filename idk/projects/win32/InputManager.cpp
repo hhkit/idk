@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "InputManager.h"
-
+#include <Windows.h>
 namespace idk::win
 {
 	void InputManager::SetKeyDown(int index)
@@ -45,25 +45,31 @@ namespace idk::win
 		_curr_mouse_scroll = ivec2{};
 	}
 
+	void InputManager::FlushCurrentBuffer()
+	{
+		for (auto& elem : curr_buf())
+			elem = false;
+	}
+
 	bool InputManager::GetKeyDown(int index)
 	{
-		return prev_buf()[index] == false && curr_buf()[index] == true;
+		return s_cast<bool>(!prev_buf()[index] && curr_buf()[index]);
 	}
 	bool InputManager::GetKey(int index)
 	{
-		return curr_buf()[index];
+		return s_cast<bool>(curr_buf()[index]);
 	}
 	bool InputManager::GetKeyUp(int index)
 	{
-		return curr_buf()[index] == false && prev_buf()[index] == true;
+		return s_cast<bool>(curr_buf()[index] == 0 && prev_buf()[index]);
 	}
 	bool InputManager::GetMouseDown(int index)
 	{
-		return prev_buf()[index] == false && curr_buf()[index] == true;
+		return s_cast<bool>(prev_buf()[index] == 0 && curr_buf()[index]);
 	}
 	bool InputManager::GetMouseUp(int index)
 	{
-		return curr_buf()[index] == false && prev_buf()[index] == true;
+		return s_cast<bool>(curr_buf()[index] == 0 && prev_buf()[index]);
 	}
 	char InputManager::GetChar()
 	{

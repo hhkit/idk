@@ -48,5 +48,7 @@ namespace idk
 		);
 
 		buffer_desc Process(uint32_t location_offset)const;
+
+		string GenString()const;
 	};
 }

@@ -6,7 +6,6 @@
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
 #include <res/MetaBundle.h>
-
 /* 
  * !!! NOTE !!!
  * TO BE INCLUDED IN THE ENTRY POINT CPP, LIKE GAME.CPP
@@ -107,6 +106,10 @@ REFLECT_END()
 REFLECT_BEGIN(idk::rad, "rad")
 REFLECT_CTOR(float)
 REFLECT_VARS(value)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::rect, "rect")
+REFLECT_VARS(position, size)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::matrix_decomposition<idk::real>, "matrix_decomposition")
@@ -352,7 +355,7 @@ REFLECT_VARS(layers)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::SceneManager, "SceneManager")
-REFLECT_VARS(_startup_scene, _active_scene)
+REFLECT_VARS(_startup_scene)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::mono::ScriptSystemConfig, "ScriptConfig")
@@ -360,6 +363,16 @@ REFLECT_VARS(path_to_game_dll)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::mono::ScriptSystem, "ScriptSystem")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::PhysicsConfig::matrix), "PhysicsLayerMatrix")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PhysicsConfig, "PhysicsConfig")
+REFLECT_VARS(matrix, batch_size)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PhysicsSystem, "PhysicsSystem")
 REFLECT_END()
 
 /*==========================================================================
@@ -434,7 +447,7 @@ REFLECT_VARS(light, shadow_bias, casts_shadows)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PointLight, "PointLight")
-REFLECT_VARS(intensity, light_color, attenuation_radius)
+REFLECT_VARS(intensity, light_color, attenuation_radius, use_inv_sq_atten)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::DirectionalLight, "DirectionalLight")
@@ -455,27 +468,33 @@ REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::Font, "Font")
-REFLECT_VARS(tracking, spacing, padding, colour, fontSize, textureAtlas, text)
+REFLECT_BEGIN(idk::TextMesh, "TextMesh")
+REFLECT_VARS(text, letter_spacing, line_height, color, font_size, font)
 REFLECT_END()
 
 // CAMERA
-REFLECT_BEGIN(idk::Viewport, "Viewport")
-REFLECT_VARS(position, size)
+REFLECT_BEGIN(idk::DontClear, "Don'tClear")
+REFLECT_END()
+REFLECT_BEGIN(idk::DepthOnly, "DepthOnly")
 REFLECT_END()
 
-REFLECT_BEGIN(idk::DontClear, "<Don'tClear>")
+REFLECT_BEGIN(idk::LayerMask, "LayerMask")
+REFLECT_VARS(mask)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, near_plane, far_plane, depth, clear, is_orthographic, overlay_debug_draw, viewport, render_target)
+REFLECT_VARS(enabled,layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target)
 REFLECT_END()
 
 // ANIMATION
+
+// Enums
 REFLECT_ENUM(idk::AnimLayerBlend, "AnimLayerBlend")
 REFLECT_ENUM(idk::anim::AnimDataType, "AnimDataType")
+REFLECT_ENUM(idk::anim::ConditionIndex, "ConditionIndex")
 REFLECT_ENUM(idk::anim::BlendTreeType, "BlendTreeType")
 
+// Animation States reflection
 REFLECT_BEGIN(idk::BasicAnimationState, "BasicAnimationState")
 REFLECT_VARS(motion)
 REFLECT_END()
@@ -497,32 +516,78 @@ REFLECT_BEGIN(idk::BlendTree, "BlendTree")
 REFLECT_VARS(motions, params, blend_tree_type)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::AnimationState, "AnimationState")
-REFLECT_VARS(name, valid, loop, speed, state_data)
+// Animation conditions and transitions
+REFLECT_BEGIN(idk::AnimationCondition, "AnimationCondition")
+REFLECT_VARS(param_name, type, op_index, val_f, val_i, val_b, val_t)
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::AnimationTransition::conditions), "vector<AnimationCondition>")
+REFLECT_END();
+
+REFLECT_BEGIN(idk::AnimationTransition, "AnimationTransition")
+REFLECT_VARS(valid, transition_from_index, transition_to_index, interruptible, has_exit_time, exit_time, transition_offset, transition_duration, conditions)
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::AnimationState::transitions), "vector<AnimationTransition>")
+REFLECT_END();
+
+REFLECT_BEGIN(idk::AnimationState, "AnimationState")
+REFLECT_VARS(name, valid, loop, speed, state_data, node_position, transitions)
+REFLECT_END()
+
+// Animation Layer serialization
 REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::AnimationLayer::anim_states), "vector<AnimationState>")
+REFLECT_END()
+
 REFLECT_BEGIN(idk::AnimationLayer, "AnimationLayer")
-REFLECT_VARS(name, default_state, default_weight, bone_mask, blend_type)
+REFLECT_VARS(name, default_index, default_weight, anim_states, bone_mask, blend_type)
+REFLECT_END()
+// Animation parameters
+REFLECT_BEGIN(idk::anim::IntParam, "anim::IntParam")
+REFLECT_VARS(name, def_val, val, valid)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::Bone, "Bone")
-REFLECT_VARS(_bone_name, _bone_index)
+REFLECT_BEGIN(idk::anim::FloatParam, "anim::FloatParam")
+REFLECT_VARS(name, def_val, val, valid)
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::animation_table), "hash_table<string,AnimationState>")
+REFLECT_BEGIN(idk::anim::BoolParam, "anim::BoolParam")
+REFLECT_VARS(name, def_val, val, valid)
 REFLECT_END()
 
-REFLECT_BEGIN(decltype(idk::Animator::layer_table), "hash_table<string,size_t>")
+REFLECT_BEGIN(idk::anim::TriggerParam, "anim::TriggerParam")
+REFLECT_VARS(name, def_val, val, valid)
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::int_vars), "hash_table<string,anim::IntParam>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::float_vars), "hash_table<string,anim::FloatParam>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::bool_vars), "hash_table<string,anim::BoolParam>")
+REFLECT_END()
+
+REFLECT_BEGIN(decltype(idk::Animator::AnimationParams::trigger_vars), "hash_table<string,anim::TriggerParam>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Animator::AnimationParams, "parameters")
+REFLECT_VARS(int_vars, float_vars, bool_vars, trigger_vars)
+REFLECT_END()
+
+// Animator serialization
 REFLECT_BEGIN(idk::vector<idk::AnimationLayer>, "vector<AnimationLayer>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Animator, "Animator")
-REFLECT_VARS(skeleton, animation_table, animation_display_order, layer_table, layers)
+REFLECT_VARS(skeleton, layers, parameters)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Bone, "Bone")
+REFLECT_VARS(bone_name, bone_index)
 REFLECT_END()
 
 // PARTICLE SYSTEM
@@ -575,4 +640,24 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::ParticleSystem, "ParticleSystem")
 REFLECT_VARS(main, emission, shape, velocity_over_lifetime, color_over_lifetime, size_over_lifetime, rotation_over_lifetime, renderer)
+REFLECT_END()
+
+// UI
+REFLECT_BEGIN(idk::RectTransform, "RectTransform")
+REFLECT_VARS(anchor_min, anchor_max, offset_min, offset_max, pivot)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Canvas, "Canvas")
+REFLECT_VARS(render_target)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::Image, "Image")
+REFLECT_VARS(texture, tint, material)
+REFLECT_END()
+
+REFLECT_ENUM(idk::TextAlignment, "TextAlignment")
+REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
+
+REFLECT_BEGIN(idk::Text, "Text")
+REFLECT_VARS(text, font, font_size, letter_spacing, line_height, alignment, wrap, best_fit, color, material)
 REFLECT_END()

@@ -33,9 +33,13 @@ namespace idk
 		: public Component<Light>
 	{
 	public:
+		bool         enabled       { true };
 		LightVariant light;
 		real         shadow_bias   { epsilon };
 		bool         casts_shadows { true };
+		bool         isolate       { false };
+
+		bool is_active_and_enabled() const;
 
 		void InitShadowMap();
 		RscHandle<FrameBuffer>& GetLightMap();
@@ -50,6 +54,12 @@ namespace idk
 
 		real GetLightIntensity()const;
 		void SetLightIntensity(const real& i);
+
+		bool GetCastShadow()const { return casts_shadows; }
+		void SetCastShadow(const bool& i) { casts_shadows = i; }
+
+		real GetShadowBias()const { return shadow_bias; }
+		void SetShadowBias(const real& i) { shadow_bias = i; }
 		//CameraData GenerateCameraData() const;
 	};
 }

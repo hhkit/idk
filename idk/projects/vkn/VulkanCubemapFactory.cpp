@@ -34,8 +34,9 @@ namespace idk::vkn
 		};
 		
 		auto ptr = std::make_unique<VknCubemap>();
+		ptr->texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>();
 		CubemapLoader loader;
-		loader.LoadCubemap(*ptr, CubemapFormat::eRGBA32, {}, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, ivec2{ 2,2 }, allocator, *fence);
+		loader.LoadCubemap(*ptr, TextureFormat::eRGBA32, {}, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, ivec2{ 2,2 }, allocator, *fence);
 		return std::move(ptr);
 	}
 	unique_ptr<CubeMap> VulkanCubemapFactory::Create()

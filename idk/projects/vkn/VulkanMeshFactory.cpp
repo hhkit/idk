@@ -400,10 +400,10 @@ namespace idk::vkn
 			//real angle = (2.f * pi) / numberOfTri;
 
 			std::vector<Vertex> vertices{
-				Vertex{ vec3{  sz, sz, 0}, vec3{0, 1,0}, vec2{1, 1} },  // front
-				Vertex{ vec3{  sz,-sz, 0}, vec3{0, 1,0}, vec2{1, 0} },  // front
-				Vertex{ vec3{-sz, -sz, 0},  vec3{0, 1,0}, vec2{0, 0} },  // front
-				Vertex{ vec3{-sz,  sz, 0},  vec3{0, 1,0}, vec2{0, 1} },  // front
+				Vertex{ vec3{  sz, sz, 0}, vec3{0, 1,0}, vec2{0, 0} },  // front
+				Vertex{ vec3{  sz,-sz, 0}, vec3{0, 1,0}, vec2{0, 1} },  // front
+				Vertex{ vec3{-sz, -sz, 0},  vec3{0, 1,0}, vec2{1, 1} },  // front
+				Vertex{ vec3{-sz,  sz, 0},  vec3{0, 1,0}, vec2{1, 0} },  // front
 			};
 
 			std::vector<uint16_t> indices{
@@ -446,6 +446,24 @@ namespace idk::vkn
 			};
 		return std::make_pair(std::move(vertices),std::move(indices));
 
+	}
+	template<typename T>
+	void RotateBuffer(T& buffer, const size_t n)
+	{
+		auto cpy = buffer;
+		auto size = buffer.size();
+		for (size_t i = 0; i < size; ++i)
+		{
+			buffer[(i + n) % size] = cpy[i];
+		}
+
+		//auto size = buffer.size();
+		//for (size_t i = 0; i < n; ++i)
+		//{
+		//	auto& hold = buffer[i];
+		//	for(size_t j=0; j<((size-1)/n);++j)
+		//		std::swap(hold,buffer[i+j*n];
+		//}
 	}
 
 	void MeshFactory::GenerateDefaultMeshes()
@@ -615,10 +633,16 @@ namespace idk::vkn
 
 		const auto fsq_mesh = Mesh::defaults[MeshType::FSQ];
 		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(fsq_mesh.guid);
+
+		const auto inv_fsq_mesh = Mesh::defaults[MeshType::INV_FSQ];
 		pair = GenerateFSQInterleavedBuffers();
 		{
 			auto& [interleaved_buffer, indices] = pair;
 			ConvertInterleaved(interleaved_buffer, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+			mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(inv_fsq_mesh.guid);
+			RotateBuffer(uv_buffer, 2);
+			compute_tangents(tangent_buffer, pos_buffer, uv_buffer, indices);
 			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
 		}
 

@@ -54,7 +54,7 @@ namespace idk {
 		if (mountPath.empty() || mountPath[0] != '/')
 			return string{};
 
-        string mount_path{ mountPath.data() };
+        string mount_path{ mountPath.data(),mountPath.size() };
 
 		const auto end_pos = mount_path.find_first_of('/', 1);
 		

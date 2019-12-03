@@ -7,11 +7,12 @@ namespace idk::anim
 {
 	struct BoneData
 	{
-		string _name;
-		int  _parent = 0;
-		mat4 _global_inverse_bind_pose;
+		string name;
+		int  parent = 0;
+		vector<int> children;
+		mat4 global_inverse_bind_pose;
 		quat pre_rotation, post_rotation;
-		matrix_decomposition<real> _local_bind_pose;
+		matrix_decomposition<real> local_bind_pose;
 	};
 
 	class Skeleton

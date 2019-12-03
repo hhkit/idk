@@ -18,6 +18,9 @@
 #include <vkn/utils/SwapchainInfo.h>
 #include <vkn/vulkan_state_fwd.h>
 #include <vkn/VulkanHashes.h>
+
+#include <vkn/RenderPassObj.h>
+
 #undef max
 #undef min
 
@@ -116,7 +119,7 @@ namespace idk::vkn
 		bool						imguiEnabled{ true };
 
 #pragma region ("Render passes")
-		vk::RenderPass BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth )const;
+		const RenderPassObj& BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth )const;
 		//vk::RenderPass RenderPass_RgbaColorOnly ()const;
 		//vk::RenderPass RenderPass_DepthOnly     ()const;
 		//vk::RenderPass RenderPass_RgbaColorDepth()const;
@@ -128,7 +131,14 @@ namespace idk::vkn
 		vk::Format					format;
 		vk::SurfaceFormatKHR        surfaceFormat;
 
+		void EnableValidation() { enable_validation = true; }
+
+#pragma region ("Creation functions")
+		//Creates command pool for the graphics queue
+		vk::UniqueCommandPool CreateGfxCommandPool();
+#pragma endregion
 	private:
+		bool enable_validation = false;
 		// type aliases
 		friend class VulkanView;
 		template<typename T>
@@ -174,7 +184,7 @@ namespace idk::vkn
 
 
 		vk::UniqueRenderPass                 m_renderpass;
-		vk::UniqueRenderPass                 m_basic_renderpasses[1<<3][BasicRenderPasses::eSizeBrp];
+		RenderPassObj                        m_basic_renderpasses[1<<3][BasicRenderPasses::eSizeBrp];
 		vk::UniqueRenderPass                 m_crenderpass;
 
 

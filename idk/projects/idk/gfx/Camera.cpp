@@ -91,28 +91,18 @@ namespace idk
 	{	
 		return CameraData{
 			GetGameObject(),
-			is_scene_camera,
-			0xFFFFFFF,
+			layer_mask,
 			ViewMatrix(),
 			ProjectionMatrix(),
 			render_target,
-			overlay_debug_draw,
 			false,
-			std::visit([&](const auto& obj)->CameraData::ClearData_t
-			{ 
-				//using T = std::decay_t<decltype(obj)>;
-				//if constexpr (std::is_same_v<T, color>)
-				//	return obj.as_vec4;
-				//else
-					return obj;
-		
-			}, clear),
+			clear,
 			Mesh::defaults[MeshType::Box],
 			viewport
 		};
 	}
 	float Camera::AspectRatio() const
 	{
-		return (render_target)? render_target->AspectRatio():(16.0f/9.0f);
+		return ((render_target)? render_target->AspectRatio():(16.0f/9.0f)) * ((float) viewport.size.x / viewport.size.y);
 	}
 }

@@ -27,3 +27,5 @@ Include all windows here
 #include <editor/windows/IGE_Console.h>
 #include <editor/windows/IGE_ProgrammerConsole.h>
 #include <editor/windows/IGE_AnimatorWindow.h>
+#include <editor/windows/IGE_HelpWindow.h>
+#include <editor/windows/IGE_LightLister.h>

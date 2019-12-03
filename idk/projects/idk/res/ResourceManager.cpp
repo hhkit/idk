@@ -310,7 +310,18 @@ namespace idk
 		const auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
 		IDK_ASSERT(success);
 
-		itr->second.is_new = !s_cast<bool>(meta_bundle);
+		auto new_meta = MetaBundle{};
+		for (auto& elem : bundle.GetAll())
+			std::visit([&](auto& handle) { new_meta.Add(handle);  }, elem);
+
+		if (new_meta != meta_bundle)
+		{
+			for (auto& elem : bundle.GetAll())
+				std::visit([](auto& handle) { 
+				if constexpr (has_tag_v<std::decay_t<decltype(handle)>, MetaTag>) 
+					handle->DirtyMeta(); }, 
+				elem);
+		}
 
 		// set path
 		for (auto& elem : bundle.GetAll())

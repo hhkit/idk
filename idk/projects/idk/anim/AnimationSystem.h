@@ -39,6 +39,8 @@ namespace idk
 		BonePose AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
 		// BonePose BlendingPass(Animator& animator, AnimationLayer& layer, size_t bone_index);
 		BonePose BlendPose(const BonePose& from, const BonePose& to, float delta);
+
+		void EvaluateTransitions(Animator& animator, AnimationLayer& layer);
 		size_t LayersPass(Animator& animator);
 		void AdvanceLayers(Animator& animator);
 		void AdvanceBlendTree(AnimationLayerState& layer_state, AnimationState& state) const;
@@ -46,7 +48,7 @@ namespace idk
 		void FinalPass(Animator& animator);
 		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
 
-		void InitializeAnimators();
+		void InitializeAnimators(bool play);
 
 		vector<Handle<Animator>> _creation_queue;
 	};

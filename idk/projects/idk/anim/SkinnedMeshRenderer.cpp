@@ -4,6 +4,9 @@
 #include <common/Transform.h>
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
+#include <math/matrix_transforms.h>
+#include <phys/RigidBody.h>
+#include <core/Scheduler.h>
 
 namespace idk
 {
@@ -13,18 +16,34 @@ namespace idk
 	}
 	AnimatedRenderObject SkinnedMeshRenderer::GenerateRenderObject() const
 	{
+		auto tfm = GetGameObject()->GetComponent<Transform>()->GlobalMatrix();
+		Handle<RigidBody> rb;
+		auto search = GetGameObject();
+		while (search)
+		{
+			rb = GetGameObject()->GetComponent<RigidBody>();
+			if (rb)
+				break;
+			else
+				search = search->Parent();
+		}
+		if (rb)
+			tfm[3] += vec4{ rb->velocity() * Core::GetScheduler().GetRemainingTime().count(), 0 };
 		return AnimatedRenderObject{
-			GetGameObject(),
-			mesh,
-			material_instance,
+			RenderObject
+			{
+			.obj_id = GetGameObject(),
+			.mesh = mesh,
+			.material_instance = material_instance,
 
-			vec3{},
-			GetGameObject()->GetComponent<Transform>()->GlobalMatrix() ,
+			.velocity = vec3{},
+			.transform = tfm,
 
-			cast_shadows,
-			receive_shadows,
-			&GetRequiredAttributes(),
-
+			.cast_shadows = cast_shadows,
+			.receive_shadows = receive_shadows,
+			.renderer_req = &GetRequiredAttributes(),
+			.layer_mask = layer_to_mask(GetGameObject()->Layer())
+			}
 		};
 	}
 	const renderer_attributes& SkinnedMeshRenderer::GetRequiredAttributes()

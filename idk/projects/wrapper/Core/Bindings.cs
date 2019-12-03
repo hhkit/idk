@@ -17,6 +17,15 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior[] ObjectGetObjectsOfType(string type);
 
+        /*
+         * Scene
+         */
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void SceneChangeScene(Guid guid);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void EngineKill();
         /**
          * Game Object
          */
@@ -173,7 +182,6 @@ namespace idk
         /*
          * Animator
          */
-
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AnimatorPlay(ulong id, string name);
 
@@ -210,7 +218,31 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorHasState(ulong id, string name);
 
+        // Parameter Getters
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int AnimatorGetInt(ulong id, string name);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AnimatorGetFloat(ulong id, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorGetBool(ulong id, string name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorGetTrigger(ulong id, string name);
+
+        // Parameter Setters
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetInt(ulong id, string name, int val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetFloat(ulong id, string name, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetBool(ulong id, string name, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetTrigger(ulong id, string name, bool val);
 
         /*
          * AudioSource
@@ -259,6 +291,55 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int AddAudioClip(ulong id, string name);
+
+        /*
+        * TextMesh
+        */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string TextMeshGetText(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextMeshSetText(ulong id, string c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color TextMeshGetColor(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextMeshSetColor(ulong id, Color c);
+
+        /*
+        * Camera
+        */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Rad CameraGetFOV(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetFOV(ulong id, Rad c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float CameraGetNearPlane(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetNearPlane(ulong id, float c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float CameraGetFarPlane(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetFarPlane(ulong id, float c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Rect CameraGetViewport(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetViewport(ulong id, Rect c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool CameraGetEnabledState(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetEnabledState(ulong id, bool c);
+
         /*
         * Light
         */
@@ -274,6 +355,35 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void LightSetIntensity(ulong id, float i);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool LightGetCastShadow(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetCastShadow(ulong id, bool i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float LightGetShadowBias(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetShadowBias(ulong id, float i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Rad LightGetFOV(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetFOV(ulong id, Rad i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float LightGetAttenuationRadius(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetAttenuationRadius(ulong id, float i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool LightGetIsInverseSqAtt(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetIsInverseSqAtt(ulong id, bool i);
 
         /*
          * Collider
@@ -297,10 +407,75 @@ namespace idk
         public extern static Guid RendererGetMaterialInstance(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void RendererSetMaterialInstance(ulong handle, Guid guid);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool RendererGetActive(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RendererSetActive(ulong id, bool active);
+
+        /*
+         * RectTransform
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetOffsetMin(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetOffsetMin(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetOffsetMax(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetOffsetMax(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetAnchorMin(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetAnchorMin(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetAnchorMax(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetAnchorMax(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetPivot(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformSetPivot(ulong id, Vector2 value);
+
+        /*
+         * Image
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid ImageGetTexture(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetTexture(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid ImageGetMaterialInstance(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetMaterialInstance(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color ImageGetColor(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ImageSetColor(ulong id, Color color);
+
+        /*
+         * Text
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string TextGetText(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetText(ulong id, string c);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Guid TextGetMaterialInstance(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetMaterialInstance(ulong id, Guid guid);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color TextGetColor(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetColor(ulong id, Color color);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static uint TextGetFontSize(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TextSetFontSize(ulong id, uint value);
+
         /*
          * Resource
          */
@@ -353,22 +528,36 @@ namespace idk
         public extern static bool InputGetKeyUp(int key);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static float InputGetAxis(char index, int a);
+        public extern static float InputGetAxis(sbyte index, int a);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static byte InputGetConnectedPlayers();
 
         /*
          * Time
          */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetTimeScale();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void TimeSetTimeScale(float val);
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetFixedDelta();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetDelta();
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetUnscaledFixedDelta();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetUnscaledDelta();
+
         /*
          * Debug
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float DebugLog(string preface, string message);
-
     }
 }

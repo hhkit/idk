@@ -129,7 +129,7 @@ namespace idk::vkn
 		auto clear_val = vk::ClearValue{ vk::ClearColorValue{} };
 		vk::RenderPassBeginInfo rpbi
 		{
-			vfb.GetRenderPass(),vfb.GetFramebuffer(),
+			*vfb.GetRenderPass(),vfb.GetFramebuffer(),
 			vk::Rect2D
 			{
 				vk::Offset2D{},vk::Extent2D{s_cast<uint32_t>(vfb.Size().x),s_cast<uint32_t>(vfb.Size().y)}
@@ -170,6 +170,7 @@ namespace idk::vkn
 			}, *fence);
 		while (device.getFenceStatus(*fence) == vk::Result::eNotReady);
 		_pm->RemovePipeline(&brdf_pipeline);
+		Core::GetResourceManager().Release(fb);
 		_pimpl->rendered_brdf = true;
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
@@ -198,46 +199,7 @@ namespace idk::vkn
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
-	/*
-	vector<IBufferedObj*> GetBufferedResources(vector<GraphicsState>& states)
-	{
-		hash_set<RscHandle<Texture>> textures;
-		hash_set<RscHandle<Mesh>> meshes;
-		for (auto& state : states)
-		{
-			for (auto& mesh_render : state.mesh_render)
-			{
-				meshes.emplace(mesh_render->mesh);
-				auto& m_inst = mesh_render->material_instance;
-				for (auto& uniform : m_inst.uniforms)
-				{
-					if (m_inst.IsImageBlock(uniform.first))
-					{
-						for (auto& tex : m_inst.GetImageBlock(uniform.first))
-						{
-							textures.emplace(tex.second);
-						}
-					}
-				}	
-			}
-		}
-
-		//Transform the result sets into buffered object vector
-		vector<IBufferedObj*> objs;
-		for (auto& mesh : meshes)
-		{
-
-		}
-	}
 	
-	void UpdateResources(uint32_t frame_index, const vector<IBufferedObj*>& buffered_objects)
-	{
-		for (auto p_obj : buffered_objects)
-		{
-			p_obj->UpdateCurrent(frame_index);
-		}
-	}
-	*/
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		try
@@ -251,11 +213,6 @@ namespace idk::vkn
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
 
-
-		//auto copy_cams = curr_buffer.light_camera_data;
-		//std::copy(curr_buffer.camera.begin(), curr_buffer.camera.end(), std::back_inserter(copy_cams));
-		//std::swap(copy_cams, curr_buffer.camera);
-
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
 
 		_debug_renderer->GrabDebugBuffer();
@@ -265,6 +222,18 @@ namespace idk::vkn
 		auto& lights = curr_buffer.lights;
 		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);
 		shared_graphics_state.BrdfLookupTable = _pimpl->BrdfLookupTable;
+		shared_graphics_state.particle_data = &curr_buffer.particle_buffer;
+		shared_graphics_state.particle_range = &curr_buffer.particle_range;
+
+		shared_graphics_state.characters_data = &curr_buffer.font_buffer;
+		shared_graphics_state.fonts_data = &curr_buffer.font_render_data;
+		shared_graphics_state.font_range = &curr_buffer.font_range;
+
+		shared_graphics_state.ui_render_per_canvas = &curr_buffer.ui_render_per_canvas;
+		shared_graphics_state.ui_canvas = &curr_buffer.ui_canvas;
+		shared_graphics_state.ui_text_data = &curr_buffer.ui_text_buffer;
+		shared_graphics_state.ui_text_range = &curr_buffer.ui_text_range;
+		shared_graphics_state.total_num_of_text = curr_buffer.ui_total_num_of_text;
 
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
@@ -273,13 +242,24 @@ namespace idk::vkn
 
 		//TODO cull the unused lights
 		for (size_t i = 0; i < lights.size(); ++i)
-			pre_render_data.active_lights[i]=i;
+			if(lights[i].cast_shadow && lights[i].index!=0)
+				pre_render_data.active_lights[i]=i;
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
-		//pre_render_data.mesh_vtx = curr_buffer.mesh_vtx;
-		//pre_render_data.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
+		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
+
 		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
 		pre_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
+
+		PostRenderData post_render_data;
+		post_render_data.shared_gfx_state = &shared_graphics_state;
+		post_render_data.cameras = &curr_buffer.camera;
+		post_render_data.canvas_render_range = &curr_buffer.canvas_render_range;
+		//post_render_data.Init();
+
+		post_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
+		post_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
+
 		hash_set<RscHandle<RenderTarget>> render_targets;
 
 		auto IsDontClear = [](const CameraData& camera)
@@ -310,16 +290,18 @@ namespace idk::vkn
 					}
 				}, camera.clear_data);
 		}
-
+		bool will_draw_debug = true;
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
-			auto& curr_state = curr_states[i];
+			auto& curr_state = curr_states[i];		
 			auto& curr_range = curr_buffer.culled_render_range[i];
 			auto& curr_cam = curr_range.camera;
+
+			//Init render datas (range for instanced data, followed by render datas for other passes)
 			curr_state.Init(curr_range, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
-			//const bool new_rt = 
-				curr_state.clear_render_target = !IsDontClear(curr_cam);
+			
+			curr_state.clear_render_target = !IsDontClear(curr_cam);
 
 			if(itr==render_targets.end())
 				render_targets.emplace(curr_cam.render_target);
@@ -330,19 +312,28 @@ namespace idk::vkn
 			curr_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
-			if (curr_cam.overlay_debug_draw)
+			curr_state.ProcessMaterialInstances();
+			if (curr_cam.render_target->RenderDebug())
 			{
+				will_draw_debug = true;
 				curr_state.dbg_pipeline = &_debug_renderer->GetPipeline();
 				//TODO Add cull step
-				curr_state.dbg_render.reserve(_debug_renderer->DbgDrawCalls().size());
-				for (auto& dbgcall : _debug_renderer->DbgDrawCalls())
+				curr_state.dbg_render.reserve(std::size(_debug_renderer->DbgDrawCalls()));
+				for (auto& [mesh,dbgcall] : _debug_renderer->DbgDrawCalls())
 				{
-					curr_state.dbg_render.emplace_back(&dbgcall);
+					if(dbgcall.num_instances)
+						curr_state.dbg_render.emplace_back(&dbgcall);
 				}
 			}
 			//_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
-
+		if (will_draw_debug)
+		{
+			for (auto& [buffer, data] : _debug_renderer->BufferUpdateInfo())
+			{
+				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
+			}
+		}
 		for (auto& prt : render_targets)
 		{
 			if (prt->NeedsFinalizing())
@@ -351,7 +342,8 @@ namespace idk::vkn
 		// */
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
-		instance_->DrawFrame(*curr_frame.GetMainSignal().render_finished,*curr_signal.render_finished);
+		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
+		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(),*curr_signal.render_finished);
 
 		}
 		catch (vk::SystemError& err)
@@ -374,6 +366,7 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
+		instance_->View().Device()->waitIdle();
 		_pimpl.reset();
 		_debug_renderer->Shutdown();
 

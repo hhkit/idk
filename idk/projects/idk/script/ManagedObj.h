@@ -44,22 +44,6 @@ namespace idk::mono
 
 		friend class ManagedType;
 	};
-
-	template<typename T>
-	inline void ManagedObject::Assign(string_view fieldname, T& obj)
-	{
-		auto me = Raw();
-		auto field = Field(fieldname);
-
-		if (field)
-		{
-			if constexpr (!std::is_class_v<std::decay_t<T>>)
-			{
-				auto val = obj;
-				mono_field_set_value(me, field, &val);
-			}
-		}
-	}
 }
 
 #include "ManagedObj.inl"

@@ -52,8 +52,8 @@ namespace idk
 		void Name(string_view name);
         string_view Tag() const;
         void Tag(string_view tag);
-        uint8_t Layer() const;
-        void Layer(uint8_t layer);
+        char Layer() const;
+        void Layer(char layer);
 		
 		
 	private:

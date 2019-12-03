@@ -1,13 +1,15 @@
 #pragma once
 
 #include <core/Component.h>
+#include <common/LayerMask.h>
 
 namespace idk
 {
+    //using LayerMask = uint32_t;
+
     class Layer : public Component<Layer>
     {
     public:
-		using LayerMask = int;
         char index;
 
 		LayerMask mask() const;

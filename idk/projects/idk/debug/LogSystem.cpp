@@ -32,10 +32,18 @@ namespace idk
 		}
 	}
 
+    void LogSystem::SetLogDir(string_view dir)
+    {
+        _log_dir = dir;
+    }
+
 	void LogSystem::Init()
 	{
-		auto logroot = string{ Core::GetSystem<FileSystem>().GetAppDataDir() } + "/idk/" + curr_datetime();
-		auto start = Core::GetScheduler().GetProgramStart();
+        if (_log_dir.empty())
+            throw; // set a log path first you dumbass
+
+        const auto logroot = _log_dir + '/' + curr_datetime();
+        const auto start = Core::GetScheduler().GetProgramStart();
 		constexpr array<string_view, s_cast<size_t>(LogPool::COUNT)> names
 		{
 			"main",
@@ -80,8 +88,7 @@ namespace idk
 
 				moved += sprintf_s(buf + moved, sizeof(buf) - moved, "%d:%.2d:%.2d.%.3d: ", h, m, s, ms);
 				moved += sprintf_s(buf + moved, sizeof(buf) - moved, preface.data());
-				sprintf_s(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
-
+				snprintf(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
 				stream << buf;
 				if (level == LogLevel::FATAL)
 					stream << std::flush;

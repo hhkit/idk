@@ -8,17 +8,19 @@
 
 #include "pch.h"
 #include <editor/commands/CMD_CreateGameObject.h>
+#include <editor/windows/IGE_HierarchyWindow.h>
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
+#include <prefab/PrefabInstance.h>
 #include <IDE.h>				 //IDE
 
 namespace idk {
 
 
-	CMD_CreateGameObject::CMD_CreateGameObject(Handle<GameObject> go)
+	CMD_CreateGameObject::CMD_CreateGameObject(Handle<GameObject> go, string name, vector<string> initial_components)
+        : parenting_gameobject{ go }, name{ name }, initial_components{ initial_components }
 	{
-		parenting_gameobject = go;
 	}
 
 	CMD_CreateGameObject::CMD_CreateGameObject(vector<RecursiveObjects> recursiveObj) : copied_object{recursiveObj}
@@ -33,8 +35,15 @@ namespace idk {
 			if (parenting_gameobject) {
 				game_object_handle->GetComponent<Transform>()->SetParent(parenting_gameobject, false);
 			}
-
-			return game_object_handle ? true : false; //Return true if create gameobject is successful
+			if (name.size())
+				game_object_handle->Name(name);
+			for (const auto& str : initial_components)
+				game_object_handle->AddComponent(string_view{ str });
+			Core::GetSystem<IDE>().selected_gameObjects.clear();
+			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
+			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
+			Core::GetSystem<IDE>().RefreshSelectedMatrix();
+			return bool(game_object_handle); //Return true if create gameobject is successful
 		}
 		else {
 			try {
@@ -43,6 +52,10 @@ namespace idk {
 			catch (const bool fail) {
 				return fail;
 			}
+			Core::GetSystem<IDE>().selected_gameObjects.clear();
+			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
+			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
+			Core::GetSystem<IDE>().RefreshSelectedMatrix();
 			return true;
 		}
 	}
@@ -72,6 +85,20 @@ namespace idk {
 
 	void CMD_CreateGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
 	{
+        static bool copy_as_prefab = false;
+        if (isRoot)
+        {
+            copy_as_prefab = false;
+            for (const auto& c : vector_ref[0].vector_of_components)
+            {
+                if (c.is<PrefabInstance>())
+                {
+                    if (c.get<PrefabInstance>().object_index == 0)
+                        copy_as_prefab = true;
+                    break;
+                }
+            }
+        }
 
 		for (RecursiveObjects& object : vector_ref) {
 			Handle<GameObject> i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
@@ -104,6 +131,11 @@ namespace idk {
 					Name& t = c.get<Name>();
 					i->GetComponent<Name>()->name = t.name;
 				}
+                else if (c.is<PrefabInstance>())
+                {
+                    if (copy_as_prefab)
+                        i->AddComponent(c);
+                }
 				else {
 					i->AddComponent(c);
 				}

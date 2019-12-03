@@ -4,6 +4,9 @@
 #include <gfx/debug_vtx_layout.h>
 #include <vkn/GraphicsState.h>
 #include <gfx/Mesh.h>
+
+#include <vkn/utils/utils.h>
+#include <IncludeComponents.h>
 namespace idk
 {
 	struct ray;
@@ -12,15 +15,27 @@ namespace idk::vkn
 {
 	enum DbgShape
 	{
-		eziPreBegin,
 		eCube,
 		eSquare,
 		eEqTriangle,
 		eLine,
 		eTetrahedron,
-		eSphere,
-		eziCount
+		eSphere
 	};
+	namespace EnumInfo
+	{
+
+		using DbgShapePack = meta::enum_pack<DbgShape,
+			DbgShape::eCube,
+			DbgShape::eSquare,
+			DbgShape::eEqTriangle,
+			DbgShape::eLine,
+			DbgShape::eTetrahedron,
+			DbgShape::eSphere
+		>;
+		using DbgShapeI = meta::enum_info < DbgShape, DbgShapePack>;
+
+	}
 	struct debug_info
 	{
 		struct inst_data
@@ -37,6 +52,9 @@ namespace idk::vkn
 	class VulkanDebugRenderer
 	{
 	public:
+		using buffer_update_info_t=vector<std::pair<hlp::vector_buffer*, string_view>>;
+		using debug_draw_calls_t  =hash_table<RscHandle<Mesh>,DbgDrawCall>;
+		;
 		VulkanDebugRenderer();
 		~VulkanDebugRenderer();
 
@@ -45,13 +63,16 @@ namespace idk::vkn
 		void Shutdown();
 		void DrawShape(DbgShape shape, const mat4& tfm, const color& color);
 		void DrawShape(MeshType shape, const mat4& tfm, const color& color);
+		void DrawShape(RscHandle<Mesh> shape, const mat4& tfm, const color& color);
 		void Draw(const ray& ray, const color& color);
 		void Draw(const sphere& sphere, const color& color);
 		void Draw(const box& box, const color& color);
 		void Draw(const aabb& o_box, const color& color);
 		void Render(const mat4& view, const mat4& projection, GraphicsState& out);
 
-		const vector<DbgDrawCall>& DbgDrawCalls()const;
+		const buffer_update_info_t &BufferUpdateInfo();
+
+		const debug_draw_calls_t &DbgDrawCalls()const;
 		const VulkanPipeline& GetPipeline()const;
 		void GrabDebugBuffer();
 	private:

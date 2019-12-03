@@ -27,17 +27,17 @@ namespace idk
 
 	void AnimationSystem::Update(span<Animator> animators)
 	{
-		InitializeAnimators();
+		InitializeAnimators(true);
 		if (_was_paused)
 		{
 			for (auto& elem : animators)
 			{
-				elem.Reset();
+				elem.ResetToDefault();
 				// SaveBindPose(elem);
 				for (auto& layer : elem.layers)
 				{
-					if (layer.curr_state.name != string{})
-						layer.Play(layer.curr_state.name);
+					if (layer.curr_state.index != 0)
+						layer.Play(layer.curr_state.index);
 				}
 
 			}
@@ -45,6 +45,9 @@ namespace idk
 		}
 		for (auto& animator : animators)
 		{
+			if (!animator._initialized)
+				continue;
+
 			// Update the layer logic first. 
 			const size_t num_layers_playing = LayersPass(animator);
 
@@ -69,7 +72,7 @@ namespace idk
 				for (size_t k = 0; k < animator.layers.size(); ++k)
 				{
 					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -103,18 +106,21 @@ namespace idk
 
 	void AnimationSystem::UpdatePaused(span<Animator> animators)
 	{
-		InitializeAnimators();
+		InitializeAnimators(false);
 		if (!_was_paused)
 		{
 			for (auto& elem : animators)
 			{
-				elem.Reset();
+				elem.ResetToDefault();
 				RestoreBindPose(elem);
 			}
 			_was_paused = true;
 		}
 		for (auto& animator : animators)
 		{
+			if (!animator._initialized)
+				continue;
+
 			if (!animator.preview_playback)
 			{
 				FinalPass(animator);
@@ -142,10 +148,10 @@ namespace idk
 				// Pass this child through all the layers to get the final transformation of the bone
 				// Find the last fully weighted bone layer
 				size_t start_layer = 0;
-				for (size_t k = 0; k < animator.layers.size(); ++k)
+				for (size_t k = 1; k < animator.layers.size(); ++k)
 				{
 					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] == true && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -157,7 +163,7 @@ namespace idk
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
-					if (curr_layer.bone_mask[child_index] == true)
+					if (curr_layer.bone_mask[child_index])
 					{
 						if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
 						{
@@ -193,7 +199,7 @@ namespace idk
 		result.rotation = quat{};
 
 		// Check if the state is valid
-		auto& anim_state = animator.GetAnimationState(state.name);
+		auto& anim_state = layer.GetAnimationState(state.index);
 		if (!anim_state.valid)
 		{
 			state.is_stopping = true;
@@ -220,7 +226,7 @@ namespace idk
 		const float ticks = std::min(state.normalized_time, 1.0f) * anim_data->motion->GetNumTicks();
 
 		// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
-		const anim::AnimatedBone* animated_bone = anim_data->motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
+		const anim::AnimatedBone* animated_bone = anim_data->motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->bone_name);
 		if (animated_bone == nullptr)
 			return result;
 
@@ -238,7 +244,7 @@ namespace idk
 		result.rotation = quat{};
 
 		// Check if the state is valid
-		auto& anim_state = animator.GetAnimationState(state.name);
+		auto& anim_state = layer.GetAnimationState(state.index);
 		if (!anim_state.valid)
 		{
 			state.is_stopping = true;
@@ -256,55 +262,21 @@ namespace idk
 		if (anim_data->blend_tree_type != anim::BlendTreeType::BlendTree_1D)
 			return result;
 
-
-		auto& motions = anim_data->motions;
-		float curr_val = anim_data->def_data[0];
-		auto res = animator.float_vars.find(anim_data->params[0]);
-		if (res != animator.float_vars.end())
-			curr_val = res->second;
-
 		// First compute the weights
 		if (!anim_data->weights_cached)
 		{
-			float sum = 0.0f;
-			
-			size_t motions_sz = motions.size();
-			if (motions_sz < 1)
-			{
-				for (size_t i = 0; i < motions_sz; ++i)
-				{
-					motions[i].weight = 1.0f;
-				}
-			}
-			else
-			{
-				for (size_t i = 0; i < motions_sz; ++i)
-				{
+			float param_val = anim_data->def_data[0];
+			auto res = animator.GetParam<anim::FloatParam>(anim_data->params[0]);
+			if (res.valid)
+				param_val = res.val;
 
-					const float curr_threshold = motions[i].thresholds[0];
-					float prev_threshold = curr_threshold;
-					float next_threshold = curr_threshold;
-
-					if (i != 0)
-						prev_threshold = motions[i - 1].thresholds[0];
-
-					if (i + 1 < motions_sz)
-						next_threshold = motions[i + 1].thresholds[0];
-
-					motions[i].weight = idk::anim::piecewise_linear(prev_threshold, curr_threshold, next_threshold, curr_val);
-
-					sum += motions[i].weight;
-				}
-
-				// Normalize the weights
-				for (auto& blend_motion : anim_data->motions)
-					blend_motion.weight /= sum;
-			}
+			anim_data->ComputeWeights(param_val);
 			anim_data->weights_cached = true;
 		}
 		
 		bool first_applied = false;
 		// Interpolate each of the animation motions based on the weights
+		auto& motions = anim_data->motions;
 		for (auto& blend_motion : motions)
 		{
 			// Ignore all blend motions without valid clip
@@ -320,7 +292,7 @@ namespace idk
 			curr_pose.rotation = quat{};
 
 			// The motion contains a hash table of all bones that are animated. If there isn't an animated bone, we get a nullptr
-			const anim::AnimatedBone* animated_bone = blend_motion.motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->_bone_name);
+			const anim::AnimatedBone* animated_bone = blend_motion.motion->GetAnimatedBone(curr_go->GetComponent<Bone>()->bone_name);
 			if (animated_bone != nullptr)
 			{
 				// Interpolate from the found keyframe to the next keyframe and store the result.
@@ -351,6 +323,9 @@ namespace idk
 	AnimationSystem::BonePose AnimationSystem::AnimationPass(Animator& animator, AnimationLayer& layer, size_t bone_index)
 	{
 		// If a layer is not playing, we return the previous pose it was in 
+		const auto curr_index = layer.curr_state.index;
+		const auto blend_index = layer.blend_state.index;
+
 		if (!layer.IsPlaying())
 		{
 			return layer.prev_poses[bone_index];
@@ -358,6 +333,10 @@ namespace idk
 		
 		BonePose result = animator._bind_pose[bone_index];
 		result.rotation = quat{};
+		if (!layer.bone_mask[bone_index])
+		{
+			return result;
+		}
 
 		if (layer.curr_state.is_playing && !layer.blend_interrupt)
 		{
@@ -366,7 +345,7 @@ namespace idk
 			if (layer.curr_state.is_stopping)
 			{
 				layer.curr_state.normalized_time = 0.0f;
-				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + layer.curr_state.name + ") in layer (" + layer.name + ") doesn't exist.");
+				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + std::to_string(curr_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 
 			layer.blend_source[bone_index] = result;
@@ -380,13 +359,15 @@ namespace idk
 			{
 				// layer.is_blending = false;
 				layer.blend_state.normalized_time = 0.0f;
+				layer.blend_state.elapsed_time = 0.0f;
 				layer.blend_interrupt = false;
-				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + layer.blend_state.name + ") in layer (" + layer.name + ") doesn't exist.");
+				layer.transition_index = 0;
+				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + std::to_string(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
 			{
 				IDK_ASSERT(abs(layer.blend_duration) > 0.0001);
-				const float blend_weight = layer.blend_state.normalized_time / layer.blend_duration;
+				const float blend_weight = layer.blend_state.elapsed_time / layer.blend_duration;
 				result = BlendPose(layer.blend_source[bone_index], blend_state_result, blend_weight);
 			}
 		}
@@ -404,6 +385,100 @@ namespace idk
 		return result;
 	}
 
+	void AnimationSystem::EvaluateTransitions(Animator& animator, AnimationLayer& layer)
+	{
+		auto& curr_state = layer.curr_state;
+		// Only evaluate curr state if it is playing
+		
+		if (curr_state.is_playing)
+		{
+			auto& anim_state = layer.GetAnimationState(curr_state.index);
+			if (!anim_state.valid)
+				return;
+
+			// if we are in a transition and cannot be interrupted, we do not evaluate conditions/exit time
+			if (layer.IsInTransition() && !layer.IsTransitionInterruptible())
+			{
+				return;
+			}
+				
+			
+			for (size_t i = 1; i < anim_state.transitions.size(); ++i)
+			{
+				// Skip invalid transitions
+				auto& curr_transition = anim_state.GetTransition(i);
+				// dont bother evaluating transition if the same transition is alr happening
+				if (!curr_transition.valid || i == layer.transition_index)
+					continue;
+
+				
+				// Evaluate exit time first
+				if (curr_transition.has_exit_time)
+				{
+					bool exit_time_reached = false;
+					if (curr_transition.exit_time <= 1.0f)
+						exit_time_reached = curr_state.normalized_time >= curr_transition.exit_time;
+					else
+						exit_time_reached = curr_state.elapsed_time >= curr_transition.exit_time;
+
+					// Do not transit if the exit time has not been reached (early out)
+					if (exit_time_reached == false)
+						continue;
+				}
+				
+				bool transit = true;
+				for (auto& cond : curr_transition.conditions)
+				{
+					switch (cond.type)
+					{
+					case anim::AnimDataType::INT:
+					{
+						auto& param = animator.GetParam<anim::IntParam>(cond.param_name);
+						transit &= param.valid ? anim::condition_ops_int[cond.op_index](param.val, cond.val_i) : false;
+						break;
+					}
+					case anim::AnimDataType::FLOAT:
+					{
+						auto& param = animator.GetParam<anim::FloatParam>(cond.param_name);
+						transit &= param.valid ? anim::condition_ops_float[cond.op_index](param.val, cond.val_f) : false;
+						break;
+					}
+					case anim::AnimDataType::BOOL:
+					{
+						auto& param = animator.GetParam<anim::BoolParam>(cond.param_name);
+						transit &= param.valid ? param.val == cond.val_b : false;
+						break;
+					}
+					case anim::AnimDataType::TRIGGER:
+					{
+						auto& param = animator.GetParam<anim::TriggerParam>(cond.param_name);
+						transit &= param.valid ? param.val : false;
+						break;
+					}
+					case anim::AnimDataType::NONE:
+					{
+						break;
+					}
+					} // end switch
+
+					if (transit == false)
+						break;
+				}
+
+				if (transit == true)
+				{
+					const bool blend_to_succeeded = layer.BlendTo(curr_transition.transition_to_index, curr_transition.transition_duration);
+					if (blend_to_succeeded && layer.blend_state.is_playing)
+					{
+						layer.blend_state.normalized_time = curr_transition.transition_offset;
+						layer.transition_index = i;
+					}
+					break;
+				}
+			}
+		}
+	}
+
 	size_t AnimationSystem::LayersPass(Animator& animator)
 	{
 		// We assume that the animator is playing here.
@@ -414,10 +489,14 @@ namespace idk
 			if (!layer.IsPlaying())
 				continue;
 
+
+			// Evaluate transitions before anything happens
+			EvaluateTransitions(animator, layer);
+
 			// Check both the blend state and the curr state
 			if (layer.curr_state.normalized_time >= 1.0f)
 			{
-				auto& anim_state = animator.GetAnimationState(layer.curr_state.name);
+				auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
 				if (!anim_state.valid)
 					continue;
 
@@ -425,41 +504,50 @@ namespace idk
 				// We dont subtract normalized_time because the designers might check
 				// normalized_time >= 1.0f to check if an animation has ended
 				if (!anim_state.loop)
+				{
 					layer.curr_state.is_playing = false;
+					layer.curr_state.normalized_time = 1.0f;
+				}
 				else
 					layer.curr_state.normalized_time -= 1.0f;
 			}
 
 			if (layer.blend_state.is_playing)
 			{
+				// Note: Blend states always loop
+				if (layer.blend_state.normalized_time >= 1.0f)
+				{
+					auto& anim_state = layer.GetAnimationState(layer.blend_state.index);
+					if (!anim_state.valid)
+						continue;
+
+					layer.blend_state.normalized_time -= 1.0f;
+				}
+
 				// Check if the blending is over
-				float delta = layer.blend_state.normalized_time / layer.blend_duration;
+				float delta = layer.blend_state.elapsed_time / layer.blend_duration;
 				if (delta >= 1.0f)
 				{
+					LOG("RESET HIT");
 					layer.curr_state = layer.blend_state;
-					layer.blend_state = AnimationLayerState{};
-					layer.blend_duration = 0.0f;
-
-					// Turn off blend interrupt the moment blending is over
-					layer.blend_interrupt = false;
+					layer.ResetBlend();
 				}
 			}
 
 			// Check if the animator wants to stop after this update
 			if (layer.curr_state.is_stopping == true)
 			{
-				layer.curr_state.normalized_time = 0.0f;
+				const size_t curr_index = layer.curr_state.index;
+				layer.curr_state.Reset();
+				layer.curr_state.index = curr_index;
+				/*layer.curr_state.normalized_time = 0.0f;
 				layer.curr_state.is_playing = false;
-				layer.curr_state.is_stopping = false;
+				layer.curr_state.is_stopping = false;*/
 			}
 
 			if (layer.blend_state.is_stopping == true)
 			{
-				layer.blend_state = AnimationLayerState{};
-				layer.blend_duration = 0.0f;
-
-				// Turn off blend interrupt the moment blending is over
-				layer.blend_interrupt = false;
+				layer.ResetBlend();
 			}
 			
 			++num_playing;
@@ -475,7 +563,7 @@ namespace idk
 			// Check both the blend state and the curr state
 			if (layer.curr_state.is_playing)
 			{
-				auto& anim_state = animator.GetAnimationState(layer.curr_state.name);
+				auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
 				if (!anim_state.valid)
 					continue;
 
@@ -485,14 +573,16 @@ namespace idk
 				else
 				{
 					auto anim_data = anim_state.GetBasicState();
-					layer.curr_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					const float inc = Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					layer.curr_state.normalized_time += inc;
+					layer.curr_state.elapsed_time += inc;
 				}
 				
 			}
 
 			if (layer.blend_state.is_playing)
 			{
-				auto& anim_state = animator.GetAnimationState(layer.blend_state.name);
+				auto& anim_state = layer.GetAnimationState(layer.blend_state.index);
 				if (!anim_state.valid)
 					continue;
 
@@ -502,7 +592,9 @@ namespace idk
 				else
 				{
 					auto anim_data = anim_state.GetBasicState();
-					layer.blend_state.normalized_time += Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					const float inc = Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
+					layer.blend_state.normalized_time += inc;
+					layer.blend_state.elapsed_time += inc;
 				}
 			}
 
@@ -523,6 +615,7 @@ namespace idk
 			time_inc += curr_inc * blendtree_motion.weight;
 		}
 
+		layer_state.elapsed_time += time_inc;
 		layer_state.normalized_time += time_inc;
 	}
 
@@ -537,14 +630,14 @@ namespace idk
 		// Don't do anything if the sizes dont match.
 		if (skeleton.size() != animator._child_objects.size())
 		{
-			std::cout << "[Animation System] Error: " << "Skeleton size of " << skeleton.size() << 
-				" and game object hierarchy of size " << animator._child_objects.size() << " don't match.\n";
+			LOG_WARNING_TO(LogPool::ANIM, "[Animation System] Error: Skeleton size of " + std::to_string(skeleton.size()) +
+				" and game object hierarchy of size " + std::to_string(animator._child_objects.size()) + " don't match.");
 
-			for (auto& layer : animator.layers)
-			{
-				layer.curr_state.is_playing = false;
-				layer.blend_state = AnimationLayerState{};
-			}
+			// for (auto& layer : animator.layers)
+			// {
+			// 	layer.curr_state.is_playing = false;
+			// 	layer.blend_state = AnimationLayerState{};
+			// }
 			
 			// animator.layers[0].is_playing = false;
 			return;
@@ -560,7 +653,7 @@ namespace idk
 				if (!curr_go)
 					continue;
 
-				const auto parent_index = skeleton[i]._parent;
+				const auto parent_index = skeleton[i].parent;
 				if (parent_index >= 0)
 				{
 					const mat4& p_transform = animator.pre_global_transforms[parent_index];
@@ -571,7 +664,7 @@ namespace idk
 					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
 
-				animator.final_bone_transforms[i] = global_inverse * animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+				animator.final_bone_transforms[i] = global_inverse * animator.pre_global_transforms[i] * curr_bone.global_inverse_bind_pose;
 
 			}
 		}
@@ -584,7 +677,7 @@ namespace idk
 
 				if (!curr_go)
 					continue;
-				const auto parent_index = skeleton[i]._parent;
+				const auto parent_index = skeleton[i].parent;
 				if (parent_index >= 0)
 				{
 					// If we have the parent, we push in the parent.global * child.local
@@ -597,9 +690,11 @@ namespace idk
 					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
 				}
 				//const auto test = decompose(_pre_global_transforms[i]);
-				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone._global_inverse_bind_pose;
+				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone.global_inverse_bind_pose;
 			}
 		}
+
+		animator.ResetTriggers();
 	}
 
 	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose)
@@ -673,7 +768,7 @@ namespace idk
 		}
 	}
 
-	void AnimationSystem::InitializeAnimators()
+	void AnimationSystem::InitializeAnimators(bool play)
 	{
 		// only remove from queue if the animator was created successfully
 		if (_creation_queue.empty())
@@ -684,7 +779,13 @@ namespace idk
 
 		vector<Handle<Animator>> uncreated;
 		uncreated.reserve(_creation_queue.size());
-
+		const auto add_to_uncreated = [&](auto& animator)
+		{
+			++animator->_intialize_count;
+			// Only try initializing 60 frames
+			if (animator->_intialize_count <= 60)
+				uncreated.push_back(animator);
+		};
 		for(auto& animator : _creation_queue)
 		{
 			const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator->GetHandle().scene);
@@ -692,17 +793,8 @@ namespace idk
 
 			if (!sg)
 			{
-				uncreated.push_back(animator);
+				add_to_uncreated(animator);
 				continue;
-			}
-
-			if (animator->skeleton)
-			{
-				size_t num_bones = animator->skeleton->data().size();
-				animator->_bind_pose.resize(num_bones);
-				animator->_child_objects.resize(num_bones);
-				animator->pre_global_transforms.resize(num_bones);
-				animator->final_bone_transforms.resize(num_bones);
 			}
 
 			auto& child_objects = animator->_child_objects;
@@ -712,30 +804,58 @@ namespace idk
 				auto c_bone = c_go->GetComponent<Bone>();
 				if (c_bone)
 				{
-					child_objects[c_bone->_bone_index] = c_go;
+					const auto index = c_bone->bone_index;
+					if(index >= 0)
+						child_objects[index] = c_go;
 				}
 			};
 
-			sg->visit(initialize_children);
-			Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
-
-			// This is here so that previously serialized animator components will still be able to display 
-			// the animation clips even if animation_display_order is not inside
-			if (animator->animation_display_order.empty() && !animator->animation_table.empty())
+			if (animator->skeleton)
 			{
-				for (auto& anim : animator->animation_table)
+				size_t num_bones = animator->skeleton->data().size();
+				animator->_bind_pose.resize(num_bones);
+				animator->_child_objects.resize(num_bones);
+				animator->pre_global_transforms.resize(num_bones);
+				animator->final_bone_transforms.resize(num_bones);
+
+				// Init child objects
+				sg->visit(initialize_children);
+
+				// Init bone component's children vector
+				auto& skeleton_data = animator->skeleton->data();
+				for (size_t i = 0; i < skeleton_data.size(); ++i)
 				{
-					animator->animation_display_order.emplace_back(anim.first);
-					anim.second.valid = true;
+					auto& bone = skeleton_data[i];
+					if (bone.parent >= 0)
+					{
+						// Put the current index into my parent's children vector.
+						child_objects[bone.parent]->GetComponent<Bone>()->children.emplace_back(s_cast<uint8_t>(i));
+					}
 				}
-			}
 
-			for (auto& layer : animator->layers)
+				// Save the bind pose here
+				Core::GetSystem<AnimationSystem>().SaveBindPose(*animator);
+
+				for (auto& layer : animator->layers)
+				{
+					layer.prev_poses.resize(animator->skeleton->data().size());
+					layer.blend_source.resize(animator->skeleton->data().size());
+					if (layer.bone_mask.size() != animator->skeleton->data().size())
+					{
+						layer.bone_mask.resize(animator->skeleton->data().size(), 1);
+					}
+				}
+
+				animator->ResetToDefault();
+				if (play)
+					for (auto& layer : animator->layers)
+						layer.Play("");
+
+				animator->_initialized = true;
+			}
+			else 
 			{
-				layer.prev_poses.resize(animator->skeleton->data().size());
-				layer.blend_source.resize(animator->skeleton->data().size());
-				layer.curr_state.name = layer.default_state;
-				layer.weight = layer.default_weight;
+				add_to_uncreated(animator);
 			}
 		}
 
@@ -767,24 +887,24 @@ namespace idk
 			auto& curr_bone = bones[i];
 
 			auto obj = scene->CreateGameObject();
-			// auto transform = curr_bone._global_inverse_bind_pose.inverse();
+			// auto transform = curr_bone.global_inverse_bind_pose.inverse();
 
-			// mat4 local_bind_pose = curr_bone._local_bind_pose.recompose();
-			obj->Name(curr_bone._name);
-			obj->GetComponent<Transform>()->position = curr_bone._local_bind_pose.position;
-			obj->GetComponent<Transform>()->rotation = curr_bone._local_bind_pose.rotation;
-			obj->GetComponent<Transform>()->scale = curr_bone._local_bind_pose.scale;
+			// mat4 local_bind_pose = curr_bone.local_bind_pose.recompose();
+			obj->Name(curr_bone.name);
+			obj->GetComponent<Transform>()->position = curr_bone.local_bind_pose.position;
+			obj->GetComponent<Transform>()->rotation = curr_bone.local_bind_pose.rotation;
+			obj->GetComponent<Transform>()->scale = curr_bone.local_bind_pose.scale;
 
 			auto c_bone = obj->AddComponent<Bone>();
-			c_bone->_bone_name = curr_bone._name;
-			c_bone->_bone_index = s_cast<int>(i);
+			c_bone->bone_name = curr_bone.name;
+			c_bone->bone_index = s_cast<int>(i);
 
-			if (curr_bone._parent >= 0)
-				obj->GetComponent<Transform>()->SetParent(animator._child_objects[curr_bone._parent], false);
+			if (curr_bone.parent >= 0)
+				obj->GetComponent<Transform>()->SetParent(animator._child_objects[curr_bone.parent], false);
 			else
 				obj->GetComponent<Transform>()->SetParent(animator.GetGameObject(), false);
 
-			animator._bind_pose[i] = curr_bone._local_bind_pose;
+			animator._bind_pose[i] = curr_bone.local_bind_pose;
 			animator._child_objects[i] = obj;
 		}
 
@@ -801,9 +921,12 @@ namespace idk
 		for (size_t i = 0; i < animator._child_objects.size(); ++i)
 		{
 			auto curr_go = animator._child_objects[i];
-			animator._bind_pose[i].position = curr_go->Transform()->position;
-			animator._bind_pose[i].rotation = curr_go->Transform()->rotation;
-			animator._bind_pose[i].scale = curr_go->Transform()->scale;
+			if (curr_go)
+			{
+				animator._bind_pose[i].position = curr_go->Transform()->position;
+				animator._bind_pose[i].rotation = curr_go->Transform()->rotation;
+				animator._bind_pose[i].scale = curr_go->Transform()->scale;
+			}
 		}
 	}
 
@@ -819,7 +942,7 @@ namespace idk
 			if (!animator._child_objects[i])
 				continue;
 
-			auto local_bind_pose = bones[i]._local_bind_pose;
+			auto local_bind_pose = bones[i].local_bind_pose;
 			auto local_bind_pose_mat = local_bind_pose.recompose();
 
 			animator._child_objects[i]->Transform()->position = local_bind_pose.position;
@@ -827,7 +950,7 @@ namespace idk
 			animator._child_objects[i]->Transform()->scale = local_bind_pose.scale;
 
 			// compute the bone_transform for the bind pose
-			const auto parent_index = animator.skeleton->data()[i]._parent;
+			const auto parent_index = animator.skeleton->data()[i].parent;
 			if (parent_index >= 0)
 			{
 				// If we have the parent, we push in the parent.global * child.local

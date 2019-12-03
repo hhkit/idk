@@ -27,7 +27,7 @@ namespace idk::mono
 		auto itr = _types.find(string{ name });
 		if (itr != _types.end())
 			return &itr->second;
-
+		
 		return nullptr;
 	}
 	void MonoEnvironment::ScanTypes()
@@ -37,6 +37,8 @@ namespace idk::mono
 		auto table = mono_image_get_table_info(script_image, MONO_TABLE_TYPEDEF);
 		const auto rows = mono_table_info_get_rows(table);
 
+		LOG_TO(LogPool::MONO, "SCANNING IMAGE: %s @ %p - %s", mono_image_get_name(script_image), script_image, mono_image_get_filename(script_image));
+		
 		for (int i = 0; i < rows; ++i)
 		{
 			uint32_t cols[MONO_TYPEDEF_SIZE];
@@ -46,6 +48,8 @@ namespace idk::mono
 			auto name_space = mono_metadata_string_heap(script_image, cols[MONO_TYPEDEF_NAMESPACE]);
 
 			auto class_ptr = mono_class_from_name(script_image, name_space, class_name);
+
+			LOG_TO(LogPool::MONO, "DETECTED %s:%s @ %p", name_space, class_name, class_ptr);
 
 			if (class_name == std::string("<Module>") || class_ptr == nullptr)
 				continue;

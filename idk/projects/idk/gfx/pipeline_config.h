@@ -27,7 +27,8 @@ namespace idk
 		enum UniformType
 		{
 			eBuffer,
-			eSampler
+			eSampler,
+			eAttachment
 		};
 		enum UniformStage
 		{

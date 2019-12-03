@@ -12,8 +12,11 @@ namespace idk
 		for (auto& elem : Mesh::defaults)
 		{
 			if (!elem)
-				std::cout << "Default mesh " << MeshType{ i }.to_string() << " not created\n";
-            elem->Name(string{ "Default" } + string{ MeshType{ i }.to_string() });
+				LOG_TO(LogPool::GFX, "Default mesh %s not created\n", MeshType{ i }.to_string().data());
+			else
+			{
+				elem->Name(string{ "Default" } +string{ MeshType{ i }.to_string() });
+			}
 			++i;
 		}
 	}

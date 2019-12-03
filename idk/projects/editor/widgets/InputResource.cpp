@@ -62,15 +62,12 @@ namespace idk
         {
             text = std::visit([](auto h) -> string
             {
-                if (h)
-                {
-                    auto name = h->Name();
-                    auto path = Core::GetResourceManager().GetPath(h);
-                    if (!name.empty())
-                        return string{ name };
-                    else if (path)
-                        return string{ PathHandle{ *path }.GetStem() };
-                }
+                auto name = h->Name();
+                auto path = Core::GetResourceManager().GetPath(h);
+                if (!name.empty())
+                    return string{ name };
+                else if (path)
+                    return string{ PathHandle{ *path }.GetStem() };
                 return "";
             }, *handle);
         }
@@ -83,7 +80,7 @@ namespace idk
 
         if (label_size.x > 0)
             RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
-
+		
         if (IsItemClicked())
         {
             OpenPopup(label);
@@ -104,11 +101,15 @@ namespace idk
                     auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
                     table.emplace(str, handle_i);
                 }
-                if (MenuItem("None"))
+
+                const T& default_res = *RscHandle<T>();
+
+                if (MenuItem(default_res.Name().size() ? default_res.Name().data() : "None"))
                 {
                     *handle = RscHandle<T>{};
                     dropped = true;
                 }
+
                 for (auto& [name, handle_i] : table)
                 {
                     if (MenuItem(name.c_str()))
@@ -121,6 +122,20 @@ namespace idk
 
             ImGui::EndPopup();
         }
+
+		std::visit([&](auto h)
+		{
+				using T = typename decltype(h)::Resource;
+				if constexpr (std::is_same_v<T, idk::Texture>)
+				{
+					if (hovered)
+					{
+						ImGui::BeginTooltip();
+						ImGui::Image(h->ID(), ImVec2{ 512, 512 }, ImVec2(0, 1), ImVec2(1, 0));
+						ImGui::EndTooltip();
+					}
+				}
+		}, *handle);
 
         return dropped;
     }

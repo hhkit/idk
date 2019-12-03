@@ -22,9 +22,12 @@ of the editor.
 #include <editor/imguidk.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/windows/IGE_ProjectWindow.h>
+#include <editor/windows/IGE_AnimatorWindow.h>
 #include <editor/windows/IGE_ProjectSettings.h>
 #include <editor/DragDropTypes.h>
 #include <editor/utils.h>
+#include <editor/ComponentIcons.h>
+
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
 #include <anim/AnimationSystem.h>
@@ -55,6 +58,20 @@ namespace idk {
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
         window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar;
+		/*Core::GetGameState().OnObjectDestroy<GameObject>() += [this](Handle<GameObject> go)
+		{
+			bool die = false;
+			for (auto& elem : _prefab_store)
+			{
+				if (elem.second == go)
+				{
+					die = true;
+					break;
+				}
+			}
+			if (die)
+				_prefab_store.clear();
+		};*/
 	}
 
     void IGE_InspectorWindow::Initialize()
@@ -102,6 +119,11 @@ namespace idk {
         }
 	}
 
+	void IGE_InspectorWindow::Reset()
+	{
+		_prefab_store.clear();
+	}
+
     void IGE_InspectorWindow::DisplayGameObjects(vector<Handle<GameObject>> gos)
     {
         const size_t gameObjectsCount = gos.size();
@@ -131,6 +153,8 @@ namespace idk {
             {
                 if (prefab_inst->object_index == 0)
                     DisplayPrefabInstanceControls(prefab_inst);
+				if (prefab_inst->prefab)
+					_prefab_inst = prefab_inst;
             }
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
@@ -148,10 +172,10 @@ namespace idk {
         // COMPONENTS
 
         ImGui::BeginChild("_inspector_inner");
-        Handle<Transform> c_transform = gos[0]->GetComponent<Transform>();
-        if (c_transform) {
-            DisplayComponent(c_transform);
-        }
+        if (const auto rect_transform = gos[0]->GetComponent<RectTransform>())
+            DisplayComponent(rect_transform);
+        else
+            DisplayComponent(gos[0]->GetComponent<Transform>());
 
         if (gameObjectsCount == 1)
         {
@@ -160,7 +184,8 @@ namespace idk {
             for (auto& component : componentSpan) {
 
                 //Skip Name and Transform and PrefabInstance
-				if (component == c_transform ||
+				if (component.is_type<Transform>() ||
+					component.is_type<RectTransform>() ||
 					component.is_type<PrefabInstance>() ||
 					component.is_type<Name>() ||
 					component.is_type<Tag>() ||
@@ -169,6 +194,7 @@ namespace idk {
 					continue;
 
                 //COMPONENT DISPLAY
+				ImGui::Text("id: %lld", component.id);
                 DisplayComponent(component);
             }
 
@@ -187,7 +213,7 @@ namespace idk {
                         ImGui::PushID(i);
                         ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
                                           ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-                                          ImGuiTreeNodeFlags_SpanAllAvailWidth);
+                                          ImGuiTreeNodeFlags_SpanFullWidth);
 
                         if (ImGui::BeginPopupContextItem())
                         {
@@ -272,6 +298,31 @@ namespace idk {
 
 
         if (ImGui::BeginPopup("AddComp", ImGuiWindowFlags_None)) {
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##component_textFilter", NULL, component_textFilter.InputBuf, IM_ARRAYSIZE(component_textFilter.InputBuf), ImVec2{100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				component_textFilter.Build();
+
+
+			
+			string deco_text = "Component";
+			if (component_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_component_textFilter"))
+					component_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
             span componentNames = GameState::GetComponentNames();
             for (const char* name : componentNames) {
                 string displayName = name;
@@ -290,30 +341,76 @@ namespace idk {
                 if (found != std::string::npos)
                     displayName.erase(found, fluffText.size());
 
+				if (!component_textFilter.PassFilter(displayName.c_str())) //skip if filtered
+					continue;
 
 
                 if (ImGui::MenuItem(displayName.c_str())) {
                     //Add component
+					int execute_counter = 0;
+					CommandController& commandController = Core::GetSystem<IDE>().command_controller;
                     for (Handle<GameObject> i : gos)
                     {
-                        Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+                        commandController.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+						++execute_counter;
                     }
+
+					commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
                 }
             }
             ImGui::EndPopup();
         }
 
 		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) {
+
+
+
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			bool value_changed = ImGui::InputTextEx("##script_textFilter", NULL, script_textFilter.InputBuf, IM_ARRAYSIZE(script_textFilter.InputBuf), ImVec2{ 100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				script_textFilter.Build();
+
+
+
+			string deco_text = "Scripts";
+			if (script_textFilter.IsActive()) {
+				deco_text = "Search Mode";
+				ImGui::SameLine();
+				if (ImGui::SmallButton("X##clear_script_textFilter"))
+					script_textFilter.Clear();
+			}
+
+			ImGui::Separator();
+
+
+			auto offset = ImGui::GetCursorPos();
+
+			ImGui::SetCursorPos(ImVec2{ ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::CalcTextSize(deco_text.c_str()).x * 0.5f, offset.y + 5 });
+			ImGui::Text(deco_text.c_str());
+			ImGui::Separator();
+
 			auto* script_env = &Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
 			if (script_env == nullptr)
 				ImGui::Text("Scripts not loaded!");
 
 			span componentNames = script_env->GetBehaviorList();
+			int execute_counter = 0;
 			for (const char* name : componentNames) {
+
+				if (!component_textFilter.PassFilter(name)) //skip if filtered
+					continue;
+
 				if (ImGui::MenuItem(name)) {
-					for (Handle<GameObject> i : gos)
+					for (Handle<GameObject> i : gos) {
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
+						++execute_counter;
+					}
 				}
+			}
+			if (execute_counter > 0) {
+				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 			ImGui::EndPopup();
 		}
@@ -340,6 +437,7 @@ namespace idk {
             ImGuidk::PushDisabled();
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
 			//c_name->name = stringBuf;
+			int execute_counter = 0;
 			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
 				string outputString = stringBuf;
 				if (i > 0) {
@@ -347,9 +445,18 @@ namespace idk {
 					outputString.append(serialize_text(i));
 					outputString.append(")");
 				}
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyInput<string>,
-                    GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() }, &editor.selected_gameObjects[i]->GetComponent<Name>()->name, outputString));
+				editor.command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty,
+                            GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() },
+                            "name",
+                            string{ editor.selected_gameObjects[i]->GetComponent<Name>()->name },
+                            string{ outputString })
+                );
+                editor.selected_gameObjects[i]->GetComponent<Name>()->name = outputString;
+				++execute_counter;
 			}
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 		}
         if (game_object.scene == Scene::prefab)
             ImGuidk::PopDisabled();
@@ -562,11 +669,14 @@ namespace idk {
         ImGui::PopItemWidth();
 
 		if (hasChanged) {
+			int execute_counter = 0;
 			for (int i = 0; i < editor.selected_gameObjects.size();++i) {
 				mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
-					
+				++execute_counter;
 			}
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			//Refresh the new matrix values
 			editor.RefreshSelectedMatrix();
 			hasChanged		= false;
@@ -574,243 +684,372 @@ namespace idk {
 		}
 	}
 
+
+    template<>
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<RectTransform> c_rt)
+    {
+        if (c_rt->GetGameObject()->HasComponent<Canvas>())
+        {
+            ImGuidk::PushDisabled();
+            ImGui::Text("Values driven by Canvas.");
+            ImGuidk::PopDisabled();
+            return;
+        }
+
+        const float region_width = ImGui::GetWindowContentRegionWidth();
+        
+        const auto w = region_width * 0.3f;
+        ImGui::PushItemWidth(w);
+
+        bool has_override = _prefab_inst &&
+            (_prefab_inst->HasOverride((*_curr_component).type.name(), "offset_min", 0) ||
+             _prefab_inst->HasOverride((*_curr_component).type.name(), "offset_max", 0));
+
+        bool changed = false;
+
+        ImGui::BeginGroup();
+
+        if (c_rt->anchor_min.y != c_rt->anchor_max.y)
+        {
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("T").x * 0.5f);
+            ImGui::Text("T");
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            changed |= ImGui::DragFloat("##top", &c_rt->offset_max.y);
+        }
+        else
+        {
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("Y").x * 0.5f);
+            ImGui::Text("Y");
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
+            float pos_y = pivot_y;
+            if (ImGui::DragFloat("##pos_y", &pos_y))
+            {
+                float dy = pos_y - pivot_y;
+                c_rt->offset_min.y += dy;
+                c_rt->offset_max.y += dy;
+                changed = true;
+            }
+        }
+
+        if (c_rt->anchor_min.x != c_rt->anchor_max.x)
+        {
+            ImGui::SetCursorPosX(region_width * 0.35f - w * 0.75f - ImGui::CalcTextSize("L").x - ImGui::GetStyle().ItemSpacing.x);
+            ImGui::Text("L");
+            ImGui::SameLine();
+            changed |= ImGui::DragFloat("##left", &c_rt->offset_min.x);
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(region_width * 0.35f + w * 0.75f);
+            changed |= ImGui::DragFloat("##right", &c_rt->offset_max.x);
+            ImGui::SameLine();
+            ImGui::Text("R");
+        }
+        else
+        {
+            ImGui::SetCursorPosX(region_width * 0.35f - w * 0.75f - ImGui::CalcTextSize("X").x - ImGui::GetStyle().ItemSpacing.x);
+            ImGui::Text("X");
+            ImGui::SameLine();
+            
+            const float pivot_x = c_rt->_local_rect.position.x + c_rt->pivot.x * c_rt->_local_rect.size.x;
+            float pos_x = pivot_x;
+            if (ImGui::DragFloat("##pos_x", &pos_x))
+            {
+                float dx = pos_x - pivot_x;
+                c_rt->offset_min.x += dx;
+                c_rt->offset_max.x += dx;
+                changed = true;
+            }
+            ImGui::SameLine();
+
+            float width = c_rt->_local_rect.size.x;
+            ImGui::SetCursorPosX(region_width * 0.35f + w * 0.75f);
+            if (ImGui::DragFloat("##width", &width))
+            {
+                c_rt->offset_min.x = pos_x - c_rt->pivot.x * width;
+                c_rt->offset_max.x = pos_x + (1.0f - c_rt->pivot.x) * width;
+                changed = true;
+            }
+            ImGui::SameLine();
+            ImGui::Text("W");
+        }
+
+        if (c_rt->anchor_min.y != c_rt->anchor_max.y)
+        {
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            changed |= ImGui::DragFloat("##bot", &c_rt->offset_min.y);
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
+            ImGui::Text("B");
+        }
+        else
+        {
+            float height = c_rt->_local_rect.size.y;
+            ImGui::SetCursorPosX(region_width * 0.35f);
+            if (ImGui::DragFloat("##height", &height))
+            {
+                const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
+                c_rt->offset_min.y = pivot_y - c_rt->pivot.y * height;
+                c_rt->offset_max.y = pivot_y + (1.0f - c_rt->pivot.y) * height;
+                changed = true;
+            }
+            ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
+            ImGui::Text("H");
+        }
+
+        ImGui::PopItemWidth();
+
+        ImGui::EndGroup();
+
+        if (has_override && ImGui::BeginPopupContextItem("__context"))
+        {
+            if (ImGui::MenuItem("Apply Property"))
+            {
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
+                PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                ov.property_path = "offset_max";
+                PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
+            }
+            if (ImGui::MenuItem("Revert Property"))
+            {
+                PropertyOverride ov{ string((*_curr_component).type.name()), "offset_min", 0 };
+                PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+                ov.property_path = "offset_max";
+                PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
+            }
+            ImGui::EndPopup();
+        }
+
+        if (changed && _prefab_inst)
+        {
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_min");
+            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_max");
+        }
+
+        if (has_override)
+        {
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0),
+                ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0) + ImVec2(4.0f, ImGui::GetItemRectSize().y),
+                ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
+
+
+
+        DisplayStack display(*this);
+
+        _curr_property_stack.push_back("anchor_min"); display.GroupBegin(); display.Label("Anchor Min"); display.ItemBegin(true);
+        changed = ImGuidk::DragVec2("##anchor_min", &c_rt->anchor_min);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+
+        _curr_property_stack.push_back("anchor_max"); display.GroupBegin(); display.Label("Anchor Max"); display.ItemBegin(true);
+        changed = ImGuidk::DragVec2("##anchor_max", &c_rt->anchor_max);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+
+        _curr_property_stack.push_back("pivot"); display.GroupBegin(); display.Label("Pivot"); display.ItemBegin(true);
+        changed = ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+
+        
+
+        // z, scale, rot
+        IDE& editor = Core::GetSystem<IDE>();
+        auto& c = *c_rt->GetGameObject()->Transform();
+
+        const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
+        const float pad_y = ImGui::GetStyle().FramePadding.y;
+
+        ImGui::PushItemWidth(-4.0f);
+
+        _curr_component = c.GetHandle();
+        _prefab_curr_component_nth = 0;
+        _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
+        display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
+        changed = ImGui::DragFloat("##pos_z", &c.position.z);
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back(); _curr_property_stack.pop_back();
+
+        changed = false;
+        _curr_property_stack.push_back("rotation");
+        display.GroupBegin(); display.Label("Rotation"); display.ItemBegin(true);
+        if (ImGuidk::DragQuat("##rot", &c.rotation))
+        {
+            changed = true;
+            for (Handle<GameObject> i : editor.selected_gameObjects)
+                i->GetComponent<Transform>()->rotation = c.rotation;
+        }
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+
+        changed = false;
+        _curr_property_stack.push_back("scale");
+        display.GroupBegin(); display.Label("Scale"); display.ItemBegin(true);
+        if (ImGuidk::DragVec3("##scl", &c.scale))
+        {
+            changed = true;
+            for (Handle<GameObject> i : editor.selected_gameObjects)
+                i->GetComponent<Transform>()->rotation = c.rotation;
+        }
+        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+    }
+
+
     template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Animator> c_anim)
 	{
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
-		const auto imgui_name = [&](string_view base, string_view added) -> string
+		DisplayStack display{*this};
+
+
+		_curr_property_stack.emplace_back("layers");
+		display.GroupBegin();
+		auto title_pos = ImGui::GetCursorPos();
+		bool tree_open = ImGui::CollapsingHeader("##animation_layers", ImGuiTreeNodeFlags_AllowItemOverlap);
+		// ImGui::SetCursorPos(title_pos);
+		ImGui::SameLine();
+		display.Label("Layers");
+		ImGui::NewLine();
+		if (tree_open)
 		{
-			return string{ base } +"##" + added.data();
+			ImGui::Indent();
+			for (auto& layer : c_anim->layers)
+			{
+				// ImGui::Separator(false);
+				ImGui::PushID(&layer);
+				
+				ImGui::Text(layer.name.data());
+				ImGui::SameLine();
+				const auto arrow_pos = ImVec2{ ImGui::GetCurrentWindowRead()->DC.CursorPos.x,
+									   ImGui::GetCurrentWindowRead()->DC.CursorPos.y + ImGui::GetFontSize() * 0.25f };
+				ImGui::RenderArrow(arrow_pos, ImGuiDir_Right, 0.7f);
+				ImGui::SameLine(0.0f, ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2);
+				ImGui::Text(c_anim->CurrentStateName().data());
+
+				ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 3 }, nullptr);
+				ImGui::PopID();
+				ImGui::Separator(false);
+			}
+			ImGui::Unindent();
+		}
+		display.GroupEnd(false);
+		_curr_property_stack.pop_back();
+
+		static char buf[50];
+		const auto display_param = [&](auto& param) -> bool
+		{
+			using T = std::decay_t<decltype(param)>;
+			bool ret_val = false;
+
+			ImGui::PushID(&param);
+			ImGui::Indent();
+			strcpy_s(buf, param.name.data());
+			ImGui::BeginGroup();
+			const float align_widget = ImGui::GetContentRegionAvailWidth() * 0.7f;
+			const float widget_size = ImGui::GetContentRegionAvailWidth() * 0.3f;
+
+			ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() * 0.5f);
+			if (ImGui::InputText("##rename_param", buf, 50, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				ret_val |= c_anim->RenameParam<T>(param.name, buf);
+			}
+
+			ImGui::PopItemWidth();
+			ImGui::SameLine(align_widget);
+
+			auto& val = c_anim->IsPlaying() ? param.val : param.def_val;
+			if constexpr (std::is_same_v <T, anim::IntParam>)
+			{
+				ImGui::PushItemWidth(widget_size);
+				ret_val |= ImGui::DragInt("##param_input", &val) && !c_anim->IsPlaying();
+				ImGui::PopItemWidth();
+			}
+			else if constexpr (std::is_same_v < T, anim::FloatParam>)
+			{
+				ImGui::PushItemWidth(widget_size);
+				ret_val |= ImGui::DragFloat("##param_input", &val, 0.01f) && !c_anim->IsPlaying();
+				ImGui::PopItemWidth();
+			}
+			else if constexpr (std::is_same_v <T, anim::BoolParam>)
+			{
+				ret_val |= ImGui::Checkbox("##param_input", &val) && !c_anim->IsPlaying();
+			}
+			else if constexpr (std::is_same_v <T, anim::TriggerParam>)
+			{
+				if (ImGui::RadioButton("##param_input", val))
+				{
+					ret_val = true && !c_anim->IsPlaying();
+					val = !val;
+				}
+			}
+			else
+				throw("???");
+
+			ImGui::Separator(false);
+
+			ImGui::EndGroup();
+			ImGui::Unindent();
+			ImGui::PopID();
+
+			return ret_val;
 		};
 
-		//ImGui::NewLine();
-		auto state_window_flags = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking;
-		auto state_window_width = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-		constexpr float state_window_height = 130.0f;
-		if (c_anim->animation_display_order.empty())
-		{
-			ImGui::TextColored(ImVec4{ 0,1,0,1 }, "Start by adding an animation state!");
-		}
-		else
-		{
-			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
-			if (ImGui::CollapsingHeader("Animation States", ImGuiTreeNodeFlags_AllowItemOverlap))
-			{
-				ImGui::Indent(5.0f);
-				for (auto& curr_state_key : c_anim->animation_display_order)
-				{
-					// Check if we can actually find the state
-					auto found_state = c_anim->animation_table.find(curr_state_key);
-					IDK_ASSERT(found_state != c_anim->animation_table.end());
-					auto& curr_state = *found_state;
-
-					bool renamed = false;
-					bool to_remove = false;
-
-					// Will change this to use something other than collapsing header. 
-					if (!curr_state.second.valid)
-						ImGuidk::PushDisabled();
-
-					ImGui::Text("Animation State: ");
-					ImGui::PushItemWidth(200.0f);
-					ImGui::SameLine();
-					renamed = ImGui::InputText(("##Animation State" + curr_state.first).c_str(), &curr_state.second.name, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo | ImGuiInputTextFlags_EnterReturnsTrue);
-					ImGui::PopItemWidth();
-
-					if (ImGui::IsItemDeactivatedAfterEdit() && !renamed)
-						curr_state.second.name = curr_state.first;
-					
-					// if (!curr_state.second.IsBlendTree())
-					// {
-					// 	ImGui::SameLine();
-					// 	if (ImGui::Button("Convert to Blend Tree"))
-					// 	{
-					// 		variant<BasicAnimationState, BlendTree> new_state{ BlendTree{} };
-					// 		curr_state.second.state_data = new_state;
-					// 	}
-					// }
-
-					if (ImGui::BeginChild(("##window" + curr_state.first).c_str(), ImVec2{ state_window_width, state_window_height }, true, state_window_flags))
-					{
-						if (curr_state.second.IsBlendTree())
-						{
-							ImGui::Text("State Type: Blend Tree");
-							auto& state_data = *curr_state.second.GetBlendTree();
-							for (size_t i = 0; i < state_data.motions.size(); ++i)
-							{
-								ImGui::PushID((int)i);
-								auto& blend_tree_motion = state_data.motions[i];
-								ImGuidk::InputResource(("##clip" + curr_state.first).c_str(), &blend_tree_motion.motion);
-								ImGui::InputFloat(("##threshold" + curr_state.first).c_str(), &blend_tree_motion.thresholds[0]);
-								ImGui::Text("Weight: %.2f", state_data.motions[i].weight);
-								ImGui::PopID();
-							}
-
-							RscHandle<anim::Animation> tmp{};
-							if (ImGuidk::InputResource(imgui_name("Add Motion Field", curr_state.first).c_str(), &tmp))
-							{
-								BlendTreeMotion new_motion{ };
-								new_motion.motion = tmp;
-								state_data.motions.push_back(new_motion);
-
-								std::sort(state_data.motions.begin(), state_data.motions.end(), 
-									[](const BlendTreeMotion& lhs, const BlendTreeMotion& rhs) 
-									{ 
-										return lhs.thresholds[0] < rhs.thresholds[0]; 
-									});
-							}
-
-							ImGui::DragFloat("TESTTTT", &state_data.def_data[0], 0.01f);
-						}
-						else
-						{
-							const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
-							const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
-							{
-								colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
-								ImGui::SameLine();
-								ImGui::SetCursorPosX(drag_pos);
-							};
-
-							auto& state_data = *curr_state.second.GetBasicState();
-							ImGui::Text("State Type: Basic Animation");
-							const bool has_valid_clip = s_cast<bool>(state_data.motion);
-							display_name_align("Clip", !has_valid_clip);
-							ImGuidk::InputResource(("##clip" + curr_state.first).c_str(), &state_data.motion);
-
-							if (!has_valid_clip)
-								ImGuidk::PushDisabled();
-							display_name_align("Speed");
-							ImGui::DragFloat(("##speed" + curr_state.first).c_str(), &curr_state.second.speed, 0.01f);
-
-							display_name_align("Loop");
-							ImGui::Checkbox(("##loop" + curr_state.first).c_str(), &curr_state.second.loop);
-							ImGui::NewLine();
-
-							if (!has_valid_clip)
-								ImGuidk::PopDisabled();
-
-							if (ImGui::Button(imgui_name("Delete State", curr_state.first).c_str()))
-								to_remove = true;
-						}
-
-					}
-					ImGui::EndChild();
-					ImGui::NewLine();
-					if (!curr_state.second.valid)
-						ImGuidk::PopDisabled();
-
-					if (to_remove)
-					{
-						c_anim->RemoveAnimation(curr_state.first);
-						break;
-					}
-
-					if (renamed)
-					{
-						bool success = c_anim->RenameAnimation(curr_state.first, curr_state.second.name);
-						if (!success)
-							curr_state.second.name = curr_state.first;
-						break;
-					}
-				}
-				ImGui::Unindent(5.0f);
-			}
-		}
-
-		
-		
-		const ImVec2 add_animation_button_size{ 150.0f, 30.0f};
-		if (ImGui::Button("Add Animation State", add_animation_button_size))
-		{
-			c_anim->AddAnimation(RscHandle<anim::Animation>{});
-		}
-		
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
-			{
-				auto res_payload = DragDrop::GetResourcePayloadData();
-				GenericResourceHandle tmp{ RscHandle<anim::Animation>{} };
-				for (auto& h : res_payload)
-				{
-					if (h.resource_id() == tmp.resource_id())
-					{
-						if (payload->IsDelivery())
-						{
-							c_anim->AddAnimation(h.AsHandle<anim::Animation>());
-						}
-						break;
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::Text("Dragging an animation file to this button works too!");
-			ImGui::EndTooltip();
-		}
-		
+		_curr_property_stack.emplace_back("parameters");
+		bool params_changed = false;
+		display.GroupBegin();
+		title_pos = ImGui::GetCursorPos();
+		tree_open = ImGui::CollapsingHeader("##animation_params", ImGuiTreeNodeFlags_AllowItemOverlap);
+		// ImGui::SetCursorPos(title_pos);
+		ImGui::SameLine();
+		display.Label("Parameters");
 		ImGui::NewLine();
-
-		auto found_default = c_anim->animation_table.find(c_anim->layers[0].default_state);
-		if(found_default == c_anim->animation_table.end() || !found_default->second.valid)
-			ImGui::TextColored(ImVec4{1,0,0,1}, "Default State");
-		else
-			ImGui::Text("Default State");
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(150.0f);
-		if (ImGui::BeginCombo(imgui_name("##def state", c_anim->layers[0].name).c_str(), c_anim->layers[0].default_state.c_str()))
+		ImGui::Indent();
+		if (tree_open)
 		{
-			for (auto& anim : c_anim->animation_table)
+			if (ImGui::CollapsingHeader("Int"))
 			{
-				string_view curr_name = anim.second.name;
-				if (ImGui::Selectable(curr_name.data(), c_anim->layers[0].default_state == curr_name))
+				for (auto& param : c_anim->GetParamTable<anim::IntParam>())
 				{
-					// c_anim->Stop();
-					c_anim->layers[0].default_state = curr_name;
-					c_anim->layers[0].curr_state.name = curr_name;
+					params_changed |= display_param(param.second);
 				}
 			}
-			ImGui::EndCombo();
+
+			if (ImGui::CollapsingHeader("Float"))
+			{
+				for (auto& param : c_anim->GetParamTable<anim::FloatParam>())
+				{
+					params_changed |= display_param(param.second);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Bool"))
+			{
+				for (auto& param : c_anim->GetParamTable<anim::BoolParam>())
+				{
+					params_changed |= display_param(param.second);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Trigger"))
+			{
+				for (auto& param : c_anim->GetParamTable<anim::TriggerParam>())
+				{
+					params_changed |= display_param(param.second);
+				}
+			}
 		}
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
+		ImGui::Unindent();
+		// ImGui::Separator(false);
+		display.GroupEnd(params_changed);
+		_curr_property_stack.pop_back();
+
+		ImGui::NewLine();
+		if (ImGui::Button("Open Animator Window"))
+		{
+			Core::GetSystem<IDE>().FindWindow<IGE_AnimatorWindow>()->is_open = true;
+		}
+		//ImGui::SameLine(0.0f, 5.0f);
+		
 		ImGui::Text("Preview"); ImGui::SameLine();
-		if (ImGui::Checkbox(imgui_name("##preview", c_anim->layers[0].name).c_str(), &c_anim->preview_playback))
+		if (ImGui::Checkbox("##preview", &c_anim->preview_playback)) 
 		{
 			c_anim->OnPreview();
 		}
-		ImGui::NewLine();
-
-		const auto data_pos_x = ImGui::CalcTextSize("Blending To: ").x + ImGui::GetCursorPosX();
-		const ImVec4 playing_text__col = c_anim->IsPlaying() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
-		ImGui::TextColored(playing_text__col, "Playing: ");
-		ImGui::SameLine();
-
-		ImGui::SetCursorPosX(data_pos_x);
-		string display_name = c_anim->layers[0].curr_state.name;
-		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), c_anim->layers[0].curr_state.normalized_time);
-		ImGui::ProgressBar(c_anim->layers[0].curr_state.normalized_time, ImVec2{ -1, 10 }, nullptr);
-
-		const ImVec4 blend_col = c_anim->IsBlending() ? ImVec4{ 0,1,0,1 } : ImVec4{ 1,0,0,1 };
-		ImGui::TextColored(blend_col, "Blending To: ");
-		display_name = c_anim->layers[0].blend_state.name;
-		ImGui::SameLine();
-
-		ImGui::SetCursorPosX(data_pos_x);
-		ImGui::Text("%s (%.2f)", display_name.empty() ? "None" : display_name.data(), c_anim->layers[0].blend_state.normalized_time);
-		static ImVec4 blend_prog_col{ 0.386953115f,0.759855568f, 0.793749988f, 1.0f };
-		if (c_anim->layers[0].blend_state.is_playing)
-			ImGui::ProgressBar(c_anim->layers[0].blend_state.normalized_time / c_anim->layers[0].blend_duration, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
-		else
-			ImGui::ProgressBar(0.0f, blend_prog_col, ImVec2{ -1, 10 }, nullptr);
-
 		ImGui::NewLine();
 	}
 
@@ -820,49 +1059,36 @@ namespace idk {
 		//Draw All your custom variables here.
 		ImGui::Text("Bone Name: ");
 		ImGui::SameLine();
-		ImGui::Text(c_bone->_bone_name.c_str());
-		ImGui::Text("Bone Index: %d", c_bone->_bone_index);
+		ImGui::Text(c_bone->bone_name.c_str());
+		ImGui::Text("Bone Index: %d", c_bone->bone_index);
 	}
 
 	template<>
-	void IGE_InspectorWindow::DisplayComponentInner(Handle<Font> c_font)
+	void IGE_InspectorWindow::DisplayComponentInner(Handle<TextMesh> c_font)
 	{
-		//Just a check to prevent vulkan from crashing because vulkan got no font yet
-		if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
-		{
-			const auto drag_pos = ImGui::GetContentRegionAvailWidth() * 0.15f;
-			const auto display_name_align = [&](string_view text, bool colored = false, ImVec4 col = ImVec4{ 1,0,0,1 })
-			{
-				colored ? ImGui::TextColored(col, text.data()) : ImGui::Text(text.data());
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(drag_pos);
-			};
-
-
-			ImGui::Text("State Type: Font Type");
-			const bool has_valid_atlas = s_cast<bool>(c_font->textureAtlas);
-			display_name_align("Atlas", !has_valid_atlas);
-			ImGuidk::InputResource(("##atlas" + string(c_font->textureAtlas->Name().data())).c_str(), &c_font->textureAtlas);
-
-			display_name_align("Text");
-			ImGui::InputTextMultiline("##InputText", &c_font->text);
-
-			display_name_align("Font Size");
-			if (ImGui::DragInt("##fontsize", &c_font->fontSize))
-			{
-				c_font->UpdateFontSize();
-			}
-
-			display_name_align("Spacing");
-			ImGui::DragFloat("##fontspacing", &c_font->spacing);
-
-			display_name_align("Track");
-			ImGui::DragFloat("##fonttrack", &c_font->tracking);
-
-			display_name_align("Color");
-			ImGui::ColorEdit4("##fontColor", &c_font->colour[0]);
-		}
+        constexpr CustomDrawFn draw_text = [](const reflect::dynamic& val)
+        {
+            return ImGui::InputTextMultiline("", &val.get<string>());
+        };
+        InjectDrawTable table{ { "text", draw_text } };
+        DisplayVal(*c_font, &table);
 	}
+
+    template<>
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<Text> c_text)
+    {
+        constexpr CustomDrawFn draw_text = [](const reflect::dynamic& val)
+        {
+            return ImGui::InputTextMultiline("", &val.get<string>());
+        };
+        constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
+        {
+            auto& anchor = val.get<TextAnchor>();
+            return ImGuidk::EnumCombo("", &anchor);
+        };
+        InjectDrawTable table{ { "text", draw_text }, { "alignment", draw_alignment } };
+        DisplayVal(*c_text, &table);
+    }
 
 	template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<AudioSource> c_audiosource)
@@ -879,40 +1105,43 @@ namespace idk {
 				changed = true;
 			}
 
-			ImGui::Text("AudioClips");
-			ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
+			ImGui::Separator();
+			if (!audio_clip_list.empty()) {
+				ImGui::Text("AudioClips");
+				ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
 
-			for (auto i = 0; i < audio_clip_list.size(); ++i) {
-				string txt = "[" + std::to_string(i) + "]";
-				if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
-					//Stop playing before switching sounds!
-					changed = true;
-				}
-				ImGui::SameLine();
-				ImGui::PushID(i);
-				if (ImGui::SmallButton("X")) {
-					static_audiosource->RemoveAudioClip(i);
+				for (auto i = 0; i < audio_clip_list.size(); ++i) {
+					string txt = "[" + std::to_string(i) + "]";
+					if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
+						//Stop playing before switching sounds!
+						changed = true;
+					}
+					ImGui::SameLine();
+					ImGui::PushID(i);
+					if (ImGui::SmallButton("X")) {
+						static_audiosource->RemoveAudioClip(i);
+						ImGui::PopID();
+						changed = true;
+						break;
+					}
+
+					ImGui::SameLine();
+					if (static_audiosource->IsAudioClipPlaying(i)) {
+						if (ImGui::SmallButton("||")) {
+							static_audiosource->Stop(i);
+						}
+					}
+					else {
+						if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
+							static_audiosource->Play(i);
+						}
+					}
 					ImGui::PopID();
-					changed = true;
-					break;
+
 				}
 
-				ImGui::SameLine();
-				if (static_audiosource->IsAudioClipPlaying(i)) {
-					if (ImGui::SmallButton("||")) {
-						static_audiosource->Stop(i);
-					}
-				}
-				else {
-					if (ImGui::ArrowButton("Play", ImGuiDir_Right)) {
-						static_audiosource->Play(i);
-					}
-				}
-				ImGui::PopID();
-
+				ImGui::EndChild();
 			}
-
-			ImGui::EndChild();
 
 			return changed;
 		};
@@ -921,7 +1150,7 @@ namespace idk {
 			{ "audio_clip_list", draw_audio_list }
 		};
 
-		displayVal(*c_audiosource, &table);
+		DisplayVal(*c_audiosource, &table);
 
 	}
 
@@ -951,7 +1180,7 @@ namespace idk {
         ImGuidk::PushFont(FontType::Smaller);
 
         _curr_property_stack.push_back("main");
-        displayVal(c_ps->main);
+        DisplayVal(c_ps->main);
         _curr_property_stack.pop_back();
 
         const auto display = [&](const char* title, reflect::dynamic dyn, InjectDrawTable* inject = nullptr)
@@ -973,7 +1202,7 @@ namespace idk {
             if (open)
             {
                 _curr_property_stack.push_back(title);
-                displayVal(std::move(dyn), inject);
+                DisplayVal(std::move(dyn), inject);
                 _curr_property_stack.pop_back();
             }
 
@@ -1044,7 +1273,7 @@ namespace idk {
         ImGui::PopFont();
     }
 
-	void IGE_InspectorWindow::DisplayComponent(GenericHandle& component)
+	void IGE_InspectorWindow::DisplayComponent(GenericHandle component)
 	{
 		//COMPONENT DISPLAY
         ImGui::PushID(component.type);
@@ -1063,9 +1292,9 @@ namespace idk {
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
+        _curr_component = component;
         if (_prefab_inst)
         {
-            _prefab_curr_component = component;
             _prefab_curr_component_nth = -1;
             const span comps = _prefab_inst->GetGameObject()->GetComponents();
             for (const auto& c : comps)
@@ -1081,21 +1310,33 @@ namespace idk {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
         bool open_header = ImGui::TreeNodeEx("",
             ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-            ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllAvailWidth);
+            ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
         ImGui::PopStyleVar();
 
         if (ImGui::IsMouseReleased(1) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
             ImGui::OpenPopup("AdditionalOptions");
 
         ImGui::SameLine();
+		ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
+		component.visit([](auto h) {
+			const auto i = ComponentIcon<std::decay_t<decltype(*h)>>;
+			if (*i != '\0')
+			{
+				ImGui::Text(i);
+				ImGui::SameLine();
+			}
+			else
+				ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + 12.0f + ImGui::GetStyle().ItemInnerSpacing.x * 2.0f);
+			});
+		auto cursor_x = ImGui::GetCursorPosX();
+
         if (auto f = (*component).get_property("enabled"); f.value.valid())
         {
-            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
             ImGui::Checkbox("##enabled", &f.value.get<bool>());
             ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
         }
         else
-            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing + ImGui::GetStyle().ItemInnerSpacing.x +
+            ImGui::SetCursorPosX(cursor_x + ImGui::GetStyle().ItemInnerSpacing.x +
                 /* checkbox width: */ ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2);
 
         ImGuidk::PushFont(FontType::Bold);
@@ -1170,8 +1411,13 @@ namespace idk {
                 Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
 			}
 			else {
-				for (Handle<GameObject> gameObject : editor.selected_gameObjects)
+				int execute_counter = 0;
+				for (Handle<GameObject> gameObject : editor.selected_gameObjects) {
 					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+					++execute_counter;
+				}
+				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 		}
 	}
@@ -1193,6 +1439,7 @@ namespace idk {
 			bool isTransformValuesEdited = false;
 			editor.RefreshSelectedMatrix();
 
+			int execute_counter = 0;
 			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
 				auto& gameObject = editor.selected_gameObjects[i];
 
@@ -1212,21 +1459,24 @@ namespace idk {
 
 						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
-
+						++execute_counter;
 					}
 					else {
 						//Mark to remove Component
 						string compName = string((*componentToMod).type.name());
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, compName));
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component)); //Remember commands are flushed at end of each update!
+						execute_counter += 2;
 					}
 				}
 				else {
 					//Add component
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component));
+					++execute_counter;
 				}
 			}
-
+			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			if (isTransformValuesEdited)
 				//Refresh the new matrix values
 				editor.RefreshSelectedMatrix();
@@ -1234,12 +1484,13 @@ namespace idk {
 	}
 
 
+
     // when curr property is key, draws using CustomDrawFn
-    bool IGE_InspectorWindow::displayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table)
+    bool IGE_InspectorWindow::DisplayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table)
     {
-        const float item_width = ImGui::GetWindowContentRegionWidth() * item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
+        static reflect::dynamic original_value;
         bool outer_changed = false;
         vector<char> indent_stack;
 
@@ -1268,63 +1519,25 @@ namespace idk {
                 return false;
             }
 
-            string curr_prop_path;
-            for (const auto& prop : _curr_property_stack)
-            {
-                if (prop.empty())
-                    continue;
-                curr_prop_path += prop;
-                curr_prop_path += '/';
-            }
-            curr_prop_path.pop_back();
-
-            bool has_override = false;
-            if (_prefab_inst)
-            {
-                for (const auto& ov : _prefab_inst->overrides)
-                {
-                    if (ov.component_name == (*_prefab_curr_component).type.name() &&
-                        ov.property_path == curr_prop_path &&
-                        ov.component_nth == _prefab_curr_component_nth)
-                    {
-                        has_override = true;
-                        break;
-                    }
-                }
-            }
-
-            ImGui::BeginGroup();
+            DisplayStack display(*this);
+            display.GroupBegin();
 
             ImGui::SetCursorPosY(currentHeight + pad_y);
-            if (has_override)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-                ImGui::Text(keyName.c_str());
-                ImGui::PopStyleColor();
-                ImGui::SameLine(-ImGui::GetStyle().IndentSpacing);
-                ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetCursorScreenPos(),
-                                                          ImGui::GetCursorScreenPos() + ImVec2(4.0f, ImGui::GetFrameHeight()),
-                                                          ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-            }
-            else
-                ImGui::Text(keyName.c_str());
+            display.Label(keyName.c_str());
 
             ImGui::SetCursorPosY(currentHeight);
-            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-
-            ImGui::PushID(("##" + curr_prop_path).c_str());
-            ImGui::PushItemWidth(-4.0f);
+            display.ItemBegin(true);
 
             bool indent = false;
             bool recurse = false;
             bool changed = false;
-            [[maybe_unused]] bool changed_and_deactivated = false;
+            bool changed_and_deactivated = false;
 
             //ALL THE TYPE STATEMENTS HERE
             bool draw_injected = false;
             if (inject_draw_table)
             {
-                if (const auto iter = inject_draw_table->find(curr_prop_path); iter != inject_draw_table->end())
+                if (const auto iter = inject_draw_table->find(display.curr_prop_path); iter != inject_draw_table->end())
                 {
                     changed |= iter->second(val);
                     draw_injected = true;
@@ -1364,6 +1577,10 @@ namespace idk {
                 {
                     changed |= ImGui::Checkbox("", &val);
                 }
+                else if constexpr (std::is_same_v<T, vec2>)
+                {
+                    changed |= ImGuidk::DragVec2("", &val);
+                }
                 else if constexpr (std::is_same_v<T, vec3>)
                 {
                     changed |= ImGuidk::DragVec3("", &val);
@@ -1371,6 +1588,10 @@ namespace idk {
                 else if constexpr (std::is_same_v<T, quat>)
                 {
                     changed |= ImGuidk::DragQuat("", &val);
+                }
+                else if constexpr (std::is_same_v<T, rect>)
+                {
+                    changed |= ImGuidk::DragRect("", &val);
                 }
                 else if constexpr (std::is_same_v<T, color>)
                 {
@@ -1380,13 +1601,33 @@ namespace idk {
                 {
                     changed |= ImGui::SliderAngle("", val.data());
                 }
+                else if constexpr (std::is_same_v<T, string>)
+                {
+                    changed |= ImGui::InputText("", &val);
+                }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputResource("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (std::is_same_v<T, Handle<GameObject>>)
                 {
+                    auto ori = val;
                     changed |= ImGuidk::InputGameObject("", &val);
+                    if (changed)
+                    {
+                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        changed_and_deactivated = true;
+                    }
+                }
+                else if constexpr (std::is_same_v<T, LayerMask>)
+                {
+                    changed |= ImGuidk::LayerMaskCombo("", &val);
                 }
                 else if constexpr (is_macro_enum_v<T>)
                 {
@@ -1431,7 +1672,7 @@ namespace idk {
                     ImGui::Indent();
                     for (auto dyn : cont)
                     {
-                        displayVal(dyn);
+                        DisplayVal(dyn);
                     }
                     ImGui::Unindent();
                 }
@@ -1444,7 +1685,7 @@ namespace idk {
                     for (auto dyn : cont)
                     {
                         auto pair = dyn.unpack();
-                        displayVal(pair[0]);
+                        DisplayVal(pair[0]);
                     }
                     ImGui::Unindent();*/
                 }
@@ -1470,29 +1711,25 @@ namespace idk {
                 }
             }
 
-            ImGui::EndGroup();
+            display.ItemEnd();
 
-            if (has_override && ImGui::BeginPopupContextItem("__context"))
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+                original_value.swap(reflect::dynamic(val).copy());
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+                changed_and_deactivated = true;
+
+            if (!original_value.valid()) // no change?
+                changed_and_deactivated = false;
+
+            if (changed_and_deactivated)
             {
-                if (ImGui::MenuItem("Apply Property"))
-                {
-                    PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
-                    PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                }
-                if (ImGui::MenuItem("Revert Property"))
-                {
-                    PropertyOverride ov{ string((*_prefab_curr_component).type.name()), curr_prop_path, _prefab_curr_component_nth };
-                    PrefabUtility::RevertPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                }
-                ImGui::EndPopup();
+                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                original_value.swap(reflect::dynamic());
             }
 
             outer_changed |= changed;
-            if (changed && _prefab_inst)
-                PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _prefab_curr_component, curr_prop_path);
-
-            ImGui::PopItemWidth();
-            ImGui::PopID();
+            display.GroupEnd(changed);
 
             indent_stack.push_back(indent);
             if (indent)
@@ -1547,5 +1784,87 @@ namespace idk {
 		}
 	}
 
+
+    void IGE_InspectorWindow::DisplayStack::ItemBegin(bool align)
+    {
+        if (align)
+        {
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() * (1.0f - item_width_ratio));
+        }
+        ImGui::PushID(curr_prop_path.c_str());
+        ImGui::PushItemWidth(-4.0f);
+    }
+
+    void IGE_InspectorWindow::DisplayStack::ItemEnd()
+    {
+        ImGui::PopItemWidth();
+        ImGui::PopID();
+    }
+
+    void IGE_InspectorWindow::DisplayStack::GroupBegin()
+    {
+        curr_prop_path.clear();
+        for (const auto& prop : self._curr_property_stack)
+        {
+            if (prop.empty())
+                continue;
+            curr_prop_path += prop;
+            curr_prop_path += '/';
+        }
+        curr_prop_path.pop_back();
+        
+        has_override = false;
+        if (self._prefab_inst && self._curr_property_stack.back().size())
+            has_override = self._prefab_inst->HasOverride(
+                (*self._curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
+
+        ImGui::BeginGroup();
+    }
+
+    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed)
+    {
+        ImGui::EndGroup();
+
+        if (has_override && ImGui::BeginPopupContextItem("__context"))
+        {
+            if (ImGui::MenuItem("Apply Property"))
+            {
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
+            }
+            if (ImGui::MenuItem("Revert Property"))
+            {
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
+            }
+            ImGui::EndPopup();
+        }
+
+        if (changed && self._prefab_inst)
+        {
+            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
+        }
+
+        if (has_override)
+        {
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0),
+                ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0) + ImVec2(4.0f, ImGui::GetItemRectSize().y),
+                ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
+    }
+
+    void IGE_InspectorWindow::DisplayStack::Label(const char* key)
+    {
+        if (has_override)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+            ImGui::Text(key);
+            ImGui::PopStyleColor();
+        }
+        else
+            ImGui::Text(key);
+        ImGui::SameLine();
+    }
 
 }

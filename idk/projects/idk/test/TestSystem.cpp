@@ -17,7 +17,7 @@
 #include <PauseConfigurations.h>
 #include <file/FileSystem.h>
 #include <gfx/ShaderGraph.h>
-
+#include <parallel/ThreadPool.h>
 namespace idk
 {
 	void TestSystem::Init()
@@ -43,7 +43,37 @@ namespace idk
 		t += Core::GetDT().count();
 		auto& app_sys = Core::GetSystem<Application>();
 		auto& gamepad = Core::GetSystem<GamepadSystem>();
+		
+		static bool fire = false;
+		if (app_sys.GetKey(Key::I) )
+		{
+			/*
+			mt::circular_buffer_lf<int, 4> poop;
 
+			int i = 0;
+			for (int iter = 0; iter < 2; ++iter)
+			{
+				for (int j = 0; j < 8; ++j, ++i)
+					poop.emplace_back(i);
+				while (auto val = poop.pop_front())
+					std::cout << *val << std::endl;
+			}
+			/*/
+			const int jobs = rand() % 70 + 10;
+			std::cout << "jobs: " << jobs << "\n";
+			vector<mt::ThreadPool::Future<void>> futures(jobs);
+			for (int i =0; i < jobs; ++i)
+				futures[i] = Core::GetThreadPool().Post([i]()
+				{
+					std::cout << "hello from " + std::to_string(mt::thread_id()) + " with index " + std::to_string(i) + "\n";
+				});
+			for (auto& elem : futures)
+				elem.get();
+			std::cout << "all printed\n";
+			fire = true;
+			//*/
+		}
+		
 		for (auto& elem : comps)
 		{
 			if (app_sys.GetKey(Key::J)) elem.GetGameObject()->Transform()->position += vec3{ +0.016, 0.0, 0.0 };
@@ -65,13 +95,28 @@ namespace idk
 			//if (rb)
 			//	rb->AddForce(vec3{ 1, 0, 0 } * sin(rad{t / 0.01f}));
 		}
-
-		for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			if (file.GetExtension() == ".tmpt")
+		{
+			bool recompile_graph = false;
+			for (auto& file : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+			{
+				switch (string_hash(file.GetExtension()))
+				{
+				case string_hash(".glsl"):
+					Core::GetResourceManager().Load<ShaderSnippet>(file); //Update the shader snippet
+				case string_hash(".tmpt"):
+					recompile_graph = true;
+					break;
+				default:
+					break;
+				}
+			}
+			if (recompile_graph) 
 			{
 				for (auto& elem : Core::GetResourceManager().GetAll<shadergraph::Graph>())
 					elem->Compile();
+				Core::GetSystem<GraphicsSystem>().LoadShaders();
 			}
+		}
 
 		if (app_sys.GetKey(Key::Control) && app_sys.GetKeyDown(Key::S))
 			Core::GetSystem<ProjectManager>().SaveProject();

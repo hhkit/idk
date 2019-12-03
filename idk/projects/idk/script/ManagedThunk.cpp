@@ -4,7 +4,11 @@
 namespace idk::mono
 {
 	ManagedThunk::ManagedThunk(MonoMethod* method)
-		: thunk{ mono_method_get_unmanaged_thunk(method) }
+		: thunk{  }
 	{
+		auto res = mono_method_get_unmanaged_thunk(method);
+		if (!res)
+			throw;
+		thunk = res;
 	}
 }

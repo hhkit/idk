@@ -14,20 +14,24 @@
   - !Light 
     casts_shadows: 1
     light: !DirectionalLight 
-      height: 5
+      bottom: -5
+      far: 5
       intensity: 1
+      left: -5
       light_color: 
         a: 1
         b: 1
         g: 1
         r: 1
-      width: 5
+      near: -5
+      right: 5
+      top: 5
     shadow_bias: 1.1920929e-07
-- !4295098368 
+- !4295032832 
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0.14901097, y: -0.97684836, z: -5.1527705}
+    position: {x: -3.93173, y: 0.14919503, z: -4.4284735}
     rotation: 
       w: 1
       x: 0
@@ -41,11 +45,76 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Animator 
-    animation_display_order: []
-    animation_table: {}
+    bool_vars: 
+      bool: 
+        def_val: 0
+        name: bool
+        val: 0
+        valid: 1
+    float_vars: 
+      float: 
+        def_val: 0
+        name: float
+        val: 0
+        valid: 1
+      speed: 
+        def_val: 0
+        name: speed
+        val: 0
+        valid: 1
+    int_vars: 
+      int: 
+        def_val: 0
+        name: int
+        val: 0
+        valid: 1
     layer_table: {Base Layer: 0}
     layers: 
-    - blend_type: Override_Blend
+    - anim_state_table: {idle: 1}
+      anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      - loop: 1
+        name: idle
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BlendTree 
+          blend_tree_type: BlendTree_1D
+          motions: 
+          - motion: {guid: b089b2c2-edd4-4d2b-8ac4-8643978dc88a}
+            speed: 1
+            thresholds: [0, 0]
+          - motion: {guid: afcdbeaa-e5e1-4a92-9360-abe7b85dde73}
+            speed: 1
+            thresholds: [1, 0]
+          params: [speed, ']
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 1
+      blend_type: Override_Blend
       bone_mask: 
       - 1
       - 1
@@ -147,16 +216,30 @@
       - 1
       - 1
       - 1
-      default_state: ""
+      default_index: 1
       default_weight: 1
       name: Base Layer
     skeleton: {guid: 76fb7538-ff96-404c-9328-3f71c95fc777}
+    trigger_vars: 
+      trigger: 
+        def_val: 0
+        name: trigger
+        val: 0
+        valid: 1
   - !MonoBehavior 
-    {enabled: 1, script_data: !TestSetForward ~}
+    enabled: 1
+    script_data: !AnimationTest 
+      Bool: 0
+      Float: 0
+      Int: 0
+      Speed: 0
+      Trigger: 0
+      elapsed: 0
+      w_pressed: 0
 - !8590000128 
   - active: 1
   - !Transform 
-    parent: {id: 4295098368}
+    parent: {id: 4295032832}
     position: {x: 0, y: 0, z: 0}
     rotation: 
       w: 1
@@ -176,7 +259,7 @@
 - !12884967424 
   - active: 1
   - !Transform 
-    parent: {id: 4295098368}
+    parent: {id: 4295032832}
     position: {x: 0, y: 0, z: 0}
     rotation: 
       w: 1
@@ -196,7 +279,7 @@
 - !17179934720 
   - active: 1
   - !Transform 
-    parent: {id: 4295098368}
+    parent: {id: 4295032832}
     position: {x: -0, y: 0, z: -0}
     rotation: 
       w: 1
@@ -211,7 +294,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 0, _bone_name: _root_jnt}
+    {bone_index: 0, bone_name: _root_jnt}
 - !21474902016 
   - active: 1
   - !Transform 
@@ -230,7 +313,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 1, _bone_name: COG_jnt}
+    {bone_index: 1, bone_name: COG_jnt}
 - !25769869312 
   - active: 1
   - !Transform 
@@ -249,7 +332,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 2, _bone_name: spine_1_jnt}
+    {bone_index: 2, bone_name: spine_1_jnt}
 - !30064836608 
   - active: 1
   - !Transform 
@@ -268,7 +351,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 3, _bone_name: spine_top_jnt}
+    {bone_index: 3, bone_name: spine_top_jnt}
 - !34359803904 
   - active: 1
   - !Transform 
@@ -287,7 +370,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 4, _bone_name: spine_2_jnt}
+    {bone_index: 4, bone_name: spine_2_jnt}
 - !38654771200 
   - active: 1
   - !Transform 
@@ -306,7 +389,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 5, _bone_name: L_hip_jnt}
+    {bone_index: 5, bone_name: L_hip_jnt}
 - !42949738496 
   - active: 1
   - !Transform 
@@ -325,7 +408,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 6, _bone_name: R_hip_jnt}
+    {bone_index: 6, bone_name: R_hip_jnt}
 - !47244705792 
   - active: 1
   - !Transform 
@@ -344,7 +427,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 7, _bone_name: spine_3_jnt}
+    {bone_index: 7, bone_name: spine_3_jnt}
 - !51539673088 
   - active: 1
   - !Transform 
@@ -363,7 +446,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 8, _bone_name: L_knee_jnt}
+    {bone_index: 8, bone_name: L_knee_jnt}
 - !55834640384 
   - active: 1
   - !Transform 
@@ -382,7 +465,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 9, _bone_name: R_knee_jnt}
+    {bone_index: 9, bone_name: R_knee_jnt}
 - !60129607680 
   - active: 1
   - !Transform 
@@ -401,7 +484,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 10, _bone_name: spine_4_jnt}
+    {bone_index: 10, bone_name: spine_4_jnt}
 - !64424574976 
   - active: 1
   - !Transform 
@@ -420,7 +503,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 11, _bone_name: L_ankle_jnt}
+    {bone_index: 11, bone_name: L_ankle_jnt}
 - !68719542272 
   - active: 1
   - !Transform 
@@ -439,7 +522,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 12, _bone_name: R_ankle_jnt}
+    {bone_index: 12, bone_name: R_ankle_jnt}
 - !73014509568 
   - active: 1
   - !Transform 
@@ -458,7 +541,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 13, _bone_name: spine_5_jnt}
+    {bone_index: 13, bone_name: spine_5_jnt}
 - !77309476864 
   - active: 1
   - !Transform 
@@ -477,7 +560,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 14, _bone_name: L_ball_jnt}
+    {bone_index: 14, bone_name: L_ball_jnt}
 - !81604444160 
   - active: 1
   - !Transform 
@@ -496,7 +579,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 15, _bone_name: R_ball_jnt}
+    {bone_index: 15, bone_name: R_ball_jnt}
 - !85899411456 
   - active: 1
   - !Transform 
@@ -515,7 +598,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 16, _bone_name: spine_6_jnt}
+    {bone_index: 16, bone_name: spine_6_jnt}
 - !90194378752 
   - active: 1
   - !Transform 
@@ -534,7 +617,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 17, _bone_name: L_toe_jnt}
+    {bone_index: 17, bone_name: L_toe_jnt}
 - !94489346048 
   - active: 1
   - !Transform 
@@ -553,7 +636,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 18, _bone_name: R_toe_jnt}
+    {bone_index: 18, bone_name: R_toe_jnt}
 - !98784313344 
   - active: 1
   - !Transform 
@@ -572,7 +655,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 19, _bone_name: spine_7_jnt}
+    {bone_index: 19, bone_name: spine_7_jnt}
 - !103079280640 
   - active: 1
   - !Transform 
@@ -591,7 +674,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 20, _bone_name: neck_jnt}
+    {bone_index: 20, bone_name: neck_jnt}
 - !107374247936 
   - active: 1
   - !Transform 
@@ -610,7 +693,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 21, _bone_name: L_clavicle_jnt}
+    {bone_index: 21, bone_name: L_clavicle_jnt}
 - !111669215232 
   - active: 1
   - !Transform 
@@ -629,7 +712,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 22, _bone_name: R_clavicle_jnt}
+    {bone_index: 22, bone_name: R_clavicle_jnt}
 - !115964182528 
   - active: 1
   - !Transform 
@@ -648,7 +731,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 23, _bone_name: head_jnt}
+    {bone_index: 23, bone_name: head_jnt}
 - !120259149824 
   - active: 1
   - !Transform 
@@ -667,7 +750,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 24, _bone_name: L_shoulder_jnt}
+    {bone_index: 24, bone_name: L_shoulder_jnt}
 - !124554117120 
   - active: 1
   - !Transform 
@@ -686,7 +769,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 25, _bone_name: R_shoulder_jnt}
+    {bone_index: 25, bone_name: R_shoulder_jnt}
 - !128849084416 
   - active: 1
   - !Transform 
@@ -705,7 +788,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 26, _bone_name: jaw_jnt}
+    {bone_index: 26, bone_name: jaw_jnt}
 - !133144051712 
   - active: 1
   - !Transform 
@@ -724,7 +807,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 27, _bone_name: upper_lip_jnt}
+    {bone_index: 27, bone_name: upper_lip_jnt}
 - !137439019008 
   - active: 1
   - !Transform 
@@ -743,7 +826,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 28, _bone_name: L_lipcorner_jnt}
+    {bone_index: 28, bone_name: L_lipcorner_jnt}
 - !141733986304 
   - active: 1
   - !Transform 
@@ -762,7 +845,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 29, _bone_name: R_lipcorner_jnt}
+    {bone_index: 29, bone_name: R_lipcorner_jnt}
 - !146028953600 
   - active: 1
   - !Transform 
@@ -781,7 +864,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 30, _bone_name: L_upper_lip_jnt}
+    {bone_index: 30, bone_name: L_upper_lip_jnt}
 - !150323920896 
   - active: 1
   - !Transform 
@@ -800,7 +883,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 31, _bone_name: R_upper_lip_jnt}
+    {bone_index: 31, bone_name: R_upper_lip_jnt}
 - !154618888192 
   - active: 1
   - !Transform 
@@ -819,7 +902,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 32, _bone_name: centre_brow_jnt}
+    {bone_index: 32, bone_name: centre_brow_jnt}
 - !158913855488 
   - active: 1
   - !Transform 
@@ -838,7 +921,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 33, _bone_name: L_inner_brow_jnt}
+    {bone_index: 33, bone_name: L_inner_brow_jnt}
 - !163208822784 
   - active: 1
   - !Transform 
@@ -857,7 +940,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 34, _bone_name: R_inner_brow_jnt}
+    {bone_index: 34, bone_name: R_inner_brow_jnt}
 - !167503790080 
   - active: 1
   - !Transform 
@@ -876,7 +959,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 35, _bone_name: L_outer_brow_jnt}
+    {bone_index: 35, bone_name: L_outer_brow_jnt}
 - !171798757376 
   - active: 1
   - !Transform 
@@ -895,7 +978,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 36, _bone_name: R_outer_brow_jnt}
+    {bone_index: 36, bone_name: R_outer_brow_jnt}
 - !176093724672 
   - active: 1
   - !Transform 
@@ -914,7 +997,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 37, _bone_name: L_mid_brow_jnt}
+    {bone_index: 37, bone_name: L_mid_brow_jnt}
 - !180388691968 
   - active: 1
   - !Transform 
@@ -933,7 +1016,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 38, _bone_name: R_mid_brow_jnt}
+    {bone_index: 38, bone_name: R_mid_brow_jnt}
 - !184683659264 
   - active: 1
   - !Transform 
@@ -952,7 +1035,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 39, _bone_name: L_eye_jnt}
+    {bone_index: 39, bone_name: L_eye_jnt}
 - !188978626560 
   - active: 1
   - !Transform 
@@ -971,7 +1054,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 40, _bone_name: R_eye_jnt}
+    {bone_index: 40, bone_name: R_eye_jnt}
 - !193273593856 
   - active: 1
   - !Transform 
@@ -990,7 +1073,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 41, _bone_name: L_upper_lid_jnt}
+    {bone_index: 41, bone_name: L_upper_lid_jnt}
 - !197568561152 
   - active: 1
   - !Transform 
@@ -1009,7 +1092,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 42, _bone_name: R_upper_lid_jnt}
+    {bone_index: 42, bone_name: R_upper_lid_jnt}
 - !201863528448 
   - active: 1
   - !Transform 
@@ -1028,7 +1111,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 43, _bone_name: L_lower_lid_jnt}
+    {bone_index: 43, bone_name: L_lower_lid_jnt}
 - !206158495744 
   - active: 1
   - !Transform 
@@ -1047,7 +1130,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 44, _bone_name: R_lower_lid_jnt}
+    {bone_index: 44, bone_name: R_lower_lid_jnt}
 - !210453463040 
   - active: 1
   - !Transform 
@@ -1066,7 +1149,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 45, _bone_name: L_squint_jnt}
+    {bone_index: 45, bone_name: L_squint_jnt}
 - !214748430336 
   - active: 1
   - !Transform 
@@ -1085,7 +1168,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 46, _bone_name: R_squint_jnt}
+    {bone_index: 46, bone_name: R_squint_jnt}
 - !219043397632 
   - active: 1
   - !Transform 
@@ -1104,7 +1187,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 47, _bone_name: L_cheek_jnt}
+    {bone_index: 47, bone_name: L_cheek_jnt}
 - !223338364928 
   - active: 1
   - !Transform 
@@ -1123,7 +1206,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 48, _bone_name: R_cheek_jnt}
+    {bone_index: 48, bone_name: R_cheek_jnt}
 - !227633332224 
   - active: 1
   - !Transform 
@@ -1142,7 +1225,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 49, _bone_name: L_nostril_jnt}
+    {bone_index: 49, bone_name: L_nostril_jnt}
 - !231928299520 
   - active: 1
   - !Transform 
@@ -1161,7 +1244,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 50, _bone_name: R_nostril_jnt}
+    {bone_index: 50, bone_name: R_nostril_jnt}
 - !236223266816 
   - active: 1
   - !Transform 
@@ -1180,7 +1263,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 51, _bone_name: L_elbow_jnt}
+    {bone_index: 51, bone_name: L_elbow_jnt}
 - !240518234112 
   - active: 1
   - !Transform 
@@ -1199,7 +1282,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 52, _bone_name: R_elbow_jnt}
+    {bone_index: 52, bone_name: R_elbow_jnt}
 - !244813201408 
   - active: 1
   - !Transform 
@@ -1218,7 +1301,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 53, _bone_name: tongue_base_jnt}
+    {bone_index: 53, bone_name: tongue_base_jnt}
 - !249108168704 
   - active: 1
   - !Transform 
@@ -1237,7 +1320,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 54, _bone_name: lower_lip_jnt}
+    {bone_index: 54, bone_name: lower_lip_jnt}
 - !253403136000 
   - active: 1
   - !Transform 
@@ -1256,7 +1339,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 55, _bone_name: L_lower_lip_jnt}
+    {bone_index: 55, bone_name: L_lower_lip_jnt}
 - !257698103296 
   - active: 1
   - !Transform 
@@ -1275,7 +1358,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 56, _bone_name: R_lower_lip_jnt}
+    {bone_index: 56, bone_name: R_lower_lip_jnt}
 - !261993070592 
   - active: 1
   - !Transform 
@@ -1294,7 +1377,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 57, _bone_name: L_wrist_jnt}
+    {bone_index: 57, bone_name: L_wrist_jnt}
 - !266288037888 
   - active: 1
   - !Transform 
@@ -1313,7 +1396,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 58, _bone_name: R_wrist_jnt}
+    {bone_index: 58, bone_name: R_wrist_jnt}
 - !270583005184 
   - active: 1
   - !Transform 
@@ -1332,7 +1415,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 59, _bone_name: tongue_mid_jnt}
+    {bone_index: 59, bone_name: tongue_mid_jnt}
 - !274877972480 
   - active: 1
   - !Transform 
@@ -1351,7 +1434,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 60, _bone_name: L_pinky_base_jnt}
+    {bone_index: 60, bone_name: L_pinky_base_jnt}
 - !279172939776 
   - active: 1
   - !Transform 
@@ -1370,7 +1453,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 61, _bone_name: L_ring_base_jnt}
+    {bone_index: 61, bone_name: L_ring_base_jnt}
 - !283467907072 
   - active: 1
   - !Transform 
@@ -1389,7 +1472,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 62, _bone_name: L_mid_base_jnt}
+    {bone_index: 62, bone_name: L_mid_base_jnt}
 - !287762874368 
   - active: 1
   - !Transform 
@@ -1408,7 +1491,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 63, _bone_name: L_index_base_jnt}
+    {bone_index: 63, bone_name: L_index_base_jnt}
 - !292057841664 
   - active: 1
   - !Transform 
@@ -1427,7 +1510,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 64, _bone_name: L_thumb_base_jnt}
+    {bone_index: 64, bone_name: L_thumb_base_jnt}
 - !296352808960 
   - active: 1
   - !Transform 
@@ -1446,7 +1529,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 65, _bone_name: R_pinky_base_jnt}
+    {bone_index: 65, bone_name: R_pinky_base_jnt}
 - !300647776256 
   - active: 1
   - !Transform 
@@ -1465,7 +1548,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 66, _bone_name: R_ring_base_jnt}
+    {bone_index: 66, bone_name: R_ring_base_jnt}
 - !304942743552 
   - active: 1
   - !Transform 
@@ -1484,7 +1567,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 67, _bone_name: R_mid_base_jnt}
+    {bone_index: 67, bone_name: R_mid_base_jnt}
 - !309237710848 
   - active: 1
   - !Transform 
@@ -1503,7 +1586,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 68, _bone_name: R_index_base_jnt}
+    {bone_index: 68, bone_name: R_index_base_jnt}
 - !313532678144 
   - active: 1
   - !Transform 
@@ -1522,7 +1605,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 69, _bone_name: R_thumb_base_jnt}
+    {bone_index: 69, bone_name: R_thumb_base_jnt}
 - !317827645440 
   - active: 1
   - !Transform 
@@ -1541,7 +1624,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 70, _bone_name: tongue_tip_jnt}
+    {bone_index: 70, bone_name: tongue_tip_jnt}
 - !322122612736 
   - active: 1
   - !Transform 
@@ -1560,7 +1643,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 71, _bone_name: L_pinky_mid_jnt}
+    {bone_index: 71, bone_name: L_pinky_mid_jnt}
 - !326417580032 
   - active: 1
   - !Transform 
@@ -1579,7 +1662,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 72, _bone_name: L_ring_mid_jnt}
+    {bone_index: 72, bone_name: L_ring_mid_jnt}
 - !330712547328 
   - active: 1
   - !Transform 
@@ -1598,7 +1681,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 73, _bone_name: L_mid_mid_jnt}
+    {bone_index: 73, bone_name: L_mid_mid_jnt}
 - !335007514624 
   - active: 1
   - !Transform 
@@ -1617,7 +1700,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 74, _bone_name: L_index_mid_jnt}
+    {bone_index: 74, bone_name: L_index_mid_jnt}
 - !339302481920 
   - active: 1
   - !Transform 
@@ -1636,7 +1719,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 75, _bone_name: L_thumb_mid_jnt}
+    {bone_index: 75, bone_name: L_thumb_mid_jnt}
 - !343597449216 
   - active: 1
   - !Transform 
@@ -1655,7 +1738,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 76, _bone_name: R_pinky_mid_jnt}
+    {bone_index: 76, bone_name: R_pinky_mid_jnt}
 - !347892416512 
   - active: 1
   - !Transform 
@@ -1674,7 +1757,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 77, _bone_name: R_ring_mid_jnt}
+    {bone_index: 77, bone_name: R_ring_mid_jnt}
 - !352187383808 
   - active: 1
   - !Transform 
@@ -1693,7 +1776,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 78, _bone_name: R_mid_mid_jnt}
+    {bone_index: 78, bone_name: R_mid_mid_jnt}
 - !356482351104 
   - active: 1
   - !Transform 
@@ -1712,7 +1795,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 79, _bone_name: R_index_mid_jnt}
+    {bone_index: 79, bone_name: R_index_mid_jnt}
 - !360777318400 
   - active: 1
   - !Transform 
@@ -1731,7 +1814,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 80, _bone_name: R_thumb_mid_jnt}
+    {bone_index: 80, bone_name: R_thumb_mid_jnt}
 - !365072285696 
   - active: 1
   - !Transform 
@@ -1750,7 +1833,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 81, _bone_name: L_pinky_tip_jnt}
+    {bone_index: 81, bone_name: L_pinky_tip_jnt}
 - !369367252992 
   - active: 1
   - !Transform 
@@ -1769,7 +1852,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 82, _bone_name: L_ring_tip_jnt}
+    {bone_index: 82, bone_name: L_ring_tip_jnt}
 - !373662220288 
   - active: 1
   - !Transform 
@@ -1788,7 +1871,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 83, _bone_name: L_mid_tip_jnt}
+    {bone_index: 83, bone_name: L_mid_tip_jnt}
 - !377957187584 
   - active: 1
   - !Transform 
@@ -1807,7 +1890,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 84, _bone_name: L_index_tip_jnt}
+    {bone_index: 84, bone_name: L_index_tip_jnt}
 - !382252154880 
   - active: 1
   - !Transform 
@@ -1826,7 +1909,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 85, _bone_name: L_thumb_tip_jnt}
+    {bone_index: 85, bone_name: L_thumb_tip_jnt}
 - !386547122176 
   - active: 1
   - !Transform 
@@ -1845,7 +1928,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 86, _bone_name: R_pinky_tip_jnt}
+    {bone_index: 86, bone_name: R_pinky_tip_jnt}
 - !390842089472 
   - active: 1
   - !Transform 
@@ -1864,7 +1947,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 87, _bone_name: R_ring_tip_jnt}
+    {bone_index: 87, bone_name: R_ring_tip_jnt}
 - !395137056768 
   - active: 1
   - !Transform 
@@ -1883,7 +1966,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 88, _bone_name: R_mid_tip_jnt}
+    {bone_index: 88, bone_name: R_mid_tip_jnt}
 - !399432024064 
   - active: 1
   - !Transform 
@@ -1902,7 +1985,7 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 89, _bone_name: R_index_tip_jnt}
+    {bone_index: 89, bone_name: R_index_tip_jnt}
 - !403726991360 
   - active: 1
   - !Transform 
@@ -1921,4 +2004,4 @@
     overrides: []
     prefab: {guid: 21b93456-96be-408a-9645-3204630e4719}
   - !Bone 
-    {_bone_index: 90, _bone_name: R_thumb_tip_jnt}
+    {bone_index: 90, bone_name: R_thumb_tip_jnt}

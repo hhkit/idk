@@ -143,11 +143,11 @@ namespace idk
 		}
 		return data;
 	}
-	string GetUniformBlock(shadergraph::ValueType type,const hash_table<string, UniformInstanceValue>& uniforms)
+	string GetUniformBlock(shadergraph::ValueType type,const std::map<string, UniformInstanceValue>& uniforms)
 	{
 		return GetUniformBlock(type, uniforms, [](auto& v) {return v; });
 	}
-	string GetUniformBlock(shadergraph::ValueType type, const hash_table<string, UniformInstance>& uniforms)
+	string GetUniformBlock(shadergraph::ValueType type, const std::map<string, UniformInstance>& uniforms)
 	{
 		return GetUniformBlock(type, uniforms, [](auto& v) {return v.value; });
 	}

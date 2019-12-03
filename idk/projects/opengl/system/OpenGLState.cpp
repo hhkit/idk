@@ -20,6 +20,7 @@
 #include <gfx/FramebufferFactory.h>
 #include <gfx/FontAtlas.h>
 #include <opengl/resource/OpenGLFontAtlas.h>
+#include <ui/Canvas.h>
 
 #include <editor/IDE.h>
 #include <gfx/ViewportUtil.h>
@@ -70,19 +71,6 @@ namespace idk::ogl
 
 	void OpenGLState::GenResources()
 	{
-		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
-		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
-
-		renderer_vertex_shaders[VDebug]       = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
-		renderer_vertex_shaders[VNormalMesh]  = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
-		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-        renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
-		renderer_vertex_shaders[VSkyBox]      = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
-
-		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
-		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
-		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/shadow.frag");
-		renderer_fragment_shaders[FPicking] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/picking.frag");
 
 		brdf_texture = Core::GetResourceManager().Create<OpenGLTexture>();
 		brdf_texture->Bind();
@@ -157,6 +145,8 @@ namespace idk::ogl
 		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
 		auto& font_render_data = curr_object_buffer.font_render_data;
 
+		if (RscHandle<RenderTarget>{}->NeedsFinalizing())
+			RscHandle<RenderTarget>{}->Finalize();
 		for (auto& cam : curr_object_buffer.camera)
 		{
 			auto& rt = *cam.render_target;
@@ -207,6 +197,7 @@ namespace idk::ogl
 				pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
 				pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
 				pipeline.SetUniform(lightblk + "intensity", light.intensity);
+				pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
 				if (light.light_map)
 				{
@@ -214,7 +205,7 @@ namespace idk::ogl
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
 
 					pipeline.SetUniform(lightblk + "vp", light.vp);
-					(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units));
+					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
 					texture_units++;
 				}
 			}
@@ -266,8 +257,6 @@ namespace idk::ogl
 				using T = std::decay_t<decltype(obj)>;
 				if constexpr (std::is_same_v<T, RscHandle<CubeMap>>)
 				{
-                    if (!obj)
-                        return;
 					const auto opengl_handle = RscHandle<ogl::OpenGLCubemap>{ obj };
 					opengl_handle->BindConvolutedToUnit(texture_units);
 					pipeline.SetUniform("irradiance_probe", texture_units++);
@@ -281,19 +270,50 @@ namespace idk::ogl
 			pipeline.SetUniform("PerCamera.inverse_view_transform", inv_view_tfm);
 		};
 
-		/*static const mat4 biasMatrix(
-			0.5, 0.0, 0.0, 0.0,
-			0.0, 0.5, 0.0, 0.0,
-			0.0, 0.0, 0.5, 0.0,
-			0.5, 0.5, 0.5, 1.0
-		);*/
 
 		for (const auto& elem : curr_object_buffer.lights)
 		{
 			pipeline.Use();
 			if (elem.index == 0) // point light
+			{
 				Core::GetSystem<DebugRenderer>().Draw(sphere{ elem.v_pos, 0.1f }, elem.light_color);
+				//fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
 
+				//glClearColor(1.f, 1.f, 1.f, 1.f);
+				//glClearDepth(1.f);
+				//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				//glEnable(GL_DEPTH_TEST);
+				//glDepthFunc(GL_LESS);
+
+				//glCullFace(GL_FRONT); //Fix for peterpanning
+
+				////const auto& light_view_tfm = elem.v;
+
+				////////////////////////////////////Calculate light view transform//////////////////////////////////////
+				//vector<mat4> matList;
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(-1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 1.f, 0.f), vec3(0.f, 0.f, 1.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, -1.f, 0.f), vec3(0.f, 0.f, -1.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 0.f, 1.f), vec3(0.f, -1.f, 0.f)).inverse());
+				//matList.emplace_back(look_at(elem.v_pos, elem.v_pos - vec3(0.f, 0.f, -1.f), vec3(0.f, -1.f, 0.f)).inverse());
+
+
+				////////////WIP////////
+
+
+				////auto& size = s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map)->size;
+				////const auto& light_p_tfm = elem.p;
+
+				//pipeline.PopAllPrograms();
+
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+				//pipeline.PushProgram(renderer_geometry_shaders[GSinglePassCube]);
+
+				//BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], light_p_tfm, light_view_tfm);
+
+			}
 			else if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
@@ -308,7 +328,7 @@ namespace idk::ogl
 				glCullFace(GL_FRONT); //Fix for peterpanning
 
 				const auto& light_view_tfm = elem.v;
-				const auto& light_p_tfm = elem.p; //near and far is currently hardcoded
+				const auto& light_p_tfm = elem.p;
 				pipeline.PopAllPrograms();
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -417,15 +437,12 @@ namespace idk::ogl
 			pipeline.Use();
 			pipeline.PopAllPrograms();
 			glBindVertexArray(vao_id);
-			
-				
-			
 
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 			pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FDebug]);
 			// render debug
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			if (cam.overlay_debug_draw && cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
+			if (cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
 				for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
 				{
 					SetObjectUniforms(elem, cam.view_matrix);
@@ -440,7 +457,6 @@ namespace idk::ogl
 
 			// If we only use proj_matrix, frustrum will be in view space.
 			// If we use proj * view, frustrum will be in model space
-			auto frust = camera_vp_to_frustum(cam.projection_matrix * cam.view_matrix);
 
 			auto c_mat = curr_mat = {};
 			auto c_mat_inst = curr_mat_inst = {};
@@ -479,36 +495,6 @@ namespace idk::ogl
 					}
 				}
 			}
-			//
-			//for (auto& elem : curr_object_buffer.mesh_render)
-			//{
-			//	// Do culling here
-			//	sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
-			//
-			//	// We only draw if the frustrum contains the mesh
-			//	if (!frust.contains(transformed_bounds))
-			//		continue;
-			//
-			//	/*
-			//	// bind shader
-			//	const auto material = elem.material_instance->material;
-			//	pipeline.PushProgram(material->_shader_program);
-			//
-			//	// set probe
-			//	GLuint texture_units = 0;
-			//	//SetPBRUniforms     (cam, inv_view_tfm, texture_units);
-			//	//SetLightUniforms   (span<LightData>{lights}, texture_units);
-			//	//SetMaterialUniforms(elem.material_instance, texture_units);
-			//	//SetObjectUniforms  (elem, cam.view_matrix);
-			//	//
-			//	//RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
-			//	*/
-			//	PushMaterialInstance(elem.material_instance);
-			//	PushMesh(RscHandle<OpenGLMesh>{elem.mesh});
-			//	PushObjectTransform(elem.transform);
-			//}
-			//
-			//FlushObjectTransforms();
 
 			curr_mat = {};
 			curr_mat_inst = {};
@@ -518,27 +504,26 @@ namespace idk::ogl
 			BindVertexShader(renderer_vertex_shaders[VertexShaders::VSkinnedMesh], cam.projection_matrix, cam.view_matrix);
 			for (auto& elem : curr_object_buffer.skinned_mesh_render)
 			{
-				// Do culling here
-				//sphere transformed_bounds = elem.mesh->bounding_volume * elem.transform;
-
-				// We only draw if the frustrum contains the mesh
-				//if (!frust.contains(transformed_bounds))
-				//	continue;
-
+				SetSkeletons(elem.skeleton_index);
 				// bind shader
 				const auto material = elem.material_instance->material;
-				pipeline.PushProgram(material->_shader_program);
+				if (curr_mat != material)
+				{
+					pipeline.PushProgram(material->_shader_program);
 
-				//PushMaterialInstance(elem.material_instance);
-				//SetSkeletons(elem.skeleton_index);
-				//PushMesh(RscHandle<OpenGLMesh>{elem.mesh});
-				//PushObjectTransform(elem.transform);
-
-				GLuint texture_units = 0;
-				SetPBRUniforms     (cam, inv_view_tfm, texture_units);
-				SetLightUniforms   (span<LightData>{lights}, texture_units);
-				SetSkeletons(elem.skeleton_index);
-				SetMaterialUniforms(elem.material_instance, texture_units);
+					// material 
+					material_texture_uniforms = 0;
+					SetPBRUniforms(cam, inv_view_tfm, material_texture_uniforms);
+					SetLightUniforms(span<LightData>{lights}, material_texture_uniforms);
+					curr_mat = material;
+					curr_mat_inst = {};
+				}
+				// material instance
+				if (curr_mat_inst != elem.material_instance)
+				{
+					SetMaterialUniforms(elem.material_instance, material_texture_uniforms);
+					curr_mat_inst = elem.material_instance;
+				}
 				SetObjectUniforms  (elem, cam.view_matrix);
 
 				RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<SkinnedMeshRenderer>();
@@ -565,7 +550,7 @@ namespace idk::ogl
 			{
 				if (elem.coords.size())
 				{
-					auto& atlas = elem.fontAtlas.as<OpenGLFontAtlas>();
+					auto& atlas = elem.atlas.as<OpenGLFontAtlas>();
 
 					glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
 					/* Use the texture containing the atlas */
@@ -574,56 +559,37 @@ namespace idk::ogl
 
 					SetObjectUniforms(elem, cam.view_matrix);
 					pipeline.SetUniform("PerFont.color", elem.color.as_vec4);
-					GL_CHECK();
-
-					//pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
 
 					/* Draw all the character on the screen in one go */
 				
 					glBufferData(GL_ARRAY_BUFFER, elem.coords.size() * sizeof(FontPoint), std::data(elem.coords), GL_DYNAMIC_DRAW);
-					//GL_CHECK();
 					glEnableVertexAttribArray(0);
 					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0);
-					//GL_CHECK();
-					glDrawArrays(GL_TRIANGLES, 0, elem.n_size);
-
+					glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(elem.coords.size()));
 					glDisableVertexAttribArray(0);
-
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}
-				GL_CHECK();
 			}
-			//glEnable(GL_CULL_FACE);
 
 			glBindVertexArray(0);
 
-            static vector<OpenGLBuffer> bufs = []()
-            {
-                vector<OpenGLBuffer> bufs_;
-                unsigned int indices[]{ 0, 3, 1, 1, 3, 2 };
-                bufs_.emplace_back(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} })
-                    .Bind().Buffer(indices, sizeof(int), 6);
-                bufs_.emplace_back(OpenGLBuffer{ GL_ARRAY_BUFFER, {
-                    { vtx::Attrib::ParticlePosition, sizeof(ParticleObj), offsetof(ParticleObj, position) },
-                    { vtx::Attrib::ParticleRotation, sizeof(ParticleObj), offsetof(ParticleObj, rotation) },
-                    { vtx::Attrib::ParticleSize, sizeof(ParticleObj), offsetof(ParticleObj, size) },
-                    { vtx::Attrib::Color, sizeof(ParticleObj), offsetof(ParticleObj, color) }
-                } });
-                return bufs_;
-            }();
 
 
-            
+            // PARTICLE SYSTEM DRAW
 
 			glBindVertexArray(particle_vao_id);
             BindVertexShader(renderer_vertex_shaders[VertexShaders::VParticle], cam.projection_matrix, cam.view_matrix);
-            vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
-            vec3 cam_pos = cam.view_matrix[3];
+            const vec3 cam_forward{ -cam.view_matrix[0][2], -cam.view_matrix[1][2], -cam.view_matrix[2][2] };
+            const vec3 cam_pos = cam.view_matrix[3];
             auto particle_render_data = curr_object_buffer.particle_render_data;
+
+            const RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
+
             for (auto& elem : particle_render_data)
             {
                 std::sort(elem.particles.begin(), elem.particles.end(),
-                    [cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) { return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
+                    [cam_forward, cam_pos](const ParticleObj& a, const ParticleObj& b) {
+                        return (a.position - cam_pos).dot(cam_forward) > (b.position - cam_pos).dot(cam_forward); });
 
                 // bind shader
                 const auto material = elem.material_instance->material;
@@ -631,7 +597,7 @@ namespace idk::ogl
                 GLuint texture_units = 0;
                 SetMaterialUniforms(elem.material_instance, texture_units);
 
-                RscHandle<OpenGLMesh>{Mesh::defaults[MeshType::FSQ]}->Bind(
+                fsq->Bind(
                     renderer_attributes{ {
                         { vtx::Attrib::Position, 0 },
                         { vtx::Attrib::UV, 1 },
@@ -640,49 +606,115 @@ namespace idk::ogl
                 glVertexAttribDivisor(0, 0);
                 glVertexAttribDivisor(1, 0);
 
-                bufs[1].Bind().Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
-                bufs[1].BindForDraw(renderer_attributes{ {
+                particle_buf.BindForDraw(renderer_attributes{ {
                     {vtx::Attrib::ParticlePosition, 2},
                     {vtx::Attrib::ParticleRotation, 3},
                     {vtx::Attrib::ParticleSize, 4},
                     {vtx::Attrib::Color, 5}
                 } });
+                particle_buf.Buffer(elem.particles.data(), sizeof(ParticleObj), static_cast<GLsizei>(elem.particles.size()));
+
                 glVertexAttribDivisor(2, 1);
                 glVertexAttribDivisor(3, 1);
                 glVertexAttribDivisor(4, 1);
                 glVertexAttribDivisor(5, 1);
 
-                bufs[0].Bind(); // index buffer
-                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(elem.particles.size()));
+                fsq->DrawInstanced(elem.particles.size());
             }
 
-			glDisable(GL_BLEND);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
+		} // for each culled camera
+
 		glBindVertexArray(0);
 
+
+
+        // UI DRAW
+        glDisable(GL_DEPTH_TEST);
+
+        RscHandle<OpenGLMesh> fsq{ Mesh::defaults[MeshType::FSQ] };
+        glBindVertexArray(font_vao_id);
+        pipeline.PushProgram(renderer_vertex_shaders[VertexShaders::VUi]);
+        auto ui_render_per_canvas = curr_object_buffer.ui_render_per_canvas;
+        for (auto& [canvas, ui_render_data] : ui_render_per_canvas)
+        {
+			//if (canvas->render_target)
+			{
+				fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{canvas->render_target});
+				for (auto& elem : ui_render_data)
+				{
+					std::visit([&](const auto& data)
+					{
+						using T = std::decay_t<decltype(data)>;
+						if constexpr (std::is_same_v<T, ImageData>)
+						{
+							if (data.texture)
+							{
+								// bind shader
+								pipeline.PushProgram(elem.material->material->_shader_program);
+								pipeline.SetUniform("tex", RscHandle<ogl::OpenGLTexture>{ data.texture }, 0);
+								pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+								pipeline.SetUniform("PerUI.is_font", false);
+								pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+
+								fsq->Bind(
+									renderer_attributes{ {
+										{ vtx::Attrib::UV, 1 },
+										{ vtx::Attrib::Position, 0 }
+									} }
+								);
+								glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(real), 0);
+
+								fsq->Draw();
+							}
+						}
+						else
+						{
+							if (data.coords.size())
+							{
+								pipeline.PushProgram(elem.material->material->_shader_program);
+
+								auto& atlas = data.atlas.as<OpenGLFontAtlas>();
+
+								glBindBuffer(GL_ARRAY_BUFFER, vbo_font_id);
+								/* Use the texture containing the atlas */
+								atlas.BindToUnit(0);
+								pipeline.SetUniform("tex", 0);
+
+								pipeline.SetUniform("PerUI.color", vec4{ elem.color });
+								pipeline.SetUniform("PerUI.is_font", true);
+								pipeline.SetUniform("ObjectMat4s.object_transform", elem.transform);
+
+								/* Draw all the character on the screen in one go */
+
+								glBufferData(GL_ARRAY_BUFFER, data.coords.size() * sizeof(FontPoint), std::data(data.coords), GL_DYNAMIC_DRAW);
+								//GL_CHECK();
+								glEnableVertexAttribArray(0);
+								glEnableVertexAttribArray(1);
+								glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), 0); // pos
+								glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(real), r_cast<void*>(2 * sizeof(real))); // uv
+								//GL_CHECK();
+								glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(data.coords.size()));
+
+								glDisableVertexAttribArray(0);
+								glDisableVertexAttribArray(1);
+
+								glBindBuffer(GL_ARRAY_BUFFER, 0);
+							}
+						}
+					}, elem.data);
+				}
+			}
+        }
+
 		fb_man.ResetFramebuffer();
-
-
 
 		//////////////////////////////////For PICKING/////////////////////////////////
 		// set main scene camera
 		
-		//vector<OpenGLTexture> addMainBuffer;
-		//addMainBuffer.emplace_back(cBufferPickingTexture);
-		if(0)
+		if(Core::GetSystem<GraphicsSystem>().enable_picking)
 		{		
-			auto cam = curr_object_buffer.curr_scene_camera;
+			auto cam = curr_object_buffer.camera[curr_object_buffer.curr_scene_camera_index];
 			{
-				const auto inv_view_tfm = invert_rotation(cam.view_matrix);
-				// calculate lights for this camera
-				auto lights = curr_object_buffer.lights;
-				for (auto& elem : lights)
-				{
-					elem.v_pos = vec3{ cam.view_matrix * vec4{ elem.v_pos, 1 } };
-					elem.v_dir = vec3{ cam.view_matrix * vec4{ elem.v_dir , 0 } };
-				}
-
 				{
 					fb_man.SetRenderTarget(fb_man.pickingBuffer);
 				}
@@ -694,20 +726,9 @@ namespace idk::ogl
 
 				BindVertexShader(renderer_vertex_shaders[VertexShaders::VDebug], cam.projection_matrix, cam.view_matrix);
 				pipeline.PushProgram(renderer_fragment_shaders[FragmentShaders::FPicking]);
-				// render debug
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				if (cam.render_target->RenderDebug() && cam.render_target->IsWorldRenderer())
-					for (auto& elem : Core::GetSystem<DebugRenderer>().GetWorldDebugInfo())
-					{
-						SetObjectUniforms(elem, cam.view_matrix);
-						pipeline.SetUniform("ColorBlk.color", elem.color.as_vec3);
-						pipeline.SetUniform("obj_index", cam.obj_id);
-
-						RscHandle<OpenGLMesh>{elem.mesh}->BindAndDraw<MeshRenderer>();
-					}
 
 				// per mesh render
-				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMesh], cam.projection_matrix, cam.view_matrix);
+				BindVertexShader(renderer_vertex_shaders[VertexShaders::VNormalMeshPicker], cam.projection_matrix, cam.view_matrix);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 				for (auto& elem : curr_object_buffer.mesh_render)
@@ -718,9 +739,6 @@ namespace idk::ogl
 
 					// set probe
 					GLuint texture_units = 0;
-					SetPBRUniforms(cam, inv_view_tfm, texture_units);
-					SetLightUniforms(span<LightData>{lights}, texture_units);
-					SetMaterialUniforms(elem.material_instance, texture_units);
 					SetObjectUniforms(elem, cam.view_matrix);
 
 					pipeline.SetUniform("obj_index", elem.obj_id);
@@ -736,10 +754,7 @@ namespace idk::ogl
 					pipeline.PushProgram(material->_shader_program);
 
 					GLuint texture_units = 0;
-					SetPBRUniforms(cam, inv_view_tfm, texture_units);
-					SetLightUniforms(span<LightData>{lights}, texture_units);
 					SetSkeletons(elem.skeleton_index);
-					SetMaterialUniforms(elem.material_instance, texture_units);
 					SetObjectUniforms(elem, cam.view_matrix);
 
 					pipeline.SetUniform("obj_index", elem.obj_id);
@@ -751,6 +766,17 @@ namespace idk::ogl
 			fb_man.ResetFramebuffer();
 		}
 		
+		if (&Core::GetSystem<IEditor>() == nullptr)
+		{
+			auto outbuf_sz = RscHandle<OpenGLRenderTarget>{}->size;
+			auto screen_sz = Core::GetSystem<Application>().GetScreenSize();
+			fb_man.SetRenderTarget(RscHandle<OpenGLRenderTarget>{});
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_man.ID());
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glViewport(0, 0, screen_sz.x, screen_sz.y);
+			glBlitFramebuffer(0, 0, outbuf_sz.x, outbuf_sz.y, 0, 0, screen_sz.x, screen_sz.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	}
 
 	void OpenGLState::ConvoluteCubeMap(const RscHandle<ogl::OpenGLCubemap>& handle)
@@ -825,14 +851,27 @@ namespace idk::ogl
 	PixelData OpenGLState::PickData(const vec2& pos)
 	{
 		PixelData pd;
+		fb_man.SetRenderTarget(fb_man.pickingBuffer);
 		glReadPixels((GLint)pos.x, (GLint)pos.y, fb_man.pickingBuffer->size.x, fb_man.pickingBuffer->size.y, GL_RGB32F, GL_UNSIGNED_BYTE, &pd);
-
+		GL_CHECK();
 		return std::move(pd);
 	}
 
 	void OpenGLState::IsPicking()
 	{
 		is_picking = true;
+	}
+
+	void OpenGLState::LoadShaderImpl()
+	{
+		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
+		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
+		renderer_geometry_shaders;
+
+		// If your shader is used by both vulkan and opengl, put it in GraphicsSystem.cpp's LoadShaders
+		renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
+
 	}
 
 	void OpenGLState::BindMaterial(const RscHandle<Material>& mat)
@@ -880,6 +919,7 @@ namespace idk::ogl
 			pipeline.SetUniform(lightblk + "shadow_bias", light.shadow_bias);
 			pipeline.SetUniform(lightblk + "cast_shadow", light.cast_shadow);
 			pipeline.SetUniform(lightblk + "intensity", light.intensity);
+			pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
 			if (light.light_map)
 			{

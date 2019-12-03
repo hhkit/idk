@@ -29,7 +29,7 @@ namespace idk
 		,   class Camera
 		,   class SkinnedMeshRenderer
 		,	class Light
-		,   class Font
+		,   class TextMesh
 
         /// PARTICLE
         ,   class ParticleSystem
@@ -37,6 +37,12 @@ namespace idk
 		/// ANIMATION
 		,	class Animator
 		,	struct Bone
+
+        /// UI
+        ,   class Canvas
+        ,   class RectTransform
+        ,   class Image
+        ,   class Text
 
 		/// SCRIPTING
 		,	class mono::Behavior
@@ -63,11 +69,16 @@ namespace idk
 		,	class PhysicsSystem
 		,	class AnimationSystem
 
+        // particle
         ,   class ParticleSystemUpdater
 
 		// gfx
 		,	class GraphicsSystem
 		,   class DebugRenderer
+
+        // ui
+        ,   class UISystem
+
 		// audio
 		,	class AudioSystem
 		
@@ -89,7 +100,7 @@ namespace idk
 			class Scene
 		,	class TestResource
 		,   class AudioClip
-		//,	class Font
+		//,	class TextMesh
 		,	class Prefab
 		,	class ShaderTemplate
 		,	class Mesh
@@ -103,6 +114,7 @@ namespace idk
 		,   class FrameBuffer
 		,	anim::Animation
 		,	anim::Skeleton
+		,   class ShaderSnippet
 		//,	class Level
 	>;
 

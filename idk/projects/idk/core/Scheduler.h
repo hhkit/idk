@@ -26,6 +26,8 @@ namespace idk
 	class Scheduler
 	{
 	public:
+		real time_scale = 1.f;
+
 		class Pass;
 
 		Scheduler();
@@ -41,8 +43,10 @@ namespace idk
 		void ParallelizedUpdate();
 		template<typename ... Ts>
 		void SetPauseState(PausedSystemConfig<Ts...>);
+		seconds GetFixedDeltaTime()noexcept;
 		seconds GetDeltaTime()noexcept;
-		seconds GetRealDeltaTime()noexcept;
+		seconds GetUnscaledDeltaTime() noexcept;
+		seconds GetRemainingTime() noexcept;
 		time_point GetProgramStart() noexcept;
 
 		span<Pass> GetPasses(UpdatePhase) noexcept;

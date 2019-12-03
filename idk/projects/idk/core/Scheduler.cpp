@@ -21,7 +21,7 @@ namespace idk
 
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
-		_accumulated_dt += std::min(_real_dt, dt_limit);
+		_accumulated_dt += std::min(_real_dt, dt_limit) * time_scale;
 
 		constexpr auto execute_pass = [](auto& pass_vector)
 		{
@@ -55,13 +55,21 @@ namespace idk
 
 		_last_frame = _this_frame;
 	}
-	seconds Scheduler::GetDeltaTime()noexcept
+	seconds Scheduler::GetFixedDeltaTime()noexcept
 	{
 		return _fixed_dt;
 	}
-	seconds Scheduler::GetRealDeltaTime()noexcept
+	seconds Scheduler::GetDeltaTime()noexcept
+	{
+		return _real_dt * time_scale;
+	}
+	seconds Scheduler::GetUnscaledDeltaTime() noexcept
 	{
 		return _real_dt;
+	}
+	seconds Scheduler::GetRemainingTime() noexcept
+	{
+		return _accumulated_dt;
 	}
 	time_point Scheduler::GetProgramStart() noexcept
 	{

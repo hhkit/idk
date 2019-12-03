@@ -22,6 +22,7 @@ namespace idk{
 		RGBAF_16,
 		RGBAF_32,
 		BGRA_8,
+		SRGB_BGRA_8,
 		RUI_32,
 		DEPTH_COMPONENT,
 		DXT1,

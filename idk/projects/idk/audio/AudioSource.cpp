@@ -180,10 +180,6 @@ namespace idk
 	void AudioSource::FMOD_RES(FMOD_RESULT e) //Same as audiosystem ParseFMOD_RESULT, but does not update the _result variable in audiosystem
 	{
 		if (e != FMOD_OK)
-		{
-			std::ostringstream stringStream;
-			stringStream << "FMOD error! (" << e << ") " << FMOD_ErrorString(e) << std::endl; //Puts string into stream
-			throw stringStream.str();
-		}
+			LOG_TO(LogPool::SYS, "FMOD error! (%d) %s ", e, FMOD_ErrorString(e));
 	}
 }

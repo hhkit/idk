@@ -12,7 +12,7 @@ namespace idk::vkn {
 		vk::DeviceSize			sizeOnDevice{};
 		void* rawData{};
 		string					path{ "" };
-		vk::UniqueImage			image{ nullptr };
+		vk::UniqueImage			image_{ nullptr };
 		vk::Format				format{};
 		vk::ImageAspectFlags    img_aspect;
 		vk::UniqueDeviceMemory  mem{ nullptr };
@@ -23,7 +23,7 @@ namespace idk::vkn {
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
 		opt<vk::DescriptorSet>	descriptorSet{};
 		vk::Sampler Sampler()const { return *sampler; }
-		vk::Image Image()const { return *image; }
+		vk::Image Image()const { return *image_; }
 		vk::ImageView ImageView()const { return *imageView; }
 		vk::ImageAspectFlags ImageAspects();
 		VknTexture() = default;

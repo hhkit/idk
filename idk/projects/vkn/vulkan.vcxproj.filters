@@ -15,9 +15,6 @@
     <ClInclude Include="RenderState.h">
       <Filter>render</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanDebugRenderer.h">
-      <Filter>render</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanView.h">
       <Filter>system</Filter>
     </ClInclude>
@@ -59,9 +56,6 @@
     </ClInclude>
     <ClInclude Include="MemoryAllocator.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameRenderer.h">
-      <Filter>render</Filter>
     </ClInclude>
     <ClInclude Include="PipelineManager.h">
       <Filter>system</Filter>
@@ -192,6 +186,55 @@
     <ClInclude Include="DeferredPass.h">
       <Filter>render\objects</Filter>
     </ClInclude>
+    <ClInclude Include="VknFontAtlas.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VknFontAtlasLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTtfLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTextureRenderMeta.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanFontAtlasFactory.h">
+      <Filter>resource\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassManager.h" />
+    <ClInclude Include="DescriptorUpdateData.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorCountArray.h">
+      <Filter>descriptor_sets</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDebugRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="CubemapRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Flags.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FontRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="CanvasRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassObj.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassInfo.h">
+      <Filter>render\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -202,9 +245,6 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="RenderState.cpp">
-      <Filter>render</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanDebugRenderer.cpp">
       <Filter>render</Filter>
     </ClCompile>
     <ClCompile Include="VulkanView.cpp">
@@ -243,9 +283,6 @@
     </ClCompile>
     <ClCompile Include="VulkanMesh.cpp">
       <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="FrameRenderer.cpp">
-      <Filter>render</Filter>
     </ClCompile>
     <ClCompile Include="ShaderModule.cpp">
       <Filter>resource</Filter>
@@ -343,13 +380,58 @@
     <ClCompile Include="VulkanCubemapFactory.cpp">
       <Filter>resource\Factories</Filter>
     </ClCompile>
-    <ClCompile Include="RenderUtil.cpp" />
-    <ClCompile Include="DeferredPass.cpp" />
     <ClCompile Include="VknRenderTargetLoader.cpp">
       <Filter>resource\Loaders</Filter>
     </ClCompile>
     <ClCompile Include="VknFramebufferFactory.cpp">
       <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFontAtlas.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VknFontAtlasLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTtfLoader.cpp">
+      <Filter>resource\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VknTextureRenderMeta.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanFontAtlasFactory.cpp">
+      <Filter>resource\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDebugRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredPass.cpp">
+      <Filter>render\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderUtil.cpp">
+      <Filter>render\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="CubemapRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorUpdateData.cpp">
+      <Filter>descriptor_sets</Filter>
+    </ClCompile>
+    <ClCompile Include="FontRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPassObj.cpp" />
+    <ClCompile Include="RenderPassInfo.cpp" />
+    <ClCompile Include="CanvasRenderer.cpp">
+      <Filter>render\renderers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -388,6 +470,9 @@
     </Filter>
     <Filter Include="render\utils">
       <UniqueIdentifier>{7c9442b0-f1a5-4229-8ac8-c5bb04d05885}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\renderers">
+      <UniqueIdentifier>{a81b1306-cd13-4d9d-933a-0e4dacb5da3a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

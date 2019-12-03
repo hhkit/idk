@@ -23,57 +23,56 @@ namespace idk
 		}
 		mat4 LookAt(vec3 pos, vec3 target_point,vec3 up)
 		{
-			//mat4 tfm;
-			return look_at(pos, target_point, up);//).normalize();
+			return look_at(pos, target_point, up);
 		}
 		mat4 View(const mat4& tfm)
 		{
-			auto mat =tfm;// = game_object.Transform()->GlobalMatrix();
-			//auto tfm = game_object.Transform();
+			auto mat =tfm;
 			auto retval = orthonormalize(mat);
 			retval[3] = mat[3];
-
-			/*vec3 upvector = tfm->Up();
-			vec3 rightvector = tfm->Right();
-			vec3 forwardvector = tfm->Forward();
-
-			mat4 findMat = retval.inverse();
-
-			mat4 matrix = mat.transpose();*/
 
 			return retval.inverse();
 		}
 		mat4 operator()(const DirectionalLight&)
 		{
 			auto trf = light->GetGameObject()->Transform();
-			vec3 v_pos = vec3(0,0,0);
-			vec3 v_dir = trf->Forward();
-			//return look_at(-vec3(v_dir.x,v_dir.y,-v_dir.z).normalize(), vec3(0,0,0), vec3{ 0,1,0 });
+			const vec3 v_pos = vec3(0, 0, 0);
+			const vec3 v_dir = trf->Forward();
 			return look_at(v_pos, v_pos - vec3(v_dir.x, v_dir.y, v_dir.z), trf->Up()).inverse();
-
-			//auto mat = light->GetGameObject()->Transform()->GlobalMatrix();
-			//const auto tfm = light->GetGameObject()->Transform();
-			//auto retval = orthonormalize(mat);
-			//retval[3] = mat[3];
-
-			/*vec3 upvector = tfm->Up();
-			vec3 rightvector = tfm->Right();
-			vec3 forwardvector = tfm->Forward();
-
-			mat4 findMat = retval.inverse();
-
-			mat4 matrix = mat.transpose();*/
-
-			//return retval.inverse();
 		}
+
+		/*vector<mat4> operator()(const PointLight&)
+		{
+			auto trf = light->GetGameObject()->Transform();
+			vec3 v_pos = trf->GlobalPosition();
+			vec3 v_dir = trf->Forward();
+
+			vector<mat4> matList;
+			matList.emplace_back(look_at(v_pos, v_pos - vec3(1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+			matList.emplace_back(look_at(v_pos, v_pos - vec3(-1.f, 0.f, 0.f), vec3(0.f, -1.f, 0.f)).inverse());
+			matList.emplace_back(look_at(v_pos, v_pos - vec3(0.f, 1.f, 0.f), vec3(0.f, 0.f, 1.f)).inverse());
+			matList.emplace_back(look_at(v_pos, v_pos - vec3(0.f, -1.f, 0.f), vec3(0.f, 0.f, -1.f)).inverse());
+			matList.emplace_back(look_at(v_pos, v_pos - vec3(0.f, 0.f, 1.f), vec3(0.f, -1.f, 0.f)).inverse());
+			matList.emplace_back(look_at(v_pos, v_pos - vec3(0.f, 0.f, -1.f), vec3(0.f, -1.f, 0.f)).inverse());
+
+			return matList;
+		}*/
+
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
+
+		//template<typename T>
+		//vector<mat4> operator()(T&) { return vector<mat4>{}; }
 	};
 	struct LightCameraProj
 	{
+		mat4 operator()([[maybe_unused]] PointLight pointlight)
+		{
+			return perspective(deg{ 90 }, 1.0f, 0.1f, 100.f);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+		}
 		mat4 operator()(SpotLight spotlight)
 		{
-			return perspective(spotlight.outer_angle*2, 1.0f, 0.1f, (spotlight.use_inv_sq_atten) ? (1 / spotlight.attenuation_radius) : spotlight.attenuation_radius);;//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
+			return perspective(spotlight.outer_angle*2, 1.0f, 0.1f, (spotlight.use_inv_sq_atten) ? (1 / spotlight.attenuation_radius) : spotlight.attenuation_radius);//perspective(spotlight.outer_angle, 1.0f, 0.1f, 1/spotlight.attenuation_radius);
 		}
 		mat4 operator()(const DirectionalLight& dirLight)
 		{
@@ -82,6 +81,11 @@ namespace idk
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
 	};
+
+	bool Light::is_active_and_enabled() const
+	{
+		return enabled && GetGameObject()->ActiveInHierarchy();
+	}
 
 	void Light::InitShadowMap()
 	{
@@ -129,7 +133,11 @@ namespace idk
 					const PointLight& point_light = light_variant;
 					retval.light_color = point_light.light_color * point_light.intensity;
 					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
+					retval.v_dir = vec3(0.f);
 					retval.intensity = point_light.intensity;
+					retval.cos_inner = 1;
+					retval.cos_outer = 1;
+					retval.falloff = (point_light.use_inv_sq_atten) ? (point_light.attenuation_radius * point_light.attenuation_radius): point_light.attenuation_radius;
 					//vp = ortho() * look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 
@@ -141,6 +149,9 @@ namespace idk
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
 					retval.intensity = dir_light.intensity;
+					retval.cos_inner = 0;
+					retval.cos_outer = 1.f;
+					retval.falloff = 1.f;
 				}
 
 				if constexpr (std::is_same_v<T, SpotLight>)
@@ -152,7 +163,7 @@ namespace idk
 					retval.v_dir = tfm->Forward();
 					retval.cos_inner = cos(spotlight.inner_angle);
 					retval.cos_outer = cos(spotlight.outer_angle);
-					retval.falloff = (spotlight.use_inv_sq_atten) ? spotlight.attenuation_radius : (1 / (spotlight.attenuation_radius * spotlight.attenuation_radius));
+					retval.falloff = (spotlight.use_inv_sq_atten) ? (1.f / (spotlight.attenuation_radius * spotlight.attenuation_radius)) : spotlight.attenuation_radius;
 					
 					retval.intensity = spotlight.intensity;
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
@@ -255,13 +266,11 @@ namespace idk
 	}
 	color Light::GetColor() const
 	{
-		std::visit([&](auto& light_variant)
+		return std::visit([&](auto& light_variant)
 		{
 			return light_variant.light_color;
 		}
 		, light);
-
-		return color{};
 	}
 	void Light::SetColor(const color& c)
 	{
@@ -273,13 +282,11 @@ namespace idk
 	}
 	real Light::GetLightIntensity() const
 	{
-		std::visit([&](auto& light_variant)
+		return std::visit([&](auto& light_variant)
 		{
 			return light_variant.intensity;
 		}
 		, light);
-
-		return 0.f;
 	}
 	void Light::SetLightIntensity(const real& i)
 	{

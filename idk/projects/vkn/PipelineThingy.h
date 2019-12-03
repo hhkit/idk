@@ -8,13 +8,21 @@
 #include <vkn/UboManager.h>
 #include <vkn/ShaderModule.h> //UboInfo
 #include <vkn/VulkanHashes.h>
+#include <vkn/DescriptorUpdateData.h>
+#include <vkn/DescriptorCountArray.h>
+namespace idk
+{
+	struct renderer_attributes;
+}
 namespace idk::vkn
 {
+	class VulkanMesh;
+	struct DescriptorUpdateData;
 	struct VknCubemap;
 	struct DescriptorsManager;
 	using desc_type_info = DescriptorTypeI;
 	//pair<num_ds,num_descriptors_per_type>
-	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, std::array<uint32_t, DescriptorTypeI::size()>>>;
+	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>;
 	template<vk::DescriptorType type>
 	static constexpr size_t desc_type_index = desc_type_info::map<type>();
 
@@ -27,82 +35,15 @@ namespace idk::vkn
 		{
 			vk::DescriptorSetLayout layout;
 			hash_table<uint32_t,vector<std::optional<ProcessedRO::BindingInfo>>>  bindings;
+			DsCountArray total_desc;
 			bool dirty = false;
-			void SetLayout(vk::DescriptorSetLayout new_layout, bool clear_bindings = false)
-			{
-				//If the layouts are different, the bindings are not compatible, clear it.
-				//or we just want the bindings to be cleared, so clear it.
-				if (new_layout != layout || clear_bindings)
-				{
-					bindings.clear();
-				}
-				layout = new_layout;
-			}
-			void Bind(ProcessedRO::BindingInfo info)
-			{
-				//if (bindings.size() <= info.binding)
-				//	bindings.resize(static_cast<size_t>(info.binding) + 1);
-				auto& vec = bindings[info.binding];
-				if (vec.size() <= info.arr_index)
-					vec.resize(info.arr_index + 1);
-				vec[info.arr_index] = std::move(info);
-				dirty = true;
-			}
-			void Unbind(uint32_t binding)
-			{
-				bindings.erase(binding);
-			}
-			monadic::result< vector<ProcessedRO::BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts)
-			{
-				monadic::result< vector<ProcessedRO::BindingInfo>, string> result{};
 
-				string err_msg;
-				vector<ProcessedRO::BindingInfo> set_bindings;
-				uint32_t type_count[DescriptorTypeI::size()] = {};
-				bool failed = false;
-				if (dirty)
-				{
-					size_t max_size = 0;
-					for (auto& binding : bindings)
-					{
-						max_size += binding.second.size();
-					}
-					set_bindings.reserve(max_size);
-					for (auto& [binding_index,binding] : bindings)
-					{
-						//if (!bindings[i])
-						//{
-						//	failed = true;
-						//	err_msg += "Binding [" + std::to_string(i) + "] is missing\n";
-						//}
-						for (auto& elem : binding)
-						{
-							if (elem)
-							{
-								auto& binding_elem = set_bindings.emplace_back(*elem);
-								type_count[binding_elem.IsImage() ?
-									desc_type_index<vk::DescriptorType::eCombinedImageSampler>
-									:
-									desc_type_index<vk::DescriptorType::eUniformBuffer>]++;
-							}
-						}
-					}
-					if (failed)
-						result = std::move(err_msg);
-					else
-					{
-						auto& cl = collated_layouts[layout];
-						cl.first++;
-						for (size_t i = 0; i < std::size(type_count); ++i)
-						{
-							cl.second[i] = type_count[i];
-						}
-						result = std::move(set_bindings);
-						dirty = false;
-					}
-				}
-				return std::move(result);
-			}
+			vector<ProcessedRO::BindingInfo> scratch_out;
+
+			void SetLayout(vk::DescriptorSetLayout new_layout,const DsCountArray& total_descriptors, bool clear_bindings = false);
+			void Bind(ProcessedRO::BindingInfo info);
+			void Unbind(uint32_t binding);
+			monadic::result< vector<ProcessedRO::BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts);
 		};
 		
 		void SetRef(
@@ -111,14 +52,20 @@ namespace idk::vkn
 		);
 		void UnbindShader(ShaderStage stage);
 		void BindShader(ShaderStage stage, RscHandle<ShaderProgram> shader);
+		void BindAttrib(uint32_t location, vk::Buffer buffer, size_t offset);
+		bool BindMeshBuffers(const RenderObject& ro);
+		bool BindMeshBuffers(RscHandle<Mesh> mesh, const renderer_attributes& attribs);
+		bool BindMeshBuffers(const VulkanMesh& mesh, const renderer_attributes& attribs);
+		void SetVertexCount(uint32_t vertex_count);
 
 		std::optional<UboInfo> GetUniform(const string& uniform_name) const;
 
 
 		template<typename T>
 		bool BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+		bool BindAttachment(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 
 		void FinalizeDrawCall(const RenderObject& ro);
 		void FinalizeDrawCall(const RenderObject& ro,size_t num_inst,size_t inst_offset);
@@ -131,12 +78,20 @@ namespace idk::vkn
 		{
 			return draw_calls;
 		}
+		//reserves an extra size chunk
+		void reserve(size_t size);
 
 	private:
+
+		hash_table<uint32_t, BoundVertexBuffer> attrib_buffers;
+		std::optional<BoundIndexBuffer> index_buffer{};
+		size_t num_vertices{};
+
+		DescriptorUpdateData dud{};
 		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
 		vector<ProcessedRO> draw_calls;
 
-		shared_ptr<pipeline_config> prev_config;
+		shared_ptr<const pipeline_config> prev_config;
 
 		bool shader_changed = false;
 		hash_table<set_t, set_bindings> curr_bindings;
@@ -154,9 +109,9 @@ namespace idk::vkn
 	};
 
 	void UpdateUniformDS(
-		vk::Device& device,
 		vk::DescriptorSet& dset,
-		vector<ProcessedRO::BindingInfo> bindings
+		vector<ProcessedRO::BindingInfo> bindings,
+		DescriptorUpdateData& ds_update_data
 	);
 
 	template<typename T>
@@ -170,7 +125,7 @@ namespace idk::vkn
 			trf_buffer,
 			trf_offset,
 			arr_index,
-			obj_uni.size,
+			hlp::buffer_size(val),
 			obj_uni.layout
 		};
 		//);

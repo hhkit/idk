@@ -71,7 +71,7 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue,
 	if(wait_for_idle)
 		queue.waitIdle(dispatcher);
 }
-vk::CommandBuffer& BeginSingleTimeCBufferCmd(vk::CommandBuffer& cmd_buffer,vk::CommandBufferInheritanceInfo* info=nullptr)
+vk::CommandBuffer BeginSingleTimeCBufferCmd(vk::CommandBuffer cmd_buffer,vk::CommandBufferInheritanceInfo* info=nullptr)
 {
 	vk::DispatchLoaderDefault dispatcher{};
 	cmd_buffer.reset(vk::CommandBufferResetFlags{}, dispatcher);
@@ -83,7 +83,7 @@ vk::CommandBuffer& BeginSingleTimeCBufferCmd(vk::CommandBuffer& cmd_buffer,vk::C
 	return cmd_buffer;
 }
 
-void EndSingleTimeCbufferCmd(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional<vk::Semaphore> signal = {})
+void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional<vk::Semaphore> signal = {})
 {
 	vk::DispatchLoaderDefault dispatcher{};
 	cmd_buffer.end(dispatcher);
@@ -100,11 +100,12 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, st
 		,(signal) ? &*signal : nullptr
 	};
 	queue.submit(submitInfo, vk::Fence{}, dispatcher);
+	if(!signal)
 	//Not very efficient, would be better to use fences instead.
-	queue.waitIdle(dispatcher);
+		queue.waitIdle(dispatcher);
 }
 
-void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
+void CopyBuffer(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
 {
 	BeginSingleTimeCBufferCmd(cmd_buffer);
 
@@ -118,7 +119,7 @@ void CopyBuffer(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer srcB
 	EndSingleTimeCbufferCmd(cmd_buffer,queue);
 }
 
-void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buffer& buffer, VknTexture& img)
+void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer& buffer, VknTexture& img)
 {
 	BeginSingleTimeCBufferCmd(cmd_buffer);
 
@@ -139,12 +140,12 @@ void CopyBufferToImage(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Buff
 		1
 	};
 
-	cmd_buffer.copyBufferToImage(buffer, *img.image, vk::ImageLayout::eTransferDstOptimal, 1, &region, dispatcher);
+	cmd_buffer.copyBufferToImage(buffer, img.Image(), vk::ImageLayout::eTransferDstOptimal, 1, &region, dispatcher);
 
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }
 
-void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format , vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal, vk::CommandBufferInheritanceInfo* info)
+void TransitionImageLayout(bool dont_begin, vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format , vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal, vk::CommandBufferInheritanceInfo* info)
 {
 	if (!dont_begin)
 		BeginSingleTimeCBufferCmd(cmd_buffer, info);
@@ -239,13 +240,13 @@ void TransitionImageLayout(bool dont_begin, vk::CommandBuffer& cmd_buffer, vk::Q
 		EndSingleTimeCbufferCmd(cmd_buffer, queue, wait, stage, signal);
 }
 
-void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout , std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal,vk::CommandBufferInheritanceInfo* info)
+void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout , std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal,vk::CommandBufferInheritanceInfo* info)
 {
 	TransitionImageLayout(false,cmd_buffer, queue, img, format, oLayout, nLayout, wait, stage, signal, info);
 	
 }
 
-void TransitionImageLayout(vk::CommandBuffer& cmd_buffer, vk::Queue& queue, vk::Image& img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout,vk::CommandBufferInheritanceInfo* info)
+void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout,vk::CommandBufferInheritanceInfo* info)
 {
 	TransitionImageLayout(cmd_buffer, queue, img, format, oLayout, nLayout, std::nullopt, std::nullopt,std::nullopt, info);
 	

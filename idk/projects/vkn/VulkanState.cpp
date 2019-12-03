@@ -28,7 +28,7 @@ namespace idk
 }
 
 //Uncomment to disable validation
-//#define WX_VAL_VULK
+#define WX_VAL_VULK
 
 //Uncomment this when the temporary glm namespace glm{...} below has been removed.
 //namespace glm = idk;
@@ -187,11 +187,10 @@ namespace idk::vkn
 	{
 		std::vector<const char*> layers
 		{
-#ifndef WX_VAL_VULK
 			"VK_LAYER_KHRONOS_validation"
-#endif
 		};
-		return layers;
+		
+		return (enable_validation) ? layers : decltype(layers){};
 	}
 
 	std::vector<const char*> VulkanState::GetExtensions(vk::Optional<const std::string>)
@@ -235,7 +234,7 @@ namespace idk::vkn
 	{
 		std::optional<vk::SurfaceFormatKHR> result;
 		for (const auto& availableFormat : availableFormats) {
-			if (availableFormat.format == vk::Format::eB8G8R8A8Unorm && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+			if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
 				result = availableFormat;
 				break;
 			}
@@ -359,19 +358,14 @@ namespace idk::vkn
 			hlp::arr_count(extensions),
 			extensions.data()
 		);
-#ifndef WX_VAL_VULK
-		auto debugInfo = populateDebugMessengerCreateInfo();
-		instInfo.pNext = &debugInfo;
-#endif
-		instInfo.pNext = nullptr;
 		try
 		{
+			auto debugInfo = populateDebugMessengerCreateInfo();
+			instInfo.pNext = (enable_validation)?&debugInfo:nullptr;
 			*instance = vk::createInstance(instInfo, nullptr, dispatcher);
 			dyn_dispatcher.init(*instance, vkGetInstanceProcAddr);
-#ifndef WX_VAL_VULK
-
-			m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
-#endif
+			if(enable_validation)
+				m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
 			//if (result != vk::Result::eSuccess)
 			//{
 			//	std::cout << "FAILED TO CREATE" << std::endl;
@@ -577,7 +571,7 @@ namespace idk::vkn
 		vk::AttachmentDescription depthAttachment
 		{
 			vk::AttachmentDescriptionFlags{}
-			,vk::Format::eD16Unorm
+			,vk::Format::eD32Sfloat
 			,vk::SampleCountFlagBits::e1
 			,vk::AttachmentLoadOp::eClear
 			,vk::AttachmentStoreOp::eStore
@@ -910,9 +904,19 @@ namespace idk::vkn
 		return static_cast<ValHandler*>((pUserData) ? pUserData : &def)->processMsg(messageSeverity, messageType, pCallbackData);
 	}
 
-	vk::RenderPass VulkanState::BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth ) const
+	const RenderPassObj& VulkanState::BasicRenderPass(BasicRenderPasses type, bool clear_col , bool clear_depth ) const
 	{
-		return *m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
+		return m_basic_renderpasses[GetRpClearIndex(clear_col,clear_depth)][type];
+	}
+
+	vk::UniqueCommandPool VulkanState::CreateGfxCommandPool()
+	{
+		vk::CommandPoolCreateInfo info
+		{
+			vk::CommandPoolCreateFlags{vk::CommandPoolCreateFlagBits::eResetCommandBuffer}
+			,*this->m_queue_family.graphics_family
+		};
+		return m_device->createCommandPoolUnique(info, nullptr, dispatcher);
 	}
 
 	void VulkanState::CleanupSwapChain() {
@@ -1025,7 +1029,7 @@ namespace idk::vkn
 			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{
-				vkn_fb.GetRenderPass()
+				*vkn_fb.GetRenderPass()
 				,frame_buffer
 				,vk::Rect2D{ vk::Offset2D{}, vk::Extent2D(s_cast<uint32_t>(vkn_fb.Size().x),s_cast<uint32_t>(vkn_fb.Size().y)) }
 				,s_cast<uint32_t>(std::size(clearcolor))
@@ -1332,7 +1336,16 @@ namespace idk::vkn
 
 	VulkanState::~VulkanState()
 	{
+		m_graphics_queue.waitIdle();
+		m_present_queue.waitIdle();
 		m_device->waitIdle();
+
+		for (auto& ucmd : m_pri_commandbuffers)
+			ucmd->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
+		for (auto& ucmd : m_present_trf_commandbuffers)
+			ucmd->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
+		for( auto& ucmd : m_blitz_commandbuffers)
+			ucmd->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
 	}
 
 	VulkanResourceManager& VulkanState::ResourceManager()

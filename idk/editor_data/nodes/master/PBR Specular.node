@@ -1,0 +1,8 @@
+vec3,vec3,float,float,float,vec3->
+Albedo,Normal,Specular,Roughness,Ambient Occlusion,Emissive
+albedo    = {0};
+normal    = {1};
+specular  = {2};
+roughness = {3};
+ambient_o = {4};
+emissive  = {5};

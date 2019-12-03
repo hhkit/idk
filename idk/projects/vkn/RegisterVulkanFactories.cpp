@@ -5,7 +5,6 @@
 #include <vkn/VulkanMeshFactory.h>
 #include <vkn/VulkanShaderModuleFactory.h>
 #include <vkn/ShaderModule.h>
-#include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>
 #include <gfx/MaterialInstance.h>
@@ -18,7 +17,10 @@
 #include <vkn/VknFrameBufferFactory.h>
 #include <vkn/VulkanCbmLoader.h>
 #include <vkn/VulkanCubemapFactory.h>
+#include <vkn/VulkanTtfLoader.h>
+#include <vkn/VulkanFontAtlasFactory.h>
 #include <vkn/VknRenderTargetLoader.h>
+#include <vkn/VulkanGlslLoader.h>
 namespace idk::vkn
 {
 
@@ -34,6 +36,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterFactory<VknRenderTargetFactory>();
 	Core::GetResourceManager().RegisterFactory<VknFrameBufferFactory>();
 	Core::GetResourceManager().RegisterFactory<VulkanCubemapFactory>();
+	Core::GetResourceManager().RegisterFactory<VulkanFontAtlasFactory>();
 
 	//Core::GetResourceManager().RegisterFactory<
 	//Core::GetResourceManager().RegisterFactory<VulkanMaterialFactory>();
@@ -44,17 +47,12 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpg");
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpeg");
 	Core::GetResourceManager().RegisterLoader<PngLoader>(".tga");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".vert");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".frag");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".geom");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".tesc");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".tese");
-	Core::GetResourceManager().RegisterLoader<VulkanGlslLoader>(".comp");
 	Core::GetResourceManager().RegisterLoader<VulkanSpvLoader>(".spv");
 	Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 	Core::GetResourceManager().RegisterLoader<VknRenderTargetLoader>(RenderTarget::ext);
 	Core::GetResourceManager().RegisterLoader<DdsLoader>(".dds");
 	Core::GetResourceManager().RegisterLoader<CbmLoader>(".cbm");
+	Core::GetResourceManager().RegisterLoader<TtfLoader>(".ttf");
 }
 
 }

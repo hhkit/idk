@@ -25,7 +25,7 @@ namespace idk
 
         string_view LayerIndexToName(layer_t layer) const;
         layer_t NameToLayerIndex(string_view layer_name) const;
-        uint32_t GetMask(span<string_view> layers) const;
+        LayerMask GetMask(span<string_view> layers) const;
 
     protected:
         virtual void ApplyConfig(Config& config);

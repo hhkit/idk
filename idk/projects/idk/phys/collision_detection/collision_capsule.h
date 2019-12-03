@@ -14,12 +14,8 @@ Collisions with capsule
 #pragma once
 #include <phys/collision_result.h>
 #include <math/shapes/capsule.h>
-#include <math/shapes/box.h>
-#include <math/shapes/sphere.h>
 
 namespace idk::phys
 {
-	col_result collide_capsule_box_discrete(const capsule& lhs, const box& rhs);
 	col_result collide_capsule_capsule_discrete(const capsule& lhs, const capsule& rhs);
-	col_result collide_capsule_sphere_discrete(const capsule& lhs, const sphere& rhs);
 }
