@@ -7,7 +7,7 @@
 #include <util/ioutils.h>
 #include <idk_config.h>
 #include <res/ResourceHandle.h>
-#include <res/ResourceExt.h>
+#include <res/ResourceExtension.h>
 
 #include "IAssetLoader.h"
 

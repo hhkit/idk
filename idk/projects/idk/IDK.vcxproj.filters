@@ -930,6 +930,9 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="memory\ArenaAllocator.h" />
+    <ClInclude Include="gfx\CompiledMesh.h" />
+    <ClInclude Include="res\ResourceExtension.h" />
+    <ClInclude Include="res\CompiledAssets.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

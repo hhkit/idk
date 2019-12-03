@@ -2,13 +2,10 @@
 
 #include <idk.h>
 #include <res/Resource.h>
+#include <res/ResourceExtension.h>
 
 namespace idk::anim
 {
-	struct AnimationMeta
-	{
-
-	};
 
 	// KeyFrame represents a keyframe. Can be translate, rotate, or scale.
 	template<typename T>
@@ -31,7 +28,6 @@ namespace idk::anim
 
 	class Animation 
 		: public Resource<Animation>
-		//, public MetaTag<AnimationMeta>
 	{
 	public:
 		hash_table<string, AnimatedBone> _animated_bones;
@@ -50,5 +46,6 @@ namespace idk::anim
 		void SetSpeeds(float fps = 25.0f, float duration = 0.0f, float num_ticks = 0.0f);
 		void AddAnimatedBone(const AnimatedBone& animated_bone);
 
+		EXTENSION(".idanim")
 	};
 }

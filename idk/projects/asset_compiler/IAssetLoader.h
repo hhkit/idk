@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <res/MetaBundle.h>
-#include <res/compiler/CompiledAssets.h>
+#include <res/CompiledAssets.h>
 
 namespace idk
 {
