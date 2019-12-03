@@ -132,10 +132,12 @@ namespace idk::mono
 			if constexpr (!std::is_class_v<Actual>)
 			{
 				auto val = obj;
+				(envi);//Unused in this path
 				mono_field_set_value(me, field, &val);
 			}
 			if constexpr (std::is_same_v<Actual, reflect::dynamic>)
 			{
+				(envi);//Unused in this path
 				reflect::dynamic& dyn = obj;
 #define HACKY_ASSIGN(TYPE) if (dyn.is<TYPE>()) mono_field_set_value(me, field, &dyn.get<TYPE>());
 				HACKY_ASSIGN(bool);

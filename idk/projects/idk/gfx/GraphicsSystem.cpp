@@ -443,14 +443,11 @@ namespace idk
 			}
 		POST_END();
 
-		hash_table<Handle<Animator>, size_t> skeleton_indices;
-
 		POST()
+		alignas(machine::cache_line_sz) hash_table<Handle<Animator>, size_t> skeleton_indices;
+
 		for (auto& elem : animators)
 			PrepareSkeletonTransform(elem, result.skeleton_transforms, skeleton_indices);
-		POST_END();
-
-		POST()
 		for (auto& elem : skinned_mesh_renderers)
 		{
 			if (elem.GetHandle().scene == Scene::prefab)
@@ -708,7 +705,6 @@ namespace idk
 			res.ui_ro = vec;
 			for (auto& elem : vec)
 			{
-				auto& prog = elem.material->material->_shader_program;
 				std::visit([&](const auto& data)
 				{				
 					using T = std::decay_t<decltype(data)>;

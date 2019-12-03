@@ -35,7 +35,7 @@ namespace idk::vkn
 			test
 		};
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void CanvasRenderer::DrawCanvas(PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
 	{
 		auto& shared_state = *state.shared_gfx_state;

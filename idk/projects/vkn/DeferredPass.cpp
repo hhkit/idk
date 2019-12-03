@@ -366,7 +366,7 @@ namespace idk::vkn
 		rp_info.AddDependency(VK_SUBPASS_EXTERNAL, 0);
 		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	vk::UniqueRenderPass BuildHdrRenderPass(const FrameBufferInfo& hdr_out)
 	{
 		RenderPassInfo rp_info;

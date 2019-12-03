@@ -185,7 +185,7 @@ namespace idk {
 					++execute_counter;
 				}
 
-				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 
 			}
 
@@ -206,7 +206,7 @@ namespace idk {
 					++execute_counter;
 				}
 
-				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 
 				selected_gameObjects.clear();
 
@@ -287,7 +287,7 @@ namespace idk {
 					}
 
 					CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-					commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+					commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 				}
 			}
 			//Each button is disabled if gameobject is not selected!
@@ -541,7 +541,7 @@ namespace idk {
 					++execute_counter;
 				}
 
-				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 
 
@@ -579,7 +579,7 @@ namespace idk {
 					++execute_counter;
 				}
 
-				commandController.ExecuteCommand(COMMAND(CMD_CallCommandAgain, execute_counter));
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 
 			//F = Focus on GameObject
