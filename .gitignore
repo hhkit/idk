@@ -357,3 +357,4 @@ idk/dep/lib/SPIRV-Tools-optd.lib
 /idk/compiler
 /idk/build/compiler
 /testproj/User
+/idk/build

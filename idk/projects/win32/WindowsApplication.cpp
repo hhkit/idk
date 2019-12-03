@@ -115,6 +115,65 @@ namespace idk::win
 	{
 		return _input_manager->GetChar();
 	}
+
+    bool Windows::SetFullscreen(bool fullscreen)
+    {
+        // stolen from chromium
+
+        if (!_fullscreen)
+        {
+            // Save current window information.  We force the window into restored mode
+            // before going fullscreen because Windows doesn't seem to hide the
+            // taskbar if the window is in the maximized state.
+            _saved_win_info.maximized = !!::IsZoomed(hWnd);
+            if (_saved_win_info.maximized)
+                ::SendMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+            _saved_win_info.style = GetWindowLong(hWnd, GWL_STYLE);
+            _saved_win_info.ex_style = GetWindowLong(hWnd, GWL_EXSTYLE);
+            GetWindowRect(hWnd, &_saved_win_info.window_rect);
+        }
+
+        _fullscreen = fullscreen;
+
+        if (_fullscreen)
+        {
+            // Set new window style and size.
+            SetWindowLong(hWnd, GWL_STYLE,
+                          _saved_win_info.style & ~(WS_CAPTION | WS_THICKFRAME));
+            SetWindowLong(hWnd, GWL_EXSTYLE,
+                          _saved_win_info.ex_style & ~(WS_EX_DLGMODALFRAME |
+                                                       WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+            // On expand, if we're given a window_rect, grow to it, otherwise do
+            // not resize.
+            MONITORINFO monitor_info;
+            monitor_info.cbSize = sizeof(monitor_info);
+            GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST),
+                            &monitor_info);
+            const auto& rect = monitor_info.rcMonitor;
+            SetWindowPos(hWnd, NULL, rect.left, rect.top,
+                         rect.right - rect.left, rect.bottom - rect.top,
+                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        }
+        else
+        {
+            // Reset original window style and size.  The multiple window size/moves
+            // here are ugly, but if SetWindowPos() doesn't redraw, the taskbar won't be
+            // repainted.  Better-looking methods welcome.
+            SetWindowLong(hWnd, GWL_STYLE, _saved_win_info.style);
+            SetWindowLong(hWnd, GWL_EXSTYLE, _saved_win_info.ex_style);
+
+                // On restore, resize to the previous saved rect size.
+            const auto& rect = _saved_win_info.window_rect;
+            SetWindowPos(hWnd, NULL, rect.left, rect.top,
+                         rect.right - rect.left, rect.bottom - rect.top,
+                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+            if (_saved_win_info.maximized)
+                ::SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+        }
+
+        return true;
+    }
 	
 	void Windows::SetTitle(string_view new_title)
 	{
@@ -352,15 +411,15 @@ namespace idk::win
 
 	BOOL Windows::InitInstance(int nCmdShow)
 	{
-		hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+        hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
+                             CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)
 		{
 			return FALSE;
 		}
 
-		ShowWindow(hWnd, nCmdShow);
+		ShowWindow(hWnd, SW_MAXIMIZE);
 		UpdateWindow(hWnd);
 
 		return TRUE;

@@ -67,6 +67,10 @@ namespace idk
 	{
 		return _real_dt;
 	}
+	seconds Scheduler::GetRemainingTime() noexcept
+	{
+		return _accumulated_dt;
+	}
 	time_point Scheduler::GetProgramStart() noexcept
 	{
 		return _program_start;

@@ -4,6 +4,9 @@
 #include <common/Transform.h>
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
+#include <math/matrix_transforms.h>
+#include <phys/RigidBody.h>
+#include <core/Scheduler.h>
 
 namespace idk
 {
@@ -13,6 +16,19 @@ namespace idk
 	}
 	AnimatedRenderObject SkinnedMeshRenderer::GenerateRenderObject() const
 	{
+		auto tfm = GetGameObject()->GetComponent<Transform>()->GlobalMatrix();
+		Handle<RigidBody> rb;
+		auto search = GetGameObject();
+		while (search)
+		{
+			rb = GetGameObject()->GetComponent<RigidBody>();
+			if (rb)
+				break;
+			else
+				search = search->Parent();
+		}
+		if (rb)
+			tfm[3] += vec4{ rb->velocity() * Core::GetScheduler().GetRemainingTime().count(), 0 };
 		return AnimatedRenderObject{
 			RenderObject
 			{
@@ -21,7 +37,7 @@ namespace idk
 			.material_instance = material_instance,
 
 			.velocity = vec3{},
-			.transform = GetGameObject()->GetComponent<Transform>()->GlobalMatrix() ,
+			.transform = tfm,
 
 			.cast_shadows = cast_shadows,
 			.receive_shadows = receive_shadows,
