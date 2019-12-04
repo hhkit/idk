@@ -929,7 +929,7 @@ namespace idk::vkn
 
 		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
-		View().Swapchain().m_graphics.images[frame_index] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
+		View().Swapchain().m_graphics.images[View().vulkan().rv] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
 //#pragma optimize ("",off)
 	void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)

@@ -137,6 +137,7 @@ namespace idk::vkn
 		//Creates command pool for the graphics queue
 		vk::UniqueCommandPool CreateGfxCommandPool();
 #pragma endregion
+		uint32_t					rv;
 	private:
 		bool enable_validation = false;
 		// type aliases
@@ -192,7 +193,6 @@ namespace idk::vkn
 
 
 		//////////Frame render variables////////
-		uint32_t					rv;
 		uint32_t					imageIndex;
 		vk::Result					rvRes;
 		vk::Semaphore				waitSemaphores;
