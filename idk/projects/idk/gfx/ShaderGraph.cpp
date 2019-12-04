@@ -61,7 +61,7 @@ namespace idk::shadergraph
 
     static void replace_variables(string& code, int slot_index, const string& replacement)
     {
-        string to_find = '{' + std::to_string(slot_index) + '}';
+        string to_find = '{' + serialize_text(slot_index) + '}';
         size_t offset = 0;
         while ((offset = code.find(to_find, offset)) != string::npos)
             code = code.replace(offset, to_find.size(), replacement);
@@ -72,7 +72,7 @@ namespace idk::shadergraph
         std::regex regex{ "\\?(\\d+):(float|vec2|vec3|vec4|mat2|mat3|mat4|sampler2D)\\{(.*)\\}" };
         std::smatch sm;
 
-        std::string _code;
+        std::string _code = code;
         while (std::regex_search(_code, sm, regex))
         {
             const auto& index = std::stoi(sm[1]);

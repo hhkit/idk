@@ -70,10 +70,17 @@ namespace idk
         // assuming screen space
         ivec2 screen_size = canvas->render_target->Size();
 
-        // 1424 * 826
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas->GetGameObject());
+        auto canvas_go = canvas->GetGameObject();
 
-        canvas->GetGameObject()->GetComponent<RectTransform>()->_local_rect = rect{ vec2{0,0}, vec2{screen_size} };
+        // 1424 * 826
+        if (!canvas_go->HasComponent<RectTransform>())
+        {
+            LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
+            return;
+        }
+
+        canvas_go->GetComponent<RectTransform>()->_local_rect = rect{ vec2{0,0}, vec2{screen_size} };
+        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
 
         tree->visit([canvas](Handle<GameObject> child, int)
         {
@@ -118,16 +125,21 @@ namespace idk
         // assuming screen space
         ivec2 screen_size = canvas->render_target->Size();
 
+        auto canvas_go = canvas->GetGameObject();
+
         // 1424 * 826
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas->GetGameObject());
-
+        if (!canvas_go->HasComponent<RectTransform>())
         {
-            auto& canvas_rt = *canvas->GetGameObject()->GetComponent<RectTransform>();
-            canvas_rt._local_rect = rect{ vec2{0,0}, vec2{screen_size} };
-            canvas_rt._matrix = mat4{ scale(vec3(2.0f / screen_size.x, 2.0f / screen_size.y, 1.0f)) };
+            LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
+            return;
         }
-        
 
+        auto& canvas_rt = *canvas_go->GetComponent<RectTransform>();
+        canvas_rt._local_rect = rect{ vec2{0,0}, vec2{screen_size} };
+        canvas_rt._matrix = mat4{ scale(vec3(2.0f / screen_size.x, 2.0f / screen_size.y, 1.0f)) };
+
+        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
+        
         tree->visit([canvas](Handle<GameObject> child, int)
         {
             if (child->HasComponent<Canvas>())

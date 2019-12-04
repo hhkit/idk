@@ -145,6 +145,7 @@ namespace idk
 		size_type _calc_capacity(size_type len) const;
 		void _grow(size_type added_len); // grow to accomodate added len
         void _set_size(size_type sz);
+        size_type _limit_count(size_type pos, size_type count) const;
 
 		// compress allocator, since it's most likely size 0
 		compressed_pair<_rep, allocator_type> _rep;

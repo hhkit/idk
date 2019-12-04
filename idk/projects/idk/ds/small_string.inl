@@ -48,7 +48,7 @@ namespace idk
 		if (count > _sso_buffer_size)
 		{
 			const auto cap = _calc_capacity(count);
-			auto* buf = _rep.second().allocate(cap);
+			auto* buf = _rep.second().allocate(cap + 1);
 			rep.longer = _longer{ buf, count, cap };
 			rep.sso.size_diff = _use_longer_mask;
 			for (size_type i = 0; i < count; ++i, ++buf)
@@ -75,7 +75,7 @@ namespace idk
 		if (count > _sso_buffer_size)
 		{
 			const auto cap = _calc_capacity(count);
-			auto* buf = _rep.second().allocate(cap);
+			auto* buf = _rep.second().allocate(cap + 1);
 			rep.longer = _longer{ buf, count, cap };
 			rep.sso.size_diff = _use_longer_mask;
 			traits_type::copy(buf, cstr, count + 1);
@@ -84,7 +84,8 @@ namespace idk
 		{
 			// mul by 2, so LSB is always 0
 			rep.sso.size_diff = (_sso_buffer_size - static_cast<CharT>(count)) << 1;
-			traits_type::copy(rep.sso.buffer, cstr, count + 1);
+            if (count)
+                traits_type::copy(rep.sso.buffer, cstr, count + 1);
 		}
 	}
 
@@ -273,8 +274,7 @@ namespace idk
 	template<typename CharT, typename Traits, typename Allocator>
 	small_string<CharT, Traits, Allocator> small_string<CharT, Traits, Allocator>::substr(size_type pos, size_type count) const
 	{
-		const auto start = begin() + pos;
-		return small_string(start, start + count, _rep.second());
+		return small_string(begin() + pos, _limit_count(pos, count), _rep.second());
 	}
 
 
@@ -446,7 +446,7 @@ namespace idk
 			return npos;
 		for (; pos < sz; ++pos)
 		{
-			if (traits_type::find(cstr, sz, _data[pos]))
+			if (traits_type::find(cstr, count, _data[pos]))
 				return pos;
 		}
 		return npos;
@@ -474,7 +474,7 @@ namespace idk
 			return npos;
 		for (; pos < sz; ++pos)
 		{
-			if (!traits_type::find(cstr, sz, _data[pos]))
+			if (!traits_type::find(cstr, count, _data[pos]))
 				return pos;
 		}
 		return npos;
@@ -526,18 +526,19 @@ namespace idk
 	template<typename CharT, typename Traits, typename Allocator>
 	auto small_string<CharT, Traits, Allocator>::find_last_not_of(const CharT* cstr, size_type pos, size_type count) const -> size_type
 	{
-		const auto _data = data();
-		const auto sz = size();
-		if (count == 0)
-			return npos;
-		if (pos > sz)
-			pos = sz - 1;
-		do
-		{
-			if (!traits_type::find(cstr, sz, _data[pos]))
-				return pos;
-		} while (pos-- > 0);
-		return npos;
+        const auto _data = data();
+        auto sz = size();
+        if (sz && count)
+        {
+            if (--sz > pos)
+                sz = pos;
+            do
+            {
+                if (!traits_type::find(cstr, count, _data[sz]))
+                    return sz;
+            } while (sz-- != 0);
+        }
+        return npos;
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
@@ -656,14 +657,14 @@ namespace idk
 
 		if (_is_sso())
 		{
-			std::shift_right(rep.sso.buffer + index, rep.sso.buffer + _sso_buffer_size - (rep.sso.size_diff >> 1) + 1, len);
+            traits_type::move(rep.sso.buffer + index + len, rep.sso.buffer + index, _sso_buffer_size - (rep.sso.size_diff >> 1) - index - len + 1);
 			// write size_diff first as it might be overwritten during copy
 			rep.sso.size_diff -= static_cast<CharT>(len << 1);
 			traits_type::copy(rep.sso.buffer + index, cstr, len); // \0 also right shifted, dont have to write it
 		}
 		else
 		{
-			std::shift_right(rep.longer.ptr + index, rep.longer.ptr + rep.longer.size + 1, len);
+            traits_type::move(rep.longer.ptr + index + len, rep.longer.ptr + index, rep.longer.size - index - len + 1);
 			traits_type::copy(rep.longer.ptr + index, cstr, len);
 			rep.longer.size += len;
 		}
@@ -679,14 +680,14 @@ namespace idk
 
         if (_is_sso())
         {
-            std::shift_right(rep.sso.buffer + index, rep.sso.buffer + _sso_buffer_size - (rep.sso.size_diff >> 1) + 1, count);
+            traits_type::move(rep.sso.buffer + index + count, rep.sso.buffer + index, _sso_buffer_size - (rep.sso.size_diff >> 1) - index - count + 1);
             // write size_diff first as it might be overwritten during copy
             rep.sso.size_diff -= static_cast<CharT>(count << 1);
             traits_type::assign(rep.sso.buffer + index, count, c); // \0 also right shifted, dont have to write it
         }
         else
         {
-            std::shift_right(rep.longer.ptr + index, rep.longer.ptr + rep.longer.size + 1, count);
+            traits_type::move(rep.longer.ptr + index + count, rep.longer.ptr + index, rep.longer.size - index - count + 1);
             traits_type::assign(rep.longer.ptr + index, count, c);
             rep.longer.size += count;
         }
@@ -703,13 +704,13 @@ namespace idk
 		{
 			auto sz = _sso_buffer_size - (rep.sso.size_diff >> 1);
 			count = std::min(count, sz - index);
-			std::shift_left(rep.sso.buffer + index, rep.sso.buffer + sz + 1, count);
+            traits_type::move(rep.sso.buffer + index, rep.sso.buffer + index + count, sz - index - count + 1);
 			rep.sso.size_diff += static_cast<CharT>(count << 1);
 		}
 		else
 		{
 			count = std::min(count, rep.longer.size - index);
-			std::shift_left(rep.longer.ptr + index, rep.longer.ptr + rep.longer.size + 1, count);
+            traits_type::move(rep.longer.ptr + index, rep.longer.ptr + index + count, rep.longer.size - index - count + 1);
             
 			_rep.first().longer.size -= count;
 		}
@@ -727,7 +728,7 @@ namespace idk
 	auto small_string<CharT, Traits, Allocator>::erase(iterator first, iterator last) -> iterator
 	{
 		const auto count = last - first;
-		std::shift_left(last, end() + 1, count);
+        traits_type::move(first, last, size() - (last - begin()) + 1); // +1 for \0
 		if (_is_sso()) _rep.first().sso.size_diff += static_cast<CharT>(count) << 1;
 		else           _rep.first().longer.size -= count;
 		return first;
@@ -1034,6 +1035,13 @@ namespace idk
             _rep.first().sso.size_diff = (_sso_buffer_size - static_cast<CharT>(sz)) << 1;
         else
             _rep.first().longer.size = sz;
+    }
+
+    template<typename CharT, typename Traits, typename Allocator>
+    auto small_string<CharT, Traits, Allocator>::_limit_count(size_type pos, size_type count) const -> size_type
+    {
+        return count < size() - pos ?
+            count : size() - pos;
     }
 
 
