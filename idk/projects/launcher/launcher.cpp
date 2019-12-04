@@ -19,7 +19,7 @@
 #include <serialize/text.h>
 #include <res/EasyFactory.h>
 #include <res/CompiledAssetLoader.h>
-#include <editor/loading/AssimpImporter.h>
+//#include <editor/loading/AssimpImporter.h>
 #include <gfx/GraphFactory.h>
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
@@ -32,7 +32,6 @@
 
 #include <test/TestSystem.h>
 
-#include <renderdoc/renderdoc_app.h>
 #include <shellapi.h>//CommandLineToArgv
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
@@ -54,25 +53,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	int num_args = 0;
 	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
 
-	if (!HasArg(L"--nodoc", command_lines, num_args)) //Additional check to allow disabling of renderdoc without changing game.cpp
-	{
-		RENDERDOC_API_1_1_2* rdoc_api = NULL;
-
-		// At init, on windows
-		if (HMODULE mod = LoadLibrary(L"renderdoc.dll"))
-		{
-			pRENDERDOC_GetAPI RENDERDOC_GetAPI =
-				(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
-			RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
-		}
-	}
-
 	auto c = std::make_unique<Core>();
 
 	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
 	c->AddSystem<win::XInputSystem>();
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL;
+	auto gfx_api = HasArg(L"--opengl", command_lines, num_args) ? GraphicsAPI::OpenGL : GraphicsAPI::Vulkan;
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
@@ -90,7 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		break;
 
 	}
-	gSys->is_deferred(HasArg(L"--deferred", command_lines, num_args));
+	gSys->is_deferred(true);
 
 	namespace fs = std::filesystem;
 
@@ -162,7 +148,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	load_scene->LoadFromResourcePath();
 	Core::GetScheduler().SetPauseState(UnpauseAll);
 	Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
-
+	//Core::GetSystem<Application>().SetFullscreen(true);
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }

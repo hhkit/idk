@@ -203,7 +203,7 @@ namespace idk::mono
 		// app
 		BIND_START("idk.Bindings::EngineKill", void)
 		{
-			if (&Core::GetSystem<IEditor>())
+			if (&Core::GetSystem<IEditor>() == nullptr)
 				Core::Shutdown();
 		}
 		BIND_END();
