@@ -102,7 +102,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     namespace fs = std::filesystem;
 
-    fs::path idk_app_data = Core::GetSystem<Application>().GetAppData();
+    fs::path idk_app_data = Core::GetSystem<Application>().GetAppData().sv();
     idk_app_data /= "idk";
     if (!fs::exists(idk_app_data))
         fs::create_directory(idk_app_data);

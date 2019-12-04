@@ -30,7 +30,7 @@ namespace idk
 			bool should_stop = false;
 			while (!should_stop)
 			{
-				auto opt= GetUniform(name + "[" + std::to_string(i) + "]");
+				auto opt= GetUniform(name + "[" + serialize_text(i) + "]");
 				if (opt)
 				{
 					result.emplace_back(std::get<RscHandle<Texture>>(*opt));
@@ -255,7 +255,7 @@ namespace idk
 			bool should_stop = false;
 			while (!should_stop)
 			{
-				auto u_itr = uniforms.find(name + "[" + std::to_string(i) + "]");
+				auto u_itr = uniforms.find(name + "[" + serialize_text(i) + "]");
 				should_stop = u_itr == uniforms.end();
 				if (!should_stop)
 				{

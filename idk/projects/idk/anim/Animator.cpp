@@ -113,7 +113,7 @@ namespace idk
 	{
 		if(index >= layers.size())
 		{
-			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + std::to_string(index) + ".");
+			LOG_TO(LogPool::ANIM, string{ "Cannot delete animation layer (" } + serialize_text(index) + ".");
 			return false;
 		}
 

@@ -14,7 +14,7 @@ namespace idk::shadergraph
         if (arrow_pos == std::string::npos)
             return;
 
-        auto str_in = str.substr(0, arrow_pos);
+        std::string str_in = str.substr(0, arrow_pos);
         auto str_out = std::string{ str.begin() + arrow_pos + 2, str.end() };
 
         std::regex regex{ "\\w+" };
@@ -43,9 +43,9 @@ namespace idk::shadergraph
         std::ifstream file{ filename };
 
         vector<NodeSignature> signatures;
-        vector<std::string> names;
+        vector<string> names;
 
-        string line;
+        std::string line;
         while (std::getline(file, line))
         {
             NodeSignature sig{ line };
@@ -81,7 +81,7 @@ namespace idk::shadergraph
     {
         t.clear();
         const auto nodes_dir = Core::GetSystem<FileSystem>().GetFullPath(dir);
-        for (auto& file : fs::recursive_directory_iterator(nodes_dir))
+        for (auto& file : fs::recursive_directory_iterator(nodes_dir.sv()))
         {
             if (file.is_directory())
                 continue;
@@ -90,7 +90,7 @@ namespace idk::shadergraph
             auto path_str = path.string();
             auto node = NodeTemplate::Parse(path_str);
 
-            t.emplace(fs::relative(path, nodes_dir).replace_extension().string(), node);
+            t.emplace(fs::relative(path, nodes_dir.sv()).replace_extension().string(), node);
         }
     }
     const NodeTemplate::table& NodeTemplate::GetTable()

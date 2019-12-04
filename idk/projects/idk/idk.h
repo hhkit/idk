@@ -6,7 +6,6 @@
 #include <unordered_set>
 #include <set>
 #include <unordered_map>
-#include <string>
 #include <string_view>
 
 #include <atomic>
@@ -23,6 +22,7 @@
 
 #include <idk_config.h>
 #include <ds/span.h>
+#include <ds/small_string.h>
 #include <debug/idk_assert.h>
 #include <math/color.h>
 #include <math/constants.h>
@@ -97,7 +97,7 @@ namespace idk
 	template<typename T,typename Equal = std::equal_to<T>>
 	using set = std::set<T, Equal>;
 
-	using string = std::string;
+	using string = idk::small_string<char>;
 
 	using string_view = std::string_view;
 

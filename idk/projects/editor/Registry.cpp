@@ -14,7 +14,7 @@ namespace idk
     {
         namespace fs = std::filesystem;
 
-        fs::path recent_path = Core::GetSystem<FileSystem>().GetFullPath(mount_path);
+        fs::path recent_path = Core::GetSystem<FileSystem>().GetFullPath(mount_path).sv();
         if (!fs::exists(recent_path))
             return yaml::node{};
         std::ifstream recent_file{ recent_path };
@@ -34,7 +34,7 @@ namespace idk
         namespace fs = std::filesystem;
         auto node = get_yaml(mount_path);
         node[string{ key }] = value;
-        fs::path recent_path = Core::GetSystem<FileSystem>().GetFullPath(mount_path);
+        fs::path recent_path = Core::GetSystem<FileSystem>().GetFullPath(mount_path).sv();
         std::ofstream recent_file{ recent_path };
         recent_file << yaml::dump(node);
     }

@@ -220,7 +220,7 @@ namespace idk {
             ImColor col = ImGui::GetColorU32(ImGuiCol_Text);
 			if (isNameEmpty) {
 				goName = "Unnamed (";
-				goName.append(std::to_string(handle.id));
+				goName.append(serialize_text(handle.id));
 				goName.append(")");
 				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
                 col = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);

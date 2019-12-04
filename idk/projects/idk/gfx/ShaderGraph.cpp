@@ -61,7 +61,7 @@ namespace idk::shadergraph
 
     static void replace_variables(string& code, int slot_index, const string& replacement)
     {
-        string to_find = '{' + std::to_string(slot_index) + '}';
+        string to_find = '{' + serialize_text(slot_index) + '}';
         size_t offset = 0;
         while ((offset = code.find(to_find, offset)) != string::npos)
             code = code.replace(offset, to_find.size(), replacement);
@@ -72,27 +72,29 @@ namespace idk::shadergraph
         std::regex regex{ "\\?(\\d+):(float|vec2|vec3|vec4|mat2|mat3|mat4|sampler2D)\\{(.*)\\}" };
         std::smatch sm;
 
-        while (std::regex_search(code, sm, regex))
+        std::string _code = code;
+        while (std::regex_search(_code, sm, regex))
         {
             const auto& index = std::stoi(sm[1]);
-            auto type = sm[2].str();
+            string type = sm[2].str();
             const auto& inner = sm[3];
 
             if (index < node.input_slots.size())
             {
                 if (node.input_slots[index].type == ValueType::from_string(make_uppercase(type)))
-                    code.replace(sm.position(), sm.length(), inner);
+                    _code.replace(sm.position(), sm.length(), inner.str());
                 else
-                    code.replace(sm.position(), sm.length(), "");
+                    _code.replace(sm.position(), sm.length(), "");
             }
             else
             {
                 if (node.output_slots[index - node.input_slots.size()].type == ValueType::from_string(make_uppercase(type)))
-                    code.replace(sm.position(), sm.length(), inner);
+                    _code.replace(sm.position(), sm.length(), inner.str());
                 else
-                    code.replace(sm.position(), sm.length(), "");
+                    _code.replace(sm.position(), sm.length(), "");
             }
         }
+        code = _code;
     }
 
     static string resolve_node(const Node& node, compiler_state& state)
@@ -112,7 +114,7 @@ namespace idk::shadergraph
                     string str{ node.output_slots[i].type.to_string() };
                     code += make_lowercase(str);
                 }
-                code += " {" + std::to_string(node.input_slots.size() + i) + "};\n";
+                code += " {" + serialize_text(node.input_slots.size() + i) + "};\n";
             }
 
             auto& tpl = NodeTemplate::GetTable().at(node.name);
@@ -154,7 +156,7 @@ namespace idk::shadergraph
             if (param.type == ValueType::SAMPLER2D)
             {
                 uniform_name = "_uTex[";
-                uniform_name += std::to_string(state.tex_counter++);
+                uniform_name += serialize_text(state.tex_counter++);
                 uniform_name += ']';
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 }, uniform_name);
             }
@@ -162,7 +164,7 @@ namespace idk::shadergraph
             {
                 uniform_name.replace(0, 1, "_u");
                 state.resolved_outputs.emplace(NodeSlot{ node.guid, 0 },
-                                               "_ub" + std::to_string(param.type) + "." + uniform_name);
+                                               "_ub" + serialize_text<char>(param.type) + "." + uniform_name);
             }
             state.uniforms[param_index] = std::make_pair(uniform_name, param.type);
         }
@@ -175,7 +177,7 @@ namespace idk::shadergraph
             {
                 const auto& value = node.input_slots[i].value;
 
-                std::string replacement;
+                string replacement;
                 if (node.input_slots[i].type == ValueType::SAMPLER2D)
                 {
                     // can't connect textures directly, we need to go through uniforms
@@ -264,9 +266,9 @@ namespace idk::shadergraph
                 if (block.empty())
                 {
                     block += "U_LAYOUT(1, ";
-                    block += std::to_string(uniform_type);
+                    block += serialize_text<char>(uniform_type);
                     block += ") uniform BLOCK(_UB";
-                    block += std::to_string(uniform_type);
+                    block += serialize_text<char>(uniform_type);
                     block += ")\n{\n";
                 }
                 block += "  ";
@@ -288,7 +290,7 @@ namespace idk::shadergraph
 
                 uniforms_str += uniform_blocks[i];
                 uniforms_str += "} _ub";
-                uniforms_str += std::to_string(i);
+                uniforms_str += serialize_text(i);
                 uniforms_str += ";\n";
             }
 
@@ -309,7 +311,7 @@ namespace idk::shadergraph
                                      UniformInstance{ uniform_name, to_uniform_instance_value(parameters[param_index]) });
                 else
 				    uniforms.emplace(parameters[param_index].name,
-                                     UniformInstance{ "_ub" + std::to_string(uniform_type) + '.' + uniform_name,
+                                     UniformInstance{ "_ub" + serialize_text<char>(uniform_type) + '.' + uniform_name,
                                                       to_uniform_instance_value(parameters[param_index]) });
 			}
         }

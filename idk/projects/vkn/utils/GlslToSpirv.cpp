@@ -141,19 +141,19 @@ std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk
 		else
 		{
 			DoNothing();
-			string filename = "/"+string{ code_id }+std::to_string(string_hash(glsl));
+			string filename = "/" + string{ code_id } + serialize_text(string_hash(glsl));
 			auto err_m = result.GetErrorMessage(); 
 			auto err_msg = err_m.c_str();
 			LOG_TO(LogPool::GFX, "%s", err_msg);
 			try
 			{
 				auto path = string{ Core::GetSystem<FileSystem>().GetAppDataDir() } +"/idk";
-				if (!std::filesystem::exists(std::filesystem::path{ path }))
-					std::filesystem::create_directory(path);
+                if (!std::filesystem::exists(path.sv()))
+					std::filesystem::create_directory(path.sv());
 				path += "/shader_err";
-				if (!std::filesystem::exists(std::filesystem::path{ path }))
-					std::filesystem::create_directory(path);
-				auto out_file = path+filename;
+				if (!std::filesystem::exists(path.sv()))
+					std::filesystem::create_directory(path.sv());
+				auto out_file = path + filename;
 				std::ofstream out{ out_file };
 				out << val;
 				out << " /* Error Message: \n" << err_msg << "\n*/";
