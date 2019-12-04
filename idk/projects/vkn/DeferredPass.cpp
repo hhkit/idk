@@ -376,7 +376,7 @@ namespace idk::vkn
 		return inited;
 	}
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	vk::UniqueRenderPass BuildAccumRenderPass(VknFrameBuffer& fb)
 	{
 		RenderPassInfo rp_info;
@@ -598,7 +598,7 @@ namespace idk::vkn
 
 	static auto& PopulateGbufferNames()
 	{
-		static const char* gbuffer_names[EGBufferBinding::size()];
+		static const char* gbuffer_names[EGBufferBinding::size()+1];
 		gbuffer_names[EGBufferBinding::map(GBufferBinding::eAlbedoAmbOcc)] = "gAlbAmbOcc";
 		gbuffer_names[EGBufferBinding::map(GBufferBinding::eViewPos)] = "gViewPos";
 		gbuffer_names[EGBufferBinding::map(GBufferBinding::eNormal)] = "gNormal";
@@ -608,7 +608,7 @@ namespace idk::vkn
 		return gbuffer_names;
 	}
 
-	static const char* (&gbuffer_names)[EGBufferBinding::size()] = PopulateGbufferNames();
+	static const auto gbuffer_names = PopulateGbufferNames();
 
 	struct DeferredPostBinder : StandardBindings
 	{
@@ -1018,6 +1018,7 @@ namespace idk::vkn
 			RenderProcessedDrawCalls(cmd_buffer, accum_stuff[i].DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi, rp, 1);
 			//End Depthless RT renderpass
 			cmd_buffer.endRenderPass();
+			++i;
 		}
 		//Copy depth buffer to render target's depth buffer
 

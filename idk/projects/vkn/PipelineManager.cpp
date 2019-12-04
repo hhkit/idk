@@ -141,6 +141,17 @@ namespace idk::vkn
 		}
 
 	}
+
+	bool HasInvalidHandles(const vector<RscHandle<ShaderProgram>>& shaders)
+	{
+		bool invalid = false;
+		for (auto& shader : shaders)
+		{
+			invalid |= (!shader || (!shader.as<ShaderModule>().operator bool() && !shader.as<ShaderModule>().HasUpdate()));
+		}
+		return invalid;
+	}
+
 //#pragma optimize("",off)
 	void PipelineManager::CheckForUpdates(uint32_t frame_index)
 	{
@@ -162,11 +173,12 @@ namespace idk::vkn
 		//Remove invalid pipelines.
 		for (auto itr = pipelines.begin(); itr != pipelines.end(); ++itr)
 		{
-			if (itr->rp && !*itr->rp)
+			if (itr->rp && (!*itr->rp || HasInvalidHandles(itr->shader_handles)))
 			{
 				pipelines_to_destroy.emplace(&itr->pipeline);
 			}
 		}
+
 		for (auto& itr : pipelines_to_destroy)
 		{
 			RemovePipeline(itr);
