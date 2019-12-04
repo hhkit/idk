@@ -222,7 +222,14 @@ namespace idk
 
 	void AudioSystem::Update(span<AudioSource> audio_sources)
 	{
-	
+		for (int i = 0; i < _max_channels; ++i) {
+			FMOD::Channel* channelPtr;
+			_result = _Core_System->getChannel(i, &channelPtr);
+
+			if (_result == FMOD_OK && channelPtr) {
+				ParseFMOD_RESULT(channelPtr->setPaused(_system_paused));
+			}
+		}
 
 		//Update all the audio source here too!
 		for (auto& elem : audio_sources)
@@ -230,9 +237,8 @@ namespace idk
 			
 			elem.UpdateAudioClips();
 
-			for (auto& audioChannel : elem.audio_clip_channels) {
-				audioChannel->setPaused(_system_paused);
-			}
+			
+
 		}
 
 		//Only one listener component will update FMODs listener

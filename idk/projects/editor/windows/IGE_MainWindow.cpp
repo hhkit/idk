@@ -429,6 +429,8 @@ namespace idk {
 				Core::GetSystem<IDE>().game_frozen = false;
 				Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
 				Core::GetSystem<PhysicsSystem>().Reset();
+				Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+
 			}
 			ImGui::SameLine(0, 0);
 			if (ImGui::Button("Reload DLL", toolButtonSize))
@@ -462,6 +464,8 @@ namespace idk {
 				Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
+				Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+
 			}
 		}
 		ImGui::PopID();
