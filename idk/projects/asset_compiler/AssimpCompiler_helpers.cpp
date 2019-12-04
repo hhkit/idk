@@ -284,6 +284,8 @@ namespace idk::ai_helpers
 			mesh.buffers.emplace_back(buf);
 		}
 
+		mesh.element_buffer = std::move(buffer.indices);
+
 		// Compute ritters bounding volume
 		span<const vec3> pos{ buffer.positions };
 		mesh.bounding_volume = ritters(pos);

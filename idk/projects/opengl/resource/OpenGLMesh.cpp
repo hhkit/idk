@@ -3,6 +3,15 @@
 
 namespace idk::ogl
 {
+	OpenGLMesh::OpenGLMesh(const CompiledMesh& m)
+	{
+		bounding_volume = m.bounding_volume;
+		for (auto& buffer : m.buffers)
+			AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, buffer.attribs }.Bind().Buffer(buffer.data.data(), 1, buffer.data.size()));
+		_element_array_object = std::move(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }.Bind().Buffer(m.element_buffer.data(), sizeof(unsigned), m.element_buffer.size()));
+		
+	}
+
 	OpenGLMesh::OpenGLMesh(OpenGLMesh&& rhs)
 		:	_buffers				{ std::move(rhs._buffers) }, 
 			_element_array_object	{ std::move(rhs._element_array_object) }, 

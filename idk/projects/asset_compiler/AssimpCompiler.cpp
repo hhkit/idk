@@ -67,7 +67,7 @@ namespace idk
 					return res ? std::make_pair(guid, *res) : std::make_pair(guid, SerializedMeta{ guid, mesh_data.name, string{reflect::get_type<Mesh>().name()}, "" } );
 				}();
 				mesh_names[t_guid] = t_meta.name;
-
+				mesh_handles.push_back(t_guid);
 				updated_metas.metadatas.emplace_back(t_meta);
 				generated_resources.emplace_back(t_guid, std::move(mesh));
 			}
@@ -89,7 +89,7 @@ namespace idk
 					auto guid = res ? res->guid : Guid::Make();
 					return res ? std::make_pair(guid, *res) : std::make_pair(guid, SerializedMeta{ guid, animation.Name().data(), string{reflect::get_type<anim::Animation>().name()}, "" });
 				}();
-
+				animation_handles.push_back(t_guid);
 				updated_metas.metadatas.emplace_back(t_meta);
 				generated_resources.emplace_back(t_guid, std::move(animation));
 			}
@@ -182,8 +182,8 @@ namespace idk
 		 	prefab.Name(fs_path.stem().string());
 
 		 	LOG_TO(LogPool::ANIM, string{ "Saving meshes and animations as prefab.\n" });
-			updated_metas.metadatas.emplace_back(t_meta);
-			generated_resources.emplace_back(t_guid, std::move(prefab));
+			updated_metas.metadatas.emplace(updated_metas.metadatas.begin(), t_meta);
+			generated_resources.emplace(generated_resources.begin(), AssetBundle::AssetPair{ t_guid, std::move(prefab) });
 		 }
 
 		return AssetBundle{ updated_metas, span<AssetBundle::AssetPair>{generated_resources} };

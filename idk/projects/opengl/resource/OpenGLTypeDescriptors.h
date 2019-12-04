@@ -26,10 +26,5 @@ namespace idk::ogl
 		std::make_pair(vtx::Attrib::ParticleSize,     OpenGLType{ GL_FLOAT, 1}),
 	};
 
-	struct OpenGLDescriptor
-	{
-		vtx::Attrib attrib = vtx::Attrib::Position;
-		unsigned    stride = 0;
-		unsigned    offset = 0;
-	};
+	using OpenGLDescriptor = vtx::Descriptor;
 }

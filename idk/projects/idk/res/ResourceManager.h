@@ -9,13 +9,17 @@
 #include <res/ResourceFactory.h>
 #include <res/ResourceHandle.h>
 #include <res/ResourceUtils.h>
+#include <res/IAssetLoader.h>
 #include <res/FileLoader.h>
 #include <meta/meta.h>
 #include <meta/tag.h>
 
 namespace idk
 {
-	namespace detail { template<typename T> struct ResourceManager_detail; }
+	namespace detail { 
+		template<typename T> struct ResourceManager_detail;
+		template<typename T> struct CompiledAssetHelper_detail;
+	}
 
 	enum class ResourceCreateError : char
 	{
@@ -92,6 +96,7 @@ namespace idk
 		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
 		template<typename Res>  LoadResult<Res>       Load    (PathHandle path, bool reload_resource = true);
 		                        GeneralLoadResult     Load    (PathHandle path, bool reload_resource = true);
+								void                  LoadCompiledAsset(PathHandle path);
 								void                  Unload  (PathHandle path);
 		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
 								GeneralGetResult      Get     (PathHandle path);
@@ -107,6 +112,7 @@ namespace idk
 		template<typename Factory>                    Factory& GetFactory();
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
 		template<typename FLoader, typename ... Args> FLoader& RegisterLoader (string_view ext, Args&& ... loader_construction_args);
+		template<typename ALoader>                    void RegisterAssetLoader();
 		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
 		template<typename Res>                        [[nodiscard]] RscHandle<Res> LoaderCreateResource(Guid);
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
@@ -128,6 +134,7 @@ namespace idk
 		array<GenericPtr, ResourceCount>               _resource_table;    // std::shared_ptr<hash_table<Guid, ResourceControlBlock<R>>>
 		array<GenericPtr, ResourceCount>               _new_resources;     // std::vector<RscHandle<R>>
 		array<GenericPtr, ResourceCount>               _factories;         // std::shared_ptr<ResourceFactory<R>>
+		hash_table<string_view, shared_ptr<IAssetLoader>> _compiled_asset_loader; // std::shared_ptr<IAssetLoader<R>>
 		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;
 		hash_table<Path,      FileControlBlock>        _loaded_files;
 
@@ -145,6 +152,7 @@ namespace idk
 		IFileLoader* GetLoader(string_view extension);
 
 		template<typename T> friend struct detail::ResourceManager_detail;
+		template<typename T> friend struct detail::CompiledAssetHelper_detail;
 	};
 
 	template<typename R> 

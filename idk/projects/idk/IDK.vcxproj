@@ -126,11 +126,13 @@
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\CompiledAssets.h" />
     <ClInclude Include="res\EasyFactory.h" />
     <ClInclude Include="res\FileLoader.h" />
     <ClInclude Include="res\GenericResourceHandle.h" />
     <ClInclude Include="res\GenericResourceHandle_detail.h" />
+    <ClInclude Include="res\IAssetLoader.h" />
     <ClInclude Include="res\MetaBundle.h" />
     <ClInclude Include="res\ResourceBundle.h" />
     <ClInclude Include="res\ResourceExtension.h" />
