@@ -21,9 +21,9 @@ namespace idk {
 		_sol_dir = Core::GetSystem<Application>().GetCurrentWorkingDir();
 		_app_data_dir = Core::GetSystem<Application>().GetAppData();
 
-		_exe_dir = FS::path{ _exe_dir }.generic_string();
-		_sol_dir = FS::path{ _sol_dir }.generic_string();
-		_app_data_dir = FS::path{ _app_data_dir }.generic_string();
+		_exe_dir = FS::path{ _exe_dir.sv() }.generic_string();
+		_sol_dir = FS::path{ _sol_dir.sv() }.generic_string();
+		_app_data_dir = FS::path{ _app_data_dir.sv() }.generic_string();
 	}
 
 	void FileSystem::Update()
@@ -108,7 +108,7 @@ namespace idk {
 	string FileSystem::ConvertFullToVirtual(string_view fullPath) const
 	{
 		string full_path{ fullPath };
-		FS::path fs_path (full_path);
+		FS::path fs_path(fullPath);
 		string ret_path;
 		auto fs_parent_path = fs_path.parent_path();
 		while (FS::exists(fs_parent_path))
@@ -403,8 +403,8 @@ namespace idk {
 			auto& internal_file = vfs.getFile(handle._key);
 			auto& parent_dir = vfs.getDir(internal_file._parent);
 
-			FS::path old_p{ internal_file._full_path };
-			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
+			FS::path old_p{ internal_file._full_path.sv() };
+			FS::path new_p{ (parent_dir._full_path + "/" + new_file_name.data()).sv() };
 			try {
 				FS::rename(old_p, new_p);
 			}
@@ -429,8 +429,8 @@ namespace idk {
 
 			auto& parent_dir = vfs.getDir(internal_dir._parent);
 
-			FS::path old_p{ internal_dir._full_path };
-			FS::path new_p{ parent_dir._full_path + "/" + new_file_name.data() };
+			FS::path old_p{ internal_dir._full_path.sv() };
+			FS::path new_p{ (parent_dir._full_path + "/" + new_file_name.data()).sv() };
 			try {
 				FS::rename(old_p, new_p);
 			}
@@ -839,7 +839,7 @@ namespace idk {
 
 		std::ofstream{ full_path };
 
-		FS::path p{ full_path };
+		FS::path p{ full_path.sv() };
 
 		// initializing the fs_file
 		const auto slot = requestFileSlot(_mounts[dir._tree_index._mount_id], dir._tree_index._depth + 1);
@@ -876,7 +876,7 @@ namespace idk {
 		if (currDepth >= mount._path_tree.size() - 1)
 			mount.AddDepth();
 
-		FS::path currPath{ mountSubDir._full_path };
+		FS::path currPath{ mountSubDir._full_path.sv() };
 		FS::directory_iterator dir{ currPath };
 
 		// initializing all the paths from this path

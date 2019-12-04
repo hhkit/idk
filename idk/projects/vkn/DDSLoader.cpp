@@ -57,7 +57,7 @@ namespace idk::vkn
 		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
 		std::stringstream strm;
 		strm << file.rdbuf();
-		DdsFile dds{ strm.str() };
+        DdsFile dds{ string{strm.str()} };
 		TextureOptions to;
 		if (meta)
 		{

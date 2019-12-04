@@ -44,7 +44,7 @@ namespace idk
 
 			// !!! CLOSE THEN UPDATE TIME
 			std::fstream::close();
-			file._time = FS::last_write_time(FS::path{ file._full_path });
+			file._time = FS::last_write_time(FS::path{ file._full_path.sv() });
 		}
 	}
 
@@ -65,7 +65,7 @@ namespace idk
 
 			// !!! CLOSE THEN UPDATE TIME
 			std::fstream::close();
-			file._time = FS::last_write_time(FS::path{ file._full_path });
+			file._time = FS::last_write_time(FS::path{ file._full_path.sv() });
 		}
 	}
 #pragma endregion fstreamWrapper

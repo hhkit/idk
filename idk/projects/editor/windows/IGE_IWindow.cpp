@@ -74,7 +74,7 @@ namespace idk {
 		va_end(args);
 	}
 
-	void IGE_IWindow::DrawText(const std::string& fmt, ...) {
+	void IGE_IWindow::DrawText(const string& fmt, ...) {
 		va_list args;
 		const char* temp = fmt.c_str();
 		va_start(args, temp);

@@ -60,7 +60,7 @@ namespace idk
 		{
 			auto& loghandle = log_files[i];
 			auto& stream = loghandle.stream;
-			loghandle.filepath = logroot + "_" + std::to_string(i) + "_" + string{ names[i] } + ".txt";
+			loghandle.filepath = logroot + "_" + serialize_text(i) + "_" + string{ names[i] } + ".txt";
 			stream.open(loghandle.filepath);
 			if (stream)
 			loghandle.signal_id = LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(

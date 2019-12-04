@@ -50,8 +50,8 @@ namespace idk::vkn
 		strideList.resize(6);
 		for (int i = 0; i < v_size; ++i)
 		{
-			auto pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
-			auto p = pp + fileExt[i] + ext.string();
+			string pp = (path.parent_path()).string() + "/" + (cubemap.stem()).string();
+			auto p = pp + fileExt[i] + string(ext.string());
 			PathHandle texPath{p};
 
 			auto file = texPath.Open(FS_PERMISSIONS::READ, true);

@@ -101,11 +101,11 @@ namespace idk
 		int count = -1;
 		while (res != param_table.end())
 		{
-			res = param_table.find(param.name + " " + std::to_string(++count));
+			res = param_table.find(param.name + " " + serialize_text(++count));
 		}
 
 		if (count >= 0)
-			param.name += " " + std::to_string(count);
+			param.name += " " + serialize_text(count);
 
 		param_table.emplace(param.name, param);
 	}

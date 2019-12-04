@@ -120,7 +120,7 @@ namespace idk {
         while (PathHandle(path)) // already exists
         {
             path = stripped_path;
-            path += std::to_string(++i);
+            path += serialize_text(++i);
             path += ext;
         }
 
@@ -143,7 +143,7 @@ namespace idk {
                 if (ImGui::MenuItem("Folder"))
                 {
                     auto folder_path = unique_new_mount_path("NewFolder", "");
-                    fs::create_directory(Core::GetSystem<FileSystem>().GetFullPath(folder_path));
+                    fs::create_directory(Core::GetSystem<FileSystem>().GetFullPath(folder_path).sv());
                     selected_path = folder_path;
                 }
 				if (ImGui::MenuItem("Material"))
@@ -247,7 +247,7 @@ namespace idk {
                 int count = 0;
                 for (const auto& part : fs::relative(current_dir.GetFullPath(), assets_dir.GetFullPath()))
                 {
-                    auto str = part.string();
+                    string str = part.string();
                     concat += '/';
                     concat += str;
 
@@ -421,7 +421,7 @@ namespace idk {
                         renaming_selected_asset = false;
 
                         fs::path old_path = selected_path.GetFullPath();
-                        fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(unique_new_mount_path(name, selected_path.GetExtension()));
+                        fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(unique_new_mount_path(name, selected_path.GetExtension())).sv();
                         fs::rename(old_path, new_path);
 
                         // move meta file as well
@@ -502,7 +502,7 @@ namespace idk {
                             fs::path old_path = old_path_handle.GetFullPath();
 
                             fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(
-                                unique_new_mount_path(old_path_handle.GetStem(), old_path_handle.GetExtension(), path));
+                                unique_new_mount_path(old_path_handle.GetStem(), old_path_handle.GetExtension(), path)).sv();
                             fs::rename(old_path, new_path);
 
                             // move meta file as well

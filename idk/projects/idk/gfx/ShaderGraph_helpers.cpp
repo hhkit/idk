@@ -32,9 +32,10 @@ namespace idk::shadergraph::helpers
 
 	vec2 parse_vec2(const string& val)
 	{
+        std::string _val = val;
 		vec2 v;
 		std::smatch matches;
-		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+		if (std::regex_match(_val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
             v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) }).value_or(0);
             v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) }).value_or(0);
@@ -49,9 +50,10 @@ namespace idk::shadergraph::helpers
 
 	vec3 parse_vec3(const string& val)
 	{
+        std::string _val = val;
 		vec3 v;
 		std::smatch matches;
-		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+		if (std::regex_match(_val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
             v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) }).value_or(0);
             v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) }).value_or(0);
@@ -67,9 +69,10 @@ namespace idk::shadergraph::helpers
 
 	vec4 parse_vec4(const string& val)
 	{
+        std::string _val = val;
 		vec4 v;
 		std::smatch matches;
-		if (std::regex_match(val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
+		if (std::regex_match(_val, matches, std::regex("([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+),([\\d\\.\\-]+)")))
 		{
 			v[0] = parse_text<float>(string_view{ &*matches[1].first, static_cast<size_t>(matches[1].length()) }).value_or(0);
             v[1] = parse_text<float>(string_view{ &*matches[2].first, static_cast<size_t>(matches[2].length()) }).value_or(0);
