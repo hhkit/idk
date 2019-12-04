@@ -78,14 +78,16 @@ namespace idk
 			auto* buf = _rep.second().allocate(cap + 1);
 			rep.longer = _longer{ buf, count, cap };
 			rep.sso.size_diff = _use_longer_mask;
-			traits_type::copy(buf, cstr, count + 1);
+			traits_type::copy(buf, cstr, count);
+            buf[count] = '\0';
 		}
 		else
 		{
 			// mul by 2, so LSB is always 0
 			rep.sso.size_diff = (_sso_buffer_size - static_cast<CharT>(count)) << 1;
             if (count)
-                traits_type::copy(rep.sso.buffer, cstr, count + 1);
+                traits_type::copy(rep.sso.buffer, cstr, count);
+            rep.sso.buffer[count] = '\0';
 		}
 	}
 
