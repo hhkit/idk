@@ -345,7 +345,7 @@ namespace idk
 			if (layer.curr_state.is_stopping)
 			{
 				layer.curr_state.normalized_time = 0.0f;
-				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + std::to_string(curr_index) + ") in layer (" + layer.name + ") doesn't exist.");
+				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + serialize_text(curr_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 
 			layer.blend_source[bone_index] = result;
@@ -362,7 +362,7 @@ namespace idk
 				layer.blend_state.elapsed_time = 0.0f;
 				layer.blend_interrupt = false;
 				layer.transition_index = 0;
-				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + std::to_string(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
+				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + serialize_text(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
 			{

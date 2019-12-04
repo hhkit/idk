@@ -81,7 +81,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::CheckAllPathChanges(file_system_detail::fs_dir& dir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		FS::path path{ dir._full_path };
+		FS::path path{ dir._full_path.sv() };
 		// Do nothing if the directory doesnt exists
 		if (!FS::exists(path))
 			return;
@@ -103,7 +103,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::CheckFileChanges(file_system_detail::fs_dir& dir)
 	{
-		auto num_files = s_cast<size_t>(std::count_if(FS::directory_iterator{ dir._full_path }, FS::directory_iterator{},
+		auto num_files = s_cast<size_t>(std::count_if(FS::directory_iterator{ dir._full_path.sv() }, FS::directory_iterator{},
 			static_cast<bool (*)(const FS::path&)>(FS::is_regular_file)));
 
 		// Checking for file changes.
@@ -127,7 +127,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::CheckDirChanges(file_system_detail::fs_dir& dir)
 	{
-		const auto num_dirs = static_cast<size_t>(std::count_if(FS::directory_iterator{ dir._full_path }, FS::directory_iterator{},
+		const auto num_dirs = static_cast<size_t>(std::count_if(FS::directory_iterator{ dir._full_path.sv() }, FS::directory_iterator{},
 			[](const FS::path& p) -> bool
 			{
 				return !FS::is_regular_file(p);
@@ -231,7 +231,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::checkFilesCreated(file_system_detail::fs_dir& mountDir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
 
@@ -272,7 +272,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::checkFilesRenamed(file_system_detail::fs_dir& mountDir)
 	{
-		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
 
@@ -318,7 +318,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::checkFilesWritten(file_system_detail::fs_dir& dir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		for (auto& file : FS::directory_iterator(dir._full_path))
+		for (auto& file : FS::directory_iterator(dir._full_path.sv()))
 		{
 			const auto current_file_last_write_time = FS::last_write_time(file);
 			FS::path tmp{ file.path() };
@@ -355,7 +355,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::checkDirCreated(file_system_detail::fs_dir& mountDir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
 
@@ -400,7 +400,7 @@ namespace idk
 
 	void file_system_detail::DirectoryWatcher::checkDirRenamed(file_system_detail::fs_dir& mountDir)
 	{
-		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
 
@@ -440,7 +440,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::recurseAndAdd(file_system_detail::fs_dir& mountDir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
-		for (auto& file : FS::directory_iterator(mountDir._full_path))
+		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
 			if (!FS::is_regular_file(tmp))

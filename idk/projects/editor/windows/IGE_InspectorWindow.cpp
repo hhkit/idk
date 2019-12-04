@@ -423,7 +423,7 @@ namespace idk {
         const float left_offset = 40.0f;
 
 		//The c_name is to just get the first gameobject
-		static string stringBuf{};
+		static std::string stringBuf{};
 		IDE& editor = Core::GetSystem<IDE>();
 		//ImVec2 startScreenPos = ImGui::GetCursorScreenPos();
 
@@ -442,7 +442,7 @@ namespace idk {
 				string outputString = stringBuf;
 				if (i > 0) {
 					outputString.append(" (");
-					outputString.append(std::to_string(i));
+					outputString.append(serialize_text(i));
 					outputString.append(")");
 				}
 				editor.command_controller.ExecuteCommand(
@@ -1068,7 +1068,14 @@ namespace idk {
 	{
         constexpr CustomDrawFn draw_text = [](const reflect::dynamic& val)
         {
-            return ImGui::InputTextMultiline("", &val.get<string>());
+            static std::string buf;
+            buf = val.get<string>();
+            if (ImGui::InputTextMultiline("", &buf))
+            {
+                val.get<string>() = buf;
+                return true;
+            }
+            return false;
         };
         InjectDrawTable table{ { "text", draw_text } };
         DisplayVal(*c_font, &table);
@@ -1079,7 +1086,14 @@ namespace idk {
     {
         constexpr CustomDrawFn draw_text = [](const reflect::dynamic& val)
         {
-            return ImGui::InputTextMultiline("", &val.get<string>());
+            static std::string buf;
+            buf = val.get<string>();
+            if (ImGui::InputTextMultiline("", &buf))
+            {
+                val.get<string>() = buf;
+                return true;
+            }
+            return false;
         };
         constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
         {
@@ -1603,7 +1617,13 @@ namespace idk {
                 }
                 else if constexpr (std::is_same_v<T, string>)
                 {
-                    changed |= ImGui::InputText("", &val);
+                    static std::string buf;
+                    buf = val;
+                    if (ImGui::InputText("", &buf))
+                    {
+                        val = buf;
+                        changed = true;
+                    }
                 }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {

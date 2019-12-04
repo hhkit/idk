@@ -1,11 +1,11 @@
 #pragma once
 
 #include "small_string.h"
-#include <string>
 #include <limits>
+#include <algorithm>
 
-#undef min
 #undef max
+#undef min
 
 namespace idk
 {
@@ -48,7 +48,7 @@ namespace idk
 		if (count > _sso_buffer_size)
 		{
 			const auto cap = _calc_capacity(count);
-			auto* buf = _rep.second().allocate(cap);
+			auto* buf = _rep.second().allocate(cap + 1);
 			rep.longer = _longer{ buf, count, cap };
 			rep.sso.size_diff = _use_longer_mask;
 			for (size_type i = 0; i < count; ++i, ++buf)
@@ -67,33 +67,52 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	small_string<CharT, Traits, Allocator>::small_string(const CharT* cstr, const Allocator& alloc)
+	small_string<CharT, Traits, Allocator>::small_string(const CharT* cstr, size_type count, const Allocator& alloc)
 		: small_string(alloc)
 	{
-		const auto len = traits_type::length(cstr);
 		auto& rep = _rep.first();
 
-		if (len > _sso_buffer_size)
+		if (count > _sso_buffer_size)
 		{
-			const auto cap = _calc_capacity(len);
-			auto* buf = _rep.second().allocate(cap);
-			rep.longer = _longer{ buf, len, cap };
+			const auto cap = _calc_capacity(count);
+			auto* buf = _rep.second().allocate(cap + 1);
+			rep.longer = _longer{ buf, count, cap };
 			rep.sso.size_diff = _use_longer_mask;
-			traits_type::copy(buf, cstr, len + 1);
+			traits_type::copy(buf, cstr, count);
+            buf[count] = '\0';
 		}
 		else
 		{
 			// mul by 2, so LSB is always 0
-			rep.sso.size_diff = (_sso_buffer_size - static_cast<CharT>(len)) << 1;
-			traits_type::copy(rep.sso.buffer, cstr, len + 1);
+			rep.sso.size_diff = (_sso_buffer_size - static_cast<CharT>(count)) << 1;
+            if (count)
+                traits_type::copy(rep.sso.buffer, cstr, count);
+            rep.sso.buffer[count] = '\0';
 		}
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>::small_string(const CharT* cstr, const Allocator& alloc)
+		: small_string(cstr, traits_type::length(cstr), alloc)
+	{
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>::small_string(const view_type& sv, const Allocator& alloc)
+		: small_string(sv.data(), sv.size(), alloc)
+	{
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>::small_string(const std::basic_string<CharT, Traits, Allocator>& str, const Allocator& alloc)
+		: small_string(str.data(), str.size(), alloc)
+	{
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
 	template<typename InputIt>
-	small_string<CharT, Traits, Allocator>::small_string(
-		InputIt first, InputIt last, const Allocator& alloc)
-        : small_string(alloc)
+	small_string<CharT, Traits, Allocator>::small_string(InputIt first, InputIt last, const Allocator& alloc)
+		: small_string(alloc)
 	{
 		const size_type len = last - first;
 		auto& rep = _rep.first();
@@ -135,7 +154,7 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	small_string<CharT, Traits, Allocator>::small_string(small_string&& other)
+	small_string<CharT, Traits, Allocator>::small_string(small_string&& other) noexcept
 		: _rep{ other._rep }
 	{
 		// flag it as "using sso" so ptr is not deallocated
@@ -151,7 +170,7 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator=(small_string&& other)
+	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::operator=(small_string&& other) noexcept
 	{
 		std::swap(_rep, other._rep);
 		return *this;
@@ -249,10 +268,15 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::sv() const -> view_type
+	{
+		return view_type(data(), size());
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
 	small_string<CharT, Traits, Allocator> small_string<CharT, Traits, Allocator>::substr(size_type pos, size_type count) const
 	{
-		const auto start = begin() + pos;
-		return small_string(start, start + count, _rep.second());
+		return small_string(begin() + pos, _limit_count(pos, count), _rep.second());
 	}
 
 
@@ -275,7 +299,7 @@ namespace idk
 	{
 		const auto s1 = size();
 		const auto s2 = str.size();
-		const auto cmp = traits_type::compare(data(), str.data(), std::min(s1, s2));
+		const auto cmp = traits_type::compare(data(), str.data(), (s1 < s2 ? s1 : s2));
 		return cmp == 0 ? _compare_sizes<difference_type>(s1, s2) : cmp;
 	}
 
@@ -289,7 +313,7 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	int small_string<CharT, Traits, Allocator>::compare(const std::basic_string_view<CharT, Traits>& sv) const
+	int small_string<CharT, Traits, Allocator>::compare(const view_type& sv) const
 	{
 		const auto s1 = size();
 		const auto s2 = sv.size();
@@ -356,7 +380,7 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	auto small_string<CharT, Traits, Allocator>::find(const std::basic_string_view<CharT, Traits>& sv, size_type pos) const -> size_type
+	auto small_string<CharT, Traits, Allocator>::find(const view_type& sv, size_type pos) const -> size_type
 	{
 		return find(sv.data(), pos, sv.size());
 	}
@@ -410,9 +434,125 @@ namespace idk
 	}
 
 	template<typename CharT, typename Traits, typename Allocator>
-	auto small_string<CharT, Traits, Allocator>::rfind(const std::basic_string_view<CharT, Traits>& sv, size_type pos) const -> size_type
+	auto small_string<CharT, Traits, Allocator>::rfind(const view_type& sv, size_type pos) const -> size_type
 	{
 		return rfind(sv.data(), pos, sv.size());
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_first_of(const CharT* cstr, size_type pos, size_type count) const -> size_type
+	{
+		const auto _data = data();
+		const auto sz = size();
+		if (count == 0)
+			return npos;
+		for (; pos < sz; ++pos)
+		{
+			if (traits_type::find(cstr, count, _data[pos]))
+				return pos;
+		}
+		return npos;
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_first_of(const CharT* cstr, size_type pos) const -> size_type
+	{
+		return find_first_of(cstr, pos, traits_type::length(cstr));
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_first_of(CharT c, size_type pos) const -> size_type
+	{
+		const auto* p = traits_type::find(data() + pos, size() - pos, c);
+		return p ? p - data() : npos;
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_first_not_of(const CharT* cstr, size_type pos, size_type count) const -> size_type
+	{
+		const auto _data = data();
+		const auto sz = size();
+		if (count == 0)
+			return npos;
+		for (; pos < sz; ++pos)
+		{
+			if (!traits_type::find(cstr, count, _data[pos]))
+				return pos;
+		}
+		return npos;
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_first_not_of(const CharT* cstr, size_type pos) const -> size_type
+	{
+		return find_first_not_of(cstr, pos, traits_type::length(cstr));
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_first_not_of(CharT c, size_type pos) const -> size_type
+	{
+		return find_first_not_of(&c, pos, 1);
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_last_of(const CharT* cstr, size_type pos, size_type count) const -> size_type
+	{
+		const auto _data = data();
+		auto sz = size();
+        if (sz && count)
+        {
+            if (--sz > pos)
+                sz = pos;
+            do
+            {
+                if (traits_type::find(cstr, count, _data[sz]))
+                    return sz;
+            }
+            while (sz-- != 0);
+        }
+		return npos;
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_last_of(const CharT* cstr, size_type pos) const -> size_type
+	{
+		return find_last_of(cstr, pos, traits_type::length(cstr));
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_last_of(CharT c, size_type pos) const -> size_type
+	{
+		return find_last_of(&c, pos, 1);
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_last_not_of(const CharT* cstr, size_type pos, size_type count) const -> size_type
+	{
+        const auto _data = data();
+        auto sz = size();
+        if (sz && count)
+        {
+            if (--sz > pos)
+                sz = pos;
+            do
+            {
+                if (!traits_type::find(cstr, count, _data[sz]))
+                    return sz;
+            } while (sz-- != 0);
+        }
+        return npos;
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_last_not_of(const CharT* cstr, size_type pos) const -> size_type
+	{
+		return find_last_not_of(cstr, pos, traits_type::length(cstr));
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	auto small_string<CharT, Traits, Allocator>::find_last_not_of(CharT c, size_type pos) const -> size_type
+	{
+		return find_last_not_of(&c, pos, 1);
 	}
 
 
@@ -464,8 +604,7 @@ namespace idk
 	{
 		auto* new_buf = _rep.second().allocate(new_cap + 1);
 		const auto _end = end();
-		std::copy(begin(), _end, new_buf);
-		*_end = '\0';
+		std::copy(begin(), _end + 1, new_buf);
 
 		auto& rep = _rep.first();
 		if (!_is_sso())
@@ -520,20 +659,43 @@ namespace idk
 
 		if (_is_sso())
 		{
-			std::shift_right(rep.sso.buffer + index, rep.sso.buffer + _sso_buffer_size - (rep.sso.size_diff >> 1) + 1, len);
+            traits_type::move(rep.sso.buffer + index + len, rep.sso.buffer + index, _sso_buffer_size - (rep.sso.size_diff >> 1) - index - len + 1);
 			// write size_diff first as it might be overwritten during copy
 			rep.sso.size_diff -= static_cast<CharT>(len << 1);
 			traits_type::copy(rep.sso.buffer + index, cstr, len); // \0 also right shifted, dont have to write it
 		}
 		else
 		{
-			std::shift_right(rep.longer.ptr + index, rep.longer.ptr + rep.longer.size + 1, len);
+            traits_type::move(rep.longer.ptr + index + len, rep.longer.ptr + index, rep.longer.size - index - len + 1);
 			traits_type::copy(rep.longer.ptr + index, cstr, len);
 			rep.longer.size += len;
 		}
 
 		return *this;
 	}
+
+    template<typename CharT, typename Traits, typename Allocator>
+    small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::insert(size_type index, size_type count, CharT c)
+    {
+        auto& rep = _rep.first();
+        _grow(count);
+
+        if (_is_sso())
+        {
+            traits_type::move(rep.sso.buffer + index + count, rep.sso.buffer + index, _sso_buffer_size - (rep.sso.size_diff >> 1) - index - count + 1);
+            // write size_diff first as it might be overwritten during copy
+            rep.sso.size_diff -= static_cast<CharT>(count << 1);
+            traits_type::assign(rep.sso.buffer + index, count, c); // \0 also right shifted, dont have to write it
+        }
+        else
+        {
+            traits_type::move(rep.longer.ptr + index + count, rep.longer.ptr + index, rep.longer.size - index - count + 1);
+            traits_type::assign(rep.longer.ptr + index, count, c);
+            rep.longer.size += count;
+        }
+
+        return *this;
+    }
 
 	template<typename CharT, typename Traits, typename Allocator>
 	small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::erase(size_type index, size_type count)
@@ -544,13 +706,14 @@ namespace idk
 		{
 			auto sz = _sso_buffer_size - (rep.sso.size_diff >> 1);
 			count = std::min(count, sz - index);
-			std::shift_left(rep.sso.buffer + index, rep.sso.buffer + sz + 1, count);
+            traits_type::move(rep.sso.buffer + index, rep.sso.buffer + index + count, sz - index - count + 1);
 			rep.sso.size_diff += static_cast<CharT>(count << 1);
 		}
 		else
 		{
 			count = std::min(count, rep.longer.size - index);
-			std::shift_left(rep.longer.ptr + index, rep.longer.ptr + rep.longer.size + 1, count);
+            traits_type::move(rep.longer.ptr + index, rep.longer.ptr + index + count, rep.longer.size - index - count + 1);
+            
 			_rep.first().longer.size -= count;
 		}
 
@@ -567,8 +730,8 @@ namespace idk
 	auto small_string<CharT, Traits, Allocator>::erase(iterator first, iterator last) -> iterator
 	{
 		const auto count = last - first;
-		std::shift_left(last, end() + 1, count);
-		if (_is_sso()) _rep.first().sso.size_diff += count << 1;
+        traits_type::move(first, last, size() - (last - begin()) + 1); // +1 for \0
+		if (_is_sso()) _rep.first().sso.size_diff += static_cast<CharT>(count) << 1;
 		else           _rep.first().longer.size -= count;
 		return first;
 	}
@@ -643,6 +806,134 @@ namespace idk
 		return append(sv.data(), sv.size());
 	}
 
+    template<typename CharT, typename Traits, typename Allocator>
+    small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::replace(size_type position, size_type count, const CharT* cstr, size_type count2)
+    {
+        const size_type old_sz = size();
+        const size_type new_sz = old_sz + count2 - count;
+        const size_type right_sz = old_sz - position - count;
+
+        if (new_sz <= capacity())
+        {
+            pointer p = data() + position;
+
+            if (cstr < data() || end() < cstr) // does not overlap
+            {
+                if (right_sz && count != count2)
+                    traits_type::move(p + count2, p + count, right_sz);
+                if (count2)
+                    traits_type::copy(p, cstr, count2);
+            }
+            else
+            {
+                // Work in-place.
+                if (count2 && count2 <= count)
+                    traits_type::move(p, cstr, count2);
+                if (right_sz && count != count2)
+                    traits_type::move(p + count2, p + count, right_sz);
+                if (count2 > count)
+                {
+                    if (cstr + count2 <= p + count)
+                        traits_type::move(p, cstr, count2);
+                    else if (cstr >= p + count)
+                        traits_type::copy(p, cstr + count2 - count, count2);
+                    else
+                    {
+                        const size_type nleft = (p + count) - cstr;
+                        traits_type::move(p, cstr, nleft);
+                        traits_type::copy(p + nleft, p + count2, count2 - nleft);
+                    }
+                }
+            }
+
+            _set_size(new_sz);
+        }
+        else
+        {
+            // reserve and copy manually
+            size_type new_cap = _calc_capacity(new_sz);
+            auto* new_buf = _rep.second().allocate(new_cap + 1);
+            const auto _beg = begin();
+            std::copy(_beg, _beg + position, new_buf);
+            traits_type::copy(new_buf + position, cstr, count2);
+            traits_type::copy(new_buf + position + count2, _beg + position + count, right_sz);
+
+            auto& rep = _rep.first();
+            if (!_is_sso())
+            {
+                const auto to_dealloc = rep.longer.ptr;
+                const auto cap = rep.longer.capacity;
+                rep.longer = { new_buf, new_sz, new_cap };
+                _rep.second().deallocate(to_dealloc, cap + 1);
+            }
+            else
+            {
+                rep.longer = { new_buf, new_sz, new_cap };
+                rep.sso.size_diff = _use_longer_mask;
+            }
+        }
+
+        return *this;
+    }
+
+    template<typename CharT, typename Traits, typename Allocator>
+    small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::replace(size_type position, size_type count, const CharT* cstr)
+    {
+        return replace(position, count, cstr, traits_type::length(cstr));
+    }
+
+    template<typename CharT, typename Traits, typename Allocator>
+    small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::replace(size_type position, size_type count, view_type sv)
+    {
+        return replace(position, count, sv.data(), sv.size());
+    }
+
+    template<typename CharT, typename Traits, typename Allocator>
+    small_string<CharT, Traits, Allocator>& small_string<CharT, Traits, Allocator>::replace(size_type position, size_type count, size_type count2, CharT c)
+    {
+        const size_type old_sz = size();
+        const size_type new_sz = old_sz + count2 - count;
+        const size_type right_sz = old_sz - position - count;
+
+        if (new_sz <= capacity())
+        {
+            pointer p = data() + position;
+
+            if (right_sz && count != count2)
+                traits_type::move(p + count2, p + count, right_sz);
+            if (count2)
+                traits_type::assign(p, count2, c);
+
+            _set_size(new_sz);
+        }
+        else
+        {
+            // reserve and copy manually
+            size_type new_cap = _calc_capacity(new_sz);
+            auto* new_buf = _rep.second().allocate(new_cap + 1);
+            const auto _beg = begin();
+            std::copy(_beg, _beg + position, new_buf);
+            traits_type::assign(new_buf + position, count2, c);
+            traits_type::copy(new_buf + position + count2, _beg + position + count, right_sz);
+
+            auto& rep = _rep.first();
+            if (!_is_sso())
+            {
+                const auto to_dealloc = rep.longer.ptr;
+                const auto cap = rep.longer.capacity;
+                rep.longer = { new_buf, new_sz, new_cap };
+                _rep.second().deallocate(to_dealloc, cap + 1);
+            }
+            else
+            {
+                rep.longer = { new_buf, new_sz, new_cap };
+                rep.sso.size_diff = _use_longer_mask;
+            }
+        }
+
+        return *this;
+    }
+
 	template<typename CharT, typename Traits, typename Allocator>
 	void small_string<CharT, Traits, Allocator>::resize(size_type count, CharT c)
 	{
@@ -656,9 +947,15 @@ namespace idk
 
 
 	template<typename CharT, typename Traits, typename Allocator>
-	small_string<CharT, Traits, Allocator>::operator std::basic_string_view<CharT, Traits>() const noexcept
+	small_string<CharT, Traits, Allocator>::operator view_type() const noexcept
 	{
-		return std::basic_string_view<CharT, Traits>(data(), size());
+		return sv();
+	}
+
+	template<typename CharT, typename Traits, typename Allocator>
+	small_string<CharT, Traits, Allocator>::operator std::basic_string<CharT, Traits, Allocator>() const
+	{
+		return std::basic_string<CharT, Traits, Allocator>(data(), size());
 	}
 
 
@@ -732,6 +1029,22 @@ namespace idk
 		else if(rep.longer.capacity < rep.longer.size + added_len)
 			reserve(_calc_capacity(rep.longer.size + added_len));
 	}
+
+    template<typename CharT, typename Traits, typename Allocator>
+    void small_string<CharT, Traits, Allocator>::_set_size(size_type sz)
+    {
+        if (_is_sso())
+            _rep.first().sso.size_diff = (_sso_buffer_size - static_cast<CharT>(sz)) << 1;
+        else
+            _rep.first().longer.size = sz;
+    }
+
+    template<typename CharT, typename Traits, typename Allocator>
+    auto small_string<CharT, Traits, Allocator>::_limit_count(size_type pos, size_type count) const -> size_type
+    {
+        return count < size() - pos ?
+            count : size() - pos;
+    }
 
 
 
@@ -833,7 +1146,9 @@ namespace idk
 	template<class CharT, class Traits, class Alloc>
 	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs,	CharT rhs)
 	{
-		return small_string(lhs).push_back(rhs);
+        auto copy = small_string(lhs);
+        copy.push_back(rhs);
+        return copy;
 	}
 	template<class CharT, class Traits, class Alloc>
 	small_string<CharT, Traits, Alloc> operator+(const CharT* lhs,                              const small_string<CharT, Traits, Alloc>& rhs)
@@ -863,7 +1178,8 @@ namespace idk
 	template<class CharT, class Traits, class Alloc>
 	small_string<CharT, Traits, Alloc> operator+(small_string<CharT, Traits, Alloc>&& lhs,      CharT rhs)
 	{
-		return lhs.push_back(rhs);
+		lhs.push_back(rhs);
+        return lhs;
 	}
 	template<class CharT, class Traits, class Alloc>
 	small_string<CharT, Traits, Alloc> operator+(const small_string<CharT, Traits, Alloc>& lhs, small_string<CharT, Traits, Alloc>&& rhs)
@@ -879,5 +1195,32 @@ namespace idk
 	small_string<CharT, Traits, Alloc> operator+(CharT lhs,                                     small_string<CharT, Traits, Alloc>&& rhs)
 	{
 		return small_string(1, lhs).append(rhs);
+	}
+
+
+
+	template<class CharT, class Traits, class Allocator>
+	std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os, const small_string<CharT, Traits, Allocator>& str)
+	{
+		return os << str.sv();
+	}
+	template<class CharT, class Traits, class Allocator>
+	std::basic_istream<CharT, Traits>& operator>>(std::basic_istream<CharT, Traits>& is, small_string<CharT, Traits, Allocator>& str)
+	{
+		typename std::basic_istream<CharT, Traits>::sentry s{ is };
+		if (s)
+		{
+			str.clear();
+			char c;
+			auto w = is.width();
+			for (size_t i = 0; i < w; ++i)
+			{
+				if (is.eof() || std::isspace(c, is.getloc()))
+					break;
+				str.push_back(c);
+			}
+			is.read(is.width());
+		}
+		return is >> str.sv();
 	}
 }
