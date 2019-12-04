@@ -6,8 +6,6 @@
 #include <map>
 namespace idk
 {
-	RESOURCE_EXTENSION(Material, ".mat");
-
 	class ShaderTemplate;
 
 	ENUM(MaterialDomain, char,
@@ -40,5 +38,7 @@ namespace idk
 
 		RscHandle<ShaderTemplate> GetTemplate() const;
 		virtual ~Material();
+
+		EXTENSION(".mat");
 	};
 }

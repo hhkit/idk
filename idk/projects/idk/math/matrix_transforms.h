@@ -12,10 +12,10 @@ namespace idk
 	constexpr T identity();
 	
 	template<typename T, unsigned D>
-	constexpr tmat<T, D, D> scale(const tvec<T, D>&);
+	constexpr tmat<T, D+1, D+1> scale(const tvec<T, D>&);
 
 	template<typename T>
-	tmat<T, 3, 3> rotate(const tvec<T, 3> & axis, trad<T> angle);
+	tmat<T, 4, 4> rotate(const tvec<T, 3> & axis, trad<T> angle);
 
 	template<typename T, unsigned D>
 	constexpr tmat<T, D + 1, D + 1> translate(const tvec<T, D> & translate);
@@ -33,7 +33,7 @@ namespace idk
 	constexpr tmat<T, 4, 4> look_at(const tvec<T, 3>& eye, const tvec<T, 3>& object, const tvec<T, 3>& up);
 
 	template< typename T >
-	tmat<T, 3, 3> orient(const tvec<T, 3> & z_prime);
+	tmat<T, 4, 4> orient(const tvec<T, 3> & z_prime);
 
 	// convert a basis to an orthonormal basis using gramm-schidt
 	template<typename T, unsigned D>

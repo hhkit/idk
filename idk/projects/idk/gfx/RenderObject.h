@@ -189,6 +189,10 @@ namespace idk
 		size_t is_font2{ 0 };
 	};
 
+	struct CanvasRenderRange
+	{
+		size_t inst_font_begin{ 0 }, inst_font_end{ 0 };
+	};
 
 
 }

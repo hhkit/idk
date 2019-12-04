@@ -16,7 +16,7 @@ namespace idk
 	}
 	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
 	{
-		const mat4 tfm = translate(oriented_box.center) * mat4 { oriented_box.axes() * scale(oriented_box.extents) };
+		const mat4 tfm = translate(oriented_box.center) * mat4 { oriented_box.axes() } * scale(oriented_box.extents);
 		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
 	}
 
@@ -32,13 +32,13 @@ namespace idk
 
 		float minSpherePoint = ((capsule.height * 0.5f) - capsule.radius);
 		minSpherePoint = minSpherePoint < 0 ? 0 : minSpherePoint;
-		const auto capsule_sphere_top_tfm  = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{capsule.dir,rightVec,frontVec  } * scale(vec3(capsule.radius*2)) };
-		const auto capsule_sphere_topB_tfm = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ frontVec,capsule.dir,rightVec } * scale(vec3(capsule.radius*2)) };
-		const auto capsule_sphere_topC_tfm = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ rightVec,frontVec,capsule.dir } * scale(vec3(capsule.radius*2)) };
+		const auto capsule_sphere_top_tfm  = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{capsule.dir,rightVec,frontVec  }} * scale(vec3(capsule.radius*2));
+		const auto capsule_sphere_topB_tfm = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ frontVec,capsule.dir,rightVec }} * scale(vec3(capsule.radius*2));
+		const auto capsule_sphere_topC_tfm = translate(capsule.center+ (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ rightVec,frontVec,capsule.dir }} * scale(vec3(capsule.radius*2));
 
-		const auto capsule_sphere_bot_tfm  = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{capsule.dir,rightVec,frontVec  } * scale(vec3(capsule.radius*2)) };
-		const auto capsule_sphere_botB_tfm = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ frontVec,capsule.dir,rightVec } * scale(vec3(capsule.radius*2)) };
-		const auto capsule_sphere_botC_tfm = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ rightVec,frontVec,capsule.dir } * scale(vec3(capsule.radius*2)) };
+		const auto capsule_sphere_bot_tfm  = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ capsule.dir,rightVec,frontVec }} * scale(vec3(capsule.radius*2));
+		const auto capsule_sphere_botB_tfm = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ frontVec,capsule.dir,rightVec }} * scale(vec3(capsule.radius*2));
+		const auto capsule_sphere_botC_tfm = translate(capsule.center- (capsule.dir.get_normalized()* minSpherePoint)) * mat4 { mat3{ rightVec,frontVec,capsule.dir }} * scale(vec3(capsule.radius*2));
 
 		const vec3 ptOrigin			= capsule.center - (capsule.dir.get_normalized()* capsule.height*0.5f); //Bottom of sphere
 		const vec3 ptVelocity		= capsule.dir.get_normalized() * capsule.height;
@@ -70,7 +70,7 @@ namespace idk
 		Draw(Mesh::defaults[MeshType::Line], line_tfm, c, duration, depth_test);
 
 		const auto orient_tfm = orient(ray.velocity.get_normalized());
-		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4{ orient(ray.velocity.get_normalized()) * scale(vec3{ 0.025f }) };
+		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient(ray.velocity.get_normalized()) } *scale(vec3{ 0.025f });
 		Draw(Mesh::defaults[MeshType::Tetrahedron], arrow_tfm, c, duration, depth_test);
 		
 	}

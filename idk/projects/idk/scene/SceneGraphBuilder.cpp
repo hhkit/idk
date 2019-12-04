@@ -14,9 +14,11 @@ namespace idk
 		GameState::GetGameState().SortObjectsOfType<GameObject>(
 			[](const auto& lhs, const auto& rhs)
 			{
-				return lhs.Transform()->Depth() == rhs.Transform()->Depth()
+				const auto ldepth = lhs.Transform()->Depth();
+				const auto rdepth = rhs.Transform()->Depth();
+				return ldepth == rdepth
 					?  lhs.GetHandle().id < rhs.GetHandle().id
-					:  lhs.Transform()->Depth() < rhs.Transform()->Depth();
+					:  ldepth < rdepth;
 			}
 		);
 
@@ -25,8 +27,9 @@ namespace idk
 		// rebuild scene graph
 		for (auto& elem : objs)
 		{
+			/*/
 			InsertObject(elem.GetHandle());
-			/*
+			/*/
 			auto key = elem.GetHandle();
 			const auto parent = elem.Parent();
 			assert(key);
@@ -37,7 +40,7 @@ namespace idk
 			}
 			else
 				sg_lookup.try_emplace(key, &scene_graphs.emplace_child(key));
-				*/
+			//*/
 		}
 
 		// we now have the rebuilt scene graph

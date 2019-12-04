@@ -30,7 +30,7 @@ namespace idk::mt
 	{
 		LOG_TO(LogPool::SYS, "spawning %d threads\n", thread_count);
 		//SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-		
+		if(0)
 		for (int i = 1; i <= 4; ++i)
 		{
 			threads.emplace_back(std::thread{ &thread_main, this, i });
@@ -43,7 +43,7 @@ namespace idk::mt
 			elem.join();
 	}
 
-	static auto idle_threshold = std::chrono::microseconds{ 5 };
+	static auto idle_threshold = std::chrono::microseconds{ 2 };
 	thread_local std::chrono::time_point<std::chrono::high_resolution_clock> idle_start{};
 
 	void ThreadPool::ExecuteJob([[maybe_unused]] const int thid)  

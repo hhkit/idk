@@ -7,7 +7,7 @@ namespace idk
 	template<typename T>
 	inline tmat<T, 4, 4> matrix_decomposition<T>::recompose() const
 	{
-		return translate(this->position) * mat4 { mat3{ rotation } *idk::scale(this->scale) };
+		return translate(this->position) * quat_cast<mat4>(rotation) *idk::scale(this->scale);
 	}
 
 	template<typename T>

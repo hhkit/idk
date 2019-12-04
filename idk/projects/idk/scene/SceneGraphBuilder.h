@@ -23,6 +23,8 @@ namespace idk
 		> sg_lookup;
 
 		SceneGraph scene_graphs;
+		size_t slot{};
+		bool dirty = true;
 	};
 
 }

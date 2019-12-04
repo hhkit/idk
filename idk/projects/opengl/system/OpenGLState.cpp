@@ -79,14 +79,14 @@ namespace idk::ogl
 		brdf_texture->SetMeta(m);
 		brdf_texture->Size(ivec2{ 512 });
 
-		//fb_man.cBufferPickingTexture = Core::GetResourceManager().Create<OpenGLTexture>();
-		//fb_man.cBufferPickingTexture->Bind();
-		//auto pickMeta = fb_man.cBufferPickingTexture->GetMeta();
-		//pickMeta.internal_format = ColorFormat::RUI_32;
-		//pickMeta.format = InputChannels::RGBA;
-		//fb_man.cBufferPickingTexture->SetMeta(pickMeta);
-		////fb_man.cBufferPickingTexture->Buffer(nullptr, main_buffer->GetMeta().size, pickMeta.format, pickMeta.internal_format);
-		//fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
+		fb_man.cBufferPickingTexture = Core::GetResourceManager().Create<OpenGLTexture>();
+		fb_man.cBufferPickingTexture->Bind();
+		auto pickMeta = fb_man.cBufferPickingTexture->GetMeta();
+		pickMeta.internal_format = ColorFormat::RUI_32;
+		pickMeta.format = InputChannels::RGBA;
+		fb_man.cBufferPickingTexture->SetMeta(pickMeta);
+		//fb_man.cBufferPickingTexture->Buffer(nullptr, main_buffer->GetMeta().size, pickMeta.format, pickMeta.internal_format);
+		fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
 
 		FrameBufferBuilder builder;
 		builder.Begin(ivec2{ 512,512 });
@@ -776,6 +776,8 @@ namespace idk::ogl
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			glViewport(0, 0, screen_sz.x, screen_sz.y);
 			glBlitFramebuffer(0, 0, outbuf_sz.x, outbuf_sz.y, 0, 0, screen_sz.x, screen_sz.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		}
 	}
 
@@ -852,7 +854,11 @@ namespace idk::ogl
 	{
 		PixelData pd;
 		fb_man.SetRenderTarget(fb_man.pickingBuffer);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_man.ID());
+		GL_CHECK();
 		glReadPixels((GLint)pos.x, (GLint)pos.y, fb_man.pickingBuffer->size.x, fb_man.pickingBuffer->size.y, GL_RGB32F, GL_UNSIGNED_BYTE, &pd);
+		GL_CHECK();
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		GL_CHECK();
 		return std::move(pd);
 	}

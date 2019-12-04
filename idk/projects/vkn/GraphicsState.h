@@ -73,6 +73,7 @@ namespace idk::vkn
 		vector<UIRenderObjectWithCanvas>* ui_canvas;
 		vector<UITextRange>*   ui_text_range;
 		vector<UIAttriBlock>*      ui_text_data;
+		//vector<CanvasRenderRange>* ui_canvas_range;
 		size_t total_num_of_text{ 0 };
 		//vector<FontPoint>* ui_text_data;
 
@@ -166,7 +167,7 @@ namespace idk::vkn
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
 		//hash_table<Handle<Canvas>, vector<UIRenderObject>>* ui_render_per_canvas;
-		const vector<GraphicsSystem::CanvasRenderRange>* canvas_render_range;
+		//vector<GraphicsSystem::CanvasRenderRange>* canvas_render_range;
 
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;

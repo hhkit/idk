@@ -29,15 +29,22 @@ namespace idk
 	{
 		const auto hextents = half_extents();
 		const auto mat = axes();
+
+		const vec3 hm[3] = {
+			hextents[0] * mat[0],
+			hextents[1] * mat[1],
+			hextents[2] * mat[2],
+		};
+
 		return array<vec3, 8>{
-			center - hextents[0] * mat[0] - hextents[1] * mat[1] - hextents[2] * mat[2],
-			center - hextents[0] * mat[0] - hextents[1] * mat[1] + hextents[2] * mat[2],
-			center - hextents[0] * mat[0] + hextents[1] * mat[1] - hextents[2] * mat[2],
-			center - hextents[0] * mat[0] + hextents[1] * mat[1] + hextents[2] * mat[2],
-			center + hextents[0] * mat[0] - hextents[1] * mat[1] - hextents[2] * mat[2],
-			center + hextents[0] * mat[0] - hextents[1] * mat[1] + hextents[2] * mat[2],
-			center + hextents[0] * mat[0] + hextents[1] * mat[1] - hextents[2] * mat[2],
-			center + hextents[0] * mat[0] + hextents[1] * mat[1] + hextents[2] * mat[2],
+			center - hm[0] - hm[1] - hm[2],
+			center - hm[0] - hm[1] + hm[2],
+			center - hm[0] + hm[1] - hm[2],
+			center - hm[0] + hm[1] + hm[2],
+			center + hm[0] - hm[1] - hm[2],
+			center + hm[0] - hm[1] + hm[2],
+			center + hm[0] + hm[1] - hm[2],
+			center + hm[0] + hm[1] + hm[2],
 		};
 	}
 	box& box::operator*=(const mat4& transform)

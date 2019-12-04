@@ -79,12 +79,12 @@ namespace idk
 				return retval;
 			}();
 
-			lookat_offset = rotate(vec3{ 0,1,0 }, rad{ 0.005f }) * lookat_offset;
+			lookat_offset = rotate(vec3{ 0,1,0 }, rad{ 0.005f }) * vec4(lookat_offset, 0);
 
 			const box orbit = [&]()
 			{
 				box retval;
-				lookat_offset2 = retval.center = rotate(vec3{ 0,1,0 }, rad{ 0.01f }) * lookat_offset2;
+				lookat_offset2 = retval.center = rotate(vec3{ 0,1,0 }, rad{ 0.01f }) * vec4 { lookat_offset2, 0 };
 				const vec3 diff2 = Normalized(-lookat_offset2);
 				const vec3 axis2 = Normalized(vec3{ 0,0,1 }.cross(diff2));
 				const auto angle2 = acos(diff2.z);
