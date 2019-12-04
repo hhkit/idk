@@ -16,6 +16,8 @@
 
 #include <vkn/VknRenderTarget.h>
 
+#include <editor/IEditor.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 size_t Track(size_t s);
@@ -1267,9 +1269,18 @@ namespace idk::vkn
 				// Destination
 				imgBlit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 				imgBlit.dstSubresource.layerCount = 1;
-				imgBlit.dstOffsets[0] = { 0,0,0 };
+				if (&Core::GetSystem<IEditor>())
+				{
+					imgBlit.dstOffsets[0] = { 0,0,0 };
+					imgBlit.dstOffsets[1].y = m_swapchain->extent.height;
+				}
+				else
+				{
+					
+					imgBlit.dstOffsets[0] = { 0,s_cast<int32_t>(m_swapchain->extent.height),0 };					
+					imgBlit.dstOffsets[1].y = 0;
+				}
 				imgBlit.dstOffsets[1].x = m_swapchain->extent.width;
-				imgBlit.dstOffsets[1].y = m_swapchain->extent.height;
 				imgBlit.dstOffsets[1].z = 1;
 
 				command_buffer.blitImage(m_swapchain->m_graphics.images[rv], vk::ImageLayout::eTransferSrcOptimal, m_swapchain->m_swapchainGraphics.images[rv], vk::ImageLayout::eTransferDstOptimal, imgBlit, vk::Filter::eLinear, dispatcher);
