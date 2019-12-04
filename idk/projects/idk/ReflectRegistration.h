@@ -295,7 +295,7 @@ REFLECT_BEGIN(idk::vector<idk::anim::KeyFrame<idk::quat>>, "vector<KeyFrame<quat
 REFLECT_END()
 
 REFLECT_BEGIN(idk::anim::AnimatedBone, "AnimatedBone")
-REFLECT_VARS(bone_name, translate_track)
+REFLECT_VARS(bone_name, translate_track, scale_track, rotation_track)
 REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::anim::Animation::_animated_bones), "hash_table<string,AnimatedBone>")
