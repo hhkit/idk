@@ -354,7 +354,8 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetScale",  void, Handle<Transform> h, vec3 v)
 			{
-				h->GlobalScale(v);
+				if (v.length_sq() > epsilon)
+					h->GlobalScale(v);
 			}
 		BIND_END();
 
@@ -390,7 +391,8 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetLocalScale", void, Handle<Transform> h, vec3 v)
 		{
-			h->scale = v;
+			if (v.length_sq() > epsilon)
+				h->scale = v;
 		}
 		BIND_END();
 
