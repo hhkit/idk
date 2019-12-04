@@ -20,6 +20,7 @@ namespace idk
 		
 		// Helper functions
 		void GenerateSkeletonTree(Animator& animator);
+		void GenerateSkeletonTree(Animator& animator, anim::Skeleton&);
 		void SaveBindPose(Animator& animator);
 		void RestoreBindPose(Animator& animator);
 		void HardReset(Animator& animator);

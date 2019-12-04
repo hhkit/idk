@@ -7,6 +7,10 @@
 
 #include <vkn/VulkanResourceManager.h>
 #include <editorstatic\imgui\imgui.h>
+namespace idk
+{
+	struct CompiledMesh;
+}
 
 namespace idk::vkn
 {
@@ -33,6 +37,18 @@ namespace idk::vkn
 	{
 	public:
 		using buffers_t = hash_table<attrib_index, MeshBuffer>;
+		VulkanMesh() = default;
+		VulkanMesh(const CompiledMesh& m);
+
+		VulkanMesh(VulkanMesh&& m) = default;
+		VulkanMesh& operator=(VulkanMesh&& m) = default;
+
+
+		VulkanMesh(const VulkanMesh& m) = delete;
+		VulkanMesh& operator=(const VulkanMesh& m) = delete;
+
+
+
 		const MeshBuffer& Get(attrib_index index)const;
 		bool Has(attrib_index index)const;
 		const buffers_t& Buffers()const { return buffers; }

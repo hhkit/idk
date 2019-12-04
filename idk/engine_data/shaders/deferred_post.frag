@@ -2,20 +2,7 @@
 
 #define MAX_LIGHTS 8
 
-const int eAlbedoAmbOcc        = 1       ;
-const int eUvMetallicRoughness = 2       ;
-const int eViewPos             = 3       ;
-const int eNormal              = 4       ;
-const int eTangent             = 5       ;
-const int eDepth               = 6       ;
-const int eGBufferSize         = eDepth+1;
-
-layout(input_attachment_index = eAlbedoAmbOcc       ,set=2, binding=0) uniform subpassInput gAlbAmbOcc;
-layout(input_attachment_index = eUvMetallicRoughness,set=2, binding=1) uniform subpassInput gUvMetRough;
-layout(input_attachment_index = eViewPos            ,set=2, binding=2) uniform subpassInput gViewPos;
-layout(input_attachment_index = eNormal             ,set=2, binding=3) uniform subpassInput gNormal;
-layout(input_attachment_index = eTangent            ,set=2, binding=4) uniform subpassInput gTangent;
-layout(input_attachment_index = eDepth              ,set=2, binding=5) uniform subpassInput gDepth;
+import /engine_data/shaders/deferred_utils.glsl
 
 U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 {
@@ -46,10 +33,6 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
 
-vec4 Load(subpassInput input_att)
-{
-	return subpassLoad(input_att);
-}
 
 
 vec3 Normal()
@@ -74,19 +57,20 @@ void main()
 {
 
 	// declare initial values here
-	if(Load(gDepth).r==1)
-		discard;
-	vec3  view_pos  = Load(gViewPos).rgb;
-	vec3  normal    = Normal();
-	vec3  tangent   = Tangent();
-	vec4 uv_met_rou = Load(gUvMetRough);
-	vec4 alb_amb_occ= Load(gAlbAmbOcc );
-	vec2  uv        = uv_met_rou.xy;
-	
-	vec3  albedo    = alb_amb_occ.rgb;
-	float metallic  = uv_met_rou.z;
-	float roughness = uv_met_rou.w;
-	float ambient_o = alb_amb_occ.a;
+	LoadGBuffers(view_pos, normal, tangent, metallic, roughness, albedo,ambient_o, uv, emissive);
+	//if(Load(gDepth).r==1)
+	//	discard;
+	//vec3  view_pos  = Load(gViewPos).rgb;
+	//vec3  normal    = Normal();
+	//vec3  tangent   = Tangent();
+	//vec4 uv_met_rou = Load(gUvMetRough);
+	//vec4 alb_amb_occ= Load(gAlbAmbOcc );
+	//vec2  uv        = uv_met_rou.xy;
+	//
+	//vec3  albedo    = alb_amb_occ.rgb;
+	//float metallic  = uv_met_rou.z;
+	//float roughness = uv_met_rou.w;
+	//float ambient_o = alb_amb_occ.a;
 	
 	vec3 view_dir = -normalize(view_pos);
 

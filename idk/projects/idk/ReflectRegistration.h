@@ -5,6 +5,7 @@
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
+#include <res/CompiledAssets.h>
 #include <res/MetaBundle.h>
 /* 
  * !!! NOTE !!!
@@ -108,12 +109,28 @@ REFLECT_CTOR(float)
 REFLECT_VARS(value)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::box, "box")
+REFLECT_VARS(center, extents, rotation)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::sphere, "sphere")
+REFLECT_VARS(center, radius)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::capsule, "capsule")
+REFLECT_VARS(center, radius, height, dir)
+REFLECT_END()
+
+
 REFLECT_BEGIN(idk::rect, "rect")
 REFLECT_VARS(position, size)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::matrix_decomposition<idk::real>, "matrix_decomposition")
 REFLECT_VARS(position, rotation, scale)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<unsigned char>, "vector<uchar>")
 REFLECT_END()
 
 /*==========================================================================
@@ -253,6 +270,7 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::vector<idk::PrefabData>, "vector<PrefabData>")
 REFLECT_END()
+
 REFLECT_BEGIN(idk::Prefab, "Prefab")
 REFLECT_VARS(data)
 REFLECT_END()
@@ -277,17 +295,55 @@ REFLECT_BEGIN(idk::vector<idk::anim::KeyFrame<idk::quat>>, "vector<KeyFrame<quat
 REFLECT_END()
 
 REFLECT_BEGIN(idk::anim::AnimatedBone, "AnimatedBone")
-REFLECT_VARS(bone_name, translate_track)
+REFLECT_VARS(bone_name, translate_track, scale_track, rotation_track)
 REFLECT_END()
 
-
-REFLECT_BEGIN(decltype(idk::anim::Animation::_animated_bones), "hash_table<string, AnimatedBone>")
+REFLECT_BEGIN(decltype(idk::anim::Animation::_animated_bones), "hash_table<string,AnimatedBone>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::anim::Animation, "Animation")
 REFLECT_VARS(_animated_bones, _fps, _duration, _num_ticks)
 REFLECT_END()
 
+REFLECT_BEGIN(decltype(idk::anim::Skeleton::_bone_table), "hash_table<string,size_t>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<int>, "vector<int>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::BoneData, "BoneData")
+REFLECT_VARS(name, parent, children, global_inverse_bind_pose, pre_rotation, post_rotation, local_bind_pose)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::anim::BoneData>, "vector<BoneData>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::anim::Skeleton, "idk::anim::Skeleton")
+REFLECT_VARS(_global_inverse, _bone_table, _bones)
+REFLECT_END()
+
+REFLECT_ENUM(idk::vtx::Attrib, "Attribute")
+
+REFLECT_BEGIN(idk::vtx::Descriptor, "Descriptor")
+REFLECT_VARS(attrib, stride, offset)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::vtx::Descriptor>, "vector<Descriptor>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::CompiledBuffer, "CompiledBuffer")
+REFLECT_VARS(attribs, data)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::CompiledBuffer>, "vector<CompiledBuffer>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<unsigned>, "vector<unsigned>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::CompiledMesh, "CompiledMesh")
+REFLECT_VARS(buffers, element_buffer, bounding_volume)
+REFLECT_END()
 
 // shader graph
 REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
@@ -425,18 +481,6 @@ REFLECT_BEGIN(idk::Collider, "Collider")
 REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_friction)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::box, "box")
-REFLECT_VARS(center, extents, rotation)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::sphere, "sphere")
-REFLECT_VARS(center, radius)
-REFLECT_END()
-
-REFLECT_BEGIN(idk::capsule, "capsule")
-REFLECT_VARS(center, radius, height, dir)
-REFLECT_END()
-
 // GRAPHICS
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, material_instance, cast_shadows, receive_shadows)
@@ -536,8 +580,6 @@ REFLECT_VARS(name, valid, loop, speed, state_data, node_position, transitions)
 REFLECT_END()
 
 // Animation Layer serialization
-REFLECT_BEGIN(decltype(idk::AnimationLayer::bone_mask), "array<bool,100>")
-REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::AnimationLayer::anim_states), "vector<AnimationState>")
 REFLECT_END()

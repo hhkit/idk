@@ -1,8 +1,32 @@
 #include "pch.h"
 #include "VulkanMesh.h"
+#include <gfx/CompiledMesh.h>
+#include <vkn/VknMeshModder.h>
+#include <vkn/BufferHelpers.h>
 namespace idk::vkn
 {
-//#pragma optimize("",off)
+	VulkanMesh::VulkanMesh(const CompiledMesh& m)
+	{
+		bounding_volume = m.bounding_volume;
+		MeshModder mm;
+
+
+		using offset_t = size_t;
+		hash_table<attrib_index, std::pair<std::shared_ptr<MeshBuffer::Managed>, offset_t>> attribs;
+		for (auto& compiled_buffer : m.buffers)
+		{
+			auto buffer = mm.CreateBuffer(string_view{ r_cast<const char*>(compiled_buffer.data.data()), hlp::buffer_size(compiled_buffer.data) });
+			auto& attrib = compiled_buffer.attribs;
+			for (auto& att : attrib)
+			{
+				
+				attribs[att.attrib] = std::make_pair(buffer, offset_t{ att.offset });
+			}
+		}
+		mm.RegisterAttribs(*this, attribs);
+		mm.SetIndexBuffer16(*this, mm.CreateBuffer(string_view{ r_cast<const char*>(std::data(m.element_buffer)),hlp::buffer_size(m.element_buffer) }),s_cast<uint32_t>(m.element_buffer.size()));
+	}
+	//#pragma optimize("",off)
 	const MeshBuffer& VulkanMesh::Get(attrib_index index) const
 	{
 		auto itr = buffers.find(index);

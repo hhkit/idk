@@ -5,6 +5,7 @@
 
 #include <gfx/Mesh.h>
 #include <gfx/vertex_descriptor.h>
+#include <gfx/CompiledMesh.h>
 #include <opengl/resource/OpenGLTypeDescriptors.h>
 #include <opengl/resource/OpenGLBuffer.h>
 
@@ -16,6 +17,7 @@ namespace idk::ogl
 	public:
 
 		OpenGLMesh() = default;
+		explicit OpenGLMesh(const CompiledMesh&);
 		OpenGLMesh(OpenGLMesh&&);
 		OpenGLMesh& operator=(OpenGLMesh&&);
 		

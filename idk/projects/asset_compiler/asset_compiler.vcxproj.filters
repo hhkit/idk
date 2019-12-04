@@ -1,49 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="CompilerCore.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="DDSCompiler.cpp">
-      <Filter>compilers</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureCompiler.cpp">
-      <Filter>compilers</Filter>
-    </ClCompile>
-    <ClCompile Include="IAssetLoader.cpp">
-      <Filter>compilers</Filter>
-    </ClCompile>
-    <ClCompile Include="AssimpCompiler.cpp">
-      <Filter>compilers\assimp</Filter>
-    </ClCompile>
-    <ClCompile Include="AssimpCompiler_helpers.cpp">
-      <Filter>compilers\assimp</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CompilerCore.h" />
-    <ClInclude Include="DDSCompiler.h">
-      <Filter>compilers</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureCompiler.h">
-      <Filter>compilers</Filter>
-    </ClInclude>
-    <ClInclude Include="CompilerList.h" />
-    <ClInclude Include="IAssetLoader.h">
-      <Filter>compilers</Filter>
-    </ClInclude>
-    <ClInclude Include="AssimpCompiler.h">
-      <Filter>compilers\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="AssimpCompiler_helpers.h">
-      <Filter>compilers\assimp</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="compilers">
       <UniqueIdentifier>{1e0e4f83-f5d3-4c41-91e0-0360c4b6e30e}</UniqueIdentifier>
     </Filter>
     <Filter Include="compilers\assimp">
       <UniqueIdentifier>{466482f8-0703-41ec-93e3-0484e4a9aeb4}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AssimpCompiler.cpp" />
+    <ClCompile Include="AssimpCompiler_helpers.cpp" />
+    <ClCompile Include="CompilerCore.cpp" />
+    <ClCompile Include="DDSCompiler.cpp" />
+    <ClCompile Include="IAssetLoader.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="TextureCompiler.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AssimpCompiler.h" />
+    <ClInclude Include="AssimpCompiler_helpers.h" />
+    <ClInclude Include="CompilerCore.h" />
+    <ClInclude Include="CompilerList.h" />
+    <ClInclude Include="DDSCompiler.h" />
+    <ClInclude Include="IAssetLoader.h" />
+    <ClInclude Include="TextureCompiler.h" />
   </ItemGroup>
 </Project>

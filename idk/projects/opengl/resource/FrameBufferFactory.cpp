@@ -79,5 +79,5 @@ namespace idk::ogl
 		out->buffer = tex;
 	}
 	void OpenGLFrameBufferFactory::PreReset(FrameBuffer&) {}
-	void OpenGLFrameBufferFactory::Finalize(FrameBuffer&, SpecializedInfo* info) {}
+	void OpenGLFrameBufferFactory::Finalize(FrameBuffer&, [[maybe_unused]]SpecializedInfo* info) {}
 }

@@ -8,6 +8,8 @@
 #include <serialize/text.h>
 #include <util/ioutils.h>
 #include <res/SaveableResourceLoader.h>
+#include <res/CompiledAssets.h>
+#include <res/CompiledAssetLoader.h>
 
 #include <IncludeResources.h>
 
@@ -121,6 +123,15 @@ namespace idk
 			}
 		};
 
+		template<typename T>
+		struct CompiledAssetHelper_detail;
+
+		template<typename ... Rs>
+		struct CompiledAssetHelper_detail<std::variant<Rs...>>
+		{
+		};
+
+		using AssetHelper = CompiledAssetHelper_detail<CompiledVariant>;
 		using ResourceHelper = ResourceManager_detail<Resources>;
 	}
 
@@ -139,7 +150,8 @@ namespace idk
 
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };
-        fs.Mount(exe_dir + "/engine_data", "/engine_data");
+		fs.Mount(exe_dir + "/engine_data", "/engine_data");
+		fs.Mount(exe_dir + "/build", "/build");
 	}
 
 	void ResourceManager::LateInit()
@@ -337,6 +349,13 @@ namespace idk
 			, elem);
 
 		return bundle;
+	}
+
+	void ResourceManager::LoadCompiledAsset(PathHandle path)
+	{
+		auto itr = _compiled_asset_loader.find(path.GetExtension());
+		if (itr != _compiled_asset_loader.end())
+			itr->second->LoadAsset(path);
 	}
 
 	void ResourceManager::Unload(PathHandle path)

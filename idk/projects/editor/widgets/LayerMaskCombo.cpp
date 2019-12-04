@@ -47,7 +47,7 @@ namespace idk::ImGuidk
             if (ImGui::Selectable("\t Nothing"))
                 layer_mask->mask = 0;
 
-            if ((mask & all_shown_layers) == all_shown_layers)
+            if (LayerMask(mask & all_shown_layers) == all_shown_layers)
                 ImGui::RenderCheckMark(ImGui::GetCursorScreenPos() + vec2{ 0, ImGui::GetStyle().ItemInnerSpacing.y }, text_color, ticksize);
             if (ImGui::Selectable("\t Everything"))
                 layer_mask->mask = all_shown_layers.mask;

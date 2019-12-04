@@ -8,30 +8,34 @@ namespace idk::vkn
 	{
 		return &shared_gfx_state->Lights()[light_index];
 	}
-	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
+	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
 	{
 		camera = data.camera;
 		range = data;
 		lights = &lights_data;
 		mesh_render.clear();
 		skinned_mesh_render.clear();
+		active_lights.clear();
 		{
 			size_t i = 0;
 			RscHandle<Texture> def_2d;
 			RscHandle<CubeMap> def_cube;
 
-			for (auto& light : lights_data)
+			active_lights.insert(active_lights.end(), all_active_lights.begin() + data.light_begin, all_active_lights.begin() + data.light_end);
+			shadow_maps_2d.resize(active_lights.size(), def_2d);
+			shadow_maps_cube.resize(active_lights.size(), def_cube);
+			for (auto& light_idx : active_lights)
 			{
-				active_lights.emplace_back(i);
-				if (light.index == 0)//point
+				auto& light = lights_data[light_idx];
+				if (light.index != 0)//point
+				//{
+				//	shadow_maps_2d[i]=(def_2d);
+				//	//shadow_maps_cube.emplace_back(light.light_map->GetDepthBuffer());
+				//}
+				//else
 				{
-					shadow_maps_2d  .emplace_back(def_2d);
-					//shadow_maps_cube.emplace_back(light.light_map->GetDepthBuffer());
-				}
-				else
-				{
-					shadow_maps_2d.emplace_back(s_cast<RscHandle<Texture>>(light.light_map->DepthAttachment()));
-					shadow_maps_cube.emplace_back(def_cube);
+					shadow_maps_2d[i]=(s_cast<RscHandle<Texture>>(light.light_map->DepthAttachment()));
+					//shadow_maps_cube[i]=(def_cube);
 				}
 				++i;
 			}
@@ -184,7 +188,7 @@ ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 	}
 }
 
-void DbgDrawCall::RegisterBuffer(DbgBufferType type, uint32_t binding, buffer_info info)
+void DbgDrawCall::RegisterBuffer([[maybe_unused]]DbgBufferType type, uint32_t binding, buffer_info info)
 {
 	mesh_buffer[binding] = info;
 }

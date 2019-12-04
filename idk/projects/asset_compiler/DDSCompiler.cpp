@@ -3,7 +3,6 @@
 #include <idk.h>
 #include <idk_config.h>
 #include <res/ResourceHandle.h>
-#include <res/MetaBundle.h>
 #include <gfx/Texture.h>
 #include <gfx/CompiledTexture.h>
 #include <util/ioutils.h>
@@ -43,6 +42,6 @@ namespace idk
 		t.filter_mode = t_meta.filter_mode;
 		t.pixel_buffer.insert(t.pixel_buffer.end(), binary_data.begin(), binary_data.end());
 
-		return AssetBundle{ updated_meta_bundle, { {t_guid, std::move(t)} } };
+		return AssetBundle{ updated_meta_bundle, {{ t_guid, std::move(t)} } };
 	}
 }

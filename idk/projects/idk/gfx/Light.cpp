@@ -14,6 +14,10 @@ namespace idk
 	struct LightCameraView
 	{
 		const Light* light;
+		mat4 operator()(const PointLight&)
+		{
+			return translate(-light->GetGameObject()->Transform()->GlobalPosition());
+		}
 		mat4 operator()(const SpotLight& )
 		{
 			const auto trf = light->GetGameObject()->Transform();

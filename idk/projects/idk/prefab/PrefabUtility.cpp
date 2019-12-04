@@ -293,7 +293,7 @@ namespace idk
         return handle;
     }
 
-    static void _create(Handle<GameObject> go, RscHandle<Prefab> prefab_handle, bool connect_inst = false)
+    static void _create(Handle<GameObject> go, RscHandle<Prefab> prefab_handle, Prefab& prefab, bool connect_inst = false)
     {
         if (connect_inst)
         {
@@ -302,7 +302,6 @@ namespace idk
             prefab_inst->object_index = 0;
         }
 
-        auto& prefab = *prefab_handle;
         prefab.data.clear();
         auto& root = prefab.data.emplace_back();
         for (auto& c : go->GetComponents())
@@ -313,7 +312,7 @@ namespace idk
         }
 
         // build tree
-        Scene& scene = *Core::GetSystem<SceneManager>().GetSceneByBuildIndex(go.scene);
+		Scene scene{ go.scene };
 
         vector<small_string<GenericHandle::index_t>> nodes;
         vector<GenericHandle::gen_t> gens;
@@ -365,20 +364,27 @@ namespace idk
             }
         }
 
-        prefab_handle->Name(go->Name());
+        prefab.Name(go->Name());
     }
 
-    RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go)
+	Prefab PrefabUtility::CreateResourceManagerHack(Handle<GameObject> go, Guid guid)
+	{
+		Prefab v;
+		_create(go, RscHandle<Prefab>{guid}, v);
+		return v;
+	}
+
+	RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go)
     {
         auto handle = Core::GetResourceManager().Create<Prefab>();
-        _create(go, handle);
+        _create(go, handle, *handle);
         return handle;
     }
 
 	RscHandle<Prefab> PrefabUtility::Create(Handle<GameObject> go, Guid guid)
 	{
 		auto handle = Core::GetResourceManager().LoaderCreateResource<Prefab>(guid);
-		_create(go, handle);
+		_create(go, handle, *handle);
 		return handle;
 	}
 
@@ -392,7 +398,7 @@ namespace idk
                 return *Core::GetResourceManager().Load<Prefab>(save_path);
         }();
 
-        _create(go, handle);
+        _create(go, handle, *handle);
         return handle;
     }
 
@@ -406,7 +412,7 @@ namespace idk
                 return *Core::GetResourceManager().Load<Prefab>(save_path);
         }();
 
-        _create(go, handle, true);
+        _create(go, handle, *handle, true);
         return handle;
     }
 

@@ -56,9 +56,6 @@
     <ClInclude Include="commands\CMD_DeleteComponent.h">
       <Filter>commands</Filter>
     </ClInclude>
-    <ClInclude Include="loading\GraphFactory.h">
-      <Filter>loader</Filter>
-    </ClInclude>
     <ClInclude Include="widgets\EnumCombo.h">
       <Filter>widgets</Filter>
     </ClInclude>
@@ -150,13 +147,15 @@
     </ClInclude>
     <ClInclude Include="IconsFontAwesome5_c.h" />
     <ClInclude Include="ComponentIcons.h" />
-    <ClInclude Include="windows\IGE_LightLister.h" />
     <ClInclude Include="widgets\IconCheckbox.h" />
     <ClInclude Include="commands\CMD_CollateCommands.h">
       <Filter>commands</Filter>
     </ClInclude>
     <ClInclude Include="commands\CMD_SelectGameObject.h">
       <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_LightLister.h">
+      <Filter>windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -204,9 +203,6 @@
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="commands\CMD_DeleteComponent.cpp">
       <Filter>commands</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\GraphFactory.cpp">
-      <Filter>loader</Filter>
     </ClCompile>
     <ClCompile Include="commands\CMD_TransformGameObject.cpp">
       <Filter>commands</Filter>
@@ -288,13 +284,15 @@
     <ClCompile Include="Vulkan_ImGui_Interface.cpp">
       <Filter>graphicsAPI_interface</Filter>
     </ClCompile>
-    <ClCompile Include="windows\IGE_LightLister.cpp" />
     <ClCompile Include="widgets\IconCheckbox.cpp" />
     <ClCompile Include="commands\CMD_CollateCommands.cpp">
       <Filter>commands</Filter>
     </ClCompile>
     <ClCompile Include="commands\CMD_SelectGameObject.cpp">
       <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_LightLister.cpp">
+      <Filter>windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

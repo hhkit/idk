@@ -7,7 +7,7 @@ namespace idk
 {
 	struct AssetBundle
 	{
-		using AssetPair = std::pair<const Guid, CompiledVariant>;
+		using AssetPair = std::pair<Guid, CompiledVariant>;
 		MetaBundle metabundle; // the new bundle
 		hash_table<Guid, CompiledVariant> assets; // the produced assets
 

@@ -93,9 +93,9 @@ namespace idk::reflect
 			if constexpr (std::is_same_v<fn_getsettype, std::optional<std::tuple<const detail::table&, void*>>(*)(void*, std::uint64_t) noexcept>)
 			{
 				std::tuple<const detail::table&, void*> tup = fn_getset(offsetted, 0).value();
-				auto name = std::get<0>(tup).m_pName;
+				auto n = std::get<0>(tup).m_pName;
 				void* value = std::get<1>(tup);
-				val.swap(dynamic{ get_type(name), value });
+				val.swap(dynamic{ get_type(n), value });
 			}
 			else
 			{

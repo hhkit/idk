@@ -251,6 +251,12 @@ namespace idk
 		return *s_cast<FLoader*>(ptr.get());
 	}
 
+	template<typename ALoader>
+	inline void ResourceManager::RegisterAssetLoader()
+	{
+		_compiled_asset_loader[ALoader::ext] = std::make_shared<ALoader>();
+	}
+
 	template<typename Res>
 	inline RscHandle<Res> ResourceManager::LoaderCreateResource(Guid guid)
 	{

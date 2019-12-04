@@ -4,10 +4,11 @@
 
 namespace idk
 {
-	AssetBundle::AssetBundle(const MetaBundle& bundle, std::initializer_list<AssetPair> assets)
+	AssetBundle::AssetBundle(const MetaBundle& bundle, std::initializer_list<AssetPair> _assets)
 		: metabundle{bundle}
-		, assets{assets}
 	{
+		for (auto& [key, value] : _assets)
+			assets.emplace(key, value);
 	}
 
 	AssetBundle::AssetBundle(const MetaBundle& bundle, span<AssetPair> assetspan)

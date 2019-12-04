@@ -2,7 +2,15 @@
 #include <idk.h>
 #include <scene/Scene.h>
 #include <idk_config.h>
+#include <core/GameObject.h>
+#include <common/Transform.h>
+#include <gfx/MeshRenderer.h>
+#include <anim/AnimationSystem.h>
+#include <anim/SkinnedMeshRenderer.h>
+#include <anim/Animator.h>
 #include <../idk/gfx/Mesh.h>
+#include <prefab/Prefab.h>
+#include <prefab/PrefabUtility.h>
 #include <res/ResourceHandle.h>
 #include <res/MetaBundle.h>
 
@@ -34,7 +42,9 @@ namespace idk
 		
 		vector<RscHandle<Mesh>> mesh_handles;
 		RscHandle<anim::Skeleton> skeleton_handle;
+		anim::Skeleton* skele = nullptr;
 		vector<RscHandle<anim::Animation>> animation_handles;
+		hash_table<Guid, string> mesh_names;
 
 		importer_scene.CollectMeshes(importer_scene.ai_scene->mRootNode);
 		importer_scene.CollectBones();
@@ -56,26 +66,14 @@ namespace idk
 					auto guid = res ? res->guid : Guid::Make();
 					return res ? std::make_pair(guid, *res) : std::make_pair(guid, SerializedMeta{ guid, mesh_data.name, string{reflect::get_type<Mesh>().name()}, "" } );
 				}();
-
+				mesh_names[t_guid] = t_meta.name;
+				mesh_handles.push_back(t_guid);
 				updated_metas.metadatas.emplace_back(t_meta);
 				generated_resources.emplace_back(t_guid, std::move(mesh));
 			}
 		}
 
 		// Adding skeleton if it exists
-		if (importer_scene.has_skeleton)
-		{
-			anim::Skeleton skeleton = importer_scene.CompileSkeleton();
-			auto [t_guid, t_meta] = [&]()
-			{
-				auto res = bundle.FetchMeta<anim::Skeleton>();
-				auto guid = res ? res->guid : Guid::Make();
-				return res ? std::make_pair(guid, *res) : std::make_pair(guid, SerializedMeta{ guid, skeleton.Name().data(), string{reflect::get_type<anim::Skeleton>().name()}, "" });
-			}();
-
-			updated_metas.metadatas.emplace_back(t_meta);
-			generated_resources.emplace_back(t_guid, std::move(skeleton));
-		}
 
 		if (importer_scene.has_animation)
 		{
@@ -91,10 +89,25 @@ namespace idk
 					auto guid = res ? res->guid : Guid::Make();
 					return res ? std::make_pair(guid, *res) : std::make_pair(guid, SerializedMeta{ guid, animation.Name().data(), string{reflect::get_type<anim::Animation>().name()}, "" });
 				}();
-
+				animation_handles.push_back(t_guid);
 				updated_metas.metadatas.emplace_back(t_meta);
 				generated_resources.emplace_back(t_guid, std::move(animation));
 			}
+		}
+
+		if (importer_scene.has_skeleton)
+		{
+			anim::Skeleton skeleton = importer_scene.CompileSkeleton();
+			auto [t_guid, t_meta] = [&]()
+			{
+				auto res = bundle.FetchMeta<anim::Skeleton>();
+				auto guid = res ? res->guid : Guid::Make();
+				return res ? std::make_pair(guid, *res) : std::make_pair(guid, SerializedMeta{ guid, skeleton.Name().data(), string{reflect::get_type<anim::Skeleton>().name()}, "" });
+			}();
+
+			updated_metas.metadatas.emplace_back(t_meta);
+			auto& [guid, skele_var] = generated_resources.emplace_back(t_guid, std::move(skeleton));
+			skele = &std::get<anim::Skeleton>(skele_var);
 		}
 		// Here we decide whether or not to save as a prefab.
 		// If importer_scene has no skeleton, then we only save as prefab if there is more than 1 mesh
@@ -102,68 +115,77 @@ namespace idk
 		// Check for errors here as well. Eg: Has skeleton but no mesh and no animation (Unlikely).
 
 		// Check if this is a pure animation file. If it is, we don't even bother creating the prefab.
-		// if (importer_scene.has_animation && !importer_scene.has_skeleton)
-		// {
-		// 	err_msg = "No mesh but animations were found. Saving as pure animation file.\n";
-		// 	LOG_TO(LogPool::ANIM, err_msg);
-		// 	return ret_val;
-		// }
-		// 
-		// const auto scene = Core::GetSystem<SceneManager>().GetPrefabScene();
-		// const auto prefab_root = scene->CreateGameObject();
-		// prefab_root->Name(path_to_resource.GetStem());
-		// if (importer_scene.has_meshes && importer_scene.has_skeleton)
-		// {
-		// 	for (auto& handle : mesh_handles)
-		// 	{
-		// 		const auto mesh_child = scene->CreateGameObject();
-		// 		mesh_child->Name(handle->Name());
-		// 		mesh_child->Transform()->SetParent(prefab_root);
-		// 		const auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
-		// 		mesh_renderer->mesh = RscHandle<Mesh>{ handle };
-		// 	}
-		// 	// Add an animator component to the prefab so that the skinned mesh renderer can draw.
-		// 	// Need to revisit this as I feel this is the wrong way to do this.
-		// 	const auto animator = prefab_root->AddComponent<Animator>();
-		// 	animator->skeleton = skeleton_handle;
-		// 	Core::GetSystem<AnimationSystem>().GenerateSkeletonTree(*animator);
-		// 
-		// 	for (auto& anim : animation_handles)
-		// 		animator->AddAnimation(anim);
-		// }
-		// else if (importer_scene.has_meshes && !importer_scene.has_skeleton)
-		// {
-		// 	// If there is only 1 mesh, we attach it to the prefab itself. If not, we make child objects with MeshRenderer components.
-		// 	if (importer_scene.num_meshes == 1)
-		// 	{
-		// 		// Just attach the mesh to the prefab itself
-		// 		const auto mesh_renderer = prefab_root->AddComponent<MeshRenderer>();
-		// 		mesh_renderer->mesh = mesh_handles[0];
-		// 	}
-		// 	else
-		// 	{
-		// 		for (auto& handle : mesh_handles)
-		// 		{
-		// 			const auto mesh_child = scene->CreateGameObject();
-		// 			mesh_child->Name(handle->Name());
-		// 			mesh_child->Transform()->SetParent(prefab_root);
-		// 			const auto mesh_renderer = mesh_child->AddComponent<MeshRenderer>();
-		// 			mesh_renderer->mesh = RscHandle<Mesh>{ handle };
-		// 		}
-		// 	}
-		// }
-		// 
-		// {
-		// 	auto prefab_meta = meta_bundle.FetchMeta<Prefab>();
-		// 	const auto prefab_handle = prefab_meta
-		// 		? PrefabUtility::Create(prefab_root, prefab_meta->guid)
-		// 		: PrefabUtility::Create(prefab_root);
-		// 	prefab_handle->Name(path_to_resource.GetStem());
-		// 	ret_val.Add(prefab_handle);
-		// 
-		// 	LOG_TO(LogPool::ANIM, string{ "Saving meshes and animations as prefab.\n" });
-		// }
-		// scene->DestroyGameObject(prefab_root);
+		 if (importer_scene.has_animation && !importer_scene.has_skeleton)
+		 {
+		 	err_msg = "No mesh but animations were found. Saving as pure animation file.\n";
+		 	LOG_TO(LogPool::ANIM, err_msg);
+		 	return  AssetBundle{ updated_metas, span<AssetBundle::AssetPair>{generated_resources} };
+		 }
+		 
+		 GameState::GetGameState().ActivateScene(Scene::prefab); 
+		 auto CreateObj = []()
+		 {
+			 return GameState::GetGameState().CreateObject<GameObject>(Scene::prefab);
+		 };
+		 auto prefab_root = CreateObj();
+		 prefab_root->Name(fs_path.stem().string());
+		 if (importer_scene.has_meshes && importer_scene.has_skeleton)
+		 {
+		 	for (auto& handle : mesh_handles)
+		 	{
+				const auto mesh_child = CreateObj();
+		 		mesh_child->Name(mesh_names[handle.guid]);
+		 		mesh_child->Transform()->SetParent(prefab_root);
+		 		const auto mesh_renderer = mesh_child->AddComponent<SkinnedMeshRenderer>();
+		 		mesh_renderer->mesh = RscHandle<Mesh>{ handle };
+		 	}
+		 	// Add an animator component to the prefab so that the skinned mesh renderer can draw.
+		 	// Need to revisit this as I feel this is the wrong way to do this.
+		 	const auto animator = prefab_root->AddComponent<Animator>();
+		 	animator->skeleton = skeleton_handle;
+			static_cast<AnimationSystem*>(nullptr)->GenerateSkeletonTree(*animator, *skele);
+		 
+		 	for (auto& anim : animation_handles)
+		 		animator->AddAnimation(anim);
+		 }
+		 else if (importer_scene.has_meshes && !importer_scene.has_skeleton)
+		 {
+		 	// If there is only 1 mesh, we attach it to the prefab itself. If not, we make child objects with MeshRenderer components.
+		 	if (importer_scene.num_meshes == 1)
+		 	{
+		 		// Just attach the mesh to the prefab itself
+		 		const auto mesh_renderer = prefab_root->AddComponent<MeshRenderer>();
+		 		mesh_renderer->mesh = mesh_handles[0];
+		 	}
+		 	else
+		 	{
+		 		for (auto& handle : mesh_handles)
+		 		{
+					const auto mesh_child = CreateObj();
+		 			mesh_child->Name(mesh_names[handle.guid]);
+		 			mesh_child->Transform()->SetParent(prefab_root);
+		 			const auto mesh_renderer = mesh_child->AddComponent<MeshRenderer>();
+		 			mesh_renderer->mesh = RscHandle<Mesh>{ handle };
+		 		}
+		 	}
+		 }
+		 
+		 {
+			auto [t_guid, t_meta]
+				= [&]()
+			{
+				auto res = bundle.FetchMeta<Prefab>();
+				auto guid = res ? res->guid : Guid::Make();
+				return res ? std::make_pair(guid, *res) : std::make_pair(guid, SerializedMeta{ guid, fs_path.stem().string(), string{reflect::get_type<Prefab>().name()}, "" });
+			}();
+			auto prefab = PrefabUtility::CreateResourceManagerHack(prefab_root, t_guid);
+		 	prefab.Name(fs_path.stem().string());
+
+		 	LOG_TO(LogPool::ANIM, string{ "Saving meshes and animations as prefab.\n" });
+			updated_metas.metadatas.emplace(updated_metas.metadatas.begin(), t_meta);
+			generated_resources.emplace(generated_resources.begin(), AssetBundle::AssetPair{ t_guid, std::move(prefab) });
+		 }
+
 		return AssetBundle{ updated_metas, span<AssetBundle::AssetPair>{generated_resources} };
 	}
 }

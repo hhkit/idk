@@ -1,0 +1,59 @@
+#version 460
+
+layout(location =1)in VS_OUT
+{
+  vec3 position;
+  vec2 uv;
+  vec3 normal;
+  vec3 tangent;
+  vec4 color;
+} fs_in;
+
+//__MATERIAL_UNIFORMS__;
+
+// declare output buffers here
+layout(location = 0) out vec4 out_albedo_amb_o;
+layout(location = 1) out vec4 out_uv_metallic_roughness;
+layout(location = 2) out vec4 out_view_pos;
+layout(location = 3) out vec4 out_normal;
+layout(location = 4) out vec4 out_tangent;
+
+vec3 Normal()
+{
+	return fs_in.normal;
+}
+vec3 Tangent()
+{
+	return fs_in.tangent;
+}
+
+#define FRAG_NORMAL Normal()
+#define FRAG_TANGENT Tangent()
+import /engine_data/shaders/utils.glsl
+
+void main()
+{
+	vec3  view_pos  = fs_in.position;
+	vec3  normal    = normalize(fs_in.normal);
+	vec3  tangent   = normalize(fs_in.tangent);
+	vec2  uv        = fs_in.uv;
+
+	// local scope here, graph will assign to this 
+
+	vec3  albedo    = vec3(1, 1, 1);
+	float specular  = 0.5;
+	float roughness = 1.0;
+	float ambient_o = 0;
+	vec3  emissive  = vec3(0);
+	
+	vec3 view_dir = -normalize(view_pos);
+
+
+	//__MATERIAL_CODE__;
+	out_albedo_amb_o = vec4(albedo,ambient_o);
+	out_uv_metallic_roughness = vec4(fs_in.uv,specular,roughness);
+	out_view_pos = vec4(fs_in.position,emissive.r);
+	out_normal = vec4(normal,emissive.g);
+	out_tangent = vec4(tangent,emissive.b);
+	
+}

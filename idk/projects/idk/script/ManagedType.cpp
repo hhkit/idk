@@ -13,8 +13,8 @@ namespace idk::mono
 
 	bool ManagedType::IsOrDerivedFrom(string_view findme) const
 	{
-		auto& envi = Core::GetSystem<ScriptSystem>().Environment();
-		auto terminate = envi.Type("Object")->Raw();
+		//auto& envi = Core::GetSystem<ScriptSystem>().Environment();
+		//auto terminate = envi.Type("Object")->Raw();
 		auto klass = Raw();
 
 		while (mono_class_get_name(klass) != string_view{"Object"})
@@ -88,7 +88,7 @@ namespace idk::mono
 		auto find_class = type;
 		auto obj_type = Core::GetSystem<ScriptSystem>().Environment().Type("Object");
 		IDK_ASSERT(obj_type);
-		auto obj = obj_type->Raw();
+		//auto obj = obj_type->Raw();
 		while (mono_class_get_name(find_class) != string_view{"Object"})
 		{
 			auto retval = mono_class_get_method_from_name(find_class, method_name.data(), param_count);

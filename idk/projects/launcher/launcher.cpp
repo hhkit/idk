@@ -18,8 +18,10 @@
 
 #include <serialize/text.h>
 #include <res/EasyFactory.h>
+#include <res/CompiledAssetLoader.h>
 #include <editor/loading/AssimpImporter.h>
-#include <editor/loading/GraphFactory.h>
+#include <gfx/GraphFactory.h>
+#include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
 #include <opengl/resource/OpenGLFontAtlasLoader.h>
@@ -118,6 +120,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".comp");
 	}
 	case GraphicsAPI::OpenGL:
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, ogl::OpenGLMesh, false>>();
 		Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
 		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
 		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
@@ -129,11 +132,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	default:
 		break;
 	}
-	Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
-	Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
-	Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
+	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<Prefab, Prefab, false>>();
+	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Animation, anim::Animation, false>>();
+	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Skeleton, anim::Skeleton, false>>();
 	Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
-
 	Core::GetResourceManager().RegisterFactory<GraphFactory>();
 
 	auto& filesys = Core::GetSystem<FileSystem>();
@@ -148,6 +150,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (elem.GetExtension() != ".meta")
 			Core::GetResourceManager().Load(elem, false);
 	}
+
+	for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
+		Core::GetResourceManager().LoadCompiledAsset(elem);
 
 
 	auto load_scene = RscHandle<Scene>{ Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" } };

@@ -45,8 +45,7 @@ namespace idk::vkn
 		canvas_pipeline2->depth_write = false;
 		canvas_pipeline2->depth_test = false;
 	}
-#pragma optimize("",off)
-	void CanvasRenderer::DrawCanvas(size_t& canvas_count,PipelineThingy& the_interface, const PostRenderData& state, RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
+	void CanvasRenderer::DrawCanvas(size_t& canvas_count,PipelineThingy& the_interface, const PostRenderData& state, [[maybe_unused]]RenderStateV2& rs, const vector<UIRenderObject>& canvas_data)
 	{
 		auto& shared_state = *state.shared_gfx_state;
 
@@ -66,7 +65,7 @@ namespace idk::vkn
 			canvas_ro_inst2.reserve(font_render_info.size());
 
 			//size_t i = state.range.inst_font_begin;
-			size_t accum_size = 0;
+			//size_t accum_size = 0;
 			//auto& canvas_range = canvas_range_data[canvas_count];
 			//auto i = canvas_range.inst_font_begin;
 			auto& i = canvas_count;

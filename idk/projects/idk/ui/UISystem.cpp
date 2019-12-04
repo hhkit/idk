@@ -37,7 +37,7 @@ namespace idk
             FinalizeMatrices(c.GetHandle());
     }
 
-    void UISystem::RecalculateRects(Handle<RectTransform> rt)
+    void UISystem::RecalculateRects([[maybe_unused]]Handle<RectTransform> rt)
     {
         //if (!rt)
         //    return;

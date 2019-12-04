@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include <idk.h>
+#include <core/GameState.h>
 #include <res/ResourceHandle.h>
 #include <anim/Animation.h>
 #include <serialize/binary.h>
@@ -24,6 +25,8 @@ namespace fs = std::filesystem;
 int main(int argc, const char* argv[])
 {
 	using namespace idk;
+
+	GameState gs;
 
 	if (argc < 2)
 	{
