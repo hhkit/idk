@@ -20,7 +20,7 @@
 #include <res/EasyFactory.h>
 #include <res/CompiledAssetLoader.h>
 #include <editor/loading/AssimpImporter.h>
-#include <editor/loading/GraphFactory.h>
+#include <gfx/GraphFactory.h>
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
@@ -112,12 +112,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 	case GraphicsAPI::Vulkan:
 	{
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh, false>>();
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".vert");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".geom");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".tesc");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".tese");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".comp");
+		break;
 	}
 	case GraphicsAPI::OpenGL:
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, ogl::OpenGLMesh, false>>();

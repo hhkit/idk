@@ -89,6 +89,7 @@
     <Compile Include="Math\Deg.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Behavior\MonoBehavior.cs" />
+    <Compile Include="Math\Perlin.cs" />
     <Compile Include="Math\Rad.cs" />
     <Compile Include="Math\Shape.cs" />
     <Compile Include="Math\Sphere.cs" />

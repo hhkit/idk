@@ -137,5 +137,9 @@
             }
             return values[0];
         }
+        public static float PerlinNoise(float x, float y)
+        {
+            return Perlin.Noise(x, y);
+        }
     }
 }
