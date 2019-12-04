@@ -15,7 +15,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 
 #include "pch.h"
-//#define HACKING_TO_THE_GATE
+#define HACKING_TO_THE_GATE
 #include <IDE.h>
 
 #include <filesystem>
@@ -72,9 +72,11 @@ namespace idk
 		if (!fs::exists(tmp_path))
 			fs::create_directory(tmp_path);
 		Core::GetSystem<FileSystem>().Mount(tmp_path.string(), path_tmp, false);
-
+#ifdef HACKING_TO_THE_GATE
+		Core::GetSystem<ProjectManager>().LoadProject(string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/project/hydeandseek.idk");
+#else
         LoadRecentProject();
-
+#endif
 		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
 		{
 			selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
@@ -238,7 +240,7 @@ namespace idk
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 
 #ifdef HACKING_TO_THE_GATE
-
+		Core::GetSystem<Application>().SetFullscreen(true);
 		if (!RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }})
 			throw;
 		OpenScene(RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }});
@@ -304,7 +306,7 @@ namespace idk
 
         auto& app = Core::GetSystem<Application>();
 
-        static auto fullscreen = false;
+        static auto fullscreen = true;
         if (ImGui::IsKeyPressed(static_cast<int>(Key::F)) && ImGui::IsKeyDown(static_cast<int>(Key::Control)))
             app.SetFullscreen(fullscreen = !fullscreen);
 
@@ -355,10 +357,7 @@ namespace idk
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-			if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::Vulkan)
-				ImGui::Image(buf->ID(), ImVec2{ window_size });
-			else
-				ImGui::Image(buf->ID(), ImVec2{ window_size }, ImVec2{ 0, 1 }, ImVec2{ 1,0 });
+			ImGui::Image(buf->ID(), ImVec2{ window_size }, ImVec2{ 0, 1 }, ImVec2{ 1,0 });
 			ImGui::PopStyleVar();
 
 			ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
@@ -370,7 +369,7 @@ namespace idk
 
 				ImGuiID main = dockspace_id;
 
-				auto& ide = Core::GetSystem<IDE>();
+				//auto& ide = Core::GetSystem<IDE>();
 				ImGui::DockBuilderDockWindow("HACK", main);
 				ImGui::DockBuilderFinish(dockspace_id);
 			}
