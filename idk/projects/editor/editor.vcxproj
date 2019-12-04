@@ -313,7 +313,6 @@
     <ClInclude Include="windows\IGE_ProgrammerConsole.h" />
     <ClInclude Include="windows\IGE_ProjectSettings.h" />
     <ClInclude Include="windows\IGE_ShadowMapWindow.h" />
-    <ClInclude Include="loading\GraphFactory.h" />
     <ClInclude Include="widgets\EnumCombo.h" />
     <ClInclude Include="widgets\InputResource.h" />
     <ClInclude Include="windows\IGE_MaterialEditor.h" />
@@ -353,7 +352,6 @@
     <ClCompile Include="widgets\LayerMaskCombo.cpp" />
     <ClCompile Include="loading\AssimpImporter.cpp" />
     <ClCompile Include="loading\AssimpImporter_helpers.cpp" />
-    <ClCompile Include="loading\GraphFactory.cpp" />
     <ClCompile Include="SceneManagement.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="widgets\ConsoleLog.cpp" />

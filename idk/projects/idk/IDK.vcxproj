@@ -64,6 +64,7 @@
     <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
+    <ClInclude Include="gfx\GraphFactory.h" />
     <ClInclude Include="gfx\ShaderIncluder.h" />
     <ClInclude Include="gfx\ShaderSnippet.h" />
     <ClInclude Include="gfx\ShaderSnippetFactory.h" />
@@ -330,6 +331,7 @@
     <ClCompile Include="gfx\FontData.cpp" />
     <ClCompile Include="gfx\Framebuffer.cpp" />
     <ClCompile Include="gfx\FramebufferFactory.cpp" />
+    <ClCompile Include="gfx\GraphFactory.cpp" />
     <ClCompile Include="gfx\Light.cpp" />
     <ClCompile Include="gfx\LightTypes.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
@@ -459,6 +461,7 @@
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\bin\editor.exe" />
     <None Include="anim\Animator.inl" />
     <None Include="core\Scheduler.inl" />
     <None Include="core\Core.inl" />

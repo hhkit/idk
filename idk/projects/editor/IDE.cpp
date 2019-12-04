@@ -36,7 +36,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 // resource importing
 #include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>
-#include <loading/GraphFactory.h>
+#include <gfx/GraphFactory.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
 #include <opengl/resource/OpenGLFontAtlasLoader.h>

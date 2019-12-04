@@ -936,6 +936,7 @@
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\IAssetLoader.h" />
+    <ClInclude Include="gfx\GraphFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1362,6 +1363,7 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="res\ResourceMeta.cpp" />
+    <ClCompile Include="gfx\GraphFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1551,6 +1553,7 @@
       <Filter>anim\detail</Filter>
     </None>
     <None Include="memory\ArenaAllocator.inl" />
+    <None Include="..\..\bin\editor.exe" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

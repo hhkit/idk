@@ -78,7 +78,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = HasArg(L"--vulkan", command_lines, num_args) ? GraphicsAPI::Vulkan : GraphicsAPI::OpenGL;
+	auto gfx_api = HasArg(L"--opengl", command_lines, num_args) ? GraphicsAPI::OpenGL : GraphicsAPI::Vulkan;
 	switch (gfx_api)
 	{
 	case GraphicsAPI::Vulkan:
@@ -96,7 +96,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		break;
 	
 	}
-	gSys->is_deferred(HasArg(L"--deferred", command_lines, num_args));
+	gSys->is_deferred(!HasArg(L"--forward", command_lines, num_args));
 
 	c->AddSystem<IDE>();
 

@@ -56,9 +56,6 @@
     <ClInclude Include="commands\CMD_DeleteComponent.h">
       <Filter>commands</Filter>
     </ClInclude>
-    <ClInclude Include="loading\GraphFactory.h">
-      <Filter>loader</Filter>
-    </ClInclude>
     <ClInclude Include="widgets\EnumCombo.h">
       <Filter>widgets</Filter>
     </ClInclude>
@@ -206,9 +203,6 @@
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="commands\CMD_DeleteComponent.cpp">
       <Filter>commands</Filter>
-    </ClCompile>
-    <ClCompile Include="loading\GraphFactory.cpp">
-      <Filter>loader</Filter>
     </ClCompile>
     <ClCompile Include="commands\CMD_TransformGameObject.cpp">
       <Filter>commands</Filter>
