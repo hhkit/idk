@@ -70,8 +70,6 @@ namespace idk
         Core::GetSystem<IDE>().reg_scene.set("scene", string{ scene.guid });
 
         return true;
-
-        return false;
     }
 
 	void SaveScene()
