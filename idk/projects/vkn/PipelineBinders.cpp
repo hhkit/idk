@@ -87,8 +87,8 @@ namespace idk::vkn
 
 	void StandardBindings::BindFont(PipelineThingy&, const FontRenderData&) {}
 
-	void StandardBindings::BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one) {}
-	void StandardBindings::BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one) {}
+	void StandardBindings::BindCanvas([[maybe_unused]] PipelineThingy& the_interface, [[maybe_unused]]const TextData& dc, [[maybe_unused]]const UIRenderObject& dc_one) {}
+	void StandardBindings::BindCanvas([[maybe_unused]] PipelineThingy& the_interface, [[maybe_unused]]const ImageData& dc,[[maybe_unused]]const UIRenderObject& dc_one) {}
 
 
 	//const GraphicsState& StandardVertexBindings::State() { return *_state; }
@@ -399,9 +399,9 @@ namespace idk::vkn
 		//mat4 block[] = { projection_trf,view_trf };
 		//the_interface.BindUniformBuffer("CameraBlock", 0, block);
 
-		mat4 obj_trf = view_trf * dc.transform;
-		mat4 obj_ivt = obj_trf.inverse().transpose();
-		mat4 block2[] = { obj_trf,obj_ivt };
+		mat4 obj_trfm = view_trf * dc.transform;
+		mat4 obj_ivt = obj_trfm.inverse().transpose();
+		mat4 block2[] = { obj_trfm,obj_ivt };
 		the_interface.BindUniformBuffer("ObjectMat4Block",0,block2);
 		vec4 block3[] = { dc.color.as_vec4};
 		the_interface.BindUniformBuffer("FontBlock", 0, block3);
@@ -433,9 +433,9 @@ namespace idk::vkn
 	
 	void CanvasVertexBindings::BindCanvas(PipelineThingy& the_interface, const TextData& dc, const UIRenderObject& dc_one)
 	{
-		mat4 obj_trf = view_trf * dc_one.transform;
-		mat4 obj_ivt = obj_trf.inverse().transpose();
-		mat4 block2[] = { obj_trf,obj_ivt };
+		mat4 obj_trfm = view_trf * dc_one.transform;
+		mat4 obj_ivt = obj_trfm.inverse().transpose();
+		mat4 block2[] = { obj_trfm,obj_ivt };
 		the_interface.BindUniformBuffer("ObjectMat4Block", 0, block2);
 		UIBlockInfo block3[] = { { dc_one.color.as_vec4, 1 } };
 		the_interface.BindUniformBuffer("UIBlock", 0, block3);
@@ -444,9 +444,9 @@ namespace idk::vkn
 
 	void CanvasVertexBindings::BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one)
 	{
-		mat4 obj_trf = view_trf * dc_one.transform;
-		mat4 obj_ivt = obj_trf.inverse().transpose();
-		mat4 block2[] = { obj_trf,obj_ivt };
+		mat4 obj_trfm = view_trf * dc_one.transform;
+		mat4 obj_ivt = obj_trfm.inverse().transpose();
+		mat4 block2[] = { obj_trfm,obj_ivt };
 		the_interface.BindUniformBuffer("ObjectMat4Block", 0, block2);
 		UIBlockInfo block3[] = { { dc_one.color.as_vec4, 0 } };
 		the_interface.BindUniformBuffer("UIBlock", 0, block3);

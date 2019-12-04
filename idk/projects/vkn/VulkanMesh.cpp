@@ -24,7 +24,7 @@ namespace idk::vkn
 			}
 		}
 		mm.RegisterAttribs(*this, attribs);
-		mm.SetIndexBuffer16(*this, mm.CreateBuffer(string_view{ r_cast<const char*>(std::data(m.element_buffer)),hlp::buffer_size(m.element_buffer) }),m.element_buffer.size());
+		mm.SetIndexBuffer16(*this, mm.CreateBuffer(string_view{ r_cast<const char*>(std::data(m.element_buffer)),hlp::buffer_size(m.element_buffer) }),s_cast<uint32_t>(m.element_buffer.size()));
 	}
 	//#pragma optimize("",off)
 	const MeshBuffer& VulkanMesh::Get(attrib_index index) const

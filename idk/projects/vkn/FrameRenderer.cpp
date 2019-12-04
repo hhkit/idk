@@ -575,7 +575,7 @@ namespace idk::vkn
 	VulkanView& View();
 //#pragma optimize("",off)
 	void RenderPipelineThingy(
-		const SharedGraphicsState& shared_state,
+		[[maybe_unused]] const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
 		PipelineManager&    pipeline_manager   ,
 		vk::CommandBuffer   cmd_buffer         , 
@@ -971,10 +971,11 @@ namespace idk::vkn
 				uv_buffer.resize(t_size);
 
 				unsigned i = 0;
-				size_t offset_size = 0;
-				size_t range = 0;
+				//size_t offset_size = 0;
+				//size_t range = 0;
 				for (auto& elem : doto)
 				{
+					elem;
 					auto& b = pos_buffer[i];
 					b.resize(hlp::buffer_size(doto[i].pos));
 					b.update<const vec2>(0, doto[i].pos, cmd_buffer);
@@ -1405,7 +1406,7 @@ namespace idk::vkn
 			{
 				bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 				is_particle_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
-				auto& obj = p_ro.Object();
+				//auto& obj = p_ro.Object();
 				if (!p_ro.config)
 					continue;
 				if (p_ro.rebind_shaders)

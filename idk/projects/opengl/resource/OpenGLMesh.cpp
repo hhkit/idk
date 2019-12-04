@@ -7,8 +7,8 @@ namespace idk::ogl
 	{
 		bounding_volume = m.bounding_volume;
 		for (auto& buffer : m.buffers)
-			AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, buffer.attribs }.Bind().Buffer(buffer.data.data(), 1, buffer.data.size()));
-		_element_array_object = std::move(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }.Bind().Buffer(m.element_buffer.data(), sizeof(unsigned), m.element_buffer.size()));
+			AddBuffer(OpenGLBuffer{ GL_ARRAY_BUFFER, buffer.attribs }.Bind().Buffer(buffer.data.data(), 1, s_cast<GLsizei>(buffer.data.size())));
+		_element_array_object = std::move(OpenGLBuffer{ GL_ELEMENT_ARRAY_BUFFER, {} }.Bind().Buffer(m.element_buffer.data(), sizeof(unsigned), s_cast<GLsizei>(m.element_buffer.size())));
 		
 	}
 

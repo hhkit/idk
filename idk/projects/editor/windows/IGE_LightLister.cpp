@@ -66,7 +66,7 @@ namespace idk
 		};
 
 		ImGuiStyle& style = ImGui::GetStyle();
-		ImGui::Columns(std::size(headers), "", true);
+		ImGui::Columns(s_cast<int>(std::size(headers)), "", true);
 
 		float offset = 0.f;
 		for (auto [header, size] : headers)
@@ -89,7 +89,7 @@ namespace idk
 
 		for (auto& light : Core::GetGameState().GetObjectsOfType<Light>())
 		{
-			ImGui::Columns(std::size(headers), "", true);
+			ImGui::Columns(s_cast<int>(std::size(headers)), "", true);
 			ImGui::PushID((std::string{ "##LL" } +std::to_string(light.GetHandle().id)).data());
 			auto go = light.GetGameObject();
 			auto name = go->Name();
@@ -111,7 +111,7 @@ namespace idk
 			ImGui::NextColumn();
 
 			auto intens = light.GetLightIntensity();
-			if (ImGui::DragFloat("##intens", &intens, 0.1, 0, 1500.f, "%.3f", 1.1f))
+			if (ImGui::DragFloat("##intens", &intens, 0.1f, 0.f, 1500.f, "%.3f", 1.1f))
 				light.SetLightIntensity(intens);
 			ImGui::NextColumn();
 
@@ -119,7 +119,7 @@ namespace idk
 				{
 					if constexpr (!std::is_same_v<std::decay_t<decltype(light)>, DirectionalLight>)
 					{
-						ImGui::DragFloat("##atten", &light.attenuation_radius, 0.1, 0, 1500.f, "%.3f", 1.1f);
+						ImGui::DragFloat("##atten", &light.attenuation_radius, 0.1f, 0.f, 1500.f, "%.3f", 1.1f);
 					}
 					ImGui::NextColumn();
 				}, light.light);

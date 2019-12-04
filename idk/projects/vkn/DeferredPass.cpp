@@ -659,7 +659,7 @@ namespace idk::vkn
 
 	using PbrDeferredPostBinding = CombinedBindings<DeferredPostBinder, PbrFwdBindings>;
 
-	void DeferredPass::LightPass(GBufferType type, PipelineThingy& the_interface, const GraphicsState& graphics_state, RenderStateV2& rs, std::optional<std::pair<size_t, size_t>> light_range,bool is_ambient)
+	void DeferredPass::LightPass(GBufferType type, PipelineThingy& the_interface, const GraphicsState& graphics_state, [[maybe_unused]]RenderStateV2& rs, std::optional<std::pair<size_t, size_t>> light_range,bool is_ambient)
 	{
 		//TODO: Prepare FSQ draw call + Forward Draw Calls
 		PbrDeferredPostBinding binding;
@@ -691,7 +691,7 @@ namespace idk::vkn
 		{"specular_light_accum_input" , vk::ImageLayout::eShaderReadOnlyOptimal},
 		{"specular_depth_input"       , vk::ImageLayout::eShaderReadOnlyOptimal              },
 	};
-	PipelineThingy DeferredPass::HdrPass(const GraphicsState& graphics_state, RenderStateV2& rs)
+	PipelineThingy DeferredPass::HdrPass([[maybe_unused]]const GraphicsState& graphics_state, RenderStateV2& rs)
 	{
 		PipelineThingy the_interface{};
 		the_interface.SetRef(rs.ubo_manager);
@@ -705,11 +705,11 @@ namespace idk::vkn
 
 		binding.Bind(the_interface);
 		auto& buffer = *hdr_buffer;
-		for (auto& g_buffer : GBuffers())
+		/*for (auto& g_buffer : GBuffers())
 		{
 			auto& gbuffer = g_buffer.gbuffer.as<VknFrameBuffer>();
 
-		}
+		}*/
 		int i = 1;
 		for (auto& [name, layout]:hdr_attachment_info )
 			the_interface.BindAttachment(name, 0, buffer.GetAttachment(i++).buffer.as<VknTexture>(), false, layout);
@@ -889,7 +889,7 @@ namespace idk::vkn
 	struct TypeCheck : StandardBindings
 	{
 		ShadingModel model;
-		bool Skip(PipelineThingy& the_interface, const  RenderObject& dc)  override
+		bool Skip([[maybe_unused]]PipelineThingy& the_interface, const  RenderObject& dc)  override
 		{ 
 			if (dc.material_instance)
 			{
@@ -978,7 +978,7 @@ namespace idk::vkn
 		//GBufferBarrier(cmd_buffer, gbuffer);
 	}
 
-	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy(&accum_stuff)[EGBufferType::size()], const CameraData& camera, RenderStateV2& rs)
+	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy(&accum_stuff)[EGBufferType::size()], const CameraData& camera, [[maybe_unused]]RenderStateV2& rs)
 	{
 		int i = 0;
 		for (auto& gbuffer : GBuffers())
@@ -1024,7 +1024,7 @@ namespace idk::vkn
 
 	}
 
-	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, VknRenderTarget& rt, [[maybe_unused]]RenderStateV2& rs)
+	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, [[maybe_unused]]VknRenderTarget& rt, [[maybe_unused]]RenderStateV2& rs)
 	{
 		auto sz = camera.render_target->Size();
 		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);

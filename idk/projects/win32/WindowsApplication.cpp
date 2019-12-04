@@ -419,7 +419,7 @@ namespace idk::win
 		return RegisterClassExW(&wcex);
 	}
 
-	BOOL Windows::InitInstance(int nCmdShow)
+	BOOL Windows::InitInstance([[maybe_unused]]int nCmdShow)
 	{
         hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
                              CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);

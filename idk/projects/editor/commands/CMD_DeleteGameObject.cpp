@@ -83,8 +83,8 @@ namespace idk {
 				bool shouldbreak = false;
 				if (dynamic_cast<CMD_CollateCommands*>(j.get())) {
 					auto specialCommand = dynamic_cast<CMD_CollateCommands*>(j.get());
-					for (const auto& j : specialCommand->repeated_commands) {
-						if (j->game_object_handle == game_object_handle) {
+					for (const auto& k : specialCommand->repeated_commands) {
+						if (k->game_object_handle == game_object_handle) {
 							shouldbreak = true;
 							break;
 						}

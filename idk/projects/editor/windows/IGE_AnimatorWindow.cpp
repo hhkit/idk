@@ -452,7 +452,7 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
 					else
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
-					if (ImGui::Selectable("##param_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_DrawFillAvailWidth))
+					if (ImGui::Selectable("##param_selectable", selected, ImGuiSelectableFlags_AllowItemOverlap | s_cast<ImGuiSelectableFlags_>(ImGuiSelectableFlags_DrawFillAvailWidth)))
 					{
 						_selected_param_type = type;
 						_selected_param = param.name;
@@ -711,7 +711,7 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
 					else
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
-					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_PressedOnClick, selectable_size))
+					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | s_cast<ImGuiSelectableFlags_>(ImGuiSelectableFlags_PressedOnClick), selectable_size))
 					{
 						selectTransition(_selected_layer, state_index, transition_index);
 						_show_transition = true;
@@ -1045,14 +1045,14 @@ namespace idk
 		auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
 		bg_col.w = bg_col.w * 0.4f;
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, bg_col);
-		const bool list_is_open = ImGui::ListBoxHeader("##transitions", curr_state.transitions.size(), 5);
+		const bool list_is_open = ImGui::ListBoxHeader("##transitions", s_cast<int>(curr_state.transitions.size()), 5);
 		ImGui::PopStyleColor();
 
 		if (list_is_open)
 		{
 			for (size_t i = 1; i < curr_state.transitions.size(); ++i)
 			{
-				ImGui::PushID(i);
+				ImGui::PushID(s_cast<int>(i));
 				auto& transition = curr_state.GetTransition(i);
 				if (!transition.valid)
 					break;
@@ -1146,7 +1146,7 @@ namespace idk
 
 		auto& state_data = *curr_state.GetBasicState();
 
-		ImGui::PushID(_selected_state);
+		ImGui::PushID(s_cast<int>(_selected_state));
 		strcpy_s(buf, curr_state.name.data());
 
 		float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Animation State").x);
@@ -1195,7 +1195,7 @@ namespace idk
 
 		auto& state_data = *curr_state.GetBlendTree();
 
-		ImGui::PushID(state_index);
+		ImGui::PushID(s_cast<int>(state_index));
 		strcpy_s(buf, curr_state.name.data());
 
 		const float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Blend Tree ").x);
@@ -1258,7 +1258,7 @@ namespace idk
 		auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
 		bg_col.w = bg_col.w * 0.4f;
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, bg_col);
-		const bool list_is_open = ImGui::ListBoxHeader("##conditions", state_data.motions.size(), 5);
+		const bool list_is_open = ImGui::ListBoxHeader("##conditions", s_cast<int>(state_data.motions.size()), 5);
 		ImGui::PopStyleColor();
 
 		if (list_is_open)
@@ -1270,7 +1270,7 @@ namespace idk
 			for (size_t i = 0; i < state_data.motions.size(); ++i)
 			{
 				auto& motion = state_data.motions[i];
-				ImGui::PushID(i);
+				ImGui::PushID(s_cast<int>(i));
 				ImGui::BeginGroup();
 				ImGui::PushItemWidth(widget_size);
 
@@ -1291,7 +1291,7 @@ namespace idk
 
 				if (ImGui::Button("Delete"))
 				{
-					delete_index = i;
+					delete_index = s_cast<int>(i);
 				}
 				ImGui::PopItemWidth();
 				ImGui::EndGroup();
@@ -1455,7 +1455,7 @@ namespace idk
 		auto& curr_state = curr_layer.GetAnimationState(state_index);
 		auto& curr_transition = curr_state.GetTransition(transition_index);
 
-		const auto param_selection = [&](string_view title, AnimationCondition& condition, auto&& type) -> bool
+		const auto param_selection = [&]([[maybe_unused]] string_view title, AnimationCondition& condition, auto&& type) -> bool
 		{
 			using ParamType = std::decay_t<decltype(type)>;
 			bool ret_val = false;
@@ -1500,14 +1500,14 @@ namespace idk
 		auto bg_col = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
 		bg_col.w = bg_col.w * 0.4f;
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, bg_col);
-		const bool list_is_open = ImGui::ListBoxHeader("##conditions", curr_transition.conditions.size(), 5);
+		const bool list_is_open = ImGui::ListBoxHeader("##conditions", s_cast<int>(curr_transition.conditions.size()), 5);
 		ImGui::PopStyleColor();
 		int to_delete = -1;
 		if (list_is_open)
 		{
 			for (size_t i = 0; i < curr_transition.conditions.size(); ++i)
 			{
-				ImGui::PushID(i);
+				ImGui::PushID(s_cast<int>(i));
 				auto& condition = curr_transition.conditions[i];
 				
 				const float widget_size = ImGui::GetContentRegionAvailWidth() * 0.25f;
@@ -1617,7 +1617,7 @@ namespace idk
 				ImGui::SetCursorPosX(delete_button_offset);
 				if (ImGui::Button("Delete"))
 				{
-					to_delete = i;
+					to_delete = s_cast<int>(i);
 				}
 
 				ImGui::EndGroup();
