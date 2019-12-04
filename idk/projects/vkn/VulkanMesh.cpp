@@ -3,12 +3,13 @@
 #include <gfx/CompiledMesh.h>
 #include <vkn/VknMeshModder.h>
 #include <vkn/BufferHelpers.h>
+#include <vkn/VulkanMeshFactory.h>
 namespace idk::vkn
 {
 	VulkanMesh::VulkanMesh(const CompiledMesh& m)
 	{
 		bounding_volume = m.bounding_volume;
-		MeshModder mm;
+		auto& mm = Core::GetResourceManager().GetFactory<MeshFactory>().mesh_modder;
 
 
 		using offset_t = size_t;
@@ -24,7 +25,7 @@ namespace idk::vkn
 			}
 		}
 		mm.RegisterAttribs(*this, attribs);
-		mm.SetIndexBuffer16(*this, mm.CreateBuffer(string_view{ r_cast<const char*>(std::data(m.element_buffer)),hlp::buffer_size(m.element_buffer) }),s_cast<uint32_t>(m.element_buffer.size()));
+		mm.SetIndexBuffer32(*this, mm.CreateBuffer(string_view{ r_cast<const char*>(std::data(m.element_buffer)),hlp::buffer_size(m.element_buffer) }),s_cast<uint32_t>(m.element_buffer.size()));
 	}
 	//#pragma optimize("",off)
 	const MeshBuffer& VulkanMesh::Get(attrib_index index) const
