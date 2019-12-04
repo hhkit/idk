@@ -43,7 +43,7 @@ namespace idk::vkn
 			stbi_uc* data;
 		};
 
-		size_t strid = 0, t_size = 0;
+		size_t t_size = 0;
 		size_t v_size = std::size(fileExt);
 		array<char*, 6> loadList{ };
 		vector<size_t> strideList{ 0 };

@@ -24,7 +24,7 @@ namespace idk::vkn
 		};
 	}
 //#pragma optimize("",off)
-	void FontRenderer::DrawFont(PipelineThingy& the_interface, const GraphicsState& state, RenderStateV2& rs)
+	void FontRenderer::DrawFont(PipelineThingy& the_interface, const GraphicsState& state, [[maybe_unused]]RenderStateV2& rs)
 	{
 		auto& shared_state = *state.shared_gfx_state;
 		
@@ -36,7 +36,7 @@ namespace idk::vkn
 		{
 			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VFont]);
 			the_interface.BindShader(ShaderStage::Fragment, state.renderer_fragment_shaders[FragmentShaders::FFont]);
-			auto& character_render_info = *shared_state.characters_data;
+			//auto& character_render_info = *shared_state.characters_data;
 			auto& font_render_info = *shared_state.fonts_data;
 			font_ro.config = font_pipeline;
 

@@ -188,7 +188,7 @@ ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 	}
 }
 
-void DbgDrawCall::RegisterBuffer(DbgBufferType type, uint32_t binding, buffer_info info)
+void DbgDrawCall::RegisterBuffer([[maybe_unused]]DbgBufferType type, uint32_t binding, buffer_info info)
 {
 	mesh_buffer[binding] = info;
 }

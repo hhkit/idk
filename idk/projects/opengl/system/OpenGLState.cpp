@@ -738,7 +738,7 @@ namespace idk::ogl
 					pipeline.PushProgram(material->_shader_program);
 
 					// set probe
-					GLuint texture_units = 0;
+					//GLuint texture_units = 0;
 					SetObjectUniforms(elem, cam.view_matrix);
 
 					pipeline.SetUniform("obj_index", elem.obj_id);
@@ -753,7 +753,7 @@ namespace idk::ogl
 					const auto material = elem.material_instance->material;
 					pipeline.PushProgram(material->_shader_program);
 
-					GLuint texture_units = 0;
+					//GLuint texture_units = 0;
 					SetSkeletons(elem.skeleton_index);
 					SetObjectUniforms(elem, cam.view_matrix);
 
@@ -871,7 +871,7 @@ namespace idk::ogl
 	void OpenGLState::LoadShaderImpl()
 	{
 		auto& renderer_vertex_shaders = sys->renderer_vertex_shaders;
-		auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
+		//auto& renderer_fragment_shaders = sys->renderer_fragment_shaders;
 		auto& renderer_geometry_shaders = sys->renderer_geometry_shaders;
 		renderer_geometry_shaders;
 

@@ -20,7 +20,7 @@
 #include <res/EasyFactory.h>
 #include <res/CompiledAssetLoader.h>
 #include <editor/loading/AssimpImporter.h>
-#include <editor/loading/GraphFactory.h>
+#include <gfx/GraphFactory.h>
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>

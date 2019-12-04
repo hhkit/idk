@@ -126,7 +126,7 @@ namespace idk::vkn
 		auto len = w * h * pixel_bytes;
 		char* raw = (char *)malloc(len);
 		std::memset(raw, 0, len);
-		unsigned stride = sizeof(unsigned char);
+		//unsigned stride = sizeof(unsigned char);
 		string_view fml{ raw,len };
 
 		//vector<CharacterCreateInfo> sadList;
