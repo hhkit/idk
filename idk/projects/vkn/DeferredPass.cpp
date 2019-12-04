@@ -1018,6 +1018,7 @@ namespace idk::vkn
 			RenderProcessedDrawCalls(cmd_buffer, accum_stuff[i].DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi, rp, 1);
 			//End Depthless RT renderpass
 			cmd_buffer.endRenderPass();
+			++i;
 		}
 		//Copy depth buffer to render target's depth buffer
 

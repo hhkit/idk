@@ -1,16 +1,7 @@
 #version 450
 
 #define MAX_LIGHTS 8
-
-const int eAlbedoAmbOcc        = 0       ;
-const int eUvMetallicRoughness = 1       ;
-const int eViewPos             = 2       ;
-const int eNormal              = 3       ;
-const int eTangent             = 4       ;
-const int eDepth               = 5       ;
-const int eGBufferSize         = eDepth+1;
-
-S_LAYOUT(2, 0) uniform sampler2D gbuffers[eGBufferSize];
+import /engine_data/shaders/deferred_utils.glsl
 
 U_LAYOUT(3,1) uniform BLOCK(PBRBlock)
 {
@@ -44,11 +35,11 @@ S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
 vec3 Normal()
 {
-	return normalize(texture(gbuffers[eNormal] ,fs_in.uv).rgb );
+	return normalize(Load(gNormal).rgb );
 }
 vec3 Tangent()
 {
-	return normalize(texture(gbuffers[eTangent] ,fs_in.uv).rgb);
+	return normalize(Load(gTangent).rgb);
 }
 #define FRAG_NORMAL Normal()
 #define FRAG_TANGENT Tangent()
@@ -64,19 +55,7 @@ void main()
 {
 
 	// declare initial values here
-	if(texture(gbuffers[eDepth],fs_in.uv).r==1)
-		discard;
-	vec3  view_pos  = texture(gbuffers[eViewPos],fs_in.uv).rgb;
-	vec3  normal    = Normal();
-	vec3  tangent   = Tangent();
-	vec4 uv_met_rou = texture(gbuffers[eUvMetallicRoughness] ,fs_in.uv);
-	vec4 alb_amb_occ= texture(gbuffers[eAlbedoAmbOcc] ,fs_in.uv);
-	vec2  uv        = uv_met_rou.xy;
-	
-	vec3  albedo    = alb_amb_occ.rgb;
-	float metallic  = uv_met_rou.z;
-	float roughness = uv_met_rou.w;
-	float ambient_o = alb_amb_occ.a;
+	LoadGBuffers(view_pos, normal, tangent, specular, roughness, albedo,ambient_o, uv, emissive);
 	
 	vec3 view_dir = -normalize(view_pos);
 
@@ -91,7 +70,7 @@ void main()
 	
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
-		vec3 result = pbr_specular(LightBlk.lights[i], view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
+		vec3 result = pbr_specular(LightBlk.lights[i], view_pos.xyz, normal, reflected, albedo, specular, roughness, ambient_o); 
 		
 		if (LightBlk.lights[i].type == 1)
 		{
@@ -107,9 +86,9 @@ void main()
 		
 		light_accum += result;
 	}
-	vec3 F = mix(vec3(0.04), albedo, metallic);
+	vec3 F = mix(vec3(0.04), albedo, specular);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
 	vec3 kD = 1.0 - kS;
-	kD *= 1.0 - metallic;
+	kD *= 1.0 - specular;
 import /engine_data/shaders/pbr_end.glsl
 }

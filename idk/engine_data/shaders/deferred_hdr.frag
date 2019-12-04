@@ -17,7 +17,7 @@ void main()
 	vec3  specular_light = subpassLoad(specular_light_accum_input).rgb;
 	
 	float depth =min(metallic_depth,specular_depth);
-	vec3 light = specular_light;//(metallic_depth<specular_depth)?metallic_light:specular_light;
+	vec3 light =(metallic_depth<specular_depth)?metallic_light:specular_light;
 	if(depth==1)
 		discard;
 	vec3 color = light/(light+1);

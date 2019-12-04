@@ -1,3 +1,27 @@
+
+const int eAlbedoAmbOcc        = 1       ;
+const int eUvMetallicRoughness = 2       ;
+const int eViewPos             = 3       ;
+const int eNormal              = 4       ;
+const int eTangent             = 5       ;
+const int eDepth               = 6       ;
+const int eGBufferSize         = eDepth+1;
+
+layout(input_attachment_index = eAlbedoAmbOcc       ,set=2, binding=0) uniform subpassInput gAlbAmbOcc;
+layout(input_attachment_index = eUvMetallicRoughness,set=2, binding=1) uniform subpassInput gUvMetRough;
+layout(input_attachment_index = eViewPos            ,set=2, binding=2) uniform subpassInput gViewPos;
+layout(input_attachment_index = eNormal             ,set=2, binding=3) uniform subpassInput gNormal;
+layout(input_attachment_index = eTangent            ,set=2, binding=4) uniform subpassInput gTangent;
+layout(input_attachment_index = eDepth              ,set=2, binding=5) uniform subpassInput gDepth;
+
+
+vec4 Load(subpassInput input_att)
+{
+	return subpassLoad(input_att);
+}
+
+
+
 #define LoadGBuffers(view_pos, normal, tangent, metallic, roughness, albedo,ambient_occ, uv, emissive) \
 if(Load(gDepth).r==1)                                                                           \
 	discard;                                                                                    \
