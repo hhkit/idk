@@ -16,7 +16,7 @@ namespace idk::vkn
 		void GenerateDefaultMeshes()override;
 		unique_ptr<Mesh> GenerateDefaultResource() override;
 		unique_ptr<Mesh> Create()override;
-	private:
 		MeshModder mesh_modder;
+	private:
 	};
 }

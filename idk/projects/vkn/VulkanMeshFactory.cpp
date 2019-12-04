@@ -631,10 +631,10 @@ namespace idk::vkn
 			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
 		}
 
-		const auto fsq_mesh = Mesh::defaults[MeshType::FSQ];
+		const auto fsq_mesh = Mesh::defaults[MeshType::INV_FSQ];
 		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(fsq_mesh.guid);
 
-		const auto inv_fsq_mesh = Mesh::defaults[MeshType::INV_FSQ];
+		const auto inv_fsq_mesh = Mesh::defaults[MeshType::FSQ];
 		pair = GenerateFSQInterleavedBuffers();
 		{
 			auto& [interleaved_buffer, indices] = pair;
