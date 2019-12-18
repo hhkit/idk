@@ -235,6 +235,9 @@
     <ClInclude Include="RenderPassInfo.h">
       <Filter>render\objects</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTask.h">
+      <Filter>render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

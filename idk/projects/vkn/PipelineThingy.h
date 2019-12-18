@@ -26,6 +26,67 @@ namespace idk::vkn
 	template<vk::DescriptorType type>
 	static constexpr size_t desc_type_index = desc_type_info::map<type>();
 
+	class binding_manager 
+	{
+		using set_t = uint32_t;
+		using binding_t = uint32_t;
+		struct set_bindings
+		{
+			vk::DescriptorSetLayout layout;
+			hash_table<uint32_t, vector<std::optional<ProcessedRO::BindingInfo>>>  bindings;
+			DsCountArray total_desc;
+			bool dirty = false;
+
+			vector<ProcessedRO::BindingInfo> scratch_out;
+
+			void SetLayout(vk::DescriptorSetLayout new_layout, const DsCountArray& total_descriptors, bool clear_bindings = false);
+			void Bind(ProcessedRO::BindingInfo info);
+			void Unbind(uint32_t binding);
+			monadic::result< vector<ProcessedRO::BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts);
+		};
+		hash_table<set_t, set_bindings> curr_bindings;
+
+		void AddBinding(set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts)
+		{
+			auto b_itr = curr_bindings.find(set);
+			if (b_itr == curr_bindings.end())
+			{
+				curr_bindings[set];
+				b_itr = curr_bindings.find(set);
+			}
+			b_itr->second.SetLayout(layout, counts);
+		}
+		void RemoveBinding(set_t set)
+		{
+			auto b_itr = curr_bindings.find(set);
+			if (b_itr != curr_bindings.end())
+				curr_bindings.erase(b_itr);
+		}
+		void MarkDirty()
+		{
+			for(auto& [set,bindings]:curr_bindings)
+				bindings.dirty = true;
+		}
+
+		template<typename T>
+		bool BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data, bool skip_if_bound = false);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+		bool BindAttachment(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
+		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+
+		bool is_bound(set_t set,uint32_t binding_index, uint32_t array_index)const noexcept
+		{
+			const auto s_itr = curr_bindings.find(set);
+			if (s_itr == curr_bindings.end())
+				return false;
+			
+			const set_bindings& existing_bindings = s_itr->second;
+			auto& bindings = existing_bindings.bindings;
+			auto itr = bindings.find(binding_index);
+			return  itr != bindings.end() && itr->second.size() > array_index && itr->second[array_index];
+		}
+	};
+
 	class PipelineThingy
 	{
 	public:
