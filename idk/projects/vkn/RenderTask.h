@@ -150,6 +150,8 @@ namespace idk::vkn
 	};
 
 	struct FrameGraphResource {};
+	struct FrameGraphResourceReadOnly {};
+	struct FrameGraphResourceMutable {};
 	struct FrameGraphNode {};
 	struct FrameGraphBuilder 
 	{
@@ -163,28 +165,42 @@ namespace idk::vkn
 		void BeginNode();
 		FrameGraphNode EndNode();
 	};
+
+	namespace FrameGraphDetail
+	{
+		using Context_t = int;
+	}
+
+	struct BaseRenderPass
+	{
+		//BaseRenderPass(FrameGraphBuilder&,...); //<-- First parameter required, will be supplemented when created.
+		virtual void Execute(FrameGraphDetail::Context_t context) = 0;
+		virtual ~BaseRenderPass() = default;
+	};
+
+	//Job: Do deallocation, reuse resources where possible. (Basically a pool)
+	struct TransientResourceManager
+	{
+
+	};
+
 	struct FrameGraph
 	{
 		//Maybe do some tuple get thing based on the pre-registered context?
-		using Context_t = int;
+		using Context_t = FrameGraphDetail::Context_t;
 		template<typename T>
 		using ExecFunc = std::function<void(T&, Context_t context)>;
 
-		struct BaseEntry
-		{
-			virtual void Execute(Context_t context) = 0;
-			//virtual void Execute(ContextTuple_t context_tuple)=0;
-		};
 
 		template<typename T>//,...Args
-		struct Entry
+		struct CallbackRenderPass : BaseRenderPass
 		{
 			T value;
 			ExecFunc<T> execute;
-			template<typename ... Args>
-			Entry(ExecFunc<T>&& func, Args&& ... args) : value{ std::forward<Args>(args)... },execute { std::move(func) }
+			template<typename InitFunc,typename ... Args>
+			CallbackRenderPass(FrameGraphBuilder& graph_builder,InitFunc&& init,ExecFunc<T>&& func, Args&& ... args) : value{ std::forward<Args>(args)... },execute { std::move(func) }
 			{
-
+				init(graph_builder, value);
 			}
 			void Execute(Context_t context)override
 			{
@@ -198,54 +214,63 @@ namespace idk::vkn
 			*/
 		};
 		//Downside: Lambdas are probably out of the question unless we can deduce the appropriate std::function to store them
-		template<typename T, typename Func>
-		struct Entry2;
-		template<typename T, typename ...Args>
-		struct Entry2<T,std::function<void(T&,Args...)>>
-		{
-			
-			using ExecFunc = std::function<void(T&,Args...)>;
-			T value;
-			ExecFunc execute;
-			Entry(ExecFunc&& func) :execute{ std::move(func)} {}
+		//template<typename T, typename Func>
+		//struct Entry2;
+		//template<typename T, typename ...Args>
+		//struct Entry2<T,std::function<void(T&,Args...)>> :BaseRenderPass
+		//{
+		//	
+		//	using ExecFunc = std::function<void(T&,Args...)>;
+		//	T value;
+		//	ExecFunc execute;
+		//	Entry(ExecFunc&& func) :execute{ std::move(func)} {}
 
-			/*
-			void Execute(ContextTuple_t context)override
-			{
-				execute(value, std::get<Args>(context)...);
-			}
-			*/
-		};
+		//	/*
+		//	void Execute(ContextTuple_t context)override
+		//	{
+		//		execute(value, std::get<Args>(context)...);
+		//	}
+		//	*/
+		//};
 
 		template<typename T,typename ... T_CtorArgs>
 		T& addCallBackPass(string_view name,
-			std::function<void(FrameGraphBuilder& builder, T&)> init,
+			const std::function<void(FrameGraphBuilder& builder, T&)>& init,
 			ExecFunc<T> execute,
 			T_CtorArgs&& ... args
 		)
 		{
-			auto ptr = std::make_unique<Entry<T>>(std::move(execute),std::forward<T_CtorArgs(args)...);
-			auto& value = ptr->value;
-			//Begin the node
-			graph_builder.BeginNode();
-			init(graph_builder, value);
-			entries.emplace_back(std::move(ptr));
-			//End the node
-			nodes.emplace_back(graph_builder.EndNode());
-			return value;
+			auto& render_pass = addRenderPass<CallbackRenderPass<T>>(name, init, std::move(execute), std::forward < T_CtorArgs(args)...);
+			return render_pass.value;
 		}
 		template<typename T,typename ...CtorArgs>
 		T& addRenderPass(string_view name,CtorArgs&&...args)
 		{
-			return addCallBackPass<T>(name,
-				[](FrameGraphBuilder&, T&) {},
-				[](T& t, Context_t context) {t.execute(context); },
-				graph_builder, std::forward<CtorArgs>(args)...
-				);
+			graph_builder.BeginNode();
+			auto render_pass = std::make_unique<T>(graph_builder,std::forward <CtorArgs(args)...);
+			nodes.emplace_back(graph_builder.EndNode());
+			T& obj = *render_pass;
+			render_passes.emplace_back(std::move(render_pass));
+			return obj;
+
 		}
+
+		//Process nodes and cull away unnecessary nodes.
+		//Figure out dependencies and synchronization points
+		//Insert new nodes to help transit concrete resources to their corresponding virtual resources
+		//Generate dependency graph
+		void Compile(); 
+
+		//using the resultant graph, allocate the concrete resources needed.
+		void Allocate(TransientResourceManager& rsc);
+
+		//Execute the renderpasses.
+		//Use the dependency graph to split the appropriate jobs into separate threads and sync those.
+		void Execute(Context_t context);
+
 		FrameGraphBuilder graph_builder;
 		vector<FrameGraphNode> nodes;
-		vector<std::unique_ptr<BaseEntry>> entries;
+		vector<std::unique_ptr<BaseRenderPass>> render_passes;
 	};
 
 
