@@ -1,0 +1,20 @@
+What it does:
+It reads the preprocessed file and attempts to find the string of includes that caused a file to be first included.
+
+How to use include_tracer.exe:
+
+First preprocess your stuff using CL/MSVC:
+- CL
+  Use \P argument.
+  
+- MSVC
+  Go to the file, right click -> Properties -> C/C++ -> Preprocessor -> Preprocess to a file.
+  Compile the file (Ctrl+F7)
+  Find the .i file in the intermediate directory.
+
+
+Put the executable next to the file(for convenience) or just remember the relative path from the executable to the file.
+
+Run the executable with -help for more information.
+
+Note that this program is case sensitive. I.E. ResourceManager.h != resourcemanager.h
