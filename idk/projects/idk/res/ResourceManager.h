@@ -174,5 +174,3 @@ namespace idk
 		bool meta_dirty()     const;
 	};
 }
-
-#include "ResourceManager.inl"

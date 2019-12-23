@@ -46,4 +46,3 @@ namespace idk::mono
 	};
 }
 
-#include "ManagedObj.inl"

@@ -55,4 +55,3 @@ namespace std
 		}
 	};
 }
-#include "Guid.inl"

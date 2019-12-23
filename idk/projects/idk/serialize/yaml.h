@@ -80,4 +80,3 @@ namespace idk::yaml
 	};
 }
 
-#include "yaml.inl"

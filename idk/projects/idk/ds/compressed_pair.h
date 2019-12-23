@@ -33,5 +33,3 @@ namespace idk
 		constexpr const T2& second() const noexcept;
 	};
 }
-
-#include "compressed_pair.inl"

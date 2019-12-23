@@ -22,4 +22,3 @@ namespace idk
 	constexpr size_t string_hash(std::string_view str) noexcept;
 }
 
-#include "string_hash.inl"

@@ -54,5 +54,3 @@ namespace idk
 		template<typename Visitor> void visit_impl(policy::pre_order_t, Visitor&& visitor, int& depth, int& last_depth) const;
 	};
 }
-
-#include "slow_tree.inl"

@@ -40,5 +40,3 @@ namespace idk::phys
 
 	raycast_result collide_ray_capsule(const ray& lhs, const capsule& c);
 }
-
-#include "collision_raycast.inl"

@@ -20,5 +20,3 @@ namespace idk
 	template<typename Vec, typename LerpFactor>
 	[[nodiscard]] Vec slerp(const Vec& lhs, const Vec& rhs, LerpFactor lerp);
 }
-
-#include "arith.inl"

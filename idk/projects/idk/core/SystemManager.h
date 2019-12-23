@@ -33,5 +33,3 @@ namespace idk
 		using Helper = detail::SystemHelper<Systems>;
 	};
 }
-
-#include "SystemManager.inl"

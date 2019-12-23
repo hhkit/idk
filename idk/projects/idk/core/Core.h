@@ -38,4 +38,3 @@ namespace idk
 		std::unique_ptr<PImpl> _pimpl;
 	};
 }
-#include "Core.inl"

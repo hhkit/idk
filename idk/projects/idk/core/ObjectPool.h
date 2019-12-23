@@ -59,5 +59,3 @@ namespace idk
 		pool<T> _pool;
 	};
 }
-
-#include "ObjectPool.inl"

@@ -57,5 +57,3 @@ namespace idk
 		SlotId _next_id = 0;
 	};
 }
-
-#include "Signal.inl"

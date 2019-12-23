@@ -11,5 +11,3 @@ namespace idk::constants
 	template<typename T>
 	constexpr T epsilon();
 }
-
-#include "constants.inl"

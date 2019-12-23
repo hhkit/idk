@@ -85,5 +85,3 @@ namespace idk
 		template<typename T> friend struct detail::TableGenerator;
 	};
 }
-
-#include "GameObject.inl"

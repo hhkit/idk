@@ -45,4 +45,3 @@ namespace idk
 	};
 
 }
-#include "linear.inl"

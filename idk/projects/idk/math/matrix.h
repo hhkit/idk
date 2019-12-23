@@ -94,5 +94,3 @@ namespace idk
 	extern template tmat<float, 3, 3> operator*(const tmat<float, 3, 3> & lhs, const tmat<float, 3, 3> & rhs);
 	extern template tmat<float, 4, 4> operator*(const tmat<float, 4, 4> & lhs, const tmat<float, 4, 4> & rhs);
 }
-
-#include "Matrix.inl"

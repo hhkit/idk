@@ -73,5 +73,3 @@ namespace idk
     template<typename T>
     constexpr auto is_basic_serializable_v = is_basic_serializable<T>::value;
 }
-
-#include "meta.inl"

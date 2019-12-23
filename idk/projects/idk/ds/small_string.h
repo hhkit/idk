@@ -226,5 +226,3 @@ namespace std
 		}
 	};
 }
-
-#include "small_string.inl"

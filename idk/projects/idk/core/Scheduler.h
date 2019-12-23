@@ -104,5 +104,3 @@ namespace idk
 		friend Scheduler;
 	};
 }
-
-#include "Scheduler.inl"

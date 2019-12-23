@@ -42,4 +42,3 @@ namespace idk
 	template<typename T>
 	constexpr tmat<T, 4, 4> invert_rotation(const tmat<T, 4, 4>&);
 }
-#include "matrix_transforms.inl"

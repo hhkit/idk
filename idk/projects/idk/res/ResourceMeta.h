@@ -39,5 +39,3 @@ namespace idk
 	};
 
 }
-
-#include "ResourceMeta.inl"
