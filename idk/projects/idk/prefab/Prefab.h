@@ -2,6 +2,7 @@
 
 #include <res/Resource.h>
 #include <prefab/PrefabData.h>
+#include <res/SaveableResource.h>
 
 namespace idk
 {

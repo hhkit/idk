@@ -2,6 +2,7 @@
 
 #include <idk.h>
 #include <util/enum.h>
+#include <res/Guid.h>
 
 namespace idk::shadergraph
 {

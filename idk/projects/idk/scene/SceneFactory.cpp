@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SceneFactory.h"
 #include <res/MetaBundle.h>
-
+#include <core/GameState.inl>
 namespace idk
 {
 	unique_ptr<Scene> SceneFactory::GenerateDefaultResource()

@@ -15,6 +15,7 @@
 #include <FMOD/core/fmod.hpp> //FMOD Core
 #include <FMOD/core/fmod_errors.h> //ErrorString
 #include <audio/AudioSystem.h> //AudioSystem
+#include <res/ResourceManager.h>
 #include <sstream> //AudioSystem
 
 namespace idk

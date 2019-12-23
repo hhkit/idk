@@ -3,6 +3,7 @@
 #include "LogSingleton.h"
 
 #include "LogSystem.h"
+#include <cstdarg>
 
 namespace idk
 {

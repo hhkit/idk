@@ -3,6 +3,7 @@
 #include <res/Resource.h>
 #include <res/ResourceMeta.h>
 #include <gfx/TextureRenderMeta.h>
+#include <file/PathHandle.h>
 
 namespace idk {
 

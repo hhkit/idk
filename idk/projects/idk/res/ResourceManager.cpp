@@ -14,7 +14,7 @@
 #include <IncludeResources.h>
 
 #include "ResourceManager.h"
-
+#include <scene/Scene.inl>
 
 namespace idk
 {

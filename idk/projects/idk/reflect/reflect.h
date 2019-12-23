@@ -342,3 +342,6 @@ namespace idk::reflect
 #undef property_vend_cpp
 #undef property_friend
 #undef property_vtable
+
+#undef max
+#undef min

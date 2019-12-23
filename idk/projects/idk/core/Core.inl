@@ -1,5 +1,5 @@
-#include "Core.h"
 #pragma once
+#include "Core.h"
 namespace idk
 {
 	template<typename T> T& Core::GetSystem()

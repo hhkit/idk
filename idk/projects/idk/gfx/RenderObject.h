@@ -8,6 +8,9 @@
 #include <math/rect.h>
 #include <gfx/FontData.h>
 #include <common/LayerMask.h>
+#include <gfx/CameraClear.h>
+
+#include <core/Handle.h>//RenderObject::obj_id
 
 namespace idk
 {

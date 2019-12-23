@@ -1,5 +1,5 @@
-#include "Signal.h"
 #pragma once
+#include "Signal.h"
 
 namespace idk
 {

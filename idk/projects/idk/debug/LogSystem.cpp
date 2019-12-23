@@ -5,6 +5,7 @@
 
 #include <core/Scheduler.h>
 #include <file/FileSystem.h>
+#include <serialize/text.h>
 namespace idk
 {
 	static auto curr_datetime()

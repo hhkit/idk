@@ -1,5 +1,5 @@
 #include "stdafx.h"
-
+#include "AnimationState.h"
 namespace idk {
 	BasicAnimationState* AnimationState::GetBasicState()
 	{

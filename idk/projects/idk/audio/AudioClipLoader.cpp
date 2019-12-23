@@ -18,7 +18,7 @@
 //Dependency includes
 #include <FMOD/core/fmod.hpp> //FMOD Core
 #include <FMOD/core/fmod_errors.h> //ErrorString
-
+#include <res/ResourceManager.h>
 
 namespace idk {
 	ResourceBundle AudioClipLoader::LoadFile(PathHandle filePath, const MetaBundle& metabundle)

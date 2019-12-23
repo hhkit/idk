@@ -11,6 +11,7 @@
 #include <mono/metadata/reflection.h>
 
 #include <core/Scheduler.h>
+#include <core/NullHandleException.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <IncludeSystems.h>

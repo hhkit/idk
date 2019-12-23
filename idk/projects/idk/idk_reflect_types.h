@@ -63,7 +63,7 @@ namespace idk::reflect
 		, UniformInstanceValue
 		, CameraClear
 		, LightVariant
-        , variant<BasicAnimationState, BlendTree>
+//        , variant<BasicAnimationState, BlendTree>
 		, CollidableShapes
 
         // macro enums

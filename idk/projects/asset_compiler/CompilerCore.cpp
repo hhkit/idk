@@ -10,6 +10,7 @@
 #include <res/ResourceExtension.h>
 
 #include "IAssetLoader.h"
+#include <fstream>
 
 namespace fs = std::filesystem;
 

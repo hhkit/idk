@@ -3,7 +3,7 @@
 #include <idk.h>
 #include <gfx/TextAnchor.h>
 #include <gfx/TextAlignment.h>
-
+#include <res/ResourceHandle.h>
 namespace idk
 {
 	struct FontPoint

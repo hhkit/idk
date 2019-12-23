@@ -937,6 +937,7 @@
     <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\IAssetLoader.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
+    <ClInclude Include="pch_common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

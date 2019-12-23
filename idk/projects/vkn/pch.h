@@ -9,6 +9,7 @@
 #include <idk.h>
 
 // add headers that you want to pre-compile here
+#include <pch_common.h>
 #include "framework.h"
 #define NOMINMAX
 #define VK_USE_PLATFORM_WIN32_KHR

@@ -1,6 +1,7 @@
 #pragma once
 #include <res/Guid.h>
 #include <res/ResourceMeta.h>
+#include <res/ResourceHandle.h>
 #include <meta/comparator.h>
 namespace idk
 {

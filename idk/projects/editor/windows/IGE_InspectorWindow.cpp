@@ -40,6 +40,7 @@ of the editor.
 #include <meta/variant.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <prefab/PrefabUtility.h>
+#include <core/Handle.inl>
 
 #include <IncludeComponents.h>
 #include <IncludeResources.h>

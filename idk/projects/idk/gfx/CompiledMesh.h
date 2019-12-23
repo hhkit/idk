@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <gfx/vertex_descriptor.h>
 #include <res/ResourceExtension.h>
-
+#include <math/shapes/sphere.h>
 namespace idk
 {
 	struct CompiledBuffer

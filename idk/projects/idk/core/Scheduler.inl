@@ -1,5 +1,6 @@
 #include "Scheduler.h"
 #include <core/Core.h>
+#include <core/GameState.inl>
 #pragma once
 namespace idk
 {

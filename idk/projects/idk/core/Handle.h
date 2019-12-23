@@ -104,5 +104,3 @@ namespace std
 		}
 	};
 }
-
-#include "Handle.inl"

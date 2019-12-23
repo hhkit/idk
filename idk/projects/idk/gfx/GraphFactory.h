@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <res/ResourceFactory.h>
 #include <gfx/ShaderGraph.h>
+#include <res/FileLoader.h>
 namespace idk
 {
 	class GraphFactory

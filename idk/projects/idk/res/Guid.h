@@ -1,6 +1,8 @@
 #pragma once
 #include <compare>
 #include <objbase.h>
+#undef max
+#undef min
 #include <idk.h>
 #include <util/hash_combine.h>
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <stack>
 
+#include <reflect/dynamic.inl>
 #include <script/ManagedType.h>
 #include <script/ValueUnboxer.h>
 #include <script/ScriptSystem.h>

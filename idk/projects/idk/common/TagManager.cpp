@@ -3,6 +3,7 @@
 #include <common/Tag.h>
 #include <core/GameObject.h>
 #include <iostream>
+#include <serialize/text.h>
 
 namespace idk
 {

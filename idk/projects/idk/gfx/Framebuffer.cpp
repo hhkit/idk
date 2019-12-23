@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Framebuffer.h"
+#include <res/ResourceManager.h>
 namespace idk
 {
 
@@ -14,4 +15,5 @@ namespace idk
 	{
 		return num_layers;
 	}
+	Attachment::~Attachment() { if (own_buffer)Core::GetResourceManager().Release(buffer); own_buffer = false; }
 }

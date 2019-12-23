@@ -2,7 +2,7 @@
 #include <res/Resource.h>
 #include <res/ResourceMeta.h>
 #include <gfx/Texture.h>
-
+#include <res/SaveableResource.h>
 namespace idk
 {
 	struct RenderTargetMeta

@@ -128,6 +128,8 @@ Variables:
 #include <FMOD/core/fmod_errors.h> //ErrorString
 
 #include <sstream> //ostringstream
+#include <res/ResourceManager.h>
+#include <core/GameState.inl>
 
 namespace idk
 {

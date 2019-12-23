@@ -4,7 +4,7 @@
 #include <editor/DragDropTypes.h>
 #include <IncludeResources.h>
 #include <map>
-
+#include <scene/Scene.h>
 namespace idk
 {
     bool ImGuidk::InputResourceEx(const char* label, GenericResourceHandle* handle, [[maybe_unused]] size_t base_resource_id)

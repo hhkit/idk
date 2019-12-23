@@ -1,6 +1,6 @@
 #pragma once
 #include <idk.h>
-
+#include <res/FileLoader.h>
 #include <vkn/VknTextureLoader.h>
 namespace idk::vkn
 {
