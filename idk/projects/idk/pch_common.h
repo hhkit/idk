@@ -6,9 +6,9 @@
 #include <res/Resource.h>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>
+#include <core/SystemManager.inl>
 //end temp
 #include <core/GameState.inl>
-#include <core/SystemManager.inl>
 #include <debug/Log.h>
 #include <event/signal.inl>
 #include <core/Handle.inl>
