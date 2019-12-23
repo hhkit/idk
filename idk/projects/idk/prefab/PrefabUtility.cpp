@@ -9,6 +9,7 @@
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
+#include <ds/slow_tree.inl>
 #include <script/MonoBehavior.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>

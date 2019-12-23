@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "FramebufferFactory.h"
+#include <res/ResourceManager.h>
+
 namespace idk
 {
 	RscHandle<FrameBuffer> FrameBufferFactory::Create(const FrameBufferInfo& info, SpecializedInfo* specialized_info)

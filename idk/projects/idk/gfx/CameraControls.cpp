@@ -22,8 +22,8 @@
 
 
 //Math
-#include <math/matrix_transforms.h>
-#include <math/matrix_decomposition.h>
+#include <math/matrix_transforms.inl>
+#include <math/matrix_decomposition.inl>
 
 namespace idk {
 	vec3 CameraControls::currentTarget() const

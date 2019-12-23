@@ -18,6 +18,9 @@
 #include <file/FileSystem.h>
 #include <gfx/ShaderGraph.h>
 #include <parallel/ThreadPool.h>
+#include <util/string_hash.inl>
+#include <res/ResourceManager.h>
+
 namespace idk
 {
 	void TestSystem::Init()

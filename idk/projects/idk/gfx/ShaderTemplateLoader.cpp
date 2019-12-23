@@ -3,6 +3,7 @@
 #include <gfx/ShaderTemplate.h>
 #include <res/MetaBundle.h>
 #include <util/ioutils.h>
+#include <res/ResourceManager.h>
 
 namespace idk
 {

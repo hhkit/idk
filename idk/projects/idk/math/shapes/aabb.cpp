@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "aabb.h"
-#include <ds/zip.h>
+#include <ds/zip.inl>
 
 namespace idk
 {

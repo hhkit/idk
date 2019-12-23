@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include <ds/ranged_for.h>
+#include <ds/ranged_for.inl>
 #include <file/FileSystem.h>
 #include <res/MetaBundle.h>
 #include <serialize/text.h>
@@ -15,6 +15,7 @@
 
 #include "ResourceManager.h"
 #include <scene/Scene.inl>
+#include <res/ResourceUtils.inl>
 
 namespace idk
 {

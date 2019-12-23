@@ -13,6 +13,7 @@
 #include <ui/Canvas.h>
 #include <common/Transform.h>
 #include <app/Application.h>
+#include <res/ResourceManager.h>
 
 #include <gfx/DebugRenderer.h>
 #include <gfx/Mesh.h>
@@ -23,6 +24,7 @@
 #include <meta/comparator.inl>
 
 #include <math/shapes/frustum.h>
+#include <math/matrix_transforms.inl>
 
 #include <parallel/ThreadPool.h>
 

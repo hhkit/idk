@@ -1,14 +1,15 @@
 #include "stdafx.h"
 #include "text.h"
 
-#include <reflect/reflect.h>
-#include <serialize/yaml.h>
+#include <reflect/reflect.inl>
+#include <serialize/yaml.inl>
 
 #include <core/GameObject.h>
 #include <scene/Scene.h>
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <script/MonoBehavior.h>
+#include <script/ScriptSystem.h>
 
 namespace idk
 {

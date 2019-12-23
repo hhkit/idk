@@ -2,6 +2,8 @@
 #include <stdafx.h>
 #include <gfx/Framebuffer.h>
 #include <gfx/Texture.h>
+#include <res/ResourceFactory.h>
+
 namespace idk
 {
 	//using AttachmentInfo = int;

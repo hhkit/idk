@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include "quaternion.h"
+#include <math/angle.inl>
 
 namespace idk
 {

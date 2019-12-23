@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <gfx/Material.h>
 #include <res/ResourceFactory.h>
+#include <res/FileLoader.h>
 
 namespace idk
 {

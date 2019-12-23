@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RenderTarget.h"
+#include <res/ResourceManager.h>
 
 namespace idk
 {

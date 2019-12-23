@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "text.h"
 
-#include <reflect/reflect.h>
+#include <reflect/reflect.inl>
 #include <serialize/yaml.h>
 
 #include <core/GameObject.h>

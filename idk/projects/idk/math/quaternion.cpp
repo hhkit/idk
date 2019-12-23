@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "quaternion.h"
+#include "quaternion.inl"
 
 namespace idk::math
 {

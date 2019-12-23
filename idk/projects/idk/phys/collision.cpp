@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <phys/raycasts/collision_raycast.h>
+#include <math/linear.h>
+
 namespace idk::phys
 {
 	bool epsilon_equal(real lhs, real rhs)

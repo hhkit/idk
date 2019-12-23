@@ -18,6 +18,7 @@
 
 #include <debug/LogSystem.h>
 #include <script/ValueBoxer.h>
+#include <script/ValueUnboxer.h>
 #include <script/MonoBinder.h>
 
 #include <util/ioutils.h>

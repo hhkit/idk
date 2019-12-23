@@ -6,6 +6,7 @@
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <util/ioutils.h>
+#include <res/Guid.inl>
 
 namespace idk
 {

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SystemManager.h"
 #include <IncludeSystems.h>
-#include <ds/ranged_for.h>
+#include <ds/ranged_for.inl>
 
 namespace idk
 {

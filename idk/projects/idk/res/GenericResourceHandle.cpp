@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "GenericResourceHandle.h"
+#include <res/ResourceUtils.inl>
 
 namespace idk
 {

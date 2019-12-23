@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ShaderProgram.h"
 #include <gfx/IShaderProgramFactory.h>
+#include <res/ResourceManager.h>
 
 namespace idk
 {

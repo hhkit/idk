@@ -2,6 +2,8 @@
 #include <memory>
 #include <math/shapes.h>
 #include <core/ISystem.h>
+#include <res/ResourceHandle.h>
+
 namespace idk
 {
 class DebugRenderer 

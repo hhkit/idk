@@ -1,5 +1,5 @@
 #pragma once
-#include <math/constants.inl>
+
 #include "idk.h"
 #include <core/Core.inl>
 //temp
@@ -12,6 +12,7 @@
 #include <debug/Log.h>
 #include <event/signal.inl>
 #include <core/Handle.inl>
+#include <meta/casts.inl>
 
 #undef min
 #undef max

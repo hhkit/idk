@@ -3,6 +3,7 @@
 #include <core/GameObject.h>
 #include <math/matrix_transforms.h>
 #include <math/matrix_decomposition.h>
+#include <math/quaternion.inl>
 
 namespace idk
 {

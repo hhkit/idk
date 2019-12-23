@@ -4,6 +4,8 @@
 #include <res/MetaBundle.h>
 #include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
+#include <res/ResourceManager.h>
+
 namespace idk
 {
 	unique_ptr<Material> MaterialFactory::GenerateDefaultResource()

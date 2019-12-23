@@ -5,8 +5,8 @@
 
 #include "Vector.h"
 #include "Matrix.h"
-#include <ds/range.h>
-#include <ds/zip.h>
+#include <ds/range.inl>
+#include <ds/zip.inl>
 
 namespace idk
 {

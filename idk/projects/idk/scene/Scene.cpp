@@ -3,7 +3,9 @@
 #include <scene/SceneManager.h>
 #include <core/GameObject.h>
 #include <util/ioutils.h>
-#include <res/ResourceBundle.h>
+#include <res/ResourceManager.h>
+#include <file/FileSystem.h>
+#include <serialize/text.h>
 
 namespace idk
 {

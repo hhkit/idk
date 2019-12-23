@@ -1,5 +1,5 @@
-#include <stdafx.h>
-#include "collision_raycast.h"
+#include "stdafx.h"
+#include "collision_raycast.inl"
 
 #include <iostream>
 

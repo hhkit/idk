@@ -8,6 +8,7 @@
 #include <math/arith.h>
 #include "scene/SceneManager.h"
 #include "AnimationSystem.h"
+#include <serialize/text.inl>
 
 #include "math/matrix_decomposition.h"
 

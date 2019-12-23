@@ -4,9 +4,12 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <res/MetaBundle.h>
+#include <res/ResourceManager.h>
 #include <scene/SceneFactory.h>
 #include <serialize/text.h>
 #include <util/ioutils.h>
+#include <file/FileSystem.h>
+#include <core/ObjectPool.inl>
 
 #include <iostream>
 

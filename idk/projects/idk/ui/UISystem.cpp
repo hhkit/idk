@@ -6,6 +6,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <scene/SceneManager.h>
+#include <ds/slow_tree.inl>
 #include <gfx/MaterialInstance.h>
 #include <gfx/Camera.h>
 #include <gfx/RenderTarget.h>

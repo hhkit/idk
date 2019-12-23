@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <math/shapes/halfspace.h>
+#include <math/shapes/sphere.h>
 #include <util/enum.h>
 
 namespace idk

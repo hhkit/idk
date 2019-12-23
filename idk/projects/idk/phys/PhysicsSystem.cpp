@@ -16,6 +16,7 @@
 
 #include <script/MonoBehavior.h>
 #include <script/MonoFunctionInvoker.h>
+#include <script/ScriptSystem.h>
 
 #include <math/matrix_decomposition.h>
 

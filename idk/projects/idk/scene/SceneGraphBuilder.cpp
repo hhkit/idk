@@ -2,6 +2,7 @@
 #include "SceneGraphBuilder.h"
 #include <core/GameObject.h>
 #include <core/GameState.h>
+#include <core/ObjectPool.inl>
 #include <common/Transform.h>
 
 namespace idk
