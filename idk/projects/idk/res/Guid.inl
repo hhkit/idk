@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Guid.h"
+
 namespace idk
 {
 	constexpr Guid::Guid() noexcept

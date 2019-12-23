@@ -4,6 +4,7 @@
 #include <ds/small_string.h>
 #include <serialize/text.h>
 #include <file/FileSystem.h>
+#include <reflect/reflect.inl>
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <common/Name.h>
@@ -12,6 +13,8 @@
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 #include <script/ManagedObj.h>
+#include <res/ResourceManager.h>
+
 namespace idk
 {
 

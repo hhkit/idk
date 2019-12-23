@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GraphFactory.h"
+#include <res/ResourceManager.h>
 #include <res/MetaBundle.h>
 #include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>

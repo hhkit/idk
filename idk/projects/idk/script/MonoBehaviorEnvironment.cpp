@@ -19,6 +19,7 @@
 
 #include <core/GameObject.h>
 #include <scene/SceneManager.h>
+#include <file/FileSystem.h>
 #include <util/ioutils.h>
 
 namespace idk::mono

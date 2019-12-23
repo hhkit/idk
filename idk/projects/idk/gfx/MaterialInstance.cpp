@@ -2,6 +2,7 @@
 #include "MaterialInstance.h"
 #include <gfx/ShaderGraph_data.h>
 #include <meta/variant.h>
+#include <serialize/text.inl>
 
 namespace idk
 {

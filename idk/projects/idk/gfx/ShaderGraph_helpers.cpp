@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ShaderGraph_helpers.h"
 #include <gfx/ShaderGraph_data.h>
+#include <serialize/text.inl>
 #include <regex>
 
 namespace idk::shadergraph::helpers

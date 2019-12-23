@@ -4,6 +4,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <gfx/MaterialInstance.h>
+#include <res/ResourceManager.h>
 
 namespace idk
 {

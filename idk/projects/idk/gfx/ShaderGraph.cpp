@@ -5,6 +5,7 @@
 #include <gfx/ShaderTemplate.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderGraph_helpers.h>
+#include <serialize/text.inl>
 #include <regex>
 
 namespace idk::shadergraph

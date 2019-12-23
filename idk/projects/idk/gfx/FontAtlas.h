@@ -4,6 +4,7 @@
 #include <res/ResourceMeta.h>
 #include <gfx/TextureRenderMeta.h>
 #include <file/PathHandle.h>
+#include <res/Guid.inl>
 
 namespace idk {
 

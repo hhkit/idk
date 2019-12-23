@@ -3,6 +3,7 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <prefab/PropertyOverride.h>
+#include <res/ResourceHandle.h>
 
 namespace idk
 {

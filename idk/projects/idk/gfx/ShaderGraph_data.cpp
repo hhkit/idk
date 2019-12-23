@@ -2,7 +2,8 @@
 #include "ShaderGraph_data.h"
 #include <regex>
 #include <sstream>
-#include <filesystem>
+#include <fstream>
+#include <file/FileSystem.h>
 namespace fs = std::filesystem;
 
 namespace idk::shadergraph

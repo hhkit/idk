@@ -9,6 +9,7 @@
 #include <math/arith.h>
 #include <math/matrix_transforms.h>
 #include <scene/SceneManager.h>
+#include <serialize/text.h>
 
 #include <iostream>
 

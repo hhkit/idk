@@ -25,7 +25,7 @@
 #include <ds/small_string.h>
 #include <debug/idk_assert.h>
 #include <math/color.h>
-#include <math/constants.h>
+#include <math/constants.inl>
 #include <math/arith.h>
 #include <math/angle.h>
 #include <math/vector.h>

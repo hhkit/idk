@@ -10,6 +10,8 @@
 #include <gfx/Camera.h>
 #include <gfx/RenderTarget.h>
 #include <math/matrix_transforms.h>
+#include <math/quaternion.inl>
+#include <res/ResourceManager.h>
 
 namespace idk
 {
