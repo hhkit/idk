@@ -1,4 +1,5 @@
 #pragma once
+#include "variant.h"
 namespace idk
 {
 	namespace detail

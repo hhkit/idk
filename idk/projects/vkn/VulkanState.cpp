@@ -1,5 +1,10 @@
 #include "pch.h"
 
+#include <meta/tag.inl>
+#include <math/linear.inl>
+#include <meta/tuple.inl>
+#include <vkn/VulkanState.inl>
+
 #include <set>
 #include <map>
 
@@ -7,7 +12,6 @@
 #include <math/matrix_transforms.h>
 #include <gfx/buffer_desc.h>
 
-#include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>

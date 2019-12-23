@@ -4,7 +4,8 @@
 
 #include <idk.h>
 #include <math/comparable.h>
-#include <meta/meta.h>
+#include <meta/meta.inl>
+#include <meta/tuple.inl>
 #include "Handleables.h"
 
 namespace idk::reflect

@@ -2,7 +2,7 @@
 
 #include <memory> // allocator
 #include <string>
-#include <ds/compressed_pair.h>
+#include <ds/compressed_pair.inl>
 #include <util/string_hash.h>
 
 namespace idk

@@ -16,6 +16,8 @@
 #include <vkn/utils/utils.inl>
 #include <vkn/VknFrameBuffer.h>
 
+#include <vkn/PipelineBinders.inl>
+
 namespace idk::vkn
 {
 	void BindCameraStuff(PipelineThingy& the_interface, const CameraData& cam)

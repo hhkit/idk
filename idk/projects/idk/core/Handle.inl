@@ -3,7 +3,8 @@
 #include "Handle.h"
 #include "GameState.h"
 #include <core/NullHandleException.h>
-#include <meta/variant.h>
+#include <meta/variant.inl>
+#include <assert.h>
 
 namespace idk
 {
