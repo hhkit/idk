@@ -103,4 +103,3 @@ namespace idk::vkn
 }
 MARK_NON_COPY_CTORABLE(idk::vkn::UboManager::DataPair)
 MARK_NON_COPY_CTORABLE(idk::vkn::UboManager)
-#include "UboManager.inl"

@@ -254,4 +254,3 @@ namespace idk::vkn
 	};
 }
 
-#include <vkn/VulkanState.inl>

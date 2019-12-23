@@ -122,4 +122,3 @@ struct DescriptorPoolsManager
 	};
 };
 }
-#include "DescriptorPoolsManager.inl"

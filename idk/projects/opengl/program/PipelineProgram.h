@@ -30,4 +30,3 @@ namespace idk::ogl
 		vector<RscHandle<ShaderProgram>> _programs;
 	};
 }
-#include "PipelineProgram.inl"

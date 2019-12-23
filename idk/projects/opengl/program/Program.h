@@ -49,4 +49,3 @@ namespace idk::ogl
 		vector<Shader> _shaders{};
 	};
 }
-#include "Program.inl"
