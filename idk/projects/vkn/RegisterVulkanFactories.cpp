@@ -21,6 +21,7 @@
 #include <vkn/VulkanFontAtlasFactory.h>
 #include <vkn/VknRenderTargetLoader.h>
 #include <vkn/VulkanGlslLoader.h>
+#include <res/ResourceManager.inl>
 namespace idk::vkn
 {
 

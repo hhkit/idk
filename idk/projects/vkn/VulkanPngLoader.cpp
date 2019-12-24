@@ -6,6 +6,7 @@
 #include <vkn/VknTextureLoader.h>
 #include <sstream>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <res/ResourceManager.inl>
 namespace idk::vkn
 {
 	VulkanView& View();

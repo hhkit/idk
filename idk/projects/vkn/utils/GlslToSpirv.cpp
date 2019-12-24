@@ -12,6 +12,7 @@
 #include <gfx/ShaderIncluder.h>
 #include <file/FileSystem.h>
 #include <core/core.h>
+#include <serialize/text.inl>
 namespace idk::vkn
 {
 	constexpr auto replacer = R"(

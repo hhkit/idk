@@ -7,6 +7,7 @@
 #include <vkn/VknFontAtlas.h>
 #include <vkn/utils/utils.h> //ReverseMap
 #include <iostream>
+#include <res/ResourceManager.inl>
 
 namespace idk::vkn
 {

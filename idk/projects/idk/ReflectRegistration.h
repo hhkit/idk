@@ -1,7 +1,7 @@
 #pragma once
 
-#include <reflect/reflect.h>
-#include <core/Core.h>
+#include <reflect/reflect.inl>
+#include <core/Core.inl>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <IncludeSystems.h>

@@ -2,6 +2,7 @@
 #include "CubemapRenderer.h"
 #include <math/matrix_transforms.h>
 #include "RenderUtil.h"
+#include <res/ResourceManager.h>
 
 namespace idk::vkn
 {
@@ -406,6 +407,12 @@ namespace idk::vkn
 	void CubemapRenderer::RenderImpl()
 	{
 		//WIP
+	}
+
+	CubemapRenderer::UniqueVknFrameBuffer::~UniqueVknFrameBuffer()
+	{
+		if (frame_buffer)
+			Core::GetResourceManager().Release(*frame_buffer);
 	}
 
 }

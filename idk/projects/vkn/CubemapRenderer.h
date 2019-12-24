@@ -59,11 +59,7 @@ namespace idk::vkn
 			UniqueVknFrameBuffer& operator=(const UniqueVknFrameBuffer&) = delete;
 			UniqueVknFrameBuffer& operator=(UniqueVknFrameBuffer&&) = default;
 
-			~UniqueVknFrameBuffer()
-			{
-				if (frame_buffer)
-					Core::GetResourceManager().Release(*frame_buffer);
-			}
+			~UniqueVknFrameBuffer();
 		};
 
 		//circular_buffer<UniqueVknFrameBuffer,32> pool;

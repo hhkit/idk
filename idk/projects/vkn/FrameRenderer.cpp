@@ -38,6 +38,7 @@
 #include <mutex>
 #include <queue>
 #include <parallel/ThreadPool.h>
+#include <res/ResourceManager.inl>
 
 
 namespace idk::vkn

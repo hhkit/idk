@@ -7,6 +7,7 @@
 #include <vkn/VknRenderTarget.h>
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <res/ResourceManager.inl>
 
 namespace idk::vkn
 {

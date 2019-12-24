@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include <vkn/VknFontAtlas.h>
+#include <res/ResourceManager.inl>
 
 namespace idk::vkn {
 	RscHandle<Texture> VknFontAtlas::Tex() const noexcept

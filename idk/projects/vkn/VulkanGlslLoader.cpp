@@ -7,6 +7,7 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/utils/GlslToSpirv.h>
 #include <util/ioutils.h>
+#include <res/ResourceManager.inl>
 
 namespace idk::vkn
 {

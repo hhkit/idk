@@ -4,18 +4,23 @@
 #include <vkn/ProcessedRO.h>
 #include <gfx/pipeline_config.h>
 
+
 #include <vkn/vulkan_enum_info.h>
 #include <vkn/UboManager.h>
 #include <vkn/ShaderModule.h> //UboInfo
 #include <vkn/VulkanHashes.h>
 #include <vkn/DescriptorUpdateData.h>
 #include <vkn/DescriptorCountArray.h>
+#include <ds/result.h>
+#include <vkn/BufferHelpers.inl>
 namespace idk
 {
 	struct renderer_attributes;
 }
 namespace idk::vkn
 {
+	struct VknTexture;
+
 	class VulkanMesh;
 	struct DescriptorUpdateData;
 	struct VknCubemap;

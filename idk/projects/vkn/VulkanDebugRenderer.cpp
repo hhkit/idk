@@ -21,6 +21,7 @@
 #include "VulkanDebugRenderer.h"
 
 #include <math/shapes/ray.h>
+#include <res/ResourceManager.inl>
 
 
 namespace idk::vkn

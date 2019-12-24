@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <gfx/Camera.h>
-#include <vkn/utils/utils.h>
+#include <vkn/utils/utils.inl>
 namespace idk
 {
 

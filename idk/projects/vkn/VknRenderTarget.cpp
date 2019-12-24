@@ -7,6 +7,7 @@
 #include <vkn/VknTextureLoader.h>
 
 #include <vkn/VknRenderTargetFactory.h>
+#include <res/ResourceManager.inl>
 
 namespace idk::vkn
 {

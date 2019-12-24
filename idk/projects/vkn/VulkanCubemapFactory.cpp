@@ -9,6 +9,7 @@
 #include <vkn/VknCubemapLoader.h>
 #include <fstream>
 #include <sstream>
+#include <res/ResourceManager.inl>
 namespace idk::vkn
 {
 

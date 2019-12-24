@@ -1,6 +1,8 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
 #include <vkn/MemoryAllocator.h>
+#include <vkn/BufferHelpers.inl>
+
 namespace idk::vkn::hlp
 {
 	// buffer that acts like a vector

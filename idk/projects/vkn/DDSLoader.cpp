@@ -7,6 +7,7 @@
 #include <core/core.h>
 #include <vkn/VulkanView.h>
 #include <res/MetaBundle.h>
+#include <res/ResourceManager.inl>
 
 namespace idk::vkn
 {

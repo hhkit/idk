@@ -23,6 +23,7 @@
 #include <vkn/VknCubeMapLoader.h>
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VknFrameBufferFactory.h>
+#include <res/ResourceManager.inl>
 
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {

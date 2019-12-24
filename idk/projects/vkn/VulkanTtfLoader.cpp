@@ -5,6 +5,7 @@
 #include <vkn/VknFontAtlasLoader.h>
 #include <sstream>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <res/ResourceManager.inl>
 
 //Dep
 #include <ft2build.h>

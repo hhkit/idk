@@ -3,6 +3,7 @@
 #include <res/ResourceMeta.h>
 #include <res/ResourceHandle.h>
 #include <meta/comparator.h>
+#include <res/ResourceManager.inl>
 namespace idk
 {
 	struct ResourceBundle;

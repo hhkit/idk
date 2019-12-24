@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "ProcessedRO.h"
+#include <vkn/utils/utils.inl>
 namespace idk::vkn
 {
 
