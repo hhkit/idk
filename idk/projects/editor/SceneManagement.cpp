@@ -11,6 +11,8 @@
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
 #include <script/ScriptSystem.h>
+#include <res/ResourceManager.inl>
+#include <serialize/text.inl>
 
 #include <util/ioutils.h>
 

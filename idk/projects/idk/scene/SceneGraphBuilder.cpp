@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "SceneGraphBuilder.h"
 #include <core/GameObject.h>
-#include <core/GameState.h>
-#include <core/ObjectPool.inl>
+#include <core/GameState.inl>
 #include <common/Transform.h>
 
 namespace idk

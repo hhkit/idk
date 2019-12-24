@@ -16,6 +16,7 @@
 #include <idk/gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <anim/Animator.h>
+#include <res/ResourceManager.inl>
 //*/
 #include <iostream>
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "small_string.h"
+#include <ds/compressed_pair.inl>
 #include <limits>
 #include <algorithm>
 

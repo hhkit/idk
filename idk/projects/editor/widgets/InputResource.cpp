@@ -2,9 +2,11 @@
 #include "InputResource.h"
 #include <imgui/imgui_internal.h>
 #include <editor/DragDropTypes.h>
+#include <scene/Scene.h>
+#include <res/ResourceManager.inl>
 #include <IncludeResources.h>
 #include <map>
-#include <scene/Scene.h>
+
 namespace idk
 {
     bool ImGuidk::InputResourceEx(const char* label, GenericResourceHandle* handle, [[maybe_unused]] size_t base_resource_id)

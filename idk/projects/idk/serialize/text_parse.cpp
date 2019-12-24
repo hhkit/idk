@@ -10,6 +10,7 @@
 #include <common/Name.h>
 #include <script/MonoBehavior.h>
 #include <script/ScriptSystem.h>
+#include <script/ManagedObj.inl>
 
 namespace idk
 {

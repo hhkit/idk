@@ -1,6 +1,8 @@
 #pragma once
 #include <utility>
 #include "GameState.h"
+#include <core/ObjectPool.inl>
+
 namespace idk
 {
 	template<typename T>

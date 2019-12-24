@@ -2,6 +2,8 @@
 #include "CMD_ModifyProperty.h"
 #include <script/ManagedObj.h>
 #include <script/MonoBehavior.h>
+#include <serialize/text.inl>
+
 namespace idk
 {
 

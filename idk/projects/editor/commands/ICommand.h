@@ -18,6 +18,10 @@ Commands will never handle new or delete, it can only contain pointers
 //////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+
+#include <core/GameObject.h>
+#include <reflect/reflect.h>
+
 namespace idk {
 	//This is for collecting deleted gameobjects and its children as well as CreateGameObject Used for undo
 	struct RecursiveObjects {

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CMD_AddBehavior.h"
 #include <script/MonoBehavior.h>
+#include <serialize/text.inl>
 
 namespace idk
 {

@@ -9,7 +9,7 @@
 #include <serialize/text.h>
 #include <util/ioutils.h>
 #include <file/FileSystem.h>
-#include <core/ObjectPool.inl>
+#include <core/GameState.inl>
 
 #include <iostream>
 

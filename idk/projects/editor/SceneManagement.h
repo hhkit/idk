@@ -1,4 +1,5 @@
 #pragma once
+#include <res/ResourceHandle.h>
 
 namespace idk
 {

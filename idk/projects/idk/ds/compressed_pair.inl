@@ -4,61 +4,67 @@
 
 namespace idk
 {
-	namespace detail
-	{
-		template<typename T, size_t I>
-		struct compressed_pair_elem<T, I, false> // base class NOT empty
-		{
-			constexpr compressed_pair_elem() noexcept(std::is_nothrow_default_constructible<T>::value)
-				: _value{}
-			{
-				static_assert(!std::is_reference<T>::value,
-					"attempted to default construct a reference element");
-			}
+    namespace detail
+    {
+        // base class NOT empty
 
-			template<typename U, typename = std::enable_if_t<std::is_constructible_v<T, U>>>
-			constexpr explicit compressed_pair_elem(U&& other) noexcept(std::is_nothrow_constructible_v<T, U>)
-				: _value(std::forward<U>(other))
-			{}
+        template<typename T, size_t I>
+        constexpr compressed_pair_elem<T, I, false>::compressed_pair_elem()
+            noexcept(std::is_nothrow_default_constructible<T>::value)
+            : _value{}
+        {
+            static_assert(!std::is_reference<T>::value,
+                          "attempted to default construct a reference element");
+        }
 
-			constexpr T& get() noexcept
-			{
-				return _value;
-			}
+        template<typename T, size_t I>
+        template<typename U, typename>
+        constexpr compressed_pair_elem<T, I, false>::compressed_pair_elem(U&& other)
+            noexcept(std::is_nothrow_constructible_v<T, U>)
+            : _value(std::forward<U>(other))
+        {}
 
-			constexpr const T& get() const noexcept
-			{
-				return _value;
-			}
+        template<typename T, size_t I>
+        constexpr T& compressed_pair_elem<T, I, false>::get() noexcept
+        {
+            return _value;
+        }
 
-		private:
-			T _value;
-		};
+        template<typename T, size_t I>
+        constexpr const T& compressed_pair_elem<T, I, false>::get() const noexcept
+        {
+            return _value;
+        }
 
-		template<typename T, size_t I>
-		struct compressed_pair_elem<T, I, true> : private T // base class empty
-		{
-			constexpr compressed_pair_elem() noexcept(std::is_nothrow_default_constructible<T>::value)
-				: T()
-			{
-			}
 
-			template<typename U, typename = std::enable_if_t<std::is_constructible_v<T, U>>>
-			constexpr explicit compressed_pair_elem(U&& other) noexcept(std::is_nothrow_constructible_v<T, U>)
-				: T(std::forward<U>(other))
-			{}
+        // base class empty
 
-			constexpr T& get() noexcept
-			{
-				return *this;
-			}
+        template<typename T, size_t I>
+        constexpr compressed_pair_elem<T, I, true>::compressed_pair_elem()
+            noexcept(std::is_nothrow_default_constructible<T>::value)
+            : T()
+        {
+        }
 
-			constexpr const T& get() const noexcept
-			{
-				return *this;
-			}
-		};
-	}
+        template<typename T, size_t I>
+        template<typename U, typename>
+        constexpr compressed_pair_elem<T, I, true>::compressed_pair_elem(U&& other)
+            noexcept(std::is_nothrow_constructible_v<T, U>)
+            : T(std::forward<U>(other))
+        {}
+
+        template<typename T, size_t I>
+        constexpr T& compressed_pair_elem<T, I, true>::get() noexcept
+        {
+            return *this;
+        }
+
+        template<typename T, size_t I>
+        constexpr const T& compressed_pair_elem<T, I, true>::get() const noexcept
+        {
+            return *this;
+        }
+    }
 
 	template<typename T1, typename T2>
 	constexpr compressed_pair<T1, T2>::compressed_pair() noexcept(

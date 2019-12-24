@@ -8,6 +8,7 @@
 #include <scene/Scene.h>
 
 #include <script/MonoBehavior.h>
+#include <script/ManagedObj.inl>
 
 namespace idk
 {
