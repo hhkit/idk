@@ -1,5 +1,5 @@
 #pragma once
-#include <meta/tuple.h>
+#include <meta/tuple.inl>
 namespace idk
 {
 	namespace anim { class Skeleton; class Animation; }

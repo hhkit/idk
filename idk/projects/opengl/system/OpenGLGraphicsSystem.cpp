@@ -4,6 +4,7 @@
 #include <glad/glad_wgl.h>
 #include <core/Core.h>
 #include <res/EasyFactory.h>
+#include <res/ResourceManager.inl>
 #include <gfx/MeshRenderer.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>

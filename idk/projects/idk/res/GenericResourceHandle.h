@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <res/ResourceHandle.h>
-#include <meta/variant.h>
+#include <meta/variant.inl>
 namespace idk
 {
 	struct GenericResourceHandle

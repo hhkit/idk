@@ -5,6 +5,7 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <gfx/MeshRenderer.h>
+#include <core/GameState.inl>
 #include <anim/AnimationSystem.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <anim/Animator.h>
@@ -12,6 +13,7 @@
 #include <prefab/Prefab.h>
 #include <prefab/PrefabUtility.h>
 #include <res/ResourceHandle.h>
+#include <res/ResourceUtils.inl>
 #include <res/MetaBundle.h>
 
 #include "AssimpCompiler.h"

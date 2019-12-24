@@ -6,6 +6,9 @@
 #include <stb/stb_image.h>
 
 //Resources
+#include <res/ResourceManager.inl>
+#include <res/ResourceUtils.inl>
+#include <res/ResourceBundle.inl>
 #include <opengl/resource/OpenGLTexture.h>
 
 #include <opengl/DDSData.h>

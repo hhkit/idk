@@ -31,7 +31,7 @@
     <OutputPath>..\..\engine_data\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <DocumentationFile>
     </DocumentationFile>
   </PropertyGroup>

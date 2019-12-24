@@ -2,6 +2,7 @@
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <gfx/GraphicsSystem.h>
 #include <res/MetaBundle.h>
+#include <res/ResourceManager.inl>
 #include <filesystem>
 
 //Dep

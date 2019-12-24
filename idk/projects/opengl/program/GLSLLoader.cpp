@@ -2,6 +2,7 @@
 #include "GLSLLoader.h"
 #include <core/Core.h>
 #include <res/MetaBundle.h>
+#include <res/ResourceManager.inl>
 #include <opengl/program/Program.h>
 #include <sstream>
 namespace idk::ogl

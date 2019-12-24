@@ -11,6 +11,7 @@
 #include <core/Core.h>
 #include <file/FileSystem.h>
 #include <math/matrix_transforms.h>
+#include <res/ResourceManager.inl>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 #include <anim/SkinnedMeshRenderer.h>

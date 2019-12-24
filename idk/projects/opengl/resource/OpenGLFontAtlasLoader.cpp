@@ -10,9 +10,8 @@
 
 //Resources
 #include <gfx/FontAtlas.h>
+#include <res/ResourceManager.inl>
 #include <opengl/system/OpenGLGraphicsSystem.h>
-
-#include <iostream>
 
 namespace idk {
 	ResourceBundle OpenGLFontAtlasLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& metabundle)
@@ -59,7 +58,6 @@ namespace idk {
 
 			if (FT_Set_Pixel_Sizes(face, 0, tm.font_size))
 			{
-				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
 				return font_handle;
 			}
@@ -191,7 +189,6 @@ namespace idk {
 
 			if (FT_Set_Pixel_Sizes(face, 0, tm.font_size))
 			{
-				std::cout << "Font atlas loading generation failed. Crash may happen.\n";
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
 				return font_handle;
 			}

@@ -2,6 +2,9 @@
 #include "FrameBuffer.h"
 #include <core/Core.h>
 #include <opengl/resource/OpenGLTexture.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
 
 namespace idk::ogl
 {

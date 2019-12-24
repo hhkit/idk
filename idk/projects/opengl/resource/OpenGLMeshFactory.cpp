@@ -2,8 +2,10 @@
 #include "OpenGLMeshFactory.h"
 #include <set>
 
+#include <math/angle.inl>
 #include <core/Core.h>
 #include <opengl/resource/OpenGLMesh.h>
+#include <res/ResourceManager.inl>
 #include <gfx/projector_functions.h>
 namespace idk::ogl
 {
