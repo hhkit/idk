@@ -130,6 +130,7 @@ Variables:
 #include <sstream> //ostringstream
 #include <res/ResourceManager.h>
 #include <core/GameState.inl>
+#include <ds/span.inl>
 
 namespace idk
 {

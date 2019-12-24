@@ -3,6 +3,7 @@
 #include <gfx/ShaderGraph_data.h>
 #include <serialize/text.inl>
 #include <regex>
+#include <ds/result.inl>
 
 namespace idk::shadergraph::helpers
 {

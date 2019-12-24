@@ -20,6 +20,8 @@
 #include <parallel/ThreadPool.h>
 #include <util/string_hash.inl>
 #include <res/ResourceManager.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

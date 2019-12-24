@@ -16,6 +16,8 @@
 #include "ResourceManager.h"
 #include <scene/Scene.inl>
 #include <res/ResourceUtils.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

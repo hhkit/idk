@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "LayerManager.h"
+#include <ds/span.inl>
 
 namespace idk
 {

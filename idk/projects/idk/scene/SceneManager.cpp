@@ -13,6 +13,7 @@
 
 #include <res/Guid.inl>
 #include <iostream>
+#include <ds/span.inl>
 
 namespace idk
 {

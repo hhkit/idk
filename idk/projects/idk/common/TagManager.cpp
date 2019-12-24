@@ -4,6 +4,7 @@
 #include <core/GameObject.h>
 #include <iostream>
 #include <serialize/text.h>
+#include <ds/span.inl>
 
 namespace idk
 {

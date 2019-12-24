@@ -17,6 +17,7 @@
 #include "WindowsApplication.h"
 
 #include <ds/span.inl>
+#include <event/Signal.inl>
 
 namespace idk::win
 {

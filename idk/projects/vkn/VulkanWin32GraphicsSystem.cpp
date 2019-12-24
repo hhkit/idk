@@ -25,6 +25,7 @@
 #include <vkn/VknFrameBufferFactory.h>
 #include <res/ResourceManager.inl>
 #include <core/SystemManager.inl>
+#include <ds/result.inl>
 
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {

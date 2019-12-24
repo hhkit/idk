@@ -8,6 +8,7 @@
 #include <gfx/ViewportUtil.h>
 #include <gfx/FramebufferFactory.h>
 #include <res/Guid.inl>
+#include <ds/span.inl>
 
 namespace idk::ogl
 {

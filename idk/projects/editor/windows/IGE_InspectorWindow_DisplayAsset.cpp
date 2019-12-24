@@ -15,6 +15,7 @@
 #include <res/ResourceManager.h>
 #include <res/ResourceUtils.inl>
 
+#include <ds/span.inl>
 namespace idk
 {
     static string get_asset_name(const GenericResourceHandle& handle)

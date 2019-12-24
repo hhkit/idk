@@ -17,6 +17,7 @@
 #include <audio/AudioSystem.h> //AudioSystem
 #include <res/ResourceManager.h>
 #include <sstream> //AudioSystem
+#include <ds/result.inl>
 
 namespace idk
 {

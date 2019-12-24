@@ -6,6 +6,7 @@
 #include <res/ResourceManager.h>
 
 #include <opengl/resource/OpenGLTextureRenderMeta.h>
+#include <ds/span.inl>
 
 namespace idk::ogl
 {

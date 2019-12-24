@@ -13,6 +13,7 @@
 
 #include <opengl/DDSData.h>
 #include <res/Guid.inl>
+#include <ds/span.inl>
 
 namespace idk
 {

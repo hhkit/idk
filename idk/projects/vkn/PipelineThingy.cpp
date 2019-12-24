@@ -11,6 +11,7 @@
 #include <vkn/VulkanMesh.h>
 
 #include <vkn/DescriptorUpdateData.h>
+#include <ds/result.inl>
 
 namespace idk::vkn
 {

@@ -6,6 +6,7 @@
 #include <proj/ProjectManager.h>
 #include <editor/IDE.h>
 #include <serialize/yaml.h>
+#include <ds/result.inl>
 
 namespace idk
 {

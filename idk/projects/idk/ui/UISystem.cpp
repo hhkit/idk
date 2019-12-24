@@ -13,6 +13,8 @@
 #include <math/matrix_transforms.h>
 #include <math/quaternion.inl>
 #include <res/ResourceManager.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

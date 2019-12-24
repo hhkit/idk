@@ -3,6 +3,7 @@
 
 #include <gfx/MeshFactory.h>
 #include <math/matrix_transforms.h>
+#include <ds/span.inl>
 
 namespace idk
 {

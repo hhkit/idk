@@ -17,6 +17,7 @@ Collisions with capsule. Currently has debug renders
 #include "collision_sphere.h"
 #include <phys/collision.cpp>
 #include <gfx/DebugRenderer.h> //Temp
+#include <ds/result.inl>
 
 namespace idk::phys
 {

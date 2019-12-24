@@ -40,6 +40,7 @@
 #include <vkn/PipelineBinders.inl>
 #include <res/ResourceManager.inl>
 #include <math/color.inl>
+#include <ds/result.inl>
 
 
 namespace idk::vkn

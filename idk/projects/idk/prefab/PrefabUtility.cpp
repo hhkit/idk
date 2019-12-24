@@ -15,6 +15,8 @@
 #include <prefab/PrefabInstance.h>
 #include <script/ManagedObj.h>
 #include <res/ResourceManager.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

@@ -2,6 +2,7 @@
 #include "ParticleSystem.h"
 #include <core/GameObject.h>
 #include <gfx/RenderObject.h>
+#include <math/arith.inl>
 
 namespace idk
 {

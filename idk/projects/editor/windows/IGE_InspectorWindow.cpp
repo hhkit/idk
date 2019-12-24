@@ -54,6 +54,8 @@ of the editor.
 #include <iostream>
 
 #include <gfx/GraphicsSystem.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk {
 

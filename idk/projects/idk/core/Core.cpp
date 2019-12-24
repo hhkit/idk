@@ -7,6 +7,7 @@
 #include <prefab/PrefabFactory.h>
 #include <gfx/GfxDbgTest.h>
 #include <parallel/ThreadPool.h>
+#include <ds/span.inl>
 
 namespace idk
 {

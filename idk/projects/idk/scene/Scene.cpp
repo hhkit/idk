@@ -6,6 +6,7 @@
 #include <res/ResourceManager.h>
 #include <file/FileSystem.h>
 #include <serialize/text.h>
+#include <ds/span.inl>
 
 namespace idk
 {

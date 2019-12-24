@@ -22,7 +22,7 @@
 
 #include <idk_config.h>
 #include <ds/span.h>
-#include <ds/small_string.h>
+#include <ds/small_string.inl>
 #include <debug/idk_assert.h>
 #include <math/color.inl>
 #include <math/constants.inl>

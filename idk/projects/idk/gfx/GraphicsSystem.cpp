@@ -29,6 +29,8 @@
 #include <parallel/ThreadPool.h>
 
 #include <meta/meta.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 struct guid_64
 {

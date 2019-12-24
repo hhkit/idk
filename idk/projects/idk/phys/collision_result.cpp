@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "collision_result.h"
+#include <ds/result.inl>
 
 namespace idk::phys
 {

@@ -2,6 +2,7 @@
 #include <utility>
 #include "GameState.h"
 #include <core/ObjectPool.inl>
+#include <ds/span.inl>
 
 namespace idk
 {

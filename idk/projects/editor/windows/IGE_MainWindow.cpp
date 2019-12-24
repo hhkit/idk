@@ -32,6 +32,7 @@ of the editor.
 #include <proj/ProjectManager.h>
 #include <imgui/ImGuizmo.h>
 #include <script/ScriptSystem.h>
+#include <ds/span.inl>
 
 namespace idk {
 

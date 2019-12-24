@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Scheduler.h"
+#include <ds/span.inl>
 
 namespace idk
 {

@@ -15,7 +15,7 @@
 #include <res/ResourceManager.h>
 #include <res/ResourceUtils.inl>
 #include <regex>
-
+#include <res/Guid.inl>
 namespace fs = std::filesystem;
 
 namespace idk

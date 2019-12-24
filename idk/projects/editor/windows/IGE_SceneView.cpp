@@ -38,6 +38,7 @@ of the editor.
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include <opengl/PixelData.h>
 #include <iostream>
+#include <ds/result.inl>
 
 namespace idk {
 

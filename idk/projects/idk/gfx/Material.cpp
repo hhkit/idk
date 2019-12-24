@@ -4,6 +4,7 @@
 #include <gfx/GraphicsSystem.h>
 #include <res/ResourceManager.h>
 
+#include <ds/result.inl>
 namespace idk
 {
 	RscHandle<ShaderTemplate> Material::GetTemplate() const

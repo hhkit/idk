@@ -11,6 +11,8 @@
 #include <scene/SceneManager.h>
 #include <ds/slow_tree.inl>
 #include <serialize/text.h>
+#include <math/arith.inl>
+#include <ds/span.inl>
 
 #include <iostream>
 

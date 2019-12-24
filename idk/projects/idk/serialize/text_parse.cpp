@@ -12,6 +12,8 @@
 #include <script/ScriptSystem.h>
 #include <script/ManagedObj.inl>
 
+#include <ds/span.inl>
+#include <ds/result.inl>
 namespace idk
 {
 

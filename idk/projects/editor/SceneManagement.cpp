@@ -17,6 +17,7 @@
 #include <res/Guid.inl>
 
 #include <util/ioutils.h>
+#include <ds/result.inl>
 
 namespace idk
 {

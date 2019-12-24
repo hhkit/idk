@@ -2,6 +2,7 @@
 #include "GraphicsState.h"
 #include <gfx/RenderTarget.h>
 #include <gfx/Framebuffer.h>
+#include <ds/span.inl>
 namespace idk::vkn
 {
 	const LightData* GraphicsState::ActiveLight(size_t light_index) const

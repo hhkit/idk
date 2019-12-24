@@ -30,6 +30,8 @@ of the editor.
 #include <res/ResourceManager.h>
 #include <serialize/text.inl>
 #include <res/ResourceUtils.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 #include <iostream>
 namespace fs = std::filesystem;

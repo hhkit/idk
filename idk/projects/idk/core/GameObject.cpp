@@ -6,6 +6,7 @@
 #include <common/Tag.h>
 #include <common/Layer.h>
 #include <reflect/reflect.inl>
+#include <ds/span.inl>
 namespace idk
 {
 	GenericHandle GameObject::AddComponent(string_view sv)

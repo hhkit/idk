@@ -3,6 +3,7 @@
 #include <core/GameObject.h>
 #include <core/GameState.inl>
 #include <common/Transform.h>
+#include <ds/span.inl>
 
 namespace idk
 {

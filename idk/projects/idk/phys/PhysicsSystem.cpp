@@ -21,6 +21,8 @@
 #include <math/matrix_decomposition.h>
 
 #include <parallel/ThreadPool.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

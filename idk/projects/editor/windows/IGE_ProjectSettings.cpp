@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "IGE_ProjectSettings.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <IncludeSystems.h>
 #include <editor/utils.h>
 #include <editor/imguidk.h>

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <idk/file/FileSystem.h>
 #include <math/ritters.h>
+#include <ds/span.inl>
 #include <vkn/BufferHelpers.inl>
 
 namespace idk::ai_helpers

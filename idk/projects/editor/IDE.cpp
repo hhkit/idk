@@ -56,6 +56,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 // util
 #include <util/ioutils.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace fs = std::filesystem;
 

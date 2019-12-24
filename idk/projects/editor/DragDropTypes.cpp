@@ -3,6 +3,7 @@
 
 #include "DragDropTypes.h"
 #include <res/GenericResourceHandle.h>
+#include <ds/span.inl>
 
 namespace idk
 {

@@ -5,6 +5,7 @@
 #include <reflect/reflect.h>
 
 #include "GameState.h"
+#include <ds/span.inl>
 
 namespace idk::detail
 {

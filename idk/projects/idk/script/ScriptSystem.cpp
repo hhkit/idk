@@ -20,6 +20,7 @@
 #include <script/MonoWrapperEnvironment.h>
 
 #include <process.h>
+#include <ds/span.inl>
 
 namespace idk::mono
 {

@@ -4,6 +4,7 @@
 #include <gfx/ShaderSnippet.h>
 #include <res/ResourceManager.h>
 #include <memory/ArenaAllocator.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

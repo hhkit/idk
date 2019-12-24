@@ -8,6 +8,7 @@
 #include <gfx/Light.h>
 #include <gfx/GraphicsSystem.h>
 #include <scene/SceneManager.h>
+#include <ds/span.inl>
 namespace idk
 {
 	IGE_LightLister::IGE_LightLister()

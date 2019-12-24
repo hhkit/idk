@@ -22,6 +22,7 @@
 #include <script/MonoBinder.h>
 
 #include <util/ioutils.h>
+#include <ds/span.inl>
 namespace idk::mono
 {
 	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)

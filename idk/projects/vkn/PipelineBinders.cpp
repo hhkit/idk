@@ -17,6 +17,7 @@
 #include <vkn/VknFrameBuffer.h>
 
 #include <vkn/PipelineBinders.inl>
+#include <ds/span.inl>
 
 namespace idk::vkn
 {

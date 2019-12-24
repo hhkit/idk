@@ -9,6 +9,8 @@
 
 #include <fstream>
 #include <filesystem>
+#include <ds/span.inl>
+#include <ds/result.inl>
 namespace fs = std::filesystem;
 
 namespace idk

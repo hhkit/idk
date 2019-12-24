@@ -22,7 +22,8 @@
 
 #include <math/shapes/ray.h>
 #include <res/ResourceManager.inl>
-
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk::vkn
 {

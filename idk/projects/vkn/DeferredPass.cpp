@@ -23,6 +23,7 @@
 #include <vkn/VknFrameBufferFactory.h>
 #include <vkn/VknTexture.h>
 #include <res/ResourceManager.h>
+#include <ds/result.inl>
 
 #if 1
 namespace idk::vkn

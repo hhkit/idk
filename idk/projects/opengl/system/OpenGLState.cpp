@@ -1,4 +1,7 @@
 #include "pch.h"
+#include <ds/span.inl>
+#include <ds/result.inl>
+#include <res/ResourceHandle.inl>
 
 #include <gfx/DebugRenderer.h>
 #include <gfx/MeshRenderer.h>

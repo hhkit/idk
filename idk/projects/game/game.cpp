@@ -28,6 +28,8 @@
 #include <shellapi.h>//CommandLineToArgv
 
 #include <natvis_ids.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {

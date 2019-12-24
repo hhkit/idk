@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "collision_raycast.inl"
+#include <ds/result.inl>
 
 #include <iostream>
 
