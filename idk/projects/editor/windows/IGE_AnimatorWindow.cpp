@@ -1,13 +1,13 @@
 #include "pch.h"
 #include <core/Core.h>
 #include <anim/AnimationUtils.h>
-#include "imguidk.h"
 
-#include "imguidk.h"
-#include "IGE_AnimatorWindow.h"
-#include "IGE_InspectorWindow.h"
 #include "IDE.h"
-#include "prefab/PrefabUtility.h"
+#include <editor/imguidk.h>
+#include <editor/windows/IGE_AnimatorWindow.h>
+#include <editor/windows/IGE_InspectorWindow.h>
+#include <prefab/PrefabUtility.h>
+#include <res/ResourceUtils.inl>
 
 namespace idk
 {

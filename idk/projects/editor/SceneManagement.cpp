@@ -12,7 +12,9 @@
 #include <gfx/Light.h>
 #include <script/ScriptSystem.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceUtils.inl>
 #include <serialize/text.inl>
+#include <res/Guid.inl>
 
 #include <util/ioutils.h>
 

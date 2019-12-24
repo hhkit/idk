@@ -12,6 +12,8 @@
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <imgui/imgui_internal.h>
+#include <res/ResourceManager.h>
+#include <res/ResourceUtils.inl>
 
 namespace idk
 {

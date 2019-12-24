@@ -102,10 +102,9 @@ namespace idk {
 		bool is_being_modified = false;
 
 		ray GenerateRayFromCurrentScreen();
-
-		POINT cachedMouseScreenPos{};
-		POINT prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
-		POINT currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+		ivec2 cachedMouseScreenPos{};
+        ivec2 prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+        ivec2 currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
 		
 	};
 

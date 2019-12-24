@@ -17,6 +17,7 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <anim/Animator.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceUtils.inl>
 //*/
 #include <iostream>
 

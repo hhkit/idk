@@ -18,7 +18,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #define HACKING_TO_THE_GATE
 #include <IDE.h>
 
-#include <filesystem>
+#include <file/FileSystem.h>
 
 // dependencies
 #include <imgui/imgui.h>
@@ -32,6 +32,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 #include <scene/SceneManager.h>
+#include <script/ScriptSystem.h>
 
 // resource importing
 #include <res/EasyFactory.h>
@@ -42,6 +43,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/resource/OpenGLFontAtlasLoader.h>
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderSnippetLoader.h>
+#include <res/ResourceManager.h>
+#include <res/ResourceUtils.inl>
 
 // editor setup
 #include <gfx/RenderTarget.h>

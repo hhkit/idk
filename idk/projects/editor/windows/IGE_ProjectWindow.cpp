@@ -26,9 +26,12 @@ of the editor.
 #include <gfx/RenderTarget.h>
 #include <prefab/PrefabUtility.h>
 #include <prefab/Prefab.h>
+#include <file/FileSystem.h>
+#include <res/ResourceManager.h>
+#include <serialize/text.inl>
+#include <res/ResourceUtils.inl>
 
 #include <iostream>
-#include <filesystem>
 namespace fs = std::filesystem;
 
 #ifdef _WIN32 

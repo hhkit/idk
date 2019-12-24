@@ -9,13 +9,12 @@
 This window displays the editor window where you can select and modify gameobjects.
 */
 //////////////////////////////////////////////////////////////////////////////////
-
-
-
 #pragma once
 
 #include <editor/windows/IGE_IWindow.h>
 #include <file/PathHandle.h>
+#include <event/Signal.h>
+#include <res/GenericResourceHandle.h>
 #include <event/Signal.h>
 
 namespace idk

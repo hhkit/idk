@@ -32,7 +32,8 @@ of the editor.
 #include <gfx/DebugRenderer.h>
 #include <win32/WindowsApplication.h>
 #include <sstream> //sstream
-#include <math/matrix_decomposition.h>
+#include <math/matrix_decomposition.inl>
+#include <res/ResourceUtils.inl>
 
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include <opengl/PixelData.h>
@@ -241,7 +242,10 @@ namespace idk {
 			}
 		}
 
-		GetCursorPos(&currMouseScreenPos);
+        POINT mouse_pos;
+		GetCursorPos(&mouse_pos);
+        currMouseScreenPos.x = mouse_pos.x;
+        currMouseScreenPos.y = mouse_pos.y;
 
 		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1) && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {

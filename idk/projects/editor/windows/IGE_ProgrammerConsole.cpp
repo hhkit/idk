@@ -1,10 +1,12 @@
 #include "pch.h"
+#include "IGE_ProgrammerConsole.h"
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
 #include <core/Scheduler.h>
 #include <debug/LogSingleton.h>
-#include "IGE_ProgrammerConsole.h"
+#include <ds/circular_buffer.inl>
 
 namespace idk
 {

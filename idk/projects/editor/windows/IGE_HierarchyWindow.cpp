@@ -26,6 +26,7 @@ of the editor.
 #include <gfx/Camera.h>
 #include <core/Core.h>
 #include <prefab/PrefabUtility.h>
+#include <serialize/text.inl>
 #include <IDE.h>		//IDE
 #include <iostream>
 

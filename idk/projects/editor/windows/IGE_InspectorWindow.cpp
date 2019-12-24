@@ -33,14 +33,18 @@ of the editor.
 #include <anim/AnimationSystem.h>
 #include <app/Application.h>
 #include <ds/span.h>
-#include <reflect/reflect.h>
+#include <reflect/reflect.inl>
 #include <res/ResourceManager.h>
+#include <res/ResourceUtils.inl>
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>
 #include <meta/variant.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <prefab/PrefabUtility.h>
 #include <core/Handle.inl>
+#include <script/ScriptSystem.h>
+#include <script/ManagedObj.inl>
+#include <serialize/text.inl>
 
 #include <IncludeComponents.h>
 #include <IncludeResources.h>

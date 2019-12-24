@@ -25,6 +25,8 @@ Derived using IDE_SceneView.cpp as a base/reference
 #include <gfx/GraphicsSystem.h>
 #include <imgui/ImGuizmo.h>
 #include <IDE.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceUtils.inl>
 
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>

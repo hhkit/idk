@@ -31,6 +31,7 @@ of the editor.
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
 #include <imgui/ImGuizmo.h>
+#include <script/ScriptSystem.h>
 
 namespace idk {
 
