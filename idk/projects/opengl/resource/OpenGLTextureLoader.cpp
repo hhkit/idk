@@ -7,9 +7,11 @@
 
 //Resources
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
 #include <res/ResourceBundle.inl>
 #include <opengl/resource/OpenGLTexture.h>
+#include <res/ResourceMeta.inl>
 
 #include <opengl/DDSData.h>
 #include <res/Guid.inl>

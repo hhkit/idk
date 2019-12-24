@@ -8,6 +8,7 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn
 {

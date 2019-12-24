@@ -1,9 +1,11 @@
 #include "stdafx.h"
-#include <core/GameState.h>
-#include <core/Scheduler.h>
+#include <core/GameState.inl>
+#include <core/Scheduler.inl>
 #include <IncludeSystems.h>
 #include <IncludeComponents.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <prefab/PrefabFactory.h>
 #include <gfx/GfxDbgTest.h>
 #include <parallel/ThreadPool.h>

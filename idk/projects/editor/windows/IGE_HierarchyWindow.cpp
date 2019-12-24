@@ -19,7 +19,7 @@ of the editor.
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
 #include <editor/DragDropTypes.h>
 #include <app/Application.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Name.h>
 #include <common/Transform.h>
 #include <prefab/PrefabInstance.h>

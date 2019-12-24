@@ -3,7 +3,9 @@
 #include <imgui/imgui_internal.h>
 #include <editor/DragDropTypes.h>
 #include <scene/Scene.h>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
 #include <IncludeResources.h>
 #include <map>

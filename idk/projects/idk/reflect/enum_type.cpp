@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <serialize/text.inl>
 #include <reflect/reflect.inl>
 #include <ds/span.inl>
 #include <ds/result.inl>

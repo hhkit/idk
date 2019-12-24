@@ -2,7 +2,8 @@
 #include "LightTypes.h"
 #include <gfx/RenderTarget.h>
 #include <gfx/FramebufferFactory.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 //#include "LightTypes.h"
 
 namespace idk

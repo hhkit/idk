@@ -24,6 +24,8 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VknFrameBufferFactory.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceMeta.inl>
 #include <core/SystemManager.inl>
 #include <ds/result.inl>
 

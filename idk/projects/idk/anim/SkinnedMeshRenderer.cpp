@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "SkinnedMeshRenderer.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <phys/RigidBody.h>
 #include <core/Scheduler.h>
 

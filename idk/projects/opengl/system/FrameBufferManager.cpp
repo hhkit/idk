@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "FrameBufferManager.h"
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <gfx/RenderTarget.h>
 #include <opengl/resource/FrameBuffer.h>
 #include <opengl/resource/OpenGLTexture.h>
+#include <res/ResourceMeta.inl>
 
 #include <gfx/ViewportUtil.h>
 #include <gfx/FramebufferFactory.h>

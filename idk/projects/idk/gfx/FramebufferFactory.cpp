@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FramebufferFactory.h"
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk
 {

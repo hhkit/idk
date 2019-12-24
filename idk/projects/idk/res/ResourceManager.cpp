@@ -13,7 +13,9 @@
 
 #include <IncludeResources.h>
 #include <reflect/reflect.inl>
-#include "ResourceManager.h"
+#include "ResourceHandle.inl"
+#include <res/ResourceMeta.inl>
+#include "ResourceManager.inl"
 #include <scene/Scene.inl>
 #include <res/ResourceUtils.inl>
 #include <ds/span.inl>

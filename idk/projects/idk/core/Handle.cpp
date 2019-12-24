@@ -1,7 +1,8 @@
 #include "stdafx.h"
-#include "Handle.h"
+#include "Handle.inl"
 #include <IncludeComponents.h>
-#include <reflect/reflect.h>
+#include <reflect/reflect.inl>
+#include <ds/result.inl>
 
 #undef GetObject
 

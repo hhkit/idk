@@ -43,7 +43,9 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/resource/OpenGLFontAtlasLoader.h>
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderSnippetLoader.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
 
 // editor setup
@@ -58,6 +60,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <util/ioutils.h>
 #include <ds/span.inl>
 #include <ds/result.inl>
+#include <res/ResourceHandle.inl>
 
 namespace fs = std::filesystem;
 

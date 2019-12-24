@@ -12,7 +12,8 @@
 #include <gfx/GraphicsSystem.h>
 #include <serialize/text.inl>
 #include <file/FileSystem.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
 #include <res/ResourceUtils.inl>
 #include <regex>
 #include <res/Guid.inl>

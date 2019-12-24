@@ -7,7 +7,7 @@
 #include <editor/IDE.h>
 #include <editor/SceneManagement.h>
 #include <gfx/Camera.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 
 namespace idk

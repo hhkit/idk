@@ -13,8 +13,9 @@
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
 #include <anim/SkinnedMeshRenderer.h>
@@ -28,6 +29,7 @@
 
 #include <editor/IDE.h>
 #include <gfx/ViewportUtil.h>
+#include <res/ResourceMeta.inl>
 
 void _check_gl_error(const char* file, int line) {
 	GLenum err(glGetError());

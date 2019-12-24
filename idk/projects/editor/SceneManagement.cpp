@@ -2,7 +2,7 @@
 #include "SceneManagement.h"
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/TagManager.h>
 #include <common/Tag.h>
 #include <common/Transform.h>
@@ -11,7 +11,9 @@
 #include <gfx/Camera.h>
 #include <gfx/Light.h>
 #include <script/ScriptSystem.h>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
 #include <serialize/text.inl>
 #include <res/Guid.inl>

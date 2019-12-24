@@ -1,5 +1,6 @@
 #pragma once
 #include "Core.h"
+#include "SystemManager.inl"
 namespace idk
 {
 	template<typename T> T& Core::GetSystem()

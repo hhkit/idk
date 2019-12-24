@@ -3,7 +3,7 @@
 #include <string>
 
 #include <idk.h>
-#include <math/comparable.h>
+#include <math/comparable.inl>
 #include <meta/meta.inl>
 #include <meta/tuple.inl>
 #include "Handleables.h"

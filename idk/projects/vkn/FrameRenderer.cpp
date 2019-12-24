@@ -8,7 +8,7 @@
 #include <file/FileSystem.h>
 #include <vkn/ShaderModule.h>
 #include <vkn/PipelineManager.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <vkn/GraphicsState.h>
 #include <gfx/RenderTarget.h>
 #include <vkn/VknFrameBuffer.h>
@@ -39,6 +39,7 @@
 #include <parallel/ThreadPool.h>
 #include <vkn/PipelineBinders.inl>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <math/color.inl>
 #include <ds/result.inl>
 

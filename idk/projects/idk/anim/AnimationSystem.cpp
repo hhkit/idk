@@ -1,16 +1,19 @@
 #include "stdafx.h"
 #include "AnimationSystem.h"
+#include "Animator.inl"
 #include "AnimationUtils.h"
 
-#include <core/GameState.h>
-#include <core/GameObject.h>
+#include <res/ResourceHandle.inl>
+#include <core/GameState.inl>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <anim/Bone.h>
-#include <math/arith.h>
-#include <math/matrix_transforms.h>
+#include <math/arith.inl>
+#include <math/matrix_transforms.inl>
+#include <math/matrix_decomposition.inl>
 #include <scene/SceneManager.h>
 #include <ds/slow_tree.inl>
-#include <serialize/text.h>
+#include <serialize/text.inl>
 #include <math/arith.inl>
 #include <ds/span.inl>
 

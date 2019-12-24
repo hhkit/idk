@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanPipeline.h>
@@ -22,6 +22,7 @@
 
 #include <math/shapes/ray.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <ds/span.inl>
 #include <ds/result.inl>
 

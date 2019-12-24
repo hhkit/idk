@@ -2,7 +2,7 @@
 #include "IGE_LightLister.h"
 #include <editor/imguidk.h>
 #include <core/Core.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <editor/IDE.h>
 #include <common/Transform.h>
 #include <gfx/Light.h>

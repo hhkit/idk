@@ -8,6 +8,7 @@
 #include <vkn/utils/GlslToSpirv.h>
 #include <util/ioutils.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn
 {

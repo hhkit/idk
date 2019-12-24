@@ -22,7 +22,8 @@
 #include <vkn/RenderPassInfo.h>
 #include <vkn/VknFrameBufferFactory.h>
 #include <vkn/VknTexture.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <ds/result.inl>
 
 #if 1

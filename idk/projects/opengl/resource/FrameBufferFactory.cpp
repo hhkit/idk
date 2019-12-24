@@ -6,6 +6,7 @@
 #include <opengl/resource/FrameBuffer.h>
 #include <opengl/resource/OpenGLCubemap.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <res/Guid.inl>
 
 namespace idk::ogl

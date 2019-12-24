@@ -1,6 +1,6 @@
 #pragma once
 #include "ObjectPool.h"
-
+#include <ds/pool.inl>
 namespace idk
 {
 	template <typename T>

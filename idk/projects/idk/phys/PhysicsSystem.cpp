@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PhysicsSystem.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <common/Layer.h>
 #include <gfx/DebugRenderer.h>
@@ -14,11 +14,12 @@
 #include <phys/collision_detection/collision_capsule_sphere.h>
 #include <phys/collision_detection/ManagedCollision.h>
 
+#include <script/ManagedObj.inl>
 #include <script/MonoBehavior.h>
 #include <script/MonoFunctionInvoker.h>
 #include <script/ScriptSystem.h>
 
-#include <math/matrix_decomposition.h>
+#include <math/matrix_decomposition.inl>
 
 #include <parallel/ThreadPool.h>
 #include <ds/span.inl>

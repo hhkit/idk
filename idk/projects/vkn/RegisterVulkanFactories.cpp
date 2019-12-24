@@ -22,6 +22,7 @@
 #include <vkn/VknRenderTargetLoader.h>
 #include <vkn/VulkanGlslLoader.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
 

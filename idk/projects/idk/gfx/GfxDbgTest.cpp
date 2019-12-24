@@ -2,7 +2,7 @@
 #include "GfxDbgTest.h"
 #include <idk.h>
 #include <gfx/DebugRenderer.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <gfx/GraphicsSystem.h>
 #include <math/shapes.h>
 #include <math/angle.inl>

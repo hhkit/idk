@@ -8,6 +8,7 @@
 #include <editor/windows/IGE_InspectorWindow.h>
 #include <prefab/PrefabUtility.h>
 #include <res/ResourceUtils.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk
 {

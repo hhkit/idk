@@ -4,6 +4,9 @@
 #include <res/ResourceMeta.h>
 #include <res/SaveableResource.h>
 #include <file/FileSystem.h>
+#include <res/ResourceBundle.inl>
+#include <res/ResourceHandle.h>
+#include <res/guid.inl>
 
 namespace idk
 {

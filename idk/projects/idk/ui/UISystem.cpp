@@ -3,16 +3,17 @@
 #include <app/Application.h>
 #include <ui/Canvas.h>
 #include <ui/RectTransform.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <scene/SceneManager.h>
 #include <ds/slow_tree.inl>
 #include <gfx/MaterialInstance.h>
 #include <gfx/Camera.h>
 #include <gfx/RenderTarget.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <math/quaternion.inl>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <ds/span.inl>
 #include <ds/result.inl>
 

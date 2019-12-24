@@ -1,7 +1,9 @@
 #pragma once
 
-#include <reflect/reflect.h>
-#include <serialize/text.h>
+#include "typed_context.h"
+#include <serialize/text.inl>
+#include <reflect/reflect.inl>
+#include <ds/result.inl>
 
 namespace idk::reflect::detail
 {

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "RigidBody.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 
 namespace idk

@@ -5,6 +5,7 @@
 #include <core/Core.h>
 #include <res/EasyFactory.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <gfx/MeshRenderer.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>

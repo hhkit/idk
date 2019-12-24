@@ -12,7 +12,9 @@
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <imgui/imgui_internal.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
 
 #include <ds/span.inl>

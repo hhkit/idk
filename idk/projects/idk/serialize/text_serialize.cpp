@@ -4,7 +4,7 @@
 #include <reflect/reflect.inl>
 #include <serialize/yaml.h>
 
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <scene/Scene.h>
 
 #include <script/MonoBehavior.h>

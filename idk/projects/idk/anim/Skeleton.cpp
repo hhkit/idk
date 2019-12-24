@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Skeleton.h"
-#include "math/matrix_transforms.h"
+#include "math/matrix_transforms.inl"
 namespace idk::anim
 {
 	Skeleton::Skeleton(const vector<BoneData>& bones, const hash_table<string, size_t>& bone_table)

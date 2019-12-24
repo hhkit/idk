@@ -14,6 +14,7 @@
 #include <common/Transform.h>
 #include <serialize/text.h> //Serialize/Deserialize
 #include <IDE.h>				 //IDE
+#include <res/ResourceHandle.inl>
 
 namespace idk {
 

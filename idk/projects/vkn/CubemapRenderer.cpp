@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "CubemapRenderer.h"
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include "RenderUtil.h"
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn
 {

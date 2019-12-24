@@ -128,7 +128,9 @@ Variables:
 #include <FMOD/core/fmod_errors.h> //ErrorString
 
 #include <sstream> //ostringstream
-#include <res/ResourceManager.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <core/GameState.inl>
 #include <ds/span.inl>
 

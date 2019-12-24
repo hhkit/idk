@@ -14,6 +14,8 @@
 #include <scene/SceneManager.h>
 #include <prefab/PrefabInstance.h>
 #include <IDE.h>				 //IDE
+#include <reflect/reflect.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk {
 

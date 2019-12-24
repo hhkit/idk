@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ParticleSystem.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <gfx/RenderObject.h>
 #include <math/arith.inl>
 

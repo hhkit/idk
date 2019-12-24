@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "AssimpImporter_helpers.h"
 #include "AssimpImporter.h"
-#include <math/matrix_decomposition.h>
+#include <math/matrix_decomposition.inl>
 #include <deque>
 #include <iostream>
 #include <idk/file/FileSystem.h>

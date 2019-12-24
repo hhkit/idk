@@ -8,7 +8,7 @@
 
 //Main Stuffs//
 //Core
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <core/GameState.h>
 
 //App

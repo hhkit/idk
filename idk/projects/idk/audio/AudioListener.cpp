@@ -11,7 +11,7 @@
 #include "stdafx.h" //Needed for every CPP. Precompiler
 #include <audio/AudioListener.h>
 #include <audio/AudioSystem.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <phys/RigidBody.h>
 #include <scene/SceneManager.h>

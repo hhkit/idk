@@ -2,7 +2,8 @@
 #include "Material.h"
 #include <gfx/ShaderProgram.h>
 #include <gfx/GraphicsSystem.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 #include <ds/result.inl>
 namespace idk

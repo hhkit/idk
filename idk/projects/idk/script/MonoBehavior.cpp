@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MonoBehavior.h"
+#include "ManagedObj.inl"
 #include <serialize/text.h>
 
 #include <script/ScriptSystem.h>

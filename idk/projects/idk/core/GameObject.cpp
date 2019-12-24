@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "GameObject.h"
+#include "GameObject.inl"
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <common/TagManager.h>

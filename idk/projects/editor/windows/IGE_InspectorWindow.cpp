@@ -34,7 +34,9 @@ of the editor.
 #include <app/Application.h>
 #include <ds/span.h>
 #include <reflect/reflect.inl>
-#include <res/ResourceManager.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>

@@ -35,6 +35,7 @@ namespace idk
 
 #include <serialize/text.h>
 #include <reflect/reflect.h>
+#include <res/ResourceMeta.inl> //GetMeta
 namespace idk
 {
 	template<typename T>

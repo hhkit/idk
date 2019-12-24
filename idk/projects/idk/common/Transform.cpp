@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Transform.h"
-#include <core/GameObject.h>
-#include <math/matrix_transforms.h>
-#include <math/matrix_decomposition.h>
+#include <core/GameObject.inl>
+#include <math/matrix_transforms.inl>
+#include <math/matrix_decomposition.inl>
 #include <math/quaternion.inl>
 
 namespace idk

@@ -10,7 +10,7 @@
 
 //IDK
 #include "IDK.h"
-#include "Core/GameObject.h"
+#include "Core/GameObject.inl"
 
 //Common
 #include <common/Transform.h>

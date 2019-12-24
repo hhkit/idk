@@ -6,6 +6,7 @@
 #include <core/Core.h>
 #include <opengl/resource/OpenGLMesh.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <gfx/projector_functions.h>
 namespace idk::ogl
 {

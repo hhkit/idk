@@ -22,7 +22,7 @@ of the editor.
 #include <IDE.h>
 #include <app/Application.h>
 #include <scene/SceneManager.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h> //transform
 #include <gfx/MeshRenderer.h>
 #include <gfx/RenderTarget.h>

@@ -9,7 +9,7 @@
 #include <map>
 
 #include <idk.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <gfx/buffer_desc.h>
 
 #include <vkn/VulkanView.h>

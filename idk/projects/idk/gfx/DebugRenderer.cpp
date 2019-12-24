@@ -2,7 +2,7 @@
 #include "DebugRenderer.h"
 
 #include <gfx/MeshFactory.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <ds/span.inl>
 
 namespace idk

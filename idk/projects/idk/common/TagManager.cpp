@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "TagManager.h"
 #include <common/Tag.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <iostream>
 #include <serialize/text.h>
 #include <ds/span.inl>

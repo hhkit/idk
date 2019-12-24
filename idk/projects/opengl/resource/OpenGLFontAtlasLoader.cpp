@@ -11,6 +11,7 @@
 //Resources
 #include <gfx/FontAtlas.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 namespace idk {

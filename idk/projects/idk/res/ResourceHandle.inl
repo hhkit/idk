@@ -2,7 +2,9 @@
 #include <type_traits>
 
 #include <res/Resource.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <math/comparable.inl>
+#include <res/Guid.inl>
 
 namespace idk
 {
