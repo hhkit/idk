@@ -11,6 +11,7 @@
 #include <file/FileSystem.h>
 #include <core/GameState.inl>
 
+#include <res/Guid.inl>
 #include <iostream>
 
 namespace idk

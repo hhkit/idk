@@ -5,6 +5,7 @@
 #include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
 #include <res/ResourceManager.h>
+#include <res/Guid.inl>
 
 namespace idk
 {

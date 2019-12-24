@@ -18,6 +18,7 @@
 
 #include "AssimpCompiler.h"
 #include "AssimpCompiler_helpers.h"
+#include <reflect/reflect.inl>
 
 namespace idk 
 {

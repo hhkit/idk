@@ -9,6 +9,7 @@
 
 #include "DDSCompiler.h"
 
+#include <res/Guid.inl>
 
 
 namespace idk

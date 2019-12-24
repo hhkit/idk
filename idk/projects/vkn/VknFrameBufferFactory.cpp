@@ -6,6 +6,7 @@
 #include <vkn/VulkanView.h>
 #include <vkn/BufferHelpers.h>
 #include <res/ResourceManager.inl>
+#include <res/Guid.inl>
 
 struct AttachmentOps
 {

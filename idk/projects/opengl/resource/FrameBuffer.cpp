@@ -5,6 +5,7 @@
 #include <res/ResourceHandle.inl>
 #include <res/ResourceManager.h>
 #include <res/ResourceManager.inl>
+#include <res/Guid.inl>
 
 namespace idk::ogl
 {

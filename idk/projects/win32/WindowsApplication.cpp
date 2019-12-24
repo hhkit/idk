@@ -16,6 +16,8 @@
 #include "InputManager.h"
 #include "WindowsApplication.h"
 
+#include <ds/span.inl>
+
 namespace idk::win
 {
 	Windows::Windows(HINSTANCE _hInstance, int nCmdShow)

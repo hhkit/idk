@@ -5,6 +5,7 @@
 #include <res/ResourceManager.inl>
 #include <opengl/program/Program.h>
 #include <sstream>
+#include <res/Guid.inl>
 namespace idk::ogl
 {
 	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)

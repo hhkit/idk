@@ -12,6 +12,7 @@
 #include <opengl/resource/OpenGLTexture.h>
 
 #include <opengl/DDSData.h>
+#include <res/Guid.inl>
 
 namespace idk
 {

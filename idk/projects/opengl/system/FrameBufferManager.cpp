@@ -7,7 +7,7 @@
 
 #include <gfx/ViewportUtil.h>
 #include <gfx/FramebufferFactory.h>
-
+#include <res/Guid.inl>
 
 namespace idk::ogl
 {

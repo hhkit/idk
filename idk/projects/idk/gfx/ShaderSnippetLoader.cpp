@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ShaderSnippetLoader.h"
 #include <res/ResourceManager.h>
+#include <res/Guid.inl>
 
 namespace idk
 {

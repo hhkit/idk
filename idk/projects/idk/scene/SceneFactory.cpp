@@ -3,6 +3,7 @@
 #include <res/MetaBundle.h>
 #include <res/ResourceManager.h>
 #include <core/GameState.inl>
+#include <res/Guid.inl>
 
 namespace idk
 {

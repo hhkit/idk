@@ -12,6 +12,7 @@
 #include <gfx/CubeMap.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include <opengl/resource/OpenGLCubemap.h>
+#include <res/Guid.inl>
 
 namespace idk
 {

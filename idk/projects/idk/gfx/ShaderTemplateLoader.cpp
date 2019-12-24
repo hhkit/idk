@@ -4,7 +4,7 @@
 #include <res/MetaBundle.h>
 #include <util/ioutils.h>
 #include <res/ResourceManager.h>
-
+#include <res/Guid.inl>
 namespace idk
 {
 	ResourceBundle ShaderTemplateLoader::LoadFile(PathHandle path, const MetaBundle& metadatas)

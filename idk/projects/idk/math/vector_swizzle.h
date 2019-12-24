@@ -1,5 +1,4 @@
 #pragma once
-#include "vector.h"
 #include <meta/casts.inl>
 #include <ds/range.inl>
 #include <ds/zip.inl>

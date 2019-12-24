@@ -21,7 +21,6 @@
 #include <vkn/VknTexture.h>
 #include <vkn/VulkanHashes.h>
 
-#include <vkn/PipelineBinders.inl>
 #include <vkn/VknCubemap.h>
 
 #include <gfx/ViewportUtil.h>
@@ -38,7 +37,9 @@
 #include <mutex>
 #include <queue>
 #include <parallel/ThreadPool.h>
+#include <vkn/PipelineBinders.inl>
 #include <res/ResourceManager.inl>
+#include <math/color.inl>
 
 
 namespace idk::vkn

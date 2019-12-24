@@ -12,7 +12,7 @@
 #include <res/CompiledAssetLoader.h>
 
 #include <IncludeResources.h>
-
+#include <reflect/reflect.inl>
 #include "ResourceManager.h"
 #include <scene/Scene.inl>
 #include <res/ResourceUtils.inl>

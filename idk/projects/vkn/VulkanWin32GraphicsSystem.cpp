@@ -24,6 +24,7 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VknFrameBufferFactory.h>
 #include <res/ResourceManager.inl>
+#include <core/SystemManager.inl>
 
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
