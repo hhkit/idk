@@ -233,6 +233,7 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -298,11 +299,17 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AddSystems.cpp" />
     <ClCompile Include="game.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</PreprocessToFile>
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">false</PreprocessToFile>
     </ClCompile>
+    <ClCompile Include="ReflectRegistered.cpp" />
+    <ClCompile Include="ReflectReg_AnimComponents.cpp" />
+    <ClCompile Include="ReflectReg_Components.cpp" />
+    <ClCompile Include="ReflectReg_GfxComponents.cpp" />
+    <ClCompile Include="ReflectReg_Resources.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -938,6 +938,10 @@
     <ClInclude Include="res\IAssetLoader.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
     <ClInclude Include="pch_common.h" />
+    <ClInclude Include="ReflectReg_Components.h" />
+    <ClInclude Include="ReflectReg_Resources.h" />
+    <ClInclude Include="ReflectReg_Common.h" />
+    <ClInclude Include="ReflectReg_GfxComponents.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

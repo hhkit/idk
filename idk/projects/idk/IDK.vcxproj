@@ -128,6 +128,10 @@
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
+    <ClInclude Include="ReflectReg_Common.h" />
+    <ClInclude Include="ReflectReg_Components.h" />
+    <ClInclude Include="ReflectReg_GfxComponents.h" />
+    <ClInclude Include="ReflectReg_Resources.h" />
     <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\CompiledAssets.h" />
     <ClInclude Include="res\EasyFactory.h" />
