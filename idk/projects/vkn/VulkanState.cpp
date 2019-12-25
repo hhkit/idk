@@ -17,6 +17,7 @@
 #include <vkn/RenderState.h>
 #include <vkn/utils/utils.h>
 #include <vkn/UboManager.h>
+#include <res/ResourceHandle.inl>
 
 #include <vkn/VknRenderTarget.h>
 
@@ -142,7 +143,7 @@ namespace idk::vkn
 			if (!findQueueFamilies(pd).isComplete())
 				throw "Unable to support desired queue family.";
 
-			auto rextensions = pd.enumerateDeviceExtensionProperties(nullptr, dispatcher);
+			auto rextensions = pd.enumerateDeviceExtensionProperties(nullptr, dyn_dispatcher);
 			std::unordered_set<std::string> extensions;
 			std::transform(rextensions.begin(), rextensions.end(),
 				std::inserter(extensions, extensions.begin()),

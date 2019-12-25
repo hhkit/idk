@@ -6,6 +6,7 @@
 #include <gfx/Mesh.h>
 
 #include <vkn/FrameRenderer.h>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn
 {

@@ -44,6 +44,7 @@
 #include <math/color.inl>
 #include <ds/result.inl>
 
+#include <vkn/DebugUtil.h>
 
 namespace idk::vkn
 {
@@ -1234,7 +1235,6 @@ namespace idk::vkn
 		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 		cmd_buffer.begin(begin_info, dispatcher);
-
 		VulkanPipeline* prev_pipeline = nullptr;
 		vector<RscHandle<ShaderProgram>> shaders;
 		auto& deferred_pass = rs.deferred_pass;
@@ -1242,7 +1242,9 @@ namespace idk::vkn
 		{
 			deferred_pass.pipeline_manager(GetPipelineManager());
 			deferred_pass.frame_index(_current_frame_index);
+			dbg::BeginLabel(cmd_buffer, "DrawToGbuffers");
 			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
+			dbg::EndLabel(cmd_buffer);
 		}
 				
 
@@ -1388,9 +1390,13 @@ namespace idk::vkn
 			TransitionFrameBuffer(camera, cmd_buffer, view);
 			//for(auto& deferred_interface : deferred_interfaces)
 			//Accumulator
+			dbg::BeginLabel(cmd_buffer, "DrawToAccum");
 			deferred_pass.DrawToAccum(cmd_buffer, deferred_interface_light, camera, rs);
+			dbg::EndLabel(cmd_buffer);
 			//HDR
+			dbg::BeginLabel(cmd_buffer, "DrawToRenderTarget");
 			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface_hdr, camera, rt, rs);
+			dbg::EndLabel(cmd_buffer);
 		}
 		//Subsequent passes shouldn't clear the buffer any more.
 		rpbi.renderPass = *View().BasicRenderPass(rt.GetRenderPassType(),false,false);

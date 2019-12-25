@@ -29,6 +29,7 @@ of the editor.
 #include <serialize/text.inl>
 #include <IDE.h>		//IDE
 #include <iostream>
+#include <res/ResourceHandle.inl>
 
 namespace idk {
 

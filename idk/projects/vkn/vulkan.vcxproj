@@ -324,6 +324,7 @@
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CubemapRenderer.h" />
     <ClInclude Include="DDSLoader.h" />
+    <ClInclude Include="DebugUtil.h" />
     <ClInclude Include="DeferredPass.h" />
     <ClInclude Include="DescriptorCountArray.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
@@ -405,6 +406,7 @@
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
     <ClCompile Include="DDSLoader.cpp" />
+    <ClCompile Include="DebugUtil.cpp" />
     <ClCompile Include="DeferredPass.cpp" />
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />

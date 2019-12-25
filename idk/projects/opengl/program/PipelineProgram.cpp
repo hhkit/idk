@@ -3,6 +3,7 @@
 #include <opengl/program/Program.h>
 #include <opengl/resource/OpenGLTexture.h>
 #include <opengl/resource/OpenGLCubemap.h>
+#include <res/ResourceHandle.inl>
 
 namespace idk::ogl
 {

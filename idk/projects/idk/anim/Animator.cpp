@@ -9,7 +9,7 @@
 #include "scene/SceneManager.h"
 #include "AnimationSystem.h"
 #include <serialize/text.inl>
-
+#include <res/ResourceHandle.inl>
 #include "math/matrix_decomposition.inl"
 
 namespace idk 

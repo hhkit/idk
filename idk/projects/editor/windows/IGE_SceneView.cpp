@@ -39,6 +39,7 @@ of the editor.
 #include <opengl/PixelData.h>
 #include <iostream>
 #include <ds/result.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk {
 
