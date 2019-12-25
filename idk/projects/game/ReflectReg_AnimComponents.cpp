@@ -49,7 +49,7 @@ REFLECT_END()
 
 REFLECT_BEGIN(decltype(idk::AnimationState::transitions), "vector<AnimationTransition>")
 REFLECT_END();
-REFLECT_BEGIN(decltype(idk::AnimationState::state_data), "variant<BasicAnimationState, BlendTree>")
+REFLECT_BEGIN(decltype(idk::AnimationState::state_data), "variant<BasicAnimationState,BlendTree>")
 REFLECT_END();
 
 REFLECT_BEGIN(idk::AnimationState, "AnimationState")

@@ -4,6 +4,7 @@
 #include <app/Application.h>
 #include <iostream>
 
+using idk::string;
 class TestApplication :
     public idk::Application
 {
@@ -26,10 +27,10 @@ public:
     bool SetFullscreen(bool) override { return false; };
     bool SetScreenSize(idk::ivec2) override { return false; };
 
-    std::string GetExecutableDir() { return {}; };
-    std::string GetAppData() { return {}; };
-    std::string GetCurrentWorkingDir() { return {}; };
-    std::optional<std::string> OpenFileDialog(const idk::DialogOptions&) override { return {}; };
+    string GetExecutableDir() { return {}; };
+    string GetAppData() { return {}; };
+    string GetCurrentWorkingDir() { return {}; };
+    std::optional<string> OpenFileDialog(const idk::DialogOptions&) override { return {}; };
 
     void Shutdown() override { i++;  std::cout << "application shutdown\n"; }
 };

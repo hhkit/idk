@@ -11,14 +11,14 @@
 #include <reflect/reflect.h>
 #include "FMOD/core/fmod.hpp" //FMOD Core
 #include "FMOD/core/fmod_errors.h" //ErrorString
-#include <scene/Scene.h>
-#include <core/GameObject.h>	
+#include <scene/Scene.inl>
+#include <core/GameObject.inl>	
 #include <audio/AudioSystem.h>	
 #include <audio/AudioClip.h>	
 #include <audio/AudioListener.h>
 #include <file/FileSystem.h>
 #include <common/Transform.h>	
-#include <core/Core.h>
+#include <core/Core.inl>
 #include "TestApplication.h"
 
 TEST(Audio, AudioSystemClassTest)
