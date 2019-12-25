@@ -5,12 +5,13 @@
 #include <serialize/yaml.inl>
 
 #include <core/GameObject.inl>
-#include <scene/Scene.h>
+#include <scene/Scene.inl>
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <script/MonoBehavior.h>
 #include <script/ScriptSystem.h>
 #include <script/ManagedObj.inl>
+#include <res/ResourceHandle.inl>
 
 #include <ds/span.inl>
 #include <ds/result.inl>

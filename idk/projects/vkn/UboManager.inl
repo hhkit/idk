@@ -1,4 +1,5 @@
 #pragma once
+#include "UboManager.h"
 #include <vkn/BufferHelpers.h>
 template<typename T>
 std::pair<vk::Buffer, uint32_t> idk::vkn::UboManager::Add(const T& data)

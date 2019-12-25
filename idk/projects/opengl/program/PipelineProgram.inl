@@ -1,4 +1,5 @@
 #pragma once
+#include "PipelineProgram.h"
 #include <glad/glad.h>
 #include <opengl/program/Program.h>
 

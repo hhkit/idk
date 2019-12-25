@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "yaml.h"
+#include "yaml.inl"
 
 namespace idk::yaml
 {

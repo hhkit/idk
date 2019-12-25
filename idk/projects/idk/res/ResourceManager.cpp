@@ -5,9 +5,9 @@
 #include <ds/ranged_for.inl>
 #include <file/FileSystem.h>
 #include <res/MetaBundle.h>
-#include <serialize/text.h>
+#include <serialize/text.inl>
 #include <util/ioutils.h>
-#include <res/SaveableResourceLoader.h>
+#include <res/SaveableResourceLoader.inl>
 #include <res/CompiledAssets.h>
 #include <res/CompiledAssetLoader.h>
 

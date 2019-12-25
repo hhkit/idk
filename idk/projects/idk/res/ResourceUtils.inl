@@ -1,5 +1,5 @@
 #pragma once
-
+#include "ResourceUtils.h"
 namespace idk
 {
 	namespace detail

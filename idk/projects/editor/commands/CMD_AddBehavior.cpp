@@ -2,7 +2,7 @@
 #include "CMD_AddBehavior.h"
 #include <script/MonoBehavior.h>
 #include <serialize/text.inl>
-
+#include <reflect/reflect.inl>
 namespace idk
 {
 	CMD_AddBehavior::CMD_AddBehavior(Handle<GameObject> gameObject, string behavior)

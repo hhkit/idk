@@ -15,7 +15,8 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 
 #include "pch.h"
-#define HACKING_TO_THE_GATE
+#include <core/Scheduler.inl>
+//#define HACKING_TO_THE_GATE
 #include <IDE.h>
 
 #include <file/FileSystem.h>
@@ -60,7 +61,9 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <util/ioutils.h>
 #include <ds/span.inl>
 #include <ds/result.inl>
+#include <serialize/text.inl>
 #include <res/ResourceHandle.inl>
+#include <core/GameObject.inl>
 
 namespace fs = std::filesystem;
 

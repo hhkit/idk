@@ -8,6 +8,7 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <res/ResourceMeta.inl>
 namespace idk::vkn
 {
 	VulkanView& View();

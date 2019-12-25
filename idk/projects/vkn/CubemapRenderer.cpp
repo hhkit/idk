@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CubemapRenderer.h"
+#include <vkn/UboManager.inl>
 #include <math/matrix_transforms.inl>
 #include "RenderUtil.h"
 #include <res/ResourceManager.inl>

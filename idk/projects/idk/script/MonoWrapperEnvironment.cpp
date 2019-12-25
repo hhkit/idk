@@ -21,8 +21,13 @@
 #include <script/ValueUnboxer.h>
 #include <script/MonoBinder.h>
 
+#include <core/GameObject.inl>
 #include <util/ioutils.h>
 #include <ds/span.inl>
+
+
+
+
 namespace idk::mono
 {
 	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)

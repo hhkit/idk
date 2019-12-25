@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <core/Core.h>
 #include <anim/AnimationUtils.h>
+#include <anim/Animator.inl>
 
 #include "IDE.h"
 #include <editor/imguidk.h>

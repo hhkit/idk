@@ -33,8 +33,8 @@ namespace idk
 	};
 }
 
-#include <serialize/text.h>
-#include <reflect/reflect.h>
+#include <serialize/text.inl> //serialize_text
+#include <reflect/reflect.inl> //get_type
 #include <res/ResourceMeta.inl> //GetMeta
 namespace idk
 {

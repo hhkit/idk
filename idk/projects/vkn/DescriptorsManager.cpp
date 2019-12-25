@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DescriptorsManager.h"
+#include <vkn/DescriptorPoolsManager.inl>
 #include <vkn/BufferHelpers.h>
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>

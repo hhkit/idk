@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "ProjectManager.h"
-#include <serialize/text.h>
+#include <serialize/text.inl>
 #include <util/ioutils.h>
 #include <scene/SceneManager.h>
-#include <reflect/reflect.h>
+#include <reflect/reflect.inl>
 #include <core/ConfigurableSystem.h>
 #include <IncludeSystems.h>
 

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "SaveableResourceLoader.h"
 #include <core/Core.h>
 #include <res/MetaBundle.h>
 #include <res/ResourceManager.h>

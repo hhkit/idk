@@ -13,6 +13,7 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <opengl/system/OpenGLGraphicsSystem.h>
+#include <res/ResourceMeta.inl>
 
 namespace idk {
 	ResourceBundle OpenGLFontAtlasLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& metabundle)

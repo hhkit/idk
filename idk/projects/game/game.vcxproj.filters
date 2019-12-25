@@ -7,10 +7,10 @@
   <ItemGroup>
     <ClCompile Include="game.cpp" />
     <ClCompile Include="AddSystems.cpp" />
-    <ClCompile Include="ReflectRegistered.cpp" />
-    <ClCompile Include="ReflectReg_Components.cpp" />
-    <ClCompile Include="ReflectReg_Resources.cpp" />
-    <ClCompile Include="ReflectReg_GfxComponents.cpp" />
     <ClCompile Include="ReflectReg_AnimComponents.cpp" />
+    <ClCompile Include="ReflectReg_Components.cpp" />
+    <ClCompile Include="ReflectReg_GfxComponents.cpp" />
+    <ClCompile Include="ReflectReg_Resources.cpp" />
+    <ClCompile Include="ReflectRegistered.cpp" />
   </ItemGroup>
 </Project>

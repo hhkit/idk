@@ -7,6 +7,7 @@
 #include <sstream>
 #include <filesystem>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
 	VulkanView& View();

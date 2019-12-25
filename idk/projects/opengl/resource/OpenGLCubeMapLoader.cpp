@@ -4,6 +4,7 @@
 #include <res/MetaBundle.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <res/ResourceMeta.inl>
 #include <filesystem>
 
 //Dep

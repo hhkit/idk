@@ -7,6 +7,7 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <res/ResourceMeta.inl>
 
 //Dep
 #include <ft2build.h>

@@ -40,6 +40,7 @@
 #include <vkn/PipelineBinders.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <vkn/UboManager.inl>
 #include <math/color.inl>
 #include <ds/result.inl>
 

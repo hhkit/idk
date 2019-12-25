@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ShaderGraph.h"
+#include <res/ResourceHandle.inl>
 #include <gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/ShaderTemplate.h>

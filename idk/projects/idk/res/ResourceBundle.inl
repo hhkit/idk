@@ -1,6 +1,6 @@
-#include "ResourceBundle.h"
-#include <res/ResourceUtils.h>
 #pragma once
+#include "ResourceBundle.h"
+#include <res/ResourceUtils.inl>
 
 namespace idk
 {

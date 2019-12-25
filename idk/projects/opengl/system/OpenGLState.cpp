@@ -18,6 +18,8 @@
 #include <res/ResourceHandle.inl>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include "OpenGLState.h"
+#include <opengl/program/PipelineProgram.inl>
+#include <opengl/program/Program.inl>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/CubeMap.h>
 #include <opengl/resource/OpenGLCubemap.h>

@@ -24,6 +24,7 @@
 #include <vkn/VknTexture.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <res/ResourceMeta.inl>
 #include <ds/result.inl>
 
 #if 1

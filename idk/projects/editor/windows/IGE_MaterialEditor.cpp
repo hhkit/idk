@@ -11,6 +11,7 @@
 #include <gfx/MaterialInstance.h>
 #include <gfx/GraphicsSystem.h>
 #include <serialize/text.inl>
+#include <reflect/reflect.inl>
 #include <file/FileSystem.h>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>

@@ -12,6 +12,7 @@
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <imgui/imgui_internal.h>
+#include <reflect/reflect.inl>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>

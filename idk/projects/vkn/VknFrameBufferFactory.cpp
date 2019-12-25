@@ -8,6 +8,7 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <res/Guid.inl>
+#include <res/ResourceMeta.inl>
 
 struct AttachmentOps
 {

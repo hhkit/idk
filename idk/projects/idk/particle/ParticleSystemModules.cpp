@@ -2,6 +2,7 @@
 #include "ParticleSystemModules.h"
 #include <particle/ParticleSystem.h>
 #include <math/euler_angles.h>
+#include <math/arith.inl> //lerp
 
 namespace idk
 {

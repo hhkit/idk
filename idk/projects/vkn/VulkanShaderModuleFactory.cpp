@@ -9,6 +9,7 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <res/Guid.inl>
+#include <vkn/BufferedObj.inl>
 
 namespace idk::vkn
 {

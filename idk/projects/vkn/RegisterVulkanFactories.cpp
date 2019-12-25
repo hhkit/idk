@@ -23,6 +23,7 @@
 #include <vkn/VulkanGlslLoader.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <res/SaveableResourceLoader.inl>
 namespace idk::vkn
 {
 

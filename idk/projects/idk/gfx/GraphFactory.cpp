@@ -8,6 +8,8 @@
 #include <gfx/ShaderGraph_helpers.h>
 #include <util/ioutils.h>
 #include <res/Guid.inl>
+#include <serialize/text.inl>
+#include <reflect/dynamic.inl>
 
 namespace idk
 {

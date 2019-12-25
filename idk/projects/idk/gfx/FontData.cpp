@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "FontData.h"
+#include <res/ResourceMeta.inl>
 #include <gfx/FontAtlas.h>
 
 namespace idk

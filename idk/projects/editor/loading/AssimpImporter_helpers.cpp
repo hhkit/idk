@@ -8,7 +8,7 @@
 #include <math/ritters.h>
 #include <ds/span.inl>
 #include <vkn/BufferHelpers.inl>
-
+#include <res/ResourceHandle.inl>
 namespace idk::ai_helpers
 {
 

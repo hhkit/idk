@@ -31,6 +31,7 @@ of the editor.
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
 #include <anim/AnimationSystem.h>
+#include <anim/Animator.inl>
 #include <app/Application.h>
 #include <ds/span.h>
 #include <reflect/reflect.inl>

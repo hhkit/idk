@@ -4,18 +4,9 @@
 
 #include <core/Core.h>
 #include <win32/WindowsApplication.h>
-#include <gfx/MeshRenderer.h>
-#include <scene/SceneManager.h>
-#include <test/TestComponent.h>
 
-#include <script/ScriptSystem.h>
-#include <script/MonoBehaviorEnvironment.h>
 
-#include <serialize/text.h>
 
-#include <gfx/CameraControls.h>
-
-#include <test/TestSystem.h>
 #include <renderdoc/renderdoc_app.h>
 
 #include <shellapi.h>//CommandLineToArgv
