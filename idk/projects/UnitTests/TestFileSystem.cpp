@@ -446,5 +446,5 @@ TEST(FileSystem, TestConvertToVirtual)
 TEST(FileSystem, CleanUp)
 {
     INIT_FILESYSTEM_UNIT_TEST();
-	std::filesystem::remove_all(vfs.GetFullPath("/FS_UnitTests/"));
+	std::filesystem::remove_all(vfs.GetFullPath("/FS_UnitTests/").sv());
 }
