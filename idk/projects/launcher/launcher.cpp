@@ -7,7 +7,6 @@
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
 #include <win32/XInputSystem.h>
-#include <ReflectRegistration.h>
 #include <file/FileSystem.h>
 #include <gfx/MeshRenderer.h>
 #include <scene/SceneManager.h>
@@ -16,9 +15,15 @@
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 
+#include <prefab/Prefab.h>
+#include <anim/Animation.h>
+#include <anim/Skeleton.h>
 #include <serialize/text.h>
 #include <res/EasyFactory.h>
 #include <res/CompiledAssetLoader.h>
+#include <proj/ProjectManager.h>
+#include <scene/scene.h>
+#include <res/ResourceHandle.inl>
 //#include <editor/loading/AssimpImporter.h>
 #include <gfx/GraphFactory.h>
 #include <opengl/resource/OpenGLMesh.h>

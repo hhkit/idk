@@ -7,10 +7,25 @@
   <ItemGroup>
     <ClCompile Include="game.cpp" />
     <ClCompile Include="AddSystems.cpp" />
-    <ClCompile Include="ReflectReg_AnimComponents.cpp" />
-    <ClCompile Include="ReflectReg_Components.cpp" />
-    <ClCompile Include="ReflectReg_GfxComponents.cpp" />
-    <ClCompile Include="ReflectReg_Resources.cpp" />
-    <ClCompile Include="ReflectRegistered.cpp" />
+    <ClCompile Include="ReflectReg_AnimComponents.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="ReflectReg_Components.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="ReflectReg_GfxComponents.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="ReflectReg_Resources.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="ReflectRegistered.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{986dba4f-4589-4d99-a701-40d2f35bbc87}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

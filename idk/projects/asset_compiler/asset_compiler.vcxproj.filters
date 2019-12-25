@@ -7,6 +7,9 @@
     <Filter Include="compilers\assimp">
       <UniqueIdentifier>{466482f8-0703-41ec-93e3-0484e4a9aeb4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{0853476a-f06c-468a-9009-95d4f2e93c5e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssimpCompiler.cpp" />
@@ -16,6 +19,21 @@
     <ClCompile Include="IAssetLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TextureCompiler.cpp" />
+    <ClCompile Include="..\game\ReflectReg_AnimComponents.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectReg_Components.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectReg_GfxComponents.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectReg_Resources.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectRegistered.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssimpCompiler.h" />

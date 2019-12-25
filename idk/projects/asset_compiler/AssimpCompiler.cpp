@@ -2,17 +2,17 @@
 #include <idk.h>
 #include <scene/Scene.h>
 #include <idk_config.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <gfx/MeshRenderer.h>
 #include <core/GameState.inl>
 #include <anim/AnimationSystem.h>
 #include <anim/SkinnedMeshRenderer.h>
-#include <anim/Animator.h>
+#include <anim/Animator.inl>
 #include <../idk/gfx/Mesh.h>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabUtility.h>
-#include <res/ResourceHandle.h>
+#include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
 #include <res/MetaBundle.h>
 

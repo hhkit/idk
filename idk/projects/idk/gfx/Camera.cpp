@@ -6,7 +6,7 @@
 #include <math/matrix_decomposition.inl>
 #include <gfx/Mesh.h>
 #include <gfx/RenderTarget.h>
-
+#include <res/ResourceHandle.inl>
 //Test
 #include <app/Application.h>
 

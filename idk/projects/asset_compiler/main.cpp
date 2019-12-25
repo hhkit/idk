@@ -8,7 +8,6 @@
 #include <res/ResourceHandle.h>
 #include <anim/Animation.h>
 #include <serialize/binary.h>
-#include <ReflectRegistration.h>
 #include <util/ioutils.h>
 
 #include "CompilerCore.h"

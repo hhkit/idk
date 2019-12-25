@@ -25,7 +25,7 @@
 #include <util/ioutils.h>
 #include <ds/span.inl>
 
-
+#include <res/ResourceHandle.inl>
 
 
 namespace idk::mono
