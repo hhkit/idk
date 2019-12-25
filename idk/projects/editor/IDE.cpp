@@ -403,9 +403,9 @@ namespace idk
 				++index;
 			}
 			std::reverse(null_objects.begin(), null_objects.end());
-			for(auto i : null_objects)
-				selected_gameObjects.erase(selected_gameObjects.begin()+i); //erase in reverse order to ensure that the indices don't change.
-		
+			for (auto i : null_objects)
+				selected_gameObjects.erase(selected_gameObjects.begin() + i); //erase in reverse order to ensure that the indices don't change.
+		}
         for (const auto go : selected_gameObjects)
         {
 			if (const auto col = go->GetComponent<Collider>())
