@@ -1,15 +1,18 @@
 #include "pch.h"
 #include "DebugUtil.h"
 #include <vkn/VulkanView.h>
-namespace idk::vkn::dbg
+namespace idk::vkn
 {
 	VulkanView& View();
+}
+namespace idk::vkn::dbg
+{
 
 	auto CreateLabel(const char* label, const color& col)
 	{
 		return vk::DebugUtilsLabelEXT
 		{
-			label,*r_cast<std::array<float,4>*>(col.data())
+			label,*r_cast<const std::array<float,4>*>(col.data())
 		};
 	}
 
