@@ -393,13 +393,25 @@ namespace idk
 #else
 		ImGuizmo::BeginFrame();
 
-
+		{ //Erase the nullptrs.
+			vector<size_t> null_objects;
+			size_t index = 0;
+			for (const auto go : selected_gameObjects)
+			{
+				if (!go)
+					null_objects.emplace_back(index);
+				++index;
+			}
+			std::reverse(null_objects.begin(), null_objects.end());
+			for(auto i : null_objects)
+				selected_gameObjects.erase(selected_gameObjects.begin()+i); //erase in reverse order to ensure that the indices don't change.
+		
         for (const auto go : selected_gameObjects)
         {
-            if (const auto col = go->GetComponent<Collider>())
-                Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
+			if (const auto col = go->GetComponent<Collider>())
+				Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
         }
-
+		
 
 		ige_main_window->DrawWindow();
 
