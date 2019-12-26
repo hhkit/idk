@@ -1,7 +1,7 @@
 #pragma once
 #include "SaveableResourceLoader.h"
 #include <core/Core.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <res/ResourceManager.h>
 #include <serialize/text.h>
 #include <util/ioutils.h>

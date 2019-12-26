@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include <algorithm>
-#include "MetaBundle.h"
+#include "MetaBundle.inl"
 
 namespace idk
 {

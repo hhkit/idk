@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <opengl/resource/OpenGLTextureLoader.h>
 #include <gfx/GraphicsSystem.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 //Dep
 #include <stb/stb_image.h>
 

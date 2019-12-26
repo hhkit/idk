@@ -6,7 +6,7 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <core/core.h>
 #include <vkn/VulkanView.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceMeta.inl>

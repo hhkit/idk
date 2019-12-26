@@ -28,29 +28,19 @@ namespace idk {
 				return false;
 		}
 
-		if (game_object_handle) {
-			const Handle<Transform> transformHandle = game_object_handle->GetComponent<Transform>();
-			if (transformHandle) {
-				transformHandle->GlobalMatrix(new_values);
-				return true;
-			}
-			else {
-				return false;
-			}
+		if (game_object_handle) 
+		{
+			const Handle<Transform> transformHandle = game_object_handle->Transform();
+			transformHandle->GlobalMatrix(new_values);
 		}
 		return false;
 	}
 
 	bool CMD_TransformGameObject::undo()  {
-		if (game_object_handle) {
-			const Handle<Transform> transformHandle = game_object_handle->GetComponent<Transform>();
-			if (transformHandle) {
-				transformHandle->GlobalMatrix(original_values);
-				return true;
-			}
-			else {
-				return false;
-			}
+		if (game_object_handle) 
+		{
+			const Handle<Transform> transformHandle = game_object_handle->Transform();
+			transformHandle->GlobalMatrix(original_values);
 		}
 		return false;
 	}

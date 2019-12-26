@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ShaderTemplateLoader.h"
 #include <gfx/ShaderTemplate.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <util/ioutils.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>

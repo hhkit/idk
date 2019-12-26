@@ -14,12 +14,16 @@ of the editor.
 
 
 #include "pch.h"
+#include <sstream> //sstream
+
+#include <iostream>
 #include <imgui/ImGuizmo.h>
+
+#include <IDE.h>
 #include <editor/windows/IGE_SceneView.h>
 #include <editor/windows/IGE_HierarchyWindow.h>
 #include <editor/commands/CommandList.h>
 #include <editor/DragDropTypes.h>
-#include <IDE.h>
 #include <app/Application.h>
 #include <scene/SceneManager.h>
 #include <core/GameObject.inl>
@@ -31,13 +35,11 @@ of the editor.
 #include <vkn/VknFramebuffer.h>
 #include <gfx/DebugRenderer.h>
 #include <win32/WindowsApplication.h>
-#include <sstream> //sstream
 #include <math/matrix_decomposition.inl>
 #include <res/ResourceUtils.inl>
 
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include <opengl/PixelData.h>
-#include <iostream>
 #include <ds/result.inl>
 #include <res/ResourceHandle.inl>
 

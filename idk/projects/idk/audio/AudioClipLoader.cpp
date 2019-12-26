@@ -14,7 +14,7 @@
 #include <audio/AudioClipLoader.h>
 #include <idk.h>
 #include <audio/AudioSystem.h> //AudioSystem
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 //Dependency includes
 #include <FMOD/core/fmod.hpp> //FMOD Core
 #include <FMOD/core/fmod_errors.h> //ErrorString

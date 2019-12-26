@@ -4,7 +4,7 @@
 
 #include <ds/ranged_for.inl>
 #include <file/FileSystem.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <serialize/text.inl>
 #include <util/ioutils.h>
 #include <res/SaveableResourceLoader.inl>

@@ -1,7 +1,7 @@
 #include <pch.h>
 #include <opengl/resource/OpenGLFontAtlasLoader.h>
 #include <gfx/GraphicsSystem.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <filesystem>
 
 //Dep

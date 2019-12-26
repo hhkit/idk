@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanTtfLoader.h"
 #include <vkn/VknFontAtlas.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <vkn/VknFontAtlasLoader.h>
 #include <sstream>
 #include <vkn/VulkanWin32GraphicsSystem.h>

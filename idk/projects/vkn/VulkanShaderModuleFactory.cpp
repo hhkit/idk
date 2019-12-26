@@ -3,7 +3,7 @@
 #include <core/Core.h>
 #include "VulkanShaderModuleFactory.h"
 #include <vkn/ShaderModule.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <util/ioutils.h>
 #include <vkn/utils/GlslToSpirv.h>
 #include <res/ResourceManager.inl>

@@ -3,7 +3,7 @@
 #include <core/Core.h>
 #include <core/GameObject.inl>
 #include <common/Transform.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <scene/SceneFactory.h>

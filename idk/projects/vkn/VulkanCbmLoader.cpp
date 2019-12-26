@@ -2,7 +2,7 @@
 #include "VulkanCbmLoader.h"
 #include <vkn/VknCubemap.h>
 #include <stb/stb_image.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <vkn/VknCubemapLoader.h>
 #include <sstream>
 #include <filesystem>

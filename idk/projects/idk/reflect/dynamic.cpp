@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include <reflect/reflect.inl>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <ds/span.inl>
 #include <ds/result.inl>
 

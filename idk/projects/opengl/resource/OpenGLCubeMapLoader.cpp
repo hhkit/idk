@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <gfx/GraphicsSystem.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceMeta.inl>

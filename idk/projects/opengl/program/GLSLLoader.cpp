@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GLSLLoader.h"
 #include <core/Core.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <opengl/program/Program.h>

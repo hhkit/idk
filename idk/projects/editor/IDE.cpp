@@ -36,6 +36,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <script/ScriptSystem.h>
 
 // resource importing
+#include <res/ResourceHandle.inl>
 #include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>
 #include <gfx/GraphFactory.h>
@@ -62,7 +63,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <ds/span.inl>
 #include <ds/result.inl>
 #include <serialize/text.inl>
-#include <res/ResourceHandle.inl>
+#include <reflect/reflect.inl>
 #include <core/GameObject.inl>
 
 namespace fs = std::filesystem;
