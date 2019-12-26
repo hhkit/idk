@@ -199,6 +199,11 @@ namespace idk
 		return itr->second.get();
 	}
 
+	ResourceManager& ResourceManager::Instance() noexcept
+	{
+		return *instance;
+	}
+
 	void ResourceManager::EmptyNewResources()
 	{
 		static constexpr auto dump_new_table = detail::ResourceHelper::DumpNewResourceVectors();

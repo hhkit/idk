@@ -8,6 +8,8 @@
 #include <core/GameObject.h>
 #include <common/Name.h>
 #include <common/Transform.h>
+#include <file/FileSystem.h>
+#include <res/ResourceManager.inl>
 #include "TestApplication.h"
 
 using namespace idk;

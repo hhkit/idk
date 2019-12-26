@@ -1,4 +1,5 @@
 #include "pch.h"
+#undef GetObject
 #include <core/Core.h>
 #include <core/GameState.h>
 #include <core/GameObject.h>
@@ -6,6 +7,7 @@
 #include <phys/Collider.h>
 #include <scene/SceneFactory.h>
 #include <scene/SceneManager.h>
+#include <res/ResourceManager.inl>
 #include "TestApplication.h"
 
 TEST(GameState, TestGameState)

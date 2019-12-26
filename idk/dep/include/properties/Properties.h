@@ -832,7 +832,7 @@ namespace property
         //--------------------------------------------------------------------------------------------
         // Example of a function that can display all the properties of any class with properties
         //--------------------------------------------------------------------------------------------
-        template< bool T_DISPLAY > inline 
+        template< bool T_DISPLAY >  
         void EnumRecursive( 
               const property::table&    Table
             , void*                     pBase
@@ -874,11 +874,12 @@ namespace property
                         const auto  StrAdded   = ( Index == lists_iterator_ends_v ) ? 
                             snprintf( &NameString[ StringIndex ], NameString.max_size() - StringIndex, "%s/",       TableEntry.m_pName )
                           : snprintf( &NameString[ StringIndex ], NameString.max_size() - StringIndex, "%s[%" PRIu64 "]/", TableEntry.m_pName, Index );
+                        const auto StrStripped = std::string_view{ &NameString[0] , static_cast<std::size_t>(StrAdded) + StringIndex - 1 };
 
                         if constexpr ( T_DISPLAY ) if ( Index == lists_iterator_ends_v )
                         {
                             // Deal with a new scope let the user know
-                            CallBack( { &NameString[ 0 ], static_cast<std::size_t>( StrAdded ) + StringIndex - 1 }, {}, Table, EntryIndex, Flags | flags::details::IS_SCOPE );
+                            CallBack(StrStripped, {}, Table, EntryIndex, Flags | flags::details::IS_SCOPE );
                         }
 
                         EnumRecursive<T_DISPLAY>( NewTable, pNewBase, NameString, StringIndex + StrAdded, CallBack );
@@ -894,7 +895,8 @@ namespace property
                         const auto  StrAdded   = ( Index == lists_iterator_ends_v ) ? 
                             snprintf( &NameString[ StringIndex ], NameString.max_size() - StringIndex, "%s",       TableEntry.m_pName )
                           : snprintf( &NameString[ StringIndex ], NameString.max_size() - StringIndex, "%s[%" PRIu64 "]", TableEntry.m_pName, Index );
-                        CallBack( { &NameString[0], static_cast<std::size_t>(StrAdded) + StringIndex }, data { Data }, Table, EntryIndex, Flags );
+                        const auto StrStripped = std::string_view{ &NameString[0], static_cast<std::size_t>(StrAdded) + StringIndex };
+                        CallBack(StrStripped, data { Data }, Table, EntryIndex, Flags );
                     }
                 };
 

@@ -38,6 +38,11 @@ namespace idk
 			struct x32 { __int32 _; };
 		};
 	};
+
+	// exposing default guid constructor
+	constexpr Guid::Guid() noexcept
+		: Data1{ 0 }, Data2{ 0 }, Data3{ 0 }, Data4{ 0,0,0,0,0,0,0,0 }
+	{}
 }
 
 // Specialize std::hash

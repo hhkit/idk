@@ -1559,6 +1559,9 @@
     </None>
     <None Include="memory\ArenaAllocator.inl" />
     <None Include="..\..\bin\editor.exe" />
+    <None Include="res\MetaBundle.inl">
+      <Filter>res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

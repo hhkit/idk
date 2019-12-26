@@ -1,6 +1,7 @@
 #pragma once
 #include <serialize/text.h>
 #include "res/ResourceMeta.h"
+#include <reflect/reflect.inl>
 namespace idk
 {
 	template<typename Meta>

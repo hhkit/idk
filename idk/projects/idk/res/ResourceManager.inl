@@ -1,5 +1,6 @@
 #pragma once
 #include "ResourceManager.h"
+#include <core/Core.inl>
 #include <res/ResourceUtils.inl>
 #include <res/ResourceMeta.h>
 #include <res/SaveableResource.h>

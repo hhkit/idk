@@ -1,16 +1,19 @@
-#include <idk.h>
-#include <core/Core.h>
-#include "CompilerCore.h"
 
 #include <filesystem>
+#include <fstream>
+
+#include <idk.h>
+#include <idk_config.h>
+#include <core/Core.h>
+
+#include <serialize/text.h>
 #include <serialize/binary.h>
 #include <util/ioutils.h>
-#include <idk_config.h>
 #include <res/ResourceHandle.h>
 #include <res/ResourceExtension.h>
 
+#include "CompilerCore.h"
 #include "IAssetLoader.h"
-#include <fstream>
 
 namespace fs = std::filesystem;
 

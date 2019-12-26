@@ -500,6 +500,7 @@
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
     <None Include="res\Guid.inl" />
+    <None Include="res\MetaBundle.inl" />
     <None Include="res\ResourceBundle.inl" />
     <None Include="res\ResourceMeta.inl" />
     <None Include="res\ResourceUtils.inl" />

@@ -76,6 +76,7 @@ namespace idk
 
 		ResourceManager() = default;
 
+		static ResourceManager& Instance() noexcept;
 		void EmptyNewResources();
 		void SaveDirtyFiles();
 		void SaveDirtyMetadata();

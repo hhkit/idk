@@ -19,6 +19,7 @@
 #include <file/FileSystem.h>
 #include <common/Transform.h>	
 #include <core/Core.inl>
+#include <res/ResourceManager.inl>
 #include "TestApplication.h"
 
 TEST(Audio, AudioSystemClassTest)

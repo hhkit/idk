@@ -2,7 +2,7 @@
 #include "GraphFactory.h"
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderGraph_helpers.h>
