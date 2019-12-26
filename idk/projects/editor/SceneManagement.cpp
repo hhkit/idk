@@ -32,6 +32,7 @@ namespace idk
 		Core::GetSystem<SceneManager>().SetActiveScene(Core::GetResourceManager().Create<Scene>());
 		auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
 		active_scene->LoadFromResourcePath();
+		Core::GetSystem<IDE>().curr_scene = active_scene;
 
 		// create default scene objects
 		{

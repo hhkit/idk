@@ -18,7 +18,7 @@ namespace idk
 			if constexpr (std::is_same_v<T, float> && R == 4 && C == 4)
 			{
 				const tvec<float, 4> & vec = rhs;
-				const tmat<float, 4, 4> mat = lhs;
+				const tmat<float, 4, 4>& mat = lhs;
 				const __m128& v = vec.sse;
 				
 				__m128 v0 = _mm_shuffle_ps(v, v, _MM_SHUFFLE(0, 0, 0, 0));
