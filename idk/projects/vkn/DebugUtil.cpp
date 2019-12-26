@@ -25,12 +25,16 @@ namespace idk::vkn::dbg
 	void BeginLabel(vk::CommandBuffer cmd_buffer, const char* label, const color& color)
 	{
 		auto dbg_label = CreateLabel(label, color);
-		cmd_buffer.beginDebugUtilsLabelEXT(dbg_label, View().DynDispatcher());
+#pragma message("YO HC I ADDED THIS. PLEASE REMOVE IF YOU'RE OKAY WITH THIS LINE.")
+		if (View().DynDispatcher().vkQueueBeginDebugUtilsLabelEXT)
+			cmd_buffer.beginDebugUtilsLabelEXT(dbg_label, View().DynDispatcher());
 	}
 
 	void EndLabel(vk::CommandBuffer cmd_buffer)
 	{
-		cmd_buffer.endDebugUtilsLabelEXT(View().DynDispatcher());
+#pragma message("I ADDED THIS TOO")
+		if (View().DynDispatcher().vkQueueEndDebugUtilsLabelEXT)
+			cmd_buffer.endDebugUtilsLabelEXT(View().DynDispatcher());
 	}
 
 }
