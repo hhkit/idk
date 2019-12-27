@@ -14,7 +14,7 @@
 #include <prefab/PrefabUtility.h>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 
 #include "AssimpCompiler.h"
 #include "AssimpCompiler_helpers.h"
