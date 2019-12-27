@@ -6,11 +6,12 @@
 #include <idk_config.h>
 #include <core/Core.h>
 
-#include <serialize/text.h>
-#include <serialize/binary.h>
+#include <serialize/text.inl>
+#include <serialize/binary.inl>
 #include <util/ioutils.h>
 #include <res/ResourceHandle.h>
 #include <res/ResourceExtension.h>
+#include <reflect/reflect.inl>
 
 #include "CompilerCore.h"
 #include "IAssetLoader.h"

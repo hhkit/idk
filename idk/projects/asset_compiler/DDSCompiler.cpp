@@ -3,12 +3,13 @@
 #include <idk.h>
 #include <idk_config.h>
 #include <res/ResourceHandle.h>
+#include <res/Guid.inl>
+#include <res/MetaBundle.inl>
 #include <gfx/Texture.h>
 #include <gfx/CompiledTexture.h>
 #include <serialize/text.inl>
 #include <util/ioutils.h>
 #include <reflect/reflect.inl>
-#include <reflect/dynamic.inl>
 
 #include "DDSCompiler.h"
 
