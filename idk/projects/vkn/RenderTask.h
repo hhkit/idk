@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <gfx/pipeline_config.h>
 #include <vkn/utils/Flags.h>
+#include <ds/ranged_for.inl>
 namespace idk::vkn
 {
 	enum LoadOp {};
@@ -39,6 +40,7 @@ namespace idk::vkn
 	};
 	struct AttachmentDescription
 	{
+		string_view name;
 		ivec2 size;
 		//Format format;
 	};
@@ -148,22 +150,138 @@ namespace idk::vkn
 
 		vector<RenderBatch> batches;
 	};
+	using fgr_id = uint32_t;
+	struct FrameGraphResource 
+	{
+		fgr_id id;
+		bool readonly = true;
+	};
+	using FrameGraphResourceReadOnly = FrameGraphResource;
+	using FrameGraphResourceMutable  = FrameGraphResource;
+	using fg_id = uint32_t;
+	struct FrameGraphNode 
+	{
+		fg_id id;
+		
+		const vector<FrameGraphResource>* buffer;
 
-	struct FrameGraphResource {};
-	struct FrameGraphResourceReadOnly {};
-	struct FrameGraphResourceMutable {};
-	struct FrameGraphNode {};
+		index_span input_resources;
+		index_span output_resources;
+
+		bool Reads(FrameGraphResource rsc)const
+		{
+			auto span = input_resources;
+			auto begin = buffer->begin() + span.begin;
+			auto end = buffer->begin() + span.end;
+			auto itr = std::find(begin, end, rsc);
+			return itr != end;
+		}
+		bool Writes(FrameGraphResource rsc)const 
+		{
+			auto span = output_resources;
+			auto begin = buffer->begin() + span.begin;
+			auto end = buffer->begin() + span.end;
+			auto itr = std::find(begin, end, rsc);
+			return itr != end;
+		}
+
+	};
+
+	struct FrameGraphResourceManager
+	{
+		FrameGraphResource CreateTexture(AttachmentDescription dsc)
+		{
+			auto rsc_index = resources.size();
+			resources.emplace_back(dsc);
+			resource_handles.emplace(NextID(), rsc_index);
+			return FrameGraphResource{ rsc_index };
+		}
+		FrameGraphResource Rename(FrameGraphResource rsc)
+		{
+			auto next_id = NextID();
+			resource_handles.emplace(next_id, resource_handles.find(rsc.id)->second);
+			return FrameGraphResource{ next_id };
+		}
+		string_view Name(FrameGraphResource fg)const
+		{
+			auto itr = resource_handles.find(fg.id);
+			if (itr == resource_handles.end())
+				return "";
+			return resources.at(itr->second).name;
+		}
+		//Generate the next id.
+		fgr_id NextID();
+
+		using rsc_index_t = size_t;
+		vector<AttachmentDescription> resources;
+		hash_table<fgr_id, rsc_index_t> resource_handles;
+	};
+
+	struct NodeBuffer
+	{
+		vector<FrameGraphResource> resources;
+		index_span StoreResources(vector<FrameGraphResource>& rsc)
+		{
+			index_span result{ resources.size(),resources.size() };
+			resources.reserve(rsc.size() + resources.size());
+			std::copy(rsc.begin(), rsc.end(), resources.end());
+			result.end = resources.size();
+			return result;
+		}
+	};
+
 	struct FrameGraphBuilder 
 	{
 		//Keep track of virtual resources
-		AttachmentInfo CreateTexture(AttachmentDescription desc);
-		AttachmentInfo CreateTexture(const Texture& texture);
-		
-		FrameGraphResource read(FrameGraphResource);
-		FrameGraphResource write(FrameGraphResource);
+		//AttachmentInfo CreateTexture(AttachmentDescription desc);
+		//AttachmentInfo CreateTexture(const Texture& texture);
+		fg_id NextID();
 
-		void BeginNode();
-		FrameGraphNode EndNode();
+		FrameGraphResource CreateTexture(AttachmentDescription desc)
+		{
+			return rsc_manager.CreateTexture(desc);
+		}
+
+		FrameGraphResource read(FrameGraphResourceReadOnly in_rsc)
+		{
+			auto rsc = rsc_manager.Rename(in_rsc);
+			curr_input_resources.emplace_back(in_rsc);
+			return rsc;
+		}
+		FrameGraphResource write(FrameGraphResourceMutable target_rsc)
+		{
+			auto rsc = rsc_manager.Rename(target_rsc);
+			if (target_rsc.readonly)
+			{
+				LOG_TO(LogPool::GFX, "Attempting to write to Read only resource %s[%u] !",rsc_manager.Name(target_rsc).data(),target_rsc.id);
+			}
+			curr_input_resources.emplace_back(target_rsc);
+			curr_output_resources.emplace_back(rsc);
+			return rsc;
+		}
+
+		void BeginNode()
+		{
+			curr_input_resources.clear();
+			curr_output_resources.clear();
+		}
+		FrameGraphNode EndNode()
+		{
+			auto input_span = consumed_resources.StoreResources(curr_input_resources);
+			auto output_span = consumed_resources.StoreResources(curr_output_resources);
+			curr_input_resources.clear();
+			curr_output_resources.clear();
+			return FrameGraphNode{ NextID(),&consumed_resources.resources,input_span,output_span };
+		}
+
+		FrameGraphResourceManager rsc_manager;
+
+
+		NodeBuffer consumed_resources;
+
+		//Consumed resources
+		vector<FrameGraphResource> curr_input_resources;
+		vector<FrameGraphResource> curr_output_resources;
 	};
 
 	namespace FrameGraphDetail
@@ -181,8 +299,82 @@ namespace idk::vkn
 	//Job: Do deallocation, reuse resources where possible. (Basically a pool)
 	struct TransientResourceManager
 	{
-
+		
 	};
+
+	template<typename T>
+	auto GetSpan(index_span ispan, T& container)
+	{
+		span<decltype(*std::data(container))> sp{ std::data(container) + ispan.begin , std::data(container)+ispan.end};
+		return sp;
+	}
+
+	struct ResourceLifetime
+	{
+		fg_id start, end; //Fixed order
+		vector<fg_id> inbetween; //Undetermined order
+	};
+	struct ResourceLifetimeManager
+	{
+		using lifetime_index = size_t;
+		vector< ResourceLifetime> resource_lifetimes;
+		hash_table<fgr_id, lifetime_index> map;
+
+		auto NewNode(fgr_id r_id)
+		{
+			auto index = resource_lifetimes.size();
+			resource_lifetimes.emplace_back(ResourceLifetime{ {},{},{} });
+			return map.emplace(r_id, index).first;
+		}
+		auto& GetOrCreate(fgr_id r_id)
+		{
+			auto itr = map.find(r_id);
+			if (itr == map.end())
+			{
+				itr = NewNode(r_id);
+			}
+			return resource_lifetimes.at(itr->second);
+		}
+
+		void EndLifetime(FrameGraphResource rsc,const FrameGraphNode& node)
+		{
+			GetOrCreate(rsc.id).end = node.id;
+		}
+		void InbetweenLifetime(FrameGraphResource rsc, const FrameGraphNode& node)
+		{
+			GetOrCreate(rsc.id).inbetween.emplace_back(node.id);
+		}
+		void StartLifetime(FrameGraphResource rsc, const FrameGraphNode& node)
+		{
+			GetOrCreate(rsc.id).start = node.id;
+		}
+	};
+
+	void FindLifetime(ResourceLifetimeManager& manager,const vector<FrameGraphNode>& nodes, const NodeBuffer& rscs, const FrameGraphNode& root)
+	{
+		auto input_span = GetSpan(root.input_resources  , rscs.resources);
+		auto output_span = GetSpan(root.output_resources, rscs.resources);
+		//TODO: Figure out how to construct the entire tree.
+		for (auto& input : input_span)
+		{
+			manager.EndLifetime(input,root);
+			for (auto& node : reverse(nodes))
+			{
+				if (node.Reads(input))
+				{
+					manager.InbetweenLifetime(input, node);
+				}
+				else if (node.Writes(input))
+				{
+					manager.EndLifetime(input, node);
+					break;
+				}
+			}
+		}
+
+
+
+	}
 
 	struct FrameGraph
 	{
