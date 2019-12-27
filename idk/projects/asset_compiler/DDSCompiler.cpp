@@ -9,7 +9,6 @@
 #include <serialize/text.inl>
 #include <util/ioutils.h>
 #include <reflect/reflect.inl>
-#include <reflect/dynamic.inl>
 
 #include "DDSCompiler.h"
 
