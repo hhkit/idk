@@ -2,11 +2,11 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
   <Type Name="idk::PathHandle">
-    <DisplayString Condition="_is_regular_file">{{file={ ((idk::FileSystem*)Core::_instance->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._files._Mypair._Myval2._Myfirst[_key._index]._mount_path }}}</DisplayString>
-    <DisplayString Condition="!_is_regular_file">{{dir={ ((idk::FileSystem*)Core::_instance->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._dirs._Mypair._Myval2._Myfirst[_key._index]._mount_path }}}</DisplayString>
+    <DisplayString Condition="_is_regular_file">{{file={ ((idk::FileSystem*)Core::_instance->_pimpl->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._files._Mypair._Myval2._Myfirst[_key._index]._mount_path }}}</DisplayString>
+    <DisplayString Condition="!_is_regular_file">{{dir={ ((idk::FileSystem*)Core::_instance->_pimpl->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._dirs._Mypair._Myval2._Myfirst[_key._index]._mount_path }}}</DisplayString>
     <Expand>
-      <Item Name="[File]" Condition="_is_regular_file">((idk::FileSystem*)Core::_instance->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._files._Mypair._Myval2._Myfirst[_key._index]</Item>
-      <Item Name="[Dir]" Condition="!_is_regular_file">((idk::FileSystem*)Core::_instance->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._dirs._Mypair._Myval2._Myfirst[_key._index]</Item>
+      <Item Name="[File]" Condition="_is_regular_file">((idk::FileSystem*)Core::_instance->_pimpl->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._files._Mypair._Myval2._Myfirst[_key._index]</Item>
+      <Item Name="[Dir]" Condition="!_is_regular_file">((idk::FileSystem*)Core::_instance->_pimpl->_system_manager._list[idk::natvis::FileSystemID]._Ptr)->_mounts[_key._mount_id]._path_tree._Mypair._Myval2._Myfirst[_key._depth]._dirs._Mypair._Myval2._Myfirst[_key._index]</Item>
     </Expand>
   </Type>
 
