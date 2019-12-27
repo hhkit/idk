@@ -1,6 +1,7 @@
 #pragma once
 
 #include <idk.h>
+#include <util/string_hash.inl>
 #include <reflect/detail/pretty_function.h>
 
 namespace idk::reflect

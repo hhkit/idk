@@ -3,6 +3,7 @@
 #include <vkn/GfxConverters.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/ShaderModule.h>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
 	template<typename T, typename = void>

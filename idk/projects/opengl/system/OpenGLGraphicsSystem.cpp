@@ -4,6 +4,10 @@
 #include <glad/glad_wgl.h>
 #include <core/Core.h>
 #include <res/EasyFactory.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/SaveableResourceLoader.inl>
+#include <event/Dispatcher.inl>
 #include <gfx/MeshRenderer.h>
 #include <gfx/ShaderTemplateFactory.h>
 #include <gfx/ShaderTemplateLoader.h>

@@ -937,6 +937,11 @@
     <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\IAssetLoader.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
+    <ClInclude Include="pch_common.h" />
+    <ClInclude Include="ReflectReg_Components.h" />
+    <ClInclude Include="ReflectReg_Resources.h" />
+    <ClInclude Include="ReflectReg_Common.h" />
+    <ClInclude Include="ReflectReg_GfxComponents.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1554,6 +1559,9 @@
     </None>
     <None Include="memory\ArenaAllocator.inl" />
     <None Include="..\..\bin\editor.exe" />
+    <None Include="res\MetaBundle.inl">
+      <Filter>res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

@@ -1,6 +1,6 @@
 #include "stdafx.h"
+#include "Handle.h"
 #include "NullHandleException.h"
-
 namespace idk
 {
 	NullHandleException::NullHandleException(GenericHandle h)

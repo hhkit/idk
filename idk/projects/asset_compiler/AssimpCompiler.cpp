@@ -2,20 +2,23 @@
 #include <idk.h>
 #include <scene/Scene.h>
 #include <idk_config.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <gfx/MeshRenderer.h>
+#include <gfx/Mesh.h>
+#include <core/GameState.inl>
 #include <anim/AnimationSystem.h>
 #include <anim/SkinnedMeshRenderer.h>
-#include <anim/Animator.h>
-#include <../idk/gfx/Mesh.h>
+#include <anim/Animator.inl>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabUtility.h>
-#include <res/ResourceHandle.h>
-#include <res/MetaBundle.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceUtils.inl>
+#include <res/MetaBundle.inl>
 
 #include "AssimpCompiler.h"
 #include "AssimpCompiler_helpers.h"
+#include <reflect/reflect.inl>
 
 namespace idk 
 {

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "AnimationLayer.h"
 #include "AnimationSystem.h"
-
+#include <res/ResourceHandle.inl>
 namespace idk
 {
 	bool AnimationLayer::Play(size_t index, float offset)

@@ -1,11 +1,13 @@
-#include <scene/Scene.h>
+#include <scene/Scene.inl>
 #include "AssimpCompiler_helpers.h"
 #include "AssimpCompiler.h"
-#include <math/matrix_decomposition.h>
+#include <math/matrix_decomposition.inl>
 #include <deque>
 #include <iostream>
 #include <../idk/file/FileSystem.h>
 #include <math/ritters.h>
+#include <ds/span.inl>
+
 
 namespace idk::ai_helpers
 {

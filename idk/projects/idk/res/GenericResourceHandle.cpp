@@ -1,5 +1,8 @@
 #include "stdafx.h"
 
+#include "GenericResourceHandle.h"
+#include <res/ResourceUtils.inl>
+
 namespace idk
 {
 	Guid GenericResourceHandle::guid() const

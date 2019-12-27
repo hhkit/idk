@@ -15,5 +15,3 @@ namespace idk
 		const T& me() const;
 	};
 }
-
-#include "comparable.inl"

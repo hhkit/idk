@@ -1,6 +1,7 @@
 #pragma once
 
 #include <idk.h>
+#include <res/ResourceHandle.h>
 
 namespace idk::shadergraph
 {

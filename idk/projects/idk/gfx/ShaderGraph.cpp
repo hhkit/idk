@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "ShaderGraph.h"
+#include <res/ResourceHandle.inl>
 #include <gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/ShaderTemplate.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderGraph_helpers.h>
+#include <serialize/text.inl>
 #include <regex>
 
 namespace idk::shadergraph

@@ -42,4 +42,3 @@ namespace idk
 		constexpr explicit operator tvec<float,4>() const noexcept;
 	};
 }
-#include "color.inl"

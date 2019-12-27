@@ -19,6 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\game\ReflectRegistered.cpp" />
+    <ClCompile Include="..\game\ReflectReg_AnimComponents.cpp" />
+    <ClCompile Include="..\game\ReflectReg_Components.cpp" />
+    <ClCompile Include="..\game\ReflectReg_GfxComponents.cpp" />
+    <ClCompile Include="..\game\ReflectReg_Resources.cpp" />
     <ClCompile Include="AssimpCompiler.cpp" />
     <ClCompile Include="AssimpCompiler_helpers.cpp" />
     <ClCompile Include="CompilerCore.cpp" />
@@ -127,6 +132,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(SolutionDir)projects\idk\;%VULKAN_SDK%\Include\;$(SolutionDir)projects\</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

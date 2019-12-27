@@ -2,5 +2,25 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="launcher.cpp" />
+    <ClCompile Include="..\game\ReflectReg_AnimComponents.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectReg_Components.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectReg_GfxComponents.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectReg_Resources.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\ReflectRegistered.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{a84265a2-8bcb-4c93-9646-227b418f1a59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

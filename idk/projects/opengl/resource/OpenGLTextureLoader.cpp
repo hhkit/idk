@@ -1,14 +1,21 @@
 #include "pch.h"
 #include <opengl/resource/OpenGLTextureLoader.h>
 #include <gfx/GraphicsSystem.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 //Dep
 #include <stb/stb_image.h>
 
 //Resources
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceUtils.inl>
+#include <res/ResourceBundle.inl>
 #include <opengl/resource/OpenGLTexture.h>
+#include <res/ResourceMeta.inl>
 
 #include <opengl/DDSData.h>
+#include <res/Guid.inl>
+#include <ds/span.inl>
 
 namespace idk
 {

@@ -11,15 +11,23 @@
 #include <mono/metadata/reflection.h>
 
 #include <core/Scheduler.h>
+#include <core/NullHandleException.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <IncludeSystems.h>
 
 #include <debug/LogSystem.h>
 #include <script/ValueBoxer.h>
+#include <script/ValueUnboxer.h>
 #include <script/MonoBinder.h>
 
+#include <core/GameObject.inl>
 #include <util/ioutils.h>
+#include <ds/span.inl>
+
+#include <res/ResourceHandle.inl>
+
+
 namespace idk::mono
 {
 	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)

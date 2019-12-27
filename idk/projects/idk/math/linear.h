@@ -1,7 +1,7 @@
 #pragma once
 #include <utility>
 
-#include <meta/tag.h>
+#include <meta/tag.inl>
 
 namespace idk
 {
@@ -45,4 +45,3 @@ namespace idk
 	};
 
 }
-#include "linear.inl"

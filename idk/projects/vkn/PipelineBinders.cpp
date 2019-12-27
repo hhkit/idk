@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PipelineBinders.inl"
+#include <vkn/UboManager.inl>
 #include <vkn/PipelineThingy.h>
 #include <gfx/GraphicsSystem.h>
 #include <vkn/GraphicsState.h>
@@ -15,6 +16,10 @@
 
 #include <vkn/utils/utils.inl>
 #include <vkn/VknFrameBuffer.h>
+
+#include <vkn/PipelineBinders.inl>
+#include <res/ResourceHandle.inl>
+#include <ds/span.inl>
 
 namespace idk::vkn
 {

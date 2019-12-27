@@ -2,6 +2,7 @@
 
 #include <idk.h>
 #include <serialize/parse_error.h>
+#include <ds/result.h>
 
 // serializer/parser for a small subset of yaml.
 // only supports: blocks, flows (only single line tested), and local primary tags
@@ -80,4 +81,3 @@ namespace idk::yaml
 	};
 }
 
-#include "yaml.inl"

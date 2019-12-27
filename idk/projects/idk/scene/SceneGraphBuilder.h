@@ -1,6 +1,6 @@
 #pragma once
 #include <ds/span.h>
-#include <ds/slow_tree.h>
+#include <ds/slow_tree.inl>
 #include <idk.h>
 #include <core/Core.h>
 

@@ -2,6 +2,8 @@
 #include "MaterialInstance.h"
 #include <gfx/ShaderGraph_data.h>
 #include <meta/variant.h>
+#include <serialize/text.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk
 {

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ritters.h"
+#include <ds/span.inl>
 
 namespace idk
 {

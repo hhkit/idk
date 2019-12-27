@@ -18,5 +18,3 @@ namespace idk
 	template<typename T>
 	constexpr auto&& fwd(T&& fwdee) noexcept;
 }
-
-#include "casts.inl"

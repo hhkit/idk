@@ -63,4 +63,3 @@ namespace idk
 		const GenericResourceHandle* itr;
 	};
 }
-#include "ResourceBundle.inl"

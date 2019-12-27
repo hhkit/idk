@@ -1,10 +1,12 @@
 #pragma once
-
+#include <core/Handle.h>
 #include <res/Resource.h>
 #include <prefab/PrefabData.h>
+#include <res/SaveableResource.h>
 
 namespace idk
 {
+    class GameObject;
 	class Prefab : public Resource<Prefab>, public Saveable<Prefab>
 	{
 	public:

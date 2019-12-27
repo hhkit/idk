@@ -1,5 +1,6 @@
 #pragma once
-
+#include <serialize/text.h>
+#include "Animator.h"
 namespace idk
 {
 	template<typename T>

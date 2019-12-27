@@ -2,27 +2,11 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-#include <debug/LogSystem.h>
 #include <core/Core.h>
-#include <vkn/VulkanWin32GraphicsSystem.h>
-#include <opengl/system/OpenGLGraphicsSystem.h>
 #include <win32/WindowsApplication.h>
-#include <win32/XInputSystem.h>
-#include <ReflectRegistration.h>
-#include <editor/IDE.h>
-#include <file/FileSystem.h>
-#include <gfx/MeshRenderer.h>
-#include <scene/SceneManager.h>
-#include <test/TestComponent.h>
 
-#include <script/ScriptSystem.h>
-#include <script/MonoBehaviorEnvironment.h>
 
-#include <serialize/text.h>
 
-#include <gfx/CameraControls.h>
-
-#include <test/TestSystem.h>
 #include <renderdoc/renderdoc_app.h>
 
 #include <shellapi.h>//CommandLineToArgv
@@ -38,7 +22,8 @@ bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 	}
 	return result;
 }
-
+void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow, LPWSTR* command_lines, int num_args);
+void ConfigAppDataAndLogger();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -74,43 +59,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto c = std::make_unique<Core>();
 	
-    c->AddSystem<Windows>(hInstance, nCmdShow);
-    c->AddSystem<win::XInputSystem>();
+	AddSystems(c, hInstance, nCmdShow, command_lines, num_args);
 
-	GraphicsSystem* gSys = nullptr;
-	auto gfx_api = HasArg(L"--opengl", command_lines, num_args) ? GraphicsAPI::OpenGL : GraphicsAPI::Vulkan;
-	switch (gfx_api)
-	{
-	case GraphicsAPI::Vulkan:
-		{
-			auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
-			gSys = &sys;
-			if (HasArg(L"--validation", command_lines, num_args))
-				sys.Instance().EnableValidation();
-			break;
-		}
-	case GraphicsAPI::OpenGL: 
-		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
-		break;
-	default:
-		break;
-	
-	}
-	gSys->is_deferred(!HasArg(L"--forward", command_lines, num_args));
-
-	c->AddSystem<IDE>();
-
-    namespace fs = std::filesystem;
-
-    fs::path idk_app_data = Core::GetSystem<Application>().GetAppData().sv();
-    idk_app_data /= "idk";
-    if (!fs::exists(idk_app_data))
-        fs::create_directory(idk_app_data);
-
-    idk_app_data /= "logs";
-    if (!fs::exists(idk_app_data))
-        fs::create_directory(idk_app_data);
-    Core::GetSystem<LogSystem>().SetLogDir(idk_app_data.string());
+	ConfigAppDataAndLogger();
 
 	c->Setup();
 	c->Run();

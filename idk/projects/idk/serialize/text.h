@@ -39,4 +39,3 @@ namespace idk
 
 }
 
-#include "text.inl"

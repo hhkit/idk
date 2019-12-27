@@ -274,7 +274,6 @@
     </ClCompile>
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
-    <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
     <ClCompile Include="OpenGL_ImGui_Interface.cpp">
       <Filter>graphicsAPI_interface</Filter>
     </ClCompile>
@@ -293,6 +292,9 @@
     </ClCompile>
     <ClCompile Include="windows\IGE_LightLister.cpp">
       <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_ModifyProperty.cpp">
+      <Filter>commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

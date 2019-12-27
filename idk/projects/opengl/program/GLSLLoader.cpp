@@ -1,9 +1,12 @@
 #include "pch.h"
 #include "GLSLLoader.h"
 #include <core/Core.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <opengl/program/Program.h>
 #include <sstream>
+#include <res/Guid.inl>
 namespace idk::ogl
 {
 	ResourceBundle GLSLLoader::LoadFile(PathHandle filepath, const MetaBundle& bundle)

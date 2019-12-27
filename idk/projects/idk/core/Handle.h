@@ -3,8 +3,9 @@
 #include <string>
 
 #include <idk.h>
-#include <math/comparable.h>
-#include <meta/meta.h>
+#include <math/comparable.inl>
+#include <meta/meta.inl>
+#include <meta/tuple.inl>
 #include "Handleables.h"
 
 namespace idk::reflect
@@ -104,5 +105,3 @@ namespace std
 		}
 	};
 }
-
-#include "Handle.inl"

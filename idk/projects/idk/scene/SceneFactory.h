@@ -1,6 +1,7 @@
 #pragma once
 #include <scene/Scene.h>
 #include <res/ResourceFactory.h>
+#include <res/FileLoader.h>
 
 namespace idk
 {

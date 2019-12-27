@@ -15,10 +15,11 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 
 #include "pch.h"
-#define HACKING_TO_THE_GATE
+#include <core/Scheduler.inl>
+//#define HACKING_TO_THE_GATE
 #include <IDE.h>
 
-#include <filesystem>
+#include <file/FileSystem.h>
 
 // dependencies
 #include <imgui/imgui.h>
@@ -32,8 +33,10 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 #include <scene/SceneManager.h>
+#include <script/ScriptSystem.h>
 
 // resource importing
+#include <res/ResourceHandle.inl>
 #include <res/EasyFactory.h>
 #include <loading/AssimpImporter.h>
 #include <gfx/GraphFactory.h>
@@ -42,6 +45,10 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/resource/OpenGLFontAtlasLoader.h>
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderSnippetLoader.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceUtils.inl>
 
 // editor setup
 #include <gfx/RenderTarget.h>
@@ -53,6 +60,11 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 // util
 #include <util/ioutils.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
+#include <serialize/text.inl>
+#include <reflect/reflect.inl>
+#include <core/GameObject.inl>
 
 namespace fs = std::filesystem;
 
@@ -382,13 +394,25 @@ namespace idk
 #else
 		ImGuizmo::BeginFrame();
 
-
+		{ //Erase the nullptrs.
+			vector<size_t> null_objects;
+			size_t index = 0;
+			for (const auto go : selected_gameObjects)
+			{
+				if (!go)
+					null_objects.emplace_back(index);
+				++index;
+			}
+			std::reverse(null_objects.begin(), null_objects.end());
+			for (auto i : null_objects)
+				selected_gameObjects.erase(selected_gameObjects.begin() + i); //erase in reverse order to ensure that the indices don't change.
+		}
         for (const auto go : selected_gameObjects)
         {
-            if (const auto col = go->GetComponent<Collider>())
-                Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
+			if (const auto col = go->GetComponent<Collider>())
+				Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
         }
-
+		
 
 		ige_main_window->DrawWindow();
 

@@ -18,13 +18,17 @@ Derived using IDE_SceneView.cpp as a base/reference
 #include <app/Application.h>
 #include <common/Transform.h> //transform
 #include <gfx/Camera.h> //camera
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <gfx/RenderTarget.h>
 #include <iostream>
 #include <math/euler_angles.h>
 #include <gfx/GraphicsSystem.h>
 #include <imgui/ImGuizmo.h>
 #include <IDE.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceUtils.inl>
 
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>

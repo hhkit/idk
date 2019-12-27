@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "CMD_ModifyProperty.h"
-#include <script/ManagedObj.h>
+#include <script/ManagedObj.inl>
 #include <script/MonoBehavior.h>
+#include <serialize/text.inl>
+#include <ds/result.inl>
+#include <res/ResourceHandle.inl>
+
 namespace idk
 {
 

@@ -12,7 +12,13 @@
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
 #include <imgui/imgui_internal.h>
+#include <reflect/reflect.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceUtils.inl>
 
+#include <ds/span.inl>
 namespace idk
 {
     static string get_asset_name(const GenericResourceHandle& handle)

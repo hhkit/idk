@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "MeshFactory.h"
+#include <res/ResourceHandle.inl>
 #include <iostream>
 
 namespace idk

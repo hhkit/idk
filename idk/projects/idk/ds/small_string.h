@@ -137,8 +137,17 @@ namespace idk
 		constexpr static CharT _sso_buffer_size = (31 / sizeof(CharT));
 		constexpr static CharT _use_longer_mask = 0x01;
 
-		struct _sso;
-		struct _longer;
+		struct _sso
+        {
+            CharT buffer[_sso_buffer_size]; // buf size should be > 24
+            CharT size_diff;
+        };
+		struct _longer
+        {
+            CharT* ptr;
+            small_string::size_type size;
+            small_string::size_type capacity;
+        };
 		union _rep { _sso sso; _longer longer; };
 
 		bool _is_sso() const;
@@ -226,5 +235,3 @@ namespace std
 		}
 	};
 }
-
-#include "small_string.inl"

@@ -24,4 +24,3 @@ namespace idk
     template<typename FindMe, typename Variant>
     constexpr auto index_in_variant_v = index_in_variant<FindMe, Variant>::value;
 }
-#include "variant.inl"

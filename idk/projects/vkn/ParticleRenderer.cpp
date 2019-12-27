@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "ParticleRenderer.h"
 #include <vkn/PipelineThingy.h>
-#include <vkn/PipelineBinders.h>
+#include <vkn/PipelineBinders.inl>
 #include <vkn/GraphicsState.h>
 #include <gfx/Mesh.h>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn
 {

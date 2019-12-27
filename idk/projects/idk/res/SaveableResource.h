@@ -2,8 +2,13 @@
 #include <idk.h>
 #include <res/ResourceExtension.h>
 
+
 namespace idk
 {
+	namespace detail {
+		template<typename T> struct ResourceManager_detail;
+		template<typename T> struct CompiledAssetHelper_detail;
+	}
 	template<typename T, typename AutoSave = true_type>
 	struct Saveable
 	{

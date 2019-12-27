@@ -30,4 +30,3 @@ namespace idk
 	template<typename T, typename ... Args>
 	constexpr auto tuple_construct(const std::tuple<Args...>&) noexcept;
 }
-#include "tuple.inl"

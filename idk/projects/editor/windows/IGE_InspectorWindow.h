@@ -15,6 +15,7 @@ This window displays the editor window where you can select and modify gameobjec
 #pragma once
 #include <editor/windows/IGE_IWindow.h>
 #include <IncludeComponents.h>
+#include <res/GenericResourceHandle.h>
 
 namespace idk {
 

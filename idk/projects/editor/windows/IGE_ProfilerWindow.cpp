@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "IGE_ProfilerWindow.h"
 #include <core/Scheduler.h>
+#include <ds/circular_buffer.inl>
+
 namespace idk
 {
 	IGE_ProfilerWindow::IGE_ProfilerWindow()

@@ -9,6 +9,7 @@
 
 // add headers that you want to pre-compile here
 #include "framework.h"
+#include <pch_common.h>
 #include <idk.h>
 #include <core/Core.h>
 #include <editor/ImGui_Interface.h>

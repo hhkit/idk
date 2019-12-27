@@ -19,5 +19,3 @@ namespace idk
 		constexpr T& operator[](size_t index) const noexcept;
 	};
 }
-
-#include "span.inl"

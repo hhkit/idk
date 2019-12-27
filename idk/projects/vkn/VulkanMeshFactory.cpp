@@ -9,6 +9,9 @@
 #include <core/Core.h>
 #include <vkn/MemoryAllocator.h>
 #include <gfx/projector_functions.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <math/angle.inl>
 
 namespace idk::vkn
 {

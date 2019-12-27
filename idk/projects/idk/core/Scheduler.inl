@@ -1,5 +1,7 @@
 #include "Scheduler.h"
 #include <core/Core.h>
+#include <ds/circular_buffer.inl>
+#include <core/GameState.inl>
 #pragma once
 namespace idk
 {

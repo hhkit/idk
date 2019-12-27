@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include "quaternion.h"
+#include <math/angle.inl>
 
 namespace idk
 {
@@ -71,12 +72,29 @@ namespace idk
 	template<typename T>
 	inline quaternion<T>::operator tmat<T, 4, 4>() const
 	{
-		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
+		auto copy = *this;
+		return tmat<T, 4, 4>{copy};
 	}
 
 	template<typename T>
 	inline quaternion<T>::operator tmat<T, 4, 4>()
 	{
+		this->normalize();
+		// poor attempt at simd
+		////1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
+		////	  2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
+		////	  2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)
+		//
+		//__m128& me = this->sse;
+		//
+		//auto mul1 = _mm_shuffle_ps(me, me, )
+		//
+		//return tmat<T, 4, 4>{
+		//	vec4{ },
+		//	vec4{ },
+		//	vec4{ },
+		//	vec4{ __m128{0,0,0,1} }
+		//};
 		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 

@@ -15,4 +15,3 @@ namespace idk
 
 	template<typename Container> constexpr auto reverse(Container&& cont) noexcept;
 }
-#include "ranged_for.inl"

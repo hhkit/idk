@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "Matrix.h"
+#include "matrix.inl"
+#include "vector.inl"
 
 namespace idk
 {

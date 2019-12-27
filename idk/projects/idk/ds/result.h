@@ -47,4 +47,3 @@ namespace idk::monadic
 		const Result*  operator->() const;
 	};
 }
-#include "result.inl"

@@ -5,6 +5,10 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanView.h>
 #include <vkn/BufferHelpers.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/Guid.inl>
+#include <res/ResourceMeta.inl>
 
 struct AttachmentOps
 {

@@ -7,6 +7,8 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/utils/utils.h> //ReverseMap
 #include <iostream>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 //+x,-x,+y,-y,+z,-z
 

@@ -61,7 +61,7 @@ namespace idk
 		seconds    _accumulated_dt;
 		seconds    _fixed_dt = seconds{ 1.0 / 60 };
 
-		vector<Pass> _passes[s_cast<int>(UpdatePhase::MAX)];
+		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];
 
 		std::array<bool, SystemCount> _systems_paused{};
 
@@ -104,5 +104,3 @@ namespace idk
 		friend Scheduler;
 	};
 }
-
-#include "Scheduler.inl"

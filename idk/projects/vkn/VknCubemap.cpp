@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "VknCubemap.h"
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn {
 	RscHandle<Texture> VknCubemap::Tex() const noexcept
 	{

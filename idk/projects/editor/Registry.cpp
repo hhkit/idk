@@ -5,7 +5,8 @@
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
 #include <editor/IDE.h>
-#include <serialize/yaml.h>
+#include <serialize/yaml.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

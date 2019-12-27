@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "SceneFactory.h"
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <core/GameState.inl>
+#include <res/Guid.inl>
 
 namespace idk
 {

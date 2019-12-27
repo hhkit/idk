@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include <reflect/reflect.h>
+#include <reflect/reflect.inl>
 
 namespace idk::reflect
 {

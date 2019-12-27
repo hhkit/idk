@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
-#include <res/ResourceHandle.h>
-#include <meta/variant.h>
+#include <res/ResourceHandle.h> 
+#include <meta/variant.inl>
 namespace idk
 {
 	struct GenericResourceHandle
@@ -18,7 +18,7 @@ namespace idk
 
 		Guid   guid() const;
 		size_t resource_id() const;
-
+		
 		template<typename T> RscHandle<T>& AsHandle();
 		template<typename T> const RscHandle<T>& AsHandle() const;
 

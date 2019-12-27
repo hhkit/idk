@@ -1,6 +1,8 @@
 #include "stdafx.h"
-
-#include <reflect/reflect.h>
+#include <serialize/text.inl>
+#include <reflect/reflect.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk::reflect
 {

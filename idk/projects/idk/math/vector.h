@@ -106,5 +106,3 @@ namespace idk
 	extern template struct tvec<float, 3>;
 	extern template struct tvec<float, 4>;
 }
-
-#include "Vector.inl"

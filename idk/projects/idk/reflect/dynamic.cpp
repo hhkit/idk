@@ -1,6 +1,9 @@
 #include "stdafx.h"
-#include <reflect/reflect.h>
-#include <res/MetaBundle.h>
+#include <reflect/reflect.inl>
+#include <res/MetaBundle.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
+
 namespace idk::reflect
 {
 	dynamic::dynamic(reflect::type type, void* obj)

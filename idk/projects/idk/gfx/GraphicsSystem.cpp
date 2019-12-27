@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "GraphicsSystem.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <gfx/MeshRenderer.h>
 #include <anim/Animator.h>
 #include <anim/SkinnedMeshRenderer.h>
@@ -13,6 +13,8 @@
 #include <ui/Canvas.h>
 #include <common/Transform.h>
 #include <app/Application.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 #include <gfx/DebugRenderer.h>
 #include <gfx/Mesh.h>
@@ -23,10 +25,13 @@
 #include <meta/comparator.inl>
 
 #include <math/shapes/frustum.h>
+#include <math/matrix_transforms.inl>
 
 #include <parallel/ThreadPool.h>
 
 #include <meta/meta.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 struct guid_64
 {

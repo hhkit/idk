@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Tag.h"
 #include <common/TagManager.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 
 namespace idk
 {

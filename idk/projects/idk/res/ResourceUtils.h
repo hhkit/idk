@@ -9,4 +9,3 @@ namespace idk
 	constexpr auto BaseResourceID = BaseResource<T>::value;
 }
 
-#include "ResourceUtils.inl"

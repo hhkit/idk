@@ -1,18 +1,23 @@
 #include "pch.h"
 
+#include <meta/tag.inl>
+#include <math/linear.inl>
+#include <meta/tuple.inl>
+#include <vkn/VulkanState.inl>
+
 #include <set>
 #include <map>
 
 #include <idk.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <gfx/buffer_desc.h>
 
-#include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/RenderState.h>
 #include <vkn/utils/utils.h>
 #include <vkn/UboManager.h>
+#include <res/ResourceHandle.inl>
 
 #include <vkn/VknRenderTarget.h>
 
@@ -138,7 +143,7 @@ namespace idk::vkn
 			if (!findQueueFamilies(pd).isComplete())
 				throw "Unable to support desired queue family.";
 
-			auto rextensions = pd.enumerateDeviceExtensionProperties(nullptr, dispatcher);
+			auto rextensions = pd.enumerateDeviceExtensionProperties(nullptr, dyn_dispatcher);
 			std::unordered_set<std::string> extensions;
 			std::transform(rextensions.begin(), rextensions.end(),
 				std::inserter(extensions, extensions.begin()),

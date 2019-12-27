@@ -1,13 +1,18 @@
 #include "stdafx.h"
-#include "text.h"
+#include "text.inl"
 
-#include <reflect/reflect.h>
-#include <serialize/yaml.h>
+#include <reflect/reflect.inl>
+#include <serialize/yaml.inl>
 
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
+#include <core/GameObject.inl>
 #include <scene/Scene.h>
 
 #include <script/MonoBehavior.h>
+#include <script/ManagedObj.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk
 {

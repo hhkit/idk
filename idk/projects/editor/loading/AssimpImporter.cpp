@@ -8,14 +8,19 @@
 #include <scene/sceneManager.h>
 #include <file/FileSystem.h>
 #include <anim/AnimationSystem.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <prefab/Prefab.h>
 #include <prefab/PrefabUtility.h>
 #include <gfx/ShaderGraph.h>
+#include <gfx/MeshRenderer.h>
 #include <common/Transform.h>
-#include <idk/gfx/MeshRenderer.h>
 #include <anim/SkinnedMeshRenderer.h>
 #include <anim/Animator.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceUtils.inl>
+#include <res/MetaBundle.inl>
 //*/
 #include <iostream>
 

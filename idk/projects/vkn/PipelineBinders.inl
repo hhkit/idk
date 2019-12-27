@@ -1,5 +1,6 @@
 #pragma once
 #include"PipelineBinders.h"
+#include <vkn/utils/utils.inl>
 
 namespace idk::vkn
 {

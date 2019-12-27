@@ -98,5 +98,3 @@ namespace idk
 	template<typename T> trad<T> atan(const T& frac);
 	template<typename T> trad<T> atan(const T& y, const T& x);
 }
-
-#include "angle.inl"

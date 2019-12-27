@@ -1,6 +1,5 @@
 #pragma once
 #include <core/Component.h>
-#include <scene/Scene.h>
 #include "GameState_detail.h"
 #undef GetObject
 
@@ -22,6 +21,7 @@ namespace idk
 
 		bool       ActivateScene(uint8_t scene);
 		bool       DeactivateScene(uint8_t scene);
+		//Ivan says this doesn't work. Use Scene::Deactivate instead
 		bool       DeactivateScene(Scene scene);
 		bool       ValidateScene(const Scene& scene);
 
@@ -76,5 +76,3 @@ namespace idk
 	extern template Handle<class GameObject> GameState::CreateObject<class GameObject>(uint8_t);
 	extern template Handle<class GameObject> GameState::CreateObject<class GameObject>(const Handle<class GameObject>&);
 }
-
-#include "GameState.inl"

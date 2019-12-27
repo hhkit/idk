@@ -1,7 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <meta/comparator.h>
-
+#include <res/Guid.h>
 namespace idk
 {
 	// tags a resource with metadata of the type Meta
@@ -39,5 +39,3 @@ namespace idk
 	};
 
 }
-
-#include "ResourceMeta.inl"

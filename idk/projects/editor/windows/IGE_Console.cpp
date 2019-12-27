@@ -16,6 +16,7 @@ Logs logs into a log.
 #include <debug/LogSystem.h>
 #include <editor/windows/IGE_Console.h>
 #include <editorstatic/imgui/imgui_internal.h> //InputTextEx
+#include <ds/circular_buffer.inl>
 
 namespace idk
 {

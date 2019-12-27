@@ -2,7 +2,8 @@
 #include <util/enum.h>
 #include <res/Resource.h>
 #include <res/ResourceMeta.h>
-
+#include <res/SaveableResource.h>
+#include <gfx/UniformInstance.h>
 #include <map>
 namespace idk
 {

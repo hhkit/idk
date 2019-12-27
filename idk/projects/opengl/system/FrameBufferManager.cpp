@@ -1,15 +1,16 @@
 #include "pch.h"
 #include "FrameBufferManager.h"
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <gfx/RenderTarget.h>
 #include <opengl/resource/FrameBuffer.h>
 #include <opengl/resource/OpenGLTexture.h>
+#include <res/ResourceMeta.inl>
 
 #include <gfx/ViewportUtil.h>
-
 #include <gfx/FramebufferFactory.h>
-
-#include <iostream>
-
+#include <res/Guid.inl>
+#include <ds/span.inl>
 
 namespace idk::ogl
 {
@@ -301,14 +302,14 @@ namespace idk::ogl
 
 		switch (fb_status)
 		{
-		case GL_FRAMEBUFFER_UNDEFINED:                     std::cout << "undefined\n";       break;
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:         std::cout << "incomplete\n";		 break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: std::cout << "missing\n";		 break;
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:        std::cout << "incomplete draw\n"; break;
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:        std::cout << "incomplete read\n"; break;
-		case GL_FRAMEBUFFER_UNSUPPORTED:                   std::cout << "unsupported\n";	 break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:        std::cout << "multisample\n";	 break;
-		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:      std::cout << "layer target\n";	 break;
+		case GL_FRAMEBUFFER_UNDEFINED:                     LOG_TO(LogPool::GFX, "undefined\n");      break;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:         LOG_TO(LogPool::GFX, "incomplete\n");	 break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: LOG_TO(LogPool::GFX, "missing\n");		 break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:        LOG_TO(LogPool::GFX, "incomplete draw\n"); break;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:        LOG_TO(LogPool::GFX, "incomplete read\n"); break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:                   LOG_TO(LogPool::GFX, "unsupported\n");	 break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:        LOG_TO(LogPool::GFX, "multisample\n");	 break;
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:      LOG_TO(LogPool::GFX, "layer target\n");	 break;
 		}
 		assert(fb_status == GL_FRAMEBUFFER_COMPLETE);
 	}

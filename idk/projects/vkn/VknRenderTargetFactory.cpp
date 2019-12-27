@@ -2,11 +2,13 @@
 #include "VknRenderTargetFactory.h"
 #include <core/Core.h>
 #include <app/Application.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <vkn/VknTexture.h>
 #include <vkn/VknRenderTarget.h>
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn
 {

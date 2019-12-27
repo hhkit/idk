@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Vector.h"
+#include "vector.inl"
 
 namespace idk
 {

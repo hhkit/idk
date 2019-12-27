@@ -25,6 +25,7 @@
 #include "FMOD/core/fmod_common.h" //FMOD Enums. This is included in the header file only because this is the only thing that should be exposed.
 #include <map> //map
 #include <list> //list. TEMPORARY TODO. Will switch to a faster container.
+#include <core/Handle.h>
 
 //External Forward Declarations
 namespace FMOD {

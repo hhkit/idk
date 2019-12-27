@@ -2,19 +2,24 @@
 
 #include <sstream>
 
-#include <ds/ranged_for.h>
+#include <ds/ranged_for.inl>
 #include <file/FileSystem.h>
-#include <res/MetaBundle.h>
-#include <serialize/text.h>
+#include <res/MetaBundle.inl>
+#include <serialize/text.inl>
 #include <util/ioutils.h>
-#include <res/SaveableResourceLoader.h>
+#include <res/SaveableResourceLoader.inl>
 #include <res/CompiledAssets.h>
 #include <res/CompiledAssetLoader.h>
 
 #include <IncludeResources.h>
-
-#include "ResourceManager.h"
-
+#include <reflect/reflect.inl>
+#include "ResourceHandle.inl"
+#include <res/ResourceMeta.inl>
+#include "ResourceManager.inl"
+#include <scene/Scene.inl>
+#include <res/ResourceUtils.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk
 {
@@ -192,6 +197,11 @@ namespace idk
 			return nullptr;
 
 		return itr->second.get();
+	}
+
+	ResourceManager& ResourceManager::Instance() noexcept
+	{
+		return *instance;
 	}
 
 	void ResourceManager::EmptyNewResources()

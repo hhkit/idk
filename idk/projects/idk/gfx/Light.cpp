@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "Light.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
+#include <math/angle.inl>
 
 #include<iostream>
 std::ostream& operator<<(std::ostream& out, const idk::vec3& v)

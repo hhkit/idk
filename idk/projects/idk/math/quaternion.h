@@ -59,5 +59,3 @@ namespace idk
 
 	extern template struct quaternion<float>;
 }
-
-#include "quaternion.inl"

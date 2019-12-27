@@ -1,11 +1,12 @@
 #include "stdafx.h"
-#include "GameObject.h"
+#include "GameObject.inl"
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <common/TagManager.h>
 #include <common/Tag.h>
 #include <common/Layer.h>
-
+#include <reflect/reflect.inl>
+#include <ds/span.inl>
 namespace idk
 {
 	GenericHandle GameObject::AddComponent(string_view sv)

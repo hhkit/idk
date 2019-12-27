@@ -24,5 +24,3 @@ namespace idk
 	template<typename T>
 	quaternion<T> decompose_rotation_matrix(const tmat<T, 3, 3> & rotation);
 }
-
-#include "matrix_decomposition.inl"

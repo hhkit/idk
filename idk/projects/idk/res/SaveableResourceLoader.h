@@ -25,4 +25,3 @@ namespace idk
 	};
 }
 
-#include "SaveableResourceLoader.inl"

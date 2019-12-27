@@ -14,12 +14,14 @@
 #include <audio/AudioClipLoader.h>
 #include <idk.h>
 #include <audio/AudioSystem.h> //AudioSystem
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 //Dependency includes
 #include <FMOD/core/fmod.hpp> //FMOD Core
 #include <FMOD/core/fmod_errors.h> //ErrorString
-
-
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/Guid.inl>
 namespace idk {
 	ResourceBundle AudioClipLoader::LoadFile(PathHandle filePath, const MetaBundle& metabundle)
 	{

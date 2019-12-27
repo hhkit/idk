@@ -3,6 +3,7 @@
 #include <cassert>
 #include "pool.h"
 
+#include "span.inl"
 namespace idk
 {
 	template<typename T>

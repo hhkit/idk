@@ -1,6 +1,8 @@
 #pragma once
 
 #include "text.h"
+#include <ds/result.inl>
+#include <reflect/reflect.inl>
 #include <charconv>
 
 namespace idk

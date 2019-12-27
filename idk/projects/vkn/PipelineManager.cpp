@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PipelineManager.h"
+#include <res/ResourceHandle.inl>
 #include <memory/ArenaAllocator.inl>
 namespace idk::vkn
 {

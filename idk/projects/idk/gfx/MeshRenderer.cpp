@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "MeshRenderer.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <gfx/GraphicsSystem.h>
 #include <gfx/Camera.h>
 #include <gfx/Mesh.h>
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <phys/RigidBody.h>
 #include <core/Scheduler.h>
 

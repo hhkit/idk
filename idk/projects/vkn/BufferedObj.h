@@ -36,4 +36,3 @@ namespace idk::vkn
 	};
 
 }
-#include "BufferedObj.inl"

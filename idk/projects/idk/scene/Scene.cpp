@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include <scene/SceneManager.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <util/ioutils.h>
-#include <res/ResourceBundle.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <file/FileSystem.h>
+#include <serialize/text.h>
+#include <ds/span.inl>
 
 namespace idk
 {

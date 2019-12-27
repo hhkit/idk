@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "binary.h"
+#include "binary.inl"
 
-#include <reflect/reflect.h>
+#include <reflect/reflect.inl>
 
 namespace idk
 {

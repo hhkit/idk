@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Collider.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <phys/RigidBody.h>
 

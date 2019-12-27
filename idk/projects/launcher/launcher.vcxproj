@@ -128,6 +128,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -235,6 +236,11 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\game\ReflectRegistered.cpp" />
+    <ClCompile Include="..\game\ReflectReg_AnimComponents.cpp" />
+    <ClCompile Include="..\game\ReflectReg_Components.cpp" />
+    <ClCompile Include="..\game\ReflectReg_GfxComponents.cpp" />
+    <ClCompile Include="..\game\ReflectReg_Resources.cpp" />
     <ClCompile Include="launcher.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

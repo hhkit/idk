@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "IGE_GameView.h"
 #include <editor/IDE.h>
+#include <res/ResourceHandle.inl>
 #include <gfx/RenderTarget.h>
 
 namespace idk

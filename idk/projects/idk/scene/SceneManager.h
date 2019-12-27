@@ -3,6 +3,8 @@
 #include <idk_config.h>
 #include <core/ISystem.h>
 #include <scene/SceneGraphBuilder.h>
+#include <res/ResourceHandle.h>
+
 namespace idk
 {
 	class Scene;

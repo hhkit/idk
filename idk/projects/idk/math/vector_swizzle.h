@@ -1,8 +1,7 @@
 #pragma once
-#include "vector.h"
-#include <meta/casts.h>
-#include <ds/range.h>
-#include <ds/zip.h>
+#include <meta/casts.inl>
+#include <ds/range.inl>
+#include <ds/zip.inl>
 
 namespace idk::detail
 {

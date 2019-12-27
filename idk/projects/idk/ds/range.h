@@ -17,5 +17,3 @@ namespace idk
 	template<size_t start, size_t stop, size_t step = 1> 
 	constexpr auto range() noexcept;
 }
-
-#include "range.inl"

@@ -1,5 +1,6 @@
 #pragma once
 #include <idk.h>
+#include <ds/pool.h>
 #include <core/ISystem.h>
 #include <ds/span.h>
 #include <gfx/RenderObject.h>

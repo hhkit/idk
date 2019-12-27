@@ -2,7 +2,7 @@
 #include "Prefab.h"
 
 #include <prefab/PrefabUtility.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 
 namespace idk
 {

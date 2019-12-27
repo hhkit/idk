@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "ShaderSnippetLoader.h"
-
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/Guid.inl>
+#include <res/MetaBundle.inl>
 namespace idk
 {
 #pragma optimize("",off)

@@ -37,5 +37,3 @@ namespace idk
 		size_t       _size = 0;
 	};
 }
-
-#include "pool.inl"

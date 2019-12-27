@@ -2,11 +2,14 @@
 #include "VulkanGlslLoader.h"
 #include <filesystem>
 #include <core/Core.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <vkn/ShaderModule.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/utils/GlslToSpirv.h>
 #include <util/ioutils.h>
+#include <vkn/BufferedObj.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn
 {

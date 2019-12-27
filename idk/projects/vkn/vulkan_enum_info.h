@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
 #include <vkn/utils/utils.h>
+#include <vkn/utils/utils.inl>
 namespace idk::vkn
 {
 	namespace EnumInfo

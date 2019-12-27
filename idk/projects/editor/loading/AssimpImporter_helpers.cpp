@@ -1,12 +1,17 @@
 #include "pch.h"
-#include "AssimpImporter_helpers.h"
-#include "AssimpImporter.h"
-#include <math/matrix_decomposition.h>
 #include <deque>
 #include <iostream>
-#include <idk/file/FileSystem.h>
-#include <math/ritters.h>
 
+#include "AssimpImporter_helpers.h"
+#include "AssimpImporter.h"
+
+#include <math/matrix_decomposition.inl>
+#include <res/MetaBundle.inl>
+#include <file/FileSystem.h>
+#include <math/ritters.h>
+#include <ds/span.inl>
+#include <vkn/BufferHelpers.inl>
+#include <res/ResourceHandle.inl>
 namespace idk::ai_helpers
 {
 

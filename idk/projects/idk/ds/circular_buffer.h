@@ -68,4 +68,3 @@ namespace idk
 		void move_end();
 	};
 }
-#include "circular_buffer.inl"

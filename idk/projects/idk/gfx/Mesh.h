@@ -2,6 +2,8 @@
 #include <idk.h>
 #include <res/Resource.h>
 #include <gfx/vertex_descriptor.h>
+#include <math/shapes/sphere.h>
+#include <res/Guid.inl>
 
 namespace idk
 {

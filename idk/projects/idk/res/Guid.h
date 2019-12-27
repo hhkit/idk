@@ -1,6 +1,8 @@
 #pragma once
 #include <compare>
 #include <objbase.h>
+#undef max
+#undef min
 #include <idk.h>
 #include <util/hash_combine.h>
 
@@ -36,6 +38,11 @@ namespace idk
 			struct x32 { __int32 _; };
 		};
 	};
+
+	// exposing default guid constructor
+	constexpr Guid::Guid() noexcept
+		: Data1{ 0 }, Data2{ 0 }, Data3{ 0 }, Data4{ 0,0,0,0,0,0,0,0 }
+	{}
 }
 
 // Specialize std::hash
@@ -53,4 +60,3 @@ namespace std
 		}
 	};
 }
-#include "Guid.inl"

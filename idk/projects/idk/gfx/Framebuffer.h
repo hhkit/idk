@@ -1,5 +1,7 @@
 #pragma once
-#include <stdafx.h>
+#include <idk.h>
+#include <res/Resource.h>
+#include <res/ResourceHandle.h>
 namespace idk
 {
 	enum class StoreOp
@@ -47,7 +49,7 @@ namespace idk
 		}
 		Attachment& operator=(const Attachment&) = delete;
 		Attachment& operator=(Attachment&& ) = default;
-		virtual ~Attachment() { if (own_buffer)Core::GetResourceManager().Release(buffer); own_buffer = false; }
+		virtual ~Attachment();
 	};
 
 	class FrameBuffer : public Resource<FrameBuffer>

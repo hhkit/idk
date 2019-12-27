@@ -3,13 +3,14 @@
 #include <idk.h>
 #include <anim/Bone.h>
 #include "common/Transform.h"
-#include "core/GameObject.h"
-#include "Animator.h"
+#include "core/GameObject.inl"
+#include "Animator.inl"
 #include <math/arith.h>
 #include "scene/SceneManager.h"
 #include "AnimationSystem.h"
-
-#include "math/matrix_decomposition.h"
+#include <serialize/text.inl>
+#include <res/ResourceHandle.inl>
+#include "math/matrix_decomposition.inl"
 
 namespace idk 
 {

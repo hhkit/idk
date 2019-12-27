@@ -6,6 +6,4 @@
 #pragma once
 
 #include "gtest/gtest.h"
-#include <idk.h>
-#include <core/Core.h>
-#include <reflect/reflect.h>
+#include <pch_common.h>

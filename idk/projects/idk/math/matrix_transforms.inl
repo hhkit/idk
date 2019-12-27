@@ -1,6 +1,6 @@
 #pragma once
-#include <ds/range.h>
-#include <ds/zip.h>
+#include <ds/range.inl>
+#include <ds/zip.inl>
 #include "matrix_transforms.h"
 #include <idk.h>
 

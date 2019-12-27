@@ -1,5 +1,6 @@
 #pragma once
 #include <idk.h>
+#include <res/FileLoader.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/IShaderProgramFactory.h>
 #include <res/ResourceFactory.h>

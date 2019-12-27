@@ -1,10 +1,15 @@
 #include "stdafx.h"
 #include "GraphFactory.h"
-#include <res/MetaBundle.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/MetaBundle.inl>
 #include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <util/ioutils.h>
+#include <res/Guid.inl>
+#include <serialize/text.inl>
+#include <reflect/dynamic.inl>
 
 namespace idk
 {

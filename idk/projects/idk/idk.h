@@ -22,15 +22,15 @@
 
 #include <idk_config.h>
 #include <ds/span.h>
-#include <ds/small_string.h>
+#include <ds/small_string.inl>
 #include <debug/idk_assert.h>
-#include <math/color.h>
-#include <math/constants.h>
+#include <math/color.inl>
+#include <math/constants.inl>
 #include <math/arith.h>
-#include <math/angle.h>
-#include <math/vector.h>
-#include <math/matrix.h>
-#include <math/quaternion.h>
+#include <math/angle.inl>
+#include <math/vector.inl>
+#include <math/matrix.inl>
+#include <math/quaternion.inl>
 
 #include <debug/Log.h>
 

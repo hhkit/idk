@@ -1,9 +1,14 @@
 #include "stdafx.h"
 #include "MaterialFactory.h"
+#include <serialize/text.inl>
 #include <util/ioutils.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <gfx/MaterialInstance.h>
 #include <gfx/ShaderProgram.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/Guid.inl>
+
 namespace idk
 {
 	unique_ptr<Material> MaterialFactory::GenerateDefaultResource()

@@ -3,7 +3,7 @@
 #include <prefab/PrefabUtility.h>
 #include <scene/SceneManager.h>
 #include <common/Transform.h>
-
+#include <res/ResourceHandle.inl>
 namespace idk
 {
 

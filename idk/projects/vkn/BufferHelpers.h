@@ -96,4 +96,3 @@ namespace idk::vkn::hlp
 	uint32_t arr_count(T&& arr) { return ArrCount<T>::count(arr); }
 }
 
-#include "BufferHelpers.inl"

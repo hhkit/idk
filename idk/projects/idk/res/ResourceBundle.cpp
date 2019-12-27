@@ -1,5 +1,7 @@
 #include "stdafx.h"
-#include "ResourceBundle.h"
+#include "ResourceBundle.inl"
+#include "res/ResourceHandle.inl"
+#include <ds/span.inl>
 
 namespace idk
 {

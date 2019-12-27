@@ -4,14 +4,22 @@
 #include <ds/small_string.h>
 #include <serialize/text.h>
 #include <file/FileSystem.h>
-#include <core/GameObject.h>
+#include <reflect/reflect.inl>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
+#include <ds/slow_tree.inl>
 #include <script/MonoBehavior.h>
+#include <script/ManagedObj.inl> //Assign
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
 #include <script/ManagedObj.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
+
 namespace idk
 {
 

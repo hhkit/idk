@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include "ParticleSystemUpdater.h"
 #include <particle/ParticleSystem.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <gfx/MaterialInstance.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

@@ -2,7 +2,11 @@
 #include "ShaderIncluder.h"
 #include <core/Core.h>
 #include <gfx/ShaderSnippet.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <memory/ArenaAllocator.inl>
+#include <ds/result.inl>
+
 namespace idk
 {
 

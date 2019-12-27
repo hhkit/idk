@@ -3,9 +3,11 @@
 
 #include <idk.h>
 #include <core/Core.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 #include <opengl/resource/OpenGLTextureRenderMeta.h>
+#include <ds/span.inl>
 
 namespace idk::ogl
 {

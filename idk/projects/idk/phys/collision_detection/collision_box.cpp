@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "collision_box.h"
+#include <ds/span.inl>
 
 namespace idk::phys
 {

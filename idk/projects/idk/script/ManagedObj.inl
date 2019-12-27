@@ -1,6 +1,7 @@
 #pragma once
 #include <stack>
 
+#include <reflect/reflect.inl>
 #include <script/ManagedType.h>
 #include <script/ValueUnboxer.h>
 #include <script/ScriptSystem.h>
@@ -40,7 +41,7 @@ if (klass == MONO_CLASS)      \
 }
 
 #define MONO_BASE_TYPE_CONST(REAL_TYPE, MONO_CLASS)                   \
-if (mono_class_get_name(klass) == string_view{MONO_CLASS})      \
+if (klass == MONO_CLASS)      \
 {                                                                     \
 	const auto old_val = s_cast<REAL_TYPE>(s_cast<float*>(mono_object_unbox(obj))); \
 	functor(field_name.data(), old_val, depth);				          \
@@ -365,9 +366,9 @@ namespace idk::mono
 
 			auto& envi = Core::GetSystem<ScriptSystem>().Environment();
 
-			MONO_BASE_TYPE_CONST(vec2, "Vector2");
-			MONO_BASE_TYPE_CONST(vec3, "Vector3");
-			MONO_BASE_TYPE_CONST(vec4, "Vector4");
+			MONO_BASE_TYPE_CONST(vec2, envi.Type("Vector2")->Raw());
+			MONO_BASE_TYPE_CONST(vec3, envi.Type("Vector3")->Raw());
+			MONO_BASE_TYPE_CONST(vec4, envi.Type("Vector4")->Raw());
 
 			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);

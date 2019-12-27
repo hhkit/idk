@@ -1,4 +1,4 @@
-#include "DescriptorPoolManager.h"
+#include "DescriptorPoolManager.inl"
 namespace hlp
 {
 

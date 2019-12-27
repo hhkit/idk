@@ -57,5 +57,3 @@ namespace std
 		}
 	};
 }
-
-#include "ResourceHandle.inl"

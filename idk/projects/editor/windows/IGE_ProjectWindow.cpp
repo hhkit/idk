@@ -19,16 +19,23 @@ of the editor.
 #include <app/Application.h>
 #include <editor/IDE.h>
 #include <editor/DragDropTypes.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <gfx/Texture.h>
 #include <gfx/ShaderGraph.h>
 #include <gfx/MaterialInstance.h>
 #include <gfx/RenderTarget.h>
 #include <prefab/PrefabUtility.h>
 #include <prefab/Prefab.h>
-
+#include <file/FileSystem.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <serialize/text.inl>
+#include <res/ResourceUtils.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
+#include <reflect/reflect.inl>
 #include <iostream>
-#include <filesystem>
 namespace fs = std::filesystem;
 
 #ifdef _WIN32 

@@ -10,9 +10,14 @@
 #include <gfx/ShaderGraph_helpers.h>
 #include <gfx/MaterialInstance.h>
 #include <gfx/GraphicsSystem.h>
+#include <serialize/text.inl>
+#include <reflect/reflect.inl>
+#include <file/FileSystem.h>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceUtils.inl>
 #include <regex>
-#include <filesystem>
-
+#include <res/Guid.inl>
 namespace fs = std::filesystem;
 
 namespace idk

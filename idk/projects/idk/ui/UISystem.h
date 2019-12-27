@@ -2,6 +2,7 @@
 
 #include <idk.h>
 #include <core/ISystem.h>
+#include <res/Guid.inl>
 
 namespace idk
 {

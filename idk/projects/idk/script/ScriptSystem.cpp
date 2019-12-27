@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ScriptSystem.h"
 
-#include <filesystem>
+#include <file/FileSystem.h>
 
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/threads.h>
@@ -20,6 +20,7 @@
 #include <script/MonoWrapperEnvironment.h>
 
 #include <process.h>
+#include <ds/span.inl>
 
 namespace idk::mono
 {

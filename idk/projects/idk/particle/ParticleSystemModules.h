@@ -3,6 +3,8 @@
 #include <math/color.h>
 #include <util/enum.h>
 #include <particle/MinMax.h>
+#include <res/Guid.inl>
+#include <res/ResourceHandle.h>
 
 namespace idk
 {

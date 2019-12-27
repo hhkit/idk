@@ -2,10 +2,11 @@
 #include <utility>
 #include <tuple>
 
-#include "Vector_detail.h"
-#include "Vector.h"
+#include "vector_detail.h"
+#include "vector.h"
 #include <meta/tuple.h>
-
+#include "linear.inl"
+#include "constants.inl"
 namespace idk
 {
 	namespace detail

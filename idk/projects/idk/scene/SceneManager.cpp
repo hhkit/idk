@@ -1,14 +1,20 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 #include <core/Core.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 #include <scene/SceneFactory.h>
 #include <serialize/text.h>
 #include <util/ioutils.h>
+#include <file/FileSystem.h>
+#include <core/GameState.inl>
 
+#include <res/Guid.inl>
 #include <iostream>
+#include <ds/span.inl>
 
 namespace idk
 {

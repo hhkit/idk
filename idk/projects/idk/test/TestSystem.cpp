@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include "TestSystem.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <test/TestComponent.h>
 #include <test/TestResourceFactory.h>
@@ -18,6 +18,12 @@
 #include <file/FileSystem.h>
 #include <gfx/ShaderGraph.h>
 #include <parallel/ThreadPool.h>
+#include <util/string_hash.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <ds/span.inl>
+#include <ds/result.inl>
+
 namespace idk
 {
 	void TestSystem::Init()

@@ -1,4 +1,3 @@
-#include "pch.h"
 #pragma once
 #include <iosfwd>
 #include <idk.h>
@@ -84,4 +83,3 @@ namespace std
 	template<typename T>
 	constexpr static size_t size_v = sizer<T>::value;
 }
-#include "utils.inl"

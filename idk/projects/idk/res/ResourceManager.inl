@@ -1,8 +1,13 @@
+#pragma once
 #include "ResourceManager.h"
+#include <core/Core.inl>
+#include <res/ResourceUtils.inl>
 #include <res/ResourceMeta.h>
 #include <res/SaveableResource.h>
 #include <file/FileSystem.h>
-#pragma once
+#include <res/ResourceBundle.inl>
+#include <res/ResourceHandle.h>
+#include <res/guid.inl>
 
 namespace idk
 {

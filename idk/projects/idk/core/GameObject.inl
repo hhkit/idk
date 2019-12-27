@@ -2,6 +2,7 @@
 #include <idk_config.h>
 #include "GameObject.h"
 #include "GameState.h"
+#include <ds/span.inl>
 namespace idk
 {
 	template<typename T>

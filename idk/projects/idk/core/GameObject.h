@@ -8,6 +8,14 @@ namespace idk::reflect
 	class type;
 }
 
+namespace idk::detail
+{
+	template<typename T>
+	struct TableGenerator;
+
+	template<typename T>
+	struct ObjectPoolHelper;
+}
 
 namespace idk
 {
@@ -77,5 +85,3 @@ namespace idk
 		template<typename T> friend struct detail::TableGenerator;
 	};
 }
-
-#include "GameObject.inl"

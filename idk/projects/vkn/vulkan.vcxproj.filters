@@ -235,6 +235,9 @@
     <ClInclude Include="RenderPassInfo.h">
       <Filter>render\objects</Filter>
     </ClInclude>
+    <ClInclude Include="DebugUtil.h">
+      <Filter>utils</Filter>
+    </ClInclude>
     <ClInclude Include="RenderTask.h">
       <Filter>render</Filter>
     </ClInclude>
@@ -436,6 +439,7 @@
     <ClCompile Include="CanvasRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
+    <ClCompile Include="DebugUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

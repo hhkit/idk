@@ -1,10 +1,12 @@
 #include "stdafx.h"
 
 #include <IncludeComponents.h>
-#include <core/GameObject.h>
-#include <reflect/reflect.h>
+#include <core/GameObject.inl>
+#include <script/ManagedObj.inl> //Assign
+#include <reflect/reflect.inl>
 
-#include "GameState.h"
+#include "GameState.inl"
+#include <ds/span.inl>
 
 namespace idk::detail
 {

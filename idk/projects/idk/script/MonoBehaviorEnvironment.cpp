@@ -17,8 +17,9 @@
 #include <script/MonoBehavior.h>
 #include <script/ValueUnboxer.h>
 
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <scene/SceneManager.h>
+#include <file/FileSystem.h>
 #include <util/ioutils.h>
 
 namespace idk::mono

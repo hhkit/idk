@@ -2,24 +2,26 @@
 #include <type_traits>
 
 #include <res/Resource.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
+#include <math/comparable.inl>
+#include <res/Guid.inl>
 
 namespace idk
 {
 	template<typename Res>
 	inline RscHandle<Res>::operator bool() const
 	{
-		return Core::GetResourceManager().Validate(*this);
+		return ResourceManager::Instance().Validate(*this);
 	}
 	template<typename Res>
 	inline Res& RscHandle<Res>::operator*() const
 	{
-		return Core::GetResourceManager().Get(*this);
+		return ResourceManager::Instance().Get(*this);
 	}
 	template<typename Res>
 	inline Res* RscHandle<Res>::operator->() const
 	{
-		return &Core::GetResourceManager().Get(*this);
+		return &ResourceManager::Instance().Get(*this);
 	}
 	template<typename Res>
 	inline bool RscHandle<Res>::operator<(const RscHandle& rhs) const

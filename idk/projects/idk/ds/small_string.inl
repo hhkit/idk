@@ -1,6 +1,7 @@
 #pragma once
 
 #include "small_string.h"
+#include <ds/compressed_pair.inl>
 #include <limits>
 #include <algorithm>
 
@@ -9,22 +10,6 @@
 
 namespace idk
 {
-	template<typename CharT, typename Traits, typename Allocator>
-	struct small_string<CharT, Traits, Allocator>::_sso
-	{
-		CharT buffer[_sso_buffer_size]; // buf size should be > 24
-		CharT size_diff;
-	};
-
-	template<typename CharT, typename Traits, typename Allocator>
-	struct small_string<CharT, Traits, Allocator>::_longer
-	{
-		CharT* ptr;
-		small_string::size_type size;
-		small_string::size_type capacity;
-	};
-
-
 
 	template<typename CharT, typename Traits, typename Allocator>
 	small_string<CharT, Traits, Allocator>::small_string(const Allocator& alloc) noexcept

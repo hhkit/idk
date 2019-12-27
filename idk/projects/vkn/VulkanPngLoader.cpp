@@ -2,10 +2,13 @@
 #include "VulkanPngLoader.h"
 #include <vkn/VknTexture.h>
 #include <stb/stb_image.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <vkn/VknTextureLoader.h>
 #include <sstream>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceMeta.inl>
 namespace idk::vkn
 {
 	VulkanView& View();

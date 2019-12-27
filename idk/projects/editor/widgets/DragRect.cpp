@@ -2,6 +2,7 @@
 #include "DragVec.h"
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <math/rect.h>
 
 namespace idk::ImGuidk
 {

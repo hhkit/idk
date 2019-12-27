@@ -4,6 +4,9 @@
 #include <vkn/VknMeshModder.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/VulkanMeshFactory.h>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <vkn/BufferHelpers.inl>
 namespace idk::vkn
 {
 	VulkanMesh::VulkanMesh(const CompiledMesh& m)

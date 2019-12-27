@@ -26,7 +26,7 @@ namespace idk
 
 		void Init() override;
 		void Shutdown() override {}
-		array<LogHandle, s_cast<size_t>(LogPool::COUNT)> log_files;
+		array<LogHandle, static_cast<size_t>(LogPool::COUNT)> log_files;
         string _log_dir;
 	};
 }

@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "box.h"
-#include <math/matrix_decomposition.h>
+#include <math/matrix_decomposition.inl>
+#include <math/quaternion.inl>
+#include <ds/zip.inl>
+#include <math/vector.inl>
 
 namespace idk
 {

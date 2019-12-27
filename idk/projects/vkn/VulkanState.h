@@ -1,4 +1,3 @@
-#include "pch.h"
 #pragma once
 #include <optional>
 #include <fstream>
@@ -254,4 +253,3 @@ namespace idk::vkn
 	};
 }
 
-#include <vkn/VulkanState.inl>

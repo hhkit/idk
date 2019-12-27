@@ -2,11 +2,12 @@
 #include "VulkanCbmLoader.h"
 #include <vkn/VknCubemap.h>
 #include <stb/stb_image.h>
-#include <res/MetaBundle.h>
+#include <res/MetaBundle.inl>
 #include <vkn/VknCubemapLoader.h>
 #include <sstream>
 #include <filesystem>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
 	VulkanView& View();

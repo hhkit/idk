@@ -31,15 +31,23 @@ of the editor.
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
 #include <anim/AnimationSystem.h>
+#include <anim/Animator.inl>
 #include <app/Application.h>
 #include <ds/span.h>
-#include <reflect/reflect.h>
-#include <res/ResourceManager.h>
+#include <reflect/reflect.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <res/ResourceUtils.inl>
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>
 #include <meta/variant.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <prefab/PrefabUtility.h>
+#include <core/Handle.inl>
+#include <script/ScriptSystem.h>
+#include <script/ManagedObj.inl>
+#include <serialize/text.inl>
 
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
@@ -49,6 +57,8 @@ of the editor.
 #include <iostream>
 
 #include <gfx/GraphicsSystem.h>
+#include <ds/span.inl>
+#include <ds/result.inl>
 
 namespace idk {
 

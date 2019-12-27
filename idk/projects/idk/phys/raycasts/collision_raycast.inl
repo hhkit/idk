@@ -1,5 +1,7 @@
 #pragma once
-#include <phys/collision_result.h>
+#include "collision_raycast.h"
+#include <math/vector.inl>
+
 namespace idk::phys
 {
 	namespace detail

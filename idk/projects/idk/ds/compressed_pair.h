@@ -9,6 +9,33 @@ namespace idk
 	{
 		template<typename T, size_t I, bool = std::is_empty<T>::value>
 		struct compressed_pair_elem;
+
+        template<typename T, size_t I>
+        struct compressed_pair_elem<T, I, false> // base class NOT empty
+        {
+            constexpr compressed_pair_elem() noexcept(std::is_nothrow_default_constructible<T>::value);
+
+            template<typename U, typename = std::enable_if_t<std::is_constructible_v<T, U>>>
+            constexpr explicit compressed_pair_elem(U&& other) noexcept(std::is_nothrow_constructible_v<T, U>);
+
+            constexpr T& get() noexcept;
+            constexpr const T& get() const noexcept;
+
+        private:
+            T _value;
+        };
+
+        template<typename T, size_t I>
+        struct compressed_pair_elem<T, I, true> : private T // base class empty
+        {
+            constexpr compressed_pair_elem() noexcept(std::is_nothrow_default_constructible<T>::value);
+
+            template<typename U, typename = std::enable_if_t<std::is_constructible_v<T, U>>>
+            constexpr explicit compressed_pair_elem(U&& other) noexcept(std::is_nothrow_constructible_v<T, U>);
+
+            constexpr T& get() noexcept;
+            constexpr const T& get() const noexcept;
+        };
 	}
 
 	// class to take advantage of empty base optimization
@@ -33,5 +60,3 @@ namespace idk
 		constexpr const T2& second() const noexcept;
 	};
 }
-
-#include "compressed_pair.inl"

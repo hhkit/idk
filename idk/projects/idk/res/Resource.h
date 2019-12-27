@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <res/ResourceHandle.h>
+#include <ds/small_string.inl>
 namespace idk
 {
     namespace detail { template<typename T> struct ResourceManager_detail; }

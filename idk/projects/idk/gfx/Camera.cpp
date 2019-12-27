@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Camera.h"
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
-#include <math/matrix_transforms.h>
-#include <math/matrix_decomposition.h>
+#include <math/matrix_transforms.inl>
+#include <math/matrix_decomposition.inl>
 #include <gfx/Mesh.h>
 #include <gfx/RenderTarget.h>
-
+#include <res/ResourceHandle.inl>
 //Test
 #include <app/Application.h>
 

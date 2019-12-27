@@ -4,6 +4,11 @@
 #include <serialize/binary.h>
 #include <serialize/text.h>
 #include <util/ioutils.h>
+
+
+#include <res/ResourceManager.inl>
+#include <serialize/binary.inl> //Should be in .inl
+#include <serialize/text.inl>	//Should be in .inl
 namespace idk
 {
 	template<typename CompiledAsset, typename EngineResource, bool Binary = true>
@@ -15,6 +20,7 @@ namespace idk
 		void LoadAsset(PathHandle handle) override;
 	};
 
+	//Should be in .inl
 	template<typename CompiledAsset, typename EngineResource, bool Binary>
 	inline void CompiledAssetLoader<CompiledAsset, EngineResource, Binary>::LoadAsset(PathHandle handle)
 	{
