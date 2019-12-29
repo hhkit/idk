@@ -5,4 +5,5 @@
 namespace idk
 {
 	string stringify(const std::istream& istream);
+    string binarify(std::istream& istream);
 }
