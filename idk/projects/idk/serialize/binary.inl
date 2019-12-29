@@ -1,6 +1,7 @@
 #pragma once
 
 #include "binary.h"
+#include <res/Guid.h>
 
 namespace idk
 {
@@ -40,6 +41,20 @@ namespace idk
                 {
                     *this << strlen(obj);
                     output += obj;
+                }
+                else if constexpr (std::is_same_v<std::decay_t<T>, Guid>)
+                {
+                    *this << obj.Data1;
+                    *this << obj.Data2;
+                    *this << obj.Data3;
+                    *this << obj.Data4[0];
+                    *this << obj.Data4[1];
+                    *this << obj.Data4[2];
+                    *this << obj.Data4[3];
+                    *this << obj.Data4[4];
+                    *this << obj.Data4[5];
+                    *this << obj.Data4[6];
+                    *this << obj.Data4[7];
                 }
                 else if constexpr (is_basic_serializable_v<T>)
                 {
@@ -133,6 +148,20 @@ namespace idk
                     *this >> sz;
                     obj = std::decay_t<T>::from_string(string_view{ begin, sz });
                     begin += sz;
+                }
+                else if constexpr (std::is_same_v<std::decay_t<T>, Guid>)
+                {
+                    *this >> obj.Data1;
+                    *this >> obj.Data2;
+                    *this >> obj.Data3;
+                    *this >> obj.Data4[0];
+                    *this >> obj.Data4[1];
+                    *this >> obj.Data4[2];
+                    *this >> obj.Data4[3];
+                    *this >> obj.Data4[4];
+                    *this >> obj.Data4[5];
+                    *this >> obj.Data4[6];
+                    *this >> obj.Data4[7];
                 }
                 else if constexpr (is_basic_serializable_v<T>)
                 {

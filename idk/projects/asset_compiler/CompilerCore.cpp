@@ -75,7 +75,7 @@ namespace idk
 					for (auto& [guid, binary_resource] : result->assets)
 					{
 						// if you're here, you're trying to get compiled so only binary here
-						std::visit([&](const auto& elem) -> bool
+						bool res = std::visit([&](const auto& elem) -> bool
 							{
 								using T = std::decay_t<decltype(elem)>;
 								if constexpr (has_extension_v<T>)
@@ -83,9 +83,9 @@ namespace idk
 									static_assert(T::ext[0] == '.', "Extension must begin with a .");
 									std::ofstream resource_stream{ destination + "/" + string{guid} + string{T::ext} };
 									//if constexpr (has_tag_v<T, Saveable>)
-										resource_stream << serialize_text(elem);
+										//resource_stream << serialize_text(elem);
 									//else
-									//	resource_stream << serialize_binary(elem);
+										resource_stream << serialize_binary(elem);
 									return true;
 								}
 								else
@@ -94,6 +94,21 @@ namespace idk
 									return false;
 								}
 							}, binary_resource);
+
+                        // testing with args
+                        // "D:\Work\dp\gam300\project_idk\HydeAndSeek\Assets\Art Assets\Game Art Assets\Environment\item_drop_artifact.obj"  "D:\Work\dp\gam300\project_idk\HydeAndSeek\Assets\Art Assets\Game Art Assets\Environment\output"
+                        if (res)
+                        {
+                            std::visit([&](const auto& elem)
+                            {
+                                using T = std::decay_t<decltype(elem)>;
+                                if constexpr (has_extension_v<T>)
+                                {
+                                    std::ifstream in{ destination + "/" + string{guid} +string{T::ext} };
+                                    auto out = parse_binary<T>(stringify(in));
+                                }
+                            }, binary_resource);
+                        }
 					}
 				}
 			}
