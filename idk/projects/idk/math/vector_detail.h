@@ -1,8 +1,10 @@
 #pragma once
-#include "angle.h"
-#include "vector_swizzle.h"
 #include <machine.h>
 #include <xmmintrin.h>
+
+#include "angle.h"
+#include "vector_swizzle.h"
+#include "vector_dim.h"
 
 #pragma warning(disable:4324) // padding
 #pragma warning(disable:4201) // unnamed struct
@@ -117,54 +119,26 @@ namespace idk
 		template<typename T, unsigned D>
 		struct is_vector<tvec<T, D>> : std::true_type {};
 
-		template<typename T, unsigned D, unsigned ... Indexes>
-		constexpr auto VectorToTuple(const tvec<T, D>& vec, std::integer_sequence<size_t, Indexes...>);
-
-		constexpr auto VectorsToTuple();
-
-		template<typename T, typename ... Tail>
-		constexpr auto VectorsToTuple(T&& front_vec, const Tail& ... tail);
-
-		template<typename T, unsigned FrontD, typename ... Tail>
-		constexpr auto VectorsToTuple(const tvec<T, FrontD>& front_vec, const Tail& ... tail);
-
-		template <typename T, typename Tuple, unsigned ... Indexes>
-		constexpr auto TupleToVector(const Tuple& tup, std::index_sequence<Indexes...>);
 
 		template<typename T, typename ... Args>
 		constexpr auto VectorConcat(const Args& ... vecs);
 		template<typename T, unsigned D, unsigned ... Indexes>
-		constexpr auto VectorToTuple(const tvec<T, D>& vec, std::integer_sequence<size_t, Indexes...>)
+		constexpr auto VectorToTuple(const tvec<T, D>& vec, std::index_sequence<Indexes...>)
 		{
-			return std::forward_as_tuple(vec[Indexes]...);
+			return std::make_tuple(vec[Indexes]...);
 		}
 
-		constexpr inline auto VectorsToTuple()
+		template<typename T>
+		constexpr inline auto VectorToTuple(const T& val, std::index_sequence<0>)
 		{
-			return std::tuple<>{};
+			return std::tuple<T>{val};
 		}
 
-		template<typename T, typename ... Tail>
-		constexpr auto VectorsToTuple(T&& front_vec, const Tail& ... tail);
-
-		template<typename T, unsigned FrontD, typename ... Tail>
-		constexpr auto VectorsToTuple(const tvec<T, FrontD>& front_vec, const Tail& ... tail);
-
-		template<typename T, typename ... Tail>
-		constexpr auto VectorsToTuple(T&& front_vec, const Tail& ... tail)
+		template<typename ... Args, unsigned ... Dims>
+		constexpr auto VectorsToTuple(std::index_sequence<Dims...>, const Args& ... vecs)
 		{
 			return std::tuple_cat(
-				std::tuple<T>(front_vec),
-				VectorsToTuple(tail...)
-			);
-		}
-
-		template<typename T, unsigned FrontD, typename ... Tail>
-		constexpr auto VectorsToTuple(const tvec<T, FrontD>& front_vec, const Tail& ... tail)
-		{
-			return std::tuple_cat(
-				VectorToTuple(front_vec, std::make_index_sequence<FrontD>{}),
-				VectorsToTuple(tail...)
+				VectorToTuple(vecs, std::make_index_sequence<Dims>{})...
 			);
 		}
 
@@ -178,10 +152,16 @@ namespace idk
 		template<typename T, typename ... Args>
 		constexpr auto VectorConcat(const Args& ... vecs)
 		{
-			auto arg_tup = VectorsToTuple(vecs...);
-			return TupleToVector<T>(arg_tup, std::make_index_sequence <std::tuple_size_v<decltype(arg_tup)>>{});
+			constexpr auto index_seq = std::index_sequence<detail::Dim_v<Args>...>{};
+			using tuple_type = decltype(VectorsToTuple(index_seq, vecs...));
+			return TupleToVector<T>(VectorsToTuple(index_seq, vecs...), std::make_index_sequence <std::tuple_size_v<tuple_type>>{});
 		}
 
+		template<>
+		constexpr auto VectorConcat<float>(const tvec<float, 3>& vec, const int& homogenous);
+
+		template<>
+		constexpr auto VectorConcat<float>(const float& x, const float&y, const float& z, const int& homogenous);
 
 		template<typename T>
 		struct Abs {};

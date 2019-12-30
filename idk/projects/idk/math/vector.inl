@@ -39,9 +39,16 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
+	template<unsigned D2, unsigned ...Indexes>
+	inline constexpr tvec<T, D>::tvec(std::index_sequence<Indexes...>, const tvec<T, D2>& vec)
+		: tvec{vec[Indexes]...}
+	{
+	}
+
+	template<typename T, unsigned D>
 	template<unsigned D2, typename>
 	constexpr tvec<T, D>::tvec(const tvec<T, D2>& rhs)
-		: tvec{ tuple_construct<tvec>(detail::VectorToTuple<T>(rhs, std::make_index_sequence<D>{})) }
+		: tvec{ std::make_index_sequence<D>{}, rhs }
 	{
 	}
 

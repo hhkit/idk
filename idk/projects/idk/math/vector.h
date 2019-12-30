@@ -32,6 +32,9 @@ namespace idk
 
 		constexpr explicit tvec(T* ptr);
 
+		template<unsigned D2, unsigned ... Indexes>
+		constexpr tvec(std::index_sequence<Indexes...>, const tvec<T, D2>&);
+
 		template<unsigned D2,
 			typename = std::enable_if_t<(D2 > D)>
 		>
@@ -105,4 +108,18 @@ namespace idk
 	extern template struct tvec<float, 2>;
 	extern template struct tvec<float, 3>;
 	extern template struct tvec<float, 4>;
+
+	namespace detail
+	{
+		template<>
+		constexpr auto VectorConcat<float>(const tvec<float, 3>& vec, const int& homogenous)
+		{
+			return tvec<float, 4>{vec[0], vec[1], vec[2], static_cast<float>(homogenous)};
+		}
+		template<>
+		constexpr auto VectorConcat<float>(const float& x, const float& y, const float& z, const int& homogenous)
+		{
+			return tvec<float, 4>{x, y, z, static_cast<float>(homogenous)};
+		}
+	}
 }

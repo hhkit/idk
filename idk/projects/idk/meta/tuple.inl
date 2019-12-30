@@ -8,7 +8,7 @@ namespace idk
 		template<typename T, typename ... Args, unsigned ... Indexes>
 		auto tuple_construct_helper(const std::tuple<Args...>& arg_tuple, std::index_sequence<Indexes...>)
 		{
-			return T{std::forward<Args>(std::get<Indexes>(arg_tuple))...};
+			return T{(std::get<Indexes>(arg_tuple))...};
 		}
 	}
 	template<typename T, typename ... Args>

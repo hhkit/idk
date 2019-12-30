@@ -35,6 +35,7 @@ of the editor.
 #include <vkn/VknFramebuffer.h>
 #include <gfx/DebugRenderer.h>
 #include <win32/WindowsApplication.h>
+#include <math/matrix_transforms.inl>
 #include <math/matrix_decomposition.inl>
 #include <res/ResourceUtils.inl>
 
