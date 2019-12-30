@@ -7,3 +7,4 @@
 
 #include "gtest/gtest.h"
 #include <pch_common.h>
+#include "core_setup.h"

@@ -20,17 +20,15 @@
 #include <common/Transform.h>	
 #include <core/Core.inl>
 #include <res/ResourceManager.inl>
-#include "TestApplication.h"
 
 TEST(Audio, AudioSystemClassTest)
 {
 	using namespace idk;
-	Core c;
-    c.AddSystem<TestApplication>();
-	auto& test = c.GetSystem<AudioSystem>();
-    EXPECT_NO_THROW(c.Setup());
+    INIT_CORE();
+	auto& test = core.GetSystem<AudioSystem>();
+    EXPECT_NO_THROW(core.Setup());
 
-    c.GetSystem<FileSystem>().Mount(TEST_DATA_PATH, "/assets");
+    core.GetSystem<FileSystem>().Mount(TEST_DATA_PATH, "/assets");
 
 	std::cout << "Getting all available sound drivers... "<< std::endl;
 
@@ -59,7 +57,7 @@ TEST(Audio, AudioSystemClassTest)
 		std::cout << "Audio path not found, skipping test...\n";
 
 		try {
-			c.Shutdown();
+			core.Shutdown();
 		}
 		catch (EXCEPTION_AudioSystem i) {
 			std::cout << "//////////////////////////////////////\n";
@@ -151,7 +149,7 @@ TEST(Audio, AudioSystemClassTest)
 		}
 	}
 	try {
-		c.Shutdown();
+		core.Shutdown();
 	}
 	catch (EXCEPTION_AudioSystem i) {
 		std::cout << i.exceptionDetails << std::endl;

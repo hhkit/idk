@@ -46,6 +46,7 @@
     <IncludePath>$(SolutionDir)projects\IDK\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemGroup>
+    <ClInclude Include="core_setup.h" />
     <ClInclude Include="pch.h" />
     <ClCompile Include="TestGeometry.cpp" />
     <ClCompile Include="TestSerializeBinary.cpp" />
@@ -117,7 +118,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -158,7 +159,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
