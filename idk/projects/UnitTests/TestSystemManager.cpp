@@ -7,7 +7,6 @@
 #include <scene/SceneManager.h>
 #include <res/ResourceManager.h>
 #include <common/Transform.h>
-#include "TestApplication.h"
 
 /*
 TEST(System, TestSystemManager)
@@ -30,9 +29,7 @@ TEST(System, TestCore)
 {
 	using namespace idk;
 
-	auto core = Core{};
-	core.AddSystem<TestApplication>();
-	core.Setup();
+    INIT_CORE();
 	
 	auto curr_scene = core.GetSystem<SceneManager>().GetActiveScene();
 	auto obj1 = curr_scene->CreateGameObject();

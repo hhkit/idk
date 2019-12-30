@@ -11,17 +11,13 @@
 #include <file/FileSystem.h>
 #include <res/ResourceManager.inl>
 #include <reflect/reflect.inl>
-#include "TestApplication.h"
 
 using namespace idk;
 
 TEST(Prefab, TestPrefabSave)
 {
-    Core core;
-	auto& fs = Core::GetSystem<FileSystem>();
-    core.AddSystem<TestApplication>();
-	core.Setup();
-    fs.Mount(TEST_DATA_PATH, "/assets");
+    INIT_CORE();
+    INIT_ASSETS();
 	auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
     auto go = scene->CreateGameObject();
@@ -46,11 +42,8 @@ TEST(Prefab, TestPrefabSave)
 
 TEST(Prefab, TestPrefabInstantiate)
 {
-    Core core;
-    auto& fs = Core::GetSystem<FileSystem>();
-    core.AddSystem<TestApplication>();
-    core.Setup();
-    fs.Mount(TEST_DATA_PATH, "/assets");
+    INIT_CORE();
+    INIT_ASSETS();
     auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
     auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");
@@ -94,11 +87,8 @@ TEST(Prefab, TestPrefabInstantiate)
 
 TEST(Prefab, TestPrefabRevert)
 {
-    Core core;
-    auto& fs = Core::GetSystem<FileSystem>();
-    core.AddSystem<TestApplication>();
-    core.Setup();
-    fs.Mount(TEST_DATA_PATH, "/assets");
+    INIT_CORE();
+    INIT_ASSETS();
     auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
     auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");
@@ -130,11 +120,8 @@ TEST(Prefab, TestPrefabRevert)
 
 TEST(Prefab, TestPrefabPropagate)
 {
-    Core core;
-    auto& fs = Core::GetSystem<FileSystem>();
-    core.AddSystem<TestApplication>();
-    core.Setup();
-    fs.Mount(TEST_DATA_PATH, "/assets");
+    INIT_CORE();
+    INIT_ASSETS();
     auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
     auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");
@@ -170,11 +157,8 @@ TEST(Prefab, TestPrefabPropagate)
 
 TEST(Prefab, TestPrefabApply)
 {
-    Core core;
-    auto& fs = Core::GetSystem<FileSystem>();
-    core.AddSystem<TestApplication>();
-    core.Setup();
-    fs.Mount(TEST_DATA_PATH, "/assets");
+    INIT_CORE();
+    INIT_ASSETS();
     auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
     auto& prefab = *core.GetResourceManager().Load<Prefab>("/assets/prefabs/stoopidguy.idp");

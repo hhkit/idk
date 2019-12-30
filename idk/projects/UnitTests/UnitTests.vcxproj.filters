@@ -45,6 +45,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="TestApplication.h" />
+    <ClInclude Include="core_setup.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

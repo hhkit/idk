@@ -5,7 +5,6 @@
 #include <serialize/yaml.inl>
 #include <util/enum.h>
 #include <ReflectRegistration.h>
-#include "TestApplication.h"
 
 using namespace idk;
 
@@ -211,9 +210,7 @@ static uint64_t parent_1_id = 0;
 
 TEST(Serialize, TestSerializeScene)
 {
-    Core core;
-    core.AddSystem<TestApplication>();
-    core.Setup();
+    INIT_CORE();
     auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
 	auto o0 = scene->CreateGameObject();
@@ -237,9 +234,7 @@ TEST(Serialize, TestSerializeScene)
 
 TEST(Serialize, TestParseScene)
 {
-    Core core;
-    core.AddSystem<TestApplication>();
-    core.Setup();
+    INIT_CORE();
     auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
 
 	parse_text(serialized_scene_0, *scene);

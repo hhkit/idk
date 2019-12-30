@@ -7,7 +7,6 @@
 #include <scene/SceneFactory.h>
 #include <scene/SceneManager.h>
 #include <res/ResourceManager.inl>
-#include "TestApplication.h"
 
 TEST(GameState, TestGameState)
 {
@@ -58,9 +57,7 @@ TEST(GameState, TestHandles)
 TEST(GameState, TestScene)
 {
     using namespace idk;
-    Core core;
-    core.AddSystem<TestApplication>();
-    core.Setup();
+    INIT_CORE();
     auto scene0 = Core::GetResourceManager().Create<Scene>(); scene0->LoadFromResourcePath();
 	auto scene1 = Core::GetResourceManager().Create<Scene>(); scene1->LoadFromResourcePath();
 	auto scene2 = Core::GetResourceManager().Create<Scene>(); scene2->LoadFromResourcePath();
