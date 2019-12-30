@@ -1,8 +1,7 @@
 #include "pch.h"
-#undef GetObject
 #include <core/Core.h>
 #include <core/GameState.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <phys/Collider.h>
 #include <scene/SceneFactory.h>

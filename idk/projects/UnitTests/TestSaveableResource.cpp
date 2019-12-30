@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <res/ResourceManager.inl>
 #include <test/TestResource.h>
 #include "TestApplication.h"
 

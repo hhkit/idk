@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Dispatcher_detail.h"
+
 namespace idk::detail
 {
 	template<typename T>

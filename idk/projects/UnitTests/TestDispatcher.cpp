@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "../IDK/idk.h"
-#include "../IDK/event/Dispatcher.h"
+#include <idk.h>
+#include <event/Dispatcher.inl>
 
 static int yolo = 0;
 

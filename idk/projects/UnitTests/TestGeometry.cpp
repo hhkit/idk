@@ -1,7 +1,6 @@
 #include "pch.h"
 #include <math/shapes/sphere.h>
-#undef min
-#undef max
+
 TEST(TestGeometry, TestSphere)
 {
 	using namespace idk;

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <serialize/binary.h>
+#include <serialize/binary.inl>
 #include <ReflectRegistration.h>
 
 using namespace idk;

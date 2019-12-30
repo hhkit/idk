@@ -4,7 +4,7 @@
 #include <string_view>
 
 #include <idk.h>
-#include "Dispatcher_detail.h"
+#include "Dispatcher_detail.inl"
 
 namespace idk
 {

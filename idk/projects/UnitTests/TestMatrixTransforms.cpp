@@ -4,8 +4,8 @@
 #include <random>
 
 #include <idk.h>
-#include <math/matrix_transforms.h>
-#include <math/matrix_decomposition.h>
+#include <math/matrix_transforms.inl>
+#include <math/matrix_decomposition.inl>
 
 TEST(Math, MatrixIdentity)
 {
@@ -46,11 +46,12 @@ TEST(Math, MatrixScale)
 	{
 		vec3 scale_vec{ dist(gen), dist(gen), dist(gen) };
 		
-		mat3 expected
+		mat4 expected
 		{
-			scale_vec.x, 0.f, 0.f,
-			0.f, scale_vec.y, 0.f,
-			0.f, 0.f, scale_vec.z
+			scale_vec.x, 0.f, 0.f, 0.f,
+			0.f, scale_vec.y, 0.f, 0.f,
+			0.f, 0.f, scale_vec.z, 0.f,
+            0.f, 0.f, 0.f, 1.0f
 		};
 
 		EXPECT_EQ(scale(scale_vec), expected);

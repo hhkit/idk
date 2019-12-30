@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "../IDK/idk.h"
-#include "../IDK/math/arith.h"
+#include <math/arith.inl>
 
 TEST(Math, TestFloatFmod)
 {

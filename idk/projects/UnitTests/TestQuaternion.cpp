@@ -1,8 +1,7 @@
 #include "pch.h"
-#include "../IDK/idk.h"
+#include <idk.h>
 
-#include <math/matrix_transforms.h>
-#include <math/matrix_decomposition.h>
+#include <math/matrix_decomposition.inl>
 #include <math/arith.h>
 
 static_assert(idk::has_tag_v<idk::quat, idk::linear>, "quaternion does not have linear functions for some reason");

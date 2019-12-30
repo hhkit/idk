@@ -10,6 +10,7 @@
 #include <common/Transform.h>
 #include <file/FileSystem.h>
 #include <res/ResourceManager.inl>
+#include <reflect/reflect.inl>
 #include "TestApplication.h"
 
 using namespace idk;

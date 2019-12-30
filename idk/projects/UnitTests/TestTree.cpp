@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <ds/slow_tree.h>
+#include <ds/slow_tree.inl>
 
 TEST(SlowTree, SlowTreeTraversal)
 {

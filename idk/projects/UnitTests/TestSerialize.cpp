@@ -1,10 +1,10 @@
 #include "pch.h"
-#include <serialize/text.h>
-#include <ReflectRegistration.h>
-#include <res/Guid.h>
+#include <core/GameObject.inl>
+#include <common/Transform.h>
 #include <scene/SceneManager.h>
+#include <serialize/yaml.inl>
 #include <util/enum.h>
-#include <serialize/yaml.h>
+#include <ReflectRegistration.h>
 #include "TestApplication.h"
 
 using namespace idk;
