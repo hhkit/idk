@@ -1,15 +1,12 @@
 #include "pch.h"
+#include <res/ResourceManager.inl>
 #include <test/TestResource.h>
-#include "TestApplication.h"
 
 TEST(Saveable, SaveableResource)
 {
 	using namespace idk;
 
-    Core core;
-    auto& fs = Core::GetSystem<FileSystem>();
-    core.AddSystem<TestApplication>();
-    core.Setup();
+    INIT_CORE();
 
 	auto ht = core.GetResourceManager().Create<TestResource>();
 

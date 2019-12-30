@@ -33,6 +33,7 @@ namespace idk
             SERIALIZE_CASE(double);
             SERIALIZE_CASE(string);
             SERIALIZE_CASE(const char*);
+            SERIALIZE_CASE(Guid);
             default: break;
             }
 #undef SERIALIZE_CASE
@@ -43,8 +44,21 @@ namespace idk
             {
                 auto cont = obj.to_container();
                 s << cont.size();
-                for (auto elem : cont)
-                    s << elem;
+
+                if (cont.value_type.hash() == reflect::typehash<reflect::dynamic>()) // stores a dynamic?!
+                {
+                    for (auto elem : cont)
+                    {
+                        s.output += elem.type.name();
+                        s.output += '\0';
+                        s << elem;
+                    }
+                }
+                else
+                {
+                    for (auto elem : cont)
+                        s << elem;
+                }
             }
             else if (obj.type.is_template<std::pair>())
             {
@@ -144,6 +158,7 @@ namespace idk
             SERIALIZE_CASE(double);
             SERIALIZE_CASE(string);
             SERIALIZE_CASE(const char*);
+            SERIALIZE_CASE(Guid);
             default: break;
             }
 #undef SERIALIZE_CASE

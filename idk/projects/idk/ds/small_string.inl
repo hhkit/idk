@@ -1196,16 +1196,15 @@ namespace idk
 		if (s)
 		{
 			str.clear();
-			char c;
 			auto w = is.width();
-			for (size_t i = 0; i < w; ++i)
+			for (std::streamsize i = 0; i < w; ++i)
 			{
+                char c = is.get();
 				if (is.eof() || std::isspace(c, is.getloc()))
 					break;
 				str.push_back(c);
 			}
-			is.read(is.width());
 		}
-		return is >> str.sv();
+        return is;
 	}
 }

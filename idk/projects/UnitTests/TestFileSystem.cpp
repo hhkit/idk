@@ -13,76 +13,70 @@
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
-#include "TestApplication.h"
 
 namespace FS = std::filesystem;
 
+using namespace idk;
 static const idk::string READ_DATA{ "0123456789\nqwerty" };
 
-#define INIT_FILESYSTEM_UNIT_TEST()\
-using namespace idk;\
-Core c;\
-FileSystem& vfs = Core::GetSystem<FileSystem>();\
-c.AddSystem<TestApplication>();\
-c.Setup();\
-std::filesystem::remove_all(string{ TEST_DATA_PATH "/FS_UnitTests/" }.c_str());\
-FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/depth_1/depth_2");\
-FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/multiple_dir_1");\
-FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/depth_1/multiple_dir_2");\
-{\
-	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_d0.txt", std::ios::out};\
-	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/test_d1.txt", std::ios::out};\
-	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/depth_2/test_d2.txt", std::ios::out};\
-\
-	std::ofstream r{ TEST_DATA_PATH "/FS_UnitTests/test_read.txt", std::ios::out};\
-	r << READ_DATA;\
-	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_write.txt", std::ios::out};\
-\
-	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/multiple_dir_1/test_d1.txt", std::ios::out};\
-	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/multiple_dir_2/test_d2.txt", std::ios::out};\
-};\
-vfs.Mount(TEST_DATA_PATH "/FS_UnitTests/", "/FS_UnitTests");\
-vfs.Update();
+#define INIT_FS() INIT_CORE(); INIT_ASSETS(); fs.Mount(TEST_DATA_PATH "/FS_UnitTests/", "/FS_UnitTests"); fs.Update();
 
 TEST(FileSystem, TestMount)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
+    FS::remove_all(string{ TEST_DATA_PATH "/FS_UnitTests/" }.c_str());
+    FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/depth_1/depth_2");
+    FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/multiple_dir_1");
+    FS::create_directories(TEST_DATA_PATH "/FS_UnitTests/depth_1/multiple_dir_2");
+    {
+        std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_d0.txt", std::ios::out };
+        std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/test_d1.txt", std::ios::out };
+        std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/depth_2/test_d2.txt", std::ios::out };
+
+        std::ofstream r{ TEST_DATA_PATH "/FS_UnitTests/test_read.txt", std::ios::out };
+        r << READ_DATA;
+        std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_write.txt", std::ios::out };
+
+        std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/multiple_dir_1/test_d1.txt", std::ios::out };
+        std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/depth_1/multiple_dir_2/test_d2.txt", std::ios::out };
+    };
+
+    INIT_FS();
+
 	// Duplicate mount not supported yet
-    EXPECT_FALSE(vfs.Mount(TEST_DATA_PATH "FS_UnitTests/", "/FS_UnitTests"));
+    EXPECT_FALSE(fs.Mount(TEST_DATA_PATH "FS_UnitTests/", "/FS_UnitTests"));
 
 	// Should not work but should not crash too.
     PathHandle bad_file;
-    EXPECT_NO_THROW(bad_file = vfs.GetFile("/blah/haha.txt"));
+    EXPECT_NO_THROW(bad_file = fs.GetFile("/blah/haha.txt"));
 	PathHandle ph{ "/FS_UnitTests" };
 	EXPECT_FALSE(bad_file);
 	EXPECT_TRUE(ph);
 
-	vfs.DumpMounts();
-	vfs.Update();
+	fs.DumpMounts();
+	fs.Update();
 }
 
-bool WatchUpdateCheck(idk::FileSystem& vfs, idk::seconds time, idk::FS_CHANGE_STATUS status)
+bool WatchUpdateCheck(idk::FileSystem& fs, idk::seconds time, idk::FS_CHANGE_STATUS status)
 {
-	using namespace idk;
 	auto start_time = Clock::now();
 
 	while (time > seconds{0})
 	{
 		auto curr_time = Clock::now();
 
-		vfs.Update();
+		fs.Update();
 
 		// Checking if querying is correct
-		auto changes = vfs.QueryFileChangesAll();
+		auto changes = fs.QueryFileChangesAll();
 		bool all_check = changes.size() == 1;
 
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+		changes = fs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
 		bool create_check = (status == FS_CHANGE_STATUS::CREATED) ? changes.size() == 1 : changes.size() == 0;
 
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+		changes = fs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
 		bool write_check = (status == FS_CHANGE_STATUS::WRITTEN) ? changes.size() == 1 : changes.size() == 0;
 
-		changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+		changes = fs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
 		bool delete_check = (status == FS_CHANGE_STATUS::DELETED) ? changes.size() == 1 : changes.size() == 0;
 		
 		if (all_check && create_check && write_check && delete_check)
@@ -95,37 +89,34 @@ bool WatchUpdateCheck(idk::FileSystem& vfs, idk::seconds time, idk::FS_CHANGE_ST
 	return false;
 }
 
-void WatchClearCheck(idk::FileSystem& vfs)
+void WatchClearCheck(idk::FileSystem& fs)
 {
-	using namespace idk;
 	// Checking if we resolved all changes properly
-	vfs.Update();
-	auto changes = vfs.QueryFileChangesAll();
+	fs.Update();
+	auto changes = fs.QueryFileChangesAll();
 	EXPECT_TRUE(changes.size() == 0);
 
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
+	changes = fs.QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED);
 	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
+	changes = fs.QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN);
 	EXPECT_TRUE(changes.size() == 0);
-	changes = vfs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
+	changes = fs.QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED);
 	EXPECT_TRUE(changes.size() == 0);
 }
 
-void TestCreateWatch(idk::FileSystem& vfs)
+void TestCreateWatch(idk::FileSystem& fs)
 {
-	using namespace idk;
 	// Create the test_watch file
 	std::ofstream{ TEST_DATA_PATH "/FS_UnitTests/test_watch.txt", std::ios::out };
 
 	// Checking if querying is correct
-	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::CREATED));
-	WatchClearCheck(vfs);
+	EXPECT_TRUE(WatchUpdateCheck(fs, seconds{ 2.0f }, FS_CHANGE_STATUS::CREATED));
+	WatchClearCheck(fs);
 }
 
-void TestWriteWatch(idk::FileSystem& vfs)
+void TestWriteWatch(idk::FileSystem& fs)
 {
-	using namespace idk;
-	vfs.Update();
+	fs.Update();
 	auto time_stamp = FS::last_write_time(TEST_DATA_PATH "/FS_UnitTests/test_watch.txt");
 	// Write to the file
 	{
@@ -135,39 +126,39 @@ void TestWriteWatch(idk::FileSystem& vfs)
 	}
 	EXPECT_TRUE(time_stamp != FS::last_write_time(TEST_DATA_PATH "/FS_UnitTests/test_watch.txt"));
 	// Checking if querying is correct
-	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
-	WatchClearCheck(vfs);
+	EXPECT_TRUE(WatchUpdateCheck(fs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
+	WatchClearCheck(fs);
 }
 
-void TestDeleteWatch(idk::FileSystem& vfs)
+void TestDeleteWatch(idk::FileSystem& fs)
 {
-	using namespace idk;
-	vfs.Update();
+	fs.Update();
 
 	string remove_file = TEST_DATA_PATH "/FS_UnitTests/test_write.txt";
 	EXPECT_TRUE(remove(remove_file.c_str()) == 0);
 
 	// Checking if querying is correct
-	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 2.0f }, FS_CHANGE_STATUS::DELETED));
-	WatchClearCheck(vfs);
+	EXPECT_TRUE(WatchUpdateCheck(fs, seconds{ 2.0f }, FS_CHANGE_STATUS::DELETED));
+	WatchClearCheck(fs);
 }
 
 TEST(FileSystem, TestDirectoryWatch)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
-	TestCreateWatch(vfs);
-	TestWriteWatch(vfs);
-	TestDeleteWatch(vfs);
+    INIT_FS();
+
+	TestCreateWatch(fs);
+	TestWriteWatch(fs);
+	TestDeleteWatch(fs);
 }
 
 TEST(FileSystem, TestPathHandle)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
+    INIT_FS();
 
 	// Constructors and assignments
 	{
-		auto valid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);		// Should create a file
-		auto invalid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	// Should be an invalid handle
+		auto valid_handle = fs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);		// Should create a file
+		auto invalid_handle = fs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	// Should be an invalid handle
 
 		// Checking if handles are valid or not
 		EXPECT_TRUE(valid_handle.is_open());
@@ -184,14 +175,14 @@ TEST(FileSystem, TestPathHandle)
 		EXPECT_FALSE(move_construct.is_open());
 		move_asssign.close();
 
-		vfs.Update();
+		fs.Update();
 	}
 
 	// Get files at varying depths
 	{
-		auto depth0_handle = vfs.GetFile("/FS_UnitTests/test_d0.txt");
-		auto depth1_handle = vfs.GetFile("/FS_UnitTests/depth_1/test_d1.txt");
-		auto depth2_handle = vfs.GetFile("/FS_UnitTests/depth_1/depth_2/test_d2.txt");
+		auto depth0_handle = fs.GetFile("/FS_UnitTests/test_d0.txt");
+		auto depth1_handle = fs.GetFile("/FS_UnitTests/depth_1/test_d1.txt");
+		auto depth2_handle = fs.GetFile("/FS_UnitTests/depth_1/depth_2/test_d2.txt");
 		EXPECT_TRUE(depth0_handle && depth1_handle && depth2_handle);
 		
 		EXPECT_EQ(FS::path(depth0_handle.GetFullPath()), TEST_DATA_PATH "/FS_UnitTests\\test_d0.txt");
@@ -201,8 +192,8 @@ TEST(FileSystem, TestPathHandle)
 
 	// Get file with same file name but different dir
 	{
-		auto dup_test1 = vfs.GetFile("/FS_UnitTests/depth_1/test_d1.txt");
-		auto dup_test2 = vfs.GetFile("/FS_UnitTests/multiple_dir_1/test_d1.txt");
+		auto dup_test1 = fs.GetFile("/FS_UnitTests/depth_1/test_d1.txt");
+		auto dup_test2 = fs.GetFile("/FS_UnitTests/multiple_dir_1/test_d1.txt");
 
 		EXPECT_FALSE(dup_test1.GetFullPath() == dup_test2.GetFullPath());
 		EXPECT_FALSE(dup_test1.GetMountPath() == dup_test2.GetMountPath());
@@ -214,48 +205,49 @@ TEST(FileSystem, TestPathHandle)
 
 TEST(FileSystem, TestPathHandleInvalidate)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
+    INIT_FS();
+
 	// Invalidate handle by file deletion
 	// Create a file
-	auto valid_handle1 = vfs.Open("/FS_UnitTests/invalidate1.txt", FS_PERMISSIONS::WRITE);
+	auto valid_handle1 = fs.Open("/FS_UnitTests/invalidate1.txt", FS_PERMISSIONS::WRITE);
 	EXPECT_TRUE(valid_handle1.is_open());
 	valid_handle1.close();
 
 	// Get the file handle to the above file
-	auto file_handle1 = vfs.GetFile("/FS_UnitTests/invalidate1.txt");
+	auto file_handle1 = fs.GetFile("/FS_UnitTests/invalidate1.txt");
 	EXPECT_TRUE(file_handle1);
 
 	// file_handle1 is now in created status
-	vfs.Update();
+	fs.Update();
 
 	// Delete the above file
 	auto res = remove(string{ TEST_DATA_PATH "/FS_UnitTests/invalidate1.txt" }.c_str());
 
 	// After this update, file_handle1 is now under delete status
-	vfs.Update();
+	fs.Update();
 	EXPECT_FALSE(file_handle1);
 
 	// Create a new file
-	auto valid_handle2 = vfs.Open("/FS_UnitTests/invalidate2.txt", FS_PERMISSIONS::WRITE);
+	auto valid_handle2 = fs.Open("/FS_UnitTests/invalidate2.txt", FS_PERMISSIONS::WRITE);
 	EXPECT_TRUE(valid_handle2.is_open());
 	valid_handle2.close();
 
 	// Get the file handle to the above file
-	auto file_handle2 = vfs.GetFile("/FS_UnitTests/invalidate2.txt");
+	auto file_handle2 = fs.GetFile("/FS_UnitTests/invalidate2.txt");
 	EXPECT_TRUE(file_handle2);
 
 	// file_handle2 should not reuse the same handle as file_handle1.
 	EXPECT_FALSE(file_handle1.SameKeyAs(file_handle2));
 
 	// Now file_handle1 is free to be reused as its change was resolved in this update
-	vfs.Update();
+	fs.Update();
 
-	auto valid_handle3 = vfs.Open("/FS_UnitTests/invalidate3.txt", FS_PERMISSIONS::WRITE);
+	auto valid_handle3 = fs.Open("/FS_UnitTests/invalidate3.txt", FS_PERMISSIONS::WRITE);
 	EXPECT_TRUE(valid_handle3.is_open());
 	valid_handle3.close();
 
 	// Get the file handle to the above file
-	auto file_handle3 = vfs.GetFile("/FS_UnitTests/invalidate3.txt");
+	auto file_handle3 = fs.GetFile("/FS_UnitTests/invalidate3.txt");
 	EXPECT_TRUE(file_handle3);
 
 	// file_handle3 should reuse the first PathHandle that was created.
@@ -268,16 +260,17 @@ TEST(FileSystem, TestPathHandleInvalidate)
 
 TEST(FileSystem, TestFileOpen)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
+    INIT_FS();
+
 	// Test Open bad file path
 	{
-		PathHandle bad_file_handle = vfs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
+		PathHandle bad_file_handle = fs.GetFile("/FS_UnitTests/bad_path/test_read.txt");
 		EXPECT_FALSE(bad_file_handle);
 
-		auto bad_stream1 = vfs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::READ);
+		auto bad_stream1 = fs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::READ);
 		auto bad_stream2 = bad_file_handle.Open(FS_PERMISSIONS::READ);
 
-		auto bad_stream3 = vfs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::WRITE);
+		auto bad_stream3 = fs.Open("/FS_UnitTests/bad_path/test_read.txt", FS_PERMISSIONS::WRITE);
 		auto bad_stream4 = bad_file_handle.Open(FS_PERMISSIONS::WRITE);
 
 		EXPECT_FALSE(bad_stream1.is_open());
@@ -289,10 +282,11 @@ TEST(FileSystem, TestFileOpen)
 
 TEST(FileSystem, TestFileRead)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
+    INIT_FS();
+
 	// Read file
-	auto valid_handle = vfs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
-	auto invalid_handle = vfs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
+	auto valid_handle = fs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
+	auto invalid_handle = fs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
 	EXPECT_TRUE(valid_handle.is_open());
 	EXPECT_FALSE(invalid_handle.is_open());
 
@@ -305,18 +299,19 @@ TEST(FileSystem, TestFileRead)
 	EXPECT_TRUE(read_data == READ_DATA);
 	valid_handle.close();
 
-	invalid_handle = vfs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
+	invalid_handle = fs.Open("/FS_UnitTests/test_read.txt", FS_PERMISSIONS::READ);
 	EXPECT_TRUE(invalid_handle.is_open());
 }
 
 TEST(FileSystem, TestFileWrite)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
-	auto file = vfs.GetFile("/FS_UnitTests/test_write.txt");
+    INIT_FS();
+
+	auto file = fs.GetFile("/FS_UnitTests/test_write.txt");
 	EXPECT_TRUE(file);
 
-	auto valid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);
-	auto invalid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	// Should be an invalid handle
+	auto valid_handle = fs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);
+	auto invalid_handle = fs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	// Should be an invalid handle
 	EXPECT_TRUE(valid_handle.is_open());
 	EXPECT_FALSE(invalid_handle.is_open());
 
@@ -333,22 +328,23 @@ TEST(FileSystem, TestFileWrite)
 	test.close();
 
 	// Should now be valid
-	invalid_handle = vfs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	
+	invalid_handle = fs.Open("/FS_UnitTests/test_write.txt", FS_PERMISSIONS::WRITE);	
 	EXPECT_TRUE(invalid_handle.is_open());
 }
 
 TEST(FileSystem, TestRename)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
-	vfs.Open("/FS_UnitTests/test_rename.txt", FS_PERMISSIONS::WRITE);
-	auto file_handle = vfs.GetFile("/FS_UnitTests/test_rename.txt");
+    INIT_FS();
+
+	fs.Open("/FS_UnitTests/test_rename.txt", FS_PERMISSIONS::WRITE);
+	auto file_handle = fs.GetFile("/FS_UnitTests/test_rename.txt");
 
 	EXPECT_TRUE(file_handle.Rename("test_rename2.ext"));
-	vfs.Update();
-	EXPECT_TRUE(vfs.QueryFileChangesAll().size() == 0);
-	EXPECT_FALSE(vfs.GetFile("/FS_UnitTests/test_rename.txt"));
-	EXPECT_FALSE(vfs.GetFile("/FS_UnitTests/test_rename2.txt"));
-	file_handle = vfs.GetFile("/FS_UnitTests/test_rename2.ext");;
+	fs.Update();
+	EXPECT_TRUE(fs.QueryFileChangesAll().size() == 0);
+	EXPECT_FALSE(fs.GetFile("/FS_UnitTests/test_rename.txt"));
+	EXPECT_FALSE(fs.GetFile("/FS_UnitTests/test_rename2.txt"));
+	file_handle = fs.GetFile("/FS_UnitTests/test_rename2.ext");;
 	EXPECT_TRUE(file_handle);
 
 	remove(file_handle.GetFullPath().data());
@@ -357,72 +353,72 @@ TEST(FileSystem, TestRename)
 
 TEST(FileSystem, TestSpecialWatch)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
+    INIT_FS();
 
 	// Creating a file using write
 	{
 		{
-			auto valid_handle = vfs.Open("/FS_UnitTests/blank_file.txt", FS_PERMISSIONS::WRITE);
+			auto valid_handle = fs.Open("/FS_UnitTests/blank_file.txt", FS_PERMISSIONS::WRITE);
 			EXPECT_TRUE(valid_handle.is_open());
 		}
-		vfs.Update();
+		fs.Update();
 		// Creating a file. Should not trigger change
-		auto changes = vfs.QueryFileChangesAll();
+		auto changes = fs.QueryFileChangesAll();
 		EXPECT_TRUE(changes.size() == 0);
 	}
-	vfs.Update();
+	fs.Update();
 
 	// Writing to a file
 	{
 		//Case 1: destructor called
 		{
-			auto valid_handle = vfs.Open("/FS_UnitTests/blank_file.txt", FS_PERMISSIONS::WRITE);
+			auto valid_handle = fs.Open("/FS_UnitTests/blank_file.txt", FS_PERMISSIONS::WRITE);
 			EXPECT_TRUE(valid_handle.is_open());
 			valid_handle << "write to file";
 		}
-		vfs.Update();
+		fs.Update();
 		// Should not trigger change
-		auto changes = vfs.QueryFileChangesAll();
+		auto changes = fs.QueryFileChangesAll();
 		EXPECT_TRUE(changes.size() == 0);
 
 		// Case 2: call close
-		auto valid_handle = vfs.Open("/FS_UnitTests/blank_file.txt", FS_PERMISSIONS::WRITE);
+		auto valid_handle = fs.Open("/FS_UnitTests/blank_file.txt", FS_PERMISSIONS::WRITE);
 		EXPECT_TRUE(valid_handle.is_open());
 		valid_handle << "write to file";
 		valid_handle.close();
 
-		vfs.Update();
+		fs.Update();
 		// Should not trigger change
-		changes = vfs.QueryFileChangesAll();
+		changes = fs.QueryFileChangesAll();
 		EXPECT_TRUE(changes.size() == 0);
 	}
-	vfs.Update();
+	fs.Update();
 
 	// Renaming a file
 	{
 		// Using PathHandle
-		auto file = vfs.GetFile("/FS_UnitTests/blank_file.txt");
+		auto file = fs.GetFile("/FS_UnitTests/blank_file.txt");
 		EXPECT_TRUE(file.Rename("blank_file1.txt"));
-		vfs.Update();
+		fs.Update();
 		// Should not trigger change
-		auto changes = vfs.QueryFileChangesAll();
+		auto changes = fs.QueryFileChangesAll();
 		EXPECT_TRUE(changes.size() == 0);
 
 		// Using FileSystem
-		EXPECT_TRUE(vfs.Rename("/FS_UnitTests/blank_file1.txt", "blank_file2.txt"));
-		vfs.Update();
+		EXPECT_TRUE(fs.Rename("/FS_UnitTests/blank_file1.txt", "blank_file2.txt"));
+		fs.Update();
 		// Should not trigger change
-		changes = vfs.QueryFileChangesAll();
+		changes = fs.QueryFileChangesAll();
 		EXPECT_TRUE(changes.size() == 0);
 	}
 }
 
 TEST(FileSystem, TestGetPaths)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
+    INIT_FS();
 
 	// size_t total_size = 0;
-	// auto paths = vfs.GetEntries("/FS_UnitTests");
+	// auto paths = fs.GetEntries("/FS_UnitTests");
 	// EXPECT_TRUE(paths.size() == 5);
 	// total_size += paths.size();
 	// 
@@ -437,14 +433,13 @@ TEST(FileSystem, TestGetPaths)
 
 TEST(FileSystem, TestConvertToVirtual)
 {
-	INIT_FILESYSTEM_UNIT_TEST();
-	auto full_path = vfs.GetFullPath("/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
-	EXPECT_EQ(vfs.ConvertFullToVirtual(full_path), "/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
-}
+    INIT_FS();
 
+	auto full_path = fs.GetFullPath("/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
+	EXPECT_EQ(fs.ConvertFullToVirtual(full_path), "/FS_UnitTests/depth_1/multiple_dir_2/hihi.ids");
+}
 
 TEST(FileSystem, CleanUp)
 {
-    INIT_FILESYSTEM_UNIT_TEST();
-	std::filesystem::remove_all(std::string_view{vfs.GetFullPath("/FS_UnitTests/")});
+    FS::remove_all(string{ TEST_DATA_PATH "/FS_UnitTests/" }.c_str());
 }

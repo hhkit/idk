@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <util/string_hash.h>
+#include <util/string_hash.inl>
 
 TEST(String, StringHash)
 {

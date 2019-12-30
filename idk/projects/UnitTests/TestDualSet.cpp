@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <ds/dual_set.h>
+#include <ds/dual_set.inl>
 
 TEST(DualSet, TestInsert)
 {

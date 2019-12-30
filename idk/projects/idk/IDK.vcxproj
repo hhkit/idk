@@ -499,6 +499,7 @@
     <None Include="reflect\detail\visit_detail.inl" />
     <None Include="reflect\enum_type.inl" />
     <None Include="reflect\uni_container.inl" />
+    <None Include="res\CompiledAssetLoader.inl" />
     <None Include="res\Guid.inl" />
     <None Include="res\MetaBundle.inl" />
     <None Include="res\ResourceBundle.inl" />

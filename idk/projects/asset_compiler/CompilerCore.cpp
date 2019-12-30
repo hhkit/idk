@@ -75,17 +75,22 @@ namespace idk
 					for (auto& [guid, binary_resource] : result->assets)
 					{
 						// if you're here, you're trying to get compiled so only binary here
-						std::visit([&](const auto& elem) -> bool
+						bool res = std::visit([&](const auto& elem) -> bool
 							{
 								using T = std::decay_t<decltype(elem)>;
 								if constexpr (has_extension_v<T>)
 								{
 									static_assert(T::ext[0] == '.', "Extension must begin with a .");
-									std::ofstream resource_stream{ destination + "/" + string{guid} + string{T::ext} };
-									//if constexpr (has_tag_v<T, Saveable>)
-										resource_stream << serialize_text(elem);
-									//else
-									//	resource_stream << serialize_binary(elem);
+                                    if constexpr (has_tag_v<T, Saveable>)
+                                    {
+                                        std::ofstream resource_stream{ destination + "/" + string{guid} +string{T::ext} };
+                                        resource_stream << serialize_text(elem);
+                                    }
+                                    else
+                                    {
+                                        std::ofstream resource_stream{ destination + "/" + string{guid} +string{T::ext}, std::ios::binary };
+                                        resource_stream << serialize_binary(elem);
+                                    }
 									return true;
 								}
 								else
@@ -94,6 +99,20 @@ namespace idk
 									return false;
 								}
 							}, binary_resource);
+
+                        // testing parse
+                        //if (res)
+                        //{
+                        //    std::visit([&](const auto& elem)
+                        //    {
+                        //        using T = std::decay_t<decltype(elem)>;
+                        //        if constexpr (has_extension_v<T> && !has_tag_v<T, Saveable>)
+                        //        {
+                        //            std::ifstream in{ destination + "/" + string{guid} +string{T::ext}, std::ios::binary};
+                        //            auto out = parse_binary<T>(binarify(in));
+                        //        }
+                        //    }, binary_resource);
+                        //}
 					}
 				}
 			}

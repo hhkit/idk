@@ -22,7 +22,6 @@
     </ClCompile>
     <ClCompile Include="TestGameState.cpp" />
     <ClCompile Include="TestZip.cpp" />
-    <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestSystemManager.cpp" />
     <ClCompile Include="TestReflect.cpp" />
     <ClCompile Include="TestAudio.cpp" />
@@ -35,12 +34,18 @@
     <ClCompile Include="TestPrefab.cpp" />
     <ClCompile Include="TestSaveableResource.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />
-    <ClCompile Include="TestGeometry.cpp" />
     <ClCompile Include="TestSerializeBinary.cpp" />
+    <ClCompile Include="TestGeometry.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="TestMatrixTransforms.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="TestApplication.h" />
+    <ClInclude Include="core_setup.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

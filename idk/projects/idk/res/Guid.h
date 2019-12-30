@@ -3,6 +3,7 @@
 #include <objbase.h>
 #undef max
 #undef min
+#undef GetObject
 #include <idk.h>
 #include <util/hash_combine.h>
 

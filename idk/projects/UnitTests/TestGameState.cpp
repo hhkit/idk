@@ -1,14 +1,12 @@
 #include "pch.h"
-#undef GetObject
 #include <core/Core.h>
 #include <core/GameState.h>
-#include <core/GameObject.h>
+#include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <phys/Collider.h>
 #include <scene/SceneFactory.h>
 #include <scene/SceneManager.h>
 #include <res/ResourceManager.inl>
-#include "TestApplication.h"
 
 TEST(GameState, TestGameState)
 {
@@ -59,9 +57,7 @@ TEST(GameState, TestHandles)
 TEST(GameState, TestScene)
 {
     using namespace idk;
-    Core core;
-    core.AddSystem<TestApplication>();
-    core.Setup();
+    INIT_CORE();
     auto scene0 = Core::GetResourceManager().Create<Scene>(); scene0->LoadFromResourcePath();
 	auto scene1 = Core::GetResourceManager().Create<Scene>(); scene1->LoadFromResourcePath();
 	auto scene2 = Core::GetResourceManager().Create<Scene>(); scene2->LoadFromResourcePath();
