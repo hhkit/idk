@@ -1,10 +1,105 @@
 #pragma once
 #include <cstdint>
+#include <math/rect.h>
 #include <gfx/pipeline_config.h>
 #include <vkn/utils/Flags.h>
 #include <ds/ranged_for.inl>
+#include <stack>
+#include <queue>
 namespace idk::vkn
 {
+	template<typename Node, typename Key, typename Policy>
+	struct TraversePolicy
+	{
+		using node_t = Node;
+		using key_t = Key;
+		TraversePolicy(Policy& pol) :policy{ pol } {}
+
+		//Returns true to continue getting deeper edges, or false to not explore the node any further.
+		bool Visit(const Node& node)
+		{
+			return policy.Policy::Visit(node);
+		}
+		//Returns a range of edges that lead deeper into the graph. Edge is used by GetNodeInfo, and hence must be compatible.
+		auto DeeperEdges(const Node& node)
+		{
+			return policy.Policy::DeeperEdges(node);
+		}
+		//Returns an info_t object by copy, that can be passed int GetKeyFromInfo and GetNodeFromInfo which can return the Key and Node by reference respectively.
+		template<typename Edge>
+		auto GetNodeInfo(const Node& node, const Edge& edge)
+		{
+			return policy.Policy::GetNodeInfo(node, edge);
+		}
+		//Extracts the Key from the info
+		template<typename Info>
+		const Key& GetKeyFromInfo(const Info& info)
+		{
+			return policy.Policy::GetKeyFromInfo(info);
+		}
+		//Extracts the Node from the info
+		template<typename Info>
+		const Node& GetNodeFromInfo(const Info& info)
+		{
+			return policy.Policy::GetNodeFromInfo(info);
+		}
+		Policy& policy;
+	};
+	template<typename Node>
+	using DepthFirst = std::stack<Node, vector<Node>>;
+	template<typename Node>
+	using BreadthFirst = std::queue<Node, vector<Node>>;
+
+	template<typename Node, typename Key = Node, template <typename Node_t> typename TraverseType = DepthFirst>
+	struct GraphTraverser
+	{
+		template<typename Policy>
+		using VisitPolicy = TraversePolicy<Node, Key, Policy>;
+		void Push(Node node)
+		{
+			frontier.push(node);
+		}
+		std::optional<Node> Pop()
+		{
+			if (!frontier.empty())
+				return {};
+			auto result = frontier.top();
+			frontier.pop();
+			return result;
+		}
+		template<typename Policy>
+		bool VisitNextNode(Policy& policy_detail)
+		{
+			VisitPolicy<Policy> policy{ policy_detail };
+			auto next = Pop();
+			if (next)
+			{
+				auto& node = *next;
+				if (policy.Visit(node))
+				{
+					auto&& input_span = policy.DeeperEdges(node);
+					for (auto& edge : input_span)
+					{
+						auto&& info = policy.GetNodeInfo(node, edge);
+						auto&& key = policy.GetKeyFromInfo(info);
+						//Not opened
+						if (opened_nodes.find(key) == opened_nodes.end())
+						{
+							//Add to list of nodes to visit
+							Push(policy.GetNodeFromInfo(info));
+						}
+					}
+				}
+			}
+			return next.operator bool();
+		}
+
+		TraverseType<Node> frontier;
+		hash_set<Key> opened_nodes;
+	};
+
+
+
 	enum LoadOp {};
 	enum StoreOp {};
 	struct Framebuffer;
@@ -150,7 +245,7 @@ namespace idk::vkn
 
 		vector<RenderBatch> batches;
 	};
-	using fgr_id = uint32_t;
+	using fgr_id = size_t;
 	struct FrameGraphResource 
 	{
 		fgr_id id;
@@ -158,7 +253,7 @@ namespace idk::vkn
 	};
 	using FrameGraphResourceReadOnly = FrameGraphResource;
 	using FrameGraphResourceMutable  = FrameGraphResource;
-	using fg_id = uint32_t;
+	using fg_id = size_t;
 	struct FrameGraphNode 
 	{
 		fg_id id;
@@ -167,22 +262,30 @@ namespace idk::vkn
 
 		index_span input_resources;
 		index_span output_resources;
+		index_span modified_resources;
+
+		auto GetInputSpan()const { return GetSpan(input_resources, *buffer); }
+		auto GetOutputSpan()const { return GetSpan(output_resources, *buffer); }
+
+		bool resource_present(index_span span, FrameGraphResource rsc)const
+		{
+			auto begin = buffer->begin() + span.begin;
+			auto end = buffer->begin() + span.end;
+			auto itr = std::find(begin, end, rsc);
+			return itr!=end;
+		}
 
 		bool Reads(FrameGraphResource rsc)const
 		{
-			auto span = input_resources;
-			auto begin = buffer->begin() + span.begin;
-			auto end = buffer->begin() + span.end;
-			auto itr = std::find(begin, end, rsc);
-			return itr != end;
+			return resource_present(input_resources, rsc);
 		}
-		bool Writes(FrameGraphResource rsc)const 
+		bool Writes(FrameGraphResource rsc)const
 		{
-			auto span = output_resources;
-			auto begin = buffer->begin() + span.begin;
-			auto end = buffer->begin() + span.end;
-			auto itr = std::find(begin, end, rsc);
-			return itr != end;
+			return resource_present(output_resources, rsc);
+		}
+		bool Modifies(FrameGraphResource rsc)const
+		{
+			return resource_present(modified_resources, rsc);
 		}
 
 	};
@@ -200,6 +303,7 @@ namespace idk::vkn
 		{
 			auto next_id = NextID();
 			resource_handles.emplace(next_id, resource_handles.find(rsc.id)->second);
+			renamed_resources.emplace(rsc.id, next_id);
 			return FrameGraphResource{ next_id };
 		}
 		string_view Name(FrameGraphResource fg)const
@@ -215,6 +319,8 @@ namespace idk::vkn
 		using rsc_index_t = size_t;
 		vector<AttachmentDescription> resources;
 		hash_table<fgr_id, rsc_index_t> resource_handles;
+		//Old to new
+		hash_table<fgr_id, fgr_id> renamed_resources;
 	};
 
 	struct NodeBuffer
@@ -228,6 +334,10 @@ namespace idk::vkn
 			result.end = resources.size();
 			return result;
 		}
+	};
+	struct WriteOptions
+	{
+		bool clear = true;
 	};
 
 	struct FrameGraphBuilder 
@@ -248,14 +358,17 @@ namespace idk::vkn
 			curr_input_resources.emplace_back(in_rsc);
 			return rsc;
 		}
-		FrameGraphResource write(FrameGraphResourceMutable target_rsc)
+		FrameGraphResource write(FrameGraphResourceMutable target_rsc, WriteOptions opt = {})
 		{
 			auto rsc = rsc_manager.Rename(target_rsc);
 			if (target_rsc.readonly)
 			{
 				LOG_TO(LogPool::GFX, "Attempting to write to Read only resource %s[%u] !",rsc_manager.Name(target_rsc).data(),target_rsc.id);
 			}
-			curr_input_resources.emplace_back(target_rsc);
+			if (!opt.clear)
+				curr_input_resources.emplace_back(target_rsc);
+			else
+				curr_modified_resources.emplace_back(target_rsc);
 			curr_output_resources.emplace_back(rsc);
 			return rsc;
 		}
@@ -267,21 +380,30 @@ namespace idk::vkn
 		}
 		FrameGraphNode EndNode()
 		{
+			auto id = NextID();
+			for (auto& rsc : curr_output_resources)
+			{
+				origin_nodes.emplace(rsc.id, id);
+			}
 			auto input_span = consumed_resources.StoreResources(curr_input_resources);
 			auto output_span = consumed_resources.StoreResources(curr_output_resources);
+			auto modified_span = consumed_resources.StoreResources(curr_modified_resources);
 			curr_input_resources.clear();
 			curr_output_resources.clear();
-			return FrameGraphNode{ NextID(),&consumed_resources.resources,input_span,output_span };
+			curr_modified_resources.clear();
+			return FrameGraphNode{ id,&consumed_resources.resources,input_span,output_span,modified_span };
 		}
 
 		FrameGraphResourceManager rsc_manager;
 
 
 		NodeBuffer consumed_resources;
+		hash_table<fgr_id, fg_id> origin_nodes;
 
 		//Consumed resources
 		vector<FrameGraphResource> curr_input_resources;
 		vector<FrameGraphResource> curr_output_resources;
+		vector<FrameGraphResource> curr_modified_resources;
 	};
 
 	namespace FrameGraphDetail
@@ -305,7 +427,7 @@ namespace idk::vkn
 	template<typename T>
 	auto GetSpan(index_span ispan, T& container)
 	{
-		span<decltype(*std::data(container))> sp{ std::data(container) + ispan.begin , std::data(container)+ispan.end};
+		span<std::remove_reference_t<decltype(*std::data(container))>> sp{ std::data(container) + ispan.begin , std::data(container)+ispan.end};
 		return sp;
 	}
 
@@ -336,44 +458,173 @@ namespace idk::vkn
 			return resource_lifetimes.at(itr->second);
 		}
 
-		void EndLifetime(FrameGraphResource rsc,const FrameGraphNode& node)
+		void EndLifetime(fgr_id rsc_id, const fg_id& node_id)
 		{
-			GetOrCreate(rsc.id).end = node.id;
+			GetOrCreate(rsc_id).end = node_id;
 		}
-		void InbetweenLifetime(FrameGraphResource rsc, const FrameGraphNode& node)
+		void InbetweenLifetime(fgr_id rsc_id, const fg_id& node_id)
 		{
-			GetOrCreate(rsc.id).inbetween.emplace_back(node.id);
+			GetOrCreate(rsc_id).inbetween.emplace_back(node_id);
 		}
-		void StartLifetime(FrameGraphResource rsc, const FrameGraphNode& node)
+		void StartLifetime(fgr_id rsc_id, const fg_id& node_id)
 		{
-			GetOrCreate(rsc.id).start = node.id;
+			GetOrCreate(rsc_id).start = node_id;
 		}
 	};
 
-	void FindLifetime(ResourceLifetimeManager& manager,const vector<FrameGraphNode>& nodes, const NodeBuffer& rscs, const FrameGraphNode& root)
+
+
+
+	struct TempGraph
 	{
-		auto input_span = GetSpan(root.input_resources  , rscs.resources);
-		auto output_span = GetSpan(root.output_resources, rscs.resources);
-		//TODO: Figure out how to construct the entire tree.
-		for (auto& input : input_span)
+		hash_table<fgr_id, fg_id> src_node;
+		hash_table<fgr_id, fg_id> end_node;
+		using fgr_span = index_span;
+		hash_table<fg_id, fgr_span> in_nodes;
+		const NodeBuffer *buffer;
+	};
+	struct ActualGraph
+	{
+		hash_table<fgr_id, fg_id>  src_node;
+		hash_table<fgr_id, fg_id>  end_node;
+		hash_table<fg_id, span<const FrameGraphResource>> in_nodes;
+	};
+	ActualGraph ConvertTempGraph(TempGraph&& tmp)
+	{
+		ActualGraph result{ 
+			 .src_node = std::move(tmp.src_node)
+			,.end_node = std::move(tmp.end_node)
+		};
+		for (auto& [id, idx_span] : tmp.in_nodes)
 		{
-			manager.EndLifetime(input,root);
-			for (auto& node : reverse(nodes))
+			result.in_nodes.emplace(id, GetSpan(idx_span, tmp.buffer->resources));
+		}
+		tmp.in_nodes.clear();
+		return result;
+	}
+	using FG_Traverser = GraphTraverser<FrameGraphNode, fg_id>;
+
+	struct ConversionPolicy
+	{
+
+		using Node = FG_Traverser::template VisitPolicy<ConversionPolicy>::node_t;
+		using Key = FG_Traverser::template VisitPolicy<ConversionPolicy>::key_t;
+
+		//Returns true to continue getting deeper edges, or false to not explore the node any further.
+		bool Visit(const Node& node)
+		{
+			graph->in_nodes.emplace(node.id, node.GetInputSpan());
+			for (auto&& written_rsc : node.GetOutputSpan())
 			{
-				if (node.Reads(input))
+				graph->src_node.emplace(written_rsc.id,node);
+			}
+			return true;
+		}
+		//Returns a range of edges that lead deeper into the graph. Edge is used by GetNodeInfo, and hence must be compatible.
+		auto DeeperEdges(const Node& node)
+		{
+			return node.GetInputSpan();
+		}
+		//Returns an info_t object by copy, that can be passed int GetKeyFromInfo and GetNodeFromInfo which can return the Key and Node by reference respectively.
+		auto GetNodeInfo(const Node&, const FrameGraphResource& edge)
+		{
+			std::optional<Node> result;
+			for (auto& node : all_nodes)
+			{
+				if (node.Writes(edge))
 				{
-					manager.InbetweenLifetime(input, node);
-				}
-				else if (node.Writes(input))
-				{
-					manager.EndLifetime(input, node);
+					result = node;
 					break;
 				}
 			}
+			return result;
 		}
+		//Extracts the Key from the info
+		const Key& GetKeyFromInfo(const std::optional<Node>& info)
+		{
+			IDK_ASSERT(info);
+			return info->id;
+		}
+		//Extracts the Node from the info
+		const Node& GetNodeFromInfo(const std::optional<Node>& info)
+		{
+			IDK_ASSERT(info);
+			return *info;
+		}
+		ActualGraph* graph;
+		const vector<FrameGraphNode>& all_nodes;
+		const NodeBuffer& rscs;
+	};
 
-
-
+	ActualGraph BuildGraph(const vector<FrameGraphNode>& nodes, const NodeBuffer& rscs, const FrameGraphResource& root)
+	{
+		ActualGraph graph;
+		FG_Traverser traverser;
+		FrameGraphNode root_node;
+		for (auto& node : nodes)
+		{
+			if (node.Writes(root))
+			{
+				root_node = node;
+				break;
+			}
+		}
+		traverser.Push(root_node);
+		ConversionPolicy cp{ &graph, nodes,rscs };
+		while (traverser.VisitNextNode(cp));
+		return graph;
+	}
+	void ComputeLifetimes(ResourceLifetimeManager& manager,const ActualGraph& graph)
+	{
+		//TODO: Figure out how to construct the entire tree.
+		for (auto& [rsc_id, node_id] : graph.src_node)
+		{
+			manager.StartLifetime(rsc_id, node_id);
+		}
+		for (auto& [rsc_id, node_id] : graph.end_node)
+		{
+			manager.EndLifetime(rsc_id, node_id);
+		}
+		for (auto& [node_id, resources] : graph.in_nodes)
+		{
+			for (auto& rsc : resources)
+			{
+				manager.InbetweenLifetime(rsc.id, node_id);
+			}
+		}
+	}
+	struct NodeDependencies
+	{
+		hash_table<fg_id, set<fg_id>> flattened_dependencies;
+		hash_table<fg_id, set<fg_id>> reversed_dependencies;
+	};
+	NodeDependencies BuildDependencyGraph(const vector<FrameGraphNode>& nodes,const ActualGraph& graph)
+	{
+		NodeDependencies dep;
+		for (auto& node : nodes)
+		{
+			auto node_id = node.id;
+			auto in_itr = graph.in_nodes.find(node_id);
+			if (in_itr != graph.in_nodes.end())
+			{
+				for (auto& in_rsc : in_itr->second)
+				{
+					auto itr = graph.src_node.find(in_rsc.id);
+					auto in_src_node_id = itr->second;
+					auto& my_deps = dep.flattened_dependencies[node_id];
+					my_deps.emplace(in_src_node_id);
+					for (auto& sub_dep : dep.flattened_dependencies[in_src_node_id])
+					{
+						my_deps.emplace(sub_dep);
+					}
+					auto& rev_deps = dep.reversed_dependencies[node_id];
+					for(auto reversed_dep : rev_deps)
+						dep.flattened_dependencies[reversed_dep].emplace(in_src_node_id);
+					rev_deps.emplace(node_id);
+				}
+			}
+		}
+		return dep;
 	}
 
 	struct FrameGraph
@@ -440,18 +691,32 @@ namespace idk::vkn
 		{
 			graph_builder.BeginNode();
 			auto render_pass = std::make_unique<T>(graph_builder,std::forward <CtorArgs(args)...);
-			nodes.emplace_back(graph_builder.EndNode());
+			auto& node =StoreNode(graph_builder.EndNode());
 			T& obj = *render_pass;
-			render_passes.emplace_back(std::move(render_pass));
+			render_passes.emplace(node.id,std::move(render_pass));
 			return obj;
 
+		}
+
+		FrameGraphNode& StoreNode(FrameGraphNode&& node)
+		{
+			auto& stored_node = nodes.emplace_back(std::move(node));
+			tmp_graph.in_nodes.emplace(node.id, node.input_resources);
+			for (auto& written_rsc : node.GetOutputSpan())
+				tmp_graph.src_node.emplace(written_rsc.id);
+			return stored_node;
 		}
 
 		//Process nodes and cull away unnecessary nodes.
 		//Figure out dependencies and synchronization points
 		//Insert new nodes to help transit concrete resources to their corresponding virtual resources
 		//Generate dependency graph
-		void Compile(); 
+		void Compile()
+		{
+			auto graph = ConvertTempGraph(std::move(tmp_graph));
+			ComputeLifetimes(rsc_lifetime_mgr,graph);
+
+		}
 
 		//using the resultant graph, allocate the concrete resources needed.
 		void Allocate(TransientResourceManager& rsc);
@@ -462,7 +727,10 @@ namespace idk::vkn
 
 		FrameGraphBuilder graph_builder;
 		vector<FrameGraphNode> nodes;
-		vector<std::unique_ptr<BaseRenderPass>> render_passes;
+		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
+
+		TempGraph tmp_graph;
+		ResourceLifetimeManager rsc_lifetime_mgr;
 	};
 
 
