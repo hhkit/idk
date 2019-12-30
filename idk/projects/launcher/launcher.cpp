@@ -20,7 +20,7 @@
 #include <anim/Skeleton.h>
 #include <serialize/text.h>
 #include <res/EasyFactory.h>
-#include <res/CompiledAssetLoader.h>
+#include <res/CompiledAssetLoader.inl>
 #include <proj/ProjectManager.h>
 #include <scene/scene.h>
 #include <res/ResourceHandle.inl>
