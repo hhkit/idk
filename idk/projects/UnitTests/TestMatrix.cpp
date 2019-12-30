@@ -159,5 +159,5 @@ TEST(Math, MatrixInverse)
 
 	for (auto& [lvec, rvec] : zip(m.inverse(), m2))
 		for (auto& [lhs, rhs] : zip(lvec, rvec))
-			EXPECT_LE(abs(lhs - rhs), epsilon);
+			EXPECT_LE(abs(lhs - rhs), epsilon * 4);
 }

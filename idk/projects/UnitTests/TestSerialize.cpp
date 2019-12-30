@@ -4,7 +4,9 @@
 #include <scene/SceneManager.h>
 #include <serialize/yaml.inl>
 #include <util/enum.h>
-#include <ReflectRegistration.h>
+#include <ReflectReg_Components.h>
+#include <ReflectReg_GfxComponents.h>
+#include <ReflectReg_Resources.h>
 
 using namespace idk;
 

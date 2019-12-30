@@ -21,7 +21,11 @@ namespace idk
 {
     void UISystem::LateInit()
     {
-        auto frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.frag", false);
+        auto res = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.frag", false);
+        if (!res)
+            return;
+
+        auto frag = *res;
         auto mat = Core::GetResourceManager().LoaderCreateResource<Material>(Guid{ 0x90da4f5c, 0x0453, 0x4e77, 0xbb3fb506c067d085 });
         mat->_shader_program = frag;
         mat->Name("Default UI");

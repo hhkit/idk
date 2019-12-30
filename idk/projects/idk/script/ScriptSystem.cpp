@@ -58,10 +58,13 @@ namespace idk::mono
 
 	void ScriptSystem::UnloadGameScripts()
 	{
-		const auto max_gen = mono_gc_max_generation();
-		for (int i = 0; i < max_gen; ++i)
-			mono_gc_collect(i);
-		script_environment = nullptr;
+        if (script_environment)
+        {
+            const auto max_gen = mono_gc_max_generation();
+            for (int i = 0; i < max_gen; ++i)
+                mono_gc_collect(i);
+            script_environment = nullptr;
+        }
 	}
 
 	void ScriptSystem::Init()
