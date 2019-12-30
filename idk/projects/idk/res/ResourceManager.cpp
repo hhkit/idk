@@ -9,7 +9,7 @@
 #include <util/ioutils.h>
 #include <res/SaveableResourceLoader.inl>
 #include <res/CompiledAssets.h>
-#include <res/CompiledAssetLoader.h>
+#include <res/CompiledAssetLoader.inl>
 
 #include <IncludeResources.h>
 #include <reflect/reflect.inl>
