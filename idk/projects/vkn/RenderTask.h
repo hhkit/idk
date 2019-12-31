@@ -292,6 +292,11 @@ namespace idk::vkn
 
 	struct FrameGraphResourceManager
 	{
+		using rsc_index_t = size_t;
+		using actual_rsc_index_t = size_t;
+		using actual_resource_t = variant<Texture>;
+
+
 		FrameGraphResource CreateTexture(AttachmentDescription dsc)
 		{
 			auto rsc_index = resources.size();
@@ -313,11 +318,26 @@ namespace idk::vkn
 				return "";
 			return resources.at(itr->second).name;
 		}
+
+		template<typename ActualResource>
+		ActualResource& Get(FrameGraphResource rsc)
+		{
+			return std::get<ActualResource>(GetVar(rsc));
+		}
+
+		actual_resource_t& GetVar(FrameGraphResource rsc)
+		{
+			return concrete_resources[resource_map.find(rsc.id)->second];
+		}
 		//Generate the next id.
 		fgr_id NextID();
 
-		using rsc_index_t = size_t;
+
 		vector<AttachmentDescription> resources;
+
+		vector<actual_resource_t> concrete_resources;
+		hash_table<fgr_id, actual_rsc_index_t> resource_map;
+
 		hash_table<fgr_id, rsc_index_t> resource_handles;
 		//Old to new
 		hash_table<fgr_id, fgr_id> renamed_resources;
