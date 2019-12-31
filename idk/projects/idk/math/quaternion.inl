@@ -80,6 +80,13 @@ namespace idk
 	inline quaternion<T>::operator tmat<T, 4, 4>()
 	{
 		this->normalize();
+		return tmat<T, 4, 4>
+		{
+			tvec<T,4>{ 1 - 2 * (y * y + z * z),     2 * (x * y + z * w),     2 * (x * z - y * w), 0 },
+			tvec<T,4>{	  2 * (x * y - z * w), 1 - 2 * (x * x + z * z),     2 * (y * z + x * w), 0},
+			tvec<T,4>{	  2 * (x * z + y * w),     2 * (y * z - x * w), 1 - 2 * (x * x + y * y), 0},
+			tvec<T,4>{	  0, 0, 0, 1}
+		};
 		// poor attempt at simd
 		////1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
 		////	  2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
@@ -95,7 +102,6 @@ namespace idk
 		//	vec4{ },
 		//	vec4{ __m128{0,0,0,1} }
 		//};
-		return tmat<T, 4, 4>{operator tmat<T, 3, 3>()};
 	}
 
 	template<typename T>

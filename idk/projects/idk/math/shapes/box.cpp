@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "box.h"
+#include <math/matrix_transforms.inl>
 #include <math/matrix_decomposition.inl>
 #include <math/quaternion.inl>
 #include <ds/zip.inl>

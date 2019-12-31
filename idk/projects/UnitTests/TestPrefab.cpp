@@ -11,6 +11,7 @@
 #include <file/FileSystem.h>
 #include <res/ResourceManager.inl>
 #include <reflect/reflect.inl>
+#include <ReflectReg_Components.h>
 
 using namespace idk;
 

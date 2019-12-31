@@ -43,7 +43,8 @@ namespace idk
 
 	mat4 Transform::LocalMatrix() const
 	{
-		return translate(position) * quat_cast<mat4>(rotation)* idk::scale(scale);
+		auto rotation_mtx = quat_cast<mat4>(rotation);
+		return translate(prescale(rotation_mtx, vec4{ scale, 1 }), position);
 	}
 
 	mat4 Transform::GlobalMatrix() const

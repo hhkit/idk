@@ -18,7 +18,11 @@ namespace idk
 
     void ParticleSystemUpdater::LateInit()
     {
-        auto particle_frag = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/default_particle.frag", false);
+        auto res = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/default_particle.frag", false);
+        if (!res)
+            return;
+
+        auto particle_frag = *res;
         auto particle_mat = Core::GetResourceManager().LoaderCreateResource<Material>(Guid{ 0xcfa6c3e0, 0x9b52, 0x412b, 0xb3e7c85ee93190ca });
         particle_mat->_shader_program = particle_frag;
         particle_mat->Name("Default Particle");

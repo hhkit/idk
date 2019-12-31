@@ -47,8 +47,8 @@ TEST(GameState, TestHandles)
 	EXPECT_TRUE(&*hTransform);
 	auto tfm = hTransform->LocalMatrix();
 	gs.DestroyQueue();
-	EXPECT_FALSE(&*h);
-	EXPECT_FALSE(&*hTransform);
+	EXPECT_THROW(*h, NullHandleException);
+    EXPECT_THROW(*hTransform, NullHandleException);
 
 	gs.CreateObject(h);
 	EXPECT_TRUE(h);
@@ -58,11 +58,12 @@ TEST(GameState, TestScene)
 {
     using namespace idk;
     INIT_CORE();
-    auto scene0 = Core::GetResourceManager().Create<Scene>(); scene0->LoadFromResourcePath();
-	auto scene1 = Core::GetResourceManager().Create<Scene>(); scene1->LoadFromResourcePath();
-	auto scene2 = Core::GetResourceManager().Create<Scene>(); scene2->LoadFromResourcePath();
+    auto scene0 = Core::GetResourceManager().LoaderEmplaceResource<Scene>(0); scene0->LoadFromResourcePath();
+	auto scene1 = Core::GetResourceManager().LoaderEmplaceResource<Scene>(1); scene1->LoadFromResourcePath();
+	auto scene2 = Core::GetResourceManager().LoaderEmplaceResource<Scene>(2); scene2->LoadFromResourcePath();
 	EXPECT_TRUE(scene0);
 	EXPECT_TRUE(scene1);
+	EXPECT_TRUE(scene2);
 	
 	const auto create_in_scene0 = 10;
 	for (int i = 0; i < create_in_scene0; ++i)

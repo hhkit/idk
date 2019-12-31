@@ -20,6 +20,22 @@ namespace idk
 		return retval;
 	}
 
+	template<typename T, unsigned D>
+	constexpr tmat<T, D, D> prescale(const tmat<T, D, D>& mat, const tvec<T, D>& scale)
+	{
+		auto retval = mat;
+		return prescale(retval, scale);
+	}
+
+	template<typename T, unsigned D>
+	constexpr tmat<T, D, D>& prescale(tmat<T, D, D>& mat, const tvec<T, D>& scale)
+	{
+		for (auto& col : mat)
+			col *= scale;
+		return mat;
+	}
+
+
 	template<typename T>
 	tmat<T, 4, 4> rotate(const tvec<T, 3> & axis, trad<T> angle)
 	{
@@ -53,6 +69,20 @@ namespace idk
 		auto retval = tmat<T, D + 1, D + 1>();
 		retval[D] = tvec<T, D + 1>{ translate_vec, 1.f };
 		return retval;
+	}
+
+	template<typename T, unsigned D>
+	constexpr tmat<T, D, D> translate(const tmat<T, D, D>& mat, const tvec<T, D - 1>& translate)
+	{
+		auto retval = mat;
+		return translate(retval);
+	}
+
+	template<typename T, unsigned D>
+	constexpr tmat<T, D, D>& translate(tmat<T, D, D>& mat, const tvec<T, D - 1>& translate)
+	{
+		mat[D - 1] += tvec<T, D>{translate, 0};
+		return mat;
 	}
 
 	template<typename T>

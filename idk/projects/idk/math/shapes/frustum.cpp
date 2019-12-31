@@ -18,7 +18,7 @@ namespace idk
 	{
 		for (auto& side : sides)
 		{
-			const float dist_to_point = side.normal.dot(s.center) + side.dist;
+			const float dist_to_point = vec4{ side.normal, 0 }.dot(vec4{ s.center, 0 }) + side.dist;
 			if (dist_to_point > s.radius)
 			{
 				return false;
