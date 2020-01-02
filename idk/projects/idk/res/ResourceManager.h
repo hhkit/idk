@@ -151,6 +151,7 @@ namespace idk
 		template<typename Res> ResourceControlBlock<Res>* GetControlBlock(RscHandle<Res> handle);
 
 		IFileLoader* GetLoader(string_view extension);
+		MetaBundle GetMeta(PathHandle path_to_file);
 
 		template<typename T> friend struct detail::ResourceManager_detail;
 		template<typename T> friend struct detail::CompiledAssetHelper_detail;

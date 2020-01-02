@@ -3,6 +3,7 @@
 #include <audio/AudioClip.h>
 #include <anim/Animation.h>
 #include <anim/Skeleton.h>
+#include <scene/Scene.h>
 #include <gfx/Mesh.h>
 #include <gfx/Material.h>
 #include <gfx/MaterialInstance.h>

@@ -200,6 +200,14 @@ namespace idk
 		return itr->second.get();
 	}
 
+	MetaBundle ResourceManager::GetMeta(PathHandle path_to_file)
+	{
+		auto meta = PathHandle{ string{path_to_file.GetFullPath()} +".meta" };
+		auto bundlestream = meta.Open(FS_PERMISSIONS::READ);
+		auto res = parse_text<MetaBundle>(stringify(bundlestream));
+		return res ? *res : MetaBundle{};
+	}
+
 	ResourceManager& ResourceManager::Instance() noexcept
 	{
 		return *instance;
@@ -283,12 +291,22 @@ namespace idk
 
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
 	{
-		auto meta = PathHandle{ string{path.GetFullPath()} +".meta" };
-		auto bundle = [&]() {
-			auto bundlestream = meta.Open(FS_PERMISSIONS::READ);
-			auto res = parse_text<MetaBundle>(stringify(bundlestream));
-			return res ? *res : MetaBundle{};
+		if (!reload_resource)
+		{
+			if (auto itr = _loaded_files.find(path.GetMountPath()); itr != _loaded_files.end())
+				return itr->second.bundle;
+		}
+
+		
+
+		auto file_is_updated = [&]() -> bool
+		{
+			auto file_last_write = path.GetLastWriteTime();
+			auto meta = PathHandle{ string{path.GetFullPath()} +".meta" };
+			return meta ? meta.GetLastWriteTime() <= file_last_write : true;
 		}();
+
+		auto old_bundle = GetMeta(path);
 
 		auto ext = path.GetExtension();
 		if (ext == ".meta")
@@ -299,21 +317,41 @@ namespace idk
 		{
 			if (path.IsFile())
 			{
-				auto wrap = [](string_view str) -> string
+				// call compiler
+				if (file_is_updated)
 				{
-					return '\"' + string{ str } +'\"';
-				};
-				auto infile = wrap(path.GetFullPath());
-				auto outdir= wrap(PathHandle{ "/build" }.GetFullPath());
-				const char* exec[] = { infile.data(), outdir.data() };
-				Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, true);
+					auto wrap = [](string_view str) -> string
+					{
+						return '\"' + string{ str } +'\"';
+					};
+					auto infile = wrap(path.GetFullPath());
+					auto outdir = wrap(PathHandle{ "/build" }.GetFullPath());
+					const char* exec[] = { infile.data(), outdir.data() };
+					Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, true);
+				}
+
+				// check compiled results
+				auto new_bundle = GetMeta(path);
+				if (new_bundle)
+				{
+					ResourceBundle resource_bundle;
+					for (auto& elem : new_bundle.metadatas)
+					{
+						GenericResourceHandle{ elem.t_hash, elem.guid }.visit([&](auto& handle)
+						{
+							resource_bundle.Add(handle);
+						});
+					}
+					return resource_bundle;
+				}
 			}
-			return {};
 		}
 		else
 		{
-			return loader->LoadFile(path, bundle);
+			auto new_bundle = loader->LoadFile(path, old_bundle);
+			return new_bundle;
 		}
+		return {};
 	}
 
 	void ResourceManager::LoadCompiledAsset(PathHandle path)

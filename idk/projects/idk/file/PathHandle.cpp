@@ -330,6 +330,13 @@ namespace idk
 		return _is_regular_file ? vfs.getFile(_key)._change_status : vfs.getDir(_key)._change_status;
 	}
 
+	system_time_point PathHandle::GetLastWriteTime() const
+	{
+		auto& vfs = Core::GetSystem<FileSystem>();
+		auto path = std::filesystem::path{ GetFullPath() };
+		return std::filesystem::last_write_time(path);
+	}
+
 #pragma endregion General Bool Checks
 
 #pragma region Helper Bool Checks
