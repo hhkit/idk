@@ -77,6 +77,7 @@
     <ClInclude Include="common\LayerMask.h" />
     <ClInclude Include="gfx\TextAlignment.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
+    <ClInclude Include="ds\index_span.h" />
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
@@ -484,6 +485,7 @@
     <None Include="ds\slow_tree.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />
+    <None Include="ds\index_span.inl" />
     <None Include="math\color.inl" />
     <None Include="math\comparable.inl" />
     <None Include="math\linear.inl" />

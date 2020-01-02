@@ -241,6 +241,9 @@
     <ClInclude Include="RenderTask.h">
       <Filter>render</Filter>
     </ClInclude>
+    <ClInclude Include="topological_sort.h">
+      <Filter>render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

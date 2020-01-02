@@ -942,6 +942,9 @@
     <ClInclude Include="ReflectReg_Resources.h" />
     <ClInclude Include="ReflectReg_Common.h" />
     <ClInclude Include="ReflectReg_GfxComponents.h" />
+    <ClInclude Include="ds\index_span.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1563,6 +1566,9 @@
       <Filter>res</Filter>
     </None>
     <None Include="res\CompiledAssetLoader.inl" />
+    <None Include="ds\index_span.inl">
+      <Filter>ds</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

@@ -4,6 +4,7 @@
 #include <gfx/pipeline_config.h>
 #include <vkn/utils/Flags.h>
 #include <ds/ranged_for.inl>
+#include <ds/index_span.h>
 #include <stack>
 #include <queue>
 namespace idk::vkn
@@ -129,10 +130,6 @@ namespace idk::vkn
 
 	struct Shaders {};
 
-	struct index_span
-	{
-		size_t begin = 0, end = 0;
-	};
 	struct AttachmentDescription
 	{
 		string_view name;
@@ -264,8 +261,8 @@ namespace idk::vkn
 		index_span output_resources;
 		index_span modified_resources;
 
-		auto GetInputSpan()const { return GetSpan(input_resources, *buffer); }
-		auto GetOutputSpan()const { return GetSpan(output_resources, *buffer); }
+		auto GetInputSpan()const { return input_resources.to_span(*buffer); }
+		auto GetOutputSpan()const { return output_resources.to_span(*buffer); }
 
 		bool resource_present(index_span span, FrameGraphResource rsc)const
 		{
@@ -517,7 +514,7 @@ namespace idk::vkn
 		};
 		for (auto& [id, idx_span] : tmp.in_nodes)
 		{
-			result.in_nodes.emplace(id, GetSpan(idx_span, tmp.buffer->resources));
+			result.in_nodes.emplace(id, idx_span.to_span(tmp.buffer->resources ));
 		}
 		tmp.in_nodes.clear();
 		return result;
@@ -652,7 +649,7 @@ namespace idk::vkn
 		//Maybe do some tuple get thing based on the pre-registered context?
 		using Context_t = FrameGraphDetail::Context_t;
 		template<typename T>
-		using ExecFunc = std::function<void(T&, Context_t context)>;
+		using ExecFunc = function<void(T&, Context_t context)>;
 
 
 		template<typename T>//,...Args
