@@ -202,7 +202,7 @@ namespace idk
 
 	MetaBundle ResourceManager::GetMeta(PathHandle path_to_file)
 	{
-		auto meta = PathHandle{ string{path_to_file.GetFullPath()} +".meta" };
+		auto meta = PathHandle{ string{path_to_file.GetMountPath()} +".meta" };
 		auto bundlestream = meta.Open(FS_PERMISSIONS::READ);
 		auto res = parse_text<MetaBundle>(stringify(bundlestream));
 		return res ? *res : MetaBundle{};
@@ -297,19 +297,24 @@ namespace idk
 				return itr->second.bundle;
 		}
 
-		
-
-		auto file_is_updated = [&]() -> bool
+		auto old_bundle = GetMeta(path);
+		auto last_compiled_file_id = [&]() -> long long
 		{
-			auto file_last_write = path.GetLastWriteTime();
-			auto meta = PathHandle{ string{path.GetFullPath()} +".meta" };
-			return meta ? meta.GetLastWriteTime() <= file_last_write : true;
+			auto p = PathHandle{ string{ path.GetMountPath() } +".time" };
+			if (p)
+			{
+				auto stream = p.Open(FS_PERMISSIONS::READ, true);
+				if (stream)
+					return *parse_binary<long long>(binarify(stream));
+			}
+			
+			return 0;
 		}();
 
-		auto old_bundle = GetMeta(path);
+		auto file_is_updated = last_compiled_file_id != path.GetLastWriteTime().time_since_epoch().count();
 
 		auto ext = path.GetExtension();
-		if (ext == ".meta")
+		if (ext == ".meta" || ext == ".time")
 			return {};
 
 		auto* loader = GetLoader(ext);
