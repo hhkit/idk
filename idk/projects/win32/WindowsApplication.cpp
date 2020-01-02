@@ -64,6 +64,8 @@ namespace idk::win
 		}
 
 	}
+#pragma optimize ("", off)
+
 	void Windows::Exec(string_view path, span<const char*> argv, bool wait)
 	{
 		vector<const char*> args{ path.data() };
@@ -73,6 +75,7 @@ namespace idk::win
 
 		_spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
 	}
+#pragma optimize ("", on)
 	int Windows::GetReturnVal()
 	{
 		return retval;

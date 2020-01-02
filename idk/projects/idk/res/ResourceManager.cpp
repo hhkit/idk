@@ -10,6 +10,7 @@
 #include <res/SaveableResourceLoader.inl>
 #include <res/CompiledAssets.h>
 #include <res/CompiledAssetLoader.inl>
+#include <app/Application.h>
 
 #include <IncludeResources.h>
 #include <reflect/reflect.inl>
@@ -282,83 +283,37 @@ namespace idk
 
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
 	{
-		if (!path)
-		{
-			LOG_WARNING_TO(LogPool::SYS, "Unmounted path.");
-			return ResourceLoadError::FileDoesNotExist;
-		}
+		auto meta = PathHandle{ string{path.GetFullPath()} +".meta" };
+		auto bundle = [&]() {
+			auto bundlestream = meta.Open(FS_PERMISSIONS::READ);
+			auto res = parse_text<MetaBundle>(stringify(bundlestream));
+			return res ? *res : MetaBundle{};
+		}();
 
-		auto* loader = GetLoader(path.GetExtension());
+		auto ext = path.GetExtension();
+		if (ext == ".meta")
+			return {};
+
+		auto* loader = GetLoader(ext);
 		if (loader == nullptr)
 		{
-			LOG_WARNING_TO(LogPool::SYS, "Extension %s not registered. ", path.GetExtension().data());
-			return ResourceLoadError::ExtensionNotRegistered;
-		}
-
-		LOG_TO(LogPool::SYS, "Loading %s. ", path.GetMountPath().data());
-
-		auto emplace_path = string{ path.GetMountPath() };
-
-		// unload the file if loaded
-		{
-			auto itr = _loaded_files.find(emplace_path);
-			if (itr != _loaded_files.end())
+			if (path.IsFile())
 			{
-				if (reload_resource)
+				auto wrap = [](string_view str) -> string
 				{
-					// release all resources attached to file
-					for (auto& elem : itr->second.bundle.GetAll())
-						std::visit([&](const auto& handle) { Release(handle); }, elem);
-					_loaded_files.erase(itr);
-				}
-				else
-					return itr->second.bundle;
+					return '\"' + string{ str } +'\"';
+				};
+				auto infile = wrap(path.GetFullPath());
+				auto outdir= wrap(PathHandle{ "/build" }.GetFullPath());
+				const char* exec[] = { infile.data(), outdir.data() };
+				Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, true);
 			}
+			return {};
 		}
-
-		// Meta handling
-		auto meta_path = PathHandle{ string{path.GetMountPath()} +".meta" };
-
-		auto meta_bundle = MetaBundle{};
-		{	// try to create meta
-			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
-			auto metastr = stringify(metastream);
-			parse_text(metastr, meta_bundle);
-		}
-
-		// reload the file
-		auto bundle = loader->LoadFile(path, meta_bundle);
-
-		const auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
-		IDK_ASSERT(success);
-
-		auto new_meta = MetaBundle{};
-		for (auto& elem : bundle.GetAll())
-			std::visit([&](auto& handle) { new_meta.Add(handle);  }, elem);
-
-		if (new_meta != meta_bundle)
+		else
 		{
-			for (auto& elem : bundle.GetAll())
-				std::visit([](auto& handle) { 
-				if constexpr (has_tag_v<std::decay_t<decltype(handle)>, MetaTag>) 
-					handle->DirtyMeta(); }, 
-				elem);
+			return loader->LoadFile(path, bundle);
 		}
-
-		// set path
-		for (auto& elem : bundle.GetAll())
-			std::visit(
-				[&](const auto& handle) 
-				{
-					using Res = typename std::decay_t<decltype(handle)>::Resource;
-
-					auto* cb = GetControlBlock(handle);
-					IDK_ASSERT(cb);
-					cb->path   = emplace_path;
-				}
-			, elem);
-
-		return bundle;
 	}
 
 	void ResourceManager::LoadCompiledAsset(PathHandle path)

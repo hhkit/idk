@@ -119,9 +119,9 @@ namespace idk
 		default:
 			break;
 		}
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
+		//Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
+        //Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
+        //Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
         Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetResourceManager().RegisterFactory<GraphFactory>();
