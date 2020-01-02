@@ -707,7 +707,7 @@ namespace idk::vkn
 		T& addRenderPass(string_view name,CtorArgs&&...args)
 		{
 			graph_builder.BeginNode();
-			auto render_pass = std::make_unique<T>(graph_builder,std::forward <CtorArgs(args)...);
+			auto render_pass = std::make_unique<T>(graph_builder,std::forward <CtorArgs>(args)...);
 			auto& node =StoreNode(graph_builder.EndNode());
 			T& obj = *render_pass;
 			render_passes.emplace(node.id,std::move(render_pass));
