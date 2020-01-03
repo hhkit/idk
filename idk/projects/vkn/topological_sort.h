@@ -2,7 +2,9 @@
 #include <idk.h>
 #include <ds/index_span.h>
 namespace idk
-{
+{   namespace graph_theory
+    {
+
     struct IntermediateGraph
     {
         using index_t = size_t;
@@ -10,7 +12,7 @@ namespace idk
         //Outgoing edges
         vector<index_span> adjacency_list;
         vector<index_t> adjacency_buffer;
-        IntermediateGraph(size_t num_nodes) :in_list(num_nodes), adjacency_list(num_nodes){}
+        IntermediateGraph(size_t num_nodes) :in_list(num_nodes), adjacency_list(num_nodes) {}
         void ClearAdjacencyList()
         {
             adjacency_list.clear();
@@ -53,9 +55,8 @@ namespace idk
         return o << " }";
     }
     */
-    namespace graph_theory
-    {
-        //returns a pair of vector of indices and a boolean to see if it succeeded(failure means it's cyclic)
+    //Conducts a topological sort on the graph so that all nodes that lead into any particular node have an index larger than the particular node.
+    //returns a pair of vector of indices and a boolean to see if it succeeded(failure means it's cyclic)
         auto KahnsAlgorithm(IntermediateGraph graph)
         {
             auto in_list = std::move(graph.in_list);
