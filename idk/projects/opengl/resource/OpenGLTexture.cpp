@@ -6,13 +6,8 @@
 namespace idk::ogl
 {
 	OpenGLTexture::OpenGLTexture()
+		: OpenGLTexture{ false }
 	{
-		glGenTextures(1, &_id);
-		glBindTexture(GL_TEXTURE_2D, _id);
-		
-		UpdateFilter(meta.filter_mode);
-		UpdateUV(meta.uv_mode);
-		Buffer(nullptr, _size);
 	}
 
 	OpenGLTexture::OpenGLTexture(const bool& compressed)
@@ -22,14 +17,14 @@ namespace idk::ogl
 
 		if (compressed)
 		{
-			UpdateFilter(meta.filter_mode,true);
-			UpdateUV(meta.uv_mode);
+			UpdateFilter(FilterMode::Linear,true);
+			UpdateUV(UVMode::Clamp);
 			_isCompressedTexture = compressed;
 		}
 		else
 		{
-			UpdateFilter(meta.filter_mode);
-			UpdateUV(meta.uv_mode);
+			UpdateFilter(FilterMode::Linear);
+			UpdateUV(UVMode::Clamp);
 			Buffer(nullptr, _size);
 		}
 	}

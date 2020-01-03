@@ -312,7 +312,7 @@ namespace idk::vkn
 			opt.filter_mode = info.filter_mode;
 			tci.internal_format = MapFormat(opt.internal_format);
 			loader.LoadTexture(t, allocator, fence, opt, tci, {});
-			t.SetMeta(opt);
+			t.GetMeta() = opt;
 		}
 		out->own_buffer = !preset;
 		out->buffer = tex;

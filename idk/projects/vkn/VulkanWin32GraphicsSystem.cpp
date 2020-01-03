@@ -193,9 +193,8 @@ namespace idk::vkn
 
 		auto& brdf_texture =  _pimpl->BrdfLookupTable = Core::GetResourceManager().Create<Texture>();
 
-		auto m = brdf_texture->GetMeta();
+		auto& m = brdf_texture->GetMeta();
 		m.internal_format = ColorFormat::RGF_16;
-		brdf_texture->SetMeta(m);
 		brdf_texture->Size(ivec2{ 512 });
 
 		TextureLoader loader;

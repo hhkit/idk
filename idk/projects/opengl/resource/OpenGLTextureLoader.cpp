@@ -108,7 +108,7 @@ namespace idk
 			: Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>();
 
 		if (meta)
-			texture_handle->SetMeta(*meta->GetMeta<Texture>());
+			texture_handle->GetMeta() = *meta->GetMeta<Texture>();
 		
 		ivec2 size{};
 		int channels{};
@@ -356,7 +356,7 @@ namespace idk
 
 		//Store the path of the image
 
-		texture_handle->SetMeta(v);
+		texture_handle->GetMeta() = v;
 		//Unbind the image
 		//temp_t->Unbind();
 		glBindTexture(GL_TEXTURE_2D, 0);

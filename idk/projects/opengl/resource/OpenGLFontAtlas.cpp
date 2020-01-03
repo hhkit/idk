@@ -6,36 +6,27 @@
 namespace idk::ogl {
 
 	OpenGLFontAtlas::OpenGLFontAtlas()
+		: OpenGLFontAtlas{false}
 	{
-		glGenTextures(1, &_id);
-		//*texture = OpenGLTexture{ _id, _size };
-		glBindTexture(GL_TEXTURE_2D, _id);
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		UpdateFilter(meta.filter_mode);
-		UpdateUV(meta.uv_mode);
-		Buffer(nullptr, _size);
 	}
 
 	OpenGLFontAtlas::OpenGLFontAtlas(const bool& compressed)
+		: _isCompressedTexture {compressed}
 	{
 		glGenTextures(1, &_id);
-		//*texture = OpenGLTexture{ _id, _size };
 		glBindTexture(GL_TEXTURE_2D, _id);
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		if (compressed)
 		{
-			UpdateFilter(meta.filter_mode, true);
-			UpdateUV(meta.uv_mode);
-			_isCompressedTexture = compressed;
+			UpdateFilter(FilterMode::Linear, true);
+			UpdateUV(UVMode::ClampToBorder);
 		}
 		else
 		{
-			UpdateFilter(meta.filter_mode);
-			UpdateUV(meta.uv_mode);
-			Buffer(nullptr, _size);
+			UpdateFilter(FilterMode::Linear);
+			UpdateUV(UVMode::ClampToBorder);
 		}
+		Buffer(nullptr, _size);
 	}
 
 	OpenGLFontAtlas::OpenGLFontAtlas(OpenGLFontAtlas&& rhs)
@@ -65,21 +56,18 @@ namespace idk::ogl {
 	void OpenGLFontAtlas::Bind()
 	{
 		glBindTexture(GL_TEXTURE_2D, _id);
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	}
 
 	void OpenGLFontAtlas::BindToUnit(GLuint texture_unit)
 	{
 		glActiveTexture(GL_TEXTURE0 + texture_unit);
 		glBindTexture(GL_TEXTURE_2D, _id);
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	}
 
 	void OpenGLFontAtlas::Buffer(void* data, ivec2 size, InputChannels format, ColorFormat internalFormat, const unsigned& mipmap_size, const float& imgSize)
 	{
 		_size = size;
 		glBindTexture(GL_TEXTURE_2D, _id);
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		if (internalFormat == ColorFormat::DEPTH_COMPONENT)
 		{
@@ -94,10 +82,7 @@ namespace idk::ogl {
 		else
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, detail::ogl_GraphicsFormat::ToColor(internalFormat), size.x, size.y, 0, detail::ogl_GraphicsFormat::ToInputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
-			//glGenerateMipmap(GL_TEXTURE_2D);
 		}
-
-		//glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		// TODO: fix internal format
@@ -117,6 +102,7 @@ namespace idk::ogl {
 		return r_cast<void*>(_id);
 	}
 
+	/*
 	void OpenGLFontAtlas::OnMetaUpdate(const FontAtlasMeta& font_meta)
 	{
 		if (_isCompressedTexture)
@@ -131,12 +117,12 @@ namespace idk::ogl {
 			Buffer(nullptr, Size(), font_meta.format, font_meta.internal_format);
 		}
 	}
+	*/
 
 	void OpenGLFontAtlas::UpdateUV(UVMode uv_mode)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
-		GL_CHECK();
 	}
 
 	void OpenGLFontAtlas::UpdateFilter(FilterMode f_mode, const bool& isMipMap)
@@ -146,7 +132,6 @@ namespace idk::ogl {
 		else
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, detail::ogl_GraphicsFormat::ToFilter(f_mode));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, detail::ogl_GraphicsFormat::ToFilter(f_mode));
-		GL_CHECK();
 	}
 
 	RscHandle<Texture> OpenGLFontAtlas::Tex() const noexcept

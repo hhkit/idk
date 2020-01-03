@@ -165,7 +165,7 @@ namespace idk::ogl
 			if (mm.internal_format != ColorFormat::RGBAF_16)
 			{
 				mm.internal_format = ColorFormat::RGBAF_16;
-				tex.as<OpenGLTexture>().SetMeta(mm);
+				tex.as<OpenGLTexture>().GetMeta() = mm;
 			}
 			tex_.Bind();
 			GL_CHECK();
@@ -248,7 +248,7 @@ namespace idk::ogl
 			if (mm.internal_format != ColorFormat::RGBAF_16)
 			{
 				mm.internal_format = ColorFormat::RGBAF_16;
-				tex.SetMeta(mm);
+				tex.GetMeta() = mm;
 			}
 			tex.Bind();
 			auto attachment_index = GL_COLOR_ATTACHMENT0 + i;

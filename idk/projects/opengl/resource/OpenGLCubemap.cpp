@@ -26,8 +26,7 @@ namespace idk::ogl
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
 
-		meta.uv_mode = UVMode::Clamp;
-		UpdateUV(meta.uv_mode);
+		UpdateUV(UVMode::Clamp);
 		
 		for (unsigned int i = 0; i < 6; i++)
 			Buffer(i,nullptr, _size);
@@ -132,10 +131,6 @@ namespace idk::ogl
 		return span<const GLuint>{_convoluted_id};
 	}
 
-	void OpenGLCubemap::OnMetaUpdate(const CubeMapMeta& tex_meta)
-	{
-		UpdateUV(tex_meta.uv_mode);
-	}
 	void OpenGLCubemap::UpdateUV(UVMode uv_mode)
 	{
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));

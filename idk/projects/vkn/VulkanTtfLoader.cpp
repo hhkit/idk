@@ -77,7 +77,7 @@ namespace idk::vkn
 			new_tm = fontAtlas->GetMeta();
 		}
 
-		fontAtlas->SetMeta(new_tm);
+		fontAtlas->GetMeta() = new_tm;
 
 		if (FT_Set_Pixel_Sizes(face, 0, new_tm.font_size))
 		{

@@ -84,7 +84,7 @@ namespace idk::ogl
 		brdf_texture->Bind();
 		auto m =brdf_texture->GetMeta();
 		m.internal_format = ColorFormat::RGF_16;
-		brdf_texture->SetMeta(m);
+		brdf_texture->GetMeta() = m;
 		brdf_texture->Size(ivec2{ 512 });
 
 		fb_man.cBufferPickingTexture = Core::GetResourceManager().Create<OpenGLTexture>();
@@ -92,8 +92,7 @@ namespace idk::ogl
 		auto pickMeta = fb_man.cBufferPickingTexture->GetMeta();
 		pickMeta.internal_format = ColorFormat::RUI_32;
 		pickMeta.format = InputChannels::RGBA;
-		fb_man.cBufferPickingTexture->SetMeta(pickMeta);
-		//fb_man.cBufferPickingTexture->Buffer(nullptr, main_buffer->GetMeta().size, pickMeta.format, pickMeta.internal_format);
+		fb_man.cBufferPickingTexture->GetMeta() = pickMeta;
 		fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
 
 		FrameBufferBuilder builder;
