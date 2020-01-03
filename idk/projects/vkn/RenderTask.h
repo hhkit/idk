@@ -7,8 +7,11 @@
 #include <ds/index_span.h>
 #include <stack>
 #include <queue>
+#include <vkn/topological_sort.h>
 namespace idk::vkn
 {
+	using VknRenderPass = int;
+	using VknFrameBuffer = int;
 	template<typename Node, typename Key, typename Policy>
 	struct TraversePolicy
 	{
@@ -293,6 +296,11 @@ namespace idk::vkn
 		using actual_rsc_index_t = size_t;
 		using actual_resource_t = variant<Texture>;
 
+		//Instantiates an actual resource using base's configuration and associate it with unique_id
+		void Instantiate(size_t unique_id, fgr_id base);
+
+		//Associate fgr_id with unique_id
+		void Alias(size_t unique_id, fgr_id id);
 
 		FrameGraphResource CreateTexture(AttachmentDescription dsc)
 		{
@@ -431,14 +439,34 @@ namespace idk::vkn
 	struct BaseRenderPass
 	{
 		//BaseRenderPass(FrameGraphBuilder&,...); //<-- First parameter required, will be supplemented when created.
+
+		VknRenderPass  render_pass;
+		VknFrameBuffer frame_buffer;
+
+		//Run to Acquire resources and transition nodes.
+		void PreExecute(const FrameGraphNode& node, TransientResourceManager& resource_manager, FrameGraphDetail::Context_t context)
+		{
+			/*
+			for (auto& input_resource : node.GetInputSpan())
+			{
+				resource_manager.PrepareRead(input_resource,context);
+			}
+			for (auto& output_resource : node.GetOutputSpan())
+			{
+				resource_manager.PrepareWrite(output_resource, context);
+			}*/
+			//BeginRenderPass(render_pass,context);
+		}
 		virtual void Execute(FrameGraphDetail::Context_t context) = 0;
+		void PostExecute(const FrameGraphNode& node, TransientResourceManager& resource_manager, FrameGraphDetail::Context_t context);
 		virtual ~BaseRenderPass() = default;
 	};
 
 	//Job: Do deallocation, reuse resources where possible. (Basically a pool)
 	struct TransientResourceManager
 	{
-		
+		void PrepareRead(const FrameGraphResource& rsc, FrameGraphDetail::Context_t context);
+		void PrepareWrite(const FrameGraphResource& rsc, FrameGraphDetail::Context_t context);
 	};
 
 	template<typename T>
@@ -487,6 +515,79 @@ namespace idk::vkn
 		{
 			GetOrCreate(rsc_id).start = node_id;
 		}
+
+		using order_t = size_t;
+		using actual_resource_id = size_t;
+		struct actual_resource_t
+		{
+			actual_resource_id id;
+			fgr_id base_rsc;
+			order_t start, end;
+		};
+
+		void ExtendLifetime(fgr_id rsc_id, order_t order)
+		{
+			auto& node = GetOrCreate(rsc_id);
+			node.start = std::min(node.start, order);
+			node.end = std::max(node.end, order);
+		}
+		template<typename Func>
+		void CombineAllLifetimes(Func&& func)
+		{
+			for (auto& [id, index] : map)
+			{
+				auto& lifetime = rsc_lifetimes[index];
+				CombineLifetimes(id, lifetime.start, lifetime.end, func);
+			}
+		}
+
+		span<const actual_resource_t> GetActualResources()const
+		{
+			return span<const actual_resource_t>{concrete_resources.data(), concrete_resources.data() + concrete_resources.size()};
+		}
+		const hash_table<fgr_id, actual_resource_id> Aliases()const
+		{
+			return resource_alias;
+		}
+
+	private:
+
+		template<typename Func>
+		void CombineLifetimes(fgr_id id, order_t start, order_t end, Func&& is_compatible)
+		{
+			for (auto& concrete_resource : concrete_resources)
+			{
+				if (!overlap_lifetime(concrete_resource, start, end) && is_compatible(id, concrete_resource))
+				{
+					Alias(id, start, end, concrete_resource);
+					return;
+				}
+			}
+			CreateResource(id, start, end);
+		}
+
+		bool overlap_lifetime(const actual_resource_t& rsc, order_t start, order_t end)
+		{
+			return !(rsc.end<start & rsc.start>end);
+		}
+		void Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc)
+		{
+			resource_alias[id] = rsc.id;
+			rsc.start = std::min(start, rsc.start);
+			rsc.end = std::max(end, rsc.end);
+		}
+		actual_resource_id NewActualRscId()
+		{
+			return concrete_resources.size();
+		}
+		void CreateResource(fgr_id id, order_t start, order_t end)
+		{
+			auto& rsc = concrete_resources.emplace_back(actual_resource_t{ NewActualRscId(),id,start,end });
+			Alias(id, start, end, rsc);
+		}
+
+		vector<actual_resource_t> concrete_resources;
+		hash_table<fgr_id, actual_resource_id> resource_alias;
 	};
 
 
@@ -504,7 +605,28 @@ namespace idk::vkn
 	{
 		hash_table<fgr_id, fg_id>  src_node;
 		hash_table<fgr_id, fg_id>  end_node;
-		hash_table<fg_id, span<const FrameGraphResource>> in_nodes;
+		hash_table<fg_id, span<const FrameGraphResource>> in_rsc_nodes;
+		hash_table<fg_id, index_span> in_nodes;
+
+		auto get_input_nodes(fg_id id)const
+		{
+			std::optional<span<const fg_id>> result{};
+			auto itr = in_nodes.find(id);
+			if (itr != in_nodes.end())
+				result =itr->second.to_span(in_buffer);
+			return result;
+		}
+		
+		template<typename itr>
+		void set_input_nodes(fg_id dst, itr begin, itr end)
+		{
+			auto& span = in_nodes[dst];
+			span.begin = in_buffer.size();
+			in_buffer.resize(in_buffer.size() + std::distance(end, begin));
+			std::copy(begin, end, in_buffer.begin() + span.begin);
+			span.end = in_buffer.size();
+		}
+		vector<fg_id> in_buffer;
 	};
 	ActualGraph ConvertTempGraph(TempGraph&& tmp)
 	{
@@ -512,9 +634,15 @@ namespace idk::vkn
 			 .src_node = std::move(tmp.src_node)
 			,.end_node = std::move(tmp.end_node)
 		};
+		vector<fg_id> node_accum;
 		for (auto& [id, idx_span] : tmp.in_nodes)
 		{
-			result.in_nodes.emplace(id, idx_span.to_span(tmp.buffer->resources ));
+			auto rsc_span = idx_span.to_span(tmp.buffer->resources);
+			result.in_rsc_nodes.emplace(id, rsc_span);
+			node_accum.clear();
+			node_accum.resize(rsc_span.size());
+			std::transform(rsc_span.begin(), rsc_span.end(), node_accum.begin(), [](auto& rsc) {return rsc.id; });
+			result.set_input_nodes(id, node_accum.begin(), node_accum.end());
 		}
 		tmp.in_nodes.clear();
 		return result;
@@ -530,7 +658,7 @@ namespace idk::vkn
 		//Returns true to continue getting deeper edges, or false to not explore the node any further.
 		bool Visit(const Node& node)
 		{
-			graph->in_nodes.emplace(node.id, node.GetInputSpan());
+			graph->in_rsc_nodes.emplace(node.id, node.GetInputSpan());
 			for (auto&& written_rsc : node.GetOutputSpan())
 			{
 				graph->src_node.emplace(written_rsc.id,node);
@@ -602,7 +730,7 @@ namespace idk::vkn
 		{
 			manager.EndLifetime(rsc_id, node_id);
 		}
-		for (auto& [node_id, resources] : graph.in_nodes)
+		for (auto& [node_id, resources] : graph.in_rsc_nodes)
 		{
 			for (auto& rsc : resources)
 			{
@@ -621,8 +749,8 @@ namespace idk::vkn
 		for (auto& node : nodes)
 		{
 			auto node_id = node.id;
-			auto in_itr = graph.in_nodes.find(node_id);
-			if (in_itr != graph.in_nodes.end())
+			auto in_itr = graph.in_rsc_nodes.find(node_id);
+			if (in_itr != graph.in_rsc_nodes.end())
 			{
 				for (auto& in_rsc : in_itr->second)
 				{
@@ -724,6 +852,56 @@ namespace idk::vkn
 			return stored_node;
 		}
 
+
+		void ComputeLifetimes(ResourceLifetimeManager& manager)
+		{
+			auto& exec_order = execution_order;
+			auto& graph_nodes = nodes;
+
+			hash_table<fg_id,size_t> fat_order;
+			//Because of the sorting of the execution order, 
+			//we can count on having ordered all dependencies before encountering the current node.
+			size_t max_order = 0;
+			for (auto index : exec_order)
+			{
+				auto& curr_node = graph_nodes[index];
+				size_t order = 0;
+				span<const FrameGraphNode> dep_nodes;
+				for (auto& dep_node : dep_nodes)
+				{
+					order = std::max(fat_order[dep_node.id], order);
+				}
+				order = order + 1;
+				fat_order[index] = order;
+				max_order = std::max(order,max_order);
+			}
+
+			for (auto index : exec_order)
+			{
+				auto& curr_node = graph_nodes[index];
+				for (auto& input_rsc : curr_node.GetInputSpan())
+				{
+					manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
+				}
+			}
+			//TODO: Create a function to check compatiblity between resources
+			manager.CombineAllLifetimes();
+		}
+
+		void CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm)
+		{
+			auto resource_templates = rlm.GetActualResources();
+			for (auto& resource_template : resource_templates)
+			{
+				rm.Instantiate(resource_template.id,resource_template.base_rsc);
+			}
+			auto& aliases = rlm.Aliases();
+			for (auto& [r_id, ar_id] : aliases)
+			{
+				rm.Alias(r_id, ar_id);
+			}
+		}
+
 		//Process nodes and cull away unnecessary nodes.
 		//Figure out dependencies and synchronization points
 		//Insert new nodes to help transit concrete resources to their corresponding virtual resources
@@ -731,8 +909,32 @@ namespace idk::vkn
 		void Compile()
 		{
 			auto graph = ConvertTempGraph(std::move(tmp_graph));
-			ComputeLifetimes(rsc_lifetime_mgr,graph);
-
+			graph_theory::IntermediateGraph dependency_graph{ nodes.size() };
+			hash_table<fg_id, size_t> id_to_indices;
+			for (size_t i = 0; i < nodes.size(); ++i)
+			{
+				id_to_indices[nodes[i].id] = i;
+			}
+			{
+				vector<size_t> index_buffer;
+				index_buffer.reserve(nodes.size());
+				for (auto& [id, index] : id_to_indices)
+				{
+					auto oid_adj_buffer = graph.get_input_nodes(id);
+					auto id_adj_buffer = *oid_adj_buffer;
+					auto& lookup_table = id_to_indices;
+					index_buffer.resize(id_adj_buffer.size());
+					std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&lookup_table](fg_id id) {return lookup_table.find(id)->second; });
+					dependency_graph.SetAdjacentNodes(index, index_buffer.begin(), index_buffer.end());
+				}
+				auto [sorted_order, success] = graph_theory::KahnsAlgorithm(dependency_graph);
+				IDK_ASSERT_MSG(success, "Cyclic dependency detected.");
+				//Maybe use copy_if to filter out useless nodes.
+				execution_order = std::move(sorted_order);
+			}
+			ComputeLifetimes(rsc_lifetime_mgr);
+			CreateConcreteResources(rsc_lifetime_mgr,this->graph_builder.rsc_manager);
+			CreateRenderPasses();
 		}
 
 		//using the resultant graph, allocate the concrete resources needed.
@@ -742,8 +944,25 @@ namespace idk::vkn
 		//Use the dependency graph to split the appropriate jobs into separate threads and sync those.
 		void Execute(Context_t context);
 
+		//Check if there's an existing renderpass that is compatible, reuse if compatible.
+		VknRenderPass  CreateRenderPass(span<const FrameGraphResource> input_rscs, span<const FrameGraphResource> output_rscs);
+		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const FrameGraphResource> input_rscs, span<const FrameGraphResource> output_rscs);
+
+		void CreateRenderPasses()
+		{
+			for (auto node_index : execution_order)
+			{
+				auto& node = nodes[node_index];
+				auto itr = render_passes.find(node.id);
+				auto& rp = *itr->second;
+				rp.render_pass = CreateRenderPass(node.GetInputSpan(),node.GetOutputSpan());
+				rp.frame_buffer = CreateFrameBuffer(rp.render_pass,node.GetInputSpan(), node.GetOutputSpan());
+			}
+		}
+
 		FrameGraphBuilder graph_builder;
 		vector<FrameGraphNode> nodes;
+		vector<size_t> execution_order;
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
 
 		TempGraph tmp_graph;
