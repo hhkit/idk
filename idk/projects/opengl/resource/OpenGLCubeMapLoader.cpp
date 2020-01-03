@@ -32,8 +32,10 @@ namespace idk
 		//auto texture_id = texture_handle->ID();
 
 		if (meta)
-			cubemap_handle->SetMeta(*meta->GetMeta<CubeMap>());
-
+		{
+			cubemap_handle->GetMeta() = *meta->GetMeta<CubeMap>();
+			cubemap_handle->DirtyMeta();
+		}
 		ivec2 size{};
 		int channels{};
 

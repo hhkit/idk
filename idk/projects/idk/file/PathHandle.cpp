@@ -332,7 +332,6 @@ namespace idk
 
 	system_time_point PathHandle::GetLastWriteTime() const
 	{
-		auto& vfs = Core::GetSystem<FileSystem>();
 		auto path = std::filesystem::path{ GetFullPath() };
 		return std::filesystem::last_write_time(path);
 	}

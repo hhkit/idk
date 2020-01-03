@@ -19,8 +19,7 @@ namespace idk {
 	};
 
 	class FontAtlas
-		: public Resource<FontAtlas>
-		, public MetaTag<FontAtlasMeta>
+		: public MetaResource<FontAtlas, FontAtlasMeta>
 	{
 	public:
 		static constexpr RscHandle<FontAtlas> defaults[FontDefault::count] =
@@ -53,6 +52,5 @@ namespace idk {
 
 	protected:
 		ivec2 _size{};
-		void OnMetaUpdate(const FontAtlasMeta&) override {};
 	};
 }

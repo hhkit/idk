@@ -75,6 +75,8 @@ namespace idk
 		{
 			control_block.resource = factory.Create();
 			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{itr->first};
+			if constexpr (has_tag_v<Res, MetaResource>)
+				control_block.userdata = std::make_shared<typename Res::Metadata>();
 			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
 		}
 
@@ -108,6 +110,8 @@ namespace idk
             if constexpr(has_tag_v<Res, Saveable>)
                 control_block.resource->Dirty();
 			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{ itr->first };
+			if constexpr (has_tag_v<Res, MetaResource>)
+				control_block.userdata = std::make_shared<typename Res::Metadata>();
 			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
 		}
 
@@ -278,6 +282,8 @@ namespace idk
 		{
 			control_block.resource = factory.Create();
 			control_block.resource->_handle = RscHandle<Res>{ itr->first };
+			if constexpr (has_tag_v<Res, MetaResource>)
+				control_block.userdata = std::make_shared<typename Res::Metadata>();
 			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
 		}
 
@@ -294,12 +300,14 @@ namespace idk
 	inline RscHandle<Res> ResourceManager::LoaderEmplaceResource(Guid guid, Args&& ...construction_args)
 	{
 		auto& table = GetTable<Res>();
-		auto& cb = table[guid]; // don't care just replace
+		auto& control_block = table[guid]; // don't care just replace
 
 		// attempt to put on other thread
 		{
-			cb.resource = std::make_unique<Res>(std::forward<Args>(construction_args)...);
-			cb.resource->_handle = RscHandle<typename Res::BaseResource>{ guid };
+			control_block.resource = std::make_unique<Res>(std::forward<Args>(construction_args)...);
+			control_block.resource->_handle = RscHandle<typename Res::BaseResource>{ guid };
+			if constexpr (has_tag_v<Res, MetaResource>)
+				control_block.userdata = std::make_shared<typename Res::Metadata>();
 			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{ guid });
 		}
 

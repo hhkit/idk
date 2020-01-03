@@ -19,8 +19,7 @@ namespace idk
 	};
 
 	class Texture
-		: public Resource<Texture>
-		, public MetaTag<TextureMeta>
+		: public MetaResource<Texture, TextureMeta>
 	{
 	public:
 		Texture() = default;

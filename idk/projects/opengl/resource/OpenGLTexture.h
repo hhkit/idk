@@ -26,7 +26,6 @@ namespace idk::ogl
 	private:
 		GLuint _id = 0;
 		bool _isCompressedTexture{false};
-		void OnMetaUpdate(const TextureMeta&);
 		void UpdateUV(UVMode);
 		void UpdateFilter(FilterMode, const bool& isMipMap = false);
 	};

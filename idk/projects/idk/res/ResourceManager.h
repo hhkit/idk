@@ -60,6 +60,8 @@ namespace idk
 		Error_DestinationExists
 	};
 
+	template<typename T, typename Meta> struct MetaResource;
+
 	class ResourceManager 
 		: public ISystem
 	{
@@ -114,6 +116,7 @@ namespace idk
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
 		template<typename FLoader, typename ... Args> FLoader& RegisterLoader (string_view ext, Args&& ... loader_construction_args);
 		template<typename ALoader>                    void RegisterAssetLoader();
+
 		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
 		template<typename Res>                        [[nodiscard]] RscHandle<Res> LoaderCreateResource(Guid);
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
@@ -155,14 +158,19 @@ namespace idk
 
 		template<typename T> friend struct detail::ResourceManager_detail;
 		template<typename T> friend struct detail::CompiledAssetHelper_detail;
+		template<typename T, typename Meta> friend struct MetaResource;
 	};
 
 	template<typename R> 
 	struct ResourceManager::ResourceControlBlock
 	{
-		bool          dirty    { false };
-		opt<string>   path     { std::nullopt };
-		shared_ptr<R> resource; // note: make atomic
+		bool             dirty    { false };
+		opt<string>      path     { std::nullopt };
+		shared_ptr<R>    resource; // note: make atomic
+
+		// meta data
+		shared_ptr<void> userdata; 
+		bool             dirty_meta { false };
 		
 		bool valid() const { return s_cast<bool>(resource); }
 	};
@@ -171,8 +179,5 @@ namespace idk
 	{
 		ResourceBundle bundle;
 		bool is_new { false };
-
-		bool resource_dirty() const;
-		bool meta_dirty()     const;
 	};
 }

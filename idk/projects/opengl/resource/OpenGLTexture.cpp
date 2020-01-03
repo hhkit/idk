@@ -113,27 +113,14 @@ namespace idk::ogl
 		return r_cast<void*>(_id);
 	}
 
-	void OpenGLTexture::OnMetaUpdate(const TextureMeta& tex_meta)
-	{
 
-		if (_isCompressedTexture)
-		{
-			UpdateFilter(meta.filter_mode,true);
-			UpdateUV(meta.uv_mode);
-		}
-		else
-		{
-			UpdateFilter(meta.filter_mode);
-			UpdateUV(meta.uv_mode);
-			Buffer(nullptr, Size(), tex_meta.format, tex_meta.internal_format);
-		}
-	}
 	void OpenGLTexture::UpdateUV(UVMode uv_mode)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
 		GL_CHECK();
 	}
+
 	void OpenGLTexture::UpdateFilter(FilterMode f_mode,const bool& isMipMap)
 	{
 		if(isMipMap)

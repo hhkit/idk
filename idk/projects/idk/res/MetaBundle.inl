@@ -11,7 +11,7 @@ namespace idk
 	{
 		if (h)
 		{
-			if constexpr (has_tag_v<T, MetaTag>)
+			if constexpr (has_tag_v<T, MetaResource>)
 				metadatas.emplace_back(SerializedMeta{ h.guid, string{h->Name()}, string{reflect::get_type<T>().name()}, serialize_text(reflect::dynamic{ h->GetMeta() }) });
 			else
 				metadatas.emplace_back(SerializedMeta{ h.guid, string{h->Name()}, string{reflect::get_type<T>().name()} });

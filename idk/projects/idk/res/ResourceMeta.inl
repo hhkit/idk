@@ -2,19 +2,20 @@
 #include <serialize/text.h>
 #include "res/ResourceMeta.h"
 #include <reflect/reflect.inl>
+#include <res/ResourceManager.inl>
 namespace idk
 {
-	template<typename Meta>
-	inline void MetaTag<Meta>::SetMeta(const Meta& inmeta)
+	template<typename Res, typename Meta>
+	inline Meta& MetaResource<Res, Meta>::GetMeta()
 	{
-		OnMetaUpdate(inmeta);
-		meta = inmeta;
-		_dirtymeta = true;
+		auto ptr = Core::GetResourceManager().GetControlBlock(this->GetHandle())->userdata.get();
+		return *static_cast<Meta*>(ptr);
 	}
-	template<typename Meta>
-	inline const Meta& MetaTag<Meta>::GetMeta() const
+
+	template<typename Res, typename Meta>
+	inline void MetaResource<Res, Meta>::DirtyMeta()
 	{
-		return meta;
+		Core::GetResourceManager().GetControlBlock(this->GetHandle())->dirty_meta = true;
 	}
 
 	template<typename Res, typename>

@@ -32,7 +32,6 @@ namespace idk::ogl
 	private:
 		GLuint _id = 0;
 		GLuint _convoluted_id[2]{};
-		void OnMetaUpdate(const CubeMapMeta&) override;
 		void UpdateUV(UVMode);
 	};
 }

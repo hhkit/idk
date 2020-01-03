@@ -35,9 +35,8 @@ namespace idk::ogl
 			tex->Size(size);
 		}
 		auto tex = Textures()[kDepthIndex];
-		auto tmeta = tex->GetMeta();
+		auto& tmeta = tex->GetMeta();
 		tmeta.internal_format = ColorFormat::DEPTH_COMPONENT;
-		tex->SetMeta(tmeta);
 		depthbuffer = s_cast<GLuint>(r_cast<intptr_t>(tex->ID()));
 		//glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
 		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);

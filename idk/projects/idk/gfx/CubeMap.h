@@ -15,8 +15,7 @@ namespace idk
 	};
 
 	class CubeMap
-		: public Resource<CubeMap>
-		, public MetaTag<CubeMapMeta>
+		: public MetaResource<CubeMap, CubeMapMeta>
 	{
 	public:
 		CubeMap() = default;

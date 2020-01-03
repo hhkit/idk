@@ -26,10 +26,6 @@
 	 *========================================================================*/
 #pragma region Specific Resources
 
-	REFLECT_BEGIN(idk::TestResource::Metadata, "TestMeta")
-	REFLECT_VARS(i, j)
-	REFLECT_END()
-
 	REFLECT_ENUM(idk::ColorFormat, "ColorFormat")
 	REFLECT_ENUM(idk::UVMode, "UVMode")
 	REFLECT_ENUM(idk::FilterMode, "FilterMode")
