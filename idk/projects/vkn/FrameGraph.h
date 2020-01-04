@@ -175,6 +175,10 @@ namespace idk::vkn
 	struct FrameGraph
 	{
 		//Maybe do some tuple get thing based on the pre-registered context?
+		//Holds:
+		// - A Command Buffer
+		// - A reference to the framegraphresourcemanager (to get resources)
+		// - Render Tasks
 		using Context_t = FrameGraphDetail::Context_t;
 		template<typename T>
 		using ExecFunc = function<void(T&, Context_t context)>;
@@ -244,6 +248,9 @@ namespace idk::vkn
 		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<fgr_id>> input_rscs, span<const std::optional<fgr_id>> output_rscs);
 
 		void CreateRenderPasses();
+
+		FrameGraphResourceManager& GetResourceManager();
+		const FrameGraphResourceManager& GetResourceManager()const ;
 
 		FrameGraphBuilder graph_builder;
 		vector<FrameGraphNode> nodes;

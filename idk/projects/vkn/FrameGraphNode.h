@@ -12,7 +12,8 @@ namespace idk::vkn
 
 		const vector<FrameGraphResource>* buffer;
 
-		index_span input_resources;
+		index_span input_resources; //The stuff that flow into the node here
+		index_span read_resources; //The stuff that will be used here (paired)
 		index_span output_resources;
 		index_span modified_resources;
 

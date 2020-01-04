@@ -104,6 +104,27 @@ namespace idk::vkn
 	{
 		CreateRenderPasses();
 	}
+	void FrameGraph::Execute(Context_t context)
+	{
+		auto& rsc_manager = GetResourceManager();
+		for (auto index : execution_order)
+		{
+			auto& node = nodes[index];
+			auto& rp = *render_passes[node.id];
+			//TODO: Thread this
+			{
+				//Transition all the resources that are gonna be read (and are not input attachments)
+				auto input_span = node.GetInputSpan();
+				for (auto& input : input_span)
+				{
+					rsc_manager.TransitionResource(input);
+				}
+				rp.PreExecute(node, context);
+				rp.Execute(context);
+				rp.PostExecute(node, context);
+			}
+		}
+	}
 	void FrameGraph::CreateRenderPasses()
 	{
 		for (auto node_index : execution_order)
@@ -116,6 +137,17 @@ namespace idk::vkn
 			rp.render_pass = CreateRenderPass(input_attachments, output_attachments);
 			rp.frame_buffer = CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments);
 		}
+	}
+
+	FrameGraphResourceManager& FrameGraph::GetResourceManager()
+	{
+		// TODO: insert return statement here
+		return graph_builder.rsc_manager;
+	}
+
+	const FrameGraphResourceManager& FrameGraph::GetResourceManager() const
+	{
+		return graph_builder.rsc_manager;
 	}
 
 }
