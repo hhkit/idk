@@ -124,9 +124,9 @@ void TestWriteWatch(idk::FileSystem& vfs)
 		of << "Test Write" << std::endl;
 		of.close();
 	}
-	EXPECT_TRUE(time_stamp != FS::last_write_time(TEST_DATA_PATH "/FS_UnitTests/test_watch.txt"));
 	// Checking if querying is correct
 	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
+	EXPECT_NE(time_stamp, FS::last_write_time(TEST_DATA_PATH "/FS_UnitTests/test_watch.txt"));
 	WatchClearCheck(vfs);
 }
 
