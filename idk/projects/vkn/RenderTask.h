@@ -264,6 +264,9 @@ namespace idk::vkn
 		index_span output_resources;
 		index_span modified_resources;
 
+		vector<std::optional<fgr_id>> input_attachments;
+		vector<std::optional<fgr_id>> output_attachments;
+
 		auto GetInputSpan()const { return input_resources.to_span(*buffer); }
 		auto GetOutputSpan()const { return output_resources.to_span(*buffer); }
 
@@ -376,14 +379,13 @@ namespace idk::vkn
 		{
 			return rsc_manager.CreateTexture(desc);
 		}
-
-		FrameGraphResource read(FrameGraphResourceReadOnly in_rsc)
+		FrameGraphResourceReadOnly read(FrameGraphResource in_rsc)
 		{
 			auto rsc = rsc_manager.Rename(in_rsc);
-			curr_input_resources.emplace_back(in_rsc);
+			curr_rsc.input_resources.emplace_back(in_rsc);
 			return rsc;
 		}
-		FrameGraphResource write(FrameGraphResourceMutable target_rsc, WriteOptions opt = {})
+		FrameGraphResourceMutable write(FrameGraphResource target_rsc, WriteOptions opt = {})
 		{
 			auto rsc = rsc_manager.Rename(target_rsc);
 			if (target_rsc.readonly)
@@ -391,44 +393,72 @@ namespace idk::vkn
 				LOG_TO(LogPool::GFX, "Attempting to write to Read only resource %s[%u] !",rsc_manager.Name(target_rsc).data(),target_rsc.id);
 			}
 			if (!opt.clear)
-				curr_input_resources.emplace_back(target_rsc);
+				curr_rsc.input_resources.emplace_back(target_rsc);
 			else
-				curr_modified_resources.emplace_back(target_rsc);
-			curr_output_resources.emplace_back(rsc);
+				curr_rsc.modified_resources.emplace_back(target_rsc);
+			curr_rsc.output_resources.emplace_back(rsc);
 			return rsc;
+		}
+
+		void set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index)
+		{
+			auto size = std::max(curr_rsc.input_attachments.size(), static_cast<size_t>(attachment_index + 1));
+			curr_rsc.input_attachments.resize(size);
+			curr_rsc.input_attachments[attachment_index] = in_rsc.id;
+		}
+		void set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index)
+		{
+			auto size = std::max(curr_rsc.output_attachments.size(), static_cast<size_t>(attachment_index + 1));
+			curr_rsc.output_attachments.resize(size);
+			curr_rsc.output_attachments[attachment_index] = out_rsc.id;
 		}
 
 		void BeginNode()
 		{
-			curr_input_resources.clear();
-			curr_output_resources.clear();
+			curr_rsc.reset();
 		}
 		FrameGraphNode EndNode()
 		{
 			auto id = NextID();
-			for (auto& rsc : curr_output_resources)
+			for (auto& rsc : curr_rsc.output_resources)
 			{
 				origin_nodes.emplace(rsc.id, id);
 			}
-			auto input_span = consumed_resources.StoreResources(curr_input_resources);
-			auto output_span = consumed_resources.StoreResources(curr_output_resources);
-			auto modified_span = consumed_resources.StoreResources(curr_modified_resources);
-			curr_input_resources.clear();
-			curr_output_resources.clear();
-			curr_modified_resources.clear();
-			return FrameGraphNode{ id,&consumed_resources.resources,input_span,output_span,modified_span };
+			auto input_span    = consumed_resources.StoreResources(curr_rsc.input_resources);
+			auto output_span   = consumed_resources.StoreResources(curr_rsc.output_resources);
+			auto modified_span = consumed_resources.StoreResources(curr_rsc.modified_resources);
+			
+			return FrameGraphNode{ id,&consumed_resources.resources,input_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments };
 		}
 
 		FrameGraphResourceManager rsc_manager;
 
 
-		NodeBuffer consumed_resources;
 		hash_table<fgr_id, fg_id> origin_nodes;
 
+
+		NodeBuffer consumed_resources;
+		struct CurrResources
+		{
+			vector<FrameGraphResource> input_resources;
+			vector<FrameGraphResource> output_resources;
+			vector<FrameGraphResource> modified_resources;
+
+			vector<std::optional<fgr_id>> input_attachments;
+			vector<std::optional<fgr_id>> output_attachments;
+			void reset()
+			{
+				input_resources.clear();
+				output_resources.clear();
+				modified_resources.clear();
+
+				input_attachments.clear();
+				output_attachments.clear();
+			}
+		};
+
 		//Consumed resources
-		vector<FrameGraphResource> curr_input_resources;
-		vector<FrameGraphResource> curr_output_resources;
-		vector<FrameGraphResource> curr_modified_resources;
+		CurrResources curr_rsc;
 	};
 
 	namespace FrameGraphDetail
@@ -439,12 +469,12 @@ namespace idk::vkn
 	struct BaseRenderPass
 	{
 		//BaseRenderPass(FrameGraphBuilder&,...); //<-- First parameter required, will be supplemented when created.
-
+		using Context_t = FrameGraphDetail::Context_t;
 		VknRenderPass  render_pass;
 		VknFrameBuffer frame_buffer;
 
 		//Run to Acquire resources and transition nodes.
-		void PreExecute(const FrameGraphNode& node, TransientResourceManager& resource_manager, FrameGraphDetail::Context_t context)
+		void PreExecute(const FrameGraphNode& node, TransientResourceManager& resource_manager, Context_t context)
 		{
 			/*
 			for (auto& input_resource : node.GetInputSpan())
@@ -456,10 +486,20 @@ namespace idk::vkn
 				resource_manager.PrepareWrite(output_resource, context);
 			}*/
 			//BeginRenderPass(render_pass,context);
+			BeginRenderPass(context);
+			BindFrameBuffer(context);
 		}
 		virtual void Execute(FrameGraphDetail::Context_t context) = 0;
-		void PostExecute(const FrameGraphNode& node, TransientResourceManager& resource_manager, FrameGraphDetail::Context_t context);
+		void PostExecute(const FrameGraphNode& node, TransientResourceManager& resource_manager, Context_t context)
+		{
+			EndRenderPass(context);
+		}
 		virtual ~BaseRenderPass() = default;
+
+	private:
+		void BeginRenderPass(Context_t);
+		void EndRenderPass(Context_t);
+		void BindFrameBuffer(Context_t);
 	};
 
 	//Job: Do deallocation, reuse resources where possible. (Basically a pool)
@@ -945,8 +985,8 @@ namespace idk::vkn
 		void Execute(Context_t context);
 
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
-		VknRenderPass  CreateRenderPass(span<const FrameGraphResource> input_rscs, span<const FrameGraphResource> output_rscs);
-		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const FrameGraphResource> input_rscs, span<const FrameGraphResource> output_rscs);
+		VknRenderPass  CreateRenderPass(span<const std::optional<fgr_id>> input_rscs, span<const std::optional<fgr_id>> output_rscs);
+		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<fgr_id>> input_rscs, span<const std::optional<fgr_id>> output_rscs);
 
 		void CreateRenderPasses()
 		{
@@ -955,8 +995,10 @@ namespace idk::vkn
 				auto& node = nodes[node_index];
 				auto itr = render_passes.find(node.id);
 				auto& rp = *itr->second;
-				rp.render_pass = CreateRenderPass(node.GetInputSpan(),node.GetOutputSpan());
-				rp.frame_buffer = CreateFrameBuffer(rp.render_pass,node.GetInputSpan(), node.GetOutputSpan());
+				auto input_attachments = span{ node.input_attachments };
+				auto output_attachments = span{ node.output_attachments };
+				rp.render_pass = CreateRenderPass(input_attachments,output_attachments );
+				rp.frame_buffer = CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments);
 			}
 		}
 
