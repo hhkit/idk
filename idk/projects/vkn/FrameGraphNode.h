@@ -1,0 +1,32 @@
+#pragma once
+#include <idk.h>
+#include "FrameGraphResource.h"
+#include <ds/index_span.inl>
+namespace idk::vkn
+{
+
+	using fg_id = size_t;
+	struct FrameGraphNode
+	{
+		fg_id id;
+
+		const vector<FrameGraphResource>* buffer;
+
+		index_span input_resources;
+		index_span output_resources;
+		index_span modified_resources;
+
+		vector<std::optional<fgr_id>> input_attachments;
+		vector<std::optional<fgr_id>> output_attachments;
+
+		auto GetInputSpan()const { return input_resources.to_span(*buffer); }
+		auto GetOutputSpan()const { return output_resources.to_span(*buffer); }
+
+		bool resource_present(index_span span, FrameGraphResource rsc)const;
+
+		bool Reads(FrameGraphResource rsc)const;
+		bool Writes(FrameGraphResource rsc)const;
+		bool Modifies(FrameGraphResource rsc)const;
+
+	};
+}

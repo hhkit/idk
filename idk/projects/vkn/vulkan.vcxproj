@@ -320,6 +320,8 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AttachmentDescription.h" />
+    <ClInclude Include="BaseRenderPass.h" />
     <ClInclude Include="BufferedObj.h" />
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CubemapRenderer.h" />
@@ -332,6 +334,11 @@
     <ClInclude Include="DescriptorUpdateData.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="FontRenderer.h" />
+    <ClInclude Include="FrameGraph.h" />
+    <ClInclude Include="FrameGraphBuilder.h" />
+    <ClInclude Include="FrameGraphNode.h" />
+    <ClInclude Include="FrameGraphResource.h" />
+    <ClInclude Include="FrameGraphResourceManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
@@ -347,6 +354,7 @@
     <ClInclude Include="RenderStateV2.h" />
     <ClInclude Include="RenderTask.h" />
     <ClInclude Include="RenderUtil.h" />
+    <ClInclude Include="ResourceLifetimeManager.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="topological_sort.h" />
@@ -358,6 +366,7 @@
     <ClInclude Include="PipelineManager.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="ShaderModule.h" />
+    <ClInclude Include="utils\GraphTraverser.h" />
     <ClInclude Include="utils\PresentationSignals.h" />
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
@@ -405,6 +414,7 @@
     <ClInclude Include="vulkan_state_fwd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseRenderPass.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
     <ClCompile Include="DDSLoader.cpp" />
@@ -415,6 +425,10 @@
     <ClCompile Include="DescriptorUpdateData.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
+    <ClCompile Include="FrameGraph.cpp" />
+    <ClCompile Include="FrameGraphBuilder.cpp" />
+    <ClCompile Include="FrameGraphNode.cpp" />
+    <ClCompile Include="FrameGraphResourceManager.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
@@ -429,6 +443,7 @@
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="RenderStateV2.cpp" />
     <ClCompile Include="RenderUtil.cpp" />
+    <ClCompile Include="ResourceLifetimeManager.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
