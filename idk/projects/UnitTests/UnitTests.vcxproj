@@ -48,6 +48,11 @@
   <ItemGroup>
     <ClInclude Include="core_setup.h" />
     <ClInclude Include="pch.h" />
+    <ClCompile Include="Reflect\ReflectRegistered.cpp" />
+    <ClCompile Include="Reflect\ReflectReg_AnimComponents.cpp" />
+    <ClCompile Include="Reflect\ReflectReg_Components.cpp" />
+    <ClCompile Include="Reflect\ReflectReg_GfxComponents.cpp" />
+    <ClCompile Include="Reflect\ReflectReg_Resources.cpp" />
     <ClCompile Include="TestGeometry.cpp" />
     <ClCompile Include="TestSerializeBinary.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />
@@ -75,6 +80,7 @@
     <ClCompile Include="TestMatrixTransforms.cpp" />
     <ClCompile Include="TestObjectPool.cpp" />
     <ClCompile Include="TestQuaternion.cpp" />
+    <ClCompile Include="TestTest.cpp" />
     <ClCompile Include="TestTree.cpp" />
     <ClCompile Include="TestVector.cpp" />
     <ClCompile Include="pch.cpp">
@@ -118,7 +124,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(UnitTestCmdLineDefines);TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -159,13 +165,14 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(UnitTestCmdLineDefines);TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)dep\include\;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

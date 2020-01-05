@@ -2,9 +2,24 @@
 #include <reflect/reflect.h>
 #include <util/enum.h>
 #include <meta/variant.h>
-#include <ReflectRegistration.h>
+#include <res/Guid.inl>
+#include <ReflectReg_Common.inl>
 
 using namespace idk;
+//
+//template<typename T>
+//struct ClassName
+//{
+//	constexpr static char m_Name[] = typeid(T).name();
+//};
+//
+//#define REFLECT_NAME_CLASS(CLASS_TYPE,Alias) template<>struct ClassName<CLASS_TYPE> { constexpr static char m_Name[] = Alias; };
+//#define REFLECT_TEMPLATE_NAME_CLASS(TEMPLATE_ARGS,CLASS_TYPE,Alias) template<TEMPLATE_ARGS>struct ClassName<CLASS_TYPE> { constexpr static char m_Name[] = Alias; };
+//#define REFLECT_TEMPLATE_BEGIN(TEMPLATE_ARGS,CLASS_TYPE, ALIAS)		template<TEMPLATE_ARGS> struct property::opin::def<CLASS_TYPE>{ using t_self = CLASS_TYPE; constexpr static char m_Name[] = ClassName<CLASS_TYPE>::m_Name; inline static const idk::reflect::detail::table_storage m_Storage { idk::reflect::detail::class_holder<t_self>{},
+//
+//REFLECT_TEMPLATE_BEGIN(typename T,RscHandle<T>, (STRINGIFY(ResourceHandle_) STRINGIFY(T)))
+//REFLECT_VAR(guid)
+//REFLECT_END()
 
 TEST(Reflect, TestReflectBasic)
 {

@@ -4,14 +4,15 @@
 #include <prefab/PrefabFactory.h>
 #include <prefab/PrefabInstance.h>
 #include <scene/SceneManager.h>
-#include <core/GameState.h>
-#include <core/GameObject.h>
+#include <core/GameState.inl>
+#include <core/GameObject.inl>
 #include <common/Name.h>
 #include <common/Transform.h>
 #include <file/FileSystem.h>
 #include <res/ResourceManager.inl>
 #include <reflect/reflect.inl>
-#include <ReflectReg_Components.h>
+#include <ReflectReg_Components.inl>
+#include <res/ResourceHandle.inl>
 
 using namespace idk;
 
