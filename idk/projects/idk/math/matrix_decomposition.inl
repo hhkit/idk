@@ -1,6 +1,6 @@
 #pragma once
 #include "matrix_decomposition.h"
-#include <math/matrix_transforms.h>
+#include <math/matrix_transforms.inl>
 #include <ds/range.inl>
 
 namespace idk

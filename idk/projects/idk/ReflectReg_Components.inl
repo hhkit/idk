@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ReflectReg_Common.h>
+#include <ReflectReg_Common.inl>
 #include <IncludeComponents.h>
 /*==========================================================================
  * components

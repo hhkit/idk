@@ -1,0 +1,4 @@
+void generate_something()
+{
+
+}

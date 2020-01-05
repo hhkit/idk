@@ -1,0 +1,26 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - uses: warrenbuckley/Setup-MSBuild@v1
+    - uses: nuget/setup-nuget@v1
+
+    - name: Pre-build
+      run: nuget restore idk\IDK.sln
+      
+    - name: Build
+      run: |
+        MSBuild.exe idk\IDK.sln -t:"00 Engine Static Dep" -p:Configuration="Debug" -p:Platform="x64"
+        MSBuild.exe idk\IDK.sln -t:"10 Core Library" -p:Configuration="Debug" -p:Platform="x64"
+        MSBuild.exe idk\IDK.sln -t:"50 Unit Testing" -p:Configuration="Debug" -p:Platform="x64"  
+
+    - name: Test
+      run: '& "idk\bin\50 Unit TestingD.exe"'

@@ -9,7 +9,6 @@
 #include "pch.h"
 
 #include <fstream>
-#include <filesystem>
 
 #include <core/Core.h>
 #include <file/FileSystem.h>
@@ -123,6 +122,7 @@ void TestWriteWatch(idk::FileSystem& vfs)
 		std::ofstream of{ TEST_DATA_PATH "/FS_UnitTests/test_watch.txt", std::ios::out };
 		of << "Test Write" << std::endl;
 		of.close();
+		FS::last_write_time(TEST_DATA_PATH "/FS_UnitTests/test_watch.txt", FS::_File_time_clock::now()); // manually update last_write_time for Github Actions?
 	}
 	// Checking if querying is correct
 	EXPECT_TRUE(WatchUpdateCheck(vfs, seconds{ 5.0f }, FS_CHANGE_STATUS::WRITTEN));
