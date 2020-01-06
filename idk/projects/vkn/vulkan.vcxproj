@@ -336,6 +336,7 @@
     <ClInclude Include="FontRenderer.h" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="FrameGraphBuilder.h" />
+    <ClInclude Include="FrameGraphDemo.h" />
     <ClInclude Include="FrameGraphNode.h" />
     <ClInclude Include="FrameGraphResource.h" />
     <ClInclude Include="FrameGraphResourceManager.h" />
@@ -348,6 +349,7 @@
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderContext.h" />
     <ClInclude Include="RenderPassInfo.h" />
     <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderPassObj.h" />

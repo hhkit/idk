@@ -44,6 +44,7 @@ namespace idk::vkn
 		struct CurrResources
 		{
 			vector<FrameGraphResource> input_resources;
+			vector<FrameGraphResource> read_resources;
 			vector<FrameGraphResource> output_resources;
 			vector<FrameGraphResource> modified_resources;
 

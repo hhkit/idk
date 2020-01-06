@@ -61,6 +61,7 @@ namespace idk::vkn
 			rm.Instantiate(resource_template.id, resource_template.base_rsc);
 		}
 		auto& aliases = rlm.Aliases();
+		//Register the aliases.
 		for (auto& [r_id, ar_id] : aliases)
 		{
 			rm.Alias(r_id, ar_id);
@@ -104,6 +105,12 @@ namespace idk::vkn
 	{
 		CreateRenderPasses();
 	}
+
+	void TransitionResource(FrameGraph::Context_t context, TransitionInfo info)
+	{
+		//TODO: Actually transition
+	}
+
 	void FrameGraph::Execute(Context_t context)
 	{
 		auto& rsc_manager = GetResourceManager();
@@ -114,10 +121,10 @@ namespace idk::vkn
 			//TODO: Thread this
 			{
 				//Transition all the resources that are gonna be read (and are not input attachments)
-				auto input_span = node.GetInputSpan();
+				auto input_span = node.GetReadSpan();
 				for (auto& input : input_span)
 				{
-					rsc_manager.TransitionResource(input);
+					TransitionResource(context,rsc_manager.TransitionInfo(input));
 				}
 				rp.PreExecute(node, context);
 				rp.Execute(context);
@@ -141,7 +148,6 @@ namespace idk::vkn
 
 	FrameGraphResourceManager& FrameGraph::GetResourceManager()
 	{
-		// TODO: insert return statement here
 		return graph_builder.rsc_manager;
 	}
 

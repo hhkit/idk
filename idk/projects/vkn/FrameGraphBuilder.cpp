@@ -18,10 +18,6 @@ namespace idk::vkn
 	FrameGraphResourceMutable FrameGraphBuilder::write(FrameGraphResource target_rsc, WriteOptions opt)
 	{
 		auto rsc = rsc_manager.Rename(target_rsc);
-		if (target_rsc.readonly)
-		{
-			LOG_TO(LogPool::GFX, "Attempting to write to Read only resource %s[%u] !", rsc_manager.Name(target_rsc).data(), target_rsc.id);
-		}
 		if (!opt.clear)
 			curr_rsc.input_resources.emplace_back(target_rsc);
 		else
@@ -57,10 +53,11 @@ namespace idk::vkn
 			origin_nodes.emplace(rsc.id, id);
 		}
 		auto input_span = consumed_resources.StoreResources(curr_rsc.input_resources);
+		auto read_span = consumed_resources.StoreResources(curr_rsc.read_resources);
 		auto output_span = consumed_resources.StoreResources(curr_rsc.output_resources);
 		auto modified_span = consumed_resources.StoreResources(curr_rsc.modified_resources);
 
-		return FrameGraphNode{ id,&consumed_resources.resources,input_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments };
+		return FrameGraphNode{ id,&consumed_resources.resources,input_span,read_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments };
 	}
 
 	void FrameGraphBuilder::CurrResources::reset()

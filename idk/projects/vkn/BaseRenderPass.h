@@ -1,4 +1,5 @@
 #pragma once
+#include "RenderContext.h"
 namespace idk::vkn
 {
 	using VknRenderPass = int;
@@ -6,10 +7,6 @@ namespace idk::vkn
 	struct FrameGraphNode;
 	struct FrameGraphResource;
 
-	namespace FrameGraphDetail
-	{
-		using Context_t = int;
-	}
 
 	struct BaseRenderPass
 	{
@@ -18,7 +15,7 @@ namespace idk::vkn
 		VknRenderPass  render_pass;
 		VknFrameBuffer frame_buffer;
 
-		//Run to Acquire resources and transition nodes.
+		//Run to Begin the rendering context (renderpass/framebuffer)
 		void PreExecute(const FrameGraphNode& node, Context_t context);
 		virtual void Execute(FrameGraphDetail::Context_t context) = 0;
 		void PostExecute(const FrameGraphNode& node, Context_t context);

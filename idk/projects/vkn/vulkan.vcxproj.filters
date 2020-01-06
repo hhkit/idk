@@ -269,6 +269,12 @@
       <Filter>render\graph</Filter>
     </ClInclude>
     <ClInclude Include="utils\GraphTraverser.h" />
+    <ClInclude Include="FrameGraphDemo.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderContext.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

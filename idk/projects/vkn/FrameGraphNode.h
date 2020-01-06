@@ -20,6 +20,7 @@ namespace idk::vkn
 		vector<std::optional<fgr_id>> input_attachments;
 		vector<std::optional<fgr_id>> output_attachments;
 
+		auto GetReadSpan()const { return read_resources.to_span(*buffer); }
 		auto GetInputSpan()const { return input_resources.to_span(*buffer); }
 		auto GetOutputSpan()const { return output_resources.to_span(*buffer); }
 

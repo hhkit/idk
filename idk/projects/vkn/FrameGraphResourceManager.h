@@ -4,6 +4,12 @@
 #include <vkn/AttachmentDescription.h>
 namespace idk::vkn
 {
+	//All the necessary information to transition a resource to its target configuration
+	struct TransitionInfo
+	{
+
+	};
+
 	struct FrameGraphResourceManager
 	{
 		using rsc_index_t = size_t;
@@ -15,6 +21,8 @@ namespace idk::vkn
 
 		//Associate fgr_id with unique_id
 		void Alias(size_t unique_id, fgr_id id);
+
+		TransitionInfo TransitionInfo(const FrameGraphResource& rsc);
 
 		FrameGraphResource CreateTexture(AttachmentDescription dsc);
 		FrameGraphResource Rename(FrameGraphResource rsc);
