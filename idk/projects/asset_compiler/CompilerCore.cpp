@@ -66,19 +66,6 @@ namespace idk
 			if (result)
 			{
 				// serialize the bundle
-				auto last_write = fs::last_write_time(pathify).time_since_epoch().count();
-				
-				auto compile_time_name = pathify.stem().string() + ".time";
-				auto tmp_compile_path = tmp + compile_time_name.data();
-				{
-					std::ofstream str{ tmp_compile_path, std::ios::binary };
-					str << serialize_binary(last_write);
-				}
-				auto compile_time_path = string{ full_path } +".time";
-				if (fs::exists(compile_time_path.sv()))
-					fs::remove(compile_time_path.sv());
-				rename(tmp_compile_path.data(), compile_time_path.data());
-
 				if (bundle != result->metabundle)
 				{
 					auto tmp_meta_path = tmp + pathify.stem().string().data();
@@ -90,6 +77,19 @@ namespace idk
 						fs::remove(meta_path);
 					rename(tmp_meta_path.data(), meta_path.string().data());
 				}
+
+				auto last_write = std::chrono::system_clock::now().time_since_epoch().count();				
+				auto compile_time_name = pathify.stem().string() + ".time";
+				auto tmp_compile_path = tmp + compile_time_name.data();
+				{
+					std::ofstream str{ tmp_compile_path, std::ios::binary };
+					str << serialize_binary(last_write);
+				}
+				auto compile_time_path = string{ full_path } +".time";
+				if (fs::exists(compile_time_path.sv()))
+					fs::remove(compile_time_path.sv());
+				rename(tmp_compile_path.data(), compile_time_path.data());
+
 
 				// serialize the resources
 				{

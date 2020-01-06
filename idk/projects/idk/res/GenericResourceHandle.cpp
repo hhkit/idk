@@ -18,6 +18,7 @@ namespace idk
 				auto backup_lut = hash_table < string_view, void(*)(GenericResourceHandle&, Guid)>
 				{
 					// "name", [](GenericResourceHandle& handle, Guid guid) { handle = RscHandle<>{ guid }; }
+					{"Prefab", [](GenericResourceHandle& handle, Guid guid) { handle = RscHandle<Prefab>{ guid }; } },
 					{"idk::anim::Animation", [](GenericResourceHandle& handle, Guid guid) { handle = RscHandle<anim::Animation>{ guid }; }},
 					{"idk::anim::Skeleton", [](GenericResourceHandle& handle, Guid guid) { handle = RscHandle<anim::Skeleton>{ guid }; } }
 				};

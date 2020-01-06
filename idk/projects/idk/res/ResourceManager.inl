@@ -14,7 +14,7 @@ namespace idk
 	template<typename Res>
 	bool ResourceManager::Validate(const RscHandle<Res>& handle)
 	{
-		return GetControlBlock(handle);
+		return static_cast<bool>(GetControlBlock(handle)->resource);
 	}
 
 	template<typename Res>
@@ -339,7 +339,6 @@ namespace idk
 	ResourceManager::ResourceControlBlock<Res>* ResourceManager::GetControlBlock(RscHandle<Res> handle)
 	{
 		auto& table = GetTable<Res>();
-		const auto itr = table.find(handle.guid);
-		return itr == table.end() ? nullptr : &itr->second;
+		return &table[handle.guid];
 	}
 }

@@ -298,7 +298,6 @@
     <ClInclude Include="resource\OpenGLTypeDescriptors.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="program\Program.h" />
-    <ClInclude Include="system\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="program\ProgramFactory.cpp" />
@@ -347,7 +346,6 @@
     </ClCompile>
     <ClCompile Include="program\Program.cpp" />
     <ClCompile Include="system\OpenGLState.cpp" />
-    <ClCompile Include="system\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="program\PipelineProgram.inl" />

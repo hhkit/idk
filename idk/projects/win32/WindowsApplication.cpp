@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include <thread>
 #include <iostream>
 #include <direct.h>
 #include <tchar.h>
@@ -73,7 +74,19 @@ namespace idk::win
 			args.emplace_back(elem);
 		args.emplace_back(nullptr);
 
-		_spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		auto retval = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		if (!wait)
+		{
+			if (children.size() >= std::thread::hardware_concurrency())
+				WaitForChildren();
+			children.emplace_back(retval);
+		}
+	}
+	void Windows::WaitForChildren()
+	{
+		for (auto& elem : children)
+			_cwait(0, elem, 0);
+		children.clear();
 	}
 #pragma optimize ("", on)
 	int Windows::GetReturnVal()

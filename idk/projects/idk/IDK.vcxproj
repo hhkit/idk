@@ -399,7 +399,11 @@
     </ClCompile>
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
-    <ClCompile Include="phys\collision.cpp" />
+    <ClCompile Include="phys\collision.cpp">
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IncludeInUnityFile>
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">false</IncludeInUnityFile>
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</IncludeInUnityFile>
+    </ClCompile>
     <ClCompile Include="prefab\Prefab.cpp" />
     <ClCompile Include="prefab\PrefabData.cpp" />
     <ClCompile Include="prefab\PrefabUtility.cpp" />

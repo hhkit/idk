@@ -25,6 +25,7 @@ namespace idk::win
 		~Windows();
 		void PollEvents() override;
 		void Exec(string_view path, span<const char*> argv, bool wait) override;
+		void WaitForChildren() override;
 
 		int GetReturnVal();
 		void Init() override {}
@@ -78,6 +79,8 @@ namespace idk::win
 		bool _focused{ true };
 		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
 		unique_ptr<InputManager> _input_manager;
+
+		vector<intptr_t> children;
 
 		static inline Windows* instance = nullptr;
 

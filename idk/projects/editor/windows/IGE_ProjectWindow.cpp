@@ -325,7 +325,7 @@ namespace idk {
         for (const auto& path : paths)
         {
             const auto ext = path.GetExtension();
-            if (ext == ".meta")
+            if (ext == ".meta" || ext == ".time")
                 continue;
 
             auto stem = path.GetFileName();

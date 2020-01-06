@@ -99,6 +99,7 @@ namespace idk
 		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
 		template<typename Res>  LoadResult<Res>       Load    (PathHandle path, bool reload_resource = true);
 		                        GeneralLoadResult     Load    (PathHandle path, bool reload_resource = true);
+								void                  LoadAsync(PathHandle path, bool wait = false);
 								void                  LoadCompiledAsset(PathHandle path);
 								void                  Unload  (PathHandle path);
 		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
@@ -116,7 +117,7 @@ namespace idk
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
 		template<typename FLoader, typename ... Args> FLoader& RegisterLoader (string_view ext, Args&& ... loader_construction_args);
 		template<typename ALoader>                    void RegisterAssetLoader();
-
+		                                              void RegisterCompilableExtension(string_view ext);
 		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
 		template<typename Res>                        [[nodiscard]] RscHandle<Res> LoaderCreateResource(Guid);
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
@@ -141,6 +142,7 @@ namespace idk
 		hash_table<string_view, shared_ptr<IAssetLoader>> _compiled_asset_loader; // std::shared_ptr<IAssetLoader<R>>
 		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;
 		hash_table<Path,      FileControlBlock>        _loaded_files;
+		hash_set<string> _compilable_extensions;
 
 		void Init()     override;
 		void LateInit() override;

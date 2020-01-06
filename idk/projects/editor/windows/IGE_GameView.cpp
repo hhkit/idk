@@ -21,7 +21,7 @@ namespace idk
 
 	void IGE_GameView::Update()
 	{
-		ImVec2 imageSize = GetScreenSize();
+		auto imageSize = vec2{ GetScreenSize() };
 		auto meta = RscHandle<RenderTarget>{};
 		auto screen_tex = meta->GetColorBuffer();
 		auto rendertex_aspect = screen_tex->AspectRatio();
@@ -42,6 +42,6 @@ namespace idk
 	}
 	vec2 IGE_GameView::GetScreenSize()
 	{
-		return vec2{ ImGui::GetWindowContentRegionMax() } -ImGui::GetWindowContentRegionMin();
+		return vec2{ ImGui::GetWindowContentRegionMax() } -vec2{ ImGui::GetWindowContentRegionMin() };
 	}
 }
