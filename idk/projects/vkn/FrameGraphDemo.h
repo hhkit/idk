@@ -6,9 +6,38 @@
 
 namespace idk::vkn
 {
+	struct RenderObject;
 	struct RenderState
 	{
 
+	};
+	struct RenderUtils
+	{
+		void DrawRenderObject(const RenderObject& ro, FrameGraphDetail::Context_t context)
+		{
+			for (auto& ub : ro.uniforms.ubos)
+			{
+				context.BindUniform(ub.name, ub.data);
+			}
+			for (auto& tex : ro.uniforms.tex)
+			{
+				context.BindUniform(tex.name, tex.data);
+			}
+			for (auto& vb : ro.vbos)
+				context.BindVertexBuffer(vb.binding, vb.buffer, vb.offset);
+
+			auto num_inst = ro.num_instances;
+			auto first_vert = ro.first_vertex;
+			auto first_inst = ro.first_instance;
+
+			if (ro.is_index)
+			{
+				context.BindIndexBuffer(ro.index_buffer, ro.index_offset, ro.index_type);
+				context.DrawIndexed(ro.num_indices, num_inst, first_vert, ro.first_index, first_inst);
+			}
+			else
+				context.Draw(ro.num_vertices, num_inst, first_vert, first_inst);
+		}
 	};
 	struct FrameGraphDemoPass : BaseRenderPass
 	{
@@ -29,9 +58,24 @@ namespace idk::vkn
 		void Execute(FrameGraphDetail::Context_t context) override
 		{
 			auto& rs = *rd.rs;
-			for (auto& ro : rs.render_objects)
+			for (auto& ro : rs.render_objects) //render objects should be flattened as much as possible
 			{
+				for (auto& shader : ro.shaders)
+				{
+					context.BindShader(shader);
+				}
+				OverrideShaders(ro.shader, context);
+				BindExtraUniforms(ro, context);
+				RenderUtils::DrawRenderObject(ro, context);
 			}
+		}
+		void OverrideShaders(span<ShaderModule> shader_modules, FrameGraphDetail::Context_t context)
+		{
+			//bind the appropriate shaders to use instead
+		}
+		void BindExtraUniforms(const RenderObject& ro, FrameGraphDetail::Context_t context)
+		{
+			//bind the extra uniforms according to the shaders here.
 		}
 	};
 	struct RenderTarget
@@ -61,7 +105,11 @@ namespace idk::vkn
 			draw_depth_buffer{ builder.write(rd.render_target.depth)}
 		{
 		}
-		void Execute(FrameGraphDetail::Context_t context) override;
+		void Execute(FrameGraphDetail::Context_t context) override
+		{
+			BindFinishPassShaders(context);
+			DrawQuad(context);
+		}
 	};
 
 	struct FrameGraphDemoTransparencyPass : BaseRenderPass
@@ -76,8 +124,8 @@ namespace idk::vkn
 		FrameGraphResourceMutable  draw_depth_buffer;
 		FrameGraphDemoTransparencyPass(FrameGraphBuilder& builder , RenderData&& render_data) :
 			rd{ std::move(render_data) },
-			draw_buffer{ builder.write(rd.draw_target.color) },
-			draw_depth_buffer{ builder.write(rd.draw_target.depth) }
+			draw_buffer{ builder.write(rd.draw_target.color,WriteOptions{.clear = false}) },
+			draw_depth_buffer{ builder.write(rd.draw_target.depth,WriteOptions{.clear=false}) }
 		{
 		}
 		void Execute(FrameGraphDetail::Context_t context) override;

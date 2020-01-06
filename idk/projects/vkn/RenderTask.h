@@ -17,8 +17,10 @@ namespace idk::vkn
 
 	enum LoadOp {};
 	enum StoreOp {};
+	enum IndexType {};
 	struct Framebuffer;
 	struct VertexBuffer;
+	struct IndexBuffer;
 	struct ShaderModule;
 	struct Texture;
 	using TextureID  = Guid;
@@ -78,6 +80,7 @@ namespace idk::vkn
 		void Associate(size_t subpass_index);
 
 		void BindVertexBuffer(uint32_t binding, const VertexBuffer& vertex_buffer, size_t byte_offset);
+		void BindIndexBuffer(const IndexBuffer& buffer, size_t offset, IndexType indexType);
 
 #pragma region Uniforms
 		void BindUniform(string_view name, string_view data);
