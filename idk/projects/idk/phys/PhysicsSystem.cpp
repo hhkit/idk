@@ -597,8 +597,8 @@ namespace idk
 							r, rShape);
 					else
 						if constexpr (std::is_same_v<RShape, box>)
-							return phys::collide_ray_aabb(
-								r, c.bounds());
+							return phys::collide_ray_box(
+								r, rShape);
 					else
 						if constexpr (std::is_same_v<RShape, capsule>)
 							return phys::collide_ray_capsule(
