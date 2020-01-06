@@ -30,8 +30,9 @@ namespace idk
 	template<typename T, unsigned D>
 	constexpr tmat<T, D, D>& prescale(tmat<T, D, D>& mat, const tvec<T, D>& scale)
 	{
+		auto scale_itr = scale.begin();
 		for (auto& col : mat)
-			col *= scale;
+			col *= *scale_itr++;
 		return mat;
 	}
 
