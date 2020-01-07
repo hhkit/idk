@@ -238,6 +238,9 @@
     <ClInclude Include="DebugUtil.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="ColorPickRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -437,6 +440,7 @@
       <Filter>render\renderers</Filter>
     </ClCompile>
     <ClCompile Include="DebugUtil.cpp" />
+    <ClCompile Include="ColorPickRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

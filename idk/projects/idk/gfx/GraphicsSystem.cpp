@@ -137,6 +137,19 @@ namespace idk
 		return _is_deferred = enable;
 	}
 
+	ColorPickResult GraphicsSystem::ColorPick(CameraData camera)
+	{
+		auto& req = request_stack.emplace_front();
+		
+		return req.promise(camera);
+	}
+
+	void GraphicsSystem::BufferRequests()
+	{
+		std::move(request_stack.begin(), request_stack.end(), std::back_inserter(request_buffer));
+		request_stack.clear();
+	}
+
 	size_t GraphicsSystem::AddRenderRequest(RenderRequest&& request)
 	{
 		CameraData& camera = request.camera;
@@ -377,14 +390,15 @@ namespace idk
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
 		span<SkinnedMeshRenderer> skinned_mesh_renderers,
-        span<ParticleSystem> ps,
+		span<ParticleSystem> ps,
 		span<TextMesh> fonts,
 		span<Text> texts,
-        span<Image> images,
-		span<const class Transform>, 
-		span<const Camera> cameras, 
+		span<Image> images,
+		span<const class Transform>,
+		span<const Camera> cameras,
 		span<const Light> lights)
 	{
+		BufferRequests();
 		if (!mesh_render_config)
 		{
 			mesh_render_config = std::make_shared<pipeline_config>();
@@ -407,10 +421,10 @@ namespace idk
 
 				const auto l_mat_inst_hash = guid_hasher(lhs.material_instance.guid);
 				const auto r_mat_inst_hash = guid_hasher(rhs.material_instance.guid);
-				const auto l_mat_hash      = guid_hasher(l_mat_inst->material.guid);
-				const auto r_mat_hash      = guid_hasher(r_mat_inst->material.guid);
-				const auto l_mesh_hash     = guid_hasher(lhs.mesh.guid);
-				const auto r_mesh_hash     = guid_hasher(rhs.mesh.guid);
+				const auto l_mat_hash = guid_hasher(l_mat_inst->material.guid);
+				const auto r_mat_hash = guid_hasher(r_mat_inst->material.guid);
+				const auto l_mesh_hash = guid_hasher(lhs.mesh.guid);
+				const auto r_mesh_hash = guid_hasher(rhs.mesh.guid);
 
 				if (l_mat_hash < r_mat_hash)
 					return true;
@@ -437,12 +451,12 @@ namespace idk
 
 
 		using ro_inst_comp = ordered_comparator<RenderObject,
-			PtrMem<decltype(&RenderObject::material_instance), & RenderObject::material_instance>,
-			PtrMem<decltype(&RenderObject::mesh), & RenderObject::mesh>
+			PtrMem<decltype(&RenderObject::material_instance), &RenderObject::material_instance>,
+			PtrMem<decltype(&RenderObject::mesh), &RenderObject::mesh>
 		>;
 		using aro_inst_comp = ordered_comparator<AnimatedRenderObject,
-			PtrMem<decltype(&RenderObject::material_instance), & RenderObject::material_instance>,
-			PtrMem<decltype(&RenderObject::mesh), & RenderObject::mesh>,
+			PtrMem<decltype(&RenderObject::material_instance), &RenderObject::material_instance>,
+			PtrMem<decltype(&RenderObject::mesh), &RenderObject::mesh>,
 			PtrMem<decltype(&AnimatedRenderObject::skeleton_index), &AnimatedRenderObject::skeleton_index>
 		>;
 
@@ -450,11 +464,11 @@ namespace idk
 		{
 			RenderBuffer tmp{};
 			std::swap(tmp, rb); //reinitialize the stuff that don't need to be swapped.
-			ClearSwap(rb.camera                         ,tmp.camera                         );//clear then swap the stuff back into rb
-			ClearSwap(rb.font_render_data               ,tmp.font_render_data               );//clear then swap the stuff back into rb
+			ClearSwap(rb.camera, tmp.camera);//clear then swap the stuff back into rb
+			ClearSwap(rb.font_render_data, tmp.font_render_data);//clear then swap the stuff back into rb
 			ClearSwap(rb.font_range, tmp.font_range);
 			ClearSwap(rb.font_buffer, tmp.font_buffer);
-			ClearSwap(rb.ui_render_per_canvas           , tmp.ui_render_per_canvas);
+			ClearSwap(rb.ui_render_per_canvas, tmp.ui_render_per_canvas);
 			ClearSwap(rb.ui_canvas, tmp.ui_canvas);
 			ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
 			//ClearSwap(rb.ui_text_buffer.pos1, tmp.ui_text_buffer.pos1);
@@ -462,32 +476,32 @@ namespace idk
 			//ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
 			//ClearSwap(rb.ui_canvas_range, tmp.ui_canvas_range);
-			ClearSwap(rb.instanced_mesh_render          ,tmp.instanced_mesh_render          );//clear then swap the stuff back into rb
+			ClearSwap(rb.instanced_mesh_render, tmp.instanced_mesh_render);//clear then swap the stuff back into rb
 			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
-			ClearSwap(rb.inst_mesh_render_buffer        ,tmp.inst_mesh_render_buffer        );//clear then swap the stuff back into rb
+			ClearSwap(rb.inst_mesh_render_buffer, tmp.inst_mesh_render_buffer);//clear then swap the stuff back into rb
 			//ClearSwap(rb.inst_skinned_mesh_render_buffer,tmp.inst_skinned_mesh_render_buffer);//clear then swap the stuff back into rb
-			ClearSwap(rb.lights                         ,tmp.lights                         );//clear then swap the stuff back into rb
-			ClearSwap(rb.light_camera_data              ,tmp.light_camera_data              );//clear then swap the stuff back into rb
-			ClearSwap(rb.mesh_render                    ,tmp.mesh_render                    );//clear then swap the stuff back into rb
-			ClearSwap(rb.skinned_mesh_render            ,tmp.skinned_mesh_render            );//clear then swap the stuff back into rb
-			ClearSwap(rb.particle_render_data           ,tmp.particle_render_data           );//clear then swap the stuff back into rb
+			ClearSwap(rb.lights, tmp.lights);//clear then swap the stuff back into rb
+			ClearSwap(rb.light_camera_data, tmp.light_camera_data);//clear then swap the stuff back into rb
+			ClearSwap(rb.mesh_render, tmp.mesh_render);//clear then swap the stuff back into rb
+			ClearSwap(rb.skinned_mesh_render, tmp.skinned_mesh_render);//clear then swap the stuff back into rb
+			ClearSwap(rb.particle_render_data, tmp.particle_render_data);//clear then swap the stuff back into rb
 			ClearSwap(rb.particle_buffer, tmp.particle_buffer);
 			ClearSwap(rb.particle_range, tmp.particle_range);
-			ClearSwap(rb.skeleton_transforms            ,tmp.skeleton_transforms            );//clear then swap the stuff back into rb
+			ClearSwap(rb.skeleton_transforms, tmp.skeleton_transforms);//clear then swap the stuff back into rb
 		};
 
 		// todo: scenegraph traversal
-		RenderBuffer& result=GetWriteBuffer();
+		RenderBuffer& result = GetWriteBuffer();
 		vector<mt::Future<void>> futures;
 #if 0   //change to 0 to reduce reallocation count.
 		result = RenderBuffer{};
 #else
-		reset_render_buffer(result); 
+		reset_render_buffer(result);
 #endif
 		result.camera.reserve(cameras.size());
 
-        result.renderer_vertex_shaders = renderer_vertex_shaders;
-        result.renderer_fragment_shaders = renderer_fragment_shaders;
+		result.renderer_vertex_shaders = renderer_vertex_shaders;
+		result.renderer_fragment_shaders = renderer_fragment_shaders;
 
 		// memcpy the lights until there is a smarter implementation
 		result.lights.reserve(lights.size());
@@ -509,7 +523,7 @@ namespace idk
 		POST_END();
 
 		POST()
-		alignas(machine::cache_line_sz) hash_table<Handle<Animator>, size_t> skeleton_indices;
+			alignas(machine::cache_line_sz) hash_table<Handle<Animator>, size_t> skeleton_indices;
 
 		for (auto& elem : animators)
 			PrepareSkeletonTransform(elem, result.skeleton_transforms, skeleton_indices);
@@ -524,190 +538,190 @@ namespace idk
 		POST_END();
 
 		POST()
-		for (auto& camera : cameras)
-		{
-			if (camera.GetHandle().scene == Scene::prefab)
-				continue;
-            if (!camera.enabled)
-                continue;
+			for (auto& camera : cameras)
+			{
+				if (camera.GetHandle().scene == Scene::prefab)
+					continue;
+				if (!camera.enabled)
+					continue;
 
-            if (camera.GetHandle().scene == Scene::editor)
-                result.curr_scene_camera_index = result.camera.size();
-            result.camera.emplace_back(camera.GenerateCameraData());
-		}
+				if (camera.GetHandle().scene == Scene::editor)
+					result.curr_scene_camera_index = result.camera.size();
+				result.camera.emplace_back(camera.GenerateCameraData());
+			}
 		POST_END();
 
 		POST()
-		for (auto& elem : mesh_renderers)
-		{
-			if (elem.GetHandle().scene == Scene::prefab)
-				continue;
-
-			auto obj = GetRenderObj(elem);
-			if (obj)
+			for (auto& elem : mesh_renderers)
 			{
-				auto& render_obj = *obj;
-				//Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
-				result.mesh_render.emplace_back(std::move(render_obj));
+				if (elem.GetHandle().scene == Scene::prefab)
+					continue;
+
+				auto obj = GetRenderObj(elem);
+				if (obj)
+				{
+					auto& render_obj = *obj;
+					//Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
+					result.mesh_render.emplace_back(std::move(render_obj));
+				}
+			}
+		POST_END();
+
+		POST()
+			for (auto& elem : ps)
+			{
+				if (elem.renderer.enabled && elem.data.num_alive)
+				{
+					const auto sz = elem.data.num_alive;
+					auto& render_data = result.particle_render_data.emplace_back();
+
+					render_data.particles.resize(sz);
+
+					for (uint16_t i = 0; i < sz; ++i)
+						render_data.particles[i].position = elem.data.position[i] * elem.transform.scale;
+					if (!elem.main.in_world_space)
+					{
+						mat3 rot{ elem.transform.rotation };
+						for (auto& p : render_data.particles)
+							p.position = elem.transform.position + rot * p.position;
+					}
+
+					for (uint16_t i = 0; i < sz; ++i)
+						render_data.particles[i].rotation = elem.data.rotation[i];
+					for (uint16_t i = 0; i < sz; ++i)
+						render_data.particles[i].size = elem.data.size[i];
+					for (uint16_t i = 0; i < sz; ++i)
+						render_data.particles[i].color = elem.data.color[i];
+
+					render_data.material_instance = elem.renderer.material;
+				}
+			}
+		POST_END();
+
+		POST()
+			for (auto& f : fonts)
+			{
+				if (f.text != "" && f.font)
+				{
+					auto& render_data = result.font_render_data.emplace_back();
+
+					render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
+
+					render_data.color = f.color;
+					render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+					render_data.atlas = f.font;
+				}
+			}
+
+		auto& ui = Core::GetSystem<UISystem>();
+		for (auto& im : images)
+		{
+			const auto& go = im.GetGameObject();
+			const auto& rt = *go->GetComponent<RectTransform>();
+
+			const auto canvas = ui.FindCanvas(go);
+			if (!canvas)
+			{
+				LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
+				continue;
+			}
+
+			auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+
+			render_data.transform = rt._matrix *
+				mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+			render_data.material = im.material;
+			render_data.color = im.tint;
+			render_data.data = ImageData{ im.texture };
+			render_data.depth = go->Transform()->Depth();
+		}
+
+		for (auto& text : texts)
+		{
+			if (text.text != "" && text.font)
+			{
+				const auto& go = text.GetGameObject();
+				const auto& rt = *go->GetComponent<RectTransform>();
+
+				const auto canvas = ui.FindCanvas(go);
+				if (!canvas)
+				{
+					LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
+					continue;
+				}
+
+				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
+				++canvas->num_of_text;
+
+				constexpr auto anchor_to_alignment = [](TextAnchor anchor)
+				{
+					switch (anchor)
+					{
+					case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft:
+						return TextAlignment::Left;
+					case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+						return TextAlignment::Center;
+					case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+						return TextAlignment::Right;
+					}
+					return TextAlignment::Left;
+				};
+
+				const float sx = rt._local_rect.size.x;
+				const float sy = rt._local_rect.size.y;
+
+
+				const auto font_data = FontData::Generate(
+					text.text, text.font,
+					text.best_fit ? 0 : text.font_size,
+					text.letter_spacing,
+					text.line_height,
+					anchor_to_alignment(text.alignment),
+					text.wrap ? sx : 0);
+
+				float tw = font_data.width;
+				float th = font_data.height;
+
+				render_data.material = text.material;
+				render_data.color = text.color;
+				render_data.data = TextData{ font_data.coords, text.font };
+				render_data.depth = go->Transform()->Depth();
+
+				float s = 1.0f;
+
+				if (text.best_fit)
+				{
+					const float sw = sx / tw;
+					const float sh = sy / th;
+					s = sw > sh ? sh : sw;
+					tw *= s;
+					th *= s;
+				}
+
+				switch (text.alignment)
+				{
+				case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
+				case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
+				case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
+				case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
+				case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
+				case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
+				case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
+				case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
+				case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
+				}
+
+				if (text.best_fit)
+					render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
 			}
 		}
-		POST_END();
+		POST_END()
 
-		POST()
-        for (auto& elem : ps)
-        {
-            if (elem.renderer.enabled && elem.data.num_alive)
-            {
-                const auto sz = elem.data.num_alive;
-                auto& render_data = result.particle_render_data.emplace_back();
-
-                render_data.particles.resize(sz);
-
-                for (uint16_t i = 0; i < sz; ++i)
-                    render_data.particles[i].position = elem.data.position[i] * elem.transform.scale;
-                if (!elem.main.in_world_space)
-                {
-                    mat3 rot{ elem.transform.rotation };
-                    for (auto& p : render_data.particles)
-                        p.position = elem.transform.position + rot * p.position;
-                }
-
-                for (uint16_t i = 0; i < sz; ++i)
-                    render_data.particles[i].rotation = elem.data.rotation[i];
-                for (uint16_t i = 0; i < sz; ++i)
-                    render_data.particles[i].size = elem.data.size[i];
-                for (uint16_t i = 0; i < sz; ++i)
-                    render_data.particles[i].color = elem.data.color[i];
-
-                render_data.material_instance = elem.renderer.material;
-            }
-        }
-		POST_END();
-
-        POST()
-        for (auto& f : fonts)
-        {
-            if (f.text != "" && f.font)
-            {
-                auto& render_data = result.font_render_data.emplace_back();
-
-                render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
-
-                render_data.color = f.color;
-                render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
-                render_data.atlas = f.font;
-            }
-        }
-
-        auto& ui = Core::GetSystem<UISystem>();
-        for (auto& im : images)
-        {
-            const auto& go = im.GetGameObject();
-            const auto& rt = *go->GetComponent<RectTransform>();
-
-            const auto canvas = ui.FindCanvas(go);
-            if (!canvas)
-            {
-                LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
-                continue;
-            }
-
-            auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
-
-            render_data.transform = rt._matrix *
-                mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
-            render_data.material = im.material;
-            render_data.color = im.tint;
-            render_data.data = ImageData{ im.texture };
-            render_data.depth = go->Transform()->Depth();
-        }
-
-        for (auto& text : texts)
-        {
-            if (text.text != "" && text.font)
-            {
-                const auto& go = text.GetGameObject();
-                const auto& rt = *go->GetComponent<RectTransform>();
-
-                const auto canvas = ui.FindCanvas(go);
-                if (!canvas)
-                {
-                    LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
-                    continue;
-                }
-
-                auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
-                ++canvas->num_of_text;
-
-                constexpr auto anchor_to_alignment = [](TextAnchor anchor)
-                {
-                    switch (anchor)
-                    {
-                    case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft:
-                        return TextAlignment::Left;
-                    case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
-                        return TextAlignment::Center;
-                    case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
-                        return TextAlignment::Right;
-                    }
-                    return TextAlignment::Left;
-                };
-
-                const float sx = rt._local_rect.size.x;
-                const float sy = rt._local_rect.size.y;
-
-
-                const auto font_data = FontData::Generate(
-                    text.text, text.font,
-                    text.best_fit ? 0 : text.font_size,
-                    text.letter_spacing,
-                    text.line_height,
-                    anchor_to_alignment(text.alignment),
-                    text.wrap ? sx : 0);
-
-                float tw = font_data.width;
-                float th = font_data.height;
-
-                render_data.material = text.material;
-                render_data.color = text.color;
-                render_data.data = TextData{ font_data.coords, text.font };
-                render_data.depth = go->Transform()->Depth();
-
-                float s = 1.0f;
-
-                if (text.best_fit)
-                {
-                    const float sw = sx / tw;
-                    const float sh = sy / th;
-                    s = sw > sh ? sh : sw;
-                    tw *= s;
-                    th *= s;
-                }
-
-                switch (text.alignment)
-                {
-                case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
-                case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
-                case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
-                case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
-                case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
-                case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
-                case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
-                case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
-                case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
-                }
-
-                if (text.best_fit)
-                    render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
-            }
-        }
-        POST_END()
-
-		for (auto& elem : futures)
-			elem.get();
+			for (auto& elem : futures)
+				elem.get();
 		futures.clear();
 
-        POST()
+		POST()
 		{
 			auto& unique_particles = result.particle_render_data;
 			const size_t avg_particle_count = 100;
@@ -725,66 +739,68 @@ namespace idk
 		}
 
 		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
-        POST_END()
+		POST_END()
 
-        POST()
-		std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
-        POST_END()
+			POST()
+			std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
+		POST_END()
 
-        POST()
-        //////For UI////////
-        {
-            auto& unique_fonts = texts;
-            const size_t avg_font_count = 100;
-            const auto size = result.ui_canvas.size() + unique_fonts.size();
-            const auto size_2 = result.ui_render_per_canvas.size() + unique_fonts.size();
-            result.ui_text_range.reserve(result.ui_text_range.size() + size);
-            result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
-            result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
-			//result.ui_canvas_range.reserve(result.ui_text_buffer.size() + size * avg_font_count);
-            //result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
-        }
-
-		// sort ui render by depth then z pos
-		for (auto& [canvas, vec] : result.ui_render_per_canvas)
-		{
-			std::stable_sort(vec.begin(), vec.end(),
-				[](const UIRenderObject& a, const UIRenderObject& b) {
-				return a.depth == b.depth ?
-					a.transform[3].z < b.transform[3].z :
-					a.depth < b.depth;
-			}
-			);
-		}
-
-		//Push it into the char buffer when done
-		result.ui_total_num_of_text = 0;
-		for (auto& [canvas, vec] : result.ui_render_per_canvas)
-		{
-			//No need to cull, this is to find all the coords data and append them to one buffer
-			//CanvasRenderRange range{};
-
-			auto& res = result.ui_canvas.emplace_back();
-			
-			res.num_of_text = canvas->num_of_text;
-			res.render_target = canvas->render_target;
-			res.ui_ro = vec;
-			for (auto& elem : vec)
+		POST()
+#pragma region FOR UI
+			//////For UI////////
 			{
-				std::visit([&](const auto& data)
-				{				
-					using T = std::decay_t<decltype(data)>;
-					if constexpr (!std::is_same_v<T, ImageData>)
-					{
-						ProcessCanvas(data.coords, result.ui_text_buffer, result.ui_text_range, result.ui_total_num_of_text);
-						//result.canvas_render_range.emplace_back(range);
-					}
-
-				}, elem.data);
+				auto& unique_fonts = texts;
+				const size_t avg_font_count = 100;
+				const auto size = result.ui_canvas.size() + unique_fonts.size();
+				const auto size_2 = result.ui_render_per_canvas.size() + unique_fonts.size();
+				result.ui_text_range.reserve(result.ui_text_range.size() + size);
+				result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+				result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+				//result.ui_canvas_range.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+				//result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 			}
-			
-			
-		}
+
+			// sort ui render by depth then z pos
+			for (auto& [canvas, vec] : result.ui_render_per_canvas)
+			{
+				std::stable_sort(vec.begin(), vec.end(),
+					[](const UIRenderObject& a, const UIRenderObject& b) {
+						return a.depth == b.depth ?
+							a.transform[3].z < b.transform[3].z :
+							a.depth < b.depth;
+					}
+				);
+			}
+
+			//Push it into the char buffer when done
+			result.ui_total_num_of_text = 0;
+			for (auto& [canvas, vec] : result.ui_render_per_canvas)
+			{
+				//No need to cull, this is to find all the coords data and append them to one buffer
+				//CanvasRenderRange range{};
+
+				auto& res = result.ui_canvas.emplace_back();
+
+				res.num_of_text = canvas->num_of_text;
+				res.render_target = canvas->render_target;
+				res.ui_ro = vec;
+				for (auto& elem : vec)
+				{
+					std::visit([&](const auto& data)
+						{
+							using T = std::decay_t<decltype(data)>;
+							if constexpr (!std::is_same_v<T, ImageData>)
+							{
+								ProcessCanvas(data.coords, result.ui_text_buffer, result.ui_text_range, result.ui_total_num_of_text);
+								//result.canvas_render_range.emplace_back(range);
+							}
+
+						}, elem.data);
+				}
+
+
+			}
+#pragma endregion
         POST_END()
 
         for (auto& elem : futures)
@@ -794,8 +810,9 @@ namespace idk
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
 		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
-		for (auto& camera : result.camera)
+		for (auto& cam : result.camera)
 		{
+			auto& camera = cam;
 			RenderRange range{ camera };
 			{
 				const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render,bounding_vols, result.instanced_mesh_render,result.inst_mesh_render_buffer);
@@ -814,6 +831,17 @@ namespace idk
 			//	range.inst_mesh_render_begin = start_index;
 			//	range.inst_mesh_render_end = end_index;
 			//}
+		}
+		for (auto& request : this->request_buffer)
+		{
+			auto& cam = request.data.camera;
+			auto& out_instanced_mesh_render = result.instanced_mesh_render;
+			auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
+			{
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer);
+				request.data.inst_mesh_render_begin = start_index;
+				request.data.inst_mesh_render_end = end_index;
+			}
 		}
 		size_t i = 0;
 		

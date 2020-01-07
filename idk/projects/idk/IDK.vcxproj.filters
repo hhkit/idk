@@ -942,6 +942,10 @@
     <ClInclude Include="ReflectReg_GfxComponents.inl" />
     <ClInclude Include="ReflectReg_Components.inl" />
     <ClInclude Include="ReflectReg_Common.inl" />
+    <ClInclude Include="gfx\ColorPickResult.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ColorPickRequest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

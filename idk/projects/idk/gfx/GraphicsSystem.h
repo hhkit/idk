@@ -11,6 +11,9 @@
 #include <gfx/FontData.h>
 #include <gfx/RenderRequest.h>
 
+#include <gfx/ColorPickRequest.h>
+#include <forward_list>
+
 #include <machine.h>
 
 namespace idk
@@ -30,6 +33,7 @@ namespace idk
 		VNormalMesh,
 		VNormalMeshPicker,
 		VSkinnedMesh,
+		VSkinnedMeshPicker,
         VParticle,
 		VSkyBox,
 		VPBRConvolute,
@@ -121,6 +125,9 @@ namespace idk
 		bool is_deferred()const;
 		bool is_deferred(bool enable);
 
+		ColorPickResult ColorPick(CameraData camera);
+		void BufferRequests();
+
 		size_t AddRenderRequest(RenderRequest&& request);
 
 		bool RenderRequestStatus(size_t index);
@@ -130,6 +137,11 @@ namespace idk
 		virtual GraphicsAPI GetAPI() = 0;
 		void LoadShaders();
 	protected:
+
+		std::forward_list<ColorPickRequest> request_stack;
+		vector<ColorPickRequest> request_buffer;
+
+
 		struct SpecialRenderBuffer
 		{
 			CameraData camera;
