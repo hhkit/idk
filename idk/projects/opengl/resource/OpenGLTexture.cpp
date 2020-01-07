@@ -6,13 +6,17 @@
 namespace idk::ogl
 {
 	OpenGLTexture::OpenGLTexture()
-		: OpenGLTexture{ false }
 	{
+		glGenTextures(1, &_id);
+		Bind();
+		SetUVMode(UVMode::Clamp);
+		SetFilteringMode(FilterMode::Linear);
 	}
 
 	OpenGLTexture::OpenGLTexture(const CompiledTexture& compiled_texture)
 		: _is_compressed{compiled_texture.is_srgb},
-		_mip_level{compiled_texture.generate_mipmaps}
+		_mip_level{compiled_texture.generate_mipmaps},
+		_internal_format{ ToInternalFormat(compiled_texture.internal_format, true) }
 	{
 		glGenTextures(1, &_id);
 		Bind();
@@ -21,7 +25,7 @@ namespace idk::ogl
 		SetFilteringMode(compiled_texture.filter_mode);
 
 		glCompressedTexImage2D(GL_TEXTURE_2D, _mip_level,
-			detail::ogl_GraphicsFormat::ToColor(compiled_texture.internal_format),
+			detail::ogl_GraphicsFormat::ToInternal(_internal_format),
 			_size.x,
 			_size.y,
 			0,
@@ -29,7 +33,7 @@ namespace idk::ogl
 			compiled_texture.pixel_buffer.data());
 
 		if (_mip_level)
-			glGenerateTextureMipmap(_id);
+			glGenerateMipmap(_id);
 	}
 
 	OpenGLTexture::OpenGLTexture(OpenGLTexture&& rhs)
@@ -37,6 +41,7 @@ namespace idk::ogl
 	{
 		rhs._id = 0;
 	}
+
 	OpenGLTexture& OpenGLTexture::operator=(OpenGLTexture&& rhs)
 	{
 		Texture::operator=(std::move(rhs));
@@ -62,37 +67,62 @@ namespace idk::ogl
 		Bind();
 	}
 
-	void OpenGLTexture::Buffer(void* data, ivec2 size, InputChannels format, ColorFormat internalFormat, const unsigned& mipmap_size, const float& imgSize)
+	void OpenGLTexture::Buffer(void* data, size_t buffer_size, ivec2 texture_size, TextureInternalFormat format, GLenum incoming_components, GLenum incoming_type)
+	{
+		_size = texture_size;
+		_internal_format = format;
+		auto gl_format = detail::ogl_GraphicsFormat::ToInternal(_internal_format);
+		Bind();
+		glTexImage2D(GL_TEXTURE_2D, _mip_level, gl_format, _size.x, _size.y, 0, incoming_components, incoming_type, data);
+	}
+
+	void OpenGLTexture::Buffer(void* data, size_t buffer_size, ivec2 size, ColorFormat format, bool compressed)
 	{
 		_size = size;
-		glBindTexture(GL_TEXTURE_2D, _id);
-		if (internalFormat == ColorFormat::DEPTH_COMPONENT)
+		Bind();
+
+		_internal_format = ToInternalFormat(format, compressed);
+		auto gl_format = detail::ogl_GraphicsFormat::ToInternal(_internal_format);
+
+		if (compressed)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, detail::ogl_GraphicsFormat::ToColor(internalFormat), size.x, size.y, 0, detail::ogl_GraphicsFormat::ToInputChannels(InputChannels::DEPTH_COMPONENT), GL_FLOAT, data); // oh no
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else if(_isCompressedTexture)
-		{
-			if(size.x && size.y && imgSize)
-				glCompressedTexImage2D(GL_TEXTURE_2D, mipmap_size, detail::ogl_GraphicsFormat::ToColor(internalFormat), size.x, size.y, 0, static_cast<GLsizei>(imgSize), data);
+			switch (format)
+			{
+			case ColorFormat::Alpha_8:
+				glTexImage2D(GL_TEXTURE_2D, _mip_level, gl_format, size.x, size.y, 0, GL_R, GL_UNSIGNED_BYTE, data);
+				break;
+			case ColorFormat::RGB_16bit:
+			case ColorFormat::RGB_24bit:
+				glTexImage2D(GL_TEXTURE_2D, _mip_level, gl_format, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+				break;
+			case ColorFormat::RGBA_32bit:
+				glTexImage2D(GL_TEXTURE_2D, _mip_level, gl_format, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+				break;
+			}
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, detail::ogl_GraphicsFormat::ToColor(internalFormat), size.x, size.y, 0, detail::ogl_GraphicsFormat::ToInputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
-			glGenerateMipmap(GL_TEXTURE_2D);
+			switch (format)
+			{
+			case ColorFormat::Alpha_8:
+				glCompressedTexImage2D(GL_TEXTURE_2D, _mip_level, gl_format, size.x, size.y, 0, buffer_size, data);
+				break;
+			case ColorFormat::RGB_16bit:
+			case ColorFormat::RGB_24bit:
+				glCompressedTexImage2D(GL_TEXTURE_2D, _mip_level, gl_format, size.x, size.y, 0, buffer_size, data);
+				break;
+			case ColorFormat::RGBA_32bit:
+				glCompressedTexImage2D(GL_TEXTURE_2D, _mip_level, gl_format, size.x, size.y, 0, buffer_size, data);
+				break;
+			}
 		}
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-		// TODO: fix internal format
-		GL_CHECK();
 	}
 
 
 	ivec2 OpenGLTexture::Size(ivec2 new_size)
 	{
 		Texture::Size(new_size);
-		if(!_is_compressed)
-			Buffer(nullptr, _size);
+		Buffer(nullptr, 0, _size, _internal_format);
 		return _size;
 	}
 

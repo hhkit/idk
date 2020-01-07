@@ -14,25 +14,26 @@ namespace idk
 	{
 	public:
 		using Saveable_t = Saveable<RenderTarget, false_type>;
-		inline const static string names[] = { "Color","Depth" };
-		static constexpr uint32_t kColorIndex = 0;
-		static constexpr uint32_t kDepthIndex = 1;
+		static constexpr string_view names[] = { "Color","Depth" };
+		static constexpr uint32_t    kColorIndex = 0;
+		static constexpr uint32_t    kDepthIndex = 1;
 		EXTENSION(".rtis");
 
 		// actually renderer-related stuff
-		ivec2 size{ 1024, 1024 };
-		AntiAliasing anti_aliasing;
-		RscHandle<Texture> color_tex;
-		RscHandle<Texture> depth_tex;
-		bool enable_mipmapping = false;
+		ivec2              size              { 1024, 1024 };
+		AntiAliasing       anti_aliasing     { AntiAliasing::None };
+		RscHandle<Texture> color_tex         { };
+		RscHandle<Texture> depth_tex         { };
+		bool               enable_mipmapping { false };
 
 		// debug information
-		bool is_world_renderer = true;
-		bool render_debug = true;
+		bool is_world_renderer { false };
+		bool render_debug      { false };
 
 		RenderTarget()noexcept = default;
 		RenderTarget(RenderTarget&&) noexcept = default;
 		RenderTarget& operator=(RenderTarget&&) noexcept = default;
+		// non-copiable
 		RenderTarget (const RenderTarget&) = delete;
 		RenderTarget& operator=(const RenderTarget&) = delete;
 		virtual ~RenderTarget();

@@ -31,12 +31,14 @@ namespace idk::ogl
 
 		for (auto& elem : Textures())
 		{
-			auto tex = elem = (elem == RscHandle<Texture>{})? Core::GetResourceManager().Create<OpenGLTexture>():Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid);
+			auto tex = elem = (elem == RscHandle<Texture>{})? 
+				  Core::GetResourceManager().Create<OpenGLTexture>()
+				: Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid);
 			tex->Size(size);
 		}
 		auto tex = Textures()[kDepthIndex];
 		auto& tmeta = tex->GetMeta();
-		tmeta.internal_format = ColorFormat::DEPTH_COMPONENT;
+		tmeta.internal_format = TextureInternalFormat::DEPTH_16;
 		depthbuffer = s_cast<GLuint>(r_cast<intptr_t>(tex->ID()));
 		//glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
 		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);

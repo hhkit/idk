@@ -31,12 +31,10 @@ namespace idk
 
 		// modifiers
 		virtual ivec2 Size(ivec2 newsize);
-		virtual void ChangeMode();
 
 		// identifier for ImGUIImage
 		virtual void* ID() const { return 0; }
 	protected:
 		ivec2 _size {};
-		void OnMetaUpdate(const TextureMeta&) {};
 	};
 }

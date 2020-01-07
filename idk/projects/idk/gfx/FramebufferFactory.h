@@ -2,6 +2,7 @@
 #include <stdafx.h>
 #include <gfx/Framebuffer.h>
 #include <gfx/Texture.h>
+#include <gfx/TextureInternalFormat.h>
 #include <res/ResourceFactory.h>
 
 namespace idk
@@ -11,38 +12,58 @@ namespace idk
 	{
 		LoadOp  load_op = LoadOp::eClear;
 		StoreOp store_op = StoreOp::eStore;
-		ColorFormat internal_format = ColorFormat::RGBAF_32;
+
+		TextureInternalFormat internal_format = TextureInternalFormat::RGBA_32_F;
 		FilterMode  filter_mode = FilterMode::Linear;
 		std::optional<RscHandle<Texture>> buffer;
 		bool isCubeMap = false;
 		bool override_as_depth = false;
 		bool is_input_att = false;
+
 		AttachmentInfo() = default;
+
 		AttachmentInfo(
 			LoadOp  load_op_,
 			StoreOp store_op_,
-			ColorFormat internal_format_,
+			ColorFormat color_format,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
-			std::optional<RscHandle<Texture>> buffer_=std::nullopt
+			std::optional<RscHandle<Texture>> buffer_= std::nullopt
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
-			internal_format{ internal_format_ },
+			internal_format{ ToInternalFormat(color_format, false) },
 			filter_mode{ filter_mode_ },
 			isCubeMap{ isCubeMap_},
 			buffer{ buffer_ }
 		{};
+
+		AttachmentInfo(
+			LoadOp  load_op_,
+			StoreOp store_op_,
+			DepthBufferMode depth_format,
+			bool enable_stencil,
+			FilterMode  filter_mode_,
+			bool isCubeMap_ = false,
+			std::optional<RscHandle<Texture>> buffer_ = std::nullopt
+		) :
+			load_op{ load_op_ },
+			store_op{ store_op_ },
+			internal_format{ ToInternalFormat(depth_format, enable_stencil) },
+			filter_mode{ filter_mode_ },
+			isCubeMap{ isCubeMap_ },
+			buffer{ buffer_ }
+		{};
+
 		AttachmentInfo(const Attachment& attachment)
 			: load_op{ attachment.load_op }
 			, store_op{ attachment.store_op }
-			, internal_format{ attachment.buffer->GetMeta().internal_format }
+			, internal_format{ ToInternalFormat(attachment.buffer->GetMeta().internal_format, false) }
 			, filter_mode{ attachment.buffer->GetMeta().filter_mode }
 			, buffer{attachment.buffer}
 		{
 		}
 	};
-
 
 	struct SpecializedInfo {};
 
@@ -53,20 +74,24 @@ namespace idk
 		ivec2 size{};
 		size_t num_layers{};
 	};
-	struct FrameBufferBuilder
+
+	class FrameBufferBuilder
 	{
-		void Begin(ivec2 size, size_t num_layers = 1);
-		void AddAttachment(AttachmentInfo att_info);
-		void SetDepthAttachment(AttachmentInfo att_info);
-		void ClearDepthAttachment();
+	public:
+		FrameBufferBuilder& Begin(ivec2 size, size_t num_layers = 1);
+		FrameBufferBuilder& AddAttachment(AttachmentInfo att_info);
+		FrameBufferBuilder& SetDepthAttachment(AttachmentInfo att_info);
+		FrameBufferBuilder& ClearDepthAttachment();
 		FrameBufferInfo End();
 	private:
 		FrameBufferInfo info;
 	};
 
-	struct FrameBufferFactory : ResourceFactory<FrameBuffer>
+	class FrameBufferFactory 
+		: public ResourceFactory<FrameBuffer>
 	{
-		RscHandle<FrameBuffer> Create(const FrameBufferInfo& info, SpecializedInfo* specialized_info=nullptr);
+	public:
+		RscHandle<FrameBuffer> Create(const FrameBufferInfo& info, SpecializedInfo* specialized_info = nullptr);
 		void Update(const FrameBufferInfo& info, RscHandle<FrameBuffer> h_fb, SpecializedInfo* specialized_info);
 	protected:
 		//out must be assigned a make unique of the implementation version of attachment

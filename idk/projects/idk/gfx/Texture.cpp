@@ -14,7 +14,4 @@ namespace idk
 	{
 		return _size = newsize;
 	}
-	void Texture::ChangeMode()
-	{
-	}
 }

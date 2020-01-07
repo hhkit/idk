@@ -73,21 +73,23 @@ namespace idk
 		, INTERNAL_FORMAT(RGB,  32, F)
 		, INTERNAL_FORMAT(RGBA, 32, F)
 
-		// srgb
-		, SRGB_8
-		, SRGB_8_ALPHA_8
-
 		// compressed
 		, RGB_DXT1
 		, RGBA_DXT1
 		, RGBA_DXT3
 		, RGBA_DXT5
 
+		// srgb
+		, SRGB_8
+		, SRGB_8_ALPHA_8
+
 		// compressed srgb
 		, SRGB_DXT1
 		, SRGBA_DXT1
 		, SRGBA_DXT3
 		, SRGBA_DXT5
+		, SRGB_FIRST = SRGB_8
+		, SRGB_LAST = SRGBA_DXT5
 
 		// depth buffer
 		, DEPTH_16

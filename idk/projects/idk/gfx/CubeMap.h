@@ -9,7 +9,7 @@ namespace idk
 	struct CubeMapMeta
 	{
 		UVMode      uv_mode = UVMode::Clamp;
-		ColorFormat internal_format = ColorFormat::RGBAF_16;
+		ColorFormat internal_format = ColorFormat::RGBA_32bit;
 		bool is_srgb{ true };
 		bool compressed{ true };
 	};
@@ -34,6 +34,5 @@ namespace idk
 	protected:
 		//Size for each texture in the cubemap
 		ivec2 _size{};
-		void OnMetaUpdate(const CubeMapMeta&) {};
 	};
 }
