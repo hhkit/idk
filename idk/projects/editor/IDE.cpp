@@ -236,14 +236,13 @@ namespace idk
             if (h.index() == BaseResourceID<Scene>)
                 OpenScene(h.AsHandle<Scene>());
         };
+
 	}
 
 	void IDE::LateInit()
 	{
 		Core::GetScheduler().SetPauseState(EditorPause);
-
-        for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
-			Core::GetResourceManager().Load(elem);
+		Core::GetResourceManager().LoadPaths(Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS));
 		Core::GetSystem<Application>().WaitForChildren();
 
 		SetupEditorScene();

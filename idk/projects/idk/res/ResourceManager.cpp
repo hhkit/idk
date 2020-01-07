@@ -281,30 +281,27 @@ namespace idk
 	void ResourceManager::WatchDirectory()
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED))
-		{
 			Unload(PathHandle{ elem });
-		}
 
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-		{
-			if (elem.GetMountPath().starts_with("/assets"))
-			{
-				Load(elem);
-			}
-			if (elem.GetMountPath().starts_with("/build"))
-				LoadCompiledAsset(elem);
-		}
-
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-		{
-			if (elem.GetMountPath().starts_with("/assets"))
-			{
-				Load(elem);
-			}
-			if (elem.GetMountPath().starts_with("/build"))
-				LoadCompiledAsset(elem);
-		}
+		LoadPaths(Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED));
+		LoadPaths(Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN));
 		Core::GetSystem<Application>().WaitForChildren();
+	}
+
+	void ResourceManager::LoadPaths(span<const PathHandle> paths)
+	{
+		for (auto& elem : paths)
+		{
+			if (elem.GetMountPath().starts_with("/assets"))
+			{
+				if (_compilable_extensions.find(elem.GetExtension()) != _compilable_extensions.end())
+					LoadAsync(elem);
+				else
+					Load(elem);
+			}
+			if (elem.GetMountPath().starts_with("/build"))
+				LoadCompiledAsset(elem);
+		}
 	}
 
 	bool ResourceManager::IsExtensionSupported(string_view ext)

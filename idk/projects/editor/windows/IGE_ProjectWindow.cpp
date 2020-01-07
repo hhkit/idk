@@ -604,7 +604,10 @@ namespace idk {
 
                     if (fs::exists(meta_path))
                         fs::remove(meta_path);
-                    fs::remove(full_path);
+
+                    if (fs::is_directory(full_path))
+                        fs::remove_all(full_path);
+                    //fs::remove(full_path);
                 }
 
                 ImGui::EndPopup();

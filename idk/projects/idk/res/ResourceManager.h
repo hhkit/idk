@@ -84,6 +84,8 @@ namespace idk
 		void SaveDirtyMetadata();
 		void WatchDirectory();
 
+		void LoadPaths(span<const PathHandle>);
+
 		/* HANDLE CHECKING - related to handles */
 		template<typename Res> bool Validate(const RscHandle<Res>&);
 		template<typename Res> Res& Get     (const RscHandle<Res>&);
