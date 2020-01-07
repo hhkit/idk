@@ -942,6 +942,8 @@
     <ClInclude Include="ReflectReg_Resources.h" />
     <ClInclude Include="ReflectReg_Common.h" />
     <ClInclude Include="ReflectReg_GfxComponents.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1369,6 +1371,7 @@
     </ClCompile>
     <ClCompile Include="res\ResourceMeta.cpp" />
     <ClCompile Include="gfx\GraphFactory.cpp" />
+    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -53,6 +53,7 @@ namespace idk
 		Saveable_t::Dirty();
 		_need_finalizing = true;
 	}
+
 	RenderTarget::ArrayRef<const RscHandle<Texture>, 2> RenderTarget::Textures() const
 	{
 		ArrayRef<const RscHandle<Texture>, 2> res;

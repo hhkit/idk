@@ -6,9 +6,12 @@
 #include <prefab/Prefab.h>
 #include <res/CompiledAssetLoader.inl>
 
+#include <res/CompiledAssets.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/VknTexture.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include <opengl/resource/OpenGLMesh.h>
+#include <opengl/resource/OpenGLTexture.h>
 #include <editor/IDE.h>
 #include <file/FileSystem.h>
 #include <debug/LogSystem.h>
@@ -29,6 +32,7 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	{
 		auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
 		gSys = &sys;
 		if (HasArg(L"--validation", command_lines, num_args))
 			sys.Instance().EnableValidation();
@@ -37,6 +41,7 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	case GraphicsAPI::OpenGL:
 		gSys = &c->AddSystem<ogl::Win32GraphicsSystem>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, ogl::OpenGLMesh>>();
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, ogl::OpenGLTexture>>();
 		break;
 	default:
 		break;
@@ -46,6 +51,10 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<Prefab, Prefab, false>>();
 	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Animation, anim::Animation>>();
 	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Skeleton, anim::Skeleton>>();
+	Core::GetResourceManager().RegisterCompilableExtension(".tga");
+	Core::GetResourceManager().RegisterCompilableExtension(".png");
+	Core::GetResourceManager().RegisterCompilableExtension(".gif");
+	Core::GetResourceManager().RegisterCompilableExtension(".dds");
 	Core::GetResourceManager().RegisterCompilableExtension(".fbx");
 	Core::GetResourceManager().RegisterCompilableExtension(".obj");
 	Core::GetResourceManager().RegisterCompilableExtension(".ma");

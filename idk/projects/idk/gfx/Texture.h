@@ -10,12 +10,11 @@ namespace idk
 
 	struct TextureMeta
 	{
-		ColorFormat internal_format = ColorFormat::RGBA_8; //Format in GPU
-		UVMode      uv_mode = UVMode::Repeat;
-		InputChannels format = InputChannels::RGBA;   //Remove, loader determines this
-		FilterMode  filter_mode = FilterMode::Linear;
-		bool is_srgb{ true };
-		bool compressed{ true };
+		ColorFormat internal_format = ColorFormat::Automatic; //Format in GPU
+		UVMode      uv_mode         = UVMode::Repeat;
+		FilterMode  filter_mode     = FilterMode::Linear;
+		bool        is_srgb         = true;
+		unsigned    mipmap_level    = 0;
 	};
 
 	class Texture

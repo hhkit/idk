@@ -35,7 +35,7 @@
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::RenderTarget, "RenderTarget")
-	REFLECT_VARS(size, is_world_renderer, render_debug, color_tex, depth_tex)
+	REFLECT_VARS(size, render_debug, color_tex, depth_tex)
 	REFLECT_END()
 
 	//REFLECT_ENUM(idk::CMColorFormat, "CMColorFormat")

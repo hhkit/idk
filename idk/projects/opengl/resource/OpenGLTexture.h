@@ -1,5 +1,6 @@
 #pragma once
 #include <gfx/Texture.h>
+#include <gfx/CompiledTexture.h>
 #include <glad/glad.h>
 
 namespace idk::ogl
@@ -9,8 +10,7 @@ namespace idk::ogl
 	{
 	public:
 		OpenGLTexture();
-		OpenGLTexture(const bool& compressed);
-		OpenGLTexture(const GLuint& ,const ivec2& size, FilterMode fm = FilterMode::Linear, UVMode uv = UVMode::Repeat);
+		explicit OpenGLTexture(const CompiledTexture&);
 		OpenGLTexture(OpenGLTexture&&);
 		OpenGLTexture& operator=(OpenGLTexture&&);
 		~OpenGLTexture();
@@ -25,8 +25,9 @@ namespace idk::ogl
 		
 	private:
 		GLuint _id = 0;
-		bool _isCompressedTexture{false};
-		void UpdateUV(UVMode);
-		void UpdateFilter(FilterMode, const bool& isMipMap = false);
+		bool _is_compressed = false;
+		GLuint _mip_level = 0;
+		void SetUVMode(UVMode);
+		void SetFilteringMode(FilterMode);
 	};
 }

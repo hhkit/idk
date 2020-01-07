@@ -65,6 +65,7 @@
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\ShaderIncluder.h" />
     <ClInclude Include="gfx\ShaderSnippet.h" />
     <ClInclude Include="gfx\ShaderSnippetFactory.h" />
@@ -76,6 +77,7 @@
     <ClInclude Include="gfx\FontData.h" />
     <ClInclude Include="common\LayerMask.h" />
     <ClInclude Include="gfx\TextAlignment.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
@@ -352,6 +354,7 @@
     <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
+    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="math\ritters.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
