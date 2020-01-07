@@ -110,14 +110,17 @@ namespace idk::vkn
 		auto req_itr = requests.begin();
 		//TODO Acquire framebuffers
 		auto [fb_start,fb_end]=_pimpl->AcquireFrameBuffers(requests.size());
+		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
+		cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 		for (auto& task : render_tasks)
 		{
 			auto& request = *req_itr;
-			vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
 			//TODO actually configure a proper result buffer
 			vk::Buffer result_buffer;
 			task.GenerateDS(rs.dpools, (++i)==render_tasks.size());
 			//TODO Bind FrameBuffers
+			//TODO beginRenderPass
+			cmd_buffer.beginRenderPass();
 			//TODO Draw using PipelineThingy's info
 			
 			size_t offset = 0;//TODO Use a proper offset
@@ -131,7 +134,9 @@ namespace idk::vkn
 				offset,0,0,layers,vk::Offset3D{data.point.x,data.point.y,0},vk::Extent3D{1,1,1}
 			};
 			cmd_buffer.copyImageToBuffer(tex.Image(), vk::ImageLayout::eTransferSrcOptimal, result_buffer, copy);
+			cmd_buffer.endRenderPass();
 		}
+		cmd_buffer.end();
 		auto& fd = _pimpl->Add(std::move(requests));
 		auto fence = *fd.fence;
 		//TODO submit buffer and set it up to signal the fence
