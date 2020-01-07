@@ -50,6 +50,7 @@ namespace idk
         }
         core_fs.Dismount("/assets");
         core_fs.Dismount("/config");
+        core_fs.Dismount("/build");
 
         fs::path path = full_path;
         IDK_ASSERT_MSG(fs::exists(path), "Project does not exist!");
@@ -70,6 +71,11 @@ namespace idk
             fs::create_directory(configs);
         core_fs.Mount(configs.string(), "/config", false);
 
+        fs::path build = dir / "Cache"; 
+        if (!fs::exists(build))
+            fs::create_directory(build);
+
+        core_fs.Mount(build.string(), "/build");
         LoadConfigs();
     }
 

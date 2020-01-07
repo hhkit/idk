@@ -243,9 +243,7 @@ namespace idk
 		Core::GetScheduler().SetPauseState(EditorPause);
 
         for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
-        {
 			Core::GetResourceManager().Load(elem);
-        }
 		Core::GetSystem<Application>().WaitForChildren();
 
 		SetupEditorScene();

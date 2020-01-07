@@ -161,7 +161,6 @@ namespace idk
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };
 		fs.Mount(exe_dir + "/engine_data", "/engine_data");
-		fs.Mount(exe_dir + "/build", "/build");
 	}
 
 	void ResourceManager::LateInit()
@@ -356,14 +355,8 @@ namespace idk
 					parse_text(metastr, meta_bundle);
 				}
 				old_bundle = meta_bundle;
-				ResourceBundle resource_bundle;
-				for (auto& elem : meta_bundle.metadatas)
-				{
-					GenericResourceHandle{ elem.t_hash, elem.guid }.visit([&](auto& handle)
-						{
-							resource_bundle.Add(handle);
-						});
-				}
+				ResourceBundle resource_bundle{meta_bundle};
+
 				auto mount_path = path.GetMountPath();
 				emplace_path = string{ mount_path.substr(0, mount_path.length() - string_view(".meta").length()) };
 				return std::make_tuple(resource_bundle, meta_bundle);
@@ -379,14 +372,7 @@ namespace idk
 					auto new_bundle = GetMeta(path);
 					if (new_bundle)
 					{
-						ResourceBundle resource_bundle;
-						for (auto& elem : new_bundle.metadatas)
-						{
-							GenericResourceHandle{ elem.t_hash, elem.guid }.visit([&](auto& handle)
-								{
-									resource_bundle.Add(handle);
-								});
-						}
+						ResourceBundle resource_bundle{new_bundle};
 						return std::make_tuple(resource_bundle, new_bundle);
 					}
 				}
@@ -443,6 +429,12 @@ namespace idk
 
 	void ResourceManager::LoadAsync(PathHandle path, bool wait)
 	{
+		if (path.GetExtension() == ".meta")
+		{
+			Load(path);
+			return;
+		}
+
 		auto last_compiled_file_time = [&]() -> long long
 		{
 			auto p = PathHandle{ string{ path.GetMountPath() } +".time" };
