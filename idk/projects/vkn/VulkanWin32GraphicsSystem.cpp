@@ -349,7 +349,16 @@ namespace idk::vkn
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
-		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(),*curr_signal.render_finished);
+		vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		vk::SubmitInfo si
+		{
+			1,
+			&*curr_frame.GetPostRenderComplete(),
+			&stage,0,nullptr,1,
+			&* curr_signal.render_finished
+		};
+		View().GraphicsQueue().submit(si, {});
+		//instance_->DrawFrame(*curr_frame.GetPostRenderComplete(),*curr_signal.render_finished);
 
 		}
 		catch (vk::SystemError& err)

@@ -984,12 +984,13 @@ namespace idk::vkn
 		return *view_;
 	}
 
-
 	void VulkanState::AcquireFrame(vk::Semaphore signal)
 	{
+		auto cf = current_frame;
 		auto& current_signal = m_swapchain->m_graphics.pSignals[current_frame];
-		m_device->waitForFences(1, &*current_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
-
+		m_device->waitForFences(1, &*current_signal.inflight_fence(), VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
+		m_device->resetFences(*current_signal.inflight_fence());
+		auto status = m_device->getFenceStatus(*current_signal.inflight_fence());
 		auto res = m_device->acquireNextImageKHR(*m_swapchain->swap_chain, std::numeric_limits<uint32_t>::max(), signal, {}, dispatcher);
 		rv = res.value;
 		rvRes = res.result;
@@ -1008,6 +1009,7 @@ namespace idk::vkn
 
 	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal)
 	{
+		return;
 		//AcquireFrame();
 		auto& current_signal = m_swapchain->m_graphics.pSignals[current_frame];
 
@@ -1017,7 +1019,7 @@ namespace idk::vkn
 
 		//updateUniformBuffer(imageIndex);
 
-		m_device->resetFences(1, &*current_signal.inflight_fence, dispatcher);
+	//	m_device->resetFences(1, &*current_signal.inflight_fence(), dispatcher);
 
 		{
 			[[maybe_unused]] auto& render_state = view_->CurrRenderState();
@@ -1078,7 +1080,7 @@ namespace idk::vkn
 			};
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
-			if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_signal.inflight_fence, dispatcher) != vk::Result::eSuccess)
+			if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_signal.inflight_fence(), dispatcher) != vk::Result::eSuccess)
 				throw std::runtime_error("failed to submit draw command buffer!");
 		}
 		
@@ -1098,16 +1100,19 @@ namespace idk::vkn
 			semaphore = CreateVkSemaphore(*View().Device());
 		return std::make_pair(std::move(semaphores_ptr), semaphores);
 	}
-#pragma optimize("",off)
 	void VulkanState::PresentFrame(vk::Semaphore wait)
 	{
-		auto& current_sc_signal = m_swapchain->m_swapchainGraphics.pSignals[current_frame];
+		auto& current_sc_signal = m_swapchain->m_graphics.pSignals[current_frame];
+		auto fence = *current_sc_signal.inflight_fence();
 		auto sz = m_present_trf_commandbuffers.size();
 		auto cf = current_frame;
 		auto& command_buffer = *m_present_trf_commandbuffers[current_frame];
-		//static auto [blargptr,blaargh_span] = CreateSemaphores(max_frames_in_flight);
-		static auto blaargh = CreateVkSemaphore(*View().Device());// blaargh_span[current_frame];
-		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::ePresentSrcKHR, hlp::BeginInfo{}, hlp::SubmissionInfo{ wait, vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer, blaargh,*current_sc_signal.inflight_fence });
+		static auto tmp = CreateSemaphores(max_frames_in_flight);
+		auto& [blargptr,blaargh_span] = tmp;
+		auto blaargh = //CreateVkSemaphore(*View().Device());/* 
+		blaargh_span[current_frame];//*/
+		m_device->resetFences(1, &fence, dispatcher);
+		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::ePresentSrcKHR, hlp::BeginInfo{}, hlp::SubmissionInfo{ wait, vk::PipelineStageFlagBits::eBottomOfPipe, blaargh,fence});
 
 		vk::SwapchainKHR swapchains[] = { *m_swapchain->swap_chain };
 
@@ -1166,12 +1171,15 @@ namespace idk::vkn
 
 	void VulkanState::PresentFrame2()
 	{
+		auto cf = current_frame;
 		auto& current_sc_signal = m_swapchain->m_swapchainGraphics.pSignals[current_frame];
 
-		m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
-
+		//Already done by acquire frame
+		//m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher); 
+		auto status = m_device->getFenceStatus(*current_sc_signal.inflight_fence());
 		auto& command_buffer = *m_blitz_commandbuffers[current_frame];
-		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer };
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eBottomOfPipe// vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer
+	};
 
 		vk::CommandBufferBeginInfo begin_info
 		{
@@ -1243,12 +1251,12 @@ namespace idk::vkn
 					//hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->swapchain_images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR, false);
 					//hlp::TransitionImageLayout(true, command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 					//BeginFrame();
-					prevFence = &*(elem->pSignals[current_frame].inflight_fence);
+					prevFence = &*(elem->pSignals[current_frame].inflight_fence());
 
 				}
 			}
 		}
-		vk::Semaphore next = waitSemaphores;
+		vk::Semaphore next = readySemaphores;
 		if (m_swapchain->m_inBetweens.empty())
 		{
 
