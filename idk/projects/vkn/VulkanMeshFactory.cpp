@@ -667,7 +667,6 @@ namespace idk::vkn
 			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
 		}
 	}
-
 	vec3 compute_tangent(vec3 p0, vec3 p1, vec3 p2, vec2 uv0, vec2 uv1, vec2 uv2)
 	{
 		vec3 p01 = p1 - p0;
@@ -687,7 +686,6 @@ namespace idk::vkn
 	{
 		return (abs(val) <= constants::epsilon<T>()) ? 0 : val;
 	}
-
 	//Treats the indices as a triangle list
 	void compute_tangents(vector<vec3>& tangents, const vector<vec3>& pos, const vector<vec2>& uv, const vector<uint16_t>& indices)
 	{
@@ -702,6 +700,9 @@ namespace idk::vkn
 			vec3 e01 = pos[i1] - pos[i0];
 			vec3 e02 = pos[i2] - pos[i0];
 			vec3 e12 = pos[i2] - pos[i1];
+			e01.normalize();
+			e02.normalize();
+			e12.normalize();
 			//N0 = E0 X  E1
 			real n0 =  e01.dot(e02);
 			//N1 = E2 X -E0
