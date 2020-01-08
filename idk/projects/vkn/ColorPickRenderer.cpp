@@ -112,18 +112,18 @@ namespace idk::vkn
 		auto [fb_start,fb_end]=_pimpl->AcquireFrameBuffers(requests.size());
 		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
 		cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+		//TODO actually configure a proper result buffer
+		vk::Buffer result_buffer;
+		size_t offset = 0;//TODO Use a proper offset
 		for (auto& task : render_tasks)
 		{
 			auto& request = *req_itr;
-			//TODO actually configure a proper result buffer
-			vk::Buffer result_buffer;
 			task.GenerateDS(rs.dpools, (++i)==render_tasks.size());
 			//TODO Bind FrameBuffers
 			//TODO beginRenderPass
 			cmd_buffer.beginRenderPass();
 			//TODO Draw using PipelineThingy's info
 			
-			size_t offset = 0;//TODO Use a proper offset
 			auto& data = request.data;
 			RscHandle<VknTexture> htex;//TODO grab tex from render buffer
 			auto& tex = htex.as<VknTexture>(); 
@@ -135,6 +135,7 @@ namespace idk::vkn
 			};
 			cmd_buffer.copyImageToBuffer(tex.Image(), vk::ImageLayout::eTransferSrcOptimal, result_buffer, copy);
 			cmd_buffer.endRenderPass();
+			offset += picking_pixel_size;
 		}
 		cmd_buffer.end();
 		auto& fd = _pimpl->Add(std::move(requests));
