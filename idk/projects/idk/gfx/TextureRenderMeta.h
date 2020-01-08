@@ -29,13 +29,6 @@ namespace idk{
 		Cubic
 	);
 
-	ENUM(InputChannels, char
-		, RED
-		, RG
-		, RGB
-		, RGBA
-	);
-
 	ENUM(DepthBufferMode, char
 		, NoDepth
 		, Depth16
@@ -54,7 +47,6 @@ namespace idk{
 		virtual ~GraphicsFormat() = default;
 		virtual unsigned ToUVMode(const UVMode& uv) = 0;
 		virtual unsigned ToColor(const ColorFormat& c) = 0;
-		virtual int ToInputChannels(const InputChannels& ic) = 0;
 		virtual unsigned ToFilter(const FilterMode& f) = 0;
 	};
 

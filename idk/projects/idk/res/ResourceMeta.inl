@@ -5,13 +5,14 @@
 #include <res/ResourceManager.inl>
 namespace idk
 {
+	
 	template<typename Res, typename Meta>
 	inline Meta& MetaResource<Res, Meta>::GetMeta()
 	{
 		auto ptr = Core::GetResourceManager().GetControlBlock(this->GetHandle())->userdata.get();
 		return *static_cast<Meta*>(ptr);
 	}
-
+	
 	template<typename Res, typename Meta>
 	inline void MetaResource<Res, Meta>::DirtyMeta()
 	{

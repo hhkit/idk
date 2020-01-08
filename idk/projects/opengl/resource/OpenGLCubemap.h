@@ -18,7 +18,7 @@ namespace idk::ogl
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
 		void BindConvolutedToUnit(GLuint texture_unit = 0);
-		void Buffer(unsigned int face_value, void* data, ivec2 size, InputChannels inputchn = InputChannels::RGB, ColorFormat cFormat = ColorFormat::RGBAF_16);
+		void Buffer(TextureTarget face_value, void* data, ivec2 size, TextureInternalFormat internal_format, GLenum color_components = GL_RGB, GLenum incoming_type = GL_UNSIGNED_BYTE);
 
 		using CubeMap::Size;
 		void Size(ivec2 new_size) override;

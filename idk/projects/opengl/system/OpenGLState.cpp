@@ -80,20 +80,8 @@ namespace idk::ogl
 	void OpenGLState::GenResources()
 	{
 
-		brdf_texture = Core::GetResourceManager().Create<OpenGLTexture>();
-		brdf_texture->Bind();
-		auto m =brdf_texture->GetMeta();
-		m.internal_format = ColorFormat::RGF_16;
-		brdf_texture->GetMeta() = m;
-		brdf_texture->Size(ivec2{ 512 });
-
-		fb_man.cBufferPickingTexture = Core::GetResourceManager().Create<OpenGLTexture>();
-		fb_man.cBufferPickingTexture->Bind();
-		auto pickMeta = fb_man.cBufferPickingTexture->GetMeta();
-		pickMeta.internal_format = ColorFormat::RUI_32;
-		pickMeta.format = InputChannels::RGBA;
-		fb_man.cBufferPickingTexture->GetMeta() = pickMeta;
-		fb_man.cBufferPickingTexture->Size(ivec2{ 512 });
+		brdf_texture = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RG_16_F, ivec2{512});
+		fb_man.cBufferPickingTexture = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::R_32_UI, ivec2{ 512 });
 
 		FrameBufferBuilder builder;
 		builder.Begin(ivec2{ 512,512 });
@@ -102,8 +90,8 @@ namespace idk::ogl
 			{
 				LoadOp::eClear,
 				StoreOp::eStore,
-				idk::ColorFormat::RGBF_32,
-				FilterMode::_enum::Linear
+				TextureInternalFormat::RGB_32_F,
+				FilterMode::Linear
 			}
 		);
 		builder.SetDepthAttachment(
@@ -111,8 +99,9 @@ namespace idk::ogl
 			{
 				LoadOp::eClear,
 				StoreOp::eStore,
-				idk::ColorFormat::DEPTH_COMPONENT,
-				FilterMode::_enum::Linear
+				DepthBufferMode::Depth16,
+				false,
+				FilterMode::Linear
 			}
 		);
 

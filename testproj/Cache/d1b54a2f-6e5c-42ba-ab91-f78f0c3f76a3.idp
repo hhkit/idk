@@ -1,0 +1,841 @@
+data: 
+- components: 
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ball_monster_model
+  - !Animator 
+    layers: 
+    - anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      blend_type: Override_Blend
+      bone_mask: [1]
+      default_index: 0
+      default_weight: 1
+      name: Base Layer
+    parameters: 
+      bool_vars: {}
+      float_vars: {}
+      int_vars: {}
+      trigger_vars: {}
+    skeleton: {guid: f8493d59-b7fc-4b83-aaeb-f1bf545d7a8d}
+  parent_index: -1
+- components: 
+  - !Transform 
+    parent: {id: 98560}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ballmonster_low
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 55e37d7d-86ba-4bc6-b230-a86a250beaad}
+  parent_index: 0
+- components: 
+  - !Transform 
+    parent: {id: 98560}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: BallMonster_root_jnt
+  - !Bone 
+    {bone_index: 0, bone_name: BallMonster_root_jnt}
+  parent_index: 0
+- components: 
+  - !Transform 
+    parent: {id: 8590033152}
+    position: {x: 0, y: 0.895877, z: 0.0740755}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: COG_jnt
+  - !Bone 
+    {bone_index: 1, bone_name: COG_jnt}
+  parent_index: 2
+- components: 
+  - !Transform 
+    parent: {id: 12885000448}
+    position: {x: 0, y: 0.1400067, z: 0.16516972}
+    rotation: 
+      w: 0.7015388
+      x: -0.088562585
+      y: 0.7015388
+      z: -0.088562585
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: torso_jnt
+  - !Bone 
+    {bone_index: 2, bone_name: torso_jnt}
+  parent_index: 3
+- components: 
+  - !Transform 
+    parent: {id: 12885000448}
+    position: {x: 3.1554436e-32, y: 0.14000665, z: 0.16516967}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: torso_splineik_jnt
+  - !Bone 
+    {bone_index: 3, bone_name: torso_splineik_jnt}
+  parent_index: 3
+- components: 
+  - !Transform 
+    parent: {id: 12885000448}
+    position: {x: -4.1095587e-16, y: -0.0076727197, z: -0.7802052}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: pelvis_splineik_jnt
+  - !Bone 
+    {bone_index: 4, bone_name: pelvis_splineik_jnt}
+  parent_index: 3
+- components: 
+  - !Transform 
+    parent: {id: 17179967744}
+    position: {x: 0.35597134, y: -7.6293944e-08, z: -5.416988e-18}
+    rotation: 
+      w: 0.9993263
+      x: 6.466705e-27
+      y: 2.247297e-18
+      z: 0.036701135
+    scale: {x: 0.9999999, y: 0.9999999, z: 1}
+  - !Name 
+    name: spine2_jnt
+  - !Bone 
+    {bone_index: 5, bone_name: spine2_jnt}
+  parent_index: 4
+- components: 
+  - !Transform 
+    parent: {id: 17179967744}
+    position: {x: -0.32626715, y: -0.074171826, z: 5.1074556e-18}
+    rotation: 
+      w: -1.6124465e-16
+      x: -0.33375198
+      y: 0.9426609
+      z: -1.7775701e-17
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: head_jnt
+  - !Bone 
+    {bone_index: 6, bone_name: head_jnt}
+  parent_index: 4
+- components: 
+  - !Transform 
+    parent: {id: 17179967744}
+    position: {x: 0.022669792, y: 0.39838156, z: 0.36956438}
+    rotation: 
+      w: 0.01585277
+      x: 0.7066907
+      y: -0.62002647
+      z: 0.340447
+    scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  - !Name 
+    name: L_scapula_jnt
+  - !Bone 
+    {bone_index: 7, bone_name: L_scapula_jnt}
+  parent_index: 4
+- components: 
+  - !Transform 
+    parent: {id: 17179967744}
+    position: {x: 0.022670211, y: 0.39837867, z: -0.36956406}
+    rotation: 
+      w: -0.340447
+      x: 0.62002647
+      y: 0.7066907
+      z: 0.01585277
+    scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  - !Name 
+    name: R_scapula_jnt
+  - !Bone 
+    {bone_index: 8, bone_name: R_scapula_jnt}
+  parent_index: 4
+- components: 
+  - !Transform 
+    parent: {id: 30064869632}
+    position: {x: 0.31195244, y: 7.6293944e-08, z: -2.2112424e-16}
+    rotation: 
+      w: 0.9966519
+      x: -2.593623e-26
+      y: 5.0064896e-18
+      z: 0.081762165
+    scale: {x: 1.0000001, y: 1.0000001, z: 1}
+  - !Name 
+    name: spine1_jnt
+  - !Bone 
+    {bone_index: 9, bone_name: spine1_jnt}
+  parent_index: 7
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.11272209, y: 7.6293944e-08, z: -2.3887236e-17}
+    rotation: 
+      w: 2.4675102e-16
+      x: -0.35841104
+      y: 0.9335639
+      z: 2.2160628e-16
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: jaw_jnt
+  - !Bone 
+    {bone_index: 10, bone_name: jaw_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.41141236, y: 0.27391493, z: -0.17555325}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_upperlip1_jnt
+  - !Bone 
+    {bone_index: 11, bone_name: L_upperlip1_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.38007674, y: 0.14682373, z: -0.31825542}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_upperlip2_jnt
+  - !Bone 
+    {bone_index: 12, bone_name: L_upperlip2_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.39373383, y: 0.037949447, z: -0.3794375}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_lipcorner_jnt
+  - !Bone 
+    {bone_index: 13, bone_name: L_lipcorner_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.22738437, y: 0.10442047, z: -0.43436554}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_cheek_jnt
+  - !Bone 
+    {bone_index: 14, bone_name: L_cheek_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.1767762, y: 0.40936095, z: -0.16754699}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_brow_jnt
+  - !Bone 
+    {bone_index: 15, bone_name: L_brow_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.20661347, y: 0.42273405, z: -2.1775688e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: browmid_jnt
+  - !Bone 
+    {bone_index: 16, bone_name: browmid_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: -0.14183763, y: 0.43275955, z: 0.04491623}
+    rotation: 
+      w: 0.6693423
+      x: -0.11872527
+      y: -0.32502756
+      z: 0.6574514
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: fluffbase_jnt
+  - !Bone 
+    {bone_index: 17, bone_name: fluffbase_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.17677628, y: 0.40936035, z: 0.16754699}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_brow_jnt
+  - !Bone 
+    {bone_index: 18, bone_name: R_brow_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.22738262, y: 0.104424894, z: 0.434365}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_cheek_jnt
+  - !Bone 
+    {bone_index: 19, bone_name: R_cheek_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.41141388, y: 0.27391067, z: 0.17555301}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_upperlip1_jnt
+  - !Bone 
+    {bone_index: 20, bone_name: R_upperlip1_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.3800756, y: 0.14682555, z: 0.318255}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_upperlip2_jnt
+  - !Bone 
+    {bone_index: 21, bone_name: R_upperlip2_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.3937335, y: 0.037949067, z: 0.379438}
+    rotation: 
+      w: 0
+      x: 6.695163e-17
+      y: -1.4621242e-16
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_lipcorner_jnt
+  - !Bone 
+    {bone_index: 22, bone_name: R_lipcorner_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 34359836928}
+    position: {x: 0.41795927, y: 0.3035516, z: -3.909311e-18}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: upperlip_jnt
+  - !Bone 
+    {bone_index: 23, bone_name: upperlip_jnt}
+  parent_index: 8
+- components: 
+  - !Transform 
+    parent: {id: 38654804224}
+    position: {x: 0.8507881, y: 3.8146972e-08, z: -7.6293944e-08}
+    rotation: 
+      w: 0.8934062
+      x: 0.17760146
+      y: -0.31947592
+      z: 0.26118618
+    scale: {x: 1, y: 1, z: 1.0000001}
+  - !Name 
+    name: L_F_shoulder_jnt
+  - !Bone 
+    {bone_index: 24, bone_name: L_F_shoulder_jnt}
+  parent_index: 9
+- components: 
+  - !Transform 
+    parent: {id: 42949771520}
+    position: {x: -0.8507861, y: 7.867813e-07, z: 1.5258788e-06}
+    rotation: 
+      w: 0.89340633
+      x: 0.17760068
+      y: -0.31947622
+      z: 0.26118594
+    scale: {x: 1, y: 1, z: 0.9999999}
+  - !Name 
+    name: R_F_shoulder_jnt
+  - !Bone 
+    {bone_index: 25, bone_name: R_F_shoulder_jnt}
+  parent_index: 10
+- components: 
+  - !Transform 
+    parent: {id: 47244738816}
+    position: {x: 0.29203507, y: 0, z: -1.934596e-16}
+    rotation: 
+      w: 0.98411006
+      x: 0
+      y: -1.0872386e-17
+      z: -0.17755954
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: pelvis_jnt
+  - !Bone 
+    {bone_index: 26, bone_name: pelvis_jnt}
+  parent_index: 11
+- components: 
+  - !Transform 
+    parent: {id: 51539706112}
+    position: {x: 0.31965998, y: -7.6293944e-08, z: 2.3782177e-17}
+    rotation: 
+      w: -5.5545935e-10
+      x: -0.261901
+      y: 0.9650948
+      z: 2.0468462e-09
+    scale: {x: 0.9999998, y: 0.9999998, z: 1}
+  - !Name 
+    name: tonguebase_jnt
+  - !Bone 
+    {bone_index: 27, bone_name: tonguebase_jnt}
+  parent_index: 12
+- components: 
+  - !Transform 
+    parent: {id: 51539706112}
+    position: {x: -0.1822995, y: -0.27625722, z: 0.385378}
+    rotation: 
+      w: 1
+      x: 0
+      y: 6.617445e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_lowerlip2_jnt
+  - !Bone 
+    {bone_index: 28, bone_name: L_lowerlip2_jnt}
+  parent_index: 12
+- components: 
+  - !Transform 
+    parent: {id: 51539706112}
+    position: {x: -0.22725677, y: -0.43185467, z: 0.22048107}
+    rotation: 
+      w: 1
+      x: 0
+      y: 6.617445e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_lowerlip1_jnt
+  - !Bone 
+    {bone_index: 29, bone_name: L_lowerlip1_jnt}
+  parent_index: 12
+- components: 
+  - !Transform 
+    parent: {id: 51539706112}
+    position: {x: -0.28115273, y: -0.46876395, z: -1.3324919e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 6.617445e-24
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: lowerlip
+  - !Bone 
+    {bone_index: 30, bone_name: lowerlip}
+  parent_index: 12
+- components: 
+  - !Transform 
+    parent: {id: 51539706112}
+    position: {x: -0.18229927, y: -0.27625677, z: -0.385378}
+    rotation: 
+      w: 0
+      x: 1.8312942e-17
+      y: -5.842975e-17
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_lowerlip2_jnt
+  - !Bone 
+    {bone_index: 31, bone_name: R_lowerlip2_jnt}
+  parent_index: 12
+- components: 
+  - !Transform 
+    parent: {id: 51539706112}
+    position: {x: -0.22725776, y: -0.4318554, z: -0.220481}
+    rotation: 
+      w: 0
+      x: 1.8312942e-17
+      y: -5.842975e-17
+      z: 1
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_lowerlip1_jnt
+  - !Bone 
+    {bone_index: 32, bone_name: R_lowerlip1_jnt}
+  parent_index: 12
+- components: 
+  - !Transform 
+    parent: {id: 81604477184}
+    position: {x: 0.28116974, y: -5.7220458e-08, z: -3.8146972e-08}
+    rotation: 
+      w: 1
+      x: 0
+      y: 7.450581e-09
+      z: -7.450581e-09
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: flufftip_jnt
+  - !Bone 
+    {bone_index: 33, bone_name: flufftip_jnt}
+  parent_index: 19
+- components: 
+  - !Transform 
+    parent: {id: 111669248256}
+    position: {x: 0.5138839, y: 3.8146972e-08, z: 7.6293944e-08}
+    rotation: 
+      w: 0.94987184
+      x: -0.19200042
+      y: 0.13908298
+      z: 0.2038022
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_F_elbow_jnt
+  - !Bone 
+    {bone_index: 34, bone_name: L_F_elbow_jnt}
+  parent_index: 26
+- components: 
+  - !Transform 
+    parent: {id: 115964215552}
+    position: {x: -0.5138837, y: -2.2888183e-07, z: 7.6293944e-08}
+    rotation: 
+      w: 0.9498718
+      x: -0.19200042
+      y: 0.139083
+      z: 0.20380214
+    scale: {x: 1.0000001, y: 1.0000001, z: 1.0000002}
+  - !Name 
+    name: R_F_elbow_jnt
+  - !Bone 
+    {bone_index: 35, bone_name: R_F_elbow_jnt}
+  parent_index: 27
+- components: 
+  - !Transform 
+    parent: {id: 120259182848}
+    position: {x: 0.20966789, y: -7.6293944e-08, z: -4.785448e-17}
+    rotation: 
+      w: 0.9903051
+      x: 5.220491e-26
+      y: 8.505739e-18
+      z: 0.13890925
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: tailbase_jnt
+  - !Bone 
+    {bone_index: 36, bone_name: tailbase_jnt}
+  parent_index: 28
+- components: 
+  - !Transform 
+    parent: {id: 120259182848}
+    position: {x: 0.029421082, y: -0.16990837, z: 0.33694798}
+    rotation: 
+      w: 0.1621844
+      x: 0.80666786
+      y: -0.56562525
+      z: -0.055238582
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_B_hip_jnt
+  - !Bone 
+    {bone_index: 37, bone_name: L_B_hip_jnt}
+  parent_index: 28
+- components: 
+  - !Transform 
+    parent: {id: 120259182848}
+    position: {x: 0.029421424, y: -0.1699076, z: -0.33694792}
+    rotation: 
+      w: 0.055238433
+      x: 0.56562525
+      y: 0.806668
+      z: 0.16218396
+    scale: {x: 0.99999976, y: 0.9999998, z: 0.9999998}
+  - !Name 
+    name: R_B_hip_jnt
+  - !Bone 
+    {bone_index: 38, bone_name: R_B_hip_jnt}
+  parent_index: 28
+- components: 
+  - !Transform 
+    parent: {id: 124554150144}
+    position: {x: 0.24872068, y: 0, z: -3.1977907e-09}
+    rotation: 
+      w: 0.9991985
+      x: -1.04166914e-16
+      y: 0
+      z: 0.04003077
+    scale: {x: 0.99999994, y: 0.99999994, z: 1}
+  - !Name 
+    name: tonguemid_jnt
+  - !Bone 
+    {bone_index: 39, bone_name: tonguemid_jnt}
+  parent_index: 29
+- components: 
+  - !Transform 
+    parent: {id: 154618921216}
+    position: {x: 0.28109115, y: 0, z: 0}
+    rotation: 
+      w: 0.9610569
+      x: -0.0054454594
+      y: 0.049407776
+      z: 0.27184355
+    scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  - !Name 
+    name: L_F_ankle_jnt
+  - !Bone 
+    {bone_index: 40, bone_name: L_F_ankle_jnt}
+  parent_index: 36
+- components: 
+  - !Transform 
+    parent: {id: 158913888512}
+    position: {x: -0.28109145, y: -3.2424927e-07, z: 3.0517577e-07}
+    rotation: 
+      w: 0.9610569
+      x: -0.0054446706
+      y: 0.049407218
+      z: 0.27184373
+    scale: {x: 0.9999999, y: 0.9999999, z: 0.99999994}
+  - !Name 
+    name: R_F_ankle_jnt
+  - !Bone 
+    {bone_index: 41, bone_name: R_F_ankle_jnt}
+  parent_index: 37
+- components: 
+  - !Transform 
+    parent: {id: 163208855808}
+    position: {x: 0.2250654, y: 2.4205764e-16, z: -5.121417e-17}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: tail_jnt
+  - !Bone 
+    {bone_index: 42, bone_name: tail_jnt}
+  parent_index: 38
+- components: 
+  - !Transform 
+    parent: {id: 167503823104}
+    position: {x: 0.463368, y: -3.8146972e-08, z: 3.8146972e-08}
+    rotation: 
+      w: 0.84291106
+      x: 0.15176453
+      y: 0.022018477
+      z: -0.515736
+    scale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
+  - !Name 
+    name: L_B_knee_jnt
+  - !Bone 
+    {bone_index: 43, bone_name: L_B_knee_jnt}
+  parent_index: 39
+- components: 
+  - !Transform 
+    parent: {id: 171798790400}
+    position: {x: -0.46336806, y: -4.196167e-07, z: -1.9073485e-07}
+    rotation: 
+      w: 0.84291106
+      x: 0.15176454
+      y: 0.02201847
+      z: -0.51573604
+    scale: {x: 1.0000001, y: 1.0000001, z: 1}
+  - !Name 
+    name: R_B_knee_jnt
+  - !Bone 
+    {bone_index: 44, bone_name: R_B_knee_jnt}
+  parent_index: 40
+- components: 
+  - !Transform 
+    parent: {id: 176093757696}
+    position: {x: 0.24302654, y: -1.5258789e-07, z: 3.7085137e-09}
+    rotation: 
+      w: 1
+      x: 3.4694503e-18
+      y: 0
+      z: -7.4505815e-09
+    scale: {x: 0.99999994, y: 0.99999994, z: 1}
+  - !Name 
+    name: tonguetip_jnt
+  - !Bone 
+    {bone_index: 45, bone_name: tonguetip_jnt}
+  parent_index: 41
+- components: 
+  - !Transform 
+    parent: {id: 180388724992}
+    position: {x: 0.25232744, y: -9.499088e-17, z: 1.5611552e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_F_toe_jnt
+  - !Bone 
+    {bone_index: 46, bone_name: L_F_toe_jnt}
+  parent_index: 42
+- components: 
+  - !Transform 
+    parent: {id: 184683692288}
+    position: {x: -0.25232676, y: 6.3773925e-08, z: -5.80696e-07}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_F_toe_jnt
+  - !Bone 
+    {bone_index: 47, bone_name: R_F_toe_jnt}
+  parent_index: 43
+- components: 
+  - !Transform 
+    parent: {id: 193273626880}
+    position: {x: 0.19586703, y: -3.8146972e-08, z: -3.8146972e-08}
+    rotation: 
+      w: 0.6924765
+      x: -0.068453185
+      y: -0.009202836
+      z: 0.7181266
+    scale: {x: 0.99999994, y: 0.9999999, z: 0.99999994}
+  - !Name 
+    name: L_B_ankle_jnt
+  - !Bone 
+    {bone_index: 48, bone_name: L_B_ankle_jnt}
+  parent_index: 45
+- components: 
+  - !Transform 
+    parent: {id: 197568594176}
+    position: {x: -0.19586761, y: -4.5776366e-07, z: -2.2888183e-07}
+    rotation: 
+      w: 0.69247633
+      x: -0.06845436
+      y: -0.009202796
+      z: 0.71812665
+    scale: {x: 1.0000001, y: 1, z: 1.0000001}
+  - !Name 
+    name: R_B_ankle_jnt
+  - !Bone 
+    {bone_index: 49, bone_name: R_B_ankle_jnt}
+  parent_index: 46
+- components: 
+  - !Transform 
+    parent: {id: 214748463360}
+    position: {x: 0.19266212, y: -4.2779588e-17, z: -1.3328504e-16}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: L_B_toe_jnt
+  - !Bone 
+    {bone_index: 50, bone_name: L_B_toe_jnt}
+  parent_index: 50
+- components: 
+  - !Transform 
+    parent: {id: 219043430656}
+    position: {x: -0.19266184, y: -1.4150768e-07, z: -3.0973806e-07}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: R_B_toe_jnt
+  - !Bone 
+    {bone_index: 51, bone_name: R_B_toe_jnt}
+  parent_index: 51

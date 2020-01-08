@@ -21,68 +21,46 @@ namespace idk
 {
 	namespace ogl::detail
 	{
-		auto ToLGLinputChannels(InputChannels i)-> GLint
-		{
-			switch (i)
-			{
-			case InputChannels::RED:  return GL_RED;
-			case InputChannels::RG:   return GL_RG;
-			case InputChannels::RGB:  return GL_RGB;
-			case InputChannels::RGBA: return GL_RGBA;
-			case InputChannels::DEPTH_COMPONENT: return GL_DEPTH_COMPONENT;
-			default: return 0;
-			}
-		}
-		auto FromLGLinputChannels(GLint i)-> InputChannels
-		{
-			switch (i)
-			{
-			case GL_RED: return InputChannels::RED;
-			case GL_RG:   return InputChannels::RG;
-			case GL_RGB:  return InputChannels::RGB;
-			case GL_RGBA: return InputChannels::RGBA;
-			case GL_DEPTH_COMPONENT : return InputChannels::DEPTH_COMPONENT;
-			default: return 0;
-			}
-		}
-		auto ToLGLColor(ColorFormat f)-> GLenum
+
+		auto ToLGLColor(TextureInternalFormat f)-> GLenum
 		{
 			switch (f)
 			{
-			case ColorFormat::RG_8			 : return GL_RG;
-			case ColorFormat::RGF_16		 : return GL_RG16F;
-			case ColorFormat::RGB_8			 : return GL_RGB8;
-			case ColorFormat::RGBA_8		 : return GL_RGBA8;
-			case ColorFormat::RGBF_16		 : return GL_RGB16F;
-			case ColorFormat::RGBF_32		 : return GL_RGB32F;
-			case ColorFormat::RGBAF_16       : return GL_RGBA16F;
-			case ColorFormat::RGBAF_32       : return GL_RGBA32F;
-			case ColorFormat::SRGB: return GL_SRGB;
-			case ColorFormat::DEPTH_COMPONENT: return GL_DEPTH_COMPONENT;
-			case ColorFormat::DXT1			 : return 0x83F1;
-			case ColorFormat::DXT3			 : return 0x83F2;
-			case ColorFormat::DXT5			 : return 0x83F3;
+			case TextureInternalFormat::RG_8		: return GL_RG;
+			case TextureInternalFormat::RG_16_F		: return GL_RG16F;
+			case TextureInternalFormat::RGB_8		: return GL_RGB8;
+			case TextureInternalFormat::RGBA_8		: return GL_RGBA8;
+			case TextureInternalFormat::RGB_16_F	: return GL_RGB16F;
+			case TextureInternalFormat::RGB_32_F	: return GL_RGB32F;
+			case TextureInternalFormat::RGBA_16_F   : return GL_RGBA16F;
+			case TextureInternalFormat::RGBA_32_F   : return GL_RGBA32F;
+			case TextureInternalFormat::SRGB_8      : return GL_SRGB;
+			case TextureInternalFormat::DEPTH_16    : return GL_DEPTH_COMPONENT;
+			case TextureInternalFormat::RGB_DXT1	: return 0x83F1;
+			case TextureInternalFormat::RGBA_DXT3	: return 0x83F2;
+			case TextureInternalFormat::RGBA_DXT5	: return 0x83F3;
 			default: return 0;
 			}
 		}
-		auto FromLGLColor(GLenum f)-> ColorFormat
+
+		auto FromLGLColor(GLenum f)-> TextureInternalFormat
 		{
 			switch (f)
 			{
-			case GL_RG: return GL_RG;
-			case  GL_RG16F: return ColorFormat::RGF_16;
-			case  GL_RGB8: return ColorFormat::RGB_8;
-			case  GL_RGBA8: return ColorFormat::RGBA_8;
-			case  GL_RGB16F: return ColorFormat::RGBF_16;
-			case  GL_RGB32F: return ColorFormat::RGBF_32;
-			case  GL_RGBA16F: return ColorFormat::RGBAF_16;
-			case  GL_RGBA32F: return ColorFormat::RGBAF_32;
-			case GL_SRGB: return ColorFormat::SRGB;
-			case  GL_DEPTH_COMPONENT: return ColorFormat::DEPTH_COMPONENT;
-			case  0x83F1: return ColorFormat::DXT1;
-			case  0x83F2: return ColorFormat::DXT3;
-			case  0x83F3: return ColorFormat::DXT5;
-			default: return 0;
+			case GL_RG: return TextureInternalFormat::RG_8;
+			case  GL_RG16F: return TextureInternalFormat::RG_16_F;
+			case  GL_RGB8: return TextureInternalFormat::RGB_8;
+			case  GL_RGBA8: return TextureInternalFormat::RGBA_8;
+			case  GL_RGB16F: return TextureInternalFormat::RGB_16_F;
+			case  GL_RGB32F: return TextureInternalFormat::RGB_32_F;
+			case  GL_RGBA16F: return TextureInternalFormat::RGBA_16_F;
+			case  GL_RGBA32F: return TextureInternalFormat::RGBA_32_F;
+			case  GL_SRGB: return TextureInternalFormat::SRGB_8;
+			case  GL_DEPTH_COMPONENT: return TextureInternalFormat::DEPTH_16;
+			case  0x83F1: return TextureInternalFormat::RGB_DXT1;
+			case  0x83F2: return TextureInternalFormat::RGBA_DXT3;
+			case  0x83F3: return TextureInternalFormat::RGBA_DXT5;
+			default: return {};
 			}
 		}
 		
@@ -90,14 +68,10 @@ namespace idk
 
 	ResourceBundle OpenGLTextureLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta)
 	{
-		//auto& metadata = path_to_meta.metadatas[0];
-		//auto texture_handle = Core::GetResourceManager().LoaderEmplaceResource<ogl::OpenGLTexture>(metadata.guid);
 		if (path_to_resource.GetExtension() == ".dds")
 			return Load_DDS(path_to_resource, path_to_meta);
 		else
 			return Load_stbi(path_to_resource,path_to_meta);
-
-		//return texture_handle;
 	}
 
 	ResourceBundle OpenGLTextureLoader::Load_stbi(PathHandle path_to_resource, const MetaBundle& path_to_meta)
@@ -121,19 +95,8 @@ namespace idk
 
 		if (data) // stbi image can fail
 		{
-			const auto col_format = [channels]() -> InputChannels
-			{
-				switch (channels)
-				{
-				default:
-				case 1: return InputChannels::RED;
-				case 2: return InputChannels::RG;
-				case 3: return InputChannels::RGB;
-				case 4: return InputChannels::RGBA;
-				}
-			}();
-
-			texture_handle->Buffer(data.get(), size, col_format, texture_handle->GetMeta().internal_format);
+			auto texture_meta = *meta->GetMeta<Texture>();
+			texture_handle->Buffer(data.get(), 4 * size.x * size.y, size, texture_meta.internal_format, texture_meta.is_srgb);
 
 			return texture_handle;
 		}
@@ -158,7 +121,6 @@ namespace idk
 			v = *meta->GetMeta<Texture>();
 
 		const char* filePath = path_to_resource.GetFullPath().data();
-
 		FILE* fp = nullptr;
 
 		/* try to open the file */
@@ -244,8 +206,6 @@ namespace idk
 				return texture_handle;
 		
 			//Get the original texture image data
-			v.internal_format = ogl::detail::FromLGLColor(li->internalFormat);
-			v.format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
 			//Read the mip maps and create textures based on them
 			fread(data, 1, size, fp);
@@ -255,7 +215,6 @@ namespace idk
 
 				//Ensure that mipmap size is nvr less than its division size (ratio of the image)
 				size = std::max(li->divSize, x) / li->divSize * std::max(li->divSize, y) / li->divSize * li->blockBytes;
-
 				glCompressedTexImage2D(GL_TEXTURE_2D, ix, li->internalFormat, x, y, 0, size, data + offset);
 
 				//Down the mipmap size
@@ -281,8 +240,6 @@ namespace idk
 			assert(size == x * y * li->blockBytes);
 
 			//Get the original texture image data
-			v.internal_format = ogl::detail::FromLGLColor(li->internalFormat);
-			v.format = ogl::detail::FromLGLinputChannels(li->externalFormat);
 			texture_handle->Size(ivec2(width, height));
 
 			//get the data for the image

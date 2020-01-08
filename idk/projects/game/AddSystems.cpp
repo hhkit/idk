@@ -32,7 +32,7 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	{
 		auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
-		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
+		//Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
 		gSys = &sys;
 		if (HasArg(L"--validation", command_lines, num_args))
 			sys.Instance().EnableValidation();
@@ -51,10 +51,10 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<Prefab, Prefab, false>>();
 	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Animation, anim::Animation>>();
 	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Skeleton, anim::Skeleton>>();
-	Core::GetResourceManager().RegisterCompilableExtension(".tga");
-	Core::GetResourceManager().RegisterCompilableExtension(".png");
-	Core::GetResourceManager().RegisterCompilableExtension(".gif");
-	Core::GetResourceManager().RegisterCompilableExtension(".dds");
+	//Core::GetResourceManager().RegisterCompilableExtension(".tga");
+	//Core::GetResourceManager().RegisterCompilableExtension(".png");
+	//Core::GetResourceManager().RegisterCompilableExtension(".gif");
+	//Core::GetResourceManager().RegisterCompilableExtension(".dds");
 	Core::GetResourceManager().RegisterCompilableExtension(".fbx");
 	Core::GetResourceManager().RegisterCompilableExtension(".obj");
 	Core::GetResourceManager().RegisterCompilableExtension(".ma");

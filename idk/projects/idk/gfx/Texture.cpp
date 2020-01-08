@@ -10,6 +10,19 @@ namespace idk
 	{
 		return _size;
 	}
+
+	TextureInternalFormat Texture::InternalFormat() const
+	{
+		return _internal_format;
+	}
+	idk::FilterMode Texture::Filter() const
+	{
+		return _filter_mode;
+	}
+	bool Texture::IsDepthTexture() const
+	{
+		return _internal_format >= TextureInternalFormat::DEPTH_FIRST && _internal_format <= TextureInternalFormat::DEPTH_LAST;
+	}
 	ivec2 Texture::Size(ivec2 newsize)
 	{
 		return _size = newsize;

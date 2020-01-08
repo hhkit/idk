@@ -91,12 +91,12 @@ namespace idk
 		itr_t itr;
 
 		iterator(itr_t b) : itr{ b } {}
-		T* operator->() const                       { return *itr; }
-		T& operator*()  const                       { return **itr; }
+		auto* operator->() const                       { return *itr; }
+		auto& operator*()  const                       { return **itr; }
 		iterator& operator++()                      { ++itr; return *this; }
-		iterator operator++(int)                    { return itr++; }
+		iterator operator++(int)                    { return iterator{itr++}; }
 		iterator& operator--()                      { --itr; return *this; }
-		iterator operator--(int)                    { return itr--; }
+		iterator operator--(int)                    { return iterator{itr--}; }
 		bool operator==(const iterator & rhs) const { return itr == rhs.itr; }
 		bool operator!=(const iterator & rhs) const { return itr != rhs.itr; }
 

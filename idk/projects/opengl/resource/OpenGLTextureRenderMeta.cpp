@@ -76,17 +76,21 @@ namespace idk::ogl::detail {
 
 		// srgb
 		case TextureInternalFormat::SRGB_8:         return GL_COMPRESSED_SRGB8_ETC2;
-		case TextureInternalFormat::SRGB_8_ALPHA_8: return GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+		case TextureInternalFormat::SRGBA_8: return GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
 
 		// compressed srgb
 		#pragma message("please remember to update glad to have the ARB_texture_view extension ")
 
-		/*
-		case TextureInternalFormat::SRGB_DXT1  : return GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
-		case TextureInternalFormat::SRGBA_DXT1  : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-		case TextureInternalFormat::SRGBA_DXT3 : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-		case TextureInternalFormat::SRGBA_DXT5 : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-		*/
+
+		case TextureInternalFormat::SRGB_DXT1: return GL_COMPRESSED_RGB;
+		case TextureInternalFormat::SRGBA_DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		case TextureInternalFormat::SRGBA_DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		case TextureInternalFormat::SRGBA_DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		//case TextureInternalFormat::SRGB_DXT1  : return GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
+		//case TextureInternalFormat::SRGBA_DXT1  : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+		//case TextureInternalFormat::SRGBA_DXT3 : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+		//case TextureInternalFormat::SRGBA_DXT5 : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+		
 				// depth buffer
 		case TextureInternalFormat::DEPTH_16: 
 			return GL_DEPTH_ATTACHMENT;

@@ -28,20 +28,20 @@ namespace idk::ogl
 		for (auto& elem : Textures())
 			Core::GetResourceManager().Free(elem);
 
+		array<TextureInternalFormat, 2> formats {
+			TextureInternalFormat::RGBA_16_F,
+			TextureInternalFormat::DEPTH_16
+		};
 
-		for (auto& elem : Textures())
+		for (auto [elem, fmt] : zip(Textures(), formats))
 		{
 			auto tex = elem = (elem == RscHandle<Texture>{})? 
-				  Core::GetResourceManager().Create<OpenGLTexture>()
-				: Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid);
-			tex->Size(size);
+				  Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(fmt, size)
+				: Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(elem.guid, fmt, size);
 		}
+
 		auto tex = Textures()[kDepthIndex];
-		auto& tmeta = tex->GetMeta();
-		tmeta.internal_format = TextureInternalFormat::DEPTH_16;
 		depthbuffer = s_cast<GLuint>(r_cast<intptr_t>(tex->ID()));
-		//glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
-		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 	}
 
 	GLuint OpenGLRenderTarget::DepthBuffer() const

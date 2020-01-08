@@ -8,7 +8,6 @@ namespace idk::vkn::hlp {
 
 	template<typename K, typename V>
 	hash_table<V, K> ReverseMap(const hash_table<K, V>& map);
-	std::string GetBinaryFile(const std::string& filepath);
 }
 namespace idk::vkn::meta
 {

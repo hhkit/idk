@@ -20,6 +20,7 @@ namespace idk
 		, INTERNAL_FORMAT(RG,   8,  UNORM)
 		, INTERNAL_FORMAT(RGB,  8,  UNORM)
 		, INTERNAL_FORMAT(RGBA, 8,  UNORM)
+		, INTERNAL_FORMAT(BGRA, 8,  UNORM)
 		, INTERNAL_FORMAT(R,    16, UNORM)
 		, INTERNAL_FORMAT(RG,   16, UNORM)
 		, INTERNAL_FORMAT(RGB,  16, UNORM)
@@ -62,6 +63,10 @@ namespace idk
 		, INTERNAL_FORMAT(RG,   32, I)
 		, INTERNAL_FORMAT(RGB,  32, I)
 		, INTERNAL_FORMAT(RGBA, 32, I)
+		, INTERNAL_FORMAT(R,    64, I)
+		, INTERNAL_FORMAT(RG,   64, I)
+		, INTERNAL_FORMAT(RGB,  64, I)
+		, INTERNAL_FORMAT(RGBA, 64, I)
 		
 		// floating point data
 		, INTERNAL_FORMAT(R,    16, F)
@@ -72,6 +77,10 @@ namespace idk
 		, INTERNAL_FORMAT(RG,   32, F)
 		, INTERNAL_FORMAT(RGB,  32, F)
 		, INTERNAL_FORMAT(RGBA, 32, F)
+		, INTERNAL_FORMAT(R,    64, F)
+		, INTERNAL_FORMAT(RG,   64, F)
+		, INTERNAL_FORMAT(RGB,  64, F)
+		, INTERNAL_FORMAT(RGBA, 64, F)
 
 		// compressed
 		, RGB_DXT1
@@ -81,7 +90,8 @@ namespace idk
 
 		// srgb
 		, SRGB_8
-		, SRGB_8_ALPHA_8
+		, SRGBA_8
+		, SBGRA_8
 
 		// compressed srgb
 		, SRGB_DXT1
@@ -98,6 +108,8 @@ namespace idk
 		, DEPTH_32_F
 		, DEPTH_24_STENCIL_8
 		, DEPTH_32_F_STENCIL_8
+		, DEPTH_FIRST = DEPTH_16
+		, DEPTH_LAST = DEPTH_32_F_STENCIL_8
 	};
 
 	TextureInternalFormat ToInternalFormat(ColorFormat, bool compressed);

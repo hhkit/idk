@@ -25,6 +25,22 @@ namespace idk
 		AttachmentInfo(
 			LoadOp  load_op_,
 			StoreOp store_op_,
+			TextureInternalFormat int_format,
+			FilterMode  filter_mode_,
+			bool isCubeMap_ = false,
+			std::optional<RscHandle<Texture>> buffer_ = std::nullopt
+		) :
+			load_op{ load_op_ },
+			store_op{ store_op_ },
+			internal_format{ int_format },
+			filter_mode{ filter_mode_ },
+			isCubeMap{ isCubeMap_ },
+			buffer{ buffer_ }
+		{};
+
+		AttachmentInfo(
+			LoadOp  load_op_,
+			StoreOp store_op_,
 			ColorFormat color_format,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
@@ -58,8 +74,8 @@ namespace idk
 		AttachmentInfo(const Attachment& attachment)
 			: load_op{ attachment.load_op }
 			, store_op{ attachment.store_op }
-			, internal_format{ ToInternalFormat(attachment.buffer->GetMeta().internal_format, false) }
-			, filter_mode{ attachment.buffer->GetMeta().filter_mode }
+			, internal_format{ attachment.buffer->InternalFormat()}
+			, filter_mode{ attachment.buffer->Filter() }
 			, buffer{attachment.buffer}
 		{
 		}

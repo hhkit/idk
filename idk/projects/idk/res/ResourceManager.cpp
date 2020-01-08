@@ -329,6 +329,7 @@ namespace idk
 				_loaded_files.erase(itr);
 			}
 		}
+		LOG_TO(LogPool::SYS, "Loading file: %s", path.GetMountPath().data());
 
 		auto old_bundle = GetMeta(path);
 

@@ -183,7 +183,7 @@ namespace idk {
 				FT_Done_FreeType(ft);
 			}
 
-			if (FT_Set_Pixel_Sizes(face, 0, font_handle->GetMeta().font_size))
+			if (FT_Set_Pixel_Sizes(face, 0, FontAtlas::Metadata{}.font_size))
 			{
 				LOG_TO(LogPool::SYS, "Font atlas loading generation failed. Crash may happen.\n");
 				return font_handle;

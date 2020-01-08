@@ -13,6 +13,7 @@ namespace idk
 		case ColorFormat::RGB_16bit: return compressed ? TextureInternalFormat::SRGB_DXT1 : TextureInternalFormat::RGB_DXT1;
 		case ColorFormat::R_16bit:   return TextureInternalFormat::R_16;
 		case ColorFormat::R_8:       return TextureInternalFormat::R_8;
+		case ColorFormat::Automatic: return TextureInternalFormat::RGBA_32_F;
 		default:
 			break;
 		}

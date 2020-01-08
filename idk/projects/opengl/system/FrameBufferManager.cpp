@@ -89,36 +89,24 @@ namespace idk::ogl
 			glViewport(0, 0, target->Size().x, target->Size().y);
 			glScissor(0, 0, target->Size().x, target->Size().y);
 		}
-		if (target->GetMeta().internal_format == ColorFormat::DEPTH_COMPONENT)
+		if (target->IsDepthTexture())
 		{
-			//glBindRenderbuffer(GL_RENDERBUFFER, _rbo_id);
-			//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024,1024);
 			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
 			glDepthFunc(GL_LEQUAL);
 
-			//glEnable(GL_DEPTH_TEST);
-
 			target->Bind();
-			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _rbo_id);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
 			GLuint buffers[] = { GL_DEPTH_ATTACHMENT };
-			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 			glDrawBuffers(1, buffers);
 		}
 		else
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, _fbo_id);
-			//TextureMeta mm = target->GetMeta();
-			//if (mm.internal_format != ColorFormat::RGBAF_16)
-			//{
-			//	mm.internal_format = ColorFormat::RGBAF_16;
-			//	target->SetMeta(mm);
-			//}
 			target->Bind();
 
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, s_cast<GLuint>(r_cast<intptr_t>(target->ID())), 0);
 			const GLuint buffers[] = { GL_COLOR_ATTACHMENT0 };
-			if(target->GetMeta().internal_format == ColorFormat::RUI_32)
+			if(target->InternalFormat() == TextureInternalFormat::R_32_UI)
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
 			else
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
@@ -161,17 +149,11 @@ namespace idk::ogl
 		auto tex = target->GetColorBuffer();
 		if(tex){
 			auto& tex_ = tex.as<OpenGLTexture>();
-			TextureMeta mm = tex_.GetMeta();
-			if (mm.internal_format != ColorFormat::RGBAF_16)
-			{
-				mm.internal_format = ColorFormat::RGBAF_16;
-				tex.as<OpenGLTexture>().GetMeta() = mm;
-			}
+			assert(tex_.InternalFormat() == TextureInternalFormat::RGBA_16_F);
+
 			tex_.Bind();
-			GL_CHECK();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 , s_cast<GLuint>(r_cast<intptr_t>(tex_.ID())), 0);
 			buffers.push_back(GL_COLOR_ATTACHMENT0 );
-			GL_CHECK();
 		}
 
 		GL_CHECK();
@@ -189,18 +171,12 @@ namespace idk::ogl
 			dp_.Bind();
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(dp_.ID())), 0);
 		}
-		GL_CHECK();
-
-		GL_CHECK();
 
 		if (!tex)
 		{
 			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, target->Size().x);
-			GL_CHECK();
 			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
-			GL_CHECK();
 			glDrawBuffer(GL_NONE);
-			GL_CHECK();
 		}
 		else
 		{
@@ -234,22 +210,13 @@ namespace idk::ogl
 
 		}
 
-		//GL_CHECK();
-
-		// set texture targets
 		vector<GLenum> buffers;
-		//auto& yolo = *meta.textures[0];
 
 		for (int i = 0; i < target->NumColorAttachments(); ++i)
 		{
 			auto& attachment = target->GetAttachment(i);
 			auto& tex = attachment.buffer.as<OpenGLTexture>();
-			TextureMeta mm = tex.GetMeta();
-			if (mm.internal_format != ColorFormat::RGBAF_16)
-			{
-				mm.internal_format = ColorFormat::RGBAF_16;
-				tex.GetMeta() = mm;
-			}
+			assert(tex.InternalFormat() == TextureInternalFormat::RGBA_16_F);
 			tex.Bind();
 			auto attachment_index = GL_COLOR_ATTACHMENT0 + i;
 			glFramebufferTexture(GL_FRAMEBUFFER, attachment_index, s_cast<GLuint>(r_cast<intptr_t>(tex.ID())), 0);
@@ -257,33 +224,24 @@ namespace idk::ogl
 		}
 		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->DepthBuffer());
 		if (target->HasDepthAttachment())
-		{
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, s_cast<GLuint>(r_cast<intptr_t>(target->DepthAttachment().buffer->ID())), 0);
-		}
-		GL_CHECK();
+
 		if (!target->NumColorAttachments())
 		{
-			//GLint max_draw =0;
-			//glGetIntegerv(GL_MAX_DRAW_BUFFERS, &max_draw);
 			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH , target->Size().x);
-			GL_CHECK();
 			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, target->Size().y);
-			GL_CHECK();
 			glDrawBuffer(GL_NONE);
-			GL_CHECK();
-		}else
+		}
+		else
 		{
 			glDrawBuffers(s_cast<GLsizei>(buffers.size()), buffers.data());
 		}
 
-		//GL_CHECK();
 		CheckFBStatus();
-		//GL_CHECK();
 
 		if(clear)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_SCISSOR_TEST);
-		//GL_CHECK();
 	}
 
 	void FrameBufferManager::ResetFramebuffer()

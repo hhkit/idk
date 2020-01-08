@@ -50,10 +50,12 @@ namespace idk::ogl
 	{
 		return unique_ptr<FrameBuffer>{};//it's gonna be null cause you shouldn't be using this.
 	}
+
 	unique_ptr<FrameBuffer> OpenGLFrameBufferFactory::Create()
 	{
 		return std::make_unique<OpenGLFrameBuffer>();
 	}
+
 	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
 	{
 		type;
@@ -61,24 +63,7 @@ namespace idk::ogl
 		out->load_op  = info.load_op;
 		out->store_op = info.store_op;
 
-		/*if (type == AttachmentType::eDepth)
-		{
-			RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
-			tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
-			out->buffer = tex;
-		}
-		else if(type == AttachmentType::eDepth3D)
-		{
-			RscHandle<OpenGLCubemap> tex = Core::GetResourceManager().Create<OpenGLCubemap>();
-			for (int i = 0; i < 6; ++i)
-			{
-				tex->Buffer(i,nullptr, size, InputChannels::RGB, info.internal_format);
-			}
-			out->buffer = tex->Tex();
-		}*/
-
-		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
+		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(info.internal_format, size);
 		out->buffer = tex;
 	}
 	void OpenGLFrameBufferFactory::PreReset(FrameBuffer&) {}

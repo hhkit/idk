@@ -1,0 +1,151 @@
+data: 
+- components: 
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: cylinder_test
+  - !Animator 
+    layers: 
+    - anim_states: 
+      - loop: 1
+        name: Empty
+        node_position: {x: 0, y: 0}
+        speed: 1
+        state_data: !BasicAnimationState 
+          motion: {guid: 00000000-0000-0000-0000-000000000000}
+        transitions: 
+        - conditions: []
+          exit_time: 0.8
+          has_exit_time: 1
+          interruptible: 0
+          transition_duration: 0.2
+          transition_from_index: 0
+          transition_offset: 0
+          transition_to_index: 0
+          valid: 0
+        valid: 0
+      blend_type: Override_Blend
+      bone_mask: [1]
+      default_index: 0
+      default_weight: 1
+      name: Base Layer
+    parameters: 
+      bool_vars: {}
+      float_vars: {}
+      int_vars: {}
+      trigger_vars: {}
+    skeleton: {guid: 559bb0f0-d6f5-467b-9c87-373c2aa485e7}
+  parent_index: -1
+- components: 
+  - !Transform 
+    parent: {id: 98560}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: pCylinder1
+  - !SkinnedMeshRenderer 
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 04ac080e-452d-43e2-be77-54ccccdb14ed}
+  parent_index: 0
+- components: 
+  - !Transform 
+    parent: {id: 98560}
+    position: {x: -0, y: 0, z: -0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: joint1_root_
+  - !Bone 
+    {bone_index: 0, bone_name: joint1_root_}
+  parent_index: 0
+- components: 
+  - !Transform 
+    parent: {id: 8590033152}
+    position: {x: 0.03, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: joint2
+  - !Bone 
+    {bone_index: 1, bone_name: joint2}
+  parent_index: 2
+- components: 
+  - !Transform 
+    parent: {id: 12885000448}
+    position: {x: 0.02, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: joint3
+  - !Bone 
+    {bone_index: 2, bone_name: joint3}
+  parent_index: 3
+- components: 
+  - !Transform 
+    parent: {id: 17179967744}
+    position: {x: 0.02, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: joint4
+  - !Bone 
+    {bone_index: 3, bone_name: joint4}
+  parent_index: 4
+- components: 
+  - !Transform 
+    parent: {id: 21474935040}
+    position: {x: 0.01, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: joint5
+  - !Bone 
+    {bone_index: 4, bone_name: joint5}
+  parent_index: 5
+- components: 
+  - !Transform 
+    parent: {id: 25769902336}
+    position: {x: 0.02, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: joint6
+  - !Bone 
+    {bone_index: 5, bone_name: joint6}
+  parent_index: 6

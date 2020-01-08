@@ -3,6 +3,7 @@
 #include <res/Resource.h>
 #include <res/ResourceMeta.h>
 #include <gfx/TextureRenderMeta.h>
+#include <gfx/TextureInternalFormat.h>
 
 namespace idk
 {
@@ -34,5 +35,6 @@ namespace idk
 	protected:
 		//Size for each texture in the cubemap
 		ivec2 _size{};
+		TextureInternalFormat _internal_format{ };
 	};
 }

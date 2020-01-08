@@ -37,7 +37,6 @@ namespace idk::ogl
 		bool   _is_compressed = false;
 		GLuint _mip_level = 0;
 
-		TextureInternalFormat _internal_format;
 		void SetUVMode(UVMode);
 		void SetFilteringMode(FilterMode);
 	};

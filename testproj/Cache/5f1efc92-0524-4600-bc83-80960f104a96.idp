@@ -1,0 +1,20 @@
+data: 
+- components: 
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: roundtable_test2
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 7576ed4a-3428-4981-8eef-c935c153485a}
+    receive_shadows: 1
+  parent_index: -1
