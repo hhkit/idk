@@ -531,6 +531,9 @@ namespace idk
         public extern static float InputGetAxis(sbyte index, int a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float InputSetRumble(sbyte index, float low_freq, float high_freq);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static byte InputGetConnectedPlayers();
 
         /*
