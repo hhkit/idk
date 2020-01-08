@@ -28,7 +28,7 @@ REFLECT_BEGIN(idk::vector<idk::RscHandle<idk::AudioClip>>, "vector<<AudioClip>>"
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioSource, "AudioSource")
-REFLECT_VARS(audio_clip_list, volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
+REFLECT_VARS(audio_clip_list, audio_clip_volume, volume, pitch, minDistance, maxDistance, is3Dsound, isUnique, isLoop)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::AudioListener, "AudioListener")
