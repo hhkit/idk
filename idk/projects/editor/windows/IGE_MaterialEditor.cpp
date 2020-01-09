@@ -449,11 +449,16 @@ namespace idk
     void IGE_MaterialEditor::disconnectNode(const Node& node)
     {
         auto& g = *_graph;
-        auto iter = std::remove_if(g.links.begin(), g.links.end(),
-            [guid = node.guid](const Link& link) { return link.node_in == guid || link.node_out == guid; });
-        for (auto jter = iter; jter != g.links.end(); ++jter)
-            addDefaultSlotValue(jter->node_in, jter->slot_in);
-        g.links.erase(iter, g.links.end());
+
+        for (auto& link : g.links)
+        {
+            if(link.node_in == node.guid || link.node_out == node.guid)
+                addDefaultSlotValue(link.node_in, link.slot_in);
+        }
+
+        g.links.erase(std::remove_if(g.links.begin(), g.links.end(),
+                                     [guid = node.guid](const Link& link) {return link.node_in == guid || link.node_out == guid; }),
+                      g.links.end());
     }
 
 

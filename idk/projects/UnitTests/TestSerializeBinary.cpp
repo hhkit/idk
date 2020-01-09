@@ -1,6 +1,8 @@
 #include "pch.h"
 #include <serialize/binary.inl>
-#include <ReflectRegistration.h>
+#include <ReflectReg_Common.inl>
+
+#include <res/ResourceHandle.inl>
 
 using namespace idk;
 

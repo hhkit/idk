@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="idk">
-      <HintPath>..\..\idk\bin\idk.dll</HintPath>
+      <HintPath>..\..\idk\engine_data\idk.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

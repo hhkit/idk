@@ -20,6 +20,8 @@
 #include <common/Transform.h>	
 #include <core/Core.inl>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
+#include <ds/result.inl>
 
 TEST(Audio, AudioSystemClassTest)
 {

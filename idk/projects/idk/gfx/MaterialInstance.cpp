@@ -74,7 +74,8 @@ namespace idk
     }
 	bool IsUniformBlock(string_view name)
 	{
-		return name.substr(0, sizeof("_UB") - 1) == "_UB";
+		auto str = name.substr(0, sizeof("_UB") - 1);
+		return  (str[0]== '_') & (str[1]=='U') & (str[2] == 'B');
 	}
 	bool MaterialInstance::IsUniformBlock(string_view name) const
 	{

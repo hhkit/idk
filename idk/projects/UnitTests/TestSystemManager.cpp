@@ -1,12 +1,13 @@
 #include "pch.h"
 #include <idk.h>
-#include <core/Core.h>
-#include <core/GameObject.h>
+#include <core/Core.inl>
+#include <core/GameObject.inl>
 #include <app/Application.h>
 #include <editor/IEditor.h>
 #include <scene/SceneManager.h>
-#include <res/ResourceManager.h>
+#include <res/ResourceManager.inl>
 #include <common/Transform.h>
+#include <res/ResourceHandle.inl>
 
 /*
 TEST(System, TestSystemManager)

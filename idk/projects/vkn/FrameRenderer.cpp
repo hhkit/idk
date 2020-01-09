@@ -919,7 +919,7 @@ namespace idk::vkn
 		//Temp, get rid of this once the other parts no longer depend on render_finished
 		ready_semaphores.emplace(readySemaphores);
 		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
-		auto inflight_fence = *_states[0].signal.inflight_fence;
+		auto inflight_fence = *_states[0].signal.inflight_fence();
 
 
 

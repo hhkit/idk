@@ -179,7 +179,7 @@ namespace idk
 		};
 	}
 	//returns indices to the start and one past the end
-	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data)
+	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro,const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data)
 	{
 
 		const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
@@ -187,13 +187,14 @@ namespace idk
 		std::pair<size_t, size_t> result{ inst.size() ,inst.size() };
 		std::optional<decltype(ro.begin())> oprev{};
 		InstRenderObjects* inst_itr{};
-		for (auto itr = ro.begin(); itr < ro.end(); ++itr)
+		auto bv_itr = bounding_vols.begin();
+		for (auto itr = ro.begin(); itr < ro.end(); ++itr,++bv_itr)
 		{
-			const auto bv = itr->mesh->bounding_volume* itr->transform;
+			const auto bv = *bv_itr;
 			if ((itr->layer_mask&camera.culling_flags) &&frust.contains(bv))
 			{
 				if (!oprev || ![](auto& itr, auto& prev) {
-					return itr->mesh == prev->mesh && itr->material_instance == prev->material_instance;
+					return (itr->mesh == prev->mesh) & (itr->material_instance == prev->material_instance);
 					}(itr, *oprev))
 				{
 
@@ -790,11 +791,14 @@ namespace idk
             elem.get();
 
 		result.active_light_buffer.reserve(result.camera.size()* result.lights.size());
+		vector<sphere> bounding_vols;
+		bounding_vols.resize(result.mesh_render.size());
+		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
 		for (auto& camera : result.camera)
 		{
 			RenderRange range{ camera };
 			{
-				const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, result.instanced_mesh_render,result.inst_mesh_render_buffer);
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render,bounding_vols, result.instanced_mesh_render,result.inst_mesh_render_buffer);
 				range.inst_mesh_render_begin = start_index;
 				range.inst_mesh_render_end = end_index;
 				ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range,range);
@@ -826,7 +830,7 @@ namespace idk
 				}
 				else
 				{
-					const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+					const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 					range.inst_mesh_render_begin = start_index;
 					range.inst_mesh_render_end = end_index;
 				}

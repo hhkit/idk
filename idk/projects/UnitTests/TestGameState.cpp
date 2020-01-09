@@ -1,12 +1,13 @@
 #include "pch.h"
-#include <core/Core.h>
-#include <core/GameState.h>
+#include <core/Core.inl>
+#include <core/GameState.inl>
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <phys/Collider.h>
 #include <scene/SceneFactory.h>
 #include <scene/SceneManager.h>
 #include <res/ResourceManager.inl>
+#include <res/ResourceHandle.inl>
 
 TEST(GameState, TestGameState)
 {

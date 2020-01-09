@@ -172,9 +172,9 @@ namespace idk::vkn
 
 
 		vk::UniqueCommandPool                m_commandpool;
-		std::vector<vk::UniqueCommandBuffer> m_pri_commandbuffers;
-		std::vector<vk::UniqueCommandBuffer> m_present_trf_commandbuffers;
-		vector<vk::UniqueCommandBuffer> m_blitz_commandbuffers;
+		vector<vk::UniqueCommandBuffer> m_pri_commandbuffers{};
+		vector<vk::UniqueCommandBuffer> m_present_trf_commandbuffers{};
+		vector<vk::UniqueCommandBuffer> m_blitz_commandbuffers{};
 		
 		//Deprecated
 		//std::vector<PresentationSignals>     m_pres_signals;
