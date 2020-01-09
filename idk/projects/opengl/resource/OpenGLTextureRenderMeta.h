@@ -10,6 +10,7 @@ namespace idk::ogl
 		{
 			public:
 			static unsigned ToInternal(const TextureInternalFormat& fmt) noexcept;
+			static unsigned ToComponents(TextureInternalFormat) noexcept;
 			static unsigned ToUVMode(const UVMode& uv) noexcept;
 			static unsigned ToColor(const ColorFormat& c) noexcept;
 			static unsigned ToFilter(const FilterMode& f) noexcept;

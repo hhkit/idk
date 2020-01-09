@@ -16,15 +16,8 @@ namespace idk::ogl
 		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto& m = *fb;
 		m.Size(Core::GetSystem<Application>().GetScreenSize());
-		//m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
-
-		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetColorBuffer(RscHandle<Texture>{tex});
-
-		tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetDepthBuffer(RscHandle<Texture>{tex});
+		m.SetColorBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RGB_16_F, m.size)});
+		m.SetDepthBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::DEPTH_16, m.size)});
 
 		fb->Name("Game View");
         m.render_debug = false;
@@ -36,13 +29,9 @@ namespace idk::ogl
 	{
 		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto &m = *fb;
-		m.Size(ivec2{ 512, 512 });
-		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetColorBuffer(RscHandle<Texture>{tex});
-		tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetDepthBuffer(RscHandle<Texture>{tex});
+		m.Size(ivec2{ 512,512 });
+		m.SetColorBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RGB_16_F, ivec2{ 512,512 })});
+		m.SetDepthBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::DEPTH_16, ivec2{ 512,512 })});
 		return fb;
 	}
 
@@ -63,8 +52,7 @@ namespace idk::ogl
 		out->load_op  = info.load_op;
 		out->store_op = info.store_op;
 
-		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(info.internal_format, size);
-		out->buffer = tex;
+		out->buffer = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(info.internal_format, size);
 	}
 	void OpenGLFrameBufferFactory::PreReset(FrameBuffer&) {}
 	void OpenGLFrameBufferFactory::Finalize(FrameBuffer&, [[maybe_unused]]SpecializedInfo* info) {}

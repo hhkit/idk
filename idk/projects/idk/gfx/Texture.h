@@ -39,7 +39,7 @@ namespace idk
 		// identifier for ImGUIImage
 		virtual void* ID() const { return 0; }
 	protected:
-		ivec2 _size {};
+		ivec2 _size {512,512};
 		TextureInternalFormat _internal_format = TextureInternalFormat::RGBA_16_F;
 		FilterMode _filter_mode;
 	};

@@ -24,7 +24,7 @@ namespace idk::ogl
 			void* data, size_t buffer_size, 
 			ivec2 texture_size, 
 			TextureInternalFormat format, 
-			GLenum incoming_components = GL_RGBA, GLenum incoming_type = GL_UNSIGNED_BYTE
+			GLenum incoming_components = GL_RGB, GLenum incoming_type = GL_UNSIGNED_BYTE
 		);
 		void Buffer(void* data, size_t buffer_size, ivec2 texture_size, ColorFormat format, bool compressed);
 

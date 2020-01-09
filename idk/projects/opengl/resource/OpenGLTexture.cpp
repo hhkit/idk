@@ -7,10 +7,16 @@ namespace idk::ogl
 {
 	OpenGLTexture::OpenGLTexture()
 	{
+		GL_CHECK();
 		glGenTextures(1, &_id);
+		GL_CHECK();
 		Bind();
+		GL_CHECK();
 		SetUVMode(UVMode::Clamp);
+		GL_CHECK();
 		SetFilteringMode(FilterMode::Linear);
+		GL_CHECK();
+		Buffer(nullptr, 0, _size, _internal_format);
 	}
 
 	OpenGLTexture::OpenGLTexture(TextureInternalFormat format, ivec2 size, unsigned mip_level)
@@ -24,7 +30,9 @@ namespace idk::ogl
 
 		SetUVMode(UVMode::Repeat);
 		SetFilteringMode(FilterMode::Linear);
+		GL_CHECK();
 		Buffer(nullptr, 0, size, format);
+		GL_CHECK();
 	}
 
 	OpenGLTexture::OpenGLTexture(const CompiledTexture& compiled_texture)
@@ -86,8 +94,11 @@ namespace idk::ogl
 		_size = texture_size;
 		_internal_format = format;
 		auto gl_format = detail::ogl_GraphicsFormat::ToInternal(_internal_format);
+		auto components = detail::ogl_GraphicsFormat::ToComponents(_internal_format);
 		Bind();
-		glTexImage2D(GL_TEXTURE_2D, 0, gl_format, _size.x, _size.y, 0, incoming_components, incoming_type, data);
+		GL_CHECK();
+		glTexImage2D(GL_TEXTURE_2D, 0, gl_format, _size.x, _size.y, 0, components, incoming_type, data);
+		GL_CHECK();
 	}
 
 	void OpenGLTexture::Buffer(void* data, size_t buffer_size, ivec2 size, ColorFormat format, bool compressed)

@@ -75,25 +75,25 @@ namespace idk::ogl::detail {
 		case TextureInternalFormat::RGBA_DXT5 : return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
 		// srgb
-		case TextureInternalFormat::SRGB_8:         return GL_COMPRESSED_SRGB8_ETC2;
-		case TextureInternalFormat::SRGBA_8: return GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+		case TextureInternalFormat::SRGB_8  : return GL_COMPRESSED_SRGB8_ETC2;
+		case TextureInternalFormat::SRGBA_8 : return GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
 
 		// compressed srgb
 		#pragma message("please remember to update glad to have the ARB_texture_view extension ")
 
 
-		case TextureInternalFormat::SRGB_DXT1: return GL_COMPRESSED_RGB;
+		case TextureInternalFormat::SRGB_DXT1:  return GL_COMPRESSED_RGB;
 		case TextureInternalFormat::SRGBA_DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 		case TextureInternalFormat::SRGBA_DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 		case TextureInternalFormat::SRGBA_DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		//case TextureInternalFormat::SRGB_DXT1  : return GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
-		//case TextureInternalFormat::SRGBA_DXT1  : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-		//case TextureInternalFormat::SRGBA_DXT3 : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-		//case TextureInternalFormat::SRGBA_DXT5 : return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+		//case TextureInternalFormat::SRGB_DXT1  : return GL_RGB; return GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
+		//case TextureInternalFormat::SRGBA_DXT1  : return GL_RGBA; return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+		//case TextureInternalFormat::SRGBA_DXT3 : return GL_RGBA; return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+		//case TextureInternalFormat::SRGBA_DXT5 : return GL_RGBA; return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
 		
 				// depth buffer
 		case TextureInternalFormat::DEPTH_16: 
-			return GL_DEPTH_ATTACHMENT;
+			return GL_DEPTH_COMPONENT;
 
 		case TextureInternalFormat::DEPTH_24:
 		case TextureInternalFormat::DEPTH_24_STENCIL_8:
@@ -106,6 +106,164 @@ namespace idk::ogl::detail {
 		default:
 			return 0;
 		}
+	}
+
+	unsigned ogl_GraphicsFormat::ToComponents(TextureInternalFormat fmt) noexcept
+	{
+		switch (fmt)
+		{
+		case idk::TextureInternalFormat::R_8: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_8: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_8: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_8: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::BGRA_8:
+			break;
+		case idk::TextureInternalFormat::R_16: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_16: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_16: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_16: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_8_SNORM: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_8_SNORM: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_8_SNORM: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_8_SNORM: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_16_SNORM: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_16_SNORM: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_16_SNORM: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_16_SNORM: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_8_UI: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_8_UI: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_8_UI: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_8_UI: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_16_UI: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_16_UI: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_16_UI: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_16_UI: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_32_UI: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_32_UI: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_32_UI: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_32_UI: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_8_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_8_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_8_I: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_8_I: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_16_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_16_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_16_I: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_16_I: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_32_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_32_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_32_I: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_32_I: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_64_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_64_I: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_64_I: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_64_I: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_16_F: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_16_F: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_16_F: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_16_F: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_32_F: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_32_F: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_32_F: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_32_F: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::R_64_F: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RG_64_F: return GL_RED;
+			break;
+		case idk::TextureInternalFormat::RGB_64_F: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_64_F: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::RGB_DXT1: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::RGBA_DXT1: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::RGBA_DXT3: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::RGBA_DXT5: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::SRGB_8: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::SRGBA_8: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::SBGRA_8:
+			break;
+		case idk::TextureInternalFormat::SRGB_DXT1: return GL_RGB;
+			break;
+		case idk::TextureInternalFormat::SRGBA_DXT1: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::SRGBA_DXT3: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::SRGBA_DXT5: return GL_RGBA;
+			break;
+		case idk::TextureInternalFormat::DEPTH_16: return GL_DEPTH_COMPONENT;
+			break;
+		case idk::TextureInternalFormat::DEPTH_24:return GL_DEPTH_COMPONENT;
+			break;
+		case idk::TextureInternalFormat::DEPTH_32:return GL_DEPTH_COMPONENT;
+			break;
+		case idk::TextureInternalFormat::DEPTH_32_F:return GL_DEPTH_COMPONENT;
+			break;
+		case idk::TextureInternalFormat::DEPTH_24_STENCIL_8:return GL_DEPTH_STENCIL;
+			break;
+		case idk::TextureInternalFormat::DEPTH_32_F_STENCIL_8:return GL_DEPTH_STENCIL;
+			break;
+		default:
+			break;
+		}
+		return 0;
 	}
 
 	unsigned ogl_GraphicsFormat::ToUVMode(const UVMode& uv_mode) noexcept
