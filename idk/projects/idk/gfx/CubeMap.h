@@ -11,8 +11,7 @@ namespace idk
 	{
 		UVMode      uv_mode = UVMode::Clamp;
 		ColorFormat internal_format = ColorFormat::Automatic;
-		bool is_srgb{ false };
-		bool compressed{ true };
+		bool is_srgb{ true };
 	};
 
 	class CubeMap
