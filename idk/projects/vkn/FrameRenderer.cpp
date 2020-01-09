@@ -281,21 +281,21 @@ namespace idk::vkn
 		}
 		GraphicsStateInterface(const GraphicsState& state) : GraphicsStateInterface{static_cast<const CoreGraphicsState&>(state)}
 		{
-			renderer_vertex_shaders = state.renderer_vertex_shaders;
-			renderer_fragment_shaders = state.renderer_fragment_shaders;
+			renderer_vertex_shaders =   state.shared_gfx_state->renderer_vertex_shaders;
+			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
 			range = state.range;
 
 			mask = state.camera.culling_flags;
 		}
 		GraphicsStateInterface(const PreRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
 		{
-			renderer_vertex_shaders = state.renderer_vertex_shaders;
-			renderer_fragment_shaders = state.renderer_fragment_shaders;
+			renderer_vertex_shaders   = state.shared_gfx_state->renderer_vertex_shaders;
+			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
 		}
 		GraphicsStateInterface(const PostRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
 		{
-			renderer_vertex_shaders = state.renderer_vertex_shaders;
-			renderer_fragment_shaders = state.renderer_fragment_shaders;
+			renderer_vertex_shaders   = state.shared_gfx_state->renderer_vertex_shaders;
+			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
 		}
 	};
 

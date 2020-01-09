@@ -51,10 +51,11 @@ namespace idk::vkn
 		auto& shared_state = *state.shared_gfx_state;
 
 		CanvasVertexBindings vert_bind;
+		auto renderer_vertex_shaders = state.shared_gfx_state->renderer_vertex_shaders;
 
 		if (canvas_data.size())
 		{
-			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VUi]);
+			the_interface.BindShader(ShaderStage::Vertex, renderer_vertex_shaders[VertexShaders::VUi]);
 			
 			auto& font_render_info = shared_state.ui_text_buffer_pos;
 			auto& font_uv_info = shared_state.ui_text_buffer_uv;

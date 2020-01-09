@@ -81,6 +81,12 @@ namespace idk::vkn
 
 	}
 	ColorPickRenderer::~ColorPickRenderer() = default;
+
+
+	//Main Tasks left:
+	//1)Change the render_data stuff to be non-instanced
+	//2)Set up the appropriate render_pass
+	//3)Set up the appropriate transfer buffer
 	void ColorPickRenderer::Render(vector<ColorPickRequest>& requests, SharedGraphicsState& shared_gs, RenderStateV2& rs)
 	{
 		auto& color_pick_frag = shared_gs.renderer_vertex_shaders[FPicking];
@@ -95,14 +101,17 @@ namespace idk::vkn
 			auto& render_data = request.data;
 			the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
 			the_interface.BindShader(ShaderStage::Fragment, color_pick_frag);
-			size_t i = 0;
-			for (auto itr = (*shared_gs.instanced_ros).data()+ render_data.inst_mesh_render_begin, end = (*shared_gs.instanced_ros).data() + render_data.inst_mesh_render_end;itr<end;++itr)
+			uint32_t i = 0;
+			the_interface.BindUniformBuffer("PerCamera", 0, render_data.camera.projection_matrix);
+			//for (auto itr = (*shared_gs.instanced_ros).data()+ render_data.inst_mesh_render_begin, end = (*shared_gs.instanced_ros).data() + render_data.inst_mesh_render_end;itr<end;++itr)
+			vector<RenderObject*> render_objects;
+			for(auto& p_ro : render_objects)
 			{
-				auto& inst_ro = *itr;
+				auto& ro = *p_ro;
 				the_interface.BindUniformBuffer("id", 0, i);
-				the_interface.BindMeshBuffers(inst_ro);
-				the_interface.BindAttrib(4, shared_gs.inst_mesh_render_buffer.buffer(), 0);
-				the_interface.FinalizeDrawCall(inst_ro, inst_ro.num_instances, inst_ro.instanced_index);
+				the_interface.BindUniformBuffer("PerObject", 0, render_data.camera.view_matrix*ro.transform);
+				the_interface.BindMeshBuffers(ro);
+				the_interface.FinalizeDrawCall(ro);
 			}
 			//TODO skinned stuff
 		}

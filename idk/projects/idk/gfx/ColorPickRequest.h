@@ -2,6 +2,7 @@
 #include <core/GameObject.h>
 #include <future>
 #include "ColorPickResult.h"
+#include <gfx/RenderObject.h> //Camera Data
 namespace idk
 {
 	struct PickReqData

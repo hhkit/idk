@@ -254,8 +254,8 @@ namespace idk::vkn
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
 
-		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
-		pre_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
+		shared_graphics_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
+		shared_graphics_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 
 		PostRenderData post_render_data;
 		post_render_data.shared_gfx_state = &shared_graphics_state;
@@ -263,9 +263,7 @@ namespace idk::vkn
 		//post_render_data.canvas_render_range = &curr_buffer.canvas_render_range;
 		//post_render_data.Init();
 
-		post_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
-		post_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
-
+		
 		hash_set<RscHandle<RenderTarget>> render_targets;
 
 		auto IsDontClear = [](const CameraData& camera)
@@ -314,8 +312,6 @@ namespace idk::vkn
 
 			//curr_state.mesh_vtx = curr_buffer.mesh_vtx;
 			//curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
-			curr_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
-			curr_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
 			curr_state.ProcessMaterialInstances();

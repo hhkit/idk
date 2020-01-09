@@ -125,7 +125,7 @@ namespace idk
 		bool is_deferred()const;
 		bool is_deferred(bool enable);
 
-		ColorPickResult ColorPick(CameraData camera);
+		ColorPickResult ColorPick(ivec2 picking_pt,CameraData camera);
 		void BufferRequests();
 
 		size_t AddRenderRequest(RenderRequest&& request);

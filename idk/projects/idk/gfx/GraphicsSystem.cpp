@@ -137,11 +137,11 @@ namespace idk
 		return _is_deferred = enable;
 	}
 
-	ColorPickResult GraphicsSystem::ColorPick(CameraData camera)
+	ColorPickResult GraphicsSystem::ColorPick(ivec2 picking_pt, CameraData camera)
 	{
 		auto& req = request_stack.emplace_front();
 		
-		return req.promise(camera);
+		return req.promise(picking_pt,camera);
 	}
 
 	void GraphicsSystem::BufferRequests()
@@ -888,9 +888,10 @@ namespace idk
 		///////////////////////Load vertex shaders
 		//renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
-		renderer_vertex_shaders[VNormalMeshPicker] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh_noinstance.vert");
+		renderer_vertex_shaders[VNormalMeshPicker] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
 		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
+		renderer_vertex_shaders[VSkinnedMeshPicker] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh_picking.vert");
 		renderer_vertex_shaders[VSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
 		renderer_vertex_shaders[VPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert");
 		renderer_vertex_shaders[VFsq] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/fsq.vert");

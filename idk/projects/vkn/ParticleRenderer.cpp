@@ -49,6 +49,7 @@ namespace idk::vkn
 	void ParticleRenderer::DrawParticles(PipelineThingy& the_interface, const GraphicsState& state, [[maybe_unused]]RenderStateV2& rs)const
 	{
 		auto& shared_state = *state.shared_gfx_state;
+		auto& renderer_vertex_shaders = state.shared_gfx_state->renderer_vertex_shaders;
 		ParticleVertexBindings vert_bind;
 		StandardMaterialBindings mat_bind;
 		mat_bind.SetState(state);
@@ -58,7 +59,7 @@ namespace idk::vkn
 		{
 			RenderObject particle_ro;
 			//auto& cam = state.camera;
-			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VParticle]);
+			the_interface.BindShader(ShaderStage::Vertex, renderer_vertex_shaders[VertexShaders::VParticle]);
 			auto& particle_render_data = *shared_state.particle_range;
 			particle_ro.config = particle_pipeline;
 			//particle_ro_inst.clear();
