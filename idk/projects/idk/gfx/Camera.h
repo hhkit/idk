@@ -43,7 +43,9 @@ namespace idk
 
 		Frustum   getFrustum() const;
 
-		mat4      getTightOrthoProjection() const;
+		mat4      getTightProjection() const;
+
+		vec3 getTightProjectionCenter() const;
 
 		mat4	  ViewMatrix() const;
 		mat4	  ProjectionMatrix() const;

@@ -62,6 +62,8 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\CameraFrustum.h" />
+    <ClInclude Include="gfx\Cascade.h" />
+    <ClInclude Include="gfx\CascadedSet.h" />
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\GraphFactory.h" />

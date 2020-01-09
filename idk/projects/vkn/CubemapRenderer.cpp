@@ -105,7 +105,7 @@ namespace idk::vkn
 	void CubemapRenderer::BeginQueue(UboManager& ubo_manager, std::optional<vk::Fence >ofence)
 	{
 		pipeline_manager().View(View());
-		pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
+		//pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
 		if (ofence)
 		{
 			auto& fence = *ofence;
@@ -235,6 +235,9 @@ namespace idk::vkn
 
 		frame_buffers.emplace_back(citr->second);
 
+		//auto temp = citr->second->GetRenderPass();
+		//temp;
+		
 		thingy.BindSampler(EpName(), 0, src.as<VknCubemap>());
 		thingy.BindMeshBuffers(ro.mesh, req);
 		thingy.FinalizeDrawCall(ro);
@@ -256,7 +259,7 @@ namespace idk::vkn
 		RenderImpl();
 		//thingy.FinalizeDrawCall(ro);
 	}
-
+//#pragma optimize("",off)
 	void CubemapRenderer::ProcessQueue(vk::CommandBuffer cmd_buffer)
 	{
 		//if (pool.size() == pool.capacity())
@@ -268,7 +271,7 @@ namespace idk::vkn
 		//	pool.emplace_back(dst, NewFrameBuffer(dst));
 		//}
 		//auto frame_buffer = cached.find(dst)->second;
-		cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, Pipeline().Pipeline());
+		//cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, Pipeline().Pipeline());
 		thingy.GenerateDS(ds_manager);
 		auto& p_ros = thingy.DrawCalls();
 
@@ -279,11 +282,18 @@ namespace idk::vkn
 			auto& p_ro = p_ros[i];
 			auto& dst = frame_buffers[i];
 			//TODO bind mesh
+
+			auto rp_obj = dst->GetRenderPass();
+			
+			pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0, rp_obj);
+			cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->Pipeline());
+			
 			auto size = dst->Size();
 			vk::ClearValue clear{ vk::ClearColorValue{} };
+
 			vk::RenderPassBeginInfo info
 			{
-				*dst->GetRenderPass(),dst->GetFramebuffer(),
+				*rp_obj,dst->GetFramebuffer(),
 				vk::Rect2D
 			{
 				vk::Offset2D{ 0,0 },vk::Extent2D{ s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y) }
@@ -333,7 +343,7 @@ namespace idk::vkn
 			cmd_buffer.endRenderPass();
 		}
 	}
-
+//#pragma optimize("",on)
 	void CubemapRenderer::ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos, const ivec2& vp_size)
 	{
 		//if (pool.size() == pool.capacity())
@@ -345,6 +355,7 @@ namespace idk::vkn
 		//	pool.emplace_back(dst, NewFrameBuffer(dst));
 		//}
 		//auto frame_buffer = cached.find(dst)->second;
+		pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
 		cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, Pipeline().Pipeline());
 		thingy.GenerateDS(ds_manager);
 		auto& p_ros = thingy.DrawCalls();

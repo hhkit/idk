@@ -27,6 +27,7 @@ namespace idk
 		alignas(16) mat4  v {};							  //
 		alignas(16) mat4  p{};							  //
 		RscHandle<FrameBuffer> light_map;				  //
+		//3 depth attachment (tri-cascade), (near, middle, far)
 	};
 
 	class Light

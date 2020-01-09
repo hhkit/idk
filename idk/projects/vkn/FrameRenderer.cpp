@@ -509,17 +509,25 @@ namespace idk::vkn
 
 		//Do post pass here
 		//Canvas pass
-		for (auto light_idx : state.active_lights)
+
+		//For each camera, get the fustrum-bounded sphere
+
+		//For each light, calculate the cascade center and cascade radius to
+		//calculate the cascade projection matrix
+		auto& cameras = *state.cameras;
+
+		//for (auto& camera : cameras)
 		{
-			auto& rs = _pre_states[curr_state++];
-			PreRenderShadow(light_idx, state, rs, frame_index);
+			for (auto light_idx : state.active_lights)
+			{
+				auto& rs = _pre_states[curr_state++];
+				PreRenderShadow(light_idx, state, rs, frame_index);
+			}
 		}
 		//TODO: Submit the command buffers
 
 		vector<vk::CommandBuffer> buffers{};
 
-
-		auto& cameras = *state.cameras;
 		if (cameras.size()==0)
 		{
 			auto& convolute_state = _pre_states[curr_state];
@@ -692,48 +700,107 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
-		auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.p};
-		ShadowBinding shadow_binding;
-		shadow_binding.for_each_binder<has_setstate>(
-			[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+
+		if (light.index == 1)
+		{
+			//for (auto& camData : *state.cameras)
+			auto& camData = *state.cameras->begin();
+			{
+				vec3 focus_point = camData.projection_center + light.v_dir.get_normalized() * camData.far_plane;
+				vec3 up_vector = light.v_dir.cross(vec3(1.f, 0, 0)).normalize();
+
+				//auto light_v = look_at(camData.projection_center, focus_point, up_vector);
+				
+				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
+				auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, camData.tight_projection_matrix };
+				ShadowBinding shadow_binding;
+				shadow_binding.for_each_binder<has_setstate>(
+					[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+				{
+					binder.SetState(cam, skel);
+				},
+					cam,
+					*state.skeleton_transforms);
+				GraphicsStateInterface gsi = { state };
+				gsi.range = (*state.shadow_ranges)[light_index];
+				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+				the_interface.GenerateDS(rs.dpools);
+
+				//auto& swapchain = view.Swapchain();
+				auto dispatcher = vk::DispatchLoaderDefault{};
+				vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+				vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+
+
+				cmd_buffer.begin(begin_info, dispatcher);
+				auto sz = light.light_map->DepthAttachment().buffer->Size();
+				vk::Rect2D render_area
+				{
+					vk::Offset2D{},
+					vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
+				};
+				auto& rt = light.light_map.as<VknFrameBuffer>();
+				vk::Framebuffer fb = rt.GetFramebuffer();
+				auto  rp = rt.GetRenderPass();
+				rt.PrepareDraw(cmd_buffer);
+				vector<vec4> clear_colors
+				{
+					vec4{1}
+				};
+				if (the_interface.DrawCalls().size())
+					rs.FlagRendered();
+				RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+
+				rs.ubo_manager.UpdateAllBuffers();
+				cmd_buffer.endRenderPass();
+				cmd_buffer.end();
+			}
+		}
+		else
+		{
+			auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.p };
+			ShadowBinding shadow_binding;
+			shadow_binding.for_each_binder<has_setstate>(
+				[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
 			{
 				binder.SetState(cam, skel);
 			},
-			cam,
+				cam,
 				*state.skeleton_transforms);
-		GraphicsStateInterface gsi = { state };
-		gsi.range = (*state.shadow_ranges)[light_index];
-		auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-		the_interface.GenerateDS(rs.dpools);
+			GraphicsStateInterface gsi = { state };
+			gsi.range = (*state.shadow_ranges)[light_index];
+			auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+			the_interface.GenerateDS(rs.dpools);
 
-		//auto& swapchain = view.Swapchain();
-		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+			//auto& swapchain = view.Swapchain();
+			auto dispatcher = vk::DispatchLoaderDefault{};
+			vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+			vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 
-		cmd_buffer.begin(begin_info, dispatcher);
-		auto sz = light.light_map->DepthAttachment().buffer->Size();
-		vk::Rect2D render_area
-		{
-			vk::Offset2D{},
-			vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)} 
-		};
-		auto& rt = light.light_map.as<VknFrameBuffer>();
-		vk::Framebuffer fb = rt.GetFramebuffer();
-		auto  rp = rt.GetRenderPass ();
-		rt.PrepareDraw(cmd_buffer);
-		vector<vec4> clear_colors
-		{
-			vec4{1}
-		};
-		if (the_interface.DrawCalls().size())
-			rs.FlagRendered();
-		RenderPipelineThingy(*state.shared_gfx_state,the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area,render_area,frame_index);
+			cmd_buffer.begin(begin_info, dispatcher);
+			auto sz = light.light_map->DepthAttachment().buffer->Size();
+			vk::Rect2D render_area
+			{
+				vk::Offset2D{},
+				vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
+			};
+			auto& rt = light.light_map.as<VknFrameBuffer>();
+			vk::Framebuffer fb = rt.GetFramebuffer();
+			auto  rp = rt.GetRenderPass();
+			rt.PrepareDraw(cmd_buffer);
+			vector<vec4> clear_colors
+			{
+				vec4{1}
+			};
+			if (the_interface.DrawCalls().size())
+				rs.FlagRendered();
+			RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
 
-		rs.ubo_manager.UpdateAllBuffers();
-		cmd_buffer.endRenderPass();
-		cmd_buffer.end();
+			rs.ubo_manager.UpdateAllBuffers();
+			cmd_buffer.endRenderPass();
+			cmd_buffer.end();
+		}
 
 	}
 

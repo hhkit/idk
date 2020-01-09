@@ -107,6 +107,8 @@ namespace idk
 		LayerMask culling_flags{ 0xFFFFFFFF };
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
+		mat4 tight_projection_matrix{};
+		vec3 projection_center{};
 		RscHandle<RenderTarget> render_target{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
@@ -114,6 +116,8 @@ namespace idk
         CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
 		rect viewport;
+		real near_plane;
+		real far_plane;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 
