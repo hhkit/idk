@@ -340,6 +340,7 @@ namespace idk::vkn
 				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
 			}
 		}
+		render_targets.emplace(RscHandle<VknRenderTarget>{});
 		for (auto& prt : render_targets)
 		{
 			if (prt->NeedsFinalizing())
