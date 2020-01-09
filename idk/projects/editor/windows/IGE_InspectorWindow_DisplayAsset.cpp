@@ -14,6 +14,7 @@
 #include <imgui/imgui_internal.h>
 #include <reflect/reflect.inl>
 #include <res/ResourceHandle.inl>
+#include <res/ResourceMeta.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
@@ -68,6 +69,12 @@ namespace idk
             ImGui::Separator();
 
             DisplayAsset(h);
+
+            if constexpr (has_tag_v<ResT, MetaResource>)
+            {
+                if (DisplayVal(h->GetMeta()))
+                    h->DirtyMeta();
+            }
         }, handle);
     }
 
