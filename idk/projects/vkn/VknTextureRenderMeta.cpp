@@ -20,6 +20,9 @@ namespace idk::vkn {
 	};
 	static const hash_table<TextureInternalFormat, vk::Format> cFormatMap
 	{
+		{ TextureInternalFormat::DEPTH_16, vk::Format::eD16Unorm },
+		{ TextureInternalFormat::DEPTH_24, vk::Format::eD24UnormS8Uint},
+		{ TextureInternalFormat::DEPTH_32, vk::Format::eD32Sfloat},
 		{ TextureInternalFormat::DEPTH_32_F_STENCIL_8, vk::Format::eD32Sfloat},
 		{ TextureInternalFormat::R_8, vk::Format::eR8Unorm },
 		{ TextureInternalFormat::R_16, vk::Format::eR16Unorm },

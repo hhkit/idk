@@ -10,8 +10,8 @@ namespace idk
 	struct CubeMapMeta
 	{
 		UVMode      uv_mode = UVMode::Clamp;
-		ColorFormat internal_format = ColorFormat::RGBA_32bit;
-		bool is_srgb{ true };
+		ColorFormat internal_format = ColorFormat::Automatic;
+		bool is_srgb{ false };
 		bool compressed{ true };
 	};
 

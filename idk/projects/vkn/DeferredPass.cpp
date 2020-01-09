@@ -324,7 +324,7 @@ namespace idk::vkn
 				})
 			.SetDepthAttachment(idk::AttachmentInfo{
 					LoadOp::eClear,StoreOp::eStore,
-					TextureInternalFormat::DEPTH_16,
+					TextureInternalFormat::DEPTH_32_F_STENCIL_8,
 					FilterMode::_enum::Nearest
 				});
 
@@ -340,7 +340,7 @@ namespace idk::vkn
 			fbf.Begin(size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-					TextureInternalFormat::DEPTH_16,
+					TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest
 				});
 			uint32_t i = 0;
@@ -489,7 +489,7 @@ namespace idk::vkn
 				fbf.AddAttachment(accum_att);
 				auto depth_att = idk::AttachmentInfo{
 					LoadOp::eLoad,StoreOp::eDontCare,
-					TextureInternalFormat::DEPTH_16,
+					TextureInternalFormat::DEPTH_32_F_STENCIL_8,
 					FilterMode::_enum::Nearest,false,
 					gbuffer.gbuffer->DepthAttachment().buffer
 				};
@@ -502,7 +502,7 @@ namespace idk::vkn
 
 			auto depth_att = idk::AttachmentInfo{
 				LoadOp::eDontCare,StoreOp::eStore,
-				TextureInternalFormat::DEPTH_16,
+				TextureInternalFormat::DEPTH_32_F_STENCIL_8,
 				FilterMode::_enum::Nearest,false,
 				rt.GetDepthBuffer()//GetColorBuffer()
 			};
