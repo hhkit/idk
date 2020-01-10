@@ -2,6 +2,19 @@
 #include <utility>
 namespace idk
 {
+	namespace detail
+	{
+		template<typename T, typename = void>
+		struct is_contiguous_container : std::false_type {};
+
+		template<typename T>
+		struct is_contiguous_container<T, std::void_t<decltype(
+			std::data(std::declval<T&>()),
+			std::size(std::declval<T&>())
+			)>> : std::true_type {};
+		template<typename T> constexpr auto is_contiguous_container_v = is_contiguous_container<T>::value;
+	}
+
 	template <typename T>
 	struct span
 	{
@@ -24,7 +37,7 @@ namespace idk
 
 		constexpr span() noexcept = default;
 		constexpr span(T* begin, T* end) noexcept;
-		template <typename Container, typename = std::enable_if_t<!std::is_same_v<std::decay_t<Container>, span>>>
+		template <typename Container, typename = std::enable_if_t<detail::is_contiguous_container_v<Container> && !std::is_same_v<std::decay_t<Container>, span>>>
 		constexpr span(Container&& c) noexcept;
 
 		// element access

@@ -34,7 +34,6 @@ namespace idk
 		if (meta)
 		{
 			cubemap_handle->GetMeta() = *meta->GetMeta<CubeMap>();
-			cubemap_handle->DirtyMeta();
 		}
 		ivec2 size{};
 		int channels{};

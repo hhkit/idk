@@ -4,6 +4,10 @@
 
 namespace idk
 {
+	namespace detail
+	{
+	}
+
 	template<typename T>
 	constexpr span<T>::span(T* begin, T* end) noexcept
 		: _begin{ begin }, _end{ end }
