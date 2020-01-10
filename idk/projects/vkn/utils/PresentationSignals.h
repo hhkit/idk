@@ -10,7 +10,9 @@ namespace idk::vkn
 		vk::UniqueSemaphore		image_available{};
 		vk::UniqueSemaphore		blit_finished{};
 		vk::UniqueSemaphore		render_finished{};
-		vk::UniqueFence			inflight_fence{};
+		vk::UniqueFence			_inflight_fence{};
+
+		vk::UniqueFence& inflight_fence();
 
 		PresentationSignals() = default;
 		PresentationSignals(PresentationSignals&& rhs) noexcept;
