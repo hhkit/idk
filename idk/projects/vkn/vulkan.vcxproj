@@ -360,6 +360,7 @@
     <ClInclude Include="utils\PresentationSignals.h" />
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
+    <ClInclude Include="utils\VknUtil.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />

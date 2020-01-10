@@ -17,23 +17,21 @@ End Header --------------------------------------------------------*/
 //#endif
 
 layout (location = 0) in vec3 position;
-
+layout (location = 1) in uint id;
+layout (location = 4) in mat4 object_transform;
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
 	mat4 perspective_transform;
 } PerCamera;
-U_LAYOUT(1, 0) uniform BLOCK(ObjectBlock)
-{
-	 mat4 object_transform;
-} PerObject;
-
 layout(location = 0) out gl_PerVertex
 {
     vec4 gl_Position;
 };
+layout(location = 1) out uint out_id;
 
 void main()
 {
 	vec3 pos = (PerObject.object_transform * vec4(position, 1.0)).xyz;
     gl_Position     = PerCamera.perspective_transform * vec4(pos, 1.0);
+	out_id = id;
 }

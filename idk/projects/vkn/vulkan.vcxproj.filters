@@ -241,6 +241,9 @@
     <ClInclude Include="ColorPickRenderer.h">
       <Filter>render\renderers</Filter>
     </ClInclude>
+    <ClInclude Include="utils\VknUtil.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

@@ -7,7 +7,8 @@ namespace idk::vkn
 
 	struct ColorPickRenderer
 	{
-		void Render(vector<ColorPickRequest>& requests, SharedGraphicsState& shared_gs, RenderStateV2& rs);
+		void PreRender(vector<ColorPickRequest>& requests, const SharedGraphicsState& shared_gs, size_t total_num_insts, vk::CommandBuffer cmd_buffer);
+		void Render(vector<ColorPickRequest>& requests, const SharedGraphicsState& shared_gs, RenderStateV2& rs);
 		ColorPickRenderer();
 		~ColorPickRenderer();
 	private:

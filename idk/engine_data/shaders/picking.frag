@@ -12,7 +12,7 @@ Creation date: -
 End Header --------------------------------------------------------*/
 #version 450
 
-S_LAYOUT(2,0) uniform uint id;
+layout(location=1)in uint id;
 
 layout(location=0)out uint out_color;
 
