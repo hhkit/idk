@@ -44,6 +44,7 @@ namespace idk::vkn
 		vk::UniqueSemaphore& GetPostRenderComplete() { return _post_render_complete; }
 		PresentationSignals& GetMainSignal();
 		SharedGraphicsState shared_graphics_state;
+		void ColorPick(vector<ColorPickRequest>&& pick_buffer);
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
 		
 		FrameRenderer() = default;

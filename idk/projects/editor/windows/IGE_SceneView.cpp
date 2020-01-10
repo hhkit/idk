@@ -190,14 +190,18 @@ namespace idk {
 			//	LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
 			//}
 			//Select gameobject here!
+			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			Handle<Camera> currCamera = main_camera.current_camera;
+			last_pick = Core::GetSystem<GraphicsSystem>().ColorPick(ivec2{ GetMousePosInWindow() },currCamera->GenerateCameraData());
+			
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
+			std::optional< Handle<GameObject>> result;
 			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
 			{
 				//Sort the obj by closest dist to point
 				//get the first obj
 				auto& editor = Core::GetSystem<IDE>();
-				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
 				Handle<GameObject> closestGameObject = obj.front();
 				auto cameraPos = editor.currentCamera().current_camera->currentPosition();
 				float distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
@@ -208,8 +212,20 @@ namespace idk {
 						distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Replace
 					}
 				}
+				result = closestGameObject;
+			}
 
+			if (last_pick && last_pick->ready())
+			{
+				result = last_pick->get();
+				last_pick.reset();
+			}
 
+			if(result)
+			{
+				auto& closestGameObject = *result;
+				auto& editor = Core::GetSystem<IDE>();
+				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
 				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Or select Deselect that particular handle
 					bool hasSelected = false;
 					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect

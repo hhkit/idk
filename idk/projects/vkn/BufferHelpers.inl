@@ -126,12 +126,13 @@ namespace idk::vkn::hlp
 	namespace detail
 	{
 		template<typename T, typename = decltype(std::data(std::declval<T>()))>
-		std::true_type has_data(T );
+		std::true_type has_data(const T& );
 		template<typename T,typename ...Args>
 		std::false_type has_data(T,Args...);
 		template<typename T>
 		static constexpr bool has_data_v = std::is_same_v<decltype(has_data(std::declval<T>())), std::true_type>;
 	}
+#pragma optimize("",off)
 	template<typename RT = size_t, typename T>
 	RT buffer_size(T const& vertices)
 	{
@@ -141,7 +142,7 @@ namespace idk::vkn::hlp
 		}
 		else
 		{
-			return static_cast<RT>(sizeof(vertices) * hlp::arr_count(vertices));
+			return static_cast<RT>(sizeof(vertices));
 		}
 	}
 
@@ -150,4 +151,18 @@ namespace idk::vkn::hlp
 	{
 		return static_cast<RT>(sizeof(T) * (end - begin));
 	}
+
+	template<typename T>
+	auto buffer_data(T& obj)
+	{
+		if constexpr (detail::has_data_v<T>)
+		{
+			return std::data(obj);
+		}
+		else
+		{
+			return &obj;
+		}
+	}
+#pragma optimize("",on)
 }

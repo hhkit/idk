@@ -342,6 +342,7 @@ namespace idk::vkn
 				prt->Finalize();
 		}
 		// */
+		curr_frame.ColorPick(std::move(request_buffer));
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);

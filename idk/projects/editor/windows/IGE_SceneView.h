@@ -16,6 +16,7 @@ This window displays the editor window where you can select and modify gameobjec
 #include <editor/windows/IGE_IWindow.h>
 #include <imgui/imgui.h>
 #include <phys/PhysicsSystem.h>
+#include <gfx/ColorPickResult.h>
 
 namespace idk {
 	class IGE_SceneView :
@@ -72,6 +73,8 @@ namespace idk {
 		const vector<float> translate_snap_type		= { 0,0.5,1,5,10,50,100,500 };
 		const vector<float> rotate_snap_type		= { 0,1,5,15,30,45,90	};
 		const vector<float> scale_snap_type			= { 0,0.5f,0.25f,0.125f,0.0625f };
+
+		std::optional<ColorPickResult> last_pick;
 
 		void DrawSnapControl();
 		void DrawGlobalAxes();

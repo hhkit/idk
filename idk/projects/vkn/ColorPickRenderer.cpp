@@ -7,7 +7,9 @@
 #include <vkn/VknRenderTarget.h>
 #include <Core/Core.inl>
 #include <res/ResourceManager.inl>	
+#include <res/ResourceHandle.inl>	
 #include <vkn/MemoryAllocator.h>
+#include <vkn/UboManager.inl>
 
 #include <vkn/utils/VknUtil.h>
 namespace idk::vkn
@@ -59,7 +61,10 @@ namespace idk::vkn
 	struct FrameDataHandler
 	{
 		std::forward_list<FrameData> data;
-		vk::UniqueFence MakeFence();
+		vk::UniqueFence MakeFence()
+		{
+			return View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
+		}
 		FrameData& Add(vector<ColorPickRequest> && requests)
 		{
 			auto& fd = data.emplace_front(FrameData{ MakeFence(),vk::UniqueBuffer{} });
@@ -96,6 +101,8 @@ namespace idk::vkn
 	//total_num_insts = total number of instances stored in inst_mesh_render_buffer
 	void ColorPickRenderer::PreRender(vector<ColorPickRequest>& requests, const  SharedGraphicsState& shared_gs, size_t total_num_insts, vk::CommandBuffer cmd_buffer)
 	{
+		if (requests.size() == 0)
+			return;
 		vector<uint32_t> id_buffer(total_num_insts);
 		ivec2 max_size{};
 		for (auto& request : requests)
@@ -151,6 +158,9 @@ namespace idk::vkn
 	//3)Set up the appropriate transfer buffer
 	void ColorPickRenderer::Render(vector<ColorPickRequest>& requests, const  SharedGraphicsState& shared_gs, RenderStateV2& rs)
 	{
+		_pimpl->handler.Check();
+		if (requests.size() == 0)
+			return;
 		auto& color_pick_frag = shared_gs.renderer_vertex_shaders[FPicking];
 		auto& mesh_vtx = shared_gs.renderer_vertex_shaders[VNormalMeshPicker];
 		auto& skinned_mesh_vtx = shared_gs.renderer_vertex_shaders[VSkinnedMeshPicker];
@@ -179,15 +189,12 @@ namespace idk::vkn
 		}
 		size_t i = 0;
 		auto req_itr = requests.begin();
-		//TODO Acquire framebuffers
 		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
-		cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-		//TODO actually configure a proper result buffer
 		vk::UniqueBuffer uresult_buffer = hlp::CreateBuffer(*View().Device(),requests.size()*sizeof(uint32_t),vk::BufferUsageFlagBits::eTransferDst,View().Dispatcher());
 		vk::Buffer result_buffer =*uresult_buffer;
-		size_t offset = 0;//TODO Use a proper offset
-		auto& fb = _pimpl->frame_buffer.as<VknRenderTarget>();
-		auto&& rp = fb.GetRenderPass(true, true);
+		size_t offset = 0;
+		auto& fb = _pimpl->frame_buffer.as<VknFrameBuffer>();
+		auto&& rp = fb.GetRenderPass();
 		std::array<vk::ClearValue,2> clear_val
 		{
 			vk::ClearColorValue
@@ -204,21 +211,24 @@ namespace idk::vkn
 			auto& request = *req_itr;
 			auto& data = request.data;
 			task.GenerateDS(rs.dpools, (++i)==render_tasks.size());
-			//TODO Bind FrameBuffers
-			//TODO beginRenderPass
 			vk::RenderPassBeginInfo rpbi
 			{
-				*rp,fb.Buffer(),
+				*rp,fb.GetFramebuffer(),
 				hlp::ToRect2D({},data.camera.render_target->Size()),
 				static_cast<uint32_t>(clear_val.size()),clear_val.data()
 			};
 			cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
-			//TODO Draw using PipelineThingy's info
+			//TODO Bind pipeline
+			//cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, );;
+			//TODO DRAW
 			
-			RscHandle<VknTexture> htex;//TODO grab tex from render buffer
+			auto htex = fb.GetAttachment(0).buffer;
 			auto& tex = htex.as<VknTexture>(); 
 			auto layers = vk::ImageSubresourceLayers
-			{};
+			{
+				vk::ImageAspectFlagBits::eColor,
+				0,0,1
+			};
 			vk::BufferImageCopy copy
 			{
 				offset,0,0,layers,vk::Offset3D{data.point.x,data.point.y,0},vk::Extent3D{1,1,1}
@@ -228,7 +238,7 @@ namespace idk::vkn
 			cmd_buffer.copyImageToBuffer(tex.Image(), vk::ImageLayout::eTransferSrcOptimal, result_buffer, copy);
 			offset += picking_pixel_size;
 		}
-		cmd_buffer.end();
+		//cmd_buffer.end();
 		auto& fd = _pimpl->handler.Add(std::move(requests));
 		fd.buffer = std::move(uresult_buffer);
 		fd.alloc = _pimpl->allocator.Allocate(result_buffer, vk::MemoryPropertyFlagBits::eHostVisible);

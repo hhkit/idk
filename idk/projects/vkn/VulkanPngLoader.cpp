@@ -23,6 +23,7 @@ namespace idk::vkn
 		int a = 0;
 		a++;
 	}
+#pragma optimize("",on)
 	ResourceBundle PngLoader::LoadFile(PathHandle handle, RscHandle<Texture> rtex, const TextureMeta* tm)
 	{
 		VknTexture& tex = rtex.as<VknTexture>();
