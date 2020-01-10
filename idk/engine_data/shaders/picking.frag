@@ -12,16 +12,11 @@ Creation date: -
 End Header --------------------------------------------------------*/
 #version 450
 
-layout (location = 3) in VS_OUT
-{
-  vec3 position;
-} vs_out;
+S_LAYOUT(2,0) uniform uint id;
 
-S_LAYOUT(6,1) uniform uint obj_index;
-
-layout(location=0)out vec4 out_color;
+layout(location=0)out uint out_color;
 
 void main()
 {
-	out_color = vec4(float(obj_index),0,0,float(gl_PrimitiveID + 1));
+	out_color = id;
 } 

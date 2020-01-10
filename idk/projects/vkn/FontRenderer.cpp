@@ -34,8 +34,8 @@ namespace idk::vkn
 
 		if (num_unique_inst)
 		{
-			the_interface.BindShader(ShaderStage::Vertex, state.renderer_vertex_shaders[VertexShaders::VFont]);
-			the_interface.BindShader(ShaderStage::Fragment, state.renderer_fragment_shaders[FragmentShaders::FFont]);
+			the_interface.BindShader(ShaderStage::Vertex,   state.shared_gfx_state->renderer_vertex_shaders[VertexShaders::VFont]);
+			the_interface.BindShader(ShaderStage::Fragment, state.shared_gfx_state->renderer_fragment_shaders[FragmentShaders::FFont]);
 			//auto& character_render_info = *shared_state.characters_data;
 			auto& font_render_info = *shared_state.fonts_data;
 			font_ro.config = font_pipeline;
