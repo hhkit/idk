@@ -137,7 +137,7 @@ namespace idk
 		return _is_deferred = enable;
 	}
 
-	ColorPickResult GraphicsSystem::ColorPick(ivec2 picking_pt, CameraData camera)
+	ColorPickResult GraphicsSystem::ColorPick(vec2 picking_pt, CameraData camera)
 	{
 		auto& req = request_stack.emplace_front();
 		
@@ -192,7 +192,7 @@ namespace idk
 		};
 	}
 	//returns indices to the start and one past the end
-	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro,const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data)
+	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro,const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data,vector<Handle<GameObject>>* handle_buffer=nullptr)
 	{
 
 		const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
@@ -210,11 +210,12 @@ namespace idk
 					return (itr->mesh == prev->mesh) & (itr->material_instance == prev->material_instance);
 					}(itr, *oprev))
 				{
-
 					inst_itr = &inst.emplace_back(CreateIROInfo(*itr));
 					inst_itr->instanced_index = instanced_data.size();
 					oprev = itr;
 				}
+				if (handle_buffer)
+					handle_buffer->emplace_back(itr->obj_id);
 				//Keep track of the number of instances to be render for this frustum
 				auto tfm = camera.view_matrix * itr->transform;
 				instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
@@ -838,7 +839,7 @@ namespace idk
 			auto& out_instanced_mesh_render = result.instanced_mesh_render;
 			auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
 			{
-				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer);
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
 				request.data.inst_mesh_render_begin = start_index;
 				request.data.inst_mesh_render_end = end_index;
 			}

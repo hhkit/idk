@@ -72,7 +72,7 @@ namespace idk {
 
 		
 	}
-
+#pragma optimize("",off)
 	void IGE_SceneView::Update()
 	{
         ImGui::PopStyleVar(3);
@@ -181,6 +181,7 @@ namespace idk {
 
 
 		//Raycast Selection
+		std::optional< Handle<GameObject>> result;
 		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
 		{
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
@@ -192,11 +193,10 @@ namespace idk {
 			//Select gameobject here!
 			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 			Handle<Camera> currCamera = main_camera.current_camera;
-			last_pick = Core::GetSystem<GraphicsSystem>().ColorPick(ivec2{ GetMousePosInWindow() },currCamera->GenerateCameraData());
+			last_pick = Core::GetSystem<GraphicsSystem>().ColorPick(GetMousePosInWindowNormalized(),currCamera->GenerateCameraData());
 			
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
-			std::optional< Handle<GameObject>> result;
 			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
 			{
 				//Sort the obj by closest dist to point
@@ -214,16 +214,20 @@ namespace idk {
 				}
 				result = closestGameObject;
 			}
+		}
 
-			if (last_pick && last_pick->ready())
-			{
-				result = last_pick->get();
-				last_pick.reset();
-			}
+		if (last_pick && last_pick->ready())
+		{
+			result = last_pick->get();
+			last_pick.reset();
+		}
+		
+		if (result)
+		{
 
-			if(result)
+			Handle<GameObject> closestGameObject = *result;
+			if (closestGameObject)
 			{
-				auto& closestGameObject = *result;
 				auto& editor = Core::GetSystem<IDE>();
 				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
 				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Or select Deselect that particular handle

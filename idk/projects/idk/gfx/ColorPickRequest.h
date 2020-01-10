@@ -7,7 +7,7 @@ namespace idk
 {
 	struct PickReqData
 	{
-		ivec2 point{};
+		vec2 point{};
 		CameraData camera;
 		size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 		vector<Handle<GameObject>> handles;
@@ -15,14 +15,14 @@ namespace idk
 	struct ColorPickRequest
 	{
 		using result_t = Handle<GameObject>;
-		ColorPickResult promise(ivec2 picking_point, CameraData camera_data) 
+		ColorPickResult promise(vec2 normalized_point, CameraData camera_data) 
 		{ 
-			data.point = picking_point;
+			data.point = normalized_point;
 			data.camera = camera_data;
 			return ColorPickResult{ result };
 		}
 
-		void select(uint32_t index) { set_result(data.handles[index]); }
+		void select(uint32_t index) { set_result((index) ? data.handles[index - 1] : result_t{}); }
 		void set_result(result_t value) { result.set_value(value); }
 
 		

@@ -63,6 +63,7 @@ namespace idk::vkn::hlp
 			vk::DeviceMemory Memory()const { return control.Memory(); }
 			size_t           Offset()const { return control.offset; }
 			size_t           Size()const { return control.size; }
+			size_t           BlockSize()const { return control.IntMemory().sz; }
 			Alloc(Memories& mem, uint32_t index,size_t u_offset, size_t offset, size_t size) :control{ &mem,index,u_offset,offset,size } {}
 			Alloc(const Alloc&) = delete;
 			Alloc(Alloc&&) = default;

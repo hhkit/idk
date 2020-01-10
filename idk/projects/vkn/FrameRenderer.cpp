@@ -450,17 +450,6 @@ namespace idk::vkn
 		}
 		size_t curr_state = 0;
 
-		{
-			auto& color_picker = _pimpl->color_picker;
-			auto& requests = _pimpl->color_pick_requests;
-			auto& shared_gs = *state.shared_gfx_state;
-			auto& rs = _pre_states[curr_state++];
-			auto cmd_buffer = rs.CommandBuffer();
-			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
-			color_picker.PreRender(requests, shared_gs, state.inst_mesh_buffer->size(),cmd_buffer);
-			color_picker.Render(requests, shared_gs, rs);
-			cmd_buffer.end();
-		}
 
 		std::optional<vk::Semaphore> copy_semaphore{};
 		{
@@ -525,6 +514,16 @@ namespace idk::vkn
 			queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 		}
 
+		{
+			auto& color_picker = _pimpl->color_picker;
+			auto& requests = _pimpl->color_pick_requests;
+			auto& shared_gs = *state.shared_gfx_state;
+			auto& rs = _pre_states[curr_state++];
+			auto cmd_buffer = rs.CommandBuffer();
+			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+			color_picker.PreRender(requests, shared_gs, state.inst_mesh_buffer->size(), cmd_buffer);
+			color_picker.Render(requests, shared_gs, rs);
+		}
 		//Do post pass here
 		//Canvas pass
 		for (auto light_idx : state.active_lights)

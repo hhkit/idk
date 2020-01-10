@@ -31,7 +31,7 @@ layout(location = 1) out uint out_id;
 
 void main()
 {
-	vec3 pos = (PerObject.object_transform * vec4(position, 1.0)).xyz;
+	vec3 pos = (object_transform * vec4(position, 1.0)).xyz;
     gl_Position     = PerCamera.perspective_transform * vec4(pos, 1.0);
 	out_id = id;
 }

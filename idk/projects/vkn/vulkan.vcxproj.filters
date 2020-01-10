@@ -443,7 +443,9 @@
       <Filter>render\renderers</Filter>
     </ClCompile>
     <ClCompile Include="DebugUtil.cpp" />
-    <ClCompile Include="ColorPickRenderer.cpp" />
+    <ClCompile Include="ColorPickRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

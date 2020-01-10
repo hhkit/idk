@@ -20,10 +20,14 @@ namespace idk::vkn::hlp
 	{
 		static const idk::hash_table<AttribFormat, vk::Format> map
 		{
-			{ AttribFormat::eIVec1,vk::Format::eR32Sint}
+			 { AttribFormat::eIVec1,vk::Format::eR32Sint}
 			,{ AttribFormat::eIVec2,vk::Format::eR32G32Sint }
 			,{ AttribFormat::eIVec3,vk::Format::eR32G32B32Sint }
 			,{ AttribFormat::eIVec4,vk::Format::eR32G32B32A32Sint }
+			,{ AttribFormat::eUVec1,vk::Format::eR32Uint}
+			,{ AttribFormat::eUVec2,vk::Format::eR32G32Uint }
+			,{ AttribFormat::eUVec3,vk::Format::eR32G32B32Uint }
+			,{ AttribFormat::eUVec4,vk::Format::eR32G32B32A32Uint }
 			,{ AttribFormat::eSVec1,vk::Format::eR32Sfloat}
 			,{ AttribFormat::eSVec2,vk::Format::eR32G32Sfloat }
 			,{ AttribFormat::eSVec3,vk::Format::eR32G32B32Sfloat }

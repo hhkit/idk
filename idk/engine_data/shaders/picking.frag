@@ -12,7 +12,7 @@ Creation date: -
 End Header --------------------------------------------------------*/
 #version 450
 
-layout(location=1)in uint id;
+layout(location=1)flat in uint id;
 
 layout(location=0)out uint out_color;
 

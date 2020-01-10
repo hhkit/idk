@@ -11,10 +11,17 @@
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args);
 
+HWND& GetHWND()
+{
+	static HWND hwnd;
+	return hwnd;
+}
 void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow, LPWSTR* command_lines, int num_args)
 {
 	using namespace idk;
-    c->AddSystem<Windows>(hInstance, nCmdShow).SetFullscreen(false);
+	auto& windows = c->AddSystem<Windows>(hInstance, nCmdShow);
+	windows.SetFullscreen(false);
+	GetHWND()=windows.GetWindowHandle();
 	c->AddSystem<win::XInputSystem>();
 
 	GraphicsSystem* gSys = nullptr;

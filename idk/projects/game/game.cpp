@@ -25,6 +25,12 @@ bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow, LPWSTR* command_lines, int num_args);
 void ConfigAppDataAndLogger();
 
+RENDERDOC_API_1_1_2*& GetRDocApi()
+{
+	static RENDERDOC_API_1_1_2* ptr;
+	return ptr;
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPWSTR    lpCmdLine,
@@ -52,6 +58,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			pRENDERDOC_GetAPI RENDERDOC_GetAPI =
 				(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
 			RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)& rdoc_api);
+			GetRDocApi() = rdoc_api;
 		}
 	}
 

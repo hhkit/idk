@@ -19,8 +19,9 @@ End Header --------------------------------------------------------*/
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in uint id;
-layout (location = 4) in ivec4 bone_ids;
-layout (location = 5) in vec4 bone_weights;
+layout (location = 2) in vec4 bone_weights;
+layout (location = 3) in ivec4 bone_ids;
+layout (location = 4) in mat4 object_transform;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
@@ -37,7 +38,7 @@ layout (location = 0) out gl_PerVertex
     vec4 gl_Position;
 };
 
-layout (location = 1) out out_id;
+layout (location = 1) out uint out_id;
 
 void main()
 {
@@ -48,11 +49,11 @@ void main()
   b_transform      += BoneMat4s.bone_transform[bone_ids[3]] * bone_weights[3];
 	
 	b_transform /= (bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3]);
-	mat4 resultant = ObjectMat4s.object_transform *
+	mat4 resultant = object_transform *
                      b_transform;  
-	vs_out.position = vec3(resultant * vec4(position, 1.0));
+	vec3 out_position = vec3(resultant * vec4(position, 1.0));
 	
-	gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
+	gl_Position     = PerCamera.perspective_transform * vec4(out_position, 1.0);
 	out_id = id;
  
 }
