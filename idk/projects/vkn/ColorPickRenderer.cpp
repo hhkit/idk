@@ -417,7 +417,7 @@ namespace idk::vkn
 				offset,0,0,layers,vk::Offset3D{point.x,(vp_size.y-1)-point.y,0},vk::Extent3D{1,1,1}
 			};
 			cmd_buffer.endRenderPass();
-			hlp::TransitionImageLayout(true, cmd_buffer, {}, tex.Image(), tex.format, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);
+			hlp::TransitionImageLayout(cmd_buffer, {}, tex.Image(), tex.format, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);
 			cmd_buffer.copyImageToBuffer(tex.Image(), vk::ImageLayout::eTransferSrcOptimal, result_buffer, copy);
 			offset += picking_pixel_size;
 		}

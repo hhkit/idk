@@ -19,6 +19,11 @@ This window displays the editor window where you can select and modify gameobjec
 #include <gfx/ColorPickResult.h>
 
 namespace idk {
+
+	struct PickState
+	{
+		bool is_multi_select = false;
+	};
 	class IGE_SceneView :
 		public IGE_IWindow
 	{
@@ -74,7 +79,7 @@ namespace idk {
 		const vector<float> rotate_snap_type		= { 0,1,5,15,30,45,90	};
 		const vector<float> scale_snap_type			= { 0,0.5f,0.25f,0.125f,0.0625f };
 
-		std::optional<ColorPickResult> last_pick;
+		std::optional<std::pair<ColorPickResult,PickState>> last_pick;
 
 		void DrawSnapControl();
 		void DrawGlobalAxes();

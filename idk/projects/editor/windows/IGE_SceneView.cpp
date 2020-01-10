@@ -181,7 +181,8 @@ namespace idk {
 
 
 		//Raycast Selection
-		std::optional< Handle<GameObject>> result;
+		std::optional< std::pair<Handle<GameObject>,PickState>> result;
+
 		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
 		{
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
@@ -193,7 +194,13 @@ namespace idk {
 			//Select gameobject here!
 			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
 			Handle<Camera> currCamera = main_camera.current_camera;
-			last_pick = Core::GetSystem<GraphicsSystem>().ColorPick(GetMousePosInWindowNormalized(),currCamera->GenerateCameraData());
+			last_pick = 
+			{
+				Core::GetSystem<GraphicsSystem>().ColorPick(GetMousePosInWindowNormalized(),currCamera->GenerateCameraData()),
+				PickState{
+					.is_multi_select = ImGui::IsKeyDown(static_cast<int>(Key::Control))
+				}
+			};
 			
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
@@ -212,25 +219,25 @@ namespace idk {
 						distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Replace
 					}
 				}
-				result = closestGameObject;
+				//result = closestGameObject;
 			}
 		}
 
-		if (last_pick && last_pick->ready())
+		if (last_pick && last_pick->first.ready())
 		{
-			result = last_pick->get();
+			result = { last_pick->first.get(),last_pick->second };
 			last_pick.reset();
 		}
 		
 		if (result)
 		{
 
-			Handle<GameObject> closestGameObject = *result;
+			auto [closestGameObject,picked_state] = *result;
 			if (closestGameObject)
 			{
 				auto& editor = Core::GetSystem<IDE>();
 				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
-				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Or select Deselect that particular handle
+				if (picked_state.is_multi_select) { //Or select Deselect that particular handle
 					bool hasSelected = false;
 					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect
 						if (closestGameObject == selected_gameObjects[counter]) {
