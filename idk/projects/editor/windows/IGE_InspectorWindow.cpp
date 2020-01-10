@@ -1122,18 +1122,14 @@ namespace idk {
 		constexpr auto draw_audio_list = [](const reflect::dynamic& dyn) -> bool
 		{
 			bool changed = false;
-
 			auto& audio_clip_list = dyn.get<vector<RscHandle<AudioClip>>>();
 			if (ImGui::Button("Add AudioClip")) {
 				audio_clip_list.emplace_back(RscHandle<AudioClip>());
 				changed = true;
 			}
 
-			ImGui::Separator();
 			if (!audio_clip_list.empty()) {
-				ImGui::Text("AudioClips");
-				ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 10, 200), true);
-
+				ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 20, 150), true);
 				for (auto i = 0; i < audio_clip_list.size(); ++i) {
 					string txt = "[" + std::to_string(i) + "]";
 					if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
@@ -1170,8 +1166,43 @@ namespace idk {
 			return changed;
 		};
 
+        constexpr auto draw_audio_volume = [](const reflect::dynamic& dyn) -> bool
+        {
+            bool changed = false;
+
+            auto& audio_clip_volume = dyn.get<vector<float>>();
+
+            if (!audio_clip_volume.empty()) {
+                ImGui::Text("");
+                ImGui::BeginChild("AudioClips_Volume", ImVec2(ImGui::GetWindowContentRegionWidth() *0.5f, 150), true);
+
+                for (auto i = 0; i < audio_clip_volume.size(); ++i) {
+                    //string txt = "[" + std::to_string(i) + "]";
+                    ImGui::Text("[%d]", i);
+                    ImGui::SameLine();
+                    ImGui::PushID(i);
+                    if (ImGui::DragFloat("##audioVol", &(static_audiosource->audio_clip_volume[i]),0.01f,0,1,"%.2f",1.0f)) {
+                        changed = true;
+                    }
+                    //ImGui::Text("%.2f", static_audiosource->audio_clip_volume[i]);
+   
+                    ImGui::PopID();
+
+                }
+
+                ImGui::EndChild();
+                ImGui::Separator();
+
+            }
+
+            return changed;
+        };
+
+
+
 		InjectDrawTable table{
-			{ "audio_clip_list", draw_audio_list }
+			{ "audio_clip_list", draw_audio_list },
+			{ "audio_clip_volume", draw_audio_volume }
 		};
 
 		DisplayVal(*c_audiosource, &table);

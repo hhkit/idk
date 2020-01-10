@@ -49,6 +49,8 @@ REFLECT_BEGIN(idk::vector<idk::string>, "vector<string>")
 REFLECT_END()
 REFLECT_BEGIN(idk::vector<unsigned char>, "vector<uchar>")
 REFLECT_END()
+REFLECT_BEGIN(idk::vector<float>, "vector<float>")
+REFLECT_END()
 
 /*==========================================================================
  * math
