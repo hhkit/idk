@@ -85,7 +85,8 @@ namespace idk::vkn::hlp
 		};
 		using UniqueAlloc =std::unique_ptr<Alloc>;
 
-	MemoryAllocator(vk::Device d, vk::PhysicalDevice pd):device{d},pdevice{pd}{}
+		MemoryAllocator();
+		MemoryAllocator(vk::Device d, vk::PhysicalDevice pd):device{d},pdevice{pd}{}
 
 		UniqueAlloc Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req);
 		UniqueAlloc Allocate(vk::Image image, vk::MemoryPropertyFlags prop);

@@ -123,10 +123,26 @@ namespace idk::vkn::hlp
 		return vk::ArrayProxy<const T>{sz, arr};
 	}
 
+	namespace detail
+	{
+		template<typename T, typename = decltype(std::data(std::declval<T>()))>
+		std::true_type has_data(T );
+		template<typename T,typename ...Args>
+		std::false_type has_data(T,Args...);
+		template<typename T>
+		static constexpr bool has_data_v = std::is_same_v<decltype(has_data(std::declval<T>())), std::true_type>;
+	}
 	template<typename RT = size_t, typename T>
 	RT buffer_size(T const& vertices)
 	{
-		return static_cast<RT>(sizeof(*std::data(vertices)) * hlp::arr_count(vertices));
+		if constexpr (detail::has_data_v<T>)
+		{
+			return static_cast<RT>(sizeof(*std::data(vertices)) * hlp::arr_count(vertices));
+		}
+		else
+		{
+			return static_cast<RT>(sizeof(vertices) * hlp::arr_count(vertices));
+		}
 	}
 
 	template<typename RT = size_t, typename T = int>

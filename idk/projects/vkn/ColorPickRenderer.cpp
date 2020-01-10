@@ -39,20 +39,22 @@ namespace idk::vkn
 		void Fulfill()
 		{
 			vk::Device d = *View().Device();
-			const byte* memory_range = static_cast<byte*>(d.mapMemory(buffer, offset, picking_pixel_size*requests.size(), vk::MemoryMapFlags{}));
+			const byte* memory_range = static_cast<byte*>(d.mapMemory(buffer_memory, offset, picking_pixel_size*requests.size(), vk::MemoryMapFlags{}));
 			size_t i = 0;
 			for (auto& req : requests)
 			{
 				auto ro_index = adjust<picking_pixel_size,uint32_t>(memory_range + picking_pixel_size * i);
-				req.request.select(ro_index); 
+				req.select(ro_index); 
 				++i;
 			}
 		}
 
 		vk::UniqueFence fence;
-		vk::DeviceMemory buffer;
+		vk::UniqueBuffer buffer;
+		hlp::MemoryAllocator::UniqueAlloc alloc;
+		vk::DeviceMemory buffer_memory;
 		size_t offset;
-		vector<RequestInfo> requests;
+		vector<ColorPickRequest> requests;
 	};
 	struct FrameDataHandler
 	{
@@ -60,21 +62,18 @@ namespace idk::vkn
 		vk::UniqueFence MakeFence();
 		FrameData& Add(vector<ColorPickRequest> && requests)
 		{
-			auto& fd = data.emplace_front(FrameData{ MakeFence() });
+			auto& fd = data.emplace_front(FrameData{ MakeFence(),vk::UniqueBuffer{} });
 			fd.requests.reserve(requests.size());
 			std::move(requests.begin(), requests.end(), std::back_inserter(fd.requests));
 			requests.clear();
 			return fd;
 		}
-		void FreeFrameBuffers(size_t pool_start, size_t pool_end);
-		std::pair<size_t, size_t> AcquireFrameBuffers(size_t num_buffers);
 		void Check()
 		{
 			while (!data.empty() && data.front().Done())
 			{
 				auto& fd = data.front();
 				fd.Fulfill();
-				FreeFrameBuffers(fd.frame_buffer_start, fd.frame_buffer_end);
 				data.pop_front();
 			}
 		}
@@ -86,6 +85,7 @@ namespace idk::vkn
 		hlp::vector_buffer id_buffer;
 		RscHandle<VknFrameBuffer> frame_buffer;
 		hlp::MemoryAllocator allocator;
+
 	};
 	ColorPickRenderer::ColorPickRenderer() :_pimpl{ std::make_unique<PImpl>() }
 	{
@@ -183,7 +183,8 @@ namespace idk::vkn
 		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
 		cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 		//TODO actually configure a proper result buffer
-		vk::Buffer result_buffer;
+		vk::UniqueBuffer uresult_buffer = hlp::CreateBuffer(*View().Device(),requests.size()*sizeof(uint32_t),vk::BufferUsageFlagBits::eTransferDst,View().Dispatcher());
+		vk::Buffer result_buffer =*uresult_buffer;
 		size_t offset = 0;//TODO Use a proper offset
 		auto& fb = _pimpl->frame_buffer.as<VknRenderTarget>();
 		auto&& rp = fb.GetRenderPass(true, true);
@@ -222,15 +223,27 @@ namespace idk::vkn
 			{
 				offset,0,0,layers,vk::Offset3D{data.point.x,data.point.y,0},vk::Extent3D{1,1,1}
 			};
-			cmd_buffer.copyImageToBuffer(tex.Image(), vk::ImageLayout::eTransferSrcOptimal, result_buffer, copy);
 			cmd_buffer.endRenderPass();
+			hlp::TransitionImageLayout(true, cmd_buffer, {}, tex.Image(), tex.format, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);
+			cmd_buffer.copyImageToBuffer(tex.Image(), vk::ImageLayout::eTransferSrcOptimal, result_buffer, copy);
 			offset += picking_pixel_size;
 		}
 		cmd_buffer.end();
 		auto& fd = _pimpl->handler.Add(std::move(requests));
+		fd.buffer = std::move(uresult_buffer);
+		fd.alloc = _pimpl->allocator.Allocate(result_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
+		fd.buffer_memory = fd.alloc->Memory();
+		View().Device()->bindBufferMemory(result_buffer, fd.buffer_memory, 0, View().Dispatcher());
 		auto fence = *fd.fence;
-		//TODO submit buffer and set it up to signal the fence
-		//TODO update framebuffer range
+
+		vk::SubmitInfo su
+		{
+			0,nullptr,
+			nullptr,
+			1,&cmd_buffer,
+			0,nullptr
+		};
+		View().GraphicsQueue().submit(su, fence);
 	}
 
 }
