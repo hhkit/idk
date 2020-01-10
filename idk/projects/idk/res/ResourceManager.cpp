@@ -272,8 +272,14 @@ namespace idk
 						}, elem);
 				}
 				auto test = serialize_text(m);
-				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << test;
+				{
+					auto stream = Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE);
+					stream << test;
+					stream.close();
+					stream.clear(); 
+				}
 				resource.is_new = false;
+				Load(path, true);
 			}
 		}
 	}
