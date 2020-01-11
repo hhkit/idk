@@ -106,7 +106,7 @@ namespace idk {
 	constexpr inline bool is_in_tuple_v = detail::is_in_tuple<T,Tuple>::value;
 
 	using SelectableComponents = std::tuple< Handle<MeshRenderer>, Handle<SkinnedMeshRenderer>>;
-#pragma optimize("",off)
+
 	template<typename T>
 	Handle<GameObject> GetGameObject(T handle)
 	{
@@ -269,7 +269,14 @@ namespace idk {
 
 		if (last_pick && last_pick->first.ready())
 		{
-			result = { last_pick->first.get(),last_pick->second };
+			try
+			{
+				result = { last_pick->first.get(),last_pick->second };
+			}
+			catch (std::future_error& err)
+			{
+				LOG_TO(LogPool::EDIT, "Error \"%s\"when trying to get picked future ", err.what());
+			}
 			last_pick.reset();
 		}
 		
