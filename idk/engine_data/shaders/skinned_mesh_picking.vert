@@ -18,16 +18,21 @@ End Header --------------------------------------------------------*/
 #define MAX_BONES 100
 
 layout (location = 0) in vec3 position;
-layout (location = 1) in uint id;
-layout (location = 2) in vec4 bone_weights;
-layout (location = 3) in ivec4 bone_ids;
-layout (location = 4) in mat4 object_transform;
+layout (location = 4) in ivec4 bone_ids;
+layout (location = 5) in vec4 bone_weights;
+layout (location = 6) in mat4 object_transform;
+layout (location = 10) in uint id;
 
 U_LAYOUT(0, 0) uniform BLOCK(CameraBlock)
 {
+	mat4 view_transform;
 	mat4 perspective_transform;
 } PerCamera;
 
+U_LAYOUT(1, 0) uniform BLOCK(IdBlock)
+{
+	uint base_offset;
+} id_info;
 U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
 {
 	mat4 bone_transform[MAX_BONES];
@@ -49,11 +54,11 @@ void main()
   b_transform      += BoneMat4s.bone_transform[bone_ids[3]] * bone_weights[3];
 	
 	b_transform /= (bone_weights[0] + bone_weights[1] + bone_weights[2] + bone_weights[3]);
-	mat4 resultant = object_transform *
+	mat4 resultant = PerCamera.view_transform * object_transform *
                      b_transform;  
 	vec3 out_position = vec3(resultant * vec4(position, 1.0));
 	
 	gl_Position     = PerCamera.perspective_transform * vec4(out_position, 1.0);
-	out_id = id;
+	out_id = id_info.base_offset+id;
  
 }

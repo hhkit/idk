@@ -17,18 +17,25 @@
 #include <renderdoc/renderdoc_app.h>
 
 #include <vkn/DebugUtil.h>
+static constexpr bool rd_enabled = true;
 RENDERDOC_API_1_1_2*& GetRDocApi();
 void RdocFrameCapture()
 {
-	auto api = GetRDocApi();
-	if(api)
-		api->StartFrameCapture(NULL, NULL);
+	if constexpr (rd_enabled)
+	{
+		auto api = GetRDocApi();
+		if(api)
+			api->StartFrameCapture(NULL, NULL);
+	}
 }
 void RdocEndFrameCapture()
 {
-	auto api = GetRDocApi();
-	if(api)
-		api->EndFrameCapture(NULL, NULL);
+	if constexpr (rd_enabled)
+	{
+		auto api = GetRDocApi();
+		if (api)
+			api->EndFrameCapture(NULL, NULL);
+	}
 }
 HWND& GetHWND();
 namespace idk::vkn
@@ -105,13 +112,8 @@ namespace idk::vkn
 			}
 		}
 	};
-
-	struct ColorPickRenderer::PImpl
+	struct ColorPickPipeline
 	{
-		FrameDataHandler handler;
-		hlp::vector_buffer id_buffer;
-		RscHandle<VknFrameBuffer> frame_buffer;
-		hlp::MemoryAllocator allocator;
 		pipeline_config config;
 		VulkanPipeline pipeline;
 		vector<vk::ShaderModule> pipeline_modules;
@@ -132,17 +134,17 @@ namespace idk::vkn
 				return false;
 			if (shaders.size() != pipeline_modules.size())
 				return true;
-			
+
 			return std::transform_reduce(
 				shaders.begin(), shaders.end(),
 				pipeline_modules.begin(),
 				false,
-				[](bool lhs, bool rhs)->bool{ return lhs | rhs; },
+				[](bool lhs, bool rhs)->bool { return lhs | rhs; },
 				[](RscHandle<ShaderProgram> prog, vk::ShaderModule mod)
 				{
 					auto& new_mod = prog.as<ShaderModule>();
 					//Don't update if any new shader is invalid
-					return  new_mod.HasCurrent()&&new_mod.Module() != mod;
+					return  new_mod.HasCurrent() && new_mod.Module() != mod;
 				}
 			);
 		}
@@ -153,7 +155,7 @@ namespace idk::vkn
 			std::transform(
 				shaders.begin(), shaders.end(),
 				pipeline_modules.begin(),
-				[](RscHandle<ShaderProgram> prog) 
+				[](RscHandle<ShaderProgram> prog)
 				{
 					return prog.as<ShaderModule>().Module();
 				}
@@ -161,24 +163,6 @@ namespace idk::vkn
 		}
 		void ConfigureConfig()
 		{
-			config.buffer_descriptions.clear();
-			config.buffer_descriptions.emplace_back(
-				buffer_desc
-				{
-					buffer_desc::binding_info{ std::nullopt,sizeof(mat4) * 2,VertexRate::eInstance},
-					{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true}
-						}
-				}
-			);
-			config.buffer_descriptions.emplace_back(
-				buffer_desc
-				{
-					buffer_desc::binding_info{ std::nullopt,sizeof(uint32_t),VertexRate::eInstance},
-					{
-						buffer_desc::attribute_info{AttribFormat::eUVec1,1,0,true}
-					}
-				}
-			);
 			config.fill_type = FillType::eFill;
 			config.cull_face = static_cast<uint32_t>(CullFace::eBack);
 			config.depth_test = true;
@@ -186,11 +170,13 @@ namespace idk::vkn
 			config.prim_top = PrimitiveTopology::eTriangleList;
 			config.stencil_test = false;
 		}
-		void InitPipeline(vector<RscHandle<ShaderProgram>>&shaders)
+		template<typename F>
+		void InitPipeline(vector<RscHandle<ShaderProgram>>& shaders,RscHandle<VknFrameBuffer> frame_buffer, F&& config_override)
 		{
 			if (DifferentModules(shaders))
 			{
 				ConfigureConfig();
+				config_override(config);
 				VulkanPipeline::Options options
 				{
 					{},
@@ -203,12 +189,21 @@ namespace idk::vkn
 				UpdateModules(shaders);
 				PipelineDescHelper helper;
 				helper.StoreBufferDescOverrides(config);
-				helper.UseShaderAttribs(shaders,config);
-				pipeline.SetRenderPass(*frame_buffer.as<VknFrameBuffer>().GetRenderPass(), true);
+				helper.UseShaderAttribs(shaders, config);
+				pipeline.SetRenderPass(*frame_buffer->GetRenderPass(), true);
 				pipeline.Create(config, shaders, View(), options);
 			}
 
 		}
+	};
+
+	struct ColorPickRenderer::PImpl
+	{
+		FrameDataHandler handler;
+		hlp::vector_buffer id_buffer;
+		RscHandle<VknFrameBuffer> frame_buffer;
+		hlp::MemoryAllocator allocator;
+		ColorPickPipeline mesh_pipeline, skinned_mesh_pipeline;
 	};
 	ColorPickRenderer::ColorPickRenderer() :_pimpl{ std::make_unique<PImpl>() }
 	{
@@ -226,8 +221,14 @@ namespace idk::vkn
 			shared_gs.renderer_vertex_shaders[VertexShaders::VNormalMeshPicker],
 			shared_gs.renderer_fragment_shaders[FragmentShaders::FPicking]
 		};
+		vector<RscHandle<ShaderProgram>> skinned_shaders
+		{
+			shared_gs.renderer_vertex_shaders[VertexShaders::VSkinnedMeshPicker],
+			shared_gs.renderer_fragment_shaders[FragmentShaders::FPicking]
+		};
 		vector<uint32_t> id_buffer(total_num_insts,0);
 		ivec2 max_size{};
+		size_t max_ro=0;
 		for (auto& request : requests)
 		{
 			auto& render_data = request.data;
@@ -244,7 +245,15 @@ namespace idk::vkn
 					*buffer_itr = id++;
 				}
 			}
-			//TODO skinned_mesh_renderers, continue using id
+		}
+		{
+			auto& render_data = requests[0].data;
+			span range{ shared_gs.instanced_ros->data()+ render_data.inst_skinned_mesh_render_begin,shared_gs.instanced_ros->data() + render_data.inst_skinned_mesh_render_end };
+			uint32_t counter = 0;
+			for (auto& i_ro: range)
+			{
+				id_buffer[i_ro.instanced_index] = counter++;
+			}
 		}
 		_pimpl->id_buffer.resize(hlp::buffer_size(id_buffer));
 		dbg::BeginLabel(cmd_buffer, "Updating Color Buffer");
@@ -275,7 +284,45 @@ namespace idk::vkn
 			_pimpl->frame_buffer = RscHandle<VknFrameBuffer>{ handle };
 		}
 		
-		_pimpl->InitPipeline(shaders);
+		_pimpl->mesh_pipeline.InitPipeline(shaders, _pimpl->frame_buffer, [](pipeline_config& config) {
+			config.buffer_descriptions.clear();
+			config.buffer_descriptions.emplace_back(
+				buffer_desc
+				{
+					buffer_desc::binding_info{ std::nullopt,sizeof(mat4) * 2,VertexRate::eInstance},
+					{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true}
+						}
+				}
+			);
+			config.buffer_descriptions.emplace_back(
+				buffer_desc
+				{
+					buffer_desc::binding_info{ std::nullopt,sizeof(uint32_t),VertexRate::eInstance},
+					{
+						buffer_desc::attribute_info{AttribFormat::eUVec1,1,0,true}
+					}
+				}
+			); });
+		_pimpl->skinned_mesh_pipeline.InitPipeline(skinned_shaders,_pimpl->frame_buffer, [](pipeline_config& config) {
+			config.buffer_descriptions.clear();
+			config.buffer_descriptions.emplace_back(
+				buffer_desc
+				{
+					buffer_desc::binding_info{ std::nullopt,sizeof(mat4) * 2,VertexRate::eInstance},
+					{
+						buffer_desc::attribute_info{AttribFormat::eMat4,6,0,true}
+					}
+				}
+			);
+			config.buffer_descriptions.emplace_back(
+				buffer_desc
+				{
+					buffer_desc::binding_info{ std::nullopt,sizeof(uint32_t),VertexRate::eInstance},
+					{
+						buffer_desc::attribute_info{AttribFormat::eUVec1,10,0,true}
+					}
+				}
+			); });
 
 	}
 
@@ -286,7 +333,7 @@ namespace idk::vkn
 	void ColorPickRenderer::Render(vector<ColorPickRequest>& requests, const  SharedGraphicsState& shared_gs, RenderStateV2& rs)
 	{
 		_pimpl->handler.Check();
-		if (requests.size() == 0 || !_pimpl->pipeline.pipeline)
+		if (requests.size() == 0 || !_pimpl->skinned_mesh_pipeline.pipeline.pipeline || !_pimpl->mesh_pipeline.pipeline.pipeline)
 			return;
 		
 		auto& color_pick_frag = shared_gs.renderer_fragment_shaders[FPicking];
@@ -307,12 +354,37 @@ namespace idk::vkn
 			for (auto itr = (*shared_gs.instanced_ros).data()+ render_data.inst_mesh_render_begin, end = (*shared_gs.instanced_ros).data() + render_data.inst_mesh_render_end;itr<end;++itr)
 			{
 				auto& ro = *itr;
-				the_interface.BindUniformBuffer("id", 0, i);
+				auto& mat_inst = *ro.material_instance;
 				//the_interface.BindUniformBuffer("PerObject", 0, render_data.camera.view_matrix*ro.transform);
-				the_interface.BindAttrib(4, shared_gs.inst_mesh_render_buffer.buffer(), 0);
-				the_interface.BindMeshBuffers(ro);
-				the_interface.BindAttrib(1, _pimpl->id_buffer.buffer(), 0);
-				the_interface.FinalizeDrawCall(ro,ro.num_instances,ro.instanced_index);
+				if (mat_inst.material&&(ro.layer_mask & request.data.camera.culling_flags)&&the_interface.BindMeshBuffers(ro))
+				{
+					the_interface.BindAttrib(4, shared_gs.inst_mesh_render_buffer.buffer(), 0);
+					the_interface.BindAttrib(1, _pimpl->id_buffer.buffer(), 0);
+					the_interface.FinalizeDrawCall(ro, ro.num_instances, ro.instanced_index);
+				}
+			}
+			the_interface.BindShader(ShaderStage::Vertex, skinned_mesh_vtx);
+			std::array<mat4, 2> mtx{ render_data.camera.view_matrix,render_data.camera.projection_matrix };
+			the_interface.BindUniformBuffer("CameraBlock", 0, mtx);
+			the_interface.BindUniformBuffer("IdBlock", 0, static_cast<uint32_t>(render_data.handles.size())+1);
+			for (auto itr = (*shared_gs.instanced_ros).data() + render_data.inst_skinned_mesh_render_begin, end = (*shared_gs.instanced_ros).data() + render_data.inst_skinned_mesh_render_end; itr < end; ++itr)
+			{
+				auto& ro = *itr;
+				auto& dc = *itr;
+				auto& mat_inst = *dc.material_instance;
+				if (mat_inst.material && dc.layer_mask & request.data.camera.culling_flags)
+				{
+					if (the_interface.BindMeshBuffers(ro))
+					{
+						for (auto& [name, ubo] : ro.uniform_buffers)
+						{
+							the_interface.BindUniformBuffer(name, 0, ubo);
+						}
+						the_interface.BindAttrib(10, _pimpl->id_buffer.buffer(), 0);
+						the_interface.BindAttrib(6, shared_gs.inst_mesh_render_buffer.buffer(), 0);
+						the_interface.FinalizeDrawCall(ro, ro.num_instances, ro.instanced_index);
+					}
+				}
 			}
 			//TODO skinned stuff
 		}
@@ -356,7 +428,6 @@ namespace idk::vkn
 			};
 			cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
 			//TODO Bind pipeline
-			_pimpl->pipeline.Bind(cmd_buffer, View());
 			SetViewport(cmd_buffer, vp_offset, vp_size);
 			SetScissor(cmd_buffer, vp_offset, vp_size);
 			//TODO DRAW
@@ -368,7 +439,15 @@ namespace idk::vkn
 				//auto& obj = p_ro.Object();
 				if (!p_ro.config)
 					continue;
-				auto& pipeline = _pimpl->pipeline;
+				
+
+				auto& pipeline = (p_ro.vertex_shader==mesh_vtx)?_pimpl->mesh_pipeline.pipeline:_pimpl->skinned_mesh_pipeline.pipeline;
+				
+				if (prev_pipeline != &pipeline)
+				{
+					pipeline.Bind(cmd_buffer, View());
+					prev_pipeline = &pipeline;
+				}
 				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 				//auto& mesh = obj.mesh.as<VulkanMesh>();

@@ -1373,6 +1373,9 @@
     </ClCompile>
     <ClCompile Include="res\ResourceMeta.cpp" />
     <ClCompile Include="gfx\GraphFactory.cpp" />
+    <ClCompile Include="ColorPickRequest.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

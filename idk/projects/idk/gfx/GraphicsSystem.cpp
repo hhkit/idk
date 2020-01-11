@@ -225,6 +225,7 @@ namespace idk
 		result.second = inst.size();
 		return result;
 	}
+
 	/* disabled until we're ready to instance animated render objects too.
 	std::pair<size_t, size_t>  CullAndBatchAnimatedRenderObjects(const frustum& frust, const vector<AnimatedRenderObject>& ro, vector<InstAnimatedRenderObjects>& inst)
 	{
@@ -872,8 +873,76 @@ namespace idk
 			//}
 		}
 
+#ifdef FLATTEN_UNI //This block is for when we wanna flatten the uniforms
+		for (auto& inst : result.instanced_mesh_render)
+		{
+			MaterialInstToUniforms(*inst.material_instance, inst.uniform_buffers, inst.uniform_textures);
+		}
+#endif
+		{
+			auto& instanced_ros = result.instanced_mesh_render;
+			auto& [inst_mesh_start, inst_mesh_end] = result.skinned_inst_range;
+			auto num_skinned = result.skinned_mesh_render.size();
+			std::pair<size_t, size_t> ani_buffer_range = { result.inst_mesh_render_buffer.size(),result.inst_mesh_render_buffer.size() + num_skinned};
+
+			inst_mesh_start = result.instanced_mesh_render.size();
+			inst_mesh_end = inst_mesh_start + num_skinned;
+
+			
+			instanced_ros.reserve(inst_mesh_end);
+			result.inst_mesh_render_buffer.reserve(ani_buffer_range.second);
+			auto pani_handles = (request_buffer.size()) ? std::make_shared<vector<Handle<GameObject>>>() : shared_ptr<vector<Handle<GameObject>>>{};
+			if (pani_handles)
+				pani_handles->reserve(num_skinned);
+			for (auto& ani_obj : result.skinned_mesh_render)
+			{
+				if (pani_handles)
+				{
+					auto& ani_handles = *pani_handles;
+					ani_handles.emplace_back(ani_obj.obj_id);
+
+				}
+				[[maybe_unused]]auto& i_ro = instanced_ros.emplace_back(CreateIROInfo(ani_obj));
+				i_ro.instanced_index = result.inst_mesh_render_buffer.size();
+				i_ro.num_instances = 1;
+				result.inst_mesh_render_buffer.emplace_back(InstancedData{ani_obj.transform});
+#ifdef FLATTEN_UNI
+				AniRenderObjectToUniforms(result.skeleton_transforms, ani_obj, i_ro.uniform_buffers, i_ro.uniform_textures);
+#else
+				SkeletonToUniforms(result.skeleton_transforms[ani_obj.skeleton_index], i_ro.uniform_buffers);
+#endif
+			}
+
+			for (auto& request : request_buffer)
+			{
+				request.data.inst_skinned_mesh_render_begin = result.skinned_inst_range.first;
+				request.data.inst_skinned_mesh_render_end = result.skinned_inst_range.second;
+				request.data.ani_handles = pani_handles;
+			}
+		}
 		//SubmitBuffers(std::move(result));
 		SwapWritingBuffer();
+	}
+	RscHandle<ShaderProgram> LoadShader(string_view path, bool reload=true)
+	{
+		PathHandle hpath = path;
+		auto result = Core::GetResourceManager().Load<ShaderProgram>(hpath,reload);
+
+		if (!result)
+		{
+			if (hpath)
+			{
+				string fullpath  = hpath.GetFullPath();
+				string mountpath = hpath.GetMountPath();
+				LOG_TO(LogPool::GFX, "Failed to load resource %s\n mounted on %s", fullpath.c_str(), mountpath.c_str());
+			}
+			else
+			{
+				string mountpath{ path }; //make sure to handle when a string_view isn't terminated by the null character.
+				LOG_TO(LogPool::GFX, "Failed to load resource on mount path %s", mountpath.c_str());
+			}
+		}
+		return *result;
 	}
 
 	void GraphicsSystem::LoadShaders()
@@ -887,37 +956,51 @@ namespace idk
 		//	Core::GetResourceManager().Load<ShaderSnippet>(glsl, false);
 		//}
 		///////////////////////Load vertex shaders
-		//renderer_vertex_shaders[VDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.vert");
-		renderer_vertex_shaders[VNormalMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh.vert");
-		renderer_vertex_shaders[VNormalMeshPicker] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/mesh_picking.vert");
-		renderer_vertex_shaders[VParticle] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/particle.vert");
-		renderer_vertex_shaders[VSkinnedMesh] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh.vert");
-		renderer_vertex_shaders[VSkinnedMeshPicker] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skinned_mesh_picking.vert");
-		renderer_vertex_shaders[VSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.vert");
-		renderer_vertex_shaders[VPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.vert");
-		renderer_vertex_shaders[VFsq] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/fsq.vert");
-		renderer_vertex_shaders[VFont] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/font.vert");
-		renderer_vertex_shaders[VUi] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.vert");
+		//renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/debug.vert");
+		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
+		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
+		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
+		renderer_vertex_shaders[VSkinnedMesh] = LoadShader("/engine_data/shaders/skinned_mesh.vert");
+		renderer_vertex_shaders[VSkinnedMeshPicker] = LoadShader("/engine_data/shaders/skinned_mesh_picking.vert");
+		renderer_vertex_shaders[VSkyBox] = LoadShader("/engine_data/shaders/skybox.vert");
+		renderer_vertex_shaders[VPBRConvolute] = LoadShader("/engine_data/shaders/pbr_convolute.vert");
+		renderer_vertex_shaders[VFsq] = LoadShader("/engine_data/shaders/fsq.vert");
+		renderer_vertex_shaders[VFont] = LoadShader("/engine_data/shaders/font.vert");
+		renderer_vertex_shaders[VUi] = LoadShader("/engine_data/shaders/ui.vert");
 
 
-		renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
-		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
-		renderer_fragment_shaders[FShadow] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/shadow.frag");
-		renderer_fragment_shaders[FPicking] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/picking.frag");
+		renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/debug.frag");
+		renderer_fragment_shaders[FSkyBox] = LoadShader("/engine_data/shaders/skybox.frag");
+		renderer_fragment_shaders[FShadow] = LoadShader("/engine_data/shaders/shadow.frag");
+		renderer_fragment_shaders[FPicking] = LoadShader("/engine_data/shaders/picking.frag");
 		////////////////////Load fragment Shaders
-		//renderer_fragment_shaders[FDebug] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/debug.frag");
-		renderer_fragment_shaders[FPBRConvolute] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/pbr_convolute.frag");
-		renderer_fragment_shaders[FSkyBox] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/skybox.frag");
-		renderer_fragment_shaders[FBrdf] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/brdf.frag");
-		renderer_fragment_shaders[FFont] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/font.frag");
-		renderer_fragment_shaders[FDeferredPost] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_post.frag");
-		renderer_fragment_shaders[FDeferredPostSpecular] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_post_specular.frag");
-		renderer_fragment_shaders[FDeferredPostAmbient] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_post_ambient.frag");
+		//renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/debug.frag");
+		renderer_fragment_shaders[FPBRConvolute] = LoadShader("/engine_data/shaders/pbr_convolute.frag");
+		renderer_fragment_shaders[FSkyBox] = LoadShader("/engine_data/shaders/skybox.frag");
+		renderer_fragment_shaders[FBrdf] = LoadShader("/engine_data/shaders/brdf.frag");
+		renderer_fragment_shaders[FFont] = LoadShader("/engine_data/shaders/font.frag");
+		renderer_fragment_shaders[FDeferredPost] = LoadShader("/engine_data/shaders/deferred_post.frag");
+		renderer_fragment_shaders[FDeferredPostSpecular] = LoadShader("/engine_data/shaders/deferred_post_specular.frag");
+		renderer_fragment_shaders[FDeferredPostAmbient] = LoadShader("/engine_data/shaders/deferred_post_ambient.frag");
 
 		////////////////////Load geometry Shaders
-		renderer_geometry_shaders[GSinglePassCube] = *Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/single_pass_cube.geom");
+		renderer_geometry_shaders[GSinglePassCube] = LoadShader("/engine_data/shaders/single_pass_cube.geom");
 
 
+	}
+
+	void GraphicsSystem::MaterialInstToUniforms(const MaterialInstance& , hash_table<string, string>& , hash_table<string, RscHandle<Texture>>& )
+	{
+	}
+
+	void GraphicsSystem::AniRenderObjectToUniforms(const vector<SkeletonTransforms>& skeletons, const AnimatedRenderObject& ani_ro, hash_table<string, string>& uniform_buffers, hash_table<string, RscHandle<Texture>>& uniform_textures)
+	{
+		MaterialInstToUniforms(*ani_ro.material_instance, uniform_buffers, uniform_textures);
+		SkeletonToUniforms(skeletons[ani_ro.skeleton_index], uniform_buffers);
+	}
+
+	void idk::GraphicsSystem::SkeletonToUniforms(const SkeletonTransforms& , hash_table<string, string>& )
+	{
 	}
 
 	void GraphicsSystem::SwapWritingBuffer()

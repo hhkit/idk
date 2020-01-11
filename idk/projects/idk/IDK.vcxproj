@@ -320,6 +320,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="ColorPickRequest.cpp" />
     <ClCompile Include="common\Layer.cpp" />
     <ClCompile Include="common\LayerManager.cpp" />
     <ClCompile Include="common\Name.cpp" />

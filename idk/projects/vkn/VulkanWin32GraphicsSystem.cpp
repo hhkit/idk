@@ -77,6 +77,9 @@ namespace idk::vkn
 
 	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
+		if (!instance_)
+			throw;
+		assert(instance_);
 	}
 	VulkanWin32GraphicsSystem::~VulkanWin32GraphicsSystem()
 	{
@@ -87,6 +90,8 @@ namespace idk::vkn
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
 		windows_->OnScreenSizeChanged.Listen([this](const ivec2&) { Instance().OnResize(); });
 
+		if (!instance_)
+			throw;
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();
 		_pm->View(instance_->View());
@@ -402,6 +407,13 @@ namespace idk::vkn
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{
 		return *(instance_.get());
+	}
+
+	void VulkanWin32GraphicsSystem::SkeletonToUniforms(const SkeletonTransforms& trf, hash_table<string, string>& out)
+	{
+		
+		auto& buffer = trf.bones_transforms;
+		out["BoneMat4Block"] = string{ reinterpret_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
 	}
 
 
