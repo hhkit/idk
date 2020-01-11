@@ -192,7 +192,7 @@ namespace idk
 		};
 	}
 	//returns indices to the start and one past the end
-	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro,const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data,vector<Handle<GameObject>>* handle_buffer=nullptr)
+	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro,const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data,vector<GenericHandle>* handle_buffer=nullptr)
 	{
 
 		const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
@@ -891,7 +891,7 @@ namespace idk
 			
 			instanced_ros.reserve(inst_mesh_end);
 			result.inst_mesh_render_buffer.reserve(ani_buffer_range.second);
-			auto pani_handles = (request_buffer.size()) ? std::make_shared<vector<Handle<GameObject>>>() : shared_ptr<vector<Handle<GameObject>>>{};
+			auto pani_handles = (request_buffer.size()) ? std::make_shared<vector<ColorPickResult::result_t>>() : shared_ptr<vector<ColorPickResult::result_t>>{};
 			if (pani_handles)
 				pani_handles->reserve(num_skinned);
 			for (auto& ani_obj : result.skinned_mesh_render)

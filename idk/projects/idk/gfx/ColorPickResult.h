@@ -5,7 +5,7 @@ namespace idk
 {
 	struct ColorPickResult
 	{
-		using result_t = Handle<GameObject>;
+		using result_t = GenericHandle;
 		bool ready(){ 
 			return stored_result || (result.valid() && result.wait_for(std::chrono::seconds{ 0 })==std::future_status::ready);
 		}

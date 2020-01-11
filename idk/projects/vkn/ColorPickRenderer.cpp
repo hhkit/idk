@@ -17,7 +17,7 @@
 #include <renderdoc/renderdoc_app.h>
 
 #include <vkn/DebugUtil.h>
-static constexpr bool rd_enabled = true;
+static constexpr bool rd_enabled = false;
 RENDERDOC_API_1_1_2*& GetRDocApi();
 void RdocFrameCapture()
 {

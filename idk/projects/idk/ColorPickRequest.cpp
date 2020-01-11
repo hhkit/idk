@@ -18,7 +18,7 @@ void ColorPickRequest::select(uint32_t index)
 void ColorPickRequest::set_result(result_t value) { result.set_value(value); }
 
 #pragma optimize("",off)
-Handle<GameObject> ColorPickRequest::GetHandle(uint32_t id) const
+ColorPickResult::result_t ColorPickRequest::GetHandle(uint32_t id) const
 {
 	auto index = id - 1;
 	return (index<data.handles.size()) ? data.handles[index] : (*data.ani_handles)[index - data.handles.size()];

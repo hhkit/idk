@@ -33,7 +33,7 @@ namespace idk
 			tfm[3] += vec4{ rb->velocity() * Core::GetScheduler().GetRemainingTime().count(), 0 };
 
 		return RenderObject{
-			.obj_id            = GetGameObject(),
+			.obj_id            = GetHandle(),
 			.mesh              = mesh,
 			.material_instance = material_instance,
 

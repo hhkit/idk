@@ -43,6 +43,8 @@ of the editor.
 #include <opengl/PixelData.h>
 #include <ds/result.inl>
 #include <res/ResourceHandle.inl>
+#include <anim/SkinnedMeshRenderer.h>
+#include <gfx/MeshRenderer.h>
 
 namespace idk {
 
@@ -72,7 +74,49 @@ namespace idk {
 
 		
 	}
+	namespace detail
+	{
+		template<typename T, typename Tuple, typename = void >
+		struct is_in_tuple : std::false_type {};
+		template<typename T, typename Tuple>
+		struct is_in_tuple< T, Tuple,std::enable_if_t < index_in_tuple_v<T, Tuple> < std::tuple_size_v<Tuple>>> : std::true_type{};
+
+		template<typename T>
+		struct is_component_handle : std::false_type
+		{
+
+		};
+		template<typename T,typename = void>
+		struct is_component : std::false_type {};
+		template<typename T>
+		struct is_component<T, std::enable_if_t < index_in_tuple_v<T, Components> < std::tuple_size_v<Components>>> :std::true_type {};
+		template<typename T>
+		struct is_component_handle<Handle<T>> : is_component<T> {};
+
+		template<typename T>
+		struct HandleType;
+		template<typename T>
+		struct HandleType<Handle<T>> { using type = T; };
+	}
+	template<typename T>
+	using HandleType_t = typename detail::HandleType<T>::type;
+	template<typename T>
+	constexpr inline bool is_component_handle_v = detail::is_component_handle<T>::value;
+	template<typename T,typename Tuple>
+	constexpr inline bool is_in_tuple_v = detail::is_in_tuple<T,Tuple>::value;
+
+	using SelectableComponents = std::tuple< Handle<MeshRenderer>, Handle<SkinnedMeshRenderer>>;
 #pragma optimize("",off)
+	template<typename T>
+	Handle<GameObject> GetGameObject(T handle)
+	{
+		if constexpr (std::is_same_v<T, Handle<GameObject>>)
+			return handle;
+		else if constexpr (is_in_tuple_v < T, SelectableComponents > )
+			return handle->GetGameObject();
+		else
+			return Handle<GameObject>{};
+	}
 	void IGE_SceneView::Update()
 	{
         ImGui::PopStyleVar(3);
@@ -181,7 +225,7 @@ namespace idk {
 
 
 		//Raycast Selection
-		std::optional< std::pair<Handle<GameObject>,PickState>> result;
+		std::optional< std::pair<GenericHandle,PickState>> result;
 
 		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
 		{
@@ -231,8 +275,17 @@ namespace idk {
 		
 		if (result)
 		{
+			auto [closestRenderer,picked_state] = *result;
+			Handle<GameObject> closestGameObject{};
+			if (closestRenderer)
+			{
+				Handle<SkinnedMeshRenderer> test1;
+				Handle<MeshRenderer> test2;
 
-			auto [closestGameObject,picked_state] = *result;
+				closestGameObject = closestRenderer.visit([](auto handle) {
+					return GetGameObject(handle);
+					});
+			}
 			if (closestGameObject)
 			{
 				auto& editor = Core::GetSystem<IDE>();
