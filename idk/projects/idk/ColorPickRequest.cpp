@@ -15,7 +15,18 @@ void ColorPickRequest::select(uint32_t index)
 	set_result((index) ? GetHandle(index) : result_t{});
 }
 
-void ColorPickRequest::set_result(result_t value) { result.set_value(value); }
+void ColorPickRequest::set_result(result_t value) 
+{ 
+	try
+	{
+	result.set_value(value);
+
+	}
+	catch (std::future_error& err)
+	{
+		LOG_TO(LogPool::GFX, "Error [Color picking]: Failed to set result, future is missing?\n - Message: \"%s\"",err.what());
+	}
+}
 
 #pragma optimize("",off)
 ColorPickResult::result_t ColorPickRequest::GetHandle(uint32_t id) const
