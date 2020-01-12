@@ -268,13 +268,13 @@ namespace idk::vkn
 			fbf.AddAttachment(
 				AttachmentInfo
 				{
-					LoadOp::eClear,StoreOp::eStore,ColorFormat::RUI_32,FilterMode::_enum::Nearest
+					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::R_32_UI,FilterMode::_enum::Nearest
 				}
 			);
 			fbf.SetDepthAttachment(
 				AttachmentInfo
 				{
-					LoadOp::eClear,StoreOp::eStore,ColorFormat::DEPTH_COMPONENT,FilterMode::_enum::Nearest
+					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::DEPTH_32_F_STENCIL_8,FilterMode::_enum::Nearest
 				}
 			);
 			auto& rm = Core::GetResourceManager();
