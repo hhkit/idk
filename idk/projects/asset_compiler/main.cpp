@@ -2,6 +2,7 @@
 //
 #include <iostream>
 #include <filesystem>
+#include <windows.h>
 
 #include <idk.h>
 #include <core/GameState.h>
@@ -21,6 +22,38 @@ namespace fs = std::filesystem;
 	- arg[1] is input file
 	- arg[2] is output directory
 */
+int main(int argc, const char* argv[]);
+
+int WINAPI wWinMain(
+	HINSTANCE   hInstance,
+	HINSTANCE   hPrevInstance,
+	PWSTR       lpCmdLine,
+	int         nCmdShow
+)
+{
+	int argc{};
+	LPWSTR* wargv = CommandLineToArgvW(lpCmdLine, &argc);;
+	std::vector<idk::string> strargv;
+	std::vector<const char*> argv;
+	for (auto itr = wargv; *itr; ++itr)
+	{
+		auto wstr = std::wstring{ *itr };
+		int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), NULL, 0, NULL, NULL);
+		std::string ret = std::string(size, 0);
+		WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), &ret[0], size, NULL, NULL);
+		strargv.push_back(ret);
+	}
+
+	argv.emplace_back("");
+	for (auto& elem : strargv)
+		argv.emplace_back(elem.data());
+	argv.emplace_back(nullptr);
+
+	LocalFree(wargv);
+
+	return main(argc + 1, argv.data());
+}
+
 int main(int argc, const char* argv[])
 {
 	using namespace idk;

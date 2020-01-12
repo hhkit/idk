@@ -43,26 +43,30 @@ namespace idk
 		framebuffer.size = ivec2{};
 	}
 
-	void FrameBufferBuilder::Begin(ivec2 size, size_t num_layers)
+	FrameBufferBuilder& FrameBufferBuilder::Begin(ivec2 size, size_t num_layers)
 	{
 		info.size = size;
 		info.num_layers = num_layers;
 		info.attachments.clear();//Clear to be sure.
+		return *this;
 	}
 
-	void FrameBufferBuilder::AddAttachment(AttachmentInfo att_info)
+	FrameBufferBuilder& FrameBufferBuilder::AddAttachment(AttachmentInfo att_info)
 	{
 		info.attachments.emplace_back(att_info);
+		return *this;
 	}
 
-	void FrameBufferBuilder::SetDepthAttachment(AttachmentInfo att_info)
+	FrameBufferBuilder& FrameBufferBuilder::SetDepthAttachment(AttachmentInfo att_info)
 	{
 		info.depth_attachment = (att_info);
+		return *this;
 	}
 
-	void FrameBufferBuilder::ClearDepthAttachment()
+	FrameBufferBuilder& FrameBufferBuilder::ClearDepthAttachment()
 	{
 		info.depth_attachment = {};
+		return *this;
 	}
 
 	FrameBufferInfo FrameBufferBuilder::End()

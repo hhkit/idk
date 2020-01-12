@@ -7,6 +7,8 @@
 
 namespace idk
 {
+	using system_time_point = std::filesystem::file_time_type;
+
 	// struct PathHandle;
 	class FStreamWrapper : public std::fstream
 	{
@@ -63,6 +65,7 @@ namespace idk
 		string_view			GetParentMountPath() const;
 
 		FS_CHANGE_STATUS	GetStatus() const;
+		system_time_point   GetLastWriteTime() const;
 
 		// Directory specific getters
 		// ====================================================================================

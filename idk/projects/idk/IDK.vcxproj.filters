@@ -1376,6 +1376,7 @@
     <ClCompile Include="ColorPickRequest.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

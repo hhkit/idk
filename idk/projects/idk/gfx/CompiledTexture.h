@@ -11,7 +11,8 @@ namespace idk
 		UVMode mode;
 		FilterMode filter_mode;
 		ivec2 size;
-		bool is_srgb;
+		bool is_srgb{};
+		unsigned generate_mipmaps{};
 		vector<unsigned char> pixel_buffer;
 
 		EXTENSION(".idds");

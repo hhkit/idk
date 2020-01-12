@@ -1,23 +1,32 @@
 #pragma once
 #include <gfx/Texture.h>
+#include <gfx/CompiledTexture.h>
+#include <gfx/TextureInternalFormat.h>
 #include <glad/glad.h>
 
 namespace idk::ogl
 {
-	class OpenGLTexture
+	class OpenGLTexture final
 		: public Texture
 	{
 	public:
 		OpenGLTexture();
-		OpenGLTexture(const bool& compressed);
-		OpenGLTexture(const GLuint& ,const ivec2& size, FilterMode fm = FilterMode::Linear, UVMode uv = UVMode::Repeat);
+		OpenGLTexture(TextureInternalFormat format, ivec2 size, unsigned mip_level = 0);
+		explicit OpenGLTexture(const CompiledTexture&);
 		OpenGLTexture(OpenGLTexture&&);
 		OpenGLTexture& operator=(OpenGLTexture&&);
 		~OpenGLTexture();
 
 		void Bind();
 		void BindToUnit(GLuint texture_unit = 0);
-		void Buffer(void* data, ivec2 size, InputChannels format_in = InputChannels::RGB, ColorFormat internalFormat_in = ColorFormat::SRGB, const unsigned& mipmap_size =0, const float& imgSize=0.f);
+
+		void Buffer(	
+			void* data, size_t buffer_size, 
+			ivec2 texture_size, 
+			TextureInternalFormat format, 
+			GLenum incoming_components = GL_RGB, GLenum incoming_type = GL_UNSIGNED_BYTE
+		);
+		void Buffer(void* data, size_t buffer_size, ivec2 texture_size, ColorFormat format, bool compressed);
 
 		using Texture::Size;
 		ivec2 Size(ivec2 new_size) override;
@@ -25,9 +34,10 @@ namespace idk::ogl
 		
 	private:
 		GLuint _id = 0;
-		bool _isCompressedTexture{false};
-		void OnMetaUpdate(const TextureMeta&);
-		void UpdateUV(UVMode);
-		void UpdateFilter(FilterMode, const bool& isMipMap = false);
+		bool   _is_compressed = false;
+		GLuint _mip_level = 0;
+
+		void SetUVMode(UVMode);
+		void SetFilteringMode(FilterMode);
 	};
 }

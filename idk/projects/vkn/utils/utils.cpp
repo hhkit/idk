@@ -10,13 +10,4 @@ namespace idk::vkn::hlp
 	{
 		return std::cerr;
 	}
-
-	std::string GetBinaryFile(const std::string& filepath)
-	{
-		std::ifstream file{ filepath,std::ios::binary };
-		std::stringstream data;
-		data << file.rdbuf();
-		file.close();
-		return data.str();
-	}
 }

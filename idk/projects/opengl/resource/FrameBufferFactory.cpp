@@ -16,15 +16,8 @@ namespace idk::ogl
 		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto& m = *fb;
 		m.Size(Core::GetSystem<Application>().GetScreenSize());
-		//m.textures.emplace_back(Core::GetResourceManager().Create<OpenGLTexture>())->Size(m.size);
-
-		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetColorBuffer(RscHandle<Texture>{tex});
-
-		tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetDepthBuffer(RscHandle<Texture>{tex});
+		m.SetColorBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RGB_16_F, m.size)});
+		m.SetDepthBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::DEPTH_16, m.size)});
 
 		fb->Name("Game View");
         m.render_debug = false;
@@ -36,13 +29,9 @@ namespace idk::ogl
 	{
 		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto &m = *fb;
-		m.Size(ivec2{ 512, 512 });
-		auto tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetColorBuffer(RscHandle<Texture>{tex});
-		tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Size(m.size);
-		m.SetDepthBuffer(RscHandle<Texture>{tex});
+		m.Size(ivec2{ 512,512 });
+		m.SetColorBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RGB_16_F, ivec2{ 512,512 })});
+		m.SetDepthBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::DEPTH_16, ivec2{ 512,512 })});
 		return fb;
 	}
 
@@ -50,10 +39,12 @@ namespace idk::ogl
 	{
 		return unique_ptr<FrameBuffer>{};//it's gonna be null cause you shouldn't be using this.
 	}
+
 	unique_ptr<FrameBuffer> OpenGLFrameBufferFactory::Create()
 	{
 		return std::make_unique<OpenGLFrameBuffer>();
 	}
+
 	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
 	{
 		type;
@@ -61,25 +52,7 @@ namespace idk::ogl
 		out->load_op  = info.load_op;
 		out->store_op = info.store_op;
 
-		/*if (type == AttachmentType::eDepth)
-		{
-			RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
-			tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
-			out->buffer = tex;
-		}
-		else if(type == AttachmentType::eDepth3D)
-		{
-			RscHandle<OpenGLCubemap> tex = Core::GetResourceManager().Create<OpenGLCubemap>();
-			for (int i = 0; i < 6; ++i)
-			{
-				tex->Buffer(i,nullptr, size, InputChannels::RGB, info.internal_format);
-			}
-			out->buffer = tex->Tex();
-		}*/
-
-		RscHandle<OpenGLTexture> tex = Core::GetResourceManager().Create<OpenGLTexture>();
-		tex->Buffer(nullptr, size, InputChannels::RGB, info.internal_format);
-		out->buffer = tex;
+		out->buffer = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(info.internal_format, size);
 	}
 	void OpenGLFrameBufferFactory::PreReset(FrameBuffer&) {}
 	void OpenGLFrameBufferFactory::Finalize(FrameBuffer&, [[maybe_unused]]SpecializedInfo* info) {}

@@ -3,20 +3,19 @@
 #include <res/Resource.h>
 #include <res/ResourceMeta.h>
 #include <gfx/TextureRenderMeta.h>
+#include <gfx/TextureInternalFormat.h>
 
 namespace idk
 {
 	struct CubeMapMeta
 	{
 		UVMode      uv_mode = UVMode::Clamp;
-		ColorFormat internal_format = ColorFormat::RGBAF_16;
+		ColorFormat internal_format = ColorFormat::Automatic;
 		bool is_srgb{ true };
-		bool compressed{ true };
 	};
 
 	class CubeMap
-		: public Resource<CubeMap>
-		, public MetaTag<CubeMapMeta>
+		: public MetaResource<CubeMap, CubeMapMeta>
 	{
 	public:
 		CubeMap() = default;
@@ -35,6 +34,6 @@ namespace idk
 	protected:
 		//Size for each texture in the cubemap
 		ivec2 _size{};
-		void OnMetaUpdate(const CubeMapMeta&) {};
+		TextureInternalFormat _internal_format{ };
 	};
 }

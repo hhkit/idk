@@ -198,14 +198,11 @@ namespace idk::vkn
 
 		auto& brdf_texture =  _pimpl->BrdfLookupTable = Core::GetResourceManager().Create<Texture>();
 
-		auto m = brdf_texture->GetMeta();
-		m.internal_format = ColorFormat::RGF_16;
-		brdf_texture->SetMeta(m);
-		brdf_texture->Size(ivec2{ 512 });
-
 		TextureLoader loader;
-		TextureOptions options{ brdf_texture->GetMeta() };
-		TexCreateInfo info = ColorBufferTexInfo(brdf_texture->Size().x, brdf_texture->Size().y);
+		TextureOptions options; 
+		options.internal_format = TextureInternalFormat::RG_16_F;
+
+		TexCreateInfo info = ColorBufferTexInfo(512, 512);
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
@@ -282,7 +279,9 @@ namespace idk::vkn
 				{
 					if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
 					{
-						RscHandle<CubeMap> cubemap = clear;
+						const RscHandle<CubeMap>& cubemap = clear;
+						if (!cubemap)
+							return;
 						VknCubemap& cm = cubemap.as<VknCubemap>();
 						RscHandle<VknCubemap> conv = cm.GetConvoluted();
 						if (RscHandle < VknCubemap>{} == conv)

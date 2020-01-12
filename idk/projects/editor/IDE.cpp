@@ -119,9 +119,9 @@ namespace idk
 		default:
 			break;
 		}
-		Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
-        Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
+		//Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
+        //Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
+        //Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
         Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetResourceManager().RegisterFactory<GraphFactory>();
@@ -236,33 +236,18 @@ namespace idk
             if (h.index() == BaseResourceID<Scene>)
                 OpenScene(h.AsHandle<Scene>());
         };
+
 	}
 
 	void IDE::LateInit()
 	{
 		Core::GetScheduler().SetPauseState(EditorPause);
-
-        for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
-        {
-            if (elem.GetExtension() != ".meta")
-                Core::GetResourceManager().Load(elem, false);
-        }
+		Core::GetResourceManager().LoadPaths(Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS));
+		Core::GetSystem<Application>().WaitForChildren();
 
 		SetupEditorScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 
-#ifdef HACKING_TO_THE_GATE
-		Core::GetSystem<Application>().SetFullscreen(true);
-		if (!RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }})
-			throw;
-		OpenScene(RscHandle<Scene>{Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" }});
-		Core::GetScheduler().SetPauseState(UnpauseAll);
-		Core::GetSystem<IDE>().game_running = true;
-		Core::GetSystem<IDE>().game_frozen = false;
-		Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
-		Core::GetSystem<PhysicsSystem>().Reset();
-		return;
-#endif
 
         { // try load recent scene / camera
             auto last_scene = reg_scene.get("scene");
@@ -340,58 +325,6 @@ namespace idk
 			}
 
 		_interface->ImGuiFrameBegin();
-#ifdef HACKING_TO_THE_GATE
-		auto buf = RscHandle<RenderTarget>()->GetColorBuffer();
-
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-
-		//ImGui::SetNextWindowPos(viewport->Pos);
-		auto window_size = viewport->Size;
-
-		auto size_condition_flags = ImGuiCond_Always;
-		auto pos_condition_flags = ImGuiCond_Always;
-		auto window_pivot = ImVec2{ 0,0 };
-		auto window_position = ImVec2{ 0,0 };
-
-		ImGui::SetNextWindowPos(window_position, pos_condition_flags, window_pivot);
-		ImGui::SetNextWindowSize(window_size, size_condition_flags);
-
-		if (ImGui::Begin("HACK", 0, ImGuiWindowFlags_NoDocking
-			| ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoCollapse
-			| ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoBringToFrontOnFocus
-			| ImGuiWindowFlags_NoSavedSettings
-			| ImGuiWindowFlags_NoNavFocus
-			| ImGuiWindowFlags_NoScrollbar
-			| ImGuiWindowFlags_NoBackground))
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-			ImGui::Image(buf->ID(), ImVec2{ window_size }, ImVec2{ 0, 1 }, ImVec2{ 1,0 });
-			ImGui::PopStyleVar();
-
-			ImGuiID dockspace_id = ImGui::GetID("IGEDOCKSPACE");
-			if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
-			{
-				ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
-				ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_CentralNode); // Add empty node
-				ImGui::DockBuilderSetNodeSize(dockspace_id, buf->Size());
-
-				ImGuiID main = dockspace_id;
-
-				//auto& ide = Core::GetSystem<IDE>();
-				ImGui::DockBuilderDockWindow("HACK", main);
-				ImGui::DockBuilderFinish(dockspace_id);
-			}
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, window_size.y - (ImGui::GetFrameHeight() * 2)), ImGuiDockNodeFlags_PassthruCentralNode);
-			ImGui::End();
-		}
-
-		
-
-#else
 		ImGuizmo::BeginFrame();
 
 		{ //Erase the nullptrs.
@@ -426,7 +359,7 @@ namespace idk
 
 		if (bool_demo_window)
 			ImGui::ShowDemoWindow(&bool_demo_window);
-#endif
+
 		_interface->ImGuiFrameEnd();
 
 		command_controller.FlushCommands();
@@ -562,7 +495,7 @@ namespace idk
 			camHandle->render_target = editor_view;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
-				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/VictorianStreet.png.cbm", false);
+				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
 			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
 		}

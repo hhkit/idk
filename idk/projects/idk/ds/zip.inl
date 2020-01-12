@@ -9,7 +9,7 @@ namespace idk
 	{
 		struct iterator_t
 		{
-			using intern_t = std::tuple<decltype(std::begin(std::declval<Ts&&>()))...>;
+			using intern_t = std::tuple<decltype(std::begin(std::declval<Ts&>()))...>;
 			intern_t track;
 			static constexpr auto indexes = std::make_index_sequence < std::tuple_size_v<intern_t>>{};
 

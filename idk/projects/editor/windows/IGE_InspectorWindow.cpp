@@ -1784,8 +1784,14 @@ namespace idk {
 
             if (changed_and_deactivated)
             {
-                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                    COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                if (_displayed_asset.guid() == Guid{})
+                {
+                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                        COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                }
+                else
+                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                        COMMAND(CMD_ModifyProperty, reflect::dynamic(val), original_value));
                 original_value.swap(reflect::dynamic());
             }
 

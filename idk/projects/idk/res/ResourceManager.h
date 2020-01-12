@@ -60,6 +60,8 @@ namespace idk
 		Error_DestinationExists
 	};
 
+	template<typename T, typename Meta> struct MetaResource;
+
 	class ResourceManager 
 		: public ISystem
 	{
@@ -82,6 +84,8 @@ namespace idk
 		void SaveDirtyMetadata();
 		void WatchDirectory();
 
+		void LoadPaths(span<const PathHandle>);
+
 		/* HANDLE CHECKING - related to handles */
 		template<typename Res> bool Validate(const RscHandle<Res>&);
 		template<typename Res> Res& Get     (const RscHandle<Res>&);
@@ -97,6 +101,7 @@ namespace idk
 		template<typename Res>  CreateResult<Res>     Create  (string_view path_to_new_asset);
 		template<typename Res>  LoadResult<Res>       Load    (PathHandle path, bool reload_resource = true);
 		                        GeneralLoadResult     Load    (PathHandle path, bool reload_resource = true);
+								void                  LoadAsync(PathHandle path, bool wait = false);
 								void                  LoadCompiledAsset(PathHandle path);
 								void                  Unload  (PathHandle path);
 		template<typename Res>  GetResult<Res>        Get     (PathHandle path);
@@ -114,6 +119,7 @@ namespace idk
 		template<typename Factory, typename ... Args> Factory& RegisterFactory(Args&& ... factory_construction_args);
 		template<typename FLoader, typename ... Args> FLoader& RegisterLoader (string_view ext, Args&& ... loader_construction_args);
 		template<typename ALoader>                    void RegisterAssetLoader();
+		                                              void RegisterCompilableExtension(string_view ext);
 		/* FACTORY RESOURCE LOADING - FACTORIES SHOULD CALL THESE */
 		template<typename Res>                        [[nodiscard]] RscHandle<Res> LoaderCreateResource(Guid);
 		template<typename Res,     typename ... Args> [[nodiscard]] RscHandle<Res> LoaderEmplaceResource(Args&& ... construction_args); 
@@ -138,6 +144,7 @@ namespace idk
 		hash_table<string_view, shared_ptr<IAssetLoader>> _compiled_asset_loader; // std::shared_ptr<IAssetLoader<R>>
 		hash_table<Extension, unique_ptr<IFileLoader>> _file_loader;
 		hash_table<Path,      FileControlBlock>        _loaded_files;
+		hash_set<string> _compilable_extensions;
 
 		void Init()     override;
 		void LateInit() override;
@@ -151,17 +158,23 @@ namespace idk
 		template<typename Res> ResourceControlBlock<Res>* GetControlBlock(RscHandle<Res> handle);
 
 		IFileLoader* GetLoader(string_view extension);
+		MetaBundle GetMeta(PathHandle path_to_file);
 
 		template<typename T> friend struct detail::ResourceManager_detail;
 		template<typename T> friend struct detail::CompiledAssetHelper_detail;
+		template<typename T, typename Meta> friend struct MetaResource;
 	};
 
 	template<typename R> 
 	struct ResourceManager::ResourceControlBlock
 	{
-		bool          dirty    { false };
-		opt<string>   path     { std::nullopt };
-		shared_ptr<R> resource; // note: make atomic
+		bool             dirty    { false };
+		opt<string>      path     { std::nullopt };
+		shared_ptr<R>    resource; // note: make atomic
+
+		// meta data
+		shared_ptr<void> userdata; 
+		bool             dirty_meta { false };
 		
 		bool valid() const { return s_cast<bool>(resource); }
 	};
@@ -170,8 +183,5 @@ namespace idk
 	{
 		ResourceBundle bundle;
 		bool is_new { false };
-
-		bool resource_dirty() const;
-		bool meta_dirty()     const;
 	};
 }

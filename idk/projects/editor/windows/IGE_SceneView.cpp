@@ -140,7 +140,7 @@ namespace idk {
             ImGui::EndMenuBar();
         }
         
-        ImVec2 imageSize = GetScreenSize();
+		auto imageSize = vec2{ GetScreenSize() };
 		auto meta = Core::GetSystem<IDE>().GetEditorRenderTarget();
         auto screen_tex = meta->GetColorBuffer();
         auto rendertex_aspect = screen_tex->AspectRatio();
@@ -744,7 +744,7 @@ namespace idk {
 
 		//Setting up draw area
 
-        ImVec2 winPos = vec2{ ImGui::GetWindowPos() } + ImGui::GetWindowContentRegionMin() + draw_rect_offset;
+		ImVec2 winPos = vec2{ ImGui::GetWindowPos() } +vec2{ ImGui::GetWindowContentRegionMin() } +draw_rect_offset;
 		ImGuizmo::SetRect(winPos.x, winPos.y, draw_rect_size.x, draw_rect_size.y); //The scene view size
 
 		ImGuizmo::SetDrawlist(); //Draw on scene view only

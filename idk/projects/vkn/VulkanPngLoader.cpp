@@ -49,10 +49,10 @@ namespace idk::vkn
 		tci.internal_format = MapFormat(def.internal_format);
 		if(handle.GetFileName()=="wl_bl_room01_normal.tga")
 			DoNothingUnopt();
-		if (def.is_srgb)
-			tci.internal_format = ToSrgb(tci.internal_format);
+
 		//TODO detect SRGB and load set format accordingly
-		InputTexInfo iti{ r_cast<const char*>(tex_data),s_cast<size_t>(size.x * size.y * 4),def.is_srgb?vk::Format::eR8G8B8A8Srgb: vk::Format::eR8G8B8A8Unorm };
+		InputTexInfo iti{ r_cast<const char*>(tex_data),s_cast<size_t>(size.x * size.y * 4),
+			(tm ? tm->is_srgb : false) ? vk::Format::eR8G8B8A8Srgb: vk::Format::eR8G8B8A8Unorm };
 		if(tm)
 			to= *tm;
 		auto blit_usage = BlitCompatUsageMasks::eDst;

@@ -103,7 +103,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 	case GraphicsAPI::Vulkan:
 	{
-		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh, false>>();
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".vert");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".geom");
@@ -113,7 +113,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		break;
 	}
 	case GraphicsAPI::OpenGL:
-		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, ogl::OpenGLMesh, false>>();
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, ogl::OpenGLMesh>>();
 		Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
 		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
 		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
@@ -126,8 +126,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		break;
 	}
 	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<Prefab, Prefab, false>>();
-	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Animation, anim::Animation, false>>();
-	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Skeleton, anim::Skeleton, false>>();
+	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Animation, anim::Animation>>();
+	Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<anim::Skeleton, anim::Skeleton>>();
 	Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 	Core::GetResourceManager().RegisterFactory<GraphFactory>();
 

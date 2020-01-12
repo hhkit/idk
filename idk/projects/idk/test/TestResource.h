@@ -12,15 +12,11 @@ namespace idk
 
 	class TestResource
 		: public Resource<TestResource>
-		, public MetaTag<TestMeta>
 		, public Saveable<TestResource>
 	{
 	public:
         int k = 0;
 		string yolo = "haha";
-
-
-		void OnMetaUpdate(const TestMeta& newmeta) override { (newmeta); k = meta.i * meta.j; }
 		EXTENSION(".test")
 	};
 }
