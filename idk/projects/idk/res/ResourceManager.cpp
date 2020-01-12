@@ -342,8 +342,8 @@ namespace idk
 		auto ext = path.GetExtension();
 		if (ext == ".time")
 			return {};
-
-
+		if (path.IsDir())
+			return {};
 		
 		auto emplace_path = string{ path.GetMountPath() };
 		auto* loader = GetLoader(ext);
@@ -368,7 +368,7 @@ namespace idk
 
 			if (loader == nullptr)
 			{
-				if (path.IsFile() && _compilable_extensions.find(ext) != _compilable_extensions.end())
+				if (_compilable_extensions.find(ext) != _compilable_extensions.end())
 				{
 					LoadAsync(path, true);
 

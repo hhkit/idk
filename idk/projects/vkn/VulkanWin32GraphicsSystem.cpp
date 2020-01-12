@@ -276,7 +276,9 @@ namespace idk::vkn
 				{
 					if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
 					{
-						RscHandle<CubeMap> cubemap = clear;
+						const RscHandle<CubeMap>& cubemap = clear;
+						if (!cubemap)
+							return;
 						VknCubemap& cm = cubemap.as<VknCubemap>();
 						RscHandle<VknCubemap> conv = cm.GetConvoluted();
 						if (RscHandle < VknCubemap>{} == conv)

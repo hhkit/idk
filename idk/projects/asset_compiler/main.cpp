@@ -32,10 +32,10 @@ int WINAPI wWinMain(
 )
 {
 	int argc{};
-	LPWSTR* wargv{};
+	LPWSTR* wargv = CommandLineToArgvW(lpCmdLine, &argc);;
 	std::vector<idk::string> strargv;
 	std::vector<const char*> argv;
-	for (auto itr = wargv; itr; ++itr)
+	for (auto itr = wargv; *itr; ++itr)
 	{
 		auto wstr = std::wstring{ *itr };
 		int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), NULL, 0, NULL, NULL);
@@ -44,14 +44,14 @@ int WINAPI wWinMain(
 		strargv.push_back(ret);
 	}
 
+	argv.emplace_back("");
 	for (auto& elem : strargv)
 		argv.emplace_back(elem.data());
 	argv.emplace_back(nullptr);
 
-	CommandLineToArgvW(lpCmdLine, &argc);
 	LocalFree(wargv);
 
-	return main(argc, argv.data());
+	return main(argc + 1, argv.data());
 }
 
 int main(int argc, const char* argv[])
