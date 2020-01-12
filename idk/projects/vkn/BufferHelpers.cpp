@@ -181,6 +181,11 @@ void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Im
 	vBarrier.dstAccessMask = vk::AccessFlags::Flags();
 	switch (oLayout)
 	{
+	case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+		sourceStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+		vBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+		vBarrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+		break;
 	case vk::ImageLayout::eTransferDstOptimal:
 	{
 		sourceStage = vk::PipelineStageFlagBits::eTransfer;

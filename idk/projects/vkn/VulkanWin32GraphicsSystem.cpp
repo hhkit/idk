@@ -340,27 +340,32 @@ namespace idk::vkn
 				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
 			}
 		}
-		render_targets.emplace(RscHandle<VknRenderTarget>{});
+		//render_targets.emplace(RscHandle<VknRenderTarget>{});
 		for (auto& prt : render_targets)
 		{
 			if (prt->NeedsFinalizing())
 				prt->Finalize();
 		}
+		if (RscHandle<VknRenderTarget>{}->NeedsFinalizing())
+			RscHandle<VknRenderTarget>{}->Finalize();
 		// */
 		curr_frame.ColorPick(std::move(request_buffer));
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
-		vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-		vk::SubmitInfo si
-		{
-			1,
-			&*curr_frame.GetPostRenderComplete(),
-			&stage,0,nullptr,1,
-			&* curr_signal.render_finished
-		};
-		View().GraphicsQueue().submit(si, {});
-		//instance_->DrawFrame(*curr_frame.GetPostRenderComplete(),*curr_signal.render_finished);
+
+
+		//vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		//vk::SubmitInfo si
+		//{
+		//	1,
+		//	&*curr_frame.GetPostRenderComplete(),
+		//	&stage,0,nullptr,1,
+		//	&* curr_signal.render_finished
+		//};
+		//View().GraphicsQueue().submit(si, {});
+		vector<RscHandle<RenderTarget>> targets{render_targets.begin(),render_targets.end()};
+		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(), *curr_signal.render_finished, targets);
 
 		}
 		catch (vk::SystemError& err)
