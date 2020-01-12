@@ -37,7 +37,9 @@ namespace idk
 
 		constexpr span() noexcept = default;
 		constexpr span(T* begin, T* end) noexcept;
-		template <typename Container, typename = std::enable_if_t<detail::is_contiguous_container_v<Container> && !std::is_same_v<std::decay_t<Container>, span>>>
+		template <typename Container, typename = std::enable_if_t<detail::is_contiguous_container_v<Container>
+			&& std::is_convertible_v<decltype(std::data(std::declval<Container&>())), T*>
+				&& !std::is_same_v<std::decay_t<Container>, span>>>
 		constexpr span(Container&& c) noexcept;
 
 		// element access

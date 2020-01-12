@@ -27,12 +27,18 @@ namespace idk
 
         auto frag = *res;
         auto mat = Core::GetResourceManager().LoaderCreateResource<Material>(Guid{ 0x90da4f5c, 0x0453, 0x4e77, 0xbb3fb506c067d085 });
-        mat->_shader_program = frag;
-        mat->Name("Default UI");
+        if (mat)
+        {
+            mat->_shader_program = frag;
+            mat->Name("Default UI");
+        }
         auto inst = Core::GetResourceManager().LoaderCreateResource<MaterialInstance>(UISystem::default_material_inst);
-        inst->material = mat;
-        inst->Name("Default UI");
-        mat->_default_instance = inst;
+        if (inst)
+        {
+            inst->material = mat;
+            inst->Name("Default UI");
+            mat->_default_instance = inst;
+        }
     }
 
     void UISystem::Update(span<class Canvas> canvases)
