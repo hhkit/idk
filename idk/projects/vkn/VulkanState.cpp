@@ -1006,7 +1006,6 @@ namespace idk::vkn
 		imageIndex = res.value;
 		m_swapchain->curr_index = res.value;
 	}
-#pragma optimize("",off)
 	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal, span<RscHandle<RenderTarget>> to_transition)
 	{
 		//AcquireFrame();
