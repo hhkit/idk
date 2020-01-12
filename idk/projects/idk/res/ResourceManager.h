@@ -24,6 +24,7 @@ namespace idk
 	enum class ResourceCreateError : char
 	{
 		PathAlreadyExists,
+		FactoryUnregistered,
 	};
 
 	enum class ResourceLoadError : char
