@@ -1006,10 +1006,8 @@ namespace idk::vkn
 		imageIndex = res.value;
 		m_swapchain->curr_index = res.value;
 	}
-
-	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal)
+	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal, span<RscHandle<RenderTarget>> to_transition)
 	{
-		return;
 		//AcquireFrame();
 		auto& current_signal = m_swapchain->m_graphics.pSignals[current_frame];
 
@@ -1038,7 +1036,7 @@ namespace idk::vkn
 			//This is the part where framebuffer can be swapped (one framebuffer per renderpass)
 			vk::RenderPassBeginInfo renderPassInfo
 			{
-				*vkn_fb.GetRenderPass()
+				*vkn_fb.GetRenderPass(false,false)
 				,frame_buffer
 				,vk::Rect2D{ vk::Offset2D{}, vk::Extent2D(s_cast<uint32_t>(vkn_fb.Size().x),s_cast<uint32_t>(vkn_fb.Size().y)) }
 				,s_cast<uint32_t>(std::size(clearcolor))
@@ -1051,17 +1049,28 @@ namespace idk::vkn
 			};
 			command_buffer.reset(vk::CommandBufferResetFlags{},dispatcher);
 			command_buffer.begin(begin_info);
-			
+			auto& tex = vkn_fb.GetColorBuffer().as<VknTexture>();
+			//hlp::TransitionImageLayout(command_buffer, {}, tex.Image(),
+			//	tex.format, vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eGeneral
+			//);
 			//command_buffer.executeCommands(render_state.TransferBuffer(), dispatcher);
-			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
+			//command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers, dispatcher);
 
 
+			for (auto& rt : to_transition)
+			{
+				if (rt == RscHandle<RenderTarget>{}) continue;
+				auto& c_tex = rt->GetColorBuffer().as<VknTexture>();
+				auto& d_tex = rt->GetDepthBuffer().as<VknTexture>();
+				hlp::TransitionImageLayout(command_buffer, vk::Queue{}, c_tex.Image(), c_tex.format, vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eGeneral);
+				hlp::TransitionImageLayout(command_buffer, vk::Queue{}, d_tex.Image(), d_tex.format, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageLayout::eGeneral);
+			}
 			//////////////////////////THIS IS WHERE UBO UPDATES MVP (VIEW TRANSFORM SHOULD BE DONE HERE)/////////////////////////
 
 			//command_buffer.executeCommands(*m_commandbuffers[m_swapchain->curr_index], dispatcher);
 
 			//command_buffer.executeCommands(render_state.CommandBuffer(), dispatcher);
-			command_buffer.endRenderPass(dispatcher);
+			//command_buffer.endRenderPass(dispatcher);
 			command_buffer.end();
 
 			vk::CommandBuffer cmds[] =
@@ -1074,14 +1083,15 @@ namespace idk::vkn
 			{
 				1
 				,&waitSemaphores
-				,waitStages
-				,0,nullptr//hlp::arr_count(cmds),std::data(cmds)
+				,waitStages,
+				hlp::arr_count(cmds),std::data(cmds)
 				,1,&readySemaphores
 			};
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
 
-			if (m_graphics_queue.submit(hlp::arr_count(frame_submit), std::data(frame_submit), *current_signal.inflight_fence(), dispatcher) != vk::Result::eSuccess)
-				throw std::runtime_error("failed to submit draw command buffer!");
+			m_graphics_queue.submit(render_state_submit_info, {}, dispatcher);
+			//if (!= vk::Result::eSuccess)
+			//	throw std::runtime_error("failed to submit draw command buffer!");
 		}
 		
 		//m_present_queue.waitIdle(dispatcher);

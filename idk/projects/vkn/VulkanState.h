@@ -98,7 +98,7 @@ namespace idk::vkn
 		VulkanView& View();
 
 		void AcquireFrame(vk::Semaphore signal);
-		void DrawFrame(vk::Semaphore wait, vk::Semaphore signal);
+		void DrawFrame(vk::Semaphore wait, vk::Semaphore signal, span<RscHandle<RenderTarget>> to_transition);
 		void PresentFrame(vk::Semaphore wait);
 		void PresentFrame2();
 		void OnResize();
