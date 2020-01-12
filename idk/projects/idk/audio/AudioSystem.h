@@ -61,7 +61,7 @@ namespace idk
 		virtual void Init() override; //Initializes the FMOD Core System
 		void Update(span<AudioSource>);
 		void UpdateTestCaseOnly(); //Remove after test!
-
+		void StopAllAudio();
 
 		void SetSystemPaused(bool);
 

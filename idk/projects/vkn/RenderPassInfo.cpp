@@ -175,7 +175,7 @@ void RenderPassInfo::AddAttachment(AttachmentInfo attachment, vector<vk::Attachm
 
 	attachment_desc.emplace_back(vk::AttachmentDescription{
 		vk::AttachmentDescriptionFlags{}
-		, (attachment.buffer)? attachment.buffer->as<VknTexture>().format:MapFormat(vk_att.internal_format)
+		, (attachment.buffer)? attachment.buffer->as<VknTexture>().format : MapFormat(vk_att.internal_format)
 		, vk::SampleCountFlagBits::e1
 		, MapLoadOp(vk_att.load_op)
 		, MapStoreOp(vk_att.store_op)

@@ -20,37 +20,16 @@ links:
   node_out: d056e8a7-d92d-41c8-87c8-b185c06b1dc0
   slot_in: 2
   slot_out: 5
-- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
+- node_in: 6f2f4c48-a1f9-46bd-80fb-a93612ccaf19
   node_out: eb496af1-5e71-4429-bacb-2f8ab7bd8154
   slot_in: 0
   slot_out: 3
-- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
+- node_in: 6f2f4c48-a1f9-46bd-80fb-a93612ccaf19
   node_out: 2449cd31-a85b-4d34-bf51-73fd5b4f33b8
   slot_in: 1
   slot_out: 0
-- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
-  node_out: 1bd680de-07ae-4d0f-8915-ab1330429283
-  slot_in: 2
-  slot_out: 0
-- node_in: 12810f6a-0b1d-463c-b274-48ad7d82011e
-  node_out: 9d40ef6d-0b8d-409f-af98-b2fec6f67472
-  slot_in: 3
-  slot_out: 0
-master_node: 12810f6a-0b1d-463c-b274-48ad7d82011e
+master_node: 6f2f4c48-a1f9-46bd-80fb-a93612ccaf19
 nodes: 
-  12810f6a-0b1d-463c-b274-48ad7d82011e: 
-    control_values: ""
-    guid: 12810f6a-0b1d-463c-b274-48ad7d82011e
-    input_slots: 
-    - {type: VEC3, value: ""}
-    - {type: VEC3, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: ""}
-    - {type: FLOAT, value: 0}
-    - {type: VEC3, value: '0,0,0'}
-    name: master\PBR
-    output_slots: []
-    position: {x: 539, y: 150}
   1bd680de-07ae-4d0f-8915-ab1330429283: 
     control_values: ""
     guid: 1bd680de-07ae-4d0f-8915-ab1330429283
@@ -67,6 +46,19 @@ nodes:
     output_slots: 
     - {type: VEC3, value: ""}
     position: {x: 162, y: 189}
+  6f2f4c48-a1f9-46bd-80fb-a93612ccaf19: 
+    control_values: ""
+    guid: 6f2f4c48-a1f9-46bd-80fb-a93612ccaf19
+    input_slots: 
+    - {type: VEC3, value: ""}
+    - {type: VEC3, value: ""}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 0}
+    - {type: FLOAT, value: 0}
+    - {type: VEC3, value: '0,0,0'}
+    name: master\PBR
+    output_slots: []
+    position: {x: 599, y: 210}
   8cde6425-134a-42bf-ac3f-91f6caeedf62: 
     control_values: ""
     guid: 8cde6425-134a-42bf-ac3f-91f6caeedf62
@@ -104,7 +96,7 @@ nodes:
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
     - {type: FLOAT, value: ""}
-    position: {x: 234, y: 31}
+    position: {x: 246, y: 11}
   eb496af1-5e71-4429-bacb-2f8ab7bd8154: 
     control_values: ""
     guid: eb496af1-5e71-4429-bacb-2f8ab7bd8154
@@ -115,7 +107,7 @@ nodes:
     name: input\basic\Vec3
     output_slots: 
     - {type: VEC3, value: ""}
-    position: {x: 429, y: 52}
+    position: {x: 402, y: 124}
 parameters: 
 - {default_value: 0, name: Specular, type: FLOAT}
 - {default_value: 0, name: Roughness, type: FLOAT}

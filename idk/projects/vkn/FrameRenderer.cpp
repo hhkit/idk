@@ -46,6 +46,8 @@
 
 #include <vkn/DebugUtil.h>
 
+#include <vkn/ColorPickRenderer.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<ThreadedRender>()
@@ -53,6 +55,8 @@ namespace idk::vkn
 	struct FrameRenderer::PImpl
 	{
 		hash_table<RscHandle<Texture>, RscHandle<VknFrameBuffer>> deferred_buffers;
+		vector<ColorPickRequest> color_pick_requests;
+		ColorPickRenderer color_picker;
 	};
 
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
@@ -281,21 +285,21 @@ namespace idk::vkn
 		}
 		GraphicsStateInterface(const GraphicsState& state) : GraphicsStateInterface{static_cast<const CoreGraphicsState&>(state)}
 		{
-			renderer_vertex_shaders = state.renderer_vertex_shaders;
-			renderer_fragment_shaders = state.renderer_fragment_shaders;
+			renderer_vertex_shaders =   state.shared_gfx_state->renderer_vertex_shaders;
+			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
 			range = state.range;
 
 			mask = state.camera.culling_flags;
 		}
 		GraphicsStateInterface(const PreRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
 		{
-			renderer_vertex_shaders = state.renderer_vertex_shaders;
-			renderer_fragment_shaders = state.renderer_fragment_shaders;
+			renderer_vertex_shaders   = state.shared_gfx_state->renderer_vertex_shaders;
+			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
 		}
 		GraphicsStateInterface(const PostRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
 		{
-			renderer_vertex_shaders = state.renderer_vertex_shaders;
-			renderer_fragment_shaders = state.renderer_fragment_shaders;
+			renderer_vertex_shaders   = state.shared_gfx_state->renderer_vertex_shaders;
+			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
 		}
 	};
 
@@ -435,15 +439,18 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
-		size_t num_conv_states = 1;
-		size_t num_instanced_buffer_state = 1;
-		auto total_pre_states = lights.size() + num_conv_states+ num_instanced_buffer_state;
+		const size_t num_conv_states = 1;
+		const size_t num_instanced_buffer_state = 1;
+		const size_t num_color_pick_states = 1;
+		auto total_pre_states = lights.size() + num_conv_states+ num_instanced_buffer_state + num_color_pick_states;
 		GrowStates(_pre_states, total_pre_states);
 		for (auto& pre_state : _pre_states)
 		{
 			pre_state.Reset();
 		}
 		size_t curr_state = 0;
+
+
 		std::optional<vk::Semaphore> copy_semaphore{};
 		{
 
@@ -507,6 +514,16 @@ namespace idk::vkn
 			queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 		}
 
+		{
+			auto& color_picker = _pimpl->color_picker;
+			auto& requests = _pimpl->color_pick_requests;
+			auto& shared_gs = *state.shared_gfx_state;
+			auto& rs = _pre_states[curr_state++];
+			auto cmd_buffer = rs.CommandBuffer();
+			cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+			color_picker.PreRender(requests, shared_gs, state.inst_mesh_buffer->size(), cmd_buffer);
+			color_picker.Render(requests, shared_gs, rs);
+		}
 		//Do post pass here
 		//Canvas pass
 
@@ -986,7 +1003,7 @@ namespace idk::vkn
 		//Temp, get rid of this once the other parts no longer depend on render_finished
 		ready_semaphores.emplace(readySemaphores);
 		vector<vk::Semaphore> arr_ready_sem(ready_semaphores.begin(), ready_semaphores.end());
-		auto inflight_fence = *_states[0].signal.inflight_fence;
+		auto inflight_fence = *_states[0].signal.inflight_fence();
 
 
 
@@ -1286,6 +1303,10 @@ namespace idk::vkn
 
 		cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, return_barriers);
 
+	}
+	void FrameRenderer::ColorPick(vector<ColorPickRequest>&& pick_buffer)
+	{
+		_pimpl->color_pick_requests = std::move(pick_buffer);
 	}
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{

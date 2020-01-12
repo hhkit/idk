@@ -75,6 +75,8 @@ namespace idk::vkn
 		vector<UIAttriBlock>*      ui_text_data;
 		//vector<CanvasRenderRange>* ui_canvas_range;
 		size_t total_num_of_text{ 0 };
+		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
+		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		//vector<FontPoint>* ui_text_data;
 
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);
@@ -134,8 +136,6 @@ namespace idk::vkn
 		//std::optional<RscHandle<CubeMap>> ShadowCube(size_t light_index)const;
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
-		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
-		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 
 		const vector<SkeletonTransforms>& GetSkeletonTransforms()const { return *skeleton_transforms; }
 
@@ -154,8 +154,6 @@ namespace idk::vkn
 		const vector<GraphicsSystem::LightRenderRange>* shadow_ranges;
 		//RscHandle<ShaderProgram> mesh_vtx;
 		//RscHandle<ShaderProgram> skinned_mesh_vtx;
-		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
-		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		void Init(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms, const vector<InstancedData>& inst_mesh_render_buffer);
 	};
 
@@ -169,8 +167,6 @@ namespace idk::vkn
 		//hash_table<Handle<Canvas>, vector<UIRenderObject>>* ui_render_per_canvas;
 		//vector<GraphicsSystem::CanvasRenderRange>* canvas_render_range;
 
-		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
-		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 		void Init();
 	};
 

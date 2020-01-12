@@ -17,6 +17,7 @@
     <ClCompile Include="..\game\ReflectRegistered.cpp">
       <Filter>Shared</Filter>
     </ClCompile>
+    <ClCompile Include="RenderDocExt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shared">

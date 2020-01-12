@@ -7,51 +7,69 @@ namespace idk::ogl
 {
 	OpenGLTexture::OpenGLTexture()
 	{
+		GL_CHECK();
 		glGenTextures(1, &_id);
-		glBindTexture(GL_TEXTURE_2D, _id);
-		
-		UpdateFilter(meta.filter_mode);
-		UpdateUV(meta.uv_mode);
-		Buffer(nullptr, _size);
+		GL_CHECK();
+		Bind();
+		GL_CHECK();
+		SetUVMode(UVMode::Clamp);
+		GL_CHECK();
+		SetFilteringMode(FilterMode::Linear);
+		GL_CHECK();
+		Buffer(nullptr, 0, _size, _internal_format);
 	}
 
-	OpenGLTexture::OpenGLTexture(const bool& compressed)
+	OpenGLTexture::OpenGLTexture(TextureInternalFormat format, ivec2 size, unsigned mip_level)
 	{
 		glGenTextures(1, &_id);
-		glBindTexture(GL_TEXTURE_2D, _id);
-
-		if (compressed)
-		{
-			UpdateFilter(meta.filter_mode,true);
-			UpdateUV(meta.uv_mode);
-			_isCompressedTexture = compressed;
-		}
-		else
-		{
-			UpdateFilter(meta.filter_mode);
-			UpdateUV(meta.uv_mode);
-			Buffer(nullptr, _size);
-		}
-	}
-
-	OpenGLTexture::OpenGLTexture(const GLuint& id, const ivec2& size, FilterMode fm, UVMode uv)
-	{
-		_id = id;
+		Bind();
 		_size = size;
-		UpdateFilter(fm);
-		UpdateUV(uv);
+		_internal_format = format;
+		_is_compressed = format >= TextureInternalFormat::SRGB_FIRST && format <= TextureInternalFormat::SRGB_FIRST;
+		_mip_level = 0;
+
+		SetUVMode(UVMode::Repeat);
+		SetFilteringMode(FilterMode::Linear);
+		GL_CHECK();
+		Buffer(nullptr, 0, size, format);
+		GL_CHECK();
+	}
+
+	OpenGLTexture::OpenGLTexture(const CompiledTexture& compiled_texture)
+		: _is_compressed{compiled_texture.is_srgb},
+		_mip_level{compiled_texture.generate_mipmaps}
+	{
+		glGenTextures(1, &_id);
+		Bind();
+		_size = compiled_texture.size;
+		_internal_format = ToInternalFormat(compiled_texture.internal_format, true);
+		SetUVMode(compiled_texture.mode);
+		SetFilteringMode(compiled_texture.filter_mode);
+
+		glCompressedTexImage2D(GL_TEXTURE_2D, 0,
+			detail::ogl_GraphicsFormat::ToInternal(_internal_format),
+			_size.x,
+			_size.y,
+			0,
+			static_cast<GLsizei>(compiled_texture.pixel_buffer.size()),
+			compiled_texture.pixel_buffer.data());
+		GL_CHECK();
+		if (_mip_level)
+			glGenerateMipmap(_id);
 	}
 
 	OpenGLTexture::OpenGLTexture(OpenGLTexture&& rhs)
-		: Texture{ std::move(rhs) }, _id{ rhs._id }, _isCompressedTexture{rhs._isCompressedTexture}
+		: Texture{ std::move(rhs) }, _id{ rhs._id }, _is_compressed{rhs._is_compressed}, _mip_level{rhs._mip_level}
 	{
 		rhs._id = 0;
 	}
+
 	OpenGLTexture& OpenGLTexture::operator=(OpenGLTexture&& rhs)
 	{
 		Texture::operator=(std::move(rhs));
 		std::swap(_id, rhs._id);
-		std::swap(_isCompressedTexture, rhs._isCompressedTexture);
+		std::swap(_is_compressed, rhs._is_compressed);
+		std::swap(_mip_level, rhs._mip_level);
 		return *this;
 	}
 	
@@ -62,50 +80,75 @@ namespace idk::ogl
 	
 	void OpenGLTexture::Bind()
 	{
-		//glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _id);
 	}
 	
 	void OpenGLTexture::BindToUnit(GLuint unit)
 	{
 		glActiveTexture(GL_TEXTURE0 + unit);
-		glBindTexture(GL_TEXTURE_2D, _id);
+		Bind();
 	}
 
-	void OpenGLTexture::Buffer(void* data, ivec2 size, InputChannels format, ColorFormat internalFormat, const unsigned& mipmap_size, const float& imgSize)
+	void OpenGLTexture::Buffer(void* data, size_t buffer_size, ivec2 texture_size, TextureInternalFormat format, GLenum incoming_components, GLenum incoming_type)
+	{
+		_size = texture_size;
+		_internal_format = format;
+		auto gl_format = detail::ogl_GraphicsFormat::ToInternal(_internal_format);
+		auto components = detail::ogl_GraphicsFormat::ToComponents(_internal_format);
+		Bind();
+		GL_CHECK();
+		glTexImage2D(GL_TEXTURE_2D, 0, gl_format, _size.x, _size.y, 0, components, incoming_type, data);
+		GL_CHECK();
+	}
+
+	void OpenGLTexture::Buffer(void* data, size_t buffer_size, ivec2 size, ColorFormat format, bool compressed)
 	{
 		_size = size;
-		glBindTexture(GL_TEXTURE_2D, _id);
-		if (internalFormat == ColorFormat::DEPTH_COMPONENT)
+		Bind();
+
+		_internal_format = ToInternalFormat(format, compressed);
+		auto gl_format = detail::ogl_GraphicsFormat::ToInternal(_internal_format);
+
+		if (compressed)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, detail::ogl_GraphicsFormat::ToColor(internalFormat), size.x, size.y, 0, detail::ogl_GraphicsFormat::ToInputChannels(InputChannels::DEPTH_COMPONENT), GL_FLOAT, data); // oh no
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else if(_isCompressedTexture)
-		{
-			if(size.x && size.y && imgSize)
-				glCompressedTexImage2D(GL_TEXTURE_2D, mipmap_size, detail::ogl_GraphicsFormat::ToColor(internalFormat), size.x, size.y, 0, static_cast<GLsizei>(imgSize), data);
+			switch (format)
+			{
+			case ColorFormat::Alpha_8:
+				glTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, GL_R, GL_UNSIGNED_BYTE, data);
+				break;
+			case ColorFormat::RGB_16bit:
+			case ColorFormat::RGB_24bit:
+				glTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+				break;
+			case ColorFormat::RGBA_32bit:
+				glTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+				break;
+			}
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, detail::ogl_GraphicsFormat::ToColor(internalFormat), size.x, size.y, 0, detail::ogl_GraphicsFormat::ToInputChannels(format), GL_UNSIGNED_BYTE, data); // oh no
-			glGenerateMipmap(GL_TEXTURE_2D);
+			switch (format)
+			{
+			case ColorFormat::Alpha_8:
+				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, buffer_size, data);
+				break;
+			case ColorFormat::RGB_16bit:
+			case ColorFormat::RGB_24bit:
+				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, buffer_size, data);
+				break;
+			case ColorFormat::RGBA_32bit:
+				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, buffer_size, data);
+				break;
+			}
 		}
-
-		//glGenerateMipmap(GL_TEXTURE_2D);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-		// TODO: fix internal format
-		GL_CHECK();
 	}
 
 
 	ivec2 OpenGLTexture::Size(ivec2 new_size)
 	{
 		Texture::Size(new_size);
-		if(!_isCompressedTexture)
-			Buffer(nullptr, _size);
-		return Texture::Size();
+		Buffer(nullptr, 0, _size, _internal_format);
+		return _size;
 	}
 
 	void* OpenGLTexture::ID() const
@@ -113,34 +156,26 @@ namespace idk::ogl
 		return r_cast<void*>(_id);
 	}
 
-	void OpenGLTexture::OnMetaUpdate(const TextureMeta& tex_meta)
-	{
 
-		if (_isCompressedTexture)
-		{
-			UpdateFilter(meta.filter_mode,true);
-			UpdateUV(meta.uv_mode);
-		}
-		else
-		{
-			UpdateFilter(meta.filter_mode);
-			UpdateUV(meta.uv_mode);
-			Buffer(nullptr, Size(), tex_meta.format, tex_meta.internal_format);
-		}
-	}
-	void OpenGLTexture::UpdateUV(UVMode uv_mode)
+	void OpenGLTexture::SetUVMode(UVMode uv_mode)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));
 		GL_CHECK();
 	}
-	void OpenGLTexture::UpdateFilter(FilterMode f_mode,const bool& isMipMap)
+
+	void OpenGLTexture::SetFilteringMode(FilterMode f_mode)
 	{
-		if(isMipMap)
+		if (_mip_level)
+		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		}
 		else
+		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, detail::ogl_GraphicsFormat::ToFilter(f_mode));
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, detail::ogl_GraphicsFormat::ToFilter(f_mode));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, detail::ogl_GraphicsFormat::ToFilter(f_mode));
+		}
 		GL_CHECK();
 	}
 }

@@ -63,6 +63,7 @@ namespace idk::vkn::hlp
 			vk::DeviceMemory Memory()const { return control.Memory(); }
 			size_t           Offset()const { return control.offset; }
 			size_t           Size()const { return control.size; }
+			size_t           BlockSize()const { return control.IntMemory().sz; }
 			Alloc(Memories& mem, uint32_t index,size_t u_offset, size_t offset, size_t size) :control{ &mem,index,u_offset,offset,size } {}
 			Alloc(const Alloc&) = delete;
 			Alloc(Alloc&&) = default;
@@ -85,7 +86,8 @@ namespace idk::vkn::hlp
 		};
 		using UniqueAlloc =std::unique_ptr<Alloc>;
 
-	MemoryAllocator(vk::Device d, vk::PhysicalDevice pd):device{d},pdevice{pd}{}
+		MemoryAllocator();
+		MemoryAllocator(vk::Device d, vk::PhysicalDevice pd):device{d},pdevice{pd}{}
 
 		UniqueAlloc Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req);
 		UniqueAlloc Allocate(vk::Image image, vk::MemoryPropertyFlags prop);

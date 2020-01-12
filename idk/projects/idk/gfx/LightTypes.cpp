@@ -42,7 +42,8 @@ namespace idk
 			{
 				LoadOp::eClear,
 				StoreOp::eStore,
-				idk::ColorFormat::DEPTH_COMPONENT,
+				DepthBufferMode::Depth16,
+				false,
 				FilterMode::_enum::Linear,
 				false //TEMP, CHANGE TO TRUE WHEN Point shadow is ready .
 			}
@@ -60,7 +61,8 @@ namespace idk
 			{
 				LoadOp::eClear,
 				StoreOp::eStore,
-				idk::ColorFormat::DEPTH_COMPONENT,
+				DepthBufferMode::Depth16,
+				false,
 				FilterMode::_enum::Linear
 			}
 		);
@@ -76,7 +78,8 @@ namespace idk
 			{
 				LoadOp::eClear,
 				StoreOp::eStore,
-				idk::ColorFormat::DEPTH_COMPONENT,
+				DepthBufferMode::Depth16,
+				false,
 				FilterMode::_enum::Linear
 			}
 		);

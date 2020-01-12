@@ -15,9 +15,13 @@ namespace idk
 
 		template<typename T, typename = sfinae<index_in_tuple_v<T, Resources> == ResourceCount>> // inherited handles
 		GenericResourceHandle(RscHandle<T> handle);
+		GenericResourceHandle(string_view type_name, Guid guid);
 
 		Guid   guid() const;
 		size_t resource_id() const;
+		
+		template<typename T>
+		auto visit(T&& visitor) const;
 		
 		template<typename T> RscHandle<T>& AsHandle();
 		template<typename T> const RscHandle<T>& AsHandle() const;
@@ -37,6 +41,12 @@ namespace idk
 	{
 		Base::operator=(RscHandle<typename T::BaseResource>{handle});
 		return *this;
+	}
+
+	template<typename T>
+	inline auto GenericResourceHandle::visit(T&& visitor) const
+	{
+		return std::visit(std::forward<T>(visitor), *this);
 	}
 
 	template<typename T>

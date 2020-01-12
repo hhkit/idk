@@ -325,7 +325,7 @@ namespace idk {
         for (const auto& path : paths)
         {
             const auto ext = path.GetExtension();
-            if (ext == ".meta")
+            if (ext == ".meta" || ext == ".time")
                 continue;
 
             auto stem = path.GetFileName();
@@ -604,7 +604,10 @@ namespace idk {
 
                     if (fs::exists(meta_path))
                         fs::remove(meta_path);
-                    fs::remove(full_path);
+
+                    if (fs::is_directory(full_path))
+                        fs::remove_all(full_path);
+                    //fs::remove(full_path);
                 }
 
                 ImGui::EndPopup();

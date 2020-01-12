@@ -10,15 +10,25 @@ namespace idk::vkn
 {
 	struct VknTexture;
 
-	struct TextureOptions : TextureMeta
+	struct TextureOptions
 	{
-		FilterMode  min_filter{};
-		FilterMode  mag_filter{};
+		FilterMode  min_filter = FilterMode::Linear;
+		FilterMode  mag_filter = FilterMode::Linear;
+		FilterMode  filter_mode = FilterMode::Linear;
+		UVMode      uv_mode = UVMode::Repeat;
 		std::optional<CompareOp> compare_op{};
+		TextureInternalFormat internal_format;
 		float anisoptrophy = 1.0f;
+
 		TextureOptions() = default;
-		TextureOptions(const TextureMeta& meta) :TextureMeta{ meta } {}
+		TextureOptions(const TextureMeta& meta) 
+		{
+			min_filter = mag_filter = filter_mode = meta.filter_mode;
+			uv_mode = meta.uv_mode;
+			internal_format = ToInternalFormat(meta.internal_format, meta.is_srgb);
+		}
 	};
+
 	struct InputTexInfo
 	{
 		const void* data{};
@@ -29,6 +39,7 @@ namespace idk::vkn
 		size_t l=0,
 			vk::Format f = {}) noexcept :data{ d }, len{ l }, format{ f }{}
 	};
+
 	struct TexCreateInfo
 	{
 		uint32_t width{};

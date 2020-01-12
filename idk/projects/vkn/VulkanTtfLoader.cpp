@@ -77,7 +77,7 @@ namespace idk::vkn
 			new_tm = fontAtlas->GetMeta();
 		}
 
-		fontAtlas->SetMeta(new_tm);
+		fontAtlas->GetMeta() = new_tm;
 
 		if (FT_Set_Pixel_Sizes(face, 0, new_tm.font_size))
 		{
@@ -178,7 +178,7 @@ namespace idk::vkn
 		tci.mipmap_level = 0;
 		tci.sampled(true);
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
-		tci.internal_format = MapFormat(def.internal_format);
+		tci.internal_format = MapFormat(ToInternalFormat(def.internal_format, def.is_srgb));
 		if (def.is_srgb)
 			tci.internal_format = ToSrgb(tci.internal_format);
 		//TODO detect SRGB and load set format accordingly

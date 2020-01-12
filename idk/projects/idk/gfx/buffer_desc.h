@@ -14,6 +14,10 @@ namespace idk
 		eIVec2,//int32
 		eIVec3,//int32
 		eIVec4,//int32
+		eUVec1,//uint32
+		eUVec2,//uint32
+		eUVec3,//uint32
+		eUVec4,//uint32
 		eSVec1,//Single Precision Floats
 		eSVec2,//Single Precision Floats
 		eSVec3,//Single Precision Floats

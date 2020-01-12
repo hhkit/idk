@@ -28,7 +28,6 @@
       <Filter>program</Filter>
     </ClInclude>
     <ClInclude Include="program\GLSLLoader.h" />
-    <ClInclude Include="system\TextureManager.h" />
     <ClInclude Include="program\ProgramFactory.h" />
     <ClInclude Include="DDSData.h">
       <Filter>resource</Filter>
@@ -103,7 +102,6 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="system\FrameBufferManager.cpp" />
     <ClCompile Include="program\GLSLLoader.cpp" />
-    <ClCompile Include="system\TextureManager.cpp" />
     <ClCompile Include="program\ProgramFactory.cpp" />
     <ClCompile Include="resource\OpenGLCubemap.cpp">
       <Filter>resource</Filter>

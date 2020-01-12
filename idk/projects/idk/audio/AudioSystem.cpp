@@ -274,6 +274,17 @@ namespace idk
 		ParseFMOD_RESULT(_Core_System->update());
 
 	}
+	void AudioSystem::StopAllAudio()
+	{
+		for (int i = 0; i < _max_channels; ++i) {
+			FMOD::Channel* channelPtr;
+			_result = _Core_System->getChannel(i, &channelPtr);
+
+			if (_result == FMOD_OK && channelPtr) {
+				ParseFMOD_RESULT(channelPtr->stop());
+			}
+		}
+	}
 	void AudioSystem::SetSystemPaused(bool is_system_paused)
 	{
 		_system_paused = is_system_paused;
@@ -295,16 +306,7 @@ namespace idk
 	{
 		Core::GetGameState().OnObjectDestroy<AudioSource>() -= _destroy_slot;
 
-		int numChannelsPlaying{};
-		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numChannelsPlaying));
-		for (int i = 0; i < _max_channels; ++i) {
-			FMOD::Channel* channelPtr;
-			_result = _Core_System->getChannel(i, &channelPtr);
-
-			if (_result == FMOD_OK && channelPtr) {
-				ParseFMOD_RESULT(channelPtr->stop());
-			}
-		}
+		StopAllAudio();
 			
 		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
 		ParseFMOD_RESULT(_soundGroup_MUSIC	  ->release()); 

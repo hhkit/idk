@@ -1,9 +1,15 @@
 #include "pch.h"
 #include "MemoryAllocator.h"
 #include <vkn/BufferHelpers.h>
+#include <vkn/VulkanView.h>
+namespace idk::vkn
+{
+	VulkanView& View();
+}
 namespace idk::vkn::hlp
 {
 	using detail::Memories;
+	MemoryAllocator::MemoryAllocator(): device{ *View().Device() }, pdevice{ View().PDevice() }{}
 	MemoryAllocator::UniqueAlloc MemoryAllocator::Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req)
 	{
 		auto itr = memories.find(mem_type);

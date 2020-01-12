@@ -48,6 +48,8 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="gfx\ColorPickRequest.h" />
+    <ClInclude Include="gfx\ColorPickResult.h" />
     <ClInclude Include="common\Layer.h" />
     <ClInclude Include="common\LayerManager.h" />
     <ClInclude Include="common\Name.h" />
@@ -67,6 +69,7 @@
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\ShaderIncluder.h" />
     <ClInclude Include="gfx\ShaderSnippet.h" />
     <ClInclude Include="gfx\ShaderSnippetFactory.h" />
@@ -78,6 +81,7 @@
     <ClInclude Include="gfx\FontData.h" />
     <ClInclude Include="common\LayerMask.h" />
     <ClInclude Include="gfx\TextAlignment.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
@@ -320,6 +324,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="ColorPickRequest.cpp" />
     <ClCompile Include="common\Layer.cpp" />
     <ClCompile Include="common\LayerManager.cpp" />
     <ClCompile Include="common\Name.cpp" />
@@ -354,6 +359,7 @@
     <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
+    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="math\ritters.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
@@ -401,7 +407,11 @@
     </ClCompile>
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
-    <ClCompile Include="phys\collision.cpp" />
+    <ClCompile Include="phys\collision.cpp">
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IncludeInUnityFile>
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">false</IncludeInUnityFile>
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</IncludeInUnityFile>
+    </ClCompile>
     <ClCompile Include="prefab\Prefab.cpp" />
     <ClCompile Include="prefab\PrefabData.cpp" />
     <ClCompile Include="prefab\PrefabUtility.cpp" />
@@ -585,6 +595,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -593,6 +604,7 @@
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -601,6 +613,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

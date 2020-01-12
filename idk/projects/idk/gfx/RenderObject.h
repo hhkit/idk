@@ -71,6 +71,8 @@ namespace idk
 		//shared_ptr<pipeline_config> config{};
 
 		// transform
+		hash_table<string, string> uniform_buffers;
+		hash_table<string, RscHandle<Texture>> uniform_textures;
 		size_t instanced_index{}, num_instances{};
 	};
 

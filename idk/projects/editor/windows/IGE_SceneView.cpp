@@ -43,6 +43,8 @@ of the editor.
 #include <opengl/PixelData.h>
 #include <ds/result.inl>
 #include <res/ResourceHandle.inl>
+#include <anim/SkinnedMeshRenderer.h>
+#include <gfx/MeshRenderer.h>
 
 namespace idk {
 
@@ -72,7 +74,49 @@ namespace idk {
 
 		
 	}
+	namespace detail
+	{
+		template<typename T, typename Tuple, typename = void >
+		struct is_in_tuple : std::false_type {};
+		template<typename T, typename Tuple>
+		struct is_in_tuple< T, Tuple,std::enable_if_t < index_in_tuple_v<T, Tuple> < std::tuple_size_v<Tuple>>> : std::true_type{};
 
+		template<typename T>
+		struct is_component_handle : std::false_type
+		{
+
+		};
+		template<typename T,typename = void>
+		struct is_component : std::false_type {};
+		template<typename T>
+		struct is_component<T, std::enable_if_t < index_in_tuple_v<T, Components> < std::tuple_size_v<Components>>> :std::true_type {};
+		template<typename T>
+		struct is_component_handle<Handle<T>> : is_component<T> {};
+
+		template<typename T>
+		struct HandleType;
+		template<typename T>
+		struct HandleType<Handle<T>> { using type = T; };
+	}
+	template<typename T>
+	using HandleType_t = typename detail::HandleType<T>::type;
+	template<typename T>
+	constexpr inline bool is_component_handle_v = detail::is_component_handle<T>::value;
+	template<typename T,typename Tuple>
+	constexpr inline bool is_in_tuple_v = detail::is_in_tuple<T,Tuple>::value;
+
+	using SelectableComponents = std::tuple< Handle<MeshRenderer>, Handle<SkinnedMeshRenderer>>;
+
+	template<typename T>
+	Handle<GameObject> GetGameObject(T handle)
+	{
+		if constexpr (std::is_same_v<T, Handle<GameObject>>)
+			return handle;
+		else if constexpr (is_in_tuple_v < T, SelectableComponents > )
+			return handle->GetGameObject();
+		else
+			return Handle<GameObject>{};
+	}
 	void IGE_SceneView::Update()
 	{
         ImGui::PopStyleVar(3);
@@ -96,7 +140,7 @@ namespace idk {
             ImGui::EndMenuBar();
         }
         
-        ImVec2 imageSize = GetScreenSize();
+		auto imageSize = vec2{ GetScreenSize() };
 		auto meta = Core::GetSystem<IDE>().GetEditorRenderTarget();
         auto screen_tex = meta->GetColorBuffer();
         auto rendertex_aspect = screen_tex->AspectRatio();
@@ -181,6 +225,8 @@ namespace idk {
 
 
 		//Raycast Selection
+		std::optional< std::pair<GenericHandle,PickState>> result;
+
 		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
 		{
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
@@ -190,6 +236,16 @@ namespace idk {
 			//	LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
 			//}
 			//Select gameobject here!
+			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			Handle<Camera> currCamera = main_camera.current_camera;
+			last_pick = 
+			{
+				Core::GetSystem<GraphicsSystem>().ColorPick(GetMousePosInWindowNormalized(),currCamera->GenerateCameraData()),
+				PickState{
+					.is_multi_select = ImGui::IsKeyDown(static_cast<int>(Key::Control))
+				}
+			};
+			
 			currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
 			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
@@ -197,7 +253,6 @@ namespace idk {
 				//Sort the obj by closest dist to point
 				//get the first obj
 				auto& editor = Core::GetSystem<IDE>();
-				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
 				Handle<GameObject> closestGameObject = obj.front();
 				auto cameraPos = editor.currentCamera().current_camera->currentPosition();
 				float distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
@@ -208,9 +263,41 @@ namespace idk {
 						distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Replace
 					}
 				}
+				//result = closestGameObject;
+			}
+		}
 
+		if (last_pick && last_pick->first.ready())
+		{
+			try
+			{
+				result = { last_pick->first.get(),last_pick->second };
+			}
+			catch (std::future_error& err)
+			{
+				LOG_TO(LogPool::EDIT, "Error \"%s\"when trying to get picked future ", err.what());
+			}
+			last_pick.reset();
+		}
+		
+		if (result)
+		{
+			auto [closestRenderer,picked_state] = *result;
+			Handle<GameObject> closestGameObject{};
+			if (closestRenderer)
+			{
+				Handle<SkinnedMeshRenderer> test1;
+				Handle<MeshRenderer> test2;
 
-				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Or select Deselect that particular handle
+				closestGameObject = closestRenderer.visit([](auto handle) {
+					return GetGameObject(handle);
+					});
+			}
+			if (closestGameObject)
+			{
+				auto& editor = Core::GetSystem<IDE>();
+				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
+				if (picked_state.is_multi_select) { //Or select Deselect that particular handle
 					bool hasSelected = false;
 					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect
 						if (closestGameObject == selected_gameObjects[counter]) {
@@ -657,7 +744,7 @@ namespace idk {
 
 		//Setting up draw area
 
-        ImVec2 winPos = vec2{ ImGui::GetWindowPos() } + ImGui::GetWindowContentRegionMin() + draw_rect_offset;
+		ImVec2 winPos = vec2{ ImGui::GetWindowPos() } +vec2{ ImGui::GetWindowContentRegionMin() } +draw_rect_offset;
 		ImGuizmo::SetRect(winPos.x, winPos.y, draw_rect_size.x, draw_rect_size.y); //The scene view size
 
 		ImGuizmo::SetDrawlist(); //Draw on scene view only

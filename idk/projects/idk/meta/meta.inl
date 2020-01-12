@@ -65,7 +65,6 @@ namespace idk
 		std::declval<T&>().insert(std::declval<typename std::decay_t<T>::value_type>())
 	)>> : is_iterable<T> {};
 
-
 	template<typename T>
 	struct is_container : std::disjunction<is_associative_container<T>, is_sequential_container<T>> {};
 

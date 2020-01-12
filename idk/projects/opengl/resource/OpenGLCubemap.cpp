@@ -26,11 +26,10 @@ namespace idk::ogl
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
 
-		meta.uv_mode = UVMode::Clamp;
-		UpdateUV(meta.uv_mode);
+		UpdateUV(UVMode::Clamp);
 		
-		for (unsigned int i = 0; i < 6; i++)
-			Buffer(i,nullptr, _size);
+		for (auto& i : TextureTarget::values)
+			Buffer(i, nullptr, _size, TextureInternalFormat::RGBA_16_F);
 
 		//Todo GET FILE HANDLE
 		//Core::GetResourceManager().GetFactory<ShaderProgramFactory>().Create();
@@ -102,15 +101,12 @@ namespace idk::ogl
 		//GL_CHECK();
 	}
 
-	void OpenGLCubemap::Buffer(unsigned int face_value,void* data, ivec2 size, InputChannels format, ColorFormat colorFormat)
+	void OpenGLCubemap::Buffer(TextureTarget face_value, void* data, ivec2 size, TextureInternalFormat internal_format, GLenum color_components, GLenum incoming_type)
 	{
-		format;
-
 		_size = size;
+		_internal_format = internal_format;
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ogl_GraphicsFormat::ToColor(colorFormat), size.x, size.y, 0, detail::ogl_GraphicsFormat::ToInputChannels(format), GL_UNSIGNED_BYTE, data);
-
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_value, 0, detail::ogl_GraphicsFormat::ToInternal(internal_format), size.x, size.y, 0, color_components, incoming_type, data);
 		GL_CHECK();
 	}
 
@@ -118,8 +114,8 @@ namespace idk::ogl
 	void OpenGLCubemap::Size(ivec2 new_size)
 	{
 		CubeMap::Size(new_size);
-		for (unsigned int i = 0; i < 6; i++)
-			Buffer(i, nullptr, _size);
+		for (auto& i : TextureTarget::values)
+			Buffer(i, nullptr, _size, _internal_format);
 	}
 
 	void* OpenGLCubemap::ID() const
@@ -132,10 +128,6 @@ namespace idk::ogl
 		return span<const GLuint>{_convoluted_id};
 	}
 
-	void OpenGLCubemap::OnMetaUpdate(const CubeMapMeta& tex_meta)
-	{
-		UpdateUV(tex_meta.uv_mode);
-	}
 	void OpenGLCubemap::UpdateUV(UVMode uv_mode)
 	{
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, detail::ogl_GraphicsFormat::ToUVMode(uv_mode));

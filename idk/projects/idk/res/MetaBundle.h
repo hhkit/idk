@@ -12,6 +12,8 @@ namespace idk
 	{
 		vector<SerializedMeta> metadatas;
 
+		MetaBundle() = default;
+
 		template<typename T>
 		void Add(RscHandle<T>);
 
@@ -24,6 +26,7 @@ namespace idk
 		const SerializedMeta* FetchMeta(string_view name) const;
 
 		explicit operator bool() const;
+		explicit operator ResourceBundle() const;
 
 		template<typename FullResType> RscHandle<FullResType> CreateResource() const;
 		template<typename FullResType> RscHandle<FullResType> CreateResource(string_view name) const;
