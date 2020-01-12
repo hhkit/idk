@@ -65,7 +65,8 @@ namespace idk
 	RscHandle<Res> ResourceManager::Create()
 	{
 		auto& factory = GetFactoryRes<Res>();
-		assert(&factory);
+		if (&factory == nullptr)
+			return {};
 
 		auto& table = GetTable<Res>();
 		const auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
@@ -96,7 +97,8 @@ namespace idk
 		}
 
 		auto& factory = GetFactoryRes<Res>();
-		assert(&factory);
+		if (&factory == nullptr)
+			return ResourceCreateError::FactoryUnregistered;
 
 		auto& table = GetTable<Res>();
 		const auto [itr, success] = table.emplace(Guid::Make(), ResourceControlBlock<Res>{});
@@ -270,7 +272,8 @@ namespace idk
 	inline RscHandle<Res> ResourceManager::LoaderCreateResource(Guid guid)
 	{
 		auto& factory = GetFactoryRes<Res>();
-		assert(&factory);
+		if (&factory == nullptr)
+			return {};
 
 		auto& table = GetTable<Res>();
 		const auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});

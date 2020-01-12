@@ -117,7 +117,7 @@ namespace idk
 								for (const auto& [guid, res_cb] : resource_man->GetTable<Rs>())
 								{
 									const auto h = RscHandle<Rs>{ guid };
-									if (h->IsDirty())
+									if (h && h->IsDirty())
 									{
 										resource_man->Save(h);
 										h->Clean();
