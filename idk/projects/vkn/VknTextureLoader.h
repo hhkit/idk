@@ -17,7 +17,7 @@ namespace idk::vkn
 		FilterMode  filter_mode = FilterMode::Linear;
 		UVMode      uv_mode = UVMode::Repeat;
 		std::optional<CompareOp> compare_op{};
-		TextureInternalFormat internal_format;
+		TextureInternalFormat internal_format = TextureInternalFormat::RGBA_8;
 		float anisoptrophy = 1.0f;
 
 		TextureOptions() = default;
