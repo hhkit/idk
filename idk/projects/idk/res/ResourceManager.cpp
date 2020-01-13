@@ -447,7 +447,7 @@ namespace idk
 
 		auto last_compiled_file_time = [&]() -> long long
 		{
-			auto p = PathHandle{ string{ path.GetMountPath() } +".time" };
+			auto p = PathHandle{ "/build" + string{ path.GetMountPath() } +".time" };
 			if (p)
 				return p.GetLastWriteTime().time_since_epoch().count();
 			return 0;
@@ -468,7 +468,8 @@ namespace idk
 			};
 			auto infile = wrap(path.GetFullPath());
 			auto outdir = wrap(PathHandle{ "/build" }.GetFullPath());
-			const char* exec[] = { infile.data(), outdir.data() };
+			auto mountdir = wrap(string(PathHandle("/build").GetFullPath()) + string{ path.GetMountPath() });
+			const char* exec[] = { infile.data(), outdir.data(), mountdir.data() };
 			Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, wait);
 		}
 	}

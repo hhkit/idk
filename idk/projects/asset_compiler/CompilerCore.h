@@ -16,6 +16,8 @@ namespace idk
 		void RegisterCompiler(string_view ext, Args&& ...);
 
 		void Compile(string_view full_path);
+
+		string time_dir;
 	private:
 		hash_table<string_view, unique_ptr<IAssetCompiler>> _loaders;
 		string destination = "build";

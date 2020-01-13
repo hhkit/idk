@@ -81,11 +81,12 @@ namespace idk
 				auto last_write = std::chrono::system_clock::now().time_since_epoch().count();				
 				auto compile_time_name = pathify.stem().string() + ".time";
 				auto tmp_compile_path = tmp + compile_time_name.data();
+				fs::create_directories(fs::path(time_dir.sv()).parent_path());
 				{
 					std::ofstream str{ tmp_compile_path, std::ios::binary };
 					str << serialize_binary(last_write);
 				}
-				auto compile_time_path = string{ full_path } +".time";
+				auto compile_time_path = time_dir + ".time";
 				if (fs::exists(compile_time_path.sv()))
 					fs::remove(compile_time_path.sv());
 				rename(tmp_compile_path.data(), compile_time_path.data());
@@ -105,6 +106,8 @@ namespace idk
 								if constexpr (has_extension_v<T>)
 								{
 									static_assert(T::ext[0] == '.', "Extension must begin with a .");
+									fs::create_directories(temp.sv());
+									fs::create_directories(dest.sv());
                                     if constexpr (has_tag_v<T, Saveable>)
                                     {
 										std::ofstream resource_stream{ temp };

@@ -360,3 +360,4 @@ idk/dep/lib/SPIRV-Tools-optd.lib
 /idk/build
 /idk/engine_data/idk.dll
 /idk/tools/compiler
+/testproj/Cache
