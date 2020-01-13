@@ -343,7 +343,9 @@ namespace idk {
 			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
 			{
 				ImGui::SetDragDropPayload(DragDrop::GAME_OBJECT, &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
-				ImGui::Text("Draging gameobject: %s", goName.c_str());
+				ImGui::Text("Draging gameobject: ");
+				ImGui::SameLine();
+				ImGui::TextColored(ImVec4(1,1,0,1),goName.c_str());
 				ImGui::Text("Drag to another gameobject to parent.");
 				ImGui::Text("Drag to parent to unparent.");
 				ImGui::Text("Drag ProjectContent to create Prefab.");
