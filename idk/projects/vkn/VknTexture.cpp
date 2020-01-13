@@ -3,11 +3,33 @@
 #include <vkn/DDSLoader.h>
 #include <vkn/VulkanTextureFactory.h>
 #include <res/ResourceManager.inl>
+#include <sstream>
 namespace idk::vkn {
+	namespace hlp
+	{
+		string DumpAllocators();
+		std::pair<size_t, size_t> DumpAllocator(std::ostream& out, const MemoryAllocator& alloc);
+	}
+	void DoNothing();
+	static size_t counter = 0;
+	static size_t texture_bytes=0;
 	VknTexture::VknTexture(const CompiledTexture& compiled_tex)
 	{
+		if (compiled_tex.pixel_buffer.size() == 0)
+			return;
 		string_view data = { reinterpret_cast<const char*>(compiled_tex.pixel_buffer.data()), compiled_tex.pixel_buffer.size()};
-		Core::GetResourceManager().GetFactory<VulkanTextureFactory>().GetDdsLoader().LoadTexture(*this,data,compiled_tex);
+		++counter;
+		auto& loader = Core::GetResourceManager().GetFactory<VulkanTextureFactory>().GetDdsLoader();
+		//if (counter == 103)
+		//{
+		//	string test = hlp::DumpAllocators();
+		//	std::stringstream ss;
+		//	hlp::DumpAllocator(ss, loader.Allocator());
+		//	string test2 = ss.str();
+		//	DoNothing();
+		//}
+		loader.LoadTexture(*this,data,compiled_tex);
+		texture_bytes += this->sizeOnDevice;
 	}
 	vk::ImageAspectFlags VknTexture::ImageAspects()
 	{

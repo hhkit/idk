@@ -206,7 +206,12 @@ namespace idk::vkn
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
-	
+
+	namespace hlp
+	{
+		string DumpAllocators();
+		std::pair<size_t, size_t> DumpAllocator(std::ostream& out, const MemoryAllocator& alloc);
+	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		try
@@ -349,9 +354,56 @@ namespace idk::vkn
 		if (RscHandle<VknRenderTarget>{}->NeedsFinalizing())
 			RscHandle<VknRenderTarget>{}->Finalize();
 		// */
+		//string test = hlp::DumpAllocators();
 		curr_frame.ColorPick(std::move(request_buffer));
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
+#if 0
+		{
+			std::stringstream out;
+			auto fbs = Core::GetResourceManager().GetAll<VknFrameBuffer>();
+			size_t total_size = 0;
+			for (auto& hfb : fbs)
+			{
+				auto& fb = *hfb;
+				size_t fb_size = 0;
+				for (size_t i = 0,end = fb.NumColorAttachments(); i < end; ++i)
+				{
+					auto sz = fb.GetAttachment(i).buffer.as<VknTexture>().sizeOnDevice;
+					fb_size += sz;
+					out << "\t\t Attachment[" << i << "] size: " << sz << "\n";
+				}
+				out << "\t Framebuffer size: " << fb_size << "\n";
+				total_size += fb_size;
+			}
+			out << "All size: " << total_size << "\n";
+			string derp = out.str();
+			derp += " ";
+		}
+#endif
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
+#if 0
+		{
+			std::stringstream out;
+			auto fbs = Core::GetResourceManager().GetAll<VknFrameBuffer>();
+			size_t total_size = 0;
+			for (auto& hfb : fbs)
+			{
+				auto& fb = *hfb;
+				size_t fb_size = 0;
+				for (size_t i = 0, end = fb.NumColorAttachments(); i < end; ++i)
+				{
+					auto sz = fb.GetAttachment(i).buffer.as<VknTexture>().sizeOnDevice;
+					fb_size += sz;
+					out << "\t\t Attachment[" << i << "] size: " << sz << "\n";
+				}
+				out << "\t Framebuffer size: " << fb_size << "\n";
+				total_size += fb_size;
+			}
+			out << "All size: " << total_size << "\n";
+			string derp = out.str();
+			derp += " ";
+		}
+#endif
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
 
 

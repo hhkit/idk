@@ -60,10 +60,14 @@ namespace idk::vkn
 		tci.height = dds.Dimensions().y;
 		tci.mipmap_level = std::max(dds.File().header.mip_map_count, 0u);
 		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width, tci.height);
-		tci.internal_format = MapFormat(to.internal_format);
+		tci.internal_format = vk::Format::eBc3SrgbBlock;// MapFormat(to.internal_format);
 		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
 
 		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti);
+	}
+	const hlp::MemoryAllocator& DdsLoader::Allocator() const
+	{
+		return allocator;
 	}
 	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& bundle)
 	{

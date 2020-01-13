@@ -304,17 +304,17 @@ namespace idk::vkn
 				})
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eNormal
 				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_16_F,
+				TextureInternalFormat::RGBA_8_SNORM,
 				FilterMode::_enum::Nearest
 				})
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eTangent
 				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_16_F,
+				TextureInternalFormat::RGBA_8_SNORM,
 				FilterMode::_enum::Nearest
 				})
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eUvMetallicRoughness
 				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_16_F,
+				TextureInternalFormat::RGBA_8,
 				FilterMode::_enum::Nearest
 				})
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eViewPos
@@ -340,7 +340,7 @@ namespace idk::vkn
 			fbf.Begin(size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-					TextureInternalFormat::RGBA_16_F,
+					TextureInternalFormat::SRGBA_8,
 				FilterMode::_enum::Nearest
 				});
 			uint32_t i = 0;

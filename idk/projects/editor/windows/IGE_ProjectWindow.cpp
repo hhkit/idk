@@ -353,8 +353,6 @@ namespace idk {
                 if (path.IsDir())
                 {
                     static auto folder_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
-                    if (!folder_icon)
-                        throw;
                     IDK_ASSERT_MSG(folder_icon, "THIS SHOULD BE LOADED");
                     id = folder_icon->ID();
                 }

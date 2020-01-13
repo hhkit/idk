@@ -26,6 +26,7 @@ namespace idk::vkn
 		vk::UniqueImage first;
 		hlp::UniqueAlloc second;
 		vk::ImageAspectFlags aspect;
+		size_t size_on_device = 0;
 	};
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
@@ -101,12 +102,13 @@ namespace idk::vkn
 		//2x2 image Checkered
 
 		auto ptr = &texture;
-		auto&& [image, alloc, aspect] = vkn::LoadTexture(allocator, load_fence, load_info,in_info);
+		auto&& [image, alloc, aspect,sz] = vkn::LoadTexture(allocator, load_fence, load_info,in_info);
 		ptr->Size(ivec2{load_info.width,load_info.height});
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
+		ptr->sizeOnDevice = sz;
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
@@ -145,8 +147,9 @@ namespace idk::vkn
 		const void* rgba = rgba32;
 		auto format = MapFormat(pixel_format);
 		auto ptr = &texture;
-		auto&& [image, alloc,aspect] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
+		auto&& [image, alloc,aspect,sz] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 		ptr->img_aspect = aspect;
+		ptr->sizeOnDevice = sz;
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
@@ -402,6 +405,7 @@ namespace idk::vkn
 
 		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
 		auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
+		result.size_on_device = alloc->Size();
 		device.bindImageMemory(*image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
 		
 		const vk::ImageAspectFlagBits img_aspect = load_info.aspect;
