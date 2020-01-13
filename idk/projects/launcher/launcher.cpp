@@ -1,7 +1,7 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <debug/LogSystem.h>
 #include <core/Core.h>
-#include <core/Scheduler.h>
+#include <core/Scheduler.inl>
 #include <PauseConfigurations.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>

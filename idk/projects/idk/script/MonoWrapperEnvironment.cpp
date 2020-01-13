@@ -224,6 +224,13 @@ namespace idk::mono
 		BIND_END();
 
 		// game object
+		
+		BIND_START("idk.Bindings::GameObjectNew", uint64_t)
+		{
+			return Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject().id;
+		}
+		BIND_END();
+
 
 		BIND_START("idk.Bindings::GameObjectAddEngineComponent",uint64_t, Handle<GameObject> go, MonoString* component)
 			{

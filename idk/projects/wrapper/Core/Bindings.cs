@@ -25,6 +25,9 @@ namespace idk
         public extern static void SceneChangeScene(Guid guid);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong GameObjectNew();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void EngineKill();
         /**
          * Game Object

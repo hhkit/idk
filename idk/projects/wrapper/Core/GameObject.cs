@@ -11,6 +11,11 @@ namespace idk
         public string name { get => Bindings.GameObjectGetName(handle); set => Bindings.GameObjectSetName(handle, value); }
         public string tag { get => Bindings.GameObjectGetTag(handle); set => Bindings.GameObjectSetTag(handle, value); }
 
+        public GameObject()
+        {
+            handle = Bindings.GameObjectNew();
+        }
+
         internal GameObject(ulong in_handle)
         {
             handle = in_handle;
