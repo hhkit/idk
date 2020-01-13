@@ -173,9 +173,9 @@ namespace idk
 			func(this);
 		SaveDirtyMetadata();
 
-		for(auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL))
+		for(auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL | FS_FILTERS::FILE))
 		{
-			if (elem.GetMountPath().starts_with("/build"))
+			if (elem.GetMountPath().starts_with("/build") && elem.IsFile())
 				LoadCompiledAsset(elem);
 		}
 	}

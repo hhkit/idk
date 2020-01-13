@@ -99,15 +99,13 @@ namespace idk
 						bool res = std::visit([&](const auto& elem) -> bool
 							{
 								using T = std::decay_t<decltype(elem)>;
-								auto stem = '/' + string{ guid } +string{ T::ext };
-								auto temp  = tmp + stem;
-								auto dest = destination + stem;
+								auto stem = fs::path{ (string{ guid } +string{ T::ext }).sv() };
+								auto temp = fs::absolute(fs::path{ tmp.sv() } / stem);
+								auto dest = fs::absolute(fs::path{ destination.sv() } / stem);
 
 								if constexpr (has_extension_v<T>)
 								{
 									static_assert(T::ext[0] == '.', "Extension must begin with a .");
-									fs::create_directories(temp.sv());
-									fs::create_directories(dest.sv());
                                     if constexpr (has_tag_v<T, Saveable>)
                                     {
 										std::ofstream resource_stream{ temp };
@@ -119,11 +117,10 @@ namespace idk
 										resource_stream << serialize_binary(elem);
                                     }
 
-									auto dest_path = fs::path{ dest.sv() };
-									if(fs::exists(dest_path))
-										fs::remove(dest_path);
+									if(fs::exists(dest))
+										fs::remove(dest);
 
-									rename(temp.data(), dest.data());
+									rename(temp.string().data(), dest.string().data());
 									return true;
 								}
 								else
