@@ -256,54 +256,56 @@ namespace idk {
 			++selectedCounter; //counter here is for shift selecting
 			
 			//Standard Click and ctrl click
-			if (ImGui::IsItemClicked(0)) {
-				//Check if handle has been selected
-				bool hasBeenSelected = false;
-				int counter = 0;
-				for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
-					if (handle == selected_gameObjects[counter]) {
-						hasBeenSelected = true;
-						break;
+			if (ImGui::IsMouseReleased(0)) {
+				if (ImGui::IsItemHovered()) {
+					//Check if handle has been selected
+					bool hasBeenSelected = false;
+					int counter = 0;
+					for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
+						if (handle == selected_gameObjects[counter]) {
+							hasBeenSelected = true;
+							break;
+						}
 					}
-				}
 
-				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Deselect that particular handle
-					if (hasBeenSelected) {
-						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Deselect that particular handle
+						if (hasBeenSelected) {
+							selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+						}
+						else {
+							selected_gameObjects.push_back(handle);
+							Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
+
+						}
+						hasSelected_GameobjectsModified = true;
+
 					}
+					else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
+						if (selected_gameObjects.size() != 0) {
+							selectedItemCounter = selectedCounter;
+							isShiftSelectCalled = true;
+
+
+						}
+					}
+
 					else {
+						//Select as normal
+						selected_gameObjects.clear();
 						selected_gameObjects.push_back(handle);
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
 
+						hasSelected_GameobjectsModified = true;
 					}
-					hasSelected_GameobjectsModified = true;
 
-				}
-				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
-					if (selected_gameObjects.size() != 0) {
-						selectedItemCounter = selectedCounter;
-						isShiftSelectCalled = true;
-
-
+					if (ImGui::IsMouseDoubleClicked(0)) {
+						Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
 					}
-				}
-				
-				else {
-					//Select as normal
-					selected_gameObjects.clear();
-					selected_gameObjects.push_back(handle);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-
-					hasSelected_GameobjectsModified = true;
-				}
-
-				if (ImGui::IsMouseDoubleClicked(0)) {
-					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
 				}
 			}
-			
 			//If the drag drops target on to the handle...
 			if (ImGui::BeginDragDropTarget()) {
+				
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT)) {
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
 					//uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
@@ -341,8 +343,10 @@ namespace idk {
 			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
 			{
 				ImGui::SetDragDropPayload(DragDrop::GAME_OBJECT, &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+				ImGui::Text("Draging gameobject: %s", goName.c_str());
 				ImGui::Text("Drag to another gameobject to parent.");
 				ImGui::Text("Drag to parent to unparent.");
+				ImGui::Text("Drag ProjectContent to create Prefab.");
 				ImGui::EndDragDropSource();
 			}
 
