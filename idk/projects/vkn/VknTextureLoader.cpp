@@ -19,6 +19,8 @@ namespace std
 
 namespace idk::vkn
 {
+
+
 	struct TextureResult
 	{
 		vk::UniqueImage first;
@@ -633,5 +635,11 @@ namespace idk::vkn
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 
+	}
+	TextureOptions::TextureOptions(const CompiledTexture& meta)
+	{
+		min_filter = mag_filter = filter_mode = meta.filter_mode;
+		uv_mode = meta.mode;
+		internal_format = ToInternalFormat(meta.internal_format, meta.is_srgb);
 	}
 }

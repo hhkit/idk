@@ -1,7 +1,14 @@
 #include "pch.h"
 #include "VknTexture.h"
-
+#include <vkn/DDSLoader.h>
+#include <vkn/VulkanTextureFactory.h>
+#include <res/ResourceManager.inl>
 namespace idk::vkn {
+	VknTexture::VknTexture(const CompiledTexture& compiled_tex)
+	{
+		string_view data = { reinterpret_cast<const char*>(compiled_tex.pixel_buffer.data()), compiled_tex.pixel_buffer.size()};
+		Core::GetResourceManager().GetFactory<VulkanTextureFactory>().GetDdsLoader().LoadTexture(*this,data,compiled_tex);
+	}
 	vk::ImageAspectFlags VknTexture::ImageAspects()
 	{
 		return img_aspect;

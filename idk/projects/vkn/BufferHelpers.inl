@@ -32,6 +32,7 @@ namespace idk::vkn::hlp
 	{
 		return CreateVertexBuffer(device, vertices.data(), vertices.data() + vertices.size(), dispatcher);
 	}
+#pragma optimize("",off)
 	template<typename Dispatcher>
 	vk::UniqueDeviceMemory AllocateBuffer(
 		vk::PhysicalDevice pdevice, vk::Device device, vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags, Dispatcher const& dispatcher)

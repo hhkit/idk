@@ -5,6 +5,10 @@
 #include <vkn/VknTexture.h>
 
 #include <vkn/VknTextureRenderMeta.h>
+namespace idk
+{
+	struct CompiledTexture;
+}
 
 namespace idk::vkn
 {
@@ -27,6 +31,7 @@ namespace idk::vkn
 			uv_mode = meta.uv_mode;
 			internal_format = ToInternalFormat(meta.internal_format, meta.is_srgb);
 		}
+		TextureOptions(const CompiledTexture& meta);
 	};
 
 	struct InputTexInfo

@@ -104,6 +104,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	case GraphicsAPI::Vulkan:
 	{
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".vert");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".geom");

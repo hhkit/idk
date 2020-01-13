@@ -95,6 +95,7 @@ namespace idk::vkn
 	public:
 		DdsLoader();
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
+		void LoadTexture(VknTexture& tex,string_view entire_file, const TextureOptions& tex_opt);
 	private:
 		vk::UniqueFence load_fence;
 		TextureLoader loader;
