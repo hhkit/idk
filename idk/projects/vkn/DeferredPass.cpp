@@ -299,17 +299,7 @@ namespace idk::vkn
 			fbf.Begin(size)
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eAlbedoAmbOcc
 				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::SRGBA_8,
-				FilterMode::_enum::Nearest
-				})
-			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eNormal
-				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_8_SNORM,
-				FilterMode::_enum::Nearest
-				})
-			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eTangent
-				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_8_SNORM,
+				TextureInternalFormat::RGBA_8,
 				FilterMode::_enum::Nearest
 				})
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eUvMetallicRoughness
@@ -320,6 +310,16 @@ namespace idk::vkn
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eViewPos
 				LoadOp::eClear,StoreOp::eStore,
 				TextureInternalFormat::RGBA_16_F,
+				FilterMode::_enum::Nearest
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eNormal
+				LoadOp::eClear,StoreOp::eStore,
+				TextureInternalFormat::RGBA_8,
+				FilterMode::_enum::Nearest
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eTangent
+				LoadOp::eClear,StoreOp::eStore,
+				TextureInternalFormat::RGBA_8,
 				FilterMode::_enum::Nearest
 				})
 			.SetDepthAttachment(idk::AttachmentInfo{
@@ -340,7 +340,7 @@ namespace idk::vkn
 			fbf.Begin(size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-					TextureInternalFormat::SRGBA_8,
+					TextureInternalFormat::ARGB_10,
 				FilterMode::_enum::Nearest
 				});
 			uint32_t i = 0;
@@ -358,7 +358,7 @@ namespace idk::vkn
 			}
 			auto vkn_att = idk::AttachmentInfo{
 				LoadOp::eLoad,StoreOp::eDontCare,
-				TextureInternalFormat::RGBA_16_F,
+				TextureInternalFormat::R_32_F,
 				FilterMode::_enum::Nearest,
 				false,
 				gbuffer->DepthAttachment().buffer

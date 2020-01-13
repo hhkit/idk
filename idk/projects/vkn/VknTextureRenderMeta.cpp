@@ -41,6 +41,8 @@ namespace idk::vkn {
 		{ TextureInternalFormat::RGB_16_F, vk::Format::eR16G16B16Sfloat },
 		{ TextureInternalFormat::RGB_32_F, vk::Format::eR16G16B16Sfloat },
 		{ TextureInternalFormat::RGBA_8, vk::Format::eR8G8B8A8Unorm },
+		{ TextureInternalFormat::ARGB_10, vk::Format::eA2B10G10R10UnormPack32 },
+		{ TextureInternalFormat::ARGB_10_SNORM, vk::Format::eA2B10G10R10SnormPack32 },
 		{ TextureInternalFormat::RGBA_8_SNORM, vk::Format::eR8G8B8A8Snorm },
 		{ TextureInternalFormat::RGBA_16_F, vk::Format::eR16G16B16A16Sfloat },
 		{ TextureInternalFormat::RGBA_32_F, vk::Format::eR16G16B16A16Sfloat },

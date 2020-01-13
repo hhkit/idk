@@ -40,7 +40,8 @@ void RdocEndFrameCapture()
 HWND& GetHWND();
 namespace idk::vkn
 {
-	constexpr size_t picking_pixel_size = sizeof(uint32_t);
+	using picking_pixel_t = uint16_t;
+	constexpr size_t picking_pixel_size = sizeof(picking_pixel_t);
 	VulkanView& View();
 	struct RequestInfo
 	{
@@ -50,7 +51,7 @@ namespace idk::vkn
 	template<size_t src_size,typename dest_t,size_t dst_size = sizeof(dest_t)>
 	dest_t adjust(const byte* start)
 	{
-		byte ro_index_buffer[std::max(picking_pixel_size, sizeof(uint32_t))] = {};
+		byte ro_index_buffer[std::max(picking_pixel_size, dst_size)] = {};
 		std::copy(start, start + src_size, ro_index_buffer);
 		auto ro_index = *reinterpret_cast<dest_t*>(ro_index_buffer);
 		//TODO: Shift the data according to endianess
@@ -72,7 +73,7 @@ namespace idk::vkn
 			size_t i = 0;
 			for (auto& req : requests)
 			{
-				auto ro_index = adjust<picking_pixel_size,uint32_t>(memory_range +offset+ picking_pixel_size * i);
+				auto ro_index = adjust<picking_pixel_size, picking_pixel_t>(memory_range +offset+ picking_pixel_size * i);
 				req.select(ro_index); 
 				++i;
 			}
@@ -268,7 +269,7 @@ namespace idk::vkn
 			fbf.AddAttachment(
 				AttachmentInfo
 				{
-					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::R_32_UI,FilterMode::_enum::Nearest
+					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::R_16_UI,FilterMode::_enum::Nearest
 				}
 			);
 			fbf.SetDepthAttachment(
