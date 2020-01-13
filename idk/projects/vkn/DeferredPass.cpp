@@ -340,7 +340,7 @@ namespace idk::vkn
 			fbf.Begin(size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-					TextureInternalFormat::ARGB_10,
+					TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest
 				});
 			uint32_t i = 0;
