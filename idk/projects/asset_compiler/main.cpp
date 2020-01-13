@@ -79,6 +79,8 @@ int main(int argc, const char* argv[])
 	c.RegisterCompiler<TextureCompiler>(".tga");
 	c.RegisterCompiler<TextureCompiler>(".png");
 	c.RegisterCompiler<TextureCompiler>(".gif");
+	c.RegisterCompiler<TextureCompiler>(".jpg");
+	c.RegisterCompiler<TextureCompiler>(".jpeg");
 	c.RegisterCompiler<AssimpCompiler>(".fbx");
 	c.RegisterCompiler<AssimpCompiler>(".obj");
 	c.RegisterCompiler<AssimpCompiler>(".ma");

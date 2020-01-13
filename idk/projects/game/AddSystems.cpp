@@ -61,6 +61,8 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	Core::GetResourceManager().RegisterCompilableExtension(".tga");
 	Core::GetResourceManager().RegisterCompilableExtension(".png");
 	Core::GetResourceManager().RegisterCompilableExtension(".gif");
+	Core::GetResourceManager().RegisterCompilableExtension(".jpeg");
+	Core::GetResourceManager().RegisterCompilableExtension(".jpg");
 	Core::GetResourceManager().RegisterCompilableExtension(".dds");
 	Core::GetResourceManager().RegisterCompilableExtension(".fbx");
 	Core::GetResourceManager().RegisterCompilableExtension(".obj");
