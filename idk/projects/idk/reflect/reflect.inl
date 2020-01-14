@@ -25,7 +25,8 @@ namespace idk::reflect
 	template<typename T>
 	type get_type()
 	{
-		const auto iter = detail::meta::instance().hashes_to_contexts.find(typehash<T>());
+		constexpr auto t_hash = typehash<T>();
+		const auto iter = detail::meta::instance().hashes_to_contexts.find(t_hash);
 		if (iter == detail::meta::instance().hashes_to_contexts.end()) // type not registered?
 		{
 			const detail::register_type<std::decay_t<T>, false> __reg;
