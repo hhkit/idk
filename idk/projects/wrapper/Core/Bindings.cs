@@ -269,6 +269,12 @@ namespace idk
         public extern static void AudioSourceSetVolume(ulong id, float volume);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSourceClipGetVolume(ulong id, int index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceClipSetVolume(ulong id, int index, float volume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float AudioSourceGetPitch(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
