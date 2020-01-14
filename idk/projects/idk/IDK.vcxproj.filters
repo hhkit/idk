@@ -131,6 +131,9 @@
     <Filter Include="gfx\font">
       <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="network">
+      <UniqueIdentifier>{f35ebc8b-d413-42b6-bebc-1f24f1326fe5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -946,6 +949,9 @@
       <Filter>gfx\object</Filter>
     </ClInclude>
     <ClInclude Include="gfx\ColorPickRequest.h" />
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
+    <ClInclude Include="network\NetworkSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1377,6 +1383,7 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
+    <ClCompile Include="network\NetworkSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

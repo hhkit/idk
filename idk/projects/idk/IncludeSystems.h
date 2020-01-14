@@ -11,6 +11,7 @@
 #include <audio/AudioSystem.h>
 #include <file/FileSystem.h>
 
+#include <network/NetworkSystem.h>
 #include <gfx/GraphicsSystem.h>
 #include <anim/AnimationSystem.h>
 #include <gfx/DebugRenderer.h>

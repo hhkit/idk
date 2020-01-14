@@ -63,6 +63,7 @@ namespace idk
 		,	class FileSystem
 		,	class LogSystem
 		,	class GamepadSystem
+		,	class NetworkSystem
 
 		// logic
 		,	class mono::ScriptSystem
