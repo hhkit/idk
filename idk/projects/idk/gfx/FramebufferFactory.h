@@ -89,12 +89,13 @@ namespace idk
 		std::optional<AttachmentInfo> depth_attachment, stencil_attachment;
 		ivec2 size{};
 		size_t num_layers{};
+		string name;
 	};
 
 	class FrameBufferBuilder
 	{
 	public:
-		FrameBufferBuilder& Begin(ivec2 size, size_t num_layers = 1);
+		FrameBufferBuilder& Begin(const string& name, ivec2 size, size_t num_layers = 1);
 		FrameBufferBuilder& AddAttachment(AttachmentInfo att_info);
 		FrameBufferBuilder& SetDepthAttachment(AttachmentInfo att_info);
 		FrameBufferBuilder& ClearDepthAttachment();

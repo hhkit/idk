@@ -84,7 +84,7 @@ namespace idk::ogl
 		fb_man.cBufferPickingTexture = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::R_32_UI, ivec2{ 512 });
 
 		FrameBufferBuilder builder;
-		builder.Begin(ivec2{ 512,512 });
+		builder.Begin("Picking Buffer",ivec2{ 512,512 });
 		builder.AddAttachment(
 			AttachmentInfo
 			{

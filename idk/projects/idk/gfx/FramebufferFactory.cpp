@@ -8,6 +8,7 @@ namespace idk
 	RscHandle<FrameBuffer> FrameBufferFactory::Create(const FrameBufferInfo& info, SpecializedInfo* specialized_info)
 	{
 		auto handle = Core::GetResourceManager().Create<FrameBuffer>();
+		handle->Name(info.name);
 		Update(info, handle,specialized_info);
 		return handle;
 	}
@@ -43,8 +44,9 @@ namespace idk
 		framebuffer.size = ivec2{};
 	}
 
-	FrameBufferBuilder& FrameBufferBuilder::Begin(ivec2 size, size_t num_layers)
+	FrameBufferBuilder& FrameBufferBuilder::Begin(const string& name,ivec2 size, size_t num_layers)
 	{
+		info.name = name;
 		info.size = size;
 		info.num_layers = num_layers;
 		info.attachments.clear();//Clear to be sure.

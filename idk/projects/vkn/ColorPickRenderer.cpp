@@ -265,7 +265,7 @@ namespace idk::vkn
 		if (curr_fb_size.x < max_size.x || curr_fb_size.y < max_size.y)
 		{
 			FrameBufferBuilder fbf;
-			fbf.Begin(max_size, 1);
+			fbf.Begin("Color Picking",max_size, 1);
 			fbf.AddAttachment(
 				AttachmentInfo
 				{
@@ -275,7 +275,7 @@ namespace idk::vkn
 			fbf.SetDepthAttachment(
 				AttachmentInfo
 				{
-					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::DEPTH_32_F_STENCIL_8,FilterMode::_enum::Nearest
+					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::DEPTH_16,FilterMode::_enum::Nearest
 				}
 			);
 			auto& rm = Core::GetResourceManager();
