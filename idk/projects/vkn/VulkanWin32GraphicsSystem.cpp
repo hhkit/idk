@@ -29,6 +29,8 @@
 #include <core/SystemManager.inl>
 #include <ds/result.inl>
 
+#include <vkn/DebugUtil.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -120,7 +122,7 @@ namespace idk::vkn
 
 		auto& brdf_pipeline = _pm->GetPipeline(brdf_config, shaders, 0);
 		FrameBufferBuilder builder;
-		builder.Begin(brdf_texture->Size());
+		builder.Begin("BRDF",brdf_texture->Size());
 		builder.AddAttachment(
 			AttachmentInfo
 			{
@@ -359,49 +361,13 @@ namespace idk::vkn
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 #if 0
 		{
-			std::stringstream out;
-			auto fbs = Core::GetResourceManager().GetAll<VknFrameBuffer>();
-			size_t total_size = 0;
-			for (auto& hfb : fbs)
-			{
-				auto& fb = *hfb;
-				size_t fb_size = 0;
-				for (size_t i = 0,end = fb.NumColorAttachments(); i < end; ++i)
-				{
-					auto sz = fb.GetAttachment(i).buffer.as<VknTexture>().sizeOnDevice;
-					fb_size += sz;
-					out << "\t\t Attachment[" << i << "] size: " << sz << "\n";
-				}
-				out << "\t Framebuffer size: " << fb_size << "\n";
-				total_size += fb_size;
-			}
-			out << "All size: " << total_size << "\n";
-			string derp = out.str();
-			derp += " ";
+			auto str = dbg::DumpFrameBufferAllocs();
 		}
 #endif
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
-#if 0
+#if 1
 		{
-			std::stringstream out;
-			auto fbs = Core::GetResourceManager().GetAll<VknFrameBuffer>();
-			size_t total_size = 0;
-			for (auto& hfb : fbs)
-			{
-				auto& fb = *hfb;
-				size_t fb_size = 0;
-				for (size_t i = 0, end = fb.NumColorAttachments(); i < end; ++i)
-				{
-					auto sz = fb.GetAttachment(i).buffer.as<VknTexture>().sizeOnDevice;
-					fb_size += sz;
-					out << "\t\t Attachment[" << i << "] size: " << sz << "\n";
-				}
-				out << "\t Framebuffer size: " << fb_size << "\n";
-				total_size += fb_size;
-			}
-			out << "All size: " << total_size << "\n";
-			string derp = out.str();
-			derp += " ";
+			auto str = dbg::DumpFrameBufferAllocs();
 		}
 #endif
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
@@ -423,6 +389,10 @@ namespace idk::vkn
 		catch (vk::SystemError& err)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
+			auto fb_dump = dbg::DumpFrameBufferAllocs();
+			auto rt_dump = dbg::DumpRenderTargetAllocs();
+			LOG_CRASH_TO(LogPool::GFX, "Framebuffer Dump %s", fb_dump.c_str());
+			LOG_CRASH_TO(LogPool::GFX, "RenderTarget Dump %s", rt_dump.c_str());
 			throw;
 		}
 	}
