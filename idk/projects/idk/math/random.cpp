@@ -43,6 +43,6 @@ namespace idk
 	{
 		// minstd_rand lcg
 		_seed = static_cast<unsigned>((_seed * multiplier) % int_max);
-		return static_cast<float>(_seed) / int_max;
+		return static_cast<float>(static_cast<double>(_seed) / int_max);
 	}
 }
