@@ -30,12 +30,12 @@ namespace idk::vkn
 
 		void ExtendLifetime(fgr_id rsc_id, order_t order);
 		template<typename Func>
-		void CombineAllLifetimes(Func&& func)
+		void CombineAllLifetimes(Func&& compatibility_checker)
 		{
 			for (auto& [id, index] : map)
 			{
-				auto& lifetime = rsc_lifetimes[index];
-				CombineLifetimes(id, lifetime.start, lifetime.end, func);
+				auto& lifetime = resource_lifetimes[index];
+				CombineLifetimes(id, lifetime.start, lifetime.end, compatibility_checker);
 			}
 		}
 
@@ -64,7 +64,7 @@ namespace idk::vkn
 		{
 			for (auto& concrete_resource : concrete_resources)
 			{
-				if (!overlap_lifetime(concrete_resource, start, end) && is_compatible(id, concrete_resource))
+				if (!overlap_lifetime(concrete_resource, start, end) && is_compatible(id, concrete_resource.base_rsc))
 				{
 					Alias(id, start, end, concrete_resource);
 					return;

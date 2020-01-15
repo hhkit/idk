@@ -7,6 +7,10 @@ namespace idk::vkn
 		fgr_id id;
 		bool readonly = true;
 	};
+	inline bool operator==(const FrameGraphResource& lhs, const FrameGraphResource& rhs)noexcept
+	{
+		return lhs.id == rhs.id && lhs.readonly == rhs.readonly;
+	}
 	using FrameGraphResourceReadOnly = FrameGraphResource;
 	using FrameGraphResourceMutable = FrameGraphResource;
 }

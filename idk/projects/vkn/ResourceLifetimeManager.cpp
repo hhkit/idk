@@ -29,14 +29,14 @@ namespace idk::vkn
 		return span<const actual_resource_t>{concrete_resources.data(), concrete_resources.data() + concrete_resources.size()};
 	}
 
-	const hash_table<fgr_id, actual_resource_id> ResourceLifetimeManager::Aliases() const
+	const hash_table<fgr_id, ResourceLifetimeManager::actual_resource_id> ResourceLifetimeManager::Aliases() const
 	{
 		return resource_alias;
 	}
 
 	bool ResourceLifetimeManager::overlap_lifetime(const actual_resource_t& rsc, order_t start, order_t end)
 	{
-		return !(rsc.end<start & rsc.start>end);
+		return !((rsc.end<start) & (rsc.start>end));
 	}
 
 	void ResourceLifetimeManager::Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc)

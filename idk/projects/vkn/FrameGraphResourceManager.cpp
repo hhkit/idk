@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "FrameGraphResourceManager.h"
+#include <gfx/Texture.h>
 namespace idk::vkn
 {
 
@@ -25,6 +26,17 @@ namespace idk::vkn
 		if (itr == resource_handles.end())
 			return "";
 		return resources.at(itr->second).name;
+	}
+
+	bool FrameGraphResourceManager::IsCompatible(fgr_id lhs, fgr_id rhs) const
+	{
+		auto l_itr = resource_handles.find(lhs);
+		auto r_itr = resource_handles.find(rhs);
+		if (l_itr == r_itr)
+			return true;
+		auto& l_desc = resources[l_itr->second], &r_desc = resources[r_itr->second];
+
+		return l_desc.format == r_desc.format && l_desc.type == r_desc.type && l_desc.layer_count == r_desc.layer_count && l_desc.aspect == r_desc.aspect;
 	}
 
 	FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(FrameGraphResource rsc)

@@ -79,7 +79,7 @@ namespace idk::vkn
 			graph->in_rsc_nodes.emplace(node.id, node.GetInputSpan());
 			for (auto&& written_rsc : node.GetOutputSpan())
 			{
-				graph->src_node.emplace(written_rsc.id, node);
+				graph->src_node.emplace(written_rsc.id, node.id);
 			}
 			return true;
 		}
@@ -207,7 +207,7 @@ namespace idk::vkn
 			T_CtorArgs&& ... args
 		)
 		{
-			auto& render_pass = addRenderPass<CallbackRenderPass<T>>(name, init, std::move(execute), std::forward < T_CtorArgs(args)...);
+			auto& render_pass = addRenderPass<CallbackRenderPass<T>>(name, init, std::move(execute), std::forward <T_CtorArgs>(args)...);
 			return render_pass.value;
 		}
 		template<typename T, typename ...CtorArgs>

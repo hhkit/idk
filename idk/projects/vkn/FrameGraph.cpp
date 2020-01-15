@@ -14,7 +14,7 @@ namespace idk::vkn
 		auto& stored_node = nodes.emplace_back(std::move(node));
 		tmp_graph.in_nodes.emplace(node.id, node.input_resources);
 		for (auto& written_rsc : node.GetOutputSpan())
-			tmp_graph.src_node.emplace(written_rsc.id);
+			tmp_graph.src_node.emplace(written_rsc.id,node.id);
 		return stored_node;
 	}
 
@@ -50,7 +50,7 @@ namespace idk::vkn
 			}
 		}
 		//TODO: Create a function to check compatiblity between resources
-		manager.CombineAllLifetimes();
+		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible,GetResourceManager(),std::placeholders::_1,std::placeholders::_2));
 	}
 
 	void FrameGraph::CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm)

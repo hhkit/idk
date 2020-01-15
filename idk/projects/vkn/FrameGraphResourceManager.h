@@ -28,6 +28,8 @@ namespace idk::vkn
 		FrameGraphResource Rename(FrameGraphResource rsc);
 		string_view Name(FrameGraphResource fg)const;
 
+		bool IsCompatible(fgr_id lhs, fgr_id rhs)const;
+
 		template<typename ActualResource>
 		ActualResource& Get(FrameGraphResource rsc)
 		{

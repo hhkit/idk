@@ -13,7 +13,7 @@ namespace idk::vkn
 	};
 	struct RenderUtils
 	{
-		void DrawRenderObject(const RenderObject& ro, FrameGraphDetail::Context_t context)
+		static void DrawRenderObject(const RenderObject& ro, FrameGraphDetail::Context_t context)
 		{
 			for (auto& ub : ro.uniforms.ubos)
 			{

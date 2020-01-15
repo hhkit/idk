@@ -16,4 +16,12 @@ namespace idk::vkn
 		EndRenderPass(context);
 	}
 
+	void BaseRenderPass::PreCommandBuffer(vk::CommandBuffer )
+	{
+	}
+
+	void BaseRenderPass::PostCommandBuffer(vk::CommandBuffer )
+	{
+	}
+
 }

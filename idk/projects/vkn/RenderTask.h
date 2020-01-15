@@ -8,6 +8,7 @@
 #include <stack>
 #include <queue>
 #include <vkn/topological_sort.h>
+#include <gfx/Texture.h>
 namespace idk::vkn
 {
 	using VknRenderPass = int;
@@ -22,7 +23,6 @@ namespace idk::vkn
 	struct VertexBuffer;
 	struct IndexBuffer;
 	struct ShaderModule;
-	struct Texture;
 	using TextureID  = Guid;
 	using CullFaceFlags = Flags<CullFace>;
 
@@ -52,28 +52,6 @@ namespace idk::vkn
 		std::optional<AttachmentBlendConfig> config;
 	};
 
-	/*
-	****************
-	Objective:
-		- Provide an interface to deal with a sub renderpass
-		- Be processed by a system to generate the appropriate vulkan render pass and pipeline information
-	****************
-	*/
-
-	struct SubPass
-	{
-#pragma region FrameBuffers
-		void BindInputAttachment(uint32_t index, const Texture& texture);
-
-		void SetOutputAttachment(uint32_t index, const Texture& texture, LoadOp load_op, StoreOp store_op);
-		void SetDepthtAttachment(const Texture& texture, LoadOp load_op, StoreOp store_op);
-		void SetAttachmentBlending(uint32_t index, AttachmentBlendConfig blend);
-#pragma endregion
-		size_t subpass_index; //generated and assigned by a subpass system
-	private:
-		vector<AttachmentInfo> input_attachments;
-		vector<AttachmentInfo> output_attachments;
-	};
 
 	struct RenderTask
 	{
