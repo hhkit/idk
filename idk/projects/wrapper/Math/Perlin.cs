@@ -75,7 +75,7 @@ namespace idk
         /// <summary>
         /// Samples Perlin Noise at (x,y) using multiple octaves, returns [0, 1].
         /// </summary>
-        public static float Octave(float x, float y, int octaves, float persistence, float frequency)
+        public static float Noise(float x, float y, int octaves, float persistence, float frequency)
         {
             float total = 0;
             float maxValue = 0;
