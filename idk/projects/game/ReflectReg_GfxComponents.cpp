@@ -1,1 +1,1 @@
-#include <ReflectReg_GfxComponents.h>
+#include <ReflectReg_GfxComponents.inl>

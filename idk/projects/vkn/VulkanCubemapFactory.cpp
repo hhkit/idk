@@ -23,6 +23,7 @@ namespace idk::vkn
 		fence = view.Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
 
+#pragma optimize("",off)
 	unique_ptr<CubeMap> VulkanCubemapFactory::GenerateDefaultResource()
 	{
 		//2x2 image Checkered
@@ -41,6 +42,7 @@ namespace idk::vkn
 		loader.LoadCubemap(*ptr, TextureFormat::eRGBA32, {}, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, ivec2{ 2,2 }, allocator, *fence);
 		return std::move(ptr);
 	}
+#pragma optimize("",on)
 	unique_ptr<CubeMap> VulkanCubemapFactory::Create()
 	{
 		return std::make_unique<VknCubemap>();

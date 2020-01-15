@@ -18,37 +18,43 @@ namespace idk::vkn {
 		{ TextureFormat::eBC4,vk::Format::eBc4UnormBlock },
 		{ TextureFormat::eBC5,vk::Format::eBc5UnormBlock },
 	};
-	static const hash_table<ColorFormat::_enum, vk::Format> cFormatMap
+	static const hash_table<TextureInternalFormat, vk::Format> cFormatMap
 	{
-		{ ColorFormat::_enum::DEPTH_COMPONENT, vk::Format::eD32Sfloat},
-		{ ColorFormat::_enum::R_8, vk::Format::eR8Unorm },
-		{ ColorFormat::_enum::R_16, vk::Format::eR16Unorm },
-		{ ColorFormat::_enum::R_32F, vk::Format::eR32Sfloat },
-		{ ColorFormat::_enum::R_64F, vk::Format::eR64Sfloat },
-		{ ColorFormat::_enum::Rint_8, vk::Format::eR8Uint },
-		{ ColorFormat::_enum::Rint_16, vk::Format::eR16Uint },
-		{ ColorFormat::_enum::Rint_32, vk::Format::eR32Uint },
-		{ ColorFormat::_enum::Rint_64, vk::Format::eR64Uint },
-		{ ColorFormat::_enum::RG_8, vk::Format::eR8G8Unorm },
-		{ ColorFormat::_enum::RGF_16, vk::Format::eR16G16Sfloat },
-		{ ColorFormat::_enum::RGB_8, vk::Format::eR8G8B8Unorm },
-		{ ColorFormat::_enum::RGBF_16, vk::Format::eR16G16B16Sfloat },
-		{ ColorFormat::_enum::RGBF_32, vk::Format::eR32G32B32Sfloat },
-		{ ColorFormat::_enum::RGBA_8, vk::Format::eR8G8B8A8Unorm },
-		{ ColorFormat::_enum::RGBAF_16, vk::Format::eR16G16B16A16Sfloat },
-		{ ColorFormat::_enum::RGBAF_32, vk::Format::eR32G32B32A32Sfloat },
-		{ ColorFormat::_enum::BGRA_8,   vk::Format::eB8G8R8A8Unorm },
-		{ ColorFormat::_enum::SRGB_BGRA_8,   vk::Format::eB8G8R8A8Srgb },
-		{ ColorFormat::_enum::SRGB ,   vk::Format::eR8G8B8Srgb },
-		{ ColorFormat::_enum::SRGBA,   vk::Format::eR8G8B8A8Srgb },
-		{ ColorFormat::_enum::DXT1,vk::Format::eBc1RgbUnormBlock },
-		{ ColorFormat::_enum::DXT3,vk::Format::eBc2UnormBlock },
-		{ ColorFormat::_enum::DXT5,vk::Format::eBc3UnormBlock },
-		{ ColorFormat::_enum::DXT1_A,vk::Format::eBc1RgbaUnormBlock },
-		{ ColorFormat::_enum::SRGB_DXT1,vk::Format::eBc1RgbSrgbBlock },
-		{ ColorFormat::_enum::SRGB_DXT3,vk::Format::eBc2SrgbBlock },
-		{ ColorFormat::_enum::SRGB_DXT5,vk::Format::eBc3SrgbBlock },
-		{ ColorFormat::_enum::SRGBA_DXT1,vk::Format::eBc1RgbaSrgbBlock },
+		{ TextureInternalFormat::DEPTH_16, vk::Format::eD16Unorm },
+		{ TextureInternalFormat::DEPTH_24, vk::Format::eD24UnormS8Uint},
+		{ TextureInternalFormat::DEPTH_32, vk::Format::eD32Sfloat},
+		{ TextureInternalFormat::DEPTH_32_F_STENCIL_8, vk::Format::eD32Sfloat},
+		{ TextureInternalFormat::R_8, vk::Format::eR8Unorm },
+		{ TextureInternalFormat::R_16, vk::Format::eR16Unorm },
+		{ TextureInternalFormat::R_32_F, vk::Format::eR32Sfloat },
+		{ TextureInternalFormat::R_64_F, vk::Format::eR64Sfloat },
+		{ TextureInternalFormat::R_8_I , vk::Format::eR8Sint },
+		{ TextureInternalFormat::R_16_I, vk::Format::eR16Sint },
+		{ TextureInternalFormat::R_32_I, vk::Format::eR32Sint },
+		{ TextureInternalFormat::R_64_I, vk::Format::eR64Sint },
+		{ TextureInternalFormat::R_8_UI , vk::Format::eR8Uint },
+		{ TextureInternalFormat::R_16_UI, vk::Format::eR16Uint },
+		{ TextureInternalFormat::R_32_UI, vk::Format::eR32Uint },
+		{ TextureInternalFormat::RG_8, vk::Format::eR8G8Unorm },
+		{ TextureInternalFormat::RG_16_F, vk::Format::eR16G16Sfloat },
+		{ TextureInternalFormat::RGB_8, vk::Format::eR8G8B8Unorm },
+		{ TextureInternalFormat::RGB_16_F, vk::Format::eR16G16B16Sfloat },
+		{ TextureInternalFormat::RGB_32_F, vk::Format::eR32G32B32Sfloat },
+		{ TextureInternalFormat::RGBA_8, vk::Format::eR8G8B8A8Unorm },
+		{ TextureInternalFormat::RGBA_16_F, vk::Format::eR16G16B16A16Sfloat },
+		{ TextureInternalFormat::RGBA_32_F, vk::Format::eR32G32B32A32Sfloat },
+		{ TextureInternalFormat::BGRA_8,   vk::Format::eB8G8R8A8Unorm },
+		{ TextureInternalFormat::SBGRA_8,   vk::Format::eB8G8R8A8Srgb },
+		{ TextureInternalFormat::SRGB_8 ,   vk::Format::eR8G8B8Srgb },
+		{ TextureInternalFormat::SRGBA_8,   vk::Format::eR8G8B8A8Srgb },
+		{ TextureInternalFormat::RGB_DXT1,vk::Format::eBc1RgbUnormBlock },
+		{ TextureInternalFormat::RGBA_DXT3,vk::Format::eBc2UnormBlock },
+		{ TextureInternalFormat::RGBA_DXT5,vk::Format::eBc3UnormBlock },
+		{ TextureInternalFormat::RGBA_DXT1,vk::Format::eBc1RgbaUnormBlock },
+		{ TextureInternalFormat::SRGB_DXT1,vk::Format::eBc1RgbSrgbBlock },
+		{ TextureInternalFormat::SRGBA_DXT3,vk::Format::eBc2SrgbBlock },
+		{ TextureInternalFormat::SRGBA_DXT5,vk::Format::eBc3SrgbBlock },
+		{ TextureInternalFormat::SRGBA_DXT1,vk::Format::eBc1RgbaSrgbBlock },
 	};
 
 	static const hash_table<FilterMode::_enum, vk::Filter> filterMap
@@ -88,7 +94,7 @@ namespace idk::vkn {
 	{
 		return formatMap;
 	}
-	hash_table<ColorFormat::_enum, vk::Format> CFormatMap()
+	hash_table<TextureInternalFormat, vk::Format> CFormatMap()
 	{
 		return cFormatMap;
 	}
@@ -115,7 +121,7 @@ namespace idk::vkn {
 		static const auto map = FormatMap();
 		return map.find(tf)->second;
 	}
-	vk::Format MapFormat(ColorFormat tf)
+	vk::Format MapFormat(TextureInternalFormat tf)
 	{
 		static const auto map = CFormatMap();
 		return map.find(tf)->second;
@@ -221,19 +227,6 @@ namespace idk::vkn {
 				}
 			}
 
-			//for (auto& [nformat, tiling] : formats)
-			//{
-			//	uint32_t score =
-			//		(SameChannels(format,nformat) << 3)
-			//		|
-			//		(SameSrgb(format, nformat)<<5)
-			//		|
-			//		(SamePrecision(format, nformat)<<0);
-			//	if (best.first < score)
-			//	{
-			//		best = {score,nformat};
-			//	}
-			//}
 			return best.second;
 		}
 		return format;
@@ -246,7 +239,6 @@ namespace idk::vkn {
 		std::stringstream ss;
 		for (auto& [ecf, format] : map)
 		{
-			ColorFormat cf = ecf;
 			auto prop = pdevice.getFormatProperties(format);
 			BlitCompatFlags flags{};
 			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
@@ -263,6 +255,7 @@ namespace idk::vkn {
 			comp.RegisterTiling(format, flags);
 		}
 	}
+
 	void PrintFormatBlitCompatibility()
 	{
 		RegisterFormatBlitCompatibility();
@@ -271,10 +264,8 @@ namespace idk::vkn {
 		std::stringstream ss;
 		for (auto& [ecf, format] : map)
 		{
-			ColorFormat cf = ecf;
 			auto prop = pdevice.getFormatProperties(format);
 
-			ss << cf.to_string() << std::endl;
 			if (prop.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst)
 				ss << "\tLinear tiling has eBlitDst\n";
 			else
@@ -301,6 +292,7 @@ namespace idk::vkn {
 			std::stringstream{}.swap(ss);
 		}
 	}
+
 	void BlitCompatibility::RegisterTiling(vk::Format format, tiling_info tile)
 	{
 		tiling[format] = tile;

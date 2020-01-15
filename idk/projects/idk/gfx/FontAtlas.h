@@ -12,15 +12,13 @@ namespace idk {
 	{
 		UVMode uv_mode = UVMode::ClampToBorder;
 		ColorFormat internal_format = ColorFormat::R_8;
-		InputChannels format = InputChannels::RED;   //Remove, loader determines this
 		FilterMode filter_mode = FilterMode::Linear;
         bool is_srgb = true;
 		unsigned font_size = 48;
 	};
 
 	class FontAtlas
-		: public Resource<FontAtlas>
-		, public MetaTag<FontAtlasMeta>
+		: public MetaResource<FontAtlas, FontAtlasMeta>
 	{
 	public:
 		static constexpr RscHandle<FontAtlas> defaults[FontDefault::count] =
@@ -53,6 +51,5 @@ namespace idk {
 
 	protected:
 		ivec2 _size{};
-		void OnMetaUpdate(const FontAtlasMeta&) override {};
 	};
 }

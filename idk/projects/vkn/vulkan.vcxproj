@@ -324,6 +324,7 @@
     <ClInclude Include="BaseRenderPass.h" />
     <ClInclude Include="BufferedObj.h" />
     <ClInclude Include="CanvasRenderer.h" />
+    <ClInclude Include="ColorPickRenderer.h" />
     <ClInclude Include="CubemapRenderer.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DebugUtil.h" />
@@ -372,6 +373,7 @@
     <ClInclude Include="utils\PresentationSignals.h" />
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
+    <ClInclude Include="utils\VknUtil.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
@@ -418,6 +420,7 @@
   <ItemGroup>
     <ClCompile Include="BaseRenderPass.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
+    <ClCompile Include="ColorPickRenderer.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
     <ClCompile Include="DDSLoader.cpp" />
     <ClCompile Include="DebugUtil.cpp" />

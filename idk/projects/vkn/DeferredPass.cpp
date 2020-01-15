@@ -155,45 +155,40 @@ namespace idk::vkn
 		{
 			inited = true;
 			FrameBufferBuilder fbf;
-			fbf.Begin(size);
-			//GBufferBinding::eAlbedoAmbOcc
-			fbf.AddAttachment(idk::AttachmentInfo{
+			fbf.Begin(size)
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eAlbedoAmbOcc
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::SRGBA,
+				TextureInternalFormat::SRGBA_8,
 				FilterMode::_enum::Nearest
-				});
-			GBufferBinding::eNormal;
-			fbf.AddAttachment(idk::AttachmentInfo{
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eNormal
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_16,
+				TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest
-				});
-			GBufferBinding::eTangent;
-			fbf.AddAttachment(idk::AttachmentInfo{
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eTangent
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_16,
+				TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest
-				});
-			GBufferBinding::eUvMetallicRoughness;
-			fbf.AddAttachment(idk::AttachmentInfo{
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eUvMetallicRoughness
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_16,
+				TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest
-				});
-			GBufferBinding::eViewPos;
-			fbf.AddAttachment(idk::AttachmentInfo{
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eViewPos
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_16,
+				TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest
-				});
-			fbf.SetDepthAttachment(
-				idk::AttachmentInfo{
+				})
+			.SetDepthAttachment(idk::AttachmentInfo{
 					LoadOp::eClear,StoreOp::eStore,
-					ColorFormat::_enum::DEPTH_COMPONENT,
+					TextureInternalFormat::DEPTH_32_F_STENCIL_8,
 					FilterMode::_enum::Nearest
 				});
+
 			auto fb_info = fbf.End();
-			//rp_obj = ConstructDeferredRenderPass(fb_info);
+
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 
 			if (gbuffer)
@@ -204,7 +199,7 @@ namespace idk::vkn
 			fbf.Begin(size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
-				ColorFormat::_enum::RGBAF_16,
+					TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest
 				});
 			uint32_t i = 0;
@@ -212,7 +207,7 @@ namespace idk::vkn
 			{
 				auto att = idk::AttachmentInfo{
 					LoadOp::eLoad,StoreOp::eDontCare,
-					ColorFormat::_enum::RGBAF_16,
+					TextureInternalFormat::RGBA_16_F,
 					FilterMode::_enum::Nearest,
 					false,
 					gbuffer->GetAttachment(i).buffer
@@ -222,7 +217,7 @@ namespace idk::vkn
 			}
 			auto vkn_att = idk::AttachmentInfo{
 				LoadOp::eLoad,StoreOp::eDontCare,
-				ColorFormat::_enum::RGBAF_16,
+				TextureInternalFormat::RGBA_16_F,
 				FilterMode::_enum::Nearest,
 				false,
 				gbuffer->DepthAttachment().buffer
@@ -293,32 +288,23 @@ namespace idk::vkn
 		spc.SetDepthAttachment(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 		rp_info.RegisterAttachment(*hdr_out.depth_attachment, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
-		//SubPassConfig test{};
-		//test.SetDepthAttachment(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
-		//Input light accum
-		//rp_info.RegisterAttachment(accum.GetAttachment(0), vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eGeneral);
-		//Input depth (for discard check)
-		//rp_info.RegisterAttachment(, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eGeneral);
-
 		spc.BuildSubpass();
-		//test.BuildSubpass();
-
 		
 		rp_info.RegisterSubpass(spc);
-		//rp_info.RegisterSubpass(test);
 		rp_info.AddDependency(VK_SUBPASS_EXTERNAL, 0,
 			vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-			vk::AccessFlagBits::eShaderRead, vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader);
-		//rp_info.AddDependency(0, 1,
-		//	vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-		//	vk::AccessFlags{}, vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlags{});
+			vk::AccessFlagBits::eShaderRead, 
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, 
+			vk::PipelineStageFlagBits::eFragmentShader);
+
 		auto create_info = rp_info.BuildRenderPass();
 		return View().Device()->createRenderPassUnique(create_info);
 	}
-//#pragma optimize("",off)
+
 	void DeferredPass::Init(VknRenderTarget& ) 
 	{
 	}
+
 	void DeferredPass::Init(VknRenderTarget& rt,  DeferredGBuffer(&gbuf)[EGBufferType::size()])
 	{
 		_gbuffer = &gbuf;
@@ -344,7 +330,7 @@ namespace idk::vkn
 			fbf.Begin(rt.Size());
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eLoad,StoreOp::eStore,
-				ColorFormat::_enum::SRGBA,
+				TextureInternalFormat::SRGBA_8,
 				FilterMode::_enum::Nearest,false,
 				rt.GetColorBuffer()
 				});
@@ -354,7 +340,7 @@ namespace idk::vkn
 				auto& buffer = *gbuffer.accum_buffer;
 				auto accum_att = idk::AttachmentInfo{
 					LoadOp::eLoad,StoreOp::eDontCare,
-					ColorFormat::_enum::SRGB,
+					TextureInternalFormat::SRGB_8,
 					FilterMode::_enum::Nearest,false,
 					buffer.GetAttachment(0).buffer
 				};
@@ -362,7 +348,7 @@ namespace idk::vkn
 				fbf.AddAttachment(accum_att);
 				auto depth_att = idk::AttachmentInfo{
 					LoadOp::eLoad,StoreOp::eDontCare,
-					ColorFormat::_enum::DEPTH_COMPONENT,
+					TextureInternalFormat::DEPTH_32_F_STENCIL_8,
 					FilterMode::_enum::Nearest,false,
 					gbuffer.gbuffer->DepthAttachment().buffer
 				};
@@ -375,7 +361,7 @@ namespace idk::vkn
 
 			auto depth_att = idk::AttachmentInfo{
 				LoadOp::eDontCare,StoreOp::eStore,
-				ColorFormat::_enum::DEPTH_COMPONENT,
+				TextureInternalFormat::DEPTH_32_F_STENCIL_8,
 				FilterMode::_enum::Nearest,false,
 				rt.GetDepthBuffer()//GetColorBuffer()
 			};
@@ -384,23 +370,6 @@ namespace idk::vkn
 			if (hdr_buffer)
 				Core::GetResourceManager().Release(hdr_buffer);
 			auto hdr_info = fbf.End();
-
-			/*
-					auto& rsm = Core::GetResourceManager();
-					if (!depth_sample_tex)
-						depth_sample_tex = rsm.Create<VknTexture>();
-					if (depth_sample_tex->Size() != size)
-					{
-						TextureLoader loader;
-						auto& tex_factory = Core::GetResourceManager().GetFactory<VulkanTextureFactory>();
-
-						TextureOptions tex_opt{};
-						tex_opt.internal_format = ColorFormat::_enum::DEPTH_COMPONENT;
-						tex_opt.is_srgb = false;
-						auto tex_info = DepthBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
-						loader.LoadTexture(*depth_sample_tex, tex_factory.GetAllocator(), tex_factory.GetFence(), tex_opt, tex_info, {});
-					}*/
-
 
 			hdr_pass = BuildHdrRenderPass(hdr_info);
 			auto tmp = VknSpecializedInfo{ hdr_pass };
@@ -430,16 +399,6 @@ namespace idk::vkn
 			light_config->depth_test = false;
 			fsq_light_ro.config = light_config;
 			fsq_amb_ro.config = ambient_config;
-
-			//auto test = AttachmentBlendConfig{};
-			//test.blend_enable = true;
-			//test.alpha_blend_op = BlendOp::eAdd;
-			//test.color_blend_op = BlendOp::eAdd;
-			//test.src_color_blend_factor = BlendFactor::eSrcAlpha;
-			//test.dst_color_blend_factor = BlendFactor::eOneMinusSrcAlpha;
-			//test.src_alpha_blend_factor = BlendFactor::eOne;
-			//test.dst_alpha_blend_factor = BlendFactor::eOneMinusSrcAlpha; //I swear to god idk why this has to be like this, but otherwise, the blend background is just black. eZero didn't work.
-			//blend = test;
 		}
 	}
 
@@ -562,8 +521,7 @@ namespace idk::vkn
 
 
 		DeferredHdrBinder binding;
-		auto& def_bind = binding;
-		def_bind.SetDeferredPass(*this);
+		binding.SetDeferredPass(*this);
 
 		auto& fsq_ro = fsq_amb_ro ;
 
@@ -639,11 +597,6 @@ namespace idk::vkn
 		std::swap(return_barriers[0].oldLayout, return_barriers[0].newLayout);
 		return_barriers[0].setDstAccessMask({});// vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
 		return_barriers[0].setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-		//std::swap(return_barriers[2].dstAccessMask, return_barriers[2].srcAccessMask);
-		//std::swap(return_barriers[2].oldLayout, return_barriers[2].newLayout);
-		//return_barriers[2].setDstAccessMask({});// vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
-		//return_barriers[2].setNewLayout(vk::ImageLayout::eGeneral);
 
 		//Transit GD  -> DepthAttachmentOptimal
 		return_barriers[1].setSrcAccessMask(vk::AccessFlagBits::eTransferRead);
@@ -790,17 +743,11 @@ namespace idk::vkn
 
 
 			std::array<float, 4> a{};
-
-			//auto& cd = std::get<vec4>(state.camera.clear_data);
 			//TODO grab the appropriate framebuffer and begin renderpass
 
-			//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
-
 			auto& camera = graphics_state.camera;
-			//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
 			auto& g_buffer = *gbuffer.gbuffer;
 			auto frame_buffer = g_buffer.GetFramebuffer();
-			//TransitionFrameBuffer(camera, cmd_buffer, view);
 
 			auto sz = g_buffer.Size();
 			rect viewport = graphics_state.camera.viewport;

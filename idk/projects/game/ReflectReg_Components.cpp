@@ -1,1 +1,1 @@
-#include <ReflectReg_Components.h>
+#include <ReflectReg_Components.inl>

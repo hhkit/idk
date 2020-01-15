@@ -1,1 +1,1 @@
-#include <ReflectRegistration.h>
+#include <ReflectRegistration.inl>

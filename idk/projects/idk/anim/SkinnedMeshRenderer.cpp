@@ -32,7 +32,7 @@ namespace idk
 		return AnimatedRenderObject{
 			RenderObject
 			{
-			.obj_id = GetGameObject(),
+			.obj_id = GetHandle(),
 			.mesh = mesh,
 			.material_instance = material_instance,
 

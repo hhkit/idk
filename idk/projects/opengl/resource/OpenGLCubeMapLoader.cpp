@@ -32,8 +32,9 @@ namespace idk
 		//auto texture_id = texture_handle->ID();
 
 		if (meta)
-			cubemap_handle->SetMeta(*meta->GetMeta<CubeMap>());
-
+		{
+			cubemap_handle->GetMeta() = *meta->GetMeta<CubeMap>();
+		}
 		ivec2 size{};
 		int channels{};
 
@@ -60,23 +61,11 @@ namespace idk
 			auto p = pp + fileExt[i] + string(ext.string());
 
 			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
-
-			//assert(data);
-
-			const auto col_format = [&]() -> InputChannels
-			{	switch (channels)
-			{
-			default:
-			case 1: return InputChannels::RED;
-			case 2: return InputChannels::RG;
-			case 3: return InputChannels::RGB;
-			case 4: return InputChannels::RGBA;
-			}
-			}();
-
-			cubemap_handle->Buffer(i, data, size, col_format);
+			if (channels == 3) cubemap_handle->Buffer(i, data, size, ToInternalFormat(tm.internal_format, tm.is_srgb), GL_RGB);
+			if (channels == 4) cubemap_handle->Buffer(i, data, size, ToInternalFormat(tm.internal_format, tm.is_srgb), GL_RGBA);
 			stbi_image_free(data);
 		}
+
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		Core::GetSystem<ogl::Win32GraphicsSystem>().EnqueueCubemapForConvolution(cubemap_handle);
 

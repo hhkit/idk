@@ -633,7 +633,6 @@
     <ClInclude Include="anim\Animator.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="ReflectRegistration.h" />
     <ClInclude Include="app\GamepadSystem.h">
       <Filter>app</Filter>
     </ClInclude>
@@ -938,10 +937,15 @@
     <ClInclude Include="res\IAssetLoader.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
     <ClInclude Include="pch_common.h" />
-    <ClInclude Include="ReflectReg_Components.h" />
-    <ClInclude Include="ReflectReg_Resources.h" />
-    <ClInclude Include="ReflectReg_Common.h" />
-    <ClInclude Include="ReflectReg_GfxComponents.h" />
+    <ClInclude Include="ReflectRegistration.inl" />
+    <ClInclude Include="ReflectReg_Resources.inl" />
+    <ClInclude Include="ReflectReg_GfxComponents.inl" />
+    <ClInclude Include="ReflectReg_Components.inl" />
+    <ClInclude Include="ReflectReg_Common.inl" />
+    <ClInclude Include="gfx\ColorPickResult.h">
+      <Filter>gfx\object</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ColorPickRequest.h" />
     <ClInclude Include="ds\index_span.h">
       <Filter>ds</Filter>
     </ClInclude>
@@ -1372,6 +1376,10 @@
     </ClCompile>
     <ClCompile Include="res\ResourceMeta.cpp" />
     <ClCompile Include="gfx\GraphFactory.cpp" />
+    <ClCompile Include="ColorPickRequest.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1569,6 +1577,7 @@
     <None Include="ds\index_span.inl">
       <Filter>ds</Filter>
     </None>
+    <None Include="ReflectReg_AnimComponents.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

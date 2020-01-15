@@ -98,7 +98,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)compiler\</OutDir>
+    <OutDir>$(SolutionDir)bin\tools\compiler\</OutDir>
     <IntDir>$(SolutionDir)build\compiler\</IntDir>
     <TargetName>idc</TargetName>
     <IncludePath>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;$(IncludePath)</IncludePath>
@@ -109,7 +109,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)compiler\</OutDir>
+    <OutDir>$(SolutionDir)bin\tools\compiler\</OutDir>
     <IntDir>$(SolutionDir)build\compiler\$(Configuration)\</IntDir>
     <TargetName>idcD</TargetName>
     <IncludePath>$(SolutionDir)projects\idk;$(SolutionDir)dep\include;$(IncludePath)</IncludePath>
@@ -135,7 +135,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>

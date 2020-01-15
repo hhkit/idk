@@ -82,7 +82,7 @@ namespace idk::vkn
 		tci.mipmap_level = 0;
 		tci.sampled(true);
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
-		tci.internal_format = MapFormat(def.internal_format);
+		tci.internal_format = MapFormat(ToInternalFormat(def.internal_format, def.is_srgb));
 		if (def.is_srgb)
 			tci.internal_format = ToSrgb(tci.internal_format);
 		InputCMInfo infoList;

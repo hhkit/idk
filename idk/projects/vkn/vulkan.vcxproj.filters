@@ -275,6 +275,12 @@
     <ClInclude Include="RenderContext.h">
       <Filter>render\graph</Filter>
     </ClInclude>
+    <ClInclude Include="ColorPickRenderer.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\VknUtil.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -490,6 +496,9 @@
       <Filter>render\graph</Filter>
     </ClCompile>
     <ClCompile Include="BaseRenderPass.cpp" />
+    <ClCompile Include="ColorPickRenderer.cpp">
+      <Filter>render\renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

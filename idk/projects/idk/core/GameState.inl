@@ -64,6 +64,7 @@ namespace idk
 		_creation_queue.emplace_back(new_handle);
 		return new_handle;
 	}
+#pragma optimize("",on)
 	template<typename T>
 	inline bool GameState::ValidateHandle(const Handle<T>& handle)
 	{

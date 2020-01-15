@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "collision_raycast.inl"
 #include <ds/result.inl>
-
+#include <gfx/DebugRenderer.h>
 #include <iostream>
 
 namespace idk::phys
@@ -182,6 +182,38 @@ namespace idk::phys
 
 			if(!result)
 				result = detail::collide_ray_aabb_face<&vec3::z>(lhs, box);
+		}
+		return result;
+	}
+	raycast_result collide_ray_box(const ray& lhs, const box& bb)
+	{
+		auto inverse_rot = bb.axes().transpose();
+		
+		// Get ray in box space where box is at 0,0,0
+		ray box_space_ray;
+		box_space_ray.origin = inverse_rot * (lhs.origin - bb.center);
+		box_space_ray.velocity = inverse_rot * lhs.velocity;
+		// Core::GetSystem<DebugRenderer>().Draw(ray{ box_space_ray.origin, box_space_ray.velocity * 100}, color{ 1,1,0 });
+
+		// Min & max of box when its at 0,0,0 with no rotation.
+		vec3 aabb_min{std::numeric_limits<float>::max()}, aabb_max{ std::numeric_limits<float>::min() };
+		const auto half_extents = bb.half_extents();
+		const auto n_half_extents = -bb.half_extents();
+		aabb_min.x = min(n_half_extents.x, half_extents.x);
+		aabb_min.y = min(n_half_extents.y, half_extents.y);
+		aabb_min.z = min(n_half_extents.z, half_extents.z);
+
+		aabb_max.x = max(n_half_extents.x, half_extents.x);
+		aabb_max.y = max(n_half_extents.y, half_extents.y);
+		aabb_max.z = max(n_half_extents.z, half_extents.z);
+
+		aabb tmp{ aabb_min, aabb_max };
+		auto result = collide_ray_aabb(box_space_ray, tmp);
+		if (result)
+		{
+			// sphere s{};
+			// Core::GetSystem<DebugRenderer>().Draw(sphere{ quat_cast<mat3>(bb.rotation) * result.value().point_of_collision });
+			result.value().point_of_collision = quat_cast<mat3>(bb.rotation) * result.value().point_of_collision + bb.center;
 		}
 		return result;
 	}

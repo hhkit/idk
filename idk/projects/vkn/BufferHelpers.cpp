@@ -83,7 +83,7 @@ vk::CommandBuffer BeginSingleTimeCBufferCmd(vk::CommandBuffer cmd_buffer,vk::Com
 	return cmd_buffer;
 }
 
-void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional<vk::Semaphore> signal = {})
+void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional<vk::Semaphore> signal = {}, std::optional<vk::Fence> fence = {})
 {
 	vk::DispatchLoaderDefault dispatcher{};
 	cmd_buffer.end(dispatcher);
@@ -99,7 +99,10 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue, std:
 		,(signal) ? 1u : 0u
 		,(signal) ? &*signal : nullptr
 	};
-	queue.submit(submitInfo, vk::Fence{}, dispatcher);
+	vk::Fence f = {};
+	if (fence)
+		f = *fence;
+	queue.submit(submitInfo, f, dispatcher);
 	if(!signal)
 	//Not very efficient, would be better to use fences instead.
 		queue.waitIdle(dispatcher);
@@ -145,10 +148,16 @@ void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }
 
-void TransitionImageLayout(bool dont_begin, vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format , vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal, vk::CommandBufferInheritanceInfo* info)
+#pragma optimize("",off)
+
+
+void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<BeginInfo> begin, std::optional<SubmissionInfo> queue_sub_config)
 {
-	if (!dont_begin)
-		BeginSingleTimeCBufferCmd(cmd_buffer, info);
+	SubmissionInfo sub_info{};
+	if (queue_sub_config)
+		sub_info = *queue_sub_config;
+	if (begin)
+		BeginSingleTimeCBufferCmd(cmd_buffer, begin->info);
 	vk::DispatchLoaderDefault dispatcher{};
 
 	//Creating image memory barrier to start performing layout transition for image
@@ -172,38 +181,43 @@ void TransitionImageLayout(bool dont_begin, vk::CommandBuffer cmd_buffer, vk::Qu
 	vBarrier.dstAccessMask = vk::AccessFlags::Flags();
 	switch (oLayout)
 	{
-		case vk::ImageLayout::eTransferDstOptimal:
-		{
-			sourceStage = vk::PipelineStageFlagBits::eTransfer;
-			vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-		}
+	case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+		sourceStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+		vBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+		vBarrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 		break;
-		case vk::ImageLayout::eTransferSrcOptimal:
-		{
+	case vk::ImageLayout::eTransferDstOptimal:
+	{
+		sourceStage = vk::PipelineStageFlagBits::eTransfer;
+		vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+	}
+	break;
+	case vk::ImageLayout::eTransferSrcOptimal:
+	{
 		sourceStage = vk::PipelineStageFlagBits::eTransfer;
 		vBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
-		}
-		break;
 	}
-	switch(nLayout)
+	break;
+	}
+	switch (nLayout)
 	{
-		case vk::ImageLayout::eDepthStencilAttachmentOptimal:
-			destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
-			vBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
-			vBarrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead| vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-			break;
-		case vk::ImageLayout::eTransferDstOptimal:
-		{
-			destinationStage = vk::PipelineStageFlagBits::eTransfer;
-			vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
-		}
+	case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+		destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+		vBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+		vBarrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 		break;
-		case vk::ImageLayout::eTransferSrcOptimal:
-			{
-				destinationStage = vk::PipelineStageFlagBits::eTransfer;
-				vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
-			}
-		break;
+	case vk::ImageLayout::eTransferDstOptimal:
+	{
+		destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+	}
+	break;
+	case vk::ImageLayout::eTransferSrcOptimal:
+	{
+		destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		vBarrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+	}
+	break;
 	}
 	if ((oLayout == vk::ImageLayout::eUndefined || oLayout == vk::ImageLayout::ePreinitialized) && nLayout == vk::ImageLayout::eTransferDstOptimal) {
 		vBarrier.srcAccessMask = vk::AccessFlags::Flags();
@@ -236,20 +250,8 @@ void TransitionImageLayout(bool dont_begin, vk::CommandBuffer cmd_buffer, vk::Qu
 		dispatcher
 	);
 
-	if (!dont_begin)
-		EndSingleTimeCbufferCmd(cmd_buffer, queue, wait, stage, signal);
-}
-
-void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout , std::optional<vk::Semaphore> wait, std::optional<vk::PipelineStageFlags> stage, std::optional<vk::Semaphore> signal,vk::CommandBufferInheritanceInfo* info)
-{
-	TransitionImageLayout(false,cmd_buffer, queue, img, format, oLayout, nLayout, wait, stage, signal, info);
-	
-}
-
-void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout,vk::CommandBufferInheritanceInfo* info)
-{
-	TransitionImageLayout(cmd_buffer, queue, img, format, oLayout, nLayout, std::nullopt, std::nullopt,std::nullopt, info);
-	
+	if (begin)
+		EndSingleTimeCbufferCmd(cmd_buffer, queue, sub_info.wait_for, sub_info.stage, sub_info.signal_after,sub_info.signal_fence);
 }
 
 }

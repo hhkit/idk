@@ -57,21 +57,38 @@ namespace idk
         return curr;
     }
 
-    bool CMD_ModifyProperty::execute()
+	CMD_ModifyProperty::CMD_ModifyProperty(reflect::dynamic object, reflect::dynamic old_value)
+        : object{ object }, new_value{object.copy()}, old_value{old_value}
+	{
+	}
+
+	bool CMD_ModifyProperty::execute()
     {
-		if (component.is_type<mono::Behavior>())
-			handle_cast<mono::Behavior>(component)->GetObject().Assign(string_view(property_path), new_value);
-		else
-			resolve_property_path(*component, property_path) = new_value;
+        if (component.id)
+        {
+            if (component.is_type<mono::Behavior>())
+                handle_cast<mono::Behavior>(component)->GetObject().Assign(string_view(property_path), new_value);
+            else
+                resolve_property_path(*component, property_path) = new_value;
+        }
+        else
+        {
+            object = new_value;
+        }
         return true;
     }
 
     bool CMD_ModifyProperty::undo()
     {
-		if (component.is_type<mono::Behavior>())
-			handle_cast<mono::Behavior>(component)->GetObject().Assign(string_view(property_path), old_value);
-		else
-			resolve_property_path(*component, property_path) = old_value;
+        if (component.id)
+        {
+            if (component.is_type<mono::Behavior>())
+                handle_cast<mono::Behavior>(component)->GetObject().Assign(string_view(property_path), old_value);
+            else
+                resolve_property_path(*component, property_path) = old_value;
+        }
+        else
+            object = old_value;
         return true;
     }
 

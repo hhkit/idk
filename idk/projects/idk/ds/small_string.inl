@@ -756,19 +756,22 @@ namespace idk
 	{
 		auto& rep = _rep.first();
 		_grow(count);
-
+		auto dst = (_is_sso())?rep.sso.buffer: rep.longer.ptr;
 		if (_is_sso())
 		{
 			const auto size_diff = rep.sso.size_diff;
 			// write size_diff first as it might be overwritten during copy
 			rep.sso.size_diff -= static_cast<CharT>(count << 1);
-			traits_type::copy(rep.sso.buffer + _sso_buffer_size - (size_diff >> 1), cstr, count + 1);
+			dst = rep.sso.buffer + _sso_buffer_size - (size_diff >> 1);
+			traits_type::copy(dst, cstr, count);
 		}
 		else
 		{
-			traits_type::copy(rep.longer.ptr + rep.longer.size, cstr, count + 1);
+			dst = rep.longer.ptr + rep.longer.size;
+			traits_type::copy(dst, cstr, count);
 			rep.longer.size += count;
 		}
+		*(dst + count) = '\0'; //null-terminate the string.
 
 		return *this;
 	}

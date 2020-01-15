@@ -40,6 +40,7 @@ namespace idk
 	}
 	void CompilerCore::Compile(string_view full_path)
 	{
+		auto tmp = string{ fs::temp_directory_path().string() };
 		auto pathify = fs::path{ full_path };
 		auto find_loader = _loaders.find(pathify.extension().generic_string());
 
@@ -65,32 +66,61 @@ namespace idk
 			if (result)
 			{
 				// serialize the bundle
+				if (bundle != result->metabundle)
 				{
-					std::ofstream bundle_stream{ meta_path };
-					bundle_stream << serialize_text(result->metabundle);
+					auto tmp_meta_path = tmp + pathify.stem().string().data();
+					{
+						std::ofstream bundle_stream{ tmp_meta_path.sv() };
+						bundle_stream << serialize_text(result->metabundle);
+					}
+					if (fs::exists(meta_path))
+						fs::remove(meta_path);
+					rename(tmp_meta_path.data(), meta_path.string().data());
 				}
+
+				auto last_write = std::chrono::system_clock::now().time_since_epoch().count();				
+				auto compile_time_name = pathify.stem().string() + ".time";
+				auto tmp_compile_path = tmp + compile_time_name.data();
+				{
+					std::ofstream str{ tmp_compile_path, std::ios::binary };
+					str << serialize_binary(last_write);
+				}
+				auto compile_time_path = string{ full_path } +".time";
+				if (fs::exists(compile_time_path.sv()))
+					fs::remove(compile_time_path.sv());
+				rename(tmp_compile_path.data(), compile_time_path.data());
+
 
 				// serialize the resources
 				{
 					for (auto& [guid, binary_resource] : result->assets)
 					{
-						// if you're here, you're trying to get compiled so only binary here
 						bool res = std::visit([&](const auto& elem) -> bool
 							{
 								using T = std::decay_t<decltype(elem)>;
+								auto stem = '/' + string{ guid } +string{ T::ext };
+								auto temp  = tmp + stem;
+								auto dest = destination + stem;
+
 								if constexpr (has_extension_v<T>)
 								{
 									static_assert(T::ext[0] == '.', "Extension must begin with a .");
                                     if constexpr (has_tag_v<T, Saveable>)
                                     {
-                                        std::ofstream resource_stream{ destination + "/" + string{guid} +string{T::ext} };
-                                        resource_stream << serialize_text(elem);
+										std::ofstream resource_stream{ temp };
+										resource_stream << serialize_text(elem);
                                     }
                                     else
                                     {
-                                        std::ofstream resource_stream{ destination + "/" + string{guid} +string{T::ext}, std::ios::binary };
-                                        resource_stream << serialize_binary(elem);
+										std::ofstream resource_stream{ temp, std::ios::binary };
+										resource_stream << serialize_binary(elem);
                                     }
+
+									auto dest_path = fs::path{ dest.sv() };
+									if(fs::exists(dest_path))
+										fs::remove(dest_path);
+
+									rename(temp.data(), dest.data());
 									return true;
 								}
 								else

@@ -10,6 +10,7 @@
 #include <res/SaveableResourceLoader.inl>
 #include <res/CompiledAssets.h>
 #include <res/CompiledAssetLoader.inl>
+#include <app/Application.h>
 
 #include <IncludeResources.h>
 #include <reflect/reflect.inl>
@@ -116,7 +117,7 @@ namespace idk
 								for (const auto& [guid, res_cb] : resource_man->GetTable<Rs>())
 								{
 									const auto h = RscHandle<Rs>{ guid };
-									if (h->IsDirty())
+									if (h && h->IsDirty())
 									{
 										resource_man->Save(h);
 										h->Clean();
@@ -134,6 +135,10 @@ namespace idk
 		template<typename ... Rs>
 		struct CompiledAssetHelper_detail<std::variant<Rs...>>
 		{
+			static hash_set<string_view> GenCompilableExtensions()
+			{
+				return { Rs::ext... };
+			}
 		};
 
 		using AssetHelper = CompiledAssetHelper_detail<CompiledVariant>;
@@ -156,7 +161,6 @@ namespace idk
 		auto& fs = Core::GetSystem<FileSystem>();
 		auto exe_dir = string{ fs.GetExeDir() };
 		fs.Mount(exe_dir + "/engine_data", "/engine_data");
-		fs.Mount(exe_dir + "/build", "/build");
 	}
 
 	void ResourceManager::LateInit()
@@ -168,6 +172,12 @@ namespace idk
 		for (auto& func : defaults_table)
 			func(this);
 		SaveDirtyMetadata();
+
+		for(auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL))
+		{
+			if (elem.GetMountPath().starts_with("/build"))
+				LoadCompiledAsset(elem);
+		}
 	}
 
 	void ResourceManager::Shutdown()
@@ -197,6 +207,14 @@ namespace idk
 			return nullptr;
 
 		return itr->second.get();
+	}
+
+	MetaBundle ResourceManager::GetMeta(PathHandle path_to_file)
+	{
+		auto meta = PathHandle{ string{path_to_file.GetMountPath()} +".meta" };
+		auto bundlestream = meta.Open(FS_PERMISSIONS::READ);
+		auto res = parse_text<MetaBundle>(stringify(bundlestream));
+		return res ? *res : MetaBundle{};
 	}
 
 	ResourceManager& ResourceManager::Instance() noexcept
@@ -232,8 +250,8 @@ namespace idk
 					dirty = std::visit([&](const auto& handle) -> bool
 						{
 							using Res = typename std::decay_t<decltype(handle)>::Resource;
-							if constexpr (has_tag_v<Res, MetaTag>)
-								return handle->_dirtymeta;
+							if constexpr (has_tag_v<Res, MetaResource>)
+								return GetControlBlock(handle)->dirty_meta;
 							else
 								return false;
 						}, elem);
@@ -249,13 +267,19 @@ namespace idk
 					std::visit([&](const auto& handle)
 						{
 							m.Add(handle);
-							if constexpr (has_tag_v<std::decay_t<decltype(handle)>::Resource, MetaTag>)
-								handle->_dirtymeta = false;
+							if constexpr (has_tag_v<std::decay_t<decltype(handle)>::Resource, MetaResource>)
+								GetControlBlock(handle)->dirty_meta = true;
 						}, elem);
 				}
 				auto test = serialize_text(m);
-				Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE) << test;
+				{
+					auto stream = Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE);
+					stream << test;
+					stream.close();
+					stream.clear(); 
+				}
 				resource.is_new = false;
+				Load(path, true);
 			}
 		}
 	}
@@ -263,15 +287,27 @@ namespace idk
 	void ResourceManager::WatchDirectory()
 	{
 		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::DELETED))
-		{
 			Unload(PathHandle{ elem });
-		}
 
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED))
-			Load(elem);
-		
-		for (auto& elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
-			Load(elem);
+		LoadPaths(Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::CREATED));
+		LoadPaths(Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN));
+		Core::GetSystem<Application>().WaitForChildren();
+	}
+
+	void ResourceManager::LoadPaths(span<const PathHandle> paths)
+	{
+		for (auto& elem : paths)
+		{
+			if (elem.GetMountPath().starts_with("/assets"))
+			{
+				if (_compilable_extensions.find(elem.GetExtension()) != _compilable_extensions.end())
+					LoadAsync(elem);
+				else
+					Load(elem);
+			}
+			if (elem.GetMountPath().starts_with("/build"))
+				LoadCompiledAsset(elem);
+		}
 	}
 
 	bool ResourceManager::IsExtensionSupported(string_view ext)
@@ -282,83 +318,153 @@ namespace idk
 
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
 	{
-		if (!path)
+		if (!reload_resource)
 		{
-			LOG_WARNING_TO(LogPool::SYS, "Unmounted path.");
-			return ResourceLoadError::FileDoesNotExist;
+			if (auto itr = _loaded_files.find(path.GetMountPath()); itr != _loaded_files.end())
+				return itr->second.bundle;
 		}
-
-		auto* loader = GetLoader(path.GetExtension());
-		if (loader == nullptr)
+		else
 		{
-			LOG_WARNING_TO(LogPool::SYS, "Extension %s not registered. ", path.GetExtension().data());
-			return ResourceLoadError::ExtensionNotRegistered;
-		}
-
-		LOG_TO(LogPool::SYS, "Loading %s. ", path.GetMountPath().data());
-
-		auto emplace_path = string{ path.GetMountPath() };
-
-		// unload the file if loaded
-		{
-			auto itr = _loaded_files.find(emplace_path);
+			// unload old data
+			auto itr = _loaded_files.find(path.GetMountPath()); 
 			if (itr != _loaded_files.end())
 			{
-				if (reload_resource)
-				{
-					// release all resources attached to file
-					for (auto& elem : itr->second.bundle.GetAll())
-						std::visit([&](const auto& handle) { Release(handle); }, elem);
-					_loaded_files.erase(itr);
-				}
-				else
-					return itr->second.bundle;
+				// release all resources attached to file
+				for (auto& elem : itr->second.bundle.GetAll())
+					elem.visit([&](const auto& handle) { Release(handle); });
+				_loaded_files.erase(itr);
 			}
 		}
+		LOG_TO(LogPool::SYS, "Loading file: %s", path.GetMountPath().data());
 
-		// Meta handling
-		auto meta_path = PathHandle{ string{path.GetMountPath()} +".meta" };
+		auto old_bundle = GetMeta(path);
 
-		auto meta_bundle = MetaBundle{};
-		{	// try to create meta
-			auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
-			auto metastr = stringify(metastream);
-			parse_text(metastr, meta_bundle);
-		}
+		auto ext = path.GetExtension();
+		if (ext == ".time")
+			return {};
+		if (path.IsDir())
+			return {};
+		
+		auto emplace_path = string{ path.GetMountPath() };
+		auto* loader = GetLoader(ext);
 
-		// reload the file
-		auto bundle = loader->LoadFile(path, meta_bundle);
-
-		const auto [itr, success] = _loaded_files.emplace(emplace_path, FileControlBlock{ bundle });
-		IDK_ASSERT(success);
-
-		auto new_meta = MetaBundle{};
-		for (auto& elem : bundle.GetAll())
-			std::visit([&](auto& handle) { new_meta.Add(handle);  }, elem);
-
-		if (new_meta != meta_bundle)
+		auto [resource_bundle, meta_bundle] = [&]() -> std::tuple<ResourceBundle, MetaBundle>
 		{
-			for (auto& elem : bundle.GetAll())
-				std::visit([](auto& handle) { 
-				if constexpr (has_tag_v<std::decay_t<decltype(handle)>, MetaTag>) 
-					handle->DirtyMeta(); }, 
-				elem);
+			if (ext == ".meta")
+			{
+				auto meta_bundle = MetaBundle{};
+				{	// try to create meta
+					auto metastream = path.Open(FS_PERMISSIONS::READ, false);
+					auto metastr = stringify(metastream);
+					parse_text(metastr, meta_bundle);
+				}
+				old_bundle = meta_bundle;
+				ResourceBundle resource_bundle{meta_bundle};
+
+				auto mount_path = path.GetMountPath();
+				emplace_path = string{ mount_path.substr(0, mount_path.length() - string_view(".meta").length()) };
+				return std::make_tuple(resource_bundle, meta_bundle);
+			}
+
+			if (loader == nullptr)
+			{
+				if (_compilable_extensions.find(ext) != _compilable_extensions.end())
+				{
+					LoadAsync(path, true);
+
+					// check compiled results
+					auto new_bundle = GetMeta(path);
+					if (new_bundle)
+					{
+						ResourceBundle resource_bundle{new_bundle};
+						return std::make_tuple(resource_bundle, new_bundle);
+					}
+				}
+				return {};
+			}
+			else
+			{
+				auto meta_path = PathHandle{ string{path.GetMountPath()} +".meta" };
+
+				auto meta_bundle = MetaBundle{};
+				{	// try to create meta
+					auto metastream = meta_path.Open(FS_PERMISSIONS::READ, false);
+					auto metastr = stringify(metastream);
+					parse_text(metastr, meta_bundle);
+				}
+
+				// reload the file
+				auto bundle = loader->LoadFile(path, meta_bundle);
+
+				auto new_meta = MetaBundle{};
+				for (auto& elem : bundle.GetAll())
+					std::visit([&](auto& handle) { new_meta.Add(handle);  }, elem);
+
+				return std::make_tuple(bundle, new_meta);
+			}
+		}();
+
+		if (old_bundle != meta_bundle) // meta is invalidated
+		{
+			for (auto& elem : resource_bundle.GetAll())
+				std::visit([](auto& handle) {
+				if constexpr (has_tag_v<std::decay_t<decltype(handle)>, MetaResource>)
+					handle->DirtyMeta(); },
+					elem);
 		}
 
-		// set path
-		for (auto& elem : bundle.GetAll())
+		_loaded_files[emplace_path].bundle = resource_bundle;
+
+		// set path of resources
+		for (auto& elem : resource_bundle.GetAll())
 			std::visit(
-				[&](const auto& handle) 
+				[&](const auto& handle)
 				{
 					using Res = typename std::decay_t<decltype(handle)>::Resource;
 
 					auto* cb = GetControlBlock(handle);
 					IDK_ASSERT(cb);
-					cb->path   = emplace_path;
+					cb->path = emplace_path;
 				}
-			, elem);
+		, elem);
 
-		return bundle;
+		return resource_bundle;
+	}
+
+	void ResourceManager::LoadAsync(PathHandle path, bool wait)
+	{
+		if (path.GetExtension() == ".meta")
+		{
+			Load(path);
+			return;
+		}
+
+		auto last_compiled_file_time = [&]() -> long long
+		{
+			auto p = PathHandle{ string{ path.GetMountPath() } +".time" };
+			if (p)
+				return p.GetLastWriteTime().time_since_epoch().count();
+			return 0;
+		}();
+
+		auto meta_path = PathHandle{ string{path.GetMountPath()} +".meta" };
+		auto file_is_updated = meta_path ?
+			last_compiled_file_time < path.GetLastWriteTime().time_since_epoch().count()
+			|| last_compiled_file_time < meta_path.GetLastWriteTime().time_since_epoch().count()
+			: true;
+
+		// call compiler
+		if (file_is_updated)
+		{
+			auto wrap = [](string_view str) -> string
+			{
+				return '\"' + string{ str } +'\"';
+			};
+			auto infile = wrap(path.GetFullPath());
+			auto outdir = wrap(PathHandle{ "/build" }.GetFullPath());
+			const char* exec[] = { infile.data(), outdir.data() };
+			Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, wait);
+		}
 	}
 
 	void ResourceManager::LoadCompiledAsset(PathHandle path)
@@ -420,6 +526,11 @@ namespace idk
 
 
 		return FileMoveResult::Ok;
+	}
+
+	void ResourceManager::RegisterCompilableExtension(string_view ext)
+	{
+		_compilable_extensions.emplace(string{ ext });
 	}
 	
 }

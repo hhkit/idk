@@ -20,13 +20,12 @@ namespace idk
 namespace idk::vkn
 {
 	struct VknTexture;
-
 	class VulkanMesh;
 	struct DescriptorUpdateData;
 	struct VknCubemap;
 	struct DescriptorsManager;
-	using desc_type_info = DescriptorTypeI;
-	//pair<num_ds,num_descriptors_per_type>
+
+	using desc_type_info = DescriptorTypeI; // pair<num_ds,num_descriptors_per_type>
 	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>;
 	template<vk::DescriptorType type>
 	static constexpr size_t desc_type_index = desc_type_info::map<type>();
@@ -126,7 +125,6 @@ namespace idk::vkn
 
 		std::optional<UboInfo> GetUniform(const string& uniform_name) const;
 
-
 		template<typename T>
 		bool BindUniformBuffer(const string& uniform_name, uint32_t array_index, const T& data, bool skip_if_bound = false);
 		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTexture& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
@@ -137,17 +135,21 @@ namespace idk::vkn
 		void FinalizeDrawCall(const RenderObject& ro,size_t num_inst,size_t inst_offset);
 
 		void GenerateDS(DescriptorsManager& d_manager,bool update_ubo_buffers=true);
-
 		void UpdateUboBuffers();
+		const vector<ProcessedRO>& DrawCalls() const { return draw_calls; }
 
-		const vector<ProcessedRO>& DrawCalls()const
-		{
-			return draw_calls;
-		}
 		//reserves an extra size chunk
 		void reserve(size_t size);
 
 	private:
+		struct Ref
+		{
+			CollatedLayouts_t collated_layouts;
+			UboManager& ubo_manager;
+			Ref(UboManager* u = nullptr)
+				: ubo_manager{ *u }
+			{}
+		};
 
 		hash_table<uint32_t, BoundVertexBuffer> attrib_buffers;
 		std::optional<BoundIndexBuffer> index_buffer{};
@@ -161,16 +163,6 @@ namespace idk::vkn
 
 		bool shader_changed = false;
 		hash_table<set_t, set_bindings> curr_bindings;
-		struct Ref
-		{
-			CollatedLayouts_t collated_layouts;
-			UboManager& ubo_manager;
-			Ref(
-				UboManager* u = nullptr
-			)
-				:ubo_manager{ *u }
-			{}
-		};
 		Ref ref;
 	};
 

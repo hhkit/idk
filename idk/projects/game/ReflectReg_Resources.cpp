@@ -1,1 +1,1 @@
-#include <ReflectReg_Resources.h>
+#include <ReflectReg_Resources.inl>

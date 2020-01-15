@@ -469,7 +469,7 @@ namespace idk {
 				Core::GetScheduler().SetPauseState(EditorPause);
 				Core::GetSystem<IDE>().game_running = false;
 				Core::GetSystem<AudioSystem>().SetSystemPaused(false);
-
+				Core::GetSystem<AudioSystem>().StopAllAudio();
 			}
 		}
 		ImGui::PopID();

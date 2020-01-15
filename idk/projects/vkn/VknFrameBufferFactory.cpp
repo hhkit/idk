@@ -312,7 +312,6 @@ namespace idk::vkn
 			opt.filter_mode = info.filter_mode;
 			tci.internal_format = MapFormat(opt.internal_format);
 			loader.LoadTexture(t, allocator, fence, opt, tci, {});
-			t.SetMeta(opt);
 		}
 		out->own_buffer = !preset;
 		out->buffer = tex;
@@ -320,7 +319,7 @@ namespace idk::vkn
 	void VknFrameBufferFactory::PreReset(FrameBuffer& )
 	{
 	}
-//#pragma optimize("",off)
+
 	void VknFrameBufferFactory::Finalize(FrameBuffer& h_fb, SpecializedInfo* specialized_info)
 	{
 		auto* spec_info = static_cast<VknSpecializedInfo*>(specialized_info);

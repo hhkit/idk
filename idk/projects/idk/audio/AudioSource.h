@@ -38,6 +38,7 @@ namespace idk
 
 
 		vector<RscHandle<AudioClip>> audio_clip_list;
+		vector<float>				 audio_clip_volume;	//This is tightly updated with the list, like a pair
 		vector<FMOD::Channel*>		 audio_clip_channels;	//This is tightly updated with the list, like a pair
 
 		//All the Audio data is inside AudioClip

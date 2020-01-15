@@ -35,7 +35,6 @@ namespace idk::vkn
 		//TODO actually get the file name
 		return string(path_to_resource.GetFullPath());
 	}
-
 	ResourceBundle VulkanGlslLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& meta)
 	{
 		auto m = meta.FetchMeta<ShaderProgram>();

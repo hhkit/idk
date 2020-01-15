@@ -317,6 +317,8 @@ namespace idk
             if (c.is_type<PrefabInstance>())
                 continue;
             root.components.emplace_back((*c).copy());
+            if (c.is_type<Transform>())
+                root.components.back().get<Transform>().parent = {};
         }
 
         // build tree

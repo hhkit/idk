@@ -30,6 +30,7 @@ namespace idk
 		// app
 		virtual void PollEvents() = 0;
 		virtual void Exec(string_view path, span<const char*> argv, bool wait) = 0;
+		virtual void WaitForChildren() {};
 
 		// movement
 		virtual vec2 GetMouseScreenPos() = 0;

@@ -104,6 +104,8 @@ namespace idk
 			Stop(index); //Stop first
 			audio_clip_list.erase(audio_clip_list.begin() + index);
 			audio_clip_channels.erase(audio_clip_channels.begin() + index);
+			audio_clip_volume.erase(audio_clip_volume.begin() + index);
+
 		}
 	}
 	bool AudioSource::IsAudioClipPlaying(int index)
@@ -132,8 +134,11 @@ namespace idk
 	void AudioSource::UpdateAudioClips()
 	{
 		FMOD_MODE mode = ConvertSettingToFMOD_MODE();
-		if (audio_clip_list.size() != audio_clip_channels.size())
+		if (audio_clip_list.size() != audio_clip_channels.size()) {
 			audio_clip_channels.resize(audio_clip_list.size(), nullptr);
+			audio_clip_volume.resize(audio_clip_list.size(), 1);
+
+		}
 
 		for (int i = 0; i < audio_clip_list.size(); ++i) {
 			if (!audio_clip_list[i])
@@ -150,7 +155,7 @@ namespace idk
 			}
 			else
 				continue;
-			FMOD_RES(audio_clip_channels[i]->setVolume(volume));
+			FMOD_RES(audio_clip_channels[i]->setVolume(volume*audio_clip_volume[i]));
 			pitch = pitch < 0 ? 0 : pitch;
 			FMOD_RES(audio_clip_channels[i]->setPitch(pitch));
 			FMOD_RES(audio_clip_channels[i]->set3DMinMaxDistance(minDistance, maxDistance));

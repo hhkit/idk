@@ -1363,6 +1363,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::InputSetRumble", void, char code, float low_freq, float high_freq)
+		{
+			Core::GetSystem<GamepadSystem>().SetRumble(code, low_freq, high_freq);
+		}
+		BIND_END();
+
         BIND_START("idk.Bindings::InputGetConnectedPlayers", char)
         {
             return Core::GetSystem<GamepadSystem>().GetConnectedPlayers();

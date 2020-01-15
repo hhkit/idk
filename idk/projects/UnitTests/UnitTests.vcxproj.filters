@@ -41,6 +41,22 @@
     <ClCompile Include="TestMatrixTransforms.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="Reflect\ReflectReg_AnimComponents.cpp">
+      <Filter>Reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflect\ReflectReg_Components.cpp">
+      <Filter>Reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflect\ReflectReg_GfxComponents.cpp">
+      <Filter>Reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflect\ReflectReg_Resources.cpp">
+      <Filter>Reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflect\ReflectRegistered.cpp">
+      <Filter>Reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="TestTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -53,6 +69,9 @@
   <ItemGroup>
     <Filter Include="Math">
       <UniqueIdentifier>{ceb382bc-0a17-49f5-9c59-b3f54ddaed32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reflect">
+      <UniqueIdentifier>{a88e6223-c346-40f5-b265-5971d5b3ecba}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

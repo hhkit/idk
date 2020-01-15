@@ -19,18 +19,12 @@ namespace idk
 	//}
 
 	template<typename Res>
-	inline ResourceBundle SaveableResourceLoader<Res>::LoadFile(RscHandle<Res> res,PathHandle p, const MetaBundle& bundle)
+	inline ResourceBundle SaveableResourceLoader<Res>::LoadFile(RscHandle<Res> res,PathHandle p, const MetaBundle&)
 	{
 		auto stream = p.Open(FS_PERMISSIONS::READ);
 		parse_text(stringify(stream), *res);
 
-		if constexpr (has_tag_v<Res, MetaTag>)
-		{
-			auto ser_meta = bundle.FetchMeta<Res>();
-			auto real_meta = ser_meta->GetMeta<Res>();
-			if (real_meta)
-				res->SetMeta(*real_meta);
-		}
+		static_assert(!has_tag_v<Res, MetaResource>, "SaveableResourceLoader cannot use MetaTag");
 
 		return res;
 	}

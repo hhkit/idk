@@ -231,7 +231,7 @@ namespace idk::vkn
 	//PipelineObject(PipelineObject&&) noexcept= default;
 	//~PipelineObject() = default;
 
-	void PipelineManager::PipelineObject::StoreBufferDescOverrides()
+	void PipelineDescHelper::StoreBufferDescOverrides(const pipeline_config& config)
 	{
 		buffer_desc_overrides = config.buffer_descriptions;
 		size_t i = 0;
@@ -245,7 +245,7 @@ namespace idk::vkn
 		}
 	}
 
-	void PipelineManager::PipelineObject::ApplyBufferDescOverrides()
+	void PipelineDescHelper::ApplyBufferDescOverrides(pipeline_config& config)
 	{
 		vector<size_t> binding_removal_indices;
 		auto& config_bdesc = config.buffer_descriptions;
@@ -277,30 +277,15 @@ namespace idk::vkn
 
 	}
 
+	void PipelineManager::PipelineObject::StoreBufferDescOverrides()
+	{
+		desc_helper.StoreBufferDescOverrides(config);
+	}
+
 	void PipelineManager::PipelineObject::Create(VulkanView& view,[[maybe_unused]] size_t fo_index)
 	{
 		//TODO: set the pipeline's modules
-		vector<std::pair<vk::ShaderStageFlagBits, vk::ShaderModule>> shaders;
-		auto old_desc = config.buffer_descriptions;
-		config.buffer_descriptions.clear();
-		for (auto& module : shader_handles)
-		{
-			auto& mod = module.as<ShaderModule>();
-			if (!mod.HasCurrent())
-				continue;
-			//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
-			//	mod.UpdateCurrent(fo_index);
-			auto& desc = mod.AttribDescriptions();
-			for (auto& desc_set : desc)
-				config.buffer_descriptions.emplace_back(desc_set);
-			//shaders.emplace_back(mod.Stage(), mod.Module());
-			if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
-				config.frag_shader = module;
-
-			if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
-				config.vert_shader = module;
-		}
-		ApplyBufferDescOverrides();
+		desc_helper.UseShaderAttribs(shader_handles, config);
 		if (rp && *rp)
 			pipeline.SetRenderPass(**rp, has_depth_stencil);
 		else

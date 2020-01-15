@@ -6,8 +6,7 @@
 //@brief	A factory class that creates AudioClip resources.
 
 //////////////////////////////////////////////////////////////////////////////////
-
-
+#pragma once
 #include <res/FileLoader.h>
 #include <audio/AudioClip.h>
 namespace idk

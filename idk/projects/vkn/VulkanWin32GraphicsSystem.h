@@ -42,6 +42,7 @@ namespace idk::vkn
 
 		VulkanState& GetVulkanHandle();
 	private:
+		void SkeletonToUniforms(const SkeletonTransforms& trf,hash_table<string,string>&)override;
 		std::unique_ptr<VulkanState> instance_;
 		void RenderBRDF(RscHandle<ShaderProgram> prog);
 

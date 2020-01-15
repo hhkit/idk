@@ -243,6 +243,7 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     <ClCompile Include="..\game\ReflectReg_GfxComponents.cpp" />
     <ClCompile Include="..\game\ReflectReg_Resources.cpp" />
     <ClCompile Include="launcher.cpp" />
+    <ClCompile Include="RenderDocExt.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

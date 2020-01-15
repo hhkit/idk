@@ -8,6 +8,40 @@
 #include <multithread_control.h>
 namespace idk::vkn
 {
+	struct PipelineDescHelper
+	{
+
+		vector<buffer_desc> buffer_desc_overrides;
+		hash_table<uint32_t, size_t> override_attr_mapping;
+
+		//Store first
+		void StoreBufferDescOverrides(const pipeline_config& config);
+		//Does not help you store your overrides.
+		void UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config)
+		{
+			config.buffer_descriptions.clear();
+			for (auto& module : shader_handles)
+			{
+				auto& mod = module.as<ShaderModule>();
+				if (!mod.HasCurrent())
+					continue;
+				//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
+				//	mod.UpdateCurrent(fo_index);
+				auto& desc = mod.AttribDescriptions();
+				for (auto& desc_set : desc)
+					config.buffer_descriptions.emplace_back(desc_set);
+				//shaders.emplace_back(mod.Stage(), mod.Module());
+				if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
+					config.frag_shader = module;
+
+				if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
+					config.vert_shader = module;
+				ApplyBufferDescOverrides(config);
+			}
+		}
+	private:
+		void ApplyBufferDescOverrides(pipeline_config& config);
+	};
 	class PipelineManager
 	{
 		struct PipelineObject;
@@ -21,7 +55,6 @@ namespace idk::vkn
 		void CheckForUpdates(uint32_t frame_index);
 		void RemovePipeline(VulkanPipeline* pipeline);
 	private:
-		//std::atomic_bool creating = false;
 		struct PipelineObject
 		{
 			pipeline_config config{};
@@ -31,12 +64,11 @@ namespace idk::vkn
 			VulkanPipeline pipeline;
 			VulkanPipeline back_pipeline;
 
-			vector<buffer_desc> buffer_desc_overrides;
-			hash_table<uint32_t, size_t> override_attr_mapping;
+			PipelineDescHelper desc_helper;
+
 
 			void StoreBufferDescOverrides();
 
-			void ApplyBufferDescOverrides();
 
 			//PipelineObject() = default;
 			//PipelineObject(PipelineObject&&) noexcept= default;
@@ -44,6 +76,7 @@ namespace idk::vkn
 			void Create(VulkanView& view, [[maybe_unused]] size_t fo_index);
 			void Swap();
 		};
+		//std::atomic_bool creating = false;
 		container_t pipelines;
 		raynal_rw_lock _lock;
 		hash_table<string, handle_t> prog_to_pipe2;

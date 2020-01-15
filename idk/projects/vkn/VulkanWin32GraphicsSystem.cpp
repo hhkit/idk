@@ -77,6 +77,9 @@ namespace idk::vkn
 
 	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
+		if (!instance_)
+			throw;
+		assert(instance_);
 	}
 	VulkanWin32GraphicsSystem::~VulkanWin32GraphicsSystem()
 	{
@@ -87,6 +90,8 @@ namespace idk::vkn
 		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
 		windows_->OnScreenSizeChanged.Listen([this](const ivec2&) { Instance().OnResize(); });
 
+		if (!instance_)
+			throw;
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();
 		_pm->View(instance_->View());
@@ -193,14 +198,11 @@ namespace idk::vkn
 
 		auto& brdf_texture =  _pimpl->BrdfLookupTable = Core::GetResourceManager().Create<Texture>();
 
-		auto m = brdf_texture->GetMeta();
-		m.internal_format = ColorFormat::RGF_16;
-		brdf_texture->SetMeta(m);
-		brdf_texture->Size(ivec2{ 512 });
-
 		TextureLoader loader;
-		TextureOptions options{ brdf_texture->GetMeta() };
-		TexCreateInfo info = ColorBufferTexInfo(brdf_texture->Size().x, brdf_texture->Size().y);
+		TextureOptions options; 
+		options.internal_format = TextureInternalFormat::RG_16_F;
+
+		TexCreateInfo info = ColorBufferTexInfo(512, 512);
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
@@ -254,8 +256,8 @@ namespace idk::vkn
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
 
-		pre_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
-		pre_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
+		shared_graphics_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
+		shared_graphics_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 
 		PostRenderData post_render_data;
 		post_render_data.shared_gfx_state = &shared_graphics_state;
@@ -263,9 +265,7 @@ namespace idk::vkn
 		//post_render_data.canvas_render_range = &curr_buffer.canvas_render_range;
 		//post_render_data.Init();
 
-		post_render_data.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
-		post_render_data.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
-
+		
 		hash_set<RscHandle<RenderTarget>> render_targets;
 
 		auto IsDontClear = [](const CameraData& camera)
@@ -279,7 +279,9 @@ namespace idk::vkn
 				{
 					if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
 					{
-						RscHandle<CubeMap> cubemap = clear;
+						const RscHandle<CubeMap>& cubemap = clear;
+						if (!cubemap)
+							return;
 						VknCubemap& cm = cubemap.as<VknCubemap>();
 						RscHandle<VknCubemap> conv = cm.GetConvoluted();
 						if (RscHandle < VknCubemap>{} == conv)
@@ -314,8 +316,6 @@ namespace idk::vkn
 
 			//curr_state.mesh_vtx = curr_buffer.mesh_vtx;
 			//curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
-			curr_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
-			curr_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
 			curr_state.ProcessMaterialInstances();
@@ -340,16 +340,32 @@ namespace idk::vkn
 				shared_graphics_state.update_instructions.emplace_back(BufferUpdateInst{buffer,data,0});
 			}
 		}
+		//render_targets.emplace(RscHandle<VknRenderTarget>{});
 		for (auto& prt : render_targets)
 		{
 			if (prt->NeedsFinalizing())
 				prt->Finalize();
 		}
+		if (RscHandle<VknRenderTarget>{}->NeedsFinalizing())
+			RscHandle<VknRenderTarget>{}->Finalize();
 		// */
+		curr_frame.ColorPick(std::move(request_buffer));
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
-		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(),*curr_signal.render_finished);
+
+
+		//vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		//vk::SubmitInfo si
+		//{
+		//	1,
+		//	&*curr_frame.GetPostRenderComplete(),
+		//	&stage,0,nullptr,1,
+		//	&* curr_signal.render_finished
+		//};
+		//View().GraphicsQueue().submit(si, {});
+		vector<RscHandle<RenderTarget>> targets{render_targets.begin(),render_targets.end()};
+		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(), *curr_signal.render_finished, targets);
 
 		}
 		catch (vk::SystemError& err)
@@ -358,6 +374,7 @@ namespace idk::vkn
 			throw;
 		}
 	}
+#pragma optimize("",off)
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
 		try
@@ -394,6 +411,13 @@ namespace idk::vkn
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{
 		return *(instance_.get());
+	}
+
+	void VulkanWin32GraphicsSystem::SkeletonToUniforms(const SkeletonTransforms& trf, hash_table<string, string>& out)
+	{
+		
+		auto& buffer = trf.bones_transforms;
+		out["BoneMat4Block"] = string{ reinterpret_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
 	}
 
 

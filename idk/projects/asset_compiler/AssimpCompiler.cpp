@@ -111,6 +111,7 @@ namespace idk
 			updated_metas.metadatas.emplace_back(t_meta);
 			auto& [guid, skele_var] = generated_resources.emplace_back(t_guid, std::move(skeleton));
 			skele = &std::get<anim::Skeleton>(skele_var);
+			skeleton_handle = RscHandle<anim::Skeleton>{t_guid};
 		}
 		// Here we decide whether or not to save as a prefab.
 		// If importer_scene has no skeleton, then we only save as prefab if there is more than 1 mesh

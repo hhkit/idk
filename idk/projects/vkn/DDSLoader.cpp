@@ -48,10 +48,6 @@ namespace idk::vkn
 	}
 	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& bundle)
 	{
-		//auto&& tm = *path_to_meta.metadatas[0].GetMeta<Texture>();
-		//TODO map the format
-		//tm.internal_format;
-		//TODO send the format and repeat mode in
 		auto meta = bundle.FetchMeta<Texture>();
 		auto tex = meta 
 			? Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(meta->guid)
@@ -81,12 +77,7 @@ namespace idk::vkn
 		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width,tci.height);
 		tci.internal_format = MapFormat(to.internal_format);
 		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
-		
-		bool linearize = !IsSrgb(to.internal_format);
-		if (linearize)
-		{
-			tci.internal_format = ToDecompressed(UnSrgb(MapFormat(to.internal_format)));
-		}
+
 		loader.LoadTexture(*tex, allocator, *load_fence,to,tci,iti);
 		return tex;
 	}

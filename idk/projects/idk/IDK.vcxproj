@@ -48,6 +48,8 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="gfx\ColorPickRequest.h" />
+    <ClInclude Include="gfx\ColorPickResult.h" />
     <ClInclude Include="common\Layer.h" />
     <ClInclude Include="common\LayerManager.h" />
     <ClInclude Include="common\Name.h" />
@@ -65,6 +67,7 @@
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\ShaderIncluder.h" />
     <ClInclude Include="gfx\ShaderSnippet.h" />
     <ClInclude Include="gfx\ShaderSnippetFactory.h" />
@@ -76,6 +79,7 @@
     <ClInclude Include="gfx\FontData.h" />
     <ClInclude Include="common\LayerMask.h" />
     <ClInclude Include="gfx\TextAlignment.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
     <ClInclude Include="ds\index_span.h" />
     <ClInclude Include="math\rect.h" />
@@ -129,10 +133,10 @@
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
     <ClInclude Include="phys\PhysicsSystem.h" />
-    <ClInclude Include="ReflectReg_Common.h" />
-    <ClInclude Include="ReflectReg_Components.h" />
-    <ClInclude Include="ReflectReg_GfxComponents.h" />
-    <ClInclude Include="ReflectReg_Resources.h" />
+    <ClInclude Include="ReflectReg_Common.inl" />
+    <ClInclude Include="ReflectReg_Components.inl" />
+    <ClInclude Include="ReflectReg_GfxComponents.inl" />
+    <ClInclude Include="ReflectReg_Resources.inl" />
     <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\CompiledAssets.h" />
     <ClInclude Include="res\EasyFactory.h" />
@@ -287,7 +291,7 @@
     <ClInclude Include="util\ioutils.h" />
     <ClInclude Include="util\macro_utils.h" />
     <ClInclude Include="reflect\reflect.h" />
-    <ClInclude Include="ReflectRegistration.h" />
+    <ClInclude Include="ReflectRegistration.inl" />
     <ClInclude Include="reflect\detail\typed_context.inl" />
     <ClInclude Include="res\Guid.h" />
     <ClInclude Include="res\Resource.h" />
@@ -319,6 +323,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="ColorPickRequest.cpp" />
     <ClCompile Include="common\Layer.cpp" />
     <ClCompile Include="common\LayerManager.cpp" />
     <ClCompile Include="common\Name.cpp" />
@@ -353,6 +358,7 @@
     <ClCompile Include="gfx\ShaderProgram.cpp" />
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp" />
     <ClCompile Include="gfx\ShaderTemplateLoader.cpp" />
+    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
     <ClCompile Include="gfx\ViewportUtil.cpp" />
     <ClCompile Include="math\ritters.cpp" />
     <ClCompile Include="math\shapes\box.cpp" />
@@ -400,7 +406,11 @@
     </ClCompile>
     <ClCompile Include="math\euler_angles.cpp" />
     <ClCompile Include="math\random.cpp" />
-    <ClCompile Include="phys\collision.cpp" />
+    <ClCompile Include="phys\collision.cpp">
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IncludeInUnityFile>
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">false</IncludeInUnityFile>
+      <IncludeInUnityFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</IncludeInUnityFile>
+    </ClCompile>
     <ClCompile Include="prefab\Prefab.cpp" />
     <ClCompile Include="prefab\PrefabData.cpp" />
     <ClCompile Include="prefab\PrefabUtility.cpp" />
@@ -496,6 +506,7 @@
     <None Include="meta\tuple.inl" />
     <None Include="meta\variant.inl" />
     <None Include="phys\raycasts\collision_raycast.inl" />
+    <None Include="ReflectReg_AnimComponents.inl" />
     <None Include="reflect\detail\meta_manager.inl" />
     <None Include="reflect\detail\table_storage.inl" />
     <None Include="reflect\detail\visit_detail.inl" />
@@ -584,6 +595,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -592,6 +604,7 @@
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -600,6 +613,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

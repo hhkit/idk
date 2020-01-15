@@ -11,6 +11,9 @@
 #include <gfx/FontData.h>
 #include <gfx/RenderRequest.h>
 
+#include <gfx/ColorPickRequest.h>
+#include <forward_list>
+
 #include <machine.h>
 
 namespace idk
@@ -30,6 +33,7 @@ namespace idk
 		VNormalMesh,
 		VNormalMeshPicker,
 		VSkinnedMesh,
+		VSkinnedMeshPicker,
         VParticle,
 		VSkyBox,
 		VPBRConvolute,
@@ -121,6 +125,9 @@ namespace idk
 		bool is_deferred()const;
 		bool is_deferred(bool enable);
 
+		ColorPickResult ColorPick(vec2 picking_pt,CameraData camera);
+		void BufferRequests();
+
 		size_t AddRenderRequest(RenderRequest&& request);
 
 		bool RenderRequestStatus(size_t index);
@@ -130,6 +137,11 @@ namespace idk
 		virtual GraphicsAPI GetAPI() = 0;
 		void LoadShaders();
 	protected:
+
+		std::forward_list<ColorPickRequest> request_stack;
+		vector<ColorPickRequest> request_buffer;
+
+
 		struct SpecialRenderBuffer
 		{
 			CameraData camera;
@@ -186,6 +198,7 @@ namespace idk
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+			alignas(machine::cache_line_sz) std::pair<size_t,size_t>   skinned_inst_range;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;
@@ -198,6 +211,9 @@ namespace idk
 
 		shared_ptr<pipeline_config> mesh_render_config{nullptr};
 
+		virtual void MaterialInstToUniforms(const MaterialInstance& mat_inst, hash_table<string, string>& uniform_buffers, hash_table<string, RscHandle<Texture>>& uniform_textures);
+		void AniRenderObjectToUniforms(const vector<SkeletonTransforms>&skeletons, const AnimatedRenderObject& mat_inst, hash_table<string, string>& uniform_buffers, hash_table<string, RscHandle<Texture>>& uniform_textures);
+		virtual void SkeletonToUniforms(const SkeletonTransforms& skeletons, hash_table<string, string>& uniform_buffers);
 		virtual void LoadShaderImpl() {}
 	private:
 
