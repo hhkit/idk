@@ -24,7 +24,7 @@ namespace idk::vkn
 
 		TransitionInfo TransitionInfo(const FrameGraphResource& rsc);
 
-		FrameGraphResource CreateTexture(AttachmentDescription dsc);
+		FrameGraphResource CreateTexture(TextureDescription dsc);
 		FrameGraphResource Rename(FrameGraphResource rsc);
 		string_view Name(FrameGraphResource fg)const;
 
@@ -41,7 +41,7 @@ namespace idk::vkn
 		fgr_id NextID();
 
 
-		vector<AttachmentDescription> resources;
+		vector<TextureDescription> resources;
 
 		vector<actual_resource_t> concrete_resources;
 		hash_table<fgr_id, actual_rsc_index_t> resource_map;

@@ -23,12 +23,12 @@ namespace idk::vkn
 		//AttachmentInfo CreateTexture(const Texture& texture);
 		fg_id NextID();
 
-		FrameGraphResource CreateTexture(AttachmentDescription desc);
+		FrameGraphResource CreateTexture(TextureDescription desc);
 		FrameGraphResourceReadOnly read(FrameGraphResource in_rsc);
 		FrameGraphResourceMutable write(FrameGraphResource target_rsc, WriteOptions opt = {});
 
-		void set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index);
-		void set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index);
+		void set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index , AttachmentDescription attachment_desc);
+		void set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc);
 
 		void BeginNode();
 		FrameGraphNode EndNode();
@@ -48,8 +48,8 @@ namespace idk::vkn
 			vector<FrameGraphResource> output_resources;
 			vector<FrameGraphResource> modified_resources;
 
-			vector<std::optional<fgr_id>> input_attachments;
-			vector<std::optional<fgr_id>> output_attachments;
+			vector<std::optional<FrameGraphAttachmentInfo>> input_attachments;
+			vector<std::optional<FrameGraphAttachmentInfo>> output_attachments;
 			void reset();
 		};
 

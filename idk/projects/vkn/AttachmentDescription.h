@@ -4,7 +4,7 @@
 namespace idk::vkn
 {
 
-	struct AttachmentDescription
+	struct TextureDescription
 	{
 		string_view name;
 		ivec2 size;
@@ -13,6 +13,12 @@ namespace idk::vkn
 		vk::ImageType type=vk::ImageType::e2D;
 		uint32_t layer_count=1;
 		vk::ImageTiling tiling_format;
-		//Format format;
+	};
+	struct AttachmentDescription
+	{
+		vk::ImageSubresourceRange sub_resource_range{};
+		vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+		std::optional<vk::Format> format{};
+		vk::ComponentMapping mapping{};
 	};
 }

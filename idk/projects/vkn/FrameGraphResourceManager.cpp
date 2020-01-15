@@ -4,7 +4,7 @@
 namespace idk::vkn
 {
 
-	FrameGraphResource FrameGraphResourceManager::CreateTexture(AttachmentDescription dsc)
+	FrameGraphResource FrameGraphResourceManager::CreateTexture(TextureDescription dsc)
 	{
 		auto rsc_index = resources.size();
 		resources.emplace_back(dsc);

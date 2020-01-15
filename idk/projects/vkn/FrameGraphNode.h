@@ -1,10 +1,11 @@
 #pragma once
 #include <idk.h>
 #include "FrameGraphResource.h"
+#include "AttachmentDescription.h"
 #include <ds/index_span.inl>
 namespace idk::vkn
 {
-
+	using FrameGraphAttachmentInfo = std::pair<fgr_id, AttachmentDescription>;
 	using fg_id = size_t;
 	struct FrameGraphNode
 	{
@@ -17,8 +18,8 @@ namespace idk::vkn
 		index_span output_resources;
 		index_span modified_resources;
 
-		vector<std::optional<fgr_id>> input_attachments;
-		vector<std::optional<fgr_id>> output_attachments;
+		vector<std::optional<FrameGraphAttachmentInfo>> input_attachments;
+		vector<std::optional<FrameGraphAttachmentInfo>> output_attachments;
 
 		auto GetReadSpan()const { return read_resources.to_span(*buffer); }
 		auto GetInputSpan()const { return input_resources.to_span(*buffer); }

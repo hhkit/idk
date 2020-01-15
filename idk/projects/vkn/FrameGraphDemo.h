@@ -51,8 +51,8 @@ namespace idk::vkn
 		FrameGraphResourceMutable depth_buffer;
 		FrameGraphDemoPass(FrameGraphBuilder& builder, RenderData&& render_data) :
 			rd{ std::move(render_data) },
-			gbuffer{ builder.write(builder.CreateTexture(AttachmentDescription{"gbuffer",ivec2{1280,720}})) },
-			depth_buffer{ builder.write(builder.CreateTexture(AttachmentDescription{"depth_buffer",ivec2{1280,720}})) }
+			gbuffer{ builder.write(builder.CreateTexture(TextureDescription{"gbuffer",ivec2{1280,720}})) },
+			depth_buffer{ builder.write(builder.CreateTexture(TextureDescription{"depth_buffer",ivec2{1280,720}})) }
 		{
 		}
 		void Execute(FrameGraphDetail::Context_t context) override

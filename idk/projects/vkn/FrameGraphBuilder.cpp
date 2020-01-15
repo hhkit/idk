@@ -3,7 +3,7 @@
 namespace idk::vkn
 {
 
-	FrameGraphResource FrameGraphBuilder::CreateTexture(AttachmentDescription desc)
+	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
 		return rsc_manager.CreateTexture(desc);
 	}
@@ -26,18 +26,18 @@ namespace idk::vkn
 		return rsc;
 	}
 
-	void FrameGraphBuilder::set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index)
+	void FrameGraphBuilder::set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{
 		auto size = std::max(curr_rsc.input_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.input_attachments.resize(size);
-		curr_rsc.input_attachments[attachment_index] = in_rsc.id;
+		curr_rsc.input_attachments[attachment_index] = { in_rsc.id,attachment_desc };
 	}
 
-	void FrameGraphBuilder::set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index)
+	void FrameGraphBuilder::set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{
 		auto size = std::max(curr_rsc.output_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.output_attachments.resize(size);
-		curr_rsc.output_attachments[attachment_index] = out_rsc.id;
+		curr_rsc.output_attachments[attachment_index] = { out_rsc.id,attachment_desc };
 	}
 
 	void FrameGraphBuilder::BeginNode()

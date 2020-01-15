@@ -244,8 +244,8 @@ namespace idk::vkn
 		void Execute(Context_t context);
 
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
-		VknRenderPass  CreateRenderPass(span<const std::optional<fgr_id>> input_rscs, span<const std::optional<fgr_id>> output_rscs);
-		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<fgr_id>> input_rscs, span<const std::optional<fgr_id>> output_rscs);
+		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs);
+		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs);
 
 		void CreateRenderPasses();
 
