@@ -484,7 +484,6 @@ namespace idk::vkn
 
 	void DeferredPass::LightPass(GBufferType type, PipelineThingy& the_interface, const GraphicsState& graphics_state, [[maybe_unused]]RenderStateV2& rs, std::optional<std::pair<size_t, size_t>> light_range,bool is_ambient)
 	{
-		//TODO: Prepare FSQ draw call + Forward Draw Calls
 		PbrDeferredPostBinding binding;
 		auto& def_bind = std::get<DeferredPostBinder>(binding.binders);
 		def_bind.type = type;
@@ -665,8 +664,6 @@ namespace idk::vkn
 				prev_pipeline = &pipeline;
 			}
 			auto& pipeline = *prev_pipeline;
-			//TODO Grab everything and render them
-			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			auto& mesh = obj.mesh.as<VulkanMesh>();
 			{
 				uint32_t set = 0;
@@ -743,7 +740,6 @@ namespace idk::vkn
 
 
 			std::array<float, 4> a{};
-			//TODO grab the appropriate framebuffer and begin renderpass
 
 			auto& camera = graphics_state.camera;
 			auto& g_buffer = *gbuffer.gbuffer;

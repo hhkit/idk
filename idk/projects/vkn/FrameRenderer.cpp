@@ -1468,7 +1468,6 @@ namespace idk::vkn
 					prev_pipeline = &pipeline;
 				}
 				auto& pipeline = *prev_pipeline;
-				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 				//auto& mesh = obj.mesh.as<VulkanMesh>();
 				{
@@ -1527,15 +1526,8 @@ namespace idk::vkn
 
 	VulkanPipeline& FrameRenderer::GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& modules)
 	{
-		// TODO: Replace with something that actually gets the pipeline
 		return GetPipelineManager().GetPipeline(config,modules,_current_frame_index);
 	}
-
-	//PipelineHandle_t FrameRenderer::GetPipelineHandle()
-	//{
-	//	// TODO: Replace with something that actually figures out what pipeline to use
-	//	return PipelineHandle_t{};
-	//}
 
 	void FrameRenderer::NonThreadedRender::Init(FrameRenderer* renderer)
 	{

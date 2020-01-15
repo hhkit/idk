@@ -355,7 +355,6 @@ namespace idk::vkn
 		{
 			auto& p_ro = p_ros[i];
 
-			//TODO set Viewport
 			SetViewport(cmd_buffer, vp_pos, vp_size);
 
 			//glDisable(GL_CULL_FACE); // vk::PipelineRasterizationStateCreateInfo

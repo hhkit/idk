@@ -31,6 +31,7 @@ namespace idk::vkn
 		{
 			auto& curr_node = graph_nodes[index];
 			size_t order = 0;
+			//TODO Get the dep_nodes from curr_node
 			span<const FrameGraphNode> dep_nodes;
 			for (auto& dep_node : dep_nodes)
 			{
@@ -49,7 +50,6 @@ namespace idk::vkn
 				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
 			}
 		}
-		//TODO: Create a function to check compatiblity between resources
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible,GetResourceManager(),std::placeholders::_1,std::placeholders::_2));
 	}
 

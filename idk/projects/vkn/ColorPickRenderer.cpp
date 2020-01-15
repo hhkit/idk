@@ -386,7 +386,6 @@ namespace idk::vkn
 					}
 				}
 			}
-			//TODO skinned stuff
 		}
 		size_t i = 0;
 		auto req_itr = requests.begin();
@@ -427,10 +426,8 @@ namespace idk::vkn
 				static_cast<uint32_t>(clear_val.size()),clear_val.data()
 			};
 			cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
-			//TODO Bind pipeline
 			SetViewport(cmd_buffer, vp_offset, vp_size);
 			SetScissor(cmd_buffer, vp_offset, vp_size);
-			//TODO DRAW
 
 			VulkanPipeline* prev_pipeline = nullptr;
 			vector<RscHandle<ShaderProgram>> shaders;
@@ -448,9 +445,6 @@ namespace idk::vkn
 					pipeline.Bind(cmd_buffer, View());
 					prev_pipeline = &pipeline;
 				}
-				//TODO Grab everything and render them
-				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-				//auto& mesh = obj.mesh.as<VulkanMesh>();
 				{
 					uint32_t set = 0;
 					for (auto& ods : p_ro.descriptor_sets)
@@ -463,7 +457,6 @@ namespace idk::vkn
 						++set;
 					}
 				}
-				//auto& renderer_req = *obj.renderer_req;
 
 				for (auto& [location, attrib] : p_ro.attrib_buffers)
 				{
