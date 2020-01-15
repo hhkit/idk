@@ -8,7 +8,6 @@ namespace idk
 {
     internal class Perlin
     {
-        private static Random _random = new Random();
         private static int[] _permutation;
 
         private static Vector2[] _gradients;
@@ -26,7 +25,7 @@ namespace idk
             /// shuffle the array
             for (var i = 0; i < p.Length; i++)
             {
-                var source = _random.Next(p.Length);
+                var source = Random.Range(0, p.Length);
 
                 var t = p[i];
                 p[i] = p[source];
@@ -52,7 +51,7 @@ namespace idk
 
                 do
                 {
-                    gradient = new Vector2((float)(_random.NextDouble() * 2 - 1), (float)(_random.NextDouble() * 2 - 1));
+                    gradient = new Vector2(Random.value * 2 - 1, Random.value * 2 - 1);
                 }
                 while (gradient.sqrMagnitude >= 1);
 
