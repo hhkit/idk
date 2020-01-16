@@ -6,7 +6,7 @@
 
 namespace idk::vkn
 {
-	struct DdsLoader;
+	class DdsLoader;
 	class VulkanTextureFactory
 		: public ResourceFactory<Texture>
 	{

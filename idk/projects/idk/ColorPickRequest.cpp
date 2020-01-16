@@ -32,19 +32,19 @@ void ColorPickRequest::set_result(result_t value)
 ColorPickResult::result_t ColorPickRequest::GetHandle(uint32_t id) const
 {
 	auto index = id - 1;
-	ColorPickResult::result_t result;
+	ColorPickResult::result_t res;
 
 	if (index < data.handles.size())
-		result = data.handles[index];
+		res = data.handles[index];
 	else {
-		index = index - data.handles.size();
+		index = index - static_cast<uint32_t>(data.handles.size());
 		if (index < (*data.ani_handles).size())
 		{
-			result = (*data.ani_handles)[index];
+			res = (*data.ani_handles)[index];
 		}
 	}
 
-	return result;
+	return res;
 }
 
 }

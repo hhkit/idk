@@ -358,7 +358,7 @@ namespace idk::vkn
 			}
 			auto vkn_att = idk::AttachmentInfo{
 				LoadOp::eLoad,StoreOp::eDontCare,
-				TextureInternalFormat::R_32_F,
+				TextureInternalFormat::DEPTH_32_F,
 				FilterMode::_enum::Nearest,
 				false,
 				gbuffer->DepthAttachment().buffer
