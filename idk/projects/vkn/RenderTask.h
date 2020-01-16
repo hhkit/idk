@@ -9,9 +9,10 @@
 #include <queue>
 #include <vkn/topological_sort.h>
 #include <gfx/Texture.h>
+#include <vkn/RenderPassObj.h>
 namespace idk::vkn
 {
-	using VknRenderPass = int;
+	using VknRenderPass = RenderPassObj;
 	using VknFrameBuffer = int;
 
 

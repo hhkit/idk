@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "FrameGraph.h"
+#include <vkn/VknTexture.h>
 namespace idk::vkn
 {
 
@@ -131,6 +132,128 @@ namespace idk::vkn
 				rp.PostExecute(node, context);
 			}
 		}
+	}
+	VknRenderPass FrameGraph::CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+	{
+		vk::Device device;
+		auto total_att = input_rscs.size() + output_rscs.size() + ((depth) ? 1 : 0);
+		vector<vk::AttachmentDescription> attachments;
+		vector<vk::AttachmentReference> attachment_input_refs(input_rscs.size());
+		vector<vk::AttachmentReference> attachment_output_refs(output_rscs.size());
+		vk::AttachmentReference depth_ref;
+		attachments.reserve(total_att);
+		{
+			auto& attachment_refs = attachment_input_refs;
+			auto ref_itr = attachment_refs.begin();
+			for (auto& input_rsc : input_rscs)
+			{
+				//TODO: Get the actual texture or format from the input_resource
+				VknTexture& tex;
+				if (input_rsc)
+				{
+					auto& [rsc_id, att_opt] = *input_rsc;
+					ref_itr->attachment = static_cast<uint32_t>(attachments.size());
+					attachments.emplace_back(vk::AttachmentDescription
+						{
+							//vk::AttachmentDescriptionFlagBits::eMayAlias
+							{},
+							(att_opt.format) ? tex.format : (*att_opt.format),
+							vk::SampleCountFlagBits::e1,
+							att_opt.load_op,
+							att_opt.store_op,
+							att_opt.stencil_load_op,
+							att_opt.stencil_store_op,
+							PreviousLayout(rsc_id),
+							NextLayout(rsc_id)
+						});
+				}
+				else
+				{
+					ref_itr->attachment = VK_ATTACHMENT_UNUSED;
+				}
+				++ref_itr;
+			}
+		}
+
+		{
+			auto& attachment_refs = attachment_output_refs;
+			auto ref_itr = attachment_refs.begin();
+			for (auto& output_rsc : output_rscs)
+			{
+				VknTexture& tex;
+				if (output_rsc)
+				{
+					auto& [rsc_id, att_opt] = *output_rsc;
+					ref_itr->attachment = static_cast<uint32_t>(attachments.size());
+					attachments.emplace_back(vk::AttachmentDescription
+						{
+							//vk::AttachmentDescriptionFlagBits::eMayAlias
+							{},
+							(att_opt.format) ? tex.format : (*att_opt.format),
+							vk::SampleCountFlagBits::e1,
+							att_opt.load_op,
+							att_opt.store_op,
+							att_opt.stencil_load_op,
+							att_opt.stencil_store_op,
+							PreviousLayout(rsc_id),
+							NextLayout(rsc_id)
+						});
+				}
+				else
+				{
+					ref_itr->attachment = VK_ATTACHMENT_UNUSED;
+				}
+				++ref_itr;
+			}
+		}
+		if (depth)
+		{
+			auto& [rsc_id, att_opt] = *depth;
+			VknTexture& tex;
+			depth_ref.attachment = attachments.size();
+			attachments.emplace_back(vk::AttachmentDescription
+			{
+				//vk::AttachmentDescriptionFlagBits::eMayAlias
+				{},
+				(att_opt.format) ? tex.format : (*att_opt.format),
+				vk::SampleCountFlagBits::e1,
+				att_opt.load_op,
+				att_opt.store_op,
+				att_opt.stencil_load_op,
+				att_opt.stencil_store_op,
+				PreviousLayout(rsc_id),//TODO: Implement the function to figure out the previous layout based on the id.
+				NextLayout(rsc_id)	   //TODO: Implement the function to figure out the next layout based on the id.
+			});
+		}
+		vk::SubpassDescription subpass_desc{
+			{},
+			vk::PipelineBindPoint::eGraphics,
+			static_cast<uint32_t>(attachment_input_refs.size()),
+			std::data(attachment_input_refs),
+			static_cast<uint32_t>(attachment_output_refs.size()),
+			std::data(attachment_output_refs),
+			nullptr,
+			(depth) ? &depth_ref : nullptr,
+			0,nullptr,			
+		};
+		vk::SubpassDependency subpass_dep
+		{
+			VK_SUBPASS_EXTERNAL,0,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput| vk::PipelineStageFlagBits::eLateFragmentTests,  //TODO: Figure this out
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, //TODO: Figure this out
+			vk::AccessFlagBits::eColorAttachmentWrite| vk::AccessFlagBits::eDepthStencilAttachmentWrite,//TODO: Figure this out
+			vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentRead,	//TODO: Figure this out
+			vk::DependencyFlagBits::eByRegion
+		};
+		vk::RenderPassCreateInfo rpci
+		{
+			vk::RenderPassCreateFlags{},
+			static_cast<uint32_t>(attachments.size()),
+			std::data(attachments),
+			1,&subpass_desc,
+			1,&subpass_dep
+		};
+		return device.createRenderPassUnique(rpci) ;
 	}
 	void FrameGraph::CreateRenderPasses()
 	{

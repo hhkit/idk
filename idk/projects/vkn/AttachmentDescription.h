@@ -16,6 +16,10 @@ namespace idk::vkn
 	};
 	struct AttachmentDescription
 	{
+		vk::AttachmentLoadOp load_op;
+		vk::AttachmentStoreOp store_op;
+		vk::AttachmentLoadOp  stencil_load_op;
+		vk::AttachmentStoreOp stencil_store_op;
 		vk::ImageSubresourceRange sub_resource_range{};
 		vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 		std::optional<vk::Format> format{};

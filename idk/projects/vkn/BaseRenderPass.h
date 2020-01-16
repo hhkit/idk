@@ -2,8 +2,6 @@
 #include "RenderContext.h"
 namespace idk::vkn
 {
-	using VknRenderPass = int;
-	using VknFrameBuffer = int;
 	struct FrameGraphNode;
 	struct FrameGraphResource;
 

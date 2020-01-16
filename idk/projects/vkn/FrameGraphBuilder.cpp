@@ -40,6 +40,11 @@ namespace idk::vkn
 		curr_rsc.output_attachments[attachment_index] = { out_rsc.id,attachment_desc };
 	}
 
+	void FrameGraphBuilder::set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
+	{
+		
+	}
+
 	void FrameGraphBuilder::BeginNode()
 	{
 		curr_rsc.reset();
