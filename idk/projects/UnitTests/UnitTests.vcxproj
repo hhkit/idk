@@ -55,6 +55,7 @@
     <ClCompile Include="Reflect\ReflectReg_Resources.cpp" />
     <ClCompile Include="TestGeometry.cpp" />
     <ClCompile Include="TestSerializeBinary.cpp" />
+    <ClCompile Include="TestSlidingWindow.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestDualSet.cpp" />
@@ -137,6 +138,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
@@ -180,6 +182,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>

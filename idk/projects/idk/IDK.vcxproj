@@ -48,6 +48,7 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\ColorPickRequest.h" />
     <ClInclude Include="gfx\ColorPickResult.h" />
     <ClInclude Include="common\Layer.h" />
@@ -493,6 +494,7 @@
     <None Include="ds\dual_set.inl" />
     <None Include="ds\ranged_for.inl" />
     <None Include="ds\result.inl" />
+    <None Include="ds\sliding_window.inl" />
     <None Include="ds\slow_tree.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />

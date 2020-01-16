@@ -57,6 +57,7 @@
       <Filter>Reflect</Filter>
     </ClCompile>
     <ClCompile Include="TestTest.cpp" />
+    <ClCompile Include="TestSlidingWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

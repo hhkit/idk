@@ -12,7 +12,7 @@ namespace idk
 	public:
 		void InstantiateServer();
 	private:
-		yojimbo::Address my_addr;
+		//yojimbo::Address my_addr;
 
 		void Init() override;
 		void Shutdown() override;

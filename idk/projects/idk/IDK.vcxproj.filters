@@ -952,6 +952,7 @@
     <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="network\NetworkSystem.h" />
+    <ClInclude Include="ds\sliding_window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1579,6 +1580,7 @@
     </None>
     <None Include="res\CompiledAssetLoader.inl" />
     <None Include="ReflectReg_AnimComponents.inl" />
+    <None Include="ds\sliding_window.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">
