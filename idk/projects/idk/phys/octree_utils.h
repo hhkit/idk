@@ -22,8 +22,9 @@ namespace idk
 		MAX
 	};
 
-	struct octree_node_data
+	struct octree_node_info
 	{
+		Handle<Collider> collider;
 		aabb bound;
 		Octant octant;
 	};
@@ -33,7 +34,7 @@ namespace idk
 		aabb bounds;
 
 		// objects
-		hash_table<Handle<Collider>, octree_node_data> object_list;
+		vector<octree_node_info> object_list;
 		// octants
 		shared_ptr<octree_node> children[8]{ nullptr };
 	};

@@ -18,13 +18,8 @@ namespace idk
 		// if(depth > 0)
 	}
 
-	void octree::insert(Handle<Collider> object)
+	void octree::insert(octree_node_info& data)
 	{
-		// construct the data
-		octree_node_data data;
-		// data.object_bounds = object->bounds();
-		data.bound = object->bounds();
-
 		if (_root == nullptr)
 		{
 			_root = std::make_shared<octree_node>();
@@ -34,7 +29,7 @@ namespace idk
 			_root->bounds.min = data.bound.min - offset_vec;
 			_root->bounds.max = data.bound.max + offset_vec;
 
-			_root->object_list.emplace(object, data);
+			_root->object_list.emplace_back(data);
 			return;
 		}
 
@@ -45,22 +40,38 @@ namespace idk
 			return;
 		}
 
-		insert_data(_root, object, data);
+		insert_data(_root, data);
 	}
 
-	void octree::insert_data(shared_ptr<octree_node> node, const Handle<Collider>& key, octree_node_data& val)
+	void octree::erase(Handle<Collider> object)
+	{
+	}
+
+	void octree::erase_from(Handle<Collider> object, shared_ptr<octree_node> node)
+	{
+		for (auto it = node->object_list.begin(); it < node->object_list.end(); ++it)
+		{
+			if (object == it->collider)
+			{
+				node->object_list.erase(it);
+				break;
+			}
+		}
+	}
+
+	void octree::insert_data(shared_ptr<octree_node> node, octree_node_info& data)
 	{
 		
 		// Simply put the object in the list if the current node has not hit the threshold for splitting
 		if (node->object_list.size() + 1 <= split_threshold)
 		{
-			node->object_list.emplace(key, val);
+			node->object_list.emplace_back(data);
 			return;
 		}
 
 		// Compute the quadrant
 		int quad_index = 0;
-		auto half_extents = val.bound.halfextents();
+		auto half_extents = data.bound.halfextents();
 		for (int i = 0; i < 3; ++i)
 		{
 
