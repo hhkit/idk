@@ -112,14 +112,14 @@ namespace idk
 	namespace detail
 	{
 		template<>
-		constexpr auto VectorConcat<float>(const tvec<float, 3>& vec, const int& homogenous)
+		inline auto VectorConcat<float>(const tvec<float, 3>& vec, const int& homogenous)
 		{
-			return tvec<float, 4>{vec[0], vec[1], vec[2], static_cast<float>(homogenous)};
+			return tvec<float, 4>{_mm_set_ps(static_cast<float>(homogenous), vec[2], vec[1], vec[0])};
 		}
 		template<>
-		constexpr auto VectorConcat<float>(const float& x, const float& y, const float& z, const int& homogenous)
+		inline auto VectorConcat<float>(const float& x, const float& y, const float& z, const int& homogenous)
 		{
-			return tvec<float, 4>{x, y, z, static_cast<float>(homogenous)};
+			return tvec<float, 4>{_mm_set_ps(static_cast<float>(homogenous), z, y ,x)};
 		}
 	}
 }
