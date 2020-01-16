@@ -158,10 +158,10 @@ namespace idk
 		}
 
 		template<>
-		constexpr auto VectorConcat<float>(const tvec<float, 3>& vec, const int& homogenous);
+		inline auto VectorConcat<float>(const tvec<float, 3>& vec, const int& homogenous);
 
 		template<>
-		constexpr auto VectorConcat<float>(const float& x, const float&y, const float& z, const int& homogenous);
+		inline auto VectorConcat<float>(const float& x, const float&y, const float& z, const int& homogenous);
 
 		template<typename T>
 		struct Abs {};
