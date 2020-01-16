@@ -20,6 +20,7 @@ namespace idk::vkn
 
 		vector<std::optional<FrameGraphAttachmentInfo>> input_attachments;
 		vector<std::optional<FrameGraphAttachmentInfo>> output_attachments;
+		std::optional<FrameGraphAttachmentInfo> depth_stencil;
 
 		auto GetReadSpan()const { return read_resources.to_span(*buffer); }
 		auto GetInputSpan()const { return input_resources.to_span(*buffer); }

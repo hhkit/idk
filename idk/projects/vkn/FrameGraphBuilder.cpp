@@ -62,7 +62,7 @@ namespace idk::vkn
 		auto output_span = consumed_resources.StoreResources(curr_rsc.output_resources);
 		auto modified_span = consumed_resources.StoreResources(curr_rsc.modified_resources);
 
-		return FrameGraphNode{ id,&consumed_resources.resources,input_span,read_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments };
+		return FrameGraphNode{ id,&consumed_resources.resources,input_span,read_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment };
 	}
 
 	void FrameGraphBuilder::CurrResources::reset()

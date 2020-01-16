@@ -264,8 +264,8 @@ namespace idk::vkn
 			auto& rp = *itr->second;
 			auto input_attachments = span{ node.input_attachments };
 			auto output_attachments = span{ node.output_attachments };
-			rp.render_pass = CreateRenderPass(input_attachments, output_attachments);
-			rp.frame_buffer = CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments);
+			rp.render_pass = CreateRenderPass(input_attachments, output_attachments,node.depth_stencil);
+			rp.frame_buffer = CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments, node.depth_stencil);
 		}
 	}
 
