@@ -2,6 +2,8 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <phys/collidable_shapes.h>
+#include <phys/octree_utils.h>
+
 namespace idk
 {
 	class Collider
@@ -25,6 +27,7 @@ namespace idk
 
 	private:
 		Handle<class RigidBody> _rigidbody;
+		shared_ptr<octree_node> _octree_node; // Do not trust outside of physics update
 		bool _static_cache = false;
         bool _active_cache = false;
 		friend class PhysicsSystem;

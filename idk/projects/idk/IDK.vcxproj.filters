@@ -954,6 +954,9 @@
     <ClInclude Include="phys\octree.h">
       <Filter>phys\util</Filter>
     </ClInclude>
+    <ClInclude Include="phys\octree_utils.h">
+      <Filter>phys\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
