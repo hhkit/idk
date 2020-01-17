@@ -168,12 +168,6 @@ namespace idk
 	}
 
 	template<typename T, size_t MaxObject>
-	inline bool sliding_window<T, MaxObject>::index_is_newer(size_t index) const
-	{
-		return sequence_greater_than(index, _start_index);
-	}
-
-	template<typename T, size_t MaxObject>
 	typename sliding_window<T, MaxObject>::iterator sliding_window<T, MaxObject>::begin()
 	{
 		return iterator{ &objects[_start_index], &objects[0], &objects[capacity()] };
@@ -239,6 +233,22 @@ namespace idk
 		}
 		else
 			return npos;
+	}
+
+	template<typename T, size_t MaxObject>
+	typename sliding_window<T, MaxObject>::iterator sliding_window<T, MaxObject>::find(size_t index)
+	{
+		if (contains(index))
+			return iterator{ &objects[index], &objects[0], &objects[capacity()] };
+		return end();
+	}
+
+	template<typename T, size_t MaxObject>
+	typename sliding_window<T, MaxObject>::const_iterator sliding_window<T, MaxObject>::find(size_t index) const
+	{
+		if (contains(index))
+			return const_iterator{ &objects[index], &objects[0], &objects[capacity()] };
+		return end();
 	}
 
 

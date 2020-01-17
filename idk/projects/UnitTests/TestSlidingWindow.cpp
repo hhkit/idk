@@ -65,9 +65,11 @@ TEST(SlidingWindowAccess, SlidingWindowTest)
 			{
 				std::cout << '(' << key << ',' << val << ')';
 			}
-			for (auto [elem, check] : zip(window, array<int, 8>{ 1, 2, 3, 4, 5, 6, 7, 5 }))
+			array<int, 8> res{ 1, 2, 3, 4, 5, 6, 7, 5 };
+			auto itr = res.begin();
+			for (auto [key, val] : window)
 			{
-				EXPECT_EQ(elem.value, check);
+				EXPECT_EQ(val, *itr++);
 			}
 
 			for (int i = 0; i < 8; ++i)
@@ -84,7 +86,7 @@ TEST(SlidingWindowAccess, SlidingWindowTest)
 
 		const auto& cwindow = window;
 		for (auto [key, value] : cwindow)
-			std::cout << '(' << key << ',' << value << ')';
+			EXPECT_EQ(key, value);
 
 		EXPECT_THROW(cwindow[9], std::out_of_range);
 		window.pop_front();

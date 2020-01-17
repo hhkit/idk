@@ -35,7 +35,6 @@ namespace idk
 		size_t start_index() const;
 		size_t end_index() const;
 		bool   contains(size_t index) const;
-		bool   index_is_newer(size_t index) const;
 
 		// iterators
 		iterator begin();
@@ -58,8 +57,11 @@ namespace idk
 		size_t push_back(const T& obj);
 		template<typename = std::enable_if_t<std::is_move_constructible_v<T>>>
 		size_t push_back(T&& obj);
-
 		size_t pop_front();
+
+		// lookup
+		iterator find(size_t index);
+		const_iterator find(size_t index) const;
 	private:
 		size_t _start_index{}, _end_index{};
 		union
