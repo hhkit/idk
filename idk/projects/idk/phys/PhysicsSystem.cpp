@@ -768,6 +768,7 @@ namespace idk
 			const auto extents = bounds.extents();
 			const auto width = max(max(extents.x, extents.y), extents.z);
 
+			_collider_octree.clear();
 			_collider_octree.rebuild(bounds.center(), width, 0);
 
 			for (auto& col : colliders)

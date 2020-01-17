@@ -34,8 +34,8 @@ namespace idk
 	{
 		Handle<Collider> collider;
 		aabb bound;
-		CollidableShapes predicted_shape;
-		LayerManager::layer_t layer;
+		// CollidableShapes predicted_shape;
+		// LayerManager::layer_t layer;
 		Octant octant;
 	};
 	struct octree_octants;
