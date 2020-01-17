@@ -21,13 +21,12 @@ namespace idk
 
 	void octree::rebuild()
 	{
+		auto info = get_all_info(_root);
 		clear();
-		for (auto& octant : _root->children)
-		{
-			octant.reset();
-			// Must be nullptr because erase_all should remove all references
-			IDK_ASSERT(octant == nullptr);
-		}
+		
+		// Re-insert all objects
+		for (auto& obj : info)
+			insert(obj);
 	}
 
 	void octree::rebuild(vec3 center, float width, unsigned depth, float offset)
@@ -223,11 +222,14 @@ namespace idk
 
 			for (auto& oct : node->children)
 			{
-				clear(oct);
-				oct.reset();
+				if (oct)
+				{
+					clear(oct);
+					oct.reset();
 
-				// Should not have any references to oct anymore
-				IDK_ASSERT(oct == nullptr);
+					// Should not have any references to oct anymore
+					IDK_ASSERT(oct == nullptr);
+				}
 			}
 		}
 	}
