@@ -5,6 +5,7 @@
 #include <phys/collision_result.h>
 #include <phys/raycasts/collision_raycast.h>
 #include <common/LayerManager.h>
+#include <phys/octree.h>
 
 namespace idk
 {
@@ -42,7 +43,8 @@ namespace idk
         bool AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const;
 
         bool debug_draw_colliders = false;
-
+		void BuildOctree();
+		void ClearOctree();
 	private:
 		struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
 		struct pair_hasher   { size_t operator()(const CollisionPair&) const; };
@@ -50,8 +52,13 @@ namespace idk
 		using CollisionList = hash_table<CollisionPair, phys::col_success, pair_hasher>;
 		CollisionList collisions;
 		CollisionList previous_collisions;
+
+		octree _collider_octree;
+		
 		void Init() override;
 		void Shutdown() override;
         void ApplyConfig(Config&) override {}
+
+		
 	};
 }

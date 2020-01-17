@@ -1,9 +1,15 @@
 #pragma once
+#include <idk.h>
 #include <core/Handle.h>
 #include <phys/collidable_shapes.h>
 
 namespace idk
 {
+	namespace phys::utils
+	{
+		static const float inv_sqrt_3 = 1.0f / sqrtf(3.0f);
+
+	}
 	enum Octant
 	{
 		NONE = -1,
@@ -22,20 +28,28 @@ namespace idk
 		MAX
 	};
 
+	
+
 	struct octree_node_info
 	{
 		Handle<Collider> collider;
 		aabb bound;
 		Octant octant;
 	};
+	struct octree_octants;
 
 	struct octree_node
 	{
-		aabb bounds;
+		aabb bound;
 
 		// objects
 		vector<octree_node_info> object_list;
 		// octants
 		shared_ptr<octree_node> children[8]{ nullptr };
+	};
+
+	struct octree_octants
+	{
+		octree_node octants[8];
 	};
 }

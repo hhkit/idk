@@ -25,11 +25,16 @@ namespace idk
 		bool is_enabled_and_active() const;
 		aabb bounds() const;
 
+		// Do not trust outside of physics update. Use getter so inspector does not reflect this.
+		shared_ptr<octree_node> get_octree_node() { return _octree_node; }
 	private:
 		Handle<class RigidBody> _rigidbody;
 		shared_ptr<octree_node> _octree_node; // Do not trust outside of physics update
 		bool _static_cache = false;
         bool _active_cache = false;
 		friend class PhysicsSystem;
+		friend class octree;
+
+		
 	};
 }

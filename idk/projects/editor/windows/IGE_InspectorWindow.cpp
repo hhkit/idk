@@ -57,6 +57,7 @@ of the editor.
 #include <iostream>
 
 #include <gfx/GraphicsSystem.h>
+#include <phys/PhysicsSystem.h>
 #include <ds/span.inl>
 #include <ds/result.inl>
 
@@ -111,6 +112,16 @@ namespace idk {
         if (ImGui::BeginMenuBar())
         {
             ImGui::Checkbox("Debug", &_debug_mode);
+            if (ImGui::Button("Build Octree"))
+            {
+                Core::GetSystem<PhysicsSystem>().BuildOctree();
+            }
+
+            if (ImGui::Button("Destroy Octree"))
+            {
+                Core::GetSystem<PhysicsSystem>().ClearOctree();
+            }
+
             ImGui::EndMenuBar();
         }
 

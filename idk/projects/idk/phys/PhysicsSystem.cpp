@@ -728,10 +728,38 @@ namespace idk
 
 	void PhysicsSystem::Init()
 	{
+		// GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
+		// {
+		// 	if (!collider)
+		// 		return;
+		// 
+		// 	octree_node_info info;
+		// 	info.collider = collider;
+		// 	info.bound = collider->bounds();
+		// 	_collider_octree.insert(info);
+		// };
+		// 
+		// GameState::GetGameState().OnObjectDestroy<Collider>() += [&](Handle<Collider> collider)
+		// {
+		// 	if (!collider)
+		// 		return;
+		// 
+		// 	_collider_octree.erase_from(collider, collider->get_octree_node());
+		// };
 	}
 
 	void PhysicsSystem::Shutdown()
 	{
+	}
+
+	void PhysicsSystem::BuildOctree()
+	{
+		_collider_octree.rebuild();
+	}
+
+	void PhysicsSystem::ClearOctree()
+	{
+		_collider_octree.clear();
 	}
 
 	size_t PhysicsSystem::pair_hasher::operator()(const CollisionPair& collision_pair) const
