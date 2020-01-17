@@ -442,9 +442,11 @@
     <ClCompile Include="CanvasRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
-    <ClCompile Include="DebugUtil.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp">
       <Filter>render\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugUtil.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -224,6 +224,13 @@ namespace idk::mono
 		BIND_END();
 
 		// game object
+		
+		BIND_START("idk.Bindings::GameObjectNew", uint64_t)
+		{
+			return Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject().id;
+		}
+		BIND_END();
+
 
 		BIND_START("idk.Bindings::GameObjectAddEngineComponent",uint64_t, Handle<GameObject> go, MonoString* component)
 			{
@@ -893,6 +900,19 @@ namespace idk::mono
 			audiosource->volume = volume;
 		}
 		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceClipGetVolume", float, Handle<AudioSource> audiosource, int index)
+		{
+			return audiosource->audio_clip_volume[index];
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSourceClipSetVolume", void, Handle<AudioSource> audiosource, int index, float volume)
+		{
+			audiosource->audio_clip_volume[index] = volume;
+		}
+		BIND_END();
+
 
 		BIND_START("idk.Bindings::AudioSourceGetPitch", float, Handle<AudioSource> audiosource)
 		{

@@ -81,11 +81,12 @@ namespace idk
 				auto last_write = std::chrono::system_clock::now().time_since_epoch().count();				
 				auto compile_time_name = pathify.stem().string() + ".time";
 				auto tmp_compile_path = tmp + compile_time_name.data();
+				fs::create_directories(fs::path(time_dir.sv()).parent_path());
 				{
 					std::ofstream str{ tmp_compile_path, std::ios::binary };
 					str << serialize_binary(last_write);
 				}
-				auto compile_time_path = string{ full_path } +".time";
+				auto compile_time_path = time_dir + ".time";
 				if (fs::exists(compile_time_path.sv()))
 					fs::remove(compile_time_path.sv());
 				rename(tmp_compile_path.data(), compile_time_path.data());
@@ -98,9 +99,9 @@ namespace idk
 						bool res = std::visit([&](const auto& elem) -> bool
 							{
 								using T = std::decay_t<decltype(elem)>;
-								auto stem = '/' + string{ guid } +string{ T::ext };
-								auto temp  = tmp + stem;
-								auto dest = destination + stem;
+								auto stem = fs::path{ (string{ guid } +string{ T::ext }).sv() };
+								auto temp = fs::absolute(fs::path{ tmp.sv() } / stem);
+								auto dest = fs::absolute(fs::path{ destination.sv() } / stem);
 
 								if constexpr (has_extension_v<T>)
 								{
@@ -116,11 +117,10 @@ namespace idk
 										resource_stream << serialize_binary(elem);
                                     }
 
-									auto dest_path = fs::path{ dest.sv() };
-									if(fs::exists(dest_path))
-										fs::remove(dest_path);
+									if(fs::exists(dest))
+										fs::remove(dest);
 
-									rename(temp.data(), dest.data());
+									rename(temp.string().data(), dest.string().data());
 									return true;
 								}
 								else

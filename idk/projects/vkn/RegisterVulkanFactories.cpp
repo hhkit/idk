@@ -46,14 +46,14 @@ void RegisterFactories()
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<Material>>(".frag");
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".fragspv");
 	//Core::GetResourceManager().RegisterExtensionLoader<ForwardingExtensionLoader<ShaderProgram>>(".vertspv");
-	Core::GetResourceManager().RegisterLoader<PngLoader>(".png");
-	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpg");
-	Core::GetResourceManager().RegisterLoader<PngLoader>(".jpeg");
-	Core::GetResourceManager().RegisterLoader<PngLoader>(".tga");
+	//Core::GetResourceManager().RegisterLoader<PngLoader>(".png");
+	//Core::GetResourceManager().RegisterLoader<PngLoader>(".jpg");
+	//Core::GetResourceManager().RegisterLoader<PngLoader>(".jpeg");
+	//Core::GetResourceManager().RegisterLoader<PngLoader>(".tga");
 	Core::GetResourceManager().RegisterLoader<VulkanSpvLoader>(".spv");
 	Core::GetResourceManager().RegisterLoader<ShaderTemplateLoader>(".tmpt");
 	Core::GetResourceManager().RegisterLoader<VknRenderTargetLoader>(RenderTarget::ext);
-	Core::GetResourceManager().RegisterLoader<DdsLoader>(".dds");
+	//Core::GetResourceManager().RegisterLoader<DdsLoader>(".dds");
 	Core::GetResourceManager().RegisterLoader<CbmLoader>(".cbm");
 	Core::GetResourceManager().RegisterLoader<TtfLoader>(".ttf");
 }

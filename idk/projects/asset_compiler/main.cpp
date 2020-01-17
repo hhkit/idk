@@ -68,17 +68,21 @@ int main(int argc, const char* argv[])
 	}
 	auto src = fs::absolute(fs::path{ argv[1] });
 	auto dest = fs::absolute(argc >= 3 ? fs::path{ argv[2] } : fs::path{ argv[1] }.parent_path());
+	auto time_dir = dest; if (argc >= 4) time_dir = argv[3];
 
 	std::cout << "compiling " << src.generic_string();
 	std::cout << " -> " << dest.generic_string();
 	std::cout << std::endl;
 
 	CompilerCore c;
+	c.time_dir = time_dir.string();
 	c.SetDestination(dest.generic_string());
 	c.RegisterCompiler<DDSCompiler>(".dds");
 	c.RegisterCompiler<TextureCompiler>(".tga");
 	c.RegisterCompiler<TextureCompiler>(".png");
 	c.RegisterCompiler<TextureCompiler>(".gif");
+	c.RegisterCompiler<TextureCompiler>(".jpg");
+	c.RegisterCompiler<TextureCompiler>(".jpeg");
 	c.RegisterCompiler<AssimpCompiler>(".fbx");
 	c.RegisterCompiler<AssimpCompiler>(".obj");
 	c.RegisterCompiler<AssimpCompiler>(".ma");

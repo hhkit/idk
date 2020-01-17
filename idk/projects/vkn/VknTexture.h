@@ -3,6 +3,7 @@
 #include "idk.h"
 #include "gfx/Texture.h"
 #include <vkn/MemoryAllocator.h>
+#include <gfx/CompiledTexture.h>
 namespace idk::vkn {
 
 	struct VknTexture
@@ -29,6 +30,7 @@ namespace idk::vkn {
 		VknTexture() = default;
 		~VknTexture();
 		//VknTexture(const VknTexture& rhs);
+		VknTexture(const CompiledTexture&);
 		VknTexture(VknTexture&& rhs) noexcept;
 
 		VknTexture& operator=(VknTexture&&) noexcept;

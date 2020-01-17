@@ -29,6 +29,8 @@
 #include <core/SystemManager.inl>
 #include <ds/result.inl>
 
+#include <vkn/DebugUtil.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -120,7 +122,7 @@ namespace idk::vkn
 
 		auto& brdf_pipeline = _pm->GetPipeline(brdf_config, shaders, 0);
 		FrameBufferBuilder builder;
-		builder.Begin(brdf_texture->Size());
+		builder.Begin("BRDF",brdf_texture->Size());
 		builder.AddAttachment(
 			AttachmentInfo
 			{
@@ -206,7 +208,12 @@ namespace idk::vkn
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
-	
+
+	namespace hlp
+	{
+		string DumpAllocators();
+		std::pair<size_t, size_t> DumpAllocator(std::ostream& out, const MemoryAllocator& alloc);
+	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		try
@@ -349,9 +356,20 @@ namespace idk::vkn
 		if (RscHandle<VknRenderTarget>{}->NeedsFinalizing())
 			RscHandle<VknRenderTarget>{}->Finalize();
 		// */
+		//string test = hlp::DumpAllocators();
 		curr_frame.ColorPick(std::move(request_buffer));
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
+#if 0
+		{
+			auto str = dbg::DumpFrameBufferAllocs();
+		}
+#endif
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
+#if 1
+		{
+			auto str = dbg::DumpFrameBufferAllocs();
+		}
+#endif
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
 
 
@@ -371,6 +389,10 @@ namespace idk::vkn
 		catch (vk::SystemError& err)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
+			auto fb_dump = dbg::DumpFrameBufferAllocs();
+			auto rt_dump = dbg::DumpRenderTargetAllocs();
+			LOG_CRASH_TO(LogPool::GFX, "Framebuffer Dump %s", fb_dump.c_str());
+			LOG_CRASH_TO(LogPool::GFX, "RenderTarget Dump %s", rt_dump.c_str());
 			throw;
 		}
 	}

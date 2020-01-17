@@ -87,12 +87,20 @@ namespace idk::vkn::hlp
 		using UniqueAlloc =std::unique_ptr<Alloc>;
 
 		MemoryAllocator();
-		MemoryAllocator(vk::Device d, vk::PhysicalDevice pd):device{d},pdevice{pd}{}
+		MemoryAllocator(vk::Device d, vk::PhysicalDevice pd);
+		MemoryAllocator(const MemoryAllocator&) = delete;
+		MemoryAllocator(MemoryAllocator&&) = default;
+		MemoryAllocator& operator=(const MemoryAllocator&) = delete;
+		MemoryAllocator& operator=(MemoryAllocator&&) = default;
 
 		UniqueAlloc Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req);
 		UniqueAlloc Allocate(vk::Image image, vk::MemoryPropertyFlags prop);
 		UniqueAlloc Allocate(vk::Buffer& buffer, vk::MemoryPropertyFlags prop);
 		UniqueAlloc Allocate(vk::PhysicalDevice pd, vk::Device d, vk::Buffer& buffer, vk::MemoryPropertyFlags prop);
+		~MemoryAllocator();
+		friend string DumpAllocators();
+	
+		friend std::pair<size_t, size_t> DumpAllocator(std::ostream& out, const MemoryAllocator& alloc);
 	private:
 		vk::Device device;
 		vk::PhysicalDevice pdevice;
