@@ -10,14 +10,21 @@ namespace idk::vkn
 
 	FrameGraphResourceReadOnly FrameGraphBuilder::read(FrameGraphResource in_rsc)
 	{
-		auto rsc = rsc_manager.Rename(in_rsc);
+		//auto rsc = rsc_manager.Rename(in_rsc);
 		curr_rsc.input_resources.emplace_back(in_rsc);
-		return rsc;
+		return in_rsc; //rsc;
 	}
 
 	FrameGraphResourceMutable FrameGraphBuilder::write(FrameGraphResource target_rsc, WriteOptions opt)
 	{
-		auto rsc = rsc_manager.Rename(target_rsc);
+		//Ensure that a resource is never written to twice. Manually create order by writing to the result of another write only once.
+		while (rsc_manager.IsWriteRenamed(target_rsc))
+		{
+			LOG_WARNING_TO(LogPool::GFX, "Warning: Writing to resource %ull twice.",target_rsc.id);
+			target_rsc = rsc_manager.WriteRenamed(target_rsc);
+		}
+
+		auto rsc = rsc_manager.WriteRename(target_rsc);
 		if (!opt.clear)
 			curr_rsc.input_resources.emplace_back(target_rsc);
 		else
@@ -40,9 +47,9 @@ namespace idk::vkn
 		curr_rsc.output_attachments[attachment_index] = { out_rsc.id,attachment_desc };
 	}
 
-	void FrameGraphBuilder::set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
+	void FrameGraphBuilder::set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, AttachmentDescription attachment_desc)
 	{
-		
+		curr_rsc.depth_attachment = {out_rsc.id,attachment_desc};
 	}
 
 	void FrameGraphBuilder::BeginNode()

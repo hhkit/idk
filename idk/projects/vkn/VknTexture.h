@@ -3,6 +3,7 @@
 #include "idk.h"
 #include "gfx/Texture.h"
 #include <vkn/MemoryAllocator.h>
+#include <meta/stl_hack.h>
 namespace idk::vkn {
 
 	struct VknTexture
@@ -28,7 +29,7 @@ namespace idk::vkn {
 		vk::ImageAspectFlags ImageAspects();
 		VknTexture() = default;
 		~VknTexture();
-		//VknTexture(const VknTexture& rhs);
+		VknTexture(const VknTexture& rhs)=delete;
 		VknTexture(VknTexture&& rhs) noexcept;
 
 		VknTexture& operator=(VknTexture&&) noexcept;
@@ -42,3 +43,5 @@ namespace idk::vkn {
 
 	};
 };
+
+MARK_NON_COPY_CTORABLE(idk::vkn::VknTexture)

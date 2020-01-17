@@ -12,6 +12,7 @@ namespace idk::vkn
 
 	FrameGraphNode& FrameGraph::StoreNode(FrameGraphNode&& node)
 	{
+		node_lookup.emplace(node.id, nodes.size());
 		auto& stored_node = nodes.emplace_back(std::move(node));
 		tmp_graph.in_nodes.emplace(node.id, node.input_resources);
 		for (auto& written_rsc : node.GetOutputSpan())
@@ -51,7 +52,7 @@ namespace idk::vkn
 				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
 			}
 		}
-		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible,GetResourceManager(),std::placeholders::_1,std::placeholders::_2));
+		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible,&GetResourceManager(),std::placeholders::_1,std::placeholders::_2));
 	}
 
 	void FrameGraph::CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm)
@@ -133,97 +134,80 @@ namespace idk::vkn
 			}
 		}
 	}
-	VknRenderPass FrameGraph::CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+
+	vk::RenderPassCreateInfo FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
-		vk::Device device;
 		auto total_att = input_rscs.size() + output_rscs.size() + ((depth) ? 1 : 0);
 		vector<vk::AttachmentDescription> attachments;
 		vector<vk::AttachmentReference> attachment_input_refs(input_rscs.size());
 		vector<vk::AttachmentReference> attachment_output_refs(output_rscs.size());
 		vk::AttachmentReference depth_ref;
+		auto& rsc_manager = GetResourceManager();
+		auto& nodes_lookup = node_lookup;
+		auto& nodes_buffer = nodes;
 		attachments.reserve(total_att);
+		auto process_attachment = [&nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref)
 		{
-			auto& attachment_refs = attachment_input_refs;
-			auto ref_itr = attachment_refs.begin();
-			for (auto& input_rsc : input_rscs)
+			auto find_input_layout = [](const FrameGraphNode& node, fgr_id id)
 			{
-				//TODO: Get the actual texture or format from the input_resource
-				VknTexture& tex;
-				if (input_rsc)
+				for (auto& o_input : node.input_attachments)
 				{
-					auto& [rsc_id, att_opt] = *input_rsc;
-					ref_itr->attachment = static_cast<uint32_t>(attachments.size());
-					attachments.emplace_back(vk::AttachmentDescription
-						{
-							//vk::AttachmentDescriptionFlagBits::eMayAlias
-							{},
-							(att_opt.format) ? tex.format : (*att_opt.format),
-							vk::SampleCountFlagBits::e1,
-							att_opt.load_op,
-							att_opt.store_op,
-							att_opt.stencil_load_op,
-							att_opt.stencil_store_op,
-							PreviousLayout(rsc_id),
-							NextLayout(rsc_id)
-						});
+					if (o_input && o_input->first ==id)
+					{
+						return o_input->second.layout;
+					}
 				}
-				else
-				{
-					ref_itr->attachment = VK_ATTACHMENT_UNUSED;
-				}
+				return vk::ImageLayout::eGeneral;
+			};
+			if (attachment_info)
+			{
+				VknTexture& tex = *rsc_manager.Get<VknTexture>(attachment_info->first);
+				auto& [rsc_id, att_opt] = *attachment_info;
+				attachment_ref.attachment = static_cast<uint32_t>(attachments.size());
+				auto prev_id = rsc_manager.GetPrevious(rsc_id);
+				vk::ImageLayout prev_layout = att_opt.layout;
+				if (prev_id)
+					prev_layout = find_input_layout(nodes_buffer[nodes_lookup.find(*prev_id)->second], *prev_id);
+				attachments.emplace_back(vk::AttachmentDescription
+					{
+						//vk::AttachmentDescriptionFlagBits::eMayAlias
+						{},
+						(att_opt.format) ? tex.format : (*att_opt.format),
+						vk::SampleCountFlagBits::e1,
+						att_opt.load_op,
+						att_opt.store_op,
+						att_opt.stencil_load_op,
+						att_opt.stencil_store_op,
+						(att_opt.load_op != vk::AttachmentLoadOp::eLoad) ? vk::ImageLayout::eUndefined : prev_layout,
+						att_opt.layout,
+					});
+			}
+			else
+			{
+				attachment_ref.attachment = VK_ATTACHMENT_UNUSED;
+			}
+		};
+		auto process_attachments = [&rsc_manager, &attachments, &process_attachment](auto& attachment_infos, auto& attachment_refs)
+		{
+			auto ref_itr = attachment_refs.begin();
+			for (auto& input_rsc : attachment_infos)
+			{
+
+				process_attachment(input_rsc, *ref_itr);
 				++ref_itr;
 			}
+		};
+
+		{
+			process_attachments(input_rscs, attachment_input_refs);
 		}
 
 		{
-			auto& attachment_refs = attachment_output_refs;
-			auto ref_itr = attachment_refs.begin();
-			for (auto& output_rsc : output_rscs)
-			{
-				VknTexture& tex;
-				if (output_rsc)
-				{
-					auto& [rsc_id, att_opt] = *output_rsc;
-					ref_itr->attachment = static_cast<uint32_t>(attachments.size());
-					attachments.emplace_back(vk::AttachmentDescription
-						{
-							//vk::AttachmentDescriptionFlagBits::eMayAlias
-							{},
-							(att_opt.format) ? tex.format : (*att_opt.format),
-							vk::SampleCountFlagBits::e1,
-							att_opt.load_op,
-							att_opt.store_op,
-							att_opt.stencil_load_op,
-							att_opt.stencil_store_op,
-							PreviousLayout(rsc_id),
-							NextLayout(rsc_id)
-						});
-				}
-				else
-				{
-					ref_itr->attachment = VK_ATTACHMENT_UNUSED;
-				}
-				++ref_itr;
-			}
+			process_attachments(input_rscs, attachment_output_refs);
 		}
 		if (depth)
 		{
-			auto& [rsc_id, att_opt] = *depth;
-			VknTexture& tex;
-			depth_ref.attachment = attachments.size();
-			attachments.emplace_back(vk::AttachmentDescription
-			{
-				//vk::AttachmentDescriptionFlagBits::eMayAlias
-				{},
-				(att_opt.format) ? tex.format : (*att_opt.format),
-				vk::SampleCountFlagBits::e1,
-				att_opt.load_op,
-				att_opt.store_op,
-				att_opt.stencil_load_op,
-				att_opt.stencil_store_op,
-				PreviousLayout(rsc_id),//TODO: Implement the function to figure out the previous layout based on the id.
-				NextLayout(rsc_id)	   //TODO: Implement the function to figure out the next layout based on the id.
-			});
+			process_attachment(depth, depth_ref);
 		}
 		vk::SubpassDescription subpass_desc{
 			{},
@@ -234,14 +218,14 @@ namespace idk::vkn
 			std::data(attachment_output_refs),
 			nullptr,
 			(depth) ? &depth_ref : nullptr,
-			0,nullptr,			
+			0,nullptr,
 		};
 		vk::SubpassDependency subpass_dep
 		{
 			VK_SUBPASS_EXTERNAL,0,
-			vk::PipelineStageFlagBits::eColorAttachmentOutput| vk::PipelineStageFlagBits::eLateFragmentTests,  //TODO: Figure this out
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests,  //TODO: Figure this out
 			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, //TODO: Figure this out
-			vk::AccessFlagBits::eColorAttachmentWrite| vk::AccessFlagBits::eDepthStencilAttachmentWrite,//TODO: Figure this out
+			vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,//TODO: Figure this out
 			vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentRead,	//TODO: Figure this out
 			vk::DependencyFlagBits::eByRegion
 		};
@@ -250,13 +234,20 @@ namespace idk::vkn
 			vk::RenderPassCreateFlags{},
 			static_cast<uint32_t>(attachments.size()),
 			std::data(attachments),
-			1,&subpass_desc,
-			1,&subpass_dep
+			1,& subpass_desc,
+			1,& subpass_dep
 		};
-		return device.createRenderPassUnique(rpci) ;
+		return rpci;
+	}
+
+	VknRenderPass FrameGraph::CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+	{
+		vk::Device device;
+		return device.createRenderPassUnique(CreateRenderPassInfo(input_rscs,output_rscs,depth));
 	}
 	void FrameGraph::CreateRenderPasses()
 	{
+		vector < std::tuple<FrameGraphNode*,BaseRenderPass*, vk::RenderPassCreateInfo>> create_info{};
 		for (auto node_index : execution_order)
 		{
 			auto& node = nodes[node_index];

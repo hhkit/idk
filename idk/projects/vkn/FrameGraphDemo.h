@@ -3,10 +3,9 @@
 
 #include <vkn/FrameGraphBuilder.h>
 #include <vkn/FrameGraph.h>
-
+#include <gfx/RenderObject.h>
 namespace idk::vkn
 {
-	struct RenderObject;
 	struct RenderState
 	{
 
@@ -15,16 +14,22 @@ namespace idk::vkn
 	{
 		static void DrawRenderObject(const RenderObject& ro, FrameGraphDetail::Context_t context)
 		{
-			for (auto& ub : ro.uniforms.ubos)
+			for (auto& [name,data_idx_span] : ro.uniforms.ubos)
 			{
-				context.BindUniform(ub.name, ub.data);
+				size_t i = 0;
+				auto data_span = ro.uniforms.get_span<string>(data_idx_span);
+				for(auto& data : data_span)
+					context.BindUniform(name,i++,data);
 			}
-			for (auto& tex : ro.uniforms.tex)
+			for (auto& [name, data_idx_span]: ro.uniforms.tex)
 			{
-				context.BindUniform(tex.name, tex.data);
+				size_t i = 0;
+				auto data_span = ro.uniforms.get_span<string>(data_idx_span);
+				for (auto& data : data_span)
+					context.BindUniform(name, i++, data);
 			}
-			for (auto& vb : ro.vbos)
-				context.BindVertexBuffer(vb.binding, vb.buffer, vb.offset);
+			for (auto& vb : ro.vbo_bindings)
+				context.BindVertexBuffer(vb.binding, vb.buffer_index, vb.offset);
 
 			auto num_inst = ro.num_instances;
 			auto first_vert = ro.first_vertex;

@@ -8,7 +8,7 @@ namespace idk::vkn
 
 	struct BaseRenderPass
 	{
-		//BaseRenderPass(FrameGraphBuilder&,...); //<-- First parameter required, will be supplemented when created.
+		//BaseRenderPass(FrameGraphBuilder&,...); //<-- First parameter required, will be forwarded from add command.
 		using Context_t = FrameGraphDetail::Context_t;
 		VknRenderPass  render_pass;
 		VknFrameBuffer frame_buffer;

@@ -244,6 +244,7 @@ namespace idk::vkn
 		void Execute(Context_t context);
 
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
+		vk::RenderPassCreateInfo  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
 		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 
@@ -254,6 +255,8 @@ namespace idk::vkn
 
 		FrameGraphBuilder graph_builder;
 		vector<FrameGraphNode> nodes;
+		//fg id to index in nodes;
+		hash_table<fg_id, size_t> node_lookup;
 		vector<size_t> execution_order;
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
 

@@ -436,6 +436,7 @@
     <ClCompile Include="FrameGraphResourceManager.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
+    <ClCompile Include="graph_test.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="ParticleRenderer.cpp" />
     <ClCompile Include="PipelineBinders.cpp" />

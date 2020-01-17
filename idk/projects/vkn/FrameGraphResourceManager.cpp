@@ -16,8 +16,26 @@ namespace idk::vkn
 	{
 		auto next_id = NextID();
 		resource_handles.emplace(next_id, resource_handles.find(rsc.id)->second);
-		renamed_resources.emplace(rsc.id, next_id);
+		renamed_resources.emplace(next_id, rsc.id);
 		return FrameGraphResource{ next_id };
+	}
+
+	FrameGraphResource FrameGraphResourceManager::WriteRename(FrameGraphResource rsc)
+	{
+		auto renamed = Rename(rsc);
+		write_renamed.emplace(rsc.id,renamed.id);
+		return renamed;
+	}
+
+	FrameGraphResource FrameGraphResourceManager::WriteRenamed(FrameGraphResource rsc)const
+	{
+		return FrameGraphResource{ write_renamed.find(rsc.id)->second };
+	}
+
+
+	bool FrameGraphResourceManager::IsWriteRenamed(FrameGraphResource rsc) const
+	{
+		return write_renamed.find(rsc.id) != write_renamed.end();
 	}
 
 	string_view FrameGraphResourceManager::Name(FrameGraphResource fg) const
@@ -39,9 +57,18 @@ namespace idk::vkn
 		return l_desc.format == r_desc.format && l_desc.type == r_desc.type && l_desc.layer_count == r_desc.layer_count && l_desc.aspect == r_desc.aspect;
 	}
 
-	FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(FrameGraphResource rsc)
+	FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(fgr_id rsc)
 	{
-		return concrete_resources[resource_map.find(rsc.id)->second];
+		return concrete_resources[resource_map.find(rsc)->second];
 	}
 
+	std::optional<fgr_id> FrameGraphResourceManager::GetPrevious(fgr_id curr) const
+	{
+		auto itr = renamed_resources.find(curr);
+		std::optional<fgr_id> result{};
+		if (itr != renamed_resources.end())
+			result = itr->first;
+		return result;
+	}
 }
+

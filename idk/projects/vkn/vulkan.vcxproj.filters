@@ -499,6 +499,9 @@
     <ClCompile Include="ColorPickRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
+    <ClCompile Include="graph_test.cpp">
+      <Filter>render\graph\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -542,6 +545,9 @@
     </Filter>
     <Filter Include="render\graph">
       <UniqueIdentifier>{5f3cc1a0-c271-4aa7-af4f-337e3659978d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\graph\test">
+      <UniqueIdentifier>{06ce5f56-4411-4f6d-8f81-abc87db95a7f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

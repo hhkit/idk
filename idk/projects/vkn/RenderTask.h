@@ -62,8 +62,8 @@ namespace idk::vkn
 		void BindIndexBuffer(const IndexBuffer& buffer, size_t offset, IndexType indexType);
 
 #pragma region Uniforms
-		void BindUniform(string_view name, string_view data);
-		void BindUniform(string_view name, const Texture& texture);
+		void BindUniform(string_view name,uint32_t index, string_view data);
+		void BindUniform(string_view name,uint32_t index, const Texture& texture);
 #pragma endregion
 
 		void BindShader(const ShaderModule& shader);
