@@ -211,7 +211,7 @@ namespace idk
 	typename circular_buffer<T, SZ>::reference circular_buffer<T, SZ>::operator[](size_t index)
 	{
 		auto buf_end = reinterpret_cast<pointer>(std::end(_buf));
-		auto starting_arm = buf_end - _start;
+		auto starting_arm = static_cast<size_t>(buf_end - _start);
 		if (starting_arm > index)
 			return _start[index];
 		else
