@@ -90,15 +90,14 @@ namespace idk
 	}
 
 	template<typename T1, typename T2>
-	template<typename>
-	typename dual_set<T1, T2>::const_iterator dual_set<T1, T2>::find(const T1& key)
+	typename dual_set<T1, T2>::const_iterator dual_set<T1, T2>::find(const T1& key) const
 	{
 		return find_first(key);
 	}
 
 	template<typename T1, typename T2>
 	template<typename>
-	typename dual_set<T1, T2>::const_iterator  dual_set<T1, T2>::find(const T2& key)
+	typename dual_set<T1, T2>::const_iterator  dual_set<T1, T2>::find(const T2& key) const
 	{
 		return find_second(key);
 	}
@@ -112,12 +111,12 @@ namespace idk
 	}
 
 	template<typename T1, typename T2>
-	typename dual_set<T1, T2>::const_iterator dual_set<T1, T2>::find_first(const T1& findme)
+	typename dual_set<T1, T2>::const_iterator dual_set<T1, T2>::find_first(const T1& findme) const
 	{
 		return _table_first.find(findme);
 	}
 	template<typename T1, typename T2>
-	typename dual_set<T1, T2>::const_iterator  dual_set<T1, T2>::find_second(const T2& findme)
+	typename dual_set<T1, T2>::const_iterator  dual_set<T1, T2>::find_second(const T2& findme) const
 	{
 		const auto itr_s = _table_second.find(findme);
 		if (itr_s == _table_second.end())
