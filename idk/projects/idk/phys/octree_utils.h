@@ -30,10 +30,12 @@ namespace idk
 
 	
 
-	struct octree_node_info
+	struct collision_info
 	{
 		Handle<Collider> collider;
 		aabb bound;
+		CollidableShapes predicted_shape;
+		LayerManager::layer_t layer;
 		Octant octant;
 	};
 	struct octree_octants;
@@ -43,7 +45,7 @@ namespace idk
 		aabb bound;
 
 		// objects
-		vector<octree_node_info> object_list;
+		hash_table<Handle<Collider>, collision_info> object_list;
 		// octants
 		shared_ptr<octree_node> children[8]{ nullptr };
 	};

@@ -43,7 +43,7 @@ namespace idk
 			insert(obj);
 	}
 
-	void octree::insert(octree_node_info& data)
+	void octree::insert(collision_info& data)
 	{
 		if (_root == nullptr)
 		{
@@ -54,7 +54,7 @@ namespace idk
 			_root->bound.min = data.bound.min - offset_vec;
 			_root->bound.max = data.bound.max + offset_vec;
 
-			_root->object_list.emplace_back(data);
+			_root->object_list.emplace(data.collider, data);
 			data.collider->_octree_node = _root;
 			return;
 		}
@@ -83,14 +83,11 @@ namespace idk
 		if (!node)
 			return;
 
-		for (auto it = node->object_list.begin(); it < node->object_list.end(); ++it)
+		auto res = node->object_list.find(object);
+		if (res != node->object_list.end())
 		{
-			if (object == it->collider)
-			{
-				object->_octree_node.reset();
-				node->object_list.erase(it);
-				break;
-			}
+			object->_octree_node.reset();
+			node->object_list.erase(res);
 		}
 	}
 
@@ -100,7 +97,7 @@ namespace idk
 		{
 			// Remove all references to this node from all the objects
 			for (auto& obj : _root->object_list)
-				obj.collider->_octree_node.reset();
+				obj.second.collider->_octree_node.reset();
 
 			_root->object_list.clear();
 			for (auto& oct : _root->children)
@@ -115,20 +112,20 @@ namespace idk
 		clear(_root);
 	}
 
-	vector<octree_node_info> octree::get_all_info(shared_ptr<octree_node> node)
+	vector<collision_info> octree::get_all_info(shared_ptr<octree_node> node)
 	{
-		vector<octree_node_info> info;
+		vector<collision_info> info;
 		info.reserve(object_count);
 		get_all_info(_root, info);
 		return info;
 	}
 
-	void octree::get_all_info(shared_ptr<octree_node> node, vector<octree_node_info>& info)
+	void octree::get_all_info(shared_ptr<octree_node> node, vector<collision_info>& info)
 	{
 		if (node)
 		{
 			for (auto& obj : node->object_list)
-				info.push_back(obj);
+				info.push_back(obj.second);
 
 			for (auto& child : node->children)
 				get_all_info(child, info);
@@ -136,13 +133,13 @@ namespace idk
 
 	}
 
-	void octree::insert_data(shared_ptr<octree_node> node, octree_node_info& data)
+	void octree::insert_data(shared_ptr<octree_node> node, collision_info& data)
 	{
 		
 		// Simply put the object in the list if the current node has not hit the threshold for splitting
 		if (node->object_list.size() + 1 <= split_threshold)
 		{
-			node->object_list.emplace_back(data);
+			node->object_list.emplace(data.collider, data);
 			return;
 		}
 
@@ -190,7 +187,7 @@ namespace idk
 		else
 		{
 			data.collider->_octree_node = node;
-			node->object_list.emplace_back(data);
+			node->object_list.emplace(data.collider, data);
 		}
 	}
 
@@ -200,7 +197,7 @@ namespace idk
 		{
 			// Remove all references to this node from all the objects
 			for (auto& obj : node->object_list)
-				obj.collider->_octree_node.reset();
+				obj.second.collider->_octree_node.reset();
 
 			node->object_list.clear();
 			for (auto& oct : node->children)
@@ -216,7 +213,7 @@ namespace idk
 		{
 			// Remove all references to this node from all the objects
 			for (auto& obj : node->object_list)
-				obj.collider->_octree_node.reset();
+				obj.second.collider->_octree_node.reset();
 
 			node->object_list.clear();
 

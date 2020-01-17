@@ -25,7 +25,7 @@ namespace idk
 		// void rebuild(float offset = 2.0f, octree_obj obj = octree_obj{});
 		void rebuild();
 		void rebuild(vec3 center, float width, unsigned depth, float offset = 2.0f);
-		void insert(octree_node_info& object);
+		void insert(collision_info& object);
 		void erase(Handle<Collider> object);
 		// Removes the object from the node
 		void erase_from(Handle<Collider> object, shared_ptr<octree_node> node);
@@ -36,9 +36,9 @@ namespace idk
 		size_t object_count = 0;
 		shared_ptr<octree_node> _root{};
 
-		vector<octree_node_info> get_all_info(shared_ptr<octree_node> node);
-		void get_all_info(shared_ptr<octree_node> node, vector<octree_node_info>& info);
-		void insert_data(shared_ptr<octree_node> node, octree_node_info& data);
+		vector<collision_info> get_all_info(shared_ptr<octree_node> node);
+		void get_all_info(shared_ptr<octree_node> node, vector<collision_info>& info);
+		void insert_data(shared_ptr<octree_node> node, collision_info& data);
 		void erase_all(shared_ptr<octree_node> node);
 		void clear(shared_ptr<octree_node> node);
 		void balance_tree(shared_ptr<octree_node> node);

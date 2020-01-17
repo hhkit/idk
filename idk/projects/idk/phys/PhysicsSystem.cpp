@@ -754,7 +754,33 @@ namespace idk
 
 	void PhysicsSystem::BuildOctree()
 	{
-		_collider_octree.rebuild();
+		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
+		// Get the bounding box that bounds all the colliders
+		if (!colliders.empty())
+		{
+			auto bounds = colliders[0].bounds();
+			for (auto& col : colliders)
+			{
+				bounds.surround(col.bounds());
+			}
+			static const vec3 grow_dir{ 1.0f / sqrtf(3.0f) };
+			const auto center = bounds.center();
+			const auto extents = bounds.extents();
+			const auto width = max(max(extents.x, extents.y), extents.z);
+
+			_collider_octree.rebuild(bounds.center(), width, 0);
+
+			for (auto& col : colliders)
+			{
+				collision_info info
+				{
+					.collider = col.GetHandle(),
+					.bound = col.bounds()
+				};
+				
+				_collider_octree.insert(info);
+			}
+		}
 	}
 
 	void PhysicsSystem::ClearOctree()
