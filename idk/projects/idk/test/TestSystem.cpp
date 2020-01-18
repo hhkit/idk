@@ -21,6 +21,7 @@
 #include <util/string_hash.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <network/NetworkSystem.h>
 #include <ds/span.inl>
 #include <ds/result.inl>
 
@@ -53,31 +54,7 @@ namespace idk
 		static bool fire = false;
 		if (app_sys.GetKey(Key::I) )
 		{
-			/*
-			mt::circular_buffer_lf<int, 4> poop;
-
-			int i = 0;
-			for (int iter = 0; iter < 2; ++iter)
-			{
-				for (int j = 0; j < 8; ++j, ++i)
-					poop.emplace_back(i);
-				while (auto val = poop.pop_front())
-					std::cout << *val << std::endl;
-			}
-			/*/
-			const int jobs = rand() % 70 + 10;
-			std::cout << "jobs: " << jobs << "\n";
-			vector<mt::ThreadPool::Future<void>> futures(jobs);
-			for (int i =0; i < jobs; ++i)
-				futures[i] = Core::GetThreadPool().Post([i]()
-				{
-					std::cout << "hello from " + std::to_string(mt::thread_id()) + " with index " + std::to_string(i) + "\n";
-				});
-			for (auto& elem : futures)
-				elem.get();
-			std::cout << "all printed\n";
-			fire = true;
-			//*/
+			Core::GetSystem<NetworkSystem>().InstantiateServer();
 		}
 		
 		for (auto& elem : comps)

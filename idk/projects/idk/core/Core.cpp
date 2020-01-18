@@ -99,13 +99,14 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::ReceivePackets,        "Receive Packets");
 
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")
 			                                      .IfPausedThen(&PhysicsSystem::DebugDrawColliders);
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&PhysicsSystem::FirePhysicsEvents,     "Trigger and Collision Events");
 
-		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&TestSystem::TestSpan, "Test system until scripts are up");
+		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&TestSystem::TestSpan,                 "Test system");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&Application::PollEvents,              "Poll OS Events");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&GamepadSystem::Update,                "Update gamepad states");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&FileSystem::Update,                   "Check for file changes");
@@ -119,8 +120,9 @@ namespace idk
         _pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems")
 												  .IfPausedThen(&ParticleSystemUpdater::EditorUpdate);
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::SendPackets,           "Send Packets");
 
 		if (editor)
 		{
@@ -131,6 +133,7 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");
 		}
+
 
         _pimpl->_scheduler->SchedulePass      <UpdatePhase::PreRender> (&UISystem::FinalizeMatrices,           "Finalize UI Matrices");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::PreRender> (&GraphicsSystem::SortCameras,          "Sort Cameras");

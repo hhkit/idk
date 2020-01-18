@@ -956,6 +956,9 @@
     <ClInclude Include="network\Player.h" />
     <ClInclude Include="network\Lobby.h" />
     <ClInclude Include="network\ConnectionManager.h" />
+    <ClInclude Include="network\Adapter.h" />
+    <ClInclude Include="network\Server.h" />
+    <ClInclude Include="network\GameConfiguration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1388,6 +1391,9 @@
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
+    <ClCompile Include="network\GameConfiguration.cpp" />
+    <ClCompile Include="network\Adapter.cpp" />
+    <ClCompile Include="network\Server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
