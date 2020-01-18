@@ -11,7 +11,9 @@ namespace idk
 
 	public:
 		void InstantiateServer();
+		bool IsHost();
 	private:
+		std::unique_ptr<class Lobby> lobby;
 		//yojimbo::Address my_addr;
 
 		void Init() override;

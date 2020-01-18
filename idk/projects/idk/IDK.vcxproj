@@ -89,7 +89,10 @@
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="multithread_control.h" />
+    <ClInclude Include="network\ConnectionManager.h" />
+    <ClInclude Include="network\Lobby.h" />
     <ClInclude Include="network\NetworkSystem.h" />
+    <ClInclude Include="network\Player.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="parallel\circular_buffer.h" />
     <ClInclude Include="parallel\HazardPointerDL.h" />

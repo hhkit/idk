@@ -953,6 +953,9 @@
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="network\NetworkSystem.h" />
     <ClInclude Include="ds\sliding_window.h" />
+    <ClInclude Include="network\Player.h" />
+    <ClInclude Include="network\Lobby.h" />
+    <ClInclude Include="network\ConnectionManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
