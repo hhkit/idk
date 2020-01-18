@@ -108,6 +108,18 @@ namespace idk
 	}
 
 	template<typename T, size_t MaxObject>
+	inline sliding_window<T, MaxObject>::~sliding_window() noexcept(std::is_nothrow_destructible_v<T>)
+	{
+		if (_start_index < _end_index)
+			std::destroy(&objects[_start_index], &objects[_end_index]);
+		else
+		{
+			std::destroy(&objects[0], &objects[_end_index]);
+			std::destroy(&objects[_start_index], &objects[capacity()]);
+		}
+	}
+
+	template<typename T, size_t MaxObject>
 	T& sliding_window<T, MaxObject>::operator[](size_t index)
 	{
 		if (!contains(index))

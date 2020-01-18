@@ -22,6 +22,7 @@ namespace idk
 		static constexpr auto npos = static_cast<size_t>(-1);
 
 		sliding_window();
+		~sliding_window() noexcept(std::is_nothrow_destructible_v<T>);
 
 		// element access
 		T&       operator[](size_t index);
