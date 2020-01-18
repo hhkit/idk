@@ -1,7 +1,5 @@
 #pragma once
 #include <idk.h>
-#include <core/Handle.h>
-#include <phys/collidable_shapes.h>
 #include <phys/octree_utils.h>
 
 namespace idk
@@ -20,6 +18,7 @@ namespace idk
 		octree(vec3 center, float width, unsigned depth, float offset = 2.0f);
 
 		aabb bounds() const { return _root->bound; }
+		bool is_in_subtree(shared_ptr<octree_node> node, Handle<Collider> object);
 
 		// Rebuilds the octree with this object inserted
 		// void rebuild(float offset = 2.0f, octree_obj obj = octree_obj{});
@@ -30,6 +29,7 @@ namespace idk
 		// Removes the object from the node
 		void erase_from(Handle<Collider> object, shared_ptr<octree_node> node);
 		void erase_all();
+		
 		
 		void clear();
 	private:

@@ -27,6 +27,7 @@
 
 namespace idk
 {
+#define OCTREE_ENABLE 1
 	constexpr float restitution_slop = 0.01f;
 	constexpr float penetration_min_slop = 0.001f;
 	constexpr float penetration_max_slop = 0.5f;
@@ -47,29 +48,70 @@ namespace idk
             LayerManager::layer_t layer;
         };
 
-        vector<ColliderInfo> static_info;
-        vector<ColliderInfo> dynamic_info;
+#if OCTREE_ENABLE
+		vector<Handle<Collider>> dynamic_info;
 
-        static_info.reserve(colliders.size() - rbs.size());
+		for (auto& elem : colliders)
+		{
+			elem._active_cache = elem.is_enabled_and_active();
+			if (!elem._active_cache || elem.GetHandle().scene == Scene::prefab)
+				continue;
 
-        for (auto& elem : colliders)
-        {
-            elem._active_cache = elem.is_enabled_and_active();
-            if (!elem._active_cache || elem.GetHandle().scene == Scene::prefab)
-                continue;
+			elem.find_rigidbody();
 
-            elem.find_rigidbody();
-            if (elem._static_cache)
-            {
-                static_info.emplace_back(
-                    std::visit([&elem](const auto& shape) -> ColliderInfo {
-                        auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-                        return ColliderInfo{ elem, pred_shape.bounds(), pred_shape, elem.GetGameObject()->Layer() };
-                    }, elem.shape)
-                );
-            }
-            else
-                dynamic_info.emplace_back(ColliderInfo{ .collider = elem, .layer = elem.GetGameObject()->Layer() });
+			auto coliider_handle = elem.GetHandle();
+			auto res = elem.get_octree_node()->object_list.find(coliider_handle);
+
+			if (res != elem.get_octree_node()->object_list.end())
+			{
+				// Only compute bound here if its static
+				if (elem._static_cache)
+				{
+					auto info = std::visit([&elem](const auto& shape) -> collision_info {
+						auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
+						return collision_info{
+							.bound = pred_shape.bounds(),
+							.predicted_shape = pred_shape
+						};
+						}, elem.shape);
+
+					res->second.bound = info.bound;
+					res->second.predicted_shape = info.predicted_shape;
+				}
+				else
+				{
+
+				}
+				res->second.layer = elem.GetGameObject()->Layer();
+			}
+#else
+		vector<ColliderInfo> static_info;
+		vector<ColliderInfo> dynamic_info;
+
+		static_info.reserve(colliders.size() - rbs.size());
+
+		for (auto& elem : colliders)
+		{
+			elem._active_cache = elem.is_enabled_and_active();
+			if (!elem._active_cache || elem.GetHandle().scene == Scene::prefab)
+				continue;
+
+			elem.find_rigidbody();
+			if (elem._static_cache)
+			{
+
+				static_info.emplace_back(
+					std::visit([&elem](const auto& shape) -> ColliderInfo {
+						auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
+						return ColliderInfo{ elem, pred_shape.bounds(), pred_shape, elem.GetGameObject()->Layer() };
+						}, elem.shape)
+				);
+
+			}
+			else
+				dynamic_info.emplace_back(ColliderInfo{ .collider = elem, .layer = elem.GetGameObject()->Layer() });
+		}
+#endif
 		}
 
 		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
@@ -175,14 +217,24 @@ namespace idk
                 const ColliderInfo* b;
                 phys::col_success res;
             };
+
+			struct ColliderInfoPair
+			{
+				const ColliderInfo* lhs;
+				const ColliderInfo* rhs;
+			};
+
 			vector<CollisionInfo> collision_frame;
             collision_frame.reserve(dynamic_info.size()); //guess
 
 			const auto dt = Core::GetDT().count();
+#if OCTREE_ENABLE
+#else
 
             // setup predict for dynamic objects
             for (auto& info : dynamic_info)
             {
+				info->
                 info.predicted_shape = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, info.collider.shape);
                 info.broad_phase = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, info.collider.shape);
                 const auto& vel = info.collider._rigidbody->velocity();
@@ -193,11 +245,7 @@ namespace idk
             // O(N^2) collision check
             // all objects confirmed to be active (but may be sleeping)
 
-			struct ColliderInfoPair
-			{
-				const ColliderInfo* lhs;
-				const ColliderInfo* rhs;
-			};
+			
 
 			vector<ColliderInfoPair> info;
 			info.reserve(dynamic_info.size() * 4);
@@ -254,7 +302,7 @@ namespace idk
 					*/
                 }
             }
-
+#endif
 			using CollisionJobResult = std::tuple<vector<CollisionInfo>, CollisionList>;
 			vector<mt::Future<CollisionJobResult>> batches;
 

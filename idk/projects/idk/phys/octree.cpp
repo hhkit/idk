@@ -10,13 +10,18 @@ namespace idk
 		rebuild(center, width, depth, offset);
 		_root = std::make_shared<octree_node>();
 
-		static const vec3 offset_dir = vec3{ phys::utils::inv_sqrt_3 };;
-		const auto offset_vec = offset_dir * (width + offset);
+		// static const vec3 offset_dir = vec3{ phys::utils::inv_sqrt_3 };;
+		const vec3 offset_vec{ (width + offset) /2.0f };
 		_root->bound.min = center - offset_vec;
 		_root->bound.max = center + offset_vec;
 
 		// TODO:
 		// if(depth > 0)
+	}
+
+	bool octree::is_in_subtree(shared_ptr<octree_node> node, Handle<Collider> object)
+	{
+		return false;
 	}
 
 	void octree::rebuild()
@@ -44,8 +49,9 @@ namespace idk
 			_root = std::make_shared<octree_node>();
 		}
 		this->offset = offset;
-		_root->bound.min = center - vec3{phys::utils::inv_sqrt_3} * (width + offset);
-		_root->bound.max = center + vec3{phys::utils::inv_sqrt_3} * (width + offset);
+		auto half_extents = (width + offset) / 2;
+		_root->bound.min = center - vec3{ half_extents } ;
+		_root->bound.max = center + vec3{ half_extents };
 
 		// Re-insert all objects
 		for (auto& obj : info)
@@ -58,8 +64,8 @@ namespace idk
 		{
 			_root = std::make_shared<octree_node>();
 			
-			static const vec3 offset_dir{  phys::utils::inv_sqrt_3 };
-			const vec3 offset_vec = offset_dir * offset;
+			// static const vec3 offset_dir{  phys::utils::inv_sqrt_3 };
+			const vec3 offset_vec{ offset / 2.0f };
 			_root->bound.min = data.bound.min - offset_vec;
 			_root->bound.max = data.bound.max + offset_vec;
 
@@ -161,19 +167,19 @@ namespace idk
 		auto node_center = node->bound.center();
 		auto node_half_extents = node->bound.halfextents();
 
-		vec3 grow_dir{ phys::utils::inv_sqrt_3 };
+		vec3 grow_dir{ 1.0f };
 
 		for (int i = 0; i < 3; ++i)
 		{
 			const float delta = obj_center[i] - node_center[i];
-			if (abs(delta) < obj_half_extents[i])// + node_half_extents[i])
+			if (abs(delta) < abs(obj_half_extents[i]))// + node_half_extents[i])
 			{
 				straddle = true;
 				break;
 			}
 
 			if (delta > 0.0f)
-				quad_index |= (1 << i);
+				quad_index |= (1 << i); // ZXY
 			else
 				grow_dir[i] *= -1.0f;
 		}
@@ -186,11 +192,19 @@ namespace idk
 			if (node->children[quad_index] == nullptr)
 			{
 				node->children[quad_index] = std::make_shared<octree_node>();
-				node->children[quad_index]->bound.center_at(node_center + grow_dir * node_half_extents);
-				node->children[quad_index]->bound.grow(node_half_extents * 2.0f);
-				
+				const auto grow_vec = grow_dir * abs(node_half_extents.x);
+				node->children[quad_index]->bound.grow(grow_vec);
+				node->children[quad_index]->bound.center_at(node_center + grow_vec / 2.0f);
+				// 
+				// for (auto& obj : node->object_list)
+				// {
+				// 	if (node->children[quad_index]->bound.contains(obj.second.bound))
+				// 	{
+				// 		insert_data(node->children[quad_index], );
+				// 	}
+				// 		
+				// }
 			}
-
 			data.octant = s_cast<Octant>(quad_index);
 			insert_data(node->children[quad_index], data);
 		}
