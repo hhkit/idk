@@ -14,9 +14,20 @@ End Header --------------------------------------------------------*/
 
 layout(location=1)flat in uint id;
 
+U_LAYOUT(5, 0) uniform BLOCK(NearFarBlock)
+{
+	float near,far;
+} PerCamera;
 layout(location=0)out uint out_color;
+
+float LinearizeDepth(float depth,float near, float far) 
+{
+    return  (((near * far) / (far + depth * (near- far )))-near) /(far-near);	
+}
 
 void main()
 {
 	out_color = id;
+	//Linearized so that picking of distant objects is more accurate. Tradeoff: Accuracy of super near objects.
+	gl_FragDepth = LinearizeDepth(gl_FragCoord.z,PerCamera.near,PerCamera.far);
 } 

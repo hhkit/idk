@@ -229,7 +229,6 @@ namespace idk::vkn
 		};
 		vector<uint32_t> id_buffer(total_num_insts,0);
 		ivec2 max_size{};
-		size_t max_ro=0;
 		for (auto& request : requests)
 		{
 			auto& render_data = request.data;
@@ -265,7 +264,7 @@ namespace idk::vkn
 		if (curr_fb_size.x < max_size.x || curr_fb_size.y < max_size.y)
 		{
 			FrameBufferBuilder fbf;
-			fbf.Begin(max_size, 1);
+			fbf.Begin("Color Picking",max_size, 1);
 			fbf.AddAttachment(
 				AttachmentInfo
 				{
@@ -275,7 +274,7 @@ namespace idk::vkn
 			fbf.SetDepthAttachment(
 				AttachmentInfo
 				{
-					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::DEPTH_32_F_STENCIL_8,FilterMode::_enum::Nearest
+					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::DEPTH_16,FilterMode::_enum::Nearest
 				}
 			);
 			auto& rm = Core::GetResourceManager();
@@ -348,9 +347,10 @@ namespace idk::vkn
 			PipelineThingy&  the_interface = render_tasks.emplace_back();
 			the_interface.SetRef(rs.ubo_manager);
 			auto& render_data = request.data;
+			std::array<float, 2> near_far{ render_data.camera.near,render_data.camera.far };
 			the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
 			the_interface.BindShader(ShaderStage::Fragment, color_pick_frag);
-			uint32_t i = 0;
+			the_interface.BindUniformBuffer("NearFarBlock", 0, near_far);
 			the_interface.BindUniformBuffer("CameraBlock", 0, render_data.camera.projection_matrix);
 			for (auto itr = (*shared_gs.instanced_ros).data()+ render_data.inst_mesh_render_begin, end = (*shared_gs.instanced_ros).data() + render_data.inst_mesh_render_end;itr<end;++itr)
 			{
