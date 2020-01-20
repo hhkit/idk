@@ -9,7 +9,7 @@ namespace idk
 
 	void NetworkSystem::InstantiateServer()
 	{
-		lobby = std::make_unique<Server>(yojimbo::Address{"127.0.0.1", 8000});
+		lobby = std::make_unique<Server>(Address{127,0,0,1, 8000});
 	}
 
 	bool NetworkSystem::IsHost()

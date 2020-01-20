@@ -90,6 +90,7 @@
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
+    <ClInclude Include="network\Address.h" />
     <ClInclude Include="network\ConnectionManager.h" />
     <ClInclude Include="network\GameConfiguration.h" />
     <ClInclude Include="network\Lobby.h" />

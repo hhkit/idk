@@ -6,8 +6,8 @@ static const int MAX_PLAYERS = 4;
 
 namespace idk
 {
-	Server::Server(const yojimbo::Address& address)
-		: adapter{ this }, server{ yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY, address, config, adapter, 0.0 }
+	Server::Server(const Address& address)
+		: adapter{ this }, server{ yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY, yojimbo::Address{address.a, address.b, address.c, address.d, address.port}, config, adapter, 0.0 }
 	{
 		server.Start(MAX_PLAYERS);
 		if (!server.IsRunning())

@@ -2,13 +2,13 @@
 #include <yojimbo/yojimbo.h>
 #include "Adapter.h"
 #include "GameConfiguration.h"
-
+#include "Address.h"
 namespace idk
 {
 	class Server
 	{
 	public:
-		Server(const yojimbo::Address& address);
+		Server(const Address& address);
 
 		void ProcessMessages();
 

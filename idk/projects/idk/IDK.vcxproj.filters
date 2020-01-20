@@ -959,6 +959,7 @@
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Server.h" />
     <ClInclude Include="network\GameConfiguration.h" />
+    <ClInclude Include="network\Address.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
