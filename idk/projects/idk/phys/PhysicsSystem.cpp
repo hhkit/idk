@@ -40,15 +40,13 @@ namespace idk
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
-        struct ColliderInfo
-        {
-            Collider& collider;
-            aabb broad_phase;
-            CollidableShapes predicted_shape;
-            LayerManager::layer_t layer;
-        };
 
 #if OCTREE_ENABLE
+		if (octree_cleared)
+		{
+			BuildOctree(colliders);
+			octree_cleared = false;
+		}
 		vector<Handle<Collider>> dynamic_info;
 
 		for (auto& elem : colliders)
@@ -59,31 +57,38 @@ namespace idk
 
 			elem.find_rigidbody();
 
-			auto coliider_handle = elem.GetHandle();
-			auto res = elem.get_octree_node()->object_list.find(coliider_handle);
+			auto collider_handle = elem.GetHandle();
+			auto res = elem.get_octree_node()->object_list.find(collider_handle);
 
 			if (res != elem.get_octree_node()->object_list.end())
 			{
-				// Only compute bound here if its static
+				res->second.layer = elem.GetGameObject()->Layer();
+
+				// Update all static objects in the octree
 				if (elem._static_cache)
 				{
-					auto info = std::visit([&elem](const auto& shape) -> collision_info {
+					auto info = std::visit([&elem](const auto& shape) -> collider_info {
 						auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-						return collision_info{
+						return collider_info{
 							.bound = pred_shape.bounds(),
 							.predicted_shape = pred_shape
 						};
 						}, elem.shape);
 
+					info.collider = collider_handle;
 					res->second.bound = info.bound;
 					res->second.predicted_shape = info.predicted_shape;
+
+					// NOTE: res potentially null after this due to the object being moved
+					UpdateOctree(info, elem._octree_node);
 				}
 				else
 				{
-
+					dynamic_info.emplace_back(collider_handle);
 				}
-				res->second.layer = elem.GetGameObject()->Layer();
+				
 			}
+		}
 #else
 		vector<ColliderInfo> static_info;
 		vector<ColliderInfo> dynamic_info;
@@ -112,7 +117,6 @@ namespace idk
 				dynamic_info.emplace_back(ColliderInfo{ .collider = elem, .layer = elem.GetGameObject()->Layer() });
 		}
 #endif
-		}
 
 		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
 		{
@@ -209,32 +213,48 @@ namespace idk
 			    return phys::col_failure{};
 	    };
 
+		const auto PredictAndUpdateDynamic = [&]()
+		{
+			// Update all dynamic colliders in the octree
+			for (auto& info : dynamic_info)
+			{
+				collider_info new_info = info->get_octree_node()->object_list.find(info)->second;
+
+				new_info.predicted_shape = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape)->CollidableShapes { return shape * pred_tfm; }, new_info.collider->shape);
+				new_info.bound = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, new_info.collider->shape);
+				const auto& vel = new_info.collider->_rigidbody->velocity();
+				new_info.bound.grow(vel);
+				new_info.bound.grow(-vel);
+
+				UpdateOctree(new_info, info->get_octree_node());
+			}
+		};
+
 		const auto CollideObjects = [&]()
 		{
-            struct CollisionInfo
-            {
-                const ColliderInfo* a;
-                const ColliderInfo* b;
-                phys::col_success res;
-            };
-
-			struct ColliderInfoPair
-			{
-				const ColliderInfo* lhs;
-				const ColliderInfo* rhs;
-			};
-
-			vector<CollisionInfo> collision_frame;
-            collision_frame.reserve(dynamic_info.size()); //guess
-
+            
 			const auto dt = Core::GetDT().count();
 #if OCTREE_ENABLE
+			// Update all dynamic stuff in the octree
+			PredictAndUpdateDynamic();
+
+			vector<CollisionInfo> collision_frame;
+			collision_frame.reserve(dynamic_info.size()); //guess
+
+			vector<ColliderInfoPair> info;
+			info.reserve(dynamic_info.size() * 4);
+			
+			// For each node in octree
+				// For each item in node
+					// Pair with every other node in octree
+
 #else
+			vector<CollisionInfo> collision_frame;
+			collision_frame.reserve(dynamic_info.size()); //guess
 
             // setup predict for dynamic objects
             for (auto& info : dynamic_info)
             {
-				info->
                 info.predicted_shape = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, info.collider.shape);
                 info.broad_phase = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, info.collider.shape);
                 const auto& vel = info.collider._rigidbody->velocity();
@@ -328,7 +348,7 @@ namespace idk
 								if (collision)
 								{
 									collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-									batch_collisions.emplace(CollisionPair{ i->collider.GetHandle(), j->collider.GetHandle() }, collision.value());
+									batch_collisions.emplace(CollisionPair{ i->collider, j->collider }, collision.value());
 								}
 								++begin_itr;
 							}
@@ -348,8 +368,8 @@ namespace idk
 			}
 			for (const auto& [i, j, result] : collision_frame)
 			{
-				const auto& lcollider = i->collider;
-				const auto& rcollider = j->collider;
+				const auto& lcollider = *(i->collider);
+				const auto& rcollider = *(j->collider);
 
 				auto lrigidbody = lcollider._rigidbody;
 				auto rrigidbody = rcollider._rigidbody;
@@ -423,7 +443,7 @@ namespace idk
 		{
             for (const auto& elem : dynamic_info)
             {
-                auto& rigidbody = *elem.collider._rigidbody;
+                auto& rigidbody = *elem->_rigidbody;
                 if (!rigidbody.is_kinematic)
                     rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
                 else
@@ -443,10 +463,11 @@ namespace idk
         if (!debug_draw_colliders)
             return;
 
-        for (const auto& elem : static_info)
-            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
-        for (const auto& elem : dynamic_info)
-            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+        // for (const auto& elem : static_info)
+        //     debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+        // for (const auto& elem : dynamic_info)
+        //     debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+		DrawOctreeDebug(_collider_octree._root);
         for (auto& elem : colliders)
         {
             if (!elem._active_cache)
@@ -611,6 +632,8 @@ namespace idk
 
 	void PhysicsSystem::Reset()
 	{
+		octree_cleared = true;
+		_collider_octree.clear();
 		previous_collisions.clear();
 		collisions.clear();
 	}
@@ -774,35 +797,25 @@ namespace idk
     }
 
 
-	void PhysicsSystem::Init()
+	void PhysicsSystem::DrawOctreeDebug(shared_ptr<octree_node> node)
 	{
-		// GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
-		// {
-		// 	if (!collider)
-		// 		return;
-		// 
-		// 	octree_node_info info;
-		// 	info.collider = collider;
-		// 	info.bound = collider->bounds();
-		// 	_collider_octree.insert(info);
-		// };
-		// 
-		// GameState::GetGameState().OnObjectDestroy<Collider>() += [&](Handle<Collider> collider)
-		// {
-		// 	if (!collider)
-		// 		return;
-		// 
-		// 	_collider_octree.erase_from(collider, collider->get_octree_node());
-		// };
+		if (node)
+		{
+			box b{
+				.center = node->bound.center(),
+				.extents = node->bound.extents()
+			};
+			Core::GetSystem<DebugRenderer>().Draw(b, color{ 0,1,0,1 });
+
+			for (auto& child : node->children)
+			{
+				DrawOctreeDebug(child);
+			}
+		}
 	}
 
-	void PhysicsSystem::Shutdown()
+	void PhysicsSystem::BuildOctree(span<Collider> colliders)
 	{
-	}
-
-	void PhysicsSystem::BuildOctree()
-	{
-		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 		// Get the bounding box that bounds all the colliders
 		if (!colliders.empty())
 		{
@@ -821,15 +834,108 @@ namespace idk
 
 			for (auto& col : colliders)
 			{
-				collision_info info
+				collider_info info
 				{
 					.collider = col.GetHandle(),
 					.bound = col.bounds()
 				};
-				
+
 				_collider_octree.insert(info);
 			}
 		}
+	}
+
+	void PhysicsSystem::UpdateOctree(collider_info& col, shared_ptr<octree_node> node)
+	{
+		if (!node->bound.contains(col.bound))
+		{
+			_collider_octree.erase_from(col.collider, node);
+			_collider_octree.insert(col);
+		}
+		// try to descend the tree (not straddling anymore
+		else
+		{
+			_collider_octree.descend(node, col);
+		}
+	}
+
+	void PhysicsSystem::PairColliders(shared_ptr<octree_node> node, vector<ColliderInfoPair>& pairs)
+	{
+		if (node)
+		{
+			auto all_info = _collider_octree.get_info(node);
+
+			auto end_it = all_info.end();
+			for (auto it = all_info.begin(); it != end_it; ++it)
+			{
+				auto itr = *it;
+				auto lhs = itr->collider;
+
+				auto jt = it;
+				for (++jt; jt != end_it; ++jt)
+				{
+					auto jtr = *jt;
+					auto rhs = jtr->collider;
+
+					// No need to check static vs static
+					if (lhs->_static_cache && rhs->_static_cache)
+						continue;
+
+					bool lhs_check = true;
+					if (!lhs->_static_cache)
+						lhs_check = !lhs->_rigidbody->sleeping();
+
+					bool rhs_check = true;
+					if (!rhs->_static_cache)
+						rhs_check = !rhs->_rigidbody->sleeping();
+
+					if (!lhs_check && !rhs_check)
+						continue;
+					
+					if (!AreLayersCollidable(itr->layer, jtr->layer))
+						continue;
+
+					pairs.emplace_back(ColliderInfoPair{ itr, jtr });
+				}
+			}
+
+			for (auto& child : node->children)
+			{
+				PairColliders(child, pairs);
+			}
+		}
+	}
+
+	void PhysicsSystem::Init()
+	{
+		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
+		{
+			if (!collider || octree_cleared)
+				return;
+		
+			collider_info info;
+			info.collider = collider;
+			info.bound = collider->bounds();
+			_collider_octree.insert(info);
+		};
+		
+		GameState::GetGameState().OnObjectDestroy<Collider>() += [&](Handle<Collider> collider)
+		{
+			if (!collider || octree_cleared)
+				return;
+		
+			_collider_octree.erase_from(collider, collider->get_octree_node());
+		};
+	}
+
+	void PhysicsSystem::Shutdown()
+	{
+	}
+
+	void PhysicsSystem::BuildOctree()
+	{
+		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
+		BuildOctree(colliders);
 	}
 
 	void PhysicsSystem::ClearOctree()

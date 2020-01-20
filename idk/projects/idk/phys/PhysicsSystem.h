@@ -4,7 +4,6 @@
 #include <core/ConfigurableSystem.h>
 #include <phys/collision_result.h>
 #include <phys/raycasts/collision_raycast.h>
-#include <common/LayerManager.h>
 #include <phys/octree.h>
 
 namespace idk
@@ -46,18 +45,41 @@ namespace idk
 		void BuildOctree();
 		void ClearOctree();
 	private:
+		struct CollisionInfo
+		{
+			const collider_info* a;
+			const collider_info* b;
+			phys::col_success res;
+		};
+
+		struct ColliderInfoPair
+		{
+			const collider_info* lhs;
+			const collider_info* rhs;
+		};
+
 		struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
+
 		struct pair_hasher   { size_t operator()(const CollisionPair&) const; };
 
 		using CollisionList = hash_table<CollisionPair, phys::col_success, pair_hasher>;
 		CollisionList collisions;
 		CollisionList previous_collisions;
 
+		bool octree_cleared = true;
 		octree _collider_octree;
-		
+
+		void BuildOctree(span<Collider> colliders);
+		void UpdateOctree(collider_info& col, shared_ptr<octree_node> node);
+		void DrawOctreeDebug(shared_ptr<octree_node> node);
+
+		void PairColliders(shared_ptr<octree_node> node, vector<ColliderInfoPair>& pairs);
+
 		void Init() override;
 		void Shutdown() override;
         void ApplyConfig(Config&) override {}
+
+		
 
 		
 	};

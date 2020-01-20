@@ -19,12 +19,16 @@ namespace idk
 
 		aabb bounds() const { return _root->bound; }
 		bool is_in_subtree(shared_ptr<octree_node> node, Handle<Collider> object);
+		vector<collider_info*> get_all_info();
+		vector<collider_info*> get_info(shared_ptr<octree_node> node);
 
 		// Rebuilds the octree with this object inserted
 		// void rebuild(float offset = 2.0f, octree_obj obj = octree_obj{});
+		
 		void rebuild();
 		void rebuild(vec3 center, float width, unsigned depth, float offset = 2.0f);
-		void insert(collision_info& object);
+		void insert(collider_info& object);
+		void descend(shared_ptr<octree_node> node, collider_info& object);
 		void erase(Handle<Collider> object);
 		// Removes the object from the node
 		void erase_from(Handle<Collider> object, shared_ptr<octree_node> node);
@@ -33,12 +37,15 @@ namespace idk
 		
 		void clear();
 	private:
+		
 		size_t object_count = 0;
 		shared_ptr<octree_node> _root{};
+		friend PhysicsSystem;
 
-		vector<collision_info> get_all_info(shared_ptr<octree_node> node);
-		void get_all_info(shared_ptr<octree_node> node, vector<collision_info>& info);
-		void insert_data(shared_ptr<octree_node> node, collision_info& data);
+		
+		void get_all_info(shared_ptr<octree_node> node, vector<collider_info*>& info);
+		
+		void insert_data(shared_ptr<octree_node> node, collider_info& data);
 		void erase_all(shared_ptr<octree_node> node);
 		void clear(shared_ptr<octree_node> node);
 		void balance_tree(shared_ptr<octree_node> node);

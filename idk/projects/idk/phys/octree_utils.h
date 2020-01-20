@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <core/Handle.h>
 #include <phys/collidable_shapes.h>
-#include <common/Layer.h>
+#include <common/LayerManager.h>
 namespace idk
 {
 	enum Octant
@@ -25,7 +25,7 @@ namespace idk
 
 	
 
-	struct collision_info
+	struct collider_info
 	{
 		Handle<Collider> collider;
 		aabb bound;
@@ -42,7 +42,7 @@ namespace idk
 		aabb bound;
 		
 		// objects
-		hash_table<Handle<Collider>, collision_info> object_list;
+		hash_table<Handle<Collider>, collider_info> object_list;
 		// octants
 		shared_ptr<octree_node> children[8]{ nullptr };
 	};

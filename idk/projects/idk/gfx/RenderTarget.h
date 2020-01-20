@@ -28,7 +28,7 @@ namespace idk
 
 		// debug information
 		bool is_world_renderer { false };
-		bool render_debug      { false };
+		bool render_debug      { true };
 
 		RenderTarget()noexcept = default;
 		RenderTarget(RenderTarget&&) noexcept = default;
