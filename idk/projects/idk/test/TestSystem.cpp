@@ -22,6 +22,7 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <network/NetworkSystem.h>
+#include <network/Client.h>
 #include <ds/span.inl>
 #include <ds/result.inl>
 
@@ -52,9 +53,23 @@ namespace idk
 		auto& gamepad = Core::GetSystem<GamepadSystem>();
 		
 		static bool fire = false;
-		if (app_sys.GetKey(Key::I) )
+		if (app_sys.GetKeyDown(Key::I) )
 		{
-			Core::GetSystem<NetworkSystem>().InstantiateServer();
+			auto devices = app_sys.GetNetworkDevices();
+			Core::GetSystem<NetworkSystem>().InstantiateServer(devices[0].ip_addresses[0]);
+		}
+
+		if (app_sys.GetKeyDown(Key::C))
+		{
+			auto devices = app_sys.GetNetworkDevices();
+			Core::GetSystem<NetworkSystem>().ConnectToServer(devices[0].ip_addresses[0]);
+		}
+
+		if (app_sys.GetKeyDown(Key::T))
+		{
+			static int i = 0;
+			if (!Core::GetSystem<NetworkSystem>().IsHost())
+				Core::GetSystem<NetworkSystem>().GetClient().SendTestMessage(i++);
 		}
 		
 		for (auto& elem : comps)

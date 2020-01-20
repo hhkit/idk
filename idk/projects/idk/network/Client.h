@@ -3,27 +3,25 @@
 #include "Adapter.h"
 #include "GameConfiguration.h"
 #include "Address.h"
+
 namespace idk
 {
-	class Server
+	class Client
 	{
 	public:
-		Server(const Address& address);
-		~Server();
+		Client(const Address& addr);
+		~Client();
 
 		void ProcessMessages();
-
 		void ReceivePackets();
 		void SendPackets();
 
-		// callbacks
-		void ClientConnected(int clientIndex);
-		void ClientDisconnected(int clientIndex);
+		void SendTestMessage(int i);
 	private:
 		Adapter           adapter;
 		GameConfiguration config;
-		yojimbo::Server   server;
+		yojimbo::Client   client;
 
-		void ProcessMessage(int clientIndex, yojimbo::Message* message);
+		void ProcessMessage(yojimbo::Message* message);
 	};
 }

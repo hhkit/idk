@@ -91,12 +91,15 @@
     <ClInclude Include="multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Address.h" />
+    <ClInclude Include="network\Client.h" />
     <ClInclude Include="network\ConnectionManager.h" />
+    <ClInclude Include="network\Device.h" />
     <ClInclude Include="network\GameConfiguration.h" />
     <ClInclude Include="network\Lobby.h" />
     <ClInclude Include="network\NetworkSystem.h" />
     <ClInclude Include="network\Player.h" />
     <ClInclude Include="network\Server.h" />
+    <ClInclude Include="network\TestMessage.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="parallel\circular_buffer.h" />
     <ClInclude Include="parallel\HazardPointerDL.h" />
@@ -374,6 +377,8 @@
     <ClCompile Include="math\shapes\frustum.cpp" />
     <ClCompile Include="math\shapes\halfspace.cpp" />
     <ClCompile Include="network\Adapter.cpp" />
+    <ClCompile Include="network\Address.cpp" />
+    <ClCompile Include="network\Client.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\Server.cpp" />

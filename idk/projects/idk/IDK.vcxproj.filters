@@ -134,6 +134,9 @@
     <Filter Include="network">
       <UniqueIdentifier>{f35ebc8b-d413-42b6-bebc-1f24f1326fe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="memory">
+      <UniqueIdentifier>{5ac86b7f-b5d8-4550-99cd-75d596f6a49b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -914,7 +917,6 @@
     <ClInclude Include="anim\AnimationTypes.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\circular_buffer.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="gfx\ShaderSnippetLoader.h">
       <Filter>gfx</Filter>
@@ -931,7 +933,6 @@
     <ClInclude Include="gfx\RenderRequest.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="memory\ArenaAllocator.h" />
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="res\ResourceExtension.h" />
     <ClInclude Include="res\CompiledAssets.h" />
@@ -948,18 +949,43 @@
     <ClInclude Include="gfx\ColorPickResult.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\ColorPickRequest.h" />
     <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
-    <ClInclude Include="network\NetworkSystem.h" />
     <ClInclude Include="ds\sliding_window.h" />
-    <ClInclude Include="network\Player.h" />
-    <ClInclude Include="network\Lobby.h" />
-    <ClInclude Include="network\ConnectionManager.h" />
-    <ClInclude Include="network\Adapter.h" />
-    <ClInclude Include="network\Server.h" />
     <ClInclude Include="network\GameConfiguration.h" />
-    <ClInclude Include="network\Address.h" />
+    <ClInclude Include="network\Device.h" />
+    <ClInclude Include="network\Adapter.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Address.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\ArenaAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\circular_buffer.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ColorPickRequest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Lobby.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\NetworkSystem.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Server.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Player.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ConnectionManager.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\TestMessage.h" />
+    <ClInclude Include="network\Client.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1391,10 +1417,20 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
-    <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />
-    <ClCompile Include="network\Adapter.cpp" />
-    <ClCompile Include="network\Server.cpp" />
+    <ClCompile Include="network\Adapter.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Address.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\NetworkSystem.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Server.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Client.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1583,7 +1619,6 @@
     <None Include="anim\Animator.inl">
       <Filter>anim\detail</Filter>
     </None>
-    <None Include="memory\ArenaAllocator.inl" />
     <None Include="..\..\bin\editor.exe" />
     <None Include="res\MetaBundle.inl">
       <Filter>res</Filter>
@@ -1591,6 +1626,9 @@
     <None Include="res\CompiledAssetLoader.inl" />
     <None Include="ReflectReg_AnimComponents.inl" />
     <None Include="ds\sliding_window.inl" />
+    <None Include="memory\ArenaAllocator.inl">
+      <Filter>memory</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

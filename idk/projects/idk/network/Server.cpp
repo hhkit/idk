@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Server.h"
+#include "TestMessage.h"
 
-static const uint8_t DEFAULT_PRIVATE_KEY[yojimbo::KeyBytes] = { 0 };
 static const int MAX_PLAYERS = 4;
 
 namespace idk
@@ -22,12 +22,44 @@ namespace idk
 
 		// setup lobby
 	}
+	Server::~Server()
+	{
+		server.Stop();
+	}
+	void Server::ProcessMessage(int clientIndex, yojimbo::Message* message)
+	{
+		switch (message->GetType()) {
+		case (int)GameMessageType::TEST:
+		{
+			LOG_TO(LogPool::NETWORK, "Received from %d: TestMessage with payload: %d", clientIndex, ((TestMessage*)message)->m_data);
+			TestMessage* testMessage = (TestMessage*)server.CreateMessage(clientIndex, (int)GameMessageType::TEST);
+			testMessage->m_data = ((TestMessage*)message)->m_data;
+			server.SendMessage(clientIndex, (int)GameChannel::RELIABLE, testMessage);
+			break;
+		}
+		default:
+			break;
+		}
+	}
+
 	void Server::ProcessMessages()
 	{
+		for (int i = 0; i < MAX_PLAYERS; i++) {
+			if (server.IsClientConnected(i)) {
+				for (int j = 0; j < config.numChannels; j++) {
+					yojimbo::Message* message = server.ReceiveMessage(i, j);
+					while (message != NULL) {
+						ProcessMessage(i, message);
+						server.ReleaseMessage(i, message);
+						message = server.ReceiveMessage(i, j);
+					}
+				}
+			}
+		}
 	}
 	void Server::ReceivePackets()
 	{
-		server.AdvanceTime(Core::GetRealDT().count());
+		server.AdvanceTime(server.GetTime() + Core::GetRealDT().count());
 		server.ReceivePackets();
 		ProcessMessages();
 	}
