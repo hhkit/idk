@@ -12,7 +12,6 @@ namespace idk
 		int b;
 		int c;
 		int d;
-	private:
 		void NetworkUpdate();
 	};
 }

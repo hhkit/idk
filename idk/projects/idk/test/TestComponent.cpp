@@ -14,7 +14,9 @@ namespace idk
 		if (app_sys.GetKeyDown(Key::C))
 		{
 			auto devices = app_sys.GetNetworkDevices();
-			network_sys.ConnectToServer(Address{(unsigned char)a,(unsigned char)b,(unsigned char)c,(unsigned char)d});
+			auto try_address = Address{ (unsigned char)a,(unsigned char)b,(unsigned char)c,(unsigned char)d };
+			LOG_TO(LogPool::NETWORK, "Try connecting to %s", string{ try_address }.c_str());
+			network_sys.ConnectToServer(try_address);
 		}
 		if (app_sys.GetKeyDown(Key::T))
 		{
