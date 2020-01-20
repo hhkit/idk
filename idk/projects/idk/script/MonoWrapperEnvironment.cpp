@@ -1601,5 +1601,20 @@ namespace idk::mono
             h->font_size = v;
         }
         BIND_END();
+
+
+		// LayerMask
+
+		BIND_START("idk.Bindings::LayerMaskLayerToName", MonoString*, int index)
+		{
+			return mono_string_new(mono_domain_get(), Core::GetSystem<LayerManager>().LayerIndexToName(index).data());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LayerMaskNameToLayer", int, MonoString* s)
+		{
+			return Core::GetSystem<LayerManager>().NameToLayerIndex(unbox(s).get());
+		}
+		BIND_END();
 	}
 }
