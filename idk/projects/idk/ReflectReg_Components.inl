@@ -54,6 +54,6 @@ REFLECT_END()
 
 // TEST
 REFLECT_BEGIN(idk::TestComponent, "TestComponent")
-REFLECT_VARS(a, b, c, d)
+REFLECT_VARS(a, b, c, d, makeme, send_pos, send_rot)
 REFLECT_END()
 #pragma endregion

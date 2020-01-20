@@ -8,8 +8,8 @@ namespace idk
 	class NetworkSystem
 		: public ISystem
 	{
-		static constexpr unsigned short server_listen_port = 8000;
-		static constexpr unsigned short client_listen_port = 8080;
+		static constexpr unsigned short server_listen_port = 8080;
+		static constexpr unsigned short client_listen_port = 8000;
 	public:
 		NetworkSystem();
 		~NetworkSystem();

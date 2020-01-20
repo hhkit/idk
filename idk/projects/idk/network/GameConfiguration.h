@@ -6,6 +6,21 @@ namespace idk
 
 	enum class GameMessageType {
 		TEST,
+		// ghost manager
+		//GHOST_TFM,
+		//GHOST_ACKNOWLEDGE,
+
+		// move manager
+		//MOVE_INFO,
+
+		// event manager
+		EVENT_INSTANTIATE_PREFAB,
+		//EVENT_LOAD_LEVEL,
+		//EVENT_CSHARP_RPC,
+		//EVENT_FIRST = EVENT_INSTANTIATE_PREFAB,
+		//EVENT_LAST = EVENT_CSHARP_RPC,
+
+		// data block manager
 		COUNT
 	};
 

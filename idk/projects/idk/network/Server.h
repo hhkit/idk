@@ -5,6 +5,9 @@
 #include "Address.h"
 namespace idk
 {
+	class EventManager;
+	class EventInstantiatePrefabPayload; //TODO: resolve this
+
 	class Server
 	{
 	public:
@@ -16,6 +19,10 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
+		// managers
+		EventManager& GetEventManager() { return *event_manager; }
+		void SendEvent(const EventInstantiatePrefabPayload&);
+
 		// callbacks
 		void ClientConnected(int clientIndex);
 		void ClientDisconnected(int clientIndex);
@@ -23,6 +30,8 @@ namespace idk
 		Adapter           adapter;
 		GameConfiguration config;
 		yojimbo::Server   server;
+
+		std::unique_ptr<EventManager> event_manager;
 
 		void ProcessMessage(int clientIndex, yojimbo::Message* message);
 	};

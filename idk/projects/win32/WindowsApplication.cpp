@@ -237,8 +237,6 @@ namespace idk::win
 		char buf[BUFSIZ];
 
 		int family = ua->Address.lpSockaddr->sa_family;
-		printf("\t%s ", family == AF_INET ? "IPv4" : "IPv6");
-
 		memset(buf, 0, BUFSIZ);
 		getnameinfo(ua->Address.lpSockaddr, ua->Address.iSockaddrLength, buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
 		if (family == AF_INET) // IPV4
@@ -261,7 +259,7 @@ namespace idk::win
 	vector<Device> Windows::GetNetworkDevices()
 	{
 		DWORD rv, size;
-		PIP_ADAPTER_ADDRESSES adapter_addresses, aa;
+		PIP_ADAPTER_ADDRESSES adapter_addresses;
 		PIP_ADAPTER_UNICAST_ADDRESS ua;
 
 		rv = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
@@ -277,7 +275,7 @@ namespace idk::win
 			return {};
 		}
 		vector<Device> devices;
-		for (aa = adapter_addresses; aa != NULL; aa = aa->Next) {
+		for (auto aa = adapter_addresses; aa != NULL; aa = aa->Next) {
 			Device d;
 			d.name = adapter_to_short_name(aa);
 			d.fullname = adapter_to_device_name(aa);

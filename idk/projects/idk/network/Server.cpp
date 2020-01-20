@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "Server.h"
-#include "TestMessage.h"
-
+#include <network/messages/TestMessage.h>
+#include <network/messages/EventMessage.h>
+#include <network/managers/EventManager.h>
+#undef SendMessage
 static const int MAX_PLAYERS = 4;
 
 namespace idk
@@ -21,6 +23,7 @@ namespace idk
 		LOG_TO(LogPool::NETWORK, "Server address is %s", buffer);
 
 		// setup lobby
+		event_manager = std::make_unique<EventManager>();
 	}
 	Server::~Server()
 	{
@@ -67,6 +70,16 @@ namespace idk
 	void Server::SendPackets()
 	{
 		server.SendPackets();
+	}
+
+	void Server::SendEvent(const EventInstantiatePrefabPayload& event)
+	{
+		for (int i = 0; i < server.GetNumConnectedClients(); ++i)
+		{
+			auto* testMessage = (EventInstantiatePrefabMessage*)server.CreateMessage(i, (int)GameMessageType::EVENT_INSTANTIATE_PREFAB);
+			testMessage->payload = event;
+			server.SendMessage(i, (int)GameChannel::RELIABLE, testMessage);
+		}
 	}
 
 	void Server::ClientConnected(int clientIndex)

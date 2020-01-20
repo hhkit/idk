@@ -984,8 +984,11 @@
     <ClInclude Include="network\ConnectionManager.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="network\TestMessage.h" />
     <ClInclude Include="network\Client.h" />
+    <ClInclude Include="network\messages\TestMessage.h" />
+    <ClInclude Include="network\messages\EventMessage.h" />
+    <ClInclude Include="network\managers\EventManager.h" />
+    <ClInclude Include="network\events\InstantiatePrefabPayload.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1432,6 +1435,7 @@
     </ClCompile>
     <ClCompile Include="network\Client.cpp" />
     <ClCompile Include="test\TestComponent.cpp" />
+    <ClCompile Include="network\managers\EventManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
