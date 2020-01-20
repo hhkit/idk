@@ -19,8 +19,8 @@ namespace idk::vkn
 			tmp_graph.src_node.emplace(written_rsc.id,node.id);
 		return stored_node;
 	}
-
-	void FrameGraph::ComputeLifetimes(ResourceLifetimeManager& manager)
+#pragma optimize("",off)
+	void FrameGraph::ComputeLifetimes(const ActualGraph& ag,ResourceLifetimeManager& manager)
 	{
 		auto& exec_order = execution_order;
 		auto& graph_nodes = nodes;
@@ -34,13 +34,14 @@ namespace idk::vkn
 			auto& curr_node = graph_nodes[index];
 			size_t order = 0;
 			//TODO Get the dep_nodes from curr_node
-			span<const FrameGraphNode> dep_nodes;
-			for (auto& dep_node : dep_nodes)
+			auto dep_rsc=  curr_node.GetInputSpan();
+			for (auto& dep_rsc : dep_rsc)
 			{
-				order = std::max(fat_order[dep_node.id], order);
+				auto dep_node = ag.src_node.find(dep_rsc.id)->second;
+				order = std::max(fat_order[dep_node], order);
 			}
 			order = order + 1;
-			fat_order[index] = order;
+			fat_order[curr_node.id] = order;
 			max_order = std::max(order, max_order);
 		}
 
@@ -82,22 +83,38 @@ namespace idk::vkn
 		}
 		{
 			vector<size_t> index_buffer;
-			index_buffer.reserve(nodes.size());
-			for (auto& [id, index] : id_to_indices)
+
+			//src,dst
+			hash_table<fg_id, vector<fg_id>> derp;
+
+			for (auto [dst, index] : id_to_indices)
 			{
-				auto oid_adj_buffer = graph.get_input_nodes(id); //input resources
+				auto oid_adj_buffer = graph.get_input_nodes(dst); //input resources
 				auto id_adj_buffer = *oid_adj_buffer;
-				auto& lookup_table = graph_builder.origin_nodes;
+				for (auto in_rsc : id_adj_buffer)
+				{
+					auto src_node = in_rsc;
+					derp[src_node].emplace_back(dst);
+				}
+			}
+
+			index_buffer.reserve(nodes.size());
+			for (auto& [id, src_index] : id_to_indices)
+			{
+				//auto oid_adj_buffer = graph.get_input_nodes(id); //input resources
+				//auto id_adj_buffer = *oid_adj_buffer;
+				//auto& lookup_table = graph_builder.origin_nodes;
+				auto& id_adj_buffer = derp[id];
 				index_buffer.resize(id_adj_buffer.size());
-				std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&lookup_table,&id_to_indices](fg_id id) {return id_to_indices.find(lookup_table.find(id)->second)->second; });
-				dependency_graph.SetAdjacentNodes(index, index_buffer.begin(), index_buffer.end());
+				std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&id_to_indices](fg_id id) {return id_to_indices.find(id)->second; });
+				dependency_graph.SetAdjacentNodes(src_index, index_buffer.begin(), index_buffer.end());
 			}
 			auto [sorted_order, success] = graph_theory::KahnsAlgorithm(dependency_graph);
 			IDK_ASSERT_MSG(success, "Cyclic dependency detected.");
 			//Maybe use copy_if to filter out useless nodes.
 			execution_order = std::move(sorted_order);
 		}
-		ComputeLifetimes(rsc_lifetime_mgr);
+		ComputeLifetimes(graph,rsc_lifetime_mgr);
 	}
 
 	void FrameGraph::AllocateResources()
@@ -287,7 +304,11 @@ namespace idk::vkn
 			result.in_rsc_nodes.emplace(id, rsc_span);
 			node_accum.clear();
 			node_accum.resize(rsc_span.size());
-			std::transform(rsc_span.begin(), rsc_span.end(), node_accum.begin(), [](auto& rsc) {return rsc.id; });
+			auto& rsc_origin_map = result.src_node;
+			std::transform(rsc_span.begin(), rsc_span.end(), node_accum.begin(), [&rsc_origin_map](auto& rsc) {
+				auto itr = rsc_origin_map.find(rsc.id);
+				return (itr!=rsc_origin_map.end())?itr->second:0; 
+				});
 			result.set_input_nodes(id, node_accum.begin(), node_accum.end());
 		}
 		tmp.in_nodes.clear();

@@ -288,7 +288,7 @@ namespace idk::vkn::gt
 						}
 				}
 			);
-			builder.set_input_attachment(clear_color_buffer, 0,
+			builder.set_input_attachment(builder.read(clear_color_buffer), 0,
 				AttachmentDescription
 				{
 						vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -302,7 +302,7 @@ namespace idk::vkn::gt
 						}
 				}
 			);
-			builder.set_input_attachment(scene_color, 1,
+			builder.set_input_attachment(builder.read(scene_color), 1,
 				AttachmentDescription
 				{
 						vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -316,7 +316,7 @@ namespace idk::vkn::gt
 						}
 				}
 			);
-			builder.set_input_attachment(scene_depth, 2,
+			builder.set_input_attachment(builder.read(scene_depth), 2,
 				AttachmentDescription
 				{
 						vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;

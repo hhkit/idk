@@ -163,7 +163,7 @@ namespace idk::vkn
 		FrameGraphNode& StoreNode(FrameGraphNode&& node);
 
 
-		void ComputeLifetimes(ResourceLifetimeManager& manager);
+		void ComputeLifetimes(const ActualGraph& ag, ResourceLifetimeManager& manager);
 
 		void CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm);
 

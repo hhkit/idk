@@ -61,8 +61,6 @@ std::pair<vector<index_t>, bool> KahnsAlgorithm(IntermediateGraph graph)
 	{
 		done &= !(bool)num_in_edges;
 	}
-	//the resultant list is in the reverse of what we want, so we reverse it.
-	std::reverse(sorted_indices.begin(), sorted_indices.end());
 	return result;
 }
 
