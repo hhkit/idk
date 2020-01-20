@@ -339,6 +339,20 @@ namespace idk::mono
 		BIND_END();
 
 
+		// behavior
+
+		BIND_START("idk.Bindings::MonoBehaviorGetEnable", bool, Handle<mono::Behavior> mb)
+		{
+			return mb->enabled;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::MonoBehaviorSetEnable", void, Handle<mono::Behavior> mb, bool set_enable)
+		{
+			mb->enabled = set_enable;
+		}
+		BIND_END();
+
 		// component
 		BIND_START("idk.Bindings::ComponentGetGameObject",  uint64_t, GenericHandle go)
 		{

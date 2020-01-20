@@ -13,7 +13,7 @@ namespace idk
 		ivec2 size;
 		bool is_srgb{};
 		unsigned generate_mipmaps{};
-		vector<unsigned char> pixel_buffer;
+		string pixel_buffer;
 
 		EXTENSION(".idds");
 	};
