@@ -10,10 +10,10 @@
 #include <vkn/topological_sort.h>
 #include <gfx/Texture.h>
 #include <vkn/RenderPassObj.h>
+#include <vkn/VknFrameBuffer.h>
 namespace idk::vkn
 {
 	using VknRenderPass = RenderPassObj;
-	using VknFrameBuffer = int;
 
 
 
@@ -23,7 +23,7 @@ namespace idk::vkn
 	struct Framebuffer;
 	struct VertexBuffer;
 	struct IndexBuffer;
-	struct ShaderModule;
+	class ShaderModule;
 	using TextureID  = Guid;
 	using CullFaceFlags = Flags<CullFace>;
 

@@ -2,7 +2,14 @@
 #include "FrameGraphBuilder.h"
 namespace idk::vkn
 {
-
+	fg_id FrameGraphBuilder::NextID()
+	{
+		return _fgid_generator.gen_next();
+	}
+	void FrameGraphBuilder::ResetIDs()
+	{
+		_fgid_generator.reset_ids();
+	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
 		return rsc_manager.CreateTexture(desc);
@@ -52,9 +59,10 @@ namespace idk::vkn
 		curr_rsc.depth_attachment = {out_rsc.id,attachment_desc};
 	}
 
-	void FrameGraphBuilder::BeginNode()
+	void FrameGraphBuilder::BeginNode(string name)
 	{
 		curr_rsc.reset();
+		curr_rsc.name = std::move(name);
 	}
 
 	FrameGraphNode FrameGraphBuilder::EndNode()
@@ -69,10 +77,10 @@ namespace idk::vkn
 		auto output_span = consumed_resources.StoreResources(curr_rsc.output_resources);
 		auto modified_span = consumed_resources.StoreResources(curr_rsc.modified_resources);
 
-		return FrameGraphNode{ id,&consumed_resources.resources,input_span,read_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment };
+		return FrameGraphNode{ id,std::move(curr_rsc.name),&consumed_resources.resources,input_span,read_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment };
 	}
 
-	void FrameGraphBuilder::CurrResources::reset()
+	void FrameGraphBuilder::PreObject::reset()
 	{
 		input_resources.clear();
 		output_resources.clear();
@@ -81,12 +89,12 @@ namespace idk::vkn
 		input_attachments.clear();
 		output_attachments.clear();
 	}
-
+#pragma optimize("",off)
 	index_span NodeBuffer::StoreResources(vector<FrameGraphResource>& rsc)
 	{
 		index_span result{ resources.size(),resources.size() };
 		resources.reserve(rsc.size() + resources.size());
-		std::copy(rsc.begin(), rsc.end(), resources.end());
+		std::copy(rsc.begin(), rsc.end(), std::back_inserter(resources));
 		result.end = resources.size();
 		return result;
 	}

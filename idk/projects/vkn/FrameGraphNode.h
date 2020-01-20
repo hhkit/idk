@@ -11,6 +11,8 @@ namespace idk::vkn
 	{
 		fg_id id;
 
+		string name;
+
 		const vector<FrameGraphResource>* buffer;
 
 		index_span input_resources; //The stuff that flow into the node here

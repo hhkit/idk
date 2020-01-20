@@ -1,9 +1,22 @@
 #include "pch.h"
 #include "FrameGraphResourceManager.h"
 #include <gfx/Texture.h>
+#include <ds/dual_set.inl>
 namespace idk::vkn
 {
-
+	void FrameGraphResourceManager::Instantiate(size_t unique_id, fgr_id base)
+	{
+		//TODO
+	}
+	void FrameGraphResourceManager::Alias(size_t unique_id, fgr_id id)
+	{
+		//TODO
+	}
+	TransitionInfo FrameGraphResourceManager::TransitionInfo(const FrameGraphResource& rsc)
+	{
+		//TODO
+		return vkn::TransitionInfo{};
+	}
 	FrameGraphResource FrameGraphResourceManager::CreateTexture(TextureDescription dsc)
 	{
 		auto rsc_index = resources.size();
@@ -60,6 +73,17 @@ namespace idk::vkn
 	FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(fgr_id rsc)
 	{
 		return concrete_resources[resource_map.find(rsc)->second];
+	}
+
+	fgr_id FrameGraphResourceManager::NextID()
+	{
+		//TODO
+		return _fgr_generator.gen_next();
+	}
+
+	void FrameGraphResourceManager::ResetIDs()
+	{
+		_fgr_generator.reset_ids();
 	}
 
 	std::optional<fgr_id> FrameGraphResourceManager::GetPrevious(fgr_id curr) const

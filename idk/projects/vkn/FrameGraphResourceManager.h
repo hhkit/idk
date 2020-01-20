@@ -4,6 +4,7 @@
 #include "FrameGraphResource.h"
 #include <vkn/AttachmentDescription.h>
 #include <vkn/VknTexture.h>
+#include <vkn/IdGenerator.h>
 namespace idk::vkn
 {
 	//All the necessary information to transition a resource to its target configuration
@@ -45,6 +46,7 @@ namespace idk::vkn
 		actual_resource_t& GetVar(fgr_id rsc);
 		//Generate the next id.
 		fgr_id NextID();
+		void ResetIDs();
 
 		std::optional<fgr_id> GetPrevious(fgr_id curr)const;
 
@@ -58,6 +60,7 @@ namespace idk::vkn
 		dual_set<fgr_id, fgr_id> write_renamed;
 		//new to old(second)
 		hash_table<fgr_id, fgr_id> renamed_resources;
+		hlp::IdGenerator<fgr_id> _fgr_generator;
 	};
 
 }

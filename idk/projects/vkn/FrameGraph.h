@@ -40,31 +40,13 @@ namespace idk::vkn
 		{
 			auto& span = in_nodes[dst];
 			span.begin = in_buffer.size();
-			in_buffer.resize(in_buffer.size() + std::distance(end, begin));
+			in_buffer.resize(in_buffer.size() + std::distance(begin, end));
 			std::copy(begin, end, in_buffer.begin() + span.begin);
 			span.end = in_buffer.size();
 		}
 		vector<fg_id> in_buffer;
 	};
-	ActualGraph ConvertTempGraph(TempGraph&& tmp)
-	{
-		ActualGraph result{
-			 .src_node = std::move(tmp.src_node)
-			,.end_node = std::move(tmp.end_node)
-		};
-		vector<fg_id> node_accum;
-		for (auto& [id, idx_span] : tmp.in_nodes)
-		{
-			auto rsc_span = idx_span.to_span(tmp.buffer->resources);
-			result.in_rsc_nodes.emplace(id, rsc_span);
-			node_accum.clear();
-			node_accum.resize(rsc_span.size());
-			std::transform(rsc_span.begin(), rsc_span.end(), node_accum.begin(), [](auto& rsc) {return rsc.id; });
-			result.set_input_nodes(id, node_accum.begin(), node_accum.end());
-		}
-		tmp.in_nodes.clear();
-		return result;
-	}
+	ActualGraph ConvertTempGraph(TempGraph&& tmp);
 	using FG_Traverser = GraphTraverser<FrameGraphNode, fg_id>;
 
 	struct ConversionPolicy
@@ -119,58 +101,14 @@ namespace idk::vkn
 		const NodeBuffer& rscs;
 	};
 
-	ActualGraph BuildGraph(const vector<FrameGraphNode>& nodes, const NodeBuffer& rscs, const FrameGraphResource& root)
-	{
-		ActualGraph graph;
-		FG_Traverser traverser;
-		FrameGraphNode root_node;
-		for (auto& node : nodes)
-		{
-			if (node.Writes(root))
-			{
-				root_node = node;
-				break;
-			}
-		}
-		traverser.Push(root_node);
-		ConversionPolicy cp{ &graph, nodes,rscs };
-		while (traverser.VisitNextNode(cp));
-		return graph;
-	}
+	ActualGraph BuildGraph(const vector<FrameGraphNode>& nodes, const NodeBuffer& rscs, const FrameGraphResource& root);
 
 	struct NodeDependencies
 	{
 		hash_table<fg_id, set<fg_id>> flattened_dependencies;
 		hash_table<fg_id, set<fg_id>> reversed_dependencies;
 	};
-	NodeDependencies BuildDependencyGraph(const vector<FrameGraphNode>& nodes, const ActualGraph& graph)
-	{
-		NodeDependencies dep;
-		for (auto& node : nodes)
-		{
-			auto node_id = node.id;
-			auto in_itr = graph.in_rsc_nodes.find(node_id);
-			if (in_itr != graph.in_rsc_nodes.end())
-			{
-				for (auto& in_rsc : in_itr->second)
-				{
-					auto itr = graph.src_node.find(in_rsc.id);
-					auto in_src_node_id = itr->second;
-					auto& my_deps = dep.flattened_dependencies[node_id];
-					my_deps.emplace(in_src_node_id);
-					for (auto& sub_dep : dep.flattened_dependencies[in_src_node_id])
-					{
-						my_deps.emplace(sub_dep);
-					}
-					auto& rev_deps = dep.reversed_dependencies[node_id];
-					for (auto reversed_dep : rev_deps)
-						dep.flattened_dependencies[reversed_dep].emplace(in_src_node_id);
-					rev_deps.emplace(node_id);
-				}
-			}
-		}
-		return dep;
-	}
+	NodeDependencies BuildDependencyGraph(const vector<FrameGraphNode>& nodes, const ActualGraph& graph);
 
 	struct FrameGraph
 	{
@@ -213,7 +151,7 @@ namespace idk::vkn
 		template<typename T, typename ...CtorArgs>
 		T& addRenderPass(string_view name, CtorArgs&&...args)
 		{
-			graph_builder.BeginNode();
+			graph_builder.BeginNode(name);
 			auto render_pass = std::make_unique<T>(graph_builder, std::forward <CtorArgs>(args)...);
 			auto& node = StoreNode(graph_builder.EndNode());
 			T& obj = *render_pass;

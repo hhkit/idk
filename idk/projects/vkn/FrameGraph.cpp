@@ -69,9 +69,10 @@ namespace idk::vkn
 			rm.Alias(r_id, ar_id);
 		}
 	}
-
+#pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
+		tmp_graph.buffer = &graph_builder.consumed_resources;
 		auto graph = ConvertTempGraph(std::move(tmp_graph));
 		graph_theory::IntermediateGraph dependency_graph{ nodes.size() };
 		hash_table<fg_id, size_t> id_to_indices;
@@ -84,11 +85,11 @@ namespace idk::vkn
 			index_buffer.reserve(nodes.size());
 			for (auto& [id, index] : id_to_indices)
 			{
-				auto oid_adj_buffer = graph.get_input_nodes(id);
+				auto oid_adj_buffer = graph.get_input_nodes(id); //input resources
 				auto id_adj_buffer = *oid_adj_buffer;
-				auto& lookup_table = id_to_indices;
+				auto& lookup_table = graph_builder.origin_nodes;
 				index_buffer.resize(id_adj_buffer.size());
-				std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&lookup_table](fg_id id) {return lookup_table.find(id)->second; });
+				std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&lookup_table,&id_to_indices](fg_id id) {return id_to_indices.find(lookup_table.find(id)->second)->second; });
 				dependency_graph.SetAdjacentNodes(index, index_buffer.begin(), index_buffer.end());
 			}
 			auto [sorted_order, success] = graph_theory::KahnsAlgorithm(dependency_graph);
@@ -245,6 +246,10 @@ namespace idk::vkn
 		vk::Device device;
 		return device.createRenderPassUnique(CreateRenderPassInfo(input_rscs,output_rscs,depth));
 	}
+	VknFrameBuffer FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+	{
+		return VknFrameBuffer();
+	}
 	void FrameGraph::CreateRenderPasses()
 	{
 		vector < std::tuple<FrameGraphNode*,BaseRenderPass*, vk::RenderPassCreateInfo>> create_info{};
@@ -268,6 +273,73 @@ namespace idk::vkn
 	const FrameGraphResourceManager& FrameGraph::GetResourceManager() const
 	{
 		return graph_builder.rsc_manager;
+	}
+	ActualGraph ConvertTempGraph(TempGraph&& tmp)
+	{
+		ActualGraph result{
+			.src_node = std::move(tmp.src_node)
+			,.end_node = std::move(tmp.end_node)
+		};
+		vector<fg_id> node_accum;
+		for (auto& [id, idx_span] : tmp.in_nodes)
+		{
+			auto rsc_span = idx_span.to_span(tmp.buffer->resources);
+			result.in_rsc_nodes.emplace(id, rsc_span);
+			node_accum.clear();
+			node_accum.resize(rsc_span.size());
+			std::transform(rsc_span.begin(), rsc_span.end(), node_accum.begin(), [](auto& rsc) {return rsc.id; });
+			result.set_input_nodes(id, node_accum.begin(), node_accum.end());
+		}
+		tmp.in_nodes.clear();
+		return result;
+	}
+
+	ActualGraph BuildGraph(const vector<FrameGraphNode>& nodes, const NodeBuffer& rscs, const FrameGraphResource& root)
+	{
+		ActualGraph graph;
+		FG_Traverser traverser;
+		FrameGraphNode root_node;
+		for (auto& node : nodes)
+		{
+			if (node.Writes(root))
+			{
+				root_node = node;
+				break;
+			}
+		}
+		traverser.Push(root_node);
+		ConversionPolicy cp{ &graph, nodes,rscs };
+		while (traverser.VisitNextNode(cp));
+		return graph;
+	}
+
+	NodeDependencies BuildDependencyGraph(const vector<FrameGraphNode>& nodes, const ActualGraph& graph)
+	{
+		NodeDependencies dep;
+		for (auto& node : nodes)
+		{
+			auto node_id = node.id;
+			auto in_itr = graph.in_rsc_nodes.find(node_id);
+			if (in_itr != graph.in_rsc_nodes.end())
+			{
+				for (auto& in_rsc : in_itr->second)
+				{
+					auto itr = graph.src_node.find(in_rsc.id);
+					auto in_src_node_id = itr->second;
+					auto& my_deps = dep.flattened_dependencies[node_id];
+					my_deps.emplace(in_src_node_id);
+					for (auto& sub_dep : dep.flattened_dependencies[in_src_node_id])
+					{
+						my_deps.emplace(sub_dep);
+					}
+					auto& rev_deps = dep.reversed_dependencies[node_id];
+					for (auto reversed_dep : rev_deps)
+						dep.flattened_dependencies[reversed_dep].emplace(in_src_node_id);
+					rev_deps.emplace(node_id);
+				}
+			}
+		}
+		return dep;
 	}
 
 }

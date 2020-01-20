@@ -344,6 +344,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
+    <ClInclude Include="IdGenerator.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
     <ClInclude Include="ParticleRenderer.h" />
     <ClInclude Include="PipelineBinders.h" />
@@ -452,6 +453,7 @@
     <ClCompile Include="ResourceLifetimeManager.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="topological_sort.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />

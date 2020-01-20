@@ -4,6 +4,7 @@
 #include "FrameGraphResource.h"
 #include "AttachmentDescription.h"
 #include "FrameGraphResourceManager.h"
+#include <vkn/IdGenerator.h>
 namespace idk::vkn
 {
 	struct NodeBuffer
@@ -22,6 +23,7 @@ namespace idk::vkn
 		//AttachmentInfo CreateTexture(AttachmentDescription desc);
 		//AttachmentInfo CreateTexture(const Texture& texture);
 		fg_id NextID();
+		void ResetIDs();
 
 		FrameGraphResource CreateTexture(TextureDescription desc);
 		FrameGraphResourceReadOnly read(FrameGraphResource in_rsc);
@@ -31,7 +33,7 @@ namespace idk::vkn
 		void set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc);
 		void set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, AttachmentDescription attachment_desc);
 
-		void BeginNode();
+		void BeginNode(string name);
 		FrameGraphNode EndNode();
 
 		FrameGraphResourceManager rsc_manager;
@@ -42,8 +44,9 @@ namespace idk::vkn
 		
 		NodeBuffer consumed_resources;
 	private:
-		struct CurrResources
+		struct PreObject
 		{
+			string name;
 			vector<FrameGraphResource> input_resources;
 			vector<FrameGraphResource> read_resources;
 			vector<FrameGraphResource> output_resources;
@@ -56,6 +59,7 @@ namespace idk::vkn
 		};
 
 		//Consumed resources
-		CurrResources curr_rsc;
+		PreObject curr_rsc;
+		hlp::IdGenerator<fg_id> _fgid_generator;
 	};
 }

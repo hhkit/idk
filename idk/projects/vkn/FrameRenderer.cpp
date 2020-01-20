@@ -800,6 +800,11 @@ namespace idk::vkn
 		cmd_buffer.end();
 	}
 //#pragma optimize("",off)
+	namespace gt
+	{
+		void GraphDeferredTest(const CoreGraphicsState& gfx_state, RenderStateV2& rs);
+	}
+
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_current_frame_index = frame_index;
@@ -862,6 +867,7 @@ namespace idk::vkn
 				for (size_t j = 0; j < curr_concurrent; ++j) {
 					auto& state = gfx_states[i + j];
 					auto& rs = _states[i + j];
+					gt::GraphDeferredTest(state, rs);
 					_render_threads[j]->Render(state, rs);
 					rendered = true;
 					//TODO submit command buffer here and signal the framebuffer's stuff.

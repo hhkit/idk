@@ -206,7 +206,7 @@ namespace idk::vkn
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
 	}
-	
+
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		try

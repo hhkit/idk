@@ -281,6 +281,9 @@
     <ClInclude Include="utils\VknUtil.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="IdGenerator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -495,13 +498,16 @@
     <ClCompile Include="ResourceLifetimeManager.cpp">
       <Filter>render\graph</Filter>
     </ClCompile>
-    <ClCompile Include="BaseRenderPass.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
     <ClCompile Include="graph_test.cpp">
       <Filter>render\graph\test</Filter>
     </ClCompile>
+    <ClCompile Include="BaseRenderPass.cpp">
+      <Filter>render\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="topological_sort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

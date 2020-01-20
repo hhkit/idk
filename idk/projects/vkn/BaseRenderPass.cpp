@@ -24,4 +24,16 @@ namespace idk::vkn
 	{
 	}
 
+	void BaseRenderPass::BeginRenderPass(Context_t)
+	{
+	}
+
+	void BaseRenderPass::EndRenderPass(Context_t)
+	{
+	}
+
+	void BaseRenderPass::BindFrameBuffer(Context_t)
+	{
+	}
+
 }
