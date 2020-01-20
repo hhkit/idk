@@ -52,4 +52,8 @@ REFLECT_BEGIN(idk::Collider, "Collider")
 REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_friction)
 REFLECT_END()
 
+// TEST
+REFLECT_BEGIN(idk::TestComponent, "TestComponent")
+REFLECT_VARS(a, b, c, d)
+REFLECT_END()
 #pragma endregion

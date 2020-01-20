@@ -1431,6 +1431,7 @@
       <Filter>network</Filter>
     </ClCompile>
     <ClCompile Include="network\Client.cpp" />
+    <ClCompile Include="test\TestComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -59,18 +59,6 @@ namespace idk
 			Core::GetSystem<NetworkSystem>().InstantiateServer(devices[0].ip_addresses[0]);
 		}
 
-		if (app_sys.GetKeyDown(Key::C))
-		{
-			auto devices = app_sys.GetNetworkDevices();
-			Core::GetSystem<NetworkSystem>().ConnectToServer(devices[0].ip_addresses[0]);
-		}
-
-		if (app_sys.GetKeyDown(Key::T))
-		{
-			static int i = 0;
-			if (!Core::GetSystem<NetworkSystem>().IsHost())
-				Core::GetSystem<NetworkSystem>().GetClient().SendTestMessage(i++);
-		}
 		
 		for (auto& elem : comps)
 		{

@@ -7,5 +7,12 @@ namespace idk
 	class TestComponent
 		: public Component<TestComponent>
 	{
+	public:
+		int a;
+		int b;
+		int c;
+		int d;
+	private:
+		void NetworkUpdate();
 	};
 }

@@ -454,6 +454,7 @@
     </ClCompile>
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="test\TestComponent.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Core.cpp" />
