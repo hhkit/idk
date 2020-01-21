@@ -27,8 +27,8 @@ namespace idk
 		
 		void rebuild();
 		void rebuild(vec3 center, float width, unsigned depth, float offset = 2.0f);
-		void insert(collider_info& object);
-		void descend(shared_ptr<octree_node> node, collider_info& object);
+		void insert(const collider_info& object);
+		void descend(shared_ptr<octree_node> node, const collider_info& object);
 		void erase(Handle<Collider> object);
 		// Removes the object from the node
 		void erase_from(Handle<Collider> object, shared_ptr<octree_node> node);

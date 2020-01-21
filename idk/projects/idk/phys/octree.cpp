@@ -58,8 +58,9 @@ namespace idk
 			insert(*obj);
 	}
 
-	void octree::insert(collider_info& data)
+	void octree::insert(const collider_info& data)
 	{
+		auto data_copy = data;
 		if (_root == nullptr)
 		{
 			_root = std::make_shared<octree_node>();
@@ -69,16 +70,17 @@ namespace idk
 			_root->bound.min = data.bound.min - offset_vec;
 			_root->bound.max = data.bound.max + offset_vec;
 
-			_root->object_list.emplace(data.collider, data);
-			data.collider->_octree_node = _root;
+			data_copy.collider->_octree_node = _root;
+			_root->object_list.emplace(data_copy.collider, data_copy);
+			
 			return;
 		}
 
 		// Rebuild the octree if the object lies outside the octree
-		if (!_root->bound.overlaps(data.bound))
+		if (!_root->bound.overlaps(data_copy.bound))
 		{
 			auto new_bound = _root->bound;
-			new_bound.surround(data.bound);
+			new_bound.surround(data_copy.bound);
 			auto new_extents = new_bound.extents();
 
 			auto width = max(max(new_extents.x, new_extents.y), new_extents.z);
@@ -86,10 +88,10 @@ namespace idk
 			return;
 		}
 
-		insert_data(_root, data);
+		insert_data(_root, data_copy);
 	}
 
-	void octree::descend(shared_ptr<octree_node> node, collider_info& object)
+	void octree::descend(shared_ptr<octree_node> node, const collider_info& object)
 	{
 		// Compute the quadrant
 		bool straddle = false;

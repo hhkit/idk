@@ -73,6 +73,7 @@ namespace idk
 		void UpdateOctree(collider_info& col, shared_ptr<octree_node> node);
 		void DrawOctreeDebug(shared_ptr<octree_node> node);
 
+		vector<ColliderInfoPair> PairColliders();
 		void PairColliders(shared_ptr<octree_node> node, vector<ColliderInfoPair>& pairs);
 
 		void Init() override;

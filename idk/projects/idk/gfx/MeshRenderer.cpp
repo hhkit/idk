@@ -19,18 +19,6 @@ namespace idk
 	RenderObject MeshRenderer::GenerateRenderObject() const
 	{
 		auto tfm = GetGameObject()->GetComponent<Transform>()->GlobalMatrix();
-		Handle<RigidBody> rb;
-		auto search = GetGameObject();
-		while (search)
-		{
-			rb = GetGameObject()->GetComponent<RigidBody>();
-			if (rb)
-				break;
-			else
-				search = search->Parent();
-		}
-		if (rb)
-			tfm[3] += vec4{ rb->velocity() * Core::GetScheduler().GetRemainingTime().count(), 0 };
 
 		return RenderObject{
 			.obj_id            = GetHandle(),

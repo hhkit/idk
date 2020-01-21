@@ -241,9 +241,9 @@ namespace idk
 			vector<CollisionInfo> collision_frame;
 			collision_frame.reserve(dynamic_info.size()); //guess
 
-			vector<ColliderInfoPair> info;
-			info.reserve(dynamic_info.size() * 4);
 			
+			
+			auto info = PairColliders();
 			// For each node in octree
 				// For each item in node
 					// Pair with every other node in octree
@@ -859,15 +859,25 @@ namespace idk
 		}
 	}
 
+	vector<PhysicsSystem::ColliderInfoPair> PhysicsSystem::PairColliders()
+	{
+		vector<ColliderInfoPair> info;
+		info.reserve(_collider_octree.object_count * 2);
+		PairColliders(_collider_octree._root, info);
+		return info;
+	}
+
 	void PhysicsSystem::PairColliders(shared_ptr<octree_node> node, vector<ColliderInfoPair>& pairs)
 	{
 		if (node)
 		{
 			auto all_info = _collider_octree.get_info(node);
+			auto node_obj_count = node->object_list.size();
 
 			auto end_it = all_info.end();
-			for (auto it = all_info.begin(); it != end_it; ++it)
+			for (size_t i = 0; i < node_obj_count; ++i)
 			{
+				auto it = all_info.begin() + i;
 				auto itr = *it;
 				auto lhs = itr->collider;
 
