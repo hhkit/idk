@@ -75,6 +75,15 @@ namespace idk
         public extern static ulong ComponentGetGameObject(ulong componenthandle);
 
         /*
+         * Behavior
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool MonoBehaviorGetEnable(ulong componenthandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MonoBehaviorSetEnable(ulong componenthandle, bool enable);
+
+        /*
          * Transform
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -571,5 +580,14 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float DebugLog(string preface, string message);
+
+        /*
+         * LayerMask
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string LayerMaskLayerToName(int layerIndex);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int LayerMaskNameToLayer(string name);
     }
 }

@@ -339,6 +339,20 @@ namespace idk::mono
 		BIND_END();
 
 
+		// behavior
+
+		BIND_START("idk.Bindings::MonoBehaviorGetEnable", bool, Handle<mono::Behavior> mb)
+		{
+			return mb->enabled;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::MonoBehaviorSetEnable", void, Handle<mono::Behavior> mb, bool set_enable)
+		{
+			mb->enabled = set_enable;
+		}
+		BIND_END();
+
 		// component
 		BIND_START("idk.Bindings::ComponentGetGameObject",  uint64_t, GenericHandle go)
 		{
@@ -1587,5 +1601,20 @@ namespace idk::mono
             h->font_size = v;
         }
         BIND_END();
+
+
+		// LayerMask
+
+		BIND_START("idk.Bindings::LayerMaskLayerToName", MonoString*, int index)
+		{
+			return mono_string_new(mono_domain_get(), Core::GetSystem<LayerManager>().LayerIndexToName(index).data());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LayerMaskNameToLayer", int, MonoString* s)
+		{
+			return Core::GetSystem<LayerManager>().NameToLayerIndex(unbox(s).get());
+		}
+		BIND_END();
 	}
 }

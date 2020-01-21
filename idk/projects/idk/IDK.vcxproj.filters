@@ -904,7 +904,6 @@
     <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
-    <ClInclude Include="common\LayerMask.h" />
     <ClInclude Include="parallel\HazardPointerDL.h" />
     <ClInclude Include="parallel\queue.h" />
     <ClInclude Include="parallel\ThreadPool.h" />
@@ -949,6 +948,11 @@
       <Filter>gfx\object</Filter>
     </ClInclude>
     <ClInclude Include="gfx\ColorPickRequest.h" />
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
+    <ClInclude Include="common\LayerMask.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="phys\octree.h">

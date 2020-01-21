@@ -85,6 +85,7 @@
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />
+    <Compile Include="LayerMask.cs" />
     <Compile Include="Math\Box.cs" />
     <Compile Include="Math\Color.cs" />
     <Compile Include="Math\Deg.cs" />
