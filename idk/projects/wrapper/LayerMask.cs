@@ -3,7 +3,7 @@
 namespace idk
 {
     [StructLayout(LayoutKind.Sequential)]
-    struct LayerMask
+    public struct LayerMask
     {
         public int value;
 
