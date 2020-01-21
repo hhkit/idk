@@ -847,6 +847,9 @@ namespace idk
 
 	void PhysicsSystem::UpdateOctree(collider_info& col, shared_ptr<octree_node> node)
 	{
+		auto info = node->object_list.find(col.collider);
+		info->second = col;
+
 		if (!node->bound.contains(col.bound))
 		{
 			_collider_octree.erase_from(col.collider, node);
@@ -855,6 +858,7 @@ namespace idk
 		// try to descend the tree (not straddling anymore
 		else
 		{
+			
 			_collider_octree.descend(node, col);
 		}
 	}
@@ -880,6 +884,8 @@ namespace idk
 				auto it = all_info.begin() + i;
 				auto itr = *it;
 				auto lhs = itr->collider;
+				if (!lhs->_active_cache || lhs.scene == Scene::prefab)
+					continue;
 
 				auto jt = it;
 				for (++jt; jt != end_it; ++jt)
@@ -887,6 +893,9 @@ namespace idk
 					auto jtr = *jt;
 					auto rhs = jtr->collider;
 
+					if (!rhs->_active_cache || rhs.scene == Scene::prefab)
+						continue;
+					
 					// No need to check static vs static
 					if (lhs->_static_cache && rhs->_static_cache)
 						continue;
@@ -905,7 +914,10 @@ namespace idk
 					if (!AreLayersCollidable(itr->layer, jtr->layer))
 						continue;
 
-					pairs.emplace_back(ColliderInfoPair{ itr, jtr });
+					if(lhs->_static_cache)
+						pairs.emplace_back(ColliderInfoPair{ jtr, itr });
+					else
+						pairs.emplace_back(ColliderInfoPair{ itr, jtr });
 				}
 			}
 
