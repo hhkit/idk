@@ -11,6 +11,8 @@ namespace idk
 	class Client
 	{
 	public:
+		Signal<> OnClientConnected;
+		Signal<> OnClientDisconnected;
 		Signal<yojimbo::Message*> OnMessageReceived[(int)GameMessageType::COUNT];
 
 		Client(const Address& addr);
@@ -25,6 +27,7 @@ namespace idk
 		Adapter           adapter;
 		GameConfiguration config;
 		yojimbo::Client   client;
+		bool connected_last_frame = false;
 
 		void ProcessMessage(yojimbo::Message* message);
 	};

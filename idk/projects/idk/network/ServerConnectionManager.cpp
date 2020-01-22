@@ -1,13 +1,13 @@
 #include "stdafx.h"
-#include "ClientConnectionManager.h"
-#include "SubstreamManager.h"
-#include <network/Client.h>
+#include "ServerConnectionManager.h"
+#include <network/Server.h>
+#include <network/SubstreamManager.h>
 #include <network/EventManager.h>
 
 namespace idk
 {
 	template<typename RealSubstreamManager>
-	inline RealSubstreamManager& ClientConnectionManager::AddSubstreamManager()
+	inline RealSubstreamManager& ServerConnectionManager::AddSubstreamManager()
 	{
 		static_assert(has_tag_v<RealSubstreamManager, SubstreamManager>, "Must inherit from CRTP template SubstreamManager<>!");
 		auto& ptr = substream_managers.emplace_back(std::make_unique<RealSubstreamManager>());
@@ -15,19 +15,19 @@ namespace idk
 		return static_cast<RealSubstreamManager&>(*ptr);
 	}
 
-	ClientConnectionManager::ClientConnectionManager(Client& _client)
-		: client{ _client }
+	ServerConnectionManager::ServerConnectionManager(int _clientID, Server& _server)
+		: clientID{_clientID}, server { _server }
 	{
 		InstantiateSubmanagers();
 	}
 
-	ClientConnectionManager::~ClientConnectionManager()
+	ServerConnectionManager::~ServerConnectionManager()
 	{
 		for (const auto& [type, slot] : OnMessageReceived_slots)
-			client.OnMessageReceived[(int) type].Unlisten(slot);
+			server.OnMessageReceived[clientID][(int)type].Unlisten(slot);
 	}
 
-	void ClientConnectionManager::InstantiateSubmanagers()
+	void ServerConnectionManager::InstantiateSubmanagers()
 	{
 		AddSubstreamManager<EventManager>();
 	}

@@ -38,8 +38,18 @@ namespace idk
 	{
 		client.AdvanceTime(client.GetTime() + Core::GetRealDT().count());
 		client.ReceivePackets();
-		if (client.IsConnected())
+		
+		auto connected_this_frame = client.IsConnected();
+		if (connected_this_frame && !connected_last_frame)
+			OnClientConnected.Fire();
+
+		if (!connected_this_frame && connected_last_frame)
+			OnClientDisconnected.Fire();
+
+		if (connected_this_frame)
 			ProcessMessages();
+
+		connected_last_frame = connected_this_frame;
 	}
 	void Client::SendPackets()
 	{

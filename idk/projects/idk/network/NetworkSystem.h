@@ -6,6 +6,8 @@ namespace idk
 {
 	class Client;
 	class Server;
+	class ClientConnectionManager;
+	class ServerConnectionManager;
 
 	class NetworkSystem
 		: public ISystem
@@ -22,12 +24,16 @@ namespace idk
 
 		Client& GetClient() { return *client; }
 		Server& GetServer() { return *lobby; }
+		ClientConnectionManager& GetClientConnectionManager() { return *client_connection_manager; }
+		ServerConnectionManager& GetServerConnectionManager() { return *server_connection_manager; }
 
 		void ReceivePackets();
 		void SendPackets();
 	private:
 		std::unique_ptr<Server> lobby;
 		std::unique_ptr<Client> client;
+		std::unique_ptr<ServerConnectionManager> server_connection_manager;
+		std::unique_ptr<ClientConnectionManager> client_connection_manager;
 
 		void Init() override;
 		void LateInit() override;

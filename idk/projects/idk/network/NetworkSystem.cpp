@@ -1,8 +1,10 @@
 #include "pch_common.h"
 #include <app/Application.h>
 #include "NetworkSystem.h"
-#include "Server.h"
-#include "Client.h"
+#include <network/Server.h>
+#include <network/Client.h>
+#include <network/ServerConnectionManager.h>
+#include <network/ClientConnectionManager.h>
 #include <yojimbo/yojimbo.h>
 namespace idk
 {
@@ -63,8 +65,12 @@ namespace idk
 	void NetworkSystem::ResetNetwork()
 	{
 		if (lobby)
+		{
 			lobby.reset();
+		}
 		if (client)
+		{
 			client.reset();
+		}
 	}
 }

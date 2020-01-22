@@ -149,6 +149,9 @@
     <Filter Include="network\substream">
       <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
     </Filter>
+    <Filter Include="parallel">
+      <UniqueIdentifier>{c0a27a3b-a553-49e0-bfdc-58031b1ed1c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -919,17 +922,12 @@
     <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
-    <ClInclude Include="common\LayerMask.h" />
-    <ClInclude Include="parallel\HazardPointerDL.h" />
-    <ClInclude Include="parallel\queue.h" />
-    <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="anim\AnimationTransition.h">
       <Filter>anim</Filter>
     </ClInclude>
     <ClInclude Include="anim\AnimationTypes.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="gfx\ShaderSnippetLoader.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -945,26 +943,10 @@
     <ClInclude Include="gfx\RenderRequest.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\CompiledMesh.h" />
-    <ClInclude Include="res\ResourceExtension.h" />
-    <ClInclude Include="res\CompiledAssets.h" />
-    <ClInclude Include="gfx\CompiledTexture.h" />
-    <ClInclude Include="res\CompiledAssetLoader.h" />
-    <ClInclude Include="res\IAssetLoader.h" />
-    <ClInclude Include="gfx\GraphFactory.h" />
     <ClInclude Include="pch_common.h" />
-    <ClInclude Include="ReflectRegistration.inl" />
-    <ClInclude Include="ReflectReg_Resources.inl" />
-    <ClInclude Include="ReflectReg_GfxComponents.inl" />
-    <ClInclude Include="ReflectReg_Components.inl" />
-    <ClInclude Include="ReflectReg_Common.inl" />
     <ClInclude Include="gfx\ColorPickResult.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\RenderTargetMeta.h" />
-    <ClInclude Include="gfx\TextureInternalFormat.h" />
-    <ClInclude Include="ds\sliding_window.h" />
-    <ClInclude Include="network\GameConfiguration.h" />
     <ClInclude Include="network\Device.h" />
     <ClInclude Include="memory\ArenaAllocator.h">
       <Filter>memory</Filter>
@@ -1010,6 +992,72 @@
     </ClInclude>
     <ClInclude Include="network\ClientConnectionManager.h">
       <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ServerConnectionManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\GameConfiguration.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CompiledMesh.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CompiledTexture.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\cache_aligned_wrapper.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="res\CompiledAssetLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\CompiledAssets.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\GraphFactory.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="res\IAssetLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\HazardPointerDL.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_Common.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_Components.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_GfxComponents.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_Resources.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectRegistration.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="common\LayerMask.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\sliding_window.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\ThreadPool.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceExtension.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderTargetMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextureInternalFormat.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\queue.h">
+      <Filter>parallel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1395,7 +1443,6 @@
     <ClCompile Include="core\NullHandleException.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
@@ -1429,21 +1476,15 @@
     <ClCompile Include="gfx\FontData.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
-    <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="gfx\ShaderIncluder.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="res\ResourceMeta.cpp" />
-    <ClCompile Include="gfx\GraphFactory.cpp" />
     <ClCompile Include="ColorPickRequest.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
-    <ClCompile Include="network\GameConfiguration.cpp" />
-    <ClCompile Include="test\TestComponent.cpp" />
     <ClCompile Include="network\Address.cpp">
       <Filter>network\data</Filter>
     </ClCompile>
@@ -1462,7 +1503,33 @@
     <ClCompile Include="network\ClientConnectionManager.cpp">
       <Filter>network\managers</Filter>
     </ClCompile>
-    <ClCompile Include="network\EventManager.cpp" />
+    <ClCompile Include="network\ServerConnectionManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\GameConfiguration.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="util\easing.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\GraphFactory.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="network\EventManager.cpp">
+      <Filter>network\substream</Filter>
+    </ClCompile>
+    <ClCompile Include="parallel\ThreadPool.cpp">
+      <Filter>parallel</Filter>
+    </ClCompile>
+    <ClCompile Include="res\ResourceMeta.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\TextureInternalFormat.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TestComponent.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1655,14 +1722,23 @@
     <None Include="res\MetaBundle.inl">
       <Filter>res</Filter>
     </None>
-    <None Include="res\CompiledAssetLoader.inl" />
-    <None Include="ReflectReg_AnimComponents.inl" />
-    <None Include="ds\sliding_window.inl" />
     <None Include="memory\ArenaAllocator.inl">
       <Filter>memory</Filter>
     </None>
     <None Include="network\ClientConnectionManager.inl">
       <Filter>network\managers</Filter>
+    </None>
+    <None Include="network\ServerConnectionManager.inl">
+      <Filter>network\managers</Filter>
+    </None>
+    <None Include="res\CompiledAssetLoader.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="ReflectReg_AnimComponents.inl">
+      <Filter>reflect</Filter>
+    </None>
+    <None Include="ds\sliding_window.inl">
+      <Filter>ds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

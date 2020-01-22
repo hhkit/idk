@@ -94,6 +94,7 @@
     <ClInclude Include="network\ClassRep.h" />
     <ClInclude Include="network\Client.h" />
     <ClInclude Include="network\ClientConnectionManager.h" />
+    <ClInclude Include="network\ServerConnectionManager.h" />
     <ClInclude Include="network\SubstreamManager.h" />
     <ClInclude Include="network\ConnectionManager.h" />
     <ClInclude Include="network\Device.h" />
@@ -387,6 +388,7 @@
     <ClCompile Include="network\GameConfiguration.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\Server.cpp" />
+    <ClCompile Include="network\ServerConnectionManager.cpp" />
     <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
@@ -529,6 +531,7 @@
     <None Include="meta\tuple.inl" />
     <None Include="meta\variant.inl" />
     <None Include="network\ClientConnectionManager.inl" />
+    <None Include="network\ServerConnectionManager.inl" />
     <None Include="phys\raycasts\collision_raycast.inl" />
     <None Include="ReflectReg_AnimComponents.inl" />
     <None Include="reflect\detail\meta_manager.inl" />
