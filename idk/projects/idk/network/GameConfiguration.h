@@ -33,6 +33,7 @@ namespace idk
 	struct GameConfiguration
 		: yojimbo::ClientServerConfig
 	{
+		static constexpr auto MAX_CLIENTS = 8;
 		GameConfiguration();
 	};
 }

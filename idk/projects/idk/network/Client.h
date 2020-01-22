@@ -6,9 +6,13 @@
 
 namespace idk
 {
+	class ClientConnectionManager;
+
 	class Client
 	{
 	public:
+		Signal<yojimbo::Message*> OnMessageReceived[(int)GameMessageType::COUNT];
+
 		Client(const Address& addr);
 		~Client();
 
@@ -16,7 +20,7 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
-		void SendTestMessage(int i);
+		void SendMessage(yojimbo::Message* message, bool guarantee_delivery = false);
 	private:
 		Adapter           adapter;
 		GameConfiguration config;

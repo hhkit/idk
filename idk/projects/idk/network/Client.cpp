@@ -1,11 +1,12 @@
+#include "stdafx.h"
 #include "Client.h"
 #include <core/Core.h>
-#include <network/messages/TestMessage.h>
-#include <network/messages/EventMessage.h>
 #include <prefab/Prefab.h>
 #include <scene/SceneManager.h>
 #include <core/GameObject.inl>
 #include <common/Transform.h>
+#undef SendMessage
+
 namespace idk
 {
 	Client::Client(const Address& server_addr)
@@ -29,7 +30,6 @@ namespace idk
 			{
 				ProcessMessage(message);
 				client.ReleaseMessage(message);
-				message = client.ReceiveMessage(i);
 			}
 		}
 	}
@@ -46,28 +46,13 @@ namespace idk
 		client.SendPackets();
 	}
 
-	void Client::SendTestMessage(int i)
+	void Client::SendMessage(yojimbo::Message* message, bool guarantee_delivery)
 	{
+		client.SendMessage((int)(guarantee_delivery ? GameChannel::RELIABLE : GameChannel::UNRELIABLE), message);
 	}
 
 	void Client::ProcessMessage(yojimbo::Message* message)
 	{
-		switch (message->GetType()) {
-		case (int)GameMessageType::TEST:
-			LOG_TO(LogPool::NETWORK, "Received from network: TestMessage with payload: %d", ((TestMessage*)message)->m_data);;
-			break;
-		case (int)GameMessageType::EVENT_INSTANTIATE_PREFAB:
-		{
-			auto& payload = ((EventInstantiatePrefabMessage*)message)->payload;
-			auto obj = payload.prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
-			if (payload.has_position)
-				obj->Transform()->GlobalPosition(payload.position);
-			if (payload.has_rotation)
-				obj->Transform()->GlobalRotation(payload.rotation);
-			break;
-		}
-		default:
-			break;
-		}
+		OnMessageReceived[message->GetType()].Fire(message);
 	}
 }

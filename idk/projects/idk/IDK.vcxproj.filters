@@ -137,6 +137,18 @@
     <Filter Include="memory">
       <UniqueIdentifier>{5ac86b7f-b5d8-4550-99cd-75d596f6a49b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="network\data">
+      <UniqueIdentifier>{b24b3ed7-5420-4408-ac31-0cbad7e5fce3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\system">
+      <UniqueIdentifier>{9206de05-115a-4361-83f9-8cd4a78421fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\managers">
+      <UniqueIdentifier>{593d88bc-f344-4363-8402-5600f411fd62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\substream">
+      <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -954,12 +966,6 @@
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="network\GameConfiguration.h" />
     <ClInclude Include="network\Device.h" />
-    <ClInclude Include="network\Adapter.h">
-      <Filter>network</Filter>
-    </ClInclude>
-    <ClInclude Include="network\Address.h">
-      <Filter>network</Filter>
-    </ClInclude>
     <ClInclude Include="memory\ArenaAllocator.h">
       <Filter>memory</Filter>
     </ClInclude>
@@ -969,26 +975,42 @@
     <ClInclude Include="gfx\ColorPickRequest.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="network\Lobby.h">
-      <Filter>network</Filter>
-    </ClInclude>
-    <ClInclude Include="network\NetworkSystem.h">
-      <Filter>network</Filter>
-    </ClInclude>
-    <ClInclude Include="network\Server.h">
-      <Filter>network</Filter>
-    </ClInclude>
     <ClInclude Include="network\Player.h">
       <Filter>network</Filter>
     </ClInclude>
     <ClInclude Include="network\ConnectionManager.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="network\Client.h" />
-    <ClInclude Include="network\messages\TestMessage.h" />
-    <ClInclude Include="network\messages\EventMessage.h" />
-    <ClInclude Include="network\managers\EventManager.h" />
-    <ClInclude Include="network\events\InstantiatePrefabPayload.h" />
+    <ClInclude Include="network\Address.h">
+      <Filter>network\data</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Server.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\NetworkSystem.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Adapter.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Client.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\PersistManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ClassRep.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventManager.h">
+      <Filter>network\substream</Filter>
+    </ClInclude>
+    <ClInclude Include="network\SubstreamManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ClientConnectionManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1421,21 +1443,26 @@
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />
-    <ClCompile Include="network\Adapter.cpp">
-      <Filter>network</Filter>
-    </ClCompile>
+    <ClCompile Include="test\TestComponent.cpp" />
     <ClCompile Include="network\Address.cpp">
-      <Filter>network</Filter>
-    </ClCompile>
-    <ClCompile Include="network\NetworkSystem.cpp">
-      <Filter>network</Filter>
+      <Filter>network\data</Filter>
     </ClCompile>
     <ClCompile Include="network\Server.cpp">
-      <Filter>network</Filter>
+      <Filter>network\system</Filter>
     </ClCompile>
-    <ClCompile Include="network\Client.cpp" />
-    <ClCompile Include="test\TestComponent.cpp" />
-    <ClCompile Include="network\managers\EventManager.cpp" />
+    <ClCompile Include="network\NetworkSystem.cpp">
+      <Filter>network\system</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Adapter.cpp">
+      <Filter>network\system</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Client.cpp">
+      <Filter>network\system</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ClientConnectionManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\EventManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1633,6 +1660,9 @@
     <None Include="ds\sliding_window.inl" />
     <None Include="memory\ArenaAllocator.inl">
       <Filter>memory</Filter>
+    </None>
+    <None Include="network\ClientConnectionManager.inl">
+      <Filter>network\managers</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

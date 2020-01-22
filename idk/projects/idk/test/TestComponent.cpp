@@ -6,7 +6,6 @@
 #include <network/Server.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
-#include <network/events/InstantiatePrefabPayload.h>
 namespace idk
 {
 	void TestComponent::NetworkUpdate()
@@ -24,12 +23,13 @@ namespace idk
 		if (app_sys.GetKeyDown(Key::T))
 		{
 			static int i = 0;
-			if (!network_sys.IsHost())
-				network_sys.GetClient().SendTestMessage(i++);
+			//if (!network_sys.IsHost())
+			//	network_sys.GetClient().SendTestMessage(i++);
 		}
 
 		if (app_sys.GetKeyDown(Key::P))
 		{
+			/*
 			network_sys.GetServer().SendEvent(EventInstantiatePrefabPayload{
 				.prefab = makeme,
 				.has_position = send_pos,
@@ -37,6 +37,7 @@ namespace idk
 				.has_rotation = send_rot,
 				.rotation = GetGameObject()->Transform()->GlobalRotation()
 				});
+				*/
 		}
 	}
 }

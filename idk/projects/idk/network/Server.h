@@ -1,5 +1,6 @@
 #pragma once
 #include <yojimbo/yojimbo.h>
+#include <event/Signal.h>
 #include "Adapter.h"
 #include "GameConfiguration.h"
 #include "Address.h"
@@ -11,6 +12,14 @@ namespace idk
 	class Server
 	{
 	public:
+		static constexpr auto ALL_CLIENTS = -1;
+
+		// signals
+		Signal<int>               OnClientConnect;
+		Signal<int>               OnClientDisconnect;
+		Signal<yojimbo::Message*> OnMessageReceived[GameConfiguration::MAX_CLIENTS][(int)GameMessageType::COUNT];
+
+		// ctor
 		Server(const Address& address);
 		~Server();
 
@@ -18,10 +27,7 @@ namespace idk
 
 		void ReceivePackets();
 		void SendPackets();
-
-		// managers
-		EventManager& GetEventManager() { return *event_manager; }
-		void SendEvent(const EventInstantiatePrefabPayload&);
+		void SendMessage(int clientIndex, yojimbo::Message* message, bool guarantee_delivery = false);
 
 		// callbacks
 		void ClientConnected(int clientIndex);
@@ -30,8 +36,6 @@ namespace idk
 		Adapter           adapter;
 		GameConfiguration config;
 		yojimbo::Server   server;
-
-		std::unique_ptr<EventManager> event_manager;
 
 		void ProcessMessage(int clientIndex, yojimbo::Message* message);
 	};

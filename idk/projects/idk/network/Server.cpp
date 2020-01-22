@@ -1,17 +1,15 @@
 #include "stdafx.h"
 #include "Server.h"
-#include <network/messages/TestMessage.h>
-#include <network/messages/EventMessage.h>
-#include <network/managers/EventManager.h>
+#include <event/Signal.inl>
+
 #undef SendMessage
-static const int MAX_PLAYERS = 4;
 
 namespace idk
 {
 	Server::Server(const Address& address)
 		: adapter{ this }, server{ yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY, yojimbo::Address{address.a, address.b, address.c, address.d, address.port}, config, adapter, 0.0 }
 	{
-		server.Start(MAX_PLAYERS);
+		server.Start(GameConfiguration::MAX_CLIENTS);
 		if (!server.IsRunning())
 		{
 			LOG_CRASH_TO(LogPool::NETWORK, "Could not create server!");
@@ -21,9 +19,6 @@ namespace idk
 		char buffer[256];
 		server.GetAddress().ToString(buffer, sizeof(buffer));
 		LOG_TO(LogPool::NETWORK, "Server address is %s", buffer);
-
-		// setup lobby
-		event_manager = std::make_unique<EventManager>();
 	}
 	Server::~Server()
 	{
@@ -31,30 +26,17 @@ namespace idk
 	}
 	void Server::ProcessMessage(int clientIndex, yojimbo::Message* message)
 	{
-		switch (message->GetType()) {
-		case (int)GameMessageType::TEST:
-		{
-			LOG_TO(LogPool::NETWORK, "Received from %d: TestMessage with payload: %d", clientIndex, ((TestMessage*)message)->m_data);
-			TestMessage* testMessage = (TestMessage*)server.CreateMessage(clientIndex, (int)GameMessageType::TEST);
-			testMessage->m_data = ((TestMessage*)message)->m_data;
-			server.SendMessage(clientIndex, (int)GameChannel::RELIABLE, testMessage);
-			break;
-		}
-		default:
-			break;
-		}
+		OnMessageReceived[clientIndex][message->GetType()].Fire(message);
 	}
 
 	void Server::ProcessMessages()
 	{
-		for (int i = 0; i < MAX_PLAYERS; i++) {
+		for (int i = 0; i < GameConfiguration::MAX_CLIENTS; i++) {
 			if (server.IsClientConnected(i)) {
 				for (int j = 0; j < config.numChannels; j++) {
-					yojimbo::Message* message = server.ReceiveMessage(i, j);
-					while (message != NULL) {
+					while (auto message = server.ReceiveMessage(i, j)) {
 						ProcessMessage(i, message);
 						server.ReleaseMessage(i, message);
-						message = server.ReceiveMessage(i, j);
 					}
 				}
 			}
@@ -70,25 +52,30 @@ namespace idk
 	void Server::SendPackets()
 	{
 		server.SendPackets();
-	}
+	} 
 
-	void Server::SendEvent(const EventInstantiatePrefabPayload& event)
+	void Server::SendMessage(int clientIndex, yojimbo::Message* message, bool guarantee)
 	{
-		for (int i = 0; i < server.GetNumConnectedClients(); ++i)
+		if (clientIndex == ALL_CLIENTS)
 		{
-			auto* testMessage = (EventInstantiatePrefabMessage*)server.CreateMessage(i, (int)GameMessageType::EVENT_INSTANTIATE_PREFAB);
-			testMessage->payload = event;
-			server.SendMessage(i, (int)GameChannel::RELIABLE, testMessage);
+			for (int i = 0; i < server.GetNumConnectedClients(); ++i)
+				server.SendMessage(i, (int)(guarantee ? GameChannel::RELIABLE : GameChannel::UNRELIABLE), message);
+		}
+		else
+		{
+			server.SendMessage(clientIndex, (int)(guarantee ? GameChannel::RELIABLE : GameChannel::UNRELIABLE), message);
 		}
 	}
 
 	void Server::ClientConnected(int clientIndex)
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d connected", clientIndex);
+		OnClientConnect.Fire(clientIndex);
 	}
 
 	void Server::ClientDisconnected(int clientIndex)
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d disconnected", clientIndex);
+		OnClientDisconnect.Fire(clientIndex);
 	}
 }

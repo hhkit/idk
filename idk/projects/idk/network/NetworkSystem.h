@@ -4,6 +4,8 @@
 
 namespace idk
 {
+	class Client;
+	class Server;
 
 	class NetworkSystem
 		: public ISystem
@@ -18,14 +20,14 @@ namespace idk
 		void ConnectToServer(const Address& d);
 		bool IsHost();
 
-		class Client& GetClient() { return *client; }
-		class Server& GetServer() { return *lobby; }
+		Client& GetClient() { return *client; }
+		Server& GetServer() { return *lobby; }
 
 		void ReceivePackets();
 		void SendPackets();
 	private:
-		std::unique_ptr<class Server> lobby;
-		std::unique_ptr<class Client> client;
+		std::unique_ptr<Server> lobby;
+		std::unique_ptr<Client> client;
 
 		void Init() override;
 		void LateInit() override;
