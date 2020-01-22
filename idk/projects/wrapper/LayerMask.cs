@@ -7,7 +7,7 @@ namespace idk
     {
         public int value;
 
-        public static implicit operator LayerMask(int value) => value;
+        public static implicit operator LayerMask(int value) { LayerMask mask; mask.value = value; return mask; }
         public static implicit operator int(LayerMask mask) => mask.value;
         
         public static LayerMask GetMask(params string[] layerNames)
