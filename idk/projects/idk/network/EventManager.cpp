@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "EventManager.h"
-#include <network/ClientConnectionManager.h>
+#include <network/ClientConnectionManager.inl>
 #include <iostream>
 
 namespace idk
