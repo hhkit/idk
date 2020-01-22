@@ -394,10 +394,9 @@ namespace idk::vkn
 		imageInfo.format = internal_format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-		imageInfo.usage = image_usage;// vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
+		imageInfo.usage = image_usage;//vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
 		imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
 		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
-
 		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
 		auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
 		device.bindImageMemory(*image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
@@ -517,7 +516,7 @@ namespace idk::vkn
 			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect);
 
 	
-		}else
+		}else if(imageInfo.initialLayout!=load_info.layout)
 		{
 			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, * image, img_aspect);
 		}

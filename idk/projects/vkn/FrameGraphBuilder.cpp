@@ -15,7 +15,7 @@ namespace idk::vkn
 		return rsc_manager.CreateTexture(desc);
 	}
 
-	FrameGraphResourceReadOnly FrameGraphBuilder::read(FrameGraphResource in_rsc)
+	FrameGraphResourceReadOnly FrameGraphBuilder::read(FrameGraphResource in_rsc,[[maybe_unused]] bool may_shader_sample)
 	{
 		//auto rsc = rsc_manager.Rename(in_rsc);
 		curr_rsc.input_resources.emplace_back(in_rsc);
@@ -30,7 +30,6 @@ namespace idk::vkn
 			LOG_WARNING_TO(LogPool::GFX, "Warning: Writing to resource %ull twice.",target_rsc.id);
 			target_rsc = rsc_manager.WriteRenamed(target_rsc);
 		}
-
 		auto rsc = rsc_manager.WriteRename(target_rsc);
 		if (!opt.clear)
 			curr_rsc.input_resources.emplace_back(target_rsc);
@@ -45,6 +44,7 @@ namespace idk::vkn
 		auto size = std::max(curr_rsc.input_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.input_attachments.resize(size);
 		curr_rsc.input_attachments[attachment_index] = { in_rsc.id,attachment_desc };
+		rsc_manager.MarkUsage(in_rsc.id, vk::ImageUsageFlagBits::eInputAttachment);
 	}
 
 	void FrameGraphBuilder::set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
@@ -52,11 +52,13 @@ namespace idk::vkn
 		auto size = std::max(curr_rsc.output_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.output_attachments.resize(size);
 		curr_rsc.output_attachments[attachment_index] = { out_rsc.id,attachment_desc };
+		curr_rsc.output_attachments.resize(size);
 	}
 
 	void FrameGraphBuilder::set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, AttachmentDescription attachment_desc)
 	{
 		curr_rsc.depth_attachment = {out_rsc.id,attachment_desc};
+		rsc_manager.MarkUsage(out_rsc.id, vk::ImageUsageFlagBits::eDepthStencilAttachment);
 	}
 
 	void FrameGraphBuilder::BeginNode(string name)

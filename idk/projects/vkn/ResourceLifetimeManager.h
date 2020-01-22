@@ -46,7 +46,7 @@ namespace idk::vkn
 		auto NewNode(fgr_id r_id)
 		{
 			auto index = resource_lifetimes.size();
-			resource_lifetimes.emplace_back(ResourceLifetime{ {},{},{} });
+			resource_lifetimes.emplace_back(ResourceLifetime{ {std::numeric_limits<decltype(ResourceLifetime::start)>::max()},{std::numeric_limits<decltype(ResourceLifetime::start)>::min()},{} });
 			return map.emplace(r_id, index).first;
 		}
 		auto& GetOrCreate(fgr_id r_id)

@@ -36,7 +36,7 @@ namespace idk::vkn
 
 	bool ResourceLifetimeManager::overlap_lifetime(const actual_resource_t& rsc, order_t start, order_t end)
 	{
-		return !((rsc.end<start) & (rsc.start>end));
+		return !((rsc.end<start) | (rsc.start>end));
 	}
 
 	void ResourceLifetimeManager::Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc)

@@ -26,7 +26,7 @@ namespace idk::vkn
 		void ResetIDs();
 
 		FrameGraphResource CreateTexture(TextureDescription desc);
-		FrameGraphResourceReadOnly read(FrameGraphResource in_rsc);
+		FrameGraphResourceReadOnly read(FrameGraphResource in_rsc,bool may_shader_sample=true);
 		FrameGraphResourceMutable write(FrameGraphResource target_rsc, WriteOptions opt = {});
 
 		void set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index , AttachmentDescription attachment_desc);

@@ -2,33 +2,84 @@
 #include "FrameGraphResourceManager.h"
 #include <gfx/Texture.h>
 #include <ds/dual_set.inl>
+
+#include <vkn/VknTextureLoader.h>
+#include <vkn/VulkanView.h>
 namespace idk::vkn
 {
-	void FrameGraphResourceManager::Instantiate(size_t unique_id, fgr_id base)
+	VulkanView& View();
+	struct FrameGraphResourceManager::Pimpl
 	{
-		//TODO
+		hlp::MemoryAllocator allocator;
+		vk::UniqueFence uload_fence;
+		vk::Fence load_fence;
+		Pimpl() :uload_fence{ View().Device()->createFenceUnique(vk::FenceCreateInfo{}) },load_fence{*uload_fence}
+		{
+			
+		}
+	};
+
+	FrameGraphResourceManager::FrameGraphResourceManager():_pimpl{std::make_unique<Pimpl>()}
+	{
+
 	}
-	void FrameGraphResourceManager::Alias(size_t unique_id, fgr_id id)
+	FrameGraphResourceManager::FrameGraphResourceManager(FrameGraphResourceManager&&)=default;
+	FrameGraphResourceManager& FrameGraphResourceManager::operator=(FrameGraphResourceManager&&)=default;
+	FrameGraphResourceManager::~FrameGraphResourceManager()=default;
+
+	void FrameGraphResourceManager::Instantiate(fgr_id unique_id, fgr_id base)
 	{
-		//TODO
+
+		auto index = concrete_resources.size();
+		//Create Resource at the back of concrete_resources
+		auto rsc_desc = GetResourceDescription(base);
+		if (!rsc_desc)
+		{
+			LOG_WARNING_TO(LogPool::GFX, "Attempting to instantiate a resource without a valid description! base: %ull",base);
+			return;
+		}
+		concrete_resources.emplace_back(InstantiateConcrete(*rsc_desc,true));
+		
+		resource_map[unique_id] = index;
+	}
+	void FrameGraphResourceManager::Alias(fgr_id unique_id, fgr_id id)
+	{
+		resource_map[unique_id] = resource_map.find(id)->second;
 	}
 	TransitionInfo FrameGraphResourceManager::TransitionInfo(const FrameGraphResource& rsc)
 	{
 		//TODO
 		return vkn::TransitionInfo{};
 	}
+#pragma optimize("",off)
+	void FrameGraphResourceManager::MarkUsage(fgr_id rsc_id, vk::ImageUsageFlags usage)
+	{
+		auto o_prsc = GetResourceDescriptionPtr(rsc_id);
+		if (!o_prsc)
+		{
+			LOG_WARNING_TO(LogPool::GFX, "Attempting to use resource that has no description! rsc_id: %ull", rsc_id);
+		}
+		else
+		{
+			(*o_prsc)->usage |= usage;
+		}
+	}
 	FrameGraphResource FrameGraphResourceManager::CreateTexture(TextureDescription dsc)
 	{
 		auto rsc_index = resources.size();
 		resources.emplace_back(dsc);
-		resource_handles.emplace(NextID(), rsc_index);
-		return FrameGraphResource{ rsc_index };
+		auto id = NextID();
+		resource_handles.emplace(id, rsc_index);
+		return FrameGraphResource{ id };
 	}
 
 	FrameGraphResource FrameGraphResourceManager::Rename(FrameGraphResource rsc)
 	{
 		auto next_id = NextID();
-		resource_handles.emplace(next_id, resource_handles.find(rsc.id)->second);
+		auto itr = resource_handles.find(rsc.id);
+		if (itr == resource_handles.end())
+			throw;
+		resource_handles.emplace(next_id, itr->second);
 		renamed_resources.emplace(next_id, rsc.id);
 		return FrameGraphResource{ next_id };
 	}
@@ -93,6 +144,44 @@ namespace idk::vkn
 		if (itr != renamed_resources.end())
 			result = itr->first;
 		return result;
+	}
+#pragma optimize("",off)
+	std::optional<TextureDescription*> FrameGraphResourceManager::GetResourceDescriptionPtr(fgr_id rsc_id)
+	{
+		std::optional<TextureDescription*> result{};
+		auto itr = resource_handles.find(rsc_id);
+		if (itr != resource_handles.end())
+		{
+			result = &resources[itr->second];
+		}
+		return result;
+	}
+	std::optional<TextureDescription> FrameGraphResourceManager::GetResourceDescription(fgr_id rsc_id) const
+	{
+		std::optional<TextureDescription> result{};
+		auto itr = resource_handles.find(rsc_id);
+		if (itr != resource_handles.end())
+		{
+			result = resources[itr->second];
+		}
+		return result;
+	}
+	FrameGraphResourceManager::actual_resource_t FrameGraphResourceManager::InstantiateConcrete(TextureDescription desc,bool is_shader_sampled)
+	{
+		auto rsc_ptr = std::make_unique<VknTexture>();
+
+		TexCreateInfo tci{};
+		tci.internal_format = desc.format;
+		tci.width = desc.size.x;
+		tci.height = desc.size.y;
+		tci.aspect = desc.aspect;
+		tci.layout = vk::ImageLayout::eUndefined;
+		tci.sampled(is_shader_sampled);
+		tci.mipmap_level = desc.mipmap_level;
+		tci.image_usage = desc.usage;
+		TextureLoader loader;
+		loader.LoadTexture(*rsc_ptr, _pimpl->allocator, _pimpl->load_fence, {}, tci, {});
+		return rsc_ptr;
 	}
 }
 

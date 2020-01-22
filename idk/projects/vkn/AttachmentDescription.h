@@ -8,12 +8,14 @@ namespace idk::vkn
 	struct TextureDescription
 	{
 		string_view name;
-		ivec2 size;
+		uivec2 size;
 		vk::Format format;
-		vk::ImageAspectFlags aspect;
+		vk::ImageAspectFlagBits aspect;
 		vk::ImageType type=vk::ImageType::e2D;
 		uint32_t layer_count=1;
+		uint32_t mipmap_level = 1;
 		vk::ImageTiling tiling_format = vk::ImageTiling::eOptimal;
+		vk::ImageUsageFlags usage{};
 		std::optional<RscHandle<VknTexture>> actual_rsc;
 	};
 	struct AttachmentDescription

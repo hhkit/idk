@@ -27,12 +27,12 @@ namespace idk::vkn::gt
 
 		PassUtil(FullRenderData& rd) :render_data{rd} {}
 
-		FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageAspectFlags flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {})
+		FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {})
 		{
 			return builder.write(builder.CreateTexture(TextureDescription
 				{
 					.name = name,//string_view name);
-					.size = ivec2{1920,1080},//ivec2 size);
+					.size = uivec2{1920,1080},//ivec2 size);
 					.format = format,//vk::Format format);
 					.aspect = flag,//vk::ImageAspectFlags aspect);
 					//vk::ImageType type = vk::ImageType::e2D);
@@ -53,11 +53,11 @@ namespace idk::vkn::gt
 		GBufferPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, FullRenderData& rd) :PassUtil{rd}
 		{
 			gbuffer_rscs[0] = CreateGBuffer(builder,"AlbedoAmbOcc",vk::Format::eR8G8B8A8Unorm);
-			gbuffer_rscs[1] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8Unorm);
-			gbuffer_rscs[2] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8Unorm);
+			gbuffer_rscs[1] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm);
+			gbuffer_rscs[2] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm);
 			gbuffer_rscs[3] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm);
-			gbuffer_rscs[4] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16Sfloat);
-			gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8Srgb);
+			gbuffer_rscs[4] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat);
+			gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb);
 			depth_rsc = CreateGBuffer(builder, "GDepth", vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
 			uint32_t index = 0;
 			for (auto& gbuffer_rsc : gbuffer_rscs)

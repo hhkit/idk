@@ -19,14 +19,22 @@ namespace idk::vkn
 		using actual_rsc_index_t = size_t;
 		using actual_resource_t = variant<unique_ptr<VknTexture>>;
 
+		FrameGraphResourceManager();
+		FrameGraphResourceManager(const FrameGraphResourceManager&) = delete;
+		FrameGraphResourceManager(FrameGraphResourceManager&&);
+		FrameGraphResourceManager& operator=(const FrameGraphResourceManager&) = delete;
+		FrameGraphResourceManager& operator=(FrameGraphResourceManager&&);
+		~FrameGraphResourceManager();
 
 		//Instantiates an actual resource using base's configuration and associate it with unique_id
-		void Instantiate(size_t unique_id, fgr_id base);
+		void Instantiate(fgr_id unique_id, fgr_id base);
 
 		//Associate fgr_id with unique_id
-		void Alias(size_t unique_id, fgr_id id);
+		void Alias(fgr_id unique_id, fgr_id id);
 
 		TransitionInfo TransitionInfo(const FrameGraphResource& rsc);
+
+		void MarkUsage(fgr_id rsc_id,vk::ImageUsageFlags usage);
 
 		FrameGraphResource CreateTexture(TextureDescription dsc);
 		FrameGraphResource Rename(FrameGraphResource rsc);
@@ -50,6 +58,11 @@ namespace idk::vkn
 
 		std::optional<fgr_id> GetPrevious(fgr_id curr)const;
 
+		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
+		std::optional<TextureDescription> GetResourceDescription(fgr_id rsc_id)const;
+
+		actual_resource_t InstantiateConcrete(TextureDescription desc, bool is_shader_sampled);
+
 		vector<TextureDescription> resources;
 
 		vector<actual_resource_t> concrete_resources;
@@ -61,6 +74,9 @@ namespace idk::vkn
 		//new to old(second)
 		hash_table<fgr_id, fgr_id> renamed_resources;
 		hlp::IdGenerator<fgr_id> _fgr_generator;
+
+		struct Pimpl;
+		std::unique_ptr<Pimpl> _pimpl;
 	};
 
 }
