@@ -628,6 +628,7 @@ namespace idk
             return;
 		for (auto& collider : colliders)
             DrawCollider(collider);
+		DrawOctreeDebug(_collider_octree._root);
 	}
 
 	void PhysicsSystem::Reset()
@@ -875,7 +876,7 @@ namespace idk
 	{
 		if (node)
 		{
-			auto all_info = _collider_octree.get_info(node);
+			auto all_info = _collider_octree.get_info_by_ptr(node);
 			auto node_obj_count = node->object_list.size();
 
 			auto end_it = all_info.end();

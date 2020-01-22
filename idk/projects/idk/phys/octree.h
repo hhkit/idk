@@ -19,8 +19,8 @@ namespace idk
 
 		aabb bounds() const { return _root->bound; }
 		bool is_in_subtree(shared_ptr<octree_node> node, Handle<Collider> object);
-		vector<collider_info*> get_all_info();
-		vector<collider_info*> get_info(shared_ptr<octree_node> node);
+		vector<collider_info> get_info_by_copy(shared_ptr<octree_node> node);
+		vector<collider_info*> get_info_by_ptr(shared_ptr<octree_node> node);
 
 		// Rebuilds the octree with this object inserted
 		// void rebuild(float offset = 2.0f, octree_obj obj = octree_obj{});
@@ -43,7 +43,8 @@ namespace idk
 		friend PhysicsSystem;
 
 		
-		void get_all_info(shared_ptr<octree_node> node, vector<collider_info*>& info);
+		void get_info_copy(shared_ptr<octree_node> node, vector<collider_info>& info);
+		void get_info_ptr(shared_ptr<octree_node> node, vector<collider_info*>& info);
 		
 		void insert_data(shared_ptr<octree_node> node, collider_info& data);
 		void erase_all(shared_ptr<octree_node> node);

@@ -26,7 +26,7 @@ namespace idk
 
 	void octree::rebuild()
 	{
-		auto info = get_all_info();
+		auto info = get_info_by_copy(_root);
 		clear();
 
 		if (_root == nullptr)
@@ -36,26 +36,27 @@ namespace idk
 		
 		// Re-insert all objects
 		for (auto& obj : info)
-			insert(*obj);
+			insert(obj);
 	}
 
-	void octree::rebuild(vec3 center, float width, unsigned depth, float offset)
+	void octree::rebuild(vec3 center, float width, unsigned depth, float off)
 	{
-		auto info = get_all_info();
+		depth;
+		auto info = get_info_by_copy(_root);
 		clear();
 
 		if (_root == nullptr)
 		{
 			_root = std::make_shared<octree_node>();
 		}
-		this->offset = offset;
+		this->offset = off;
 		auto half_extents = (width + offset) / 2;
 		_root->bound.min = center - vec3{ half_extents } ;
 		_root->bound.max = center + vec3{ half_extents };
 
 		// Re-insert all objects
 		for (auto& obj : info)
-			insert(*obj);
+			insert(obj);
 	}
 
 	void octree::insert(const collider_info& data)
@@ -70,14 +71,13 @@ namespace idk
 			_root->bound.min = data.bound.min - offset_vec;
 			_root->bound.max = data.bound.max + offset_vec;
 
-			data_copy.collider->_octree_node = _root;
-			_root->object_list.emplace(data_copy.collider, data_copy);
-			
-			return;
+			// data_copy.collider->_octree_node = _root;
+			// _root->object_list.emplace(data_copy.collider, data_copy);
+			// 
+			// return;
 		}
-
 		// Rebuild the octree if the object lies outside the octree
-		if (!_root->bound.overlaps(data_copy.bound))
+		else if (!_root->bound.contains(data_copy.bound))
 		{
 			auto new_bound = _root->bound;
 			new_bound.surround(data_copy.bound);
@@ -85,7 +85,7 @@ namespace idk
 
 			auto width = max(max(new_extents.x, new_extents.y), new_extents.z);
 			rebuild(new_bound.center(), width, 0);
-			return;
+			// return;
 		}
 
 		insert_data(_root, data_copy);
@@ -139,6 +139,7 @@ namespace idk
 
 	void octree::erase(Handle<Collider> object)
 	{
+		object;
 	}
 
 	void octree::erase_from(Handle<Collider> object, shared_ptr<octree_node> node)
@@ -151,7 +152,7 @@ namespace idk
 		{
 			object->_octree_node.reset();
 			node->object_list.erase(res);
-			--object_count;
+			object_count = object_count ?  object_count - 1 : 0;
 		}
 	}
 
@@ -177,31 +178,44 @@ namespace idk
 		clear(_root);
 	}
 
-	vector<collider_info*> octree::get_all_info()
+	vector<collider_info> octree::get_info_by_copy(shared_ptr<octree_node> node)
 	{
-		vector<collider_info*> info;
+		vector<collider_info> info;
 		info.reserve(object_count);
-		get_all_info(_root, info);
+		get_info_copy(_root, info);
 		return info;
 	}
 
-	vector<collider_info*> octree::get_info(shared_ptr<octree_node> node)
+	vector<collider_info*> octree::get_info_by_ptr(shared_ptr<octree_node> node)
 	{
 		vector<collider_info*> info;
 		info.reserve(object_count);
-		get_all_info(node, info);
+		get_info_ptr(node, info);
 		return info;
 	}
 
-	void octree::get_all_info(shared_ptr<octree_node> node, vector<collider_info*>& info)
+	void octree::get_info_ptr(shared_ptr<octree_node> node, vector<collider_info*>& info)
 	{
 		if (node)
 		{
 			for (auto& obj : node->object_list)
-				info.push_back(&obj.second);
+				info.emplace_back(&obj.second);
 
 			for (auto& child : node->children)
-				get_all_info(child, info);
+				get_info_ptr(child, info);
+		}
+
+	}
+
+	void octree::get_info_copy(shared_ptr<octree_node> node, vector<collider_info>& info)
+	{
+		if (node)
+		{
+			for (auto& obj : node->object_list)
+				info.emplace_back(obj.second);
+
+			for (auto& child : node->children)
+				get_info_copy(child, info);
 		}
 
 	}
