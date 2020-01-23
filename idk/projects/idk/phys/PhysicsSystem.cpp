@@ -71,7 +71,7 @@ namespace idk
             else
                 dynamic_info.emplace_back(ColliderInfo{ .collider = elem, .layer = elem.GetGameObject()->Layer() });
 		}
-
+		
 		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
 		{
 			std::visit([&](const auto& shape)
@@ -203,23 +203,23 @@ namespace idk
 			info.reserve(dynamic_info.size() * 4);
 
             // dynamic vs dynamic
-            for (const auto& i : dynamic_info)
+			auto dynamic_end = dynamic_info.end();
+            for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
             {
-                for (const auto& j : dynamic_info)
-                {
-                    const auto& lrigidbody = *i.collider._rigidbody;
-                    const auto& rrigidbody = *j.collider._rigidbody;
+				const auto& lrigidbody = *i->collider._rigidbody;
+				const bool lrb_sleeping = lrigidbody.sleeping();
+                for (auto j = i + 1; j != dynamic_end; ++j)
+                {                    
+                    const auto& rrigidbody = *j->collider._rigidbody;
 
-                    if (lrigidbody.GetHandle() == rrigidbody.GetHandle())
+                    if (lrb_sleeping && rrigidbody.sleeping())
                         continue;
-                    if (lrigidbody.sleeping() && rrigidbody.sleeping())
+                    if (!AreLayersCollidable(i->layer, j->layer))
                         continue;
-                    if (!AreLayersCollidable(i.layer, j.layer))
-                        continue;
-                    if (!i.broad_phase.overlaps(j.broad_phase))
+                    if (!i->broad_phase.overlaps(j->broad_phase))
                         continue;
 
-					info.emplace_back(ColliderInfoPair{ &i, &j });
+					info.emplace_back(ColliderInfoPair{ &*i, &*j });
 					/*
                     const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
                     if (collision)
@@ -233,12 +233,13 @@ namespace idk
             // dynamic vs static
             for (const auto& i : dynamic_info)
             {
+				const auto& lrigidbody = *i.collider._rigidbody;
+
+				if (lrigidbody.sleeping())
+					continue;
+
                 for (const auto& j : static_info)
                 {
-                    const auto& lrigidbody = *i.collider._rigidbody;
-
-                    if (lrigidbody.sleeping())
-                        continue;
                     if (!AreLayersCollidable(i.layer, j.layer))
                         continue;
                     if (!i.broad_phase.overlaps(j.broad_phase))
