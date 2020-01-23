@@ -21,6 +21,7 @@ namespace idk
 		bool is_in_subtree(shared_ptr<octree_node> node, Handle<Collider> object);
 		vector<collider_info> get_info_by_copy(shared_ptr<octree_node> node);
 		vector<collider_info*> get_info_by_ptr(shared_ptr<octree_node> node);
+		collider_info* search_tree(Handle<Collider> object, shared_ptr<octree_node> node);
 
 		// Rebuilds the octree with this object inserted
 		// void rebuild(float offset = 2.0f, octree_obj obj = octree_obj{});

@@ -132,7 +132,7 @@ namespace idk
 				node->children[quad_index]->bound.center_at(node_center + grow_vec / 2.0f);
 			}
 			erase_from(object.collider, node);
-			copy.octant = s_cast<Octant>(quad_index);
+			// copy.octant = s_cast<Octant>(quad_index);
 			insert_data(node->children[quad_index], copy);
 		}
 	}
@@ -194,6 +194,29 @@ namespace idk
 		return info;
 	}
 
+	collider_info* octree::search_tree(Handle<Collider> object, shared_ptr<octree_node> node)
+	{
+		collider_info* ret_val = nullptr;
+		if (node)
+		{
+			auto res = node->object_list.find(object);
+			if(res != node->object_list.end())
+				ret_val = &res->second;
+			else
+			{
+				// Search subtree and break when a match is found
+				for (auto& child : node->children)
+				{
+					ret_val = search_tree(object, child);
+					if (ret_val)
+						break;
+				}
+			}
+		}
+
+		return ret_val;
+	}
+
 	void octree::get_info_ptr(shared_ptr<octree_node> node, vector<collider_info*>& info)
 	{
 		if (node)
@@ -245,7 +268,7 @@ namespace idk
 		for (int i = 0; i < 3; ++i)
 		{
 			const float delta = obj_center[i] - node_center[i];
-			if (abs(delta) < abs(obj_half_extents[i]))// + node_half_extents[i])
+			if (abs(delta) < obj_half_extents[i])// + node_half_extents[i])
 			{
 				straddle = true;
 				break;
@@ -257,28 +280,20 @@ namespace idk
 				grow_dir[i] *= -1.0f;
 		}
 
-		
-
 		if (!straddle)
 		{
 			// Create the child that the object will be put into
 			if (node->children[quad_index] == nullptr)
 			{
-				node->children[quad_index] = std::make_shared<octree_node>();
-				const auto grow_vec = grow_dir * abs(node_half_extents.x);
-				node->children[quad_index]->bound.grow(grow_vec);
-				node->children[quad_index]->bound.center_at(node_center + grow_vec / 2.0f);
-				// 
-				// for (auto& obj : node->object_list)
-				// {
-				// 	if (node->children[quad_index]->bound.contains(obj.second.bound))
-				// 	{
-				// 		insert_data(node->children[quad_index], );
-				// 	}
-				// 		
-				// }
+				auto new_node = std::make_shared<octree_node>();
+				
+				const auto grow_vec = grow_dir * node_half_extents.x;
+				new_node->bound.grow(grow_vec);
+				new_node->bound.center_at(node_center + grow_vec / 2.0f);
+				new_node->depth = node->depth + 1;
+				node->children[quad_index] = new_node;
 			}
-			data.octant = s_cast<Octant>(quad_index);
+			// data.octant = s_cast<Octant>(quad_index);
 			insert_data(node->children[quad_index], data);
 		}
 		else

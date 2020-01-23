@@ -38,7 +38,7 @@ namespace idk
     {
         return shape * col.GetGameObject()->Transform()->GlobalMatrix();
     };
-
+#pragma optimize("", off)
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
 
@@ -48,14 +48,17 @@ namespace idk
 			BuildOctree(colliders);
 			octree_cleared = false;
 		}
-		vector<Handle<Collider>> dynamic_info;
-		size_t num_colliders = 0;
+
+		vector<collider_info*> static_info;
+		static_info.reserve(colliders.size() - rbs.size());
+		vector<collider_info*> dynamic_info;
+		dynamic_info.reserve(rbs.size());
+
 		for (auto& elem : colliders)
 		{
 			elem._active_cache = elem.is_enabled_and_active();
 			if (!elem._active_cache || elem.GetHandle().scene == Scene::prefab)
 				continue;
-			++num_colliders;
 			
 			elem.find_rigidbody();
 
@@ -83,15 +86,21 @@ namespace idk
 
 					// NOTE: res potentially null after this due to the object being moved
 					UpdateOctree(info, elem._octree_node);
+
+					static_info.emplace_back(&elem._octree_node->object_list.find(collider_handle)->second);
 				}
 				else
 				{
-					dynamic_info.emplace_back(collider_handle);
+					if (!res->second.collider)
+					{
+						LOG_TO(LogPool::PHYS, "JHHA");
+					}
+					dynamic_info.emplace_back(&res->second);
 				}
 				
 			}
 		}
-		LOG_TO(LogPool::PHYS, "Octree Count: %d, Collider Count: %d", _collider_octree.object_count, num_colliders);
+		// LOG_TO(LogPool::PHYS, "Octree Count: %d, Collider Count: %d", _collider_octree.object_count, num_colliders);
 #else
 		vector<ColliderInfo> static_info;
 		vector<ColliderInfo> dynamic_info;
@@ -221,7 +230,7 @@ namespace idk
 			// Update all dynamic colliders in the octree
 			for (auto& info : dynamic_info)
 			{
-				collider_info new_info = info->get_octree_node()->object_list.find(info)->second;
+				collider_info new_info = *info;
 
 				new_info.predicted_shape = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape)->CollidableShapes { return shape * pred_tfm; }, new_info.collider->shape);
 				new_info.bound = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, new_info.collider->shape);
@@ -229,7 +238,7 @@ namespace idk
 				new_info.bound.grow(vel);
 				new_info.bound.grow(-vel);
 
-				UpdateOctree(new_info, info->get_octree_node());
+				UpdateOctree(new_info, info->collider->get_octree_node());
 			}
 		};
 
@@ -245,13 +254,76 @@ namespace idk
 			collision_frame.reserve(dynamic_info.size()); //guess
 
 			
-			
-			auto info = PairColliders();
-			LOG_TO(LogPool::PHYS, "Pairs Count: %d", info.size());
-			// For each node in octree
-				// For each item in node
-					// Pair with every other node in octree
+			vector<ColliderInfoPair> info;
+			info.reserve(dynamic_info.size() * 4);
 
+			auto static_end = static_info.end();
+			auto dynamic_end = dynamic_info.end();
+
+			for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
+			{
+				const auto i_info = *i;
+				auto i_node = i_info->collider->get_octree_node();
+				for (auto j = i + 1; j != dynamic_end; ++j)
+				{
+					auto j_info = *j;
+					auto j_node = j_info->collider->get_octree_node();
+
+					const auto& lrigidbody = i_info->collider->_rigidbody;
+					const auto& rrigidbody = j_info->collider->_rigidbody;
+
+					if (lrigidbody == rrigidbody)
+						continue;
+					if (lrigidbody->sleeping() && rrigidbody->sleeping())
+						continue;
+
+					if (!AreLayersCollidable(i_info->layer, j_info->layer))
+						continue;
+
+					// Both exist in the same node, means we definitely need to check
+					if (i_node == j_node)
+						info.emplace_back(ColliderInfoPair{ i_info, j_info });
+					// i_node higher in the tree: find j's collider in i's tree
+					else if(i_node->depth < j_node->depth && _collider_octree.search_tree(j_info->collider, i_node))
+						info.emplace_back(ColliderInfoPair{ i_info, j_info });
+					// j_node higher in the tree: find i's collider in j's tree
+					else if(_collider_octree.search_tree(i_info->collider, j_node))
+						info.emplace_back(ColliderInfoPair{ i_info, j_info });
+					
+				}
+			}
+
+			for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
+			{
+				const auto i_info = *i;
+				auto i_node = i_info->collider->get_octree_node();
+				for (auto j = static_info.begin(); j != static_end; ++j)
+				{
+					auto j_info = *j;
+					auto j_node = j_info->collider->get_octree_node();
+
+					const auto& lrigidbody = i_info->collider->_rigidbody;
+
+					if (lrigidbody->sleeping())
+						continue;
+
+					if (!AreLayersCollidable(i_info->layer, j_info->layer))
+						continue;
+
+					// Both exist in the same node, means we definitely need to check
+					if (i_node == j_node)
+						info.emplace_back(ColliderInfoPair{ i_info, j_info });
+					// i_node higher in the tree: find j's collider in i's tree
+					else if (i_node->depth < j_node->depth && _collider_octree.search_tree(j_info->collider, i_node))
+						info.emplace_back(ColliderInfoPair{ i_info, j_info });
+					// j_node higher in the tree: find i's collider in j's tree
+					else if (_collider_octree.search_tree(i_info->collider, j_node))
+						info.emplace_back(ColliderInfoPair{ i_info, j_info });
+
+				}
+			}
+
+			LOG_TO(LogPool::PHYS, "Pairs Count: %d", info.size());
 #else
 			vector<CollisionInfo> collision_frame;
 			collision_frame.reserve(dynamic_info.size()); //guess
@@ -447,7 +519,7 @@ namespace idk
 		{
             for (const auto& elem : dynamic_info)
             {
-                auto& rigidbody = *elem->_rigidbody;
+                auto& rigidbody = *elem->collider->_rigidbody;
                 if (!rigidbody.is_kinematic)
                     rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
                 else
@@ -932,7 +1004,7 @@ namespace idk
 			}
 		}
 	}
-
+#pragma optimize("", off)
 	void PhysicsSystem::Init()
 	{
 		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
@@ -940,6 +1012,10 @@ namespace idk
 			if (!collider || octree_cleared)
 				return;
 		
+			collider->_active_cache = collider->is_enabled_and_active();
+			if (!collider->_active_cache || collider.scene == Scene::prefab)
+				return;
+
 			collider_info info;
 			info.collider = collider;
 			info.bound = collider->bounds();

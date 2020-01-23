@@ -29,7 +29,6 @@ namespace idk
 	{
 		Handle<Collider> collider;
 		aabb bound;
-		Octant octant;
 
 		// Run-time
 		CollidableShapes predicted_shape;
@@ -45,6 +44,8 @@ namespace idk
 		hash_table<Handle<Collider>, collider_info> object_list;
 		// octants
 		shared_ptr<octree_node> children[8]{ nullptr };
+
+		size_t depth{ 0 };
 	};
 
 	struct octree_octants
