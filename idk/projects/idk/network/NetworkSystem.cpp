@@ -1,11 +1,16 @@
 #include "pch_common.h"
-#include <app/Application.h>
+#include <yojimbo/yojimbo.h>
+
 #include "NetworkSystem.h"
+
+#include <app/Application.h>
 #include <network/Server.h>
 #include <network/Client.h>
 #include <network/ServerConnectionManager.h>
 #include <network/ClientConnectionManager.h>
-#include <yojimbo/yojimbo.h>
+#include <network/IDManager.h>
+#include <network/ElectronView.h>
+#include <core/GameState.h>
 namespace idk
 {
 	NetworkSystem::NetworkSystem() = default;
@@ -23,6 +28,7 @@ namespace idk
 		{
 			server_connection_manager[clientid].reset();
 		};
+		id_manager = std::make_unique<IDManager>();
 	}
 
 	void NetworkSystem::ConnectToServer(const Address& d)
@@ -37,6 +43,7 @@ namespace idk
 		{
 			client_connection_manager.reset();
 		};
+		id_manager = std::make_unique<IDManager>();
 	}
 
 	bool NetworkSystem::IsHost()
@@ -100,5 +107,10 @@ namespace idk
 			elem.reset();
 		client.reset();
 		client_connection_manager.reset();
+		id_manager.reset();
+
+		// network ids no longer relevant
+		for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
+			elem.network_id = 0;
 	}
 }

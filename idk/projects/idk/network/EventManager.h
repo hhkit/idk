@@ -1,5 +1,6 @@
 #pragma once
 #include <network/SubstreamManager.h>
+#include <res/ResourceHandle.h>
 
 namespace idk
 {
@@ -11,8 +12,9 @@ namespace idk
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
 		void SendTestMessage(int i);
-		void SendInstantiatePrefabEvent();
+		void SendInstantiatePrefabEvent(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> quaternion);
 	private:
 		ConnectionManager* connection_manager = nullptr;
+		void OnInstantiatePrefabEvent(EventInstantiatePrefabMessage* message);
 	};
 }

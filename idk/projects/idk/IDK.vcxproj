@@ -94,7 +94,12 @@
     <ClInclude Include="network\ClassRep.h" />
     <ClInclude Include="network\Client.h" />
     <ClInclude Include="network\ClientConnectionManager.h" />
+    <ClInclude Include="network\ElectronTransformView.h" />
+    <ClInclude Include="network\ElectronView.h" />
+    <ClInclude Include="network\EventInstantiatePrefabMessage.h" />
+    <ClInclude Include="network\IDManager.h" />
     <ClInclude Include="network\IncludeMessages.h" />
+    <ClInclude Include="network\network.h" />
     <ClInclude Include="network\ServerConnectionManager.h" />
     <ClInclude Include="network\SubstreamManager.h" />
     <ClInclude Include="network\ConnectionManager.h" />
@@ -386,8 +391,10 @@
     <ClCompile Include="network\Address.cpp" />
     <ClCompile Include="network\Client.cpp" />
     <ClCompile Include="network\ClientConnectionManager.cpp" />
+    <ClCompile Include="network\ElectronTransformView.cpp" />
     <ClCompile Include="network\EventManager.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />
+    <ClCompile Include="network\IDManager.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\Server.cpp" />
     <ClCompile Include="network\ServerConnectionManager.cpp" />

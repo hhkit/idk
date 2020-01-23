@@ -10,6 +10,7 @@ namespace idk
 	class Client;
 	class Server;
 	class ConnectionManager;
+	class IDManager;
 	class ClientConnectionManager;
 	class ServerConnectionManager;
 
@@ -30,14 +31,17 @@ namespace idk
 
 		bool IsHost();
 		ConnectionManager& GetConnectionManager(size_t token = GameConfiguration::MAX_CLIENTS);
+		IDManager& GetIDManager() { return *id_manager; }
 
 		void ReceivePackets();
 		void SendPackets();
 	private:
-		std::unique_ptr<Server> lobby;
-		std::unique_ptr<Client> client;
-		std::unique_ptr<ServerConnectionManager> server_connection_manager[GameConfiguration::MAX_CLIENTS];
-		std::unique_ptr<ClientConnectionManager> client_connection_manager;
+		unique_ptr<Server> lobby;
+		unique_ptr<Client> client;
+		unique_ptr<ServerConnectionManager> server_connection_manager[GameConfiguration::MAX_CLIENTS];
+		unique_ptr<ClientConnectionManager> client_connection_manager;
+
+		unique_ptr<IDManager> id_manager;
 
 		void Init() override;
 		void LateInit() override;

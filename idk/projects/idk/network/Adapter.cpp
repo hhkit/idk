@@ -9,7 +9,7 @@ namespace idk
 
 	YOJIMBO_MESSAGE_FACTORY_START(GameMessageFactory, MessageCount);
 	ADD_MESSAGE(TestMessage);
-	//ADD_MESSAGE(EventInstantiatePrefabMessage);
+	ADD_MESSAGE(EventInstantiatePrefabMessage);
 	YOJIMBO_MESSAGE_FACTORY_FINISH();
 
 	yojimbo::MessageFactory* Adapter::CreateMessageFactory(yojimbo::Allocator& allocator)

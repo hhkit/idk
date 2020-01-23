@@ -146,14 +146,17 @@
     <Filter Include="network\managers">
       <UniqueIdentifier>{593d88bc-f344-4363-8402-5600f411fd62}</UniqueIdentifier>
     </Filter>
-    <Filter Include="network\substream">
-      <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
-    </Filter>
     <Filter Include="parallel">
       <UniqueIdentifier>{c0a27a3b-a553-49e0-bfdc-58031b1ed1c9}</UniqueIdentifier>
     </Filter>
     <Filter Include="network\messages">
       <UniqueIdentifier>{a13cb9de-2d6a-465a-b261-288e30b35648}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\views">
+      <UniqueIdentifier>{091e737d-85bc-4cf1-adce-737e0ddf4d33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\substream managers">
+      <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -985,7 +988,7 @@
       <Filter>network\managers</Filter>
     </ClInclude>
     <ClInclude Include="network\EventManager.h">
-      <Filter>network\substream</Filter>
+      <Filter>network\substream managers</Filter>
     </ClInclude>
     <ClInclude Include="network\SubstreamManager.h">
       <Filter>network\managers</Filter>
@@ -1067,6 +1070,21 @@
     </ClInclude>
     <ClInclude Include="network\ConnectionManager.h">
       <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\IDManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\network.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ElectronView.h">
+      <Filter>network\views</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ElectronTransformView.h">
+      <Filter>network\views</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventInstantiatePrefabMessage.h">
+      <Filter>network\messages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1525,7 +1543,7 @@
       <Filter>gfx\shadergraph</Filter>
     </ClCompile>
     <ClCompile Include="network\EventManager.cpp">
-      <Filter>network\substream</Filter>
+      <Filter>network\substream managers</Filter>
     </ClCompile>
     <ClCompile Include="parallel\ThreadPool.cpp">
       <Filter>parallel</Filter>
@@ -1539,6 +1557,8 @@
     <ClCompile Include="test\TestComponent.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="network\IDManager.cpp" />
+    <ClCompile Include="network\ElectronTransformView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

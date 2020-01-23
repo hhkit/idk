@@ -30,15 +30,11 @@ namespace idk
 
 		if (app_sys.GetKeyDown(Key::P))
 		{
-			/*
-			network_sys.GetServer().SendEvent(EventInstantiatePrefabPayload{
-				.prefab = makeme,
-				.has_position = send_pos,
-				.position = GetGameObject()->Transform()->GlobalPosition(),
-				.has_rotation = send_rot,
-				.rotation = GetGameObject()->Transform()->GlobalRotation()
-				});
-				*/
+			network_sys.GetConnectionManager().GetManager<EventManager>()->SendInstantiatePrefabEvent(
+				makeme,
+				send_pos ? opt<vec3>{GetGameObject()->Transform()->GlobalPosition()} : std::nullopt,
+				send_rot ? opt<quat>{GetGameObject()->Transform()->GlobalRotation()} : std::nullopt
+			);
 		}
 	}
 }

@@ -44,6 +44,10 @@ namespace idk
         ,   class Image
         ,   class Text
 
+		/// NETWORKING
+		,	class ElectronView
+		,	class ElectronTransformView
+
 		/// SCRIPTING
 		,	class mono::Behavior
 
