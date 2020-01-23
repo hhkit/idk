@@ -66,6 +66,12 @@ namespace idk
         public extern static void GameObjectSetTag(ulong gamehandle, string tag);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int GameObjectGetLayer(ulong gamehandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GameObjectSetLayer(ulong gamehandle, int layer);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong GameObjectFindWithTag(string tag);
 
         /*
@@ -357,6 +363,12 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void CameraSetEnabledState(ulong id, bool c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int CameraGetCullingMask(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetCullingMask(ulong id, int value);
 
         /*
         * Light

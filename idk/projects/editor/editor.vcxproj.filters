@@ -157,6 +157,9 @@
     <ClInclude Include="windows\IGE_LightLister.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_ParentGameObject.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -296,6 +299,7 @@
     <ClCompile Include="commands\CMD_ModifyProperty.cpp">
       <Filter>commands</Filter>
     </ClCompile>
+    <ClCompile Include="commands\CMD_ParentGameObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

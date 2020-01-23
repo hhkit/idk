@@ -329,6 +329,18 @@ namespace idk::mono
         }
 		BIND_END();
 
+		BIND_START("idk.Bindings::GameObjectGetLayer", int, Handle<GameObject> go)
+		{
+			return go->Layer();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectSetLayer", void, Handle<GameObject> go, int layer)
+		{
+			go->Layer(layer);
+		}
+		BIND_END();
+
         BIND_START("idk.Bindings::GameObjectFindWithTag",  uint64_t, MonoString* tag)
         {
             char* s = mono_string_to_utf8(tag);
@@ -1247,6 +1259,18 @@ namespace idk::mono
 		BIND_START("idk.Bindings::CameraSetEnabledState", void, Handle<Camera> h, bool r)
 		{
 			h->enabled = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetCullingMask", int, Handle<Camera> h)
+		{
+			return reinterpret_cast<int&>(h->layer_mask);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetCullingMask", void, Handle<Camera> h, int mask)
+		{
+			h->layer_mask = LayerMask(mask);
 		}
 		BIND_END();
 
