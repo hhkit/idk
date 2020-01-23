@@ -3,6 +3,7 @@
 #include "ManagedObj.inl"
 #include <serialize/text.h>
 
+#include <core/GameObject.h>
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <script/MonoFunctionInvoker.h>
@@ -55,32 +56,53 @@ namespace idk::mono
 
 	void Behavior::Start()
 	{
-		if (!_started && script_data)
+		try
 		{
-			_started = true;
-			auto method = script_data.Type()->GetThunk("Start");
-			if (method)
-				method->Invoke(script_data.Raw());
+			if (!_started && script_data)
+			{
+				_started = true;
+				auto method = script_data.Type()->GetThunk("Start");
+				if (method)
+					method->Invoke(script_data.Raw());
+			}
+		}
+		catch (...)
+		{
+			LOG_ERROR_TO(LogPool::GAME, "Exception in %s(%ld)", GetGameObject()->Name().data(), GetGameObject().id);
 		}
 	}
 
 	void Behavior::FixedUpdate()
 	{
-		if (enabled && script_data)
+		try
 		{
-			auto method = script_data.Type()->GetThunk("FixedUpdate");
-			if (method)
-				method->Invoke(script_data.Raw());
+			if (enabled && script_data)
+			{
+				auto method = script_data.Type()->GetThunk("FixedUpdate");
+				if (method)
+					method->Invoke(script_data.Raw());
+			}
+		}
+		catch (...)
+		{
+			LOG_ERROR_TO(LogPool::GAME, "Exception in %s(%ld)", GetGameObject()->Name().data(), GetGameObject().id);
 		}
 	}
 
 	void Behavior::Update()
 	{
+		try
+		{
 		if (enabled && script_data)
 		{
 			auto method = script_data.Type()->GetThunk("Update");
 			if (method)
 				method->Invoke(script_data.Raw());
+		}
+		}
+		catch (...)
+		{
+			LOG_ERROR_TO(LogPool::GAME, "Exception in %s(%ld)", GetGameObject()->Name().data(), GetGameObject().id);
 		}
 	}
 

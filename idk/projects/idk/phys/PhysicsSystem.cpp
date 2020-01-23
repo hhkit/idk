@@ -32,6 +32,7 @@ namespace idk
 	constexpr float penetration_min_slop = 0.001f;
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
+	constexpr size_t split_threshold = 10;
 
     constexpr auto calc_shape = [](const auto& shape, const Collider& col)
     {
@@ -58,9 +59,9 @@ namespace idk
 			elem.find_rigidbody();
 
 			auto collider_handle = elem.GetHandle();
-			auto res = elem.get_octree_node()->object_list.find(collider_handle);
+			auto res = elem._octree_node->object_list.find(collider_handle);
 
-			if (res != elem.get_octree_node()->object_list.end())
+			if (res != elem._octree_node->object_list.end())
 			{
 				res->second.layer = elem.GetGameObject()->Layer();
 
@@ -949,6 +950,8 @@ namespace idk
 		
 			_collider_octree.erase_from(collider, collider->get_octree_node());
 		};
+
+		_collider_octree.split_threshold = split_threshold;
 	}
 
 	void PhysicsSystem::Shutdown()
