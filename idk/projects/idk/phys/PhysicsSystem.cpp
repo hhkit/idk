@@ -32,7 +32,9 @@ namespace idk
 	constexpr float penetration_min_slop = 0.001f;
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
-	constexpr size_t split_threshold = 10;
+	constexpr size_t split_threshold = 100;
+	constexpr unsigned octree_depth = 5;
+	constexpr float octree_offset = 5.0f;
 
     constexpr auto calc_shape = [](const auto& shape, const Collider& col)
     {
@@ -48,10 +50,15 @@ namespace idk
 			BuildOctree(colliders);
 			octree_cleared = false;
 		}
-
-		vector<Handle<Collider>> static_info;
+		struct Test
+		{
+			Collider& col;
+			Handle<Collider> col_h;
+		};
+		hash_table<octree_node*, vector<size_t>> static_node_info;
+		vector<Test> static_info;
 		static_info.reserve(colliders.size() - rbs.size());
-		vector<Handle<Collider>> dynamic_info;
+		vector<Test> dynamic_info;
 		dynamic_info.reserve(rbs.size());
 
 		for (auto& elem : colliders)
@@ -84,18 +91,30 @@ namespace idk
 					col_info->bound = info.bound;
 					col_info->predicted_shape = info.predicted_shape;
 
-					static_info.emplace_back(collider_handle);
+					static_info.emplace_back(Test{ elem, collider_handle });
 					// NOTE: res potentially null after this due to the object being moved
 					UpdateOctree(info, elem._octree_node);
+
+					auto found_node_slot = static_node_info.find(elem._octree_node.get());
+					if (found_node_slot == static_node_info.end())
+					{
+						vector<size_t> indices{};
+						indices.emplace_back(static_info.size() - 1);
+						static_node_info.emplace(elem._octree_node.get(), indices);
+					}
+					else
+					{
+						found_node_slot->second.emplace_back(static_info.size() - 1);
+					}
 				}
 				else
 				{
-					dynamic_info.emplace_back(collider_handle);
+					dynamic_info.emplace_back(Test{ elem, collider_handle });
 				}
 				
 			}
 		}
-		// LOG_TO(LogPool::PHYS, "Octree Count: %d, Collider Count: %d", _collider_octree.object_count, num_colliders);
+		LOG_TO(LogPool::PHYS, "Octree Count: %d, Static Count: %d, Dynamic Count: %d", _collider_octree.size(), static_info.size(), dynamic_info.size());
 #else
 		vector<ColliderInfo> static_info;
 		vector<ColliderInfo> dynamic_info;
@@ -225,18 +244,18 @@ namespace idk
 			// Update all dynamic colliders in the octree
 			for (auto& info : dynamic_info)
 			{
-				auto res = _collider_octree.find(info);
+				auto res = _collider_octree.find(info.col_h);
 				if (res)
 				{
 					collider_info new_info = *res;
 
-					new_info.predicted_shape = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape)->CollidableShapes { return shape * pred_tfm; }, new_info.collider->shape);
-					new_info.bound = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, new_info.collider->shape);
-					const auto& vel = new_info.collider->_rigidbody->velocity();
+					new_info.predicted_shape = std::visit([&pred_tfm = info.col._rigidbody->_pred_tfm](const auto& shape)->CollidableShapes { return shape * pred_tfm; }, info.col.shape);
+					new_info.bound = std::visit([&pred_tfm = info.col._rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, info.col.shape);
+					const auto& vel = info.col._rigidbody->velocity();
 					new_info.bound.grow(vel);
 					new_info.bound.grow(-vel);
 
-					UpdateOctree(new_info, res->collider->get_octree_node());
+					UpdateOctree(new_info, info.col.get_octree_node());
 				}
 			}
 		};
@@ -256,74 +275,84 @@ namespace idk
 			vector<ColliderInfoPair> info;
 			info.reserve(dynamic_info.size() * 4);
 
-			auto static_end = static_info.end();
+			
+			auto static_node_info_end = static_node_info.end();
 			auto dynamic_end = dynamic_info.end();
 
 			// dynamic vs dynamic
 			for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
 			{
-				const auto i_info = _collider_octree.find(*i);
-				auto i_node = i_info->collider->get_octree_node();
+				const auto i_info = _collider_octree.find(i->col_h);
+				auto i_node = i->col.get_octree_node();
+				const auto& lrigidbody = i->col._rigidbody;
+
 				for (auto j = i + 1; j != dynamic_end; ++j)
 				{
-					auto j_info = _collider_octree.find(*j);
-					auto j_node = j_info->collider->get_octree_node();
-
-					const auto& lrigidbody = i_info->collider->_rigidbody;
-					const auto& rrigidbody = j_info->collider->_rigidbody;
+					auto j_node = j->col.get_octree_node();
+					auto j_info = _collider_octree.find(j->col_h);
+					const auto& rrigidbody = j->col._rigidbody;
 
 					if (lrigidbody == rrigidbody)
 						continue;
+
 					if (lrigidbody->sleeping() && rrigidbody->sleeping())
 						continue;
 
 					if (!AreLayersCollidable(i_info->layer, j_info->layer))
 						continue;
-
+					
 					// Both exist in the same node, means we definitely need to check
-					if (i_node == j_node)
-						info.emplace_back(ColliderInfoPair{ i_info, j_info });
-					// i_node higher in the tree: find j's collider in i's tree
-					else if(i_node->depth < j_node->depth && _collider_octree.find_subtree(j_info->collider, i_node))
-						info.emplace_back(ColliderInfoPair{ i_info, j_info });
-					// j_node higher in the tree: find i's collider in j's tree
-					else if(_collider_octree.find_subtree(i_info->collider, j_node))
+					// bool broad_phase = false;
+					// if (i_node == j_node)
+					// 	broad_phase = true;
+					// else if(i_node->depth < j_node->depth && )
+					// 
+					if (i_info->bound.overlaps(j_info->bound))
 						info.emplace_back(ColliderInfoPair{ i_info, j_info });
 					
 				}
 			}
-
+			LOG_TO(LogPool::PHYS, "Dynamic vs Dynamic: %d", info.size());
 			// dynamic vs static
+			size_t broad_phase = 0;
 			for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
 			{
-				const auto i_info = _collider_octree.find(*i);
-				auto i_node = i_info->collider->get_octree_node();
-				for (auto j = static_info.begin(); j != static_end; ++j)
+				const auto lhs_info = _collider_octree.find(i->col_h);
+				auto lhs_node = i->col.get_octree_node();
+				const auto& lrigidbody = i->col._rigidbody;
+
+				if (lrigidbody->sleeping())
+					continue;
+
+				// For each node that contains the static objects
+				for (auto j : static_node_info)
 				{
-					auto j_info = _collider_octree.find(*j);
-					auto j_node = j_info->collider->get_octree_node();
-
-					const auto& lrigidbody = i_info->collider->_rigidbody;
-
-					if (lrigidbody->sleeping())
+					// First check if we even need to check this node. 
+					// We should only check against this node if lhs's bounding volume overlaps the node's volume
+					// auto index = j.second[0];
+					auto rhs_node = j.first;
+					if (!rhs_node->bound.overlaps(lhs_info->bound))
 						continue;
 
-					if (!AreLayersCollidable(i_info->layer, j_info->layer))
-						continue;
+					// Test against all static objects in this node
+					for (auto& k : j.second)
+					{	
+						const auto& col_info = static_info[k];
+						const auto rhs_info = _collider_octree.find(col_info.col_h);
 
-					// Both exist in the same node, means we definitely need to check
-					if (i_node == j_node)
-						info.emplace_back(ColliderInfoPair{ i_info, j_info });
-					// i_node higher in the tree: find j's collider in i's tree
-					else if (i_node->depth < j_node->depth && _collider_octree.find_subtree(j_info->collider, i_node))
-						info.emplace_back(ColliderInfoPair{ i_info, j_info });
-					// j_node higher in the tree: find i's collider in j's tree
-					else if (_collider_octree.find_subtree(i_info->collider, j_node))
-						info.emplace_back(ColliderInfoPair{ i_info, j_info });
+						if (!AreLayersCollidable(lhs_info->layer, rhs_info->layer))
+							continue;
 
+						++broad_phase;
+
+						if(lhs_info->bound.overlaps(rhs_info->bound))
+							info.emplace_back(ColliderInfoPair{ lhs_info, rhs_info });
+
+					}
 				}
 			}
 
+			LOG_TO(LogPool::PHYS, "Static Dynamic Broad Phase: %d", broad_phase);
 			LOG_TO(LogPool::PHYS, "Pairs Count: %d", info.size());
 #else
 			vector<CollisionInfo> collision_frame;
@@ -448,7 +477,7 @@ namespace idk
 				const auto& lcollider = *(i->collider);
 				const auto& rcollider = *(j->collider);
 
-				auto lrigidbody = lcollider._rigidbody;
+				auto lrigidbody = *lcollider._rigidbody;
 				auto rrigidbody = rcollider._rigidbody;
 
 				// triggers do not require resolution
@@ -463,7 +492,7 @@ namespace idk
 				};
 
 				const auto [lvel, linv_mass, lrb_ptr] =
-                    RigidBodyInfo{ lrigidbody->_pred_tfm[3].xyz - lrigidbody->_prev_pos, lrigidbody->inv_mass, &*lrigidbody };
+                    RigidBodyInfo{ lrigidbody._pred_tfm[3].xyz - lrigidbody._prev_pos, lrigidbody.inv_mass, &*lcollider._rigidbody };
                 const auto [rvel, rinv_mass, rrb_ptr] = rrigidbody ?
                     RigidBodyInfo{ rrigidbody->_pred_tfm[3].xyz - rrigidbody->_prev_pos, rrigidbody->inv_mass, &*rrigidbody } : RigidBodyInfo{};
 
@@ -520,7 +549,7 @@ namespace idk
 		{
             for (const auto& elem : dynamic_info)
             {
-                auto& rigidbody = *elem->_rigidbody;
+                auto& rigidbody = *elem.col._rigidbody;
                 if (!rigidbody.is_kinematic)
                     rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
                 else
@@ -908,10 +937,14 @@ namespace idk
 			const auto width = max(max(extents.x, extents.y), extents.z);
 
 			_collider_octree.clear();
-			_collider_octree.rebuild(bounds.center(), width, 0);
+			_collider_octree.rebuild(bounds.center(), width, octree_depth, octree_offset);
 
 			for (auto& col : colliders)
 			{
+				bool active = col.is_enabled_and_active();
+				if (!active || col.GetHandle().scene == Scene::prefab)
+					continue;
+
 				collider_info info
 				{
 					.collider = col.GetHandle(),
@@ -925,20 +958,19 @@ namespace idk
 
 	void PhysicsSystem::UpdateOctree(collider_info& col, shared_ptr<octree_node> node)
 	{
-		auto info = _collider_octree.find_subtree(col.collider, node);
+		auto info = _collider_octree.find(col.collider);
 		if (info)
 		{
 			*info = col;
-
-			if (!node->bound.contains(col.bound))
+			// if object is alr in root, dont bother checking.
+			if (node != _collider_octree._root && !node->bound.contains(col.bound))
 			{
-				_collider_octree.erase_from(col.collider, node);
+				_collider_octree.erase(col.collider);
 				_collider_octree.insert(col);
 			}
 			// try to descend the tree (not straddling anymore
 			else
 			{
-
 				_collider_octree.descend(node, col);
 			}
 		}
@@ -1031,7 +1063,7 @@ namespace idk
 			if (!collider || octree_cleared)
 				return;
 		
-			_collider_octree.erase_from(collider, collider->get_octree_node());
+			_collider_octree.erase(collider);
 		};
 
 		_collider_octree.split_threshold = split_threshold;

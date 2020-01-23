@@ -39,15 +39,20 @@ namespace idk
 	struct octree_node
 	{
 		aabb bound;
+		float width{ 0.0f };
+		vec3 center{0.0f};
+
 		// objects
-		hash_set<Handle<Collider>> object_set;
+		hash_set<Handle<Collider>> node_set;
+		hash_set<Handle<Collider>> tree_set;
 		// octants
 		shared_ptr<octree_node> children[8]{ nullptr };
 		size_t depth{ 0 };
 
-		bool exists(Handle<Collider> obj) const { return object_set.find(obj) != object_set.end(); }
+		bool exists(Handle<Collider> obj) const { return node_set.find(obj) != node_set.end(); }
+		bool exists_subtree(Handle<Collider> obj) const { return tree_set.find(obj) != tree_set.end(); }
 		bool contains(const collider_info& col_info) const { return bound.contains(col_info.bound); }
-		size_t size() const { return object_set.size(); }
+		size_t size() const { return node_set.size(); }
 	};
 
 	struct octree_octants

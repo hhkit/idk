@@ -39,6 +39,41 @@ namespace idk
 			insert(obj);
 	}
 
+	static void split(shared_ptr<octree_node> node, unsigned depth)
+	{
+		static vec3 dir[] =
+		{
+			vec3{-1,-1,-1}, // 0
+			vec3{-1,-1, 1}, // 1
+			vec3{-1, 1,-1}, // 2
+			vec3{-1, 1, 1}, // 3
+
+			vec3{ 1,-1,-1}, // 4
+			vec3{ 1,-1, 1}, // 5
+			vec3{ 1, 1,-1}, // 6
+			vec3{ 1, 1, 1}  // 7
+		};
+		if (depth == 0)
+			return;
+
+		const auto node_half_extents = node->width / 2.0f;
+		const auto node_center = node->bound.center();
+		for (int i = 0; i < 8; ++i)
+		{
+			const auto grow_vec = dir[i] * node_half_extents;
+
+			auto new_node = std::make_shared<octree_node>();
+			new_node->bound.grow(grow_vec);
+			new_node->bound.center_at(node_center + grow_vec / 2.0f);
+			new_node->width = node_half_extents;
+			new_node->center = new_node->bound.center();
+
+			node->children[i] = new_node;
+		}
+
+		split(node, depth - 1);
+	}
+
 	void octree::rebuild(vec3 center, float width, unsigned depth, float off)
 	{
 		depth;
@@ -53,6 +88,8 @@ namespace idk
 		auto half_extents = (width + offset) / 2;
 		_root->bound.min = center - vec3{ half_extents } ;
 		_root->bound.max = center + vec3{ half_extents };
+
+		split(_root, depth);
 
 		// Re-insert all objects
 		for (auto& obj : info)
@@ -76,16 +113,12 @@ namespace idk
 			// 
 			// return;
 		}
-		// Rebuild the octree if the object lies outside the octree
+		// Keep object inside the root
 		else if (!_root->bound.contains(data_copy.bound))
 		{
-			auto new_bound = _root->bound;
-			new_bound.surround(data_copy.bound);
-			auto new_extents = new_bound.extents();
-
-			auto width = max(max(new_extents.x, new_extents.y), new_extents.z);
-			rebuild(new_bound.center(), width, 0);
-			// return;
+			data_copy.collider->_octree_node = _root;
+			_root->node_set.emplace(data_copy.collider);
+			_objects.emplace(data.collider, data);
 		}
 
 		insert_data(_root, data_copy);
@@ -99,10 +132,8 @@ namespace idk
 		auto obj_half_extents = object.bound.halfextents();
 		auto obj_center = object.bound.center();
 
-		auto node_center = node->bound.center();
-		auto node_half_extents = node->bound.halfextents();
-
-		vec3 grow_dir{ 1.0f };
+		auto node_center = node->center;
+		auto node_half_extents = node->width / 2.0f;
 
 		for (int i = 0; i < 3; ++i)
 		{
@@ -115,22 +146,12 @@ namespace idk
 
 			if (delta > 0.0f)
 				quad_index |= (1 << i); // ZXY
-			else
-				grow_dir[i] *= -1.0f;
 		}
 
 		if (!straddle)
 		{
 			collider_info copy = object;
-
-			// Create the child that the object will be put into
-			if (node->children[quad_index] == nullptr)
-			{
-				node->children[quad_index] = std::make_shared<octree_node>();
-				const auto grow_vec = grow_dir * abs(node_half_extents.x);
-				node->children[quad_index]->bound.grow(grow_vec);
-				node->children[quad_index]->bound.center_at(node_center + grow_vec / 2.0f);
-			}
+			
 			erase_from(object.collider, node);
 			// copy.octant = s_cast<Octant>(quad_index);
 			insert_data(node->children[quad_index], copy);
@@ -139,22 +160,62 @@ namespace idk
 
 	void octree::erase(Handle<Collider> object)
 	{
-		object;
+		if (_root)
+		{
+			auto res = _root->node_set.find(object);
+			if (res != _root->node_set.end())
+			{
+				object->_octree_node.reset();
+
+				_root->node_set.erase(res);
+				_objects.erase(_objects.find(object));
+			}
+			else
+			{
+				for (auto& c_node : _root->children)
+					erase_from(object, c_node);
+				// res = _root->tree_set.find(object);
+				// if (res != _root->tree_set.end())
+				// {
+				// 	_root->tree_set.erase(res);
+				// 	for (auto& child : _root->children)
+				// 	{
+				// 		if (child)
+				// 			erase_from(object, child);
+				// 	}
+				// }
+			}
+		}
 	}
 
 	void octree::erase_from(Handle<Collider> object, shared_ptr<octree_node> node)
 	{
-		if (!node)
-			return;
-
-		auto res = node->object_set.find(object);
-		if (res != node->object_set.end())
+		auto res = node->node_set.find(object);
+		if (res != node->node_set.end())
 		{
 			object->_octree_node.reset();
-			node->object_set.erase(res);
 
-			_objects.erase(_objects.find(object));			
+			node->node_set.erase(res);
+			_objects.erase(_objects.find(object));
 		}
+		else
+		{
+			for (auto& c_node : node->children)
+				erase_from(object, c_node);
+		}
+		/*else
+		{
+			res = node->tree_set.find(object);
+			if (res != node->tree_set.end())
+			{
+				node->tree_set.erase(res);
+				for (auto& child : node->children)
+				{
+					if (child)
+						erase_from(object, child);
+				}
+			}
+		}*/
 	}
 
 	void octree::erase_all()
@@ -162,10 +223,11 @@ namespace idk
 		if (_root)
 		{
 			// Remove all references to this node from all the objects
-			for (auto& obj : _root->object_set)
+			for (auto& obj : _root->node_set)
 				obj->_octree_node.reset();
 
-			_root->object_set.clear();
+			_root->node_set.clear();
+			_root->tree_set.clear();
 			for (auto& oct : _root->children)
 			{
 				erase_all(oct);
@@ -200,19 +262,9 @@ namespace idk
 		collider_info* ret_val = nullptr;
 		if (node)
 		{
-			if (node->exists(object))
+			if (node->exists(object) || node->exists_subtree(object))
 			{
 				return &_objects[object];
-			}
-			else
-			{
-				// Search subtree and break when a match is found
-				for (auto& child : node->children)
-				{
-					ret_val = find_subtree(object, child);
-					if (ret_val)
-						break;
-				}
 			}
 		}
 
@@ -239,13 +291,16 @@ namespace idk
 	{
 		if (node)
 		{
-			for (auto& obj : node->object_set)
+			for (auto& obj : node->node_set)
 			{
 				info.emplace_back(&_objects[obj]);
 			}
 
-			for (auto& child : node->children)
-				get_info_ptr(child, info);
+			for (auto& c_node : node->children)
+				get_info_ptr(c_node, info);
+
+			//for (auto& obj : node->tree_set)
+			//	info.emplace_back(&_objects[obj]);
 		}
 
 	}
@@ -254,11 +309,15 @@ namespace idk
 	{
 		if (node)
 		{
-			for (auto& obj : node->object_set)
+			for (auto& obj : node->node_set)
+			{
 				info.emplace_back(_objects[obj]);
+			}
 
-			for (auto& child : node->children)
-				get_info_copy(child, info);
+			for (auto& c_node : node->children)
+				get_info_copy(c_node, info);
+			// for (auto& obj : node->tree_set)
+			// 	info.emplace_back(_objects[obj]);
 		}
 
 	}
@@ -267,62 +326,78 @@ namespace idk
 	{
 		
 		// Simply put the object in the list if the current node has not hit the threshold for splitting
-		if (node->object_set.size() + 1 <= split_threshold)
+		if (node->node_set.size() + 1 <= split_threshold)
 		{
 			data.collider->_octree_node = node;
-			node->object_set.emplace(data.collider);
+			node->node_set.emplace(data.collider);
 			_objects.emplace(data.collider, data);
 			return;
 		}
 
+		for (auto& c_node : node->children)
+		{
+			if (c_node->bound.contains(data.bound))
+			{
+				// node->tree_set.emplace(data.collider);
+				insert_data(c_node, data);
+				return;
+			}
+		}
+
+		// Insert into this node
+		data.collider->_octree_node = node;
+		node->node_set.emplace(data.collider);
+		_objects.emplace(data.collider, data);
+
 		// Compute the quadrant
-		bool straddle = false;
-		int quad_index = 0;
-		auto obj_half_extents = data.bound.halfextents();
-		auto obj_center = data.bound.center();
+		//bool straddle = false;
+		//int quad_index = 0;
+		//auto obj_half_extents = data.bound.halfextents();
+		//auto obj_center = data.bound.center();
 
-		auto node_center = node->bound.center();
-		auto node_half_extents = node->bound.halfextents();
+		//auto node_center = node->bound.center();
+		//auto node_half_extents = node->bound.halfextents();
 
-		vec3 grow_dir{ 1.0f };
+		//vec3 grow_dir{ 1.0f };
 
-		for (int i = 0; i < 3; ++i)
-		{
-			const float delta = obj_center[i] - node_center[i];
-			if (abs(delta) < obj_half_extents[i])// + node_half_extents[i])
-			{
-				straddle = true;
-				break;
-			}
+		//for (int i = 0; i < 3; ++i)
+		//{
+		//	const float delta = obj_center[i] - node_center[i];
+		//	if (abs(delta) < obj_half_extents[i])// + node_half_extents[i])
+		//	{
+		//		straddle = true;
+		//		break;
+		//	}
 
-			if (delta > 0.0f)
-				quad_index |= (1 << i); // ZXY
-			else
-				grow_dir[i] *= -1.0f;
-		}
+		//	if (delta > 0.0f)
+		//		quad_index |= (1 << i); // ZXY
+		//	else
+		//		grow_dir[i] *= -1.0f;
+		//}
 
-		if (!straddle)
-		{
-			// Create the child that the object will be put into
-			if (node->children[quad_index] == nullptr)
-			{
-				auto new_node = std::make_shared<octree_node>();
-				
-				const auto grow_vec = grow_dir * node_half_extents.x;
-				new_node->bound.grow(grow_vec);
-				new_node->bound.center_at(node_center + grow_vec / 2.0f);
-				new_node->depth = node->depth + 1;
-				node->children[quad_index] = new_node;
-			}
-			// data.octant = s_cast<Octant>(quad_index);
-			insert_data(node->children[quad_index], data);
-		}
-		else
-		{
-			data.collider->_octree_node = node;
-			node->object_set.emplace(data.collider);
-			_objects.emplace(data.collider, data);
-		}
+		//if (!straddle && node->depth < 5)
+		//{
+		//	// Create the child that the object will be put into
+		//	if (node->children[quad_index] == nullptr)
+		//	{
+		//		auto new_node = std::make_shared<octree_node>();
+		//		
+		//		const auto grow_vec = grow_dir * node_half_extents.x;
+		//		new_node->bound.grow(grow_vec);
+		//		new_node->bound.center_at(node_center + grow_vec / 2.0f);
+		//		new_node->depth = node->depth + 1;
+		//		node->children[quad_index] = new_node;
+		//	}
+		//	
+		//	node->tree_set.emplace(data.collider);
+		//	insert_data(node->children[quad_index], data);
+		//}
+		//else
+		//{
+		//	data.collider->_octree_node = node;
+		//	node->node_set.emplace(data.collider);
+		//	_objects.emplace(data.collider, data);
+		//}
 	}
 
 	void octree::erase_all(shared_ptr<octree_node> node)
@@ -330,10 +405,12 @@ namespace idk
 		if (node)
 		{
 			// Remove all references to this node from all the objects
-			for (auto& obj : node->object_set)
-				obj->_octree_node.reset();
+			for (auto& obj : node->node_set)
+				if(obj)
+					obj->_octree_node.reset();
 
-			node->object_set.clear();
+			node->node_set.clear();
+			node->tree_set.clear();
 			for (auto& oct : node->children)
 			{
 				erase_all(oct);
@@ -346,10 +423,14 @@ namespace idk
 		if (node)
 		{
 			// Remove all references to this node from all the objects
-			for (auto& obj : node->object_set)
-				obj->_octree_node.reset();
+			for (auto& obj : node->node_set)
+			{
+				if(obj)
+					obj->_octree_node.reset();
+			}
 
-			node->object_set.clear();
+			node->node_set.clear();
+			node->tree_set.clear();
 
 			for (auto& oct : node->children)
 			{
