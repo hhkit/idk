@@ -27,6 +27,7 @@ namespace idk
 		Handle<class RigidBody> _rigidbody;
 		bool _static_cache = false;
         bool _active_cache = false;
+		int node_id = -1;
 		friend class PhysicsSystem;
 	};
 }
