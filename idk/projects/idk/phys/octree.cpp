@@ -65,6 +65,7 @@ namespace idk
 			auto new_node = std::make_shared<octree_node>();
 			new_node->bound.grow(grow_vec);
 			new_node->bound.center_at(node_center + grow_vec / 2.0f);
+			new_node->depth = node->depth + 1;
 			new_node->width = node_half_extents;
 			new_node->center = new_node->bound.center();
 
@@ -76,7 +77,7 @@ namespace idk
 
 	void octree::rebuild(vec3 center, float width, unsigned depth, float off)
 	{
-		depth;
+		_max_depth = depth;
 		auto info = get_info_by_copy(_root);
 		clear();
 
@@ -89,7 +90,7 @@ namespace idk
 		_root->bound.min = center - vec3{ half_extents } ;
 		_root->bound.max = center + vec3{ half_extents };
 
-		split(_root, depth);
+		split(_root, _max_depth);
 
 		// Re-insert all objects
 		for (auto& obj : info)
@@ -107,11 +108,6 @@ namespace idk
 			const vec3 offset_vec{ offset / 2.0f };
 			_root->bound.min = data.bound.min - offset_vec;
 			_root->bound.max = data.bound.max + offset_vec;
-
-			// data_copy.collider->_octree_node = _root;
-			// _root->object_list.emplace(data_copy.collider, data_copy);
-			// 
-			// return;
 		}
 		// Keep object inside the root
 		else if (!_root->bound.contains(data_copy.bound))
@@ -170,7 +166,7 @@ namespace idk
 				_root->node_set.erase(res);
 				_objects.erase(_objects.find(object));
 			}
-			else
+			else if(_max_depth != _root->depth)
 			{
 				for (auto& c_node : _root->children)
 					erase_from(object, c_node);

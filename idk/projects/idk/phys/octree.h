@@ -40,7 +40,7 @@ namespace idk
 	private:
 		hash_table<Handle<Collider>, collider_info> _objects;
 		// vector<collider_info> _objects;
-		size_t _min_bound = 0;
+		size_t _max_depth = 0;
 		shared_ptr<octree_node> _root{};
 		friend PhysicsSystem;
 
