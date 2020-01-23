@@ -152,6 +152,9 @@
     <Filter Include="parallel">
       <UniqueIdentifier>{c0a27a3b-a553-49e0-bfdc-58031b1ed1c9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="network\messages">
+      <UniqueIdentifier>{a13cb9de-2d6a-465a-b261-288e30b35648}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -1059,6 +1062,12 @@
     <ClInclude Include="parallel\queue.h">
       <Filter>parallel</Filter>
     </ClInclude>
+    <ClInclude Include="network\TestMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\IncludeMessages.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1530,6 +1539,9 @@
     <ClCompile Include="test\TestComponent.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="network\ConnectionManager.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1739,6 +1751,9 @@
     </None>
     <None Include="ds\sliding_window.inl">
       <Filter>ds</Filter>
+    </None>
+    <None Include="network\ConnectionManager.inl">
+      <Filter>network</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

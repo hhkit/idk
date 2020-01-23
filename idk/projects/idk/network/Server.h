@@ -17,7 +17,7 @@ namespace idk
 		// signals
 		Signal<int>               OnClientConnect;
 		Signal<int>               OnClientDisconnect;
-		Signal<yojimbo::Message*> OnMessageReceived[GameConfiguration::MAX_CLIENTS][(int)GameMessageType::COUNT];
+		Signal<yojimbo::Message*> OnMessageReceived[GameConfiguration::MAX_CLIENTS][MessageCount];
 
 		// ctor
 		Server(const Address& address);
@@ -27,6 +27,8 @@ namespace idk
 
 		void ReceivePackets();
 		void SendPackets();
+
+		template<typename T> T* CreateMessage(int client) { return static_cast<T*>(server.CreateMessage(client, MessageID<T>)); }
 		void SendMessage(int clientIndex, yojimbo::Message* message, bool guarantee_delivery = false);
 
 		// callbacks

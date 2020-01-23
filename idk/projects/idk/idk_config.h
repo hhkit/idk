@@ -64,6 +64,7 @@ namespace idk
 		,	class LogSystem
 		,	class GamepadSystem
 		,	class NetworkSystem
+		,	class ConnectionManager
 
 		// logic
 		,	class mono::ScriptSystem

@@ -94,6 +94,7 @@
     <ClInclude Include="network\ClassRep.h" />
     <ClInclude Include="network\Client.h" />
     <ClInclude Include="network\ClientConnectionManager.h" />
+    <ClInclude Include="network\IncludeMessages.h" />
     <ClInclude Include="network\ServerConnectionManager.h" />
     <ClInclude Include="network\SubstreamManager.h" />
     <ClInclude Include="network\ConnectionManager.h" />
@@ -104,6 +105,7 @@
     <ClInclude Include="network\PersistManager.h" />
     <ClInclude Include="network\Player.h" />
     <ClInclude Include="network\Server.h" />
+    <ClInclude Include="network\TestMessage.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="parallel\circular_buffer.h" />
     <ClInclude Include="parallel\HazardPointerDL.h" />
@@ -384,6 +386,7 @@
     <ClCompile Include="network\Address.cpp" />
     <ClCompile Include="network\Client.cpp" />
     <ClCompile Include="network\ClientConnectionManager.cpp" />
+    <ClCompile Include="network\ConnectionManager.cpp" />
     <ClCompile Include="network\EventManager.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
@@ -531,6 +534,7 @@
     <None Include="meta\tuple.inl" />
     <None Include="meta\variant.inl" />
     <None Include="network\ClientConnectionManager.inl" />
+    <None Include="network\ConnectionManager.inl" />
     <None Include="network\ServerConnectionManager.inl" />
     <None Include="phys\raycasts\collision_raycast.inl" />
     <None Include="ReflectReg_AnimComponents.inl" />

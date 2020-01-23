@@ -12,6 +12,7 @@
 #include <file/FileSystem.h>
 
 #include <network/NetworkSystem.h>
+#include <network/ConnectionManager.h>
 #include <gfx/GraphicsSystem.h>
 #include <anim/AnimationSystem.h>
 #include <gfx/DebugRenderer.h>

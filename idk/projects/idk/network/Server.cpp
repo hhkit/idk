@@ -22,6 +22,7 @@ namespace idk
 	}
 	Server::~Server()
 	{
+		server.DisconnectAllClients();
 		server.Stop();
 	}
 	void Server::ProcessMessage(int clientIndex, yojimbo::Message* message)

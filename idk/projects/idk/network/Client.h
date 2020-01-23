@@ -13,7 +13,7 @@ namespace idk
 	public:
 		Signal<> OnClientConnected;
 		Signal<> OnClientDisconnected;
-		Signal<yojimbo::Message*> OnMessageReceived[(int)GameMessageType::COUNT];
+		Signal<yojimbo::Message*> OnMessageReceived[MessageCount];
 
 		Client(const Address& addr);
 		~Client();
@@ -22,6 +22,8 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
+		template<typename T>
+		T* CreateMessage();
 		void SendMessage(yojimbo::Message* message, bool guarantee_delivery = false);
 	private:
 		Adapter           adapter;
@@ -31,4 +33,10 @@ namespace idk
 
 		void ProcessMessage(yojimbo::Message* message);
 	};
+
+	template<typename T>
+	inline T* Client::CreateMessage()
+	{
+		return static_cast<T*>(client.CreateMessage(MessageID<T>));
+	}
 }

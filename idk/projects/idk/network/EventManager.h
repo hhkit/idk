@@ -9,6 +9,11 @@ namespace idk
 	public:
 		void SubscribeEvents(ClientConnectionManager& client) override;
 		void SubscribeEvents(ServerConnectionManager& server) override;
+
+		void SendTestMessage(int i);
+		void SendInstantiatePrefabEvent();
 	private:
+		ServerConnectionManager* server{};
+		ClientConnectionManager* client{};
 	};
 }

@@ -13,10 +13,16 @@ namespace idk
 		ClientConnectionManager(Client& client);
 		~ClientConnectionManager();
 
-		template<typename Func, typename = sfinae<std::is_invocable_v<Func, yojimbo::Message*>>>
-		void Subscribe(GameMessageType type, Func&& func);
+		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType*>>>
+		void Subscribe(Func&& func);
+
+		template<typename T> T*   CreateMessage();
+		template<typename T> void SendMessage(T* message, bool guarantee_delivery);
+
+		// get relevant substream manager
+		template<typename Manager> Manager* GetManager();
 	private:
-		struct EventSlot { GameMessageType type; SignalBase::SlotId slot; };
+		struct EventSlot { unsigned type; SignalBase::SlotId slot; };
 		Client& client;
 		vector<EventSlot> OnMessageReceived_slots;
 		vector<unique_ptr<BaseSubstreamManager>> substream_managers;

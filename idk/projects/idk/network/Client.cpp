@@ -25,7 +25,8 @@ namespace idk
 
 	void Client::ProcessMessages()
 	{
-		for (int i = 0; i < config.numChannels; i++) {
+		for (int i = 0; i < config.numChannels; i++) 
+		{
 			while (auto message = client.ReceiveMessage(i)) 
 			{
 				ProcessMessage(message);

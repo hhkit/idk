@@ -15,12 +15,14 @@ namespace idk
 	{
 		ResetNetwork();
 		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
+		OnServerCreate.Fire();
 	}
 
 	void NetworkSystem::ConnectToServer(const Address& d)
 	{
 		ResetNetwork();
 		client = std::make_unique<Client>(Address{ d.a,d.b,d.c,d.d, server_listen_port });
+		OnClientCreate.Fire();
 	}
 
 	bool NetworkSystem::IsHost()

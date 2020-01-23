@@ -1,12 +1,15 @@
 #include "stdafx.h"
 #include "Adapter.h"
 #include "Server.h"
+#include <network/IncludeMessages.h>
 
 namespace idk
 {
-	YOJIMBO_MESSAGE_FACTORY_START(GameMessageFactory, (int)GameMessageType::COUNT);
-	//YOJIMBO_DECLARE_MESSAGE_TYPE((int)GameMessageType::TEST, TestMessage);
-	//YOJIMBO_DECLARE_MESSAGE_TYPE((int)GameMessageType::EVENT_INSTANTIATE_PREFAB, EventInstantiatePrefabMessage);
+#define ADD_MESSAGE(TYPE) YOJIMBO_DECLARE_MESSAGE_TYPE(MessageID<TYPE>, TYPE)
+
+	YOJIMBO_MESSAGE_FACTORY_START(GameMessageFactory, MessageCount);
+	ADD_MESSAGE(TestMessage);
+	//ADD_MESSAGE(EventInstantiatePrefabMessage);
 	YOJIMBO_MESSAGE_FACTORY_FINISH();
 
 	yojimbo::MessageFactory* Adapter::CreateMessageFactory(yojimbo::Allocator& allocator)

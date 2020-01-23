@@ -109,7 +109,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)build\game\$(Configuration)\</IntDir>
-    <TargetName>editorD</TargetName>
+    <TargetName>editorrD</TargetName>
     <LibraryPath>$(SolutionDir)dep\lib\;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

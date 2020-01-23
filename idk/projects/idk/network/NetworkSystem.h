@@ -1,6 +1,8 @@
 #pragma once
 #include <yojimbo/yojimbo.h>
 #include <core/ISystem.h>
+#include <network/Address.h>
+#include <event/Signal.h>
 
 namespace idk
 {
@@ -15,6 +17,9 @@ namespace idk
 		static constexpr unsigned short server_listen_port = 8080;
 		static constexpr unsigned short client_listen_port = 8000;
 	public:
+		Signal<> OnServerCreate;
+		Signal<> OnClientCreate;
+
 		NetworkSystem();
 		~NetworkSystem();
 

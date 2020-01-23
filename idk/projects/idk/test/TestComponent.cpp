@@ -2,8 +2,8 @@
 #include "TestComponent.h"
 #include <app/Application.h>
 #include <network/NetworkSystem.h>
-#include <network/Client.h>
-#include <network/Server.h>
+#include <network/ConnectionManager.inl>
+#include <network/EventManager.h>
 #include <core/GameObject.h>
 #include <common/Transform.h>
 namespace idk
@@ -23,8 +23,9 @@ namespace idk
 		if (app_sys.GetKeyDown(Key::T))
 		{
 			static int i = 0;
-			//if (!network_sys.IsHost())
-			//	network_sys.GetClient().SendTestMessage(i++);
+			Core::GetSystem<ConnectionManager>().GetClientManager<EventManager>()->SendTestMessage(i);
+			LOG("Sending test message %d", i);
+			++i;
 		}
 
 		if (app_sys.GetKeyDown(Key::P))
