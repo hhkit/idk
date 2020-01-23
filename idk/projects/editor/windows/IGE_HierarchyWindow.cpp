@@ -332,13 +332,13 @@ namespace idk {
 							}
 
 							//If im draging to my parent, unparent
-							if (i->GetComponent<Transform>()->parent == handle) {
-								i->GetComponent<Transform>()->parent = Handle <GameObject>{};
-							}
-							else { //Else parent normally
-								i->GetComponent<Transform>()->SetParent(handle, true);
-							}
+							if (i->Parent() == handle)
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+							else //Else parent normally
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
 						}
+
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, selected_gameObjects.size()));
 					}
 					else
 					{
@@ -354,13 +354,10 @@ namespace idk {
 						}
 						if (!isParentingToChild)
 						{
-							//If im draging to my parent, unparent
-							if (i->GetComponent<Transform>()->parent == handle) {
-								i->GetComponent<Transform>()->parent = Handle <GameObject>{};
-							}
-							else { //Else parent normally
-								i->GetComponent<Transform>()->SetParent(handle, true);
-							}
+							if (i->Parent() == handle)
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+							else //Else parent normally
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
 						}
 					}
 
