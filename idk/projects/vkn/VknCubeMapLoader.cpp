@@ -193,7 +193,7 @@ namespace idk::vkn {
 
 		auto ptr = texture.texture;
 		auto&& [image, alloc, aspect] = vkn::LoadCubemap(allocator, load_fence, load_info, in_info);
-		texture.Size(ptr->Size(ivec2{ load_info.width,load_info.height }));
+		texture.Size(ptr->Size(uivec2{ load_info.width,load_info.height }));
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->image_ = std::move(image);
@@ -225,7 +225,7 @@ namespace idk::vkn {
 		ptr->sampler = device.createSamplerUnique(sampler_info);
 
 	}
-	void CubemapLoader::LoadCubemap(VknCubemap& texture, TextureFormat pixel_format, std::optional<CubemapOptions> ooptions, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	void CubemapLoader::LoadCubemap(VknCubemap& texture, TextureFormat pixel_format, std::optional<CubemapOptions> ooptions, const char* rgba32, size_t len, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 
 		if (texture.texture == RscHandle<VknTexture>{})
@@ -276,7 +276,7 @@ namespace idk::vkn {
 		;
 		texture.Size(texture.texture->Size(size));
 	}
-	void CubemapLoader::LoadCubemap(VknCubemap& texture, TextureFormat input_pixel_format, std::optional<CubemapOptions> options, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	void CubemapLoader::LoadCubemap(VknCubemap& texture, TextureFormat input_pixel_format, std::optional<CubemapOptions> options, string_view rgba32, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		LoadCubemap(texture, input_pixel_format, options, rgba32.data(), rgba32.size(), size, allocator, load_fence, isRenderTarget);
 	}

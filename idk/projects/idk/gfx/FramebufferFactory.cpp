@@ -40,10 +40,10 @@ namespace idk
 	{
 		PreReset(framebuffer);
 		framebuffer.attachments.clear();
-		framebuffer.size = ivec2{};
+		framebuffer.size = {};
 	}
 
-	FrameBufferBuilder& FrameBufferBuilder::Begin(ivec2 size, size_t num_layers)
+	FrameBufferBuilder& FrameBufferBuilder::Begin(uivec2 size, size_t num_layers)
 	{
 		info.size = size;
 		info.num_layers = num_layers;

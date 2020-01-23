@@ -11,7 +11,7 @@ namespace idk::ogl
 	{
 	public:
 		OpenGLTexture();
-		OpenGLTexture(TextureInternalFormat format, ivec2 size, unsigned mip_level = 0);
+		OpenGLTexture(TextureInternalFormat format, uivec2 size, unsigned mip_level = 0);
 		explicit OpenGLTexture(const CompiledTexture&);
 		OpenGLTexture(OpenGLTexture&&);
 		OpenGLTexture& operator=(OpenGLTexture&&);
@@ -22,14 +22,14 @@ namespace idk::ogl
 
 		void Buffer(	
 			void* data, size_t buffer_size, 
-			ivec2 texture_size, 
+			uivec2 texture_size, 
 			TextureInternalFormat format, 
 			GLenum incoming_components = GL_RGB, GLenum incoming_type = GL_UNSIGNED_BYTE
 		);
-		void Buffer(void* data, size_t buffer_size, ivec2 texture_size, ColorFormat format, bool compressed);
+		void Buffer(void* data, size_t buffer_size, uivec2 texture_size, ColorFormat format, bool compressed);
 
 		using Texture::Size;
-		ivec2 Size(ivec2 new_size) override;
+		uivec2 Size(uivec2 new_size) override;
 		virtual void* ID() const override;
 		
 	private:

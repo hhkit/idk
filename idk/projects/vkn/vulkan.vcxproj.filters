@@ -284,6 +284,15 @@
     <ClInclude Include="IdGenerator.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="VknTextureView.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="TexturePool.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassCreateInfoBundle.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -508,6 +517,10 @@
       <Filter>render\graph</Filter>
     </ClCompile>
     <ClCompile Include="topological_sort.cpp" />
+    <ClCompile Include="VknTextureView.cpp">
+      <Filter>render\graph\util_objects</Filter>
+    </ClCompile>
+    <ClCompile Include="TexturePool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -554,6 +567,9 @@
     </Filter>
     <Filter Include="render\graph\test">
       <UniqueIdentifier>{06ce5f56-4411-4f6d-8f81-abc87db95a7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\graph\util_objects">
+      <UniqueIdentifier>{f2f7830d-f1f0-45b2-87f8-df255d3c1629}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

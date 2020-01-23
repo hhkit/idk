@@ -28,8 +28,8 @@ namespace idk::vkn
 
 		auto fb = std::make_unique<VknRenderTarget>();
 		auto &m = *fb;
-		m.size = Core::GetSystem<Application>().GetScreenSize();
-
+		m.size = uivec2{ Core::GetSystem<Application>().GetScreenSize() };
+		
 		m.SetColorBuffer(RscHandle<Texture>{ptr      });
 		m.SetDepthBuffer(RscHandle<Texture>{depth_ptr});
 
@@ -45,7 +45,7 @@ namespace idk::vkn
 		auto fb = std::make_unique<VknRenderTarget>();
 		
 		auto& m = *fb;
-		m.Size(ivec2{ Core::GetSystem<Application>().GetScreenSize() });
+		m.Size(uivec2{ Core::GetSystem<Application>().GetScreenSize() });
 		m.SetColorBuffer(RscHandle<Texture>{ptr      });
 		m.SetDepthBuffer(RscHandle<Texture>{depth_ptr});
 	

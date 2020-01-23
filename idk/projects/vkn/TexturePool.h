@@ -1,0 +1,31 @@
+#pragma once
+#include <vkn/VknTextureView.h>
+#include <vkn/AttachmentDescription.h>
+#include <forward_list>
+namespace idk::vkn
+{
+
+	struct TexturePool
+	{
+	public:
+		TexturePool();
+		TexturePool(const TexturePool&) = delete;;
+		TexturePool(TexturePool&&);
+		TexturePool& operator=(const TexturePool&) = delete;;
+		TexturePool& operator=(TexturePool&&);
+		~TexturePool();
+		VknTextureView allocate(const TextureDescription& description);
+		void reset_allocations();
+	private:
+		VknTextureView create(const TextureDescription& description);
+		//search for a free texture that matches the description
+		std::optional<VknTextureView> free_match(const TextureDescription& desc);
+
+		vector<unique_ptr<VknTexture>> allocated_textures;
+		//potentially use unordered_multimap or unordered_map of forward_lists
+		std::forward_list<unique_ptr<VknTexture>> free_textures;
+
+		struct Pimpl;
+		std::unique_ptr<Pimpl> _pimpl;
+	};
+}

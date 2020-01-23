@@ -334,7 +334,7 @@ namespace idk::vkn
 		}
 	}
 
-	void CubemapRenderer::ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos, const ivec2& vp_size)
+	void CubemapRenderer::ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos, const uivec2& vp_size)
 	{
 		//if (pool.size() == pool.capacity())
 		//{

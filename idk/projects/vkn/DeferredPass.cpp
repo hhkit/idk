@@ -79,11 +79,11 @@ namespace idk::vkn
 	};
 
 
-	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size);
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const uivec2& size);
 	template<typename T, typename...Args>
 	using has_setstate = decltype(std::declval<T>().SetState(std::declval<Args>()...));
 	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders);
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp);
+	std::pair<ivec2, uivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp);
 
 	void GBufferBarrier(vk::CommandBuffer cmd_buffer, DeferredGBuffer& gbuffer)
 	{
@@ -148,7 +148,7 @@ namespace idk::vkn
 		index_t depth_attachment;
 	};
 
-	bool DeferredGBuffer::Init(ivec2 size)
+	bool DeferredGBuffer::Init(uivec2 size)
 	{
 		bool inited = false;
 		if (!gbuffer || gbuffer->Size()!=size)
@@ -622,7 +622,7 @@ namespace idk::vkn
 		)
 	{
 		auto offset = ivec2{ rpbi.renderArea.offset.x,rpbi.renderArea.offset.y };
-		auto size= ivec2{ s_cast<uint32_t>(rpbi.renderArea.extent.width),s_cast<uint32_t>(rpbi.renderArea.extent.height )};
+		auto size= uivec2{ s_cast<uint32_t>(rpbi.renderArea.extent.width),s_cast<uint32_t>(rpbi.renderArea.extent.height )};
 		auto& view = View();
 		vector<RscHandle<ShaderProgram>> shaders;
 		VulkanPipeline* prev_pipeline = nullptr;

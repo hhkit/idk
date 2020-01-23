@@ -6,11 +6,11 @@ namespace idk {
 	{
 		return s_cast<float>(_size.x) / _size.y;
 	}
-	ivec2 FontAtlas::Size() const
+	uivec2 FontAtlas::Size() const
 	{
 		return _size;
 	}
-	void FontAtlas::Size(ivec2 newsize)
+	void FontAtlas::Size(uivec2 newsize)
 	{
 		_size = newsize;
 	}

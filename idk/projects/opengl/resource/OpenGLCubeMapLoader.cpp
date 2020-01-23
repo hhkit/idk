@@ -61,8 +61,8 @@ namespace idk
 			auto p = pp + fileExt[i] + string(ext.string());
 
 			auto data = stbi_load(PathHandle{ p }.GetFullPath().data(), &size.x, &size.y, &channels, 0);
-			if (channels == 3) cubemap_handle->Buffer(i, data, size, ToInternalFormat(tm.internal_format, tm.is_srgb), GL_RGB);
-			if (channels == 4) cubemap_handle->Buffer(i, data, size, ToInternalFormat(tm.internal_format, tm.is_srgb), GL_RGBA);
+			if (channels == 3) cubemap_handle->Buffer(i, data, uivec2{size}, ToInternalFormat(tm.internal_format, tm.is_srgb), GL_RGB);
+			if (channels == 4) cubemap_handle->Buffer(i, data, uivec2{size}, ToInternalFormat(tm.internal_format, tm.is_srgb), GL_RGBA);
 			stbi_image_free(data);
 		}
 

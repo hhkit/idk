@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "FrameGraph.h"
 #include <vkn/VknTexture.h>
+#include <vkn/VulkanView.h>
+#include <vkn/VknTextureView.h>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
 
@@ -16,11 +19,11 @@ namespace idk::vkn
 		auto& stored_node = nodes.emplace_back(std::move(node));
 		tmp_graph.in_nodes.emplace(node.id, node.input_resources);
 		for (auto& written_rsc : node.GetOutputSpan())
-			tmp_graph.src_node.emplace(written_rsc.id,node.id);
+			tmp_graph.src_node.emplace(written_rsc.id, node.id);
 		return stored_node;
 	}
 #pragma optimize("",off)
-	void FrameGraph::ComputeLifetimes(const ActualGraph& ag,ResourceLifetimeManager& manager)
+	void FrameGraph::ComputeLifetimes(const ActualGraph& ag, ResourceLifetimeManager& manager)
 	{
 		auto& exec_order = execution_order;
 		auto& graph_nodes = nodes;
@@ -34,7 +37,7 @@ namespace idk::vkn
 			auto& curr_node = graph_nodes[index];
 			size_t order = 0;
 			//TODO Get the dep_nodes from curr_node
-			auto dep_rsc=  curr_node.GetInputSpan();
+			auto dep_rsc = curr_node.GetInputSpan();
 			for (auto& dep_rsc : dep_rsc)
 			{
 				auto dep_node = ag.src_node.find(dep_rsc.id)->second;
@@ -53,7 +56,7 @@ namespace idk::vkn
 				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
 			}
 		}
-		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible,&GetResourceManager(),std::placeholders::_1,std::placeholders::_2));
+		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
 	}
 
 	void FrameGraph::CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm)
@@ -114,7 +117,7 @@ namespace idk::vkn
 			//Maybe use copy_if to filter out useless nodes.
 			execution_order = std::move(sorted_order);
 		}
-		ComputeLifetimes(graph,rsc_lifetime_mgr);
+		ComputeLifetimes(graph, rsc_lifetime_mgr);
 	}
 
 	void FrameGraph::AllocateResources()
@@ -144,7 +147,7 @@ namespace idk::vkn
 				auto input_span = node.GetReadSpan();
 				for (auto& input : input_span)
 				{
-					TransitionResource(context,rsc_manager.TransitionInfo(input));
+					TransitionResource(context, rsc_manager.TransitionInfo(input));
 				}
 				rp.PreExecute(node, context);
 				rp.Execute(context);
@@ -153,18 +156,23 @@ namespace idk::vkn
 		}
 	}
 
-	vk::RenderPassCreateInfo FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+
+
+
+	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
+		RenderPassCreateInfoBundle bundle{};
 		auto total_att = input_rscs.size() + output_rscs.size() + ((depth) ? 1 : 0);
-		vector<vk::AttachmentDescription> attachments;
-		vector<vk::AttachmentReference> attachment_input_refs(input_rscs.size());
-		vector<vk::AttachmentReference> attachment_output_refs(output_rscs.size());
-		vk::AttachmentReference depth_ref;
+		vector<vk::AttachmentDescription>& attachments = bundle.attachments();
+		auto& attachment_input_refs = bundle.attachment_input_refs () =vector<vk::AttachmentReference> (input_rscs.size());
+		auto& attachment_output_refs= bundle.attachment_output_refs() =vector<vk::AttachmentReference> (output_rscs.size());
+		vk::AttachmentReference& depth_ref = bundle.depth_ref();
 		auto& rsc_manager = GetResourceManager();
 		auto& nodes_lookup = node_lookup;
 		auto& nodes_buffer = nodes;
 		attachments.reserve(total_att);
-		auto process_attachment = [&nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref)
+		auto& src_nodes = graph_builder.origin_nodes;
+		auto process_attachment = [&src_nodes, &nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref)
 		{
 			auto find_input_layout = [](const FrameGraphNode& node, fgr_id id)
 			{
@@ -179,18 +187,19 @@ namespace idk::vkn
 			};
 			if (attachment_info)
 			{
-				VknTexture& tex = *rsc_manager.Get<VknTexture>(attachment_info->first);
+				auto tex = rsc_manager.Get<VknTextureView>(attachment_info->first);
 				auto& [rsc_id, att_opt] = *attachment_info;
 				attachment_ref.attachment = static_cast<uint32_t>(attachments.size());
 				auto prev_id = rsc_manager.GetPrevious(rsc_id);
+				
 				vk::ImageLayout prev_layout = att_opt.layout;
 				if (prev_id)
-					prev_layout = find_input_layout(nodes_buffer[nodes_lookup.find(*prev_id)->second], *prev_id);
+					prev_layout = find_input_layout(nodes_buffer[nodes_lookup.find(src_nodes.find(*prev_id)->second)->second], *prev_id);
 				attachments.emplace_back(vk::AttachmentDescription
 					{
 						//vk::AttachmentDescriptionFlagBits::eMayAlias
 						{},
-						(att_opt.format) ? tex.format : (*att_opt.format),
+						(att_opt.format) ? tex.Format() : (*att_opt.format),
 						vk::SampleCountFlagBits::e1,
 						att_opt.load_op,
 						att_opt.store_op,
@@ -221,14 +230,14 @@ namespace idk::vkn
 		}
 
 		{
-			process_attachments(input_rscs, attachment_output_refs);
+			process_attachments(output_rscs, attachment_output_refs);
 		}
 		if (depth)
 		{
 			process_attachment(depth, depth_ref);
 		}
 		vk::SubpassDescription subpass_desc{
-			{},
+			vk::SubpassDescriptionFlags{},
 			vk::PipelineBindPoint::eGraphics,
 			static_cast<uint32_t>(attachment_input_refs.size()),
 			std::data(attachment_input_refs),
@@ -247,21 +256,15 @@ namespace idk::vkn
 			vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentRead,	//TODO: Figure this out
 			vk::DependencyFlagBits::eByRegion
 		};
-		vk::RenderPassCreateInfo rpci
-		{
-			vk::RenderPassCreateFlags{},
-			static_cast<uint32_t>(attachments.size()),
-			std::data(attachments),
-			1,& subpass_desc,
-			1,& subpass_dep
-		};
-		return rpci;
+		bundle.set(subpass_desc, subpass_dep);
+		return bundle;
 	}
 
 	VknRenderPass FrameGraph::CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
-		vk::Device device;
-		return device.createRenderPassUnique(CreateRenderPassInfo(input_rscs,output_rscs,depth));
+		vk::Device device = *View().Device();
+		auto info = CreateRenderPassInfo(input_rscs, output_rscs, depth);
+		return device.createRenderPassUnique(info);
 	}
 	VknFrameBuffer FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{

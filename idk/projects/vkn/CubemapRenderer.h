@@ -75,7 +75,7 @@ namespace idk::vkn
 		void QueueRenderToCubeMap(RscHandle<CubeMap> dst);//WIP
 
 		void ProcessQueue(vk::CommandBuffer cmd_buffer);
-		void ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos = { 0,0 }, const ivec2& vp_size = { 1,1 });
+		void ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos = { 0,0 }, const uivec2& vp_size = { 1,1 });
 
 		void ResetRsc();
 

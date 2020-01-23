@@ -8,6 +8,7 @@
 #include "BaseRenderPass.h"
 #include <vkn/utils/GraphTraverser.h>
 #include <vkn/topological_sort.h>
+#include <vkn/RenderPassCreateInfoBundle.h>
 namespace idk::vkn
 {
 
@@ -182,7 +183,7 @@ namespace idk::vkn
 		void Execute(Context_t context);
 
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
-		vk::RenderPassCreateInfo  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
+		RenderPassCreateInfoBundle  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
 		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 

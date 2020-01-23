@@ -180,7 +180,7 @@ namespace idk::vkn
 	};
 
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
+	std::pair<ivec2, uivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
 		auto& [offset, size] = pair;
@@ -653,7 +653,7 @@ namespace idk::vkn
 
 				auto config = *obj.config;
 				config.viewport_offset = ivec2{ s_cast<uint32_t>(viewport.offset.x),s_cast<uint32_t>(viewport.offset.y) };
-				config.viewport_size = ivec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
+				config.viewport_size = uivec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
 
 				if (is_mesh_renderer)
 					config.buffer_descriptions.emplace_back(
@@ -820,7 +820,7 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
-		ivec2 max_size{};
+		uivec2 max_size{};
 		for (auto& gfx_state : gfx_states)
 		{
 			auto sz = gfx_state.camera.render_target->Size();
@@ -1097,7 +1097,7 @@ namespace idk::vkn
 	}
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
 	//and command buffer hasn't ended
-	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, ivec2 vp_size)
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, uivec2 vp_size)
 	{
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
@@ -1175,7 +1175,7 @@ namespace idk::vkn
 	}
 
 
-	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size)
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const uivec2& size)
 	{
 		config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
 		config.viewport_offset = offset;

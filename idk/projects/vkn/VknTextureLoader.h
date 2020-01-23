@@ -39,7 +39,10 @@ namespace idk::vkn
 		size_t l=0,
 			vk::Format f = {}) noexcept :data{ d }, len{ l }, format{ f }{}
 	};
-
+	inline vk::ImageUsageFlags mark_sampled(vk::ImageUsageFlags flags, bool is_sampled) noexcept
+	{
+		return (is_sampled) ? flags | vk::ImageUsageFlagBits::eSampled : (flags & ~vk::ImageUsageFlagBits::eSampled);
+	}
 	struct TexCreateInfo
 	{
 		uint32_t width{};
@@ -53,7 +56,7 @@ namespace idk::vkn
 		//True if you intend to sample with a shader
 		void sampled(bool will_sample)
 		{
-			image_usage = (will_sample) ? image_usage | vk::ImageUsageFlagBits::eSampled : (image_usage & ~vk::ImageUsageFlagBits::eSampled);
+			image_usage = mark_sampled(image_usage,will_sample);
 		}
 	};
 	TexCreateInfo ColorBufferTexInfo(uint32_t width, uint32_t height);
@@ -63,7 +66,8 @@ namespace idk::vkn
 	public:
 		//Will override TexCreateInfo's format if TextureOptions is set
 		void LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info);
-		void LoadTexture(VknTexture& texture, TextureFormat input_pixel_format, std::optional<TextureOptions> options, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
-		void LoadTexture(VknTexture& texture, TextureFormat input_pixel_format, std::optional<TextureOptions> options, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
+		//TODO: Deprecate these 2 functions below usage the one above instead
+		void LoadTexture(VknTexture& texture, TextureFormat input_pixel_format, std::optional<TextureOptions> options, const char* rgba32, size_t len, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
+		void LoadTexture(VknTexture& texture, TextureFormat input_pixel_format, std::optional<TextureOptions> options, string_view rgba32, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
 	};
 }

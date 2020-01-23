@@ -27,7 +27,7 @@ namespace idk::vkn {
 
 		VknFontAtlas& operator=(VknFontAtlas&&) noexcept;
 		using FontAtlas::Size;
-		void Size(ivec2 new_size) override;
+		void Size(uivec2 new_size) override;
 		virtual void* ID() const;
 
 	private:

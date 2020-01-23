@@ -28,7 +28,7 @@ namespace idk
             template<typename Itr>
             void SetAdjacentNodes(index_t src, Itr index_begin, Itr index_end)
             {
-                assert(adjacency_list[src].start == adjacency_list[src].end && adjacency_list[src].end == 0);
+                assert(adjacency_list[src].begin== adjacency_list[src].end && adjacency_list[src].end == 0);
                 auto start = adjacency_buffer.size();
                 auto len = std::distance(index_begin, index_end);
                 adjacency_buffer.reserve(start + len);

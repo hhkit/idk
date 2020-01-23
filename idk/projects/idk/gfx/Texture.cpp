@@ -6,7 +6,7 @@ namespace idk
 	{
 		return s_cast<float>(_size.x) / _size.y;
 	}
-	ivec2 Texture::Size() const
+	uivec2 Texture::Size() const
 	{
 		return _size;
 	}
@@ -23,7 +23,7 @@ namespace idk
 	{
 		return _internal_format >= TextureInternalFormat::DEPTH_FIRST && _internal_format <= TextureInternalFormat::DEPTH_LAST;
 	}
-	ivec2 Texture::Size(ivec2 newsize)
+	uivec2 Texture::Size(uivec2 newsize)
 	{
 		return _size = newsize;
 	}

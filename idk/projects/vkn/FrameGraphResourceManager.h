@@ -5,6 +5,8 @@
 #include <vkn/AttachmentDescription.h>
 #include <vkn/VknTexture.h>
 #include <vkn/IdGenerator.h>
+#include <vkn/VknTextureView.h>
+#include <vkn/TexturePool.h>
 namespace idk::vkn
 {
 	//All the necessary information to transition a resource to its target configuration
@@ -13,11 +15,13 @@ namespace idk::vkn
 
 	};
 
+
+
 	struct FrameGraphResourceManager
 	{
 		using rsc_index_t = size_t;
 		using actual_rsc_index_t = size_t;
-		using actual_resource_t = variant<unique_ptr<VknTexture>>;
+		using actual_resource_t = variant<VknTextureView>;
 
 		FrameGraphResourceManager();
 		FrameGraphResourceManager(const FrameGraphResourceManager&) = delete;
@@ -25,6 +29,7 @@ namespace idk::vkn
 		FrameGraphResourceManager& operator=(const FrameGraphResourceManager&) = delete;
 		FrameGraphResourceManager& operator=(FrameGraphResourceManager&&);
 		~FrameGraphResourceManager();
+
 
 		//Instantiates an actual resource using base's configuration and associate it with unique_id
 		void Instantiate(fgr_id unique_id, fgr_id base);
@@ -46,9 +51,9 @@ namespace idk::vkn
 		bool IsCompatible(fgr_id lhs, fgr_id rhs)const;
 
 		template<typename ActualResource>
-		unique_ptr<ActualResource>& Get(fgr_id rsc)
+		ActualResource& Get(fgr_id rsc)
 		{
-			return std::get<unique_ptr<ActualResource>>(GetVar(rsc));
+			return std::get<ActualResource>(GetVar(rsc));
 		}
 
 		actual_resource_t& GetVar(fgr_id rsc);
@@ -74,9 +79,7 @@ namespace idk::vkn
 		//new to old(second)
 		hash_table<fgr_id, fgr_id> renamed_resources;
 		hlp::IdGenerator<fgr_id> _fgr_generator;
-
-		struct Pimpl;
-		std::unique_ptr<Pimpl> _pimpl;
+		TexturePool pool;
 	};
 
 }

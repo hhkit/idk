@@ -30,7 +30,7 @@ namespace idk::vkn
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info);
 	
 	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, std::optional<TextureOptions> options,
-		string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+		string_view rgba32, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		LoadTexture(texture, pixel_format,options, rgba32.data(), rgba32.size(), size, allocator, load_fence, isRenderTarget);
 	}
@@ -100,9 +100,10 @@ namespace idk::vkn
 
 		auto ptr = &texture;
 		auto&& [image, alloc, aspect] = vkn::LoadTexture(allocator, load_fence, load_info,in_info);
-		ptr->Size(ivec2{load_info.width,load_info.height});
+		ptr->Size(uivec2{load_info.width,load_info.height});
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
+		ptr->usage = load_info.image_usage;
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
@@ -132,7 +133,7 @@ namespace idk::vkn
 		ptr->sampler = device.createSamplerUnique(sampler_info);
 
 	}
-	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, std::optional<TextureOptions> ooptions, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	void TextureLoader::LoadTexture(VknTexture& texture, TextureFormat pixel_format, std::optional<TextureOptions> ooptions, const char* rgba32, size_t len, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		TextureOptions options{};
 		if (ooptions)

@@ -46,6 +46,7 @@ namespace idk::vkn
 		while (i > 0 && !((d >> i)>=4))--i; //Decrease mipmap count
 		return i;
 	}
+#pragma optimize("",off)
 	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& bundle)
 	{
 		auto meta = bundle.FetchMeta<Texture>();
@@ -57,7 +58,7 @@ namespace idk::vkn
 		std::stringstream strm;
 		strm << file.rdbuf();
         DdsFile dds{ string{strm.str()} };
-		TextureOptions to;
+		TextureOptions to{};
 		if (meta)
 		{
 			auto load = meta->GetMeta<Texture>();

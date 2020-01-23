@@ -5,24 +5,11 @@
 
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanView.h>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
 	VulkanView& View();
-	struct FrameGraphResourceManager::Pimpl
-	{
-		hlp::MemoryAllocator allocator;
-		vk::UniqueFence uload_fence;
-		vk::Fence load_fence;
-		Pimpl() :uload_fence{ View().Device()->createFenceUnique(vk::FenceCreateInfo{}) },load_fence{*uload_fence}
-		{
-			
-		}
-	};
-
-	FrameGraphResourceManager::FrameGraphResourceManager():_pimpl{std::make_unique<Pimpl>()}
-	{
-
-	}
+	FrameGraphResourceManager::FrameGraphResourceManager() = default;
 	FrameGraphResourceManager::FrameGraphResourceManager(FrameGraphResourceManager&&)=default;
 	FrameGraphResourceManager& FrameGraphResourceManager::operator=(FrameGraphResourceManager&&)=default;
 	FrameGraphResourceManager::~FrameGraphResourceManager()=default;
@@ -135,6 +122,7 @@ namespace idk::vkn
 	void FrameGraphResourceManager::ResetIDs()
 	{
 		_fgr_generator.reset_ids();
+		pool.reset_allocations();
 	}
 
 	std::optional<fgr_id> FrameGraphResourceManager::GetPrevious(fgr_id curr) const
@@ -168,20 +156,18 @@ namespace idk::vkn
 	}
 	FrameGraphResourceManager::actual_resource_t FrameGraphResourceManager::InstantiateConcrete(TextureDescription desc,bool is_shader_sampled)
 	{
-		auto rsc_ptr = std::make_unique<VknTexture>();
+		FrameGraphResourceManager::actual_resource_t result{};
 
-		TexCreateInfo tci{};
-		tci.internal_format = desc.format;
-		tci.width = desc.size.x;
-		tci.height = desc.size.y;
-		tci.aspect = desc.aspect;
-		tci.layout = vk::ImageLayout::eUndefined;
-		tci.sampled(is_shader_sampled);
-		tci.mipmap_level = desc.mipmap_level;
-		tci.image_usage = desc.usage;
-		TextureLoader loader;
-		loader.LoadTexture(*rsc_ptr, _pimpl->allocator, _pimpl->load_fence, {}, tci, {});
-		return rsc_ptr;
+		if (!desc.actual_rsc)
+		{
+			desc.usage = mark_sampled(desc.usage, is_shader_sampled);
+			result = pool.allocate(desc);
+		}
+		else
+		{
+			result = **desc.actual_rsc;
+		}
+		return result;
 	}
 }
 

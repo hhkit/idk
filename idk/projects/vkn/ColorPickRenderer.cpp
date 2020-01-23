@@ -227,7 +227,7 @@ namespace idk::vkn
 			shared_gs.renderer_fragment_shaders[FragmentShaders::FPicking]
 		};
 		vector<uint32_t> id_buffer(total_num_insts,0);
-		ivec2 max_size{};
+		uivec2 max_size{};
 		size_t max_ro=0;
 		for (auto& request : requests)
 		{
@@ -417,7 +417,8 @@ namespace idk::vkn
 			auto& request = *req_itr;
 			auto& data = request.data;
 			task.GenerateDS(rs.dpools, (++i)==render_tasks.size());
-			auto vp_offset = ivec2{}, vp_size = data.camera.render_target->Size();
+			auto vp_offset = ivec2{};
+			auto vp_size = data.camera.render_target->Size();
 			auto rect = hlp::ToRect2D(vp_offset, vp_size);
 			vk::RenderPassBeginInfo rpbi
 			{
@@ -486,7 +487,7 @@ namespace idk::vkn
 			ivec2 point = ivec2{ data.point * vec2{ vp_size } };
 			vk::BufferImageCopy copy
 			{
-				offset,0,0,layers,vk::Offset3D{point.x,(vp_size.y-1)-point.y,0},vk::Extent3D{1,1,1}
+				offset,0,0,layers,vk::Offset3D{point.x,static_cast<int32_t>(vp_size.y)-1-point.y,0},vk::Extent3D{1,1,1}
 			};
 			cmd_buffer.endRenderPass();
 			hlp::TransitionImageLayout(cmd_buffer, {}, tex.Image(), tex.format, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);

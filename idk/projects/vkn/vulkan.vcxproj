@@ -352,6 +352,7 @@
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
     <ClInclude Include="RenderContext.h" />
+    <ClInclude Include="RenderPassCreateInfoBundle.h" />
     <ClInclude Include="RenderPassInfo.h" />
     <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderPassObj.h" />
@@ -360,6 +361,7 @@
     <ClInclude Include="RenderUtil.h" />
     <ClInclude Include="ResourceLifetimeManager.h" />
     <ClInclude Include="SpinLock.h" />
+    <ClInclude Include="TexturePool.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="topological_sort.h" />
     <ClInclude Include="utils\Flags.h" />
@@ -378,6 +380,7 @@
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
+    <ClInclude Include="VknTextureView.h" />
     <ClInclude Include="VulkanFontAtlasFactory.h" />
     <ClInclude Include="VknFontAtlasLoader.h" />
     <ClInclude Include="VknFrameBuffer.h" />
@@ -452,8 +455,10 @@
     <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="ResourceLifetimeManager.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
+    <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="topological_sort.cpp" />
+    <ClCompile Include="VknTextureView.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />

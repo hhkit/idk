@@ -69,4 +69,7 @@ namespace idk::vkn
 		std::unique_ptr<pimpl> impl_;
 		VulkanState* vulkan_;
 	};
+
+	//Convenience function
+	VulkanView& View();
 }
