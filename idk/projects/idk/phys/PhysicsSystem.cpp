@@ -49,13 +49,14 @@ namespace idk
 			octree_cleared = false;
 		}
 		vector<Handle<Collider>> dynamic_info;
-
+		size_t num_colliders = 0;
 		for (auto& elem : colliders)
 		{
 			elem._active_cache = elem.is_enabled_and_active();
 			if (!elem._active_cache || elem.GetHandle().scene == Scene::prefab)
 				continue;
-
+			++num_colliders;
+			
 			elem.find_rigidbody();
 
 			auto collider_handle = elem.GetHandle();
@@ -90,7 +91,7 @@ namespace idk
 				
 			}
 		}
-		LOG_TO(LogPool::PHYS, "Octree Count: %d, Collider Count: %d", _collider_octree.object_count, colliders.size());
+		LOG_TO(LogPool::PHYS, "Octree Count: %d, Collider Count: %d", _collider_octree.object_count, num_colliders);
 #else
 		vector<ColliderInfo> static_info;
 		vector<ColliderInfo> dynamic_info;
