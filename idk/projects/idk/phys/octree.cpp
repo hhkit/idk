@@ -147,12 +147,13 @@ namespace idk
 		if (!node)
 			return;
 
-		auto res = node->object_list.find(object);
-		if (res != node->object_list.end())
+		auto res = node->object_set.find(object);
+		if (res != node->object_set.end())
 		{
 			object->_octree_node.reset();
-			node->object_list.erase(res);
-			object_count = object_count ?  object_count - 1 : 0;
+			node->object_set.erase(res);
+
+			_objects.erase(_objects.find(object));			
 		}
 	}
 
@@ -161,15 +162,15 @@ namespace idk
 		if (_root)
 		{
 			// Remove all references to this node from all the objects
-			for (auto& obj : _root->object_list)
-				obj.second.collider->_octree_node.reset();
+			for (auto& obj : _root->object_set)
+				obj->_octree_node.reset();
 
-			_root->object_list.clear();
+			_root->object_set.clear();
 			for (auto& oct : _root->children)
 			{
 				erase_all(oct);
 			}
-			object_count = 0;
+			_objects.clear();
 		}
 	}
 
@@ -181,7 +182,7 @@ namespace idk
 	vector<collider_info> octree::get_info_by_copy(shared_ptr<octree_node> node)
 	{
 		vector<collider_info> info;
-		info.reserve(object_count);
+		info.reserve(_objects.size());
 		get_info_copy(_root, info);
 		return info;
 	}
@@ -189,25 +190,26 @@ namespace idk
 	vector<collider_info*> octree::get_info_by_ptr(shared_ptr<octree_node> node)
 	{
 		vector<collider_info*> info;
-		info.reserve(object_count);
+		info.reserve(_objects.size());
 		get_info_ptr(node, info);
 		return info;
 	}
 
-	collider_info* octree::search_tree(Handle<Collider> object, shared_ptr<octree_node> node)
+	collider_info* octree::find_subtree(Handle<Collider> object, shared_ptr<octree_node> node)
 	{
 		collider_info* ret_val = nullptr;
 		if (node)
 		{
-			auto res = node->object_list.find(object);
-			if(res != node->object_list.end())
-				ret_val = &res->second;
+			if (node->exists(object))
+			{
+				return &_objects[object];
+			}
 			else
 			{
 				// Search subtree and break when a match is found
 				for (auto& child : node->children)
 				{
-					ret_val = search_tree(object, child);
+					ret_val = find_subtree(object, child);
 					if (ret_val)
 						break;
 				}
@@ -217,12 +219,30 @@ namespace idk
 		return ret_val;
 	}
 
+	collider_info* octree::find(Handle<Collider> key)
+	{
+		auto res = _objects.find(key);
+		if (res != _objects.end())
+			return &res->second;
+		return nullptr;
+	}
+
+	const collider_info* octree::find(Handle<Collider> key) const
+	{
+		auto res = _objects.find(key);
+		if (res != _objects.end())
+			return &res->second;
+		return nullptr;
+	}
+
 	void octree::get_info_ptr(shared_ptr<octree_node> node, vector<collider_info*>& info)
 	{
 		if (node)
 		{
-			for (auto& obj : node->object_list)
-				info.emplace_back(&obj.second);
+			for (auto& obj : node->object_set)
+			{
+				info.emplace_back(&_objects[obj]);
+			}
 
 			for (auto& child : node->children)
 				get_info_ptr(child, info);
@@ -234,8 +254,8 @@ namespace idk
 	{
 		if (node)
 		{
-			for (auto& obj : node->object_list)
-				info.emplace_back(obj.second);
+			for (auto& obj : node->object_set)
+				info.emplace_back(_objects[obj]);
 
 			for (auto& child : node->children)
 				get_info_copy(child, info);
@@ -247,11 +267,11 @@ namespace idk
 	{
 		
 		// Simply put the object in the list if the current node has not hit the threshold for splitting
-		if (node->object_list.size() + 1 <= split_threshold)
+		if (node->object_set.size() + 1 <= split_threshold)
 		{
 			data.collider->_octree_node = node;
-			node->object_list.emplace(data.collider, data);
-			++object_count;
+			node->object_set.emplace(data.collider);
+			_objects.emplace(data.collider, data);
 			return;
 		}
 
@@ -300,8 +320,8 @@ namespace idk
 		else
 		{
 			data.collider->_octree_node = node;
-			node->object_list.emplace(data.collider, data);
-			++object_count;
+			node->object_set.emplace(data.collider);
+			_objects.emplace(data.collider, data);
 		}
 	}
 
@@ -310,10 +330,10 @@ namespace idk
 		if (node)
 		{
 			// Remove all references to this node from all the objects
-			for (auto& obj : node->object_list)
-				obj.second.collider->_octree_node.reset();
+			for (auto& obj : node->object_set)
+				obj->_octree_node.reset();
 
-			node->object_list.clear();
+			node->object_set.clear();
 			for (auto& oct : node->children)
 			{
 				erase_all(oct);
@@ -326,10 +346,10 @@ namespace idk
 		if (node)
 		{
 			// Remove all references to this node from all the objects
-			for (auto& obj : node->object_list)
-				obj.second.collider->_octree_node.reset();
+			for (auto& obj : node->object_set)
+				obj->_octree_node.reset();
 
-			node->object_list.clear();
+			node->object_set.clear();
 
 			for (auto& oct : node->children)
 			{

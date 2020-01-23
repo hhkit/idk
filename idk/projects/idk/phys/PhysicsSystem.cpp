@@ -49,9 +49,9 @@ namespace idk
 			octree_cleared = false;
 		}
 
-		vector<collider_info*> static_info;
+		vector<Handle<Collider>> static_info;
 		static_info.reserve(colliders.size() - rbs.size());
-		vector<collider_info*> dynamic_info;
+		vector<Handle<Collider>> dynamic_info;
 		dynamic_info.reserve(rbs.size());
 
 		for (auto& elem : colliders)
@@ -63,11 +63,11 @@ namespace idk
 			elem.find_rigidbody();
 
 			auto collider_handle = elem.GetHandle();
-			auto res = elem._octree_node->object_list.find(collider_handle);
+			auto col_info = _collider_octree.find(collider_handle);
 
-			if (res != elem._octree_node->object_list.end())
+			if (col_info)
 			{
-				res->second.layer = elem.GetGameObject()->Layer();
+				col_info->layer = elem.GetGameObject()->Layer();
 
 				// Update all static objects in the octree
 				if (elem._static_cache)
@@ -81,21 +81,16 @@ namespace idk
 						}, elem.shape);
 
 					info.collider = collider_handle;
-					res->second.bound = info.bound;
-					res->second.predicted_shape = info.predicted_shape;
+					col_info->bound = info.bound;
+					col_info->predicted_shape = info.predicted_shape;
 
+					static_info.emplace_back(collider_handle);
 					// NOTE: res potentially null after this due to the object being moved
 					UpdateOctree(info, elem._octree_node);
-
-					static_info.emplace_back(&elem._octree_node->object_list.find(collider_handle)->second);
 				}
 				else
 				{
-					if (!res->second.collider)
-					{
-						LOG_TO(LogPool::PHYS, "JHHA");
-					}
-					dynamic_info.emplace_back(&res->second);
+					dynamic_info.emplace_back(collider_handle);
 				}
 				
 			}
@@ -230,15 +225,19 @@ namespace idk
 			// Update all dynamic colliders in the octree
 			for (auto& info : dynamic_info)
 			{
-				collider_info new_info = *info;
+				auto res = _collider_octree.find(info);
+				if (res)
+				{
+					collider_info new_info = *res;
 
-				new_info.predicted_shape = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape)->CollidableShapes { return shape * pred_tfm; }, new_info.collider->shape);
-				new_info.bound = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, new_info.collider->shape);
-				const auto& vel = new_info.collider->_rigidbody->velocity();
-				new_info.bound.grow(vel);
-				new_info.bound.grow(-vel);
+					new_info.predicted_shape = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape)->CollidableShapes { return shape * pred_tfm; }, new_info.collider->shape);
+					new_info.bound = std::visit([&pred_tfm = new_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, new_info.collider->shape);
+					const auto& vel = new_info.collider->_rigidbody->velocity();
+					new_info.bound.grow(vel);
+					new_info.bound.grow(-vel);
 
-				UpdateOctree(new_info, info->collider->get_octree_node());
+					UpdateOctree(new_info, res->collider->get_octree_node());
+				}
 			}
 		};
 
@@ -260,13 +259,14 @@ namespace idk
 			auto static_end = static_info.end();
 			auto dynamic_end = dynamic_info.end();
 
+			// dynamic vs dynamic
 			for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
 			{
-				const auto i_info = *i;
+				const auto i_info = _collider_octree.find(*i);
 				auto i_node = i_info->collider->get_octree_node();
 				for (auto j = i + 1; j != dynamic_end; ++j)
 				{
-					auto j_info = *j;
+					auto j_info = _collider_octree.find(*j);
 					auto j_node = j_info->collider->get_octree_node();
 
 					const auto& lrigidbody = i_info->collider->_rigidbody;
@@ -284,22 +284,23 @@ namespace idk
 					if (i_node == j_node)
 						info.emplace_back(ColliderInfoPair{ i_info, j_info });
 					// i_node higher in the tree: find j's collider in i's tree
-					else if(i_node->depth < j_node->depth && _collider_octree.search_tree(j_info->collider, i_node))
+					else if(i_node->depth < j_node->depth && _collider_octree.find_subtree(j_info->collider, i_node))
 						info.emplace_back(ColliderInfoPair{ i_info, j_info });
 					// j_node higher in the tree: find i's collider in j's tree
-					else if(_collider_octree.search_tree(i_info->collider, j_node))
+					else if(_collider_octree.find_subtree(i_info->collider, j_node))
 						info.emplace_back(ColliderInfoPair{ i_info, j_info });
 					
 				}
 			}
 
+			// dynamic vs static
 			for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
 			{
-				const auto i_info = *i;
+				const auto i_info = _collider_octree.find(*i);
 				auto i_node = i_info->collider->get_octree_node();
 				for (auto j = static_info.begin(); j != static_end; ++j)
 				{
-					auto j_info = *j;
+					auto j_info = _collider_octree.find(*j);
 					auto j_node = j_info->collider->get_octree_node();
 
 					const auto& lrigidbody = i_info->collider->_rigidbody;
@@ -314,10 +315,10 @@ namespace idk
 					if (i_node == j_node)
 						info.emplace_back(ColliderInfoPair{ i_info, j_info });
 					// i_node higher in the tree: find j's collider in i's tree
-					else if (i_node->depth < j_node->depth && _collider_octree.search_tree(j_info->collider, i_node))
+					else if (i_node->depth < j_node->depth && _collider_octree.find_subtree(j_info->collider, i_node))
 						info.emplace_back(ColliderInfoPair{ i_info, j_info });
 					// j_node higher in the tree: find i's collider in j's tree
-					else if (_collider_octree.search_tree(i_info->collider, j_node))
+					else if (_collider_octree.find_subtree(i_info->collider, j_node))
 						info.emplace_back(ColliderInfoPair{ i_info, j_info });
 
 				}
@@ -519,7 +520,7 @@ namespace idk
 		{
             for (const auto& elem : dynamic_info)
             {
-                auto& rigidbody = *elem->collider->_rigidbody;
+                auto& rigidbody = *elem->_rigidbody;
                 if (!rigidbody.is_kinematic)
                     rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
                 else
@@ -924,26 +925,29 @@ namespace idk
 
 	void PhysicsSystem::UpdateOctree(collider_info& col, shared_ptr<octree_node> node)
 	{
-		auto info = node->object_list.find(col.collider);
-		info->second = col;
+		auto info = _collider_octree.find_subtree(col.collider, node);
+		if (info)
+		{
+			*info = col;
 
-		if (!node->bound.contains(col.bound))
-		{
-			_collider_octree.erase_from(col.collider, node);
-			_collider_octree.insert(col);
-		}
-		// try to descend the tree (not straddling anymore
-		else
-		{
-			
-			_collider_octree.descend(node, col);
+			if (!node->bound.contains(col.bound))
+			{
+				_collider_octree.erase_from(col.collider, node);
+				_collider_octree.insert(col);
+			}
+			// try to descend the tree (not straddling anymore
+			else
+			{
+
+				_collider_octree.descend(node, col);
+			}
 		}
 	}
 
 	vector<PhysicsSystem::ColliderInfoPair> PhysicsSystem::PairColliders()
 	{
 		vector<ColliderInfoPair> info;
-		info.reserve(_collider_octree.object_count * 2);
+		info.reserve(_collider_octree.size() * 2);
 		PairColliders(_collider_octree._root, info);
 		return info;
 	}
@@ -953,7 +957,7 @@ namespace idk
 		if (node)
 		{
 			auto all_info = _collider_octree.get_info_by_ptr(node);
-			auto node_obj_count = node->object_list.size();
+			auto node_obj_count = node->size();
 
 			auto end_it = all_info.end();
 			for (size_t i = 0; i < node_obj_count; ++i)

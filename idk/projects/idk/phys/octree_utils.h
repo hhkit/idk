@@ -39,13 +39,15 @@ namespace idk
 	struct octree_node
 	{
 		aabb bound;
-		
 		// objects
-		hash_table<Handle<Collider>, collider_info> object_list;
+		hash_set<Handle<Collider>> object_set;
 		// octants
 		shared_ptr<octree_node> children[8]{ nullptr };
-
 		size_t depth{ 0 };
+
+		bool exists(Handle<Collider> obj) const { return object_set.find(obj) != object_set.end(); }
+		bool contains(const collider_info& col_info) const { return bound.contains(col_info.bound); }
+		size_t size() const { return object_set.size(); }
 	};
 
 	struct octree_octants

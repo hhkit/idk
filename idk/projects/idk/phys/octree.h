@@ -21,10 +21,11 @@ namespace idk
 		bool is_in_subtree(shared_ptr<octree_node> node, Handle<Collider> object);
 		vector<collider_info> get_info_by_copy(shared_ptr<octree_node> node);
 		vector<collider_info*> get_info_by_ptr(shared_ptr<octree_node> node);
-		collider_info* search_tree(Handle<Collider> object, shared_ptr<octree_node> node);
 
-		// Rebuilds the octree with this object inserted
-		// void rebuild(float offset = 2.0f, octree_obj obj = octree_obj{});
+		collider_info* find(Handle<Collider> key);
+		const collider_info* find(Handle<Collider> key) const;
+		collider_info* find_subtree(Handle<Collider> object, shared_ptr<octree_node> node);
+		size_t size() const { return _objects.size(); }
 		
 		void rebuild();
 		void rebuild(vec3 center, float width, unsigned depth, float offset = 2.0f);
@@ -38,8 +39,9 @@ namespace idk
 		
 		void clear();
 	private:
-		
-		size_t object_count = 0;
+		hash_table<Handle<Collider>, collider_info> _objects;
+		// vector<collider_info> _objects;
+		size_t _min_bound = 0;
 		shared_ptr<octree_node> _root{};
 		friend PhysicsSystem;
 
