@@ -42,10 +42,10 @@ namespace idk
 		
 		auto connected_this_frame = client.IsConnected();
 		if (connected_this_frame && !connected_last_frame)
-			OnClientConnected.Fire();
+			OnConnectionToServer.Fire();
 
 		if (!connected_this_frame && connected_last_frame)
-			OnClientDisconnected.Fire();
+			OnDisconnectionFromServer.Fire();
 
 		if (connected_this_frame)
 			ProcessMessages();
@@ -55,6 +55,11 @@ namespace idk
 	void Client::SendPackets()
 	{
 		client.SendPackets();
+	}
+
+	yojimbo::Message* Client::CreateMessage(int id)
+	{
+		return client.CreateMessage(id);
 	}
 
 	void Client::SendMessage(yojimbo::Message* message, bool guarantee_delivery)

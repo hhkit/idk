@@ -386,7 +386,6 @@
     <ClCompile Include="network\Address.cpp" />
     <ClCompile Include="network\Client.cpp" />
     <ClCompile Include="network\ClientConnectionManager.cpp" />
-    <ClCompile Include="network\ConnectionManager.cpp" />
     <ClCompile Include="network\EventManager.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />

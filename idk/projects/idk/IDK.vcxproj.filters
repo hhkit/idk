@@ -963,9 +963,6 @@
     <ClInclude Include="network\Player.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="network\ConnectionManager.h">
-      <Filter>network</Filter>
-    </ClInclude>
     <ClInclude Include="network\Address.h">
       <Filter>network\data</Filter>
     </ClInclude>
@@ -1067,6 +1064,9 @@
     </ClInclude>
     <ClInclude Include="network\IncludeMessages.h">
       <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ConnectionManager.h">
+      <Filter>network\managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1538,9 +1538,6 @@
     </ClCompile>
     <ClCompile Include="test\TestComponent.cpp">
       <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="network\ConnectionManager.cpp">
-      <Filter>network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

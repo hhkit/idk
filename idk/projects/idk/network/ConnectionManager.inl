@@ -6,14 +6,13 @@
 namespace idk
 {
 	template<typename T>
-	inline T* ConnectionManager::GetServerManager(size_t index)
+	inline void ConnectionManager::SendMessage(T* message, bool guarantee_delivery)
 	{
-		auto& man = server_connection_manager[index];
-		return man ? man->GetManager<T>() : nullptr;
+		SendMessage((yojimbo::Message*) message, guarantee_delivery);
 	}
-	template<typename T>
-	inline T* ConnectionManager::GetClientManager()
+	template<typename Manager>
+	inline Manager* ConnectionManager::GetManager()
 	{
-		return client_connection_manager ? client_connection_manager->GetManager<T>() : nullptr;
+		return static_cast<Manager*>(GetManager(index_in_tuple_v<Manager, SubstreamTypes>));
 	}
 }

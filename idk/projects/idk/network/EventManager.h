@@ -13,7 +13,6 @@ namespace idk
 		void SendTestMessage(int i);
 		void SendInstantiatePrefabEvent();
 	private:
-		ServerConnectionManager* server{};
-		ClientConnectionManager* client{};
+		ConnectionManager* connection_manager = nullptr;
 	};
 }

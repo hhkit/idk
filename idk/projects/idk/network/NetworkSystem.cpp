@@ -15,19 +15,48 @@ namespace idk
 	{
 		ResetNetwork();
 		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
-		OnServerCreate.Fire();
+		lobby->OnClientConnect += [this](int clientid)
+		{
+			server_connection_manager[clientid] = std::make_unique<ServerConnectionManager>(clientid, *lobby);
+		};
+		lobby->OnClientDisconnect += [this](int clientid)
+		{
+			server_connection_manager[clientid].reset();
+		};
 	}
 
 	void NetworkSystem::ConnectToServer(const Address& d)
 	{
 		ResetNetwork();
 		client = std::make_unique<Client>(Address{ d.a,d.b,d.c,d.d, server_listen_port });
-		OnClientCreate.Fire();
+		client->OnConnectionToServer += [this]()
+		{
+			client_connection_manager = std::make_unique<ClientConnectionManager>(*client);
+		};
+		client->OnDisconnectionFromServer += [this]()
+		{
+			client_connection_manager.reset();
+		};
 	}
 
 	bool NetworkSystem::IsHost()
 	{
 		return static_cast<bool>(lobby);
+	}
+
+	ConnectionManager& NetworkSystem::GetConnectionManager(size_t token)
+	{
+		if (token == GameConfiguration::MAX_CLIENTS)
+		{
+			if (client_connection_manager)
+				return *client_connection_manager;
+			for (auto& elem : server_connection_manager)
+				if (elem)
+					return *elem;
+
+			throw;
+		}
+		return *server_connection_manager[token];
 	}
 
 	void NetworkSystem::ReceivePackets()
@@ -66,13 +95,10 @@ namespace idk
 	}
 	void NetworkSystem::ResetNetwork()
 	{
-		if (lobby)
-		{
-			lobby.reset();
-		}
-		if (client)
-		{
-			client.reset();
-		}
+		lobby.reset();
+		for (auto& elem : server_connection_manager)
+			elem.reset();
+		client.reset();
+		client_connection_manager.reset();
 	}
 }

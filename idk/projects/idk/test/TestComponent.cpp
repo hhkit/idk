@@ -23,7 +23,7 @@ namespace idk
 		if (app_sys.GetKeyDown(Key::T))
 		{
 			static int i = 0;
-			Core::GetSystem<ConnectionManager>().GetClientManager<EventManager>()->SendTestMessage(i);
+			network_sys.GetConnectionManager().GetManager<EventManager>()->SendTestMessage(i);
 			LOG("Sending test message %d", i);
 			++i;
 		}

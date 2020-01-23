@@ -16,24 +16,4 @@ namespace idk
 			}
 		);
 	}
-	template<typename T>
-	inline T* ServerConnectionManager::CreateMessage()
-	{
-		return server.CreateMessage<T>(clientID);
-	}
-	template<typename T>
-	inline void ServerConnectionManager::SendMessage(T* message, bool guarantee_delivery)
-	{
-		server.SendMessage(clientID, message, guarantee_delivery);
-	}
-	template<typename Manager>
-	inline Manager* ServerConnectionManager::GetManager()
-	{
-		for (auto& elem : substream_managers)
-		{
-			if (elem->GetManagerType() == index_in_tuple_v<Manager, SubstreamTypes>)
-				return elem.get();
-		}
-		return nullptr;
-	}
 }

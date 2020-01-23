@@ -28,7 +28,7 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
-		template<typename T> T* CreateMessage(int client) { return static_cast<T*>(server.CreateMessage(client, MessageID<T>)); }
+		yojimbo::Message* CreateMessage(int client, int type_id) { return server.CreateMessage(client, type_id); }
 		void SendMessage(int clientIndex, yojimbo::Message* message, bool guarantee_delivery = false);
 
 		// callbacks

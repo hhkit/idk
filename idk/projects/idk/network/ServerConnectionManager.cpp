@@ -27,6 +27,26 @@ namespace idk
 			server.OnMessageReceived[clientID][(int)type].Unlisten(slot);
 	}
 
+	yojimbo::Message* ServerConnectionManager::CreateMessage(size_t id)
+	{
+		return server.CreateMessage(clientID, static_cast<int>(id));
+	}
+
+	void ServerConnectionManager::SendMessage(yojimbo::Message* message, bool guarantee_delivery)
+	{
+		server.SendMessage(clientID, message, guarantee_delivery);
+	}
+
+	BaseSubstreamManager* ServerConnectionManager::GetManager(size_t substream_type_id)
+	{
+		for (auto& elem : substream_managers)
+		{
+			if (elem->GetManagerType() == substream_type_id)
+				return elem.get();
+		}
+		return nullptr;
+	}
+
 	void ServerConnectionManager::InstantiateSubmanagers()
 	{
 		AddSubstreamManager<EventManager>();
