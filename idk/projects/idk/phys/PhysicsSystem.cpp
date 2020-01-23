@@ -90,6 +90,7 @@ namespace idk
 				
 			}
 		}
+		LOG_TO(LogPool::PHYS, "Octree Count: %d, Collider Count: %d", _collider_octree.object_count, colliders.size());
 #else
 		vector<ColliderInfo> static_info;
 		vector<ColliderInfo> dynamic_info;
@@ -245,6 +246,7 @@ namespace idk
 			
 			
 			auto info = PairColliders();
+			LOG_TO(LogPool::PHYS, "Pairs Count: %d", info.size());
 			// For each node in octree
 				// For each item in node
 					// Pair with every other node in octree
