@@ -251,6 +251,7 @@ namespace idk
 		{
 			data.collider->_octree_node = node;
 			node->object_list.emplace(data.collider, data);
+			++object_count;
 			return;
 		}
 
