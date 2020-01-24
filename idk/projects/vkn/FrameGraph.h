@@ -180,12 +180,13 @@ namespace idk::vkn
 
 		//Execute the renderpasses.
 		//Use the dependency graph to split the appropriate jobs into separate threads and sync those.
+		//Will not call ProcessBatches
 		void Execute(Context_t context);
 
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
 		RenderPassCreateInfoBundle  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
-		VknFrameBuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
+		Framebuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 
 		void CreateRenderPasses();
 

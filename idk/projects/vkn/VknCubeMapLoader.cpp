@@ -196,6 +196,7 @@ namespace idk::vkn {
 		texture.Size(ptr->Size(uivec2{ load_info.width,load_info.height }));
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
+		ptr->Layers(6);
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views

@@ -372,7 +372,6 @@ namespace idk
 	}
 	CameraControls& IDE::currentCamera()
 	{
-		// TODO: insert return statement here
 		return _interface->Inputs()->main_camera;
 	}
 

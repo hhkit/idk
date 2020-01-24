@@ -15,7 +15,7 @@ namespace idk::vkn
 	{
 		EndRenderPass(context);
 	}
-
+	/*
 	void BaseRenderPass::PreCommandBuffer(vk::CommandBuffer )
 	{
 	}
@@ -23,17 +23,19 @@ namespace idk::vkn
 	void BaseRenderPass::PostCommandBuffer(vk::CommandBuffer )
 	{
 	}
-
-	void BaseRenderPass::BeginRenderPass(Context_t)
+	*/
+	void BaseRenderPass::BeginRenderPass(Context_t context)
 	{
+		context.SetRenderPass(this->render_pass);
 	}
 
 	void BaseRenderPass::EndRenderPass(Context_t)
 	{
 	}
 
-	void BaseRenderPass::BindFrameBuffer(Context_t)
+	void BaseRenderPass::BindFrameBuffer(Context_t context)
 	{
+		context.SetFrameBuffer(this->frame_buffer);
 	}
 
 }

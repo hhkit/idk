@@ -293,6 +293,9 @@
     <ClInclude Include="RenderPassCreateInfoBundle.h">
       <Filter>render\graph\util_objects</Filter>
     </ClInclude>
+    <ClInclude Include="RenderBundle.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -521,6 +524,7 @@
       <Filter>render\graph\util_objects</Filter>
     </ClCompile>
     <ClCompile Include="TexturePool.cpp" />
+    <ClCompile Include="RenderTask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

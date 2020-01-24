@@ -104,6 +104,7 @@ namespace idk::vkn
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->usage = load_info.image_usage;
+		ptr->Layers(load_info.layers);
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
@@ -391,7 +392,7 @@ namespace idk::vkn
 		imageInfo.extent.height = static_cast<uint32_t>(height);
 		imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
 		imageInfo.mipLevels = load_info.mipmap_level+1; //Currently no mipmapping
-		imageInfo.arrayLayers = 1;
+		imageInfo.arrayLayers = load_info.layers;
 		imageInfo.format = internal_format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;

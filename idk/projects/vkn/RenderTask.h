@@ -11,16 +11,20 @@
 #include <gfx/Texture.h>
 #include <vkn/RenderPassObj.h>
 #include <vkn/VknFrameBuffer.h>
+#include <vkn/VknTextureView.h>
 namespace idk::vkn
 {
 	using VknRenderPass = RenderPassObj;
 
 
+	struct UboManager;
+
+	struct RenderBundle;// holds the stuff required to actually draw/submit
 
 	enum LoadOp {};
 	enum StoreOp {};
 	enum IndexType {};
-	struct Framebuffer;
+	using Framebuffer = vk::Framebuffer;
 	struct VertexBuffer;
 	struct IndexBuffer;
 	class ShaderModule;
@@ -67,6 +71,9 @@ namespace idk::vkn
 #pragma endregion
 
 		void BindShader(const ShaderModule& shader);
+		void SetRenderPass(RenderPassObj render_pass);
+		void SetFrameBuffer(const Framebuffer& fb);
+		void BindInputAttachments();
 
 #pragma region Draw
 		void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance);
@@ -89,6 +96,12 @@ namespace idk::vkn
 		void SetStencilWrite(bool enabled);
 #pragma endregion 
 		const pipeline_config GetCurrentConfig()const noexcept;
+
+		
+		void SetInputAttachments(span<VknTextureView> input_attachments);
+
+		void ProcessBatches(RenderBundle& render_bundle);
+
 	private:
 
 
@@ -114,6 +127,8 @@ namespace idk::vkn
 		struct RenderBatch
 		{
 			pipeline_config pipeline;
+			RenderPassObj render_pass;
+			vk::Framebuffer frame_buffer;
 			Shaders shaders;
 			vector<DrawCall> draw_calls;
 		};
@@ -129,6 +144,9 @@ namespace idk::vkn
 		std::optional<vec4> clear;
 
 		pipeline_config curr_config;
+
+		RenderPassObj curr_rp;
+		vk::Framebuffer curr_frame_buffer;
 
 		vector<RenderBatch> batches;
 	};

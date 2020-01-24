@@ -25,7 +25,6 @@ namespace idk {
 
 	vkn::VknImageData& idk::vkn::VknImageData::operator=(VknImageData&& rhs)
 	{
-		// TODO: insert return statement here
 		std::swap(image, rhs.image);
 		std::swap(format, rhs.format);
 		std::swap(imageView, rhs.imageView);

@@ -104,7 +104,6 @@ namespace idk::ogl
 	}
 	OpenGLState& Win32GraphicsSystem::Instance()
 	{
-		// TODO: insert return statement here
 		return *_opengl;
 	}
 

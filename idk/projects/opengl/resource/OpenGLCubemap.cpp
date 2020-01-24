@@ -67,7 +67,6 @@ namespace idk::ogl
 
 	OpenGLCubemap& OpenGLCubemap::operator=(OpenGLCubemap&& rhs)
 	{
-		// TODO: insert return statement here
 		CubeMap::operator=(std::move(rhs));
 		std::swap(_id, rhs._id);
 		std::swap(texture, rhs.texture);

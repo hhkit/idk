@@ -27,7 +27,7 @@ namespace idk::vkn::gt
 
 		PassUtil(FullRenderData& rd) :render_data{rd} {}
 
-		FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {})
+		FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {})
 		{
 			return builder.write(builder.CreateTexture(TextureDescription
 				{
@@ -38,7 +38,8 @@ namespace idk::vkn::gt
 					//vk::ImageType type = vk::ImageType::e2D);
 					//uint32_t layer_count = 1);
 					//vk::ImageTiling tiling_format);
-					.actual_rsc = target
+					.usage = usage,
+					.actual_rsc = target,
 				}
 			));
 
@@ -58,7 +59,7 @@ namespace idk::vkn::gt
 			gbuffer_rscs[3] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm);
 			gbuffer_rscs[4] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat);
 			gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb);
-			depth_rsc = CreateGBuffer(builder, "GDepth", vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
+			depth_rsc = CreateGBuffer(builder, "GDepth", vk::Format::eD32Sfloat,vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
 			uint32_t index = 0;
 			for (auto& gbuffer_rsc : gbuffer_rscs)
 			{
@@ -183,7 +184,7 @@ namespace idk::vkn::gt
 
 		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_,RscHandle<VknRenderTarget> rt, FullRenderData& rd) :PassUtil{ rd } ,accum{accum_}
 		{
-			hdr_rsc = CreateGBuffer(builder, "HDR", vk::Format::eR8G8B8A8Srgb, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{rt->GetColorBuffer()});
+			hdr_rsc = CreateGBuffer(builder, "HDR", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{rt->GetColorBuffer()});
 			builder.set_output_attachment(hdr_rsc,0, AttachmentDescription
 				{
 					vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
@@ -243,7 +244,7 @@ namespace idk::vkn::gt
 		FrameGraphResource render_target;
 		CubeClearPass(FrameGraphBuilder& builder, FullRenderData& frd) : PassUtil{ frd }
 		{
-			auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageAspectFlagBits::eColor);
+			auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
 			render_target = color_att;
 			std::array<float, 4> clear_color{};
 			builder.set_output_attachment(color_att, 0,
@@ -272,8 +273,8 @@ namespace idk::vkn::gt
 	{
 		ClearCombine(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, FrameGraphResource clear_color_buffer, FrameGraphResource scene_color, FrameGraphResource scene_depth, FullRenderData& frd) : PassUtil{ frd }
 		{
-			auto color_att = CreateGBuffer(builder, "ClearCombine", vk::Format::eR8G8B8A8Srgb, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{rt->GetColorBuffer()});
-			auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
+			auto color_att = CreateGBuffer(builder, "ClearCombine", vk::Format::eR8G8B8A8Srgb,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{rt->GetColorBuffer()});
+			auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
 			builder.set_output_attachment(color_att, 0,
 				AttachmentDescription
 				{

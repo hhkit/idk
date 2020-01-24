@@ -351,6 +351,7 @@
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderBundle.h" />
     <ClInclude Include="RenderContext.h" />
     <ClInclude Include="RenderPassCreateInfoBundle.h" />
     <ClInclude Include="RenderPassInfo.h" />
@@ -452,6 +453,7 @@
     <ClCompile Include="RenderPassObj.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="RenderStateV2.cpp" />
+    <ClCompile Include="RenderTask.cpp" />
     <ClCompile Include="RenderUtil.cpp" />
     <ClCompile Include="ResourceLifetimeManager.cpp" />
     <ClCompile Include="ShaderModule.cpp" />

@@ -2,9 +2,17 @@
 #include "VknTexture.h"
 
 namespace idk::vkn {
-	vk::ImageAspectFlags VknTexture::ImageAspects()
+	vk::ImageAspectFlags VknTexture::ImageAspects()const
 	{
 		return img_aspect;
+	}
+	uint32_t& VknTexture::Layers(uint32_t layers) noexcept
+	{
+		return _layers = layers;
+	}
+	uint32_t VknTexture::Layers()const noexcept
+	{
+		return _layers;
 	}
 	VknTexture::~VknTexture()
 	{
@@ -27,7 +35,6 @@ namespace idk::vkn {
 
 	VknTexture& VknTexture::operator=(VknTexture&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		Texture::operator=(std::move(rhs));
 
 		std::swap(size, rhs.size);

@@ -62,6 +62,7 @@ namespace idk::vkn
 	void FrameGraph::CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm)
 	{
 		auto resource_templates = rlm.GetActualResources();
+		
 		for (auto& resource_template : resource_templates)
 		{
 			rm.Instantiate(resource_template.id, resource_template.base_rsc);
@@ -172,7 +173,7 @@ namespace idk::vkn
 		auto& nodes_buffer = nodes;
 		attachments.reserve(total_att);
 		auto& src_nodes = graph_builder.origin_nodes;
-		auto process_attachment = [&src_nodes, &nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref)
+		auto process_attachment = [&src_nodes, &nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref,vk::ImageLayout actual_layout)
 		{
 			auto find_input_layout = [](const FrameGraphNode& node, fgr_id id)
 			{
@@ -190,6 +191,7 @@ namespace idk::vkn
 				auto tex = rsc_manager.Get<VknTextureView>(attachment_info->first);
 				auto& [rsc_id, att_opt] = *attachment_info;
 				attachment_ref.attachment = static_cast<uint32_t>(attachments.size());
+				attachment_ref.layout = actual_layout;
 				auto prev_id = rsc_manager.GetPrevious(rsc_id);
 				
 				vk::ImageLayout prev_layout = att_opt.layout;
@@ -199,7 +201,7 @@ namespace idk::vkn
 					{
 						//vk::AttachmentDescriptionFlagBits::eMayAlias
 						{},
-						(att_opt.format) ? tex.Format() : (*att_opt.format),
+						(att_opt.format) ? (*att_opt.format) : tex.Format() ,
 						vk::SampleCountFlagBits::e1,
 						att_opt.load_op,
 						att_opt.store_op,
@@ -214,27 +216,27 @@ namespace idk::vkn
 				attachment_ref.attachment = VK_ATTACHMENT_UNUSED;
 			}
 		};
-		auto process_attachments = [&rsc_manager, &attachments, &process_attachment](auto& attachment_infos, auto& attachment_refs)
+		auto process_attachments = [&rsc_manager, &attachments, &process_attachment](auto& attachment_infos, auto& attachment_refs,vk::ImageLayout actual_layout)
 		{
 			auto ref_itr = attachment_refs.begin();
 			for (auto& input_rsc : attachment_infos)
 			{
 
-				process_attachment(input_rsc, *ref_itr);
+				process_attachment(input_rsc, *ref_itr, actual_layout);
 				++ref_itr;
 			}
 		};
 
 		{
-			process_attachments(input_rscs, attachment_input_refs);
+			process_attachments(input_rscs, attachment_input_refs,vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
 
 		{
-			process_attachments(output_rscs, attachment_output_refs);
+			process_attachments(output_rscs, attachment_output_refs,vk::ImageLayout::eColorAttachmentOptimal);
 		}
 		if (depth)
 		{
-			process_attachment(depth, depth_ref);
+			process_attachment(depth, depth_ref,vk::ImageLayout::eDepthStencilAttachmentOptimal);
 		}
 		vk::SubpassDescription subpass_desc{
 			vk::SubpassDescriptionFlags{},
@@ -266,9 +268,51 @@ namespace idk::vkn
 		auto info = CreateRenderPassInfo(input_rscs, output_rscs, depth);
 		return device.createRenderPassUnique(info);
 	}
-	VknFrameBuffer FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+	Framebuffer FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
-		return VknFrameBuffer();
+		vk::Device d = *View().Device();
+		auto& rsc_manager = GetResourceManager();
+		vector<vk::ImageView> targets;
+		uivec2 size{std::numeric_limits<uint32_t>::max()}; //TODO get an actual size
+		uint32_t num_layers = std::numeric_limits<uint32_t>::max();
+		for (auto& input_rsc : input_rscs)
+		{
+			if (input_rsc)
+			{
+				auto tex = rsc_manager.Get<VknTextureView>(input_rsc->first);
+				targets.emplace_back(tex.ImageView());
+				//Temp: getting min size
+				size = min(tex.Size(), size);
+				num_layers = min(tex.Layers(), num_layers);
+			}
+		}
+		for (auto& output_rsc : output_rscs)
+		{
+			if (output_rsc)
+			{
+				auto tex = rsc_manager.Get<VknTextureView>(output_rsc->first);
+				targets.emplace_back(tex.ImageView());
+				//Temp: getting min size
+				size = min(tex.Size(),size);
+				num_layers = min(tex.Layers(),num_layers);
+			}
+		}
+		if (depth)
+		{
+			auto tex = rsc_manager.Get<VknTextureView>(depth->first);
+			targets.emplace_back(tex.ImageView());
+			//Temp: getting min size
+			size = min(tex.Size(), size);
+			num_layers = min(tex.Layers(), num_layers);
+		}
+		//TODO shift this into a pool and use unique
+		return d.createFramebuffer(vk::FramebufferCreateInfo
+			{
+				{},*rp,
+				static_cast<uint32_t>(targets.size()),
+				std::data(targets),
+				size.x,size.y,num_layers
+			});
 	}
 	void FrameGraph::CreateRenderPasses()
 	{

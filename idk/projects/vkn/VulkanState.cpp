@@ -1399,7 +1399,6 @@ namespace idk::vkn
 
 	VulkanResourceManager& VulkanState::ResourceManager()
 	{
-		// TODO: insert return statement here
 		return rsc_manager;
 	}
 

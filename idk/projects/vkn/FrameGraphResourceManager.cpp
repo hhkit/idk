@@ -13,11 +13,10 @@ namespace idk::vkn
 	FrameGraphResourceManager::FrameGraphResourceManager(FrameGraphResourceManager&&)=default;
 	FrameGraphResourceManager& FrameGraphResourceManager::operator=(FrameGraphResourceManager&&)=default;
 	FrameGraphResourceManager::~FrameGraphResourceManager()=default;
-
+#pragma optimize("",off)
 	void FrameGraphResourceManager::Instantiate(fgr_id unique_id, fgr_id base)
 	{
-
-		auto index = concrete_resources.size();
+		concrete_resources.resize(std::max(unique_id+1, concrete_resources.size()));
 		//Create Resource at the back of concrete_resources
 		auto rsc_desc = GetResourceDescription(base);
 		if (!rsc_desc)
@@ -25,13 +24,13 @@ namespace idk::vkn
 			LOG_WARNING_TO(LogPool::GFX, "Attempting to instantiate a resource without a valid description! base: %ull",base);
 			return;
 		}
-		concrete_resources.emplace_back(InstantiateConcrete(*rsc_desc,true));
+		concrete_resources[unique_id]=InstantiateConcrete(*rsc_desc,true);
 		
-		resource_map[unique_id] = index;
+		resource_map[base] = unique_id;
 	}
-	void FrameGraphResourceManager::Alias(fgr_id unique_id, fgr_id id)
+	void FrameGraphResourceManager::Alias(fgr_id id, fgr_id unique_id)
 	{
-		resource_map[unique_id] = resource_map.find(id)->second;
+		resource_map[id] = unique_id;
 	}
 	TransitionInfo FrameGraphResourceManager::TransitionInfo(const FrameGraphResource& rsc)
 	{

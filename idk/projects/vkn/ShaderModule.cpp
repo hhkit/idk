@@ -386,7 +386,6 @@ ShaderModule::LayoutTable::const_iterator ShaderModule::LayoutsEnd() const
 const UboInfo& ShaderModule::GetLayout(const string& uniform_name) const
 {
 	auto itr = Current().ubo_info.find(uniform_name);
-	// TODO: insert return statement here
 	
 	return (itr!= Current().ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
 }

@@ -20,7 +20,6 @@ namespace idk::vkn
 		};
 		VulkanResourceManager& VulkanView::ResourceManager() const
 		{
-			// TODO: insert return statement here
 			return this->vulkan_->ResourceManager();
 		}
 		vk::DispatchLoaderDefault& VulkanView::Dispatcher() const { return vulkan().dispatcher; }

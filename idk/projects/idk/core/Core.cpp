@@ -176,12 +176,10 @@ namespace idk
 	}
 	SystemManager& Core::GetSystemManager()
 	{
-		// TODO: insert return statement here
 		return _pimpl->_system_manager;
 	}
 	const SystemManager& Core::GetSystemManager() const
 	{
-		// TODO: insert return statement here
 		return _pimpl->_system_manager;
 	}
 	void Core::Shutdown()

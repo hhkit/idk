@@ -1018,7 +1018,6 @@ namespace idk
 
 	GraphicsSystem::RenderBuffer& GraphicsSystem::GetWriteBuffer()
 	{
-		// TODO: insert return statement here
 		return object_buffer[curr_write_buffer];
 	}
 

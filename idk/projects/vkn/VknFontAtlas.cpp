@@ -25,7 +25,6 @@ namespace idk::vkn {
 	}
 	VknFontAtlas& VknFontAtlas::operator=(VknFontAtlas&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		FontAtlas::operator=(std::move(rhs));
 		std::swap(texture, rhs.texture);
 

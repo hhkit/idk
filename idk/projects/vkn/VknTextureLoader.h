@@ -53,6 +53,7 @@ namespace idk::vkn
 		vk::ImageAspectFlagBits aspect;
 		vk::ImageLayout layout = vk::ImageLayout::eGeneral;
 		bool read_after = false;//True if you intend to copy the memory back out for reading.
+		uint32_t layers = 1;
 		//True if you intend to sample with a shader
 		void sampled(bool will_sample)
 		{

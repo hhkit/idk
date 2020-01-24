@@ -30,7 +30,6 @@ namespace idk::vkn {
 
 	VknCubemap& VknCubemap::operator=(VknCubemap&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		CubeMap::operator=(std::move(rhs));
 		std::swap(texture, rhs.texture);
 		//std::swap(size, rhs.size);
