@@ -378,6 +378,8 @@
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
     <ClInclude Include="utils\VknUtil.h" />
+    <ClInclude Include="vector_span.h" />
+    <ClInclude Include="vector_span_builder.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />

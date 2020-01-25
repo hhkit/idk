@@ -12,6 +12,8 @@
 #include <vkn/RenderPassObj.h>
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VknTextureView.h>
+#include <ds/lazy_vector.h>
+#include <vkn/vector_span_builder.h>
 namespace idk::vkn
 {
 	using VknRenderPass = RenderPassObj;
@@ -29,7 +31,6 @@ namespace idk::vkn
 	struct IndexBuffer;
 	class ShaderModule;
 	using TextureID  = Guid;
-	using CullFaceFlags = Flags<CullFace>;
 
 	struct indexed_draw_info
 	{
@@ -66,8 +67,8 @@ namespace idk::vkn
 		void BindIndexBuffer(const IndexBuffer& buffer, size_t offset, IndexType indexType);
 
 #pragma region Uniforms
-		void BindUniform(string_view name,uint32_t index, string_view data);
-		void BindUniform(string_view name,uint32_t index, const Texture& texture);
+		void BindUniform(string_view name, uint32_t index, string_view data);
+		void BindUniform(string_view name, uint32_t index, const Texture& texture);
 #pragma endregion
 
 		void BindShader(const ShaderModule& shader);
@@ -76,26 +77,102 @@ namespace idk::vkn
 		void BindInputAttachments();
 
 #pragma region Draw
-		void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance);
-		void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_index, uint32_t first_instance);
+		void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance)
+		{
+			vertex_draw_info di{};
+			di.first_instance = first_instance;
+			di.num_instances = num_instances;
+			di.num_vertices= num_vertices;
+			di.first_vertex= first_vertex;
+			_current_draw_call.draw_info = di;
+			AddToBatch(_current_draw_call);
+		}
+		void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_index, uint32_t first_instance)
+		{
+			indexed_draw_info di{};
+			di.first_instance = first_instance;
+			di.num_instances = num_instances;
+			di.num_indices = num_indices;
+			di.first_index = first_index;
+			di.first_vertex = first_vertex;
+			_current_draw_call.draw_info = di;
+			AddToBatch(_current_draw_call);
+		}
 #pragma endregion
 
 #pragma region PipelineConfigurations
 		void Inherit(const pipeline_config& config);
+		void SetPipelineConfig(const pipeline_config& config)
+		{
+			_current_batch.pipeline = config;
+		}
 		//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
-		void SetClearColor(uint32_t attachment_index, std::optional<color> col);
-		void SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil);
-		void SetScissors(rect);
-		void SetViewport(rect);
-		void SetFillType(FillType);
-		void SetCullFace(CullFace);
-		void SetPrimitiveTopology(PrimitiveTopology);
-		void SetDepthTest(bool enabled);
-		void SetDepthWrite(bool enabled);
-		void SetStencilTest(bool enabled);
-		void SetStencilWrite(bool enabled);
+		//If col is nullopt, we clear all the colors from attachment_index onwards.
+		void SetClearColor(uint32_t attachment_index, std::optional<color> col)
+		{
+			if (col)
+				clear_colors[attachment_index] = *col;
+			else
+				clear_colors.resize(attachment_index);
+		}
+		void SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil = {})
+		{
+			clear_depths = depth;
+			clear_stencil = stencil;
+		}
+		void SetScissors(rect r)
+		{
+			StartNewBatch();
+			_rect_builder.start();
+			_rect_builder.emplace_back(r);
+			_current_batch.scissor =_rect_builder.end();
+		}
+		void SetViewport(rect r)
+		{
+			StartNewBatch();
+			_rect_builder.start();
+			_rect_builder.emplace_back(r);
+			_current_batch.viewport = _rect_builder.end();
+		}
+		void SetFillType(FillType type)
+		{
+			StartNewBatch();
+			_current_batch.pipeline.fill_type = type;
+		}
+		void SetCullFace(CullFaceFlags cf)
+		{
+			StartNewBatch();
+			_current_batch.pipeline.cull_face = cf;
+		}
+		void SetPrimitiveTopology(PrimitiveTopology pt)
+		{
+			StartNewBatch();
+			_current_batch.pipeline.prim_top= pt;
+		}
+		void SetDepthTest(bool enabled)
+		{
+			StartNewBatch();
+			_current_batch.pipeline.depth_test= enabled;
+		}
+		void SetDepthWrite(bool enabled){
+			StartNewBatch();
+			_current_batch.pipeline.depth_write = enabled;
+		}
+		void SetStencilTest(bool enabled)
+		{
+			StartNewBatch();
+			_current_batch.pipeline.stencil_test= enabled;
+		}
+		void SetStencilWrite(bool enabled)
+		{
+			StartNewBatch();
+			_current_batch.pipeline.stencil_write= enabled;
+		}
 #pragma endregion 
-		const pipeline_config GetCurrentConfig()const noexcept;
+		const pipeline_config GetCurrentConfig()const noexcept
+		{
+			return _current_batch.pipeline;
+		}
 
 		
 		void SetInputAttachments(span<VknTextureView> input_attachments);
@@ -103,7 +180,20 @@ namespace idk::vkn
 		void ProcessBatches(RenderBundle& render_bundle);
 
 	private:
-
+		struct DrawCall;
+		void AddToBatch(const DrawCall& draw_call)
+		{
+			if (_start_new_batch)
+			{
+				batches.emplace_back(_current_batch);
+			}
+			batches.back().draw_calls.emplace_back(draw_call);
+			_start_new_batch = false;
+		}
+		void StartNewBatch(bool start = true)noexcept
+		{
+			_start_new_batch = start;
+		}
 
 		struct UboData {};
 		struct TexData {};
@@ -127,6 +217,8 @@ namespace idk::vkn
 		struct RenderBatch
 		{
 			pipeline_config pipeline;
+			vector_span<rect> scissor, viewport;
+
 			RenderPassObj render_pass;
 			vk::Framebuffer frame_buffer;
 			Shaders shaders;
@@ -140,13 +232,26 @@ namespace idk::vkn
 		vector<TexData> uniform_textures;
 
 		vector<VertexBindingData> vertex_buffers;
-#pragma endregion 
-		std::optional<vec4> clear;
+#pragma endregion Initial Data
+#pragma region Clear Info
+		lazy_vector<color> clear_colors;
+		std::optional<float> clear_depths;
+		std::optional<uint8_t> clear_stencil;
+#pragma endregion Clear Info
 
+#pragma region Pipeline State
 		pipeline_config curr_config;
+		vector<rect> _rect_buffer;
+		vector_span_builder<rect> _rect_builder{ _rect_buffer };
+#pragma endregion
 
 		RenderPassObj curr_rp;
 		vk::Framebuffer curr_frame_buffer;
+
+		bool _start_new_batch = true;
+
+		RenderBatch _current_batch{};
+		DrawCall _current_draw_call{};
 
 		vector<RenderBatch> batches;
 	};

@@ -164,7 +164,7 @@ namespace idk::vkn
 		void ConfigureConfig()
 		{
 			config.fill_type = FillType::eFill;
-			config.cull_face = static_cast<uint32_t>(CullFace::eBack);
+			config.cull_face = CullFace::eBack;
 			config.depth_test = true;
 			config.depth_write = true;
 			config.prim_top = PrimitiveTopology::eTriangleList;

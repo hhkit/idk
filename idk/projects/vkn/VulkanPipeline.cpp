@@ -501,7 +501,7 @@ namespace idk::vkn
 			, VK_FALSE //depthClampEnable VK_FALSE discards fragments that are beyond the depth range, VK_TRUE clamps it instead.
 			, VK_FALSE //If rasterizerDiscardEnable is set to VK_TRUE, then geometry never passes through the rasterizer stage. This basically disables any output to the framebuffer.
 			, GetPolygonMode(config) //Any other mode requires enabling a GPU feature
-			, static_cast<vk::CullModeFlags>(config.cull_face)
+			, static_cast<vk::CullModeFlags>(static_cast<uint32_t>(config.cull_face))
 			, vk::FrontFace::eClockwise
 			, VK_FALSE
 			, 0.0f

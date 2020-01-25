@@ -29,7 +29,7 @@ namespace idk::vkn
 			config = { *pipline_conf }; //Attempt using default copy ctor to copy the external configs
 		else
 		{
-			config.cull_face = static_cast<uint32_t>(CullFace::eNone);
+			config.cull_face = CullFace::eNone;
 			config.depth_test = false;
 			config.depth_write = false;
 			config.render_pass_type = BasicRenderPasses::eRgbaColorOnly;

@@ -296,6 +296,12 @@
     <ClInclude Include="RenderBundle.h">
       <Filter>render\graph\util_objects</Filter>
     </ClInclude>
+    <ClInclude Include="vector_span.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_span_builder.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

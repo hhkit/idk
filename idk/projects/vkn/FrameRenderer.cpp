@@ -1385,7 +1385,7 @@ namespace idk::vkn
 			auto config = ConfigWithVP(skybox_render_config,camera,offset,size);
 			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
 			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
-			config.cull_face = s_cast<uint32_t>(CullFace::eNone);
+			config.cull_face = CullFace::eNone;
 			config.depth_test = false;
 			config.depth_write = false;
 			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;

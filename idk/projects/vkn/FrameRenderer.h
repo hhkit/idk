@@ -125,7 +125,7 @@ namespace idk::vkn
 		CanvasRenderer _canvas_renderer;
 
 		DeferredGBuffer _gbuffers[EGBufferType::size()];
-		ivec2 _gbuffer_size{};
+		uivec2 _gbuffer_size{};
 
 		struct PImpl;
 		shared_ptr<PImpl> _pimpl;
