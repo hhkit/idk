@@ -949,6 +949,14 @@
     <ClInclude Include="ds\index_span.h">
       <Filter>ds</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
+    <ClInclude Include="ds\lazy_vector.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\Flags.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

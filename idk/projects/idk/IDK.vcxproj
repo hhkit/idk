@@ -48,6 +48,7 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="ds\Flags.h" />
     <ClInclude Include="gfx\ColorPickRequest.h" />
     <ClInclude Include="gfx\ColorPickResult.h" />
     <ClInclude Include="common\Layer.h" />
@@ -82,6 +83,7 @@
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
     <ClInclude Include="ds\index_span.h" />
+    <ClInclude Include="ds\lazy_vector.h" />
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
