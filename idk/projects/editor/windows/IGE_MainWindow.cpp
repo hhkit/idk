@@ -425,7 +425,7 @@ namespace idk {
 				// for (auto& i : editor.ige_windows)
 				// 	if (i->window_name != "Game")
 				// 		i->is_open = false;
-				// editor.currentCamera().current_camera->enabled = false;
+				// editor._camera.current_camera->enabled = false;
 				HotReloadDLL();
 				Core::GetSystem<IDE>().FindWindow<IGE_InspectorWindow>()->Reset();
 				Core::GetScheduler().SetPauseState(UnpauseAll);

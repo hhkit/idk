@@ -4,9 +4,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
-    <ClInclude Include="EditorInputs.h">
-      <Filter>controls</Filter>
-    </ClInclude>
     <ClInclude Include="commands\CMD_AddComponent.h">
       <Filter>commands</Filter>
     </ClInclude>
@@ -136,15 +133,6 @@
     <ClInclude Include="commands\CMD_ModifyProperty.h">
       <Filter>commands</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGL_ImGui_Interface.h">
-      <Filter>graphicsAPI_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui_Interface.h">
-      <Filter>graphicsAPI_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Vulkan_ImGui_Interface.h">
-      <Filter>graphicsAPI_interface</Filter>
-    </ClInclude>
     <ClInclude Include="IconsFontAwesome5_c.h" />
     <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="widgets\IconCheckbox.h" />
@@ -160,13 +148,20 @@
     <ClInclude Include="commands\CMD_ParentGameObject.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="imgui_interface.h">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="opengl_imgui_interface.h">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraControls.h" />
+    <ClInclude Include="vulkan_imgui_interface.h">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="IDE.cpp" />
-    <ClCompile Include="EditorInputs.cpp">
-      <Filter>controls</Filter>
-    </ClCompile>
     <ClCompile Include="commands\CMD_AddComponent.cpp">
       <Filter>commands</Filter>
     </ClCompile>
@@ -277,15 +272,6 @@
     </ClCompile>
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
-    <ClCompile Include="OpenGL_ImGui_Interface.cpp">
-      <Filter>graphicsAPI_interface</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui_Interface.cpp">
-      <Filter>graphicsAPI_interface</Filter>
-    </ClCompile>
-    <ClCompile Include="Vulkan_ImGui_Interface.cpp">
-      <Filter>graphicsAPI_interface</Filter>
-    </ClCompile>
     <ClCompile Include="widgets\IconCheckbox.cpp" />
     <ClCompile Include="commands\CMD_CollateCommands.cpp">
       <Filter>commands</Filter>
@@ -300,6 +286,13 @@
       <Filter>commands</Filter>
     </ClCompile>
     <ClCompile Include="commands\CMD_ParentGameObject.cpp" />
+    <ClCompile Include="opengl_imgui_interface.cpp">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraControls.cpp" />
+    <ClCompile Include="vulkan_imgui_interface.cpp">
+      <Filter>graphicsAPI_interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

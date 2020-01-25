@@ -20,6 +20,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/ImGui_Interface.h>
 #include <editor/commands/CommandController.h>
 #include <editor/Registry.h>
+#include <editor/CameraControls.h>
 
 #undef FindWindow
 
@@ -61,7 +62,7 @@ namespace idk
 
 		RscHandle<Scene> curr_scene;
 		Registry reg_scene{ "/user/LastScene.yaml" };
-		
+
 		IDE();
 
 		void Init() override;
@@ -70,8 +71,6 @@ namespace idk
 		void Shutdown() override;
 		void EditorUpdate() override;
 		void EditorDraw() override;
-
-		CameraControls& currentCamera();
 
 		void ClearScene();
 		string_view GetTmpSceneMountPath() const;
@@ -84,24 +83,13 @@ namespace idk
         }
 
 		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
+		void ApplyDefaultStyle();
 		void ApplyDefaultColors();
-
+		void LoadEditorFonts();
 
 	private:
-		friend class IGE_MainWindow;
-		friend class IGE_SceneView;
-		friend class IGE_ProjectWindow;
-		friend class IGE_HierarchyWindow;
-		friend class IGE_InspectorWindow;
-		friend class IGE_AnimatorWindow;
-		friend class IGE_LightLister;
-		friend class CMD_DeleteGameObject;
-		friend class CMD_CreateGameObject;
-		friend class CMD_CollateCommands;
-		friend class CMD_SelectGameObject;
-		friend class CommandController;
-
-		unique_ptr<edt::I_Interface> _interface;
+		unique_ptr<imgui_interface> _interface;
+		CameraControls _camera;
 
 		// Editor Scene
 		bool game_running = false;
@@ -110,7 +98,7 @@ namespace idk
 		void SetupEditorScene();
 
 		//Editor Windows
-		unique_ptr<IGE_MainWindow>			ige_main_window		{};
+		unique_ptr<IGE_MainWindow>			ige_main_window		{ nullptr };
 		vector<unique_ptr<IGE_IWindow>>		ige_windows			{};
 		hash_table<size_t, IGE_IWindow*>	windows_by_type		{};
 
@@ -147,5 +135,20 @@ namespace idk
 		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
 		vector<vector<RecursiveObjects>> copied_gameobjects	{}; //A vector of data containing gameobject data.
 		reflect::dynamic				 copied_component	{};
+
+
+
+		friend class IGE_MainWindow;
+		friend class IGE_SceneView;
+		friend class IGE_ProjectWindow;
+		friend class IGE_HierarchyWindow;
+		friend class IGE_InspectorWindow;
+		friend class IGE_AnimatorWindow;
+		friend class IGE_LightLister;
+		friend class CMD_DeleteGameObject;
+		friend class CMD_CreateGameObject;
+		friend class CMD_CollateCommands;
+		friend class CMD_SelectGameObject;
+		friend class CommandController;
 	};
 }

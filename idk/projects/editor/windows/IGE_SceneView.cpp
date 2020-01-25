@@ -123,12 +123,12 @@ namespace idk {
 
         if (!is_window_displayed)
         {
-            Core::GetSystem<IDE>().currentCamera().current_camera->enabled = false;
+            Core::GetSystem<IDE>()._camera.current_camera->enabled = false;
             Core::GetSystem<GraphicsSystem>().enable_picking = false;
             return;
         }
         else
-            Core::GetSystem<IDE>().currentCamera().current_camera->enabled = true;
+            Core::GetSystem<IDE>()._camera.current_camera->enabled = true;
 
         if (ImGui::BeginMenuBar())
         {
@@ -162,7 +162,7 @@ namespace idk {
         {
 			//Draw where it is going to be created in at
 
-			Handle<Camera> cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+			Handle<Camera> cam = Core::GetSystem<IDE>()._camera.current_camera;
 			vec3 objectFinalPos{};
 
 			currRay = GenerateRayFromCurrentScreen();
@@ -236,7 +236,7 @@ namespace idk {
 			//	LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
 			//}
 			//Select gameobject here!
-			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 			Handle<Camera> currCamera = main_camera.current_camera;
 			last_pick = 
 			{
@@ -254,7 +254,7 @@ namespace idk {
 				//get the first obj
 				auto& editor = Core::GetSystem<IDE>();
 				Handle<GameObject> closestGameObject = obj.front();
-				auto cameraPos = editor.currentCamera().current_camera->currentPosition();
+				auto cameraPos = editor._camera.current_camera->currentPosition();
 				float distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
 				for (auto& iObject : obj) {
 					float comparingDistance = cameraPos.distance(iObject->GetComponent<Transform>()->position);
@@ -342,7 +342,7 @@ namespace idk {
 		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1) && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
-				Handle<Transform> tfm = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera->GetGameObject()->GetComponent<Transform>();
+				Handle<Transform> tfm = Core::GetSystem<IDE>()._camera.current_camera->GetGameObject()->GetComponent<Transform>();
 				distance_to_focused_vector = focused_vector.distance(tfm->position);
 				cachedMouseScreenPos = currMouseScreenPos;
 				ImGui::SetWindowFocus();
@@ -545,7 +545,7 @@ namespace idk {
 		const auto bottom_right = vec2(ImGui::GetWindowPos()) + vec2(ImGui::GetWindowContentRegionMax()) - vec2(32.0f, 32.0f);
 		const float axis_len = 24.0f;
 		IDE& editor = Core::GetSystem<IDE>();
-		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
+		CameraControls& main_camera = editor._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 		auto view = currCamera->ViewMatrix();
@@ -573,7 +573,7 @@ namespace idk {
 		IDE& editor = Core::GetSystem<IDE>();
 
 		int counter = 0;
-		auto cameraPos = editor.currentCamera().current_camera->currentPosition();
+		auto cameraPos = editor._camera.current_camera->currentPosition();
 		float distanceToCamera = refVector[counter]->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
 		for (int i = 0; i < refVector.size(); ++i) {
 			float comparingDistance = cameraPos.distance(refVector[i]->GetComponent<Transform>()->position);
@@ -605,7 +605,7 @@ namespace idk {
 
 
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
@@ -656,7 +656,7 @@ namespace idk {
 		
 		IDE& editor = Core::GetSystem<IDE>();
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 		vec3 localY =  tfm->Up()	* delta.y*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localy axis
@@ -674,7 +674,7 @@ namespace idk {
 	{
 		
 		auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
-		auto cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		auto cam = Core::GetSystem<IDE>()._camera;
 		auto tfm = cam.current_camera->GetGameObject()->Transform();
 		IDE& editor = Core::GetSystem<IDE>();
 		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
@@ -692,7 +692,7 @@ namespace idk {
 
 		//vec2 delta{ static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) , static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) };
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
@@ -711,7 +711,7 @@ namespace idk {
 		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) * orbit_strength; //Global Y Axis
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) * -orbit_strength; //Local X Axis
 		//Getting camera datas
-		Handle<Camera>		currCamera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+		Handle<Camera>		currCamera = Core::GetSystem<IDE>()._camera.current_camera;
 		Handle<Transform>	tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 		mat4				cam_matrix = tfm->GlobalMatrix();
 
@@ -734,7 +734,7 @@ namespace idk {
 	{
 		//Getting camera datas
 		IDE&				editor			 = Core::GetSystem<IDE>();
-		CameraControls&		main_camera		 = editor._interface->Inputs()->main_camera;
+		CameraControls&		main_camera		 = editor._camera;
 		Handle<Camera>		currCamera		 = main_camera.current_camera;
 		Handle<Transform>	tfm				 = currCamera->GetGameObject()->GetComponent<Transform>();
 		const auto			view_mtx		 = currCamera->ViewMatrix();
@@ -860,7 +860,7 @@ namespace idk {
 	{
 		//auto& app_sys = Core::GetSystem<Application>();
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		//Handle<Camera> currCamera = main_camera.current_camera;
 
 		return main_camera.WindowsPointToRay(GetMousePosInWindowNormalized());

@@ -426,7 +426,7 @@ namespace idk {
 				if (!handle) //Ignore handle zero
 					return true;
 				IDE& editor = Core::GetSystem<IDE>();
-				Handle<Camera>& editorCam = editor.currentCamera().current_camera;
+				Handle<Camera>& editorCam = editor._camera.current_camera;
 				if (handle == editorCam->GetGameObject())
 					return true;
 				++counter;

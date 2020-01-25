@@ -84,20 +84,12 @@ namespace idk
 		if (!fs::exists(tmp_path))
 			fs::create_directory(tmp_path);
 		Core::GetSystem<FileSystem>().Mount(tmp_path.string(), path_tmp, false);
-#ifdef HACKING_TO_THE_GATE
-		Core::GetSystem<ProjectManager>().LoadProject(string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/project/hydeandseek.idk");
-#else
         LoadRecentProject();
-#endif
-		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
-		{
-			selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
-		});
-		Core::GetResourceManager().RegisterLoader<ShaderSnippetLoader>(".glsl");
+
 		switch (Core::GetSystem<GraphicsSystem>().GetAPI())
 		{
 		case GraphicsAPI::OpenGL:
-			_interface = std::make_unique<edt::OI_Interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
+			_interface = std::make_unique<opengl_imgui_interface>(&Core::GetSystem<ogl::Win32GraphicsSystem>().Instance());
             Core::GetResourceManager().RegisterLoader<OpenGLCubeMapLoader>(".cbm");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".png");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".tga");
@@ -107,7 +99,7 @@ namespace idk
 			Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 			break;
 		case GraphicsAPI::Vulkan:
-			_interface = std::make_unique<edt::VI_Interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
+			_interface = std::make_unique<vulkan_imgui_interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
 
 			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".vert");
 			Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".frag");
@@ -119,13 +111,11 @@ namespace idk
 		default:
 			break;
 		}
-		//Core::GetResourceManager().RegisterLoader<AssimpImporter>(".fbx");
-        //Core::GetResourceManager().RegisterLoader<AssimpImporter>(".obj");
-        //Core::GetResourceManager().RegisterLoader<AssimpImporter>(".md5mesh");
+		Core::GetResourceManager().RegisterLoader<ShaderSnippetLoader>(".glsl");
         Core::GetResourceManager().RegisterLoader<GraphLoader>(shadergraph::Graph::ext);
 
 		Core::GetResourceManager().RegisterFactory<GraphFactory>();
-        Core::GetSystem<Application>().OnClosed.Listen([&]() { closing = true; });
+
 
         auto& fs = Core::GetSystem<FileSystem>();
         fs.Mount(string{ fs.GetExeDir() } + "/editor_data", "/editor_data", false);
@@ -140,51 +130,9 @@ namespace idk
         io.IniFilename = NULL;
         ImGui::LoadIniSettingsFromDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
 
-        //Imgui Style
-        auto& style = ImGui::GetStyle();
-        style.FramePadding = ImVec2(4.0f, 0);
-        style.ItemSpacing = ImVec2(6.0f, 3.0f);
-        style.ItemSpacing = ImVec2(6.0f, 3.0f);
-        style.WindowRounding = 0;
-        style.TabRounding = 0;
-        style.IndentSpacing = 14.0f;
-        style.ScrollbarRounding = 0;
-        style.GrabRounding = 0;
-        style.ChildRounding = 0;
-        style.PopupRounding = 0;
-        style.FrameRounding = 1.0f;
-        style.CurveTessellationTol = 0.5f;
-
+		ApplyDefaultStyle();
 		ApplyDefaultColors();
-
-        // font config
-        ImFontConfig config;
-        config.OversampleH = 5;
-        config.OversampleV = 3;
-        config.RasterizerMultiply = 1.5f;
-        auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
-        auto fontpathbold = fs.GetFullPath("/editor_data/fonts/SourceSansPro-SemiBold.ttf");
-        auto iconfontpath = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAR);
-        auto iconfontpath2 = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAS);
-        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 15.0f, &config); // Default
-
-        // merge in icons from MDI
-        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-        ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true; icons_config.GlyphMinAdvanceX = 14.0f; icons_config.GlyphOffset.y = 1.0f;
-        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
-        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
-
-        // smaller and bold style of default font
-        io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
-        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 12.0f, &icons_config, icons_ranges);
-        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 12.0f, &icons_config, icons_ranges);
-
-        io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
-        io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
-        io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
-
-        io.Fonts->Build();
-
+		LoadEditorFonts();
 
 		//Window Initializations
 		ige_main_window = std::make_unique<IGE_MainWindow>();
@@ -237,6 +185,13 @@ namespace idk
                 OpenScene(h.AsHandle<Scene>());
         };
 
+		Core::GetSystem<Application>().OnClosed.Listen([&]() { closing = true; });
+
+		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
+		{
+			selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
+		});
+
 	}
 
 	void IDE::LateInit()
@@ -265,7 +220,7 @@ namespace idk
                 auto cam = reg_scene.get("camera");
                 if (cam.size())
                 {
-                    auto& t = *currentCamera().current_camera->GetGameObject()->Transform();
+                    auto& t = *_camera.current_camera->GetGameObject()->Transform();
                     auto res = parse_text<Transform>(cam);
                     if (res)
                     {
@@ -283,7 +238,7 @@ namespace idk
 
     void IDE::EarlyShutdown()
     {
-        reg_scene.set("camera", serialize_text(*currentCamera().current_camera->GetGameObject()->Transform()));
+        reg_scene.set("camera", serialize_text(*_camera.current_camera->GetGameObject()->Transform()));
 
         ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
         Core::GetSystem<ProjectManager>().SaveConfigs();
@@ -370,11 +325,6 @@ namespace idk
 		// call imgui draw,
 		_interface->ImGuiFrameRender();
 	}
-	CameraControls& IDE::currentCamera()
-	{
-		// TODO: insert return statement here
-		return _interface->Inputs()->main_camera;
-	}
 
 	void IDE::ClearScene()
 	{
@@ -396,6 +346,23 @@ namespace idk
 	string_view IDE::GetTmpSceneMountPath() const
 	{
 		return "/tmp/tmp_scene.ids";
+	}
+
+	void IDE::ApplyDefaultStyle()
+	{
+		auto& style = ImGui::GetStyle();
+		style.FramePadding = ImVec2(4.0f, 0);
+		style.ItemSpacing = ImVec2(6.0f, 3.0f);
+		style.ItemSpacing = ImVec2(6.0f, 3.0f);
+		style.WindowRounding = 0;
+		style.TabRounding = 0;
+		style.IndentSpacing = 14.0f;
+		style.ScrollbarRounding = 0;
+		style.GrabRounding = 0;
+		style.ChildRounding = 0;
+		style.PopupRounding = 0;
+		style.FrameRounding = 1.0f;
+		style.CurveTessellationTol = 0.5f;
 	}
 
 	void IDE::ApplyDefaultColors()
@@ -466,6 +433,39 @@ namespace idk
 
 	}
 
+	void IDE::LoadEditorFonts()
+	{
+		auto& fs = Core::GetSystem<FileSystem>();
+		auto& io = ImGui::GetIO();
+
+		ImFontConfig config;
+		config.OversampleH = 5;
+		config.OversampleV = 3;
+		config.RasterizerMultiply = 1.5f;
+		auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
+		auto fontpathbold = fs.GetFullPath("/editor_data/fonts/SourceSansPro-SemiBold.ttf");
+		auto iconfontpath = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAR);
+		auto iconfontpath2 = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAS);
+		io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 15.0f, &config); // Default
+
+		// merge in icons from MDI
+		static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+		ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true; icons_config.GlyphMinAdvanceX = 14.0f; icons_config.GlyphOffset.y = 1.0f;
+		io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
+		io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
+
+		// smaller and bold style of default font
+		io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
+		io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 12.0f, &icons_config, icons_ranges);
+		io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 12.0f, &icons_config, icons_ranges);
+
+		io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
+		io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
+		io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
+
+		io.Fonts->Build();
+	}
+
 	void IDE::RefreshSelectedMatrix()
 	{
 		//Refresh the new matrix values
@@ -497,7 +497,7 @@ namespace idk
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
-			Core::GetSystem<IDE>().currentCamera().current_camera = camHandle;
+			_camera.current_camera = camHandle;
 		}
 	}
 
@@ -524,7 +524,7 @@ namespace idk
 			*/
 			const float distanceFromObject = 20; 
 
-			const CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			const CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 			const Handle<Camera> currCamera = main_camera.current_camera;
 			const Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
 			camTransform->position = finalCamPos;

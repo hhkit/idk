@@ -337,7 +337,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::GameObjectSetLayer", void, Handle<GameObject> go, int layer)
 		{
-			go->Layer(layer);
+			go->Layer(static_cast<decltype(idk::Layer::index)>(layer));
 		}
 		BIND_END();
 
@@ -1631,7 +1631,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::LayerMaskLayerToName", MonoString*, int index)
 		{
-			return mono_string_new(mono_domain_get(), Core::GetSystem<LayerManager>().LayerIndexToName(index).data());
+			return mono_string_new(mono_domain_get(), Core::GetSystem<LayerManager>().LayerIndexToName(static_cast<decltype(idk::Layer::index)>(index)).data());
 		}
 		BIND_END();
 

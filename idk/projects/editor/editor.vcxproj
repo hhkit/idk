@@ -276,6 +276,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CameraControls.h" />
     <ClInclude Include="commands\CMD_AddBehavior.h" />
     <ClInclude Include="commands\CMD_CollateCommands.h" />
     <ClInclude Include="commands\CMD_DeleteComponent.h" />
@@ -287,7 +288,6 @@
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
     <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="DragDropTypes.h" />
-    <ClInclude Include="EditorInputs.h" />
     <ClInclude Include="commands\CMD_AddComponent.h" />
     <ClInclude Include="commands\CMD_CreateGameObject.h" />
     <ClInclude Include="commands\CommandController.h" />
@@ -329,13 +329,14 @@
     <ClInclude Include="windows\IGE_WindowList.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IDE.h" />
-    <ClInclude Include="ImGui_Interface.h" />
-    <ClInclude Include="OpenGL_ImGui_Interface.h" />
+    <ClInclude Include="imgui_interface.h" />
+    <ClInclude Include="opengl_imgui_interface.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Vulkan_ImGui_Interface.h" />
+    <ClInclude Include="vulkan_imgui_interface.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CameraControls.cpp" />
     <ClCompile Include="commands\CMD_AddBehavior.cpp" />
     <ClCompile Include="commands\CMD_CollateCommands.cpp" />
     <ClCompile Include="commands\CMD_DeleteComponent.cpp" />
@@ -346,7 +347,6 @@
     <ClCompile Include="commands\CMD_SelectGameObject.cpp" />
     <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
     <ClCompile Include="DragDropTypes.cpp" />
-    <ClCompile Include="EditorInputs.cpp" />
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
@@ -384,8 +384,7 @@
     <ClCompile Include="windows\IGE_ProjectWindow.cpp" />
     <ClCompile Include="windows\IGE_SceneView.cpp" />
     <ClCompile Include="IDE.cpp" />
-    <ClCompile Include="ImGui_Interface.cpp" />
-    <ClCompile Include="OpenGL_ImGui_Interface.cpp" />
+    <ClCompile Include="opengl_imgui_interface.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">Create</PrecompiledHeader>
@@ -394,7 +393,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Deploy|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Vulkan_ImGui_Interface.cpp" />
+    <ClCompile Include="vulkan_imgui_interface.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

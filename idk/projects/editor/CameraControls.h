@@ -1,9 +1,11 @@
 #pragma once
 
-#include "phys/raycasts/collision_raycast.h"
+#include <phys/raycasts/collision_raycast.h>
 
-namespace idk {
-	class CameraControls {
+namespace idk
+{
+	class CameraControls 
+	{
 	public:
 		CameraControls() = default;
 		CameraControls(Handle<Camera>);
@@ -24,12 +26,12 @@ namespace idk {
 		void		PanCamera(const vec2& screenpos);
 		void		StopPanningCamera();
 
-		vec3		currentTarget() const;
+		vec3		CurrentTarget() const;
 		void		SetTarget(Handle<Transform>);
 		void        SetCurrentCamera(Handle<Camera>);
 		void		FocusOnObj(Handle<GameObject>);
 
-		vec3		convertMouseCoord(const vec2&);
+		vec3		ConvertMouseCoord(const vec2&);
 
 		void		LookAt();
 
