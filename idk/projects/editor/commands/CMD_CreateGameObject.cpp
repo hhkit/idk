@@ -85,6 +85,11 @@ namespace idk {
 		return false;
 	}
 
+	Handle<GameObject> CMD_CreateGameObject::GetGameObject()
+	{
+		return game_object_handle;
+	}
+
 	void CMD_CreateGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
 	{
         static bool copy_as_prefab = false;
