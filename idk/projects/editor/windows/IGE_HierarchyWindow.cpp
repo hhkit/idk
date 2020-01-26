@@ -45,14 +45,11 @@ namespace idk {
 	void IGE_HierarchyWindow::BeginWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{150.0f,100.0f});
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-
 	}
+
 	void IGE_HierarchyWindow::Update()
 	{
-		
 		ImGui::PopStyleVar(2);
 
 
@@ -79,15 +76,16 @@ namespace idk {
             IDE& editor = Core::GetSystem<IDE>();
 
 			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N"))
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-
-            if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N"))
 			{
-                if (editor.GetSelectedObjects().game_objects.size())
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.GetSelectedObjects().game_objects.front()));
-                else
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-            }
+				editor.CreateGameObject();
+			}
+			if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N"))
+			{
+				if (editor.GetSelectedObjects().game_objects.size())
+					editor.CreateGameObject(editor.GetSelectedObjects().game_objects.front());
+				else
+					editor.CreateGameObject();
+			}
             if (ImGui::BeginMenu("UI")) 
 			{
 				const auto go = editor.GetSelectedObjects().game_objects.empty() ?
@@ -104,13 +102,13 @@ namespace idk {
 				{
 					if (ImGui::MenuItem("Canvas"))
 					{
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
+						editor.CreateGameObject(go, "Canvas", vector<string>{ "RectTransform", "Canvas" });
 					}
 				}
 				if (ImGui::MenuItem("Image"))
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Image", vector<string>{ "RectTransform", "Image" }));
+					editor.CreateGameObject(go, "Image", vector<string>{ "RectTransform", "Image" });
 				if (ImGui::MenuItem("Text"))
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Text", vector<string>{ "RectTransform", "Text" }));
+					editor.CreateGameObject(go, "Text", vector<string>{ "RectTransform", "Text" });
 				
 				ImGui::EndMenu();
             }
@@ -335,7 +333,7 @@ namespace idk {
 								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
 						}
 
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, selected_gameObjects.size()));
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, static_cast<int>(selected_gameObjects.size())));
 					}
 					else
 					{

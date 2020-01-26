@@ -34,7 +34,7 @@ namespace idk {
 		
 		//Executes given ICommand Object. USAGE: ExecuteCommand(COMMAND(CMD_AddComponent,gameobjectHandle));
 		//Puts all command into a stack that is called when flushcommands is called
-		void ExecuteCommand(unique_ptr<ICommand> command);
+		ICommand* ExecuteCommand(unique_ptr<ICommand> command);
 		//Executes the undo function of previous ICommand Object.
 		void UndoCommand();
 		//Exectues function of an undone ICommand Object.

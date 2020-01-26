@@ -749,7 +749,9 @@ namespace idk {
 
 		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == GizmoMode::Local ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
-		if (editor.GetSelectedObjects().game_objects.size() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
+		if (editor.GetSelectedObjects().game_objects.size() &&
+			editor.GetSelectedObjects().game_objects[0] &&
+			!ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
 			Handle<Transform> gameObjectTransform = editor.GetSelectedObjects().game_objects[0]->Transform();
 
 

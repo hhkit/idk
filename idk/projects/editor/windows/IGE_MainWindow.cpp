@@ -183,7 +183,7 @@ namespace idk {
 			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
 				IDE& editor = Core::GetSystem<IDE>();
 				int execute_counter = 0;
-
+				 
 				for (auto& i : editor.copied_gameobjects) {
 					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject, i));
 					++execute_counter;
@@ -230,19 +230,15 @@ namespace idk {
 		{
 			if (ImGui::MenuItem("Create Empty","CTRL+SHIFT+N")) 
 			{
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+				editor.CreateGameObject();
 			} 
 
 			if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) 
 			{
-				if (editor.GetSelectedObjects().game_objects.size()) 
-				{
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.GetSelectedObjects().game_objects.front()));
-				}
-				else 
-				{
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-				}
+				if (editor.GetSelectedObjects().game_objects.size())
+					editor.CreateGameObject(editor.GetSelectedObjects().game_objects.front());
+				else
+					editor.CreateGameObject();
 			}
 
 			ImGui::EndMenu();
@@ -569,23 +565,32 @@ namespace idk {
 			}
 			
 			//DEL = Delete
-			//else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
-			//	int execute_counter = 0;
-			//	//Move the gizmo away before deleting
-			//	float				fake_matrix[16]{ 0 }; 
-			//	ImGuizmo::Manipulate(fake_matrix, fake_matrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, fake_matrix, NULL, NULL);
+			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
+				int execute_counter = 0;
+				//Move the gizmo away before deleting
+				//float				fake_matrix[16]{ 0 }; 
+				//ImGuizmo::Manipulate(fake_matrix, fake_matrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, fake_matrix, NULL, NULL);
+
+				for (auto h : editor.GetSelectedObjects().game_objects)
+				{
+					if (h)
+					{
+						commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, h));
+						++execute_counter;
+					}
+				}
 
 
+				//while (!editor.selected_gameObjects.empty()) {
+				//	//Handle<GameObject> i = editor.selected_gameObjects.front();
+				//	//editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
+				//	commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+				//	++execute_counter;
+				//}
 
-			//	while (!editor.selected_gameObjects.empty()) {
-			//		Handle<GameObject> i = editor.selected_gameObjects.front();
-			//		editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
-			//		commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
-			//		++execute_counter;
-			//	}
-
-			//	commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			//}
+				editor.Unselect(); ++execute_counter;
+				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+			}
 
 			//F = Focus on GameObject
 			if (ImGui::IsKeyPressed('F'))

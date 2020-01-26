@@ -132,6 +132,8 @@ namespace idk {
 
     void IGE_InspectorWindow::DisplayGameObjects(vector<Handle<GameObject>> gos)
     {
+        gos.erase(std::remove_if(gos.begin(), gos.end(), [](auto h) { return !h; }), gos.end());
+
         const size_t gameObjectsCount = gos.size();
 
         if (gameObjectsCount == 0)

@@ -92,6 +92,9 @@ namespace idk
 		void SetSelection(ObjectSelection selection);
 		void Unselect();
 
+		// game object create/delete
+		void CreateGameObject(Handle<GameObject> parent = {}, string name = "", vector<string> initial_components = {});
+
 		void ClearScene();
 
 	private:

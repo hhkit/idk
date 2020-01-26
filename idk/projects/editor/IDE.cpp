@@ -369,7 +369,15 @@ namespace idk
 		command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, ObjectSelection{}));
 	}
 
-    void IDE::ClearScene()
+	void IDE::CreateGameObject(Handle<GameObject> parent, string name, vector<string> initial_components)
+	{
+		CMD_CreateGameObject* cmd = static_cast<CMD_CreateGameObject*>(
+			command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, parent, std::move(name), std::move(initial_components))));
+		SelectGameObject(cmd->game_object_handle);
+		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+	}
+
+	void IDE::ClearScene()
 	{
 		// clear removed tags
 		const auto num_tags = Core::GetSystem<TagManager>().GetNumOfTags();

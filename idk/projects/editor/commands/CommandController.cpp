@@ -32,38 +32,46 @@ namespace idk {
 		ClearUndoRedoStack();
 	}
 
-	void CommandController::ExecuteCommand(unique_ptr<ICommand> command) {
-
-		pollStack.push(std::move(command));
+	ICommand* CommandController::ExecuteCommand(unique_ptr<ICommand> command)
+	{
+		if (command->execute())
+		{
+			redoStack.clear();
+			undoStack.push_back(std::move(command));
+			if (undoStack.size() > undoLimit) //If exceed limit, delete the last one
+				undoStack.pop_front();
+			return undoStack.back().get();
+		}
+		return nullptr;
 	}
 
 	void CommandController::FlushCommands()
 	{
-		while (pollStack.size()) {
-			
-			unique_ptr<ICommand> command = std::move(pollStack.front());
-			pollStack.pop();
+		//while (pollStack.size()) {
+		//	
+		//	unique_ptr<ICommand> command = std::move(pollStack.front());
+		//	pollStack.pop();
 
-			const bool isSuccess = command->execute();
+		//	const bool isSuccess = command->execute();
 
-			if (isSuccess) {
-				if (undoStack.size() >= undoLimit) { //If exceed limit, delete the last one
-					undoStack.pop_front();
-				}
+		//	if (isSuccess) {
+		//		if (undoStack.size() >= undoLimit) { //If exceed limit, delete the last one
+		//			undoStack.pop_front();
+		//		}
 
-				undoStack.push_back(std::move(command));
+		//		undoStack.push_back(std::move(command));
 
-				if (redoStack.size() != NULL) {     //Clear the redo stack after execution
-					redoStack.clear();
-				}
-				if (dynamic_cast<CMD_DeleteGameObject*>(undoStack.back().get()))
-					break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
-				if (dynamic_cast<CMD_DeleteComponent*>(undoStack.back().get()))
-					break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
-				if (dynamic_cast<CMD_CollateCommands*>(undoStack.back().get()))
-					break;
-			}
-		}
+		//		if (redoStack.size() != NULL) {     //Clear the redo stack after execution
+		//			redoStack.clear();
+		//		}
+		//		if (dynamic_cast<CMD_DeleteGameObject*>(undoStack.back().get()))
+		//			break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
+		//		if (dynamic_cast<CMD_DeleteComponent*>(undoStack.back().get()))
+		//			break; //Exit loop to safely delete gameobject till next frame. (This is so that CMD_DeleteGameObject does not remove an already deleted gameobject again. Important when undoing)
+		//		if (dynamic_cast<CMD_CollateCommands*>(undoStack.back().get()))
+		//			break;
+		//	}
+		//}
 	}
 
 	void CommandController::UndoCommand() {  //Does not handle deletes, just moves the pointer to another list

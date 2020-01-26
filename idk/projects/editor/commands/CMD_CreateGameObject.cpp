@@ -34,7 +34,10 @@ namespace idk {
 		auto& ide = Core::GetSystem<IDE>();
 
 		if (copied_object.empty()) {
-			game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			if (game_object_handle == Handle<GameObject>{})
+				game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			else
+				Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject(game_object_handle);
 
 			if (parenting_gameobject) {
 				game_object_handle->GetComponent<Transform>()->SetParent(parenting_gameobject, false);
@@ -44,7 +47,6 @@ namespace idk {
 			for (const auto& str : initial_components)
 				game_object_handle->AddComponent(string_view{ str });
 
-			ide.SelectGameObject(game_object_handle);
 			ide.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
 			ide.RefreshSelectedMatrix();
 			return bool(game_object_handle); //Return true if create gameobject is successful
@@ -56,7 +58,6 @@ namespace idk {
 			catch (const bool fail) {
 				return fail;
 			}
-			ide.SelectGameObject(game_object_handle);
 			ide.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
 			ide.RefreshSelectedMatrix();
 			return true;
