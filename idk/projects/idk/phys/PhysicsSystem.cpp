@@ -31,6 +31,7 @@ namespace idk
 	constexpr float penetration_min_slop = 0.001f;
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
+	constexpr float margin = 0.2f;
 
     constexpr auto calc_shape = [](const auto& shape, const Collider& col)
     {
@@ -47,6 +48,12 @@ namespace idk
             LayerManager::layer_t layer;
         };
 
+		if (_rebuild_tree)
+		{
+			BuildStaticTree(colliders);
+			_rebuild_tree = false;
+		}
+
         vector<ColliderInfo> static_info;
         vector<ColliderInfo> dynamic_info;
 
@@ -54,8 +61,29 @@ namespace idk
 
         for (auto& elem : colliders)
         {
-            elem._active_cache = elem.is_enabled_and_active();
-            if (!elem._active_cache || elem.GetHandle().scene == Scene::prefab)
+			bool to_insert = false;
+            const bool active_this_frame =  elem.is_enabled_and_active();
+			const bool active_prev_frame = elem._active_cache;
+			const bool is_prefab = elem.GetHandle().scene == Scene::prefab;
+
+			// Was activated this frame
+			if (active_this_frame)
+			{
+				if (!active_prev_frame && !is_prefab)
+				{
+					// TODO: Insert node here.
+					to_insert = true;
+				}
+			}
+			// Not active this frame but last frame was active
+			else if(active_prev_frame && !is_prefab)
+			{
+				static_tree.remove(elem.node_id);
+				elem.node_id = -1;
+			}
+
+			elem._active_cache = active_this_frame;
+            if (!elem._active_cache || is_prefab)
                 continue;
 
             elem.find_rigidbody();
@@ -64,9 +92,14 @@ namespace idk
                 static_info.emplace_back(
                     std::visit([&elem](const auto& shape) -> ColliderInfo {
                         auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-                        return ColliderInfo{ elem, pred_shape.bounds(), pred_shape, elem.GetGameObject()->Layer() };
+						elem._broadphase_cache = pred_shape.bounds();
+                        return ColliderInfo{ elem, elem._broadphase_cache, pred_shape, elem.GetGameObject()->Layer() };
                     }, elem.shape)
                 );
+				if (to_insert)
+					static_tree.insert(elem, static_info.back().broad_phase, margin);
+				else
+					static_tree.update(elem, static_info.back().broad_phase, margin);
             }
             else
                 dynamic_info.emplace_back(ColliderInfo{ .collider = elem, .layer = elem.GetGameObject()->Layer() });
@@ -392,10 +425,11 @@ namespace idk
 		for (int i = 0; i < 4;++i)
 			CollideObjects();
 		FinalizePositions();
-
+		
         if (!debug_draw_colliders)
             return;
 
+		static_tree.debug_draw();
         for (const auto& elem : static_info)
             debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
         for (const auto& elem : dynamic_info)
@@ -560,12 +594,16 @@ namespace idk
             return;
 		for (auto& collider : colliders)
             DrawCollider(collider);
+
+		static_tree.debug_draw();
 	}
 
 	void PhysicsSystem::Reset()
 	{
 		previous_collisions.clear();
 		collisions.clear();
+		static_tree.clear();
+		_rebuild_tree = true;
 	}
 
 	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, LayerMask layer_mask, bool hit_triggers)
@@ -726,9 +764,63 @@ namespace idk
         return GetConfig().matrix[a] & LayerMask(1 << b);
     }
 
+	void PhysicsSystem::BuildStaticTree()
+	{
+		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
+		BuildStaticTree(colliders);
+	}
+
+	void PhysicsSystem::BuildStaticTree(span<Collider> colliders)
+	{
+		static_tree.clear();
+		for (auto& col : colliders)
+		{
+			col._active_cache = col.is_enabled_and_active();
+			if (!col._active_cache || col.GetHandle().scene == Scene::prefab)
+				return;
+
+			col.find_rigidbody();
+			if (col._static_cache)
+				static_tree.insert(col, col.bounds(), 0.2f);
+		}
+	}
+
+	void PhysicsSystem::ClearStaticTree()
+	{
+		static_tree.clear();
+	}
+
 
 	void PhysicsSystem::Init()
 	{
+		static_tree.preallocate_nodes(4);
+		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
+		{
+			if (!collider)
+				return;
+
+			auto& col = *collider;
+			if (!col.is_enabled_and_active() || col.GetHandle().scene == Scene::prefab)
+				return;
+
+			col.find_rigidbody();
+			if (col._static_cache)
+				static_tree.insert(col, col.bounds(), 0.2f);
+		};
+
+		GameState::GetGameState().OnObjectDestroy<Collider>() += [&](Handle<Collider> collider)
+		{
+			if (!collider)
+				return;
+
+			auto& col = *collider;
+			if (col.node_id < 0)
+				return;
+
+			col._active_cache = false;
+			static_tree.remove(col.node_id);
+			col.node_id = -1;
+		};
 	}
 
 	void PhysicsSystem::Shutdown()

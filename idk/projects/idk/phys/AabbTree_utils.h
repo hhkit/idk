@@ -2,31 +2,37 @@
 #include <idk.h>
 #include <phys/Collider.h>
 #include <phys/collidable_shapes.h>
+#include <common/LayerManager.h>
 
 namespace idk
 {
+	struct update_info
+	{
+		Collider& collider;
+		aabb new_bound;
+		float margin = 0.2f;
+		
+	};
+
 	struct AabbNode
 	{
-		AabbNode()
-			:left{ -1 }, right{ -1 }, parent{ -1 }, height{0}
-		{
-		}
-		bool leaf() const { return right < 0; }
+		AabbNode() : parent{ -1 } {}
 
+		bool leaf() const { return valid && left < 0; }
+		// bool valid() const { return }
 		union {
 			int parent;
 			int next;	// free list maybe
 		};
-		union {
-			struct {
-				int left;
-				int right;
-			};
-
-			Handle<Collider> collider;
-		};
-
+		
+		int left = -1;
+		int right = -1;
+		Handle<Collider> collider;
 		aabb fat_aabb;
 		int height{ 0 };
+		bool valid = false;
+
+		// Run-time stuff
+		LayerManager::layer_t layer;
 	};
 }

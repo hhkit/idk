@@ -390,7 +390,7 @@ namespace idk::vkn
 			//TODO skinned stuff
 		}
 		size_t i = 0;
-		auto req_itr = requests.begin();
+		
 		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
 		vk::UniqueBuffer uresult_buffer = hlp::CreateBuffer(*View().Device(),requests.size()*sizeof(uint32_t),vk::BufferUsageFlagBits::eTransferDst,View().Dispatcher());
 		vk::Buffer result_buffer =*uresult_buffer;
@@ -409,6 +409,7 @@ namespace idk::vkn
 			}
 		};
 		auto& fd = _pimpl->handler.Add(std::move(requests));
+		auto req_itr = fd.requests.begin();
 		fd.buffer = std::move(uresult_buffer);
 		fd.alloc = _pimpl->allocator.Allocate(result_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 		fd.mem_chunk_size = fd.alloc->BlockSize();

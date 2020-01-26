@@ -5,6 +5,7 @@
 #include <phys/collision_result.h>
 #include <phys/raycasts/collision_raycast.h>
 #include <common/LayerManager.h>
+#include <phys/AAbbTree.h>
 
 namespace idk
 {
@@ -40,6 +41,9 @@ namespace idk
 		bool RayCastAllObj			(const ray& r, vector<Handle<GameObject>>& collidedList);
 
         bool AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const;
+		void BuildStaticTree();
+		void BuildStaticTree(span<Collider> colliders);
+		void ClearStaticTree();
 
         bool debug_draw_colliders = false;
 
@@ -50,8 +54,12 @@ namespace idk
 		using CollisionList = hash_table<CollisionPair, phys::col_success, pair_hasher>;
 		CollisionList collisions;
 		CollisionList previous_collisions;
+		AabbTree static_tree;
+		bool _rebuild_tree = false;
+
 		void Init() override;
 		void Shutdown() override;
         void ApplyConfig(Config&) override {}
+		
 	};
 }
