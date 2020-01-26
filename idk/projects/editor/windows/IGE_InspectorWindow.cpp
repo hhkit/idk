@@ -86,14 +86,6 @@ namespace idk {
 
     void IGE_InspectorWindow::Initialize()
     {
-        Core::GetSystem<IDE>().FindWindow<IGE_HierarchyWindow>()->OnGameObjectSelectionChanged.Listen([&]()
-            {
-                _displayed_asset = RscHandle<Texture>();
-            });
-        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetsSelected.Listen([&](span<GenericResourceHandle> handles)
-            {
-                _displayed_asset = handles[0];
-            });
     }
 
     void IGE_InspectorWindow::BeginWindow()
@@ -115,17 +107,21 @@ namespace idk {
         }
 
         _prefab_inst = Handle<PrefabInstance>();
-        if (_displayed_asset.guid())
-        {
-            const bool valid = std::visit([](auto h) { return bool(h); }, _displayed_asset);
-            if (valid)
-                DisplayAsset(_displayed_asset);
-            else
-                _displayed_asset = RscHandle<Texture>();
-        }
+
+        auto& ide = Core::GetSystem<IDE>();
+        const auto& selection = ide.GetSelectedObjects();
+        if (selection.game_objects.empty() && selection.assets.empty())
+            return;
+        if (selection.game_objects.size() && selection.assets.size())
+            return;
+
+        if(selection.game_objects.size())
+            DisplayGameObjects(selection.game_objects);
         else
         {
-            DisplayGameObjects(Core::GetSystem<IDE>().selected_gameObjects);
+            const bool valid = std::visit([](auto h) { return bool(h); }, selection.assets[0]);
+            if (valid)
+                DisplayAsset(selection.assets[0]);
         }
 	}
 
@@ -445,29 +441,36 @@ namespace idk {
         ImGui::PushItemWidth(-8.0f);
         if (game_object.scene == Scene::prefab)
             ImGuidk::PushDisabled();
-		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
-			//c_name->name = stringBuf;
+
+		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) 
+        {
 			int execute_counter = 0;
-			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
+            int i = 0;
+			for (auto go : editor.GetSelectedObjects().game_objects)
+            {
+                if (!go)
+                    continue;
+
 				string outputString = stringBuf;
 				if (i > 0) {
 					outputString.append(" (");
 					outputString.append(serialize_text(i));
 					outputString.append(")");
 				}
+
 				editor.command_controller.ExecuteCommand(
                     COMMAND(CMD_ModifyProperty,
-                            GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() },
+                            GenericHandle{ go->GetComponent<Name>() },
                             "name",
-                            string{ editor.selected_gameObjects[i]->GetComponent<Name>()->name },
-                            string{ outputString })
+                            string{ go->GetComponent<Name>()->name }, // old name
+                            string{ outputString })                   // new name
                 );
-                editor.selected_gameObjects[i]->GetComponent<Name>()->name = outputString;
 				++execute_counter;
 			}
-			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+
+            editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 		}
+
         if (game_object.scene == Scene::prefab)
             ImGuidk::PopDisabled();
         ImGui::PopItemWidth();
@@ -487,7 +490,7 @@ namespace idk {
             ImGui::Text("ID");
             ImGui::SameLine();
             string idName = std::to_string(game_object.id);
-            if (editor.selected_gameObjects.size() == 1)
+            if (editor.GetSelectedObjects().game_objects.size() == 1)
                 ImGui::Text("%s (scene: %d, index: %d, gen: %d)",
                     idName.data(),
                     s_cast<int>(game_object.scene),
@@ -617,7 +620,7 @@ namespace idk {
         auto origin = c.position;
         if (ImGuidk::DragVec3("##0", &c.position))
         {
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (auto i : editor.GetSelectedObjects().game_objects)
             {
                 i->GetComponent<Transform>()->position = c.position;
             }
@@ -631,7 +634,7 @@ namespace idk {
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
         if (ImGuidk::DragQuat("##1", &c.rotation))
         {
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (auto i : editor.GetSelectedObjects().game_objects)
             {
                 i->GetComponent<Transform>()->rotation = c.rotation;
             }
@@ -665,7 +668,7 @@ namespace idk {
 
         if (ImGuidk::DragVec3("##2", &c.scale))
         {
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (auto i : editor.GetSelectedObjects().game_objects)
             {
                 i->GetComponent<Transform>()->scale = c.scale;
             }
@@ -680,9 +683,9 @@ namespace idk {
 
 		if (hasChanged) {
 			int execute_counter = 0;
-			for (int i = 0; i < editor.selected_gameObjects.size();++i) {
-				mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size();++i) {
+				mat4 modifiedMat = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>()->GlobalMatrix();
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.GetSelectedObjects().game_objects[i], originalMatrix[i], modifiedMat));
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
@@ -881,7 +884,7 @@ namespace idk {
         if (ImGuidk::DragQuat("##rot", &c.rotation))
         {
             changed = true;
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
                 i->GetComponent<Transform>()->rotation = c.rotation;
         }
         display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
@@ -892,7 +895,7 @@ namespace idk {
         if (ImGuidk::DragVec3("##scl", &c.scale))
         {
             changed = true;
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
                 i->GetComponent<Transform>()->rotation = c.rotation;
         }
         display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
@@ -1455,7 +1458,7 @@ namespace idk {
 		if (ImGui::MenuItem("Remove Component")) {
 			IDE& editor = Core::GetSystem<IDE>();
 
-			if (editor.selected_gameObjects.size() == 1) {
+			if (editor.GetSelectedObjects().game_objects.size() == 1) {
                 Handle<GameObject> go = i.visit([](auto h)
                 {
                     if constexpr (!std::is_same_v<decltype(h), Handle<GameObject>>)
@@ -1467,8 +1470,8 @@ namespace idk {
 			}
 			else {
 				int execute_counter = 0;
-				for (Handle<GameObject> gameObject : editor.selected_gameObjects) {
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+				for (auto go : editor.GetSelectedObjects().game_objects) {
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, string((*i).type.name())));
 					++execute_counter;
 				}
 				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
@@ -1495,8 +1498,8 @@ namespace idk {
 			editor.RefreshSelectedMatrix();
 
 			int execute_counter = 0;
-			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
-				auto& gameObject = editor.selected_gameObjects[i];
+			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
+                auto& gameObject = editor.GetSelectedObjects().game_objects[i];
 
 				GenericHandle componentToMod = gameObject->GetComponent(editor.copied_component.type);
 				if (componentToMod) { //Name cannot be pasted as there is no button to copy
@@ -1506,14 +1509,14 @@ namespace idk {
 						vector<mat4>& originalMatrix = editor.selected_matrix;
 						
 						Handle<Transform> copiedTransform = handle_cast<Transform>(editor.copied_component.get<GenericHandle>());
-						Handle<Transform> gameObjectTransform = editor.selected_gameObjects[i]->GetComponent<Transform>();
+						Handle<Transform> gameObjectTransform = gameObject->GetComponent<Transform>();
 						if (copiedTransform->parent)
 							gameObjectTransform->LocalMatrix(copiedTransform->LocalMatrix()); 
 						else 
 							gameObjectTransform->GlobalMatrix(copiedTransform->GlobalMatrix()); //If the parent of the copied gameobject component is deleted, use Global instead
 
 						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, gameObject, originalMatrix[i], modifiedMat));
 						++execute_counter;
 					}
 					else {
@@ -1784,12 +1787,12 @@ namespace idk {
 
             if (changed_and_deactivated)
             {
-                if (_displayed_asset.guid() == Guid{})
+                if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
                 {
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
                         COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
                 }
-                else
+                else // displaying prefab game object
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
                         COMMAND(CMD_ModifyProperty, reflect::dynamic(val), original_value));
                 original_value.swap(reflect::dynamic());

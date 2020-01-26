@@ -10,9 +10,7 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 #include <pch_common.h>
-#include <idk.h>
-#include <core/Core.h>
-#include <editor/ImGui_Interface.h>
-#include <editor/Vulkan_ImGui_Interface.h>
-#include <editor/OpenGl_ImGui_Interface.h>
+#include <imgui/imgui.h>
+#include <editor/vulkan_imgui_interface.h>
+#include <editor/opengl_imgui_interface.h>
 #endif //PCH_H

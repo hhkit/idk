@@ -47,15 +47,6 @@ namespace idk {
 					commands_affected.push_back(i.get());
 				}
 			}
-			//Find and deselect from selected gameobject
-			auto iterator = editor.selected_gameObjects.begin();
-			for (; iterator != editor.selected_gameObjects.end(); ++iterator) {
-				if (*iterator == game_object_handle) {
-					break;
-				}
-			}
-			if (iterator != editor.selected_gameObjects.end())
-				editor.selected_gameObjects.erase(iterator);
 
 			gameobject_vector.clear();
 			editor.RecursiveCollectObjects(game_object_handle,gameobject_vector);

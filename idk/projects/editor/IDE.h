@@ -21,6 +21,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/commands/CommandController.h>
 #include <editor/Registry.h>
 #include <editor/CameraControls.h>
+#include <editor/ObjectSelection.h>
 
 #undef FindWindow
 
@@ -29,29 +30,21 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 namespace idk
 {
 	//Forward Declarations
-	class IGE_IWindow; 
-
-	class IGE_MainWindow;
-	class IGE_SceneView;
-	class IGE_ProjectWindow;
-	class IGE_HierarchyWindow;
-	class IGE_InspectorWindow;
-	class IGE_AnimatorWindow;
-
-	class CameraControls;
-
+	class IGE_IWindow;
 	class RenderTarget;
 
-	enum GizmoOperation {
-		GizmoOperation_Null = 0,
-		GizmoOperation_Translate,
-		GizmoOperation_Rotate,
-		GizmoOperation_Scale
-	};
-	enum MODE
+	enum class GizmoOperation
 	{
-		LOCAL,
-		WORLD
+		Null = 0,
+		Translate,
+		Rotate,
+		Scale
+	};
+
+	enum class GizmoMode
+	{
+		Local,
+		World
 	};
 
 	class IDE : public IEditor
@@ -59,12 +52,18 @@ namespace idk
 	public:
         constexpr static auto path_tmp = "/tmp";
         constexpr static auto path_idk_app_data = "/idk";
+        constexpr static auto path_tmp_scene = "/tmp/tmp_scene.ids";
 
 		RscHandle<Scene> curr_scene;
 		Registry reg_scene{ "/user/LastScene.yaml" };
 
+		// gizmos
+		GizmoOperation	gizmo_operation = GizmoOperation::Translate;
+		GizmoMode		gizmo_mode = GizmoMode::Local; //World is might not work properly for scaling for now.
+
 		IDE();
 
+		// lifetime
 		void Init() override;
 		void LateInit() override;
 		void EarlyShutdown() override;
@@ -72,20 +71,28 @@ namespace idk
 		void EditorUpdate() override;
 		void EditorDraw() override;
 
-		void ClearScene();
-		string_view GetTmpSceneMountPath() const;
+		// IDE_Style
+		void ApplyDefaultStyle();
+		void ApplyDefaultColors();
+		void LoadEditorFonts();
 
+		// getters
         template <typename T> // move into .inl if there are more template fns
         T* FindWindow()
         {
             auto iter = windows_by_type.find(reflect::typehash<T>());
             return iter != windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
         }
-
 		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
-		void ApplyDefaultStyle();
-		void ApplyDefaultColors();
-		void LoadEditorFonts();
+
+		// selection
+		const ObjectSelection& GetSelectedObjects();
+		void SelectGameObject(Handle<GameObject> handle, bool multiselect = false);
+		void SelectAsset(GenericResourceHandle handle, bool multiselect = false);
+		void SetSelection(ObjectSelection selection);
+		void Unselect();
+
+		void ClearScene();
 
 	private:
 		unique_ptr<imgui_interface> _interface;
@@ -98,7 +105,6 @@ namespace idk
 		void SetupEditorScene();
 
 		//Editor Windows
-		unique_ptr<IGE_MainWindow>			ige_main_window		{ nullptr };
 		vector<unique_ptr<IGE_IWindow>>		ige_windows			{};
 		hash_table<size_t, IGE_IWindow*>	windows_by_type		{};
 
@@ -110,8 +116,6 @@ namespace idk
 		bool flag_skip_render	= false;
 
 		//For Gizmo controls
-		GizmoOperation	gizmo_operation = GizmoOperation_Translate;
-		MODE			gizmo_mode		= MODE::LOCAL; //World is might not work properly for scaling for now.
 
 		void FocusOnSelectedGameObjects();
 
@@ -127,8 +131,8 @@ namespace idk
 		void DecreaseScrollPower();
 
 		//For selecting and displaying in inspector.
-		vector<Handle<GameObject>> selected_gameObjects{};
-		vector<mat4>			   selected_matrix{}; //For selected_gameObjects
+		ObjectSelection				_selected_objects{};
+		vector<mat4>				selected_matrix{}; //For selected_gameObjects
 		void RefreshSelectedMatrix();
 
 		//For copy commands
@@ -148,7 +152,7 @@ namespace idk
 		friend class CMD_DeleteGameObject;
 		friend class CMD_CreateGameObject;
 		friend class CMD_CollateCommands;
-		friend class CMD_SelectGameObject;
+		friend class CMD_SelectObject;
 		friend class CommandController;
 	};
 }

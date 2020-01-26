@@ -139,9 +139,6 @@
     <ClInclude Include="commands\CMD_CollateCommands.h">
       <Filter>commands</Filter>
     </ClInclude>
-    <ClInclude Include="commands\CMD_SelectGameObject.h">
-      <Filter>commands</Filter>
-    </ClInclude>
     <ClInclude Include="windows\IGE_LightLister.h">
       <Filter>windows</Filter>
     </ClInclude>
@@ -158,6 +155,10 @@
     <ClInclude Include="vulkan_imgui_interface.h">
       <Filter>graphicsAPI_interface</Filter>
     </ClInclude>
+    <ClInclude Include="commands\CMD_SelectObject.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectSelection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -276,9 +277,6 @@
     <ClCompile Include="commands\CMD_CollateCommands.cpp">
       <Filter>commands</Filter>
     </ClCompile>
-    <ClCompile Include="commands\CMD_SelectGameObject.cpp">
-      <Filter>commands</Filter>
-    </ClCompile>
     <ClCompile Include="windows\IGE_LightLister.cpp">
       <Filter>windows</Filter>
     </ClCompile>
@@ -292,6 +290,10 @@
     <ClCompile Include="CameraControls.cpp" />
     <ClCompile Include="vulkan_imgui_interface.cpp">
       <Filter>graphicsAPI_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="IDE_Style.cpp" />
+    <ClCompile Include="commands\CMD_SelectObject.cpp">
+      <Filter>commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

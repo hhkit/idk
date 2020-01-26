@@ -108,11 +108,11 @@ namespace idk {
 	using SelectableComponents = std::tuple< Handle<MeshRenderer>, Handle<SkinnedMeshRenderer>>;
 
 	template<typename T>
-	Handle<GameObject> GetGameObject(T handle)
+	Handle<GameObject> GetGameObject([[maybe_unused]] T handle)
 	{
 		if constexpr (std::is_same_v<T, Handle<GameObject>>)
 			return handle;
-		else if constexpr (is_in_tuple_v < T, SelectableComponents > )
+		else if constexpr (is_in_tuple_v<T, SelectableComponents>)
 			return handle->GetGameObject();
 		else
 			return Handle<GameObject>{};
@@ -296,29 +296,27 @@ namespace idk {
 			if (closestGameObject)
 			{
 				auto& editor = Core::GetSystem<IDE>();
-				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
+				//vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
 				if (picked_state.is_multi_select) { //Or select Deselect that particular handle
-					bool hasSelected = false;
-					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect
-						if (closestGameObject == selected_gameObjects[counter]) {
-							selected_gameObjects.erase(selected_gameObjects.begin() + counter);
-							hasSelected = true;
-							break;
-						}
-					}
-					if (!hasSelected) {
-						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
-						editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
-					}
-					Core::GetSystem<IDE>().RefreshSelectedMatrix();
+					//bool hasSelected = false;
+					//for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect
+					//	if (closestGameObject == selected_gameObjects[counter]) {
+					//		selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+					//		hasSelected = true;
+					//		break;
+					//	}
+					//}
+					//if (!hasSelected) {
+					//	selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
+					//	Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
+					//	editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
+					//}
+					//Core::GetSystem<IDE>().RefreshSelectedMatrix();
 
 				}
 				else {
 					//Select as normal
-					selected_gameObjects.clear();
-					selected_gameObjects.push_back(closestGameObject);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
+					Core::GetSystem<IDE>().SelectGameObject(closestGameObject);
 					editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 
 					Core::GetSystem<IDE>().RefreshSelectedMatrix();
@@ -329,7 +327,7 @@ namespace idk {
 			// If raycast hits nothing, we should clear the selected objects
 			else
 			{
-				Core::GetSystem<IDE>().selected_gameObjects.clear();
+				Core::GetSystem<IDE>().Unselect();
 
 			}
 		}
@@ -749,10 +747,10 @@ namespace idk {
 
 		ImGuizmo::SetDrawlist(); //Draw on scene view only
 
-		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
+		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == GizmoMode::Local ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
-		if (editor.selected_gameObjects.size() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
-			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->Transform(); 
+		if (editor.GetSelectedObjects().game_objects.size() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
+			Handle<Transform> gameObjectTransform = editor.GetSelectedObjects().game_objects[0]->Transform();
 
 
 			if (gameObjectTransform) {
@@ -765,25 +763,22 @@ namespace idk {
 					}
 				}
 
-				switch (editor.gizmo_operation) {
-				default:
-				case GizmoOperation_Null:
-
-					break;
-
-				case GizmoOperation_Translate:
+				switch (editor.gizmo_operation) 
+				{
+				case GizmoOperation::Translate:
 					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, &translate_snap_val[0]);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
 					break;
-
-				case GizmoOperation_Rotate:
+				case GizmoOperation::Rotate:
 					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, &rotate_snap_val);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
 					break;
-
-				case GizmoOperation_Scale:
+				case GizmoOperation::Scale:
 					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, &scale_snap_val);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
+					break;
+				default:
+				case GizmoOperation::Null:
 					break;
 				}
 
@@ -794,9 +789,9 @@ namespace idk {
 				if (!ImGuizmo::IsUsing()) {
 					vector<mat4>& originalMatrix = editor.selected_matrix;
 					int execute_counter = 0;
-					for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
-						mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+					for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
+						mat4 modifiedMat = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>()->GlobalMatrix();
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.GetSelectedObjects().game_objects[i], originalMatrix[i], modifiedMat));
 						++execute_counter;
 					}
 					//Refresh the new matrix values
@@ -835,8 +830,8 @@ namespace idk {
 			is_being_modified = true;
 			mat4 difference = GenerateMat4FromGizmoMatrix() - gameObjectTransform->GlobalMatrix();
 			IDE& editor = Core::GetSystem<IDE>();
-			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
-				Handle<Transform> iTransform = editor.selected_gameObjects[i]->GetComponent<Transform>();
+			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
+				Handle<Transform> iTransform = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>();
 				mat4 newMatrix = iTransform->GlobalMatrix() + difference;
 				iTransform->GlobalMatrix(newMatrix); //Assign new variables
 			}

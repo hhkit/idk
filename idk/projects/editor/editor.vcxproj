@@ -284,7 +284,7 @@
     <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
     <ClInclude Include="commands\CMD_ModifyProperty.h" />
     <ClInclude Include="commands\CMD_ParentGameObject.h" />
-    <ClInclude Include="commands\CMD_SelectGameObject.h" />
+    <ClInclude Include="commands\CMD_SelectObject.h" />
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
     <ClInclude Include="ComponentIcons.h" />
     <ClInclude Include="DragDropTypes.h" />
@@ -294,6 +294,7 @@
     <ClInclude Include="commands\CommandList.h" />
     <ClInclude Include="commands\ICommand.h" />
     <ClInclude Include="IconsFontAwesome5_c.h" />
+    <ClInclude Include="ObjectSelection.h" />
     <ClInclude Include="ProjectManagement.h" />
     <ClInclude Include="Registry.h" />
     <ClInclude Include="widgets\IconCheckbox.h" />
@@ -344,12 +345,13 @@
     <ClCompile Include="commands\CMD_InstantiatePrefab.cpp" />
     <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
     <ClCompile Include="commands\CMD_ParentGameObject.cpp" />
-    <ClCompile Include="commands\CMD_SelectGameObject.cpp" />
+    <ClCompile Include="commands\CMD_SelectObject.cpp" />
     <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
     <ClCompile Include="DragDropTypes.cpp" />
     <ClCompile Include="commands\CMD_AddComponent.cpp" />
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
+    <ClCompile Include="IDE_Style.cpp" />
     <ClCompile Include="imguidk.cpp" />
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />

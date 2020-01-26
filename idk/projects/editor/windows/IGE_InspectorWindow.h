@@ -61,8 +61,6 @@ namespace idk {
         bool			hasChanged = false;
         void			TransformModifiedCheck();
 
-        GenericResourceHandle _displayed_asset{ RscHandle<Texture>() }; // if false, show gameobject(s)
-
         Handle<PrefabInstance> _prefab_inst;
         GenericHandle _curr_component;
         int _prefab_curr_component_nth;

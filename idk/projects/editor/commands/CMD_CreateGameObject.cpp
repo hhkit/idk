@@ -31,6 +31,8 @@ namespace idk {
 
 	bool CMD_CreateGameObject::execute()
 	{
+		auto& ide = Core::GetSystem<IDE>();
+
 		if (copied_object.empty()) {
 			game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
 
@@ -41,10 +43,10 @@ namespace idk {
 				game_object_handle->Name(name);
 			for (const auto& str : initial_components)
 				game_object_handle->AddComponent(string_view{ str });
-			Core::GetSystem<IDE>().selected_gameObjects.clear();
-			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
-			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
-			Core::GetSystem<IDE>().RefreshSelectedMatrix();
+
+			ide.SelectGameObject(game_object_handle);
+			ide.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
+			ide.RefreshSelectedMatrix();
 			return bool(game_object_handle); //Return true if create gameobject is successful
 		}
 		else {
@@ -54,10 +56,9 @@ namespace idk {
 			catch (const bool fail) {
 				return fail;
 			}
-			Core::GetSystem<IDE>().selected_gameObjects.clear();
-			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
-			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
-			Core::GetSystem<IDE>().RefreshSelectedMatrix();
+			ide.SelectGameObject(game_object_handle);
+			ide.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
+			ide.RefreshSelectedMatrix();
 			return true;
 		}
 	}
@@ -67,16 +68,6 @@ namespace idk {
 		if (game_object_handle) {
 
 			IDE& editor = Core::GetSystem<IDE>();
-		
-			//Find and deselect from selected gameobject
-			auto iterator = editor.selected_gameObjects.begin();
-			for (; iterator != editor.selected_gameObjects.end(); ++iterator) {
-				if (*iterator == game_object_handle) {
-					break;
-				}
-			}
-			if (iterator != editor.selected_gameObjects.end())
-				editor.selected_gameObjects.erase(iterator);
 
 			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
 

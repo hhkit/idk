@@ -23,5 +23,5 @@ Contains all commands
 #include <editor/commands/CMD_ModifyProperty.h>
 #include <editor/commands/CMD_InstantiatePrefab.h>
 #include <editor/commands/CMD_CollateCommands.h>
-#include <editor/commands/CMD_SelectGameObject.h>
+#include <editor/commands/CMD_SelectObject.h>
 #include <editor/commands/CMD_ParentGameObject.h>

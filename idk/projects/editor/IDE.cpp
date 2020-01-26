@@ -73,7 +73,6 @@ namespace idk
 	IDE::IDE()
 	{
 	}
-
 	void IDE::Init()
 	{
         fs::path idk_app_data = Core::GetSystem<FileSystem>().GetAppDataDir();
@@ -135,9 +134,8 @@ namespace idk
 		LoadEditorFonts();
 
 		//Window Initializations
-		ige_main_window = std::make_unique<IGE_MainWindow>();
-
 #define ADD_WINDOW(type) windows_by_type.emplace(reflect::typehash<type>(), ige_windows.emplace_back(std::make_unique<type>()).get());
+		ADD_WINDOW(IGE_MainWindow);
 		ADD_WINDOW(IGE_GameView);
 		ADD_WINDOW(IGE_SceneView);
 		ADD_WINDOW(IGE_ShadowMapWindow);
@@ -154,10 +152,8 @@ namespace idk
 		ADD_WINDOW(IGE_HelpWindow);	
 #undef ADD_WINDOW
 
-		ige_main_window->Initialize();
-		for (auto& i : ige_windows) {
+		for (auto& i : ige_windows)
 			i->Initialize();
-		}
 
 		Core::GetSystem<SceneManager>().OnSceneChange +=
 			[](RscHandle<Scene> active_scene)
@@ -187,10 +183,10 @@ namespace idk
 
 		Core::GetSystem<Application>().OnClosed.Listen([&]() { closing = true; });
 
-		Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
-		{
-			selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
-		});
+		//Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
+		//{
+		//	selected_gameObjects.erase(std::remove(selected_gameObjects.begin(), selected_gameObjects.end(), h), selected_gameObjects.end());
+		//});
 
 	}
 
@@ -282,28 +278,28 @@ namespace idk
 		_interface->ImGuiFrameBegin();
 		ImGuizmo::BeginFrame();
 
-		{ //Erase the nullptrs.
-			vector<size_t> null_objects;
-			size_t index = 0;
-			for (const auto go : selected_gameObjects)
-			{
-				if (!go)
-					null_objects.emplace_back(index);
-				++index;
-			}
-			std::reverse(null_objects.begin(), null_objects.end());
-			for (auto i : null_objects)
-				selected_gameObjects.erase(selected_gameObjects.begin() + i); //erase in reverse order to ensure that the indices don't change.
-		}
-        for (const auto go : selected_gameObjects)
+		//{ //Erase the nullptrs.
+		//	vector<size_t> null_objects;
+		//	size_t index = 0;
+		//	for (const auto go : selected_gameObjects)
+		//	{
+		//		if (!go)
+		//			null_objects.emplace_back(index);
+		//		++index;
+		//	}
+		//	std::reverse(null_objects.begin(), null_objects.end());
+		//	for (auto i : null_objects)
+		//		selected_gameObjects.erase(selected_gameObjects.begin() + i); //erase in reverse order to ensure that the indices don't change.
+		//}
+        for (const auto go : _selected_objects.game_objects)
         {
-			if (const auto col = go->GetComponent<Collider>())
-				Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
+			if (go)
+			{
+				if (const auto col = go->GetComponent<Collider>())
+					Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
+			}
         }
 		
-
-		ige_main_window->DrawWindow();
-
 		for (auto& i : ige_windows) {
 			if (flag_skip_render) {
 				flag_skip_render = false;
@@ -326,7 +322,54 @@ namespace idk
 		_interface->ImGuiFrameRender();
 	}
 
-	void IDE::ClearScene()
+	const ObjectSelection& IDE::GetSelectedObjects()
+	{
+		return _selected_objects;
+	}
+	void IDE::SelectGameObject(Handle<GameObject> handle, bool multiselect)
+    {
+		if (!handle)
+			return;
+		if (!multiselect)
+		{
+			ObjectSelection sel;
+			sel.game_objects.push_back(handle);
+			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
+		}
+		else
+		{
+			auto copy = _selected_objects;
+			copy.game_objects.push_back(handle);
+			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, copy));
+		}
+    }
+	void IDE::SelectAsset(GenericResourceHandle handle, bool multiselect)
+	{
+		if (!handle.visit([](auto h) { return bool(h); }))
+			return;
+		if (!multiselect)
+		{
+			ObjectSelection sel;
+			sel.assets.push_back(handle);
+			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
+		}
+		else
+		{
+			auto copy = _selected_objects;
+			copy.assets.push_back(handle);
+			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, copy));
+		}
+	}
+	void IDE::SetSelection(ObjectSelection selection)
+	{
+		command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, selection));
+	}
+	void IDE::Unselect()
+	{
+		command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, ObjectSelection{}));
+	}
+
+    void IDE::ClearScene()
 	{
 		// clear removed tags
 		const auto num_tags = Core::GetSystem<TagManager>().GetNumOfTags();
@@ -339,138 +382,16 @@ namespace idk
 		//Clear IDE values
 		Core::GetSystem<IDE>().flag_skip_render = true;
 		Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
-		Core::GetSystem<IDE>().selected_gameObjects.clear();
+		Core::GetSystem<IDE>()._selected_objects.game_objects.clear();
+		Core::GetSystem<IDE>()._selected_objects.assets.clear();
 		Core::GetSystem<IDE>().selected_matrix.clear();
-	}
-
-	string_view IDE::GetTmpSceneMountPath() const
-	{
-		return "/tmp/tmp_scene.ids";
-	}
-
-	void IDE::ApplyDefaultStyle()
-	{
-		auto& style = ImGui::GetStyle();
-		style.FramePadding = ImVec2(4.0f, 0);
-		style.ItemSpacing = ImVec2(6.0f, 3.0f);
-		style.ItemSpacing = ImVec2(6.0f, 3.0f);
-		style.WindowRounding = 0;
-		style.TabRounding = 0;
-		style.IndentSpacing = 14.0f;
-		style.ScrollbarRounding = 0;
-		style.GrabRounding = 0;
-		style.ChildRounding = 0;
-		style.PopupRounding = 0;
-		style.FrameRounding = 1.0f;
-		style.CurveTessellationTol = 0.5f;
-	}
-
-	void IDE::ApplyDefaultColors()
-	{
-		auto& style = ImGui::GetStyle();
-		auto* colors = style.Colors;
-		ImGui::StyleColorsDark();
-
-		colors[ImGuiCol_CheckMark] = colors[ImGuiCol_Text];
-
-		// grays
-		colors[ImGuiCol_WindowBg] =
-			ImColor(29, 34, 41).Value;
-		colors[ImGuiCol_PopupBg] =
-			colors[ImGuiCol_ScrollbarBg] =
-			ImColor(43, 49, 56, 240).Value;
-		colors[ImGuiCol_Border] =
-			colors[ImGuiCol_Separator] =
-			colors[ImGuiCol_ScrollbarGrab] =
-			ImColor(63, 70, 77).Value;
-		//ImColor(106, 118, 129).Value;
-
-		colors[ImGuiCol_MenuBarBg] =
-			ImColor(36, 58, 74).Value;
-		colors[ImGuiCol_ScrollbarBg].w = 0.5f;
-
-		// main accent - 2
-		colors[ImGuiCol_TitleBg] =
-			ImColor(5, 30, 51).Value;
-
-		// main accent - 1
-		colors[ImGuiCol_TitleBgActive] =
-			colors[ImGuiCol_TabUnfocused] =
-			ImColor(11, 54, 79).Value;
-
-		// main accent
-		colors[ImGuiCol_Tab] =
-			colors[ImGuiCol_TabUnfocusedActive] =
-			colors[ImGuiCol_FrameBg] =
-			colors[ImGuiCol_Button] =
-			colors[ImGuiCol_Header] =
-			colors[ImGuiCol_SeparatorHovered] =
-			colors[ImGuiCol_ScrollbarGrabHovered] =
-			ImColor(23, 75, 111).Value;
-
-		// main accent + 1
-		colors[ImGuiCol_TabHovered] =
-			colors[ImGuiCol_TabActive] =
-			colors[ImGuiCol_ButtonHovered] =
-			colors[ImGuiCol_FrameBgHovered] =
-			colors[ImGuiCol_HeaderHovered] =
-			colors[ImGuiCol_SeparatorActive] =
-			colors[ImGuiCol_ScrollbarGrabActive] =
-			ImColor(46, 115, 143).Value;
-
-		// main accent + 2
-		colors[ImGuiCol_TextSelectedBg] =
-			colors[ImGuiCol_ButtonActive] =
-			colors[ImGuiCol_FrameBgActive] =
-			colors[ImGuiCol_HeaderActive] =
-			ImColor(65, 153, 163).Value;
-
-		// complement accent
-		colors[ImGuiCol_PlotLinesHovered] =
-			ImColor(222, 116, 35).Value;
-		//style.Colors[ImGuiCol_PlotLinesHovered]
-		// ImColor(
-
-	}
-
-	void IDE::LoadEditorFonts()
-	{
-		auto& fs = Core::GetSystem<FileSystem>();
-		auto& io = ImGui::GetIO();
-
-		ImFontConfig config;
-		config.OversampleH = 5;
-		config.OversampleV = 3;
-		config.RasterizerMultiply = 1.5f;
-		auto fontpath = fs.GetFullPath("/editor_data/fonts/SourceSansPro-Regular.ttf");
-		auto fontpathbold = fs.GetFullPath("/editor_data/fonts/SourceSansPro-SemiBold.ttf");
-		auto iconfontpath = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAR);
-		auto iconfontpath2 = fs.GetFullPath("/editor_data/fonts/" FONT_ICON_FILE_NAME_FAS);
-		io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 15.0f, &config); // Default
-
-		// merge in icons from MDI
-		static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-		ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true; icons_config.GlyphMinAdvanceX = 14.0f; icons_config.GlyphOffset.y = 1.0f;
-		io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
-		io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
-
-		// smaller and bold style of default font
-		io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 13.0f, &config); // Smaller
-		io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 12.0f, &icons_config, icons_ranges);
-		io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 12.0f, &icons_config, icons_ranges);
-
-		io.Fonts->AddFontFromFileTTF(fontpathbold.c_str(), 15.0f, &config); // Bold
-		io.Fonts->AddFontFromFileTTF(iconfontpath.c_str(), 14.0f, &icons_config, icons_ranges);
-		io.Fonts->AddFontFromFileTTF(iconfontpath2.c_str(), 14.0f, &icons_config, icons_ranges);
-
-		io.Fonts->Build();
 	}
 
 	void IDE::RefreshSelectedMatrix()
 	{
 		//Refresh the new matrix values
 		selected_matrix.clear();
-		for (const auto& i : selected_gameObjects) {
+		for (const auto& i : _selected_objects.game_objects) {
 			selected_matrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
 		}
 	}
@@ -503,9 +424,9 @@ namespace idk
 
 	void IDE::FocusOnSelectedGameObjects()
 	{
-		if (selected_gameObjects.size()) {
+		if (_selected_objects.game_objects.size()) {
 			vec3 finalCamPos{};
-			for (const auto& i : selected_gameObjects) {
+			for (const auto& i : _selected_objects.game_objects) {
 
 				const auto transform = i->GetComponent<Transform>();
 				if (transform) {
@@ -514,7 +435,7 @@ namespace idk
 
 			}
 
-            finalCamPos /= static_cast<float>(selected_gameObjects.size());
+            finalCamPos /= static_cast<float>(_selected_objects.game_objects.size());
 
 			/*
 			Needs to find how much space the object pixels takes on screen, then this distance is based on that.

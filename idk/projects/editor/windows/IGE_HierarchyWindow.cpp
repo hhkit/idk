@@ -70,28 +70,28 @@ namespace idk {
 		ImGui::PopStyleVar(3);
 
 		ImGui::SetCursorPosX(5);
-		if (ImGui::Button("Create")) {
+		if (ImGui::Button("Create")) 
+		{
 			ImGui::OpenPopup("CreatePopup");
-
 		}
-		if (ImGui::BeginPopup("CreatePopup")) {
+		if (ImGui::BeginPopup("CreatePopup")) 
+		{
             IDE& editor = Core::GetSystem<IDE>();
 
-			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N")) {
+			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N"))
 				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-			}
-            if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
-                if (editor.selected_gameObjects.size()) {
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.selected_gameObjects.front()));
-                }
-                else {
+
+            if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N"))
+			{
+                if (editor.GetSelectedObjects().game_objects.size())
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.GetSelectedObjects().game_objects.front()));
+                else
                     editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-                }
-
-
             }
-            if (ImGui::BeginMenu("UI")) {
-				const auto go = editor.selected_gameObjects.empty()? Handle<GameObject>() :editor.selected_gameObjects.front();
+            if (ImGui::BeginMenu("UI")) 
+			{
+				const auto go = editor.GetSelectedObjects().game_objects.empty() ?
+					Handle<GameObject>() : editor.GetSelectedObjects().game_objects.front();
 
 				auto parent = go;
 				while (parent)
@@ -117,9 +117,9 @@ namespace idk {
 
 			ImGui::EndPopup();
 		}
+
 		if (ImGui::Button("...##AdditionalStuff")) {
 			ImGui::OpenPopup("OpenAdditionalStuff");
-
 		}
 		if (ImGui::BeginPopup("OpenAdditionalStuff")) {
 			ImGui::Checkbox("Show Editor Objects", &show_editor_objects);
@@ -187,7 +187,8 @@ namespace idk {
 				return true;
 			}
 
-			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
+			ObjectSelection selection = Core::GetSystem<IDE>().GetSelectedObjects();
+			vector<Handle<GameObject>>& selected_gameObjects = selection.game_objects;
 
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
@@ -199,17 +200,18 @@ namespace idk {
 
 			bool is_its_child_been_selected = false;
 			//Check if gameobject has been selected. Causes Big-O(n^2)
-			for (Handle<GameObject>& i : selected_gameObjects) {
-				if (handle == i) {
+			for (auto i : selected_gameObjects) 
+			{
+				if (handle == i) 
+				{
 					nodeFlags |= ImGuiTreeNodeFlags_Selected;
 					break;
 				}
-				else if (CheckIfChildrenIsSelected(children, i)) {
+				else if (CheckIfChildrenIsSelected(children, i))
+				{
 					is_its_child_been_selected = true;
 					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-
 				}
-
 			}
 
 			Handle<Name> c_name = handle->GetComponent<Name>();
@@ -268,33 +270,28 @@ namespace idk {
 						}
 					}
 
-					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Deselect that particular handle
+					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) //Deselect that particular handle
+					{ 
 						if (hasBeenSelected) {
 							selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+							Core::GetSystem<IDE>().SetSelection(selection);
 						}
 						else {
-							selected_gameObjects.push_back(handle);
-							Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-
+							Core::GetSystem<IDE>().SelectGameObject(handle, true);
 						}
 						hasSelected_GameobjectsModified = true;
 
 					}
-					else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
+					else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) 
+					{
 						if (selected_gameObjects.size() != 0) {
 							selectedItemCounter = selectedCounter;
 							isShiftSelectCalled = true;
-
-
 						}
 					}
 
 					else {
-						//Select as normal
-						selected_gameObjects.clear();
-						selected_gameObjects.push_back(handle);
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-
+						Core::GetSystem<IDE>().SelectGameObject(handle);
 						hasSelected_GameobjectsModified = true;
 					}
 
@@ -409,96 +406,96 @@ namespace idk {
         ImGui::PopStyleVar();
 
 		//Shift Select logic
-		if (isShiftSelectCalled) {
-			//std::cout << "Items to skip: ";
-			//for (int& i : itemToSkipInGraph) {
-			//	std::cout << i << ", ";
-			//}
-			//std::cout << std::endl;
+		//if (isShiftSelectCalled) {
+		//	//std::cout << "Items to skip: ";
+		//	//for (int& i : itemToSkipInGraph) {
+		//	//	std::cout << i << ", ";
+		//	//}
+		//	//std::cout << std::endl;
 
-			int counter = 0; //This is the same as the above scenegraph. I cant use the tree to track which places to skip, so we are using the vector
-			vector<int> minMax{ -1,-1 };
-			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
-			vector<Handle<GameObject>> selectedForSelect = selected_gameObjects;
-			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+		//	int counter = 0; //This is the same as the above scenegraph. I cant use the tree to track which places to skip, so we are using the vector
+		//	vector<int> minMax{ -1,-1 };
+		//	vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
+		//	vector<Handle<GameObject>> selectedForSelect = selected_gameObjects;
+		//	sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
 
-				depth;
-				if (!handle) //Ignore handle zero
-					return true;
-				IDE& editor = Core::GetSystem<IDE>();
-				Handle<Camera>& editorCam = editor._camera.current_camera;
-				if (handle == editorCam->GetGameObject())
-					return true;
-				++counter;
+		//		depth;
+		//		if (!handle) //Ignore handle zero
+		//			return true;
+		//		IDE& editor = Core::GetSystem<IDE>();
+		//		Handle<Camera>& editorCam = editor._camera.current_camera;
+		//		if (handle == editorCam->GetGameObject())
+		//			return true;
+		//		++counter;
 
-				//Finds what is selected and use as min and max
-				for (int i = 0; i < selectedForSelect.size(); ++i) {
-					if (selectedForSelect[i] == handle) {
-						minMax[0] = minMax[0] == -1 ? counter : (minMax[0] > counter ? counter : minMax[0]);
-						minMax[1] = minMax[1] == -1 ? counter : (minMax[1] < counter ? counter : minMax[1]);
-						break;
-					}
-				}
+		//		//Finds what is selected and use as min and max
+		//		for (int i = 0; i < selectedForSelect.size(); ++i) {
+		//			if (selectedForSelect[i] == handle) {
+		//				minMax[0] = minMax[0] == -1 ? counter : (minMax[0] > counter ? counter : minMax[0]);
+		//				minMax[1] = minMax[1] == -1 ? counter : (minMax[1] < counter ? counter : minMax[1]);
+		//				break;
+		//			}
+		//		}
 
-				//Skips similar to closed trees
-				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
-					if (itemToSkipInGraph[i] == counter) {
-						return false;
-					}
-				}
-
-
-				return true;
-			});
-			//std::cout << "Seletected item: " << selectedItemCounter << std::endl;
-			if (minMax[0] == minMax[1]) {
-				if (minMax[0] < selectedItemCounter)
-					minMax[1] = selectedItemCounter;
-				else
-					minMax[0] = selectedItemCounter;
-			}
-			else if (minMax[0] > selectedItemCounter) { //out of ranges, selectedItemCounter becomes min
-				minMax[0] = selectedItemCounter;
-			}
-			else if (minMax[1] < selectedItemCounter) { //out of ranges, selectedItemCounter becomes max
-				minMax[1] = selectedItemCounter;
-			}
-
-			selected_gameObjects.clear();
-			counter = 0;
-			int execute_counter = 0;
-			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
-				
-				depth;
-				
-				if (!handle) //Ignore handle zero
-					return true;
-
-				++counter;
+		//		//Skips similar to closed trees
+		//		for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
+		//			if (itemToSkipInGraph[i] == counter) {
+		//				return false;
+		//			}
+		//		}
 
 
+		//		return true;
+		//	});
+		//	//std::cout << "Seletected item: " << selectedItemCounter << std::endl;
+		//	if (minMax[0] == minMax[1]) {
+		//		if (minMax[0] < selectedItemCounter)
+		//			minMax[1] = selectedItemCounter;
+		//		else
+		//			minMax[0] = selectedItemCounter;
+		//	}
+		//	else if (minMax[0] > selectedItemCounter) { //out of ranges, selectedItemCounter becomes min
+		//		minMax[0] = selectedItemCounter;
+		//	}
+		//	else if (minMax[1] < selectedItemCounter) { //out of ranges, selectedItemCounter becomes max
+		//		minMax[1] = selectedItemCounter;
+		//	}
 
-				if (counter >= minMax[0] && counter <= minMax[1]) {
-					selected_gameObjects.push_back(handle);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-					++execute_counter;
-					hasSelected_GameobjectsModified = true;
-				}
-				//Skips similar to closed trees
-				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
-					if (itemToSkipInGraph[i] == counter) {
-						return false;
-					}
-				}
-				return true;
-			});
+		//	selected_gameObjects.clear();
+		//	counter = 0;
+		//	int execute_counter = 0;
+		//	sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+		//		
+		//		depth;
+		//		
+		//		if (!handle) //Ignore handle zero
+		//			return true;
 
-			Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+		//		++counter;
 
-			//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
 
-			//Refresh the new matrix values
-		}
+
+		//		if (counter >= minMax[0] && counter <= minMax[1]) {
+		//			selected_gameObjects.push_back(handle);
+		//			Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
+		//			++execute_counter;
+		//			hasSelected_GameobjectsModified = true;
+		//		}
+		//		//Skips similar to closed trees
+		//		for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
+		//			if (itemToSkipInGraph[i] == counter) {
+		//				return false;
+		//			}
+		//		}
+		//		return true;
+		//	});
+
+		//	Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+
+		//	//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
+
+		//	//Refresh the new matrix values
+		//}
         if (hasSelected_GameobjectsModified)
         {
             Core::GetSystem<IDE>().RefreshSelectedMatrix();
@@ -524,6 +521,10 @@ namespace idk {
 
 			scroll_focused_gameObject = {};
 		}
+
+
+		if (ImGui::InvisibleButton("empty_space", ImGui::GetContentRegionAvail()))
+			Core::GetSystem<IDE>().Unselect();
 
 
 	}
