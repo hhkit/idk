@@ -371,9 +371,9 @@ namespace idk
 
 	void IDE::CreateGameObject(Handle<GameObject> parent, string name, vector<string> initial_components)
 	{
-		CMD_CreateGameObject* cmd = static_cast<CMD_CreateGameObject*>(
-			command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, parent, std::move(name), std::move(initial_components))));
-		SelectGameObject(cmd->game_object_handle);
+		auto* cmd = command_controller.ExecuteCommand(
+			COMMAND(CMD_CreateGameObject, parent, std::move(name), std::move(initial_components)));
+		SelectGameObject(cmd->GetGameObject());
 		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 	}
 
