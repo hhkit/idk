@@ -23,10 +23,9 @@ namespace idk {
 
 	private:
 
-		void RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot = false);
+		bool RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot = false);
 
 		vector<RecursiveObjects>	gameobject_vector	{};
-		vector<ICommand*>			commands_affected	{}; //Stores a dumb pointer (This is to check if the unique pointer is still there)
 	};
 
 }

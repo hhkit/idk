@@ -27,6 +27,7 @@ namespace idk
 	//This is for collecting deleted gameobjects and its children as well as CreateGameObject Used for undo
 	struct RecursiveObjects {
 		Handle<GameObject>			original_handle			{};
+		Handle<GameObject>			preserved_handle		{};
 		Handle<GameObject>			parent_of_children		{}; //Only for children, used when undoing. The main deleted gameobject would have this as null.
 		vector<reflect::dynamic>	vector_of_components	{}; //Contains components for the new gameobject
 		vector<RecursiveObjects>	children				{};

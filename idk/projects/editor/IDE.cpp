@@ -255,25 +255,25 @@ namespace idk
         auto& app = Core::GetSystem<Application>();
 
         static auto fullscreen = true;
-        if (ImGui::IsKeyPressed(static_cast<int>(Key::F)) && ImGui::IsKeyDown(static_cast<int>(Key::Control)))
+        if (ImGui::IsKeyPressed(static_cast<int>(Key::F)) && ImGui::GetIO().KeyCtrl)
             app.SetFullscreen(fullscreen = !fullscreen);
 
 		// scene controls
-		if (!game_running)
-			if (app.GetKey(Key::Control))
+		if (!game_running && ImGui::GetIO().KeyCtrl)
+		{
+			if (ImGui::IsKeyPressed(static_cast<int>(Key::S)))
 			{
-				if(app.GetKeyDown(Key::S))
-				{
-					if (app.GetKey(Key::Shift))
-						SaveSceneAs();
-					else
-						SaveScene();
-				}
-				if (app.GetKeyDown(Key::N))
-					NewScene();
-				if (app.GetKeyDown(Key::O))
-					OpenScene();
+				if (ImGui::GetIO().KeyShift)
+					SaveSceneAs();
+				else
+					SaveScene();
 			}
+			if (ImGui::IsKeyPressed(static_cast<int>(Key::N)))
+				NewScene();
+			if (ImGui::IsKeyPressed(static_cast<int>(Key::O)))
+				OpenScene();
+		}
+		PollShortcutInputs();
 
 		_interface->ImGuiFrameBegin();
 		ImGuizmo::BeginFrame();
@@ -320,6 +320,66 @@ namespace idk
 	{
 		// call imgui draw,
 		_interface->ImGuiFrameRender();
+	}
+
+	void IDE::PollShortcutInputs()
+	{
+		if (ImGui::IsAnyItemActive()) //Do not do any shortcuts when inputs are active! EG: Editing texts!
+			return;
+		if (ImGui::IsAnyMouseDown()) //Disable shortcut whenever mouse is pressed
+			return;
+
+		//CTRL + Z
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::GetIO().KeyCtrl) {
+			command_controller.UndoCommand();
+		}
+
+		//CTRL + Y
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::GetIO().KeyCtrl) {
+			command_controller.RedoCommand();
+		}
+
+		//CTRL + C
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && ImGui::GetIO().KeyCtrl) 
+		{
+			Copy();
+		}
+
+		//CTRL + V
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::GetIO().KeyCtrl) 
+		{
+			Paste();
+		}
+
+
+		//Q = Move
+		if (ImGui::IsKeyPressed('Q')) {
+			gizmo_operation = GizmoOperation::Null;
+		}
+		//W = Translate
+		else if (ImGui::IsKeyPressed('W')) {
+			gizmo_operation = GizmoOperation::Translate;
+		}
+		//E = Rotate
+		else if (ImGui::IsKeyPressed('E')) {
+			gizmo_operation = GizmoOperation::Rotate;
+		}
+		//R = Scale
+		else if (ImGui::IsKeyPressed('R')) {
+			gizmo_operation = GizmoOperation::Scale;
+		}
+
+		//DEL = Delete
+		else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+		{
+			DeleteSelectedGameObjects();
+		}
+
+		//F = Focus on GameObject
+		else if (ImGui::IsKeyPressed('F'))
+		{
+			FocusOnSelectedGameObjects();
+		}
 	}
 
 	const ObjectSelection& IDE::GetSelectedObjects()
@@ -377,6 +437,58 @@ namespace idk
 		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 	}
 
+    void IDE::DeleteSelectedGameObjects()
+    {
+		int execute_counter = 0;
+
+		for (auto h : GetSelectedObjects().game_objects)
+		{
+			if (h)
+			{
+				command_controller.ExecuteCommand(COMMAND(CMD_DeleteGameObject, h));
+				++execute_counter;
+			}
+		}
+
+		Unselect(); ++execute_counter;
+		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+    }
+
+	void IDE::Copy()
+	{
+		_copied_game_objects.clear();
+		for (auto h : GetSelectedObjects().game_objects)
+		{
+			vector<RecursiveObjects> new_obj{};
+			RecursiveCollectObjects(h, new_obj);
+			_copied_game_objects.push_back(std::move(new_obj));
+		}
+	}
+
+	void IDE::Paste()
+	{
+		int execute_counter = 0;
+		ObjectSelection sel;
+
+		for (auto v : _copied_game_objects)
+		{
+			if (v.size() && v[0].original_handle)
+			{
+				auto* cmd = command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, v));
+				sel.game_objects.push_back(cmd->GetGameObject());
+				++execute_counter;
+			}
+		}
+
+		if (execute_counter)
+		{
+			SetSelection(sel);
+			++execute_counter;
+		}
+
+		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+	}
+
 	void IDE::ClearScene()
 	{
 		// clear removed tags
@@ -392,16 +504,6 @@ namespace idk
 		Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
 		Core::GetSystem<IDE>()._selected_objects.game_objects.clear();
 		Core::GetSystem<IDE>()._selected_objects.assets.clear();
-		Core::GetSystem<IDE>().selected_matrix.clear();
-	}
-
-	void IDE::RefreshSelectedMatrix()
-	{
-		//Refresh the new matrix values
-		selected_matrix.clear();
-		for (const auto& i : _selected_objects.game_objects) {
-			selected_matrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
-		}
 	}
 
 	void IDE::SetupEditorScene()

@@ -35,16 +35,17 @@ namespace idk {
 		//Executes given ICommand Object. USAGE: ExecuteCommand(COMMAND(CMD_AddComponent,gameobjectHandle));
 		//Puts all command into a stack that is called when flushcommands is called
 		ICommand* ExecuteCommand(unique_ptr<ICommand> command);
+
 		//Executes the undo function of previous ICommand Object.
 		void UndoCommand();
 		//Exectues function of an undone ICommand Object.
 		void RedoCommand();
-		//Clears the stack
+
 		void ClearUndoRedoStack();
 
 		bool CanUndo();
-
 		bool CanRedo();
+
 	private:
 		friend class IDE;
 		friend class CMD_DeleteGameObject;

@@ -22,14 +22,13 @@ Takes in a NEW Commands and handles its delete internally
 #include <editor/commands/CMD_CollateCommands.h>
 #include <IDE.h>
 
-namespace idk {
+namespace idk 
+{
 	CommandController::CommandController()
 	{
 	}
-
-
-	CommandController::~CommandController() {
-		ClearUndoRedoStack();
+	CommandController::~CommandController()
+	{
 	}
 
 	ICommand* CommandController::ExecuteCommand(unique_ptr<ICommand> command)
@@ -74,40 +73,28 @@ namespace idk {
 		//}
 	}
 
-	void CommandController::UndoCommand() {  //Does not handle deletes, just moves the pointer to another list
-		if (undoStack.size() == NULL)
+	void CommandController::UndoCommand()  //Does not handle deletes, just moves the pointer to another list
+	{
+		if (undoStack.empty())
 			return;
-
 		if (undoStack.back()->undo())  //If execute is a success, add to the redo stack
 			redoStack.push_back(std::move(undoStack.back()));
-
 		undoStack.pop_back();
-
-		IDE& editor = Core::GetSystem<IDE>();
-		editor.RefreshSelectedMatrix();
 	}
 
-	void CommandController::RedoCommand() {
-		if (redoStack.size() == NULL)
+	void CommandController::RedoCommand() 
+	{
+		if (redoStack.empty())
 			return;
-
 		if (redoStack.back()->execute())  //If execute is a success, add to the undo stack
 			undoStack.push_back(std::move(redoStack.back()));
-
-
 		redoStack.pop_back();
-
 	}
 
 	void CommandController::ClearUndoRedoStack()
 	{
-		if (undoStack.size() != NULL) {     //Clear the redo stack after execution
-			undoStack.clear();
-		}
-
-		if (redoStack.size() != NULL) {     //Clear the redo stack after execution
-			redoStack.clear();
-		}
+		undoStack.clear();
+		redoStack.clear();
 	}
 
 	bool CommandController::CanUndo()

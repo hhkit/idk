@@ -592,20 +592,23 @@ namespace idk {
     template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Transform> c_transform)
 	{
-
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
 		IDE& editor = Core::GetSystem<IDE>();
 
-		vector<mat4>& originalMatrix = editor.selected_matrix;
-		//This is dumped if no items are changed.
-		//if (!isBeingModified) {
-		//	originalMatrix.clear();
-		//	for (Handle<GameObject> i : editor.selected_gameObjects) {
-		//		originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
-		//	}
-		//}
-
+        bool has_changed = false;
+        static vector<mat4> original_matrices;
+        static auto check_modify = [&has_changed, &editor]()
+        {
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            {
+                original_matrices.clear();
+                for (auto i : editor.GetSelectedObjects().game_objects)
+                    original_matrices.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+            }
+            if (ImGui::IsItemDeactivatedAfterEdit())
+                has_changed = true;
+        };
 
         auto& c = *c_transform;
 
@@ -614,20 +617,21 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
+
         auto y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
         ImGui::Text("Position");
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-        auto origin = c.position;
         if (ImGuidk::DragVec3("##0", &c.position))
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->position = c.position;
+                i->GetComponent<Transform>()->GlobalPosition(c.GlobalPosition());
             }
         }
-        TransformModifiedCheck();
+        check_modify();
+
 
         y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
@@ -638,10 +642,11 @@ namespace idk {
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->rotation = c.rotation;
+                i->GetComponent<Transform>()->GlobalRotation(c.GlobalRotation());
             }
         }
-        TransformModifiedCheck();
+        check_modify();
+
 
         bool has_scale_override = false;
         if (_prefab_inst)
@@ -672,30 +677,32 @@ namespace idk {
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->scale = c.scale;
+                i->GetComponent<Transform>()->GlobalScale(c.GlobalScale());
             }
             if (_prefab_inst)
             {
                 PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "scale");
             }
         }
-        TransformModifiedCheck();
+        check_modify();
 
         ImGui::PopItemWidth();
 
-		if (hasChanged) {
+
+		if (has_changed) 
+        {
 			int execute_counter = 0;
-			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size();++i) {
-				mat4 modifiedMat = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>()->GlobalMatrix();
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.GetSelectedObjects().game_objects[i], originalMatrix[i], modifiedMat));
+            for(size_t i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i)
+            {
+                const auto h = editor.GetSelectedObjects().game_objects[i];
+                if (!h)
+                    continue;
+                const mat4 modified_mat = h->GetComponent<Transform>()->GlobalMatrix();
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, h, original_matrices[i], modified_mat));
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			//Refresh the new matrix values
-			editor.RefreshSelectedMatrix();
-			hasChanged		= false;
-			//isBeingModified = false;
 		}
 	}
 
@@ -1484,62 +1491,61 @@ namespace idk {
 
 	void IGE_InspectorWindow::MenuItem_CopyComponent(GenericHandle i)
 	{
-		if (ImGui::MenuItem("Copy Component")) {
-			Core::GetSystem<IDE>().copied_component.swap((*i).copy());
-		}
+		if (ImGui::MenuItem("Copy Component"))
+			_copied_component.swap((*i).copy());
 	}
 
 	void IGE_InspectorWindow::MenuItem_PasteComponent()
 	{
-		if (ImGui::MenuItem("Paste Component")) {
+		if (ImGui::MenuItem("Paste Component")) 
+        {
 			IDE& editor = Core::GetSystem<IDE>();
-			if (!editor.copied_component.valid())
+			if (!_copied_component.valid())
 				return;
 
-			bool isTransformValuesEdited = false;
-			editor.RefreshSelectedMatrix();
-
 			int execute_counter = 0;
-			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
+			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) 
+            {
                 auto& gameObject = editor.GetSelectedObjects().game_objects[i];
 
-				GenericHandle componentToMod = gameObject->GetComponent(editor.copied_component.type);
-				if (componentToMod) { //Name cannot be pasted as there is no button to copy
+				GenericHandle componentToMod = gameObject->GetComponent(_copied_component.type);
+				if (componentToMod) //Name cannot be pasted as there is no button to copy
+                {
 					//replace values
-					if (componentToMod == gameObject->GetComponent<Transform>()) {
-						isTransformValuesEdited = true;
-						vector<mat4>& originalMatrix = editor.selected_matrix;
+					if (componentToMod == gameObject->GetComponent<Transform>()) 
+                    {
+						mat4 originalMatrix = gameObject->GetComponent<Transform>()->GlobalMatrix();
 						
-						Handle<Transform> copiedTransform = handle_cast<Transform>(editor.copied_component.get<GenericHandle>());
+                        const auto& copiedTransform = _copied_component.get<Transform>();
 						Handle<Transform> gameObjectTransform = gameObject->GetComponent<Transform>();
-						if (copiedTransform->parent)
-							gameObjectTransform->LocalMatrix(copiedTransform->LocalMatrix()); 
-						else 
-							gameObjectTransform->GlobalMatrix(copiedTransform->GlobalMatrix()); //If the parent of the copied gameobject component is deleted, use Global instead
+						if (copiedTransform.parent)
+							gameObjectTransform->LocalMatrix(copiedTransform.LocalMatrix()); 
+						else //If the parent of the copied gameobject component is deleted, use Global instead
+							gameObjectTransform->GlobalMatrix(copiedTransform.GlobalMatrix());
 
 						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, gameObject, originalMatrix[i], modifiedMat));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, gameObject, originalMatrix, modifiedMat));
 						++execute_counter;
 					}
-					else {
+					else 
+                    {
 						//Mark to remove Component
 						string compName = string((*componentToMod).type.name());
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, compName));
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component)); //Remember commands are flushed at end of each update!
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, _copied_component)); //Remember commands are flushed at end of each update!
 						execute_counter += 2;
 					}
 				}
-				else {
+				else 
+                {
 					//Add component
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component));
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, _copied_component));
 					++execute_counter;
 				}
 			}
+
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			if (isTransformValuesEdited)
-				//Refresh the new matrix values
-				editor.RefreshSelectedMatrix();
 		}
 	}
 
@@ -1839,22 +1845,6 @@ namespace idk {
 
         return outer_changed;
     }
-
-	void IGE_InspectorWindow::TransformModifiedCheck()
-	{
-		// if (ImGui::IsItemEdited()) {
-		// 	isBeingModified = true;
-		// }
-		if (ImGui::IsItemDeactivatedAfterEdit()) {
-			hasChanged = true;
-
-		}
-		else if (ImGui::IsItemDeactivated()) {
-			hasChanged = false;
-			//isBeingModified = false;
-
-		}
-	}
 
 
     void IGE_InspectorWindow::DisplayStack::ItemBegin(bool align)

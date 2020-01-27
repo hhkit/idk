@@ -33,7 +33,8 @@ namespace idk {
 	{
 		auto& ide = Core::GetSystem<IDE>();
 
-		if (copied_object.empty()) {
+		if (copied_object.empty()) // create new game object, not a copy
+		{
 			if (game_object_handle == Handle<GameObject>{})
 				game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
 			else
@@ -47,19 +48,14 @@ namespace idk {
 			for (const auto& str : initial_components)
 				game_object_handle->AddComponent(string_view{ str });
 
-			ide.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
-			ide.RefreshSelectedMatrix();
+			ide.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
 			return bool(game_object_handle); //Return true if create gameobject is successful
 		}
-		else {
-			try {
-				RecursiveCreateObjects(copied_object, true);
-			}
-			catch (const bool fail) {
-				return fail;
-			}
-			ide.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
-			ide.RefreshSelectedMatrix();
+		else
+		{
+			if (!RecursiveCreateObjects(copied_object, true))
+				return false;
+			ide.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
 			return true;
 		}
 	}
@@ -77,7 +73,7 @@ namespace idk {
 		return false;
 	}
 
-	void CMD_CreateGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
+	bool CMD_CreateGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
 	{
         static bool copy_as_prefab = false;
         if (isRoot)
@@ -94,19 +90,25 @@ namespace idk {
             }
         }
 
-		for (RecursiveObjects& object : vector_ref) {
-			Handle<GameObject> i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
-			if (isRoot) {
+		for (RecursiveObjects& object : vector_ref) 
+		{
+			if (object.preserved_handle == Handle<GameObject>{})
+				object.preserved_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			else
+				Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject(object.preserved_handle);
+
+			auto i = object.preserved_handle;
+			if (isRoot) 
+			{
 				game_object_handle = i;
 				isRoot = false;
 			}
 
-			if (!game_object_handle) {
-				throw false; //Throws if the recursion fails
-			}
+			if (!game_object_handle)
+				return false; //Throws if the recursion fails
 
-			for (auto& c : object.vector_of_components) {
-
+			for (auto& c : object.vector_of_components)
+			{
 				if (c.is<Transform>())
 				{
 					Transform& t = c.get<Transform>();
@@ -130,18 +132,19 @@ namespace idk {
                     if (copy_as_prefab)
                         i->AddComponent(c);
                 }
-				else {
+				else
 					i->AddComponent(c);
-				}
 			}
 
 			//Assign children with this gameobject as parent
-			for (auto& childObject : object.children) {
+			for (auto& childObject : object.children)
 				childObject.parent_of_children = i;
-			}
 
-			RecursiveCreateObjects(object.children);
+			if (!RecursiveCreateObjects(object.children))
+				return false;
 		}
+
+		return true;
 	}
 
 }

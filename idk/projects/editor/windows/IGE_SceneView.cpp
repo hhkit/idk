@@ -318,8 +318,6 @@ namespace idk {
 					//Select as normal
 					Core::GetSystem<IDE>().SelectGameObject(closestGameObject);
 					editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
-
-					Core::GetSystem<IDE>().RefreshSelectedMatrix();
 				}
 
 
@@ -789,17 +787,13 @@ namespace idk {
 
 			if (is_being_modified) {
 				if (!ImGuizmo::IsUsing()) {
-					vector<mat4>& originalMatrix = editor.selected_matrix;
 					int execute_counter = 0;
 					for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
 						mat4 modifiedMat = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>()->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.GetSelectedObjects().game_objects[i], originalMatrix[i], modifiedMat));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.GetSelectedObjects().game_objects[i], original_matrices[i], modifiedMat));
 						++execute_counter;
 					}
-					//Refresh the new matrix values
-					editor.RefreshSelectedMatrix();
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-
 
 					is_being_modified = false;
 				}
@@ -828,11 +822,21 @@ namespace idk {
 
 	void IGE_SceneView::ImGuizmoManipulateUpdate(Handle<Transform>& gameObjectTransform)
 	{
-		if (ImGuizmo::IsUsing()) {
-			is_being_modified = true;
-			mat4 difference = GenerateMat4FromGizmoMatrix() - gameObjectTransform->GlobalMatrix();
+		if (ImGuizmo::IsUsing())
+		{
 			IDE& editor = Core::GetSystem<IDE>();
-			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
+
+			if (!is_being_modified)
+			{
+				original_matrices.clear();
+				for (auto h : editor.GetSelectedObjects().game_objects)
+					original_matrices.push_back(h->GetComponent<Transform>()->GlobalMatrix());
+				is_being_modified = true;
+			}
+
+			mat4 difference = GenerateMat4FromGizmoMatrix() - gameObjectTransform->GlobalMatrix();
+			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i)
+			{
 				Handle<Transform> iTransform = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>();
 				mat4 newMatrix = iTransform->GlobalMatrix() + difference;
 				iTransform->GlobalMatrix(newMatrix); //Assign new variables

@@ -71,6 +71,8 @@ namespace idk
 		void EditorUpdate() override;
 		void EditorDraw() override;
 
+		void PollShortcutInputs();
+
 		// IDE_Style
 		void ApplyDefaultStyle();
 		void ApplyDefaultColors();
@@ -92,8 +94,11 @@ namespace idk
 		void SetSelection(ObjectSelection selection);
 		void Unselect();
 
-		// game object create/delete
+		// game object operations
 		void CreateGameObject(Handle<GameObject> parent = {}, string name = "", vector<string> initial_components = {});
+		void DeleteSelectedGameObjects();
+		void Copy();
+		void Paste();
 
 		void ClearScene();
 
@@ -135,13 +140,10 @@ namespace idk
 
 		//For selecting and displaying in inspector.
 		ObjectSelection				_selected_objects{};
-		vector<mat4>				selected_matrix{}; //For selected_gameObjects
-		void RefreshSelectedMatrix();
 
 		//For copy commands
 		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
-		vector<vector<RecursiveObjects>> copied_gameobjects	{}; //A vector of data containing gameobject data.
-		reflect::dynamic				 copied_component	{};
+		vector<vector<RecursiveObjects>> _copied_game_objects; // A vector of data containing gameobject data.
 
 
 

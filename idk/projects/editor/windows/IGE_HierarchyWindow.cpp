@@ -155,7 +155,6 @@ namespace idk {
 		int selectedCounter = 0; // This is for Shift Select. This iterates.
 		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
 		bool isShiftSelectCalled = false;
-		bool hasSelected_GameobjectsModified = false;
 		int focused_gameobject_position =  0 ; //If it is -1, it means the ScrollToGameObjectInHierarchy is not called.
 		int total_gameobjects_displayed = 0; //This is for the focused thing.
 		bool is_scroll_focused_gameObject_found = false;
@@ -277,7 +276,6 @@ namespace idk {
 						else {
 							Core::GetSystem<IDE>().SelectGameObject(handle, true);
 						}
-						hasSelected_GameobjectsModified = true;
 
 					}
 					else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) 
@@ -290,7 +288,6 @@ namespace idk {
 
 					else {
 						Core::GetSystem<IDE>().SelectGameObject(handle);
-						hasSelected_GameobjectsModified = true;
 					}
 
 					if (ImGui::IsMouseDoubleClicked(0)) {
@@ -494,11 +491,6 @@ namespace idk {
 
 		//	//Refresh the new matrix values
 		//}
-        if (hasSelected_GameobjectsModified)
-        {
-            Core::GetSystem<IDE>().RefreshSelectedMatrix();
-            OnGameObjectSelectionChanged.Fire();
-        }
 
 		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
 

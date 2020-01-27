@@ -170,27 +170,13 @@ namespace idk {
 
 
 			} //Do something if pressed
-			if (ImGui::MenuItem("Copy", "CTRL+C", nullptr, false)) {
-				IDE& editor = Core::GetSystem<IDE>();
-				editor.copied_gameobjects.clear();
-				for (auto& i : editor.GetSelectedObjects().game_objects) {
-					vector<RecursiveObjects> newObject{};
-					editor.RecursiveCollectObjects(i, newObject);
-					editor.copied_gameobjects.push_back(std::move(newObject));
-				}
-
+			if (ImGui::MenuItem("Copy", "CTRL+C", nullptr, false))
+			{
+				Core::GetSystem<IDE>().Copy();
 			} 
-			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
-				IDE& editor = Core::GetSystem<IDE>();
-				int execute_counter = 0;
-				 
-				for (auto& i : editor.copied_gameobjects) {
-					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject, i));
-					++execute_counter;
-				}
-
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-
+			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) 
+			{
+				Core::GetSystem<IDE>().Paste();
 			}
 
 			ImGui::Separator();
@@ -502,109 +488,6 @@ namespace idk {
 
 	}
 
-	void IGE_MainWindow::PollShortcutInput()
-	{
-
-		if (ImGui::IsAnyItemActive()) { //Do not do any shortcuts when inputs are active! EG: Editing texts!
-			return;
-		}
-		IDE& editor = Core::GetSystem<IDE>();
-		CommandController& commandController = editor.command_controller;
-		GizmoOperation& gizmo_operation = editor.gizmo_operation;
-
-		if (!ImGui::IsAnyMouseDown()) { //Disable shortcut whenever mouse is pressed
-
-			//CTRL + Z
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				commandController.UndoCommand();
-			}
-
-			//CTRL + Y
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				commandController.RedoCommand();
-			}
-
-			//CTRL + C
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				editor.copied_gameobjects.clear();
-				for (auto& i : editor.GetSelectedObjects().game_objects) {
-					vector<RecursiveObjects> newObject{};
-					editor.RecursiveCollectObjects(i, newObject);
-					editor.copied_gameobjects.push_back(std::move(newObject));
-				}
-			}
-
-			//CTRL + V
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				int execute_counter = 0;
-				for (auto& i : editor.copied_gameobjects) {
-					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject,i));
-					++execute_counter;
-				}
-
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			}
-
-
-			//QWER = Move, Translate, Rotate, Scale (refer to ASCII Table)
-			//Q = Move
-			if (ImGui::IsKeyPressed('Q')) {
-				gizmo_operation = GizmoOperation::Null;
-			}
-			//W = Translate
-			else if (ImGui::IsKeyPressed('W')) {
-				gizmo_operation = GizmoOperation::Translate;
-			}
-			//E = Rotate
-			else if (ImGui::IsKeyPressed('E')) {
-				gizmo_operation = GizmoOperation::Rotate;
-			}
-			//R = Scale
-			else if (ImGui::IsKeyPressed('R')) {
-				gizmo_operation = GizmoOperation::Scale;
-			}
-			
-			//DEL = Delete
-			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
-				int execute_counter = 0;
-				//Move the gizmo away before deleting
-				//float				fake_matrix[16]{ 0 }; 
-				//ImGuizmo::Manipulate(fake_matrix, fake_matrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, fake_matrix, NULL, NULL);
-
-				for (auto h : editor.GetSelectedObjects().game_objects)
-				{
-					if (h)
-					{
-						commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, h));
-						++execute_counter;
-					}
-				}
-
-
-				//while (!editor.selected_gameObjects.empty()) {
-				//	//Handle<GameObject> i = editor.selected_gameObjects.front();
-				//	//editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
-				//	commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
-				//	++execute_counter;
-				//}
-
-				editor.Unselect(); ++execute_counter;
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			}
-
-			//F = Focus on GameObject
-			if (ImGui::IsKeyPressed('F'))
-			{
-				editor.FocusOnSelectedGameObjects();
-
-			}
-
-
-
-		}
-	}
-
-
 	void IGE_MainWindow::Update() {
 
 		ImGui::PopStyleVar(3); //Pop from BeginWindow()
@@ -671,9 +554,6 @@ namespace idk {
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
 
 		DisplayHintBarChildWindow();
-
-		PollShortcutInput();
-		
 
 	}
 
