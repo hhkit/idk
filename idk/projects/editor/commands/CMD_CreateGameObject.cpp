@@ -31,8 +31,6 @@ namespace idk {
 
 	bool CMD_CreateGameObject::execute()
 	{
-		auto& ide = Core::GetSystem<IDE>();
-
 		if (copied_object.empty()) // create new game object, not a copy
 		{
 			if (game_object_handle == Handle<GameObject>{})
