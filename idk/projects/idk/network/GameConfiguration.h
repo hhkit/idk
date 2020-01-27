@@ -9,6 +9,7 @@ namespace idk
 	,	class EventInstantiatePrefabMessage
 	,	class EventLoadLevelMessage
 	,	class EventCSharpRPCMessage
+	,	class GhostMessage
 	>;
 
 	static constexpr auto MessageCount = std::tuple_size_v<NetworkMessageTuple>;

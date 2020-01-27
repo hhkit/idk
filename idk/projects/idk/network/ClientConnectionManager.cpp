@@ -3,6 +3,9 @@
 #include "SubstreamManager.h"
 #include <network/Client.h>
 #include <network/EventManager.h>
+#include <network/GhostManager.h>
+
+#undef SendMessage
 
 namespace idk
 {
@@ -12,6 +15,7 @@ namespace idk
 		static_assert(has_tag_v<RealSubstreamManager, SubstreamManager>, "Must inherit from CRTP template SubstreamManager<>!");
 		auto& ptr = substream_managers.emplace_back(std::make_unique<RealSubstreamManager>());
 		ptr->SubscribeEvents(*this);
+		ptr->SetConnectionManager(this);
 		return static_cast<RealSubstreamManager&>(*ptr);
 	}
 
@@ -50,5 +54,6 @@ namespace idk
 	void ClientConnectionManager::InstantiateSubmanagers()
 	{
 		AddSubstreamManager<EventManager>();
+		AddSubstreamManager<GhostManager>();
 	}
 }

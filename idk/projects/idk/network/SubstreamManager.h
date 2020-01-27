@@ -17,10 +17,14 @@ namespace idk
 	class BaseSubstreamManager
 	{
 	public:
+		void SetConnectionManager(ConnectionManager* man) { connection_manager = man; }
+
 		virtual ~BaseSubstreamManager() = default;
 		virtual size_t GetManagerType() const = 0;
 		virtual void SubscribeEvents(ClientConnectionManager&) = 0;
 		virtual void SubscribeEvents(ServerConnectionManager&) = 0;
+	protected:
+		ConnectionManager* connection_manager = nullptr;
 	};
 
 	template<typename T>

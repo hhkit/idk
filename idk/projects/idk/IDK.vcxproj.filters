@@ -1086,6 +1086,12 @@
     <ClInclude Include="network\EventInstantiatePrefabMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="network\GhostMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\GhostManager.h">
+      <Filter>network\substream managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1559,6 +1565,9 @@
     </ClCompile>
     <ClCompile Include="network\IDManager.cpp" />
     <ClCompile Include="network\ElectronTransformView.cpp" />
+    <ClCompile Include="network\GhostManager.cpp">
+      <Filter>network\substream managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

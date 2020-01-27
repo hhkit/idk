@@ -17,17 +17,12 @@ namespace idk
 {
 	void EventManager::SubscribeEvents(ClientConnectionManager& client)
 	{
-		connection_manager = &client;
-		client.Subscribe<TestMessage>([](TestMessage* message)
-			{
-				LOG_TO(LogPool::NETWORK, "Received message %d", message->i);
-			});
+		client.Subscribe<TestMessage>([](TestMessage* message) { LOG_TO(LogPool::NETWORK, "Received message %d", message->i); });
 		client.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });
 	}
 
 	void EventManager::SubscribeEvents(ServerConnectionManager& server)
 	{
-		connection_manager = &server;
 		server.Subscribe<TestMessage>([&server](TestMessage* message)
 			{
 				LOG_TO(LogPool::NETWORK, "Received message %d", message->i);

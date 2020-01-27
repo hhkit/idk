@@ -14,7 +14,6 @@ namespace idk
 		void SendTestMessage(int i);
 		void SendInstantiatePrefabEvent(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> quaternion);
 	private:
-		ConnectionManager* connection_manager = nullptr;
 		void OnInstantiatePrefabEvent(EventInstantiatePrefabMessage* message);
 	};
 }
