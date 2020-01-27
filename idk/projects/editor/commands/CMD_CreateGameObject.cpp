@@ -62,15 +62,10 @@ namespace idk {
 	
 	bool CMD_CreateGameObject::undo()
 	{
-		if (game_object_handle) {
-
-			IDE& editor = Core::GetSystem<IDE>();
-
-			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
-
-			return true;
-		}
-		return false;
+		if (!game_object_handle)
+			return false;
+		Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
+		return true;
 	}
 
 	bool CMD_CreateGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
