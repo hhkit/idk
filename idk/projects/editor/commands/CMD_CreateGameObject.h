@@ -21,6 +21,8 @@ namespace idk {
 
 		virtual bool undo() override;
 
+		Handle<GameObject> GetGameObject();
+
 	private:
 		Handle<GameObject> parenting_gameobject{};
         string name;

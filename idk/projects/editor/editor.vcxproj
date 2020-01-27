@@ -282,6 +282,7 @@
     <ClInclude Include="commands\CMD_DeleteGameObject.h" />
     <ClInclude Include="commands\CMD_InstantiatePrefab.h" />
     <ClInclude Include="commands\CMD_ModifyProperty.h" />
+    <ClInclude Include="commands\CMD_ParentGameObject.h" />
     <ClInclude Include="commands\CMD_SelectGameObject.h" />
     <ClInclude Include="commands\CMD_TransformGameObject.h" />
     <ClInclude Include="ComponentIcons.h" />
@@ -341,6 +342,7 @@
     <ClCompile Include="commands\CMD_DeleteGameObject.cpp" />
     <ClCompile Include="commands\CMD_InstantiatePrefab.cpp" />
     <ClCompile Include="commands\CMD_ModifyProperty.cpp" />
+    <ClCompile Include="commands\CMD_ParentGameObject.cpp" />
     <ClCompile Include="commands\CMD_SelectGameObject.cpp" />
     <ClCompile Include="commands\CMD_TransformGameObject.cpp" />
     <ClCompile Include="DragDropTypes.cpp" />

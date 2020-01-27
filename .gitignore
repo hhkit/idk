@@ -359,5 +359,6 @@ idk/dep/lib/SPIRV-Tools-optd.lib
 /testproj/User
 /idk/build
 /idk/engine_data/idk.dll
+/idk/engine_data/idk.xml
 /idk/tools/compiler
 /testproj/Cache

@@ -329,6 +329,18 @@ namespace idk::mono
         }
 		BIND_END();
 
+		BIND_START("idk.Bindings::GameObjectGetLayer", int, Handle<GameObject> go)
+		{
+			return go->Layer();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectSetLayer", void, Handle<GameObject> go, int layer)
+		{
+			go->Layer(layer);
+		}
+		BIND_END();
+
         BIND_START("idk.Bindings::GameObjectFindWithTag",  uint64_t, MonoString* tag)
         {
             char* s = mono_string_to_utf8(tag);
@@ -1250,6 +1262,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::CameraGetCullingMask", int, Handle<Camera> h)
+		{
+			return reinterpret_cast<int&>(h->layer_mask);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetCullingMask", void, Handle<Camera> h, int mask)
+		{
+			h->layer_mask = LayerMask(mask);
+		}
+		BIND_END();
+
 		// //////lights////////////////
 		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
 		{
@@ -1601,5 +1625,20 @@ namespace idk::mono
             h->font_size = v;
         }
         BIND_END();
+
+
+		// LayerMask
+
+		BIND_START("idk.Bindings::LayerMaskLayerToName", MonoString*, int index)
+		{
+			return mono_string_new(mono_domain_get(), Core::GetSystem<LayerManager>().LayerIndexToName(index).data());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LayerMaskNameToLayer", int, MonoString* s)
+		{
+			return Core::GetSystem<LayerManager>().NameToLayerIndex(unbox(s).get());
+		}
+		BIND_END();
 	}
 }

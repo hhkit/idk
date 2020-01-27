@@ -304,13 +304,17 @@ namespace idk {
 				}
 			}
 			//If the drag drops target on to the handle...
-			if (ImGui::BeginDragDropTarget()) {
-				
+			if (ImGui::BeginDragDropTarget()) 
+			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT)) {
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
-					//uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
-					if (selected_gameObjects.size()) {
-						for (Handle<GameObject>& i : selected_gameObjects) {
+					Handle<GameObject> drop_payload = Handle<GameObject>{ *static_cast<uint64_t*>(payload->Data) }; // Getting the Payload Data
+					auto object_itr = std::find(selected_gameObjects.begin(), selected_gameObjects.end(), drop_payload);
+
+					if (object_itr != selected_gameObjects.end()) // object is amongst the multi selected
+					{
+						for (Handle<GameObject>& i : selected_gameObjects)
+						{
 							if (i == handle) //do not parent self
 								continue;
 
@@ -328,12 +332,32 @@ namespace idk {
 							}
 
 							//If im draging to my parent, unparent
-							if (i->GetComponent<Transform>()->parent == handle) {
-								i->GetComponent<Transform>()->parent = Handle <GameObject>{};
+							if (i->Parent() == handle)
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+							else //Else parent normally
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+						}
+
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, selected_gameObjects.size()));
+					}
+					else
+					{
+						auto i = drop_payload;
+						Handle<GameObject> parentCheck = handle->GetComponent<Transform>()->parent; //Check for if im parenting to my own children
+						bool isParentingToChild = false;
+						while (parentCheck) {
+							if (i == parentCheck) {
+								isParentingToChild = true;
+								break;
 							}
-							else { //Else parent normally
-								i->GetComponent<Transform>()->SetParent(handle, true);
-							}
+							parentCheck = parentCheck->GetComponent<Transform>()->parent;
+						}
+						if (!isParentingToChild)
+						{
+							if (i->Parent() == handle)
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+							else //Else parent normally
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
 						}
 					}
 

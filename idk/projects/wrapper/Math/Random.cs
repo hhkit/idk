@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace idk
 {
@@ -34,5 +35,33 @@ namespace idk
                 value + value + value + value + value + value - 6;
             return mean + gauss / 3.0f * x;
         }
+
+        public static void Shuffle<T>(T[] array)
+        {
+            for (int i = 0; i < array.Length - 1; i++)
+            {
+                int j = Range(i, array.Length);
+                T tmp = array[i];
+                array[i] = array[j];
+                array[j] = tmp;
+            }
+        }
+
+        public static void Shuffle<T>(IList<T> list)
+        {
+            for (int i = 0; i < list.Count - 1; i++)
+            {
+                int j = Range(i, list.Count);
+                T tmp = list[i];
+                list[i] = list[j];
+                list[j] = tmp;
+            }
+        }
+    }
+
+    public static class RandomExtensions
+    {
+        public static T[] Shuffle<T>(this T[] array) { Random.Shuffle(array); return array; }
+        public static IList<T> Shuffle<T>(this IList<T> list) { Random.Shuffle(list); return list; }
     }
 }
