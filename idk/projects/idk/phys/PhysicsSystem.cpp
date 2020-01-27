@@ -41,15 +41,7 @@ namespace idk
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
-        // struct ColliderInfo
-        // {
-        //     Collider* collider;
-        //     aabb broad_phase;
-        //     CollidableShapes predicted_shape;
-        //     LayerManager::layer_t layer;
-        // };
 #if AABB_TREE
-		// inserted_within_tick.clear();
 		if (_rebuild_tree)
 		{
 			BuildStaticTree(colliders);
