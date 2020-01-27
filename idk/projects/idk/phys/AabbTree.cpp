@@ -7,7 +7,6 @@
 namespace idk
 {
 #define AREA_BALANCED 1
-#define DEBUG_TREE 1
 	void AabbTree::preallocate_nodes(size_t num)
 	{
 		_node_table.clear();
@@ -61,10 +60,7 @@ namespace idk
 		int sp = 1;
 		constexpr int max_size_stack = 4096;
 		int stack[max_size_stack];
-		// query_stack.clear();
-		// query_stack.resize(_nodes.size());
-		// 
-		// query_stack.emplace_back(_root_index);
+
 		*stack = _root_index;
 		while (sp)
 		{

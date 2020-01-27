@@ -32,13 +32,13 @@ namespace idk
 
 		hash_table<Handle<Collider>, int> _node_table;
 		vector<AabbNode> _nodes;
-		mutable vector<int> query_stack;
 		
 		int _free_list = -1;
 		int _node_count = 0;
 		int _leaf_count = 0;
 		int _root_index = -1;
-		// stats
+
+		// stats (not used yet)
 		bool _debug = true;
 		mutable int num_collision_tests = 0;
 		mutable int num_inserts = 0;
