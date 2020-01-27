@@ -1563,10 +1563,12 @@
     <ClCompile Include="test\TestComponent.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="network\IDManager.cpp" />
     <ClCompile Include="network\ElectronTransformView.cpp" />
     <ClCompile Include="network\GhostManager.cpp">
       <Filter>network\substream managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\IDManager.cpp">
+      <Filter>network\managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1779,7 +1781,7 @@
       <Filter>ds</Filter>
     </None>
     <None Include="network\ConnectionManager.inl">
-      <Filter>network</Filter>
+      <Filter>network\managers</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
