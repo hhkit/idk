@@ -61,7 +61,8 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-		//MenuBar
+		// MenuBar
+
         ImGui::BeginMenuBar();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(3);
@@ -142,6 +143,8 @@ namespace idk {
 		ImGui::PopStyleVar();
 
 		ImGui::EndMenuBar();
+		// ================================== menu bar
+
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
@@ -155,9 +158,6 @@ namespace idk {
 		int selectedCounter = 0; // This is for Shift Select. This iterates.
 		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
 		bool isShiftSelectCalled = false;
-		int focused_gameobject_position =  0 ; //If it is -1, it means the ScrollToGameObjectInHierarchy is not called.
-		int total_gameobjects_displayed = 0; //This is for the focused thing.
-		bool is_scroll_focused_gameObject_found = false;
 		vector<int> itemToSkipInGraph{};
 		//Refer to TestSystemManager.cpp
 
@@ -165,7 +165,8 @@ namespace idk {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
 
 		//Display gameobjects
-		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+		sceneGraph.visit([&](const Handle<GameObject> handle, int depth) -> bool 
+		{
 
 			if (depth > 0) {
 				for (int i = 0; i < depth; ++i)
@@ -216,14 +217,13 @@ namespace idk {
 			if (c_name)
 				goName = c_name->name;
 			
-			const bool isNameEmpty = goName.empty();
             const bool is_prefab = handle->HasComponent<PrefabInstance>();
             ImColor col = ImGui::GetColorU32(ImGuiCol_Text);
-			if (isNameEmpty) {
+			if (goName.empty())
+			{
 				goName = "Unnamed (";
 				goName.append(serialize_text(handle.id));
 				goName.append(")");
-				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
                 col = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
 			}
             if (is_prefab)
@@ -241,60 +241,64 @@ namespace idk {
 			
 			string idString = std::to_string(handle.id); //Use id string as id
 			if (is_its_child_been_selected)
+			{
 				ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.75f, 0.75f, 0.0f, 0.4f));
+				if (scroll_focused_gameObject)
+					ImGui::SetNextItemOpen(true); // open this tree node to reveal the child
+			}
 
+			//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
 
 			if (is_its_child_been_selected)
 				ImGui::PopStyleColor();
-				
 
             ImGui::PopStyleColor();
 
-			
+
 			++selectedCounter; //counter here is for shift selecting
 			
 			//Standard Click and ctrl click
-			if (ImGui::IsMouseReleased(0)) {
-				if (ImGui::IsItemHovered()) {
-					//Check if handle has been selected
-					bool hasBeenSelected = false;
-					int counter = 0;
-					for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
-						if (handle == selected_gameObjects[counter]) {
-							hasBeenSelected = true;
-							break;
-						}
-					}
-
-					if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) //Deselect that particular handle
-					{ 
-						if (hasBeenSelected) {
-							selected_gameObjects.erase(selected_gameObjects.begin() + counter);
-							Core::GetSystem<IDE>().SetSelection(selection);
-						}
-						else {
-							Core::GetSystem<IDE>().SelectGameObject(handle, true);
-						}
-
-					}
-					else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) 
-					{
-						if (selected_gameObjects.size() != 0) {
-							selectedItemCounter = selectedCounter;
-							isShiftSelectCalled = true;
-						}
-					}
-
-					else {
-						Core::GetSystem<IDE>().SelectGameObject(handle);
-					}
-
-					if (ImGui::IsMouseDoubleClicked(0)) {
-						Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+			if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
+			{
+				//Check if handle has been selected
+				bool hasBeenSelected = false;
+				int counter = 0;
+				for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
+					if (handle == selected_gameObjects[counter]) {
+						hasBeenSelected = true;
+						break;
 					}
 				}
+
+				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) //Deselect that particular handle
+				{
+					if (hasBeenSelected) {
+						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+						Core::GetSystem<IDE>().SetSelection(selection);
+					}
+					else {
+						Core::GetSystem<IDE>().SelectGameObject(handle, true);
+					}
+
+				}
+				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift)))
+				{
+					if (selected_gameObjects.size() != 0) {
+						selectedItemCounter = selectedCounter;
+						isShiftSelectCalled = true;
+					}
+				}
+
+				else {
+					Core::GetSystem<IDE>().SelectGameObject(handle);
+				}
+
+				if (ImGui::IsMouseDoubleClicked(0)) {
+					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+				}
 			}
+
 			//If the drag drops target on to the handle...
 			if (ImGui::BeginDragDropTarget()) 
 			{
@@ -368,16 +372,11 @@ namespace idk {
 				ImGui::EndDragDropSource();
 			}
 
-			++total_gameobjects_displayed;
-			if (scroll_focused_gameObject) {
-				if (!is_scroll_focused_gameObject_found) {
-					if (scroll_focused_gameObject == handle) {
-						is_scroll_focused_gameObject_found = true;
-					}
-					else {
-						++focused_gameobject_position;
-					}
-				}
+
+			if (scroll_focused_gameObject)
+			{
+				if (scroll_focused_gameObject == handle)
+					ImGui::SetScrollHereY();
 			}
 
 
@@ -392,126 +391,12 @@ namespace idk {
 			}
 
 			return true; //Go to next in visit. Does not skip children
-
-
-
-
 		});
 
-        ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2); // ImGuiStyleVar_ItemSpacing, FramePadding
 
-		//Shift Select logic
-		//if (isShiftSelectCalled) {
-		//	//std::cout << "Items to skip: ";
-		//	//for (int& i : itemToSkipInGraph) {
-		//	//	std::cout << i << ", ";
-		//	//}
-		//	//std::cout << std::endl;
-
-		//	int counter = 0; //This is the same as the above scenegraph. I cant use the tree to track which places to skip, so we are using the vector
-		//	vector<int> minMax{ -1,-1 };
-		//	vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
-		//	vector<Handle<GameObject>> selectedForSelect = selected_gameObjects;
-		//	sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
-
-		//		depth;
-		//		if (!handle) //Ignore handle zero
-		//			return true;
-		//		IDE& editor = Core::GetSystem<IDE>();
-		//		Handle<Camera>& editorCam = editor._camera.current_camera;
-		//		if (handle == editorCam->GetGameObject())
-		//			return true;
-		//		++counter;
-
-		//		//Finds what is selected and use as min and max
-		//		for (int i = 0; i < selectedForSelect.size(); ++i) {
-		//			if (selectedForSelect[i] == handle) {
-		//				minMax[0] = minMax[0] == -1 ? counter : (minMax[0] > counter ? counter : minMax[0]);
-		//				minMax[1] = minMax[1] == -1 ? counter : (minMax[1] < counter ? counter : minMax[1]);
-		//				break;
-		//			}
-		//		}
-
-		//		//Skips similar to closed trees
-		//		for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
-		//			if (itemToSkipInGraph[i] == counter) {
-		//				return false;
-		//			}
-		//		}
-
-
-		//		return true;
-		//	});
-		//	//std::cout << "Seletected item: " << selectedItemCounter << std::endl;
-		//	if (minMax[0] == minMax[1]) {
-		//		if (minMax[0] < selectedItemCounter)
-		//			minMax[1] = selectedItemCounter;
-		//		else
-		//			minMax[0] = selectedItemCounter;
-		//	}
-		//	else if (minMax[0] > selectedItemCounter) { //out of ranges, selectedItemCounter becomes min
-		//		minMax[0] = selectedItemCounter;
-		//	}
-		//	else if (minMax[1] < selectedItemCounter) { //out of ranges, selectedItemCounter becomes max
-		//		minMax[1] = selectedItemCounter;
-		//	}
-
-		//	selected_gameObjects.clear();
-		//	counter = 0;
-		//	int execute_counter = 0;
-		//	sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
-		//		
-		//		depth;
-		//		
-		//		if (!handle) //Ignore handle zero
-		//			return true;
-
-		//		++counter;
-
-
-
-		//		if (counter >= minMax[0] && counter <= minMax[1]) {
-		//			selected_gameObjects.push_back(handle);
-		//			Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-		//			++execute_counter;
-		//			hasSelected_GameobjectsModified = true;
-		//		}
-		//		//Skips similar to closed trees
-		//		for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
-		//			if (itemToSkipInGraph[i] == counter) {
-		//				return false;
-		//			}
-		//		}
-		//		return true;
-		//	});
-
-		//	Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-
-		//	//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
-
-		//	//Refresh the new matrix values
-		//}
-
-		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
-
-
-		if (scroll_focused_gameObject) { //If this was called by sceneview. scroll the hierarchy to this position then null this.
-
-			if (is_scroll_focused_gameObject_found) {
-				const int clamp_val = 5;
-				if (focused_gameobject_position < clamp_val)
-					focused_gameobject_position = 0;
-				else if ((total_gameobjects_displayed-focused_gameobject_position) < clamp_val)
-					focused_gameobject_position = total_gameobjects_displayed;
-				const float pos = static_cast<float>(focused_gameobject_position) / static_cast<float>(total_gameobjects_displayed);
-				ImGui::SetScrollY(ImGui::GetScrollMaxY() * pos); //sceneGraph will always be 1 or more
-			}
-
-
-
-			scroll_focused_gameObject = {};
-		}
-
+		// reset this, scrolled to in visit
+		scroll_focused_gameObject = {};
 
 		if (ImGui::InvisibleButton("empty_space", ImGui::GetContentRegionAvail()))
 		{

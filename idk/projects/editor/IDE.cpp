@@ -300,16 +300,13 @@ namespace idk
 			}
         }
 		
-		for (auto& i : ige_windows) {
+		for (auto& i : ige_windows)
 			i->DrawWindow();
-		}
 
 		if (bool_demo_window)
 			ImGui::ShowDemoWindow(&bool_demo_window);
 
 		_interface->ImGuiFrameEnd();
-
-		command_controller.FlushCommands();
 	}
 
 	void IDE::EditorDraw()
