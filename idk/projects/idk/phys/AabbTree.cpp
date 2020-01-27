@@ -2,37 +2,110 @@
 #include <phys/AAbbTree.h>
 #include <gfx/DebugRenderer.h>
 #include <core/GameObject.h>
-
+#include <phys/PhysicsSystem.h>
+#include <stack>
 namespace idk
 {
 #define AREA_BALANCED 1
+#define DEBUG_TREE 1
 	void AabbTree::preallocate_nodes(size_t num)
 	{
-		// _node_table.clear();
+		_node_table.clear();
 		_nodes.clear();
 		_nodes.resize(num);
 		// Clear doesnt call _nodes.clear(). Instead, it adds all the nodes in _nodes to the free_list
 		clear();
 	}
 
-	void AabbTree::add_to_update(Collider& collider, const aabb& new_bound, float margin)
-	{
-		// _to_update.emplace_back(collider, new_bound, margin);
-	}
-
-	void AabbTree::update(Collider& collider, const aabb& new_bound, float margin)
+	void AabbTree::update(Collider& collider, const ColliderInfo& info, float margin)
 	{
 		auto& node = _nodes[collider.node_id];
-		if (!node.fat_aabb.contains(new_bound))
+		int index = collider.node_id;
+		if (!node.fat_aabb.contains(info.broad_phase))
 		{
-			remove(collider.node_id);
-			const auto index = insert(collider, new_bound, margin);
-			_nodes[index].layer = collider.GetGameObject()->Layer();
+			if (remove(collider.node_id))
+			{
+				collider.node_id = -1;
+				index = insert(collider, info, margin);
+			}
 		}
+
+		_nodes[index].info = info;
 	}
 
+	int AabbTree::insert(Collider& collider, const ColliderInfo& info, float margin)
+	{
+		const auto index = insert(collider, info.broad_phase, margin);
+		if (index >= 0)
+		{
+			_nodes[index].info = info;
+		}
+		return index;
+	}
+
+	int AabbTree::find(Handle<Collider> collider) const
+	{
+		auto res = _node_table.find(collider);
+		if (res == _node_table.end())
+			return -1;
+		return res->second;
+	}
+
+	int AabbTree::query_collisions(const ColliderInfo& against, vector<ColliderInfoPair>& pairs) const
+	{
+		if (_root_index < 0)
+			return 0;
+
+		const auto& phys_sys = Core::GetSystem<PhysicsSystem>();
+		int num_collisions = 0;
+		int sp = 1;
+		constexpr int max_size_stack = 4096;
+		int stack[max_size_stack];
+		// query_stack.clear();
+		// query_stack.resize(_nodes.size());
+		// 
+		// query_stack.emplace_back(_root_index);
+		*stack = _root_index;
+		while (sp)
+		{
+			const int index = stack[--sp];
+			const auto& node = _nodes[index];
+			
+			// Check if the bounds of the leaf node collides against the other bounds
+			if (node.leaf())
+			{
+				if (!phys_sys.AreLayersCollidable(against.layer, node.info.layer))
+					continue;
+
+				++num_collision_tests;
+				if (!against.broad_phase.overlaps(node.info.broad_phase))
+					continue;
+
+				pairs.emplace_back(ColliderInfoPair{ &against,&node.info });
+				++num_collisions;
+			}
+			else
+			{
+				if (node.fat_aabb.overlaps(against.broad_phase))
+				{
+					stack[sp++] = node.left;
+					stack[sp++] = node.right;
+				}
+				++num_collision_tests;
+			}
+		}
+		
+		return num_collisions;
+	}
+// #pragma optimize("", off)
 	int AabbTree::insert(Collider& collider, const aabb& bound, float margin)
 	{
+		auto res = _node_table.find(collider.GetHandle());
+		if (res != _node_table.end())
+		{
+			return collider.node_id;
+		}
+
 		int ret_val = -1;
 
 		// Initialize the new node with data
@@ -49,9 +122,14 @@ namespace idk
 			auto& inserted_node = _nodes[inserted_index];
 			inserted_node.collider = collider.GetHandle();
 			inserted_node.fat_aabb = inserted_aabb;
+			inserted_node.info.broad_phase = bound;
+			// inserted_node.info.layer = collider.GetGameObject()->Layer();
 			collider.node_id = inserted_index;
 
 			_root_index = inserted_index;
+			++_leaf_count;
+
+			_node_table.emplace(collider.GetHandle(), inserted_index);
 			return inserted_index;
 		}
 
@@ -61,14 +139,14 @@ namespace idk
 
 		while (to_explore >= 0)
 		{
-			auto& node = _nodes[to_explore];
-			if (node.leaf())
+			if (_nodes[to_explore].leaf())
 			{
 				// Create parent and new node
 				int inserted_index = get_node();
-				auto& inserted_node = _nodes[inserted_index];
 				parent_index = get_node();
+				auto& inserted_node = _nodes[inserted_index];
 				auto& parent_node = _nodes[parent_index];
+				auto& node = _nodes[to_explore];
 
 				// Initializing the node to be inserted
 				inserted_node.collider = collider.GetHandle();
@@ -102,10 +180,12 @@ namespace idk
 #else
 				// No need to update the aabb of this parent node -> We do it when we call sync anyways.
 #endif
+				++_leaf_count;
 				ret_val = inserted_index;
 				break;
 			}
 			
+			auto& node = _nodes[to_explore];
 			auto& node_left = _nodes[node.left];
 			auto& node_right = _nodes[node.right];
 
@@ -150,15 +230,27 @@ namespace idk
 #endif
 		IDK_ASSERT(parent_index >= 0);
 		IDK_ASSERT(ret_val >= 0);
+
+		_node_table.emplace(collider.GetHandle(), ret_val);
 		return ret_val;
 	}
 
-	void AabbTree::remove(int index)
+	bool AabbTree::remove(int index)
 	{
+		if (index < 0 || index >= _nodes.size())
+		{
+			LOG_CRASH_TO(LogPool::PHYS, "Removing element that doesnt exist");
+			return false;
+		}
+
 		auto& node_to_remove = _nodes[index];
-		
-		// MUST BE LEAF NODE
-		IDK_ASSERT(node_to_remove.leaf());
+		auto res = _node_table.find(node_to_remove.collider);
+		if (res == _node_table.end())
+			return false;
+
+		// Must be valid and leaf node
+		if (!node_to_remove.valid || !node_to_remove.leaf())
+			return false;
 
 		// Removing only node in the tree
 		if (index == _root_index)
@@ -166,7 +258,10 @@ namespace idk
 			add_to_freelist(index);
 			_root_index = -1;
 			_node_count = 0;
-			return;
+			_leaf_count = 0;
+
+			_node_table.erase(res);
+			return true;
 		}
 
 		int parent_index = node_to_remove.parent;
@@ -187,7 +282,7 @@ namespace idk
 			add_to_freelist(parent_index);
 			add_to_freelist(index);
 			// node_to_remove.collider->node_id = -1;
-
+			
 			sync(sibling.parent);
 			// Means node's parent is root
 		};
@@ -204,26 +299,37 @@ namespace idk
 		{
 			remove_impl(sibling_index);
 		}
+
+		_node_table.erase(res);
+		--_leaf_count;
+		return true;
 	}
 
 	void AabbTree::clear()
 	{
 		const int max_size = s_cast<int>(_nodes.size());
-		
+		_free_list = -1;
 
 		// Insert backwards
 		for (int i = max_size - 1; i >= 0; --i)
 		{
+			auto& node = _nodes[i];
+			if (node.collider)
+				node.collider->node_id = -1;
 			add_to_freelist(i);
 		}
 		// IDK_ASSERT(_free_list == 0);
 		_node_count = 0;
+		_leaf_count = 0;
 		_root_index = -1;
+		_node_table.clear();
+	}
 
-		if (max_size == 0)
-		{
-			_free_list = -1;
-		}
+	void AabbTree::reset_stats()
+	{
+		num_collision_tests = 0;
+		num_inserts = 0;
+		num_removes = 0;
 	}
 
 	void AabbTree::debug_draw() const
@@ -238,16 +344,12 @@ namespace idk
 		}
 	}
 
-	void AabbTree::node_deactivated(int index)
-	{
-
-	}
-
 	void AabbTree::add_to_freelist(int index)
 	{
 		auto& node = _nodes[index];
-
-		node.parent = -1;	// Will also set next to -1.
+		
+		node.parent = -1;
+		node.next = -1;
 		node.left = -1;
 		node.right = -1;
 		node.valid = false;

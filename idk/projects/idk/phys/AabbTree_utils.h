@@ -6,12 +6,18 @@
 
 namespace idk
 {
-	struct update_info
+	struct ColliderInfo
 	{
-		Collider& collider;
-		aabb new_bound;
-		float margin = 0.2f;
-		
+		Collider* collider;
+		aabb broad_phase;
+		CollidableShapes predicted_shape;
+		LayerManager::layer_t layer;
+	};
+
+	struct ColliderInfoPair
+	{
+		const ColliderInfo* lhs;
+		const ColliderInfo* rhs;
 	};
 
 	struct AabbNode
@@ -20,10 +26,8 @@ namespace idk
 
 		bool leaf() const { return valid && left < 0; }
 		// bool valid() const { return }
-		union {
-			int parent;
-			int next;	// free list maybe
-		};
+		int parent = -1;
+		int next = -1;	// free list maybe
 		
 		int left = -1;
 		int right = -1;
@@ -33,6 +37,6 @@ namespace idk
 		bool valid = false;
 
 		// Run-time stuff
-		LayerManager::layer_t layer;
+		ColliderInfo info;
 	};
 }

@@ -29,6 +29,7 @@ namespace idk
 		Handle<class RigidBody> _rigidbody;
 		bool _static_cache = false;
         bool _active_cache = false;
+		bool _was_enabled  = true;
 		aabb _broadphase_cache{};
 		
 		friend class PhysicsSystem;

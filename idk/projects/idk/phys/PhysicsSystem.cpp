@@ -27,6 +27,7 @@
 
 namespace idk
 {
+#define AABB_TREE 1
 	constexpr float restitution_slop = 0.01f;
 	constexpr float penetration_min_slop = 0.001f;
 	constexpr float penetration_max_slop = 0.5f;
@@ -40,71 +41,117 @@ namespace idk
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
-        struct ColliderInfo
-        {
-            Collider& collider;
-            aabb broad_phase;
-            CollidableShapes predicted_shape;
-            LayerManager::layer_t layer;
-        };
-
+        // struct ColliderInfo
+        // {
+        //     Collider* collider;
+        //     aabb broad_phase;
+        //     CollidableShapes predicted_shape;
+        //     LayerManager::layer_t layer;
+        // };
+#if AABB_TREE
+		// inserted_within_tick.clear();
 		if (_rebuild_tree)
 		{
 			BuildStaticTree(colliders);
+			// const auto count = static_tree.leaf_count();
+			// LOG("TOTAL LEAVES: %d", count);
 			_rebuild_tree = false;
 		}
-
-        vector<ColliderInfo> static_info;
+#endif
+        // vector<ColliderInfo> static_info;
         vector<ColliderInfo> dynamic_info;
 
-        static_info.reserve(colliders.size() - rbs.size());
+        // static_info.reserve(colliders.size() - rbs.size());
 
         for (auto& elem : colliders)
         {
+			// bool to_insert = false;
 			bool to_insert = false;
-            const bool active_this_frame =  elem.is_enabled_and_active();
-			const bool active_prev_frame = elem._active_cache;
-			const bool is_prefab = elem.GetHandle().scene == Scene::prefab;
+			bool to_remove = false;
 
-			// Was activated this frame
-			if (active_this_frame)
+			// Active/Enabled
+            const bool is_active =  elem.is_enabled_and_active();
+			const bool was_active = elem._active_cache;
+			elem._active_cache = is_active;
+
+			// Static/non-static
+			const bool was_static = elem._static_cache;
+			elem.find_rigidbody();
+			const bool is_static = elem._static_cache;
+			
+			const bool is_prefab = elem.GetHandle().scene == Scene::prefab;
+#if AABB_TREE
+			// Update tree based on colliders that are active
+			if (!is_prefab)
 			{
-				if (!active_prev_frame && !is_prefab)
+				// deactivated this frame
+				if (was_active && !is_active)
 				{
-					// TODO: Insert node here.
+					// make sure its static
+					if (is_static || was_static)
+					{
+						to_remove = true;
+					}
+				}
+				// Activated this frame
+				else if (is_active && !was_active)
+				{
+					// Check to see if it is static or not
 					to_insert = true;
 				}
+				// Was neither activated nor deactivated
+				else if(is_active)
+				{
+					// Check if the had a rigidbody added to it
+					if (was_static && !is_static)
+					{
+						to_remove = true;
+						
+					}
+					// Rigidbody removed
+					else if (is_static && !was_static)
+					{
+						to_insert = true;
+					}
+				}
 			}
-			// Not active this frame but last frame was active
-			else if(active_prev_frame && !is_prefab)
+
+			if (to_remove)
 			{
-				static_tree.remove(elem.node_id);
-				elem.node_id = -1;
+				if (static_tree.remove(elem.node_id))
+				{
+					// LOG_TO(LogPool::PHYS, "REMOVED from tick: %u, %u, %u", elem.GetHandle().index, elem.GetHandle().gen, elem.GetHandle().scene);
+					elem.node_id = -1;
+				}
 			}
+#endif
+			
+			if (!is_active || is_prefab)
+				continue;
 
-			elem._active_cache = active_this_frame;
-            if (!elem._active_cache || is_prefab)
-                continue;
-
-            elem.find_rigidbody();
-            if (elem._static_cache)
+            if (is_static)
             {
-                static_info.emplace_back(
-                    std::visit([&elem](const auto& shape) -> ColliderInfo {
-                        auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-						elem._broadphase_cache = pred_shape.bounds();
-                        return ColliderInfo{ elem, elem._broadphase_cache, pred_shape, elem.GetGameObject()->Layer() };
-                    }, elem.shape)
-                );
+				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {
+					auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
+					elem._broadphase_cache = pred_shape.bounds();
+					return ColliderInfo{ .collider = &elem, .broad_phase = elem._broadphase_cache, .predicted_shape = pred_shape, .layer = elem.GetGameObject()->Layer() };
+				}, elem.shape);
+				// static_info.emplace_back(collider_info);
+#if AABB_TREE
 				if (to_insert)
-					static_tree.insert(elem, static_info.back().broad_phase, margin);
+				{
+					// inserted_within_tick.emplace(elem.GetHandle());
+					static_tree.insert(elem, collider_info, margin);
+					// LOG_TO(LogPool::PHYS, "INSERTED from TICK: %u, %u, %u", elem.GetHandle().index, elem.GetHandle().gen, elem.GetHandle().scene);
+				}
 				else
-					static_tree.update(elem, static_info.back().broad_phase, margin);
+					static_tree.update(elem, collider_info, margin);
+#endif
             }
             else
-                dynamic_info.emplace_back(ColliderInfo{ .collider = elem, .layer = elem.GetGameObject()->Layer() });
+                dynamic_info.emplace_back(ColliderInfo{ .collider = &elem, .layer = elem.GetGameObject()->Layer() });
 		}
-		
+		// LOG_TO(LogPool::PHYS, "static_info: %d, tree: %d", static_info.size(), static_tree.leaf_count());
 		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
 		{
 			std::visit([&](const auto& shape)
@@ -200,50 +247,47 @@ namespace idk
 			    return phys::col_failure{};
 	    };
 
+		struct CollisionInfo
+		{
+			const ColliderInfo* a;
+			const ColliderInfo* b;
+			phys::col_success res;
+		};
+
+		vector<ColliderInfoPair> info;
+		info.reserve(dynamic_info.size() * 4);
+		vector<CollisionInfo> collision_frame;
+		collision_frame.reserve(dynamic_info.size()); //guess
+
 		const auto CollideObjects = [&]()
 		{
-            struct CollisionInfo
-            {
-                const ColliderInfo* a;
-                const ColliderInfo* b;
-                phys::col_success res;
-            };
-			vector<CollisionInfo> collision_frame;
-            collision_frame.reserve(dynamic_info.size()); //guess
+			info.clear();
+			collision_frame.clear();
+			
 
 			const auto dt = Core::GetDT().count();
 
             // setup predict for dynamic objects
             for (auto& info : dynamic_info)
             {
-                info.predicted_shape = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, info.collider.shape);
-                info.broad_phase = std::visit([&pred_tfm = info.collider._rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, info.collider.shape);
-                const auto& vel = info.collider._rigidbody->velocity();
+                info.predicted_shape = std::visit([&pred_tfm = info.collider->_rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, info.collider->shape);
+                info.broad_phase = std::visit([&pred_tfm = info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, info.collider->shape);
+                const auto& vel = info.collider->_rigidbody->velocity();
                 info.broad_phase.grow(vel);
                 info.broad_phase.grow(-vel);
             }
 
             // O(N^2) collision check
             // all objects confirmed to be active (but may be sleeping)
-
-			struct ColliderInfoPair
-			{
-				const ColliderInfo* lhs;
-				const ColliderInfo* rhs;
-			};
-
-			vector<ColliderInfoPair> info;
-			info.reserve(dynamic_info.size() * 4);
-
             // dynamic vs dynamic
 			auto dynamic_end = dynamic_info.end();
             for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
             {
-				const auto& lrigidbody = *i->collider._rigidbody;
+				const auto& lrigidbody = *i->collider->_rigidbody;
 				const bool lrb_sleeping = lrigidbody.sleeping();
                 for (auto j = i + 1; j != dynamic_end; ++j)
                 {                    
-                    const auto& rrigidbody = *j->collider._rigidbody;
+                    const auto& rrigidbody = *j->collider->_rigidbody;
 
                     if (lrb_sleeping && rrigidbody.sleeping())
                         continue;
@@ -263,31 +307,44 @@ namespace idk
 					*/
                 }
             }
+			// vector<ColliderInfoPair> tree_cols;
+			// int tree_num_cols = 0;
+			// int notree_num_tests = 0;
+			// int notree_num_cols = 0;
             // dynamic vs static
             for (const auto& i : dynamic_info)
             {
-				const auto& lrigidbody = *i.collider._rigidbody;
+				const auto& lrigidbody = *i.collider->_rigidbody;
 
 				if (lrigidbody.sleeping())
 					continue;
-
-                for (const auto& j : static_info)
-                {
-                    if (!AreLayersCollidable(i.layer, j.layer))
-                        continue;
-                    if (!i.broad_phase.overlaps(j.broad_phase))
-                        continue;
+#if AABB_TREE
+				static_tree.query_collisions(i, info);
+#else
+				for (const auto& j : static_info)
+				{
+					if (!AreLayersCollidable(i.layer, j.layer))
+						continue;
+					++notree_num_tests;
+					if (!i.broad_phase.overlaps(j.broad_phase))
+						continue;
+					++notree_num_cols;
 					info.emplace_back(ColliderInfoPair{ &i,&j });
 					/*
-                    const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
-                    if (collision)
-                    {
-                        collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-                        collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
-                    }
+					const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
+					if (collision)
+					{
+						collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+						collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
+					}
 					*/
-                }
+				}
+#endif
+				
             }
+			
+			// LOG_TO(LogPool::PHYS, "Num Tests: %d/%d    |    %d/%d", static_tree.num_tests(), notree_num_tests, tree_num_cols, notree_num_cols);
+			// static_tree.reset_stats();
 
 			using CollisionJobResult = std::tuple<vector<CollisionInfo>, CollisionList>;
 			vector<mt::Future<CollisionJobResult>> batches;
@@ -314,7 +371,7 @@ namespace idk
 								if (collision)
 								{
 									collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-									batch_collisions.emplace(CollisionPair{ i->collider.GetHandle(), j->collider.GetHandle() }, collision.value());
+									batch_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, collision.value());
 								}
 								++begin_itr;
 							}
@@ -334,8 +391,8 @@ namespace idk
 			}
 			for (const auto& [i, j, result] : collision_frame)
 			{
-				const auto& lcollider = i->collider;
-				const auto& rcollider = j->collider;
+				const auto& lcollider = *i->collider;
+				const auto& rcollider = *j->collider;
 
 				auto lrigidbody = lcollider._rigidbody;
 				auto rrigidbody = rcollider._rigidbody;
@@ -409,7 +466,7 @@ namespace idk
 		{
             for (const auto& elem : dynamic_info)
             {
-                auto& rigidbody = *elem.collider._rigidbody;
+                auto& rigidbody = *elem.collider->_rigidbody;
                 if (!rigidbody.is_kinematic)
                     rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
                 else
@@ -429,11 +486,11 @@ namespace idk
         if (!debug_draw_colliders)
             return;
 
-		static_tree.debug_draw();
-        for (const auto& elem : static_info)
-            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+		// static_tree.debug_draw();
+        // for (const auto& elem : static_info)
+        //     debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
         for (const auto& elem : dynamic_info)
-            debug_draw(elem.predicted_shape, elem.collider.is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+            debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
         for (auto& elem : colliders)
         {
             if (!elem._active_cache)
@@ -781,7 +838,10 @@ namespace idk
 
 			col.find_rigidbody();
 			if (col._static_cache)
+			{
 				static_tree.insert(col, col.bounds(), 0.2f);
+				// inserted_within_tick.emplace(col.GetHandle());
+			}
 		}
 	}
 
@@ -793,19 +853,24 @@ namespace idk
 
 	void PhysicsSystem::Init()
 	{
-		static_tree.preallocate_nodes(4);
+#if AABB_TREE
+		static_tree.preallocate_nodes(2500); // Avg ~1030 static objects -> means (2 * 1030 - 1) total nodes in b-tree
 		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
 		{
 			if (!collider)
 				return;
 
 			auto& col = *collider;
-			if (!col.is_enabled_and_active() || col.GetHandle().scene == Scene::prefab)
+			col._static_cache = col.is_enabled_and_active();
+			if (!col._static_cache || col.GetHandle().scene == Scene::prefab)
 				return;
 
 			col.find_rigidbody();
 			if (col._static_cache)
+			{
 				static_tree.insert(col, col.bounds(), 0.2f);
+				// LOG_TO(LogPool::PHYS, "INSERTED from object create: %u, %u, %u", collider.index, collider.gen, collider.scene);
+			}
 		};
 
 		GameState::GetGameState().OnObjectDestroy<Collider>() += [&](Handle<Collider> collider)
@@ -814,13 +879,18 @@ namespace idk
 				return;
 
 			auto& col = *collider;
-			if (col.node_id < 0)
+			if (!col._static_cache)
 				return;
 
-			col._active_cache = false;
-			static_tree.remove(col.node_id);
-			col.node_id = -1;
+			if (static_tree.remove(col.node_id))
+			{
+				// LOG_TO(LogPool::PHYS, "REMOVED from object create: %u, %u, %u", collider.index, collider.gen, collider.scene);
+				col.node_id = -1;
+				col._active_cache = false;
+			}
+			
 		};
+#endif
 	}
 
 	void PhysicsSystem::Shutdown()
