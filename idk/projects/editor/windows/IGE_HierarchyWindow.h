@@ -30,8 +30,11 @@ namespace idk
 		void ScrollToSelectedInHierarchy(Handle<GameObject> gameObject);
 
 	private:
-		ImGuiTextFilter textFilter{};
-		bool show_editor_objects{};
+		ImGuiTextFilter textFilter;
+		bool show_editor_objects = false;
+
+		// [0] is the start anchor, [1] is what the user shift selected to
+		Handle<GameObject> shift_select_anchors[2];
 
 		//This checks when user raycast selects. When this is not null, it will focus in the scenegraph.visit. It will then be nulled there.
 		Handle<GameObject> scroll_focused_gameObject;

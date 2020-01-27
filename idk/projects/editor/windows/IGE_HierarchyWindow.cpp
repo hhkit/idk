@@ -120,7 +120,7 @@ namespace idk {
 		if (ImGui::Button("...##AdditionalStuff")) {
 			ImGui::OpenPopup("OpenAdditionalStuff");
 		}
-		if (ImGui::BeginPopup("OpenAdditionalStuff")) {
+		if (ImGui::BeginPopup("OpenAdditionalStuff", ImGuiWindowFlags_NoMove)) {
 			ImGui::Checkbox("Show Editor Objects", &show_editor_objects);
 			ImGui::EndPopup();
 		}
@@ -155,19 +155,19 @@ namespace idk {
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();
 
-		int selectedCounter = 0; // This is for Shift Select. This iterates.
-		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
-		bool isShiftSelectCalled = false;
-		vector<int> itemToSkipInGraph{};
-		//Refer to TestSystemManager.cpp
+		bool shift_selecting = false;
 
+		ObjectSelection selection = Core::GetSystem<IDE>().GetSelectedObjects();
+		vector<Handle<GameObject>>& selected_gameObjects = selection.game_objects;
+
+		if (shift_select_anchors[0] && shift_select_anchors[1])
+			selected_gameObjects.clear();
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
 
 		//Display gameobjects
 		sceneGraph.visit([&](const Handle<GameObject> handle, int depth) -> bool 
 		{
-
 			if (depth > 0) {
 				for (int i = 0; i < depth; ++i)
 					ImGui::Indent();
@@ -176,25 +176,18 @@ namespace idk {
 				for (int i = depth; i < 0; ++i)
 					ImGui::Unindent();
 			}
-			if (!handle) //Ignore handle zero
+
+			if (!handle) //Ignore null/invalid handle
+				return true;
+			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) // ignore editor
 				return true;
 
-			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) { // ignore editor
-				++selectedCounter; //counter here is for shift selecting
-
-				return true;
-			}
-
-			ObjectSelection selection = Core::GetSystem<IDE>().GetSelectedObjects();
-			vector<Handle<GameObject>>& selected_gameObjects = selection.game_objects;
-
-			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
-			if (children->size() == 0) {
+			if (children->size() == 0)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
-			}
 
 			bool is_its_child_been_selected = false;
 			//Check if gameobject has been selected. Causes Big-O(n^2)
@@ -235,7 +228,6 @@ namespace idk {
 			
 			if (!textFilter.PassFilter(goName.c_str())) {
                 ImGui::PopStyleColor();
-				++selectedCounter; // counter here is for shift selecting
 				return true;
 			}
 			
@@ -255,24 +247,45 @@ namespace idk {
 
             ImGui::PopStyleColor();
 
-
-			++selectedCounter; //counter here is for shift selecting
-			
-			//Standard Click and ctrl click
-			if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
+			// handle shift selecting here.
+			// [0] is the start anchor, [1] is what the user shift selected to
+			if (shift_select_anchors[0] && shift_select_anchors[1])
 			{
-				//Check if handle has been selected
-				bool hasBeenSelected = false;
-				int counter = 0;
-				for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
-					if (handle == selected_gameObjects[counter]) {
-						hasBeenSelected = true;
-						break;
+				if (!shift_selecting)
+				{
+					if (handle == shift_select_anchors[0] || handle == shift_select_anchors[1])
+					{
+						shift_selecting = true;
+						selected_gameObjects.push_back(handle);
 					}
 				}
-
-				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) //Deselect that particular handle
+				else // shift_selecting
 				{
+					selected_gameObjects.push_back(handle);
+					if (handle == shift_select_anchors[0] || handle == shift_select_anchors[1])
+					{
+						shift_selecting = false;
+						Core::GetSystem<IDE>().SetSelection(selection);
+						shift_select_anchors[1] = {}; // keep the start anchor which is [0]
+					}
+				}
+			}
+			
+			//Standard Click and ctrl click
+			if (ImGui::IsMouseReleased(0) && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
+			{
+				if (ImGui::GetIO().KeyCtrl) //Deselect that particular handle
+				{
+					//Check if handle has been selected
+					bool hasBeenSelected = false;
+					int counter = 0;
+					for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
+						if (handle == selected_gameObjects[counter]) {
+							hasBeenSelected = true;
+							break;
+						}
+					}
+
 					if (hasBeenSelected) {
 						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
 						Core::GetSystem<IDE>().SetSelection(selection);
@@ -281,20 +294,21 @@ namespace idk {
 						Core::GetSystem<IDE>().SelectGameObject(handle, true);
 					}
 
+					shift_select_anchors[0] = handle;
 				}
-				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift)))
+				else if (ImGui::GetIO().KeyShift)
 				{
-					if (selected_gameObjects.size() != 0) {
-						selectedItemCounter = selectedCounter;
-						isShiftSelectCalled = true;
-					}
+					if (shift_select_anchors[0])
+						shift_select_anchors[1] = handle;
 				}
-
-				else {
+				else
+				{
 					Core::GetSystem<IDE>().SelectGameObject(handle);
+					shift_select_anchors[0] = handle;
 				}
 
-				if (ImGui::IsMouseDoubleClicked(0)) {
+				if (ImGui::IsMouseDoubleClicked(0)) 
+				{
 					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
 				}
 			}
@@ -380,15 +394,10 @@ namespace idk {
 			}
 
 
-			if (isTreeOpen) {
-
+			if (isTreeOpen)
 				ImGui::TreePop();
-
-			}
-			else {
-				itemToSkipInGraph.push_back(selectedCounter);
+			else
 				return false; //Skip children
-			}
 
 			return true; //Go to next in visit. Does not skip children
 		});
