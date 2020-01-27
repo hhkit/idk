@@ -48,14 +48,12 @@ namespace idk {
 			for (const auto& str : initial_components)
 				game_object_handle->AddComponent(string_view{ str });
 
-			ide.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
 			return bool(game_object_handle); //Return true if create gameobject is successful
 		}
 		else
 		{
 			if (!RecursiveCreateObjects(copied_object, true))
 				return false;
-			ide.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
 			return true;
 		}
 	}

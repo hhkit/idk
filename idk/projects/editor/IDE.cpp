@@ -432,6 +432,7 @@ namespace idk
 			COMMAND(CMD_CreateGameObject, parent, std::move(name), std::move(initial_components)));
 		SelectGameObject(cmd->GetGameObject(), false, true);
 		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+		FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(cmd->GetGameObject());
 	}
 
     void IDE::DeleteSelectedGameObjects()

@@ -210,7 +210,9 @@ namespace idk {
                     if (!payload->IsDelivery())
                         continue;
 
-                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
+                    auto* cmd = Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
+					Core::GetSystem<IDE>().SelectGameObject(cmd->GetGameObject(), false, true);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
                     break;
                 }
             }

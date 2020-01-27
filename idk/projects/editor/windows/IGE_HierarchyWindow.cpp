@@ -155,8 +155,8 @@ namespace idk {
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();
 
+		Handle<GameObject> scroll_focus_next_frame;
 		bool shift_selecting = false;
-
 		ObjectSelection selection = Core::GetSystem<IDE>().GetSelectedObjects();
 		vector<Handle<GameObject>>& selected_gameObjects = selection.game_objects;
 
@@ -306,26 +306,28 @@ namespace idk {
 					Core::GetSystem<IDE>().SelectGameObject(handle);
 					shift_select_anchors[0] = handle;
 				}
+			}
 
-				if (ImGui::IsMouseDoubleClicked(0)) 
-				{
-					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
-				}
+			if (ImGui::IsMouseDoubleClicked(0))
+			{
+				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
 			}
 
 			//If the drag drops target on to the handle...
 			if (ImGui::BeginDragDropTarget()) 
 			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT)) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT)) 
+				{
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
 					Handle<GameObject> drop_payload = Handle<GameObject>{ *static_cast<uint64_t*>(payload->Data) }; // Getting the Payload Data
 					auto object_itr = std::find(selected_gameObjects.begin(), selected_gameObjects.end(), drop_payload);
 
+					int execute_counter = 0;
 					if (object_itr != selected_gameObjects.end()) // object is amongst the multi selected
 					{
-						for (Handle<GameObject>& i : selected_gameObjects)
+						for (Handle<GameObject> i : selected_gameObjects)
 						{
-							if (i == handle) //do not parent self
+							if (!i || i == handle) //do not parent self
 								continue;
 
 							Handle<GameObject> parentCheck = handle->GetComponent<Transform>()->parent; //Check for if im parenting to my own children
@@ -346,9 +348,10 @@ namespace idk {
 								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
 							else //Else parent normally
 								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+							++execute_counter;
 						}
 
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, static_cast<int>(selected_gameObjects.size())));
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 					}
 					else
 					{
@@ -368,16 +371,19 @@ namespace idk {
 								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
 							else //Else parent normally
 								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+							Core::GetSystem<IDE>().SelectGameObject(i, false, true);
+							Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 						}
 					}
 
+					scroll_focus_next_frame = drop_payload;
 				}
 				ImGui::EndDragDropTarget();
 			}
 			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
 			{
-				ImGui::SetDragDropPayload(DragDrop::GAME_OBJECT, &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
-				ImGui::Text("Draging gameobject: ");
+				ImGui::SetDragDropPayload(DragDrop::GAME_OBJECT, &handle.id, sizeof(uint64_t));
+				ImGui::Text("Dragging gameobject: ");
 				ImGui::SameLine();
 				ImGui::TextColored(ImVec4(1,1,0,1),goName.c_str());
 				ImGui::Text("Drag to another gameobject to parent.");
@@ -390,7 +396,10 @@ namespace idk {
 			if (scroll_focused_gameObject)
 			{
 				if (scroll_focused_gameObject == handle)
+				{
 					ImGui::SetScrollHereY();
+					scroll_focused_gameObject = {};
+				}
 			}
 
 
@@ -404,12 +413,40 @@ namespace idk {
 
 		ImGui::PopStyleVar(2); // ImGuiStyleVar_ItemSpacing, FramePadding
 
-		// reset this, scrolled to in visit
-		scroll_focused_gameObject = {};
+		if (scroll_focus_next_frame)
+			ScrollToSelectedInHierarchy(scroll_focus_next_frame);
 
 		if (ImGui::InvisibleButton("empty_space", ImGui::GetContentRegionAvail()))
 		{
 			Core::GetSystem<IDE>().Unselect();
+		}
+		if (ImGui::BeginDragDropTarget()) // drag onto empty space unparents gameobjects
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(uint64_t));
+				Handle<GameObject> drop_payload = Handle<GameObject>{ *static_cast<uint64_t*>(payload->Data) }; // Getting the Payload Data
+				auto object_itr = std::find(selected_gameObjects.begin(), selected_gameObjects.end(), drop_payload);
+
+				int execute_counter = 0;
+				if (object_itr != selected_gameObjects.end()) // object is amongst the multi selected
+				{
+					for (auto h : selected_gameObjects)
+					{
+						if (!h)
+							continue;
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, h, Handle<GameObject>{}));
+						++execute_counter;
+					}
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+				}
+				else
+				{
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, drop_payload, Handle<GameObject>{}));
+					Core::GetSystem<IDE>().SelectGameObject(drop_payload, false, true);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+				}
+			}
 		}
 	}
 
