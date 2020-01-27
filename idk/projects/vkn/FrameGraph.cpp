@@ -55,6 +55,10 @@ namespace idk::vkn
 			{
 				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
 			}
+			for (auto& input_rsc : curr_node.GetOutputSpan())
+			{
+				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
+			}
 		}
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
 	}

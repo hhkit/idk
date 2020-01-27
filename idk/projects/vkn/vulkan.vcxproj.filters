@@ -302,6 +302,9 @@
     <ClInclude Include="vector_span_builder.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="UniformManager.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -531,6 +534,7 @@
     </ClCompile>
     <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="RenderTask.cpp" />
+    <ClCompile Include="UniformManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

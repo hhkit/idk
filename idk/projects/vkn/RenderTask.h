@@ -14,6 +14,9 @@
 #include <vkn/VknTextureView.h>
 #include <ds/lazy_vector.h>
 #include <vkn/vector_span_builder.h>
+
+#include <vkn/UniformManager.h>
+
 namespace idk::vkn
 {
 	using VknRenderPass = RenderPassObj;
@@ -27,8 +30,8 @@ namespace idk::vkn
 	enum StoreOp {};
 	enum IndexType {};
 	using Framebuffer = vk::Framebuffer;
-	struct VertexBuffer;
-	struct IndexBuffer;
+	using VertexBuffer = vk::Buffer;
+	using IndexBuffer = vk::Buffer;
 	class ShaderModule;
 	using TextureID  = Guid;
 
@@ -50,7 +53,11 @@ namespace idk::vkn
 
 	using draw_info = std::variant<indexed_draw_info, vertex_draw_info>;
 
-	struct Shaders {};
+
+	struct Shaders 
+	{
+		std::array< std::optional<RscHandle<ShaderProgram>>, static_cast<size_t>(ShaderStage::Size)> shaders;
+	};
 
 	struct AttachmentInfo
 	{
@@ -61,17 +68,18 @@ namespace idk::vkn
 
 	struct RenderTask
 	{
-		void Associate(size_t subpass_index);
+		//void Associate(size_t subpass_index);
 
-		void BindVertexBuffer(uint32_t binding, const VertexBuffer& vertex_buffer, size_t byte_offset);
-		void BindIndexBuffer(const IndexBuffer& buffer, size_t offset, IndexType indexType);
+		void BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset);
+		void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType);
 
 #pragma region Uniforms
-		void BindUniform(string_view name, uint32_t index, string_view data);
-		void BindUniform(string_view name, uint32_t index, const Texture& texture);
+		void BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound=false);
+		void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false,vk::ImageLayout layout= vk::ImageLayout::eGeneral);
 #pragma endregion
 
-		void BindShader(const ShaderModule& shader);
+		void BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader);
+		void UnbindShader(ShaderStage shader_stage);
 		void SetRenderPass(RenderPassObj render_pass);
 		void SetFrameBuffer(const Framebuffer& fb);
 		void BindInputAttachments();
@@ -101,7 +109,7 @@ namespace idk::vkn
 #pragma endregion
 
 #pragma region PipelineConfigurations
-		void Inherit(const pipeline_config& config);
+		//void Inherit(const pipeline_config& config);
 		void SetPipelineConfig(const pipeline_config& config)
 		{
 			_current_batch.pipeline = config;
@@ -195,8 +203,6 @@ namespace idk::vkn
 			_start_new_batch = start;
 		}
 
-		struct UboData {};
-		struct TexData {};
 		struct VertexBindingData
 		{
 			//vk::Buffer buffer;
@@ -230,9 +236,9 @@ namespace idk::vkn
 #pragma region Initial Data
 		vector<UboData> ubos;
 		vector<TexData> uniform_textures;
-
 		vector<VertexBindingData> vertex_buffers;
 #pragma endregion Initial Data
+
 #pragma region Clear Info
 		lazy_vector<color> clear_colors;
 		std::optional<float> clear_depths;
@@ -252,6 +258,8 @@ namespace idk::vkn
 
 		RenderBatch _current_batch{};
 		DrawCall _current_draw_call{};
+
+		UniformManager _uniform_manager;
 
 		vector<RenderBatch> batches;
 	};

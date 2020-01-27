@@ -21,11 +21,12 @@ namespace idk::vkn
 		//search for a free texture that matches the description
 		std::optional<VknTextureView> free_match(const TextureDescription& desc);
 
+		struct Pimpl;
+		std::unique_ptr<Pimpl> _pimpl;
+
 		vector<unique_ptr<VknTexture>> allocated_textures;
 		//potentially use unordered_multimap or unordered_map of forward_lists
 		std::forward_list<unique_ptr<VknTexture>> free_textures;
 
-		struct Pimpl;
-		std::unique_ptr<Pimpl> _pimpl;
 	};
 }
