@@ -159,6 +159,7 @@
       <Filter>commands</Filter>
     </ClInclude>
     <ClInclude Include="ObjectSelection.h" />
+    <ClInclude Include="commands\CMD_ModifyGameObjectHeader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -295,6 +296,7 @@
     <ClCompile Include="commands\CMD_SelectObject.cpp">
       <Filter>commands</Filter>
     </ClCompile>
+    <ClCompile Include="commands\CMD_ModifyGameObjectHeader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

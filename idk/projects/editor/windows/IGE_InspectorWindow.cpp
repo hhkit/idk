@@ -438,7 +438,7 @@ namespace idk {
         ImGui::SetCursorPosX(left_offset - ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.y * 2);
         bool is_active = game_object->ActiveSelf();
         if (ImGui::Checkbox("##Active", &is_active))
-            game_object->SetActive(is_active);
+            editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, std::nullopt, std::nullopt, is_active));
 		ImGui::SameLine();
         ImGui::PushItemWidth(-8.0f);
         if (game_object.scene == Scene::prefab)
@@ -460,13 +460,7 @@ namespace idk {
 					outputString.append(")");
 				}
 
-				editor.command_controller.ExecuteCommand(
-                    COMMAND(CMD_ModifyProperty,
-                            GenericHandle{ go->GetComponent<Name>() },
-                            "name",
-                            string{ go->GetComponent<Name>()->name }, // old name
-                            string{ outputString })                   // new name
-                );
+                editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, outputString));
 				++execute_counter;
 			}
 
@@ -517,7 +511,7 @@ namespace idk {
             for (const auto& tag : Core::GetSystem<TagManager>().GetConfig().tags)
             {
                 if (ImGui::MenuItem(tag.data()))
-                    game_object->Tag(tag);
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, tag));
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Tag##_add_tag_"))
@@ -546,7 +540,7 @@ namespace idk {
                 label += ": ";
                 label += layers[i];
                 if (ImGui::MenuItem(label.c_str()))
-                    game_object->Layer(i);
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, std::nullopt, i));
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Layer##_add_layer_"))
