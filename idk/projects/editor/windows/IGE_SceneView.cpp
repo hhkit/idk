@@ -291,42 +291,43 @@ namespace idk {
 
 				closestGameObject = closestRenderer.visit([](auto handle) {
 					return GetGameObject(handle);
-					});
+				});
 			}
 			if (closestGameObject)
 			{
 				auto& editor = Core::GetSystem<IDE>();
-				//vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
-				if (picked_state.is_multi_select) { //Or select Deselect that particular handle
-					//bool hasSelected = false;
-					//for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect
-					//	if (closestGameObject == selected_gameObjects[counter]) {
-					//		selected_gameObjects.erase(selected_gameObjects.begin() + counter);
-					//		hasSelected = true;
-					//		break;
-					//	}
-					//}
-					//if (!hasSelected) {
-					//	selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
-					//	Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
-					//	editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
-					//}
-					//Core::GetSystem<IDE>().RefreshSelectedMatrix();
+				auto sel = editor.GetSelectedObjects();
+				auto& selected_gameObjects = sel.game_objects;
 
+				if (picked_state.is_multi_select) // select/deselect that particular handle
+				{
+					bool hasSelected = false;
+					for (auto i = 0; i < selected_gameObjects.size(); ++i) //Select and deselect
+					{
+						if (closestGameObject == selected_gameObjects[i])
+						{
+							selected_gameObjects.erase(selected_gameObjects.begin() + i);
+							Core::GetSystem<IDE>().SetSelection(sel);
+							hasSelected = true;
+							break;
+						}
+					}
+					if (!hasSelected)
+					{
+						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
+						Core::GetSystem<IDE>().SetSelection(sel);
+						editor.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
+					}
 				}
-				else {
-					//Select as normal
+				else //Select as normal
+				{
 					Core::GetSystem<IDE>().SelectGameObject(closestGameObject);
-					editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
+					editor.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 				}
-
-
 			}
-			// If raycast hits nothing, we should clear the selected objects
-			else
+			else // If raycast hits nothing, we should clear the selected objects
 			{
 				Core::GetSystem<IDE>().Unselect();
-
 			}
 		}
 
@@ -336,7 +337,7 @@ namespace idk {
         currMouseScreenPos.y = mouse_pos.y;
 
 		//Right Mouse WASD control
-		if (ImGui::IsMouseDown(1) && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {
+		if (ImGui::IsMouseDown(1) && !ImGui::GetIO().KeyAlt) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				Handle<Transform> tfm = Core::GetSystem<IDE>()._camera.current_camera->GetGameObject()->GetComponent<Transform>();
 				distance_to_focused_vector = focused_vector.distance(tfm->position);

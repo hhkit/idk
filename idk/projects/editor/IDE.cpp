@@ -198,7 +198,7 @@ namespace idk
 
 		SetupEditorScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
-
+		GetEditorRenderTarget()->render_debug = true;
 
         { // try load recent scene / camera
             auto last_scene = reg_scene.get("scene");
@@ -301,10 +301,6 @@ namespace idk
         }
 		
 		for (auto& i : ige_windows) {
-			if (flag_skip_render) {
-				flag_skip_render = false;
-				break;
-			}
 			i->DrawWindow();
 		}
 
@@ -386,7 +382,7 @@ namespace idk
 	{
 		return _selected_objects;
 	}
-	void IDE::SelectGameObject(Handle<GameObject> handle, bool multiselect)
+	void IDE::SelectGameObject(Handle<GameObject> handle, bool multiselect, bool force)
     {
 		if (!handle)
 			return;
@@ -394,7 +390,8 @@ namespace idk
 		{
 			ObjectSelection sel;
 			sel.game_objects.push_back(handle);
-			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
+			if (force || sel != _selected_objects)
+				command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
 		}
 		else
 		{
@@ -403,7 +400,7 @@ namespace idk
 			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, copy));
 		}
     }
-	void IDE::SelectAsset(GenericResourceHandle handle, bool multiselect)
+	void IDE::SelectAsset(GenericResourceHandle handle, bool multiselect, bool force)
 	{
 		if (!handle.visit([](auto h) { return bool(h); }))
 			return;
@@ -411,7 +408,8 @@ namespace idk
 		{
 			ObjectSelection sel;
 			sel.assets.push_back(handle);
-			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
+			if (force || sel != _selected_objects)
+				command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
 		}
 		else
 		{
@@ -420,25 +418,30 @@ namespace idk
 			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, copy));
 		}
 	}
-	void IDE::SetSelection(ObjectSelection selection)
+	void IDE::SetSelection(ObjectSelection selection, bool force)
 	{
-		command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, selection));
+		if (force || selection != _selected_objects)
+			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, selection));
 	}
-	void IDE::Unselect()
+	void IDE::Unselect(bool force)
 	{
-		command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, ObjectSelection{}));
+		if (force || !_selected_objects.empty())
+			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, ObjectSelection{}));
 	}
 
 	void IDE::CreateGameObject(Handle<GameObject> parent, string name, vector<string> initial_components)
 	{
 		auto* cmd = command_controller.ExecuteCommand(
 			COMMAND(CMD_CreateGameObject, parent, std::move(name), std::move(initial_components)));
-		SelectGameObject(cmd->GetGameObject());
+		SelectGameObject(cmd->GetGameObject(), false, true);
 		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 	}
 
     void IDE::DeleteSelectedGameObjects()
     {
+		if (GetSelectedObjects().game_objects.empty())
+			return;
+
 		int execute_counter = 0;
 
 		for (auto h : GetSelectedObjects().game_objects)
@@ -450,7 +453,7 @@ namespace idk
 			}
 		}
 
-		Unselect(); ++execute_counter;
+		Unselect(true); ++execute_counter;
 		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
     }
 
@@ -500,7 +503,6 @@ namespace idk
 		}
 
 		//Clear IDE values
-		Core::GetSystem<IDE>().flag_skip_render = true;
 		Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
 		Core::GetSystem<IDE>()._selected_objects.game_objects.clear();
 		Core::GetSystem<IDE>()._selected_objects.assets.clear();

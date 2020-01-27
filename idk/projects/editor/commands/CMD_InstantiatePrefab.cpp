@@ -14,7 +14,7 @@ namespace idk
 
     bool CMD_InstantiatePrefab::execute()
     {
-        _handle = PrefabUtility::Instantiate(_prefab, *Core::GetSystem<SceneManager>().GetActiveScene());
+        _handle = PrefabUtility::Instantiate(_prefab, *Core::GetSystem<SceneManager>().GetActiveScene(), _handle);
         _handle->Transform()->position = _pos;
         return true;
     }

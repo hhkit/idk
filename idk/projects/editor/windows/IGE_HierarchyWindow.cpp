@@ -514,9 +514,9 @@ namespace idk {
 
 
 		if (ImGui::InvisibleButton("empty_space", ImGui::GetContentRegionAvail()))
+		{
 			Core::GetSystem<IDE>().Unselect();
-
-
+		}
 	}
 
 	void IGE_HierarchyWindow::ScrollToSelectedInHierarchy(Handle<GameObject> gameObject)

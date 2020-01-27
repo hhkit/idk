@@ -89,10 +89,10 @@ namespace idk
 
 		// selection
 		const ObjectSelection& GetSelectedObjects();
-		void SelectGameObject(Handle<GameObject> handle, bool multiselect = false);
-		void SelectAsset(GenericResourceHandle handle, bool multiselect = false);
-		void SetSelection(ObjectSelection selection);
-		void Unselect();
+		void SelectGameObject(Handle<GameObject> handle, bool multiselect = false, bool force = false);
+		void SelectAsset(GenericResourceHandle handle, bool multiselect = false, bool force = false);
+		void SetSelection(ObjectSelection selection, bool force = false);
+		void Unselect(bool force = false);
 
 		// game object operations
 		void CreateGameObject(Handle<GameObject> parent = {}, string name = "", vector<string> initial_components = {});
@@ -105,6 +105,7 @@ namespace idk
 	private:
 		unique_ptr<imgui_interface> _interface;
 		CameraControls _camera;
+		CommandController command_controller; //For editor commands
 
 		// Editor Scene
 		bool game_running = false;
@@ -113,20 +114,14 @@ namespace idk
 		void SetupEditorScene();
 
 		//Editor Windows
-		vector<unique_ptr<IGE_IWindow>>		ige_windows			{};
-		hash_table<size_t, IGE_IWindow*>	windows_by_type		{};
+		vector<unique_ptr<IGE_IWindow>>	ige_windows;
+		hash_table<size_t, IGE_IWindow*> windows_by_type;
 
-		CommandController command_controller			{}; //For editor commands
-
-		bool bool_demo_window					 { false };
-
-        bool closing			= false;
-		bool flag_skip_render	= false;
+		bool bool_demo_window = false;
+        bool closing = false;
 
 		//For Gizmo controls
-
 		void FocusOnSelectedGameObjects();
-
 
 		//Scrolling
 		float		scroll_multiplier			= 2.0f;			//AFfects pan and scrolling intensity

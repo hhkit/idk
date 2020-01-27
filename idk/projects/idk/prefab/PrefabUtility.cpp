@@ -260,12 +260,12 @@ namespace idk
 
 
 
-    Handle<GameObject> PrefabUtility::Instantiate(RscHandle<Prefab> prefab, Scene& scene)
+    Handle<GameObject> PrefabUtility::Instantiate(RscHandle<Prefab> prefab, Scene& scene, Handle<GameObject> force_handle)
     {
         if (!prefab)
             return Handle<GameObject>();
 
-        const auto handle = scene.CreateGameObject();
+        const auto handle = force_handle != Handle<GameObject>() ? scene.CreateGameObject(force_handle) : scene.CreateGameObject();
         const auto& prefab_data = prefab->data;
         auto i = 0;
         for (const auto& d : prefab_data[i].components)
