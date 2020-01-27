@@ -512,9 +512,6 @@
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\CameraControls.h">
-      <Filter>gfx\camera</Filter>
-    </ClInclude>
     <ClInclude Include="scene\SceneGraphBuilder.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -1108,9 +1105,6 @@
     </ClCompile>
     <ClCompile Include="anim\SkeletonFactory.cpp">
       <Filter>anim\res/factories</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\CameraControls.cpp">
-      <Filter>gfx\camera</Filter>
     </ClCompile>
     <ClCompile Include="serialize\yaml_dump.cpp">
       <Filter>serialize</Filter>

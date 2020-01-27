@@ -40,7 +40,7 @@ namespace idk
         {
             for (int i = 0; i < array.Length - 1; i++)
             {
-                int j = Range(i, array.Length - 1);
+                int j = Range(i, array.Length);
                 T tmp = array[i];
                 array[i] = array[j];
                 array[j] = tmp;
@@ -51,7 +51,7 @@ namespace idk
         {
             for (int i = 0; i < list.Count - 1; i++)
             {
-                int j = Range(i, list.Count - 1);
+                int j = Range(i, list.Count);
                 T tmp = list[i];
                 list[i] = list[j];
                 list[j] = tmp;
@@ -61,7 +61,7 @@ namespace idk
 
     public static class RandomExtensions
     {
-        public static T[] Shuffle<T>(this T[] array) { Shuffle(array); return array; }
-        public static IList<T> Shuffle<T>(this IList<T> list) { Shuffle(list); return list; }
+        public static T[] Shuffle<T>(this T[] array) { Random.Shuffle(array); return array; }
+        public static IList<T> Shuffle<T>(this IList<T> list) { Random.Shuffle(list); return list; }
     }
 }

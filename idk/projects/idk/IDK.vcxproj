@@ -162,7 +162,6 @@
     <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
-    <ClInclude Include="gfx\CameraControls.h" />
     <ClInclude Include="gfx\Light.h" />
     <ClInclude Include="gfx\LightTypes.h" />
     <ClInclude Include="gfx\RenderTarget.h" />
@@ -335,7 +334,6 @@
     <ClCompile Include="debug\LogSingleton.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
-    <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />

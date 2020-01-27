@@ -1,32 +1,27 @@
 #include "stdafx.h"
+#include "CameraControls.h"
 
 //Graphics
-#include "GraphicsSystem.h"
+#include <gfx/GraphicsSystem.h>
 #include <gfx/RenderTarget.h>
-
-//Camera
-#include "CameraControls.h"
-#include "Camera.h"
+#include <gfx/Camera.h>
 
 //IDK
-#include "IDK.h"
-#include "Core/GameObject.inl"
+#include <idk.h>
+#include <core/GameObject.inl>
 
 //Common
 #include <common/Transform.h>
-
-#include <test/TestSystem.h>
-
-#include <Core/Component.h>
+#include <core/Component.h>
 #include <iostream>
-
 
 //Math
 #include <math/matrix_transforms.inl>
 #include <math/matrix_decomposition.inl>
 
-namespace idk {
-	vec3 CameraControls::currentTarget() const
+namespace idk 
+{
+	vec3 CameraControls::CurrentTarget() const
 	{
 		return _target;
 	}
@@ -275,7 +270,7 @@ namespace idk {
 		return wbPos;
 	}
 
-	vec3 CameraControls::convertMouseCoord(const vec2& screenCoord)
+	vec3 CameraControls::ConvertMouseCoord(const vec2& screenCoord)
 	{
         const real d = screenCoord.x * screenCoord.x + screenCoord.y + screenCoord.y;
         const real radiusSq = _radius * _radius;

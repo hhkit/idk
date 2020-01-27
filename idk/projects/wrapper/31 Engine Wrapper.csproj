@@ -32,8 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>..\..\engine_data\idk.xml</DocumentationFile>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
@@ -91,7 +90,6 @@
     <Compile Include="Math\Deg.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Behavior\MonoBehavior.cs" />
-    <Compile Include="Math\Perlin.cs" />
     <Compile Include="Math\Rad.cs" />
     <Compile Include="Math\Random.cs" />
     <Compile Include="Math\Shape.cs" />

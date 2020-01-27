@@ -170,27 +170,13 @@ namespace idk {
 
 
 			} //Do something if pressed
-			if (ImGui::MenuItem("Copy", "CTRL+C", nullptr, false)) {
-				IDE& editor = Core::GetSystem<IDE>();
-				editor.copied_gameobjects.clear();
-				for (auto& i : editor.selected_gameObjects) {
-					vector<RecursiveObjects> newObject{};
-					editor.RecursiveCollectObjects(i, newObject);
-					editor.copied_gameobjects.push_back(std::move(newObject));
-				}
-
+			if (ImGui::MenuItem("Copy", "CTRL+C", nullptr, false))
+			{
+				Core::GetSystem<IDE>().Copy();
 			} 
-			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) {
-				IDE& editor = Core::GetSystem<IDE>();
-				int execute_counter = 0;
-
-				for (auto& i : editor.copied_gameobjects) {
-					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject, i));
-					++execute_counter;
-				}
-
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-
+			if (ImGui::MenuItem("Paste", "CTRL+V", nullptr, false)) 
+			{
+				Core::GetSystem<IDE>().Paste();
 			}
 
 			ImGui::Separator();
@@ -199,23 +185,23 @@ namespace idk {
 
 
 			} //Do something if pressed
-			if (ImGui::MenuItem("Delete")) {
-				vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
-				IDE& editor = Core::GetSystem<IDE>();
-				int execute_counter = 0;
-				while (!editor.selected_gameObjects.empty()) {
-					Handle<GameObject> i = editor.selected_gameObjects.front();
-					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
-					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
-					++execute_counter;
-				}
+			//if (ImGui::MenuItem("Delete")) {
+			//	vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
+			//	IDE& editor = Core::GetSystem<IDE>();
+			//	int execute_counter = 0;
+			//	while (!editor.selected_gameObjects.empty()) {
+			//		Handle<GameObject> i = editor.selected_gameObjects.front();
+			//		editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
+			//		commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
+			//		++execute_counter;
+			//	}
 
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+			//	commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 
-				selected_gameObjects.clear();
+			//	selected_gameObjects.clear();
 
 
-			} //Do something if pressed
+			//} //Do something if pressed
 
 			ImGui::EndMenu(); //Close BeginMenu("Window")
 
@@ -224,31 +210,24 @@ namespace idk {
 
 	void IGE_MainWindow::DisplayGameObjectMenu()
 	{
-
 		IDE& editor = Core::GetSystem<IDE>();
 		
 		if (ImGui::BeginMenu("GameObject"))
 		{
-			if (ImGui::MenuItem("Create Empty","CTRL+SHIFT+N")) {
-
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-
+			if (ImGui::MenuItem("Create Empty","CTRL+SHIFT+N")) 
+			{
+				editor.CreateGameObject();
 			} 
-			if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
-				if (editor.selected_gameObjects.size()) {
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.selected_gameObjects.front()));
 
-				}
-				else {
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-				}
-
-
+			if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) 
+			{
+				if (editor.GetSelectedObjects().game_objects.size())
+					editor.CreateGameObject(editor.GetSelectedObjects().game_objects.front());
+				else
+					editor.CreateGameObject();
 			}
 
-
-			ImGui::EndMenu(); 
-
+			ImGui::EndMenu();
 		}
 	}
 
@@ -257,7 +236,7 @@ namespace idk {
 		if (ImGui::BeginMenu("Component"))
 		{
 			IDE& editor = Core::GetSystem<IDE>();
-			bool canSelect = editor.selected_gameObjects.size() == 0 ? false : true;
+			bool canSelect = editor.GetSelectedObjects().game_objects.size();
 
 			span componentNames = GameState::GetComponentNames();
 			for (const char* name : componentNames) {
@@ -285,7 +264,7 @@ namespace idk {
 				if (ImGui::MenuItem(displayName.c_str(),nullptr,nullptr,canSelect)) {
 					//Add component
 					int execute_counter = 0;
-					for (Handle<GameObject> i : editor.selected_gameObjects) {
+					for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects) {
 						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
 						++execute_counter;
 					}
@@ -362,10 +341,10 @@ namespace idk {
 		ImVec4 activeColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
 		ImVec4 inactiveColor = ImGui::GetStyle().Colors[ImGuiCol_Button];
 
-		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Null);
-		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Null ? activeColor : inactiveColor);
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Null);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Null ? activeColor : inactiveColor);
 		if (ImGui::Button("Hand##Tool", toolButtonSize)) {
-			gizmo_operation = GizmoOperation_Null;
+			gizmo_operation = GizmoOperation::Null;
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
@@ -373,10 +352,10 @@ namespace idk {
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 1);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Translate);
-		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Translate ? activeColor : inactiveColor);
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Translate);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Translate ? activeColor : inactiveColor);
 		if (ImGui::Button("Move##Tool", toolButtonSize)) {
-			gizmo_operation = GizmoOperation_Translate;
+			gizmo_operation = GizmoOperation::Translate;
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
@@ -384,10 +363,10 @@ namespace idk {
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 2);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Rotate);
-		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Rotate ? activeColor : inactiveColor);
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Rotate);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Rotate ? activeColor : inactiveColor);
 		if (ImGui::Button("Rotate##Tool", toolButtonSize)) {
-			gizmo_operation = GizmoOperation_Rotate;
+			gizmo_operation = GizmoOperation::Rotate;
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
@@ -395,10 +374,10 @@ namespace idk {
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 3);
 		ImGui::SetCursorPosY(toolButtonStartPos.y);
 
-		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation_Scale);
-		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation_Scale ? activeColor : inactiveColor);
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Scale);
+		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Scale ? activeColor : inactiveColor);
 		if (ImGui::Button("Scale##Tool", toolButtonSize)) {
-			gizmo_operation = GizmoOperation_Scale;
+			gizmo_operation = GizmoOperation::Scale;
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
@@ -406,10 +385,10 @@ namespace idk {
 		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 6);
 		ImGui::SetCursorPosY(toolButtonStartPos.y+3);
 
-		MODE& gizmo_mode = Core::GetSystem<IDE>().gizmo_mode;
-		string localGlobal = gizmo_mode == WORLD ? "Global##Tool" : "Local##Tool";
+		auto& gizmo_mode = Core::GetSystem<IDE>().gizmo_mode;
+		string localGlobal = gizmo_mode == GizmoMode::World ? "Global##Tool" : "Local##Tool";
 		if (ImGui::Button(localGlobal.c_str(), ImVec2{ toolButtonSize.x+20.0f,toolButtonSize.y-6.0f })) {
-			gizmo_mode = gizmo_mode == WORLD ? LOCAL : WORLD;
+			gizmo_mode = gizmo_mode == GizmoMode::World ? GizmoMode::Local : GizmoMode::World;
 		}
 
 
@@ -425,7 +404,7 @@ namespace idk {
 				// for (auto& i : editor.ige_windows)
 				// 	if (i->window_name != "Game")
 				// 		i->is_open = false;
-				// editor.currentCamera().current_camera->enabled = false;
+				// editor._camera.current_camera->enabled = false;
 				HotReloadDLL();
 				Core::GetSystem<IDE>().FindWindow<IGE_InspectorWindow>()->Reset();
 				Core::GetScheduler().SetPauseState(UnpauseAll);
@@ -516,100 +495,6 @@ namespace idk {
 
 	}
 
-	void IGE_MainWindow::PollShortcutInput()
-	{
-
-		if (ImGui::IsAnyItemActive()) { //Do not do any shortcuts when inputs are active! EG: Editing texts!
-			return;
-		}
-		IDE& editor = Core::GetSystem<IDE>();
-		CommandController& commandController = editor.command_controller;
-		GizmoOperation& gizmo_operation = editor.gizmo_operation;
-
-		if (!ImGui::IsAnyMouseDown()) { //Disable shortcut whenever mouse is pressed
-
-			//CTRL + Z
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				commandController.UndoCommand();
-			}
-
-			//CTRL + Y
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				commandController.RedoCommand();
-			}
-
-			//CTRL + C
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				editor.copied_gameobjects.clear();
-				for (auto& i : editor.selected_gameObjects) {
-					vector<RecursiveObjects> newObject{};
-					editor.RecursiveCollectObjects(i, newObject);
-					editor.copied_gameobjects.push_back(std::move(newObject));
-				}
-			}
-
-			//CTRL + V
-			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::IsKeyDown(static_cast<int>(Key::Control))) {
-				int execute_counter = 0;
-				for (auto& i : editor.copied_gameobjects) {
-					commandController.ExecuteCommand(COMMAND(CMD_CreateGameObject,i));
-					++execute_counter;
-				}
-
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			}
-
-
-			//QWER = Move, Translate, Rotate, Scale (refer to ASCII Table)
-			//Q = Move
-			if (ImGui::IsKeyPressed(81)) {
-				gizmo_operation = GizmoOperation_Null;
-			}
-			//W = Translate
-			else if (ImGui::IsKeyPressed(87)) {
-				gizmo_operation = GizmoOperation_Translate;
-			}
-			//E = Rotate
-			else if (ImGui::IsKeyPressed(69)) {
-				gizmo_operation = GizmoOperation_Rotate;
-			}
-			//R = Scale
-			else if (ImGui::IsKeyPressed(82)) {
-				gizmo_operation = GizmoOperation_Scale;
-			}
-			
-			//DEL = Delete
-			else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
-				int execute_counter = 0;
-				//Move the gizmo away before deleting
-				float				fake_matrix[16]{ 0 }; 
-				ImGuizmo::Manipulate(fake_matrix, fake_matrix, ImGuizmo::TRANSLATE, ImGuizmo::MODE::WORLD, fake_matrix, NULL, NULL);
-
-
-
-				while (!editor.selected_gameObjects.empty()) {
-					Handle<GameObject> i = editor.selected_gameObjects.front();
-					editor.selected_gameObjects.erase(editor.selected_gameObjects.begin());
-					commandController.ExecuteCommand(COMMAND(CMD_DeleteGameObject, i));
-					++execute_counter;
-				}
-
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			}
-
-			//F = Focus on GameObject
-			if (ImGui::IsKeyPressed(70))
-			{
-				editor.FocusOnSelectedGameObjects();
-
-			}
-
-
-
-		}
-	}
-
-
 	void IGE_MainWindow::Update() {
 
 		ImGui::PopStyleVar(3); //Pop from BeginWindow()
@@ -676,9 +561,6 @@ namespace idk {
 		//ImGui::DockBuilderDockWindow("SceneView", dockspace_id);
 
 		DisplayHintBarChildWindow();
-
-		PollShortcutInput();
-		
 
 	}
 

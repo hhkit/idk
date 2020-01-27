@@ -390,7 +390,6 @@ namespace idk::vkn
 			//TODO skinned stuff
 		}
 		size_t i = 0;
-		
 		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
 		vk::UniqueBuffer uresult_buffer = hlp::CreateBuffer(*View().Device(),requests.size()*sizeof(uint32_t),vk::BufferUsageFlagBits::eTransferDst,View().Dispatcher());
 		vk::Buffer result_buffer =*uresult_buffer;
