@@ -11,7 +11,7 @@ namespace idk
 	{
 		frame_start_functions.emplace_back([this, mem_fn]()
 			{
-				auto gs = Core::GetGameState();
+				auto& gs = Core::GetGameState();
 				std::invoke(mem_fn, static_cast<Subscriber*>(this), gs.GetObjectsOfType<Objects>()...);
 			});
 	}
@@ -21,7 +21,7 @@ namespace idk
 	{
 		frame_end_functions.emplace_back([this, mem_fn]()
 			{
-				auto gs = Core::GetGameState();
+				auto& gs = Core::GetGameState();
 				std::invoke(mem_fn, static_cast<Subscriber*>(this), gs.GetObjectsOfType<Objects>()...);
 			});
 	}

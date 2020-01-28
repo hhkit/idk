@@ -13,9 +13,9 @@ namespace idk
 		{
 			enum
 			{
-				DIRTY_POS,
-				DIRTY_ROT,
-				DIRTY_SCALE
+				DIRTY_POS = 1 << 0,
+				DIRTY_ROT = 1 << 1,
+				DIRTY_SCALE = 1 << 2
 			};
 
 			vec3 position{};
@@ -30,6 +30,7 @@ namespace idk
 			quat start_rot, end_rot;
 			vec3 start_scale, end_scale;
 
+			int state_mask{};
 			real t = 1;
 		};
 

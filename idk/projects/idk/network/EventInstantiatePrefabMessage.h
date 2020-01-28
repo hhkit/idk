@@ -22,6 +22,7 @@ namespace idk
 		bool Serialize(Stream& stream) 
 		{
 			serialize_bytes(stream, (uint8_t*) &prefab, sizeof(prefab));
+			serialize_int(stream, id, 0, 4096);
 			serialize_bool(stream, use_position);
 			if (use_position)
 			{

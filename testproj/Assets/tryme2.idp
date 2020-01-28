@@ -2,7 +2,7 @@ data:
 - components: 
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: 0, z: 0}
+    position: {x: 1.3579475, y: -0.4402723, z: -5.1014147}
     rotation: 
       w: 1
       x: 0
@@ -11,6 +11,12 @@ data:
     scale: {x: 1, y: 1, z: 1}
   - !Name 
     name: tryme
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
+    mesh: {guid: 55e37d7d-86ba-4bc6-b230-a86a250beaad}
+    receive_shadows: 1
   - !ElectronView 
     network_id: 0
   - !ElectronTransformView 

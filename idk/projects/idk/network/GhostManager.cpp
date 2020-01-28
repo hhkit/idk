@@ -44,21 +44,24 @@ namespace idk
 		{
 			if (auto ghost_data = std::get_if<ElectronTransformView::PreviousFrame>(&ghost.ghost_data))
 			{
-				auto ghost_msg = connection_manager->CreateMessage<GhostMessage>();
+				if (ghost_data->state_mask)
+				{
+					auto ghost_msg = connection_manager->CreateMessage<GhostMessage>();
 
-				ghost_msg->network_id = ghost.GetNetworkID();
-				ghost_msg->state_flags = ghost_data->state_mask;
+					ghost_msg->network_id = ghost.GetNetworkID();
+					ghost_msg->state_flags = ghost_data->state_mask;
 
-				if (ghost_msg->state_flags & GhostMessage::TRANSFORM_POS)
-					ghost_msg->position = ghost_data->position;
+					if (ghost_msg->state_flags & GhostMessage::TRANSFORM_POS)
+						ghost_msg->position = ghost_data->position;
 
-				if (ghost_msg->state_flags & GhostMessage::TRANSFORM_ROT)
-					ghost_msg->rotation = ghost_data->rotation;
+					if (ghost_msg->state_flags & GhostMessage::TRANSFORM_ROT)
+						ghost_msg->rotation = ghost_data->rotation;
 
-				if (ghost_msg->state_flags & GhostMessage::TRANSFORM_SCALE)
-					ghost_msg->scale = ghost_data->scale;
+					if (ghost_msg->state_flags & GhostMessage::TRANSFORM_SCALE)
+						ghost_msg->scale = ghost_data->scale;
 
-				connection_manager->SendMessage(ghost_msg);
+					connection_manager->SendMessage(ghost_msg, true);
+				}
 			}
 		}
 	}
@@ -72,9 +75,11 @@ namespace idk
 		{
 			// push the ghost data into the view
 			auto tfm_view = view->GetGameObject()->GetComponent<ElectronTransformView>();
+			if (msg->state_flags)
 			if (tfm_view->interp_over != seconds{ 0 })
 			{
 				auto ghost_data = ElectronTransformView::GhostData{};
+				ghost_data.state_mask = msg->state_flags;
 				if (tfm_view->sync_position && msg->state_flags & GhostMessage::TRANSFORM_POS)
 				{
 					ghost_data.start_pos = tfm.position;

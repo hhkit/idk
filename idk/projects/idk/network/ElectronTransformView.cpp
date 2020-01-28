@@ -26,7 +26,7 @@ namespace idk
 			auto& tfm = *GetGameObject()->Transform();
 			if (sync_position)
 			{
-				const auto curr_pos = tfm.GlobalPosition();
+				const auto curr_pos = tfm.position;
 				if ((curr_pos - previous_data.position).length_sq() > delta_threshold)
 				{
 					previous_data.position = curr_pos;
@@ -36,7 +36,7 @@ namespace idk
 
 			if (sync_rotation)
 			{
-				const auto curr_rot = tfm.GlobalRotation();
+				const auto curr_rot = tfm.rotation;
 				if (curr_rot != previous_data.rotation)
 				{
 					previous_data.rotation = curr_rot;
@@ -46,7 +46,7 @@ namespace idk
 
 			if (sync_scale)
 			{
-				const auto curr_scale = tfm.GlobalScale();
+				const auto curr_scale = tfm.scale;
 				if (curr_scale != previous_data.scale)
 				{
 					previous_data.scale = curr_scale;
@@ -69,18 +69,22 @@ namespace idk
 			if (ghost.t >= 1)
 				return true;
 
-			ghost.t = std::min(1.f, ghost.t + advance);
 			auto& tfm = *GetGameObject()->Transform();
+			// snap
+			if ((ghost.end_pos - tfm.position).length_sq() > delta_threshold)
+				ghost.t = 1;
+
+			ghost.t = std::min(1.f, ghost.t + advance);
 
 			const auto t = ghost.t;
 
-			if (sync_position)
+			if (sync_position && (ghost.state_mask & PreviousFrame::DIRTY_POS))
 				tfm.position = lerp(ghost.start_pos, ghost.end_pos, t);
 
-			if (sync_rotation)
+			if (sync_rotation && (ghost.state_mask & PreviousFrame::DIRTY_ROT))
 				tfm.rotation = slerp(ghost.start_rot, ghost.end_rot, t);
 
-			if (sync_scale)
+			if (sync_scale && (ghost.state_mask & PreviousFrame::DIRTY_SCALE))
 				tfm.scale = lerp(ghost.start_scale, ghost.end_scale, t);
 
 			return true;

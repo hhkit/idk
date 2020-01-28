@@ -15,9 +15,10 @@ namespace idk
 
 	NetworkID IDManager::CreateNewIDFor(Handle<ElectronView> go)
 	{
-		while(ids.find(running_count) != ids.end())
+		do
+		{
 			++running_count;
-
+		} while (ids.find(running_count) != ids.end());
 		ids[running_count] = go;
 		go->network_id = running_count;
 		return running_count;

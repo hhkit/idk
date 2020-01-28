@@ -96,7 +96,7 @@ namespace idk
 	{
 		auto obj = message->prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
-		Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message->id, ev);
+		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message->id, ev));
 		auto& tfm = *obj->Transform();
 		if (message->use_position)
 			tfm.position = message->position;

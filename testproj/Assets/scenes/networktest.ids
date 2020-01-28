@@ -1,0 +1,80 @@
+- !65536 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.70710677
+      x: -0.70710677
+      y: -0
+      z: -0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Directional Light
+  - !Light 
+    casts_shadows: 1
+    light: !DirectionalLight 
+      bottom: -5
+      far: 5
+      intensity: 1
+      left: -5
+      light_color: 
+        a: 1
+        b: 1
+        g: 1
+        r: 1
+      near: -5
+      right: 5
+      top: 5
+    shadow_bias: 1.1920929e-07
+- !4295032832 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Camera
+  - !Camera 
+    clear: !color 
+      a: 1
+      b: 0
+      g: 0
+      r: 0
+    depth: 0
+    enabled: 1
+    far_plane: 100
+    field_of_view: {value: 0.7853982}
+    is_orthographic: 0
+    layer_mask: {mask: 4294967295}
+    near_plane: 0.1
+    render_target: {guid: 00000000-0000-0000-0000-000000000000}
+    viewport: 
+      position: {x: 0, y: 0}
+      size: {x: 1, y: 1}
+- !8590000128 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !TestComponent 
+    a: 10
+    b: 84
+    c: 42
+    d: 103
+    makeme: {guid: d7e32fdd-2edc-4c2d-857e-ba77459f42e1}
+    send_pos: 0
+    send_rot: 0
