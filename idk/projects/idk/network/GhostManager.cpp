@@ -51,13 +51,13 @@ namespace idk
 					ghost_msg->network_id = ghost.GetNetworkID();
 					ghost_msg->state_flags = ghost_data->state_mask;
 
-					if (ghost_msg->state_flags & GhostMessage::TRANSFORM_POS)
+					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_POS)
 						ghost_msg->position = ghost_data->position;
 
-					if (ghost_msg->state_flags & GhostMessage::TRANSFORM_ROT)
+					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_ROT)
 						ghost_msg->rotation = ghost_data->rotation;
 
-					if (ghost_msg->state_flags & GhostMessage::TRANSFORM_SCALE)
+					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_SCALE)
 						ghost_msg->scale = ghost_data->scale;
 
 					connection_manager->SendMessage(ghost_msg, true);
@@ -80,19 +80,19 @@ namespace idk
 			{
 				auto ghost_data = ElectronTransformView::GhostData{};
 				ghost_data.state_mask = msg->state_flags;
-				if (tfm_view->sync_position && msg->state_flags & GhostMessage::TRANSFORM_POS)
+				if (tfm_view->sync_position && msg->state_flags & GhostFlags::TRANSFORM_POS)
 				{
 					ghost_data.start_pos = tfm.position;
 					ghost_data.end_pos   = msg->position;
 				}
 
-				if (tfm_view->sync_rotation && msg->state_flags & GhostMessage::TRANSFORM_ROT)
+				if (tfm_view->sync_rotation && msg->state_flags & GhostFlags::TRANSFORM_ROT)
 				{
 					ghost_data.start_rot = tfm.rotation;
 					ghost_data.end_rot = msg->rotation;
 				}
 
-				if (tfm_view->sync_scale && msg->state_flags & GhostMessage::TRANSFORM_SCALE)
+				if (tfm_view->sync_scale && msg->state_flags & GhostFlags::TRANSFORM_SCALE)
 				{
 					ghost_data.start_scale = tfm.scale;
 					ghost_data.end_scale = msg->scale;
@@ -102,11 +102,11 @@ namespace idk
 			}
 			else
 			{
-				if (msg->state_flags & GhostMessage::TRANSFORM_POS)
+				if (msg->state_flags & GhostFlags::TRANSFORM_POS)
 					tfm.position = msg->position;
-				if (msg->state_flags & GhostMessage::TRANSFORM_ROT)
+				if (msg->state_flags & GhostFlags::TRANSFORM_ROT)
 					tfm.rotation = msg->rotation;
-				if (msg->state_flags & GhostMessage::TRANSFORM_SCALE)
+				if (msg->state_flags & GhostFlags::TRANSFORM_SCALE)
 					tfm.scale = msg->scale;
 			}
 		}

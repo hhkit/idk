@@ -11,13 +11,6 @@ namespace idk
 	public:
 		struct PreviousFrame
 		{
-			enum
-			{
-				DIRTY_POS = 1 << 0,
-				DIRTY_ROT = 1 << 1,
-				DIRTY_SCALE = 1 << 2
-			};
-
 			vec3 position{};
 			quat rotation{};
 			vec3 scale{};

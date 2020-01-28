@@ -1092,6 +1092,9 @@
     <ClInclude Include="network\GhostManager.h">
       <Filter>network\substream managers</Filter>
     </ClInclude>
+    <ClInclude Include="network\GhostFlags.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

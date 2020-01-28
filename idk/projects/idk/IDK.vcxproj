@@ -82,6 +82,7 @@
     <ClInclude Include="gfx\TextAlignment.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
+    <ClInclude Include="network\GhostFlags.h" />
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />

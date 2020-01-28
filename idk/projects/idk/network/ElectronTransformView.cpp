@@ -3,6 +3,7 @@
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <network/ElectronView.h>
+#include <network/GhostFlags.h>
 
 namespace idk
 {
@@ -30,7 +31,7 @@ namespace idk
 				if ((curr_pos - previous_data.position).length_sq() > delta_threshold)
 				{
 					previous_data.position = curr_pos;
-					previous_data.state_mask |= PreviousFrame::DIRTY_POS;
+					previous_data.state_mask |= GhostFlags::TRANSFORM_POS;
 				}
 			}
 
@@ -40,7 +41,7 @@ namespace idk
 				if (curr_rot != previous_data.rotation)
 				{
 					previous_data.rotation = curr_rot;
-					previous_data.state_mask |= PreviousFrame::DIRTY_ROT;
+					previous_data.state_mask |= GhostFlags::TRANSFORM_ROT;
 				}
 			}
 
@@ -50,7 +51,7 @@ namespace idk
 				if (curr_scale != previous_data.scale)
 				{
 					previous_data.scale = curr_scale;
-					previous_data.state_mask |= PreviousFrame::DIRTY_SCALE;
+					previous_data.state_mask |= GhostFlags::TRANSFORM_SCALE;
 				}
 			}
 			return true;
@@ -78,13 +79,13 @@ namespace idk
 
 			const auto t = ghost.t;
 
-			if (sync_position && (ghost.state_mask & PreviousFrame::DIRTY_POS))
+			if (sync_position && (ghost.state_mask & GhostFlags::TRANSFORM_POS))
 				tfm.position = lerp(ghost.start_pos, ghost.end_pos, t);
 
-			if (sync_rotation && (ghost.state_mask & PreviousFrame::DIRTY_ROT))
+			if (sync_rotation && (ghost.state_mask & GhostFlags::TRANSFORM_ROT))
 				tfm.rotation = slerp(ghost.start_rot, ghost.end_rot, t);
 
-			if (sync_scale && (ghost.state_mask & PreviousFrame::DIRTY_SCALE))
+			if (sync_scale && (ghost.state_mask & GhostFlags::TRANSFORM_SCALE))
 				tfm.scale = lerp(ghost.start_scale, ghost.end_scale, t);
 
 			return true;
