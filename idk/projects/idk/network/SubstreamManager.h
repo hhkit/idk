@@ -4,6 +4,7 @@
 
 namespace idk
 {
+	class ConnectionManager;
 	class ClientConnectionManager;
 	class ServerConnectionManager;
 
@@ -17,7 +18,9 @@ namespace idk
 	class BaseSubstreamManager
 	{
 	public:
-		void SetConnectionManager(ConnectionManager* man) { connection_manager = man; }
+		void SetConnectionManager(ConnectionManager* man);
+		void NetworkFrameStart();
+		void NetworkFrameEnd()  ;
 
 		virtual ~BaseSubstreamManager() = default;
 		virtual size_t GetManagerType() const = 0;
@@ -25,6 +28,13 @@ namespace idk
 		virtual void SubscribeEvents(ServerConnectionManager&) = 0;
 	protected:
 		ConnectionManager* connection_manager = nullptr;
+		vector<function<void()>> frame_start_functions;
+		vector<function<void()>> frame_end_functions;
+
+		template<typename Subscriber, typename ... Objects>
+		void OnFrameStart(void(Subscriber::*)(span<Objects>...));
+		template<typename Subscriber, typename ... Objects>
+		void OnFrameEnd(void(Subscriber::*)(span<Objects>...));
 	};
 
 	template<typename T>
@@ -36,4 +46,5 @@ namespace idk
 		static constexpr auto type = index_in_tuple_v<T, SubstreamTypes>;
 		size_t GetManagerType() const final { return type; }
 	};
+
 }

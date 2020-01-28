@@ -35,6 +35,9 @@ namespace idk
 
 		void ReceivePackets();
 		void SendPackets();
+
+		void RespondToPackets();
+		void PreparePackets();
 	private:
 		unique_ptr<Server> lobby;
 		unique_ptr<Client> client;

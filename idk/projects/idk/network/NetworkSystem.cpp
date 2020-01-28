@@ -83,6 +83,24 @@ namespace idk
 			client->SendPackets();
 	}
 
+	void NetworkSystem::RespondToPackets()
+	{
+		for (auto& elem : server_connection_manager)
+			if (elem)
+				elem->FrameStartManagers();
+		if (client_connection_manager)
+			client_connection_manager->FrameStartManagers();
+	}
+
+	void NetworkSystem::PreparePackets()
+	{
+		for (auto& elem : server_connection_manager)
+			if (elem)
+				elem->FrameEndManagers();
+		if (client_connection_manager)
+			client_connection_manager->FrameEndManagers();
+	}
+
 	void NetworkSystem::Init()
 	{
 		InitializeYojimbo();

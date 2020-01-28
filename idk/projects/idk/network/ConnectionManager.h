@@ -11,6 +11,9 @@ namespace idk
 	public:
 		virtual ~ConnectionManager() = default;
 
+		virtual void FrameStartManagers() = 0;
+		virtual void FrameEndManagers() = 0;
+
 		template<typename T> T* CreateMessage() { return static_cast<T*>(CreateMessage(MessageID<T>)); }
 		template<typename T> void SendMessage(T* message, bool guarantee_delivery = false);
 		template<typename Manager> Manager* GetManager();

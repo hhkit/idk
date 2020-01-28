@@ -31,6 +31,18 @@ namespace idk
 			server.OnMessageReceived[clientID][(int)type].Unlisten(slot);
 	}
 
+	void ServerConnectionManager::FrameStartManagers()
+	{
+		for (auto& elem : substream_managers)
+			elem->NetworkFrameStart();
+	}
+
+	void ServerConnectionManager::FrameEndManagers()
+	{
+		for (auto& elem : substream_managers)
+			elem->NetworkFrameEnd();
+	}
+
 	yojimbo::Message* ServerConnectionManager::CreateMessage(size_t id)
 	{
 		return server.CreateMessage(clientID, static_cast<int>(id));

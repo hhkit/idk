@@ -1570,6 +1570,9 @@
     <ClCompile Include="network\IDManager.cpp">
       <Filter>network\managers</Filter>
     </ClCompile>
+    <ClCompile Include="network\SubstreamManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1758,7 +1761,6 @@
     <None Include="anim\Animator.inl">
       <Filter>anim\detail</Filter>
     </None>
-    <None Include="..\..\bin\editor.exe" />
     <None Include="res\MetaBundle.inl">
       <Filter>res</Filter>
     </None>
@@ -1781,6 +1783,9 @@
       <Filter>ds</Filter>
     </None>
     <None Include="network\ConnectionManager.inl">
+      <Filter>network\managers</Filter>
+    </None>
+    <None Include="network\SubstreamManager.inl">
       <Filter>network\managers</Filter>
     </None>
   </ItemGroup>

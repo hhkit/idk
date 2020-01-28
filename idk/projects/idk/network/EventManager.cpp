@@ -11,6 +11,7 @@
 #include <network/NetworkSystem.h>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
+#include <network/ElectronTransformView.h>
 #include <network/EventInstantiatePrefabMessage.h>
 
 namespace idk
@@ -56,9 +57,9 @@ namespace idk
 		Core::GetSystem<NetworkSystem>().GetIDManager().CreateNewIDFor(ev);
 		auto& tfm = *obj->Transform();
 		if (position)
-			tfm.GlobalPosition(*position);
+			tfm.position = *position;
 		if (rotation)
-			tfm.GlobalRotation(*rotation);
+			tfm.rotation = *rotation;
 
 		auto instantiate_event = connection_manager->CreateMessage<EventInstantiatePrefabMessage>();
 		instantiate_event->id = ev->network_id;
@@ -75,6 +76,17 @@ namespace idk
 			instantiate_event->rotation = *rotation;
 		}
 
+		if (auto tfm_view = obj->GetComponent<ElectronTransformView>())
+		{
+			tfm_view->ghost_data = ElectronTransformView::PreviousFrame
+			{
+				.position = tfm.position,
+				.rotation = tfm.rotation,
+				.scale = tfm.scale,
+				.state_mask = 0
+			};
+		}
+
 		connection_manager->SendMessage(instantiate_event, true);
 
 #pragma message("Store the event for future connections")
@@ -87,8 +99,8 @@ namespace idk
 		Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message->id, ev);
 		auto& tfm = *obj->Transform();
 		if (message->use_position)
-			tfm.GlobalPosition(message->position);
+			tfm.position = message->position;
 		if (message->use_rotation)
-			tfm.GlobalRotation(message->rotation);
+			tfm.rotation = message->rotation;
 	}
 }

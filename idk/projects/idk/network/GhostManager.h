@@ -10,6 +10,8 @@ namespace idk
 		void SubscribeEvents(ClientConnectionManager& client) override;
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
+		void UpdateGhosts(span<ElectronTransformView>);
+		void UpdateMasters(span<ElectronTransformView>);
 		void SendGhosts(span<ElectronTransformView> views); // by right should be just ElectronView but we deal with that later
 	private:
 		void OnGhostReceived(class GhostMessage* msg);

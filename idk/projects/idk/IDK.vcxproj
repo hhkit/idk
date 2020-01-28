@@ -401,6 +401,7 @@
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\Server.cpp" />
     <ClCompile Include="network\ServerConnectionManager.cpp" />
+    <ClCompile Include="network\SubstreamManager.cpp" />
     <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
@@ -516,7 +517,6 @@
     <ClCompile Include="util\ioutils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\bin\editor.exe" />
     <None Include="anim\Animator.inl" />
     <None Include="core\Scheduler.inl" />
     <None Include="core\Core.inl" />
@@ -545,6 +545,7 @@
     <None Include="network\ClientConnectionManager.inl" />
     <None Include="network\ConnectionManager.inl" />
     <None Include="network\ServerConnectionManager.inl" />
+    <None Include="network\SubstreamManager.inl" />
     <None Include="phys\raycasts\collision_raycast.inl" />
     <None Include="ReflectReg_AnimComponents.inl" />
     <None Include="reflect\detail\meta_manager.inl" />

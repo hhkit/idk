@@ -45,6 +45,8 @@ namespace idk
 		NetworkID GetNetworkID() const;
 		Handle<ElectronView> GetView() const;
 
-		void UpdateGhost();
+		// these two functions shouldn't be here
+		bool UpdateMaster();
+		bool UpdateGhost();
 	};
 }

@@ -19,6 +19,9 @@ namespace idk
 
 		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType*>>>
 		void Subscribe(Func&& func);
+
+		void FrameStartManagers() override;
+		void FrameEndManagers() override;
 	private:
 		struct EventSlot { unsigned type; SignalBase::SlotId slot; };
 		Client& client;
