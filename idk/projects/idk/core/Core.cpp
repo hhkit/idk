@@ -104,7 +104,7 @@ namespace idk
 
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")
-			                                      .IfPausedThen(&PhysicsSystem::DebugDrawColliders);
+			                                              .IfPausedThen(&PhysicsSystem::DebugDrawColliders);
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&PhysicsSystem::FirePhysicsEvents,     "Trigger and Collision Events");
 
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&TestSystem::TestSpan,                 "Test system");
@@ -114,12 +114,12 @@ namespace idk
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AudioSystem::Update,                  "Update listeners and sources");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&UISystem::Update,                     "Update UI");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts")
-			                                      .IfPausedThen(&ScriptSystem::ScriptPausedUpdate);
+			                                              .IfPausedThen(&ScriptSystem::ScriptPausedUpdate);
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
-												  .IfPausedThen(&AnimationSystem::UpdatePaused);
+												          .IfPausedThen(&AnimationSystem::UpdatePaused);
         _pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems")
-												  .IfPausedThen(&ParticleSystemUpdater::EditorUpdate);
+												          .IfPausedThen(&ParticleSystemUpdater::EditorUpdate);
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
@@ -128,12 +128,12 @@ namespace idk
 
 		if (editor)
 		{
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::WatchDirectory,      "Watch files");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&IEditor::EditorUpdate,                "Editor Update");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects Again");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&ResourceManager::WatchDirectory,      "Watch files");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&IEditor::EditorUpdate,                "Editor Update");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects Again");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&SceneManager::BuildSceneGraph,        "Build scene graph");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");
 		}
 
 

@@ -27,12 +27,12 @@ namespace idk
 			real t = 1;
 		};
 
-		bool sync_position  { true  };
-		bool sync_rotation  { false };
-		bool sync_scale     { false };
-		seconds interp_over { 0.2   };
-		real send_threshold{ 0.1f };
-		real snap_threshold{ 0.5f };
+		bool sync_position        { true  };
+		bool sync_rotation        { false };
+		bool sync_scale           { false };
+		float interp_over_seconds { 0.2   };
+		real send_threshold       { 0.1f  };
+		real snap_threshold       { 0.5f  };
 
 		// interp data
 		variant<void*, PreviousFrame, GhostData> ghost_data{};

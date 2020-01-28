@@ -65,7 +65,7 @@ namespace idk
 		if (auto ghost_ = std::get_if<GhostData>(&ghost_data))
 		{
 			GhostData& ghost = *ghost_;
-			auto advance = Core::GetDT() / interp_over;
+			auto advance = Core::GetDT().count() / interp_over_seconds;
 
 			if (ghost.t >= 1)
 				return true;

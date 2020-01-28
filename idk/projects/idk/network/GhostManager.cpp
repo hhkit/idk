@@ -84,7 +84,7 @@ namespace idk
 			// push the ghost data into the view
 			auto tfm_view = view->GetGameObject()->GetComponent<ElectronTransformView>();
 			if (msg->state_flags)
-			if (tfm_view->interp_over != seconds{ 0 })
+			if (tfm_view->interp_over_seconds != 0 )
 			{
 				auto ghost_data = ElectronTransformView::GhostData{};
 				ghost_data.state_mask = msg->state_flags;
