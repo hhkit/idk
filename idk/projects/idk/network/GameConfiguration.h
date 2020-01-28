@@ -10,6 +10,8 @@ namespace idk
 	,	class EventLoadLevelMessage
 	,	class EventCSharpRPCMessage
 	,	class GhostMessage
+	,	class MoveClientMessage
+	,	class MoveBroadcastMessage
 	>;
 
 	static constexpr auto MessageCount = std::tuple_size_v<NetworkMessageTuple>;
@@ -19,6 +21,7 @@ namespace idk
 	enum class GameChannel {
 		RELIABLE,
 		UNRELIABLE,
+		FASTEST_GUARANTEED,
 		COUNT
 	};
 

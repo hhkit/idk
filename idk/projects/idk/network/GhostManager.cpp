@@ -68,7 +68,7 @@ namespace idk
 					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_SCALE)
 						ghost_msg->scale = ghost_data->scale;
 
-					connection_manager->SendMessage(ghost_msg, true);
+					connection_manager->SendMessage(ghost_msg, GameChannel::RELIABLE);
 				}
 			}
 		}

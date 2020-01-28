@@ -33,7 +33,7 @@ namespace idk
 
 
 		yojimbo::Message* CreateMessage(size_t id) override;
-		void SendMessage(yojimbo::Message* message, bool guarantee_delivery) override;
+		void SendMessage(yojimbo::Message* message, GameChannel delivery_mode) override;
 		BaseSubstreamManager* GetManager(size_t substream_type_id) override;
 		void InstantiateSubmanagers();
 		template<typename RealSubstreamManager> RealSubstreamManager& AddSubstreamManager();

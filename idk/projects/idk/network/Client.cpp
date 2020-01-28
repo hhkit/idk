@@ -62,9 +62,9 @@ namespace idk
 		return client.CreateMessage(id);
 	}
 
-	void Client::SendMessage(yojimbo::Message* message, bool guarantee_delivery)
+	void Client::SendMessage(yojimbo::Message* message, GameChannel delivery_mode)
 	{
-		client.SendMessage((int)(guarantee_delivery ? GameChannel::RELIABLE : GameChannel::UNRELIABLE), message);
+		client.SendMessage((int)(delivery_mode), message);
 	}
 
 	void Client::ProcessMessage(yojimbo::Message* message)

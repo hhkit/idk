@@ -48,9 +48,9 @@ namespace idk
 		return server.CreateMessage(clientID, static_cast<int>(id));
 	}
 
-	void ServerConnectionManager::SendMessage(yojimbo::Message* message, bool guarantee_delivery)
+	void ServerConnectionManager::SendMessage(yojimbo::Message* message, GameChannel delivery_mode)
 	{
-		server.SendMessage(clientID, message, guarantee_delivery);
+		server.SendMessage(clientID, message, delivery_mode);
 	}
 
 	BaseSubstreamManager* ServerConnectionManager::GetManager(size_t substream_type_id)

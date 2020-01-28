@@ -29,7 +29,7 @@ namespace idk
 		vector<unique_ptr<BaseSubstreamManager>> substream_managers;
 
 		yojimbo::Message* CreateMessage(size_t id) override;
-		void SendMessage(yojimbo::Message* message, bool guarantee_delivery) override;
+		void SendMessage(yojimbo::Message* message, GameChannel delivery_mode) override;
 		class BaseSubstreamManager* GetManager(size_t substream_type_id) override;
 
 		void InstantiateSubmanagers();

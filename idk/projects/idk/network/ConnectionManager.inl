@@ -6,9 +6,9 @@
 namespace idk
 {
 	template<typename T>
-	inline void ConnectionManager::SendMessage(T* message, bool guarantee_delivery)
+	inline void ConnectionManager::SendMessage(T* message, GameChannel delivery_mode)
 	{
-		SendMessage((yojimbo::Message*) message, guarantee_delivery);
+		SendMessage((yojimbo::Message*) message, delivery_mode);
 	}
 	template<typename Manager>
 	inline Manager* ConnectionManager::GetManager()

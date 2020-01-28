@@ -55,16 +55,16 @@ namespace idk
 		server.SendPackets();
 	} 
 
-	void Server::SendMessage(int clientIndex, yojimbo::Message* message, bool guarantee)
+	void Server::SendMessage(int clientIndex, yojimbo::Message* message, GameChannel delivery_mode)
 	{
 		if (clientIndex == ALL_CLIENTS)
 		{
 			for (int i = 0; i < server.GetNumConnectedClients(); ++i)
-				server.SendMessage(i, (int)(guarantee ? GameChannel::RELIABLE : GameChannel::UNRELIABLE), message);
+				server.SendMessage(i, (int)(delivery_mode), message);
 		}
 		else
 		{
-			server.SendMessage(clientIndex, (int)(guarantee ? GameChannel::RELIABLE : GameChannel::UNRELIABLE), message);
+			server.SendMessage(clientIndex, (int)(delivery_mode), message);
 		}
 	}
 

@@ -29,7 +29,7 @@ namespace idk
 				LOG_TO(LogPool::NETWORK, "Received message %d", message->i);
 				auto pingback = server.CreateMessage<TestMessage>();
 				pingback->i = message->i + 1;
-				server.SendMessage(pingback, true);
+				server.SendMessage(pingback, GameChannel::RELIABLE);
 			});
 
 		// the server should never be told to instantiate prefabs
@@ -40,7 +40,7 @@ namespace idk
 		auto& conn_man = Core::GetSystem<NetworkSystem>().GetConnectionManager();
 		auto test_mess = conn_man.CreateMessage<TestMessage>();
 		test_mess->i = i;
-		conn_man.SendMessage(test_mess, true);
+		conn_man.SendMessage(test_mess, GameChannel::RELIABLE);
 	}
 
 	void EventManager::SendInstantiatePrefabEvent(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> rotation)
@@ -87,7 +87,7 @@ namespace idk
 			};
 		}
 
-		connection_manager->SendMessage(instantiate_event, true);
+		connection_manager->SendMessage(instantiate_event, GameChannel::RELIABLE);
 
 #pragma message("Store the event for future connections")
 	}

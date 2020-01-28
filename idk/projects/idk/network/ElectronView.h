@@ -8,8 +8,10 @@ namespace idk
 		: public Component<ElectronView>
 	{
 	public:
+		static constexpr int SERVER = -1;
+
 		NetworkID network_id {};
-		bool hack{};
+		int owner{ SERVER };
 		vector<GenericHandle> observed_components;
 	};
 }

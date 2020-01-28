@@ -23,7 +23,7 @@ namespace idk
 		void SendPackets();
 
 		yojimbo::Message* CreateMessage(int id);
-		void SendMessage(yojimbo::Message* message, bool guarantee_delivery = false);
+		void SendMessage(yojimbo::Message* message, GameChannel delivery_mode);
 	private:
 		Adapter           adapter;
 		GameConfiguration config;
