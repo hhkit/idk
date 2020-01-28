@@ -621,7 +621,8 @@ namespace idk {
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->GlobalPosition(c.GlobalPosition());
+                if (i)
+                    i->GetComponent<Transform>()->position = c.position;
             }
         }
         check_modify();
@@ -636,7 +637,8 @@ namespace idk {
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->GlobalRotation(c.GlobalRotation());
+                if (i)
+                    i->GetComponent<Transform>()->rotation = c.rotation;
             }
         }
         check_modify();
@@ -671,7 +673,8 @@ namespace idk {
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->GlobalScale(c.GlobalScale());
+                if (i)
+                    i->GetComponent<Transform>()->scale = c.scale;
             }
             if (_prefab_inst)
             {
