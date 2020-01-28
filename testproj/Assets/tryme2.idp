@@ -20,5 +20,9 @@ data:
   - !ElectronView 
     network_id: 0
   - !ElectronTransformView 
-    {sync_position: 1, sync_rotation: 0, sync_scale: 0}
+    send_threshold: 0.01
+    snap_threshold: 5
+    sync_position: 1
+    sync_rotation: 1
+    sync_scale: 0
   parent_index: -1

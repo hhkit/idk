@@ -28,7 +28,7 @@ namespace idk
 			if (sync_position)
 			{
 				const auto curr_pos = tfm.position;
-				if ((curr_pos - previous_data.position).length_sq() > delta_threshold)
+				if ((curr_pos - previous_data.position).length_sq() > send_threshold * send_threshold)
 				{
 					previous_data.position = curr_pos;
 					previous_data.state_mask |= GhostFlags::TRANSFORM_POS;
@@ -72,7 +72,7 @@ namespace idk
 
 			auto& tfm = *GetGameObject()->Transform();
 			// snap
-			if ((ghost.end_pos - tfm.position).length_sq() > delta_threshold)
+			if ((ghost.end_pos - tfm.position).length_sq() > snap_threshold * snap_threshold)
 				ghost.t = 1;
 
 			ghost.t = std::min(1.f, ghost.t + advance);

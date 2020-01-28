@@ -55,8 +55,16 @@ namespace idk
 						ghost_msg->position = ghost_data->position;
 
 					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_ROT)
-						ghost_msg->rotation = ghost_data->rotation;
-
+					{
+						IDK_ASSERT(ghost_msg);
+						IDK_ASSERT(ghost_data);
+						IDK_ASSERT(ghost_msg->rotation.x + 5);
+						IDK_ASSERT(ghost_data->rotation.x + 5);
+						ghost_msg->rotation.x = ghost_data->rotation.x;
+						ghost_msg->rotation.y = ghost_data->rotation.y;
+						ghost_msg->rotation.z = ghost_data->rotation.z;
+						ghost_msg->rotation.w = ghost_data->rotation.w;
+					}
 					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_SCALE)
 						ghost_msg->scale = ghost_data->scale;
 

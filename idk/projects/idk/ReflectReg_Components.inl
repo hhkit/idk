@@ -63,6 +63,6 @@ REFLECT_VAR(network_id)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::ElectronTransformView, "ElectronTransformView")
-REFLECT_VARS(sync_position, sync_rotation, sync_scale)
+REFLECT_VARS(sync_position, sync_rotation, sync_scale, send_threshold, snap_threshold)
 REFLECT_END()
 #pragma endregion

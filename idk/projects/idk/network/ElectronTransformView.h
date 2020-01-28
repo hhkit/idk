@@ -30,8 +30,9 @@ namespace idk
 		bool sync_position  { true  };
 		bool sync_rotation  { false };
 		bool sync_scale     { false };
-		seconds interp_over { 1     };
-		real delta_threshold{ 0.1f  };
+		seconds interp_over { 0.2   };
+		real send_threshold{ 0.1f };
+		real snap_threshold{ 0.5f };
 
 		// interp data
 		variant<void*, PreviousFrame, GhostData> ghost_data{};
