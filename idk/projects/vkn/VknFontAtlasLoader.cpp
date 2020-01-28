@@ -265,7 +265,7 @@ namespace idk::vkn
 
 		auto ptr = texture.texture;
 		auto&& [image, alloc, aspect] = vkn::LoadFontAtlas(allocator, load_fence, load_info, in_info);
-		texture.Size(ptr->Size(uivec2{ load_info.width,load_info.height }));
+		texture.Size(ptr->Size(uvec2{ load_info.width,load_info.height }));
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->image_ = std::move(image);
@@ -296,7 +296,7 @@ namespace idk::vkn
 		};
 		ptr->sampler = device.createSamplerUnique(sampler_info);
 	}
-	void FontAtlasLoader::LoadFontAtlas(VknFontAtlas& texture, TextureFormat pixel_format, std::optional<FontAtlasOptions> ooptions, const char* rgba32, size_t len, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	void FontAtlasLoader::LoadFontAtlas(VknFontAtlas& texture, TextureFormat pixel_format, std::optional<FontAtlasOptions> ooptions, const char* rgba32, size_t len, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		FontAtlasOptions options{};
 		if (ooptions)
@@ -339,7 +339,7 @@ namespace idk::vkn
 		ptr->sampler = device.createSamplerUnique(sampler_info);
 		texture.Size(size);
 	}
-	void FontAtlasLoader::LoadFontAtlas(VknFontAtlas& texture, TextureFormat pixel_format, std::optional<FontAtlasOptions> options, string_view rgba32, uivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
+	void FontAtlasLoader::LoadFontAtlas(VknFontAtlas& texture, TextureFormat pixel_format, std::optional<FontAtlasOptions> options, string_view rgba32, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget)
 	{
 		LoadFontAtlas(texture, pixel_format, options, rgba32.data(), rgba32.size(), size, allocator, load_fence, isRenderTarget);
 	}

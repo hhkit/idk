@@ -32,7 +32,7 @@ namespace idk::vkn::gt
 			return builder.write(builder.CreateTexture(TextureDescription
 				{
 					.name = name,//string_view name);
-					.size = uivec2{1920,1080},//ivec2 size);
+					.size = uvec2{1920,1080},//ivec2 size);
 					.format = format,//vk::Format format);
 					.aspect = flag,//vk::ImageAspectFlags aspect);
 					//vk::ImageType type = vk::ImageType::e2D);

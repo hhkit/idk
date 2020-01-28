@@ -50,7 +50,7 @@ namespace idk::vkn {
 		return *this;
 	}
 
-	uivec2 VknTexture::Size(uivec2 new_size)
+	uvec2 VknTexture::Size(uvec2 new_size)
 	{
 		return Texture::Size(new_size);
 

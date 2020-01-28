@@ -40,13 +40,13 @@ namespace idk::ogl {
 		texture->BindToUnit(texture_unit);
 	}
 
-	void OpenGLFontAtlas::Buffer(void* data, size_t buffer_size, uivec2 texture_size, TextureInternalFormat format, GLenum incoming_components, GLenum incoming_type)
+	void OpenGLFontAtlas::Buffer(void* data, size_t buffer_size, uvec2 texture_size, TextureInternalFormat format, GLenum incoming_components, GLenum incoming_type)
 	{
 		texture->Buffer(data, buffer_size, texture_size, format, incoming_components, incoming_type);
 	}
 
 
-	void OpenGLFontAtlas::Size(uivec2 new_size)
+	void OpenGLFontAtlas::Size(uvec2 new_size)
 	{
 		FontAtlas::Size(new_size);
 		texture->Size(new_size);

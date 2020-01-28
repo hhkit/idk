@@ -28,18 +28,18 @@ namespace idk
 
 		// accessors
 		float AspectRatio() const;
-		uivec2 Size() const;
+		uvec2 Size() const;
 		TextureInternalFormat InternalFormat() const;
 		idk::FilterMode Filter() const;
 		bool IsDepthTexture() const;
 
 		// modifiers
-		virtual uivec2 Size(uivec2 newsize);
+		virtual uvec2 Size(uvec2 newsize);
 
 		// identifier for ImGUIImage
 		virtual void* ID() const { return 0; }
 	protected:
-		uivec2 _size {512,512};
+		uvec2 _size {512,512};
 		TextureInternalFormat _internal_format = TextureInternalFormat::RGBA_16_F;
 		FilterMode _filter_mode;
 	};

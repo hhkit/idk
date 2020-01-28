@@ -43,7 +43,7 @@ namespace idk
 		framebuffer.size = {};
 	}
 
-	FrameBufferBuilder& FrameBufferBuilder::Begin(uivec2 size, size_t num_layers)
+	FrameBufferBuilder& FrameBufferBuilder::Begin(uvec2 size, size_t num_layers)
 	{
 		info.size = size;
 		info.num_layers = num_layers;

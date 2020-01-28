@@ -80,11 +80,11 @@ namespace idk::ogl
 	void OpenGLState::GenResources()
 	{
 
-		brdf_texture = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RG_16_F, uivec2{512});
-		fb_man.cBufferPickingTexture = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::R_32_UI, uivec2{ 512 });
+		brdf_texture = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RG_16_F, uvec2{512});
+		fb_man.cBufferPickingTexture = Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::R_32_UI, uvec2{ 512 });
 
 		FrameBufferBuilder builder;
-		builder.Begin(uivec2{ 512,512 });
+		builder.Begin(uvec2{ 512,512 });
 		builder.AddAttachment(
 			AttachmentInfo
 			{

@@ -45,7 +45,7 @@ namespace idk::vkn {
 		return *this;
 	}
 
-	void VknCubemap::Size(uivec2 new_size)
+	void VknCubemap::Size(uvec2 new_size)
 	{
 		CubeMap::Size(new_size);
 	}

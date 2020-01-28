@@ -10,7 +10,7 @@ namespace idk
 		ColorFormat internal_format;
 		UVMode mode;
 		FilterMode filter_mode;
-		uivec2 size;
+		uvec2 size;
 		bool is_srgb{};
 		unsigned generate_mipmaps{};
 		vector<unsigned char> pixel_buffer;

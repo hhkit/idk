@@ -281,7 +281,7 @@ namespace idk::vkn
 		return fb;
 	}
 
-	void VknFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, uivec2 size, unique_ptr<Attachment>& out)
+	void VknFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, uvec2 size, unique_ptr<Attachment>& out)
 	{
 		using tex_create_ptr_t = TexCreateInfo(*)(uint32_t width, uint32_t height);
 		constexpr static tex_create_ptr_t cr8_funcs[]

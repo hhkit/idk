@@ -5,8 +5,8 @@ namespace idk::vkn
 	struct UboManager;
 	struct RenderBundle
 	{
-		UboManager& _ubo_manager;
 		vk::CommandBuffer _cmd_buffer;
-		RenderBundle(UboManager& ubo_manager, vk::CommandBuffer cmd_buffer):_ubo_manager{ubo_manager},_cmd_buffer{cmd_buffer}{}
+		DescriptorsManager& _d_manager;
+		RenderBundle(vk::CommandBuffer cmd_buffer, DescriptorsManager& d_manager) :_cmd_buffer{ cmd_buffer }, _d_manager{ d_manager }{}
 	};
 }

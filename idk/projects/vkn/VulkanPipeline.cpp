@@ -473,7 +473,7 @@ namespace idk::vkn
 	{
 		auto sc = vulkan.Swapchain().extent;
 		ivec2 screen_offs = (config.viewport_offset) ? *config.viewport_offset : ivec2{ 0,0 };
-		uivec2 screen_size = (config.viewport_size) ? *config.viewport_size : uivec2{ sc.width,sc.height };
+		uvec2 screen_size = (config.viewport_size) ? *config.viewport_size : uvec2{ sc.width,sc.height };
 		return vk::Viewport
 		{
 			s_cast<float>(screen_offs.x), s_cast<float>(screen_offs.y), //x,y
@@ -486,7 +486,7 @@ namespace idk::vkn
 	{
 		auto sc = vulkan.Swapchain().extent;
 		auto screen_offs = (config.viewport_offset) ? *config.viewport_offset : ivec2{ 0,0 };
-		auto screen_size = (config.viewport_size) ? *config.viewport_size : uivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
+		auto screen_size = (config.viewport_size) ? *config.viewport_size : uvec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
 		return vk::Rect2D{
 			{ screen_offs.x, screen_offs.y },
 		{ s_cast<uint32_t>(screen_size.x), s_cast<uint32_t>(screen_size.y) }

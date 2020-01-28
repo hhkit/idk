@@ -9,7 +9,7 @@ namespace idk::vkn {
 	struct VknTexture
 		: public Texture
 	{
-		uivec2					size{};
+		uvec2					size{};
 		vk::DeviceSize			sizeOnDevice{};
 		void* rawData{};
 		string					path{ "" };
@@ -36,7 +36,7 @@ namespace idk::vkn {
 		uint32_t& Layers(uint32_t layers)noexcept;
 		uint32_t Layers()const noexcept;
 		using Texture::Size;
-		uivec2 Size(uivec2 new_size) override;
+		uvec2 Size(uvec2 new_size) override;
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
 		void* ID() const override;
 

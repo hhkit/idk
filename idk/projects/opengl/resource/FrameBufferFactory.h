@@ -20,7 +20,7 @@ namespace idk::ogl
 		unique_ptr<FrameBuffer> GenerateDefaultResource() override;
 		unique_ptr<FrameBuffer> Create() override;
 		//out must be assigned a make unique of the implementation version of attachment
-		void CreateAttachment(AttachmentType type, const AttachmentInfo& info, uivec2 size, unique_ptr<Attachment>& out) override;
+		void CreateAttachment(AttachmentType type, const AttachmentInfo& info, uvec2 size, unique_ptr<Attachment>& out) override;
 		void PreReset(FrameBuffer& framebuffer) override;//resets the framebuffer (queue resource for destruction)
 		
 		void Finalize(FrameBuffer& h_fb,SpecializedInfo* info=nullptr) override;

@@ -18,7 +18,7 @@ namespace idk::vkn
 		vk::Image            Image       ()const noexcept;
 		vk::ImageView        ImageView   ()const noexcept;
 		vk::Sampler          Sampler     ()const noexcept;
-		uivec2               Size        ()const noexcept;
+		uvec2               Size        ()const noexcept;
 		vk::Format           Format      ()const noexcept;
 		vk::ImageAspectFlags ImageAspects()const noexcept;
 		uint32_t             Layers      ()const noexcept;
@@ -27,7 +27,7 @@ namespace idk::vkn
 		vk::Image            _image     {};
 		vk::ImageView        _image_view{};
 		vk::Sampler          _sampler   {};
-		uivec2               _size      {};
+		uvec2               _size      {};
 		vk::Format           _format    {};
 		vk::ImageAspectFlags _aspects   {};
 		uint32_t             _layers    {};

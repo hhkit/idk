@@ -96,7 +96,7 @@ namespace idk
 		if (data) // stbi image can fail
 		{
 			auto texture_meta = *meta->GetMeta<Texture>();
-			texture_handle->Buffer(data.get(), 4 * size.x * size.y, uivec2{ size }, texture_meta.internal_format, texture_meta.is_srgb);
+			texture_handle->Buffer(data.get(), 4 * size.x * size.y, uvec2{ size }, texture_meta.internal_format, texture_meta.is_srgb);
 
 			return texture_handle;
 		}
@@ -206,7 +206,7 @@ namespace idk
 				return texture_handle;
 		
 			//Get the original texture image data
-			texture_handle->Size(uivec2(width, height));
+			texture_handle->Size(uvec2(width, height));
 			//Read the mip maps and create textures based on them
 			fread(data, 1, size, fp);
 			unsigned offset = 0;
@@ -240,7 +240,7 @@ namespace idk
 			assert(size == x * y * li->blockBytes);
 
 			//Get the original texture image data
-			texture_handle->Size(uivec2(width, height));
+			texture_handle->Size(uvec2(width, height));
 
 			//get the data for the image
 			unsigned char* data = (unsigned char*)malloc(size);
@@ -284,7 +284,7 @@ namespace idk
 			size_t size = x * y * li->blockBytes;
 
 			//Get the original texture image data
-			texture_handle->Size(uivec2(width, height));
+			texture_handle->Size(uvec2(width, height));
 
 			unsigned char* data = (unsigned char*)malloc(size);
 

@@ -101,7 +101,7 @@ namespace idk
 		RscHandle<ShaderProgram> frag_shader{};
 		RscHandle<ShaderProgram> vert_shader{};
 		std::optional<ivec2> viewport_offset{};
-		std::optional<uivec2> viewport_size{};
+		std::optional<uvec2> viewport_size{};
 		vector<buffer_desc> buffer_descriptions;
 		FillType fill_type = eFill;
 		PrimitiveTopology prim_top = eTriangleList;

@@ -57,7 +57,7 @@ namespace idk::vkn
 			rp = *render_pass;
 		string_view str{ r_cast<const char*>(&rp),sizeof(rp) };
 		combi += str; //Add renderpass as a part of the unique id.
-		uivec2 viewport_size{};
+		uvec2 viewport_size{};
 		ivec2 viewport_offset{};
 		if (config.viewport_size)
 			viewport_size = *config.viewport_size;

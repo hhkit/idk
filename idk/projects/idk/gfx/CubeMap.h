@@ -26,14 +26,14 @@ namespace idk
 
 		// accessors
 		float AspectRatio() const;
-		uivec2 Size() const;
+		uvec2 Size() const;
 
 		// modifiers
-		virtual void Size(uivec2 newsize);
+		virtual void Size(uvec2 newsize);
 
 	protected:
 		//Size for each texture in the cubemap
-		uivec2 _size{};
+		uvec2 _size{};
 		TextureInternalFormat _internal_format{ };
 	};
 }

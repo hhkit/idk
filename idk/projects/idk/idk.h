@@ -46,9 +46,9 @@ namespace idk
 	using ivec3 = tvec<int, 3>;
 	using ivec4 = tvec<int, 4>;
 
-	using uivec2 = tvec<uint32_t, 2>;
-	using uivec3 = tvec<uint32_t, 3>;
-	using uivec4 = tvec<uint32_t, 4>;
+	using uvec2 = tvec<uint32_t, 2>;
+	using uvec3 = tvec<uint32_t, 3>;
+	using uvec4 = tvec<uint32_t, 4>;
 
 	using bvec2 = tvec<bool, 2>;
 	using bvec3 = tvec<bool, 3>;

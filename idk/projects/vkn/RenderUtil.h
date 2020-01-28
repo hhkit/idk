@@ -5,6 +5,6 @@
 namespace idk::vkn
 {
 	VulkanView& View();
-	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, uivec2 vp_size);
-	void SetScissor(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, uivec2 vp_size);
+	void SetViewport(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, uvec2 vp_size);
+	void SetScissor(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, uvec2 vp_size);
 }

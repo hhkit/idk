@@ -31,7 +31,7 @@ namespace idk::vkn {
 
 		return *this;
 	}
-	void VknFontAtlas::Size(uivec2 new_size)
+	void VknFontAtlas::Size(uvec2 new_size)
 	{
 		FontAtlas::Size(new_size);
 

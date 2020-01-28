@@ -8,7 +8,7 @@
 
 namespace idk
 {
-	constexpr uivec2 shadow_map_dim{ 512,512};
+	constexpr uvec2 shadow_map_dim{ 512,512};
 
 	const void* PointLight::unique_id() const noexcept
 	{

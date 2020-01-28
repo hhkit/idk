@@ -17,7 +17,7 @@ namespace idk::vkn
 		arr_index{ arr_index_ },
 		size{ size_ },
 		layout{ layout_ },
-		type_index{ desc_type_index<vk::DescriptorType::eUniformBuffer> }
+		type_index{ desc_type_idx<vk::DescriptorType::eUniformBuffer> }
 	{
 	}
 	UniformUtils::BindingInfo::BindingInfo(
@@ -32,7 +32,7 @@ namespace idk::vkn
 		arr_index{ arr_index_ },
 		size{ size_ },
 		layout{ layout_ },
-		type_index{ desc_type_index<vk::DescriptorType::eCombinedImageSampler> }
+		type_index{ desc_type_idx<vk::DescriptorType::eCombinedImageSampler> }
 	{
 	}
 	UniformUtils::BindingInfo::BindingInfo(
@@ -47,7 +47,7 @@ namespace idk::vkn
 		arr_index{ arr_index_ },
 		size{ size_ },
 		layout{ layout_ },
-		type_index{ desc_type_index<vk::DescriptorType::eInputAttachment> }
+		type_index{ desc_type_idx<vk::DescriptorType::eInputAttachment> }
 	{
 	}
 
@@ -119,9 +119,25 @@ namespace idk::vkn
 
 		return result;
 	}
+	void UniformManager::SetUboManager(UboManager& ubo_manager) noexcept
+	{
+		_ubo_manager = &ubo_manager;
+	}
 	void UniformManager::AddBinding(binding_manager::set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts)
 	{
 		_bindings.AddBinding(set, layout, counts);
+	}
+
+	//Before this
+
+	bool UniformManager::RegisterUniforms(string name, binding_manager::set_t set, uint32_t binding, uint32_t size)
+	{
+		auto& bindings = _bindings.curr_bindings;
+		auto set_info = bindings.find(set);
+		bool can_set = set_info != bindings.end();
+		if (can_set)
+			_uniform_names[std::move(name)] = UniInfo{ set,binding,size,set_info->second.layout };
+		return can_set;
 	}
 	void UniformManager::RemoveBinding(binding_manager::set_t set)
 	{
@@ -151,8 +167,7 @@ namespace idk::vkn
 		if (itr != _uniform_names.end())
 		{
 			auto& info = itr->second;
-			auto [buffer, offset] = _ubo_manager->Add(data);
-			_bindings.BindUniformBuffer(info, array_index, buffer, offset, skip_if_bound);
+			bound = BindUniformBuffer(info, array_index, data, skip_if_bound);
 		}
 		return bound;
 	}
@@ -163,7 +178,7 @@ namespace idk::vkn
 		if (itr != _uniform_names.end())
 		{
 			auto& info = itr->second;
-			bound = _bindings.BindSampler(info, array_index, texture, skip_if_bound, layout);
+			bound = BindSampler(info, array_index, texture, skip_if_bound, layout);
 		}
 		return bound;
 	}
@@ -174,23 +189,67 @@ namespace idk::vkn
 		if (itr != _uniform_names.end())
 		{
 			auto& info = itr->second;
-			bound =_bindings.BindAttachment(info, array_index, texture, skip_if_bound, layout);
+			bound = BindAttachment(info, array_index, texture, skip_if_bound, layout);
 		}
 		return bound;
 	}
-	hash_table<uint32_t, vector_span<UniformManager::BindingInfo>> UniformManager::FinalizeCurrent()
+	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
-		hash_table<uint32_t, vector_span<BindingInfo>> result;
+		auto [buffer, offset] = _ubo_manager->Add(data);
+		return _bindings.BindUniformBuffer(info, array_index, buffer, offset, skip_if_bound);
+	}
+	bool UniformManager::BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
+	{
+		return _bindings.BindSampler(info, array_index, texture, skip_if_bound, layout);;
+	}
+	bool UniformManager::BindAttachment(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
+	{
+		return _bindings.BindAttachment(info, array_index, texture, skip_if_bound, layout);
+	}
+	vector_span<UniformManager::set_binding_t>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
+	{
+		vector_span_builder builder{ all_sets };
+		builder.start();
 		for (auto& [index, set] : _bindings.curr_bindings)
 		{
 			auto bindings = set.FinalizeDC(_collated_layouts,_buffer_builder);
 			if (bindings)
 			{
 				if(bindings->size())
-					result.emplace(index, *bindings);
+					builder.emplace_back(index, *bindings);
 			}
 		}
-		return result;
+		return builder.end();
+	}
+	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
+	{
+		auto dsl = dm.Allocate(_collated_layouts);
+		size_t i = 0;
+		for (auto& [set, binding] : bindings)
+		{
+			auto layout = [](auto& bindings)
+			{
+				vk::DescriptorSetLayout layout{};
+				for (auto& binding : bindings)
+				{
+					if (binding.layout)
+					{
+						layout = binding.layout;
+						break;
+					}
+				}
+				return layout;
+			}(binding);
+			auto itr = dsl.find(layout);
+			if (itr != dsl.end())
+			{
+				auto ds = itr->second.GetNext();
+				//TODO update ds
+				//UpdateUniformDS(ds, bindings, dud);
+				descriptor_sets[i] = ds;
+			}
+			++i;
+		}
 	}
 	void UniformUtils::binding_manager::AddBinding(set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts)
 	{

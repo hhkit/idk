@@ -227,7 +227,7 @@ namespace idk::vkn
 			shared_gs.renderer_fragment_shaders[FragmentShaders::FPicking]
 		};
 		vector<uint32_t> id_buffer(total_num_insts,0);
-		uivec2 max_size{};
+		uvec2 max_size{};
 		size_t max_ro=0;
 		for (auto& request : requests)
 		{

@@ -49,7 +49,7 @@ namespace idk::vkn
 	{
 		return _sampler;
 	}
-	uivec2 VknTextureView::Size() const noexcept
+	uvec2 VknTextureView::Size() const noexcept
 	{
 		return _size;
 	}

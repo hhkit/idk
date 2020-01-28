@@ -7,6 +7,7 @@
 #include <vkn/UboManager.inl>
 #include <vkn/vector_span.h>
 #include <vkn/vector_span_builder.h>
+#include <vkn/DescriptorsManager.h>
 namespace idk::vkn
 {
 
@@ -16,7 +17,7 @@ namespace idk::vkn
 	using desc_type_info = DescriptorTypeI; // pair<num_ds,num_descriptors_per_type>
 	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>;
 	template<vk::DescriptorType type>
-	static constexpr size_t desc_type_index = desc_type_info::map<type>();
+	static constexpr size_t desc_type_idx = desc_type_info::map<type>();
 	struct UniformUtils
 	{
 		struct ImageBinding
@@ -119,26 +120,27 @@ namespace idk::vkn
 	struct UniformManager : public UniformUtils
 	{
 		using set_bindings = binding_manager::set_bindings;
+
+		void SetUboManager(UboManager& ubo_manager) noexcept;
+
 		//Do this first
 		void AddBinding(binding_manager::set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts);
 		//Before this
-		bool RegisterUniforms(string name, binding_manager::set_t set, uint32_t binding, uint32_t size)
-		{
-			auto& bindings = _bindings.curr_bindings;
-			auto set_info = bindings.find(set);
-			bool can_set = set_info != bindings.end();
-			if(can_set)
-				_uniform_names[std::move(name)] = UniInfo{ set,binding,size,set_info->second.layout };
-			return can_set;
-		}
+		bool RegisterUniforms(string name, binding_manager::set_t set, uint32_t binding, uint32_t size);
 		void RemoveBinding(binding_manager::set_t set);
 
 		bool BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound = false);
 		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 		bool BindAttachment(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
-		hash_table<uint32_t, vector_span<BindingInfo>> FinalizeCurrent();
+		bool BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound = false);
+		bool BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+		bool BindAttachment(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
+		//set, bindings
+		using set_binding_t = std::pair<uint32_t, vector_span<BindingInfo>>;
+		vector_span<set_binding_t> FinalizeCurrent(vector<set_binding_t>& all_sets);
+		void GenerateDescriptorSets(span<const set_binding_t> bindings,DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_managers);
 	private:
 		hash_table<string, UniInfo> _uniform_names;
 		UboManager* _ubo_manager;

@@ -19,7 +19,7 @@ namespace idk::ogl
 		Buffer(nullptr, 0, _size, _internal_format);
 	}
 
-	OpenGLTexture::OpenGLTexture(TextureInternalFormat format, uivec2 size, unsigned mip_level)
+	OpenGLTexture::OpenGLTexture(TextureInternalFormat format, uvec2 size, unsigned mip_level)
 	{
 		glGenTextures(1, &_id);
 		Bind();
@@ -89,7 +89,7 @@ namespace idk::ogl
 		Bind();
 	}
 
-	void OpenGLTexture::Buffer(void* data, size_t buffer_size, uivec2 texture_size, TextureInternalFormat format, GLenum incoming_components, GLenum incoming_type)
+	void OpenGLTexture::Buffer(void* data, size_t buffer_size, uvec2 texture_size, TextureInternalFormat format, GLenum incoming_components, GLenum incoming_type)
 	{
 		_size = texture_size;
 		_internal_format = format;
@@ -101,7 +101,7 @@ namespace idk::ogl
 		GL_CHECK();
 	}
 
-	void OpenGLTexture::Buffer(void* data, size_t buffer_size, uivec2 size, ColorFormat format, bool compressed)
+	void OpenGLTexture::Buffer(void* data, size_t buffer_size, uvec2 size, ColorFormat format, bool compressed)
 	{
 		_size = size;
 		Bind();
@@ -144,7 +144,7 @@ namespace idk::ogl
 	}
 
 
-	uivec2 OpenGLTexture::Size(uivec2 new_size)
+	uvec2 OpenGLTexture::Size(uvec2 new_size)
 	{
 		Texture::Size(new_size);
 		Buffer(nullptr, 0, _size, _internal_format);

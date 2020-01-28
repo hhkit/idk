@@ -4,8 +4,8 @@ namespace idk::vkn
 {
 	bool FrameGraphNode::resource_present(index_span span, FrameGraphResource rsc) const
 	{
-		auto begin = buffer->begin() + span.begin;
-		auto end = buffer->begin() + span.end;
+		auto begin = buffer->begin() + span._begin;
+		auto end = buffer->begin() + span._end;
 		auto itr = std::find(begin, end, rsc);
 		return itr != end;
 	}

@@ -97,7 +97,7 @@ namespace idk::vkn
 		index_span result{ resources.size(),resources.size() };
 		resources.reserve(rsc.size() + resources.size());
 		std::copy(rsc.begin(), rsc.end(), std::back_inserter(resources));
-		result.end = resources.size();
+		result._end = resources.size();
 		return result;
 	}
 

@@ -11,7 +11,7 @@ namespace idk
 		void start()
 		{
 			_span.set_buffer(_buffer);
-			_span.begin = _buffer.size();
+			_span._begin = _buffer.size();
 		}
 
 		template<typename ...Args>
@@ -22,7 +22,7 @@ namespace idk
 
 		vector_span<T> end()
 		{
-			_span.end = _buffer.size();
+			_span._end = _buffer.size();
 			return _span;
 		}
 

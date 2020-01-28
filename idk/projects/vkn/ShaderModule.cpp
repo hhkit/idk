@@ -176,6 +176,7 @@ namespace idk::vkn
 			auto type = code_reflector.get_type(ub.type_id);
 			info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
 			info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
+			info.input_attachment_index = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationInputAttachmentIndex);
 			info.stage = StageToUniformStage(single_stage);
 			info.size = (type.array.size()) ? type.array.back() : 1;
 			info.type = uniform_layout_t::UniformType::eAttachment;

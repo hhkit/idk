@@ -40,10 +40,10 @@ namespace idk::vkn
 		void set_input_nodes(fg_id dst, itr begin, itr end)
 		{
 			auto& span = in_nodes[dst];
-			span.begin = in_buffer.size();
+			span._begin = in_buffer.size();
 			in_buffer.resize(in_buffer.size() + std::distance(begin, end));
-			std::copy(begin, end, in_buffer.begin() + span.begin);
-			span.end = in_buffer.size();
+			std::copy(begin, end, in_buffer.begin() + span._begin);
+			span._end = in_buffer.size();
 		}
 		vector<fg_id> in_buffer;
 	};

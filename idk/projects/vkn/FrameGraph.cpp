@@ -277,7 +277,7 @@ namespace idk::vkn
 		vk::Device d = *View().Device();
 		auto& rsc_manager = GetResourceManager();
 		vector<vk::ImageView> targets;
-		uivec2 size{std::numeric_limits<uint32_t>::max()}; //TODO get an actual size
+		uvec2 size{std::numeric_limits<uint32_t>::max()}; //TODO get an actual size
 		uint32_t num_layers = std::numeric_limits<uint32_t>::max();
 		for (auto& input_rsc : input_rscs)
 		{

@@ -27,7 +27,7 @@ namespace idk::vkn {
 
 		VknCubemap& operator=(VknCubemap&&) noexcept;
 		using CubeMap::Size;
-		void Size(uivec2 new_size) override;
+		void Size(uvec2 new_size) override;
 		virtual void* ID() const;
 
 		void SetConvoluted(const RscHandle<VknCubemap>&);

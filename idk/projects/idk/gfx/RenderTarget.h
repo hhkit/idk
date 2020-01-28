@@ -20,7 +20,7 @@ namespace idk
 		EXTENSION(".rtis");
 
 		// actually renderer-related stuff
-		uivec2              size              { 1024, 1024 };
+		uvec2              size              { 1024, 1024 };
 		AntiAliasing       anti_aliasing     { AntiAliasing::None };
 		RscHandle<Texture> color_tex         { };
 		RscHandle<Texture> depth_tex         { };
@@ -40,8 +40,8 @@ namespace idk
 
 		float AspectRatio() const noexcept;
 
-		uivec2 Size() const noexcept                  { return size; }
-		void  Size(uivec2 new_size)            { size = new_size; Dirty(); }
+		uvec2 Size() const noexcept                  { return size; }
+		void  Size(uvec2 new_size)            { size = new_size; Dirty(); }
 
 		bool  IsWorldRenderer() const noexcept       { return is_world_renderer; }
 		void  IsWorldRenderer(bool new_val) noexcept { is_world_renderer = new_val; }
