@@ -19,6 +19,7 @@
 #include <res/ResourceHandle.inl>
 #include <ds/span.inl>
 #include <ds/result.inl>
+#include <util/property_path.h>
 
 namespace idk
 {
@@ -60,48 +61,6 @@ namespace idk
             return GenericHandle();
         }
 
-        static reflect::dynamic resolve_property_path(const reflect::dynamic& obj, string_view path)
-        {
-            size_t offset = 0;
-            reflect::dynamic curr;
-
-            while (offset < path.size())
-            {
-                auto end = path.find('/', offset);
-                if (end == string::npos)
-                    end = path.size();
-                const string_view token(path.data() + offset, end - offset);
-
-                if (curr.valid())
-                {
-					if (curr.type.is<mono::ManagedObject>())
-						return curr;
-                    if (curr.type.is_container())
-                    {
-                        auto cont = curr.to_container();
-                        if (cont.value_type.is_template<std::pair>())
-                        {
-                            auto key_type = cont.value_type.create().unpack()[0].type;
-                            curr.swap(cont[*parse_text(string(token), key_type)]);
-                        }
-                        else
-                            curr.swap(cont[*parse_text<size_t>(string(token))]);
-                    }
-                    else if (curr.type.is_template<std::variant>())
-                        curr.swap(curr.get_variant_value().get_property(token).value);
-                    else
-                        curr.swap(curr.get_property(token).value);
-                }
-                else
-                    curr.swap(obj.get_property(token).value);
-
-                offset = end;
-                ++offset;
-            }
-
-            return curr;
-        }
-
         const static PropertyOverride default_overrides[]{
             { "Transform", "position" }, { "Transform", "rotation" }, { "Transform", "parent" },
             { "Name", "name" }
@@ -121,10 +80,23 @@ namespace idk
             return false;
         }
 
-		static bool has_override(PrefabInstance& prefab_inst, string_view component_name, string_view property_path, int component_nth)
+        static void add_default_overrides(PrefabInstance& prefab_inst)
+        {
+            for (const auto& ov : default_overrides)
+            {
+                prefab_inst.overrides.push_back(ov);
+                prefab_inst.overrides.back().value.swap(resolve_property_path(
+                    *get_component(prefab_inst.GetGameObject(), ov.component_name, ov.component_nth), ov.property_path));
+            }
+        }
+
+		static int find_override(PrefabInstance& prefab_inst, string_view component_name, string_view property_path, int component_nth)
 		{
+            int i = -1;
 			for (auto& ov : prefab_inst.overrides)
 			{
+                ++i;
+
 				if (ov.component_name != component_name)
 					continue;
                 if (ov.component_nth != component_nth)
@@ -133,25 +105,29 @@ namespace idk
 				if (ov.property_path.size() == property_path.size())
 				{
 					if (ov.property_path == property_path)
-						return true;
+						return i;
 				}
 				else if (ov.property_path.size() > property_path.size()) // eg. scale/x vs scale
 				{
 					if (ov.property_path.find(property_path) == 0 && ov.property_path[property_path.size()] == '/')
 					{
 						ov.property_path = property_path; // make ov the shorter one
-						return true;
+						return i;
 					}
 				}
 				else // eg. scale vs scale/x
 				{
 					if (ov.property_path.find(property_path) == 0 && ov.property_path[property_path.size()] == '/')
-						return true;
+						return i;
 				}
 			}
-			
-			return false;
+			return -1;
 		}
+
+        static bool has_override(PrefabInstance& prefab_inst, string_view component_name, string_view property_path, int component_nth)
+        {
+            return find_override(prefab_inst, component_name, property_path, component_nth) >= 0;
+        }
 
 
         static void propagate_property(Handle<PrefabInstance> origin, int component_index, string_view property_path)
@@ -267,10 +243,11 @@ namespace idk
 
         const auto handle = force_handle != Handle<GameObject>() ? scene.CreateGameObject(force_handle) : scene.CreateGameObject();
         const auto& prefab_data = prefab->data;
-        auto i = 0;
+        int i = 0;
         for (const auto& d : prefab_data[i].components)
             helpers::add_component(handle, d);
         auto prefab_inst = handle->AddComponent<PrefabInstance>();
+        helpers::add_default_overrides(*prefab_inst);
         prefab_inst->prefab = prefab;
         prefab_inst->object_index = i;
 
@@ -285,6 +262,7 @@ namespace idk
             child_handle->Transform()->parent = game_objects[prefab_data[i].parent_index];
 
             prefab_inst = child_handle->AddComponent<PrefabInstance>();
+            helpers::add_default_overrides(*prefab_inst);
             prefab_inst->prefab = prefab;
             prefab_inst->object_index = i;
         }
@@ -301,11 +279,46 @@ namespace idk
         return handle;
     }
 
+    Handle<GameObject> PrefabUtility::InstantiateSpecific(Handle<GameObject> handle, const PrefabInstance& prefab_inst)
+    {
+        const auto& prefab = prefab_inst.prefab;
+        if (!prefab || !handle)
+            return {};
+
+        const auto& prefab_data = prefab->data[prefab_inst.object_index];
+
+        vector<int> removed;
+        for (const auto& nth : prefab_inst.removed_components)
+            removed.push_back(prefab_data.GetComponentIndex(nth.component_name, nth.component_nth));
+
+        for (size_t i = 0; i < prefab_data.components.size(); ++i)
+        {
+            const auto& d = prefab_data.components[i];
+            if (std::find(removed.begin(), removed.end(), i) == removed.end()) // not removed
+                helpers::add_component(handle, d);
+        }
+
+        handle->AddComponent(prefab_inst);
+
+        for (const auto& ov : prefab_inst.overrides)
+        {
+            if (const auto comp = helpers::get_component(handle, ov.component_name, ov.component_nth))
+            {
+                auto prop = resolve_property_path(*comp, ov.property_path);
+                if (prop.valid())
+                    prop = ov.value;
+            }
+        }
+
+        return handle;
+    }
+
     static void _create(Handle<GameObject> go, RscHandle<Prefab> prefab_handle, Prefab& prefab, bool connect_inst = false)
     {
         if (connect_inst)
         {
             auto prefab_inst = go->AddComponent<PrefabInstance>();
+            helpers::add_default_overrides(*prefab_inst);
             prefab_inst->prefab = prefab_handle;
             prefab_inst->object_index = 0;
         }
@@ -363,6 +376,7 @@ namespace idk
                 if (connect_inst)
                 {
                     auto prefab_inst = child->AddComponent<PrefabInstance>();
+                    helpers::add_default_overrides(*prefab_inst);
                     prefab_inst->prefab = prefab_handle;
                     prefab_inst->object_index = static_cast<int>(prefab.data.size() - 1);
                 }
@@ -377,7 +391,7 @@ namespace idk
         prefab.Name(go->Name());
     }
 
-	Prefab PrefabUtility::CreateResourceManagerHack(Handle<GameObject> go, Guid guid)
+    Prefab PrefabUtility::CreateResourceManagerHack(Handle<GameObject> go, Guid guid)
 	{
 		Prefab v;
 		_create(go, RscHandle<Prefab>{guid}, v);
@@ -501,7 +515,7 @@ namespace idk
                     curr_ov_vals.emplace_back();
                 else
                 {
-                    auto dyn = helpers::resolve_property_path(*comp_handle, ov.property_path);
+                    auto dyn = resolve_property_path(*comp_handle, ov.property_path);
                     curr_ov_vals.emplace_back(dyn.type.create() = dyn);
                 }
             }
@@ -513,7 +527,7 @@ namespace idk
                     default_ov_vals.emplace_back();
                 else
                 {
-                    auto dyn = helpers::resolve_property_path(*comp_handle, ov.property_path);
+                    auto dyn = resolve_property_path(*comp_handle, ov.property_path);
                     default_ov_vals.emplace_back(dyn.type.create() = dyn);
                 }
             }
@@ -539,7 +553,7 @@ namespace idk
                     continue;
                 auto& ov = prefab_inst.overrides[i];
                 const auto comp_handle = helpers::get_component(go, ov.component_name, ov.component_nth);
-                helpers::resolve_property_path(*comp_handle, ov.property_path) = curr_ov_vals[i];
+                resolve_property_path(*comp_handle, ov.property_path) = curr_ov_vals[i];
             }
             for (int i = 0; i < helpers::num_default_overrides; ++i)
             {
@@ -547,7 +561,7 @@ namespace idk
                     continue;
                 auto& ov = helpers::default_overrides[i];
                 const auto comp_handle = helpers::get_component(go, ov.component_name, ov.component_nth);
-                helpers::resolve_property_path(*comp_handle, ov.property_path) = default_ov_vals[i];
+                resolve_property_path(*comp_handle, ov.property_path) = default_ov_vals[i];
             }
         }
     }
@@ -565,8 +579,8 @@ namespace idk
             if (helpers::is_default_override(prop_override))
                 continue;
 
-            helpers::resolve_property_path(*helpers::get_component(prefab_inst.GetGameObject(), component_name, component_nth), property_path) =
-                helpers::resolve_property_path(prefab->data[object_index].FindComponent(component_name, component_nth), property_path);
+            resolve_property_path(*helpers::get_component(prefab_inst.GetGameObject(), component_name, component_nth), property_path) =
+                resolve_property_path(prefab->data[object_index].FindComponent(component_name, component_nth), property_path);
         }
     }
 
@@ -618,14 +632,16 @@ namespace idk
             if (c == component)
                 break;
         }
-        PropertyOverride override{ string((*component).type.name()), string(property_path), component_nth };
 
-        if (helpers::is_default_override(override))
-            return;
-        if (helpers::has_override(*prefab_inst, override.component_name, property_path, component_nth))
-            return;
+        int ov_i = helpers::find_override(*prefab_inst, (*component).type.name(), property_path, component_nth);
+        if (ov_i == -1) // override not found
+        {
+            ov_i = static_cast<int>(prefab_inst->overrides.size());
+            prefab_inst->overrides.push_back({ string((*component).type.name()), string(property_path), component_nth });
+        }
 
-        prefab_inst->overrides.push_back(override);
+        reflect::dynamic value = resolve_property_path(*component, property_path);
+        prefab_inst->overrides[ov_i].value = value;
     }
 
     static void _revert_property_override(PrefabInstance& prefab_inst, const PropertyOverride& override)
@@ -640,11 +656,11 @@ namespace idk
         if (!comp_handle)
             return;
 
-        auto prop = helpers::resolve_property_path(*comp_handle, override.property_path);
+        auto prop = resolve_property_path(*comp_handle, override.property_path);
         if (!prop.valid())
             return;
 
-        auto prop_prefab = helpers::resolve_property_path(
+        auto prop_prefab = resolve_property_path(
             prefab.data[prefab_inst.object_index].FindComponent(override.component_name, override.component_nth), override.property_path);
         if (!prop_prefab.valid())
             return;
@@ -735,7 +751,7 @@ namespace idk
 
 		Prefab& prefab = *target.prefab;
 
-		auto prop_prefab = helpers::resolve_property_path(
+		auto prop_prefab = resolve_property_path(
 			prefab.data[target.object_index].FindComponent(override.component_name, override.component_nth), override.property_path);
 		if (!prop_prefab.valid())
 			return;
@@ -746,7 +762,7 @@ namespace idk
 		if (!comp_handle)
 			return;
 
-		auto prop = helpers::resolve_property_path(*comp_handle, override.property_path);
+		auto prop = resolve_property_path(*comp_handle, override.property_path);
 		if (!prop.valid())
 			return;
 

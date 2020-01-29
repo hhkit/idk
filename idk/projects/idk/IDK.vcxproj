@@ -305,6 +305,7 @@
     <ClInclude Include="core\Handle.h" />
     <ClInclude Include="ds\pool.h" />
     <ClInclude Include="ds\span.h" />
+    <ClInclude Include="util\property_path.h" />
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
@@ -477,6 +478,7 @@
     <ClCompile Include="ui\UISystem.cpp" />
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
+    <ClCompile Include="util\property_path.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\bin\editor.exe" />

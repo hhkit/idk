@@ -5,11 +5,12 @@
 #include <serialize/yaml.inl>
 
 #include <core/GameObject.inl>
-#include <core/GameObject.inl>
 #include <scene/Scene.h>
+#include <prefab/PrefabInstance.h>
 
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl>
+
 #include <ds/span.inl>
 #include <ds/result.inl>
 #include <res/ResourceHandle.inl>
@@ -97,7 +98,8 @@ namespace idk
 				{
 					auto& held = obj.get<reflect::dynamic>();
 					yaml::node ret = serialize_yaml(held);
-					ret.tag(held.type.name());
+                    if (held.valid())
+                        ret.tag(held.type.name());
 					return ret;
 				}
 
@@ -236,13 +238,20 @@ namespace idk
             yaml::node& elem = node.emplace_back();
             elem.tag(serialize_text(obj.GetHandle().id));
             elem.emplace_back(yaml::mapping_type{ { "active", yaml::node{obj.ActiveSelf()} } });
-			for (auto& handle : obj.GetComponents())
-			{
-				auto reflected = *handle;
-				auto component_typename = reflected.type.name();
-				elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
-			
-			}
+
+            if (const auto prefab_inst = obj.GetComponent<PrefabInstance>())
+            {
+                elem.emplace_back(serialize_yaml(*prefab_inst)).tag(reflect::get_type<PrefabInstance>().name());
+            }
+            else
+            {
+                for (auto& handle : obj.GetComponents())
+                {
+                    auto reflected = *handle;
+                    auto component_typename = reflected.type.name();
+                    elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
+                }
+            }
         }
 
         return yaml::dump(node);

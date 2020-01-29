@@ -14,6 +14,8 @@ namespace idk
         // for simplicity's sake only prefab roots have PrefabInstance component attached.
         static Handle<GameObject> Instantiate(RscHandle<Prefab> prefab, Scene& scene, Handle<GameObject> force_handle = {});
 
+        static Handle<GameObject> InstantiateSpecific(Handle<GameObject> handle, const PrefabInstance& prefab_inst);
+
         // create prefab from given game object, does not save it.
 		static Prefab CreateResourceManagerHack(Handle<GameObject> go, Guid guid);
         static RscHandle<Prefab> Create(Handle<GameObject> go);
