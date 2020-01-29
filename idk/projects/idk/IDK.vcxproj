@@ -94,6 +94,8 @@
     <ClInclude Include="parallel\queue.h" />
     <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="pch_common.h" />
+    <ClInclude Include="phys\AAbbTree.h" />
+    <ClInclude Include="phys\AabbTree_utils.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h" />
@@ -367,6 +369,7 @@
     <ClCompile Include="particle\ParticleSystem.cpp" />
     <ClCompile Include="particle\ParticleSystemModules.cpp" />
     <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
+    <ClCompile Include="phys\AabbTree.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />

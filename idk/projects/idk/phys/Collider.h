@@ -18,6 +18,8 @@ namespace idk
 		real static_friction  { .6f };
 		real dynamic_friction { .6f };
 
+		int node_id = -1;
+
 		void find_rigidbody();
 		bool is_static() const;
 		bool is_enabled_and_active() const;
@@ -27,6 +29,9 @@ namespace idk
 		Handle<class RigidBody> _rigidbody;
 		bool _static_cache = false;
         bool _active_cache = false;
+		bool _was_enabled  = true;
+		aabb _broadphase_cache{};
+		
 		friend class PhysicsSystem;
 	};
 }
