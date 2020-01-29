@@ -12,8 +12,10 @@ namespace idk
 		vec3  center() const;
 		vec3  extents() const;
 		vec3  halfextents() const;
-
+		float volume() const;
 		const aabb& bounds() const;
+		aabb  combine(const aabb& rhs) const;
+		bool equals(const aabb& rhs, float eps = epsilon);
 
 		// modifiers
 		aabb& translate(const vec3& trans);
@@ -21,6 +23,7 @@ namespace idk
 		aabb& surround (const vec3& point);
 		aabb& surround (const aabb& rhs);
 		aabb& grow     (const vec3& rhs);
+		
 
 		// collision
 		bool contains(const vec3& point) const;

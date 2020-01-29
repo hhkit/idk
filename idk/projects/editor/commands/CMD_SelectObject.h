@@ -8,21 +8,21 @@
 
 
 #include <editor/commands/ICommand.h>
-#include <core/GameObject.h>
+#include <editor/ObjectSelection.h>
 
-namespace idk {
-
-	class CMD_SelectGameObject : public ICommand { //This command is saved when mouse is released, after moving.
+namespace idk 
+{
+	class CMD_SelectObject : public ICommand 
+	{ //This command is saved when mouse is released, after moving.
 	public:
-		CMD_SelectGameObject(Handle<GameObject> gameObject);
+		CMD_SelectObject(ObjectSelection new_selection);
 
 		virtual bool execute() override;
 		virtual bool undo() override;
 
 	private:
-		//vector<Handle<GameObject>> previous_selected_state{};
-		//vector<Handle<GameObject>> current_selected_state{};
-		bool		first_execute			{ false };
+		ObjectSelection old_selection;
+		ObjectSelection new_selection;
 	};
 
 }

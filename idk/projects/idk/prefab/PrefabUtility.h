@@ -12,7 +12,7 @@ namespace idk
     public:
         // instantiate given prefab in the given scene.
         // for simplicity's sake only prefab roots have PrefabInstance component attached.
-        static Handle<GameObject> Instantiate(RscHandle<Prefab> prefab, Scene& scene);
+        static Handle<GameObject> Instantiate(RscHandle<Prefab> prefab, Scene& scene, Handle<GameObject> force_handle = {});
 
         // create prefab from given game object, does not save it.
 		static Prefab CreateResourceManagerHack(Handle<GameObject> go, Guid guid);

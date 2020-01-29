@@ -21,14 +21,12 @@ namespace idk {
 
 		virtual bool undo() override;
 
-		Handle<GameObject> GetGameObject();
-
 	private:
 		Handle<GameObject> parenting_gameobject{};
         string name;
         vector<string> initial_components{};
 
-		void RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot = false);
+		bool RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot = false);
 		vector<RecursiveObjects> copied_object{}; //If this is empty, create empty. Else use copied_object to build gameobject
 	};
 

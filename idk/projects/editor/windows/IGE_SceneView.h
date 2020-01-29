@@ -104,6 +104,7 @@ namespace idk {
 
 
 		float gizmo_matrix[16]{};
+		vector<mat4> original_matrices;
 
 		mat4 GenerateMat4FromGizmoMatrix();
 

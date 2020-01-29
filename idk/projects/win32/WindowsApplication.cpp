@@ -79,12 +79,12 @@ namespace idk::win
 			args.emplace_back(elem);
 		args.emplace_back(nullptr);
 
-		auto retval = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		auto ret = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
 		if (!wait)
 		{
 			if (children.size() >= std::thread::hardware_concurrency())
 				WaitForChildren();
-			children.emplace_back(retval);
+			children.emplace_back(ret);
 		}
 	}
 	void Windows::WaitForChildren()

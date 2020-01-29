@@ -158,6 +158,9 @@
     <Filter Include="network\substream managers">
       <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
     </Filter>
+    <Filter Include="phys\aabb tree">
+      <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -535,9 +538,6 @@
     </ClInclude>
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\CameraControls.h">
-      <Filter>gfx\camera</Filter>
     </ClInclude>
     <ClInclude Include="scene\SceneGraphBuilder.h">
       <Filter>common</Filter>
@@ -1107,6 +1107,12 @@
     <ClInclude Include="network\ClientMoveManager.h">
       <Filter>network\substream managers</Filter>
     </ClInclude>
+    <ClInclude Include="phys\AAbbTree.h">
+      <Filter>phys\aabb tree</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\AabbTree_utils.h">
+      <Filter>phys\aabb tree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1256,9 +1262,6 @@
     </ClCompile>
     <ClCompile Include="anim\SkeletonFactory.cpp">
       <Filter>anim\res/factories</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\CameraControls.cpp">
-      <Filter>gfx\camera</Filter>
     </ClCompile>
     <ClCompile Include="serialize\yaml_dump.cpp">
       <Filter>serialize</Filter>
@@ -1601,6 +1604,10 @@
     </ClCompile>
     <ClCompile Include="network\ClientMoveManager.cpp">
       <Filter>network\substream managers</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\TextureInternalFormat.cpp" />
+    <ClCompile Include="phys\AabbTree.cpp">
+      <Filter>phys\aabb tree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

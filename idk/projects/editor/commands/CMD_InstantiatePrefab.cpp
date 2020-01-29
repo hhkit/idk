@@ -14,14 +14,14 @@ namespace idk
 
     bool CMD_InstantiatePrefab::execute()
     {
-        _handle = PrefabUtility::Instantiate(_prefab, *Core::GetSystem<SceneManager>().GetActiveScene());
-        _handle->Transform()->position = _pos;
+        game_object_handle = PrefabUtility::Instantiate(_prefab, *Core::GetSystem<SceneManager>().GetActiveScene(), game_object_handle);
+        game_object_handle->Transform()->position = _pos;
         return true;
     }
 
     bool CMD_InstantiatePrefab::undo()
     {
-        GameState::GetGameState().DestroyObject(_handle);
+        GameState::GetGameState().DestroyObject(game_object_handle);
         return true;
     }
 

@@ -23,8 +23,6 @@ namespace idk {
 	private:
 		mat4		original_values			{};
 		mat4		new_values				{};
-
-		bool		first_execute			{ false };
 	};
 
 }

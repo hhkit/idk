@@ -45,13 +45,13 @@ namespace idk
 	}
 	void IGE_AnimatorWindow::Update()
 	{
-		if (Core::GetSystem<IDE>().selected_gameObjects.empty())
+		if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.empty())
 		{
 			_curr_animator_component = Handle<Animator>{};
 		}
 		else
 		{
-			const auto curr_obj = Core::GetSystem<IDE>().selected_gameObjects[0];
+			const auto curr_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects[0];
 			const auto curr_obj_comp = curr_obj->GetComponent<Animator>();
 			if (curr_obj_comp != _curr_animator_component)
 				resetSelection();

@@ -138,6 +138,13 @@ namespace idk {
 	{
         ImGui::PopStyleVar(2);
 
+        {
+            const auto& selected_assets = Core::GetSystem<IDE>().GetSelectedObjects().assets;
+            if (selected_assets.empty())
+                selected_path = "";
+            else
+                selected_path = selected_assets[0].visit([](auto h) { return *Core::GetResourceManager().GetPath(h); });
+        }
 
         ImGui::BeginMenuBar();
         {
@@ -192,9 +199,7 @@ namespace idk {
 		ImGui::PopStyleVar();
 
 
-		//float currentWidth = ImGui::GetColumnWidth(-1);
-		//currentWidth = currentWidth < 100 ? 100 : currentWidth;
-		//currentWidth = currentWidth > 400 ? 400 : currentWidth;
+
         if(ImGui::IsWindowAppearing())
             ImGui::SetColumnWidth(-1, 200);
 
@@ -546,10 +551,11 @@ namespace idk {
                     auto get_res = Core::GetResourceManager().Get(path);
                     if (get_res && get_res->Count())
                     {
-                        selected_assets.clear();
+                        ObjectSelection sel;
                         for (auto h : get_res->GetAll())
-                            selected_assets.push_back(h);
-                        OnAssetsSelected.Fire(span<GenericResourceHandle>(selected_assets));
+                            sel.assets.push_back(h);
+                        OnAssetsSelected.Fire(span<GenericResourceHandle>(sel.assets));
+                        Core::GetSystem<IDE>().SetSelection(sel);
                     }
                 }
             }
@@ -561,7 +567,7 @@ namespace idk {
                     filter.Clear();
                 }
                 else
-                    OnAssetDoubleClicked.Fire(selected_assets[0]);
+                    OnAssetDoubleClicked.Fire(Core::GetSystem<IDE>().GetSelectedObjects().assets[0]);
             }
 
             if (ImGui::BeginPopupContextItem(path.GetMountPath().data()))
@@ -583,14 +589,14 @@ namespace idk {
                     ImGui::Separator();
                 }
 
+#ifdef _WIN32 
                 if (ImGui::MenuItem("Show in Explorer"))
                 {
-#ifdef _WIN32 
                     auto args = "/select,\"" + string(fs::path(path.GetFullPath()).make_preferred().string()) + '"';
                     ShellExecuteA(NULL, "open", "explorer.exe", args.c_str(), NULL, SW_SHOWNORMAL);
-#endif
-                    ImGui::Separator();
                 }
+                ImGui::Separator();
+#endif
 
                 //if (ImGui::MenuItem("Rename"))
                 //{
