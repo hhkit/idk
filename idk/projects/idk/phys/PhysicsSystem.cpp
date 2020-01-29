@@ -33,6 +33,7 @@ namespace idk
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float damping = 0.99f;
 	constexpr float margin = 0.2f;
+	constexpr int	collision_threshold = 64;
 
     constexpr auto calc_shape = [](const auto& shape, const Collider& col)
     {
@@ -252,13 +253,13 @@ namespace idk
 			const auto dt = Core::GetDT().count();
 
             // setup predict for dynamic objects
-            for (auto& info : dynamic_info)
+            for (auto& d_info : dynamic_info)
             {
-                info.predicted_shape = std::visit([&pred_tfm = info.collider->_rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, info.collider->shape);
-                info.broad_phase = std::visit([&pred_tfm = info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, info.collider->shape);
-                const auto& vel = info.collider->_rigidbody->velocity();
-                info.broad_phase.grow(vel);
-                info.broad_phase.grow(-vel);
+				d_info.predicted_shape = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, d_info.collider->shape);
+				d_info.broad_phase = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, d_info.collider->shape);
+                const auto& vel = d_info.collider->_rigidbody->velocity();
+				d_info.broad_phase.grow(vel);
+				d_info.broad_phase.grow(-vel);
             }
 
             // O(N^2) collision check
@@ -329,12 +330,12 @@ namespace idk
 			using CollisionJobResult = std::tuple<vector<CollisionInfo>, CollisionList>;
 			vector<mt::Future<CollisionJobResult>> batches;
 
-			if (info.size())
+			if (info.size() >= collision_threshold)
 			{
 				const auto sz = info.size();
 				const auto batch_sz = GetConfig().batch_size;
-				batches.reserve(batch_sz / sz + batch_sz % sz ? 1 : 0);
-
+				batches.reserve(sz / batch_sz + (sz % batch_sz ? 1 : 0));
+				// LOG("Size | Batches: %d   |   %d", batch_sz, batches.capacity());
 				for (size_t i = 0; i < sz; i += batch_sz)
 				{
 					batches.push_back(Core::GetThreadPool().Post(
@@ -367,6 +368,22 @@ namespace idk
 					auto [batch_frame, collision_list] = elem.get();
 					collision_frame.insert(collision_frame.end(), batch_frame.begin(), batch_frame.end());
 					collisions.merge(collision_list);
+				}
+			}
+			else
+			{
+				collision_frame.reserve(info.size());
+				collisions.reserve(info.size());
+				for(auto& pair : info)
+				{
+					auto& i = pair.lhs;
+					auto& j = pair.rhs;
+					const auto collision = std::visit(CollideShapes, i->predicted_shape, j->predicted_shape);
+					if (collision)
+					{
+						collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+						collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, collision.value());
+					}
 				}
 			}
 			for (const auto& [i, j, result] : collision_frame)
