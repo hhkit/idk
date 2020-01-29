@@ -53,19 +53,21 @@ REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_fr
 REFLECT_END()
 
 // PREFAB
-REFLECT_BEGIN(idk::ComponentNth, "ComponentNth")
-REFLECT_VARS(component_name, component_nth)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
 REFLECT_VARS(component_name, property_path, component_nth, value)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::ComponentNth, "ComponentNth")
+REFLECT_VARS(component_name, component_nth)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::vector<idk::PropertyOverride>, "vector<PropertyOverride>")
+REFLECT_END()
+REFLECT_BEGIN(idk::vector<idk::ComponentNth>, "vector<ComponentNth>")
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
-REFLECT_VARS(prefab, overrides, object_index)
+REFLECT_VARS(prefab, overrides, object_index, removed_components)
 REFLECT_END()
 
 #pragma endregion

@@ -187,62 +187,103 @@ namespace idk {
 
         if (gameObjectsCount == 1)
         {
-            //Display remaining components here
             auto componentSpan = gos[0]->GetComponents();
-            for (auto& component : componentSpan) {
+            if (!_prefab_inst)
+            {
+                //Display remaining components here
+                for (auto& component : componentSpan) 
+                {
 
-                //Skip Name and Transform and PrefabInstance
-				if (component.is_type<Transform>() ||
-					component.is_type<RectTransform>() ||
-					component.is_type<PrefabInstance>() ||
-					component.is_type<Name>() ||
-					component.is_type<Tag>() ||
-					component.is_type<Layer>()
-                    )
-					continue;
+                    //Skip Name and Transform and PrefabInstance
+                    if (component.is_type<Transform>() ||
+                        component.is_type<RectTransform>() ||
+                        component.is_type<PrefabInstance>() ||
+                        component.is_type<Name>() ||
+                        component.is_type<Tag>() ||
+                        component.is_type<Layer>()
+                        )
+                        continue;
 
-                //COMPONENT DISPLAY
-				ImGui::Text("id: %lld", component.id);
-                DisplayComponent(component);
+                    //COMPONENT DISPLAY
+                    ImGui::Text("id: %lld", component.id);
+                    DisplayComponent(component);
+                }
             }
-
-            if (_prefab_inst)
+            else
             {
                 vector<int> removed, added;
                 PrefabUtility::GetPrefabInstanceComponentDiff(gos[0], removed, added);
-                if (removed.size())
+                auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
+
+                for (int i = 0, j = 0; i < prefab_components.size() && j < componentSpan.size(); ++i)
                 {
-                    auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
-
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
-                    ImGuidk::PushFont(FontType::Bold);
-                    for (int i : removed)
+                    if (std::find(removed.begin(), removed.end(), i) != removed.end()) // i is removed
                     {
+                        // Draw Removed Component
                         ImGui::PushID(i);
-                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
-                                          ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-                                          ImGuiTreeNodeFlags_SpanFullWidth);
 
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
+                                            ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
+                                            ImGuiTreeNodeFlags_SpanFullWidth);
+                        ImGui::PopStyleColor();
+
+                        string_view name = prefab_components[i].type.name();
+                        if (prefab_components[i].type.is<mono::Behavior>())
+                            name = prefab_components[i].get<mono::Behavior>().TypeName();
+
+                        bool will_break = false;
                         if (ImGui::BeginPopupContextItem())
                         {
                             if (ImGui::MenuItem("Revert Removed Component"))
                             {
-                                gos[0]->AddComponent(prefab_components[i]);
+                                PrefabUtility::RevertRemovedComponent(gos[0], i);
+                                will_break = true;
                             }
                             if (ImGui::MenuItem("Apply Removed Component"))
                             {
                                 PrefabUtility::RemoveComponentFromPrefab(_prefab_inst->prefab, _prefab_inst->object_index, i);
+                                will_break = true;
                             }
                             ImGui::EndPopup();
                         }
 
                         ImGui::SameLine(ImGui::GetStyle().IndentSpacing +
-                            ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + 1);
-                        ImGui::Text("%s (Removed)", prefab_components[i].type.name().data());
+                                        ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + 1);
+                        ImGuidk::PushFont(FontType::Bold);
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+                        ImGui::Text("%s (Removed)", name.data());
+                        ImGui::PopStyleColor();
+                        ImGui::PopFont();
+
                         ImGui::PopID();
+
+                        if (will_break)
+                            break;
+
+                        continue;
                     }
-                    ImGui::PopFont();
-                    ImGui::PopStyleColor();
+
+                    auto& component = componentSpan[j];
+
+                    //Skip Name and Transform and PrefabInstance
+                    if (component.is_type<Transform>() ||
+                        component.is_type<RectTransform>() ||
+                        component.is_type<PrefabInstance>() ||
+                        component.is_type<Name>() ||
+                        component.is_type<Tag>() ||
+                        component.is_type<Layer>()
+                        )
+                    {
+                        ++j;
+                        if (component.is_type<PrefabInstance>())
+                            --i; // PrefabInstance will never be in prefab_data, so prefab_data has 1 less component
+                        continue;
+                    }
+
+                    ImGui::Text("id: %lld", component.id);
+                    DisplayComponent(component);
+                    ++j;
                 }
             }
         }
@@ -1461,10 +1502,13 @@ namespace idk {
 
 	void IGE_InspectorWindow::MenuItem_RemoveComponent(GenericHandle i)
 	{
-		if (ImGui::MenuItem("Remove Component")) {
+		if (ImGui::MenuItem("Remove Component")) 
+        {
 			IDE& editor = Core::GetSystem<IDE>();
+            CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 
-			if (editor.GetSelectedObjects().game_objects.size() == 1) {
+			if (editor.GetSelectedObjects().game_objects.size() == 1)
+            {
                 Handle<GameObject> go = i.visit([](auto h)
                 {
                     if constexpr (!std::is_same_v<decltype(h), Handle<GameObject>>)
@@ -1472,15 +1516,25 @@ namespace idk {
                     else
                         return Handle<GameObject>();
                 });
-                Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
+                commandController.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
+
+                if (_prefab_inst)
+                {
+                    auto old = _prefab_inst->removed_components;
+                    PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _prefab_curr_component_nth);
+                    commandController.ExecuteCommand(
+                        COMMAND(CMD_ModifyProperty, _prefab_inst, "removed_components", old, _prefab_inst->removed_components));
+                    commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+                }
 			}
-			else {
+			else 
+            {
 				int execute_counter = 0;
-				for (auto go : editor.GetSelectedObjects().game_objects) {
+				for (auto go : editor.GetSelectedObjects().game_objects) 
+                {
 					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, string((*i).type.name())));
 					++execute_counter;
 				}
-				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 		}
