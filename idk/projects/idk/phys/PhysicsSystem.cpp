@@ -27,7 +27,7 @@
 
 namespace idk
 {
-#define AABB_TREE 1
+// #define AABB_TREE 1
 	constexpr float restitution_slop = 0.01f;
 	constexpr float penetration_min_slop = 0.001f;
 	constexpr float penetration_max_slop = 0.5f;
@@ -41,19 +41,16 @@ namespace idk
 
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
-#if AABB_TREE
+
 		if (_rebuild_tree)
 		{
 			BuildStaticTree(colliders);
-			// const auto count = static_tree.leaf_count();
-			// LOG("TOTAL LEAVES: %d", count);
 			_rebuild_tree = false;
 		}
-#endif
-        // vector<ColliderInfo> static_info;
-        vector<ColliderInfo> dynamic_info;
 
-        // static_info.reserve(colliders.size() - rbs.size());
+        // vector<ColliderInfo> static_info;
+		// static_info.reserve(colliders.size() - rbs.size());
+        vector<ColliderInfo> dynamic_info;
 
         for (auto& elem : colliders)
         {
@@ -72,7 +69,6 @@ namespace idk
 			const bool is_static = elem._static_cache;
 			
 			const bool is_prefab = elem.GetHandle().scene == Scene::prefab;
-#if AABB_TREE
 			// Update tree based on colliders that are active
 			if (!is_prefab)
 			{
@@ -92,13 +88,13 @@ namespace idk
 					to_insert = true;
 				}
 				// Was neither activated nor deactivated
-				else if(is_active)
+				else if (is_active)
 				{
 					// Check if the had a rigidbody added to it
 					if (was_static && !is_static)
 					{
 						to_remove = true;
-						
+
 					}
 					// Rigidbody removed
 					else if (is_static && !was_static)
@@ -116,7 +112,6 @@ namespace idk
 					elem.node_id = -1;
 				}
 			}
-#endif
 			
 			if (!is_active || is_prefab)
 				continue;
@@ -125,20 +120,17 @@ namespace idk
             {
 				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {
 					auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-					elem._broadphase_cache = pred_shape.bounds();
-					return ColliderInfo{ .collider = &elem, .broad_phase = elem._broadphase_cache, .predicted_shape = pred_shape, .layer = elem.GetGameObject()->Layer() };
+					return ColliderInfo{ .collider = &elem, .broad_phase = pred_shape.bounds(), .predicted_shape = pred_shape, .layer = elem.GetGameObject()->Layer() };
 				}, elem.shape);
 				// static_info.emplace_back(collider_info);
-#if AABB_TREE
 				if (to_insert)
 				{
 					// inserted_within_tick.emplace(elem.GetHandle());
-					static_tree.insert(elem, collider_info, margin);
 					// LOG_TO(LogPool::PHYS, "INSERTED from TICK: %u, %u, %u", elem.GetHandle().index, elem.GetHandle().gen, elem.GetHandle().scene);
+					static_tree.insert(elem, collider_info, margin);
 				}
 				else
 					static_tree.update(elem, collider_info, margin);
-#endif
             }
             else
                 dynamic_info.emplace_back(ColliderInfo{ .collider = &elem, .layer = elem.GetGameObject()->Layer() });
@@ -310,29 +302,25 @@ namespace idk
 
 				if (lrigidbody.sleeping())
 					continue;
-#if AABB_TREE
 				static_tree.query_collisions(i, info);
-#else
-				for (const auto& j : static_info)
-				{
-					if (!AreLayersCollidable(i.layer, j.layer))
-						continue;
-					++notree_num_tests;
-					if (!i.broad_phase.overlaps(j.broad_phase))
-						continue;
-					++notree_num_cols;
-					info.emplace_back(ColliderInfoPair{ &i,&j });
-					/*
-					const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
-					if (collision)
-					{
-						collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-						collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
-					}
-					*/
-				}
-#endif
-				
+				//for (const auto& j : static_info)
+				//{
+				//	if (!AreLayersCollidable(i.layer, j.layer))
+				//		continue;
+				//	++notree_num_tests;
+				//	if (!i.broad_phase.overlaps(j.broad_phase))
+				//		continue;
+				//	++notree_num_cols;
+				//	info.emplace_back(ColliderInfoPair{ &i,&j });
+				//	/*
+				//	const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
+				//	if (collision)
+				//	{
+				//		collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+				//		collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
+				//	}
+				//	*/
+				//}
             }
 			
 			// LOG_TO(LogPool::PHYS, "Num Tests: %d/%d    |    %d/%d", static_tree.num_tests(), notree_num_tests, tree_num_cols, notree_num_cols);
@@ -644,7 +632,7 @@ namespace idk
 		for (auto& collider : colliders)
             DrawCollider(collider);
 
-		static_tree.debug_draw();
+		// static_tree.debug_draw();
 	}
 
 	void PhysicsSystem::Reset()
@@ -845,7 +833,6 @@ namespace idk
 
 	void PhysicsSystem::Init()
 	{
-#if AABB_TREE
 		static_tree.preallocate_nodes(2500); // Avg ~1030 static objects -> means (2 * 1030 - 1) total nodes in b-tree
 		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
 		{
@@ -880,9 +867,8 @@ namespace idk
 				col.node_id = -1;
 				col._active_cache = false;
 			}
-			
+
 		};
-#endif
 	}
 
 	void PhysicsSystem::Shutdown()

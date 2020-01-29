@@ -456,12 +456,12 @@ namespace idk {
 		
 		ImGui::PopStyleVar();
 
-		ImGui::SameLine();
-		if (ImGui::Button("Build Tree"))
-			Core::GetSystem<PhysicsSystem>().BuildStaticTree();
-		ImGui::SameLine();
-		if (ImGui::Button("Clear Tree"))
-			Core::GetSystem<PhysicsSystem>().ClearStaticTree();
+		// ImGui::SameLine();
+		// if (ImGui::Button("Build Tree"))
+		// 	Core::GetSystem<PhysicsSystem>().BuildStaticTree();
+		// ImGui::SameLine();
+		// if (ImGui::Button("Clear Tree"))
+		// 	Core::GetSystem<PhysicsSystem>().ClearStaticTree();
 
         ImGui::SameLine(ImGui::GetWindowContentRegionWidth() -
             ImGui::CalcTextSize("Draw All Colliders").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
