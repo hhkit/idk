@@ -69,7 +69,7 @@ namespace idk
 					return elem.get();
 		}
 		}
-		IDK_ASSERT(false, "You shouldn't have gotten here?");
+		IDK_ASSERT_MSG(false, "You shouldn't have gotten here?");
 	}
 
 	void NetworkSystem::ReceivePackets()
@@ -91,14 +91,30 @@ namespace idk
 
 	void NetworkSystem::RespondToPackets()
 	{
+		// call static
 		for (auto& elem : frame_start_callbacks)
 			elem.callback();
+		
+		// per client
+		if (client_connection_manager)
+			client_connection_manager->FrameStartManagers();
+		for (auto& elem : server_connection_manager)
+			if (elem)
+				elem->FrameStartManagers();
 	}
 
 	void NetworkSystem::PreparePackets()
 	{
+		// call static
 		for (auto& elem : frame_end_callbacks)
 			elem.callback();
+
+		// per client
+		if (client_connection_manager)
+			client_connection_manager->FrameEndManagers();
+		for (auto& elem : server_connection_manager)
+			if (elem)
+				elem->FrameEndManagers();
 	}
 
 	void NetworkSystem::Init()

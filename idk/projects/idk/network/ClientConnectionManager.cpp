@@ -2,6 +2,8 @@
 #include "ClientConnectionManager.h"
 #include "SubstreamManager.h"
 #include <network/Client.h>
+#include <network/ClientConnectionManager.inl>
+#include <network/ClientMoveManager.h>
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
 
@@ -65,6 +67,7 @@ namespace idk
 
 	void ClientConnectionManager::InstantiateSubmanagers()
 	{
+		AddSubstreamManager<ClientMoveManager>();
 		AddSubstreamManager<EventManager>();
 		AddSubstreamManager<GhostManager>();
 	}

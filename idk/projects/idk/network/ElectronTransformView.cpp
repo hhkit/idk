@@ -19,7 +19,7 @@ namespace idk
 
 	bool ElectronTransformView::UpdateMaster()
 	{
-		if (auto prev_data = std::get_if<PreviousFrame>(&ghost_data))
+		if (auto prev_data = std::get_if<PreviousFrame>(&network_data))
 		{
 			PreviousFrame& previous_data = *prev_data;
 			previous_data.state_mask = 0;
@@ -62,7 +62,7 @@ namespace idk
 
 	bool ElectronTransformView::UpdateGhost()
 	{
-		if (auto ghost_ = std::get_if<GhostData>(&ghost_data))
+		if (auto ghost_ = std::get_if<GhostData>(&network_data))
 		{
 			GhostData& ghost = *ghost_;
 			auto advance = Core::GetDT().count() / interp_over_seconds;

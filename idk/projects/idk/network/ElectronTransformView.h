@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
+#include <ds/sliding_window.inl>
 #include <network/network.h>
 
 namespace idk
@@ -27,21 +28,22 @@ namespace idk
 			real t = 1;
 		};
 
-		struct ControlObject
-		{
-			int owningClient = 0;
-			unsigned seq_no = 0;
-			vec3 moved_position;
-			quat moved_rotation;
-			vec3 moved_scale;
-		};
-
 		struct ClientObject
 		{
-			unsigned seq_no = 0;
+			struct DeltaAndValue
+			{
+				vec3 position; vec3 delPos;
+				quat rotation; quat delRot;
+				vec3 scale;    vec3 delScale;
+
+				StateMask state_mask{};
+			};
+
 			vec3 prev_position;
 			quat prev_rotation;
 			vec3 prev_scale;
+
+			sliding_window<DeltaAndValue, 64> move_window;
 		};
 
 		bool sync_position        { true  };
@@ -52,7 +54,7 @@ namespace idk
 		real snap_threshold       { 0.5f  };
 
 		// interp data
-		variant<void*, PreviousFrame, GhostData, ControlObject> ghost_data{};
+		variant<void*, PreviousFrame, GhostData, ClientObject> network_data{};
 
 		NetworkID GetNetworkID() const;
 		Handle<ElectronView> GetView() const;

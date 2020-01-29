@@ -10,9 +10,9 @@
 #include <network/ElectronTransformView.h>
 namespace idk
 {
-	void ServerMoveManager::SubscribeEvents(ClientConnectionManager& client)
+	void ServerMoveManager::SubscribeEvents(ClientConnectionManager&)
 	{
-		IDK_ASSERT(false, "Server Move Manager only used on server!");
+		IDK_ASSERT_MSG(false, "Server Move Manager only used on server!");
 	}
 
 	void ServerMoveManager::SubscribeEvents(ServerConnectionManager& server)
@@ -22,6 +22,7 @@ namespace idk
 
 	void ServerMoveManager::OnMoveReceived(MoveClientMessage* move)
 	{
+		LOG_TO(LogPool::NETWORK, "Received move event");
 		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(move->network_id);
 		if (view)
 		{

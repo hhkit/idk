@@ -11,7 +11,7 @@ namespace idk
 	public:
 		unsigned network_id;
 
-		int  state_mask{};
+		StateMask state_mask{};
 		vec3 position;
 		quat rotation;
 		vec3 scale;

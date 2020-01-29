@@ -1104,6 +1104,9 @@
     <ClInclude Include="network\MoveClientMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="network\ClientMoveManager.h">
+      <Filter>network\substream managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1594,6 +1597,9 @@
       <Filter>network\views</Filter>
     </ClCompile>
     <ClCompile Include="network\ServerMoveManager.cpp">
+      <Filter>network\substream managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ClientMoveManager.cpp">
       <Filter>network\substream managers</Filter>
     </ClCompile>
   </ItemGroup>

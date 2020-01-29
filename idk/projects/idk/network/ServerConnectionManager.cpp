@@ -2,6 +2,7 @@
 #include "ServerConnectionManager.h"
 #include <network/Server.h>
 #include <network/SubstreamManager.h>
+#include <network/ServerMoveManager.h>
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
 
@@ -65,6 +66,7 @@ namespace idk
 
 	void ServerConnectionManager::InstantiateSubmanagers()
 	{
+		AddSubstreamManager<ServerMoveManager>();
 		AddSubstreamManager<EventManager>();
 		AddSubstreamManager<GhostManager>();
 	}

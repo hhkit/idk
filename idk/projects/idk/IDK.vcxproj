@@ -82,6 +82,7 @@
     <ClInclude Include="gfx\TextAlignment.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
+    <ClInclude Include="network\ClientMoveManager.h" />
     <ClInclude Include="network\EventTransferOwnershipMessage.h" />
     <ClInclude Include="network\GhostFlags.h" />
     <ClInclude Include="math\rect.h" />
@@ -397,6 +398,7 @@
     <ClCompile Include="network\Address.cpp" />
     <ClCompile Include="network\Client.cpp" />
     <ClCompile Include="network\ClientConnectionManager.cpp" />
+    <ClCompile Include="network\ClientMoveManager.cpp" />
     <ClCompile Include="network\ElectronTransformView.cpp" />
     <ClCompile Include="network\EventManager.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />

@@ -29,15 +29,15 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_int(stream, network_id, 0, 4096);
-			serialize_int(stream, state_mask, 0, 0xFFFFFFFF);
-			if (stateMask & GhostFlags::TRANSFORM_POS)
+			serialize_int(stream, state_mask, 0, 0x7FFFFFFF);
+			if (state_mask & GhostFlags::TRANSFORM_POS)
 			{
 				serialize_float(stream, translation.x);
 				serialize_float(stream, translation.y);
 				serialize_float(stream, translation.z);
 			}
 
-			if (stateMask & GhostFlags::TRANSFORM_ROT)
+			if (state_mask & GhostFlags::TRANSFORM_ROT)
 			{
 				serialize_float(stream, rotation.x);
 				serialize_float(stream, rotation.y);
@@ -45,7 +45,7 @@ namespace idk
 				serialize_float(stream, rotation.w);
 			}
 
-			if (stateMask & GhostFlags::TRANSFORM_SCALE)
+			if (state_mask & GhostFlags::TRANSFORM_SCALE)
 			{
 				serialize_float(stream, scale.x);
 				serialize_float(stream, scale.y);

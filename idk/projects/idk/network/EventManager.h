@@ -6,6 +6,7 @@
 namespace idk
 {
 	class EventInstantiatePrefabMessage;
+	class EventTransferOwnershipMessage;
 
 	class EventManager
 		: public SubstreamManager<EventManager>
@@ -19,5 +20,6 @@ namespace idk
 		static void SendTransferOwnership(Handle<ElectronView> transfer, Host target_host);
 	private:
 		void OnInstantiatePrefabEvent(EventInstantiatePrefabMessage* message);
+		void OnTransferOwnershipEvent(EventTransferOwnershipMessage* message);
 	};
 }

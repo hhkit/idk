@@ -42,23 +42,28 @@ namespace idk
 	{
 		for (auto& ghost : views)
 		{
-			if (auto ghost_data = std::get_if<ElectronTransformView::PreviousFrame>(&ghost.ghost_data))
+			auto view = ghost.GetView();
+			if (view->owner != Host::SERVER)
+				continue;
+
+			if (auto network_data = std::get_if<ElectronTransformView::PreviousFrame>(&ghost.network_data))
 			{
-				if (ghost_data->state_mask)
+				if (network_data->state_mask)
 				{
+					LOG_TO(LogPool::NETWORK, "Sending Ghost Message for %d", view->network_id);
 					connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::RELIABLE, [&](GhostMessage& ghost_msg)
 						{
 							ghost_msg.network_id = ghost.GetNetworkID();
-							ghost_msg.state_mask = ghost_data->state_mask;
+							ghost_msg.state_mask = network_data->state_mask;
 
 							if (ghost_msg.state_mask & GhostFlags::TRANSFORM_POS)
-								ghost_msg.AddPosition(ghost_data->position);
+								ghost_msg.AddPosition(network_data->position);
 
 							if (ghost_msg.state_mask & GhostFlags::TRANSFORM_ROT)
-								ghost_msg.AddRotation(ghost_data->rotation);
+								ghost_msg.AddRotation(network_data->rotation);
 
 							if (ghost_msg.state_mask & GhostFlags::TRANSFORM_SCALE)
-								ghost_msg.AddScale(ghost_data->scale);
+								ghost_msg.AddScale(network_data->scale);
 						});
 				}
 			}
@@ -73,22 +78,23 @@ namespace idk
 		if (view)
 		{
 			// push the ghost data into the view
+			LOG_TO(LogPool::NETWORK, "Received Ghost Message for %d", view->network_id);
 			auto tfm_view = view->GetGameObject()->GetComponent<ElectronTransformView>();
 			if (msg->state_mask)
 			{
 				if (tfm_view->interp_over_seconds != 0)
 				{
-					if (!(std::get_if<ElectronTransformView::GhostData>(&tfm_view->ghost_data) || std::get_if<void*>(&tfm_view->ghost_data)))
+					if (!(std::get_if<ElectronTransformView::GhostData>(&tfm_view->network_data) || std::get_if<void*>(&tfm_view->network_data)))
 						return;
 
-					auto ghost_data = ElectronTransformView::GhostData{};
-					ghost_data.state_mask = msg->state_mask;
+					auto network_data = ElectronTransformView::GhostData{};
+					network_data.state_mask = msg->state_mask;
 					if (tfm_view->sync_position)
 					{
 						if (auto pos = msg->GetPosition())
 						{
-							ghost_data.start_pos = tfm.position;
-							ghost_data.end_pos = *pos;
+							network_data.start_pos = tfm.position;
+							network_data.end_pos = *pos;
 						}
 					}
 
@@ -96,18 +102,18 @@ namespace idk
 					{
 						if (auto rot = msg->GetRotation())
 						{
-							ghost_data.start_rot = tfm.rotation;
-							ghost_data.end_rot = *rot;
+							network_data.start_rot = tfm.rotation;
+							network_data.end_rot = *rot;
 						}
 					}
 
 					if (tfm_view->sync_scale && msg->state_mask & GhostFlags::TRANSFORM_SCALE)
 					{
-						ghost_data.start_scale = tfm.scale;
-						ghost_data.end_scale = msg->scale;
+						network_data.start_scale = tfm.scale;
+						network_data.end_scale = msg->scale;
 					}
-					ghost_data.t = 0;
-					tfm_view->ghost_data = ghost_data;
+					network_data.t = 0;
+					tfm_view->network_data = network_data;
 				}
 				else
 				{

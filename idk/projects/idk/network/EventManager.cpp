@@ -21,6 +21,7 @@ namespace idk
 	{
 		client.Subscribe<TestMessage>([](TestMessage* message) { LOG_TO(LogPool::NETWORK, "Received message %d", message->i); });
 		client.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });
+		client.Subscribe<EventTransferOwnershipMessage>([this](EventTransferOwnershipMessage* msg) { OnTransferOwnershipEvent(msg); });
 	}
 
 	void EventManager::SubscribeEvents(ServerConnectionManager& server)
@@ -39,6 +40,7 @@ namespace idk
 	}
 	void EventManager::SendTestMessage(int i)
 	{
+		LOG_TO(LogPool::NETWORK, "Sending test message w payload %d", i);
 		Core::GetSystem<NetworkSystem>().BroadcastMessage <TestMessage>(GameChannel::RELIABLE, [&](TestMessage& msg)
 			{
 				msg.i = i;
@@ -47,6 +49,10 @@ namespace idk
 
 	void EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> rotation)
 	{
+		LOG_TO(LogPool::NETWORK, "Broadcasting instantiate prefab message %s", string(prefab.guid).c_str());
+		if (!prefab)
+			return;
+
 		auto dyn = prefab->data[0].FindComponent("ElectronView", 0);
 		if (!dyn.valid())
 		{
@@ -65,7 +71,7 @@ namespace idk
 			tfm.rotation = *rotation;
 		if (auto tfm_view = obj->GetComponent<ElectronTransformView>())
 		{
-			tfm_view->ghost_data = ElectronTransformView::PreviousFrame
+			tfm_view->network_data = ElectronTransformView::PreviousFrame
 			{
 				.position = tfm.position,
 				.rotation = tfm.rotation,
@@ -99,6 +105,7 @@ namespace idk
 	// static
 	void EventManager::SendTransferOwnership(Handle<ElectronView> transfer, Host target_host)
 	{
+		LOG_TO(LogPool::NETWORK, "Transferring ownership of %d to %d", transfer->network_id, (int) target_host);
 		auto conn_man = Core::GetSystem<NetworkSystem>().GetConnectionTo(target_host);
 		if (!conn_man)
 		{
@@ -124,6 +131,7 @@ namespace idk
 	// targets
 	void EventManager::OnInstantiatePrefabEvent(EventInstantiatePrefabMessage* message)
 	{
+		LOG_TO(LogPool::NETWORK, "Received instantiate prefab event");
 		auto obj = message->prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
 		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message->id, ev));
@@ -132,5 +140,21 @@ namespace idk
 			tfm.position = message->position;
 		if (message->use_rotation)
 			tfm.rotation = message->rotation;
+	}
+
+	void EventManager::OnTransferOwnershipEvent(EventTransferOwnershipMessage* message)
+	{
+		LOG_TO(LogPool::NETWORK, "Received transfer ownership event");
+		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(message->object_to_transfer);
+		ev->owner = Host::ME;
+
+		// remove ghost data
+		auto& tfm = *ev->GetGameObject()->Transform();
+		ev->GetGameObject()->GetComponent<ElectronTransformView>()->network_data = ElectronTransformView::ClientObject
+		{
+			.prev_position = tfm.position,
+			.prev_rotation = tfm.rotation,
+			.prev_scale    = tfm.scale
+		};
 	}
 }

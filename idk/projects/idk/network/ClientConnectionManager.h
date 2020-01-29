@@ -17,6 +17,7 @@ namespace idk
 		using ConnectionManager::SendMessage;
 		using ConnectionManager::GetManager;
 
+
 		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType*>>>
 		void Subscribe(Func&& func);
 

@@ -18,7 +18,14 @@ namespace idk
 			auto devices = app_sys.GetNetworkDevices();
 			auto try_address = Address{ (unsigned char)a,(unsigned char)b,(unsigned char)c,(unsigned char)d };
 			LOG_TO(LogPool::NETWORK, "Try connecting to %s", string{ try_address }.c_str());
-			network_sys.ConnectToServer(try_address);
+			network_sys.ConnectToServer(try_address); network_sys.GetClient().OnConnectionToServer += []()
+			{
+				LOG_TO(LogPool::NETWORK, "Connected to server");
+			}; 
+			network_sys.GetClient().OnDisconnectionFromServer += []()
+			{
+				LOG_TO(LogPool::NETWORK, "Disconnected from server");
+			};
 		}
 
 		if (app_sys.GetKeyDown(Key::T))
@@ -35,6 +42,16 @@ namespace idk
 			EventManager::BroadcastInstantiatePrefab(makeme,
 				send_pos ? opt<vec3>{GetGameObject()->Transform()->GlobalPosition()} : std::nullopt,
 				send_rot ? opt<quat>{GetGameObject()->Transform()->GlobalRotation()} : std::nullopt);
+		}
+
+		if (app_sys.GetKeyDown(Key::L))
+		{
+			auto view = GetGameObject()->GetComponent<ElectronView>();
+			if (view)
+			{
+				if (auto conn_man = network_sys.GetConnectionTo(Host::CLIENT0))
+					conn_man->GetManager<EventManager>()->SendTransferOwnership(view, Host::CLIENT0);
+			}
 		}
 	}
 }
