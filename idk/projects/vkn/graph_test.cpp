@@ -4,17 +4,25 @@
 
 #include <vkn/GraphicsState.h>
 #include <vkn/RenderStateV2.h>
+#include <vkn/RenderBundle.h>
+#include "graph_test.h"
 
-
+#include <res/ResourceHandle.inl>
+#pragma optimize("",off)
 namespace idk::vkn::gt
 {
+	template<typename T>
+	string_view to_data(const T& obj)
+	{
+		return string_view{ reinterpret_cast<const char*>(hlp::buffer_data(obj)), hlp::buffer_size(obj) };
+	}
 	struct PassUtil : BaseRenderPass
 	{
 		struct FullRenderData
 		{
-			const CoreGraphicsState* gfx_state;
+			const GraphicsState* gfx_state;
 			RenderStateV2* rs_state;
-			const CoreGraphicsState& GetGfxState()const
+			const GraphicsState& GetGfxState()const
 			{
 				return *gfx_state;
 			}
@@ -23,9 +31,9 @@ namespace idk::vkn::gt
 				return *rs_state;
 			}
 		};
-		FullRenderData& render_data;
+		FullRenderData render_data;
 
-		PassUtil(FullRenderData& rd) :render_data{rd} {}
+		PassUtil(FullRenderData rd) :render_data{rd} {}
 
 		FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {})
 		{
@@ -100,6 +108,80 @@ namespace idk::vkn::gt
 		}
 		void Execute(FrameGraphDetail::Context_t context) override
 		{
+			auto& gfx_state = this->render_data.GetGfxState();
+
+			std::array description{
+					buffer_desc
+					{
+						buffer_desc::binding_info{ std::nullopt,sizeof(mat4) * 2,VertexRate::eInstance},
+						{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true},
+						 buffer_desc::attribute_info{AttribFormat::eMat4,8,sizeof(mat4),true}
+						 }
+					}
+			};
+			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh]);
+			context.SetBufferDescriptions(description);
+			auto mesh_range = index_span{ gfx_state.range.inst_mesh_render_begin,gfx_state.range.inst_mesh_render_end };
+			const renderer_attributes* prev_req = {};
+			for (auto& ro : mesh_range.to_span(*gfx_state.shared_gfx_state->instanced_ros))
+			{
+				auto& mesh = ro.mesh.as<VulkanMesh>();
+				auto& req = *ro.renderer_req;
+				if (&req != prev_req)
+				{
+					context.BindVertexBuffer(req.instanced_requirements.find(vtx::InstAttrib::_enum::ModelTransform)->second, gfx_state.shared_gfx_state->inst_mesh_render_buffer.buffer(), 0);
+					prev_req = &req;
+				}
+				auto idx_buffer = mesh.GetIndexBuffer();
+
+				auto mat_info = ro.material_instance->get_cache();
+				auto& frag = ro.material_instance->material->_shader_program;
+				if (!frag)
+					continue;
+				context.BindShader(ShaderStage::Fragment,ro.material_instance->material->_shader_program);
+				context.BindUniform("CameraBlock", 0, to_data(gfx_state.camera.projection_matrix));
+				{
+					auto itr = mat_info.uniforms.begin();
+					auto end = mat_info.uniforms.end();
+					while(itr!=end)
+					{
+						if (mat_info.IsUniformBlock(itr))
+						{
+							
+							context.BindUniform(itr->first,0,mat_info.GetUniformBlock(itr));
+						}
+						else if (mat_info.IsImageBlock(itr))
+						{
+							auto img_block = mat_info.GetImageBlock(itr);
+							for (size_t i = 0; i < img_block.size(); ++i)
+							{
+								context.BindUniform(itr->first, i,img_block[i].as<VknTexture>() );
+							}
+						}
+					}
+				}
+				for (auto& [attrib, buffer] : mesh.Buffers())
+				{
+					if(buffer.buffer())
+					{
+						auto index_itr = req.mesh_requirements.find(attrib);
+						if (index_itr != req.mesh_requirements.end())
+						{
+							context.BindVertexBuffer(index_itr->second, *buffer.buffer(), buffer.offset);
+						}
+					}
+				}
+				if (idx_buffer)
+				{
+					context.BindIndexBuffer(*idx_buffer->buffer(), idx_buffer->offset, mesh.IndexType());
+					context.DrawIndexed(mesh.IndexCount(), ro.num_instances, 0, 0, ro.instanced_index);
+				}
+				else
+				{
+					context.Draw(mesh.IndexCount(), ro.num_instances, 0, ro.instanced_index);
+
+				}
+			}
 		}
 	};
 
@@ -352,7 +434,7 @@ namespace idk::vkn::gt
 	struct DeferredRendering
 	{
 		//returns color and depth
-		std::pair<FrameGraphResource, FrameGraphResource> MakePass(FrameGraph& graph,RscHandle<VknRenderTarget> rt, const CoreGraphicsState& gfx_state, RenderStateV2& rs)
+		std::pair<FrameGraphResource, FrameGraphResource> MakePass(FrameGraph& graph,RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 		{
 			PassUtil::FullRenderData rd{&gfx_state,&rs};
 			auto& gbuffer_pass = graph.addRenderPass<GBufferPass>("GBufferPass", rt     ,rd );
@@ -381,10 +463,8 @@ namespace idk::vkn::gt
 		}
 	};
 
-	void GraphDeferredTest(const CoreGraphicsState& gfx_state, RenderStateV2& rs)
+	void GraphDeferredTest(FrameGraph& fg,const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
-		std::remove_reference_t<FrameGraph::Context_t> context;
-		FrameGraph fg;
 		DeferredRendering dr;
 		CubeClearRendering ccr;
 		auto [color,depth] = dr.MakePass(fg, {}, gfx_state, rs);
@@ -392,6 +472,28 @@ namespace idk::vkn::gt
 		fg.Compile();
 		fg.AllocateResources();
 		fg.BuildRenderPasses();
-		fg.Execute(context);
+		fg.Execute();
 	}
+
+	struct GraphTest::PImpl
+	{
+		FrameGraph fg;	
+	};
+
+	GraphTest::GraphTest() :_pimpl{std::make_unique<PImpl>()}
+	{
+	}
+	void GraphTest::DeferredTest(const GraphicsState& gfx_state, RenderStateV2& rs)
+	{
+		GraphDeferredTest(_pimpl->fg,gfx_state,rs);
+		
+		RenderBundle rb{ 
+			*rs.cmd_buffer ,
+			rs.dpools
+		};
+		_pimpl->fg.ProcessBatches(rb);
+	}
+	GraphTest::GraphTest(GraphTest&&) = default;
+	GraphTest& GraphTest::operator=(GraphTest&&) = default;
+	GraphTest::~GraphTest() = default;
 }

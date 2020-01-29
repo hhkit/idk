@@ -344,6 +344,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
+    <ClInclude Include="graph_test.h" />
     <ClInclude Include="IdGenerator.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
     <ClInclude Include="ParticleRenderer.h" />

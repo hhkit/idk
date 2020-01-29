@@ -28,7 +28,8 @@ namespace idk::vkn
 
 	enum LoadOp {};
 	enum StoreOp {};
-	enum class IndexType { e16, e32 };
+	//enum class IndexType { e16, e32 };
+	using IndexType = vk::IndexType;
 	using Framebuffer = vk::Framebuffer;
 	using VertexBuffer = vk::Buffer;
 	using IndexBuffer = vk::Buffer;
@@ -65,9 +66,23 @@ namespace idk::vkn
 		std::optional<AttachmentBlendConfig> config;
 	};
 
-
 	struct RenderTask
 	{
+		enum class LabelType
+		{
+			eBegin,
+			eInsert,
+			eEnd,
+		};
+		enum class LabelLevel
+		{
+			eDrawCall,
+			eBatch,
+			eWhole,
+		};
+
+		void DebugLabel(LabelLevel, string);
+
 		//void Associate(size_t subpass_index);
 
 		void SetUboManager(UboManager& ubo_manager);
@@ -97,7 +112,7 @@ namespace idk::vkn
 		{
 			_current_batch.pipeline = config;
 		}
-		void SetBufferDescriptions();
+		void SetBufferDescriptions(span<buffer_desc>);
 		//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
 		//If col is nullopt, we clear all the colors from attachment_index onwards.
 		void SetClearColor(uint32_t attachment_index, std::optional<color> col)
@@ -201,7 +216,7 @@ namespace idk::vkn
 			vector_span<UniformManager::set_binding_t> uniforms;
 			vector_span <VertexBindingData>            vertex_buffers;
 			IndexBindingData                           index_buffer;
-
+			std::pair<LabelType, string>               label;
 			draw_info draw_info; //might need to split into two types/vectors of draw calls to prevent branching
 		};
 
@@ -214,6 +229,7 @@ namespace idk::vkn
 		{
 			using uniform_t = UniformManager::set_binding_t;
 			DrawCallBuilder( vector<VertexBindingData>&);
+			void SetLabel(LabelType, string);
 			void AddVertexBuffer(VertexBindingData);
 			void SetIndexBuffer(IndexBindingData);
 			DrawCall end(draw_info, vector_span<UniformManager::set_binding_t> uniforms);
@@ -234,6 +250,7 @@ namespace idk::vkn
 			vk::Framebuffer frame_buffer;
 			Shaders shaders;
 			vector<DrawCall> draw_calls;
+			std::optional<std::string> label;
 		};
 
 
@@ -257,6 +274,7 @@ namespace idk::vkn
 
 		RenderBatch _current_batch{};
 
+		std::optional<string> _label;
 
 		vector<UniformManager::set_binding_t> _uniform_sets;
 		vector<VertexBindingData> _vertex_bindings;

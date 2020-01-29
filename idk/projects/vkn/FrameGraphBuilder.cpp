@@ -10,6 +10,12 @@ namespace idk::vkn
 	{
 		_fgid_generator.reset_ids();
 	}
+	void FrameGraphBuilder::Reset()
+	{
+		ResetIDs();
+		consumed_resources.resources.clear();
+		origin_nodes.clear();
+	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
 		return rsc_manager.CreateTexture(desc);

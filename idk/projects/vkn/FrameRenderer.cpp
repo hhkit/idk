@@ -48,6 +48,8 @@
 
 #include <vkn/ColorPickRenderer.h>
 
+#include <vkn/graph_test.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<ThreadedRender>()
@@ -57,6 +59,8 @@ namespace idk::vkn
 		hash_table<RscHandle<Texture>, RscHandle<VknFrameBuffer>> deferred_buffers;
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
+		gt::GraphTest test;
+		uint32_t testing = 0;
 	};
 
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
@@ -802,9 +806,9 @@ namespace idk::vkn
 //#pragma optimize("",off)
 	namespace gt
 	{
+
 		void GraphDeferredTest(const CoreGraphicsState& gfx_state, RenderStateV2& rs);
 	}
-
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_current_frame_index = frame_index;
@@ -867,7 +871,9 @@ namespace idk::vkn
 				for (size_t j = 0; j < curr_concurrent; ++j) {
 					auto& state = gfx_states[i + j];
 					auto& rs = _states[i + j];
-					gt::GraphDeferredTest(state, rs);
+					//gt::GraphDeferredTest(state, rs);
+					_pimpl->testing |= (i == 0 && j == 0);
+						
 					_render_threads[j]->Render(state, rs);
 					rendered = true;
 					//TODO submit command buffer here and signal the framebuffer's stuff.
@@ -1430,6 +1436,8 @@ namespace idk::vkn
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
+		if (_pimpl->testing)
+			_pimpl->test.DeferredTest(state, rs),_pimpl->testing--;
 		bool still_rendering = (processed_ro.size() > 0) ||  camera.render_target->RenderDebug();
 		if (still_rendering)
 		{

@@ -305,6 +305,9 @@
     <ClInclude Include="UniformManager.h">
       <Filter>render\graph\util_objects</Filter>
     </ClInclude>
+    <ClInclude Include="graph_test.h">
+      <Filter>render\graph\test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

@@ -24,6 +24,7 @@ namespace idk::vkn
 		//AttachmentInfo CreateTexture(const Texture& texture);
 		fg_id NextID();
 		void ResetIDs();
+		void Reset();
 
 		FrameGraphResource CreateTexture(TextureDescription desc);
 		FrameGraphResourceReadOnly read(FrameGraphResource in_rsc,bool may_shader_sample=true);

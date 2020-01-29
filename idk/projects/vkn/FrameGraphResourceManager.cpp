@@ -168,5 +168,16 @@ namespace idk::vkn
 		}
 		return result;
 	}
+	void FrameGraphResourceManager::Reset()
+	{
+		ResetIDs();
+		pool.reset_allocations();
+		resources.clear();
+		concrete_resources.clear();
+		resource_map.clear();
+		resource_handles.clear();
+		write_renamed.clear();
+		renamed_resources.clear();
+	}
 }
 

@@ -6,9 +6,29 @@
 #include <vkn/utils/VknUtil.h>
 
 #include <vkn/PipelineManager.h>
+#include <res/ResourceHandle.inl>
+
+#include <vkn/DebugUtil.h>
 
 namespace idk::vkn
 {
+	void RenderTask::DebugLabel(LabelLevel type, string label)
+	{
+		switch (type)
+		{
+		case idk::vkn::RenderTask::LabelLevel::eDrawCall:
+			this->_dc_builder.SetLabel(LabelType::eInsert, std::move(label));
+			break;
+		case idk::vkn::RenderTask::LabelLevel::eBatch:
+			this->_current_batch.label = std::move(label);
+			break;
+		case idk::vkn::RenderTask::LabelLevel::eWhole:
+			this->_label = std::move(label);
+			break;
+		default:
+			break;
+		}
+	}
 	void RenderTask::SetUboManager(UboManager& ubo_manager)
 	{
 		_uniform_manager.SetUboManager(ubo_manager);
@@ -29,10 +49,17 @@ namespace idk::vkn
 	{
 		_uniform_manager.BindSampler(name, index, texture, skip_if_bound,layout);
 	}
+#pragma optimize("",off)
 	void RenderTask::BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader_handle)
 	{
+		auto& bound_shader = _current_batch.shaders.shaders[static_cast<size_t>(stage)];
+		if (bound_shader == shader_handle)
+			return;
 		UnbindShader(stage);
+		auto& shader3 = *shader_handle;
+		auto& shader2 = *RscHandle<ShaderModule>{ shader_handle };
 		auto& shader = shader_handle.as<ShaderModule>();
+		//DebugBreak();
 		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
 		{
 			_uniform_manager.AddBinding(itr->first,*itr->second.layout,itr->second.entry_counts);
@@ -42,7 +69,7 @@ namespace idk::vkn
 			auto [name, info] = *itr;
 			_uniform_manager.RegisterUniforms(name, info.set, info.binding, info.size);
 		}
-		_current_batch.shaders.shaders[static_cast<size_t>(stage)] = shader_handle;
+		bound_shader = shader_handle;
 		if(stage==ShaderStage::Fragment)
 			BindInputAttachmentToCurrent();
 	}
@@ -89,6 +116,11 @@ namespace idk::vkn
 		auto uniforms = _uniform_manager.FinalizeCurrent(_uniform_sets);
 		AddToBatch(_dc_builder.end(di, uniforms));
 	}
+	void RenderTask::SetBufferDescriptions(span<buffer_desc> descriptions)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.buffer_descriptions = {descriptions.begin(),descriptions.end()};
+	}
 	void RenderTask::SetInputAttachments(span<VknTextureView> input_attachments) noexcept
 	{
 		_input_attachments = input_attachments;
@@ -119,6 +151,7 @@ namespace idk::vkn
 		}
 		if(clear_other)
 			clear.emplace_back(vk::ClearDepthStencilValue{depth,stencil});
+		return static_cast<uint32_t>(clear.size());
 	}
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
@@ -128,15 +161,22 @@ namespace idk::vkn
 		
 		_uniform_manager.GenerateDescriptorSets(span{ _uniform_sets }, d_manager, uniform_sets);
 
-
 		PipelineManager ppm;
 		vector<vk::Viewport> viewports;
 		std::optional<RenderPassObj> prev_rp;
 		vector<vk::ClearValue> clear_values;
 		compute_clear_info(clear_colors, clear_depths, clear_stencil,clear_values);
 		vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
+		if (_label)
+		{
+			dbg::BeginLabel(cmd_buffer, _label->c_str());
+		}
 		for (auto& batch : this->batches)
 		{
+			if (batch.label)
+			{
+				dbg::BeginLabel(cmd_buffer, batch.label->c_str());
+			}
 			if (!prev_rp || batch.render_pass != *prev_rp)
 			{
 				vk::RenderPassBeginInfo rpbi
@@ -167,6 +207,11 @@ namespace idk::vkn
 				cmd_buffer.setViewport(0,viewports);
 				for (auto& p_ro : batch.draw_calls)
 				{
+
+					if (p_ro.label.first == LabelType::eInsert)
+					{
+						dbg::BeginLabel(cmd_buffer, batch.label->c_str());
+					}
 					auto set_bindings = p_ro.uniforms.to_span();
 					auto dses = p_ro.uniforms.to_span(uniform_sets);
 					for (size_t i=0;i<set_bindings.size();++i)
@@ -182,9 +227,23 @@ namespace idk::vkn
 					}
 					
 					std::visit(DrawFunc{}, p_ro.draw_info, std::variant<vk::CommandBuffer>{cmd_buffer}, std::variant<IndexBindingData>{ p_ro.index_buffer});
+
+					if (p_ro.label.first == LabelType::eInsert)
+					{
+						dbg::EndLabel(cmd_buffer);
+					}
 				}
 
 			}
+			if (batch.label)
+			{
+				dbg::EndLabel(cmd_buffer);
+			}
+		}
+
+		if (_label)
+		{
+			dbg::EndLabel(cmd_buffer);
 		}
 	}
 	void RenderTask::BindInputAttachmentToCurrent()
@@ -217,11 +276,16 @@ namespace idk::vkn
 		{
 			//Retire the current batch
 			batches.emplace_back(_current_batch);
+			_current_batch.label.reset();
 		}
 		_start_new_batch = start;
 	}
 	RenderTask::DrawCallBuilder::DrawCallBuilder(vector<VertexBindingData>& vtx) : _vb_builder{vtx}
 	{
+	}
+	void RenderTask::DrawCallBuilder::SetLabel(LabelType type, string str)
+	{
+		this->current_draw_call.label = { type,std::move(str) };
 	}
 	void RenderTask::DrawCallBuilder::AddVertexBuffer(VertexBindingData data)
 	{
@@ -241,11 +305,13 @@ namespace idk::vkn
 		}
 		current_draw_call.vertex_buffers = _vb_builder.end();
 		current_draw_call.uniforms = uniforms;
-		return current_draw_call;
+		RenderTask::DrawCall result = current_draw_call;
+		current_draw_call.label = {};
+		return result;
 	}
 	void RenderTask::DrawFunc::operator()(indexed_draw_info di, vk::CommandBuffer cmd_buffer ,IndexBindingData idx)
 	{
-		cmd_buffer.bindIndexBuffer(idx.buffer, idx.offset, (idx.type==IndexType::e16) ? vk::IndexType::eUint16:vk::IndexType::eUint32 );
+		cmd_buffer.bindIndexBuffer(idx.buffer, idx.offset, idx.type);
 		cmd_buffer.drawIndexed(di.num_indices,di.num_instances,di.first_index,di.first_vertex,di.first_instance);
 	}
 	void RenderTask::DrawFunc::operator()(vertex_draw_info di, vk::CommandBuffer cmd_buffer, IndexBindingData)

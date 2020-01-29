@@ -81,6 +81,7 @@ namespace idk::vkn
 #pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
+		GetResourceManager().Reset();
 		tmp_graph.buffer = &graph_builder.consumed_resources;
 		auto graph = ConvertTempGraph(std::move(tmp_graph));
 		graph_theory::IntermediateGraph dependency_graph{ nodes.size() };
@@ -139,8 +140,10 @@ namespace idk::vkn
 		//TODO: Actually transition
 	}
 
-	void FrameGraph::Execute(Context_t context)
+	void FrameGraph::Execute()
 	{
+		_contexts.clear();
+		_contexts.reserve(execution_order.size());
 		auto& rsc_manager = GetResourceManager();
 		for (auto index : execution_order)
 		{
@@ -148,6 +151,7 @@ namespace idk::vkn
 			auto& rp = *render_passes[node.id];
 			//TODO: Thread this
 			{
+				auto& context= _contexts.emplace_back();
 				//Transition all the resources that are gonna be read (and are not input attachments)
 				auto input_span = node.GetReadSpan();
 				for (auto& input : input_span)
@@ -158,6 +162,20 @@ namespace idk::vkn
 				rp.Execute(context);
 				rp.PostExecute(node, context);
 			}
+		}
+		nodes.clear();
+		render_passes.clear();
+		execution_order.clear();
+		graph_builder.Reset();
+		rsc_lifetime_mgr.map.clear();
+		rsc_lifetime_mgr.resource_lifetimes.clear();
+	}
+
+	void FrameGraph::ProcessBatches(RenderBundle& bundle)
+	{
+		for (auto& rt : _contexts)
+		{
+			rt.ProcessBatches(bundle);
 		}
 	}
 

@@ -3,6 +3,7 @@
 namespace idk::vkn
 {
 	struct UboManager;
+	struct DescriptorsManager;
 	struct RenderBundle
 	{
 		vk::CommandBuffer _cmd_buffer;
