@@ -2,25 +2,26 @@
 #include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/network.h>
-#include <network/GhostFlags.h>
+#include "GhostFlags.h"
+
 namespace idk
 {
-	class GhostMessage
+	class MoveClientMessage
 		: public yojimbo::Message
 	{
 	public:
-		unsigned network_id;
+		NetworkID network_id;
+		unsigned state_mask{};
 
-		int  state_mask{};
-		vec3 position;
+		vec3 translation;
 		quat rotation;
 		vec3 scale;
 
-		GhostMessage& AddPosition(vec3 trans);
-		GhostMessage& AddRotation(quat rot);
-		GhostMessage& AddScale(vec3 scl);
+		MoveClientMessage& AddTranslation(vec3 trans);
+		MoveClientMessage& AddRotation(quat rot);
+		MoveClientMessage& AddScale(vec3 scl);
 
-		opt<vec3> GetPosition() const;
+		opt<vec3> GetTranslation() const;
 		opt<quat> GetRotation() const;
 		opt<vec3> GetScale() const;
 
@@ -28,16 +29,15 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_int(stream, network_id, 0, 4096);
-			serialize_int(stream, state_mask, 0, std::numeric_limits<int>::max());
-
-			if (state_mask & GhostFlags::TRANSFORM_POS)
+			serialize_int(stream, state_mask, 0, 0xFFFFFFFF);
+			if (stateMask & GhostFlags::TRANSFORM_POS)
 			{
-				serialize_float(stream, position.x);
-				serialize_float(stream, position.y);
-				serialize_float(stream, position.z);
+				serialize_float(stream, translation.x);
+				serialize_float(stream, translation.y);
+				serialize_float(stream, translation.z);
 			}
 
-			if (state_mask & GhostFlags::TRANSFORM_ROT)
+			if (stateMask & GhostFlags::TRANSFORM_ROT)
 			{
 				serialize_float(stream, rotation.x);
 				serialize_float(stream, rotation.y);
@@ -45,7 +45,7 @@ namespace idk
 				serialize_float(stream, rotation.w);
 			}
 
-			if (state_mask & GhostFlags::TRANSFORM_SCALE)
+			if (stateMask & GhostFlags::TRANSFORM_SCALE)
 			{
 				serialize_float(stream, scale.x);
 				serialize_float(stream, scale.y);

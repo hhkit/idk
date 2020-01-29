@@ -10,7 +10,9 @@ namespace idk
 	YOJIMBO_MESSAGE_FACTORY_START(GameMessageFactory, MessageCount);
 	ADD_MESSAGE(TestMessage);
 	ADD_MESSAGE(EventInstantiatePrefabMessage);
+	ADD_MESSAGE(EventTransferOwnershipMessage);
 	ADD_MESSAGE(GhostMessage);
+	ADD_MESSAGE(MoveClientMessage);
 	YOJIMBO_MESSAGE_FACTORY_FINISH();
 
 	yojimbo::MessageFactory* Adapter::CreateMessageFactory(yojimbo::Allocator& allocator)

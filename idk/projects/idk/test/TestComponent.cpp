@@ -20,21 +20,21 @@ namespace idk
 			LOG_TO(LogPool::NETWORK, "Try connecting to %s", string{ try_address }.c_str());
 			network_sys.ConnectToServer(try_address);
 		}
+
 		if (app_sys.GetKeyDown(Key::T))
 		{
 			static int i = 0;
-			network_sys.GetConnectionManager().GetManager<EventManager>()->SendTestMessage(i);
+			if (auto conn_man = network_sys.GetConnectionTo(Host::SERVER))
+				conn_man->GetManager<EventManager>()->SendTestMessage(i);
 			LOG("Sending test message %d", i);
 			++i;
 		}
 
 		if (app_sys.GetKeyDown(Key::P))
 		{
-			network_sys.GetConnectionManager().GetManager<EventManager>()->SendInstantiatePrefabEvent(
-				makeme,
+			EventManager::BroadcastInstantiatePrefab(makeme,
 				send_pos ? opt<vec3>{GetGameObject()->Transform()->GlobalPosition()} : std::nullopt,
-				send_rot ? opt<quat>{GetGameObject()->Transform()->GlobalRotation()} : std::nullopt
-			);
+				send_rot ? opt<quat>{GetGameObject()->Transform()->GlobalRotation()} : std::nullopt);
 		}
 	}
 }

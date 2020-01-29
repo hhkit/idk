@@ -1095,6 +1095,15 @@
     <ClInclude Include="network\GhostFlags.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="network\EventTransferOwnershipMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ServerMoveManager.h">
+      <Filter>network\substream managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\MoveClientMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1566,7 +1575,6 @@
     <ClCompile Include="test\TestComponent.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="network\ElectronTransformView.cpp" />
     <ClCompile Include="network\GhostManager.cpp">
       <Filter>network\substream managers</Filter>
     </ClCompile>
@@ -1575,6 +1583,18 @@
     </ClCompile>
     <ClCompile Include="network\SubstreamManager.cpp">
       <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\MoveClientMessage.cpp">
+      <Filter>network\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="network\GhostMessage.cpp">
+      <Filter>network\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ElectronTransformView.cpp">
+      <Filter>network\views</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ServerMoveManager.cpp">
+      <Filter>network\substream managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1790,6 +1810,9 @@
     </None>
     <None Include="network\SubstreamManager.inl">
       <Filter>network\managers</Filter>
+    </None>
+    <None Include="network\NetworkSystem.inl">
+      <Filter>network\system</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

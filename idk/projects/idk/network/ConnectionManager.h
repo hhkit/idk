@@ -16,6 +16,10 @@ namespace idk
 
 		template<typename T> T* CreateMessage() { return static_cast<T*>(CreateMessage(MessageID<T>)); }
 		template<typename T> void SendMessage(T* message, GameChannel delivery_mode);
+
+		template<typename T, typename Func, typename = sfinae<std::is_invocable_v<Func, T&>>> 
+		void CreateAndSendMessage(GameChannel channel, Func&& func);
+
 		template<typename Manager> Manager* GetManager();
 	protected:
 		virtual yojimbo::Message* CreateMessage(size_t id) = 0;

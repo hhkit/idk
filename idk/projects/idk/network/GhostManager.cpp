@@ -15,14 +15,14 @@ namespace idk
 	{
 		client.Subscribe<GhostMessage>([this](GhostMessage* msg) { OnGhostReceived(msg); });
 		
-		OnFrameStart(&GhostManager::UpdateGhosts);
+		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&GhostManager::UpdateGhosts);
 	}
 
 	void GhostManager::SubscribeEvents(ServerConnectionManager& server)
 	{
 		// TODO: acknowledgment
 
-		OnFrameStart(&GhostManager::UpdateMasters);
+		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&GhostManager::UpdateMasters); // note: will break on multiple connections
 		OnFrameEnd(&GhostManager::SendGhosts);
 	}
 
@@ -46,29 +46,20 @@ namespace idk
 			{
 				if (ghost_data->state_mask)
 				{
-					auto ghost_msg = connection_manager->CreateMessage<GhostMessage>();
+					connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::RELIABLE, [&](GhostMessage& ghost_msg)
+						{
+							ghost_msg.network_id = ghost.GetNetworkID();
+							ghost_msg.state_mask = ghost_data->state_mask;
 
-					ghost_msg->network_id = ghost.GetNetworkID();
-					ghost_msg->state_flags = ghost_data->state_mask;
+							if (ghost_msg.state_mask & GhostFlags::TRANSFORM_POS)
+								ghost_msg.AddPosition(ghost_data->position);
 
-					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_POS)
-						ghost_msg->position = ghost_data->position;
+							if (ghost_msg.state_mask & GhostFlags::TRANSFORM_ROT)
+								ghost_msg.AddRotation(ghost_data->rotation);
 
-					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_ROT)
-					{
-						IDK_ASSERT(ghost_msg);
-						IDK_ASSERT(ghost_data);
-						IDK_ASSERT(ghost_msg->rotation.x + 5);
-						IDK_ASSERT(ghost_data->rotation.x + 5);
-						ghost_msg->rotation.x = ghost_data->rotation.x;
-						ghost_msg->rotation.y = ghost_data->rotation.y;
-						ghost_msg->rotation.z = ghost_data->rotation.z;
-						ghost_msg->rotation.w = ghost_data->rotation.w;
-					}
-					if (ghost_msg->state_flags & GhostFlags::TRANSFORM_SCALE)
-						ghost_msg->scale = ghost_data->scale;
-
-					connection_manager->SendMessage(ghost_msg, GameChannel::RELIABLE);
+							if (ghost_msg.state_mask & GhostFlags::TRANSFORM_SCALE)
+								ghost_msg.AddScale(ghost_data->scale);
+						});
 				}
 			}
 		}
@@ -83,39 +74,50 @@ namespace idk
 		{
 			// push the ghost data into the view
 			auto tfm_view = view->GetGameObject()->GetComponent<ElectronTransformView>();
-			if (msg->state_flags)
-			if (tfm_view->interp_over_seconds != 0 )
+			if (msg->state_mask)
 			{
-				auto ghost_data = ElectronTransformView::GhostData{};
-				ghost_data.state_mask = msg->state_flags;
-				if (tfm_view->sync_position && msg->state_flags & GhostFlags::TRANSFORM_POS)
+				if (tfm_view->interp_over_seconds != 0)
 				{
-					ghost_data.start_pos = tfm.position;
-					ghost_data.end_pos   = msg->position;
-				}
+					if (!(std::get_if<ElectronTransformView::GhostData>(&tfm_view->ghost_data) || std::get_if<void*>(&tfm_view->ghost_data)))
+						return;
 
-				if (tfm_view->sync_rotation && msg->state_flags & GhostFlags::TRANSFORM_ROT)
-				{
-					ghost_data.start_rot = tfm.rotation;
-					ghost_data.end_rot = msg->rotation;
-				}
+					auto ghost_data = ElectronTransformView::GhostData{};
+					ghost_data.state_mask = msg->state_mask;
+					if (tfm_view->sync_position)
+					{
+						if (auto pos = msg->GetPosition())
+						{
+							ghost_data.start_pos = tfm.position;
+							ghost_data.end_pos = *pos;
+						}
+					}
 
-				if (tfm_view->sync_scale && msg->state_flags & GhostFlags::TRANSFORM_SCALE)
-				{
-					ghost_data.start_scale = tfm.scale;
-					ghost_data.end_scale = msg->scale;
+					if (tfm_view->sync_rotation && msg->state_mask & GhostFlags::TRANSFORM_ROT)
+					{
+						if (auto rot = msg->GetRotation())
+						{
+							ghost_data.start_rot = tfm.rotation;
+							ghost_data.end_rot = *rot;
+						}
+					}
+
+					if (tfm_view->sync_scale && msg->state_mask & GhostFlags::TRANSFORM_SCALE)
+					{
+						ghost_data.start_scale = tfm.scale;
+						ghost_data.end_scale = msg->scale;
+					}
+					ghost_data.t = 0;
+					tfm_view->ghost_data = ghost_data;
 				}
-				ghost_data.t = 0;
-				tfm_view->ghost_data = ghost_data;
-			}
-			else
-			{
-				if (msg->state_flags & GhostFlags::TRANSFORM_POS)
-					tfm.position = msg->position;
-				if (msg->state_flags & GhostFlags::TRANSFORM_ROT)
-					tfm.rotation = msg->rotation;
-				if (msg->state_flags & GhostFlags::TRANSFORM_SCALE)
-					tfm.scale = msg->scale;
+				else
+				{
+					if (msg->state_mask & GhostFlags::TRANSFORM_POS)
+						tfm.position = msg->position;
+					if (msg->state_mask & GhostFlags::TRANSFORM_ROT)
+						tfm.rotation = msg->rotation;
+					if (msg->state_mask & GhostFlags::TRANSFORM_SCALE)
+						tfm.scale = msg->scale;
+				}
 			}
 		}
 	}

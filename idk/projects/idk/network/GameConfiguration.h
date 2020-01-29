@@ -8,10 +8,11 @@ namespace idk
 		class TestMessage
 	,	class EventInstantiatePrefabMessage
 	,	class EventLoadLevelMessage
+	,	class EventTransferOwnershipMessage
 	,	class EventCSharpRPCMessage
 	,	class GhostMessage
 	,	class MoveClientMessage
-	,	class MoveBroadcastMessage
+	,	class MoveReturnMessage
 	>;
 
 	static constexpr auto MessageCount = std::tuple_size_v<NetworkMessageTuple>;

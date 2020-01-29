@@ -10,6 +10,13 @@ namespace idk
 	{
 		SendMessage((yojimbo::Message*) message, delivery_mode);
 	}
+	template<typename T, typename Func, typename>
+	inline void ConnectionManager::CreateAndSendMessage(GameChannel channel, Func&& func)
+	{
+		auto msg = CreateMessage<T>();
+		func(*msg);
+		SendMessage(msg, channel);
+	}
 	template<typename Manager>
 	inline Manager* ConnectionManager::GetManager()
 	{

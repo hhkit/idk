@@ -51,19 +51,25 @@ namespace idk
 		return static_cast<bool>(lobby);
 	}
 
-	ConnectionManager& NetworkSystem::GetConnectionManager(size_t token)
+	ConnectionManager* NetworkSystem::GetConnectionTo(Host host)
 	{
-		if (token == GameConfiguration::MAX_CLIENTS)
+		switch (host)
+		{
+		case Host::SERVER:  return client_connection_manager.get();
+		case Host::CLIENT0: return server_connection_manager[0].get();
+		case Host::CLIENT1: return server_connection_manager[1].get();
+		case Host::CLIENT2: return server_connection_manager[2].get();
+		case Host::CLIENT3: return server_connection_manager[3].get();
+		case Host::CLIENT_MAX:
 		{
 			if (client_connection_manager)
-				return *client_connection_manager;
+				return client_connection_manager.get();
 			for (auto& elem : server_connection_manager)
 				if (elem)
-					return *elem;
-
-			throw;
+					return elem.get();
 		}
-		return *server_connection_manager[token];
+		}
+		IDK_ASSERT(false, "You shouldn't have gotten here?");
 	}
 
 	void NetworkSystem::ReceivePackets()
@@ -85,20 +91,14 @@ namespace idk
 
 	void NetworkSystem::RespondToPackets()
 	{
-		for (auto& elem : server_connection_manager)
-			if (elem)
-				elem->FrameStartManagers();
-		if (client_connection_manager)
-			client_connection_manager->FrameStartManagers();
+		for (auto& elem : frame_start_callbacks)
+			elem.callback();
 	}
 
 	void NetworkSystem::PreparePackets()
 	{
-		for (auto& elem : server_connection_manager)
-			if (elem)
-				elem->FrameEndManagers();
-		if (client_connection_manager)
-			client_connection_manager->FrameEndManagers();
+		for (auto& elem : frame_end_callbacks)
+			elem.callback();
 	}
 
 	void NetworkSystem::Init()

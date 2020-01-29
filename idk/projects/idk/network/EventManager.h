@@ -1,9 +1,12 @@
 #pragma once
 #include <network/SubstreamManager.h>
 #include <res/ResourceHandle.h>
+#include <network/network.h>
 
 namespace idk
 {
+	class EventInstantiatePrefabMessage;
+
 	class EventManager
 		: public SubstreamManager<EventManager>
 	{
@@ -12,7 +15,8 @@ namespace idk
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
 		void SendTestMessage(int i);
-		void SendInstantiatePrefabEvent(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> quaternion);
+		static void BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> quaternion);
+		static void SendTransferOwnership(Handle<ElectronView> transfer, Host target_host);
 	private:
 		void OnInstantiatePrefabEvent(EventInstantiatePrefabMessage* message);
 	};
