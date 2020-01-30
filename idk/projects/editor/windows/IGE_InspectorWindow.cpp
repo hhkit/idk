@@ -1623,9 +1623,12 @@ namespace idk {
 
             while (depth_change++ <= 0)
             {
-                if (indent_stack.back())
-                    ImGui::Unindent();
-				if (!indent_stack.empty()) indent_stack.pop_back();
+                if (indent_stack.size())
+                {
+                    if (indent_stack.back())
+                        ImGui::Unindent();
+                    indent_stack.pop_back();
+                }
                 if(!_curr_property_stack.empty()) _curr_property_stack.pop_back();
             }
             _curr_property_stack.push_back(key);
@@ -1883,9 +1886,13 @@ namespace idk {
                 return display_key_value(key, std::forward<decltype(val)>(val), depth_change);
 		};
 
-		dyn.visit(generic_visitor);
-		if (dyn.is<mono::Behavior>())
-			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor, _debug_mode);
+        if (dyn.is<mono::Behavior>())
+        {
+            _curr_property_stack.push_back("script_data");
+            dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor, _debug_mode);
+        }
+        else
+            dyn.visit(generic_visitor);
 
         std::swap(prop_stack_copy, _curr_property_stack);
         for (auto i : indent_stack)
