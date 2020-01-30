@@ -2,14 +2,65 @@
 #include "MemoryAllocator.h"
 #include <vkn/BufferHelpers.h>
 #include <vkn/VulkanView.h>
+#include <sstream>
 namespace idk::vkn
 {
 	VulkanView& View();
 }
 namespace idk::vkn::hlp
 {
+	static hash_set<MemoryAllocator*> _allocators;
+	std::pair<size_t,size_t> DumpAllocator(std::ostream& out,const MemoryAllocator& alloc)
+	{
+		size_t alloc_allocced = 0;
+		size_t alloc_freed = 0;
+		for (auto& mems : alloc.memories)
+		{
+			size_t chunk_alloced = 0;
+			size_t chunk_free = 0;
+			for (auto& mem : mems.second.memories)
+			{
+				size_t free = 0;
+				for (auto& freed : mem.free_list)
+				{
+					free += freed.end - freed.start;
+				}
+				out << "\t\tSlice Allocated[" << (mem.sz - free) << "/" << mem.sz << "]\n";
+				chunk_alloced += mem.sz;
+				chunk_free += free;
+			}
+			out << "\tChunk Allocated[" << (chunk_alloced - chunk_free) << "/" << chunk_alloced << "]\n";
+			alloc_allocced += chunk_alloced;
+			alloc_freed += chunk_free;
+		}
+		out << " Allocator Allocated[" << (alloc_allocced - alloc_freed) << "/" << alloc_allocced << "]\n";
+		return { alloc_allocced,alloc_freed };
+	}
+	string DumpAllocators()
+	{
+		std::stringstream out;
+		size_t allocator_index=0;
+		size_t total_alloc = 0;
+		size_t total_free  =0;
+		for (auto& palloc : _allocators)
+		{
+			auto& alloc = *palloc;
+			out << "Allocator[" << allocator_index << "]{\n";
+			auto [alloc_allocced, alloc_freed]=DumpAllocator(out,alloc);
+			total_alloc+= alloc_allocced;
+			total_free+= alloc_freed;
+			//for (auto& block : alloc)
+			//{
+			//}
+			out << "}\n";
+		}
+		out << "Total Allocated[" << (total_alloc- total_free) << "/" << total_alloc<< "]\n";
+		return out.str();
+	}
 	using detail::Memories;
-	MemoryAllocator::MemoryAllocator(): device{ *View().Device() }, pdevice{ View().PDevice() }{}
+
+	MemoryAllocator::MemoryAllocator(vk::Device d, vk::PhysicalDevice pd) :device{ d }, pdevice{ pd }{_allocators.emplace(this); }
+	MemoryAllocator::MemoryAllocator() : device{ *View().Device() }, pdevice{ View().PDevice() }{_allocators.emplace(this); }
 	MemoryAllocator::UniqueAlloc MemoryAllocator::Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req)
 	{
 		auto itr = memories.find(mem_type);
@@ -27,6 +78,10 @@ namespace idk::vkn::hlp
 		auto mem_req = d.getBufferMemoryRequirements(buffer, vk::DispatchLoaderDefault{});
 		auto mem_type = hlp::findMemoryType(pd, mem_req.memoryTypeBits, prop);
 		return Allocate(d, mem_type, mem_req);
+	}
+	MemoryAllocator::~MemoryAllocator()
+	{
+		_allocators.erase(this);
 	}
 	UniqueAlloc MemoryAllocator::Allocate(vk::Image image, vk::MemoryPropertyFlags prop)
 	{

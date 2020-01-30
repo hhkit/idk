@@ -160,6 +160,10 @@
 	REFLECT_VARS(buffers, element_buffer, bounding_volume)
 	REFLECT_END()
 
+	REFLECT_BEGIN(idk::CompiledTexture, "CompiledTexture")
+	REFLECT_VARS(internal_format, mode, filter_mode, size, is_srgb, generate_mipmaps, pixel_buffer)
+	REFLECT_END()
+
 	// shader graph
 	REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 

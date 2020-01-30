@@ -23,31 +23,23 @@
 namespace idk {
 
 
-	CMD_CollateCommands::CMD_CollateCommands(int counts) : num_of_times_to_repeat{ counts }
+	CMD_CollateCommands::CMD_CollateCommands(int counts)
+		: count{ counts }
 	{
-		
 	}
 
 
 	bool CMD_CollateCommands::execute()
 	{
-
-		if (num_of_times_to_repeat < 2)
-			return false;	//Ignore this command when the callcommand is 1 or less
-		//printf("CMD CCA Count: %d\n", num_of_times_to_repeat);
-		if (!first_call) {		//Do not execute on first command call. But collect commands from controller
-			
+		if (repeated_commands.empty()) // first call
+		{
 			CommandController& controller = Core::GetSystem<IDE>().command_controller;
-			for (auto i = 0; i < num_of_times_to_repeat; ++i) {
-
+			for (auto i = 0; i < count; ++i)
+			{
 				repeated_commands.push_back(std::move(controller.undoStack.back()));
 				controller.undoStack.pop_back();
-
 			}
-			
-			
-			first_call = true;
-			return true;			//Once returned, this will automatically push into the undostack
+			return true;
 		}
 
 		//Back to front
@@ -64,7 +56,6 @@ namespace idk {
 		for (auto i = repeated_commands.begin(); i != repeated_commands.end(); ++i) {
 			(*i)->undo(); //Ignores failed commands
 		}
-
 
 		return true;
 	}

@@ -11,6 +11,8 @@
 #include <gfx/CameraClear.h>
 
 #include <core/Handle.h>//RenderObject::obj_id
+#undef near
+#undef far
 
 namespace idk
 {

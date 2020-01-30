@@ -169,7 +169,7 @@ namespace idk::vkn
 		}
 		return total;
 	}
-
+#pragma optimize("",off)
 	vk::PhysicalDevice VulkanState::SelectDevice(std::vector<vk::PhysicalDevice> const& devices)
 	{
 		float most_suitable = 0;
@@ -1275,7 +1275,8 @@ namespace idk::vkn
 
 			if (m_swapchain->m_swapchainGraphics.images[rv] != m_swapchain->m_graphics.images[rv])
 			{
-				m_device->resetFences(1, &*prevFence, dispatcher);
+				if(prevFence)
+					m_device->resetFences(1, prevFence, dispatcher);
 				//->resetFences(1, &*current_signal.master_fence, dispatcher);
 
 				hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);

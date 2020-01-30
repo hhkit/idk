@@ -33,8 +33,8 @@ vec4 alb_amb_occ_= Load(gAlbAmbOcc );                                           
 vec4 deep_depth  = Load(gDepth );                                                            \
 																								\
 vec3 view_pos   = view_pos_.rgb;                                                                \
-vec3 normal   = normal_.rgb;                                                                    \
-vec3 tangent   = tangent_.rgb;                                                                  \
+vec3 normal   = normal_.rgb   *2 - 1;                                                                    \
+vec3 tangent   = tangent_.rgb *2 - 1;                                                                  \
 float metallic   = uv_met_rou_.z;                                                                \
 float roughness  = uv_met_rou_.w;                                                                \
 vec3  albedo     = alb_amb_occ_.rgb;                                                             \

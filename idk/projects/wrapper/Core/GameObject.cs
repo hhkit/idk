@@ -10,6 +10,12 @@ namespace idk
         public Transform transform { get { return GetComponent<Transform>(); } }
         public string name { get => Bindings.GameObjectGetName(handle); set => Bindings.GameObjectSetName(handle, value); }
         public string tag { get => Bindings.GameObjectGetTag(handle); set => Bindings.GameObjectSetTag(handle, value); }
+        public int layer { get => Bindings.GameObjectGetLayer(handle); set => Bindings.GameObjectSetLayer(handle, value); }
+
+        public GameObject()
+        {
+            handle = Bindings.GameObjectNew();
+        }
 
         internal GameObject(ulong in_handle)
         {

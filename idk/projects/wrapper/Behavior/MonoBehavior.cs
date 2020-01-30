@@ -8,6 +8,12 @@ namespace idk
         List<Coroutine> coroutines = new List<Coroutine>();
         List<Coroutine> new_coroutines = new List<Coroutine>();
 
+        public bool enabled
+        {
+            get => Bindings.MonoBehaviorGetEnable(handle);
+            set => Bindings.MonoBehaviorSetEnable(handle, value);
+        }
+
         /// public virtual void OnCollisionEnter(Collision other) { }
         /// public virtual void OnCollisionStay(Collision other) { }
         /// public virtual void OnCollisionExit(Collision other) { }

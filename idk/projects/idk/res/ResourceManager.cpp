@@ -173,9 +173,9 @@ namespace idk
 			func(this);
 		SaveDirtyMetadata();
 
-		for(auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL))
+		for(auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL | FS_FILTERS::FILE))
 		{
-			if (elem.GetMountPath().starts_with("/build"))
+			if (elem.GetMountPath().starts_with("/build") && elem.IsFile())
 				LoadCompiledAsset(elem);
 		}
 	}
@@ -312,8 +312,7 @@ namespace idk
 
 	bool ResourceManager::IsExtensionSupported(string_view ext)
 	{
-		auto itr = _file_loader.find(ext.data());
-		return itr != _file_loader.end();
+		return _file_loader.find(ext.data()) != _file_loader.end() || _compilable_extensions.find(ext.data()) != _compilable_extensions.end();
 	}
 
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
@@ -366,24 +365,31 @@ namespace idk
 				return std::make_tuple(resource_bundle, meta_bundle);
 			}
 
-			if (loader == nullptr)
+			if (_compilable_extensions.find(ext) != _compilable_extensions.end())
 			{
-				if (_compilable_extensions.find(ext) != _compilable_extensions.end())
-				{
-					LoadAsync(path, true);
+				LoadAsync(path, true);
 
-					// check compiled results
-					auto new_bundle = GetMeta(path);
-					if (new_bundle)
+				// check compiled results
+				auto new_bundle = GetMeta(path);
+				if (new_bundle)
+				{
+					ResourceBundle resource_bundle{ new_bundle };
+					for (auto& elem : resource_bundle.GetAll())
 					{
-						ResourceBundle resource_bundle{new_bundle};
-						return std::make_tuple(resource_bundle, new_bundle);
+						for (auto& _loader : _compiled_asset_loader)
+							LoadCompiledAsset(PathHandle{ "/build/" + string{elem.guid()} +string{_loader.first} });
 					}
+					return std::make_tuple(resource_bundle, new_bundle);
 				}
-				return {};
+				else
+					return {};
 			}
 			else
 			{
+				if (loader == nullptr)
+				{
+					return{};
+				}
 				auto meta_path = PathHandle{ string{path.GetMountPath()} +".meta" };
 
 				auto meta_bundle = MetaBundle{};
@@ -441,7 +447,7 @@ namespace idk
 
 		auto last_compiled_file_time = [&]() -> long long
 		{
-			auto p = PathHandle{ string{ path.GetMountPath() } +".time" };
+			auto p = PathHandle{ "/build" + string{ path.GetMountPath() } +".time" };
 			if (p)
 				return p.GetLastWriteTime().time_since_epoch().count();
 			return 0;
@@ -462,7 +468,8 @@ namespace idk
 			};
 			auto infile = wrap(path.GetFullPath());
 			auto outdir = wrap(PathHandle{ "/build" }.GetFullPath());
-			const char* exec[] = { infile.data(), outdir.data() };
+			auto mountdir = wrap(string(PathHandle("/build").GetFullPath()) + string{ path.GetMountPath() });
+			const char* exec[] = { infile.data(), outdir.data(), mountdir.data() };
 			Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, wait);
 		}
 	}

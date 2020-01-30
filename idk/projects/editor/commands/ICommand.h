@@ -22,15 +22,19 @@ Commands will never handle new or delete, it can only contain pointers
 #include <core/GameObject.h>
 #include <reflect/reflect.h>
 
-namespace idk {
+namespace idk 
+{
 	//This is for collecting deleted gameobjects and its children as well as CreateGameObject Used for undo
 	struct RecursiveObjects {
 		Handle<GameObject>			original_handle			{};
+		Handle<GameObject>			preserved_handle		{};
 		Handle<GameObject>			parent_of_children		{}; //Only for children, used when undoing. The main deleted gameobject would have this as null.
 		vector<reflect::dynamic>	vector_of_components	{}; //Contains components for the new gameobject
 		vector<RecursiveObjects>	children				{};
 	};
-	class ICommand {
+
+	class ICommand 
+	{
 	public:
 		//Disables Copy or Move constructor
 		ICommand() noexcept								= default;
@@ -43,11 +47,12 @@ namespace idk {
 		virtual bool undo() = 0;						//Return true if the command works. When it is true, it will add to the redo stack
 
 		virtual ~ICommand() noexcept = default;			// virtual needs default destructor
+
+		Handle<GameObject> GetGameObject() { return game_object_handle; }
+
 	protected:
-
+		//This is used in most commands. This is required by DeleteGameObject command as it checks and modifies this handle when calling undo.
+		Handle<GameObject>	game_object_handle{};
 		friend class CMD_DeleteGameObject;
-
-		Handle<GameObject>	game_object_handle		{};	//This is used in most commands. This is required by DeleteGameObject command as it checks and modifies this handle when calling undo.
-
 	};
 }

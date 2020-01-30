@@ -40,7 +40,8 @@ void RdocEndFrameCapture()
 HWND& GetHWND();
 namespace idk::vkn
 {
-	constexpr size_t picking_pixel_size = sizeof(uint32_t);
+	using picking_pixel_t = uint16_t;
+	constexpr size_t picking_pixel_size = sizeof(picking_pixel_t);
 	VulkanView& View();
 	struct RequestInfo
 	{
@@ -50,7 +51,7 @@ namespace idk::vkn
 	template<size_t src_size,typename dest_t,size_t dst_size = sizeof(dest_t)>
 	dest_t adjust(const byte* start)
 	{
-		byte ro_index_buffer[std::max(picking_pixel_size, sizeof(uint32_t))] = {};
+		byte ro_index_buffer[std::max(picking_pixel_size, dst_size)] = {};
 		std::copy(start, start + src_size, ro_index_buffer);
 		auto ro_index = *reinterpret_cast<dest_t*>(ro_index_buffer);
 		//TODO: Shift the data according to endianess
@@ -72,7 +73,7 @@ namespace idk::vkn
 			size_t i = 0;
 			for (auto& req : requests)
 			{
-				auto ro_index = adjust<picking_pixel_size,uint32_t>(memory_range +offset+ picking_pixel_size * i);
+				auto ro_index = adjust<picking_pixel_size, picking_pixel_t>(memory_range +offset+ picking_pixel_size * i);
 				req.select(ro_index); 
 				++i;
 			}
@@ -228,7 +229,6 @@ namespace idk::vkn
 		};
 		vector<uint32_t> id_buffer(total_num_insts,0);
 		ivec2 max_size{};
-		size_t max_ro=0;
 		for (auto& request : requests)
 		{
 			auto& render_data = request.data;
@@ -264,17 +264,17 @@ namespace idk::vkn
 		if (curr_fb_size.x < max_size.x || curr_fb_size.y < max_size.y)
 		{
 			FrameBufferBuilder fbf;
-			fbf.Begin(max_size, 1);
+			fbf.Begin("Color Picking",max_size, 1);
 			fbf.AddAttachment(
 				AttachmentInfo
 				{
-					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::R_32_UI,FilterMode::_enum::Nearest
+					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::R_16_UI,FilterMode::_enum::Nearest
 				}
 			);
 			fbf.SetDepthAttachment(
 				AttachmentInfo
 				{
-					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::DEPTH_32_F_STENCIL_8,FilterMode::_enum::Nearest
+					LoadOp::eClear,StoreOp::eStore,TextureInternalFormat::DEPTH_16,FilterMode::_enum::Nearest
 				}
 			);
 			auto& rm = Core::GetResourceManager();
@@ -347,9 +347,10 @@ namespace idk::vkn
 			PipelineThingy&  the_interface = render_tasks.emplace_back();
 			the_interface.SetRef(rs.ubo_manager);
 			auto& render_data = request.data;
+			std::array<float, 2> near_far{ render_data.camera.near,render_data.camera.far };
 			the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
 			the_interface.BindShader(ShaderStage::Fragment, color_pick_frag);
-			uint32_t i = 0;
+			the_interface.BindUniformBuffer("NearFarBlock", 0, near_far);
 			the_interface.BindUniformBuffer("CameraBlock", 0, render_data.camera.projection_matrix);
 			for (auto itr = (*shared_gs.instanced_ros).data()+ render_data.inst_mesh_render_begin, end = (*shared_gs.instanced_ros).data() + render_data.inst_mesh_render_end;itr<end;++itr)
 			{
@@ -389,7 +390,6 @@ namespace idk::vkn
 			//TODO skinned stuff
 		}
 		size_t i = 0;
-		auto req_itr = requests.begin();
 		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
 		vk::UniqueBuffer uresult_buffer = hlp::CreateBuffer(*View().Device(),requests.size()*sizeof(uint32_t),vk::BufferUsageFlagBits::eTransferDst,View().Dispatcher());
 		vk::Buffer result_buffer =*uresult_buffer;
@@ -408,6 +408,7 @@ namespace idk::vkn
 			}
 		};
 		auto& fd = _pimpl->handler.Add(std::move(requests));
+		auto req_itr = fd.requests.begin();
 		fd.buffer = std::move(uresult_buffer);
 		fd.alloc = _pimpl->allocator.Allocate(result_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 		fd.mem_chunk_size = fd.alloc->BlockSize();

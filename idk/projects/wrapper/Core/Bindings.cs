@@ -25,6 +25,9 @@ namespace idk
         public extern static void SceneChangeScene(Guid guid);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong GameObjectNew();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void EngineKill();
         /**
          * Game Object
@@ -63,6 +66,12 @@ namespace idk
         public extern static void GameObjectSetTag(ulong gamehandle, string tag);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int GameObjectGetLayer(ulong gamehandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GameObjectSetLayer(ulong gamehandle, int layer);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong GameObjectFindWithTag(string tag);
 
         /*
@@ -70,6 +79,15 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong ComponentGetGameObject(ulong componenthandle);
+
+        /*
+         * Behavior
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool MonoBehaviorGetEnable(ulong componenthandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MonoBehaviorSetEnable(ulong componenthandle, bool enable);
 
         /*
          * Transform
@@ -266,6 +284,12 @@ namespace idk
         public extern static void AudioSourceSetVolume(ulong id, float volume);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSourceClipGetVolume(ulong id, int index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceClipSetVolume(ulong id, int index, float volume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float AudioSourceGetPitch(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -339,6 +363,12 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void CameraSetEnabledState(ulong id, bool c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int CameraGetCullingMask(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetCullingMask(ulong id, int value);
 
         /*
         * Light
@@ -562,5 +592,14 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float DebugLog(string preface, string message);
+
+        /*
+         * LayerMask
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string LayerMaskLayerToName(int layerIndex);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int LayerMaskNameToLayer(string name);
     }
 }

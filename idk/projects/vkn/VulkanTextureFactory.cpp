@@ -9,17 +9,25 @@
 #include <vkn/VknTextureLoader.h>
 #include <fstream>
 #include <sstream>
+#include <vkn/DDSLoader.h>
 namespace idk::vkn
 {
 
 
 
-	VulkanTextureFactory::VulkanTextureFactory(): _allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
+	VulkanTextureFactory::VulkanTextureFactory(): _allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() },_dds_loader{std::make_unique<DdsLoader>()}
 	{
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		
 		_fence = view.Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
+	DdsLoader& VulkanTextureFactory::GetDdsLoader()
+	{
+		// TODO: insert return statement here
+		return *_dds_loader;
+	}
+
+	VulkanTextureFactory::~VulkanTextureFactory() = default; //Here for the DdsLoader's dtor
 
 	unique_ptr<Texture> VulkanTextureFactory::GenerateDefaultResource()
 	{

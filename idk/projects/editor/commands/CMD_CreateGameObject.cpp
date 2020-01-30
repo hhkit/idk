@@ -31,8 +31,12 @@ namespace idk {
 
 	bool CMD_CreateGameObject::execute()
 	{
-		if (copied_object.empty()) {
-			game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+		if (copied_object.empty()) // create new game object, not a copy
+		{
+			if (game_object_handle == Handle<GameObject>{})
+				game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			else
+				Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject(game_object_handle);
 
 			if (parenting_gameobject) {
 				game_object_handle->GetComponent<Transform>()->SetParent(parenting_gameobject, false);
@@ -41,51 +45,26 @@ namespace idk {
 				game_object_handle->Name(name);
 			for (const auto& str : initial_components)
 				game_object_handle->AddComponent(string_view{ str });
-			Core::GetSystem<IDE>().selected_gameObjects.clear();
-			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
-			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
-			Core::GetSystem<IDE>().RefreshSelectedMatrix();
+
 			return bool(game_object_handle); //Return true if create gameobject is successful
 		}
-		else {
-			try {
-				RecursiveCreateObjects(copied_object, true);
-			}
-			catch (const bool fail) {
-				return fail;
-			}
-			Core::GetSystem<IDE>().selected_gameObjects.clear();
-			Core::GetSystem<IDE>().selected_gameObjects.push_back(game_object_handle);
-			Core::GetSystem<IDE>().FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(game_object_handle);
-			Core::GetSystem<IDE>().RefreshSelectedMatrix();
+		else
+		{
+			if (!RecursiveCreateObjects(copied_object, true))
+				return false;
 			return true;
 		}
 	}
 	
 	bool CMD_CreateGameObject::undo()
 	{
-		if (game_object_handle) {
-
-			IDE& editor = Core::GetSystem<IDE>();
-		
-			//Find and deselect from selected gameobject
-			auto iterator = editor.selected_gameObjects.begin();
-			for (; iterator != editor.selected_gameObjects.end(); ++iterator) {
-				if (*iterator == game_object_handle) {
-					break;
-				}
-			}
-			if (iterator != editor.selected_gameObjects.end())
-				editor.selected_gameObjects.erase(iterator);
-
-			Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
-
-			return true;
-		}
-		return false;
+		if (!game_object_handle)
+			return false;
+		Core::GetSystem<SceneManager>().GetActiveScene()->DestroyGameObject(game_object_handle);
+		return true;
 	}
 
-	void CMD_CreateGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
+	bool CMD_CreateGameObject::RecursiveCreateObjects(vector<RecursiveObjects>& vector_ref, bool isRoot)
 	{
         static bool copy_as_prefab = false;
         if (isRoot)
@@ -102,19 +81,25 @@ namespace idk {
             }
         }
 
-		for (RecursiveObjects& object : vector_ref) {
-			Handle<GameObject> i = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
-			if (isRoot) {
+		for (RecursiveObjects& object : vector_ref) 
+		{
+			if (object.preserved_handle == Handle<GameObject>{})
+				object.preserved_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+			else
+				Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject(object.preserved_handle);
+
+			auto i = object.preserved_handle;
+			if (isRoot) 
+			{
 				game_object_handle = i;
 				isRoot = false;
 			}
 
-			if (!game_object_handle) {
-				throw false; //Throws if the recursion fails
-			}
+			if (!game_object_handle)
+				return false; //Throws if the recursion fails
 
-			for (auto& c : object.vector_of_components) {
-
+			for (auto& c : object.vector_of_components)
+			{
 				if (c.is<Transform>())
 				{
 					Transform& t = c.get<Transform>();
@@ -138,18 +123,19 @@ namespace idk {
                     if (copy_as_prefab)
                         i->AddComponent(c);
                 }
-				else {
+				else
 					i->AddComponent(c);
-				}
 			}
 
 			//Assign children with this gameobject as parent
-			for (auto& childObject : object.children) {
+			for (auto& childObject : object.children)
 				childObject.parent_of_children = i;
-			}
 
-			RecursiveCreateObjects(object.children);
+			if (!RecursiveCreateObjects(object.children))
+				return false;
 		}
+
+		return true;
 	}
 
 }
