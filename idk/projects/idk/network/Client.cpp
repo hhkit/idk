@@ -19,8 +19,7 @@ namespace idk
 
 	Client::~Client()
 	{
-		if (client.IsConnected())
-			client.Disconnect();
+		client.Disconnect();
 	}
 
 	void Client::ProcessMessages()
