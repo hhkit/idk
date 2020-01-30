@@ -1621,7 +1621,7 @@ namespace idk {
 
             string keyName = format_name(key);
 
-            while (depth_change++ <= 0)
+            while (++depth_change <= 0)
             {
                 if (indent_stack.size())
                 {

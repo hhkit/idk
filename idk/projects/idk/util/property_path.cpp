@@ -98,7 +98,7 @@ namespace idk
                         {
                             if (end == path.size())
                             {
-                                reflect::dynamic(key) = value;
+                                reflect::dynamic{ arg } = value;
                                 return false;
                             }
 

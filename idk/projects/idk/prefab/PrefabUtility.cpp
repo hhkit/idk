@@ -316,9 +316,7 @@ namespace idk
         {
             if (const auto comp = helpers::get_component(handle, ov.component_name, ov.component_nth))
             {
-                auto prop = resolve_property_path(*comp, ov.property_path);
-                if (prop.valid() && ov.value.valid())
-                    prop = ov.value;
+                assign_property_path(*comp, ov.property_path, ov.value);
             }
         }
 
@@ -675,16 +673,9 @@ namespace idk
         if (!comp_handle)
             return;
 
-        auto prop = resolve_property_path(*comp_handle, override.property_path);
-        if (!prop.valid())
-            return;
-
         auto prop_prefab = resolve_property_path(
             prefab.data[prefab_inst.object_index].FindComponent(override.component_name, override.component_nth), override.property_path);
-        if (!prop_prefab.valid())
-            return;
-
-        prop = prop_prefab;
+        assign_property_path(*comp_handle, override.property_path, prop_prefab);
     }
 
     void PrefabUtility::RevertPropertyOverride(Handle<GameObject> target, const PropertyOverride& override)
