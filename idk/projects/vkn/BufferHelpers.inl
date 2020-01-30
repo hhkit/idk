@@ -132,7 +132,7 @@ namespace idk::vkn::hlp
 		template<typename T>
 		static constexpr bool has_data_v = std::is_same_v<decltype(has_data(std::declval<T>())), std::true_type>;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	template<typename RT = size_t, typename T>
 	RT buffer_size(T const& vertices)
 	{
@@ -164,5 +164,5 @@ namespace idk::vkn::hlp
 			return &obj;
 		}
 	}
-#pragma optimize("",on)
+//#pragma optimize("",on)
 }

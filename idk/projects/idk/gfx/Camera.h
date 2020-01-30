@@ -44,6 +44,8 @@ namespace idk
 		Frustum   getFrustum() const;
 
 		mat4      getTightProjection() const;
+		vec3      getFarCorner() const;
+		real	  getBSphereRadius() const;
 
 		vec3 getTightProjectionCenter() const;
 

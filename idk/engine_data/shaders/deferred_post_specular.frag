@@ -31,6 +31,13 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
+S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_LIGHTS];
+
+S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
+{
+	DLight directional_vp[MAX_LIGHTS];
+}DirectionalBlk;
+
 // lighting functions 
 
 vec3 Normal()
@@ -67,7 +74,7 @@ void main()
 	vec4 world_pos = 
 		PerCamera.inverse_view_transform *
 		vec4(view_pos,1);
-	
+	int j=0;
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		vec3 result = pbr_specular(LightBlk.lights[i], view_pos.xyz, normal, reflected, albedo, specular, roughness, ambient_o); 
@@ -75,7 +82,12 @@ void main()
 		if (LightBlk.lights[i].type == 1)
 		{
 			if(LightBlk.lights[i].cast_shadow!=0)
-				result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
+				//result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
+			{
+				result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j++].vp * world_pos));
+				result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j++].vp * world_pos));
+				result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j++].vp * world_pos));
+			}
 			//vvvp = LightBlk.lights[i].vp;
 		}
 		if (LightBlk.lights[i].type == 2)

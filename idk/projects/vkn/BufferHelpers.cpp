@@ -148,7 +148,7 @@ void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
 
 
 void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<BeginInfo> begin, std::optional<SubmissionInfo> queue_sub_config)

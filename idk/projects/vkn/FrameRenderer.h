@@ -84,7 +84,7 @@ namespace idk::vkn
 		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs ,ivec2 vp_pos, ivec2 vp_size);
 
 		//PreRender
-		void PreRenderShadow(size_t light_index, const PreRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+		void PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& rs,size_t& curr_state, uint32_t frame_index);
 		
 		//PostRender
 		void PostRenderCanvas(size_t& canvas_count, RscHandle<RenderTarget> rt, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index);

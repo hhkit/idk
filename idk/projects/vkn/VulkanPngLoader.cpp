@@ -17,13 +17,13 @@ namespace idk::vkn
 		fence = View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlagBits::eSignaled });
 	}
 	vk::Format ToSrgb(vk::Format f);
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void DoNothingUnopt()
 	{
 		int a = 0;
 		a++;
 	}
-#pragma optimize("",on)
+//#pragma optimize("",on)
 	ResourceBundle PngLoader::LoadFile(PathHandle handle, RscHandle<Texture> rtex, const TextureMeta* tm)
 	{
 		VknTexture& tex = rtex.as<VknTexture>();

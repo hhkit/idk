@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
+
 #include <gfx/LightTypes.h>
 #include <gfx/Camera.h>
 #pragma warning (push)
@@ -26,8 +27,11 @@ namespace idk
 		alignas(16) mat4  vp {};						  //160
 		alignas(16) mat4  v {};							  //
 		alignas(16) mat4  p{};							  //
-		RscHandle<FrameBuffer> light_map;				  //
+		//RscHandle<FrameBuffer> light_map;				  //
 		//3 depth attachment (tri-cascade), (near, middle, far)
+		vector<Lightmap> light_maps;
+		//alignas(16) mat4 w {};
+		CameraData camDataRef{};
 	};
 
 	class Light
@@ -43,9 +47,9 @@ namespace idk
 		bool is_active_and_enabled() const;
 
 		void InitShadowMap();
-		RscHandle<FrameBuffer>& GetLightMap();
-		const RscHandle<FrameBuffer>& GetLightMap()const;
-		void SetLightMap(const RscHandle<FrameBuffer>& light_map);
+		vector<Lightmap>& GetLightMap();
+		const vector<Lightmap>& GetLightMap()const;
+		void SetLightMap(const vector<Lightmap>& light_map);
 
 		LightData GenerateLightData() const;
 		void SetLightData(const LightData& ld);

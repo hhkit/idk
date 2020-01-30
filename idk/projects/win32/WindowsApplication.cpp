@@ -65,7 +65,7 @@ namespace idk::win
 		}
 
 	}
-#pragma optimize ("", off)
+//#pragma optimize ("", off)
 
 	void Windows::Exec(string_view path, span<const char*> argv, bool wait)
 	{
@@ -88,7 +88,7 @@ namespace idk::win
 			_cwait(0, elem, 0);
 		children.clear();
 	}
-#pragma optimize ("", on)
+//#pragma optimize ("", on)
 	int Windows::GetReturnVal()
 	{
 		return retval;

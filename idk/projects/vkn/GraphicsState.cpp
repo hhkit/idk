@@ -10,7 +10,7 @@ namespace idk::vkn
 	{
 		return &shared_gfx_state->Lights()[light_index];
 	}
-	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
+	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
 	{
 		camera = data.camera;
 		range = data;
@@ -18,29 +18,47 @@ namespace idk::vkn
 		mesh_render.clear();
 		skinned_mesh_render.clear();
 		active_lights.clear();
+		active_dir_lights.clear();
 		{
-			size_t i = 0;
+			size_t i = 0, j =0;
 			RscHandle<Texture> def_2d;
 			RscHandle<CubeMap> def_cube;
 
 			active_lights.insert(active_lights.end(), all_active_lights.begin() + data.light_begin, all_active_lights.begin() + data.light_end);
 			shadow_maps_2d.resize(active_lights.size(), def_2d);
+			active_dir_lights.insert(active_dir_lights.end(), active_directional_light.begin() + data.dir_light_begin, active_directional_light.begin() + data.dir_light_end);
+			shadow_maps_directional.resize(active_directional_light.size(), def_2d);
 			shadow_maps_cube.resize(active_lights.size(), def_cube);
 			for (auto& light_idx : active_lights)
 			{
 				auto& light = lights_data[light_idx];
-				if (light.index != 0)//point
-				//{
-				//	shadow_maps_2d[i]=(def_2d);
-				//	//shadow_maps_cube.emplace_back(light.light_map->GetDepthBuffer());
-				//}
-				//else
+				if (light.index == 2)//spotlight
 				{
-					shadow_maps_2d[i]=(s_cast<RscHandle<Texture>>(light.light_map->DepthAttachment()));
+					for(auto& elem: light.light_maps)
+						shadow_maps_2d[i]=(s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
 					//shadow_maps_cube[i]=(def_cube);
 				}
+				else if(light.index == 1) //directional light
+				{
+					if(!light.light_maps.empty())
+						shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
+					for (auto& elem : light.light_maps)
+						shadow_maps_directional[j++] = (s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
+					++j;
+				}
+
 				++i;
+				
 			}
+			//for (auto& dir_light_idx : active_directional_light)
+			//{
+			//	auto& light = lights_data[dir_light_idx];
+			//	//if (!light.light_maps.empty())
+			//		//shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
+			//	for (auto& elem : light.light_maps)
+			//		shadow_maps_directional[j++] = (s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
+			//	//++j;
+			//}
 		}
 		skeleton_transforms = &s_transforms;
 		CullAndAdd(render_objects, skinned_render_objects);

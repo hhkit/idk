@@ -109,6 +109,7 @@ namespace idk::vkn
 	{
 		SharedGraphicsState* shared_gfx_state;
 		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
+		vector<size_t> active_dir_lights; //If we are somehow able to cull the lights that are completely not rendered.
 		vector<size_t> active_canvas;
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;
@@ -125,6 +126,7 @@ namespace idk::vkn
 		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
 		vector<RscHandle<Texture>> shadow_maps_2d  ;
+		vector<RscHandle<Texture>> shadow_maps_directional;
 		vector<RscHandle<CubeMap>> shadow_maps_cube;
 
 		bool clear_render_target = false;
@@ -142,7 +144,7 @@ namespace idk::vkn
 		vector<const DbgDrawCall*> dbg_render;
 		const VulkanPipeline* dbg_pipeline;
 
-		void Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights,const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
+		void Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light,const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
 		void CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects);
 	};
 

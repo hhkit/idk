@@ -348,10 +348,11 @@ namespace idk
 		return result;
 	}
 
-	void CullLights(const CameraData& camera,const vector<LightData>& lights, vector<size_t>& active_light_buffer,GraphicsSystem::RenderRange& range)
+	void CullLights(const CameraData& camera,vector<LightData>& lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, GraphicsSystem::RenderRange& range)
 	{
 		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		range.light_begin = active_light_buffer.size();
+		range.dir_light_begin = directional_light_buffer.size();
 		for (size_t i = 0; i < lights.size(); ++i)
 		{
 			auto& light = lights[i];
@@ -362,6 +363,8 @@ namespace idk
 					sphere sphere{ invert_rotation(light.v)[3],light.falloff };
 					if(frustum.contains(sphere))
 						active_light_buffer.emplace_back(i);
+
+					light.camDataRef = camera;
 				}
 				break;
 			case index_in_variant_v<SpotLight, LightVariant>:
@@ -371,21 +374,43 @@ namespace idk
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
+
+					light.camDataRef = camera;
 				}
 			}
 				break;
 			case index_in_variant_v<DirectionalLight, LightVariant>:
-				active_light_buffer.emplace_back(i);
-				break;
-			}
-			if (light.index == index_in_variant_v<DirectionalLight, LightVariant>)
 			{
+
+				//Perform camera light loop to populate the data
+				float n_plane = camera.near_plane, f_plane = camera.far_plane;
+
+				float diff = f_plane - n_plane;
+				float first_end = n_plane + 0.30f * diff;
+				float second_end = n_plane + 0.50f * diff;
+
+				float cascadeiter[4] = { n_plane,first_end,second_end,f_plane };
+				///////////////////////////////////////>>>>>>>>>>>>>>>>>>>>>>>
+				unsigned k = 0, j = 1;
+				light.camDataRef = camera;
+
+				for (auto& elem : light.light_maps)
+				{
+					elem.SetCascade(camera, light, cascadeiter[k], cascadeiter[j]);
+					directional_light_buffer.emplace_back(i);
+					++k; ++j;
+				}
+
 				active_light_buffer.emplace_back(i);
-				continue; //SKIP
+
+				
+			}
+				break;
 			}
 
 		}
 		range.light_end = active_light_buffer.size();
+		range.dir_light_end = directional_light_buffer.size();
 	}
 
 	void GraphicsSystem::BufferGraphicsState(
@@ -809,6 +834,7 @@ namespace idk
             elem.get();
 
 		result.active_light_buffer.reserve(result.camera.size()* result.lights.size());
+		result.directional_light_buffer.reserve(result.camera.size());
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
 		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
@@ -823,7 +849,7 @@ namespace idk
 				ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range,range);
 				ProcessFonts(result.font_render_data,result.font_buffer,result.font_range,range);
 
-				CullLights(camera,result.lights, result.active_light_buffer,range);
+				CullLights(camera,result.lights, result.active_light_buffer,result.directional_light_buffer,range);
 
 			}
 			
@@ -849,9 +875,9 @@ namespace idk
 		
 		for (auto& light : result.lights)
 		{
-			CameraData camera{};
-			camera.view_matrix = { light.v };
-			camera.projection_matrix = { light.p };
+			CameraData light_cam_info{};
+			light_cam_info.view_matrix = { light.v };
+			light_cam_info.projection_matrix = { light.p };
 			LightRenderRange range{ ++i };
 			{
 				if (!light.cast_shadow)
@@ -860,7 +886,7 @@ namespace idk
 				}
 				else
 				{
-					const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+					const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 					range.inst_mesh_render_begin = start_index;
 					range.inst_mesh_render_end = end_index;
 				}

@@ -946,6 +946,14 @@
       <Filter>gfx\object</Filter>
     </ClInclude>
     <ClInclude Include="gfx\ColorPickRequest.h" />
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
+    <ClInclude Include="gfx\CascadedSet.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Lightmap.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1377,6 +1385,12 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
+    <ClCompile Include="gfx\CascadedSet.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Lightmap.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

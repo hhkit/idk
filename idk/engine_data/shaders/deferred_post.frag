@@ -1,6 +1,7 @@
 #version 450
 
 #define MAX_LIGHTS 8
+#define MAX_MAP  8
 
 import /engine_data/shaders/deferred_utils.glsl
 
@@ -32,8 +33,12 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
+S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_LIGHTS];
 
-
+S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
+{
+	DLight directional_vp[MAX_LIGHTS];
+}DirectionalBlk;
 
 vec3 Normal()
 {
@@ -82,15 +87,36 @@ void main()
 	vec4 world_pos = 
 		PerCamera.inverse_view_transform *
 		vec4(view_pos,1);
-	
+	int j=0;
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		vec3 result = pbr_metallic(LightBlk.lights[i], view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
-		
+		vec4 cascade_c = vec4(0,0,0,0);
 		if (LightBlk.lights[i].type == 1)
 		{
 			if(LightBlk.lights[i].cast_shadow!=0)
-				result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
+			{
+				//result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));			
+				if(depth_r <= DirectionalBlk.directional_vp[j].far_plane)
+				{
+					result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					//cascade_c = vec4(0.1,0,0,0);
+				}
+				++j;
+				if(depth_r <= DirectionalBlk.directional_vp[j].far_plane)
+				{
+					result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					//cascade_c = vec4(0,0.1,0,0);
+				}
+				++j;
+				if(depth_r <= DirectionalBlk.directional_vp[j].far_plane)
+				{
+					result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					//cascade_c = vec4(0,0,0.1,0);
+				}
+				++j;
+				
+			}
 			//vvvp = LightBlk.lights[i].vp;
 		}
 		if (LightBlk.lights[i].type == 2)
@@ -99,7 +125,7 @@ void main()
 				result *= (vec3(1-ShadowCalculation(LightBlk.lights[i],shadow_maps[i],LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
 		}
 		
-		light_accum += result;
+		light_accum += result + cascade_c.xyz;
 	}
 	vec3 F = mix(vec3(0.04), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
