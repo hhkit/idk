@@ -14,6 +14,7 @@ namespace idk::vkn
 		vector< ResourceLifetime> resource_lifetimes;
 		hash_table<fgr_id, lifetime_index> map;
 
+		void ClearLifetimes();
 
 		void EndLifetime(fgr_id rsc_id, const fg_id& node_id);
 		void InbetweenLifetime(fgr_id rsc_id, const fg_id& node_id);

@@ -94,7 +94,6 @@ namespace idk::vkn
 			throw;
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();
-		_pm->View(instance_->View());
 
 		_pimpl = std::make_unique<Pimpl>();
 		_pimpl->allocator = std::make_unique<hlp::MemoryAllocator>(*instance_->View().Device(), instance_->View().PDevice());

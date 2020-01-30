@@ -4,14 +4,6 @@
 #include <memory/ArenaAllocator.inl>
 namespace idk::vkn
 {
-	void PipelineManager::View(VulkanView& view)
-	{
-		_view = &view;
-	}
-	VulkanView& PipelineManager::View()
-	{
-		return *_view;
-	}
 	template<typename P>
 	bool LessChain(P clhs, P crhs)
 	{

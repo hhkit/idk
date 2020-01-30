@@ -8,6 +8,7 @@
 #include <vkn/vector_span.h>
 #include <vkn/vector_span_builder.h>
 #include <vkn/DescriptorsManager.h>
+#include <vkn/DescriptorUpdateData.h>
 namespace idk::vkn
 {
 
@@ -148,5 +149,6 @@ namespace idk::vkn
 		CollatedLayouts_t _collated_layouts;
 		vector<BindingInfo> _buffer;
 		vector_span_builder<BindingInfo> _buffer_builder{ _buffer };
+		DescriptorUpdateData _dud;
 	};
 }

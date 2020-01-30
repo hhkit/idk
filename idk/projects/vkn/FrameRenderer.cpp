@@ -872,7 +872,7 @@ namespace idk::vkn
 					auto& state = gfx_states[i + j];
 					auto& rs = _states[i + j];
 					//gt::GraphDeferredTest(state, rs);
-					_pimpl->testing |= (i == 0 && j == 0);
+					_pimpl->testing=1;// |= (i == 0 && j == 0);
 						
 					_render_threads[j]->Render(state, rs);
 					rendered = true;
@@ -1436,8 +1436,8 @@ namespace idk::vkn
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
-		if (_pimpl->testing)
-			_pimpl->test.DeferredTest(state, rs),_pimpl->testing--;
+		if (_pimpl->testing&& state.range.inst_mesh_render_end- state.range.inst_mesh_render_begin>0)
+			_pimpl->test.DeferredTest(state, rs), _pimpl->testing=0;
 		bool still_rendering = (processed_ro.size() > 0) ||  camera.render_target->RenderDebug();
 		if (still_rendering)
 		{

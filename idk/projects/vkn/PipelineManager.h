@@ -48,8 +48,6 @@ namespace idk::vkn
 		using container_t = object_pool<PipelineObject>;
 	public:
 		using handle_t = container_t::handle_t;
-		void View(VulkanView& view);
-		VulkanView& View();
 		//Assumes that shader programs are the only differing thing.
 		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass = {},bool has_depth_stencil=false);
 		void CheckForUpdates(uint32_t frame_index);

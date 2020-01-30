@@ -12,6 +12,9 @@
 
 namespace idk::vkn
 {
+	RenderTask::RenderTask() :ppm{std::make_unique<PipelineManager>()}
+	{
+	}
 	void RenderTask::DebugLabel(LabelLevel type, string label)
 	{
 		switch (type)
@@ -56,8 +59,6 @@ namespace idk::vkn
 		if (bound_shader == shader_handle)
 			return;
 		UnbindShader(stage);
-		auto& shader3 = *shader_handle;
-		auto& shader2 = *RscHandle<ShaderModule>{ shader_handle };
 		auto& shader = shader_handle.as<ShaderModule>();
 		//DebugBreak();
 		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
@@ -75,6 +76,7 @@ namespace idk::vkn
 	}
 	void RenderTask::UnbindShader(ShaderStage stage)
 	{
+		StartNewBatch();
 		auto& oshader = _current_batch.shaders.shaders[static_cast<size_t>(stage)];
 		if (oshader)
 		{
@@ -121,6 +123,13 @@ namespace idk::vkn
 		StartNewBatch();
 		_current_batch.pipeline.buffer_descriptions = {descriptions.begin(),descriptions.end()};
 	}
+	void RenderTask::SetBlend(uint32_t attachment_index, AttachmentBlendConfig blend_config)
+	{
+		auto& configs = _current_batch.pipeline.attachment_configs;
+		uint32_t size = static_cast<uint32_t>(configs.size());
+		configs.resize(std::max(size, attachment_index + 1));
+		configs[attachment_index] = blend_config;
+	}
 	void RenderTask::SetInputAttachments(span<VknTextureView> input_attachments) noexcept
 	{
 		_input_attachments = input_attachments;
@@ -155,13 +164,15 @@ namespace idk::vkn
 	}
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
+		//AddToBatch(_current_batch);
+		StartNewBatch();//flush the current batch
 		auto cmd_buffer = render_bundle._cmd_buffer;
 		auto& d_manager = render_bundle._d_manager;
 		vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
+
 		
 		_uniform_manager.GenerateDescriptorSets(span{ _uniform_sets }, d_manager, uniform_sets);
 
-		PipelineManager ppm;
 		vector<vk::Viewport> viewports;
 		std::optional<RenderPassObj> prev_rp;
 		vector<vk::ClearValue> clear_values;
@@ -171,23 +182,24 @@ namespace idk::vkn
 		{
 			dbg::BeginLabel(cmd_buffer, _label->c_str());
 		}
+		if (batches.size())
+		{
+
+		auto rp = curr_rp;
+		auto fb = curr_frame_buffer;
+		vk::RenderPassBeginInfo rpbi
+		{
+			*rp,fb,
+			hlp::ToRect2D(render_area),
+			static_cast<uint32_t>(clear_values.size()),
+			std::data(clear_values),
+		};
+		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
 		for (auto& batch : this->batches)
 		{
 			if (batch.label)
 			{
 				dbg::BeginLabel(cmd_buffer, batch.label->c_str());
-			}
-			if (!prev_rp || batch.render_pass != *prev_rp)
-			{
-				vk::RenderPassBeginInfo rpbi
-				{
-					*batch.render_pass,batch.frame_buffer,
-					hlp::ToRect2D(batch.render_area),
-					static_cast<uint32_t>(clear_values.size()),
-					std::data(clear_values),
-				};
-				cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
-				prev_rp= batch.render_pass;
 			}
 			if (batch.draw_calls.size() > 0)
 			{
@@ -199,7 +211,7 @@ namespace idk::vkn
 						condensed_shaders.emplace_back(*oshader);
 					}
 				}
-				auto& pipeline =ppm.GetPipeline(batch.pipeline, condensed_shaders, 0, batch.render_pass);
+				auto& pipeline =ppm->GetPipeline(batch.pipeline, condensed_shaders, 0, rp);
 				pipeline.Bind(render_bundle._cmd_buffer, View());
 				viewports.resize(batch.viewport.size());
 				auto bviewports = batch.viewport.to_span();
@@ -240,7 +252,9 @@ namespace idk::vkn
 				dbg::EndLabel(cmd_buffer);
 			}
 		}
+		cmd_buffer.endRenderPass();
 
+		}
 		if (_label)
 		{
 			dbg::EndLabel(cmd_buffer);
@@ -276,6 +290,7 @@ namespace idk::vkn
 		{
 			//Retire the current batch
 			batches.emplace_back(_current_batch);
+			_current_batch.draw_calls.clear();
 			_current_batch.label.reset();
 		}
 		_start_new_batch = start;
@@ -318,4 +333,5 @@ namespace idk::vkn
 	{
 		cmd_buffer.draw(di.num_vertices, di.num_instances, di.first_vertex, di.first_instance);
 	}
+
 }

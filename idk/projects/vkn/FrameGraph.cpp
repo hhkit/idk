@@ -78,10 +78,18 @@ namespace idk::vkn
 			rm.Alias(r_id, ar_id);
 		}
 	}
+	void FrameGraph::Reset()
+	{
+		nodes.clear();
+		render_passes.clear();
+		execution_order.clear();
+		graph_builder.Reset();
+		rsc_lifetime_mgr.ClearLifetimes();
+		GetResourceManager().Reset();
+	}
 #pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
-		GetResourceManager().Reset();
 		tmp_graph.buffer = &graph_builder.consumed_resources;
 		auto graph = ConvertTempGraph(std::move(tmp_graph));
 		graph_theory::IntermediateGraph dependency_graph{ nodes.size() };
@@ -163,12 +171,6 @@ namespace idk::vkn
 				rp.PostExecute(node, context);
 			}
 		}
-		nodes.clear();
-		render_passes.clear();
-		execution_order.clear();
-		graph_builder.Reset();
-		rsc_lifetime_mgr.map.clear();
-		rsc_lifetime_mgr.resource_lifetimes.clear();
 	}
 
 	void FrameGraph::ProcessBatches(RenderBundle& bundle)

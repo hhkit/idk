@@ -16,6 +16,8 @@
 #include <vkn/vector_span_builder.h>
 
 #include <vkn/UniformManager.h>
+#include <vkn/PipelineManager.h>
+
 
 namespace idk::vkn
 {
@@ -81,6 +83,8 @@ namespace idk::vkn
 			eWhole,
 		};
 
+		RenderTask();
+
 		void DebugLabel(LabelLevel, string);
 
 		//void Associate(size_t subpass_index);
@@ -113,6 +117,7 @@ namespace idk::vkn
 			_current_batch.pipeline = config;
 		}
 		void SetBufferDescriptions(span<buffer_desc>);
+		void SetBlend(uint32_t attachment_index, AttachmentBlendConfig blend_config = {});
 		//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
 		//If col is nullopt, we clear all the colors from attachment_index onwards.
 		void SetClearColor(uint32_t attachment_index, std::optional<color> col)
@@ -245,14 +250,14 @@ namespace idk::vkn
 		{
 			pipeline_config pipeline;
 			vector_span<rect> scissor, viewport;
-			rect render_area;
-			RenderPassObj render_pass;
-			vk::Framebuffer frame_buffer;
+			//RenderPassObj render_pass;
+			//vk::Framebuffer frame_buffer;
 			Shaders shaders;
 			vector<DrawCall> draw_calls;
 			std::optional<std::string> label;
 		};
 
+		unique_ptr<PipelineManager> ppm;
 
 #pragma region Clear Info
 		lazy_vector<color> clear_colors;
@@ -265,6 +270,7 @@ namespace idk::vkn
 		vector<rect> _rect_buffer;
 		vector_span_builder<rect> _rect_builder{ _rect_buffer };
 		span<VknTextureView> _input_attachments;
+		rect render_area;
 #pragma endregion
 
 		RenderPassObj curr_rp;

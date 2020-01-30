@@ -1,5 +1,7 @@
 #pragma once
 #include "RenderTask.h"
+#include <meta/stl_hack.h>
+
 namespace idk::vkn
 {
 	struct FrameGraphResourceManager;
@@ -21,3 +23,4 @@ namespace idk::vkn
 		using Context_t = Context&;
 	}
 }
+MARK_NON_COPY_CTORABLE(idk::vkn::FrameGraphDetail::Context);

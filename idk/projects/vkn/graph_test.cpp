@@ -108,8 +108,9 @@ namespace idk::vkn::gt
 		}
 		void Execute(FrameGraphDetail::Context_t context) override
 		{
+			context.SetUboManager(this->render_data.rs_state->ubo_manager);
 			auto& gfx_state = this->render_data.GetGfxState();
-
+			context.DebugLabel(RenderTask::LabelLevel::eWhole,"FG: Gbuffer pass");
 			std::array description{
 					buffer_desc
 					{
@@ -121,6 +122,16 @@ namespace idk::vkn::gt
 			};
 			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh]);
 			context.SetBufferDescriptions(description);
+			size_t i = 0;
+			for (auto& buffer : gbuffer_rscs)
+			{
+				context.SetBlend(i);
+				context.SetClearColor(i, idk::color{0,0,0,0});
+				++i;
+			}
+			context.SetClearDepthStencil(1.0f);
+			context.SetViewport(gfx_state.camera.viewport);
+			context.SetScissors(gfx_state.camera.viewport);
 			auto mesh_range = index_span{ gfx_state.range.inst_mesh_render_begin,gfx_state.range.inst_mesh_render_end };
 			const renderer_attributes* prev_req = {};
 			for (auto& ro : mesh_range.to_span(*gfx_state.shared_gfx_state->instanced_ros))
@@ -153,11 +164,14 @@ namespace idk::vkn::gt
 						else if (mat_info.IsImageBlock(itr))
 						{
 							auto img_block = mat_info.GetImageBlock(itr);
+							auto name = string_view{ itr->first };
+							name = name.substr(0, name.find_first_of('['));
 							for (size_t i = 0; i < img_block.size(); ++i)
 							{
-								context.BindUniform(itr->first, i,img_block[i].as<VknTexture>() );
+								context.BindUniform(name, i,img_block[i].as<VknTexture>() );
 							}
 						}
+						++itr;
 					}
 				}
 				for (auto& [attrib, buffer] : mesh.Buffers())
@@ -465,6 +479,7 @@ namespace idk::vkn::gt
 
 	void GraphDeferredTest(FrameGraph& fg,const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
+		fg.Reset();
 		DeferredRendering dr;
 		CubeClearRendering ccr;
 		auto [color,depth] = dr.MakePass(fg, {}, gfx_state, rs);

@@ -218,6 +218,7 @@ namespace idk::vkn
 		}
 		Create(config2, info, std::move(layouts), vulkan, options);
 	}
+#pragma optimize ("",off)
 	void VulkanPipeline::Create(const config_t& config, vector<vk::PipelineShaderStageCreateInfo> info, hash_table<uint32_t, vk::DescriptorSetLayout> slayout, Vulkan_t& vulkan, const Options& options)
 	{
 		auto& m_device = vulkan.Device();
@@ -306,7 +307,7 @@ namespace idk::vkn
 			,&viewportState
 			,&rasterizer
 			,&multisampling
-			,(_has_depth_stencil) ? &dsci : nullptr
+			,(_has_depth_stencil|| config.depth_test|config.depth_write|config.stencil_test) ? &dsci : nullptr
 			,std::data(colorBlending)
 			,&dynamicState
 			,*m_pipelinelayout

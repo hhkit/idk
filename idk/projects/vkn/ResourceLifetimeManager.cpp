@@ -2,6 +2,13 @@
 #include "ResourceLifetimeManager.h"
 namespace idk::vkn
 {
+	void ResourceLifetimeManager::ClearLifetimes()
+	{
+		this->concrete_resources.clear();
+		this->resource_alias.clear();
+		this->map.clear();
+		this->resource_lifetimes.clear();
+	}
 	void ResourceLifetimeManager::EndLifetime(fgr_id rsc_id, const fg_id& node_id)
 	{
 		GetOrCreate(rsc_id).end = node_id;

@@ -104,7 +104,6 @@ namespace idk::vkn
 
 	void CubemapRenderer::BeginQueue(UboManager& ubo_manager, std::optional<vk::Fence >ofence)
 	{
-		pipeline_manager().View(View());
 		pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
 		if (ofence)
 		{

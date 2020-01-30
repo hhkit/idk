@@ -9,6 +9,7 @@
 #include <vkn/utils/GraphTraverser.h>
 #include <vkn/topological_sort.h>
 #include <vkn/RenderPassCreateInfoBundle.h>
+//MARK_NON_COPY_CTORABLE(idk::vkn::FrameGraphDetail::Context);
 namespace idk::vkn
 {
 
@@ -167,6 +168,8 @@ namespace idk::vkn
 		void ComputeLifetimes(const ActualGraph& ag, ResourceLifetimeManager& manager);
 
 		void CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm);
+
+		void Reset();
 
 		//Process nodes and cull away unnecessary nodes.
 		//Figure out dependencies and synchronization points

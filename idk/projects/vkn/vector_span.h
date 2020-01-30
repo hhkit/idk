@@ -19,6 +19,8 @@ namespace idk
 
 	template<typename T,typename vector_t>
 	inline typename vector_span<T,vector_t>::span_t vector_span<T,vector_t>::to_span() const {
+		if (!_buffer)
+			return { nullptr,nullptr };
 		auto& buffer = *_buffer;
 		return span_t{ buffer.data() + _begin,buffer.data() + _end };
 	}
