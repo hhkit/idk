@@ -31,7 +31,7 @@ namespace idk
                         {
                             if (end == path.size())
                             {
-                                ret.swap(arg);
+                                ret.swap(reflect::dynamic{ arg }.copy());
                                 return false;
                             }
 
@@ -111,6 +111,8 @@ namespace idk
                         }
                         return false;
                     });
+
+                    return;
                 }
 
                 if (curr.type.is_container())

@@ -196,7 +196,7 @@ namespace idk::mono
 	inline void ManagedObject::VisitImpl(T&& functor, int& depth, bool ignore_privacy)
 	{
 		++depth;
-		auto last_children = 0;
+		auto last_children = -1;
 
 		auto class_stack = [&]()
 		{

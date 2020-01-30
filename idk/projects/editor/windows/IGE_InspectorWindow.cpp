@@ -215,7 +215,7 @@ namespace idk {
                 PrefabUtility::GetPrefabInstanceComponentDiff(gos[0], removed, added);
                 auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
 
-                for (int i = 0, j = 0; i < prefab_components.size() && j < componentSpan.size(); ++i)
+                for (int i = 0, j = 0; i < prefab_components.size() || j < componentSpan.size(); ++i)
                 {
                     if (std::find(removed.begin(), removed.end(), i) != removed.end()) // i is removed
                     {
@@ -280,6 +280,8 @@ namespace idk {
                             --i; // PrefabInstance will never be in prefab_data, so prefab_data has 1 less component
                         continue;
                     }
+
+                    _curr_component_is_added = std::find(added.begin(), added.end(), j) != added.end(); // j is newly added
 
                     ImGui::Text("id: %lld", component.id);
                     DisplayComponent(component);
@@ -919,7 +921,7 @@ namespace idk {
         ImGui::PushItemWidth(-4.0f);
 
         _curr_component = c.GetHandle();
-        _prefab_curr_component_nth = 0;
+        _curr_component_nth = 0;
         _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
         display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
         changed = ImGui::DragFloat("##pos_z", &c.position.z);
@@ -1386,13 +1388,15 @@ namespace idk {
 		string displayingComponent = [&]() ->string
 		{
 			auto type = (*component).type;
-			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + "(Script)" : string{ type.name() };
+			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + " (Script)" : string{ type.name() };
 		}();
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);
 
 		if (found != std::string::npos)
 			displayingComponent.erase(found, fluffText.size());
+        if (_curr_component_is_added)
+            displayingComponent += " (Added)";
 
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
@@ -1400,12 +1404,12 @@ namespace idk {
         _curr_component = component;
         if (_prefab_inst)
         {
-            _prefab_curr_component_nth = -1;
+            _curr_component_nth = -1;
             const span comps = _prefab_inst->GetGameObject()->GetComponents();
             for (const auto& c : comps)
             {
                 if (c.type == component.type)
-                    ++_prefab_curr_component_nth;
+                    ++_curr_component_nth;
                 if (c == component)
                     break;
             }
@@ -1521,7 +1525,7 @@ namespace idk {
                 if (_prefab_inst)
                 {
                     auto old = _prefab_inst->removed_components;
-                    PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _prefab_curr_component_nth);
+                    PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _curr_component_nth);
                     commandController.ExecuteCommand(
                         COMMAND(CMD_ModifyProperty, _prefab_inst, "removed_components", old, _prefab_inst->removed_components));
                     commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
@@ -1621,7 +1625,7 @@ namespace idk {
 
             string keyName = format_name(key);
 
-            while (++depth_change <= 0)
+            while (depth_change++ <= 0)
             {
                 if (indent_stack.size())
                 {
@@ -1861,7 +1865,7 @@ namespace idk {
             }
 
             outer_changed |= changed;
-            display.GroupEnd(changed);
+            display.GroupEnd(changed, val);
 
             indent_stack.push_back(indent);
             if (indent)
@@ -1937,12 +1941,12 @@ namespace idk {
         has_override = false;
         if (self._prefab_inst && self._curr_property_stack.back().size())
             has_override = self._prefab_inst->HasOverride(
-                (*self._curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
+                (*self._curr_component).type.name(), curr_prop_path, self._curr_component_nth);
 
         ImGui::BeginGroup();
     }
 
-    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed)
+    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed, reflect::dynamic val)
     {
         ImGui::EndGroup();
 
@@ -1950,12 +1954,12 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._curr_component_nth };
                 PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._curr_component_nth };
                 PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             ImGui::EndPopup();
@@ -1963,7 +1967,7 @@ namespace idk {
 
         if (changed && self._prefab_inst)
         {
-            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
+            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path, val);
         }
 
         if (has_override)
