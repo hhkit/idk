@@ -27,6 +27,68 @@ namespace idk
     namespace helpers
     {
 
+        static int prefab_data_component_nth_to_instance_component_nth(Handle<GameObject> target, string_view component_name, int component_nth)
+        {
+            // offset nth by removed components to sync that to prefab data
+
+            auto prefab_inst = target->GetComponent<PrefabInstance>();
+            IDK_ASSERT(prefab_inst);
+
+            auto& removed = prefab_inst->removed_components; // sort in ascending nth
+            std::sort(removed.begin(), removed.end(), [](const ComponentNth& a, const ComponentNth& b) {
+                int diff = a.component_name.compare(b.component_name);
+                return diff == 0 ? (a.component_nth < b.component_nth) : (diff < 0);
+            });
+
+            for (auto iter = removed.rbegin(); iter != removed.rend(); ++iter)
+            {
+                if (component_name == iter->component_name && iter->component_nth <= component_nth)
+                    --component_nth;
+            }
+
+            return component_nth;
+        }
+
+        static int instance_component_nth_to_prefab_data_component_nth(Handle<GameObject> target, string_view component_name, int component_nth)
+        {
+            // offset nth by removed components to sync that to prefab data
+
+            auto prefab_inst = target->GetComponent<PrefabInstance>();
+            IDK_ASSERT(prefab_inst);
+
+            auto& removed = prefab_inst->removed_components; // sort in ascending nth
+            std::sort(removed.begin(), removed.end(), [](const ComponentNth& a, const ComponentNth& b) {
+                int diff = a.component_name.compare(b.component_name);
+                return diff == 0 ? (a.component_nth < b.component_nth) : (diff < 0);
+            });
+
+            for (const auto& i : removed)
+            {
+                if (component_name == i.component_name && i.component_nth <= component_nth)
+                    ++component_nth;
+            }
+
+            return component_nth;
+        }
+
+        static int instance_component_to_prefab_data_component_nth(Handle<GameObject> target, GenericHandle component)
+        {
+            auto prefab_inst = target->GetComponent<PrefabInstance>();
+            IDK_ASSERT(prefab_inst);
+
+            const auto type = component.type;
+            int nth = 0;
+            for (const auto c : target->GetComponents())
+            {
+                if (c == component)
+                    break;
+                if (type == c.type)
+                    ++nth;
+            }
+
+            return instance_component_nth_to_prefab_data_component_nth(target, (*component).type.name(), nth);
+        }
+
         static void add_component(Handle<GameObject> go, const reflect::dynamic& prefab_comp)
         {
             if (prefab_comp.is<Transform>())
@@ -189,7 +251,7 @@ namespace idk
 
         static void propagate_removed_component(Handle<PrefabInstance> origin, string_view component_name, int component_nth)
         {
-            auto prefab = origin->prefab;
+            const auto prefab = origin->prefab;
             for (auto& prefab_inst : GameState::GetGameState().GetObjectsOfType<PrefabInstance>())
             {
                 if (prefab_inst.prefab != prefab ||
@@ -197,16 +259,17 @@ namespace idk
                     prefab_inst.object_index != origin->object_index)
                     continue;
 
+                int nth = prefab_data_component_nth_to_instance_component_nth(prefab_inst.GetGameObject(), component_name, component_nth);
                 for (auto c : prefab_inst.GetGameObject()->GetComponents())
                 {
                     if ((*c).type.name() == component_name)
                     {
-                        if (component_nth == 0)
+                        if (nth == 0)
                         {
                             prefab_inst.GetGameObject()->RemoveComponent(c);
                             break;
                         }
-                        --component_nth;
+                        --nth;
                     }
                 }
             }
@@ -243,7 +306,7 @@ namespace idk
                     continue;
 
                 // otherwise find it and kill it
-                int nth = component_nth;
+                int nth = prefab_data_component_nth_to_instance_component_nth(prefab_inst.GetGameObject(), component_name, component_nth);
                 for (auto c : prefab_inst.GetGameObject()->GetComponents())
                 {
                     if ((*c).type == type && nth-- == 0)
@@ -253,68 +316,6 @@ namespace idk
                     }
                 }
             }
-        }
-
-        static int prefab_data_component_nth_to_instance_component_nth(Handle<GameObject> target, string_view component_name, int component_nth)
-        {
-            // offset nth by removed components to sync that to prefab data
-
-            auto prefab_inst = target->GetComponent<PrefabInstance>();
-            IDK_ASSERT(prefab_inst);
-
-            auto& removed = prefab_inst->removed_components; // sort in ascending nth
-            std::sort(removed.begin(), removed.end(), [](const ComponentNth& a, const ComponentNth& b) {
-                int diff = a.component_name.compare(b.component_name);
-                return diff == 0 ? (a.component_nth < b.component_nth) : (diff < 0);
-            });
-
-            for (auto iter = removed.rbegin(); iter != removed.rend(); ++iter)
-            {
-                if (component_name == iter->component_name && iter->component_nth <= component_nth)
-                    --component_nth;
-            }
-
-            return component_nth;
-        }
-
-        static int instance_component_nth_to_prefab_data_component_nth(Handle<GameObject> target, string_view component_name, int component_nth)
-        {
-            // offset nth by removed components to sync that to prefab data
-
-            auto prefab_inst = target->GetComponent<PrefabInstance>();
-            IDK_ASSERT(prefab_inst);
-
-            auto& removed = prefab_inst->removed_components; // sort in ascending nth
-            std::sort(removed.begin(), removed.end(), [](const ComponentNth& a, const ComponentNth& b) {
-                int diff = a.component_name.compare(b.component_name);
-                return diff == 0 ? (a.component_nth < b.component_nth) : (diff < 0);
-            });
-
-            for (const auto& i : removed)
-            {
-                if (component_name == i.component_name && i.component_nth <= component_nth)
-                    ++component_nth;
-            }
-
-            return component_nth;
-        }
-
-        static int instance_component_to_prefab_data_component_nth(Handle<GameObject> target, GenericHandle component)
-        {
-            auto prefab_inst = target->GetComponent<PrefabInstance>();
-            IDK_ASSERT(prefab_inst);
-
-            const auto type = component.type;
-            int nth = 0;
-            for (const auto c : target->GetComponents())
-            {
-                if (c == component)
-                    break;
-                if (type == c.type)
-                    ++nth;
-            }
-
-            return instance_component_nth_to_prefab_data_component_nth(target, (*component).type.name(), nth);
         }
     }
 
@@ -968,6 +969,7 @@ namespace idk
                 helpers::propagate_property(obj_prefab_inst, c_index, override.property_path);
             }
             obj_prefab_inst->overrides.clear();
+            helpers::add_default_overrides(*obj_prefab_inst);
         }
 
         prefab->Dirty();

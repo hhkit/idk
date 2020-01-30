@@ -7,6 +7,7 @@
 #include <core/GameObject.inl>
 #include <scene/Scene.h>
 #include <prefab/PrefabInstance.h>
+#include <prefab/PrefabUtility.h>
 
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl>
@@ -241,6 +242,15 @@ namespace idk
 
             if (const auto prefab_inst = obj.GetComponent<PrefabInstance>())
             {
+                vector<int> removed, added;
+                PrefabUtility::GetPrefabInstanceComponentDiff(obj.GetHandle(), removed, added);
+                auto comps = obj.GetComponents();
+                for (auto i : added)
+                {
+                    auto reflected = *comps[i];
+                    auto component_typename = reflected.type.name();
+                    elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
+                }
                 elem.emplace_back(serialize_yaml(*prefab_inst)).tag(reflect::get_type<PrefabInstance>().name());
             }
             else

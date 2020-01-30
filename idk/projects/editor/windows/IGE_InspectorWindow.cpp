@@ -264,6 +264,8 @@ namespace idk {
                         continue;
                     }
 
+                    if (j >= componentSpan.size())
+                        continue;
                     auto& component = componentSpan[j];
 
                     //Skip Name and Transform and PrefabInstance
