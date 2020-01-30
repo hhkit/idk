@@ -409,7 +409,6 @@ namespace idk::vkn
 			}
 		};
 		auto& fd = _pimpl->handler.Add(std::move(requests));
-		auto req_itr = fd.requests.begin();
 		fd.buffer = std::move(uresult_buffer);
 		auto req_itr = fd.requests.begin();
 		fd.alloc = _pimpl->allocator.Allocate(result_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
@@ -421,7 +420,8 @@ namespace idk::vkn
 			auto& request = *req_itr;
 			auto& data = request.data;
 			task.GenerateDS(rs.dpools, (++i)==render_tasks.size());
-			auto vp_offset = ivec2{}, vp_size = data.camera.render_target->Size();
+			auto vp_offset = ivec2{};
+			auto vp_size = data.camera.render_target->Size();
 			auto rect = hlp::ToRect2D(vp_offset, vp_size);
 			vk::RenderPassBeginInfo rpbi
 			{

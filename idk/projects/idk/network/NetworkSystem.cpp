@@ -132,15 +132,16 @@ namespace idk
 
 	void NetworkSystem::Shutdown()
 	{
+		ResetNetwork();
 		ShutdownYojimbo();
 	}
 	void NetworkSystem::ResetNetwork()
 	{
-		lobby.reset();
 		for (auto& elem : server_connection_manager)
 			elem.reset();
-		client.reset();
+		lobby.reset();
 		client_connection_manager.reset();
+		client.reset();
 		id_manager.reset();
 
 		// network ids no longer relevant
