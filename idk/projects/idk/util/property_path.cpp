@@ -12,6 +12,9 @@ namespace idk
         size_t offset = 0;
         reflect::dynamic curr;
 
+        if (!obj.valid())
+            return curr;
+
         while (offset < path.size())
         {
             auto end = path.find('/', offset);
@@ -74,7 +77,7 @@ namespace idk
 
     void assign_property_path(const reflect::dynamic& obj, string_view path, reflect::dynamic value)
     {
-        if (!value.valid())
+        if (!value.valid() || !obj.valid())
             return;
 
         size_t offset = 0;

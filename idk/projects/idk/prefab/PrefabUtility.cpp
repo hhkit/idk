@@ -457,6 +457,14 @@ namespace idk
             {
                 const Handle<GameObject> child{ child_index, gens[child_index], go.scene };
                 PrefabData& child_prefab_data = prefab.data.emplace_back();
+                for (auto& c : child->GetComponents())
+                {
+                    if (c.is_type<PrefabInstance>())
+                        continue;
+                    child_prefab_data.components.emplace_back((*c).copy());
+                }
+                child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
+
                 if (connect_inst)
                 {
                     auto prefab_inst = child->AddComponent<PrefabInstance>();
@@ -464,11 +472,6 @@ namespace idk
                     prefab_inst->prefab = prefab_handle;
                     prefab_inst->object_index = static_cast<int>(prefab.data.size() - 1);
                 }
-                for (auto& c : child->GetComponents())
-                {
-                    child_prefab_data.components.emplace_back((*c).copy());
-                }
-                child_prefab_data.parent_index = static_cast<int>(game_objects.find(curr_par));
             }
         }
 
@@ -701,13 +704,16 @@ namespace idk
         auto prefab_inst = target->GetComponent<PrefabInstance>();
         IDK_ASSERT(prefab_inst);
 
-        int component_nth = helpers::instance_component_to_prefab_data_component_nth(target, component);
+        const auto tname = (*component).type.name();
+        const int component_nth = helpers::instance_component_to_prefab_data_component_nth(target, component);
+        if (prefab_inst->prefab->data[prefab_inst->object_index].GetComponentIndex(tname, component_nth) == -1)
+            return; // newly added, don't record
 
-        int ov_i = helpers::find_override(*prefab_inst, (*component).type.name(), property_path, component_nth);
+        int ov_i = helpers::find_override(*prefab_inst, tname, property_path, component_nth);
         if (ov_i == -1) // override not found
         {
             ov_i = static_cast<int>(prefab_inst->overrides.size());
-            prefab_inst->overrides.push_back({ string((*component).type.name()), string(property_path), component_nth });
+            prefab_inst->overrides.push_back({ string(tname), string(property_path), component_nth });
         }
 
         if (!val.valid())

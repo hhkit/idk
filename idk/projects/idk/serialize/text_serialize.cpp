@@ -242,6 +242,8 @@ namespace idk
 
             if (const auto prefab_inst = obj.GetComponent<PrefabInstance>())
             {
+                elem.emplace_back(serialize_yaml(*prefab_inst)).tag(reflect::get_type<PrefabInstance>().name());
+
                 vector<int> removed, added;
                 PrefabUtility::GetPrefabInstanceComponentDiff(obj.GetHandle(), removed, added);
                 auto comps = obj.GetComponents();
@@ -251,7 +253,6 @@ namespace idk
                     auto component_typename = reflected.type.name();
                     elem.emplace_back(serialize_yaml(reflected)).tag(component_typename);
                 }
-                elem.emplace_back(serialize_yaml(*prefab_inst)).tag(reflect::get_type<PrefabInstance>().name());
             }
             else
             {
