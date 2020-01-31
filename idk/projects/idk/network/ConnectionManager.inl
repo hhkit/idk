@@ -3,6 +3,7 @@
 #include <network/ConnectionManager.h>
 #include <network/ClientConnectionManager.inl>
 #include <network/ServerConnectionManager.inl>
+#undef SendMessage
 namespace idk
 {
 	template<typename T>

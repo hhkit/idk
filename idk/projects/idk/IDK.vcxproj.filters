@@ -1113,6 +1113,9 @@
     <ClInclude Include="phys\AabbTree_utils.h">
       <Filter>phys\aabb tree</Filter>
     </ClInclude>
+    <ClInclude Include="network\EventLoadLevelMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1609,6 +1612,7 @@
     <ClCompile Include="phys\AabbTree.cpp">
       <Filter>phys\aabb tree</Filter>
     </ClCompile>
+    <ClCompile Include="network\EventLoadLevelMessage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

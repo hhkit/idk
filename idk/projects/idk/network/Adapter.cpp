@@ -11,6 +11,7 @@ namespace idk
 	ADD_MESSAGE(TestMessage);
 	ADD_MESSAGE(EventInstantiatePrefabMessage);
 	ADD_MESSAGE(EventTransferOwnershipMessage);
+	ADD_MESSAGE(EventLoadLevelMessage);
 	ADD_MESSAGE(GhostMessage);
 	ADD_MESSAGE(MoveClientMessage);
 	YOJIMBO_MESSAGE_FACTORY_FINISH();

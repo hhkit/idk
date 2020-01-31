@@ -2,6 +2,8 @@
 #include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/GameConfiguration.h>
+
+#undef SendMessage
 namespace idk
 {
 	class BaseSubstreamManager;

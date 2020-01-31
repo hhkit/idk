@@ -12,6 +12,7 @@
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
 #include <network/ElectronTransformView.h>
+#include <network/EventLoadLevelMessage.h>
 #include <network/EventInstantiatePrefabMessage.h>
 #include <network/EventTransferOwnershipMessage.h>
 
@@ -128,6 +129,30 @@ namespace idk
 			});
 	}
 
+	void EventManager::BroadcastLoadLevel(RscHandle<Scene> scene)
+	{
+		static auto scene_change_slot = 0;
+		Core::GetSystem<SceneManager>().SetNextScene(scene);
+		scene_change_slot = Core::GetSystem<SceneManager>().OnSceneChange += 
+			[&id_manager = Core::GetSystem<NetworkSystem>().GetIDManager()]
+		(RscHandle<Scene> scene)
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
+				id_manager.CreateNewIDFor(elem.GetHandle());
+
+			Core::GetSystem<NetworkSystem>().BroadcastMessage<EventLoadLevelMessage>(GameChannel::RELIABLE, 
+				[scene](EventLoadLevelMessage& msg)
+				{
+					msg.SetScene(scene);
+					for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
+						msg.AddView(elem.GetHandle());
+				});
+			
+
+			Core::GetSystem<SceneManager>().OnSceneChange -= scene_change_slot;
+		};
+	}
+
 	// targets
 	void EventManager::OnInstantiatePrefabEvent(EventInstantiatePrefabMessage* message)
 	{
@@ -155,6 +180,22 @@ namespace idk
 			.prev_position = tfm.position,
 			.prev_rotation = tfm.rotation,
 			.prev_scale    = tfm.scale
+		};
+	}
+	void EventManager::OnLoadLevelMessage(EventLoadLevelMessage* msg)
+	{
+		static auto scene_change_slot = 0;
+		Core::GetSystem<SceneManager>().SetNextScene(msg->GetScene());
+		vector<EventLoadLevelMessage::ViewMapping> views( msg->GetObjects().begin(), msg->GetObjects().end() );
+		scene_change_slot = Core::GetSystem<SceneManager>().OnSceneChange +=
+			[&id_manager = Core::GetSystem<NetworkSystem>().GetIDManager(),
+			views = std::move(views)]
+		(RscHandle<Scene>)
+		{
+			for (auto& elem : views)
+				id_manager.EmplaceID(elem.id, elem.view);
+
+			Core::GetSystem<SceneManager>().OnSceneChange -= scene_change_slot;
 		};
 	}
 }

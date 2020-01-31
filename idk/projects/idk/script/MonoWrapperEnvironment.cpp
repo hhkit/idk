@@ -10,6 +10,8 @@
 #include <mono/utils/mono-logger.h>
 #include <mono/metadata/reflection.h>
 
+#include <network/EventManager.h>
+
 #include <core/Scheduler.h>
 #include <core/NullHandleException.h>
 #include <IncludeComponents.h>
@@ -1638,6 +1640,73 @@ namespace idk::mono
 		BIND_START("idk.Bindings::LayerMaskNameToLayer", int, MonoString* s)
 		{
 			return Core::GetSystem<LayerManager>().NameToLayerIndex(unbox(s).get());
+		}
+		BIND_END();
+
+		// Networking
+
+		BIND_START("idk.Bindings::NetworkGetIsHost", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().IsHost();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetIsConnected", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().GetConnectionTo();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkDisconnect", void)
+		{
+			throw "have not written disconnect";
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkConnect", void, Address a)
+		{
+			Core::GetSystem<NetworkSystem>().ConnectToServer(a);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkLoadScene", void, Guid g)
+		{
+			RscHandle<Scene> scene{ g };
+			throw "have not written";
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkInstantiatePrefabPosition", void, Guid g, vec3 pos)
+		{
+			EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkInstantiatePrefabPositionRotation", void, Guid g, vec3 pos, quat rot)
+		{
+			EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, rot);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ViewGetNetworkId", NetworkID, Handle<ElectronView> ev)
+		{
+			return ev->network_id;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ViewTransferOwnership", void, Handle<ElectronView> ev, int newOwner)
+		{
+			EventManager::SendTransferOwnership(ev, static_cast<Host>(newOwner));
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ViewExecRPC", void, Handle<ElectronView> ev, MonoString* method_name, int rpc_target, MonoArray* params)
+		{
+			auto length = mono_array_length(params);
+			auto* param_start = mono_array_addr_with_size(params, 1, 0);
+			vector<unsigned char> param_vec(param_start, param_start + length);
+
+			// do things
 		}
 		BIND_END();
 	}

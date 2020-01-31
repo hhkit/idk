@@ -624,7 +624,7 @@ namespace idk
         public extern static void NetworkDisconnect();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkLoadScene(Scene scene);
+        public extern static void NetworkLoadScene(Guid scene);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong NetworkInstantiatePrefabPosition(Guid guid, Vector3 pos);
@@ -636,12 +636,12 @@ namespace idk
          * ElectronView
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static int ViewGetNetworkId(ulong handle);
+        public extern static uint ViewGetNetworkId(ulong handle);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ViewTransferOwnership(ulong handle, int newID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, object[] parameters);
+        public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[] parameters);
     }
 }

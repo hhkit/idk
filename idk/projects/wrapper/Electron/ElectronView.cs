@@ -1,10 +1,26 @@
-﻿namespace idk
+﻿using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+namespace idk
 {
     public class ElectronView
         : Component
     {
-        public int InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
+        private static BinaryFormatter formatter = new BinaryFormatter();   
+
+        public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
         public void TransferOwnership(int newOwnerId) => Bindings.ViewTransferOwnership(handle, newOwnerId);
-        public void RPC(string methodName, RPCTarget target, params object[] parameters) => Bindings.ViewExecRPC(handle, methodName, target, parameters);
+        public void RPC(string methodName, RPCTarget target, params object[] parameters)
+        {
+            byte[] bytes;
+            var formatter = new BinaryFormatter();
+            using (MemoryStream stream = new MemoryStream())
+            {
+                foreach (var param in parameters)
+                    formatter.Serialize(stream, param);
+                bytes = stream.ToArray();
+            }
+            Bindings.ViewExecRPC(handle, methodName, target, bytes);
+        }
     }
 }

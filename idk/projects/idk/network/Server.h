@@ -4,6 +4,9 @@
 #include "Adapter.h"
 #include "GameConfiguration.h"
 #include "Address.h"
+
+#undef SendMessage
+
 namespace idk
 {
 	class EventManager;
