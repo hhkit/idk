@@ -9,6 +9,10 @@
 
 #include <res/ResourceHandle.inl>
 #include <vkn/VknCubemap.h>
+
+#include <gfx/Camera.h>
+
+#include <vkn/utils/utils.inl>
 #pragma optimize("",off)
 namespace idk::vkn::gt
 {
@@ -108,9 +112,11 @@ namespace idk::vkn::gt
 					}
 				);
 			}
+			auto& cam_clear = render_data.GetGfxState().camera.clear_data;
+			auto dc_val = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, DontClear>::value;
 			builder.set_depth_stencil_attachment(depth_rsc, AttachmentDescription
 				{
-					vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+					(dc_val==cam_clear.index())? vk::AttachmentLoadOp::eLoad:vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -452,18 +458,22 @@ namespace idk::vkn::gt
 			context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 		}
 	};
-	struct CubeClearPass : PassUtil
+	struct CubeClearPass : PassUtil, FsqUtil
 	{
 		FrameGraphResource render_target;
 		CubeClearPass(FrameGraphBuilder& builder, FullRenderData& frd) : PassUtil{ frd }
 		{
+			auto& gfx_state = this->render_data.GetGfxState();
 			auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
 			render_target = color_att;
 			std::array<float, 4> clear_color{};
+			auto& cam_clear = gfx_state.camera.clear_data;
+			auto dc_val = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, DontClear>::value;
+			auto do_val = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, DepthOnly>::value;
 			builder.set_output_attachment(color_att, 0,
 				AttachmentDescription
 				{
-						vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+						(dc_val!=cam_clear.index()&&do_val!=cam_clear.index()) ? vk::AttachmentLoadOp::eClear:vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 						vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
 						vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 						vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -479,9 +489,76 @@ namespace idk::vkn::gt
 				}
 			);
 		}
-		void Execute(Context_t)override 
+		void Execute(Context_t context)override 
 		{
+			return;
+			context.SetUboManager(this->render_data.rs_state->ubo_manager);
+			auto& gfx_state = this->render_data.GetGfxState();
+			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Cube Clear");
+			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 
+			{
+				size_t i = 0;
+				auto& cam_clear = gfx_state.camera.clear_data;
+				auto color_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, color>::value;
+				auto cube_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, RscHandle<CubeMap>>::value;
+				color col = {};
+				if (color_index==cam_clear.index())
+				{
+					col = std::get<color>(cam_clear);
+				}
+
+				AttachmentBlendConfig blend{};
+				blend.blend_enable = true;
+				blend.dst_color_blend_factor = BlendFactor::eOne;
+				blend.src_color_blend_factor = BlendFactor::eOne;
+				blend.color_blend_op = BlendOp::eAdd;
+				blend.alpha_blend_op = BlendOp::eMax;
+				blend.dst_alpha_blend_factor = BlendFactor::eOne;
+				blend.src_alpha_blend_factor = BlendFactor::eOne;
+				context.SetBlend(i);
+				context.SetClearColor(i, col);
+				context.SetClearDepthStencil(1.0f);
+				++i;
+			}
+			context.SetViewport(gfx_state.camera.viewport);
+			context.SetScissors(gfx_state.camera.viewport);
+
+			auto& light_indices = gfx_state.active_lights;
+			vector<LightData> lights;
+			vector<VknTextureView> shadow_maps;
+			lights.reserve(8);
+			shadow_maps.reserve(8);
+			FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
+			auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+			BindMesh(context, fsq_requirements, mesh);
+
+
+			pipeline_config skybox_render_config;
+			skybox_render_config.fill_type = FillType::eFill;
+			skybox_render_config.prim_top = PrimitiveTopology::eTriangleList;
+			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox]);
+			context.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox]);
+			context.SetCullFace({});
+			context.SetDepthTest(false);
+			context.SetDepthWrite(false);
+
+			//No idea if this is expensive....if really so I will try shift up to init
+			
+
+			auto camera = gfx_state.camera;
+			
+			auto sb_cm = std::get<RscHandle<CubeMap>>(camera.clear_data);
+
+			auto mesh = *camera.CubeMapMesh;
+
+			//rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, *sb_cm, camera.projection_matrix * mat4{ mat3{camera.view_matrix} });
+
+			//rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
+
+
+			//DrawFSQ
+			context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 		}
 	};
 
