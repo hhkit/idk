@@ -96,5 +96,14 @@ namespace idk
         public bool SetTrigger(string name, bool val)
         => Bindings.AnimatorSetTrigger(handle, name, val);
 
+        public float GetWeight()
+      => Bindings.AnimatorGetWeight(handle);
+        public float GetWeight(string name)
+      => Bindings.AnimatorGetWeight(handle, name);
+
+        public bool SetWeight(float weight)
+       => Bindings.AnimatorSetWeight(handle, weight);
+        public bool SetWeight(float weight, string name)
+       => Bindings.AnimatorSetWeight(handle, weight, name);
     }
 }

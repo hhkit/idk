@@ -67,7 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\Animation\AnimationState.cs" />
+    <Compile Include="Components\AnimationState.cs" />
     <Compile Include="Components\Animator.cs" />
     <Compile Include="Components\AudioSource.cs" />
     <Compile Include="Components\Camera.cs" />

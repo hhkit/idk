@@ -265,6 +265,12 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorSetTrigger(ulong id, string name, bool val);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AnimatorGetWeight(ulong id, string name = "");
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetWeight(ulong id, float weight, string name = "");
+
         /*
          * AudioSource
          */

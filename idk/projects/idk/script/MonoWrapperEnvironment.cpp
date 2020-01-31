@@ -962,7 +962,7 @@ namespace idk::mono
 				auto l = unbox(layer);
 				index = animator->FindLayerIndex(l.get());
 			}
-			return animator->SetWeight(index, weight);
+			return animator->SetWeight(weight, index);
 		}
 		BIND_END();
 

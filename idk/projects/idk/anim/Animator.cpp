@@ -185,14 +185,14 @@ namespace idk
 #pragma endregion
 
 #pragma region Script Functions
-	bool Animator::Play(string_view animation_name, int layer_index, float offset)
+	bool Animator::Play(string_view animation_name, float offset, int layer_index)
 	{
 		if (layer_index >= layers.size())
-			return;
-		layers[layer_index].Play(animation_name, offset);
+			return false;
+		return layers[layer_index].Play(animation_name, offset);
 	}
 
-	bool Animator::BlendTo(string_view animation_name, int layer_index, float time)
+	bool Animator::BlendTo(string_view animation_name, float time, int layer_index)
 	{
 		if (layer_index >= layers.size())
 			return false;
@@ -367,7 +367,7 @@ namespace idk
 		return cs_state;
 	}
 
-	float Animator::GetWeight(float weight, int layer_index) const
+	float Animator::GetWeight(int layer_index) const
 	{
 		if (layer_index >= layers.size())
 			return 0.0f;

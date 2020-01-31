@@ -74,8 +74,8 @@ namespace idk
 		// void Stop();
 		// void Stop(string_view layer_name);
 
-		bool Play(string_view animation_name = 0, int layer_index = 0, float offset = 0.0f);
-		bool BlendTo(string_view animation_name, int layer_index = 0, float time = 0.2f);
+		bool Play(string_view animation_name = 0, float offset = 0.0f, int layer_index = 0);
+		bool BlendTo(string_view animation_name, float time = 0.2f, int layer_index = 0);
 		bool Resume(int layer_index = 0);
 		bool Pause(int layer_index = 0);
 		bool Stop(int layer_index = 0);
@@ -91,7 +91,7 @@ namespace idk
 		bool GetTrigger(string_view name) const;
 
 		CSharpState GetState(string_view name, int layer_index) const;
-		float GetWeight(float weight, int layer_index = 0) const;
+		float GetWeight(int layer_index = 0) const;
 
 		string DefaultStateName(int layer_index = 0) const;
 		string CurrentStateName(int layer_index = 0) const;

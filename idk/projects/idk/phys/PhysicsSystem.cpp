@@ -483,9 +483,10 @@ namespace idk
         if (!debug_draw_colliders)
             return;
 
-		// static_tree.debug_draw();
+		
         // for (const auto& elem : static_info)
         //     debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+		static_tree.debug_draw();
         for (const auto& elem : dynamic_info)
             debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
         for (auto& elem : colliders)
