@@ -58,7 +58,6 @@ namespace idk::vkn
 		auto size = std::max(curr_rsc.output_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.output_attachments.resize(size);
 		curr_rsc.output_attachments[attachment_index] = { out_rsc.id,attachment_desc };
-		curr_rsc.output_attachments.resize(size);
 	}
 
 	void FrameGraphBuilder::set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, AttachmentDescription attachment_desc)

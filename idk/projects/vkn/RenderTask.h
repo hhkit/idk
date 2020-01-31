@@ -70,6 +70,8 @@ namespace idk::vkn
 
 	struct RenderTask
 	{
+		//hack
+		int32_t attachment_offset = 0;
 		enum class LabelType
 		{
 			eBegin,

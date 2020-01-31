@@ -84,6 +84,7 @@ namespace idk::vkn::gt
 
 		GBufferPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, FullRenderData& rd) :PassUtil{rd}
 		{
+			rt = RscHandle<VknRenderTarget>{ render_data.GetGfxState().camera.render_target };
 			gbuffer_rscs[0] = CreateGBuffer(builder,"AlbedoAmbOcc",vk::Format::eR8G8B8A8Unorm);
 			gbuffer_rscs[1] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm);
 			gbuffer_rscs[2] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat);
@@ -294,6 +295,7 @@ namespace idk::vkn::gt
 		}
 		void Execute(FrameGraphDetail::Context_t context) override
 		{
+			context.attachment_offset = -1;
 			context.SetUboManager(this->render_data.rs_state->ubo_manager);
 			auto& gfx_state = this->render_data.GetGfxState();
 			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Accum Pass");
@@ -361,14 +363,15 @@ namespace idk::vkn::gt
 
 		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_,RscHandle<VknRenderTarget> rt, FullRenderData& rd) :PassUtil{ rd } ,accum{accum_}
 		{
-			hdr_rsc = CreateGBuffer(builder, "HDR", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{rt->GetColorBuffer()});
+			hdr_rsc = CreateGBuffer(builder, "HDR", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
+			depth_att = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth);
 			builder.set_output_attachment(hdr_rsc,0, AttachmentDescription
 				{
 					vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-					vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
 					vk::ImageSubresourceRange
 					{
 						vk::ImageAspectFlagBits::eColor,0,1,0,1
@@ -379,7 +382,11 @@ namespace idk::vkn::gt
 					//vk::ComponentMapping mapping{};
 				}
 			);
-			builder.set_input_attachment(accum_att=builder.read(accum.accum_rsc), 0, AttachmentDescription
+			auto derp1 = builder.read(accum.accum_rsc);
+			auto derp2 = builder.read(accum.depth_rsc);
+			auto derp3 = builder.read(accum.accum_rsc);
+			auto derp4 = builder.read(accum.depth_rsc);
+			builder.set_input_attachment(accum_att=derp1, 0, AttachmentDescription
 				{
 					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -395,7 +402,7 @@ namespace idk::vkn::gt
 					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 					//vk::ComponentMapping mapping{};
 				});
-			builder.set_input_attachment(depth_att=builder.read(accum.depth_rsc), 1, AttachmentDescription
+			builder.set_input_attachment(derp2, 1, AttachmentDescription
 				{
 					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -407,6 +414,55 @@ namespace idk::vkn::gt
 						vk::ImageAspectFlagBits::eDepth,0,1,0,1
 					},//vk::ImageSubresourceRange sub_resource_range{};
 					//std::optional<vk::ClearValue> clear_value;
+					//std::optional<vk::Format> format{};
+					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+					//vk::ComponentMapping mapping{};
+				});
+
+			builder.set_input_attachment(derp3, 2, AttachmentDescription
+				{
+					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+					vk::ImageSubresourceRange
+					{
+						vk::ImageAspectFlagBits::eColor,0,1,0,1
+					},//vk::ImageSubresourceRange sub_resource_range{};
+					//std::optional<vk::ClearValue> clear_value;
+					//std::optional<vk::Format> format{};
+					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+					//vk::ComponentMapping mapping{};
+				});
+			builder.set_input_attachment(derp4, 3, AttachmentDescription
+				{
+					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+					vk::ImageSubresourceRange
+					{
+						vk::ImageAspectFlagBits::eDepth,0,1,0,1
+					},//vk::ImageSubresourceRange sub_resource_range{};
+					//std::optional<vk::ClearValue> clear_value;
+					//std::optional<vk::Format> format{};
+					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+					//vk::ComponentMapping mapping{};
+				});
+			builder.set_depth_stencil_attachment(depth_att, AttachmentDescription
+				{
+					vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+					vk::ImageSubresourceRange
+					{
+						vk::ImageAspectFlagBits::eDepth,0,1,0,1
+					},//vk::ImageSubresourceRange sub_resource_range{};
+					vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
 					//std::optional<vk::Format> format{};
 					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 					//vk::ComponentMapping mapping{};
@@ -445,12 +501,9 @@ namespace idk::vkn::gt
 			context.SetViewport(gfx_state.camera.viewport);
 			context.SetScissors(gfx_state.camera.viewport);
 
-			auto& light_indices = gfx_state.active_lights;
-			vector<LightData> lights;
-			vector<VknTextureView> shadow_maps;
-			lights.reserve(8);
-			shadow_maps.reserve(8);
-			FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
+			context.SetCullFace({});
+			//context.SetDepthTest(false);
+
 			auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
 			BindMesh(context, fsq_requirements, mesh);
 
@@ -574,11 +627,11 @@ namespace idk::vkn::gt
 
 	struct ClearCombine : PassUtil, FsqUtil
 	{
-		RscHandle<ShaderProgram> clear_merge;
+		static RscHandle<ShaderProgram> clear_merge;
 		ClearCombine(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, FrameGraphResource clear_color_buffer, FrameGraphResource scene_color, FrameGraphResource scene_depth, FullRenderData& frd) : PassUtil{ frd }
 		{
-			auto color_att = CreateGBuffer(builder, "ClearCombine", vk::Format::eR8G8B8A8Srgb,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{rt->GetColorBuffer()});
-			auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
+			auto color_att = CreateGBuffer(builder, "ClearCombine", vk::Format::eR8G8B8A8Srgb,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{render_data.GetGfxState().camera.render_target->GetColorBuffer()});
+			//auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
 			builder.set_output_attachment(color_att, 0,
 				AttachmentDescription
 				{
@@ -635,24 +688,27 @@ namespace idk::vkn::gt
 						}
 				}
 			);
-			builder.set_depth_stencil_attachment(depth_att,
-				AttachmentDescription
-				{
-						vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
-						vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
-						vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-						vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-						vk::ImageLayout::eDepthStencilAttachmentOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-						vk::ImageSubresourceRange
-						{
-							vk::ImageAspectFlagBits::eDepth,0,1,0,1
-						}
-				}
-			);
+			//builder.set_depth_stencil_attachment(depth_att,
+			//	AttachmentDescription
+			//	{
+			//			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
+			//			vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
+			//			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+			//			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+			//			vk::ImageLayout::eDepthStencilAttachmentOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+			//			vk::ImageSubresourceRange
+			//			{
+			//				vk::ImageAspectFlagBits::eDepth,0,1,0,1
+			//			}
+			//	}
+			//);
 
 		}
 		void Execute(Context_t context)override
 		{
+			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Clear Combine");
+			
+			auto& gfx_state = this->render_data.GetGfxState();
 			if (!clear_merge)
 			{
 				auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/clear_merge.frag");
@@ -660,6 +716,8 @@ namespace idk::vkn::gt
 					clear_merge = *tmp;
 			}
 			auto& shd = clear_merge.as<ShaderModule>();
+			context.SetViewport(gfx_state.camera.viewport);
+			context.SetScissors(gfx_state.camera.viewport);
 			if (shd.HasCurrent())
 			{
 
@@ -673,6 +731,8 @@ namespace idk::vkn::gt
 			}
 		}
 	};
+	RscHandle<ShaderProgram> ClearCombine::clear_merge = {};
+
 	struct DeferredRendering
 	{
 		//returns color and depth
