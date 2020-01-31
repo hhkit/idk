@@ -12,6 +12,7 @@
 
 namespace idk::vkn
 {
+#pragma optimize("",off)
 	RenderTask::RenderTask() :ppm{std::make_unique<PipelineManager>()}
 	{
 	}
@@ -52,7 +53,6 @@ namespace idk::vkn
 	{
 		_uniform_manager.BindSampler(name, index, texture, skip_if_bound,layout);
 	}
-#pragma optimize("",off)
 	void RenderTask::BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader_handle)
 	{
 		auto& bound_shader = _current_batch.shaders.shaders[static_cast<size_t>(stage)];
@@ -290,9 +290,12 @@ namespace idk::vkn
 		while (itr != end)
 		{
 			auto& info = itr->second;
-			if (info.type == uniform_layout_t::UniformType::eAttachment && info.input_attachment_index<input_attachments.size())
+			auto input_att_index = info.input_attachment_index;
+			if (info.type == uniform_layout_t::UniformType::eAttachment && input_att_index <input_attachments.size())
 			{
-				_uniform_manager.BindAttachment(UniformManager::UniInfo{ info.set,info.binding,info.size,info.layout }, 0, input_attachments[itr->second.input_attachment_index]);
+				//tmp
+				input_att_index -= 1;
+				_uniform_manager.BindAttachment(UniformManager::UniInfo{ info.set,info.binding,info.size,info.layout }, 0, input_attachments[input_att_index]);
 			}
 			++itr;
 		}

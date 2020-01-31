@@ -8,6 +8,7 @@
 #include "graph_test.h"
 
 #include <res/ResourceHandle.inl>
+#include <vkn/VknCubemap.h>
 #pragma optimize("",off)
 namespace idk::vkn::gt
 {
@@ -65,6 +66,11 @@ namespace idk::vkn::gt
 					}
 				}
 			}
+			auto idx_buffer = mesh.GetIndexBuffer();
+			if (idx_buffer)
+			{
+				context.BindIndexBuffer(*idx_buffer->buffer(), idx_buffer->offset, mesh.IndexType());
+			}
 		}
 	};
 	struct GBufferPass :PassUtil
@@ -75,10 +81,10 @@ namespace idk::vkn::gt
 		GBufferPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, FullRenderData& rd) :PassUtil{rd}
 		{
 			gbuffer_rscs[0] = CreateGBuffer(builder,"AlbedoAmbOcc",vk::Format::eR8G8B8A8Unorm);
-			gbuffer_rscs[1] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm);
-			gbuffer_rscs[2] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm);
-			gbuffer_rscs[3] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm);
-			gbuffer_rscs[4] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat);
+			gbuffer_rscs[1] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm);
+			gbuffer_rscs[2] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat);
+			gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm);
+			gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm);
 			gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb);
 			depth_rsc = CreateGBuffer(builder, "GDepth", vk::Format::eD32Sfloat,vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
 			uint32_t index = 0;
@@ -202,14 +208,8 @@ namespace idk::vkn::gt
 		}
 	};
 
-	struct AccumPass : PassUtil
+	struct FsqUtil
 	{
-		FrameGraphResourceMutable accum_rsc;
-		FrameGraphResourceReadOnly depth_rsc;
-		GBufferPass& gbuffer_pass;
-
-		FragmentShaders deferred_post= FDeferredPost;
-
 		inline const static renderer_attributes fsq_requirements =
 		{
 			{
@@ -217,6 +217,16 @@ namespace idk::vkn::gt
 				{vtx::Attrib::UV,1},
 			}
 		};
+	};
+
+	struct AccumPass : PassUtil , FsqUtil
+	{
+		FrameGraphResourceMutable accum_rsc;
+		FrameGraphResourceReadOnly depth_rsc;
+		GBufferPass& gbuffer_pass;
+
+		FragmentShaders deferred_post= FDeferredPost;
+
 		AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers, FullRenderData& rd) :PassUtil{ rd },gbuffer_pass{gbuffers}
 		{
 			accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat);
@@ -282,7 +292,10 @@ namespace idk::vkn::gt
 			auto& gfx_state = this->render_data.GetGfxState();
 			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Accum Pass");
 			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
-			context.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[deferred_post]);
+			context.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[deferred_post]);
+			context.BindUniform("irradiance_probe" , 0, *RscHandle<VknCubemap>{});
+			context.BindUniform("environment_probe", 0, *RscHandle<VknCubemap>{});
+			context.BindUniform("brdfLUT"          , 0, *RscHandle<VknTexture>{});
 			//for (auto& buffer : gbuffer_rscs)
 			{
 				size_t i = 0;
@@ -297,6 +310,7 @@ namespace idk::vkn::gt
 				blend.src_alpha_blend_factor = BlendFactor::eOne;
 				context.SetBlend(i,blend);
 				context.SetClearColor(i, idk::color{ 0,0,0,0 });
+				context.SetClearDepthStencil(1.0f);
 				++i;
 			}
 			context.SetViewport(gfx_state.camera.viewport);
@@ -304,29 +318,40 @@ namespace idk::vkn::gt
 
 			auto& light_indices = gfx_state.active_lights;
 			vector<LightData> lights;
+			vector<VknTextureView> shadow_maps;
 			lights.reserve(8);
+			shadow_maps.reserve(8);
+			FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
+			auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+			BindMesh(context, fsq_requirements, mesh);
+
 			for (size_t i = 0; i < light_indices.size();i+=8)
 			{
-				for (size_t j = 0; j+i < light_indices.size() && j<8; ++j)
-					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[i]]);
+				lights.clear();
+				for (size_t j = 0; j + i < light_indices.size() && j < 8; ++j)
+				{
+					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[i+j]]);
+					context.BindUniform("shadow_maps",j,gfx_state.shadow_maps_2d[i+j].as<VknTexture>());
+				}
+				
 				auto light_data = PrepareLightBlock(gfx_state.camera, lights);
 				context.BindUniform("LightBlock", 0, light_data);
 				//Bind all the other uniforms
+				context.BindUniform("PBRBlock", 0, string_view{ hlp::buffer_data<const char*>(pbr_trf),hlp::buffer_size(pbr_trf) });
 				//DrawFSQ
-				lights.clear();
+				context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 			}
-			BindMesh(context, fsq_requirements,Mesh::defaults[MeshType::FSQ].as<VulkanMesh>());
 		}
 	};
 	
-	struct HdrPass : PassUtil
+	struct HdrPass : PassUtil, FsqUtil
 	{
 		FrameGraphResourceMutable hdr_rsc;
 		AccumPass& accum;
 		
 		FrameGraphResourceMutable accum_att, depth_att;
 
-
+		RscHandle<ShaderProgram> hdr_shader;
 
 		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_,RscHandle<VknRenderTarget> rt, FullRenderData& rd) :PassUtil{ rd } ,accum{accum_}
 		{
@@ -383,6 +408,48 @@ namespace idk::vkn::gt
 		}
 		void Execute(FrameGraphDetail::Context_t context) override
 		{
+			context.SetUboManager(this->render_data.rs_state->ubo_manager);
+			auto& gfx_state = this->render_data.GetGfxState();
+			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: HDR Pass");
+			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+			if (!hdr_shader)
+			{
+				auto frag_opt = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
+				if (frag_opt)
+					hdr_shader = *frag_opt;
+			}
+				
+			context.BindShader(ShaderStage::Fragment, hdr_shader);
+			{
+				size_t i = 0;
+
+				AttachmentBlendConfig blend{};
+				blend.blend_enable = true;
+				blend.dst_color_blend_factor = BlendFactor::eOne;
+				blend.src_color_blend_factor = BlendFactor::eOne;
+				blend.color_blend_op = BlendOp::eAdd;
+				blend.alpha_blend_op = BlendOp::eMax;
+				blend.dst_alpha_blend_factor = BlendFactor::eOne;
+				blend.src_alpha_blend_factor = BlendFactor::eOne;
+				context.SetBlend(i);
+				context.SetClearColor(i, idk::color{ 0,0,0,0 });
+				context.SetClearDepthStencil(1.0f);
+				++i;
+			}
+			context.SetViewport(gfx_state.camera.viewport);
+			context.SetScissors(gfx_state.camera.viewport);
+
+			auto& light_indices = gfx_state.active_lights;
+			vector<LightData> lights;
+			vector<VknTextureView> shadow_maps;
+			lights.reserve(8);
+			shadow_maps.reserve(8);
+			FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
+			auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+			BindMesh(context, fsq_requirements, mesh);
+
+			//DrawFSQ
+			context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 		}
 	};
 	struct CubeClearPass : PassUtil
@@ -412,7 +479,10 @@ namespace idk::vkn::gt
 				}
 			);
 		}
-		void Execute(Context_t)override {}
+		void Execute(Context_t)override 
+		{
+
+		}
 	};
 
 	struct ClearCombine : PassUtil

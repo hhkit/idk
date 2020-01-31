@@ -166,6 +166,7 @@ namespace idk::vkn
 				{
 					TransitionResource(context, rsc_manager.TransitionInfo(input));
 				}
+				context.SetRscManager(rsc_manager);
 				rp.PreExecute(node, context);
 				rp.Execute(context);
 				rp.PostExecute(node, context);
@@ -201,13 +202,15 @@ namespace idk::vkn
 		{
 			auto find_input_layout = [](const FrameGraphNode& node, fgr_id id)
 			{
-				for (auto& o_input : node.input_attachments)
+				for (auto& o_input : node.output_attachments)
 				{
 					if (o_input && o_input->first ==id)
 					{
 						return o_input->second.layout;
 					}
 				}
+				if (node.depth_stencil)
+					return node.depth_stencil->second.layout;
 				return vk::ImageLayout::eGeneral;
 			};
 			if (attachment_info)
@@ -251,9 +254,6 @@ namespace idk::vkn
 			}
 		};
 
-		{
-			process_attachments(input_rscs, attachment_input_refs,vk::ImageLayout::eShaderReadOnlyOptimal);
-		}
 
 		{
 			process_attachments(output_rscs, attachment_output_refs,vk::ImageLayout::eColorAttachmentOptimal);
@@ -261,6 +261,9 @@ namespace idk::vkn
 		if (depth)
 		{
 			process_attachment(depth, depth_ref,vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		}
+		{
+			process_attachments(input_rscs, attachment_input_refs, vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
 		vk::SubpassDescription subpass_desc{
 			vk::SubpassDescriptionFlags{},
@@ -299,17 +302,6 @@ namespace idk::vkn
 		vector<vk::ImageView> targets;
 		uvec2 size{std::numeric_limits<uint32_t>::max()}; //TODO get an actual size
 		uint32_t num_layers = std::numeric_limits<uint32_t>::max();
-		for (auto& input_rsc : input_rscs)
-		{
-			if (input_rsc)
-			{
-				auto tex = rsc_manager.Get<VknTextureView>(input_rsc->first);
-				targets.emplace_back(tex.ImageView());
-				//Temp: getting min size
-				size = min(tex.Size(), size);
-				num_layers = min(tex.Layers(), num_layers);
-			}
-		}
 		for (auto& output_rsc : output_rscs)
 		{
 			if (output_rsc)
@@ -328,6 +320,17 @@ namespace idk::vkn
 			//Temp: getting min size
 			size = min(tex.Size(), size);
 			num_layers = min(tex.Layers(), num_layers);
+		}
+		for (auto& input_rsc : input_rscs)
+		{
+			if (input_rsc)
+			{
+				auto tex = rsc_manager.Get<VknTextureView>(input_rsc->first);
+				targets.emplace_back(tex.ImageView());
+				//Temp: getting min size
+				size = min(tex.Size(), size);
+				num_layers = min(tex.Layers(), num_layers);
+			}
 		}
 		//TODO shift this into a pool and use unique
 		return { d.createFramebuffer(vk::FramebufferCreateInfo

@@ -25,6 +25,8 @@ namespace idk::vkn
 		virtual ~BaseRenderPass() = default;
 
 	private:
+		vector<VknTextureView> _input_attachments;
+		vector<string_view> _input_attachment_names;
 		void BeginRenderPass(Context_t);
 		void EndRenderPass(Context_t);
 		void BindFrameBuffer(Context_t);

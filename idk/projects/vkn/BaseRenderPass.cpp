@@ -1,14 +1,24 @@
 #include "pch.h"
 #include "BaseRenderPass.h"
 
+#include <vkn/FrameGraphNode.h>
+#include <vkn/FrameGraphResourceManager.h>
+
 //Run to Acquire resources and transition nodes.
 namespace idk::vkn
 {
-
+#pragma optimize("",off)
 	void BaseRenderPass::PreExecute(const FrameGraphNode& node, Context_t context)
 	{
 		BeginRenderPass(context);
 		BindFrameBuffer(context);
+		auto span = node.GetInputSpan();
+		for (auto& input : span)
+		{
+			_input_attachments.emplace_back(context.Resources().Get<VknTextureView>(input.id));
+			_input_attachment_names.emplace_back(context.Resources().Name(input));
+		}
+		context.SetInputAttachments(_input_attachments);
 	}
 
 	void BaseRenderPass::PostExecute(const FrameGraphNode& node, Context_t context)

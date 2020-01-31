@@ -238,6 +238,48 @@ namespace idk::vkn
 		}
 	}
 
+	//Does not help you store your overrides.
+#pragma optimize("",off)
+	void PipelineDescHelper::UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config)
+	{
+		config.buffer_descriptions.clear();
+		hash_set<uint32_t> layouts;
+		for (auto& module : shader_handles)
+		{
+			auto& mod = module.as<ShaderModule>();
+			if (!mod.HasCurrent())
+				continue;
+			//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
+			//	mod.UpdateCurrent(fo_index);
+			auto& desc = mod.AttribDescriptions();
+			for (auto& desc_set : desc)
+			{
+				bool skip = false;
+				for (auto attrib : desc_set.attributes)
+				{
+					if (attrib.fixed_location)
+					{
+						if (layouts.find(attrib.location) != layouts.end())
+						{
+							skip = true;
+							break;
+						}
+						layouts.emplace(attrib.location);
+					}
+				}
+				if(!skip)
+					config.buffer_descriptions.emplace_back(desc_set);
+			}
+			//shaders.emplace_back(mod.Stage(), mod.Module());
+			if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
+				config.frag_shader = module;
+
+			if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
+				config.vert_shader = module;
+			ApplyBufferDescOverrides(config);
+		}
+	}
+
 	void PipelineDescHelper::ApplyBufferDescOverrides(pipeline_config& config)
 	{
 		vector<size_t> binding_removal_indices;

@@ -91,11 +91,13 @@ namespace idk::vkn
 	void FrameGraphBuilder::PreObject::reset()
 	{
 		input_resources.clear();
+		read_resources.clear();
 		output_resources.clear();
 		modified_resources.clear();
 
 		input_attachments.clear();
 		output_attachments.clear();
+		depth_attachment.reset();
 	}
 #pragma optimize("",off)
 	index_span NodeBuffer::StoreResources(vector<FrameGraphResource>& rsc)
