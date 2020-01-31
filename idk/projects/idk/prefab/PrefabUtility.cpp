@@ -375,7 +375,7 @@ namespace idk
     Handle<GameObject> PrefabUtility::InstantiateSpecific(Handle<GameObject> handle, const PrefabInstance& prefab_inst)
     {
         const auto& prefab = prefab_inst.prefab;
-        if (!prefab || !handle)
+        if (!prefab || handle.id == 0)
             return {};
 
         const auto& prefab_data = prefab->data[prefab_inst.object_index];
