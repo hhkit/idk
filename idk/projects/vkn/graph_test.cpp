@@ -460,6 +460,12 @@ namespace idk::vkn::gt
 	};
 	struct CubeClearPass : PassUtil, FsqUtil
 	{
+
+		renderer_attributes req = { {
+			std::make_pair(vtx::Attrib::Position, 0),
+			std::make_pair(vtx::Attrib::Normal, 1),
+			std::make_pair(vtx::Attrib::UV, 2) } 
+		};
 		FrameGraphResource render_target;
 		CubeClearPass(FrameGraphBuilder& builder, FullRenderData& frd) : PassUtil{ frd }
 		{
@@ -491,7 +497,6 @@ namespace idk::vkn::gt
 		}
 		void Execute(Context_t context)override 
 		{
-			return;
 			context.SetUboManager(this->render_data.rs_state->ubo_manager);
 			auto& gfx_state = this->render_data.GetGfxState();
 			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Cube Clear");
@@ -524,14 +529,14 @@ namespace idk::vkn::gt
 			context.SetViewport(gfx_state.camera.viewport);
 			context.SetScissors(gfx_state.camera.viewport);
 
-			auto& light_indices = gfx_state.active_lights;
-			vector<LightData> lights;
-			vector<VknTextureView> shadow_maps;
-			lights.reserve(8);
-			shadow_maps.reserve(8);
-			FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
-			auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
-			BindMesh(context, fsq_requirements, mesh);
+			//auto& light_indices = gfx_state.active_lights;
+			//vector<LightData> lights;
+			//vector<VknTextureView> shadow_maps;
+			//lights.reserve(8);
+			//shadow_maps.reserve(8);
+			//FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
+			//auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+			//BindMesh(context, fsq_requirements, mesh);
 
 
 			pipeline_config skybox_render_config;
@@ -550,10 +555,15 @@ namespace idk::vkn::gt
 			
 			auto sb_cm = std::get<RscHandle<CubeMap>>(camera.clear_data);
 
-			auto mesh = *camera.CubeMapMesh;
+			auto& mesh = camera.CubeMapMesh->as<VulkanMesh>();
 
+			auto mat4block = camera.projection_matrix * mat4{ mat3{camera.view_matrix} };
 			//rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, *sb_cm, camera.projection_matrix * mat4{ mat3{camera.view_matrix} });
 
+			context.BindUniform("CameraBlock", 0, string_view{ hlp::buffer_data<const char*>(mat4block),hlp::buffer_size(mat4block) });
+
+			context.BindUniform("sb", 0, sb_cm.as<VknCubemap>());
+			BindMesh(context, req, mesh);
 			//rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
 
 
@@ -562,8 +572,9 @@ namespace idk::vkn::gt
 		}
 	};
 
-	struct ClearCombine : PassUtil
+	struct ClearCombine : PassUtil, FsqUtil
 	{
+		RscHandle<ShaderProgram> clear_merge;
 		ClearCombine(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, FrameGraphResource clear_color_buffer, FrameGraphResource scene_color, FrameGraphResource scene_depth, FullRenderData& frd) : PassUtil{ frd }
 		{
 			auto color_att = CreateGBuffer(builder, "ClearCombine", vk::Format::eR8G8B8A8Srgb,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{rt->GetColorBuffer()});
@@ -640,7 +651,27 @@ namespace idk::vkn::gt
 			);
 
 		}
-		void Execute(Context_t)override {}
+		void Execute(Context_t context)override
+		{
+			if (!clear_merge)
+			{
+				auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/clear_merge.frag");
+				if (tmp)
+					clear_merge = *tmp;
+			}
+			auto& shd = clear_merge.as<ShaderModule>();
+			if (shd.HasCurrent())
+			{
+
+				context.BindShader(ShaderStage::Fragment, clear_merge);
+				context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+				auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+				BindMesh(context, this->fsq_requirements, mesh);
+
+				context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
+
+			}
+		}
 	};
 	struct DeferredRendering
 	{
