@@ -242,6 +242,7 @@ namespace idk
 
             if (const auto prefab_inst = obj.GetComponent<PrefabInstance>())
             {
+                PrefabUtility::RecordDefaultOverrides(obj.GetHandle());
                 elem.emplace_back(serialize_yaml(*prefab_inst)).tag(reflect::get_type<PrefabInstance>().name());
 
                 vector<int> removed, added;

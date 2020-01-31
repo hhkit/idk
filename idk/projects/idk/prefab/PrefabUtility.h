@@ -50,6 +50,7 @@ namespace idk
         //   property_path: path of the property changed, delimited by '/'. eg. "position", or "position/x"
         static void RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path, reflect::dynamic val = {});
         static void RecordPrefabInstanceRemoveComponent(Handle<GameObject> target, string_view component_name, int component_nth);
+        static void RecordDefaultOverrides(Handle<GameObject> target);
 
         static void RevertPropertyOverride(Handle<GameObject> target, const PropertyOverride& override);
         static void RevertRemovedComponent(Handle<GameObject> target, int component_index);

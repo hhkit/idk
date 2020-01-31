@@ -159,7 +159,9 @@
       <Filter>commands</Filter>
     </ClInclude>
     <ClInclude Include="ObjectSelection.h" />
-    <ClInclude Include="commands\CMD_ModifyGameObjectHeader.h" />
+    <ClInclude Include="commands\CMD_ModifyGameObjectHeader.h">
+      <Filter>commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -284,7 +286,6 @@
     <ClCompile Include="commands\CMD_ModifyProperty.cpp">
       <Filter>commands</Filter>
     </ClCompile>
-    <ClCompile Include="commands\CMD_ParentGameObject.cpp" />
     <ClCompile Include="opengl_imgui_interface.cpp">
       <Filter>graphicsAPI_interface</Filter>
     </ClCompile>
@@ -296,7 +297,12 @@
     <ClCompile Include="commands\CMD_SelectObject.cpp">
       <Filter>commands</Filter>
     </ClCompile>
-    <ClCompile Include="commands\CMD_ModifyGameObjectHeader.cpp" />
+    <ClCompile Include="commands\CMD_ParentGameObject.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\CMD_ModifyGameObjectHeader.cpp">
+      <Filter>commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

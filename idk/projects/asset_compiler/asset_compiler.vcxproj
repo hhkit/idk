@@ -30,6 +30,7 @@
     <ClCompile Include="DDSCompiler.cpp" />
     <ClCompile Include="IAssetLoader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SceneUpdater.cpp" />
     <ClCompile Include="TextureCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +40,7 @@
     <ClInclude Include="CompilerList.h" />
     <ClInclude Include="DDSCompiler.h" />
     <ClInclude Include="IAssetLoader.h" />
+    <ClInclude Include="SceneUpdater.h" />
     <ClInclude Include="TextureCompiler.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
