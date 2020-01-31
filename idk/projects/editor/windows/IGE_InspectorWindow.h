@@ -48,7 +48,7 @@ namespace idk {
             void Label(const char* key);
             void ItemBegin(bool align = false);
             void ItemEnd();
-            void GroupEnd(bool changed);
+            void GroupEnd(bool changed, reflect::dynamic val = {});
         };
 
 
@@ -56,7 +56,8 @@ namespace idk {
 
         Handle<PrefabInstance> _prefab_inst;
         GenericHandle _curr_component;
-        int _prefab_curr_component_nth;
+        int _curr_component_nth;
+        bool _curr_component_is_added;
         vector<string> _curr_property_stack;
         // spawn prefab instances in prefab scene so prefab assets can be displayed.
         hash_table<RscHandle<Prefab>, Handle<GameObject>> _prefab_store;

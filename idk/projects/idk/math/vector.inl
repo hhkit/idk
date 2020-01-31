@@ -98,6 +98,10 @@ namespace idk
 		{
 			return detail::sse_dot(*this, rhs).m128_f32[0];
 		}
+		else if constexpr (D == 3)
+		{
+			return this->x * rhs.x + this->y * rhs.y + this->z * rhs.z;
+		}
 		else
 		{
 			T accum{};

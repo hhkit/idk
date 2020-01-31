@@ -19,9 +19,26 @@ namespace idk
 		return extents() / 2;
 	}
 
+	float aabb::volume() const
+	{
+		const auto size = extents();
+		return size.x * size.y * size.z;
+	}
+
 	const aabb& aabb::bounds() const
 	{
 		return *this;
+	}
+
+	aabb aabb::combine(const aabb& rhs) const
+	{
+		return aabb{ vec3{ std::min(min.x, rhs.min.x), std::min(min.y, rhs.min.y), std::min(min.z, rhs.min.z) },
+					 vec3{ std::max(max.x, rhs.max.x), std::max(max.y, rhs.max.y), std::max(max.z, rhs.max.z) }};
+	}
+
+	bool aabb::equals(const aabb& rhs, float)
+	{
+		return min == rhs.min && max == rhs.max;
 	}
 	
 	aabb& aabb::translate(const vec3& trans)
@@ -85,15 +102,14 @@ namespace idk
 		return true;
 	}
 
-	bool aabb::contains(const aabb& box) const
+	bool aabb::contains(const aabb& other) const
 	{
-		for (auto [mymin, mymax, yourmin, yourmax] : zip(min, max, box.min, box.max))
-		{
-			if (mymin > yourmin || yourmax > mymax)
-				return false;
-		}
-
-		return true;
+		return	other.min.x >= min.x &&
+				other.max.x <= max.x &&
+				other.min.y >= min.y &&
+				other.max.y <= max.y &&
+				other.min.z >= min.z &&
+				other.max.z <= max.z;
 	}
 
 	bool aabb::overlaps(const aabb& rhs) const

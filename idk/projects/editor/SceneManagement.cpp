@@ -176,12 +176,13 @@ namespace idk
 
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
 
-			RestoreFromTemporaryScene();
 			prefab_scene->LoadFromResourcePath();
 
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
 					Core::GetResourceManager().Load(path, true);
+
+			RestoreFromTemporaryScene();
 		}
 	}
 }

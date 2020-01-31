@@ -26,12 +26,6 @@ REFLECT_BEGIN(idk::SpotLight, "SpotLight")
 REFLECT_VARS(intensity, light_color, inner_angle, outer_angle, attenuation_radius, use_inv_sq_atten)
 REFLECT_END()
 
-REFLECT_BEGIN(idk::vector<idk::PropertyOverride>, "vector<PropertyOverride>")
-REFLECT_END()
-REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
-REFLECT_VARS(prefab, overrides, object_index)
-REFLECT_END()
-
 REFLECT_BEGIN(idk::SkinnedMeshRenderer, "SkinnedMeshRenderer")
 REFLECT_VARS(mesh, material_instance)
 REFLECT_END()

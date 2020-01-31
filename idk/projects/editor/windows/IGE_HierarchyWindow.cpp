@@ -308,7 +308,7 @@ namespace idk {
 				}
 			}
 
-			if (ImGui::IsMouseDoubleClicked(0))
+			if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered())
 			{
 				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
 			}
