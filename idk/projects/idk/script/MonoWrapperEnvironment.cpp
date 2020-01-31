@@ -1669,10 +1669,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkCreateLobby", void)
+		{
+
+			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
+			Core::GetSystem<NetworkSystem>().InstantiateServer(devices[0].ip_addresses[0]);
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::NetworkLoadScene", void, Guid g)
 		{
 			RscHandle<Scene> scene{ g };
-			throw "have not written";
+			EventManager::BroadcastLoadLevel(scene);
 		}
 		BIND_END();
 

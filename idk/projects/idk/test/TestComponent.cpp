@@ -12,7 +12,7 @@ namespace idk
 	{
 		auto& app_sys = Core::GetSystem<Application>();
 		auto& network_sys = Core::GetSystem<NetworkSystem>();
-
+		/*
 		if (app_sys.GetKeyDown(Key::C))
 		{
 			auto devices = app_sys.GetNetworkDevices();
@@ -27,7 +27,7 @@ namespace idk
 				LOG_TO(LogPool::NETWORK, "Disconnected from server");
 			};
 		}
-
+		*/
 		if (app_sys.GetKeyDown(Key::T))
 		{
 			static int i = 0;

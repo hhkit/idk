@@ -23,6 +23,7 @@ namespace idk
 		client.Subscribe<TestMessage>([](TestMessage* message) { LOG_TO(LogPool::NETWORK, "Received message %d", message->i); });
 		client.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });
 		client.Subscribe<EventTransferOwnershipMessage>([this](EventTransferOwnershipMessage* msg) { OnTransferOwnershipEvent(msg); });
+		client.Subscribe<EventLoadLevelMessage>([this](EventLoadLevelMessage* msg) { OnLoadLevelMessage(msg); });
 	}
 
 	void EventManager::SubscribeEvents(ServerConnectionManager& server)

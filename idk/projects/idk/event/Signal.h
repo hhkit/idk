@@ -54,6 +54,7 @@ namespace idk
 		void   operator-=(SlotId id) { Unlisten(id); }
 	private:
 		hash_table<SlotId, Fn> _slots;
+		vector<SlotId> _removeus;
 		SlotId _next_id = 0;
 	};
 }

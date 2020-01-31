@@ -14,7 +14,11 @@ namespace idk
 	{
 		uint64_t clientId;
 		yojimbo::random_bytes((uint8_t*)&clientId, 8);
-		client.InsecureConnect(DEFAULT_PRIVATE_KEY, clientId, yojimbo::Address{ server_addr.a, server_addr.b, server_addr.c, server_addr.d, server_addr.port });
+		client.InsecureConnect(DEFAULT_PRIVATE_KEY, clientId, yojimbo::Address{ server_addr.a, server_addr.b, server_addr.c, server_addr.d, server_addr.port }); 
+
+		LOG_TO(LogPool::NETWORK, "Try connecting to %s", string{ server_addr }.c_str());
+		OnConnectionToServer += []() { LOG_TO(LogPool::NETWORK, "Connected to server"); };
+		OnDisconnectionFromServer += []() { LOG_TO(LogPool::NETWORK, "Disconnected from server"); };
 	}
 
 	Client::~Client()

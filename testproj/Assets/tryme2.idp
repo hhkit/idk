@@ -20,6 +20,7 @@ data:
   - !ElectronView 
     network_id: 0
   - !ElectronTransformView 
+    interp_over_seconds: 0.05
     send_threshold: 0.01
     snap_threshold: 5
     sync_position: 1
