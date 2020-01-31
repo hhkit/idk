@@ -49,6 +49,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
+    <ClInclude Include="network\EventInvokeRPCMessage.h" />
     <ClInclude Include="network\EventLoadLevelMessage.h" />
     <ClInclude Include="gfx\ColorPickRequest.h" />
     <ClInclude Include="gfx\ColorPickResult.h" />
@@ -403,6 +404,7 @@
     <ClCompile Include="network\ElectronTransformView.cpp" />
     <ClCompile Include="network\EventLoadLevelMessage.cpp" />
     <ClCompile Include="network\EventManager.cpp" />
+    <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
     <ClCompile Include="network\GameConfiguration.cpp" />
     <ClCompile Include="network\GhostManager.cpp" />
     <ClCompile Include="network\GhostMessage.cpp" />

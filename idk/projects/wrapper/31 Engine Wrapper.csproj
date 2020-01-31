@@ -87,6 +87,7 @@
     <Compile Include="Electron\ElectronNetwork.cs" />
     <Compile Include="Electron\IElectronObservable.cs" />
     <Compile Include="Electron\Player.cs" />
+    <Compile Include="Electron\RPC.cs" />
     <Compile Include="Electron\RPCTarget.cs" />
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />

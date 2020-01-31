@@ -2,6 +2,7 @@
 {
     public enum RPCTarget
     {
-
+        All,
+        Others,
     }
 }

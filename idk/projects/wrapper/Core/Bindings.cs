@@ -642,6 +642,6 @@ namespace idk
         public extern static bool ViewTransferOwnership(ulong handle, int newID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[] parameters);
+        public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[][] parameters);
     }
 }

@@ -15,6 +15,7 @@
 #include <network/EventLoadLevelMessage.h>
 #include <network/EventInstantiatePrefabMessage.h>
 #include <network/EventTransferOwnershipMessage.h>
+#include <network/EventInvokeRPCMessage.h>
 
 namespace idk
 {
@@ -24,6 +25,7 @@ namespace idk
 		client.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });
 		client.Subscribe<EventTransferOwnershipMessage>([this](EventTransferOwnershipMessage* msg) { OnTransferOwnershipEvent(msg); });
 		client.Subscribe<EventLoadLevelMessage>([this](EventLoadLevelMessage* msg) { OnLoadLevelMessage(msg); });
+		client.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage* msg) { OnInvokeRPCMessage(msg); });
 	}
 
 	void EventManager::SubscribeEvents(ServerConnectionManager& server)
@@ -49,17 +51,17 @@ namespace idk
 			});
 	}
 
-	void EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> rotation)
+	Handle<GameObject> EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> rotation)
 	{
 		LOG_TO(LogPool::NETWORK, "Broadcasting instantiate prefab message %s", string(prefab.guid).c_str());
 		if (!prefab)
-			return;
+			return {};
 
 		auto dyn = prefab->data[0].FindComponent("ElectronView", 0);
 		if (!dyn.valid())
 		{
 			LOG_TO(LogPool::NETWORK, "Tried to instantiate a prefab without an ElectronView component!");
-			return;
+			return {};
 		}
 
 		// create object
@@ -101,6 +103,7 @@ namespace idk
 				}
 			});
 
+		return obj;
 #pragma message("Store the event for future connections")
 	}
 

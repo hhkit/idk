@@ -1116,6 +1116,9 @@
     <ClInclude Include="network\EventLoadLevelMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="network\EventInvokeRPCMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1613,6 +1616,7 @@
       <Filter>phys\aabb tree</Filter>
     </ClCompile>
     <ClCompile Include="network\EventLoadLevelMessage.cpp" />
+    <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

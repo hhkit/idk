@@ -9,7 +9,7 @@ namespace idk
 	,	class EventInstantiatePrefabMessage
 	,	class EventLoadLevelMessage
 	,	class EventTransferOwnershipMessage
-	,	class EventCSharpRPCMessage
+	,	class EventInvokeRPCMessage
 	,	class GhostMessage
 	,	class MoveClientMessage
 	,	class MoveReturnMessage

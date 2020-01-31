@@ -149,6 +149,7 @@ namespace idk::mono
 				find_method(type, "Update");
 				find_method(type, "PausedUpdate");
 				find_method(type, "UpdateCoroutines");
+				type.FindRPCs();
 				
 
 				//if (!Core::GetSystem<ScriptSystem>().Environment().IsAbstract(mono_class_get_type(type.Raw())))

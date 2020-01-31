@@ -70,6 +70,19 @@
     scale: {x: 1, y: 1, z: 1}
   - !Name 
     name: ""
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !NetworkHostTester 
+      instantiate: {guid: cd2e2a8c-ea5d-427c-a1ba-ce2205110c38}
+      obj: {id: 0}
+      scene: {guid: 00000000-0000-0000-0000-000000000000}
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !NetworkClientTester 
+      a: 10
+      b: 84
+      c: 42
+      d: 103
   - !TestComponent 
     a: 10
     b: 84

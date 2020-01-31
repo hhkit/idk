@@ -1,0 +1,40 @@
+data: 
+- components: 
+  - !Transform 
+    parent: {id: 0}
+    position: {x: -2.3841858e-06, y: 0, z: -0.016}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: NetworkPrefab
+  - !Layer 
+    index: 0
+  - !ElectronView 
+    network_id: 0
+  - !ElectronTransformView 
+    interp_over_seconds: 0.05
+    send_threshold: 0.1
+    snap_threshold: 0.5
+    sync_position: 1
+    sync_rotation: 0
+    sync_scale: 0
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !NetworkClientTester 
+      a: 10
+      b: 84
+      c: 42
+      d: 103
+  - !TestComponent 
+    a: 10
+    b: 84
+    c: 42
+    d: 103
+    makeme: {guid: d7e32fdd-2edc-4c2d-857e-ba77459f42e1}
+    send_pos: 0
+    send_rot: 0
+  parent_index: -1

@@ -27,6 +27,8 @@ namespace idk::mono
 
 		void CacheMessages();
 		bool CacheThunk(string_view method_name, int param_count = 0);
+		void FindRPCs();
+		MonoMethod* GetRPC(string_view method) const;
 
 		std::variant <ManagedThunk, MonoMethod*, std::nullopt_t> GetMethod(string_view method_name, int param_count = 0) const;
 		opt<ManagedThunk> GetThunk(string_view method_name, int param_count = 0) const;
@@ -34,6 +36,7 @@ namespace idk::mono
 		MonoClass* type{};
 		string name;
 		hash_table<string, ManagedThunk> thunks;
+		hash_table<string, MonoMethod*> rpcs;
 
 		MonoMethod* FindMethod(string_view method_name, int param_count) const;
 	};

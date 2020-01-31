@@ -62,7 +62,12 @@ namespace idk::mono
 
 		auto mb_itr = _types.find("MonoBehavior");
 		IDK_ASSERT_MSG(mb_itr != _types.end(), "cannot find idk.MonoBehavior");
-		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache method");
+		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache UpdateCoroutines");
+
+		auto ev_itr = _types.find("ElectronView");
+		IDK_ASSERT_MSG(ev_itr != _types.end(), "cannot find idk.ElectronView");
+		IDK_ASSERT_MSG(ev_itr->second.CacheThunk("Reserialize", 1), "could not cache Deserialize");
+
 	}
 
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
@@ -1684,15 +1689,15 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkInstantiatePrefabPosition", void, Guid g, vec3 pos)
+		BIND_START("idk.Bindings::NetworkInstantiatePrefabPosition", uint64_t, Guid g, vec3 pos)
 		{
-			EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos);
+			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos).id;
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkInstantiatePrefabPositionRotation", void, Guid g, vec3 pos, quat rot)
+		BIND_START("idk.Bindings::NetworkInstantiatePrefabPositionRotation", uint64_t, Guid g, vec3 pos, quat rot)
 		{
-			EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, rot);
+			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, rot).id;
 		}
 		BIND_END();
 
@@ -1711,10 +1716,19 @@ namespace idk::mono
 		BIND_START("idk.Bindings::ViewExecRPC", void, Handle<ElectronView> ev, MonoString* method_name, int rpc_target, MonoArray* params)
 		{
 			auto length = mono_array_length(params);
-			auto* param_start = mono_array_addr_with_size(params, 1, 0);
-			vector<unsigned char> param_vec(param_start, param_start + length);
+			vector<vector<unsigned char>> param_vec;
+			for (int i = 0; i < length; ++i)
+			{
+				auto subarr = mono_array_get(params, MonoArray*, i);
+				auto subarr_len = mono_array_length(subarr);
+				auto& buffer = param_vec.emplace_back();
+
+				for (int j = 0; j < subarr_len; ++j)
+					buffer.push_back(mono_array_get(subarr, unsigned char, j));
+			}
 
 			// do things
+			EventManager::BroadcastRPC(ev, unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
 	}
