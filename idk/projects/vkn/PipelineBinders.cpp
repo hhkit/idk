@@ -21,6 +21,8 @@
 #include <res/ResourceHandle.inl>
 #include <ds/span.inl>
 
+#include <vkn/RenderUtil.h>
+
 namespace idk::vkn
 {
 	void BindCameraStuff(PipelineThingy& the_interface, const CameraData& cam)
@@ -34,48 +36,6 @@ namespace idk::vkn
 		the_interface.BindUniformBuffer("CameraBlock", 0, projection_trf);
 	}
 
-
-	template<typename T>
-	struct FakeMat4
-	{
-		static constexpr unsigned N = 4;
-		tvec<T, N> data[N];
-
-		FakeMat4() = default;
-		FakeMat4(const tmat<T, N, N>& m)
-		{
-			for (uint32_t i = 0; i < N; ++i)
-			{
-				data[i] = m[i];
-			}
-		}
-	};
-
-	struct ShaderLightData : BaseLightData
-	{
-		FakeMat4<float> vp;
-		ShaderLightData() = default;
-		ShaderLightData(const LightData& data) : BaseLightData{ data }, vp{ data.vp }{}
-	};
-
-
-	string PrepareLightBlock(const CameraData& cam, const vector<LightData>& lights)
-	{
-		vector<ShaderLightData> tmp_light(lights.size());
-		for (size_t i = 0; i < tmp_light.size(); ++i)
-		{
-			auto& light = tmp_light[i] = (lights)[i];
-			light.v_pos = cam.view_matrix * vec4{ light.v_pos,1 };
-			light.v_dir = (cam.view_matrix * vec4{ light.v_dir,0 }).get_normalized();
-		}
-
-		string light_block;
-		uint32_t len = s_cast<uint32_t>(tmp_light.size());
-		light_block += string{ reinterpret_cast<const char*>(&len),sizeof(len) };
-		light_block += string(16 - sizeof(len), '\0');
-		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
-		return light_block;
-	}
 
 
 	void StandardBindings::Bind(PipelineThingy& ) {}

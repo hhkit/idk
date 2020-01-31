@@ -12,6 +12,7 @@ namespace idk::vkn
 		using Context_t = FrameGraphDetail::Context_t;
 		VknRenderPass  render_pass;
 		Framebuffer frame_buffer;
+		uvec2       fb_size;
 
 		//Run to Begin the rendering context (renderpass/framebuffer)
 		void PreExecute(const FrameGraphNode& node, Context_t context);

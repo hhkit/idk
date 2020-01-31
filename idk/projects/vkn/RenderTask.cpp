@@ -93,9 +93,10 @@ namespace idk::vkn
 	{
 		curr_rp = render_pass;
 	}
-	void RenderTask::SetFrameBuffer(const Framebuffer& fb)
+	void RenderTask::SetFrameBuffer(const Framebuffer& fb, uvec2 size)
 	{
 		curr_frame_buffer = fb;
+		fb_size = size;
 	}
 	void RenderTask::Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance)
 	{
@@ -187,6 +188,20 @@ namespace idk::vkn
 
 		auto rp = curr_rp;
 		auto fb = curr_frame_buffer;
+		auto ra_max = vec2{ std::numeric_limits<float>::min() };
+		auto ra_min = vec2{ std::numeric_limits<float>::max() };
+		for (auto& batch : batches)
+		{
+			for (auto& sc : batch.scissor.to_span())
+			{
+				auto vmin= sc.position;
+				auto vmax= vmin + sc.size;
+				ra_max = max(ra_max, vmax);
+				ra_min = min(ra_min, vmin);
+			}
+		}
+		render_area = {ra_min,ra_max-ra_min};
+
 		vk::RenderPassBeginInfo rpbi
 		{
 			*rp,fb,
@@ -235,7 +250,11 @@ namespace idk::vkn
 
 					for (auto& vb : p_ro.vertex_buffers)
 					{
-						cmd_buffer.bindVertexBuffers(vb.binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
+						auto opt_binding = pipeline.GetBinding(vb.binding);
+						if (opt_binding)
+						{
+							cmd_buffer.bindVertexBuffers(*opt_binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
+						}
 					}
 					
 					std::visit(DrawFunc{}, p_ro.draw_info, std::variant<vk::CommandBuffer>{cmd_buffer}, std::variant<IndexBindingData>{ p_ro.index_buffer});

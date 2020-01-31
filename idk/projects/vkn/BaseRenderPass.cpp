@@ -35,7 +35,7 @@ namespace idk::vkn
 
 	void BaseRenderPass::BindFrameBuffer(Context_t context)
 	{
-		context.SetFrameBuffer(this->frame_buffer);
+		context.SetFrameBuffer(this->frame_buffer,this->fb_size);
 	}
 
 }

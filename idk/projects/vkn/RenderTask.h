@@ -103,7 +103,7 @@ namespace idk::vkn
 		void BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader);
 		void UnbindShader(ShaderStage shader_stage);
 		void SetRenderPass(RenderPassObj render_pass);
-		void SetFrameBuffer(const Framebuffer& fb);
+		void SetFrameBuffer(const Framebuffer& fb,uvec2 size);
 
 #pragma region Draw
 		void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance);
@@ -135,6 +135,7 @@ namespace idk::vkn
 		void SetScissors(rect r)
 		{
 			StartNewBatch();
+			r.Scale(fb_size);
 			_rect_builder.start();
 			_rect_builder.emplace_back(r);
 			_current_batch.scissor =_rect_builder.end();
@@ -142,6 +143,8 @@ namespace idk::vkn
 		void SetViewport(rect r)
 		{
 			StartNewBatch();
+			r.Scale(fb_size);
+
 			_rect_builder.start();
 			_rect_builder.emplace_back(r);
 			_current_batch.viewport = _rect_builder.end();
@@ -275,6 +278,7 @@ namespace idk::vkn
 
 		RenderPassObj curr_rp;
 		vk::Framebuffer curr_frame_buffer;
+		uvec2 fb_size;
 
 		bool _start_new_batch = true;
 

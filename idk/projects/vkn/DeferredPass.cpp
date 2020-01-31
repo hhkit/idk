@@ -389,11 +389,11 @@ namespace idk::vkn
 
 			light_config->attachment_configs.resize(1);
 			auto& blend = light_config->attachment_configs[0];
-			blend.blend_enable = true;
+			blend.blend_enable           = true;
 			blend.dst_color_blend_factor = BlendFactor::eOne;
 			blend.src_color_blend_factor = BlendFactor::eOne;
-			blend.color_blend_op = BlendOp::eAdd;
-			blend.alpha_blend_op = BlendOp::eMax;
+			blend.color_blend_op         = BlendOp::eAdd;
+			blend.alpha_blend_op         = BlendOp::eMax;
 			blend.dst_alpha_blend_factor = BlendFactor::eOne;
 			blend.src_alpha_blend_factor = BlendFactor::eOne;
 			light_config->depth_test = false;

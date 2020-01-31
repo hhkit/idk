@@ -292,7 +292,7 @@ namespace idk::vkn
 		auto info = CreateRenderPassInfo(input_rscs, output_rscs, depth);
 		return device.createRenderPassUnique(info);
 	}
-	Framebuffer FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+	std::pair<Framebuffer, uvec2> FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
 		vk::Device d = *View().Device();
 		auto& rsc_manager = GetResourceManager();
@@ -330,13 +330,13 @@ namespace idk::vkn
 			num_layers = min(tex.Layers(), num_layers);
 		}
 		//TODO shift this into a pool and use unique
-		return d.createFramebuffer(vk::FramebufferCreateInfo
+		return { d.createFramebuffer(vk::FramebufferCreateInfo
 			{
 				{},*rp,
 				static_cast<uint32_t>(targets.size()),
 				std::data(targets),
 				size.x,size.y,num_layers
-			});
+			}),size };
 	}
 	void FrameGraph::CreateRenderPasses()
 	{
@@ -349,7 +349,9 @@ namespace idk::vkn
 			auto input_attachments = span{ node.input_attachments };
 			auto output_attachments = span{ node.output_attachments };
 			rp.render_pass = CreateRenderPass(input_attachments, output_attachments,node.depth_stencil);
-			rp.frame_buffer = CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments, node.depth_stencil);
+			auto [fb,size]= CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments, node.depth_stencil);
+			rp.frame_buffer = fb;
+			rp.fb_size = size;
 		}
 	}
 

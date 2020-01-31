@@ -52,7 +52,20 @@ namespace idk::vkn::gt
 			));
 
 		}
-
+		void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh)
+		{
+			for (auto& [attrib, buffer] : mesh.Buffers())
+			{
+				if (buffer.buffer())
+				{
+					auto index_itr = req.mesh_requirements.find(attrib);
+					if (index_itr != req.mesh_requirements.end())
+					{
+						context.BindVertexBuffer(index_itr->second, *buffer.buffer(), buffer.offset);
+					}
+				}
+			}
+		}
 	};
 	struct GBufferPass :PassUtil
 	{
@@ -174,17 +187,7 @@ namespace idk::vkn::gt
 						++itr;
 					}
 				}
-				for (auto& [attrib, buffer] : mesh.Buffers())
-				{
-					if(buffer.buffer())
-					{
-						auto index_itr = req.mesh_requirements.find(attrib);
-						if (index_itr != req.mesh_requirements.end())
-						{
-							context.BindVertexBuffer(index_itr->second, *buffer.buffer(), buffer.offset);
-						}
-					}
-				}
+				BindMesh(context, req,mesh);
 				if (idx_buffer)
 				{
 					context.BindIndexBuffer(*idx_buffer->buffer(), idx_buffer->offset, mesh.IndexType());
@@ -205,6 +208,15 @@ namespace idk::vkn::gt
 		FrameGraphResourceReadOnly depth_rsc;
 		GBufferPass& gbuffer_pass;
 
+		FragmentShaders deferred_post= FDeferredPost;
+
+		inline const static renderer_attributes fsq_requirements =
+		{
+			{
+				{vtx::Attrib::Position,0},
+				{vtx::Attrib::UV,1},
+			}
+		};
 		AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers, FullRenderData& rd) :PassUtil{ rd },gbuffer_pass{gbuffers}
 		{
 			accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat);
@@ -266,6 +278,44 @@ namespace idk::vkn::gt
 		}
 		void Execute(FrameGraphDetail::Context_t context) override
 		{
+			context.SetUboManager(this->render_data.rs_state->ubo_manager);
+			auto& gfx_state = this->render_data.GetGfxState();
+			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Accum Pass");
+			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+			context.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[deferred_post]);
+			//for (auto& buffer : gbuffer_rscs)
+			{
+				size_t i = 0;
+				
+				AttachmentBlendConfig blend{};
+				blend.blend_enable           = true;
+				blend.dst_color_blend_factor = BlendFactor::eOne;
+				blend.src_color_blend_factor = BlendFactor::eOne;
+				blend.color_blend_op         = BlendOp::eAdd;
+				blend.alpha_blend_op         = BlendOp::eMax;
+				blend.dst_alpha_blend_factor = BlendFactor::eOne;
+				blend.src_alpha_blend_factor = BlendFactor::eOne;
+				context.SetBlend(i,blend);
+				context.SetClearColor(i, idk::color{ 0,0,0,0 });
+				++i;
+			}
+			context.SetViewport(gfx_state.camera.viewport);
+			context.SetScissors(gfx_state.camera.viewport);
+
+			auto& light_indices = gfx_state.active_lights;
+			vector<LightData> lights;
+			lights.reserve(8);
+			for (size_t i = 0; i < light_indices.size();i+=8)
+			{
+				for (size_t j = 0; j+i < light_indices.size() && j<8; ++j)
+					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[i]]);
+				auto light_data = PrepareLightBlock(gfx_state.camera, lights);
+				context.BindUniform("LightBlock", 0, light_data);
+				//Bind all the other uniforms
+				//DrawFSQ
+				lights.clear();
+			}
+			BindMesh(context, fsq_requirements,Mesh::defaults[MeshType::FSQ].as<VulkanMesh>());
 		}
 	};
 	

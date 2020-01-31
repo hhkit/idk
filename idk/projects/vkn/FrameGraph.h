@@ -193,7 +193,7 @@ namespace idk::vkn
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
 		RenderPassCreateInfoBundle  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
-		Framebuffer CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
+		std::pair<Framebuffer,uvec2> CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 
 
 		FrameGraphResourceManager& GetResourceManager();
