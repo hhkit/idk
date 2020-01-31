@@ -14,7 +14,6 @@
 #include <script/ManagedObj.inl> //Assign
 #include <prefab/Prefab.h>
 #include <prefab/PrefabInstance.h>
-#include <script/ManagedObj.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <ds/span.inl>

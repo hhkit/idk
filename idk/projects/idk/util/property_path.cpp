@@ -3,6 +3,7 @@
 #include "property_path.h"
 #include <reflect/reflect.inl>
 #include <script/ManagedObj.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk
 {
@@ -28,7 +29,7 @@ namespace idk
                 {
                     string_view token2 = token;
                     reflect::dynamic ret;
-                    curr.get<mono::ManagedObject>().Visit([&](auto&& key, auto&& arg, int depth_change)
+                    curr.get<mono::ManagedObject>().Visit([&](auto&& key, auto&& arg, int)
                     {
                         if (serialize_text(key) == token2)
                         {
@@ -95,7 +96,7 @@ namespace idk
                 if (curr.type.is<mono::ManagedObject>())
                 {
                     string_view token2 = token;
-                    curr.get<mono::ManagedObject>().Visit([&](auto&& key, auto&& arg, int depth_change)
+                    curr.get<mono::ManagedObject>().Visit([&](auto&& key, auto&& arg, int)
                     {
                         if (serialize_text(key) == token2)
                         {
