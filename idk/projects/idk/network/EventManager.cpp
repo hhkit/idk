@@ -139,8 +139,20 @@ namespace idk
 		(RscHandle<Scene> scene)
 		{
 			for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
+			{
 				id_manager.CreateNewIDFor(elem.GetHandle());
-
+				auto& tfm = *elem.GetGameObject()->Transform();
+				if (auto tfm_view = elem.GetGameObject()->GetComponent<ElectronTransformView>())
+				{
+					tfm_view->network_data = ElectronTransformView::PreviousFrame
+					{
+						.position = tfm.position,
+						.rotation = tfm.rotation,
+						.scale = tfm.scale,
+						.state_mask = 0
+					};
+				}
+			}
 			Core::GetSystem<NetworkSystem>().BroadcastMessage<EventLoadLevelMessage>(GameChannel::RELIABLE, 
 				[scene](EventLoadLevelMessage& msg)
 				{
@@ -193,8 +205,8 @@ namespace idk
 			views = std::move(views)]
 		(RscHandle<Scene>)
 		{
-			for (auto& elem : views)
-				id_manager.EmplaceID(elem.id, elem.view);
+			for (auto [eview, view] : zip(Core::GetGameState().GetObjectsOfType<ElectronView>(), views))
+				id_manager.EmplaceID(view.id, eview.GetHandle());
 
 			Core::GetSystem<SceneManager>().OnSceneChange -= scene_change_slot;
 		};
