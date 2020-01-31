@@ -1528,7 +1528,7 @@ namespace idk {
                 });
                 commandController.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
 
-                if (_prefab_inst)
+                if (_prefab_inst && !_curr_component_is_added)
                 {
                     auto old = _prefab_inst->removed_components;
                     PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _curr_component_nth);
