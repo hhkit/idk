@@ -201,40 +201,43 @@ namespace idk
          * Animator
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorPlay(ulong id, string name);
+        public extern static bool AnimatorPlay(ulong id, string name, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorCrossFade(ulong id, string name, float time = 0.2f);
+        public extern static bool AnimatorCrossFade(ulong id, string name, float time = 0.2f, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorPause(ulong id);
+        public extern static bool AnimatorPause(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorResume(ulong id);
+        public extern static bool AnimatorResume(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorStop(ulong id);
+        public extern static bool AnimatorStop(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string AnimatorDefaultStateName(ulong id);
+        public extern static AnimationState AnimatorGetState(ulong id, string name, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string AnimatorCurrentStateName(ulong id);
+        public extern static string AnimatorDefaultStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string AnimatorBlendStateName(ulong id);
+        public extern static string AnimatorCurrentStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorIsPlaying(ulong id);
+        public extern static string AnimatorBlendStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorIsBlending(ulong id);
+        public extern static bool AnimatorIsPlaying(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorHasCurrAnimEnded(ulong id);
+        public extern static bool AnimatorIsBlending(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorHasState(ulong id, string name);
+        public extern static bool AnimatorHasCurrAnimEnded(ulong id, string layer = "");
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorHasState(ulong id, string name, string layer = "");
 
         // Parameter Getters
         [MethodImpl(MethodImplOptions.InternalCall)]

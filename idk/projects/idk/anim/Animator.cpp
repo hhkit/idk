@@ -185,133 +185,51 @@ namespace idk
 #pragma endregion
 
 #pragma region Script Functions
-	void Animator::Play(string_view animation_name, float offset)
+	bool Animator::Play(string_view animation_name, int layer_index, float offset)
 	{
-		layers[0].Play(animation_name, offset);
-	}
-
-
-	void Animator::Play(string_view animation_name, string_view layer_name, float offset)
-	{
-		// bool valid = true;
-		auto layer_res = FindLayerIndex(layer_name);
-		if (layer_res >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
+		if (layer_index >= layers.size())
 			return;
-		}
-
-		layers[layer_res].Play(animation_name, offset);
-	}
-
-	void Animator::Play(string_view animation_name, size_t layer_index, float offset)
-	{
-		// bool valid = true;
-		if (s_cast<size_t>(layer_index) >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) +") doesn't exist." << std::endl;
-			// valid = false;
-			return;
-		}
-
 		layers[layer_index].Play(animation_name, offset);
 	}
 
-	void Animator::BlendTo(string_view animation_name, float time)
+	bool Animator::BlendTo(string_view animation_name, int layer_index, float time)
 	{
+		if (layer_index >= layers.size())
+			return false;
+
 		// Cap blend duration to 1.0f
 		time = std::min(abs(time), 1.0f);
 
 		// If time is 0.0, we just call play cos its the same.
 		if(time < 0.00001f)
-			layers[0].Play(animation_name);
+			return layers[layer_index].Play(animation_name);
 		else
-			layers[0].BlendTo(animation_name, time);
+			return layers[layer_index].BlendTo(animation_name, time);
 	}
 
-	void Animator::Resume()
+	bool Animator::Resume(int layer_index)
 	{
-		layers[0].Resume();
-	}
-
-	void Animator::Resume(string_view layer_name)
-	{
-		auto layer_res = FindLayerIndex(layer_name);
-		if (layer_res >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
-			return;
-		}
-
-		layers[layer_res].Resume();
-	}
-
-	void Animator::Resume(size_t layer_index)
-	{
-		if (s_cast<size_t>(layer_index) >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) + ") doesn't exist." << std::endl;
-			// valid = false;
-			return;
-		}
+		if (layer_index >= layers.size())
+			return false;
 		layers[layer_index].Resume();
+		return true;
 	}
 
-	void Animator::Pause()
+	bool Animator::Pause(int layer_index)
 	{
-		layers[0].Pause();
-		preview_playback = false;
-	}
-
-	void Animator::Pause(string_view layer_name)
-	{
-		auto layer_res = FindLayerIndex(layer_name);
-		if (layer_res >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
-			return;
-		}
-
-		layers[layer_res].Pause();
-	}
-
-	void Animator::Pause(int layer_index)
-	{
-		if (s_cast<size_t>(layer_index) >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) + ") doesn't exist." << std::endl;
-			return;
-		}
-
+		if (layer_index >= layers.size())
+			return false;
 		layers[layer_index].Pause();
+		return true;
 	}
 
-	void Animator::Stop()
+	bool Animator::Stop(int layer_index)
 	{
-		layers[0].Stop();
-	}
-
-	void Animator::Stop(string_view layer_name)
-	{
-		auto layer_res = FindLayerIndex(layer_name);
-		if (layer_res >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer (" + string{ layer_name } +") doesn't exist." << std::endl;
-			return;
-		}
-
-		layers[layer_res].Stop();
-	}
-
-	void Animator::Stop(int layer_index)
-	{
-		if (s_cast<size_t>(layer_index) >= layers.size())
-		{
-			std::cout << "[Animator] Animation Layer index (" + std::to_string(layer_index) + ") doesn't exist." << std::endl;
-			return;
-		}
+		if (layer_index >= layers.size())
+			return false;
 
 		layers[layer_index].Stop();
+		return true;
 	}
 
 	void Animator::PauseAllLayers()
@@ -379,52 +297,132 @@ namespace idk
 		return SetParam<anim::TriggerParam>(name, val);
 	}
 
-	bool Animator::HasState(string_view name) const
+	bool Animator::SetWeight(float weight, int layer_index)
 	{
-		return layers[0].HasState(name);
+		if (layer_index == 0 || layer_index >= layers.size())
+		{
+			return false;
+		}
+		layers[layer_index].weight = weight;
+		return true;
 	}
 
-	bool Animator::IsPlaying() const
+	bool Animator::HasState(string_view name, int layer_index) const
 	{
-		return layers[0].IsPlaying();
+		if (layer_index >= layers.size())
+			return false;
+
+		return layers[layer_index].HasState(name);
 	}
 
-	bool Animator::IsBlending() const
+	bool Animator::IsPlaying(int layer_index) const
 	{
-		return layers[0].IsBlending();
+		if (layer_index >= layers.size())
+			return false;
+		return layers[layer_index].IsPlaying();
 	}
 
-	bool Animator::HasCurrAnimEnded() const
+	bool Animator::IsBlending(int layer_index) const
 	{
-		return layers[0].HasCurrAnimEnded();
+		if (layer_index >= layers.size())
+			return false;
+		return layers[layer_index].IsBlending();
 	}
 
-	string Animator::DefaultStateName() const
+	bool Animator::HasCurrAnimEnded(int layer_index) const
 	{
-		return layers[0].DefaultStateName();
+		if (layer_index >= layers.size())
+			return false;
+		return layers[layer_index].HasCurrAnimEnded();
 	}
 
-	string Animator::CurrentStateName() const
+	CSharpState Animator::GetState(string_view name, int layer_index) const
 	{
-		return layers[0].CurrentStateName();
+		if (layer_index >= layers.size())
+			return CSharpState{};
+
+		const auto& layer = layers[layer_index];
+		auto index = layer.FindAnimationIndex(name);
+		auto& state = layer.GetAnimationState(index);
+		if (!state.valid)
+			return CSharpState{};
+
+		CSharpState cs_state;
+		cs_state.valid = state.valid;
+		cs_state.loop = state.loop;
+
+		cs_state.normalizedTime = 0.0f;
+		if (index == layer.curr_state.index)
+			cs_state.normalizedTime = layer.curr_state.normalized_time;
+		else if(index == layer.blend_state.index)
+			cs_state.normalizedTime = layer.blend_state.normalized_time;
+
+		auto state_data = state.GetBasicState();
+		if (state_data)
+		{
+			cs_state.duration = state_data->motion->_duration;
+			cs_state.fps = state_data->motion->_fps;
+		}
+		
+		return cs_state;
 	}
 
-	string Animator::BlendStateName() const
+	float Animator::GetWeight(float weight, int layer_index) const
 	{
-		return layers[0].BlendStateName();
+		if (layer_index >= layers.size())
+			return 0.0f;
+		return layers[layer_index].weight;
 	}
 
-
-	void Animator::SetEntryState(string_view , float)
+	string Animator::DefaultStateName(int layer_index) const
 	{
-		// auto res = animation_table.find(name.data());
-		// if (res == animation_table.end())
-		// {
-		// 	return;
-		// }
-		// 
-		// layers[0].default_index = name;
+		if (layer_index >= layers.size())
+			return "";
+		return layers[layer_index].DefaultStateName();
 	}
+
+	string Animator::CurrentStateName(int layer_index) const
+	{
+		if (layer_index >= layers.size())
+			return "";
+		return layers[layer_index].CurrentStateName();
+	}
+
+	float Animator::CurrentStateTime(int layer_index) const
+	{
+		if (layer_index >= layers.size())
+			return 0.0f;
+		return layers[layer_index].curr_state.normalized_time;
+	}
+
+	float Animator::CurrentStateElapsed(int layer_index) const
+	{
+		if (layer_index >= layers.size())
+			return 0.0f;
+		return layers[layer_index].curr_state.normalized_time;
+	}
+
+	string Animator::BlendStateName(int layer_index) const
+	{
+		if (layer_index >= layers.size())
+			return "";
+		return layers[layer_index].BlendStateName();
+	}
+
+	float Animator::BlendStateTime(int layer_index) const
+	{
+		if (layer_index >= layers.size())
+			return 0.0f;
+		return layers[layer_index].blend_state.normalized_time;
+	}
+
+	float Animator::BlendStateElapsed(int layer_index) const
+	{
+		if (layer_index >= layers.size())
+			return 0.0f;
+		return layers[layer_index].blend_state.elapsed_time;
+	}
+
 #pragma endregion
 
 	void Animator::on_parse()

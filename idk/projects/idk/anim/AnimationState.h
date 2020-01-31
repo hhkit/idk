@@ -4,7 +4,16 @@
 namespace idk
 {
 	namespace anim { class Animation; }
-	
+	struct CSharpState
+	{
+		bool valid = false;
+		bool loop = false;
+		float normalizedTime = 0.0f;
+		float speed = 0.0f;
+		float duration = 0.0f;
+		float fps = 0.0f;
+	};
+
 	struct BasicAnimationState
 	{
 		RscHandle<anim::Animation> motion{};
@@ -51,6 +60,7 @@ namespace idk
 
 		// Functions
 		BasicAnimationState* GetBasicState();
+		const BasicAnimationState* GetBasicState() const;
 		BlendTree* GetBlendTree();
 		AnimationTransition& GetTransition(size_t index);
 		bool IsBlendTree() const;

@@ -3,44 +3,78 @@ namespace idk
     public class Animator
         : Component
     {
-        public void Play(string name)
+        public bool Play(string name)
              => Bindings.AnimatorPlay(handle, name);
+        public bool Play(string name, string layer)
+             => Bindings.AnimatorPlay(handle, name, layer);
 
-        public void CrossFade(string name)
+        public bool CrossFade(string name)
            => Bindings.AnimatorCrossFade(handle, name);
 
-        public void CrossFade(string name, float time)
+        public bool CrossFade(string name, float time)
           => Bindings.AnimatorCrossFade(handle, name, time);
 
-        public void Resume()
+        public bool CrossFade(string name, string layer)
+          => Bindings.AnimatorCrossFade(handle, name, 0.2f, layer);
+
+        public bool CrossFade(string name, float time, string layer)
+          => Bindings.AnimatorCrossFade(handle, name, time, layer);
+
+        public bool Resume()
              => Bindings.AnimatorResume(handle);
+        public bool Resume(string layer)
+             => Bindings.AnimatorResume(handle, layer);
 
-        public void Pause()
+        public bool Pause()
              => Bindings.AnimatorPause(handle);
+        public bool Pause(string layer)
+             => Bindings.AnimatorPause(handle, layer);
 
-        public void Stop()
+        public bool Stop()
              => Bindings.AnimatorStop(handle);
+        public bool Stop(string layer)
+             => Bindings.AnimatorStop(handle, layer);
 
+        public AnimationState GetState(string name)
+            => Bindings.AnimatorGetState(handle, name);
+         
+        public AnimationState GetState(string name, string layer)
+             => Bindings.AnimatorGetState(handle,name, layer);
+        
         public string DefaultStateName()
             => Bindings.AnimatorDefaultStateName(handle);
+        public string DefaultStateName(string layer)
+           => Bindings.AnimatorDefaultStateName(handle, layer);
 
         public string CurrentStateName()
            => Bindings.AnimatorCurrentStateName(handle);
+        public string CurrentStateName(string layer)
+           => Bindings.AnimatorCurrentStateName(handle, layer);
 
         public string BlendStateName()
            => Bindings.AnimatorBlendStateName(handle);
+        public string BlendStateName(string layer)
+           => Bindings.AnimatorBlendStateName(handle, layer);
 
         public bool IsPlaying()
            => Bindings.AnimatorIsPlaying(handle);
+        public bool IsPlaying(string layer)
+           => Bindings.AnimatorIsPlaying(handle, layer);
 
         public bool IsBlending()
           => Bindings.AnimatorIsBlending(handle);
+        public bool IsBlending(string layer)
+          => Bindings.AnimatorIsBlending(handle, layer);
 
         public bool HasCurrAnimEnded()
            => Bindings.AnimatorHasCurrAnimEnded(handle);
+        public bool HasCurrAnimEnded(string layer)
+           => Bindings.AnimatorHasCurrAnimEnded(handle, layer);
 
         public bool HasState(string name)
           => Bindings.AnimatorHasState(handle, name);
+        public bool HasState(string name, string layer)
+          => Bindings.AnimatorHasState(handle, name, layer);
         public int GetInt(string name)
          => Bindings.AnimatorGetInt(handle, name);
         public float GetFloat(string name)
