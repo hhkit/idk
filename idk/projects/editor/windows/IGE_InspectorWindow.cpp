@@ -244,7 +244,6 @@ namespace idk {
                             if (ImGui::MenuItem("Apply Removed Component"))
                             {
                                 PrefabUtility::RemoveComponentFromPrefab(_prefab_inst->prefab, _prefab_inst->object_index, i);
-                                SaveScene();
                                 will_break = true;
                             }
                             ImGui::EndPopup();
@@ -622,7 +621,6 @@ namespace idk {
         if (ImGui::Button("Apply"))
         {
             PrefabUtility::ApplyPrefabInstance(c_prefab->GetGameObject());
-            SaveScene();
         }
         ImGui::SameLine();
         if (ImGui::Button("Revert"))
@@ -874,7 +872,6 @@ namespace idk {
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
                 ov.property_path = "offset_max";
                 PrefabUtility::ApplyPropertyOverride(_prefab_inst->GetGameObject(), ov);
-                SaveScene();
             }
             if (ImGui::MenuItem("Revert Property"))
             {
@@ -1962,7 +1959,6 @@ namespace idk {
             {
                 PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._curr_component_nth };
                 PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
-                SaveScene();
             }
             if (ImGui::MenuItem("Revert Property"))
             {

@@ -82,6 +82,9 @@ namespace idk
 
 	void SaveScene()
 	{
+		if (Core::GetSystem<IDE>().IsGameRunning())
+			return;
+
 		auto curr_scene = Core::GetSystem<IDE>().curr_scene;
 		auto path = [&]() -> opt<string>
 		{
