@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MonoBehaviorEnvironment.h"
 
+#include <filesystem>
 #include <thread>
 
 #include <mono/jit/jit.h>
@@ -32,16 +33,12 @@ namespace idk::mono
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
 
 		// open file
-		while (true)
 		{
+			auto tmp_file_name = string{ full_path_to_game_dll } +"a";
+			rename(full_path_to_game_dll.data(), tmp_file_name.data());
+			rename(tmp_file_name.data(), full_path_to_game_dll.data());
 			std::ifstream file{ full_path_to_game_dll, std::ios::binary };
-			if (!file.is_open())
-			{
-				std::this_thread::yield();
-				continue;
-			}
 			assembly_data = binarify(file);
-			break;
 		}
 		// load assembly
 		mono_domain_set(_domain, true);
