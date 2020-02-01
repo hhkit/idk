@@ -1,47 +1,38 @@
 #pragma once
-#include "ImGui_Interface.h"
-#include "EditorInputs.h"
 
-namespace idk {
+#include "imgui_interface.h"
+
+namespace idk
+{
 	namespace ogl {
 		class OpenGLState;
 	}
-	namespace edt {
-		
-		class OI_Interface :public I_Interface {
-		public:
-			OI_Interface(ogl::OpenGLState*);
 
-			void Init() override;
-			void Shutdown() override;
+	class opengl_imgui_interface : public imgui_interface
+	{
+	public:
+		opengl_imgui_interface(ogl::OpenGLState*);
 
-			void ImGuiFrameBegin() override;
-			void ImGuiFrameUpdate() override;
-			void ImGuiFrameEnd() override;
+		void Init() override;
+		void Shutdown() override;
 
-			void ImGuiFrameRender() override;
+		void ImGuiFrameBegin() override;
+		void ImGuiFrameUpdate() override;
+		void ImGuiFrameEnd() override;
 
-			EditorInputs* Inputs() override;
-			
-			void TestFunction();
+		void ImGuiFrameRender() override;
 
-		private:
+		void TestFunction();
 
-			
-			struct EditorParameter
-			{
-				//ImGui
-				bool					im_demoWindow{ true };
-				vec4                    im_clearColor{};
-
-				//OpenGL
-				
-			};
-
-			EditorParameter				editorControls;
-			ogl::OpenGLState*			oglObj;
-			EditorInputs				editorInputs;
-
+	private:
+		struct EditorParameter
+		{
+			//ImGui
+			bool					im_demoWindow{ true };
+			vec4                    im_clearColor{};
 		};
+
+		EditorParameter				editorControls;
+		ogl::OpenGLState*			oglObj;
 	};
-};
+}

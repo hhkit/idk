@@ -48,6 +48,9 @@
     <ClInclude Include="audio\AudioSource.h" />
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
+    <ClInclude Include="ds\sliding_window.h" />
+    <ClInclude Include="network\EventInvokeRPCMessage.h" />
+    <ClInclude Include="network\EventLoadLevelMessage.h" />
     <ClInclude Include="gfx\ColorPickRequest.h" />
     <ClInclude Include="gfx\ColorPickResult.h" />
     <ClInclude Include="common\Layer.h" />
@@ -81,6 +84,9 @@
     <ClInclude Include="gfx\TextAlignment.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
+    <ClInclude Include="network\ClientMoveManager.h" />
+    <ClInclude Include="network\EventTransferOwnershipMessage.h" />
+    <ClInclude Include="network\GhostFlags.h" />
     <ClInclude Include="math\rect.h" />
     <ClInclude Include="gfx\ViewportUtil.h" />
     <ClInclude Include="machine.h" />
@@ -88,12 +94,40 @@
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="multithread_control.h" />
+    <ClInclude Include="network\Adapter.h" />
+    <ClInclude Include="network\Address.h" />
+    <ClInclude Include="network\ClassRep.h" />
+    <ClInclude Include="network\Client.h" />
+    <ClInclude Include="network\ClientConnectionManager.h" />
+    <ClInclude Include="network\ElectronTransformView.h" />
+    <ClInclude Include="network\ElectronView.h" />
+    <ClInclude Include="network\EventInstantiatePrefabMessage.h" />
+    <ClInclude Include="network\GhostMessage.h" />
+    <ClInclude Include="network\IDManager.h" />
+    <ClInclude Include="network\IncludeMessages.h" />
+    <ClInclude Include="network\GhostManager.h" />
+    <ClInclude Include="network\MoveClientMessage.h" />
+    <ClInclude Include="network\ServerMoveManager.h" />
+    <ClInclude Include="network\network.h" />
+    <ClInclude Include="network\ServerConnectionManager.h" />
+    <ClInclude Include="network\SubstreamManager.h" />
+    <ClInclude Include="network\ConnectionManager.h" />
+    <ClInclude Include="network\Device.h" />
+    <ClInclude Include="network\EventManager.h" />
+    <ClInclude Include="network\GameConfiguration.h" />
+    <ClInclude Include="network\NetworkSystem.h" />
+    <ClInclude Include="network\PersistManager.h" />
+    <ClInclude Include="network\Player.h" />
+    <ClInclude Include="network\Server.h" />
+    <ClInclude Include="network\TestMessage.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="parallel\circular_buffer.h" />
     <ClInclude Include="parallel\HazardPointerDL.h" />
     <ClInclude Include="parallel\queue.h" />
     <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="pch_common.h" />
+    <ClInclude Include="phys\AAbbTree.h" />
+    <ClInclude Include="phys\AabbTree_utils.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h" />
@@ -160,7 +194,6 @@
     <ClInclude Include="event\Signal.h" />
     <ClInclude Include="file\FileSystemIncludes.h" />
     <ClInclude Include="gfx\Camera.h" />
-    <ClInclude Include="gfx\CameraControls.h" />
     <ClInclude Include="gfx\Light.h" />
     <ClInclude Include="gfx\LightTypes.h" />
     <ClInclude Include="gfx\RenderTarget.h" />
@@ -304,6 +337,7 @@
     <ClInclude Include="core\Handle.h" />
     <ClInclude Include="ds\pool.h" />
     <ClInclude Include="ds\span.h" />
+    <ClInclude Include="util\property_path.h" />
     <ClInclude Include="util\string_hash.h" />
   </ItemGroup>
   <ItemGroup>
@@ -333,7 +367,6 @@
     <ClCompile Include="debug\LogSingleton.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
-    <ClCompile Include="gfx\CameraControls.cpp" />
     <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />
@@ -364,11 +397,31 @@
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />
     <ClCompile Include="math\shapes\halfspace.cpp" />
+    <ClCompile Include="network\Adapter.cpp" />
+    <ClCompile Include="network\Address.cpp" />
+    <ClCompile Include="network\Client.cpp" />
+    <ClCompile Include="network\ClientConnectionManager.cpp" />
+    <ClCompile Include="network\ClientMoveManager.cpp" />
+    <ClCompile Include="network\ElectronTransformView.cpp" />
+    <ClCompile Include="network\EventLoadLevelMessage.cpp" />
+    <ClCompile Include="network\EventManager.cpp" />
+    <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
+    <ClCompile Include="network\GameConfiguration.cpp" />
+    <ClCompile Include="network\GhostManager.cpp" />
+    <ClCompile Include="network\GhostMessage.cpp" />
+    <ClCompile Include="network\IDManager.cpp" />
+    <ClCompile Include="network\MoveClientMessage.cpp" />
+    <ClCompile Include="network\NetworkSystem.cpp" />
+    <ClCompile Include="network\Server.cpp" />
+    <ClCompile Include="network\ServerConnectionManager.cpp" />
+    <ClCompile Include="network\ServerMoveManager.cpp" />
+    <ClCompile Include="network\SubstreamManager.cpp" />
     <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />
     <ClCompile Include="particle\ParticleSystemModules.cpp" />
     <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
+    <ClCompile Include="phys\AabbTree.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
@@ -436,6 +489,7 @@
     </ClCompile>
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="test\TestComponent.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
     <ClCompile Include="core\Core.cpp" />
@@ -476,9 +530,9 @@
     <ClCompile Include="ui\UISystem.cpp" />
     <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="util\ioutils.cpp" />
+    <ClCompile Include="util\property_path.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\bin\editor.exe" />
     <None Include="anim\Animator.inl" />
     <None Include="core\Scheduler.inl" />
     <None Include="core\Core.inl" />
@@ -491,6 +545,7 @@
     <None Include="ds\dual_set.inl" />
     <None Include="ds\ranged_for.inl" />
     <None Include="ds\result.inl" />
+    <None Include="ds\sliding_window.inl" />
     <None Include="ds\slow_tree.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />
@@ -503,6 +558,11 @@
     <None Include="meta\tag.inl" />
     <None Include="meta\tuple.inl" />
     <None Include="meta\variant.inl" />
+    <None Include="network\ClientConnectionManager.inl" />
+    <None Include="network\ConnectionManager.inl" />
+    <None Include="network\NetworkSystem.inl" />
+    <None Include="network\ServerConnectionManager.inl" />
+    <None Include="network\SubstreamManager.inl" />
     <None Include="phys\raycasts\collision_raycast.inl" />
     <None Include="ReflectReg_AnimComponents.inl" />
     <None Include="reflect\detail\meta_manager.inl" />

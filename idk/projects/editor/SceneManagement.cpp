@@ -82,6 +82,9 @@ namespace idk
 
 	void SaveScene()
 	{
+		if (Core::GetSystem<IDE>().IsGameRunning())
+			return;
+
 		auto curr_scene = Core::GetSystem<IDE>().curr_scene;
 		auto path = [&]() -> opt<string>
 		{
@@ -142,7 +145,7 @@ namespace idk
 	{
 		if (const auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene())
 		{
-			auto stream = Core::GetSystem<FileSystem>().Open(Core::GetSystem<IDE>().GetTmpSceneMountPath(), FS_PERMISSIONS::WRITE);
+			auto stream = Core::GetSystem<FileSystem>().Open(IDE::path_tmp_scene, FS_PERMISSIONS::WRITE);
 			stream << serialize_text(*active_scene);
 		}
 	}
@@ -155,7 +158,7 @@ namespace idk
 			auto load_scene = Core::GetSystem<IDE>().curr_scene;
 			Core::GetSystem<SceneManager>().SetActiveScene(load_scene);
 			load_scene->Activate();
-			auto stream = Core::GetSystem<FileSystem>().Open(Core::GetSystem<IDE>().GetTmpSceneMountPath(), FS_PERMISSIONS::READ);
+			auto stream = Core::GetSystem<FileSystem>().Open(IDE::path_tmp_scene, FS_PERMISSIONS::READ);
 			auto deser = stringify(stream);
 			parse_text(deser, *load_scene);
 			Core::GetSystem<IDE>().ClearScene();
@@ -176,12 +179,13 @@ namespace idk
 
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
 
-			RestoreFromTemporaryScene();
 			prefab_scene->LoadFromResourcePath();
 
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
 					Core::GetResourceManager().Load(path, true);
+
+			RestoreFromTemporaryScene();
 		}
 	}
 }

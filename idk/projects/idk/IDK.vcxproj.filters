@@ -131,6 +131,36 @@
     <Filter Include="gfx\font">
       <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="network">
+      <UniqueIdentifier>{f35ebc8b-d413-42b6-bebc-1f24f1326fe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory">
+      <UniqueIdentifier>{5ac86b7f-b5d8-4550-99cd-75d596f6a49b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\data">
+      <UniqueIdentifier>{b24b3ed7-5420-4408-ac31-0cbad7e5fce3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\system">
+      <UniqueIdentifier>{9206de05-115a-4361-83f9-8cd4a78421fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\managers">
+      <UniqueIdentifier>{593d88bc-f344-4363-8402-5600f411fd62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parallel">
+      <UniqueIdentifier>{c0a27a3b-a553-49e0-bfdc-58031b1ed1c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\messages">
+      <UniqueIdentifier>{a13cb9de-2d6a-465a-b261-288e30b35648}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\views">
+      <UniqueIdentifier>{091e737d-85bc-4cf1-adce-737e0ddf4d33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="network\substream managers">
+      <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="phys\aabb tree">
+      <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -508,9 +538,6 @@
     </ClInclude>
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\CameraControls.h">
-      <Filter>gfx\camera</Filter>
     </ClInclude>
     <ClInclude Include="scene\SceneGraphBuilder.h">
       <Filter>common</Filter>
@@ -901,18 +928,12 @@
     <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
-    <ClInclude Include="common\LayerMask.h" />
-    <ClInclude Include="parallel\HazardPointerDL.h" />
-    <ClInclude Include="parallel\queue.h" />
-    <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="anim\AnimationTransition.h">
       <Filter>anim</Filter>
     </ClInclude>
     <ClInclude Include="anim\AnimationTypes.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\circular_buffer.h" />
-    <ClInclude Include="parallel\cache_aligned_wrapper.h" />
     <ClInclude Include="gfx\ShaderSnippetLoader.h">
       <Filter>gfx</Filter>
     </ClInclude>
@@ -928,24 +949,177 @@
     <ClInclude Include="gfx\RenderRequest.h">
       <Filter>gfx</Filter>
     </ClInclude>
-    <ClInclude Include="memory\ArenaAllocator.h" />
-    <ClInclude Include="gfx\CompiledMesh.h" />
-    <ClInclude Include="res\ResourceExtension.h" />
-    <ClInclude Include="res\CompiledAssets.h" />
-    <ClInclude Include="gfx\CompiledTexture.h" />
-    <ClInclude Include="res\CompiledAssetLoader.h" />
-    <ClInclude Include="res\IAssetLoader.h" />
-    <ClInclude Include="gfx\GraphFactory.h" />
     <ClInclude Include="pch_common.h" />
-    <ClInclude Include="ReflectRegistration.inl" />
-    <ClInclude Include="ReflectReg_Resources.inl" />
-    <ClInclude Include="ReflectReg_GfxComponents.inl" />
-    <ClInclude Include="ReflectReg_Components.inl" />
-    <ClInclude Include="ReflectReg_Common.inl" />
     <ClInclude Include="gfx\ColorPickResult.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\ColorPickRequest.h" />
+    <ClInclude Include="network\Device.h" />
+    <ClInclude Include="memory\ArenaAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\circular_buffer.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ColorPickRequest.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Player.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Address.h">
+      <Filter>network\data</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Server.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\NetworkSystem.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Adapter.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Client.h">
+      <Filter>network\system</Filter>
+    </ClInclude>
+    <ClInclude Include="network\PersistManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ClassRep.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventManager.h">
+      <Filter>network\substream managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\SubstreamManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ClientConnectionManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ServerConnectionManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\GameConfiguration.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CompiledMesh.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\CompiledTexture.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\cache_aligned_wrapper.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="res\CompiledAssetLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="res\CompiledAssets.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\GraphFactory.h">
+      <Filter>gfx\shadergraph</Filter>
+    </ClInclude>
+    <ClInclude Include="res\IAssetLoader.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\HazardPointerDL.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_Common.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_Components.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_GfxComponents.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectReg_Resources.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectRegistration.inl">
+      <Filter>reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="common\LayerMask.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\sliding_window.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\ThreadPool.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="res\ResourceExtension.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderTargetMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextureInternalFormat.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\queue.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="network\TestMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\IncludeMessages.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ConnectionManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\IDManager.h">
+      <Filter>network\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\network.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ElectronView.h">
+      <Filter>network\views</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ElectronTransformView.h">
+      <Filter>network\views</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventInstantiatePrefabMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\GhostMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\GhostManager.h">
+      <Filter>network\substream managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\GhostFlags.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventTransferOwnershipMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ServerMoveManager.h">
+      <Filter>network\substream managers</Filter>
+    </ClInclude>
+    <ClInclude Include="network\MoveClientMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ClientMoveManager.h">
+      <Filter>network\substream managers</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\AAbbTree.h">
+      <Filter>phys\aabb tree</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\AabbTree_utils.h">
+      <Filter>phys\aabb tree</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventLoadLevelMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventInvokeRPCMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="util\property_path.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1095,9 +1269,6 @@
     </ClCompile>
     <ClCompile Include="anim\SkeletonFactory.cpp">
       <Filter>anim\res/factories</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\CameraControls.cpp">
-      <Filter>gfx\camera</Filter>
     </ClCompile>
     <ClCompile Include="serialize\yaml_dump.cpp">
       <Filter>serialize</Filter>
@@ -1330,7 +1501,6 @@
     <ClCompile Include="core\NullHandleException.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="util\easing.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
@@ -1364,19 +1534,91 @@
     <ClCompile Include="gfx\FontData.cpp">
       <Filter>gfx\font</Filter>
     </ClCompile>
-    <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="gfx\ShaderIncluder.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="res\ResourceMeta.cpp" />
-    <ClCompile Include="gfx\GraphFactory.cpp" />
     <ClCompile Include="ColorPickRequest.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
+    <ClCompile Include="network\Address.cpp">
+      <Filter>network\data</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Server.cpp">
+      <Filter>network\system</Filter>
+    </ClCompile>
+    <ClCompile Include="network\NetworkSystem.cpp">
+      <Filter>network\system</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Adapter.cpp">
+      <Filter>network\system</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Client.cpp">
+      <Filter>network\system</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ClientConnectionManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ServerConnectionManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\GameConfiguration.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="util\easing.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\GraphFactory.cpp">
+      <Filter>gfx\shadergraph</Filter>
+    </ClCompile>
+    <ClCompile Include="network\EventManager.cpp">
+      <Filter>network\substream managers</Filter>
+    </ClCompile>
+    <ClCompile Include="parallel\ThreadPool.cpp">
+      <Filter>parallel</Filter>
+    </ClCompile>
+    <ClCompile Include="res\ResourceMeta.cpp">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\TextureInternalFormat.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TestComponent.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="network\GhostManager.cpp">
+      <Filter>network\substream managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\IDManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\SubstreamManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\MoveClientMessage.cpp">
+      <Filter>network\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="network\GhostMessage.cpp">
+      <Filter>network\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ElectronTransformView.cpp">
+      <Filter>network\views</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ServerMoveManager.cpp">
+      <Filter>network\substream managers</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ClientMoveManager.cpp">
+      <Filter>network\substream managers</Filter>
+    </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
+    <ClCompile Include="phys\AabbTree.cpp">
+      <Filter>phys\aabb tree</Filter>
+    </ClCompile>
+    <ClCompile Include="network\EventLoadLevelMessage.cpp" />
+    <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
+    <ClCompile Include="util\property_path.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1565,13 +1807,36 @@
     <None Include="anim\Animator.inl">
       <Filter>anim\detail</Filter>
     </None>
-    <None Include="memory\ArenaAllocator.inl" />
-    <None Include="..\..\bin\editor.exe" />
     <None Include="res\MetaBundle.inl">
       <Filter>res</Filter>
     </None>
-    <None Include="res\CompiledAssetLoader.inl" />
-    <None Include="ReflectReg_AnimComponents.inl" />
+    <None Include="memory\ArenaAllocator.inl">
+      <Filter>memory</Filter>
+    </None>
+    <None Include="network\ClientConnectionManager.inl">
+      <Filter>network\managers</Filter>
+    </None>
+    <None Include="network\ServerConnectionManager.inl">
+      <Filter>network\managers</Filter>
+    </None>
+    <None Include="res\CompiledAssetLoader.inl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="ReflectReg_AnimComponents.inl">
+      <Filter>reflect</Filter>
+    </None>
+    <None Include="ds\sliding_window.inl">
+      <Filter>ds</Filter>
+    </None>
+    <None Include="network\ConnectionManager.inl">
+      <Filter>network\managers</Filter>
+    </None>
+    <None Include="network\SubstreamManager.inl">
+      <Filter>network\managers</Filter>
+    </None>
+    <None Include="network\NetworkSystem.inl">
+      <Filter>network\system</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="_natvis\matrix.natvis">

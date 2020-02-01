@@ -58,8 +58,10 @@ namespace idk
 		time_point _last_frame;
 		time_point _this_frame;
 		seconds    _real_dt;
-		seconds    _accumulated_dt;
-		seconds    _fixed_dt = seconds{ 1.0 / 60 };
+		seconds    _accumulated_real_dt;
+		seconds    _accumulated_fixed_dt;
+		seconds    _game_update = seconds{ 1.0 / 30 };
+		seconds    _fixed_dt = seconds{ 1.0 / 30 };
 
 		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];
 

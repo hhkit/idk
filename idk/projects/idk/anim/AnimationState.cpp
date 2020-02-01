@@ -5,6 +5,10 @@ namespace idk {
 	{
 		return std::get_if<BasicAnimationState>(&state_data);
 	}
+	const BasicAnimationState* AnimationState::GetBasicState() const
+	{
+		return std::get_if<BasicAnimationState>(&state_data);
+	}
 	BlendTree* AnimationState::GetBlendTree()
 	{
 		return std::get_if<BlendTree>(&state_data);

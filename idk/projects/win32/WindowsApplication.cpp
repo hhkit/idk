@@ -6,6 +6,11 @@
 #include <tchar.h>
 #include <Shlwapi.h>
 #include <ShlObj.h>
+#include <winsock2.h>
+#include <iphlpapi.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "iphlpapi.lib")
 #include <stdio.h>  
 #include <locale>
 #include <codecvt>
@@ -74,18 +79,26 @@ namespace idk::win
 			args.emplace_back(elem);
 		args.emplace_back(nullptr);
 
-		auto retval = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		auto ret = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		if (wait)
+			LOG_TO(LogPool::SYS, "Executed %s with retcode %d", path.data(), ret);
+		else
+			LOG_TO(LogPool::SYS, "Executing %s with child %p", path.data(), ret);
 		if (!wait)
 		{
 			if (children.size() >= std::thread::hardware_concurrency())
 				WaitForChildren();
-			children.emplace_back(retval);
+			children.emplace_back(ret);
 		}
 	}
 	void Windows::WaitForChildren()
 	{
 		for (auto& elem : children)
-			_cwait(0, elem, 0);
+		{
+			int ret;
+			_cwait(&ret, elem, 0);
+			LOG_TO(LogPool::SYS, "Child %p ended with retcode %d", elem, ret);
+		}
 		children.clear();
 	}
 #pragma optimize ("", on)
@@ -209,6 +222,82 @@ namespace idk::win
 	{
 		std::wstring wide_str{ new_title.begin(), new_title.end() };
 		SetWindowText(hWnd, wide_str.data());
+	}
+
+	string adapter_to_short_name(PIP_ADAPTER_ADDRESSES aa)
+	{
+		char buf[BUFSIZ];
+		memset(buf, 0, BUFSIZ);
+		WideCharToMultiByte(CP_ACP, 0, aa->FriendlyName, wcslen(aa->FriendlyName), buf, BUFSIZ, NULL, NULL);
+		return buf;
+	}
+
+	string adapter_to_device_name(PIP_ADAPTER_ADDRESSES aa)
+	{
+		char buf[BUFSIZ];
+		memset(buf, 0, BUFSIZ);
+		WideCharToMultiByte(CP_ACP, 0, aa->Description, wcslen(aa->Description), buf, BUFSIZ, NULL, NULL);
+		return buf;
+	}
+
+	std::optional<Address> adapter_to_address(PIP_ADAPTER_UNICAST_ADDRESS ua)
+	{
+		char buf[BUFSIZ];
+
+		int family = ua->Address.lpSockaddr->sa_family;
+		memset(buf, 0, BUFSIZ);
+		getnameinfo(ua->Address.lpSockaddr, ua->Address.iSockaddrLength, buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
+		if (family == AF_INET) // IPV4
+		{
+			in_addr addr;
+			if (InetPtonA(family, buf, &addr) != 1)
+				return {};
+			return Address{ addr.S_un.S_un_b.s_b1, addr.S_un.S_un_b.s_b2,addr.S_un.S_un_b.s_b3 ,addr.S_un.S_un_b.s_b4 };
+		}
+		if (family == AF_INET6) // IPV6
+		{
+			in6_addr addr;
+			if (InetPtonA(family, buf, &addr) != 1)
+				return {};
+			
+		}
+		return {};
+	}
+
+	vector<Device> Windows::GetNetworkDevices()
+	{
+		DWORD rv, size;
+		PIP_ADAPTER_ADDRESSES adapter_addresses;
+		PIP_ADAPTER_UNICAST_ADDRESS ua;
+
+		rv = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
+		if (rv != ERROR_BUFFER_OVERFLOW) 
+			return {};
+
+		adapter_addresses = (PIP_ADAPTER_ADDRESSES)malloc(size);
+
+		rv = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, adapter_addresses, &size);
+		if (rv != ERROR_SUCCESS) 
+		{
+			free(adapter_addresses);
+			return {};
+		}
+		vector<Device> devices;
+		for (auto aa = adapter_addresses; aa != NULL; aa = aa->Next) {
+			Device d;
+			d.name = adapter_to_short_name(aa);
+			d.fullname = adapter_to_device_name(aa);
+			for (ua = aa->FirstUnicastAddress; ua != NULL; ua = ua->Next) {
+				auto get_addr = adapter_to_address(ua);
+				if (get_addr)
+					d.ip_addresses.emplace_back(*get_addr);
+			}
+			devices.emplace_back(d);
+		}
+
+		free(adapter_addresses);
+
+		return devices;
 	}
 
 	string Windows::GetExecutableDir()

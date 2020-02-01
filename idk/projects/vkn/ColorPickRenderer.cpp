@@ -390,7 +390,7 @@ namespace idk::vkn
 			//TODO skinned stuff
 		}
 		size_t i = 0;
-		auto req_itr = requests.begin();
+		
 		vk::CommandBuffer cmd_buffer = *rs.cmd_buffer;
 		vk::UniqueBuffer uresult_buffer = hlp::CreateBuffer(*View().Device(),requests.size()*sizeof(uint32_t),vk::BufferUsageFlagBits::eTransferDst,View().Dispatcher());
 		vk::Buffer result_buffer =*uresult_buffer;
@@ -410,6 +410,7 @@ namespace idk::vkn
 		};
 		auto& fd = _pimpl->handler.Add(std::move(requests));
 		fd.buffer = std::move(uresult_buffer);
+		auto req_itr = fd.requests.begin();
 		fd.alloc = _pimpl->allocator.Allocate(result_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 		fd.mem_chunk_size = fd.alloc->BlockSize();
 		fd.buffer_memory = fd.alloc->Memory();
@@ -419,7 +420,8 @@ namespace idk::vkn
 			auto& request = *req_itr;
 			auto& data = request.data;
 			task.GenerateDS(rs.dpools, (++i)==render_tasks.size());
-			auto vp_offset = ivec2{}, vp_size = data.camera.render_target->Size();
+			auto vp_offset = ivec2{};
+			auto vp_size = data.camera.render_target->Size();
 			auto rect = hlp::ToRect2D(vp_offset, vp_size);
 			vk::RenderPassBeginInfo rpbi
 			{

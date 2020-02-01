@@ -88,6 +88,8 @@
         <Item Name="[ParticleSystem]"      Condition="type == idk::natvis::ParticleSystemID"     >*((idk::Handle&lt;idk::ParticleSystem&gt;*)(&amp;id))</Item>
         <Item Name="[Canvas]"              Condition="type == idk::natvis::CanvasID"             >*((idk::Handle&lt;idk::Canvas&gt;*)(&amp;id))</Item>
         <Item Name="[RectTransform]"       Condition="type == idk::natvis::RectTransformID"      >*((idk::Handle&lt;idk::RectTransform&gt;*)(&amp;id))</Item>
+        <Item Name="[ElectronView]"        Condition="type == idk::natvis::ElectronViewID"       >*((idk::Handle&lt;idk::ElectronView&gt;*)(&amp;id))</Item>
+        <Item Name="[ElectronTransformView]" Condition="type == idk::natvis::ElectronTransformViewID"      >*((idk::Handle&lt;idk::ElectronTransformView&gt;*)(&amp;id))</Item>
       </CustomListItems>
     </Expand>
   </Type>

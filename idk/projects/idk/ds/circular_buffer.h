@@ -22,8 +22,17 @@ namespace idk
 	class circular_buffer
 	{
 	public:
+		using element_type = T;
+		using value_type = std::remove_cv_t<T>;
+		using size_t = std::size_t;
+		using difference_type = std::ptrdiff_t;
+		using pointer = T*;
+		using const_pointer = const T*;
+		using reference = T&;
+		using const_reference = const T&;
 		struct iterator;
 		struct const_iterator;
+
 
 		// constructors
 		constexpr circular_buffer() = default;
@@ -37,18 +46,20 @@ namespace idk
 		~circular_buffer() noexcept;
 
 		// accessors
+		reference front();
+		const_reference front() const;
+		reference operator[](size_t index);
+		const_reference operator[](size_t index) const;
 		constexpr bool empty() const noexcept;
-		constexpr auto size() const noexcept;
-		constexpr auto capacity() const noexcept;
+		constexpr size_t size() const noexcept;
+		constexpr size_t capacity() const noexcept;
 
 		// iterators
-		auto begin();
-		auto end();
-		auto begin() const;
-		auto end() const;
+		iterator begin();
+		iterator end();
+		const_iterator begin() const;
+		const_iterator end() const;
 
-		auto& front();
-		const auto& front() const;
 
 		// modifiers
 		bool push_back(T&& obj);

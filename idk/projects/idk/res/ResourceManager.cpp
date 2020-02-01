@@ -240,6 +240,7 @@ namespace idk
 
 	void ResourceManager::SaveDirtyMetadata()
 	{
+		static vector<Path> dirty_files;
 		for (auto& [path, resource] : _loaded_files)
 		{
 			auto dirty = resource.is_new; // is the resource brand new?
@@ -259,29 +260,37 @@ namespace idk
 			// if (path.find("YY_model.fbx") != string::npos) __debugbreak();
 			if (dirty)
 			{
-				// save the .meta file
-				MetaBundle m;
-
-				for (auto& elem : resource.bundle.GetAll())
-				{
-					std::visit([&](const auto& handle)
-						{
-							m.Add(handle);
-							if constexpr (has_tag_v<std::decay_t<decltype(handle)>::Resource, MetaResource>)
-								GetControlBlock(handle)->dirty_meta = true;
-						}, elem);
-				}
-				auto test = serialize_text(m);
-				{
-					auto stream = Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE);
-					stream << test;
-					stream.close();
-					stream.clear(); 
-				}
-				resource.is_new = false;
-				Load(path, true);
+				dirty_files.push_back(path);
 			}
 		}
+
+		for (auto& path : dirty_files)
+		{
+			auto& resource = _loaded_files[path];
+			// save the .meta file
+			MetaBundle m;
+
+			for (auto& elem : resource.bundle.GetAll())
+			{
+				std::visit([&](const auto& handle)
+					{
+						m.Add(handle);
+						if constexpr (has_tag_v<std::decay_t<decltype(handle)>::Resource, MetaResource>)
+							GetControlBlock(handle)->dirty_meta = true;
+					}, elem);
+			}
+			auto test = serialize_text(m);
+			{
+				auto stream = Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE);
+				stream << test;
+				stream.close();
+				stream.clear();
+			}
+			resource.is_new = false;
+			Load(path, true);
+		}
+
+		dirty_files.clear();
 	}
 
 	void ResourceManager::WatchDirectory()
@@ -410,8 +419,10 @@ namespace idk
 			}
 		}();
 
+		auto& fcb = _loaded_files[emplace_path];
 		if (old_bundle != meta_bundle) // meta is invalidated
 		{
+			fcb.is_new = true;
 			for (auto& elem : resource_bundle.GetAll())
 				std::visit([](auto& handle) {
 				if constexpr (has_tag_v<std::decay_t<decltype(handle)>, MetaResource>)
@@ -419,7 +430,7 @@ namespace idk
 					elem);
 		}
 
-		_loaded_files[emplace_path].bundle = resource_bundle;
+		fcb.bundle = resource_bundle;
 
 		// set path of resources
 		for (auto& elem : resource_bundle.GetAll())

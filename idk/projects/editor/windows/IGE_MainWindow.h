@@ -42,10 +42,6 @@ namespace idk {
 		void DisplayToolBarChildWindow();
 		void DisplayHintBarChildWindow();
 
-		void PollShortcutInput();
-
-
-
 		const ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoTitleBar
 										  | ImGuiWindowFlags_NoScrollbar
 										  | ImGuiWindowFlags_NoResize

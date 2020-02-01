@@ -21,7 +21,7 @@ namespace idk
 			std::ifstream stream;
 			stream.open(full_path.data(), std::ios::binary);
 			IDK_ASSERT(stream);
-			return stringify(stream);
+			return binarify(stream);
 		}();
 
 		auto [t_guid, t_meta] = [&]()
@@ -41,7 +41,7 @@ namespace idk
 		t.internal_format = t_meta.internal_format;
 		t.is_srgb = t_meta.is_srgb;
 		t.filter_mode = t_meta.filter_mode;
-		t.pixel_buffer.insert(t.pixel_buffer.end(), binary_data.begin(), binary_data.end());
+		t.pixel_buffer = std::move(binary_data);
 
 		return AssetBundle{ updated_meta_bundle, {{ t_guid, std::move(t)} } };
 	}

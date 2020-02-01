@@ -94,6 +94,13 @@ namespace idk::mono
 				thunk->Invoke(script_data.Raw());
 		}
 	}
+
+	void Behavior::InvokeRPC(string_view rpc, MonoArray* params)
+	{
+		auto rpc_method = script_data.Type()->GetRPC(rpc);
+		if (rpc_method)
+			mono_runtime_invoke_array(rpc_method, script_data.Raw(), params, nullptr);
+	}
 	
 	Behavior::Behavior(const Behavior& rhs)
 		: enabled{ rhs.enabled }

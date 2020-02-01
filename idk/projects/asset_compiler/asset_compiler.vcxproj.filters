@@ -34,6 +34,7 @@
     <ClCompile Include="..\game\ReflectRegistered.cpp">
       <Filter>Shared</Filter>
     </ClCompile>
+    <ClCompile Include="SceneUpdater.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssimpCompiler.h" />
@@ -43,5 +44,6 @@
     <ClInclude Include="DDSCompiler.h" />
     <ClInclude Include="IAssetLoader.h" />
     <ClInclude Include="TextureCompiler.h" />
+    <ClInclude Include="SceneUpdater.h" />
   </ItemGroup>
 </Project>

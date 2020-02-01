@@ -173,11 +173,12 @@ namespace idk
 
 		try
 		{
-			auto ser = serialize_text(*saveme);
-			auto stream = Core::template GetSystem<FileSystem>().Open(filepath, FS_PERMISSIONS::WRITE);
-			stream << ser;
-
-			return saveme;
+			{
+				auto ser = serialize_text(*saveme);
+				auto stream = Core::template GetSystem<FileSystem>().Open(filepath, FS_PERMISSIONS::WRITE);
+				stream << ser;
+			}
+			return Load<Res>(filepath).value();
 		}
 		catch (...)
 		{

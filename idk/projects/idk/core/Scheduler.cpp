@@ -14,7 +14,7 @@ namespace idk
 	{
 
 		_last_frame = _this_frame = Clock::now();
-		_accumulated_dt = seconds{};
+		_accumulated_fixed_dt = _accumulated_real_dt = seconds{};
 	}
 	void Scheduler::SequentialUpdate()
 	{
@@ -22,7 +22,8 @@ namespace idk
 
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
-		_accumulated_dt += std::min(_real_dt, dt_limit) * time_scale;
+		_accumulated_real_dt += std::min(_real_dt, dt_limit);
+		_accumulated_fixed_dt += std::min(_real_dt, dt_limit) * time_scale;
 
 		constexpr auto execute_pass = [](auto& pass_vector)
 		{
@@ -39,17 +40,19 @@ namespace idk
 				elem.previous_frames.push_back(Pass::Call{ duration_cast<seconds>(end - pt), paused });
 			}
 		};
-
-		execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
-
-		while (_accumulated_dt > _fixed_dt)
+		while (_accumulated_real_dt > _real_dt)
 		{
-			_accumulated_dt -= _fixed_dt;
-			execute_pass(_passes[s_cast<size_t>(UpdatePhase::Fixed)]);
-		}
+			_accumulated_real_dt -= _real_dt;
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
 
-		execute_pass(_passes[s_cast<size_t>(UpdatePhase::MainUpdate)]);
+			while (_accumulated_fixed_dt > _fixed_dt)
+			{
+				_accumulated_fixed_dt -= _fixed_dt;
+				execute_pass(_passes[s_cast<size_t>(UpdatePhase::Fixed)]);
+			}
 
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::MainUpdate)]);
+		};
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::PreRender)]);
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::Render)]);
@@ -70,7 +73,7 @@ namespace idk
 	}
 	seconds Scheduler::GetRemainingTime() noexcept
 	{
-		return _accumulated_dt;
+		return _accumulated_real_dt;
 	}
 	time_point Scheduler::GetProgramStart() noexcept
 	{

@@ -18,31 +18,20 @@ namespace idk {
 		game_object_handle = gameObject;
 	}
 
-	bool CMD_TransformGameObject::execute() {
-		//Skips first execute
-		if (!first_execute) {
-			first_execute = true;
-			if (game_object_handle)
-				return true;
-			else
-				return false;
-		}
-
-		if (game_object_handle) 
-		{
-			const Handle<Transform> transformHandle = game_object_handle->Transform();
-			transformHandle->GlobalMatrix(new_values);
-		}
-		return false;
+	bool CMD_TransformGameObject::execute()
+	{
+		if (!game_object_handle)
+			return false;
+		game_object_handle->Transform()->GlobalMatrix(new_values);
+		return true;
 	}
 
-	bool CMD_TransformGameObject::undo()  {
-		if (game_object_handle) 
-		{
-			const Handle<Transform> transformHandle = game_object_handle->Transform();
-			transformHandle->GlobalMatrix(original_values);
-		}
-		return false;
+	bool CMD_TransformGameObject::undo()
+	{
+		if (!game_object_handle)
+			return false;
+		game_object_handle->Transform()->GlobalMatrix(original_values);
+		return true;
 	}
 
 

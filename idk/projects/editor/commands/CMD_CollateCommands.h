@@ -31,10 +31,7 @@ namespace idk {
 		virtual bool undo() override;
 
 		vector<unique_ptr<ICommand>> repeated_commands{};
-	private:
-		int num_of_times_to_repeat;
-		bool first_call = false;
-
+		int count = 0;
 	};
 
 }

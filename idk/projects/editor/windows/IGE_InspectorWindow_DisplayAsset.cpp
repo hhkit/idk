@@ -86,7 +86,7 @@ namespace idk
         if (iter == _prefab_store.end())
             iter = _prefab_store.emplace(prefab, PrefabUtility::Instantiate(prefab, *Core::GetSystem<SceneManager>().GetPrefabScene())).first;
         DisplayGameObjects({ iter->second });
-        if (iter->second->GetComponent<PrefabInstance>()->overrides.size() ||
+        if (iter->second->GetComponent<PrefabInstance>()->overrides.size() > 4||
             iter->second->GetComponents().size() != prefab->data[0].components.size() + 1) // + 1 for prefab instance
             PrefabUtility::ApplyPrefabInstance(iter->second);
     }

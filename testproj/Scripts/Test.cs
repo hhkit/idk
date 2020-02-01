@@ -98,8 +98,8 @@ namespace TestAndSeek
 
             if (rb)
             {
-                System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(Axis.Horizontal), Input.GetAxis(Axis.Vertical));
-                rb.AddForce(f * (Input.GetAxis(Axis.Horizontal) * Vector3.right + Input.GetAxis(Axis.Vertical) * Vector3.forward));
+                System.Console.WriteLine("h: {0}, v: {1}", Input.GetAxis(0, Axis.Horizontal), Input.GetAxis(0, Axis.Vertical));
+                rb.AddForce(f * (Input.GetAxis(0, Axis.Horizontal) * Vector3.right + Input.GetAxis(0, Axis.Vertical) * Vector3.forward));
 
 
                 if (Input.GetKey(KeyCode.W)) rb.AddForce(f * Vector3.forward);
