@@ -35,9 +35,9 @@ namespace idk
 				msg.param_count = (int)buffer.size();
 				msg.param_buffer.clear();
 				msg.param_buffer.resize(msg.param_count);
-				for (int i = 0; i < msg.param_count; ++i)
+				for (unsigned i = 0; i < msg.param_count; ++i)
 				{
-					msg.param_buffer[i].size = buffer[i].size();
+					msg.param_buffer[i].size = (int) buffer[i].size();
 					msg.param_buffer[i].buffer = buffer[i];
 				}
 			});

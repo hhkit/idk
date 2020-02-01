@@ -60,8 +60,8 @@ namespace idk
 		seconds    _real_dt;
 		seconds    _accumulated_real_dt;
 		seconds    _accumulated_fixed_dt;
-		seconds    _game_update = seconds{ 1.0 / 30 };
-		seconds    _fixed_dt = seconds{ 1.0 / 30 };
+		seconds    _game_update = seconds{ 1.0 / 60 };
+		seconds    _fixed_dt = seconds{ 1.0 / 60 };
 
 		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];
 

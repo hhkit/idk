@@ -69,7 +69,7 @@ namespace idk
 					return elem.get();
 		}
 		}
-		IDK_ASSERT_MSG(false, "You shouldn't have gotten here?");
+		return nullptr; // no connection found
 	}
 
 	void NetworkSystem::ReceivePackets()
