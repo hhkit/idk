@@ -362,3 +362,6 @@ idk/dep/lib/SPIRV-Tools-optd.lib
 /idk/engine_data/idk.xml
 /idk/tools/compiler
 /testproj/Cache
+/idk/engine_data/Owin.dll
+/idk/engine_data/Microsoft.Owin.xml
+/idk/engine_data/Microsoft.Owin.dll
