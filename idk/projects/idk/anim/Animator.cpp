@@ -168,9 +168,31 @@ namespace idk
 	{
 		if (preview_playback)
 		{
-			for (size_t i = 0; i < layers.size(); ++i)
+			for (auto& layer : layers)
 			{
-				layers[i].Play(layers[i].curr_state.index);
+				auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
+				if (anim_state.valid)
+				{
+
+					bool has_valid_clip = true;
+					const auto state = anim_state.GetBasicState();
+					if (state)
+					{
+						has_valid_clip = s_cast<bool>(state->motion);
+					}
+					else
+					{
+						// All motions need to be valid for a blend tree to be valid
+						for (auto& m : anim_state.GetBlendTree()->motions)
+							if (!m.motion)
+							{
+								has_valid_clip = false;
+								break;
+							}
+					}
+					if (has_valid_clip)
+						layer.Play(layer.curr_state.index);
+				}
 			}
 
 			layers[0].weight = 1.0f;

@@ -70,4 +70,17 @@ REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
 REFLECT_VARS(prefab, overrides, object_index, removed_components)
 REFLECT_END()
 
+// TEST
+REFLECT_BEGIN(idk::TestComponent, "TestComponent")
+REFLECT_VARS(a, b, c, d, makeme, send_pos, send_rot)
+REFLECT_END()
+
+// NETWORKING
+REFLECT_BEGIN(idk::ElectronView, "ElectronView")
+REFLECT_VAR(network_id)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ElectronTransformView, "ElectronTransformView")
+REFLECT_VARS(sync_position, sync_rotation, sync_scale, send_threshold, snap_threshold, interp_over_seconds)
+REFLECT_END()
 #pragma endregion

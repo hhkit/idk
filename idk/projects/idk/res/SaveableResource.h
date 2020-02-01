@@ -15,13 +15,15 @@ namespace idk
 		static constexpr auto autosave = AutoSave::value;
 
 		bool IsDirty() const { return _dirty; }
-		void Dirty() { _dirty = true; };
+		void Dirty() { if (_saveable) _dirty = true; };
+		void SetSaveableFlag(bool set) { _saveable = set; _dirty = false; }
 	private:
 		template<typename T>
 		friend struct detail::ResourceManager_detail;
 		friend class ResourceManager;
 
 		bool _dirty = false;
+		bool _saveable = true;
 
 		void Clean() { _dirty = false; };
 	};

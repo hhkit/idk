@@ -610,5 +610,47 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int LayerMaskNameToLayer(string name);
+
+        /*
+         * Network
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool NetworkGetIsConnected();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool NetworkGetIsHost();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int NetworkGetPing();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkCreateLobby();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkConnect(Address a);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkDisconnect();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkLoadScene(Guid scene);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong NetworkInstantiatePrefabPosition(Guid guid, Vector3 pos);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong NetworkInstantiatePrefabPositionRotation(Guid guid, Vector3 pos, Quaternion rot);
+
+        /*
+         * ElectronView
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static uint ViewGetNetworkId(ulong handle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ViewTransferOwnership(ulong handle, int newID);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[][] parameters);
     }
 }

@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Reflection;
 
 namespace idk
 {
@@ -47,6 +50,13 @@ namespace idk
             new_coroutines.Add(coroutine);
             return coroutine;
         }
+        public override Object Clone()
+        {
+            var retval = (MonoBehavior) MemberwiseClone();
+            retval.coroutines = new List<Coroutine>();
+            retval.new_coroutines = new List<Coroutine>();
+            return retval;
+        }
 
         internal void UpdateCoroutines()
         {
@@ -69,5 +79,6 @@ namespace idk
         {
             coroutines.Remove(stopme);
         }
+
     }
 }

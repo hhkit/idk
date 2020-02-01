@@ -17,6 +17,7 @@
 #include <particle/ParticleSystemUpdater.h>
 #include <ui/UISystem.h>
 
+#include <network/NetworkSystem.h>
 #include <phys/PhysicsSystem.h>
 
 #include <res/ResourceManager.h>

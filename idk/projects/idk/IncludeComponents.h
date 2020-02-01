@@ -14,6 +14,9 @@
 #include <gfx/Light.h>
 #include <gfx/TextMesh.h>
 
+#include <network/ElectronView.h>
+#include <network/ElectronTransformView.h>
+
 #include <ui/Canvas.h>
 #include <ui/RectTransform.h>
 #include <ui/Image.h>

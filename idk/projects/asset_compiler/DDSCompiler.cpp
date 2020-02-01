@@ -21,7 +21,7 @@ namespace idk
 			std::ifstream stream;
 			stream.open(full_path.data(), std::ios::binary);
 			IDK_ASSERT(stream);
-			return stringify(stream);
+			return binarify(stream);
 		}();
 
 		auto [t_guid, t_meta] = [&]()

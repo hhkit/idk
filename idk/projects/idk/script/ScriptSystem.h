@@ -42,6 +42,7 @@ namespace idk::mono
 
 		void ApplyConfig(Config& config) override;
 		void RefreshGameScripts();
+		void CompileGameScripts();
 
 		Handle<Behavior>       GetMonoBehaviorInstance(std::string_view type);
 		span<Handle<Behavior>> GetMonoBehaviorsOfType(std::string_view type);

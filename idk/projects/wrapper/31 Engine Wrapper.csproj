@@ -88,6 +88,14 @@
     <Compile Include="Core\IDK.cs" />
     <Compile Include="Core\Object.cs" />
     <Compile Include="Debug\NullRef.cs" />
+    <Compile Include="Electron\Address.cs" />
+    <Compile Include="Electron\ElectronStream.cs" />
+    <Compile Include="Electron\ElectronView.cs" />
+    <Compile Include="Electron\ElectronNetwork.cs" />
+    <Compile Include="Electron\IElectronObservable.cs" />
+    <Compile Include="Electron\Player.cs" />
+    <Compile Include="Electron\RPC.cs" />
+    <Compile Include="Electron\RPCTarget.cs" />
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />

@@ -2,9 +2,11 @@
 
 #include "CompiledAssetLoader.h"
 #include <res/ResourceManager.inl>
+#include <res/SaveableResource.h>
 #include <serialize/binary.inl>
 #include <serialize/text.inl>
 #include <util/ioutils.h>
+#include <meta/tag.inl>
 
 #include <res/compiled_asset_tags.h>
 
@@ -33,7 +35,9 @@ namespace idk
             {
                 (*res).guid = guid;
             }
-            Core::GetResourceManager().LoaderEmplaceResource<EngineResource>(guid, std::move(*res));
+            auto ptr = Core::GetResourceManager().LoaderEmplaceResource<EngineResource>(guid, std::move(*res));
+            if constexpr (has_tag_v<EngineResource, Saveable>)
+                ptr->SetSaveableFlag(false);
         }
     }
 }

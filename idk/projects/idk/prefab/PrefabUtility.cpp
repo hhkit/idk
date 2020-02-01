@@ -128,15 +128,23 @@ namespace idk
         };
         constexpr static auto num_default_overrides = std::size(default_overrides);
 
-        static bool is_default_override(const PropertyOverride& ov)
+        static bool is_default_override(const PropertyOverride& ov, bool is_root = true)
         {
-            if (ov.component_name == "Transform")
+            if (is_root)
             {
-                if (ov.property_path.find("position") == 0 || ov.property_path.find("rotation") == 0 || ov.property_path.find("parent") == 0)
+                if (ov.component_name == "Transform")
+                {
+                    if (ov.property_path.find("position") == 0 || ov.property_path.find("rotation") == 0 || ov.property_path.find("parent") == 0)
+                        return true;
+                }
+                else if (ov.component_name == "Name")
                     return true;
             }
-            else if (ov.component_name == "Name")
-                return true;
+            else
+            {
+                if (ov.component_name == "Transform" && ov.property_path.find("parent") == 0)
+                    return true;
+            }
 
             return false;
         }
@@ -182,20 +190,30 @@ namespace idk
 
         static void add_default_overrides(PrefabInstance& prefab_inst)
         {
-            for (const auto& ov : default_overrides)
+            constexpr auto add_ov = [](PrefabInstance& inst, string_view name, string_view path)
             {
-                auto ov_i = find_override(prefab_inst, ov.component_name, ov.property_path, 0);
+                auto ov_i = find_override(inst, name, path, 0);
                 if (ov_i >= 0)
                 {
-                    prefab_inst.overrides[ov_i].value.swap(resolve_property_path(
-                        *get_component(prefab_inst.GetGameObject(), ov.component_name, ov.component_nth), ov.property_path));
+                    inst.overrides[ov_i].value.swap(resolve_property_path(
+                        *get_component(inst.GetGameObject(), name, 0), path));
                 }
                 else
                 {
-                    prefab_inst.overrides.push_back(ov);
-                    prefab_inst.overrides.back().value.swap(resolve_property_path(
-                        *get_component(prefab_inst.GetGameObject(), ov.component_name, ov.component_nth), ov.property_path));
+                    inst.overrides.push_back({ name, path });
+                    inst.overrides.back().value.swap(resolve_property_path(
+                        *get_component(inst.GetGameObject(), name, 0), path));
                 }
+            };
+
+            if (prefab_inst.object_index > 0)
+            {
+                add_ov(prefab_inst, "Transform", "parent");
+            }
+            else
+            {
+                for (const auto& ov : default_overrides)
+                    add_ov(prefab_inst, ov.component_name, ov.property_path);
             }
         }
 
@@ -376,6 +394,9 @@ namespace idk
     {
         const auto& prefab = prefab_inst.prefab;
         if (!prefab || handle.id == 0)
+            return {};
+
+        if (prefab_inst.object_index >= prefab->data.size())
             return {};
 
         const auto& prefab_data = prefab->data[prefab_inst.object_index];
@@ -673,7 +694,7 @@ namespace idk
                 continue;
             if (helpers::has_override(prefab_inst, component_name, property_path, component_nth))
                 continue;
-            if (helpers::is_default_override(prop_override))
+            if (helpers::is_default_override(prop_override, object_index == 0))
                 continue;
 
             assign_property_path(*helpers::get_component(prefab_inst.GetGameObject(), component_name, component_nth), property_path,
@@ -748,7 +769,7 @@ namespace idk
 
     static void _revert_property_override(PrefabInstance& prefab_inst, const PropertyOverride& override)
     {
-        if (helpers::is_default_override(override))
+        if (helpers::is_default_override(override, prefab_inst.object_index == 0))
             return;
 
         const Prefab& prefab = *prefab_inst.prefab;
@@ -844,15 +865,46 @@ namespace idk
         auto& prefab_inst = *prefab_inst_handle;
 
         for (auto& override : prefab_inst.overrides)
-        {
-            if (!helpers::is_default_override(override))
-                _revert_property_override(prefab_inst, override);
-        }
+            _revert_property_override(prefab_inst, override);
         prefab_inst.overrides.clear();
 
         vector<Handle<GameObject>> objs;
         auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
         tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
+
+        // find missing objs
+        for (int i = 0; i < prefab_inst.prefab->data.size(); ++i)
+        {
+            auto iter = std::find_if(objs.begin(), objs.end(), [i](Handle<GameObject> obj)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index == i)
+                        return true;
+                }
+                return false;
+            });
+            if (iter != objs.end()) // object still exists
+                continue;
+
+            // spawn child
+            auto child = Scene{ instance_root.scene }.CreateGameObject();
+            auto child_inst = child->AddComponent<PrefabInstance>();
+            child_inst->prefab = prefab_inst.prefab;
+            child_inst->object_index = i;
+
+            InstantiateSpecific(child, *child_inst);
+            const auto parent_index = prefab_inst.prefab->data[i].parent_index;
+            child->Transform()->SetParent(*std::find_if(objs.begin(), objs.end(), [parent_index](Handle<GameObject> obj)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index == parent_index)
+                        return true;
+                }
+                return false;
+            }));
+        }
 
         // diff components
         for (auto obj : objs)
@@ -863,8 +915,7 @@ namespace idk
 
             for (auto& override : obj_inst->overrides)
             {
-                if (!helpers::is_default_override(override))
-                    _revert_property_override(*obj_inst, override);
+                _revert_property_override(*obj_inst, override);
             }
             obj_inst->overrides.clear();
 
@@ -934,7 +985,7 @@ namespace idk
 
 	static void _apply_property_override(PrefabInstance& target, const PropertyOverride& override)
 	{
-		if (helpers::is_default_override(override))
+		if (helpers::is_default_override(override, target.object_index == 0))
 			return;
 
         const Handle<GameObject> go = target.GetGameObject();
@@ -985,13 +1036,53 @@ namespace idk
         auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
         tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
+        // find missing objs
+        for (int i = 0; i < prefab->data.size(); ++i)
+        {
+            auto iter = std::find_if(objs.begin(), objs.end(), [i](Handle<GameObject> obj)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index == i)
+                        return true;
+                }
+                return false;
+            });
+            if (iter != objs.end()) // object still exists
+                continue;
+
+            // remove obj from prefab, and make sure links are still correct
+            prefab->data.erase(prefab->data.begin() + i);
+            for (auto obj : objs)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index > i)
+                        --inst->object_index;
+                }
+            }
+        }
+
         // diff components
         for (auto obj : objs)
         {
             auto obj_prefab_inst = obj->GetComponent<PrefabInstance>();
             if (!obj_prefab_inst)
             {
-                // todo: apply added obj
+                auto parent = obj->Parent();
+                auto parent_inst = parent->GetComponent<PrefabInstance>();
+                obj_prefab_inst = obj->AddComponent<PrefabInstance>();
+                obj_prefab_inst->object_index = prefab->data.size();
+                obj_prefab_inst->prefab = prefab;
+                auto& obj_prefab_data = prefab->data.emplace_back();
+                for (auto& c : obj->GetComponents())
+                {
+                    if (c.is_type<PrefabInstance>())
+                        continue;
+                    obj_prefab_data.components.emplace_back((*c).copy());
+                }
+                prefab->data.back().parent_index = parent_inst->object_index;
+                helpers::add_default_overrides(*obj_prefab_inst);
                 continue;
             }
             if (obj_prefab_inst->prefab != prefab)
