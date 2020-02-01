@@ -409,7 +409,6 @@ namespace idk::vkn
 			}
 		};
 		auto& fd = _pimpl->handler.Add(std::move(requests));
-		auto req_itr = fd.requests.begin();
 		fd.buffer = std::move(uresult_buffer);
 		auto req_itr = fd.requests.begin();
 		fd.alloc = _pimpl->allocator.Allocate(result_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
