@@ -673,7 +673,7 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
-        const bool has_pos_override = _prefab_inst->object_index > 0 && has_override(_prefab_inst, "position");
+        const bool has_pos_override = has_override(_prefab_inst, "position") && _prefab_inst->object_index > 0;
         auto y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
         if (has_pos_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
@@ -695,7 +695,7 @@ namespace idk {
         }
         check_modify();
 
-        const bool has_rot_override = _prefab_inst->object_index > 0 && has_override(_prefab_inst, "rotation");
+        const bool has_rot_override = has_override(_prefab_inst, "rotation") && _prefab_inst->object_index > 0;
         y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
         if (has_rot_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
