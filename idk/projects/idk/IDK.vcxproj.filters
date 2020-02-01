@@ -161,6 +161,9 @@
     <Filter Include="phys\aabb tree">
       <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="phys\aabb tree">
+      <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -928,6 +931,9 @@
     <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
+    <ClInclude Include="parallel\HazardPointerDL.h" />
+    <ClInclude Include="parallel\queue.h" />
+    <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="anim\AnimationTransition.h">
       <Filter>anim</Filter>
     </ClInclude>

@@ -239,6 +239,9 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorHasState(ulong id, string name, string layer = "");
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorHasState(ulong id, string name, string layer = "");
+
         // Parameter Getters
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int AnimatorGetInt(ulong id, string name);
