@@ -5,18 +5,23 @@
 namespace idk
 {
 	bool AnimationLayer::Play(size_t index, float offset)
-	{
-		// Reset the blend/interrupt state and the playing state
-		Reset();
+	{	
 		if (index >= anim_states.size())
 		{
+			Reset();
 			LOG_CRASH_TO(LogPool::ANIM, "Animation States table is messed up. Somehow we are accessing out of bounds.");
 			return false;
 		}
+
+		if (IsInTransition() && !IsTransitionInterruptible())
+			return false;
 		
-		if (curr_state.is_playing && curr_state.index == index)
+		// Reset the blend/interrupt state and the playing state
+		const bool is_playing = curr_state.is_playing && !curr_state.is_stopping;
+		if (is_playing && curr_state.index == index)
 			return false;
 
+		Reset();
 		curr_state.is_playing = true;
 		curr_state.index = index;
 		// cap at 1.0f
@@ -26,12 +31,10 @@ namespace idk
 
 	bool AnimationLayer::Play(string_view anim_name, float offset)
 	{
-		// Reset the blend/interrupt state and the playing state
-		Reset();
-
 		auto found_anim = anim_name.empty() ? default_index : FindAnimationIndex(anim_name);
 		if (found_anim >= anim_states.size())
 		{
+			Reset();
 			return false;
 		}
 

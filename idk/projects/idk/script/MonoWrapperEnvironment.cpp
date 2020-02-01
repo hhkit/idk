@@ -757,10 +757,16 @@ namespace idk::mono
 		// BIND_END();
 
 		// Animator
-		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name)
+		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			return animator->Play(s.get());
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->Play(s.get(), 0.0f, index);
 		}
 		BIND_END();
 
