@@ -378,6 +378,9 @@ namespace idk
         if (!prefab || handle.id == 0)
             return {};
 
+        if (prefab_inst.object_index >= prefab->data.size())
+            return {};
+
         const auto& prefab_data = prefab->data[prefab_inst.object_index];
 
         vector<int> removed;
@@ -854,6 +857,40 @@ namespace idk
         auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
         tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
+        // find missing objs
+        for (int i = 0; i < prefab_inst.prefab->data.size(); ++i)
+        {
+            auto iter = std::find_if(objs.begin(), objs.end(), [i](Handle<GameObject> obj)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index == i)
+                        return true;
+                }
+                return false;
+            });
+            if (iter != objs.end()) // object still exists
+                continue;
+
+            // spawn child
+            auto child = Scene{ instance_root.scene }.CreateGameObject();
+            auto child_inst = child->AddComponent<PrefabInstance>();
+            child_inst->prefab = prefab_inst.prefab;
+            child_inst->object_index = i;
+
+            InstantiateSpecific(child, *child_inst);
+            const auto parent_index = prefab_inst.prefab->data[i].parent_index;
+            child->Transform()->SetParent(*std::find_if(objs.begin(), objs.end(), [parent_index](Handle<GameObject> obj)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index == parent_index)
+                        return true;
+                }
+                return false;
+            }));
+        }
+
         // diff components
         for (auto obj : objs)
         {
@@ -985,13 +1022,53 @@ namespace idk
         auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
         tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
+        // find missing objs
+        for (int i = 0; i < prefab->data.size(); ++i)
+        {
+            auto iter = std::find_if(objs.begin(), objs.end(), [i](Handle<GameObject> obj)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index == i)
+                        return true;
+                }
+                return false;
+            });
+            if (iter != objs.end()) // object still exists
+                continue;
+
+            // remove obj from prefab, and make sure links are still correct
+            prefab->data.erase(prefab->data.begin() + i);
+            for (auto obj : objs)
+            {
+                if (const auto inst = obj->GetComponent<PrefabInstance>())
+                {
+                    if (inst->object_index > i)
+                        --inst->object_index;
+                }
+            }
+        }
+
         // diff components
         for (auto obj : objs)
         {
             auto obj_prefab_inst = obj->GetComponent<PrefabInstance>();
             if (!obj_prefab_inst)
             {
-                // todo: apply added obj
+                auto parent = obj->Parent();
+                auto parent_inst = parent->GetComponent<PrefabInstance>();
+                obj_prefab_inst = obj->AddComponent<PrefabInstance>();
+                obj_prefab_inst->object_index = prefab->data.size();
+                obj_prefab_inst->prefab = prefab;
+                auto& obj_prefab_data = prefab->data.emplace_back();
+                for (auto& c : obj->GetComponents())
+                {
+                    if (c.is_type<PrefabInstance>())
+                        continue;
+                    obj_prefab_data.components.emplace_back((*c).copy());
+                }
+                prefab->data.back().parent_index = parent_inst->object_index;
+                helpers::add_default_overrides(*obj_prefab_inst);
                 continue;
             }
             if (obj_prefab_inst->prefab != prefab)
