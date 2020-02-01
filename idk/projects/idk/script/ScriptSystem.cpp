@@ -15,6 +15,7 @@
 #include <app/Application.h>
 #include <proj/ProjectManager.h>
 
+#include <editor/IEditor.h>
 #include <script/MonoBehavior.h>
 #include <script/MonoEnvironment.h>
 #include <script/MonoBehaviorEnvironment.h>
@@ -32,7 +33,8 @@ namespace idk::mono
 
 		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{
-			script_environment = std::make_unique<MonoBehaviorEnvironment>(PathHandle{ GetConfig().path_to_game_dll }.GetFullPath());
+			script_environment = std::make_unique<MonoBehaviorEnvironment>(string{ Core::GetSystem<ProjectManager>().GetProjectDir() } 
+				+ string{ GetConfig().path_to_game_dll });
 			script_environment->Init();
 		}
 		else
