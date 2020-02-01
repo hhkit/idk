@@ -143,6 +143,7 @@
     <ClInclude Include="ReflectReg_Resources.inl" />
     <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\CompiledAssets.h" />
+    <ClInclude Include="res\compiled_asset_tags.h" />
     <ClInclude Include="res\EasyFactory.h" />
     <ClInclude Include="res\FileLoader.h" />
     <ClInclude Include="res\GenericResourceHandle.h" />

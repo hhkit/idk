@@ -10,6 +10,8 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 
+#include <vkn/VknTextureLoader.h>
+
 namespace idk::vkn
 {
 
@@ -19,7 +21,6 @@ namespace idk::vkn
 		hlp::UniqueAlloc second;
 		vk::ImageAspectFlags aspect;
 	};
-	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
 	FontAtlasResult LoadFontAtlas(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
 	FontAtlasResult LoadFontAtlas(hlp::MemoryAllocator& allocator, vk::Fence fence, const FACreateInfo& load_info, std::optional<InputFAInfo> in_info);
 

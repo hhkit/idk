@@ -966,6 +966,7 @@
     <ClInclude Include="ds\Flags.h">
       <Filter>ds</Filter>
     </ClInclude>
+    <ClInclude Include="res\compiled_asset_tags.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

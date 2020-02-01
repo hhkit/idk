@@ -6,6 +6,8 @@
 #include <serialize/text.inl>
 #include <util/ioutils.h>
 
+#include <res/compiled_asset_tags.h>
+
 namespace idk
 {
     template<typename CompiledAsset, typename EngineResource, bool Binary>
@@ -27,6 +29,10 @@ namespace idk
         if (res)
         {
             Guid guid{ handle.GetStem() };
+            if constexpr (ca_tags::prepend_guid<CompiledAsset>::value)
+            {
+                (*res).guid = guid;
+            }
             Core::GetResourceManager().LoaderEmplaceResource<EngineResource>(guid, std::move(*res));
         }
     }

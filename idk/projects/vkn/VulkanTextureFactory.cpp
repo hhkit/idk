@@ -36,7 +36,24 @@ namespace idk::vkn
 		
 		auto ptr = std::make_unique<VknTexture>();
 		TextureLoader loader;
-		loader.LoadTexture(*ptr, TextureFormat::eRGBA32, {}, string_view{ r_cast<const char*>(rgba),hlp::buffer_size(rgba) }, uvec2{ 2,2 }, _allocator, *_fence);
+
+		TexCreateInfo tci =
+		{
+			2,2,
+			MapFormat(TextureFormat::eRGBA32),
+			vk::ImageUsageFlagBits::eSampled,
+			1,
+			vk::ImageAspectFlagBits::eColor,
+		};
+
+		InputTexInfo input_info
+		{
+			rgba,
+			hlp::buffer_size(rgba),
+			MapFormat(TextureFormat::eRGBA32)
+		};
+
+		loader.LoadTexture(*ptr, _allocator, *_fence, {}, tci,input_info);
 		return std::move(ptr);
 	}
 	unique_ptr<Texture> VulkanTextureFactory::Create()

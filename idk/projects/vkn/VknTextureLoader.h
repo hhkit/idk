@@ -16,6 +16,7 @@ namespace idk::vkn
 
 	struct TextureOptions
 	{
+		Guid guid;
 		FilterMode  min_filter = FilterMode::Linear;
 		FilterMode  mag_filter = FilterMode::Linear;
 		FilterMode  filter_mode = FilterMode::Linear;
@@ -71,9 +72,16 @@ namespace idk::vkn
 	{
 	public:
 		//Will override TexCreateInfo's format if TextureOptions is set
-		void LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info);
-		//TODO: Deprecate these 2 functions below usage the one above instead
-		void LoadTexture(VknTexture& texture, TextureFormat input_pixel_format, std::optional<TextureOptions> options, const char* rgba32, size_t len, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
-		void LoadTexture(VknTexture& texture, TextureFormat input_pixel_format, std::optional<TextureOptions> options, string_view rgba32, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
+		void LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
 	};
+
+	struct ImageViewInfo
+	{
+		uint32_t base_mip_level = 0;
+		uint32_t level_count = 1;
+		uint32_t base_array_layer = 0;
+		uint32_t array_layer_count = 1;
+	};
+
+	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect, ImageViewInfo = {});
 }
