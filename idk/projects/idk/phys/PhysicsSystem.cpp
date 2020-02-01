@@ -3,7 +3,11 @@
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <common/Layer.h>
+
 #include <gfx/DebugRenderer.h>
+
+#include <scene/SceneManager.h>
+
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>
 #include <phys/collision_detection/collision_box.h>
@@ -852,6 +856,10 @@ namespace idk
 	void PhysicsSystem::Init()
 	{
 		static_tree.preallocate_nodes(2500); // Avg ~1030 static objects -> means (2 * 1030 - 1) total nodes in b-tree
+
+		// Changing scenes should reset physics
+		Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { Reset(); };
+		
 		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
 		{
 			if (!collider)

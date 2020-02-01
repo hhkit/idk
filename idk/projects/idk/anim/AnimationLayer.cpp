@@ -13,11 +13,11 @@ namespace idk
 			LOG_CRASH_TO(LogPool::ANIM, "Animation States table is messed up. Somehow we are accessing out of bounds.");
 			return false;
 		}
-
-		curr_state.is_playing = true;
-		if (curr_state.index == index)
+		
+		if (curr_state.is_playing && curr_state.index == index)
 			return false;
 
+		curr_state.is_playing = true;
 		curr_state.index = index;
 		// cap at 1.0f
 		curr_state.normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
