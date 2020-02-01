@@ -49,6 +49,7 @@ of the editor.
 #include <script/ScriptSystem.h>
 #include <script/ManagedObj.inl>
 #include <serialize/text.inl>
+#include <util/property_path.h>
 
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
@@ -1414,17 +1415,20 @@ namespace idk {
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
         _curr_component = component;
-        if (_prefab_inst)
+        _curr_component_nth = -1;
+        Handle<GameObject> go = component.visit([](auto h)
         {
-            _curr_component_nth = -1;
-            const span comps = _prefab_inst->GetGameObject()->GetComponents();
-            for (const auto& c : comps)
-            {
-                if (c.type == component.type)
-                    ++_curr_component_nth;
-                if (c == component)
-                    break;
-            }
+            if constexpr (!std::is_same_v<decltype(h), Handle<GameObject>>)
+                return h->GetGameObject();
+            else
+                return Handle<GameObject>();
+        });
+        for (const auto& c : go->GetComponents())
+        {
+            if (c.type == component.type)
+                ++_curr_component_nth;
+            if (c == component)
+                break;
         }
 
         ImGui::PushID("__component_header");
@@ -1865,14 +1869,40 @@ namespace idk {
 
             if (changed_and_deactivated)
             {
+                auto new_value = reflect::dynamic(val).copy();
                 if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
                 {
+                    int execute_counter = 0;
+                    const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
+                    for (size_t i = 1; i < sel_obj.size(); ++i)
+                    {
+                        auto obj = sel_obj[i];
+
+                        auto components = obj->GetComponents();
+                        auto nth = _curr_component_nth;
+                        for (auto c : components)
+                        {
+                            if (c.type == _curr_component.type && nth-- == 0)
+                            {
+                                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                                    COMMAND(CMD_ModifyProperty, c, display.curr_prop_path, 
+                                            resolve_property_path(*c, display.curr_prop_path), new_value));
+                                if (obj->HasComponent<PrefabInstance>())
+                                    PrefabUtility::RecordPrefabInstanceChange(obj, c, display.curr_prop_path, new_value);
+                                ++execute_counter;
+                                break;
+                            }
+                        }
+                    }
+
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                        COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                        COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, new_value));
+                    if (execute_counter > 1)
+                        Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, ++execute_counter));
                 }
                 else // displaying prefab game object
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                        COMMAND(CMD_ModifyProperty, reflect::dynamic(val), original_value));
+                        COMMAND(CMD_ModifyProperty, new_value, original_value));
                 original_value.swap(reflect::dynamic());
             }
 
