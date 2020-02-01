@@ -121,6 +121,7 @@ namespace idk::vkn
 			vk::SamplerCreateFlags{},
 			GetFilterMode(options,FilterType::eMin),
 			GetFilterMode(options,FilterType::eMag),
+			//vk::SamplerMipmapMode::eNearest,//
 			(options.filter_mode==FilterMode::Nearest) ? vk::SamplerMipmapMode::eNearest :vk::SamplerMipmapMode::eLinear,
 			GetRepeatMode(options,UvAxis::eU),
 			GetRepeatMode(options,UvAxis::eV),
@@ -130,7 +131,7 @@ namespace idk::vkn
 			options.anisoptrophy,
 			s_cast<bool>(options.compare_op),//Used for percentage close filtering
 			(options.compare_op) ? MapCompareOp(*options.compare_op) : vk::CompareOp::eNever,
-			0.0f,0.0f,
+			0.0f,0.0f+load_info.mipmap_level,
 			vk::BorderColor::eFloatOpaqueBlack,
 			VK_FALSE
 
