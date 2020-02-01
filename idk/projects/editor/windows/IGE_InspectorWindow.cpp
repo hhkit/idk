@@ -49,6 +49,7 @@ of the editor.
 #include <script/ScriptSystem.h>
 #include <script/ManagedObj.inl>
 #include <serialize/text.inl>
+#include <util/property_path.h>
 
 #include <IncludeComponents.h>
 #include <IncludeResources.h>
@@ -650,6 +651,21 @@ namespace idk {
                 has_changed = true;
         };
 
+        constexpr auto has_override = [](Handle<PrefabInstance> prefab_inst, const char* prop)
+        {
+            if (!prefab_inst)
+                return false;
+            for (const auto& ov : prefab_inst->overrides)
+            {
+                if (ov.component_name == reflect::get_type<Transform>().name() &&
+                    ov.property_path == prop)
+                {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         auto& c = *c_transform;
 
         const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
@@ -657,10 +673,12 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
-
+        const bool has_pos_override = has_override(_prefab_inst, "position") && _prefab_inst->object_index > 0;
         auto y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
+        if (has_pos_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
         ImGui::Text("Position");
+        if (has_pos_override) ImGui::PopStyleColor();
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
         if (ImGuidk::DragVec3("##0", &c.position))
@@ -670,13 +688,19 @@ namespace idk {
                 if (i)
                     i->GetComponent<Transform>()->position = c.position;
             }
+            if (_prefab_inst)
+            {
+                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "position");
+            }
         }
         check_modify();
 
-
+        const bool has_rot_override = has_override(_prefab_inst, "rotation") && _prefab_inst->object_index > 0;
         y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
+        if (has_rot_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
         ImGui::Text("Rotation");
+        if (has_rot_override) ImGui::PopStyleColor();
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
         if (ImGuidk::DragQuat("##1", &c.rotation))
@@ -686,35 +710,21 @@ namespace idk {
                 if (i)
                     i->GetComponent<Transform>()->rotation = c.rotation;
             }
+            if (_prefab_inst)
+            {
+                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "rotation");
+            }
         }
         check_modify();
 
-
-        bool has_scale_override = false;
-        if (_prefab_inst)
-        {
-            for (const auto& ov : _prefab_inst->overrides)
-            {
-                if (ov.component_name == reflect::get_type<Transform>().name() &&
-                    ov.property_path == "scale")
-                {
-                    has_scale_override = true;
-                    break;
-                }
-            }
-        }
-        if (has_scale_override)
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-
+        const bool has_scale_override = has_override(_prefab_inst, "scale");
         y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
+        if (has_scale_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
         ImGui::Text("Scale");
+        if (has_scale_override) ImGui::PopStyleColor();
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-
-        if (has_scale_override)
-            ImGui::PopStyleColor();
-
         if (ImGuidk::DragVec3("##2", &c.scale))
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
@@ -1405,17 +1415,20 @@ namespace idk {
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
 
         _curr_component = component;
-        if (_prefab_inst)
+        _curr_component_nth = -1;
+        Handle<GameObject> go = component.visit([](auto h)
         {
-            _curr_component_nth = -1;
-            const span comps = _prefab_inst->GetGameObject()->GetComponents();
-            for (const auto& c : comps)
-            {
-                if (c.type == component.type)
-                    ++_curr_component_nth;
-                if (c == component)
-                    break;
-            }
+            if constexpr (!std::is_same_v<decltype(h), Handle<GameObject>>)
+                return h->GetGameObject();
+            else
+                return Handle<GameObject>();
+        });
+        for (const auto& c : go->GetComponents())
+        {
+            if (c.type == component.type)
+                ++_curr_component_nth;
+            if (c == component)
+                break;
         }
 
         ImGui::PushID("__component_header");
@@ -1856,14 +1869,40 @@ namespace idk {
 
             if (changed_and_deactivated)
             {
+                auto new_value = reflect::dynamic(val).copy();
                 if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
                 {
+                    int execute_counter = 0;
+                    const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
+                    for (size_t i = 1; i < sel_obj.size(); ++i)
+                    {
+                        auto obj = sel_obj[i];
+
+                        auto components = obj->GetComponents();
+                        auto nth = _curr_component_nth;
+                        for (auto c : components)
+                        {
+                            if (c.type == _curr_component.type && nth-- == 0)
+                            {
+                                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
+                                    COMMAND(CMD_ModifyProperty, c, display.curr_prop_path, 
+                                            resolve_property_path(*c, display.curr_prop_path), new_value));
+                                if (obj->HasComponent<PrefabInstance>())
+                                    PrefabUtility::RecordPrefabInstanceChange(obj, c, display.curr_prop_path, new_value);
+                                ++execute_counter;
+                                break;
+                            }
+                        }
+                    }
+
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                        COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
+                        COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, new_value));
+                    if (execute_counter > 1)
+                        Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, ++execute_counter));
                 }
                 else // displaying prefab game object
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                        COMMAND(CMD_ModifyProperty, reflect::dynamic(val), original_value));
+                        COMMAND(CMD_ModifyProperty, new_value, original_value));
                 original_value.swap(reflect::dynamic());
             }
 

@@ -920,30 +920,32 @@ namespace idk::ai_helpers
 	void Scene::BuildAnimation(AnimationData& anim_data) const
 	{
 		// Do all the keyframe optimizations here.
-		const auto trans_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
-		{
-			return vec3_equal(lhs.val, rhs.val);
-		};
+		//const auto trans_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
+		//{
+		//	return vec3_equal(lhs.val, rhs.val);
+		//};
 
-		const auto scale_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
-		{
-			return vec3_equal(lhs.val, rhs.val, 0.01f);
-		};
+		//const auto scale_pred = [](const anim::KeyFrame<vec3>& lhs, const anim::KeyFrame<vec3>& rhs)
+		//{
+		//	return vec3_equal(lhs.val, rhs.val, 0.01f);
+		//};
 
-		for (auto& anim_bone : anim_data.animated_bones)
-		{
-			// Translation optimization
-			anim_bone.translate_track.erase(
-				std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), trans_pred), anim_bone.translate_track.end());
-			if (anim_bone.translate_track.size() == 1)
-				anim_bone.translate_track.clear();
-
-			// Scale optimization
-			anim_bone.scale_track.erase(
-				std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), scale_pred), anim_bone.scale_track.end());
-			if (anim_bone.scale_track.size() == 1)
-				anim_bone.scale_track.clear();
-		}
+		//for (auto& anim_bone : anim_data.animated_bones)
+		//{
+		//	// Translation optimization
+		//	const auto t_back = anim_bone.translate_track.back();
+		//	anim_bone.translate_track.erase(
+		//		std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), trans_pred), anim_bone.translate_track.end());
+		//	if (anim_bone.translate_track.size() == 1)
+		//		anim_bone.translate_track.emplace_back(t_back);
+		//	
+		//	// Scale optimization
+		//	const auto s_back = anim_bone.translate_track.back();
+		//	anim_bone.scale_track.erase(
+		//		std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), scale_pred), anim_bone.scale_track.end());
+		//	if (anim_bone.scale_track.size() == 1)
+		//		anim_bone.scale_track.emplace_back(s_back);
+		//}
 	}
 	vector<anim::Animation> Scene::CompileAnimations()
 	{
