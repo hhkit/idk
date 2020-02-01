@@ -170,6 +170,8 @@ namespace idk
 		if (const auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene())
 		{
 			const auto prefab_scene =Core::GetSystem<SceneManager>().GetPrefabScene();
+
+			auto objs = Core::GetSystem<IDE>().GetSelectedObjects();
 			SaveSceneTemporarily();
 			active_scene->Deactivate();
 			prefab_scene->Deactivate();
@@ -177,15 +179,17 @@ namespace idk
 				if (path.GetExtension() == ".idp")
 					Core::GetResourceManager().Unload(path);
 
+
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
-
 			prefab_scene->LoadFromResourcePath();
-
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))
 				if (path.GetExtension() == ".idp")
 					Core::GetResourceManager().Load(path, true);
 
+
 			RestoreFromTemporaryScene();
+			Core::GetSystem<IDE>().SetSelection(objs);
+
 		}
 	}
 }

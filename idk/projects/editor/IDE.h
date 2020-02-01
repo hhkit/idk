@@ -111,6 +111,7 @@ namespace idk
 		// Editor Scene
 		bool game_running = false;
 		bool game_frozen = true;
+		bool scripts_changed = false;
 		RscHandle<RenderTarget> editor_view;
 		void SetupEditorScene();
 

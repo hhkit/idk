@@ -230,6 +230,19 @@ namespace idk
             else
                 NewScene(); 
         }
+
+		Core::GetSystem<Application>().OnFocusGain += [this]()
+		{
+			if (game_running)
+				return;
+
+			if (scripts_changed)
+			{
+				Core::GetSystem<mono::ScriptSystem>().CompileGameScripts();
+				HotReloadDLL();
+				scripts_changed = false;
+			}
+		};
 	}
 
     void IDE::EarlyShutdown()
@@ -257,6 +270,16 @@ namespace idk
         static auto fullscreen = true;
         if (ImGui::IsKeyPressed(static_cast<int>(Key::F)) && ImGui::GetIO().KeyCtrl)
             app.SetFullscreen(fullscreen = !fullscreen);
+
+		// check files
+		for (auto elem : Core::GetSystem<FileSystem>().QueryFileChangesByChange(FS_CHANGE_STATUS::WRITTEN))
+		{
+			if (elem.GetExtension() == ".cs")
+			{
+				scripts_changed = true;
+				break;
+			}
+		}
 
 		// scene controls
 		if (!game_running && ImGui::GetIO().KeyCtrl)

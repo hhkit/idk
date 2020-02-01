@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MonoBehaviorEnvironment.h"
 
-#include <iostream>
+#include <thread>
 
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
@@ -32,9 +32,17 @@ namespace idk::mono
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
 
 		// open file
-		std::ifstream file{ full_path_to_game_dll, std::ios::binary };
-		assembly_data = stringify(file);
-
+		while (true)
+		{
+			std::ifstream file{ full_path_to_game_dll, std::ios::binary };
+			if (!file.is_open())
+			{
+				std::this_thread::yield();
+				continue;
+			}
+			assembly_data = binarify(file);
+			break;
+		}
 		// load assembly
 		mono_domain_set(_domain, true);
 		MonoImageOpenStatus status;
@@ -109,7 +117,6 @@ namespace idk::mono
 					
 					LOG_TO(LogPool::MONO, "  CHECKING %s:%s @ %p", mono_class_get_namespace(check_parent), mono_class_get_name(check_parent), check_parent);
 					auto my_img = mono_class_get_image(check_parent);
-					LOG_TO(LogPool::MONO, "    IMAGE: %s @ %p - %s", mono_image_get_name(my_img), my_img, mono_image_get_filename(my_img));
 					if (mono_class_get_name(check_parent) == string_view{ "MonoBehavior" })
 						return true;
 					if (check_parent == monobehavior)
@@ -130,8 +137,6 @@ namespace idk::mono
 				constexpr auto find_method = [](ManagedType& type, string_view fn_name, int param_count = 0)
 				{
 					auto res = type.CacheThunk(fn_name, param_count);
-					if (res)
-						LOG_TO(LogPool::MONO, string{ "Found function " } +string{ fn_name });
 				};
 
 				//type.CacheMessages();
