@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include <res/FileLoader.h>
 
 #include <opengl/resource/OpenGLFontAtlas.h>
