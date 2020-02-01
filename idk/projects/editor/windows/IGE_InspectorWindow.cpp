@@ -650,6 +650,21 @@ namespace idk {
                 has_changed = true;
         };
 
+        constexpr auto has_override = [](Handle<PrefabInstance> prefab_inst, const char* prop)
+        {
+            if (!prefab_inst)
+                return false;
+            for (const auto& ov : prefab_inst->overrides)
+            {
+                if (ov.component_name == reflect::get_type<Transform>().name() &&
+                    ov.property_path == prop)
+                {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         auto& c = *c_transform;
 
         const float item_width = ImGui::GetWindowContentRegionWidth() * 0.75f;
@@ -657,10 +672,12 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
-
+        const bool has_pos_override = _prefab_inst->object_index > 0 && has_override(_prefab_inst, "position");
         auto y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
+        if (has_pos_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
         ImGui::Text("Position");
+        if (has_pos_override) ImGui::PopStyleColor();
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
         if (ImGuidk::DragVec3("##0", &c.position))
@@ -670,13 +687,19 @@ namespace idk {
                 if (i)
                     i->GetComponent<Transform>()->position = c.position;
             }
+            if (_prefab_inst)
+            {
+                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "position");
+            }
         }
         check_modify();
 
-
+        const bool has_rot_override = _prefab_inst->object_index > 0 && has_override(_prefab_inst, "rotation");
         y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
+        if (has_rot_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
         ImGui::Text("Rotation");
+        if (has_rot_override) ImGui::PopStyleColor();
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
         if (ImGuidk::DragQuat("##1", &c.rotation))
@@ -686,35 +709,21 @@ namespace idk {
                 if (i)
                     i->GetComponent<Transform>()->rotation = c.rotation;
             }
+            if (_prefab_inst)
+            {
+                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "rotation");
+            }
         }
         check_modify();
 
-
-        bool has_scale_override = false;
-        if (_prefab_inst)
-        {
-            for (const auto& ov : _prefab_inst->overrides)
-            {
-                if (ov.component_name == reflect::get_type<Transform>().name() &&
-                    ov.property_path == "scale")
-                {
-                    has_scale_override = true;
-                    break;
-                }
-            }
-        }
-        if (has_scale_override)
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
-
+        const bool has_scale_override = has_override(_prefab_inst, "scale");
         y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
+        if (has_scale_override) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
         ImGui::Text("Scale");
+        if (has_scale_override) ImGui::PopStyleColor();
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-
-        if (has_scale_override)
-            ImGui::PopStyleColor();
-
         if (ImGuidk::DragVec3("##2", &c.scale))
         {
             for (auto i : editor.GetSelectedObjects().game_objects)
