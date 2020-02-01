@@ -12,6 +12,8 @@
 #include <script/ScriptSystem.h>
 #include <script/ManagedObj.inl>
 #include <res/ResourceHandle.inl>
+#include <prefab/PrefabUtility.h>
+#include <prefab/PrefabInstance.h>
 
 #include <ds/span.inl>
 #include <ds/result.inl>
@@ -383,7 +385,13 @@ namespace idk
 					trans.parent = new_trans.parent;
 				}
 				else if (type.is<Name>())
+				{
 					handle->GetComponent<Name>()->name = obj.get<Name>().name;
+				}
+				else if (type.is<PrefabInstance>())
+				{
+					PrefabUtility::InstantiateSpecific(handle, obj.get<PrefabInstance>());
+				}
 				else
 				{
 					handle->AddComponent(obj);

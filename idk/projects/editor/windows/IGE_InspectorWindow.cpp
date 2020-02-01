@@ -27,6 +27,7 @@ of the editor.
 #include <editor/DragDropTypes.h>
 #include <editor/utils.h>
 #include <editor/ComponentIcons.h>
+#include <editor/SceneManagement.h>
 
 #include <common/TagManager.h>
 #include <common/LayerManager.h>
@@ -86,14 +87,6 @@ namespace idk {
 
     void IGE_InspectorWindow::Initialize()
     {
-        Core::GetSystem<IDE>().FindWindow<IGE_HierarchyWindow>()->OnGameObjectSelectionChanged.Listen([&]()
-            {
-                _displayed_asset = RscHandle<Texture>();
-            });
-        Core::GetSystem<IDE>().FindWindow<IGE_ProjectWindow>()->OnAssetsSelected.Listen([&](span<GenericResourceHandle> handles)
-            {
-                _displayed_asset = handles[0];
-            });
     }
 
     void IGE_InspectorWindow::BeginWindow()
@@ -115,17 +108,21 @@ namespace idk {
         }
 
         _prefab_inst = Handle<PrefabInstance>();
-        if (_displayed_asset.guid())
-        {
-            const bool valid = std::visit([](auto h) { return bool(h); }, _displayed_asset);
-            if (valid)
-                DisplayAsset(_displayed_asset);
-            else
-                _displayed_asset = RscHandle<Texture>();
-        }
+
+        auto& ide = Core::GetSystem<IDE>();
+        const auto& selection = ide.GetSelectedObjects();
+        if (selection.game_objects.empty() && selection.assets.empty())
+            return;
+        if (selection.game_objects.size() && selection.assets.size())
+            return;
+
+        if(selection.game_objects.size())
+            DisplayGameObjects(selection.game_objects);
         else
         {
-            DisplayGameObjects(Core::GetSystem<IDE>().selected_gameObjects);
+            const bool valid = std::visit([](auto h) { return bool(h); }, selection.assets[0]);
+            if (valid)
+                DisplayAsset(selection.assets[0]);
         }
 	}
 
@@ -136,6 +133,8 @@ namespace idk {
 
     void IGE_InspectorWindow::DisplayGameObjects(vector<Handle<GameObject>> gos)
     {
+        gos.erase(std::remove_if(gos.begin(), gos.end(), [](auto h) { return !h; }), gos.end());
+
         const size_t gameObjectsCount = gos.size();
 
         if (gameObjectsCount == 0)
@@ -189,62 +188,107 @@ namespace idk {
 
         if (gameObjectsCount == 1)
         {
-            //Display remaining components here
             auto componentSpan = gos[0]->GetComponents();
-            for (auto& component : componentSpan) {
+            if (!_prefab_inst)
+            {
+                //Display remaining components here
+                for (auto& component : componentSpan) 
+                {
 
-                //Skip Name and Transform and PrefabInstance
-				if (component.is_type<Transform>() ||
-					component.is_type<RectTransform>() ||
-					component.is_type<PrefabInstance>() ||
-					component.is_type<Name>() ||
-					component.is_type<Tag>() ||
-					component.is_type<Layer>()
-                    )
-					continue;
+                    //Skip Name and Transform and PrefabInstance
+                    if (component.is_type<Transform>() ||
+                        component.is_type<RectTransform>() ||
+                        component.is_type<PrefabInstance>() ||
+                        component.is_type<Name>() ||
+                        component.is_type<Tag>() ||
+                        component.is_type<Layer>()
+                        )
+                        continue;
 
-                //COMPONENT DISPLAY
-				ImGui::Text("id: %lld", component.id);
-                DisplayComponent(component);
+                    //COMPONENT DISPLAY
+                    ImGui::Text("id: %lld", component.id);
+                    DisplayComponent(component);
+                }
             }
-
-            if (_prefab_inst)
+            else
             {
                 vector<int> removed, added;
                 PrefabUtility::GetPrefabInstanceComponentDiff(gos[0], removed, added);
-                if (removed.size())
+                auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
+
+                for (int i = 0, j = 0; i < prefab_components.size() || j < componentSpan.size(); ++i)
                 {
-                    auto prefab_components = _prefab_inst->prefab->data[_prefab_inst->object_index].components;
-
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
-                    ImGuidk::PushFont(FontType::Bold);
-                    for (int i : removed)
+                    if (std::find(removed.begin(), removed.end(), i) != removed.end()) // i is removed
                     {
+                        // Draw Removed Component
                         ImGui::PushID(i);
-                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
-                                          ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
-                                          ImGuiTreeNodeFlags_SpanFullWidth);
 
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+                        ImGui::TreeNodeEx("", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet |
+                                            ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
+                                            ImGuiTreeNodeFlags_SpanFullWidth);
+                        ImGui::PopStyleColor();
+
+                        string_view name = prefab_components[i].type.name();
+                        if (prefab_components[i].type.is<mono::Behavior>())
+                            name = prefab_components[i].get<mono::Behavior>().TypeName();
+
+                        bool will_break = false;
                         if (ImGui::BeginPopupContextItem())
                         {
                             if (ImGui::MenuItem("Revert Removed Component"))
                             {
-                                gos[0]->AddComponent(prefab_components[i]);
+                                PrefabUtility::RevertRemovedComponent(gos[0], i);
+                                will_break = true;
                             }
                             if (ImGui::MenuItem("Apply Removed Component"))
                             {
                                 PrefabUtility::RemoveComponentFromPrefab(_prefab_inst->prefab, _prefab_inst->object_index, i);
+                                will_break = true;
                             }
                             ImGui::EndPopup();
                         }
 
                         ImGui::SameLine(ImGui::GetStyle().IndentSpacing +
-                            ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + 1);
-                        ImGui::Text("%s (Removed)", prefab_components[i].type.name().data());
+                                        ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetTextLineHeight() + 1);
+                        ImGuidk::PushFont(FontType::Bold);
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+                        ImGui::Text("%s (Removed)", name.data());
+                        ImGui::PopStyleColor();
+                        ImGui::PopFont();
+
                         ImGui::PopID();
+
+                        if (will_break)
+                            break;
+
+                        continue;
                     }
-                    ImGui::PopFont();
-                    ImGui::PopStyleColor();
+
+                    if (j >= componentSpan.size())
+                        continue;
+                    auto& component = componentSpan[j];
+
+                    //Skip Name and Transform and PrefabInstance
+                    if (component.is_type<Transform>() ||
+                        component.is_type<RectTransform>() ||
+                        component.is_type<PrefabInstance>() ||
+                        component.is_type<Name>() ||
+                        component.is_type<Tag>() ||
+                        component.is_type<Layer>()
+                        )
+                    {
+                        ++j;
+                        if (component.is_type<PrefabInstance>())
+                            --i; // PrefabInstance will never be in prefab_data, so prefab_data has 1 less component
+                        continue;
+                    }
+
+                    _curr_component_is_added = std::find(added.begin(), added.end(), j) != added.end(); // j is newly added
+
+                    ImGui::Text("id: %lld", component.id);
+                    DisplayComponent(component);
+                    ++j;
                 }
             }
         }
@@ -440,34 +484,35 @@ namespace idk {
         ImGui::SetCursorPosX(left_offset - ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.y * 2);
         bool is_active = game_object->ActiveSelf();
         if (ImGui::Checkbox("##Active", &is_active))
-            game_object->SetActive(is_active);
+            editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, std::nullopt, std::nullopt, is_active));
 		ImGui::SameLine();
         ImGui::PushItemWidth(-8.0f);
         if (game_object.scene == Scene::prefab)
             ImGuidk::PushDisabled();
-		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) {
-			//c_name->name = stringBuf;
+
+		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) 
+        {
 			int execute_counter = 0;
-			for (size_t i = 0; i < editor.selected_gameObjects.size();++i) {
+            int i = 0;
+			for (auto go : editor.GetSelectedObjects().game_objects)
+            {
+                if (!go)
+                    continue;
+
 				string outputString = stringBuf;
 				if (i > 0) {
 					outputString.append(" (");
 					outputString.append(serialize_text(i));
 					outputString.append(")");
 				}
-				editor.command_controller.ExecuteCommand(
-                    COMMAND(CMD_ModifyProperty,
-                            GenericHandle{ editor.selected_gameObjects[i]->GetComponent<Name>() },
-                            "name",
-                            string{ editor.selected_gameObjects[i]->GetComponent<Name>()->name },
-                            string{ outputString })
-                );
-                editor.selected_gameObjects[i]->GetComponent<Name>()->name = outputString;
+
+                editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, outputString));
 				++execute_counter;
 			}
-			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+
+            editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 		}
+
         if (game_object.scene == Scene::prefab)
             ImGuidk::PopDisabled();
         ImGui::PopItemWidth();
@@ -487,7 +532,7 @@ namespace idk {
             ImGui::Text("ID");
             ImGui::SameLine();
             string idName = std::to_string(game_object.id);
-            if (editor.selected_gameObjects.size() == 1)
+            if (editor.GetSelectedObjects().game_objects.size() == 1)
                 ImGui::Text("%s (scene: %d, index: %d, gen: %d)",
                     idName.data(),
                     s_cast<int>(game_object.scene),
@@ -512,7 +557,7 @@ namespace idk {
             for (const auto& tag : Core::GetSystem<TagManager>().GetConfig().tags)
             {
                 if (ImGui::MenuItem(tag.data()))
-                    game_object->Tag(tag);
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, tag));
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Tag##_add_tag_"))
@@ -541,7 +586,7 @@ namespace idk {
                 label += ": ";
                 label += layers[i];
                 if (ImGui::MenuItem(label.c_str()))
-                    game_object->Layer(i);
+                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, std::nullopt, i));
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Layer##_add_layer_"))
@@ -587,20 +632,23 @@ namespace idk {
     template<>
 	void IGE_InspectorWindow::DisplayComponentInner(Handle<Transform> c_transform)
 	{
-
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{};
 		IDE& editor = Core::GetSystem<IDE>();
 
-		vector<mat4>& originalMatrix = editor.selected_matrix;
-		//This is dumped if no items are changed.
-		//if (!isBeingModified) {
-		//	originalMatrix.clear();
-		//	for (Handle<GameObject> i : editor.selected_gameObjects) {
-		//		originalMatrix.push_back(i->GetComponent<Transform>()->GlobalMatrix());
-		//	}
-		//}
-
+        bool has_changed = false;
+        static vector<mat4> original_matrices;
+        static auto check_modify = [&has_changed, &editor]()
+        {
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            {
+                original_matrices.clear();
+                for (auto i : editor.GetSelectedObjects().game_objects)
+                    original_matrices.push_back(i->GetComponent<Transform>()->GlobalMatrix());
+            }
+            if (ImGui::IsItemDeactivatedAfterEdit())
+                has_changed = true;
+        };
 
         auto& c = *c_transform;
 
@@ -609,20 +657,22 @@ namespace idk {
 
         ImGui::PushItemWidth(-4.0f);
 
+
         auto y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
         ImGui::Text("Position");
         ImGui::SetCursorPosY(y);
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
-        auto origin = c.position;
         if (ImGuidk::DragVec3("##0", &c.position))
         {
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->position = c.position;
+                if (i)
+                    i->GetComponent<Transform>()->position = c.position;
             }
         }
-        TransformModifiedCheck();
+        check_modify();
+
 
         y = ImGui::GetCursorPosY();
         ImGui::SetCursorPosY(y + pad_y);
@@ -631,12 +681,14 @@ namespace idk {
         ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - item_width);
         if (ImGuidk::DragQuat("##1", &c.rotation))
         {
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->rotation = c.rotation;
+                if (i)
+                    i->GetComponent<Transform>()->rotation = c.rotation;
             }
         }
-        TransformModifiedCheck();
+        check_modify();
+
 
         bool has_scale_override = false;
         if (_prefab_inst)
@@ -665,32 +717,35 @@ namespace idk {
 
         if (ImGuidk::DragVec3("##2", &c.scale))
         {
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (auto i : editor.GetSelectedObjects().game_objects)
             {
-                i->GetComponent<Transform>()->scale = c.scale;
+                if (i)
+                    i->GetComponent<Transform>()->scale = c.scale;
             }
             if (_prefab_inst)
             {
                 PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "scale");
             }
         }
-        TransformModifiedCheck();
+        check_modify();
 
         ImGui::PopItemWidth();
 
-		if (hasChanged) {
+
+		if (has_changed) 
+        {
 			int execute_counter = 0;
-			for (int i = 0; i < editor.selected_gameObjects.size();++i) {
-				mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+            for(size_t i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i)
+            {
+                const auto h = editor.GetSelectedObjects().game_objects[i];
+                if (!h)
+                    continue;
+                const mat4 modified_mat = h->GetComponent<Transform>()->GlobalMatrix();
+				editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, h, original_matrices[i], modified_mat));
 				++execute_counter;
 			}
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			//Refresh the new matrix values
-			editor.RefreshSelectedMatrix();
-			hasChanged		= false;
-			//isBeingModified = false;
 		}
 	}
 
@@ -869,7 +924,7 @@ namespace idk {
         ImGui::PushItemWidth(-4.0f);
 
         _curr_component = c.GetHandle();
-        _prefab_curr_component_nth = 0;
+        _curr_component_nth = 0;
         _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
         display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
         changed = ImGui::DragFloat("##pos_z", &c.position.z);
@@ -881,7 +936,7 @@ namespace idk {
         if (ImGuidk::DragQuat("##rot", &c.rotation))
         {
             changed = true;
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
                 i->GetComponent<Transform>()->rotation = c.rotation;
         }
         display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
@@ -892,7 +947,7 @@ namespace idk {
         if (ImGuidk::DragVec3("##scl", &c.scale))
         {
             changed = true;
-            for (Handle<GameObject> i : editor.selected_gameObjects)
+            for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
                 i->GetComponent<Transform>()->rotation = c.rotation;
         }
         display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
@@ -1336,13 +1391,15 @@ namespace idk {
 		string displayingComponent = [&]() ->string
 		{
 			auto type = (*component).type;
-			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + "(Script)" : string{ type.name() };
+			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + " (Script)" : string{ type.name() };
 		}();
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);
 
 		if (found != std::string::npos)
 			displayingComponent.erase(found, fluffText.size());
+        if (_curr_component_is_added)
+            displayingComponent += " (Added)";
 
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 cursorPos2{}; //This is for setting after all members are placed
@@ -1350,12 +1407,12 @@ namespace idk {
         _curr_component = component;
         if (_prefab_inst)
         {
-            _prefab_curr_component_nth = -1;
+            _curr_component_nth = -1;
             const span comps = _prefab_inst->GetGameObject()->GetComponents();
             for (const auto& c : comps)
             {
                 if (c.type == component.type)
-                    ++_prefab_curr_component_nth;
+                    ++_curr_component_nth;
                 if (c == component)
                     break;
             }
@@ -1452,10 +1509,13 @@ namespace idk {
 
 	void IGE_InspectorWindow::MenuItem_RemoveComponent(GenericHandle i)
 	{
-		if (ImGui::MenuItem("Remove Component")) {
+		if (ImGui::MenuItem("Remove Component")) 
+        {
 			IDE& editor = Core::GetSystem<IDE>();
+            CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 
-			if (editor.selected_gameObjects.size() == 1) {
+			if (editor.GetSelectedObjects().game_objects.size() == 1)
+            {
                 Handle<GameObject> go = i.visit([](auto h)
                 {
                     if constexpr (!std::is_same_v<decltype(h), Handle<GameObject>>)
@@ -1463,15 +1523,25 @@ namespace idk {
                     else
                         return Handle<GameObject>();
                 });
-                Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
+                commandController.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
+
+                if (_prefab_inst && !_curr_component_is_added)
+                {
+                    auto old = _prefab_inst->removed_components;
+                    PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _curr_component_nth);
+                    commandController.ExecuteCommand(
+                        COMMAND(CMD_ModifyProperty, _prefab_inst, "removed_components", old, _prefab_inst->removed_components));
+                    commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+                }
 			}
-			else {
+			else 
+            {
 				int execute_counter = 0;
-				for (Handle<GameObject> gameObject : editor.selected_gameObjects) {
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, string((*i).type.name())));
+				for (auto go : editor.GetSelectedObjects().game_objects) 
+                {
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, string((*i).type.name())));
 					++execute_counter;
 				}
-				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 			}
 		}
@@ -1479,62 +1549,61 @@ namespace idk {
 
 	void IGE_InspectorWindow::MenuItem_CopyComponent(GenericHandle i)
 	{
-		if (ImGui::MenuItem("Copy Component")) {
-			Core::GetSystem<IDE>().copied_component.swap((*i).copy());
-		}
+		if (ImGui::MenuItem("Copy Component"))
+			_copied_component.swap((*i).copy());
 	}
 
 	void IGE_InspectorWindow::MenuItem_PasteComponent()
 	{
-		if (ImGui::MenuItem("Paste Component")) {
+		if (ImGui::MenuItem("Paste Component")) 
+        {
 			IDE& editor = Core::GetSystem<IDE>();
-			if (!editor.copied_component.valid())
+			if (!_copied_component.valid())
 				return;
 
-			bool isTransformValuesEdited = false;
-			editor.RefreshSelectedMatrix();
-
 			int execute_counter = 0;
-			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
-				auto& gameObject = editor.selected_gameObjects[i];
+			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) 
+            {
+                auto& gameObject = editor.GetSelectedObjects().game_objects[i];
 
-				GenericHandle componentToMod = gameObject->GetComponent(editor.copied_component.type);
-				if (componentToMod) { //Name cannot be pasted as there is no button to copy
+				GenericHandle componentToMod = gameObject->GetComponent(_copied_component.type);
+				if (componentToMod) //Name cannot be pasted as there is no button to copy
+                {
 					//replace values
-					if (componentToMod == gameObject->GetComponent<Transform>()) {
-						isTransformValuesEdited = true;
-						vector<mat4>& originalMatrix = editor.selected_matrix;
+					if (componentToMod == gameObject->GetComponent<Transform>()) 
+                    {
+						mat4 originalMatrix = gameObject->GetComponent<Transform>()->GlobalMatrix();
 						
-						Handle<Transform> copiedTransform = handle_cast<Transform>(editor.copied_component.get<GenericHandle>());
-						Handle<Transform> gameObjectTransform = editor.selected_gameObjects[i]->GetComponent<Transform>();
-						if (copiedTransform->parent)
-							gameObjectTransform->LocalMatrix(copiedTransform->LocalMatrix()); 
-						else 
-							gameObjectTransform->GlobalMatrix(copiedTransform->GlobalMatrix()); //If the parent of the copied gameobject component is deleted, use Global instead
+                        const auto& copiedTransform = _copied_component.get<Transform>();
+						Handle<Transform> gameObjectTransform = gameObject->GetComponent<Transform>();
+						if (copiedTransform.parent)
+							gameObjectTransform->LocalMatrix(copiedTransform.LocalMatrix()); 
+						else //If the parent of the copied gameobject component is deleted, use Global instead
+							gameObjectTransform->GlobalMatrix(copiedTransform.GlobalMatrix());
 
 						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, gameObject, originalMatrix, modifiedMat));
 						++execute_counter;
 					}
-					else {
+					else 
+                    {
 						//Mark to remove Component
 						string compName = string((*componentToMod).type.name());
 						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, compName));
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component)); //Remember commands are flushed at end of each update!
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, _copied_component)); //Remember commands are flushed at end of each update!
 						execute_counter += 2;
 					}
 				}
-				else {
+				else 
+                {
 					//Add component
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, editor.copied_component));
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, _copied_component));
 					++execute_counter;
 				}
 			}
+
 			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			if (isTransformValuesEdited)
-				//Refresh the new matrix values
-				editor.RefreshSelectedMatrix();
 		}
 	}
 
@@ -1561,9 +1630,12 @@ namespace idk {
 
             while (depth_change++ <= 0)
             {
-                if (indent_stack.back())
-                    ImGui::Unindent();
-				if (!indent_stack.empty()) indent_stack.pop_back();
+                if (indent_stack.size())
+                {
+                    if (indent_stack.back())
+                        ImGui::Unindent();
+                    indent_stack.pop_back();
+                }
                 if(!_curr_property_stack.empty()) _curr_property_stack.pop_back();
             }
             _curr_property_stack.push_back(key);
@@ -1784,19 +1856,19 @@ namespace idk {
 
             if (changed_and_deactivated)
             {
-                if (_displayed_asset.guid() == Guid{})
+                if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
                 {
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
                         COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, reflect::dynamic(val).copy()));
                 }
-                else
+                else // displaying prefab game object
                     Core::GetSystem<IDE>().command_controller.ExecuteCommand(
                         COMMAND(CMD_ModifyProperty, reflect::dynamic(val), original_value));
                 original_value.swap(reflect::dynamic());
             }
 
             outer_changed |= changed;
-            display.GroupEnd(changed);
+            display.GroupEnd(changed, val);
 
             indent_stack.push_back(indent);
             if (indent)
@@ -1821,9 +1893,13 @@ namespace idk {
                 return display_key_value(key, std::forward<decltype(val)>(val), depth_change);
 		};
 
-		dyn.visit(generic_visitor);
-		if (dyn.is<mono::Behavior>())
-			dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor, _debug_mode);
+        if (dyn.is<mono::Behavior>())
+        {
+            _curr_property_stack.push_back("script_data");
+            dyn.get<mono::Behavior>().GetObject().Visit(generic_visitor, _debug_mode);
+        }
+        else
+            dyn.visit(generic_visitor);
 
         std::swap(prop_stack_copy, _curr_property_stack);
         for (auto i : indent_stack)
@@ -1834,22 +1910,6 @@ namespace idk {
 
         return outer_changed;
     }
-
-	void IGE_InspectorWindow::TransformModifiedCheck()
-	{
-		// if (ImGui::IsItemEdited()) {
-		// 	isBeingModified = true;
-		// }
-		if (ImGui::IsItemDeactivatedAfterEdit()) {
-			hasChanged = true;
-
-		}
-		else if (ImGui::IsItemDeactivated()) {
-			hasChanged = false;
-			//isBeingModified = false;
-
-		}
-	}
 
 
     void IGE_InspectorWindow::DisplayStack::ItemBegin(bool align)
@@ -1884,12 +1944,12 @@ namespace idk {
         has_override = false;
         if (self._prefab_inst && self._curr_property_stack.back().size())
             has_override = self._prefab_inst->HasOverride(
-                (*self._curr_component).type.name(), curr_prop_path, self._prefab_curr_component_nth);
+                (*self._curr_component).type.name(), curr_prop_path, self._curr_component_nth);
 
         ImGui::BeginGroup();
     }
 
-    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed)
+    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed, reflect::dynamic val)
     {
         ImGui::EndGroup();
 
@@ -1897,12 +1957,12 @@ namespace idk {
         {
             if (ImGui::MenuItem("Apply Property"))
             {
-                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._curr_component_nth };
                 PrefabUtility::ApplyPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             if (ImGui::MenuItem("Revert Property"))
             {
-                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._prefab_curr_component_nth };
+                PropertyOverride ov{ string((*self._curr_component).type.name()), curr_prop_path, self._curr_component_nth };
                 PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             ImGui::EndPopup();
@@ -1910,7 +1970,7 @@ namespace idk {
 
         if (changed && self._prefab_inst)
         {
-            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path);
+            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path, val);
         }
 
         if (has_override)

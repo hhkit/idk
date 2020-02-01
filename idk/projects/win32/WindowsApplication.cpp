@@ -74,18 +74,26 @@ namespace idk::win
 			args.emplace_back(elem);
 		args.emplace_back(nullptr);
 
-		auto retval = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		auto ret = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		if (wait)
+			LOG_TO(LogPool::SYS, "Executed %s with retcode %d", path.data(), ret);
+		else
+			LOG_TO(LogPool::SYS, "Executing %s with child %p", path.data(), ret);
 		if (!wait)
 		{
 			if (children.size() >= std::thread::hardware_concurrency())
 				WaitForChildren();
-			children.emplace_back(retval);
+			children.emplace_back(ret);
 		}
 	}
 	void Windows::WaitForChildren()
 	{
 		for (auto& elem : children)
-			_cwait(0, elem, 0);
+		{
+			int ret;
+			_cwait(&ret, elem, 0);
+			LOG_TO(LogPool::SYS, "Child %p ended with retcode %d", elem, ret);
+		}
 		children.clear();
 	}
 #pragma optimize ("", on)

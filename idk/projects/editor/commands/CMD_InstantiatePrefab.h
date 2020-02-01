@@ -14,7 +14,6 @@ namespace idk
         virtual bool undo() override;
 
     private:
-        Handle<GameObject> _handle;
         RscHandle<Prefab> _prefab;
         vec3 _pos;
     };

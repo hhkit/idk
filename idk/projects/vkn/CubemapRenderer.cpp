@@ -93,7 +93,7 @@ namespace idk::vkn
 	{
 		FrameBufferBuilder builder;
 		auto& cube_map = *dst;
-		builder.Begin(cube_map.Size());
+		builder.Begin("CubemapRenderer",cube_map.Size());
 		idk::AttachmentInfo info{};
 		info.load_op = LoadOp::eClear;
 		info.store_op = StoreOp::eStore;

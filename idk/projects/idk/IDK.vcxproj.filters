@@ -131,6 +131,9 @@
     <Filter Include="gfx\font">
       <UniqueIdentifier>{9a7c314a-37da-468b-a550-032b719d98c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="phys\aabb tree">
+      <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -508,9 +511,6 @@
     </ClInclude>
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\CameraControls.h">
-      <Filter>gfx\camera</Filter>
     </ClInclude>
     <ClInclude Include="scene\SceneGraphBuilder.h">
       <Filter>common</Filter>
@@ -901,7 +901,6 @@
     <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
-    <ClInclude Include="common\LayerMask.h" />
     <ClInclude Include="parallel\HazardPointerDL.h" />
     <ClInclude Include="parallel\queue.h" />
     <ClInclude Include="parallel\ThreadPool.h" />
@@ -951,6 +950,16 @@
     </ClInclude>
     <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
+    <ClInclude Include="common\LayerMask.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\AAbbTree.h">
+      <Filter>phys\aabb tree</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\AabbTree_utils.h">
+      <Filter>phys\aabb tree</Filter>
+    </ClInclude>
+    <ClInclude Include="util\property_path.h" />
     <ClInclude Include="ds\lazy_vector.h">
       <Filter>ds</Filter>
     </ClInclude>
@@ -1106,9 +1115,6 @@
     </ClCompile>
     <ClCompile Include="anim\SkeletonFactory.cpp">
       <Filter>anim\res/factories</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\CameraControls.cpp">
-      <Filter>gfx\camera</Filter>
     </ClCompile>
     <ClCompile Include="serialize\yaml_dump.cpp">
       <Filter>serialize</Filter>
@@ -1388,6 +1394,10 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
+    <ClCompile Include="phys\AabbTree.cpp">
+      <Filter>phys\aabb tree</Filter>
+    </ClCompile>
+    <ClCompile Include="util\property_path.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

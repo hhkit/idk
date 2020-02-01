@@ -25,6 +25,9 @@ namespace idk
         public extern static void SceneChangeScene(Guid guid);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong GameObjectNew();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void EngineKill();
         /**
          * Game Object
@@ -63,6 +66,12 @@ namespace idk
         public extern static void GameObjectSetTag(ulong gamehandle, string tag);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int GameObjectGetLayer(ulong gamehandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GameObjectSetLayer(ulong gamehandle, int layer);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong GameObjectFindWithTag(string tag);
 
         /*
@@ -70,6 +79,15 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong ComponentGetGameObject(ulong componenthandle);
+
+        /*
+         * Behavior
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool MonoBehaviorGetEnable(ulong componenthandle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void MonoBehaviorSetEnable(ulong componenthandle, bool enable);
 
         /*
          * Transform
@@ -183,40 +201,43 @@ namespace idk
          * Animator
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorPlay(ulong id, string name);
+        public extern static bool AnimatorPlay(ulong id, string name, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorCrossFade(ulong id, string name, float time = 0.2f);
+        public extern static bool AnimatorCrossFade(ulong id, string name, float time = 0.2f, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorPause(ulong id);
+        public extern static bool AnimatorPause(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorResume(ulong id);
+        public extern static bool AnimatorResume(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AnimatorStop(ulong id);
+        public extern static bool AnimatorStop(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string AnimatorDefaultStateName(ulong id);
+        public extern static AnimationState AnimatorGetState(ulong id, string name, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string AnimatorCurrentStateName(ulong id);
+        public extern static string AnimatorDefaultStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string AnimatorBlendStateName(ulong id);
+        public extern static string AnimatorCurrentStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorIsPlaying(ulong id);
+        public extern static string AnimatorBlendStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorIsBlending(ulong id);
+        public extern static bool AnimatorIsPlaying(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorHasCurrAnimEnded(ulong id);
+        public extern static bool AnimatorIsBlending(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorHasState(ulong id, string name);
+        public extern static bool AnimatorHasCurrAnimEnded(ulong id, string layer = "");
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorHasState(ulong id, string name, string layer = "");
 
         // Parameter Getters
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -244,6 +265,12 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorSetTrigger(ulong id, string name, bool val);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AnimatorGetWeight(ulong id, string name = "");
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AnimatorSetWeight(ulong id, float weight, string name = "");
+
         /*
          * AudioSource
          */
@@ -264,6 +291,12 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSourceSetVolume(ulong id, float volume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSourceClipGetVolume(ulong id, int index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSourceClipSetVolume(ulong id, int index, float volume);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float AudioSourceGetPitch(ulong id);
@@ -339,6 +372,12 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void CameraSetEnabledState(ulong id, bool c);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int CameraGetCullingMask(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetCullingMask(ulong id, int value);
 
         /*
         * Light
@@ -562,5 +601,14 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float DebugLog(string preface, string message);
+
+        /*
+         * LayerMask
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string LayerMaskLayerToName(int layerIndex);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int LayerMaskNameToLayer(string name);
     }
 }

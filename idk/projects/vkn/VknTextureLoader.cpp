@@ -19,11 +19,14 @@ namespace std
 
 namespace idk::vkn
 {
+
+
 	struct TextureResult
 	{
 		vk::UniqueImage first;
 		hlp::UniqueAlloc second;
 		vk::ImageAspectFlags aspect;
+		size_t size_on_device = 0;
 	};
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
@@ -107,6 +110,7 @@ namespace idk::vkn
 		ptr->Layers(load_info.layers);
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
+		ptr->sizeOnDevice = sz;
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
@@ -145,8 +149,9 @@ namespace idk::vkn
 		const void* rgba = rgba32;
 		auto format = MapFormat(pixel_format);
 		auto ptr = &texture;
-		auto&& [image, alloc,aspect] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
+		auto&& [image, alloc,aspect,sz] = vkn::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 		ptr->img_aspect = aspect;
+		ptr->sizeOnDevice = sz;
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		//TODO set up Samplers and Image Views
@@ -401,6 +406,7 @@ namespace idk::vkn
 		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
 		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
 		auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
+		result.size_on_device = alloc->Size();
 		device.bindImageMemory(*image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
 		
 		const vk::ImageAspectFlagBits img_aspect = load_info.aspect;
@@ -634,5 +640,11 @@ namespace idk::vkn
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 
+	}
+	TextureOptions::TextureOptions(const CompiledTexture& meta)
+	{
+		min_filter = mag_filter = filter_mode = meta.filter_mode;
+		uv_mode = meta.mode;
+		internal_format = ToInternalFormat(meta.internal_format, meta.is_srgb);
 	}
 }

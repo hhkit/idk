@@ -100,13 +100,6 @@ namespace idk::yaml
         throw "only works on scalars";
     }
 
-    // returns const& to scalar
-    template<>
-    decltype(auto) node::get<scalar_type>() const
-    {
-        return as_scalar();
-    }
-
     template<typename... Ts>
     node& node::emplace_back(Ts&&... args)
     {

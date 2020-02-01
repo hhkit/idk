@@ -65,23 +65,20 @@ namespace idk
 		void OnPreview();
 
 		// Script Functions
-		void Play(string_view animation_name = "", float offset = 0.0f);
-		void Play(string_view animation_name, string_view layer_name, float offset = 0.0f);
-		void Play(string_view animation_name, size_t layer_index, float offset = 0.0f);
+		// void Play(string_view animation_name = "", float offset = 0.0f);
+		// void Play(string_view animation_name, string_view layer_name, float offset = 0.0f);
+		// void Resume();
+		// void Resume(string_view layer_name);
+		// void Pause();
+		// void Pause(string_view layer_name);
+		// void Stop();
+		// void Stop(string_view layer_name);
 
-		void BlendTo(string_view animation_name, float time = 0.2f);
-
-		void Resume();
-		void Resume(string_view layer_name);
-		void Resume(size_t layer_index);
-
-		void Pause();
-		void Pause(string_view layer_name);
-		void Pause(int layer_index);
-
-		void Stop();
-		void Stop(string_view layer_name);
-		void Stop(int layer_index);
+		bool Play(string_view animation_name = 0, float offset = 0.0f, int layer_index = 0);
+		bool BlendTo(string_view animation_name, float time = 0.2f, int layer_index = 0);
+		bool Resume(int layer_index = 0);
+		bool Pause(int layer_index = 0);
+		bool Stop(int layer_index = 0);
 
 		// void ResumeAllLayers();
 		void PauseAllLayers();
@@ -93,14 +90,22 @@ namespace idk
 		bool GetBool(string_view name) const;
 		bool GetTrigger(string_view name) const;
 
-		string DefaultStateName() const;
-		string CurrentStateName() const;
-		string BlendStateName() const;
-		bool HasState(string_view name) const;
+		CSharpState GetState(string_view name, int layer_index) const;
+		float GetWeight(int layer_index = 0) const;
 
-		bool IsPlaying() const;
-		bool IsBlending() const;
-		bool HasCurrAnimEnded() const;
+		string DefaultStateName(int layer_index = 0) const;
+		string CurrentStateName(int layer_index = 0) const;
+		float CurrentStateTime(int index = 0) const;
+		float CurrentStateElapsed(int index = 0) const;
+		string BlendStateName(int index = 0) const;
+		float BlendStateTime(int index = 0) const;
+		float BlendStateElapsed(int index = 0) const;
+
+		bool HasState(string_view name, int index = 0) const;
+		bool IsPlaying(int index = 0) const;
+		bool IsBlending(int index = 0) const;
+
+		bool HasCurrAnimEnded(int index = 0) const;
 
 		// Script Setters
 		bool SetInt(string_view name, int val);
@@ -108,9 +113,10 @@ namespace idk
 		bool SetBool(string_view name, bool val);
 		bool SetTrigger(string_view name, bool val);
 
-		void ResetTriggers();
+		// Layers
+		bool SetWeight(float weight, int layer_index = 0);
 
-		void SetEntryState(string_view name, float offset = 0.0f);
+		void ResetTriggers();
 
 		// Serialization
 		void on_parse();

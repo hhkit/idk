@@ -45,13 +45,13 @@ namespace idk
 	}
 	void IGE_AnimatorWindow::Update()
 	{
-		if (Core::GetSystem<IDE>().selected_gameObjects.empty())
+		if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.empty())
 		{
 			_curr_animator_component = Handle<Animator>{};
 		}
 		else
 		{
-			const auto curr_obj = Core::GetSystem<IDE>().selected_gameObjects[0];
+			const auto curr_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects[0];
 			const auto curr_obj_comp = curr_obj->GetComponent<Animator>();
 			if (curr_obj_comp != _curr_animator_component)
 				resetSelection();
@@ -738,19 +738,24 @@ namespace idk
 					const auto new_cursor_pos = ImGui::GetCursorPos();
 					ImGui::SetCursorPos(prev_cursor_pos + selectable_offset);
 					
-					// Display transition name					
-					if(layer.transition_index == transition_index)
+					// Display transition name	
+					float weight = 0.0f;
+					const bool style_and_bar = layer.curr_state.index == state_index && layer.transition_index == transition_index;
+					if (style_and_bar)
+					{
+						weight = layer.blend_state.elapsed_time / layer.blend_duration;
 						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0,1,0,1 });
-					
+					}
+						
 					ImGui::Text(transition_from.data());
 
 					ImGui::SameLine();
 					arrow();
 					ImGui::SameLine(0.0f, ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2);
 					ImGui::Text(transition_to.data());
-					if (layer.transition_index == transition_index)
+					if (style_and_bar)
 						ImGui::PopStyleColor(1);
-					float weight = layer.transition_index == transition_index ? layer.blend_state.elapsed_time / layer.blend_duration : 0.0f;
+					
 					ImGui::ProgressBar(weight, _blend_prog_col, ImVec2(-1, 3), nullptr);
 
 					ImGui::EndGroup();

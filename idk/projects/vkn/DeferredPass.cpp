@@ -155,30 +155,30 @@ namespace idk::vkn
 		{
 			inited = true;
 			FrameBufferBuilder fbf;
-			fbf.Begin(size)
+			fbf.Begin("GBuffer",size)
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eAlbedoAmbOcc
 				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::SRGBA_8,
-				FilterMode::_enum::Nearest
-				})
-			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eNormal
-				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_16_F,
-				FilterMode::_enum::Nearest
-				})
-			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eTangent
-				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_16_F,
+				TextureInternalFormat::RGBA_8,
 				FilterMode::_enum::Nearest
 				})
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eUvMetallicRoughness
 				LoadOp::eClear,StoreOp::eStore,
-				TextureInternalFormat::RGBA_16_F,
+				TextureInternalFormat::RGBA_8,
 				FilterMode::_enum::Nearest
 				})
 			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eViewPos
 				LoadOp::eClear,StoreOp::eStore,
 				TextureInternalFormat::RGBA_16_F,
+				FilterMode::_enum::Nearest
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eNormal
+				LoadOp::eClear,StoreOp::eStore,
+				TextureInternalFormat::RGBA_8,
+				FilterMode::_enum::Nearest
+				})
+			.AddAttachment(idk::AttachmentInfo{ // GBufferBinding::eTangent
+				LoadOp::eClear,StoreOp::eStore,
+				TextureInternalFormat::RGBA_8,
 				FilterMode::_enum::Nearest
 				})
 			.SetDepthAttachment(idk::AttachmentInfo{
@@ -196,7 +196,7 @@ namespace idk::vkn
 			auto new_buffer = fb_factory.Create(fb_info);
 			gbuffer = RscHandle<VknFrameBuffer>{ new_buffer };
 
-			fbf.Begin(size);
+			fbf.Begin("Accum Buffer",size);
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eClear,StoreOp::eStore,
 					TextureInternalFormat::RGBA_16_F,
@@ -217,7 +217,7 @@ namespace idk::vkn
 			}
 			auto vkn_att = idk::AttachmentInfo{
 				LoadOp::eLoad,StoreOp::eDontCare,
-				TextureInternalFormat::RGBA_16_F,
+				TextureInternalFormat::DEPTH_32_F,
 				FilterMode::_enum::Nearest,
 				false,
 				gbuffer->DepthAttachment().buffer
@@ -327,7 +327,7 @@ namespace idk::vkn
 		{
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 			FrameBufferBuilder fbf;
-			fbf.Begin(rt.Size());
+			fbf.Begin("HDR Buffer",rt.Size());
 			fbf.AddAttachment(idk::AttachmentInfo{
 				LoadOp::eLoad,StoreOp::eStore,
 				TextureInternalFormat::SRGBA_8,

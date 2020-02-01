@@ -41,7 +41,7 @@ namespace idk
 		t.internal_format = t_meta.internal_format;
 		t.is_srgb = t_meta.is_srgb;
 		t.filter_mode = t_meta.filter_mode;
-		t.pixel_buffer.insert(t.pixel_buffer.end(), binary_data.begin(), binary_data.end());
+		t.pixel_buffer = std::move(binary_data);
 
 		return AssetBundle{ updated_meta_bundle, {{ t_guid, std::move(t)} } };
 	}

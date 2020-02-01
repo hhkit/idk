@@ -108,11 +108,11 @@ namespace idk {
 	using SelectableComponents = std::tuple< Handle<MeshRenderer>, Handle<SkinnedMeshRenderer>>;
 
 	template<typename T>
-	Handle<GameObject> GetGameObject(T handle)
+	Handle<GameObject> GetGameObject([[maybe_unused]] T handle)
 	{
 		if constexpr (std::is_same_v<T, Handle<GameObject>>)
 			return handle;
-		else if constexpr (is_in_tuple_v < T, SelectableComponents > )
+		else if constexpr (is_in_tuple_v<T, SelectableComponents>)
 			return handle->GetGameObject();
 		else
 			return Handle<GameObject>{};
@@ -123,12 +123,12 @@ namespace idk {
 
         if (!is_window_displayed)
         {
-            Core::GetSystem<IDE>().currentCamera().current_camera->enabled = false;
+            Core::GetSystem<IDE>()._camera.current_camera->enabled = false;
             Core::GetSystem<GraphicsSystem>().enable_picking = false;
             return;
         }
         else
-            Core::GetSystem<IDE>().currentCamera().current_camera->enabled = true;
+            Core::GetSystem<IDE>()._camera.current_camera->enabled = true;
 
         if (ImGui::BeginMenuBar())
         {
@@ -162,7 +162,7 @@ namespace idk {
         {
 			//Draw where it is going to be created in at
 
-			Handle<Camera> cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+			Handle<Camera> cam = Core::GetSystem<IDE>()._camera.current_camera;
 			vec3 objectFinalPos{};
 
 			currRay = GenerateRayFromCurrentScreen();
@@ -210,7 +210,9 @@ namespace idk {
                     if (!payload->IsDelivery())
                         continue;
 
-                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
+                    auto* cmd = Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
+					Core::GetSystem<IDE>().SelectGameObject(cmd->GetGameObject(), false, true);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
                     break;
                 }
             }
@@ -236,7 +238,7 @@ namespace idk {
 			//	LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
 			//}
 			//Select gameobject here!
-			CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+			CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 			Handle<Camera> currCamera = main_camera.current_camera;
 			last_pick = 
 			{
@@ -254,7 +256,7 @@ namespace idk {
 				//get the first obj
 				auto& editor = Core::GetSystem<IDE>();
 				Handle<GameObject> closestGameObject = obj.front();
-				auto cameraPos = editor.currentCamera().current_camera->currentPosition();
+				auto cameraPos = editor._camera.current_camera->currentPosition();
 				float distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
 				for (auto& iObject : obj) {
 					float comparingDistance = cameraPos.distance(iObject->GetComponent<Transform>()->position);
@@ -291,46 +293,43 @@ namespace idk {
 
 				closestGameObject = closestRenderer.visit([](auto handle) {
 					return GetGameObject(handle);
-					});
+				});
 			}
 			if (closestGameObject)
 			{
 				auto& editor = Core::GetSystem<IDE>();
-				vector<Handle<GameObject>>& selected_gameObjects = editor.selected_gameObjects; //Get reference from IDE
-				if (picked_state.is_multi_select) { //Or select Deselect that particular handle
+				auto sel = editor.GetSelectedObjects();
+				auto& selected_gameObjects = sel.game_objects;
+
+				if (picked_state.is_multi_select) // select/deselect that particular handle
+				{
 					bool hasSelected = false;
-					for (auto counter = 0; counter < selected_gameObjects.size(); ++counter) { //Select and deselect
-						if (closestGameObject == selected_gameObjects[counter]) {
-							selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+					for (auto i = 0; i < selected_gameObjects.size(); ++i) //Select and deselect
+					{
+						if (closestGameObject == selected_gameObjects[i])
+						{
+							selected_gameObjects.erase(selected_gameObjects.begin() + i);
+							Core::GetSystem<IDE>().SetSelection(sel);
 							hasSelected = true;
 							break;
 						}
 					}
-					if (!hasSelected) {
+					if (!hasSelected)
+					{
 						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
-						editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
+						Core::GetSystem<IDE>().SetSelection(sel);
+						editor.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 					}
-					Core::GetSystem<IDE>().RefreshSelectedMatrix();
-
 				}
-				else {
-					//Select as normal
-					selected_gameObjects.clear();
-					selected_gameObjects.push_back(closestGameObject);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, closestGameObject));
-					editor.FindWindow< IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
-
-					Core::GetSystem<IDE>().RefreshSelectedMatrix();
+				else //Select as normal
+				{
+					Core::GetSystem<IDE>().SelectGameObject(closestGameObject);
+					editor.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 				}
-
-
 			}
-			// If raycast hits nothing, we should clear the selected objects
-			else
+			else // If raycast hits nothing, we should clear the selected objects
 			{
-				Core::GetSystem<IDE>().selected_gameObjects.clear();
-
+				Core::GetSystem<IDE>().Unselect();
 			}
 		}
 
@@ -340,9 +339,9 @@ namespace idk {
         currMouseScreenPos.y = mouse_pos.y;
 
 		//Right Mouse WASD control
-		if (ImGui::IsMouseDown(1) && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) {
+		if (ImGui::IsMouseDown(1) && !ImGui::GetIO().KeyAlt) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
-				Handle<Transform> tfm = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera->GetGameObject()->GetComponent<Transform>();
+				Handle<Transform> tfm = Core::GetSystem<IDE>()._camera.current_camera->GetGameObject()->GetComponent<Transform>();
 				distance_to_focused_vector = focused_vector.distance(tfm->position);
 				cachedMouseScreenPos = currMouseScreenPos;
 				ImGui::SetWindowFocus();
@@ -545,7 +544,7 @@ namespace idk {
 		const auto bottom_right = vec2(ImGui::GetWindowPos()) + vec2(ImGui::GetWindowContentRegionMax()) - vec2(32.0f, 32.0f);
 		const float axis_len = 24.0f;
 		IDE& editor = Core::GetSystem<IDE>();
-		CameraControls& main_camera = editor._interface->Inputs()->main_camera;
+		CameraControls& main_camera = editor._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 		auto view = currCamera->ViewMatrix();
@@ -573,7 +572,7 @@ namespace idk {
 		IDE& editor = Core::GetSystem<IDE>();
 
 		int counter = 0;
-		auto cameraPos = editor.currentCamera().current_camera->currentPosition();
+		auto cameraPos = editor._camera.current_camera->currentPosition();
 		float distanceToCamera = refVector[counter]->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
 		for (int i = 0; i < refVector.size(); ++i) {
 			float comparingDistance = cameraPos.distance(refVector[i]->GetComponent<Transform>()->position);
@@ -605,7 +604,7 @@ namespace idk {
 
 
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
@@ -656,7 +655,7 @@ namespace idk {
 		
 		IDE& editor = Core::GetSystem<IDE>();
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 		vec3 localY =  tfm->Up()	* delta.y*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localy axis
@@ -674,7 +673,7 @@ namespace idk {
 	{
 		
 		auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
-		auto cam = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		auto cam = Core::GetSystem<IDE>()._camera;
 		auto tfm = cam.current_camera->GetGameObject()->Transform();
 		IDE& editor = Core::GetSystem<IDE>();
 		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
@@ -692,7 +691,7 @@ namespace idk {
 
 		//vec2 delta{ static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) , static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) };
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		Handle<Camera> currCamera = main_camera.current_camera;
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
@@ -711,7 +710,7 @@ namespace idk {
 		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) * orbit_strength; //Global Y Axis
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) * -orbit_strength; //Local X Axis
 		//Getting camera datas
-		Handle<Camera>		currCamera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera.current_camera;
+		Handle<Camera>		currCamera = Core::GetSystem<IDE>()._camera.current_camera;
 		Handle<Transform>	tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 		mat4				cam_matrix = tfm->GlobalMatrix();
 
@@ -734,7 +733,7 @@ namespace idk {
 	{
 		//Getting camera datas
 		IDE&				editor			 = Core::GetSystem<IDE>();
-		CameraControls&		main_camera		 = editor._interface->Inputs()->main_camera;
+		CameraControls&		main_camera		 = editor._camera;
 		Handle<Camera>		currCamera		 = main_camera.current_camera;
 		Handle<Transform>	tfm				 = currCamera->GetGameObject()->GetComponent<Transform>();
 		const auto			view_mtx		 = currCamera->ViewMatrix();
@@ -749,10 +748,12 @@ namespace idk {
 
 		ImGuizmo::SetDrawlist(); //Draw on scene view only
 
-		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == MODE::LOCAL ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
+		ImGuizmo::MODE gizmo_mode = editor.gizmo_mode == GizmoMode::Local ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD;
 
-		if (editor.selected_gameObjects.size() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
-			Handle<Transform> gameObjectTransform = editor.selected_gameObjects[0]->Transform(); 
+		if (editor.GetSelectedObjects().game_objects.size() &&
+			editor.GetSelectedObjects().game_objects[0] &&
+			!ImGui::IsKeyDown(static_cast<int>(Key::Alt))) { //Dont enable gizmo when ALT is pressed prevent pressing on the gizmo when moving camera
+			Handle<Transform> gameObjectTransform = editor.GetSelectedObjects().game_objects[0]->Transform();
 
 
 			if (gameObjectTransform) {
@@ -765,25 +766,22 @@ namespace idk {
 					}
 				}
 
-				switch (editor.gizmo_operation) {
-				default:
-				case GizmoOperation_Null:
-
-					break;
-
-				case GizmoOperation_Translate:
+				switch (editor.gizmo_operation) 
+				{
+				case GizmoOperation::Translate:
 					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::TRANSLATE, gizmo_mode, gizmo_matrix, NULL, &translate_snap_val[0]);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
 					break;
-
-				case GizmoOperation_Rotate:
+				case GizmoOperation::Rotate:
 					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::ROTATE,	gizmo_mode, gizmo_matrix, NULL, &rotate_snap_val);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
 					break;
-
-				case GizmoOperation_Scale:
+				case GizmoOperation::Scale:
 					ImGuizmo::Manipulate(viewMatrix, projectionMatrix, ImGuizmo::SCALE,		gizmo_mode, gizmo_matrix, NULL, &scale_snap_val);
 					ImGuizmoManipulateUpdate(gameObjectTransform);
+					break;
+				default:
+				case GizmoOperation::Null:
 					break;
 				}
 
@@ -792,17 +790,13 @@ namespace idk {
 
 			if (is_being_modified) {
 				if (!ImGuizmo::IsUsing()) {
-					vector<mat4>& originalMatrix = editor.selected_matrix;
 					int execute_counter = 0;
-					for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
-						mat4 modifiedMat = editor.selected_gameObjects[i]->GetComponent<Transform>()->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.selected_gameObjects[i], originalMatrix[i], modifiedMat));
+					for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
+						mat4 modifiedMat = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>()->GlobalMatrix();
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.GetSelectedObjects().game_objects[i], original_matrices[i], modifiedMat));
 						++execute_counter;
 					}
-					//Refresh the new matrix values
-					editor.RefreshSelectedMatrix();
 					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-
 
 					is_being_modified = false;
 				}
@@ -831,12 +825,22 @@ namespace idk {
 
 	void IGE_SceneView::ImGuizmoManipulateUpdate(Handle<Transform>& gameObjectTransform)
 	{
-		if (ImGuizmo::IsUsing()) {
-			is_being_modified = true;
-			mat4 difference = GenerateMat4FromGizmoMatrix() - gameObjectTransform->GlobalMatrix();
+		if (ImGuizmo::IsUsing())
+		{
 			IDE& editor = Core::GetSystem<IDE>();
-			for (int i = 0; i < editor.selected_gameObjects.size(); ++i) {
-				Handle<Transform> iTransform = editor.selected_gameObjects[i]->GetComponent<Transform>();
+
+			if (!is_being_modified)
+			{
+				original_matrices.clear();
+				for (auto h : editor.GetSelectedObjects().game_objects)
+					original_matrices.push_back(h->GetComponent<Transform>()->GlobalMatrix());
+				is_being_modified = true;
+			}
+
+			mat4 difference = GenerateMat4FromGizmoMatrix() - gameObjectTransform->GlobalMatrix();
+			for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i)
+			{
+				Handle<Transform> iTransform = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>();
 				mat4 newMatrix = iTransform->GlobalMatrix() + difference;
 				iTransform->GlobalMatrix(newMatrix); //Assign new variables
 			}
@@ -860,7 +864,7 @@ namespace idk {
 	{
 		//auto& app_sys = Core::GetSystem<Application>();
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._interface->Inputs()->main_camera;
+		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
 		//Handle<Camera> currCamera = main_camera.current_camera;
 
 		return main_camera.WindowsPointToRay(GetMousePosInWindowNormalized());

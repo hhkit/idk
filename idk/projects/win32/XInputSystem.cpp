@@ -74,6 +74,7 @@ namespace idk::win
             {
                 // Controller is connected 
                 _curr_buf()[i] = _process_state(state);
+                _connected_users |= 1 << i;
             }
             else
             {

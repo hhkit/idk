@@ -506,7 +506,6 @@
     <ClCompile Include="CanvasRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
-    <ClCompile Include="DebugUtil.cpp" />
     <ClCompile Include="FrameGraph.cpp">
       <Filter>render\graph</Filter>
     </ClCompile>

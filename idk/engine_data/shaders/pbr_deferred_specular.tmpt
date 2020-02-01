@@ -34,7 +34,7 @@ import /engine_data/shaders/utils.glsl
 void main()
 {
 	vec3  view_pos  = fs_in.position;
-	vec3  normal    = normalize(fs_in.normal);
+	vec3  normal    = normalize(fs_in.normal) ;
 	vec3  tangent   = normalize(fs_in.tangent);
 	vec2  uv        = fs_in.uv;
 
@@ -50,6 +50,8 @@ void main()
 
 
 	//__MATERIAL_CODE__;
+	normal  = normal  *0.5 + 0.5;
+	tangent = tangent *0.5 + 0.5;
 	out_albedo_amb_o = vec4(albedo,ambient_o);
 	out_uv_metallic_roughness = vec4(fs_in.uv,specular,roughness);
 	out_view_pos = vec4(fs_in.position,emissive.r);

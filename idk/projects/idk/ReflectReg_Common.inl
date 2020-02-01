@@ -41,6 +41,11 @@ REFLECT_BEGIN(idk::reflect::type, "type") REFLECT_END()
 REFLECT_BEGIN(idk::string, "string") REFLECT_END()
 REFLECT_BEGIN(float, "float") REFLECT_END()
 REFLECT_BEGIN(int, "int") REFLECT_END()
+REFLECT_BEGIN(bool, "bool") REFLECT_END()
+REFLECT_BEGIN(char, "char") REFLECT_END()
+REFLECT_BEGIN(short, "short") REFLECT_END()
+REFLECT_BEGIN(unsigned, "uint") REFLECT_END()
+REFLECT_BEGIN(double, "double") REFLECT_END()
 
 // COMMON CONTAINERS
 REFLECT_BEGIN(idk::vector<idk::reflect::dynamic>, "vector<dynamic>")

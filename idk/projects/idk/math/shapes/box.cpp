@@ -14,16 +14,18 @@ namespace idk
 	}
 	aabb box::bounds() const
 	{
-		vec3 hextents{};
-		for (auto [cvec, length]: zip(axes(), half_extents()))
+		const vec3 hextents = half_extents();
+		vec3 tmp;
+		const auto axis = axes();
+		for (int i = 0; i < 3; ++i)
 		{
-			auto col_vec = cvec;
+			auto col_vec = axis[i];
 			for (auto& elem : col_vec)
 				elem = abs(elem);
-			hextents += col_vec * length;
+			tmp += col_vec * hextents[i];
 		}
 
-		return aabb{ center - hextents, center + hextents };
+		return aabb{ center - tmp, center + tmp };
 	}
 	vec3 box::half_extents() const
 	{

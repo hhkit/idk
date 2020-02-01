@@ -43,10 +43,30 @@ namespace idk
 				// SaveBindPose(elem);
 				for (auto& layer : elem.layers)
 				{
-					if (layer.curr_state.index != 0)
-						layer.Play(layer.curr_state.index);
+					auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
+					if (anim_state.valid)
+					{
+						
+						bool has_valid_clip = true;
+						const auto state = anim_state.GetBasicState();
+						if (state)
+						{
+							has_valid_clip = s_cast<bool>(state->motion);
+						}
+						else
+						{
+							// All motions need to be valid for a blend tree to be valid
+							for (auto& m : anim_state.GetBlendTree()->motions)
+								if (!m.motion)
+								{
+									has_valid_clip = false;
+									break;
+								}
+						}
+						if (has_valid_clip)
+							layer.Play(layer.curr_state.index);
+					}
 				}
-
 			}
 			_was_paused = false;
 		}
@@ -79,7 +99,7 @@ namespace idk
 				for (size_t k = 0; k < animator.layers.size(); ++k)
 				{
 					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					if (layer.IsPlaying() && layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -90,14 +110,16 @@ namespace idk
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
-
-					if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+					if (curr_layer.IsPlaying() && curr_layer.bone_mask[child_index])
 					{
-						// We do a blend from the curr layer to the final bone pose: 
-						// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
-						// This means we do Blend(curr_pose, layer_pose, 0.25);
-						BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
-						final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+						if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+						{
+							// We do a blend from the curr layer to the final bone pose: 
+							// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
+							// This means we do Blend(curr_pose, layer_pose, 0.25);
+							BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
+							final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+						}
 					}
 				}
 
@@ -158,7 +180,7 @@ namespace idk
 				for (size_t k = 1; k < animator.layers.size(); ++k)
 				{
 					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					if (layer.IsPlaying() && layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -170,7 +192,7 @@ namespace idk
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
-					if (curr_layer.bone_mask[child_index])
+					if (curr_layer.IsPlaying() && curr_layer.bone_mask[child_index])
 					{
 						if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
 						{
@@ -342,6 +364,7 @@ namespace idk
 		result.rotation = quat{};
 		if (!layer.bone_mask[bone_index])
 		{
+			layer.prev_poses[bone_index] = result;
 			return result;
 		}
 

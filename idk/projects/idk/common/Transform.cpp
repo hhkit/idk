@@ -156,7 +156,7 @@ namespace idk
 			const auto new_global = decomp.recompose();
 
 			const auto parent_inv = parent->Transform()->GlobalMatrix().inverse();
-			position = decompose(parent_inv * new_global).scale;
+			scale = decompose(parent_inv * new_global).scale;
 		}
 	}
 

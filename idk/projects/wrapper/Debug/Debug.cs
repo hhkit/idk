@@ -8,14 +8,17 @@ namespace idk
 {
     public class Debug
     {
-        public static void Log(string log
-        ,   [System.Runtime.CompilerServices.CallerMemberName] string memberName = ""
+        /// <summary>
+        /// Logs a message to the console.
+        /// </summary>
+        public static void Log(object message
+        ,    [System.Runtime.CompilerServices.CallerMemberName] string memberName = ""
         ,    [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = ""
         ,    [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
             )
         {
             Bindings.DebugLog(sourceFilePath.Substring(sourceFilePath.LastIndexOf('\\') + 1)
-                + ":" + sourceLineNumber + ":" + memberName, log);
+                + ":" + sourceLineNumber + ":" + memberName, message.ToString());
         }
     }
 }

@@ -36,7 +36,7 @@ namespace idk
 	RscHandle<FrameBuffer> PointLight::InitShadowMap()
 	{
 		FrameBufferBuilder builder;
-		builder.Begin(shadow_map_dim);
+		builder.Begin("ShadowMap["+std::to_string(shadow_map_dim.x)+", "+ std::to_string(shadow_map_dim.y)+"]",shadow_map_dim);
 		builder.SetDepthAttachment(
 			AttachmentInfo
 			{
@@ -55,7 +55,7 @@ namespace idk
 	RscHandle<FrameBuffer> DirectionalLight::InitShadowMap()
 	{
 		FrameBufferBuilder builder;
-		builder.Begin(shadow_map_dim);
+		builder.Begin("ShadowMap[" + std::to_string(shadow_map_dim.x) + ", " + std::to_string(shadow_map_dim.y) + "]", shadow_map_dim);
 		builder.SetDepthAttachment(
 			AttachmentInfo
 			{
@@ -72,7 +72,7 @@ namespace idk
 	RscHandle<FrameBuffer> SpotLight::InitShadowMap()
 	{
 		FrameBufferBuilder builder;
-		builder.Begin(shadow_map_dim);
+		builder.Begin("ShadowMap[" + std::to_string(shadow_map_dim.x) + ", " + std::to_string(shadow_map_dim.y) + "]", shadow_map_dim);
 		builder.SetDepthAttachment(
 			AttachmentInfo
 			{

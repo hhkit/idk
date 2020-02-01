@@ -11,6 +11,8 @@
 #include <gfx/CameraClear.h>
 
 #include <core/Handle.h>//RenderObject::obj_id
+#undef near
+#undef far
 #include <ds/index_span.inl>
 
 namespace idk
@@ -146,6 +148,8 @@ namespace idk
         CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
 		rect viewport;
+		real near = 0.1f;
+		real far = 1.f;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 

@@ -46,7 +46,29 @@ namespace idk::vkn
 		while (i > 0 && !((d >> i)>=4))--i; //Decrease mipmap count
 		return i;
 	}
-#pragma optimize("",off)
+	void DdsLoader::LoadTexture(VknTexture& tex, string_view entire_file, const TextureOptions& to)
+	{
+		DdsFile dds{ entire_file };
+
+		InputTexInfo iti;
+		iti.data = dds.Data().data();
+		iti.len = dds.Data().length();
+		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
+		TexCreateInfo tci;
+		tci.aspect = vk::ImageAspectFlagBits::eColor;
+		tci.width = dds.Dimensions().x;
+		tci.height = dds.Dimensions().y;
+		tci.mipmap_level = std::max(dds.File().header.mip_map_count, 0u);
+		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width, tci.height);
+		tci.internal_format = iti.format;// MapFormat(to.internal_format);
+		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
+
+		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti);
+	}
+	const hlp::MemoryAllocator& DdsLoader::Allocator() const
+	{
+		return allocator;
+	}
 	ResourceBundle DdsLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& bundle)
 	{
 		auto meta = bundle.FetchMeta<Texture>();
@@ -57,29 +79,14 @@ namespace idk::vkn
 		auto file = path_to_resource.Open(idk::FS_PERMISSIONS::READ, true);
 		std::stringstream strm;
 		strm << file.rdbuf();
-        DdsFile dds{ string{strm.str()} };
-		TextureOptions to{};
+		TextureOptions to;
 		if (meta)
 		{
 			auto load = meta->GetMeta<Texture>();
 			if (load)
 				to = *load;
 		}
-
-		InputTexInfo iti;
-		iti.data = dds.Data().data();
-		iti.len = dds.Data().length();
-		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
-		TexCreateInfo tci;
-		tci.aspect = vk::ImageAspectFlagBits::eColor;
-		tci.width = dds.Dimensions().x;
-		tci.height = dds.Dimensions().y;
-		tci.mipmap_level = std::max(dds.File().header.mip_map_count,0u);
-		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width,tci.height);
-		tci.internal_format = MapFormat(to.internal_format);
-		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
-
-		loader.LoadTexture(*tex, allocator, *load_fence,to,tci,iti);
+		LoadTexture(*tex, strm.str(), to);
 		return tex;
 	}
 

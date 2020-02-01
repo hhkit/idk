@@ -60,6 +60,14 @@ namespace idk
         public void StopAll()
             => Bindings.AudioSourceStopAll(handle);
 
+        //Plays all audioclip in the audiosource.
+        public float GetClipVolume(int index)
+            => Bindings.AudioSourceClipGetVolume(handle, index);
+
+        //Sets an audioclip volume.
+        public void SetClipVolume(int index, float volume)
+            => Bindings.AudioSourceClipSetVolume(handle, index, volume);
+
         //Gets the number of audioclips in audiosource.
         public int Size()
             => Bindings.AudioSourceSize(handle);

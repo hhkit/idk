@@ -1,7 +1,7 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <debug/LogSystem.h>
 #include <core/Core.h>
-#include <core/Scheduler.h>
+#include <core/Scheduler.inl>
 #include <PauseConfigurations.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
@@ -104,6 +104,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	case GraphicsAPI::Vulkan:
 	{
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".vert");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".frag");
 		Core::GetResourceManager().RegisterLoader<vkn::VulkanGlslLoader>(".geom");

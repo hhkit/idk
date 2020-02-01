@@ -98,7 +98,9 @@ namespace idk
 			false,
 			clear,
 			Mesh::defaults[MeshType::Box],
-			viewport
+			viewport,
+			near_plane,
+			far_plane
 		};
 	}
 	float Camera::AspectRatio() const

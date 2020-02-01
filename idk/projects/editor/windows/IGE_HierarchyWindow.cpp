@@ -45,14 +45,11 @@ namespace idk {
 	void IGE_HierarchyWindow::BeginWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{150.0f,100.0f});
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-
 	}
+
 	void IGE_HierarchyWindow::Update()
 	{
-		
 		ImGui::PopStyleVar(2);
 
 
@@ -64,34 +61,36 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-		//MenuBar
+		// MenuBar
+
         ImGui::BeginMenuBar();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(3);
 
 		ImGui::SetCursorPosX(5);
-		if (ImGui::Button("Create")) {
+		if (ImGui::Button("Create")) 
+		{
 			ImGui::OpenPopup("CreatePopup");
-
 		}
-		if (ImGui::BeginPopup("CreatePopup")) {
+		if (ImGui::BeginPopup("CreatePopup")) 
+		{
             IDE& editor = Core::GetSystem<IDE>();
 
-			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N")) {
-				editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
+			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N"))
+			{
+				editor.CreateGameObject();
 			}
-            if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N")) {
-                if (editor.selected_gameObjects.size()) {
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, editor.selected_gameObjects.front()));
-                }
-                else {
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject));
-                }
-
-
-            }
-            if (ImGui::BeginMenu("UI")) {
-				const auto go = editor.selected_gameObjects.empty()? Handle<GameObject>() :editor.selected_gameObjects.front();
+			if (ImGui::MenuItem("Create Empty Child", "ALT+SHIFT+N"))
+			{
+				if (editor.GetSelectedObjects().game_objects.size())
+					editor.CreateGameObject(editor.GetSelectedObjects().game_objects.front());
+				else
+					editor.CreateGameObject();
+			}
+            if (ImGui::BeginMenu("UI")) 
+			{
+				const auto go = editor.GetSelectedObjects().game_objects.empty() ?
+					Handle<GameObject>() : editor.GetSelectedObjects().game_objects.front();
 
 				auto parent = go;
 				while (parent)
@@ -104,24 +103,24 @@ namespace idk {
 				{
 					if (ImGui::MenuItem("Canvas"))
 					{
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Canvas", vector<string>{ "RectTransform", "Canvas" }));
+						editor.CreateGameObject(go, "Canvas", vector<string>{ "RectTransform", "Canvas" });
 					}
 				}
 				if (ImGui::MenuItem("Image"))
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Image", vector<string>{ "RectTransform", "Image" }));
+					editor.CreateGameObject(go, "Image", vector<string>{ "RectTransform", "Image" });
 				if (ImGui::MenuItem("Text"))
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, go, "Text", vector<string>{ "RectTransform", "Text" }));
+					editor.CreateGameObject(go, "Text", vector<string>{ "RectTransform", "Text" });
 				
 				ImGui::EndMenu();
             }
 
 			ImGui::EndPopup();
 		}
+
 		if (ImGui::Button("...##AdditionalStuff")) {
 			ImGui::OpenPopup("OpenAdditionalStuff");
-
 		}
-		if (ImGui::BeginPopup("OpenAdditionalStuff")) {
+		if (ImGui::BeginPopup("OpenAdditionalStuff", ImGuiWindowFlags_NoMove)) {
 			ImGui::Checkbox("Show Editor Objects", &show_editor_objects);
 			ImGui::EndPopup();
 		}
@@ -144,6 +143,8 @@ namespace idk {
 		ImGui::PopStyleVar();
 
 		ImGui::EndMenuBar();
+		// ================================== menu bar
+
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
@@ -154,22 +155,19 @@ namespace idk {
 		//To unindent the first gameobject which is the scene
 		ImGui::Unindent();
 
-		int selectedCounter = 0; // This is for Shift Select. This iterates.
-		int selectedItemCounter = 0; // This is for Shift Select. This is assigned
-		bool isShiftSelectCalled = false;
-		bool hasSelected_GameobjectsModified = false;
-		int focused_gameobject_position =  0 ; //If it is -1, it means the ScrollToGameObjectInHierarchy is not called.
-		int total_gameobjects_displayed = 0; //This is for the focused thing.
-		bool is_scroll_focused_gameObject_found = false;
-		vector<int> itemToSkipInGraph{};
-		//Refer to TestSystemManager.cpp
+		Handle<GameObject> scroll_focus_next_frame;
+		bool shift_selecting = false;
+		ObjectSelection selection = Core::GetSystem<IDE>().GetSelectedObjects();
+		vector<Handle<GameObject>>& selected_gameObjects = selection.game_objects;
 
+		if (shift_select_anchors[0] && shift_select_anchors[1])
+			selected_gameObjects.clear();
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
 
 		//Display gameobjects
-		sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
-
+		sceneGraph.visit([&](const Handle<GameObject> handle, int depth) -> bool 
+		{
 			if (depth > 0) {
 				for (int i = 0; i < depth; ++i)
 					ImGui::Indent();
@@ -178,38 +176,33 @@ namespace idk {
 				for (int i = depth; i < 0; ++i)
 					ImGui::Unindent();
 			}
-			if (!handle) //Ignore handle zero
+
+			if (!handle) //Ignore null/invalid handle
+				return true;
+			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) // ignore editor
 				return true;
 
-			if (!show_editor_objects && handle.scene == Scene::editor || handle.scene == Scene::prefab) { // ignore editor
-				++selectedCounter; //counter here is for shift selecting
-
-				return true;
-			}
-
-			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
-
-			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow| ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
 			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
-			if (children->size() == 0) {
+			if (children->size() == 0)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
-			}
 
 			bool is_its_child_been_selected = false;
 			//Check if gameobject has been selected. Causes Big-O(n^2)
-			for (Handle<GameObject>& i : selected_gameObjects) {
-				if (handle == i) {
+			for (auto i : selected_gameObjects) 
+			{
+				if (handle == i) 
+				{
 					nodeFlags |= ImGuiTreeNodeFlags_Selected;
 					break;
 				}
-				else if (CheckIfChildrenIsSelected(children, i)) {
+				else if (CheckIfChildrenIsSelected(children, i))
+				{
 					is_its_child_been_selected = true;
 					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-
 				}
-
 			}
 
 			Handle<Name> c_name = handle->GetComponent<Name>();
@@ -217,14 +210,13 @@ namespace idk {
 			if (c_name)
 				goName = c_name->name;
 			
-			const bool isNameEmpty = goName.empty();
             const bool is_prefab = handle->HasComponent<PrefabInstance>();
             ImColor col = ImGui::GetColorU32(ImGuiCol_Text);
-			if (isNameEmpty) {
+			if (goName.empty())
+			{
 				goName = "Unnamed (";
 				goName.append(serialize_text(handle.id));
 				goName.append(")");
-				//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
                 col = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
 			}
             if (is_prefab)
@@ -236,80 +228,106 @@ namespace idk {
 			
 			if (!textFilter.PassFilter(goName.c_str())) {
                 ImGui::PopStyleColor();
-				++selectedCounter; // counter here is for shift selecting
 				return true;
 			}
 			
 			string idString = std::to_string(handle.id); //Use id string as id
 			if (is_its_child_been_selected)
+			{
 				ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.75f, 0.75f, 0.0f, 0.4f));
+				if (scroll_focused_gameObject)
+					ImGui::SetNextItemOpen(true); // open this tree node to reveal the child
+			}
 
+			//Draw Node. Trees will always return true if open, so use IsItemClicked to set object instead!
 			bool isTreeOpen = ImGui::TreeNodeEx(idString.c_str(), nodeFlags, goName.c_str());
 
 			if (is_its_child_been_selected)
 				ImGui::PopStyleColor();
-				
 
             ImGui::PopStyleColor();
 
-			
-			++selectedCounter; //counter here is for shift selecting
-			
-			//Standard Click and ctrl click
-			if (ImGui::IsItemClicked(0)) {
-				//Check if handle has been selected
-				bool hasBeenSelected = false;
-				int counter = 0;
-				for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
-					if (handle == selected_gameObjects[counter]) {
-						hasBeenSelected = true;
-						break;
-					}
-				}
-
-				if (ImGui::IsKeyDown(static_cast<int>(Key::Control))) { //Deselect that particular handle
-					if (hasBeenSelected) {
-						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
-					}
-					else {
+			// handle shift selecting here.
+			// [0] is the start anchor, [1] is what the user shift selected to
+			if (shift_select_anchors[0] && shift_select_anchors[1])
+			{
+				if (!shift_selecting)
+				{
+					if (handle == shift_select_anchors[0] || handle == shift_select_anchors[1])
+					{
+						shift_selecting = true;
 						selected_gameObjects.push_back(handle);
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-
-					}
-					hasSelected_GameobjectsModified = true;
-
-				}
-				else if (ImGui::IsKeyDown(static_cast<int>(Key::Shift))) {
-					if (selected_gameObjects.size() != 0) {
-						selectedItemCounter = selectedCounter;
-						isShiftSelectCalled = true;
-
-
 					}
 				}
-				
-				else {
-					//Select as normal
-					selected_gameObjects.clear();
+				else // shift_selecting
+				{
 					selected_gameObjects.push_back(handle);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-
-					hasSelected_GameobjectsModified = true;
-				}
-
-				if (ImGui::IsMouseDoubleClicked(0)) {
-					Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+					if (handle == shift_select_anchors[0] || handle == shift_select_anchors[1])
+					{
+						shift_selecting = false;
+						Core::GetSystem<IDE>().SetSelection(selection);
+						shift_select_anchors[1] = {}; // keep the start anchor which is [0]
+					}
 				}
 			}
 			
+			//Standard Click and ctrl click
+			if (ImGui::IsMouseReleased(0) && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
+			{
+				if (ImGui::GetIO().KeyCtrl) //Deselect that particular handle
+				{
+					//Check if handle has been selected
+					bool hasBeenSelected = false;
+					int counter = 0;
+					for (counter = 0; counter < selected_gameObjects.size(); ++counter) {
+						if (handle == selected_gameObjects[counter]) {
+							hasBeenSelected = true;
+							break;
+						}
+					}
+
+					if (hasBeenSelected) {
+						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
+						Core::GetSystem<IDE>().SetSelection(selection);
+					}
+					else {
+						Core::GetSystem<IDE>().SelectGameObject(handle, true);
+					}
+
+					shift_select_anchors[0] = handle;
+				}
+				else if (ImGui::GetIO().KeyShift)
+				{
+					if (shift_select_anchors[0])
+						shift_select_anchors[1] = handle;
+				}
+				else
+				{
+					Core::GetSystem<IDE>().SelectGameObject(handle);
+					shift_select_anchors[0] = handle;
+				}
+			}
+
+			if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered())
+			{
+				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+			}
+
 			//If the drag drops target on to the handle...
-			if (ImGui::BeginDragDropTarget()) {
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT)) {
+			if (ImGui::BeginDragDropTarget()) 
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT)) 
+				{
 					IM_ASSERT(payload->DataSize == sizeof(uint64_t));
-					//uint64_t* source = static_cast<uint64_t*>(payload->Data); // Getting the Payload Data
-					if (selected_gameObjects.size()) {
-						for (Handle<GameObject>& i : selected_gameObjects) {
-							if (i == handle) //do not parent self
+					Handle<GameObject> drop_payload = Handle<GameObject>{ *static_cast<uint64_t*>(payload->Data) }; // Getting the Payload Data
+					auto object_itr = std::find(selected_gameObjects.begin(), selected_gameObjects.end(), drop_payload);
+
+					int execute_counter = 0;
+					if (object_itr != selected_gameObjects.end()) // object is amongst the multi selected
+					{
+						for (Handle<GameObject> i : selected_gameObjects)
+						{
+							if (!i || i == handle) //do not parent self
 								continue;
 
 							Handle<GameObject> parentCheck = handle->GetComponent<Transform>()->parent; //Check for if im parenting to my own children
@@ -326,176 +344,110 @@ namespace idk {
 							}
 
 							//If im draging to my parent, unparent
-							if (i->GetComponent<Transform>()->parent == handle) {
-								i->GetComponent<Transform>()->parent = Handle <GameObject>{};
+							if (i->Parent() == handle)
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+							else //Else parent normally
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+							++execute_counter;
+						}
+
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+					}
+					else
+					{
+						auto i = drop_payload;
+						Handle<GameObject> parentCheck = handle->GetComponent<Transform>()->parent; //Check for if im parenting to my own children
+						bool isParentingToChild = false;
+						while (parentCheck) {
+							if (i == parentCheck) {
+								isParentingToChild = true;
+								break;
 							}
-							else { //Else parent normally
-								i->GetComponent<Transform>()->SetParent(handle, true);
-							}
+							parentCheck = parentCheck->GetComponent<Transform>()->parent;
+						}
+						if (!isParentingToChild)
+						{
+							if (i->Parent() == handle)
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+							else //Else parent normally
+								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+							Core::GetSystem<IDE>().SelectGameObject(i, false, true);
+							Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 						}
 					}
 
+					scroll_focus_next_frame = drop_payload;
 				}
 				ImGui::EndDragDropTarget();
 			}
 			if (ImGui::BeginDragDropSource()) //ImGuiDragDropFlags_
 			{
-				ImGui::SetDragDropPayload(DragDrop::GAME_OBJECT, &handle.id, sizeof(uint64_t)); // "STRING" is a tag! This is used in IGE_InspectorWindow
+				ImGui::SetDragDropPayload(DragDrop::GAME_OBJECT, &handle.id, sizeof(uint64_t));
+				ImGui::Text("Dragging gameobject: ");
+				ImGui::SameLine();
+				ImGui::TextColored(ImVec4(1,1,0,1),goName.c_str());
 				ImGui::Text("Drag to another gameobject to parent.");
 				ImGui::Text("Drag to parent to unparent.");
+				ImGui::Text("Drag ProjectContent to create Prefab.");
 				ImGui::EndDragDropSource();
 			}
 
-			++total_gameobjects_displayed;
-			if (scroll_focused_gameObject) {
-				if (!is_scroll_focused_gameObject_found) {
-					if (scroll_focused_gameObject == handle) {
-						is_scroll_focused_gameObject_found = true;
-					}
-					else {
-						++focused_gameobject_position;
-					}
+
+			if (scroll_focused_gameObject)
+			{
+				if (scroll_focused_gameObject == handle)
+				{
+					ImGui::SetScrollHereY();
+					scroll_focused_gameObject = {};
 				}
 			}
 
 
-			if (isTreeOpen) {
-
+			if (isTreeOpen)
 				ImGui::TreePop();
-
-			}
-			else {
-				itemToSkipInGraph.push_back(selectedCounter);
+			else
 				return false; //Skip children
-			}
 
 			return true; //Go to next in visit. Does not skip children
-
-
-
-
 		});
 
-        ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2); // ImGuiStyleVar_ItemSpacing, FramePadding
 
-		//Shift Select logic
-		if (isShiftSelectCalled) {
-			//std::cout << "Items to skip: ";
-			//for (int& i : itemToSkipInGraph) {
-			//	std::cout << i << ", ";
-			//}
-			//std::cout << std::endl;
+		if (scroll_focus_next_frame)
+			ScrollToSelectedInHierarchy(scroll_focus_next_frame);
 
-			int counter = 0; //This is the same as the above scenegraph. I cant use the tree to track which places to skip, so we are using the vector
-			vector<int> minMax{ -1,-1 };
-			vector<Handle<GameObject>>& selected_gameObjects = Core::GetSystem<IDE>().selected_gameObjects;
-			vector<Handle<GameObject>> selectedForSelect = selected_gameObjects;
-			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
+		if (ImGui::InvisibleButton("empty_space", ImGui::GetContentRegionAvail()))
+		{
+			Core::GetSystem<IDE>().Unselect();
+		}
+		if (ImGui::BeginDragDropTarget()) // drag onto empty space unparents gameobjects
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDrop::GAME_OBJECT, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(uint64_t));
+				Handle<GameObject> drop_payload = Handle<GameObject>{ *static_cast<uint64_t*>(payload->Data) }; // Getting the Payload Data
+				auto object_itr = std::find(selected_gameObjects.begin(), selected_gameObjects.end(), drop_payload);
 
-				depth;
-				if (!handle) //Ignore handle zero
-					return true;
-				IDE& editor = Core::GetSystem<IDE>();
-				Handle<Camera>& editorCam = editor.currentCamera().current_camera;
-				if (handle == editorCam->GetGameObject())
-					return true;
-				++counter;
-
-				//Finds what is selected and use as min and max
-				for (int i = 0; i < selectedForSelect.size(); ++i) {
-					if (selectedForSelect[i] == handle) {
-						minMax[0] = minMax[0] == -1 ? counter : (minMax[0] > counter ? counter : minMax[0]);
-						minMax[1] = minMax[1] == -1 ? counter : (minMax[1] < counter ? counter : minMax[1]);
-						break;
+				int execute_counter = 0;
+				if (object_itr != selected_gameObjects.end()) // object is amongst the multi selected
+				{
+					for (auto h : selected_gameObjects)
+					{
+						if (!h)
+							continue;
+						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, h, Handle<GameObject>{}));
+						++execute_counter;
 					}
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 				}
-
-				//Skips similar to closed trees
-				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
-					if (itemToSkipInGraph[i] == counter) {
-						return false;
-					}
-				}
-
-
-				return true;
-			});
-			//std::cout << "Seletected item: " << selectedItemCounter << std::endl;
-			if (minMax[0] == minMax[1]) {
-				if (minMax[0] < selectedItemCounter)
-					minMax[1] = selectedItemCounter;
 				else
-					minMax[0] = selectedItemCounter;
-			}
-			else if (minMax[0] > selectedItemCounter) { //out of ranges, selectedItemCounter becomes min
-				minMax[0] = selectedItemCounter;
-			}
-			else if (minMax[1] < selectedItemCounter) { //out of ranges, selectedItemCounter becomes max
-				minMax[1] = selectedItemCounter;
-			}
-
-			selected_gameObjects.clear();
-			counter = 0;
-			int execute_counter = 0;
-			sceneGraph.visit([&](const Handle<GameObject>& handle, int depth) -> bool {
-				
-				depth;
-				
-				if (!handle) //Ignore handle zero
-					return true;
-
-				++counter;
-
-
-
-				if (counter >= minMax[0] && counter <= minMax[1]) {
-					selected_gameObjects.push_back(handle);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_SelectGameObject, handle));
-					++execute_counter;
-					hasSelected_GameobjectsModified = true;
+				{
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, drop_payload, Handle<GameObject>{}));
+					Core::GetSystem<IDE>().SelectGameObject(drop_payload, false, true);
+					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 				}
-				//Skips similar to closed trees
-				for (int i = 0; i < itemToSkipInGraph.size(); ++i) {
-					if (itemToSkipInGraph[i] == counter) {
-						return false;
-					}
-				}
-				return true;
-			});
-
-			Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-
-			//std::cout << "MIN: " << minMax[0] << " MAX: " << minMax[1] << std::endl;
-
-			//Refresh the new matrix values
-		}
-        if (hasSelected_GameobjectsModified)
-        {
-            Core::GetSystem<IDE>().RefreshSelectedMatrix();
-            OnGameObjectSelectionChanged.Fire();
-        }
-
-		ImGui::PopStyleVar(); //ImGuiStyleVar_ItemSpacing
-
-
-		if (scroll_focused_gameObject) { //If this was called by sceneview. scroll the hierarchy to this position then null this.
-
-			if (is_scroll_focused_gameObject_found) {
-				const int clamp_val = 5;
-				if (focused_gameobject_position < clamp_val)
-					focused_gameobject_position = 0;
-				else if ((total_gameobjects_displayed-focused_gameobject_position) < clamp_val)
-					focused_gameobject_position = total_gameobjects_displayed;
-				const float pos = static_cast<float>(focused_gameobject_position) / static_cast<float>(total_gameobjects_displayed);
-				ImGui::SetScrollY(ImGui::GetScrollMaxY() * pos); //sceneGraph will always be 1 or more
 			}
-
-
-
-			scroll_focused_gameObject = {};
 		}
-
-
 	}
 
 	void IGE_HierarchyWindow::ScrollToSelectedInHierarchy(Handle<GameObject> gameObject)

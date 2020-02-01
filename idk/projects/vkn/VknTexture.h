@@ -3,6 +3,7 @@
 #include "idk.h"
 #include "gfx/Texture.h"
 #include <vkn/MemoryAllocator.h>
+#include <gfx/CompiledTexture.h>
 #include <meta/stl_hack.h>
 namespace idk::vkn {
 
@@ -27,6 +28,8 @@ namespace idk::vkn {
 		~VknTexture();
 		VknTexture(const VknTexture & rhs) = delete;
 		VknTexture(VknTexture && rhs) noexcept;
+		//VknTexture(const VknTexture& rhs);
+		VknTexture(const CompiledTexture&);
 
 		VknTexture& operator=(VknTexture&&) noexcept;
 		vk::Sampler Sampler()const { return *sampler; }
