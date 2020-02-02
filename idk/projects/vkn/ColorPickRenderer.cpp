@@ -65,7 +65,7 @@ namespace idk::vkn
 			return View().Device()->getFenceStatus(*fence)==vk::Result::eSuccess;
 		}
 		//Fulfill the promises
-#pragma optimize("",off)
+//#pragma optimize("",off)
 		void Fulfill()
 		{
 			vk::Device d = *View().Device();
@@ -149,7 +149,7 @@ namespace idk::vkn
 				}
 			);
 		}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 		void UpdateModules(vector<RscHandle<ShaderProgram>>& shaders)
 		{
 			pipeline_modules.resize(shaders.size());

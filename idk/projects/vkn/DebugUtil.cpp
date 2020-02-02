@@ -42,7 +42,7 @@ namespace idk::vkn::dbg
 		if (View().DynDispatcher().vkCmdEndDebugUtilsLabelEXT)
 			cmd_buffer.endDebugUtilsLabelEXT(View().DynDispatcher());
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	string DumpFrameBufferAllocs()
 	{
 		std::stringstream out;

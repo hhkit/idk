@@ -436,7 +436,7 @@ namespace idk::vkn
 	{
 		_pipeline_manager = &manager;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
@@ -714,7 +714,7 @@ namespace idk::vkn
 			}
 		}
 	}
-#pragma optimize("", off)
+//#pragma optimize("", off)
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];

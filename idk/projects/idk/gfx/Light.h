@@ -25,7 +25,6 @@ namespace idk
 
 	struct CamLightData
 	{
-		CameraData cam_data;
 		vector<Lightmap> cam_lightmaps;
 	};
 	struct LightData :BaseLightData

@@ -20,5 +20,6 @@ namespace idk::vkn
  			DoNothing();
 		return VK_FALSE;
 	}
+#pragma optimize("",on)
 
 }

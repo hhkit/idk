@@ -338,6 +338,11 @@ namespace idk
 		_interface->ImGuiFrameRender();
 	}
 
+	Handle<Camera> IDE::getSceneEditorCam()
+	{
+		return _camera.current_camera;
+	}
+
 	void IDE::PollShortcutInputs()
 	{
 		if (ImGui::IsAnyItemActive()) //Do not do any shortcuts when inputs are active! EG: Editing texts!

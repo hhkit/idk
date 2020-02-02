@@ -356,6 +356,16 @@ namespace idk
 		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		range.light_begin = active_light_buffer.size();
 		range.dir_light_begin = directional_light_buffer.size();
+		
+		//Perform camera light loop to populate the data
+		float n_plane = camera.near_plane, f_plane = camera.far_plane;
+
+		float diff = f_plane - n_plane;
+		float first_end = n_plane + 0.2f * diff;
+		float second_end = n_plane + 0.4f * diff;
+
+		float cascadeiter[4] = { n_plane,first_end,second_end,f_plane };
+
 		for (size_t i = 0; i < lights.size(); ++i)
 		{
 			auto& light = lights[i];
@@ -384,19 +394,9 @@ namespace idk
 				break;
 			case index_in_variant_v<DirectionalLight, LightVariant>:
 			{
-
-				//Perform camera light loop to populate the data
-				float n_plane = camera.near_plane, f_plane = camera.far_plane;
-
-				float diff = f_plane - n_plane;
-				float first_end = n_plane + 0.30f * diff;
-				float second_end = n_plane + 0.50f * diff;
-
-				float cascadeiter[4] = { n_plane,first_end,second_end,f_plane };
 				///////////////////////////////////////>>>>>>>>>>>>>>>>>>>>>>>
 				unsigned k = 0, j = 1;
 				light.camDataRef = camera;
-
 
 				for (auto& elem : d_lightmaps[camera.obj_id].cam_lightmaps)
 				{
@@ -416,7 +416,7 @@ namespace idk
 		range.light_end = active_light_buffer.size();
 		range.dir_light_end = directional_light_buffer.size();
 	}
-#pragma optimize("", off)
+//#pragma optimize("", off)
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -578,7 +578,6 @@ namespace idk
 
 						for (auto& c : result.camera)
 						{
-							d_lightmaps[c.obj_id].cam_data = c;
 							if (d_lightmaps[c.obj_id].cam_lightmaps.empty())
 								d_lightmaps[c.obj_id].cam_lightmaps = e.InitShadowMap();
 						}

@@ -87,7 +87,7 @@ namespace idk::vkn
 		ShaderDirectionalData() = default;
 		ShaderDirectionalData(const DLightData& data) : vp{ data.vp }, far_plane{data.far_plane} {}
 	};
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	string PrepareDirectionalBlock(const vector<DLightData>& vp)
 	{
 		vector<ShaderDirectionalData> tmp_dlight(vp.size());

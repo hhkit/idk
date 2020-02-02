@@ -27,6 +27,7 @@ namespace idk {
 		real far_plane = 1.f;
 	private:
 		
+		mat4 oldCamView{};
 		real near_plane = 0.f;
 		
 		vec3 center = {};
