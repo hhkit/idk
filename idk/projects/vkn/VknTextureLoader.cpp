@@ -318,7 +318,6 @@ namespace idk::vkn
 		);
 	}
 	void DoNothing();
-#pragma optimize("",off)
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		auto format = load_info.internal_format, internal_format = load_info.internal_format;

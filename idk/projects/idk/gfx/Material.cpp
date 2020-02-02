@@ -8,7 +8,6 @@
 #include <ds/result.inl>
 namespace idk
 {
-#pragma optimize("",off)
 	RscHandle<ShaderTemplate> Material::GetTemplate() const
 	{
 		if (domain == MaterialDomain::Surface)

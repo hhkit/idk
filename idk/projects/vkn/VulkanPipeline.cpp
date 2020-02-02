@@ -218,7 +218,6 @@ namespace idk::vkn
 		}
 		Create(config2, info, std::move(layouts), vulkan, options);
 	}
-#pragma optimize ("",off)
 	void VulkanPipeline::Create(const config_t& config, vector<vk::PipelineShaderStageCreateInfo> info, hash_table<uint32_t, vk::DescriptorSetLayout> slayout, Vulkan_t& vulkan, const Options& options)
 	{
 		auto& m_device = vulkan.Device();
