@@ -10,7 +10,7 @@
 #include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
-#pragma optimize("",off)
+// #pragma optimize("",off)
 	VulkanView& View();
 	CbmLoader::CbmLoader() : allocator{ *View().Device(),View().PDevice() }
 	{

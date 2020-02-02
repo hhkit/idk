@@ -164,7 +164,7 @@ namespace idk::vkn
 			counter++;
 			futures.emplace_back(Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs,&counter));
 		}
-//#pragma optimize("",off)
+//// #pragma optimize("",off)
 		void Join() override
 		{
 			for(auto& future : futures)
@@ -596,7 +596,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
-//#pragma optimize("",off)
+//// #pragma optimize("",off)
 	void RenderPipelineThingy(
 		[[maybe_unused]] const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -799,7 +799,7 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 	}
-//#pragma optimize("",off)
+//// #pragma optimize("",off)
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_current_frame_index = frame_index;
