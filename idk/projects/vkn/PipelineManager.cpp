@@ -239,7 +239,6 @@ namespace idk::vkn
 	}
 
 	//Does not help you store your overrides.
-#pragma optimize("",off)
 	void PipelineDescHelper::UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config)
 	{
 		config.buffer_descriptions.clear();

@@ -390,6 +390,14 @@ const UboInfo& ShaderModule::GetLayout(const string& uniform_name) const
 	
 	return (itr!= Current().ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
 }
+std::optional<UboInfo> ShaderModule::TryGetLayout(const string& uniform_name) const
+{
+	std::optional<UboInfo> result{};
+	auto itr = Current().ubo_info.find(uniform_name);
+	if(itr != Current().ubo_info.end())
+		result = itr->second;
+	return result;
+}
 void DoNothing();
 ShaderModule::~ShaderModule()
 {

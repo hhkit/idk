@@ -235,6 +235,7 @@ namespace idk::vkn
 	{
 		ref.~Ref();
 		new (&ref) Ref{ &ubo_manager };
+		reserve(1000);
 	}
 	void PipelineThingy::UnbindShader(ShaderStage stage)
 	{
@@ -330,10 +331,14 @@ namespace idk::vkn
 			if (ohshader)
 			{
 				auto& shader = ohshader->as<ShaderModule>();
-				if (shader && shader.HasLayout(uniform_name))
+				if (shader)
 				{
-					result = shader.GetLayout(uniform_name);
-					break;
+					auto opt = shader.TryGetLayout(uniform_name);
+					if (opt)
+					{
+						result = *opt;
+						break;
+					}
 				}
 			}
 		}
