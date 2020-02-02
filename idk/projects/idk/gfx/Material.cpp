@@ -8,6 +8,7 @@
 #include <ds/result.inl>
 namespace idk
 {
+#pragma optimize("",off)
 	RscHandle<ShaderTemplate> Material::GetTemplate() const
 	{
 		if (domain == MaterialDomain::Surface)
@@ -19,7 +20,7 @@ namespace idk
 				switch (model)
 				{
 				case ShadingModel::DefaultLit: return LOAD(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
-				case ShadingModel::Unlit:      return LOAD(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/pbr_deferred.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return LOAD(Core::GetSystem<GraphicsSystem>().is_deferred()?"/engine_data/shaders/unlit.tmpt":"/engine_data/shaders/pbr_forward.tmpt");
 				case ShadingModel::Specular:   return LOAD(Core::GetSystem<GraphicsSystem>().is_deferred() ? "/engine_data/shaders/pbr_deferred_specular.tmpt" : "/engine_data/shaders/pbr_specular.tmpt");
 				}
 			case BlendMode::Masked:

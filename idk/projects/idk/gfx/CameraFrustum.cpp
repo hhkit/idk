@@ -50,7 +50,6 @@ namespace idk {
 	{}
 	Frustum& Frustum::operator=(const Frustum& rhs)
 	{
-		// TODO: insert return statement here
 		vertices = rhs.vertices;
 		boundingBox = rhs.boundingBox;
 
@@ -58,7 +57,6 @@ namespace idk {
 	}
 	Frustum& Frustum::operator=(Frustum&& rhs)
 	{
-		// TODO: insert return statement here
 		vertices = std::move(rhs.vertices);
 		boundingBox = std::move(rhs.boundingBox);
 

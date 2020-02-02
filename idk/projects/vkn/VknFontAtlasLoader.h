@@ -60,7 +60,7 @@ namespace idk::vkn
 	public:
 		//Will override TexCreateInfo's format if TextureOptions is set
 		void LoadFontAtlas(VknFontAtlas& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<FontAtlasOptions> ooptional, const FACreateInfo& load_info, std::optional<InputFAInfo> in_info);
-		void LoadFontAtlas(VknFontAtlas& texture, TextureFormat input_pixel_format, std::optional<FontAtlasOptions> options, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
-		void LoadFontAtlas(VknFontAtlas& texture, TextureFormat input_pixel_format, std::optional<FontAtlasOptions> options, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
+		void LoadFontAtlas(VknFontAtlas& texture, TextureFormat input_pixel_format, std::optional<FontAtlasOptions> options, const char* rgba32, size_t len, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
+		void LoadFontAtlas(VknFontAtlas& texture, TextureFormat input_pixel_format, std::optional<FontAtlasOptions> options, string_view rgba32, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
 	};
 }

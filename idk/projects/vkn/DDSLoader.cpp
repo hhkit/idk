@@ -52,7 +52,7 @@ namespace idk::vkn
 
 		InputTexInfo iti;
 		iti.data = dds.Data().data();
-		iti.len = dds.Data().length();
+		iti.len = dds.size();
 		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
 		TexCreateInfo tci;
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
@@ -63,7 +63,7 @@ namespace idk::vkn
 		tci.internal_format = iti.format;// MapFormat(to.internal_format);
 		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
 
-		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti);
+		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti,to.guid);
 	}
 	const hlp::MemoryAllocator& DdsLoader::Allocator() const
 	{

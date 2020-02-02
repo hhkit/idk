@@ -6,11 +6,11 @@ namespace idk {
 	{
 		return s_cast<float>(_size.x) / _size.y;
 	}
-	ivec2 CubeMap::Size() const
+	uvec2 CubeMap::Size() const
 	{
 		return _size;
 	}
-	void CubeMap::Size(ivec2 newsize)
+	void CubeMap::Size(uvec2 newsize)
 	{
 		_size = newsize;
 	}

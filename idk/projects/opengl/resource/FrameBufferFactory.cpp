@@ -15,7 +15,7 @@ namespace idk::ogl
 	{
 		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto& m = *fb;
-		m.Size(Core::GetSystem<Application>().GetScreenSize());
+		m.Size(uvec2{ Core::GetSystem<Application>().GetScreenSize() });
 		m.SetColorBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RGB_16_F, m.size)});
 		m.SetDepthBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::DEPTH_16, m.size)});
 
@@ -29,9 +29,9 @@ namespace idk::ogl
 	{
 		auto fb = std::make_unique<OpenGLRenderTarget>();
 		auto &m = *fb;
-		m.Size(ivec2{ 512,512 });
-		m.SetColorBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RGB_16_F, ivec2{ 512,512 })});
-		m.SetDepthBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::DEPTH_16, ivec2{ 512,512 })});
+		m.Size(uvec2{ 512,512 });
+		m.SetColorBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::RGB_16_F, uvec2{ 512,512 })});
+		m.SetDepthBuffer(RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<OpenGLTexture>(TextureInternalFormat::DEPTH_16, uvec2{ 512,512 })});
 		return fb;
 	}
 
@@ -45,7 +45,7 @@ namespace idk::ogl
 		return std::make_unique<OpenGLFrameBuffer>();
 	}
 
-	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out)
+	void OpenGLFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, uvec2 size, unique_ptr<Attachment>& out)
 	{
 		type;
 		out = std::make_unique<OpenGLAttachment>();
