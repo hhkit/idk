@@ -418,4 +418,10 @@ namespace idk::vkn
 		the_interface.BindSampler("tex", 0, dc.texture.as<VknTexture>());
 	}
 
+	bool UnlitFilter::Skip(PipelineThingy& the_interface, const RenderObject& dc)
+	{
+
+		return !dc.material_instance|| !dc.material_instance->material|| dc.material_instance->material->model!=ShadingModel::Unlit;
+	}
+
 }
