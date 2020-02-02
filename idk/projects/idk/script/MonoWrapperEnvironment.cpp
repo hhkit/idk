@@ -771,7 +771,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->Play(s.get(), 0.0f, index);
 		}
@@ -784,7 +784,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->BlendTo(s.get(), time, index);
 		}
@@ -796,7 +796,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->Pause(index);
 		}
@@ -808,7 +808,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->Resume(index);
 		}
@@ -820,7 +820,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->Stop(index);
 		}
@@ -833,7 +833,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->GetState(s.get(), index);
 		}
@@ -845,7 +845,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 
 			return mono_string_new(mono_domain_get(), animator->DefaultStateName(index).c_str());
@@ -858,7 +858,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return mono_string_new(mono_domain_get(), animator->CurrentStateName(index).c_str());
 		}
@@ -870,7 +870,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return mono_string_new(mono_domain_get(), animator->BlendStateName(index).c_str());
 		}
@@ -882,7 +882,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->IsPlaying(index);
 		}
@@ -894,7 +894,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->IsBlending(index);
 		}
@@ -906,7 +906,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->HasCurrAnimEnded(index);
 		}
@@ -919,7 +919,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			auto ret_val = animator->HasState(s.get(), index);
 			return ret_val;
@@ -932,7 +932,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->GetWeight(index);
 		}
@@ -973,7 +973,7 @@ namespace idk::mono
 			if (layer)
 			{
 				auto l = unbox(layer);
-				index = animator->FindLayerIndex(l.get());
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return animator->SetWeight(weight, index);
 		}

@@ -193,7 +193,7 @@
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
-	REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
+	REFLECT_VARS(_shader_program, domain, blend, model, master_node, nodes, links, parameters)
 	REFLECT_END()
 
 #pragma endregion
