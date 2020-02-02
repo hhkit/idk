@@ -1284,12 +1284,12 @@ namespace idk::vkn
 		//Preprocess MeshRender's uniforms
 		//TODO make ProcessRoUniforms only render forward pass stuff.
 		auto&& the_interface = (is_deferred) ? [](auto& state,auto& rs) {
-			//UnlitMaterialBinding binders;
-			//binders.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
-			//return vkn::ProcessRoUniforms(state, rs.ubo_manager, binders);
-			PipelineThingy the_interface{};
-			the_interface.SetRef(rs.ubo_manager);
-			return the_interface;
+			UnlitMaterialBinding binders;
+			binders.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
+			return vkn::ProcessRoUniforms(state, rs.ubo_manager, binders);
+			//PipelineThingy the_interface{};
+			//the_interface.SetRef(rs.ubo_manager);
+			//return the_interface;
 		}(state,rs) : ProcessRoUniforms(state, rs.ubo_manager);
 		
 		//the_interface.SetRef(rs.ubo_manager);
