@@ -929,7 +929,7 @@ namespace idk::vkn
 		}
 		//GBufferBarrier(cmd_buffer, gbuffer);
 	}
-
+//#pragma optimize("",off)
 	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy(&accum_stuff)[EGBufferType::size()], const CameraData& camera, [[maybe_unused]]RenderStateV2& rs)
 	{
 		int i = 0;
@@ -967,7 +967,8 @@ namespace idk::vkn
 			//Begin Depthless RT renderpass
 			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
 			//Draw FSQ
-			RenderProcessedDrawCalls(cmd_buffer, accum_stuff[i].DrawCalls(), camera, pipeline_manager(), frame_index(), rpbi, rp, 1);
+			auto& dc = accum_stuff[i].DrawCalls();
+			RenderProcessedDrawCalls(cmd_buffer, dc, camera, pipeline_manager(), frame_index(), rpbi, rp, 1);
 			//End Depthless RT renderpass
 			cmd_buffer.endRenderPass();
 			++i;

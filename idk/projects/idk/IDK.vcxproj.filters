@@ -1119,6 +1119,14 @@
     <ClInclude Include="phys\AabbTree_utils.h">
       <Filter>phys\aabb tree</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\RenderTargetMeta.h" />
+    <ClInclude Include="gfx\TextureInternalFormat.h" />
+    <ClInclude Include="gfx\CascadedSet.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\Lightmap.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
     <ClInclude Include="network\EventLoadLevelMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
@@ -1622,6 +1630,12 @@
       <Filter>network\substream managers</Filter>
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
+    <ClCompile Include="gfx\CascadedSet.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Lightmap.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
     <ClCompile Include="phys\AabbTree.cpp">
       <Filter>phys\aabb tree</Filter>
     </ClCompile>

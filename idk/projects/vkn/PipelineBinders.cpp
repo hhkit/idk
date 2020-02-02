@@ -76,6 +76,29 @@ namespace idk::vkn
 		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
 		return light_block;
 	}
+	struct DLightData {
+		float far_plane{};
+		mat4 vp{};
+	};
+	struct ShaderDirectionalData
+	{
+		alignas(16) float far_plane;
+		FakeMat4<float> vp;
+		ShaderDirectionalData() = default;
+		ShaderDirectionalData(const DLightData& data) : vp{ data.vp }, far_plane{data.far_plane} {}
+	};
+//#pragma optimize("",off)
+	string PrepareDirectionalBlock(const vector<DLightData>& vp)
+	{
+		vector<ShaderDirectionalData> tmp_dlight(vp.size());
+		for (size_t i = 0; i < tmp_dlight.size(); ++i)
+		{
+			auto& matrix = tmp_dlight[i] = vp[i];
+		}
+		string d_block;
+		d_block += string{ reinterpret_cast<const char*>(tmp_dlight.data()), hlp::buffer_size(tmp_dlight) };
+		return d_block;
+	}
 
 
 	void StandardBindings::Bind(PipelineThingy& ) {}
@@ -149,22 +172,41 @@ namespace idk::vkn
 		cam = state.camera;
 		auto& all_lights = *state.lights;
 		vector<LightData> lights;
-		size_t i = 0,end = vstate.active_lights.size();
+		size_t i = 0, end = vstate.active_lights.size(), j = 0, d_end = vstate.active_dir_lights.size();
 		if (light_range)
 		{
 			auto& [start, _end] = *light_range;
 			i = start;
 			end = _end;
 		}
-
+		vector<DLightData> directional_vp{};
 		for (;i<end;++i)
 		{
 			auto active_index = vstate.active_lights[i];
 			auto& light = all_lights[active_index];
 			lights.emplace_back(light);
-			shadow_maps.emplace_back(light.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+			if (light.index != 1)
+			{
+				for (auto& elem : light.light_maps)
+				{
+					auto v = elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer;
+					shadow_maps.emplace_back(v);
+				}
+			}
+			else if (light.index == 1)
+			{
+				if(!light.light_maps.empty())
+					shadow_maps.emplace_back(light.light_maps[2].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+
+				for (auto& elem : state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
+				{
+					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+					directional_vp.emplace_back(DLightData{ elem.far_plane,elem.cascade_projection * light.v});
+				}
+			}
 		}
 		light_block = PrepareLightBlock(cam, lights);
+		dlight_block = PrepareDirectionalBlock(directional_vp);
 		view_trf = cam.view_matrix;
 		pbr_trf = view_trf.inverse();
 		LoadStuff(vstate);
@@ -253,7 +295,7 @@ namespace idk::vkn
 
 		{
 			uint32_t i = 0;
-			if (state.shadow_maps_2d.size() == 0)
+			if (shadow_maps.size() == 0)
 			{
 				//Make sure that it's there.
 				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
@@ -263,12 +305,32 @@ namespace idk::vkn
 			{
 				//Bind the shadow maps
 				for (auto& shadow_map : shadow_maps)
+				{				
+					//auto& sm_uni = shadow_map;
+					{
+						auto& depth_tex = shadow_map.as<VknTexture>();
+						the_interface.BindSampler("shadow_maps", i++, depth_tex, true);
+					}
+				}
+			}
+			i = 0;
+			if (state.shadow_maps_directional.size() == 0)
+			{
+				//Make sure that it's there.
+				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
+				the_interface.BindSampler("shadow_maps_directional", 0, tex, true);
+			}
+			else
+			{
+				//Bind the shadow maps for directional lights
+				the_interface.BindUniformBuffer("DirectionalBlock", 0, dlight_block, true);
+				for (auto& shadow_map : shadow_maps_directional)
 				{
-					
 					auto& sm_uni = shadow_map;
 					{
 						auto& depth_tex = sm_uni.as<VknTexture>();
-						the_interface.BindSampler("shadow_maps", i++, depth_tex, true);
+						the_interface.BindSampler("shadow_map_directional", i++, depth_tex, true);
+						
 					}
 				}
 			}
@@ -395,15 +457,6 @@ namespace idk::vkn
 
 	void FontVertexBindings::BindFont(PipelineThingy& the_interface, const FontRenderData& dc)
 	{
-		////map back into z: (0,1)
-		//mat4 projection_trf = mat4{ 1,0,0,0,
-		//					0,1,0,0,
-		//					0,0,0.5f,0.5f,
-		//					0,0,0,1
-		//}*proj_trf;//map back into z: (0,1)
-		//mat4 block[] = { projection_trf,view_trf };
-		//the_interface.BindUniformBuffer("CameraBlock", 0, block);
-
 		mat4 obj_trfm = view_trf * dc.transform;
 		mat4 obj_ivt = obj_trfm.inverse().transpose();
 		mat4 block2[] = { obj_trfm,obj_ivt };
@@ -412,11 +465,6 @@ namespace idk::vkn
 		the_interface.BindUniformBuffer("FontBlock", 0, block3);
 		the_interface.BindSampler("tex", 0, *dc.atlas.as<VknFontAtlas>().texture);
 	}
-
-	/*void CanvasVertexBindings::SetState(const PostRenderData& vstate)
-	{
-		
-	}*/
 
 	void CanvasVertexBindings::SetState(const CameraData& cam)
 	{

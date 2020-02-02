@@ -38,43 +38,91 @@ namespace idk
 		return Frustum(ProjectionMatrix()*ViewMatrix());
 	}
 
-	mat4 Camera::getTightOrthoProjection() const
+	mat4 Camera::getTightProjection() const
 	{
-		Frustum frustum{ ProjectionMatrix() * ViewMatrix() };
+		//Frustum frustum{ ProjectionMatrix() * ViewMatrix() };
 
-		/*const auto tfm = GetGameObject()->Transform();
-		vec3 front = tfm->Forward();
-		vec3 right = front.cross(vec3(0,0,1)).normalize();
-		vec3 newUp = front.cross(right).normalize();*/
-		mat4 rotMat = ViewMatrix();
+		///*const auto tfm = GetGameObject()->Transform();
+		//vec3 front = tfm->Forward();
+		//vec3 right = front.cross(vec3(0,0,1)).normalize();
+		//vec3 newUp = front.cross(right).normalize();*/
+		//mat4 rotMat = ViewMatrix();
 
-		array<vec3,8> frustumVert;
+		//array<vec3,8> frustumVert;
 
-		vec3 minV, maxV;
-		minV = maxV = rotMat * vec4(frustum.vertices[0], 0);
-		unsigned i = 0;
-		for (auto& elem : frustumVert)
-		{
-			elem = rotMat * vec4(frustum.vertices[i],0);
-			
-			minV.x = std::min(minV.x, elem.x);
-			minV.y = std::min(minV.y, elem.y);
-			minV.z = std::min(minV.z, elem.z);
-			maxV.x = std::max(maxV.x, elem.x);
-			maxV.y = std::max(maxV.y, elem.y);
-			maxV.z = std::max(maxV.z, elem.z);
-		}
+		//vec3 minV, maxV;
+		//minV = maxV = rotMat * vec4(frustum.vertices[0], 0);
+		//unsigned i = 0;
+		//for (auto& elem : frustumVert)
+		//{
+		//	elem = rotMat * vec4(frustum.vertices[i],0);
+		//	
+		//	minV.x = std::min(minV.x, elem.x);
+		//	minV.y = std::min(minV.y, elem.y);
+		//	minV.z = std::min(minV.z, elem.z);
+		//	maxV.x = std::max(maxV.x, elem.x);
+		//	maxV.y = std::max(maxV.y, elem.y);
+		//	maxV.z = std::max(maxV.z, elem.z);
+		//}
 
-		vec3 extent = (maxV - minV) * 0.5f;
+		//vec3 extent = (maxV - minV) * 0.5f;
+		//
+
+		//return ortho(-extent.x, extent.y, -extent.y, extent.y, -extent.z, extent.z);
+
+		//const auto tfm = GetGameObject()->Transform();
 		
+		//vec3 far_corners = getFarCorner();
+		
+		//float end = near_plane + far_plane;
+		//vec3 sphere_center = tfm->position + tfm->Forward() * (near_plane + 0.5f * end);
 
-		return ortho(-extent.x, extent.y, -extent.y, extent.y, -extent.z, extent.z);
+		float sphere_radius = getBSphereRadius();
+		//float rad = sphere_radius / 2.f;
+
+		return ortho(-sphere_radius, sphere_radius, -sphere_radius, sphere_radius,-sphere_radius, sphere_radius);
+	
+
+	}
+
+	vec3 Camera::getFarCorner() const
+	{
+		const auto tfm = GetGameObject()->Transform();
+		vec3 front = tfm->Forward();
+		vec3 right = front.cross(vec3(0, 0, 1)).normalize();
+		vec3 newUp = front.cross(right).normalize();
+
+		float ap = AspectRatio();
+
+		vec2 tangent_fov = { tanf(ap * *deg(field_of_view).data()),tanf(ap) };
+
+		return front + right * tangent_fov.x + newUp * tangent_fov.y;
+	}
+
+	real Camera::getBSphereRadius() const
+	{
+		const auto tfm = GetGameObject()->Transform();
+
+		float end = near_plane + far_plane;
+		vec3 sphere_center = tfm->position + tfm->Forward() * (near_plane + 0.5f * end);
+		
+		vec3 far_corners = getFarCorner();
+		
+		return (tfm->position + far_corners * far_plane - sphere_center).length();
+	}
+
+	vec3 Camera::getTightProjectionCenter() const
+	{
+		const auto tfm = GetGameObject()->Transform();
+		vec3 front = tfm->Forward();
+		vec3 half_cascade = vec3(front * 0.5f * far_plane);
+		return tfm->position + half_cascade;
 	}
 
 	mat4 Camera::ViewMatrix() const
 	{
 		auto mat = GetGameObject()->Transform()->GlobalMatrix();
-		const auto tfm = GetGameObject()->Transform();
+		//const auto tfm = GetGameObject()->Transform();
 		auto retval = orthonormalize(mat);
 		retval[3] = mat[3];
 
@@ -89,18 +137,27 @@ namespace idk
 	}
 	CameraData Camera::GenerateCameraData() const
 	{	
+		rad vfov{  field_of_view *0.5f };
+		rad hfov{ ( field_of_view  *AspectRatio()) * 0.5f };
 		return CameraData{
 			GetGameObject(),
 			layer_mask,
 			ViewMatrix(),
 			ProjectionMatrix(),
+			getTightProjection(),
+			getTightProjectionCenter(),
 			render_target,
 			false,
 			clear,
 			Mesh::defaults[MeshType::Box],
 			viewport,
 			near_plane,
-			far_plane
+			far_plane,
+			getBSphereRadius(),
+			getFarCorner(),
+			GetGameObject()->Transform()->Forward(),
+			GetGameObject()->Transform()->position,
+			{tan(hfov),tan(vfov) },
 		};
 	}
 	float Camera::AspectRatio() const

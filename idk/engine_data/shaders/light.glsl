@@ -20,3 +20,9 @@ struct Light
 	
 	mat4 vp;
 };
+
+struct DLight
+{
+	float far_plane;
+	mat4 vp;
+};

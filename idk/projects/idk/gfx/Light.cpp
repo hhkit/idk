@@ -102,27 +102,27 @@ namespace idk
 		, light);
 	}
 
-	RscHandle<FrameBuffer>& Light::GetLightMap()
+	vector<Lightmap>& Light::GetLightMap()
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant) ->RscHandle<FrameBuffer> &
+			std::visit([&](auto& light_variant) ->vector<Lightmap> &
 				{
-					return light_variant.light_map;
+					return light_variant.GetShadowMap();
 				}
 		, light);
 	}
-	const RscHandle<FrameBuffer>& Light::GetLightMap() const
+	const vector<Lightmap>& Light::GetLightMap() const
 	{
 		// TODO: insert return statement here
 		return
-			std::visit([&](auto& light_variant)-> const RscHandle<FrameBuffer> &
+			std::visit([&](auto& light_variant)-> const vector<Lightmap> &
 				{
-					return light_variant.light_map;
+					return light_variant.GetShadowMap();
 				}
 		, light);
 	}
-	void Light::SetLightMap(const RscHandle<FrameBuffer>& light_map)
+	void Light::SetLightMap(const vector<Lightmap>& light_map)
 	{
 		GetLightMap() = light_map;
 	}
@@ -177,7 +177,8 @@ namespace idk
 				retval.v = LightCameraView{ this }(light_variant);
 				retval.p = LightCameraProj{}(light_variant);
 				retval.vp = retval.p * retval.v;
-				retval.light_map = light_variant.light_map;
+				//retval.w = GetGameObject()->Transform()->GlobalMatrix();
+				retval.light_maps = light_variant.GetShadowMap();
 				retval.cast_shadow = casts_shadows;
 			}
 		, light);

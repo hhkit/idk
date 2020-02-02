@@ -2,6 +2,7 @@
 #include "ElectronView.h"
 #include <reflect/reflect.h>
 #include <math/arith.inl>
+#include <ds/result.inl>
 #include <serialize/binary.inl>
 
 namespace idk
