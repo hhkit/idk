@@ -130,9 +130,13 @@ namespace idk
 		}
 	}
 
-	void NetworkSystem::Shutdown()
+	void NetworkSystem::EarlyShutdown()
 	{
 		ResetNetwork();
+	}
+
+	void NetworkSystem::Shutdown()
+	{
 		ShutdownYojimbo();
 	}
 	void NetworkSystem::ResetNetwork()

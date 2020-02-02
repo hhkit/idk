@@ -195,7 +195,9 @@ namespace idk::ogl
 				pipeline.SetUniform(lightblk + "intensity", light.intensity);
 				pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
-				if (light.light_map)
+
+				//SHADOW IS COMMENTED
+				/*if (light.light_map)
 				{
 					const auto t = light.light_map->DepthAttachment().buffer;
 					t.as<OpenGLTexture>().BindToUnit(texture_units);
@@ -203,7 +205,7 @@ namespace idk::ogl
 					pipeline.SetUniform(lightblk + "vp", light.vp);
 					pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", texture_units);
 					texture_units++;
-				}
+				}*/
 			}
 		};
 
@@ -313,7 +315,9 @@ namespace idk::ogl
 			else if (elem.index == 1) // directional light
 			{
 				Core::GetSystem<DebugRenderer>().Draw(ray{ elem.v_pos, elem.v_dir * 0.25f }, elem.light_color);
-				fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
+				
+				//YOU HAVE NO SHADOW
+				//fb_man.SetRenderTarget(s_cast<RscHandle<OpenGLFrameBuffer>>(elem.light_map));
 
 				glClearColor(1.f,1.f,1.f,1.f);
 				glClearDepth(1.f);
@@ -923,7 +927,7 @@ namespace idk::ogl
 			pipeline.SetUniform(lightblk + "intensity", light.intensity);
 			pipeline.SetUniform(lightblk + "falloff", light.falloff);
 
-			if (light.light_map)
+			/*if (light.light_map)
 			{
 				const auto t = light.light_map->DepthAttachment().buffer;
 				t.as<OpenGLTexture>().BindToUnit(material_texture_uniforms);
@@ -931,7 +935,7 @@ namespace idk::ogl
 				pipeline.SetUniform(lightblk + "vp", light.vp);
 				(pipeline.SetUniform("shadow_maps[" + std::to_string(i) + "]", material_texture_uniforms));
 				material_texture_uniforms++;
-			}
+			}*/
 		}
 	}
 

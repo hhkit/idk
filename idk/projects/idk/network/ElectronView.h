@@ -39,10 +39,12 @@ namespace idk
 		void UnpackGhostData(span <string> data_pack);
 		void UnpackMoveData(span <string> data_pack);
 
-		template<typename Hnd, typename Mem, typename Obj>
-		void RegisterMember(Handle<Hnd> obj, Obj(Mem::*), float interp = 1.f);
+		template<typename Hnd, typename Obj, typename Mem>
+		void RegisterMember(Handle<Hnd> obj, Obj(Mem::*), float interp = 1.f, 
+			function<bool(const Obj&, const Obj&)> send_when = std::not_equal_to<Obj>{});
 		template<typename Val>
-		void RegisterMember(function<Val()> getter, function<void(const Val&)> setter, float interp = 1.f);
+		void RegisterMember(function<Val()> getter, function<void(const Val&)> setter, float interp = 1.f,
+			function<bool(const Val&, const Val&)> send_when = std::not_equal_to<Val>{});
 	private:
 		struct BaseParameter;
 		template<typename T>

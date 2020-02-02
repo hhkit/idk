@@ -4,7 +4,7 @@
 namespace idk {
 	Frustum::Frustum()
 	{
-		unsigned i = 0;
+		/*unsigned i = 0;
 		boundingBox.max = boundingBox.min = vec4(frustumVertList.at(0), 0);
 
 		for (auto& elem : vertices)
@@ -18,11 +18,11 @@ namespace idk {
 			boundingBox.max.x = std::max(boundingBox.max.x, elem.x);
 			boundingBox.max.y = std::max(boundingBox.max.y, elem.y);
 			boundingBox.max.z = std::max(boundingBox.max.z, elem.z);
-		}
+		}*/
 	}
 	Frustum::Frustum(const mat4& vp)
 	{
-		const mat4 in_vp = vp.inverse();
+		/*const mat4 in_vp = vp.inverse();
 
 		unsigned i = 0;
 		boundingBox.max = boundingBox.min = in_vp * vec4(frustumVertList.at(0), 0);
@@ -38,7 +38,7 @@ namespace idk {
 			boundingBox.max.x = std::max(boundingBox.max.x, elem.x);
 			boundingBox.max.y = std::max(boundingBox.max.y, elem.y);
 			boundingBox.max.z = std::max(boundingBox.max.z, elem.z);
-		}
+		}*/
 	}
 	Frustum::Frustum(const Frustum& rhs)
 		:vertices{ rhs.vertices },
@@ -64,7 +64,7 @@ namespace idk {
 	}
 	void Frustum::computeBounding(const mat4& vp)
 	{
-		const mat4 in_vp = vp.inverse();
+		/*const mat4 in_vp = vp.inverse();
 
 		unsigned i = 0;
 		boundingBox.max = boundingBox.min = in_vp * vec4(frustumVertList.at(0),0);
@@ -80,6 +80,6 @@ namespace idk {
 			boundingBox.max.x = std::max(boundingBox.max.x, elem.x);
 			boundingBox.max.y = std::max(boundingBox.max.y, elem.y);
 			boundingBox.max.z = std::max(boundingBox.max.z, elem.z);
-		}
+		}*/
 	}
 }

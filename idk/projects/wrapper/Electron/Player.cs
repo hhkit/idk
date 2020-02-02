@@ -1,7 +1,7 @@
-﻿namespace idk.Electron
+﻿namespace idk
 {
     public class Player
     {
-        public int ActorNumber { get; private set; }
+        public int ActorNumber { get; internal set; }
     }
 }

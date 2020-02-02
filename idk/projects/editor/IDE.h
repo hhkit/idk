@@ -17,7 +17,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 
 #pragma once
 #include <editor/IEditor.h>
-#include <editor/ImGui_Interface.h>
+#include <editor/imgui_interface.h>
 #include <editor/commands/CommandController.h>
 #include <editor/Registry.h>
 #include <editor/CameraControls.h>
@@ -70,6 +70,8 @@ namespace idk
 		void Shutdown() override;
 		void EditorUpdate() override;
 		void EditorDraw() override;
+
+		Handle<Camera> getSceneEditorCam();
 
 		void PollShortcutInputs();
 

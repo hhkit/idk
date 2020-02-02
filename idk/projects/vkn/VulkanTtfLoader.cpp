@@ -41,7 +41,7 @@ namespace idk::vkn
 		}
 		return copied;
 	}
-//#pragma optimize("",off)
+//// #pragma optimize("",off)
 	ResourceBundle TtfLoader::LoadFile(PathHandle handle, RscHandle<FontAtlas> font_handle, const FontAtlasMeta* tm)
 	{
 

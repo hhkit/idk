@@ -15,10 +15,29 @@ namespace idk
 		static const char test[] = "PointLight";
 		return s_cast<const char*>(test);
 	}
+	vector<Lightmap>& SpotLight::GetShadowMap()
+	{
+		// TODO: insert return statement here
+		return light_map;
+	}
+	const vector<Lightmap>& SpotLight::GetShadowMap() const
+	{
+		// TODO: insert return statement here
+		return light_map;
+	}
 	const void* SpotLight::unique_id() const noexcept
 	{
 		static const char test[] = "SpotLight";
 		return s_cast<const char*>(test);
+	}
+	vector<Lightmap>& DirectionalLight::GetShadowMap()
+	{
+		return light_map;
+	}
+	const vector<Lightmap>& DirectionalLight::GetShadowMap() const
+	{
+		// TODO: insert return statement here
+		return light_map;
 	}
 	const void* DirectionalLight::unique_id() const noexcept
 	{
@@ -28,63 +47,71 @@ namespace idk
 	template<typename T>
 	bool NeedShadowMapImpl(T& light)
 	{
-		return !light.light_map;
+		return !!light.light_map.empty();
 	}
 	bool NeedShadowMap(const PointLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const SpotLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const DirectionalLight&light){return NeedShadowMapImpl(light);};
-	RscHandle<FrameBuffer> PointLight::InitShadowMap()
+	vector<Lightmap> PointLight::InitShadowMap()
 	{
-		FrameBufferBuilder builder;
-		builder.Begin("ShadowMap["+std::to_string(shadow_map_dim.x)+", "+ std::to_string(shadow_map_dim.y)+"]",shadow_map_dim);
-		builder.SetDepthAttachment(
-			AttachmentInfo
-			{
-				LoadOp::eClear,
-				StoreOp::eStore,
-				DepthBufferMode::Depth16,
-				false,
-				FilterMode::_enum::Linear,
-				false //TEMP, CHANGE TO TRUE WHEN Point shadow is ready .
-			}
-		);
-		//TODO turn it into a cube map
-		auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
-		return shadow_map;
+		light_map.resize(1);
+		//vector<Lightmap> framebuffers;
+		for (auto& elem : light_map)
+		{
+			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
+
+			//if (elem.NeedLightMap())
+			elem.InitShadowMap();
+		}
+		return light_map;
 	}
-	RscHandle<FrameBuffer> DirectionalLight::InitShadowMap()
+	vector<Lightmap>& PointLight::GetShadowMap()
 	{
-		FrameBufferBuilder builder;
-		builder.Begin("ShadowMap[" + std::to_string(shadow_map_dim.x) + ", " + std::to_string(shadow_map_dim.y) + "]", shadow_map_dim);
-		builder.SetDepthAttachment(
-			AttachmentInfo
-			{
-				LoadOp::eClear,
-				StoreOp::eStore,
-				DepthBufferMode::Depth16,
-				false,
-				FilterMode::_enum::Linear
-			}
-		);
-		auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
-		return shadow_map;
+		// TODO: insert return statement here
+		return light_map;
 	}
-	RscHandle<FrameBuffer> SpotLight::InitShadowMap()
+	const vector<Lightmap>& PointLight::GetShadowMap() const
 	{
-		FrameBufferBuilder builder;
-		builder.Begin("ShadowMap[" + std::to_string(shadow_map_dim.x) + ", " + std::to_string(shadow_map_dim.y) + "]", shadow_map_dim);
-		builder.SetDepthAttachment(
-			AttachmentInfo
-			{
-				LoadOp::eClear,
-				StoreOp::eStore,
-				DepthBufferMode::Depth16,
-				false,
-				FilterMode::_enum::Linear
-			}
-		);
-		auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
-		return shadow_map;
+		// TODO: insert return statement here
+		return light_map;
+	}
+	vector <Lightmap> DirectionalLight::InitShadowMap()
+	{
+		light_map.resize(cascade_count);
+		for (auto& elem : light_map)
+		{
+			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
+
+			//if (elem.NeedLightMap())
+			elem.InitShadowMap();
+		}
+		return light_map;
+	}
+
+	vector<Lightmap> DirectionalLight::InitShadowMap() const
+	{
+		vector<Lightmap> lm{};
+		lm.resize(cascade_count);
+		for (auto& elem : lm)
+		{
+			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
+
+			//if (elem.NeedLightMap())
+			elem.InitShadowMap();
+		}
+		return lm;
+	}
+	vector < Lightmap> SpotLight::InitShadowMap()
+	{
+		light_map.resize(1);
+		for (auto& elem : light_map)
+		{
+			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
+
+			//if (elem.NeedLightMap())
+			elem.InitShadowMap();
+		}
+		return light_map;
 	}
 }
 

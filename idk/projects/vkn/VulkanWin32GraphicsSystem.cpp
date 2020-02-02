@@ -252,11 +252,16 @@ namespace idk::vkn
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
 		pre_render_data.active_lights.reserve(lights.size());
+		pre_render_data.active_dir_lights.reserve(curr_buffer.directional_light_buffer.size());
 		pre_render_data.cameras = &curr_buffer.camera;
+		pre_render_data.d_lightmaps = &curr_buffer.d_lightmaps;
 
 		for (size_t i = 0; i < lights.size(); ++i)
 			if(lights[i].cast_shadow && lights[i].index!=0)
 				pre_render_data.active_lights.emplace_back(i);
+
+		for (auto& elem : curr_buffer.directional_light_buffer)
+			pre_render_data.active_dir_lights.emplace_back(elem);
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
@@ -267,6 +272,7 @@ namespace idk::vkn
 		PostRenderData post_render_data;
 		post_render_data.shared_gfx_state = &shared_graphics_state;
 		post_render_data.cameras = &curr_buffer.camera;
+		post_render_data.d_lightmaps = &curr_buffer.d_lightmaps;
 		//post_render_data.canvas_render_range = &curr_buffer.canvas_render_range;
 		//post_render_data.Init();
 
@@ -277,32 +283,32 @@ namespace idk::vkn
 		{
 			return camera.clear_data.index() == meta::IndexOf <std::remove_const_t<decltype(camera.clear_data)>, DontClear>::value;
 		};
-		for (auto& camera : curr_buffer.camera)
-		{
-			auto& pimpl = _pimpl;
-			std::visit([&](auto& clear)
-				{
-					if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
-					{
-						const RscHandle<CubeMap>& cubemap = clear;
-						if (!cubemap)
-							return;
-						VknCubemap& cm = cubemap.as<VknCubemap>();
-						RscHandle<VknCubemap> conv = cm.GetConvoluted();
-						if (RscHandle < VknCubemap>{} == conv)
-						{
-							conv = Core::GetResourceManager().Create<VknCubemap>();
-							conv->Size(cubemap->Size());
-							CubemapLoader loader;
-							CubemapOptions options{cm.GetMeta()};
-							CMCreateInfo info = CMColorBufferTexInfo(cubemap->Size().x, cubemap->Size().y);
-							info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
-							loader.LoadCubemap(conv.as<VknCubemap>(), *pimpl->allocator, *pimpl->fence, options, info, {});
-							cm.SetConvoluted(conv);
-						}
-					}
-				}, camera.clear_data);
-		}
+		//for (auto& camera : curr_buffer.camera)
+		//{
+		//	/*auto& pimpl = _pimpl;
+		//	std::visit([&](auto& clear)
+		//		{
+		//			if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
+		//			{
+		//				const RscHandle<CubeMap>& cubemap = clear;
+		//				if (!cubemap)
+		//					return;
+		//				VknCubemap& cm = cubemap.as<VknCubemap>();
+		//				RscHandle<VknCubemap> conv = cm.GetConvoluted();
+		//				if (RscHandle < VknCubemap>{} == conv)
+		//				{
+		//					conv = Core::GetResourceManager().Create<VknCubemap>();
+		//					conv->Size(cubemap->Size());
+		//					CubemapLoader loader;
+		//					CubemapOptions options{cm.GetMeta()};
+		//					CMCreateInfo info = CMColorBufferTexInfo(cubemap->Size().x, cubemap->Size().y);
+		//					info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
+		//					loader.LoadCubemap(conv.as<VknCubemap>(), *pimpl->allocator, *pimpl->fence, options, info, {});
+		//					cm.SetConvoluted(conv);
+		//				}
+		//			}
+		//		}, camera.clear_data);*/
+		//}
 		bool will_draw_debug = true;
 		for (size_t i = 0; i < curr_states.size(); ++i)
 		{
@@ -310,8 +316,32 @@ namespace idk::vkn
 			auto& curr_range = curr_buffer.culled_render_range[i];
 			auto& curr_cam = curr_range.camera;
 
+			auto& pimpl = _pimpl;
+			std::visit([&](auto& clear)
+			{
+				if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
+				{
+					const RscHandle<CubeMap>& cubemap = clear;
+					if (!cubemap)
+						return;
+					VknCubemap& cm = cubemap.as<VknCubemap>();
+					RscHandle<VknCubemap> conv = cm.GetConvoluted();
+					if (RscHandle < VknCubemap>{} == conv)
+					{
+						conv = Core::GetResourceManager().Create<VknCubemap>();
+						conv->Size(cubemap->Size());
+						CubemapLoader loader;
+						CubemapOptions options{ cm.GetMeta() };
+						CMCreateInfo info = CMColorBufferTexInfo(cubemap->Size().x, cubemap->Size().y);
+						info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
+						loader.LoadCubemap(conv.as<VknCubemap>(), *pimpl->allocator, *pimpl->fence, options, info, {});
+						cm.SetConvoluted(conv);
+					}
+				}
+			}, curr_cam.clear_data);
+
 			//Init render datas (range for instanced data, followed by render datas for other passes)
-			curr_state.Init(curr_range,curr_buffer.active_light_buffer, curr_buffer.lights, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
+			curr_state.Init(curr_range,curr_buffer.active_light_buffer,curr_buffer.directional_light_buffer, curr_buffer.lights,curr_buffer.d_lightmaps, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);
 			
 			curr_state.clear_render_target = !IsDontClear(curr_cam);
@@ -394,7 +424,7 @@ namespace idk::vkn
 			throw;
 		}
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
 		try

@@ -9,7 +9,7 @@ namespace idk
         private static BinaryFormatter formatter = new BinaryFormatter();   
 
         public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
-        public void TransferOwnership(int newOwnerId) => Bindings.ViewTransferOwnership(handle, newOwnerId);
+        public void TransferOwnership(Player newOwner) => Bindings.ViewTransferOwnership(handle, newOwner.ActorNumber);
         public void RPC(string methodName, RPCTarget target, params object[] parameters)
         {
             byte[][] bytes = new byte[parameters.Length][];

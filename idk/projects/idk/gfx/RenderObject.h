@@ -137,10 +137,12 @@ namespace idk
 
 	struct CameraData
 	{
-		GenericHandle obj_id{};
+		Handle<GameObject> obj_id{};
 		LayerMask culling_flags{ 0xFFFFFFFF };
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
+		mat4 tight_projection_matrix{};
+		vec3 projection_center{};
 		RscHandle<RenderTarget> render_target{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
@@ -148,8 +150,13 @@ namespace idk
         CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
 		rect viewport;
-		real near = 0.1f;
-		real far = 1.f;
+		real near_plane;
+		real far_plane;
+		real b_sphere_radius;
+		vec3 far_corner;
+		vec3 look;
+		vec3 pos;
+		vec2 tan_halfFOV;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 
@@ -232,6 +239,14 @@ namespace idk
 	{
 		size_t inst_font_begin{ 0 }, inst_font_end{ 0 };
 	};
+
+	/*struct LightMapBlock
+	{
+		LightData light_target{};
+		CameraData camera_target{};
+
+		vector<FrameBuffer> lightMaps{};
+	};*/
 
 
 }

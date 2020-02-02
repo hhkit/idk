@@ -81,7 +81,6 @@ namespace idk::vkn::dbg
 			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
 		}
 	}
-#pragma optimize("",off)
 	string DumpFrameBufferAllocs()
 	{
 		std::stringstream out;

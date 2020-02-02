@@ -86,7 +86,7 @@ namespace idk {
 
 
 	}
-
+#pragma optimize("" , off)
 	void IGE_ShadowMapWindow::Update()
 	{
 		ImGui::PopStyleVar(3);
@@ -98,12 +98,29 @@ namespace idk {
 		for (auto& light : light_info)
 		{
 			//ImGui::RadioButton(light.name.c_str(), &index, i);
-			auto& rt = *light.data->light_map; 
-			auto& img = **rt.DepthAttachment();
-			const vec2 size = vec2{ img.Size() };
 			
-			ImGui::Image(img.ID(), size*(this->window_size.y*0.5f/size.y), ImVec2(0, 1), ImVec2(1, 0));
-			ImGui::NewLine();
+			/*float y = (this->window_size.y * 0.5f);
+			auto& rt = *light.data->light_map;
+			auto& img = **rt.DepthAttachment();
+			const vec2 size = vec2{ img.Size() };*/
+
+			//ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
+			if (light.data->index == 1)
+			{
+				for (auto& e : gfx_sys.d_lightmaps)
+				{
+					ImGui::Text("%d",e.first);
+					for (auto& rt : e.second.cam_lightmaps)
+					{
+						auto& rtt = *rt.light_map;
+						auto& img = **rtt.DepthAttachment();
+						const vec2 size = vec2{ img.Size() };
+
+						ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(1, 0), ImVec2(0, 1));
+					}
+				}
+				ImGui::NewLine();
+			}
 		}
 
 		//ImGui::Image(, size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));

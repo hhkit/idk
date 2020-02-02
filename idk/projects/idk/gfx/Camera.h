@@ -19,7 +19,7 @@ namespace idk
 
 		//real aspect = 16.f / 9.f;
 		real near_plane = 0.1f;
-		real far_plane = 100.f;
+		real far_plane = 170.f;
 
 		int  depth = 0;
 		RscHandle<RenderTarget> render_target;
@@ -43,7 +43,11 @@ namespace idk
 
 		Frustum   getFrustum() const;
 
-		mat4      getTightOrthoProjection() const;
+		mat4      getTightProjection() const;
+		vec3      getFarCorner() const;
+		real	  getBSphereRadius() const;
+
+		vec3 getTightProjectionCenter() const;
 
 		mat4	  ViewMatrix() const;
 		mat4	  ProjectionMatrix() const;

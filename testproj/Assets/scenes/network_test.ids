@@ -83,3 +83,38 @@
       instantiate: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
       obj: {id: 0}
       scene: {guid: 522d0d0c-cbbe-4681-bd2c-816e649da50e}
+  - !MonoBehavior 
+    {enabled: 1, script_data: !NetworkDebugger ~}
+- !12884967424 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: -3.8357313, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 29.087101, y: 0.7105797, z: 29.087101}
+  - !Name 
+    name: ""
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 00000000-0000-0000-0000-000000000000}
+    mesh: {guid: 00000000-0000-0000-0000-000000000000}
+    receive_shadows: 1

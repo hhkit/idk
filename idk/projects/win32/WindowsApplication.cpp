@@ -70,7 +70,6 @@ namespace idk::win
 		}
 
 	}
-#pragma optimize ("", off)
 
 	void Windows::Exec(string_view path, span<const char*> argv, bool wait)
 	{

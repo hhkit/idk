@@ -3,6 +3,7 @@
 
 #include <prefab/Prefab.h>
 #include <scene/SceneManager.h>
+#include <res/ResourceHandle.inl>
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 

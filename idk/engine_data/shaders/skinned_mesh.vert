@@ -52,6 +52,7 @@ layout (location = 1) out VS_OUT
   vec3 normal;
   vec3 tangent;
   vec4 color;
+  float clip_pos;
 } vs_out;
 
 
@@ -73,6 +74,7 @@ void main()
 	vs_out.tangent  = vec3( nml_transform * vec4(tangent, 0.0));
 	vs_out.uv       = uv;
 	vs_out.color    = vec4(1);
+	vs_out.clip_pos = gl_Position.z;
 	gl_Position     = PerCamera.perspective_transform * vec4(vs_out.position, 1.0);
  
 	// vs_out.uv = gl_Position.xy;

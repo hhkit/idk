@@ -196,6 +196,15 @@ namespace idk
 		Core::GetResourceManager().LoadPaths(Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS));
 		Core::GetSystem<Application>().WaitForChildren();
 
+		auto& fs = Core::GetSystem<FileSystem>();
+		fs.Remount("/build", true);
+		for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL | FS_FILTERS::FILE))
+		{
+			if (elem.GetMountPath().starts_with("/build") && elem.IsFile())
+				Core::GetResourceManager().LoadCompiledAsset(elem);
+		}
+
+		
 		SetupEditorScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 		GetEditorRenderTarget()->render_debug = true;
@@ -335,6 +344,11 @@ namespace idk
 	{
 		// call imgui draw,
 		_interface->ImGuiFrameRender();
+	}
+
+	Handle<Camera> IDE::getSceneEditorCam()
+	{
+		return _camera.current_camera;
 	}
 
 	void IDE::PollShortcutInputs()
