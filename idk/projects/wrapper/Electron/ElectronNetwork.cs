@@ -6,11 +6,11 @@
         public delegate void ClientConnectionSignal(Player id);
         public delegate void ServerConnectionSignal();
 
-        public static ClientConnectionSignal OnClientConnected;
-        public static ClientConnectionSignal OnClientDisconnected;
+        public static event ClientConnectionSignal OnClientConnected;
+        public static event ClientConnectionSignal OnClientDisconnected;
 
-        public static ServerConnectionSignal OnServerConnected;
-        public static ServerConnectionSignal OnServerDisconnected;
+        public static event ServerConnectionSignal OnServerConnected;
+        public static event ServerConnectionSignal OnServerDisconnected;
         #endregion
 
         public static bool IsHost { get => Bindings.NetworkGetIsHost(); }
@@ -39,12 +39,16 @@
 
         internal static void ExecClientConnect(int id)
         {
-            OnClientConnected(new Player() { ActorNumber = id }) ;
+            Player p = new Player();
+            p.ActorNumber = id;
+            OnClientConnected(p) ;
         }
 
         internal static void ExecClientDisconnect(int id)
         {
-            OnClientDisconnected(new Player() { ActorNumber = id });
+            Player p = new Player();
+            p.ActorNumber = id;
+            OnClientDisconnected(p);
         }
 
         internal static void ExecServerConnect()

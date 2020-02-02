@@ -1826,6 +1826,15 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::ViewIsMine", bool, Handle<ElectronView> ev)
+		{
+			if (&Core::GetSystem<NetworkSystem>().GetServer())
+				return ev->owner == Host::SERVER;
+			else
+				return ev->owner == Host::ME;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::ViewTransferOwnership", void, Handle<ElectronView> ev, int newOwner)
 		{
 			EventManager::SendTransferOwnership(ev, static_cast<Host>(newOwner));

@@ -92,7 +92,7 @@
     - component_name: Transform
       component_nth: 0
       property_path: position
-      value: !vec3 {x: -3.987343, y: -0.92294836, z: -4.3625813}
+      value: !vec3 {x: -3.987343, y: -2.672389, z: -4.630499}
     - component_name: Transform
       component_nth: 0
       property_path: rotation
@@ -196,15 +196,18 @@
   - active: 1
   - !Transform 
     parent: {id: 0}
-    position: {x: 0, y: -4.684711, z: -4.6651144}
+    position: {x: 0, y: -22.747776, z: -4.6651144}
     rotation: 
       w: 1
       x: 0
       y: 0
       z: 0
-    scale: {x: 12.23, y: 1.2302402, z: 12.23}
+    scale: {x: 149.46037, y: 15.034518, z: 149.46037}
   - !Name 
-    name: ""
+    name: Floor
+  - !Tag Floor
+  - !Layer 
+    index: 0
   - !Collider 
     bounciness: 0
     dynamic_friction: 0.6
@@ -225,3 +228,84 @@
     material_instance: {guid: 24cd7391-54aa-4823-bb11-dbf80c6cd5ea}
     mesh: {guid: 5eacf9f1-9036-40da-a735-6b51e5294654}
     receive_shadows: 1
+- !34359803904 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: GameManager
+  - !Layer 
+    index: 0
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !LobbyManager 
+      player0: {id: 25769869312}
+      player1: {id: 21474902016}
+      player2: {id: 17179934720}
+      player3: {id: 12884967424}
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !NetworkHostTester 
+      instantiate: {guid: 00000000-0000-0000-0000-000000000000}
+      movespeed: 35
+      obj: {id: 0}
+      scene: {guid: 00000000-0000-0000-0000-000000000000}
+      turnspeed: 90
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !NetworkClientTester 
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+- !38654771200 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 1
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 25769869312}
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+- !42949738496 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 1
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 21474902016}
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+- !47244705792 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 1
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 17179934720}
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+- !51539673088 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 1
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 12884967424}
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
