@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GraphicsSystem.h"
+#include "scene/SceneManager.h"
 #include <core/GameObject.inl>
 #include <gfx/MeshRenderer.h>
 #include <anim/Animator.h>
@@ -569,15 +570,17 @@ namespace idk
 					
 					if (res.index == 1)
 					{
+						Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
+							d_lightmaps.clear();
+						};
+
 						auto& e = std::get<DirectionalLight>(elem.light);
 
 						for (auto& c : result.camera)
 						{
 							d_lightmaps[c.obj_id].cam_data = c;
 							if (d_lightmaps[c.obj_id].cam_lightmaps.empty())
-							{
 								d_lightmaps[c.obj_id].cam_lightmaps = e.InitShadowMap();
-							}
 						}
 
 					}

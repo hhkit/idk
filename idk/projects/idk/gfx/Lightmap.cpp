@@ -95,10 +95,10 @@ namespace idk {
 		//real min_v = std::numeric_limits<real>::min();
 		vec3 min_c = { max_v ,max_v ,max_v };
 		vec3 max_c = -min_c;
-		vec3 mmc, mmv, v;
+		vec3 v;
 
-		mmc = min_c;
-		mmv = max_c;
+		//mmc = min_c;
+		//mmv = max_c;
 
 		mat4 m = lightView * invView;
 
@@ -110,17 +110,22 @@ namespace idk {
 
 			min_c = {min(min_c.x,elem.x),min(min_c.y,elem.y) ,min(min_c.z,elem.z) };
 			max_c = { max(max_c.x,elem.x),max(max_c.y,elem.y) ,max(max_c.z,elem.z) };
-			mmc = { min(mmc.x,v.x),min(mmc.y,v.y) ,min(mmc.z,v.z) };
-			mmv = { max(mmv.x,v.x),max(mmv.y,v.y) ,max(mmv.z,v.z) };
+			//mmc = { min(mmc.x,v.x),min(mmc.y,v.y) ,min(mmc.z,v.z) };
+			//mmv = { max(mmv.x,v.x),max(mmv.y,v.y) ,max(mmv.z,v.z) };
 		}
-		Core::GetSystem<DebugRenderer>().Draw(aabb{ min_c, max_c }, color{ 1,1,1,1 }, seconds(0.5f));
+		//Core::GetSystem<DebugRenderer>().Draw(aabb{ min_c, max_c }, color{ 1,1,1,1 }, seconds(0.5f));
 		//vec4 vView(0.0f, 0.0f, -far_plane, 1.0f);
 		//vec4 vClip = camData.projection_matrix * vView;
 		//bound_radius = max(max(min_c.x + max_c.x,abs(max_c.y - min_c.y)),min_c.z + max_c.z);
 
 		//texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / ( bound_radius)));
 
-		cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y,-max_c.z,-min_c.z);
+		vec3 max_comp = max(min_c,max_c);
+		float max_rad = max(max(max_comp.x,max_comp.y),max_comp.z);
+
+		texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / (2.f * max_rad)));
+
+		cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y,min_c.z,max_c.z);
 		//clip_plane_z = vClip.z;
 	}
 

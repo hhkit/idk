@@ -107,14 +107,17 @@ namespace idk {
 			//ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
 			if (light.data->index == 1)
 			{
-				ImGui::Text("%d", light.data->camDataRef.obj_id);
-				for (auto& rt : light.data->light_maps)
+				for (auto& e : gfx_sys.d_lightmaps)
 				{
-					auto& rtt = *rt.light_map;
-					auto& img = **rtt.DepthAttachment();
-					const vec2 size = vec2{ img.Size() };
+					ImGui::Text("%d",e.first);
+					for (auto& rt : e.second.cam_lightmaps)
+					{
+						auto& rtt = *rt.light_map;
+						auto& img = **rtt.DepthAttachment();
+						const vec2 size = vec2{ img.Size() };
 
-					ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
+						ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
+					}
 				}
 				ImGui::NewLine();
 			}

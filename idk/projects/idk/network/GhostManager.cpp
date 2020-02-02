@@ -2,11 +2,12 @@
 #include "GhostManager.h"
 #include <core/GameObject.inl>
 #include <common/Transform.h>
+#include <res/ResourceHandle.inl>
 #include <network/GhostMessage.h>
-#include <network/NetworkSystem.h>
+#include <network/NetworkSystem.inl>
 #include <network/IDManager.h>
 #include <network/ElectronTransformView.h>
-#include <network/ClientConnectionManager.inl>
+#include <network/ConnectionManager.inl>
 #include <network/SubstreamManager.inl>
 
 namespace idk

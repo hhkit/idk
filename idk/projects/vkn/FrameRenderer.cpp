@@ -726,13 +726,13 @@ namespace idk::vkn
 				
 				
 				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
-				
+
 				for (auto& e : *state.d_lightmaps)
 				{
 					for (auto& elem : e.second.cam_lightmaps)
 					{
 						auto& rs = r[curr_state++];
-						auto cam = CameraData{ Handle<GameObject>{}, LayerMask{0xFFFFFFFF }, light.v, elem.cascade_projection * light.v };
+						auto cam = CameraData{ Handle<GameObject>{}, LayerMask{0xFFFFFFFF }, light.v, elem.cascade_projection };
 						ShadowBinding shadow_binding;
 						shadow_binding.for_each_binder<has_setstate>(
 							[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
