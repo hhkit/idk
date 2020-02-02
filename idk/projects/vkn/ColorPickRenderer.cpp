@@ -347,7 +347,7 @@ namespace idk::vkn
 			PipelineThingy&  the_interface = render_tasks.emplace_back();
 			the_interface.SetRef(rs.ubo_manager);
 			auto& render_data = request.data;
-			std::array<float, 2> near_far{ render_data.camera.near,render_data.camera.far };
+			std::array<float, 2> near_far{ render_data.camera.near_plane,render_data.camera.far_plane };
 			the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
 			the_interface.BindShader(ShaderStage::Fragment, color_pick_frag);
 			the_interface.BindUniformBuffer("NearFarBlock", 0, near_far);
