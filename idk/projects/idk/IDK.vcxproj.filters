@@ -1126,7 +1126,7 @@
       <Filter>network\messages</Filter>
     </ClInclude>
     <ClInclude Include="util\property_path.h" />
-    <ClInclude Include="ElectronRigidbodyView.h">
+    <ClInclude Include="network\ElectronRigidbodyView.h">
       <Filter>network\views</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1629,6 +1629,7 @@
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
     <ClCompile Include="util\property_path.cpp" />
     <ClCompile Include="network\ElectronView.cpp" />
+    <ClCompile Include="network\ElectronRigidbodyView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -57,6 +57,7 @@ namespace idk
 							ghost_msg.pack = view.PackGhostData();
 						});
 				}
+				view.CacheMasterValues();
 			}
 		}
 	}

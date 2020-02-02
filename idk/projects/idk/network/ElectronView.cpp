@@ -4,12 +4,11 @@
 #include <network/ElectronTransformView.h>
 namespace idk
 {
-	ElectronView::ElectronView(const ElectronView&)
+	ElectronView::ElectronView(const ElectronView& rhs)
 	{
-		throw;
 	}
 	ElectronView::ElectronView(ElectronView&&) noexcept = default;
-	ElectronView& ElectronView::operator=(const ElectronView&)
+	ElectronView& ElectronView::operator=(const ElectronView& rhs)
 	{
 		throw;
 	}
@@ -76,6 +75,7 @@ namespace idk
 					auto packed = param->PackMoveData();
 					if (packed.size())
 						pack.emplace_back(std::move(packed));
+					param->CacheCurrValue();
 				}
 			}
 			return pack;
@@ -94,7 +94,7 @@ namespace idk
 				IDK_ASSERT(param);
 				if (state_mask & (1 << i))
 				{
-					auto packed = param->PackMoveData();
+					auto packed = param->PackGhostData();
 					if (packed.size())
 						pack.emplace_back(std::move(packed));
 				}
@@ -140,13 +140,27 @@ namespace idk
 
 	void ElectronView::CacheMasterValues()
 	{
-		if (auto* master = std::get_if<Master>(&network_data))
+		if (std::get_if<Master>(&network_data) || std::get_if<ClientObject>(&network_data))
 		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
 				auto& param = parameters[i];
 				IDK_ASSERT(param);
 				param->CacheCurrValue();
+			}
+		}
+	}
+	void ElectronView::UpdateClient()
+	{
+		if (auto* master = std::get_if<ClientObject>(&network_data))
+		{
+			state_mask = 0;
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				IDK_ASSERT(param);
+				if (param->ValueChanged())
+					state_mask = 1 << i;
 			}
 		}
 	}

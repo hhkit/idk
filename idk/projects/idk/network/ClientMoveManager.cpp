@@ -5,6 +5,7 @@
 #include <network/SubstreamManager.inl>
 #include <network/ConnectionManager.inl>
 #include <network/MoveClientMessage.h>
+#include <network/NetworkSystem.inl>
 #include <network/GhostFlags.h>
 #include <network/ElectronView.h>
 
@@ -23,6 +24,7 @@ namespace idk
 	void ClientMoveManager::SubscribeEvents(ClientConnectionManager& client)
 	{
 		//OnFrameStart(&ClientMoveManager::CachePreviousPositions);
+		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&ClientMoveManager::CachePreviousPositions);
 		OnFrameEnd(&ClientMoveManager::SendMoves);
 	}
 
@@ -33,6 +35,8 @@ namespace idk
 
 	void ClientMoveManager::CachePreviousPositions(span<ElectronView> views)
 	{
+		for (auto& elem : views)
+			elem.UpdateClient();
 	}
 
 	void ClientMoveManager::SendMoves(span<ElectronView> views)
@@ -41,14 +45,18 @@ namespace idk
 		{
 			if (auto* move_data = std::get_if<ElectronView::ClientObject>(&elem.network_data))
 			{
-				auto& tfm = *elem.GetGameObject()->Transform(); 
 				
-				connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::FASTEST_GUARANTEED, [&](MoveClientMessage& msg)
-					{
-						msg.state_mask = elem.state_mask;
-						msg.network_id = elem.network_id;
-						msg.pack = elem.PackMoveData();
-					});
+				if (elem.state_mask)
+				{
+					LOG_TO(LogPool::NETWORK, "Sending client move message for %d", elem.network_id);
+					connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::FASTEST_GUARANTEED, [&](MoveClientMessage& msg)
+						{
+							msg.state_mask = elem.state_mask;
+							msg.network_id = elem.network_id;
+							msg.pack = elem.PackMoveData();
+						});
+				}
+				elem.CacheMasterValues();
 			}
 		}
 	}

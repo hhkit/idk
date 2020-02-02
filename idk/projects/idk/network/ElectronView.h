@@ -31,6 +31,7 @@ namespace idk
 		void SetAsClientObject();
 
 		void CacheMasterValues();
+		void UpdateClient();
 		void UpdateMaster();
 		void UpdateGhost();
 		vector<string> PackMoveData();
@@ -40,6 +41,8 @@ namespace idk
 
 		template<typename Hnd, typename Mem, typename Obj>
 		void RegisterMember(Handle<Hnd> obj, Obj(Mem::*), float interp = 1.f);
+		template<typename Val>
+		void RegisterMember(function<Val()> getter, function<void(const Val&)> setter, float interp = 1.f);
 	private:
 		struct BaseParameter;
 		template<typename T>
