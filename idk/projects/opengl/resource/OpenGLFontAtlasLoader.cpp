@@ -92,7 +92,7 @@ namespace idk {
 			/* you might as well save this value as it is needed later on */
 			w = std::max(mw, w);
 			h += mh;
-			font_handle->Size(ivec2(w, h));
+			font_handle->Size(uvec2(w, h));
 
             font_handle->ascender = face->ascender / s_cast<float>(face->units_per_EM) * tm.font_size;
             font_handle->descender = face->descender / s_cast<float>(face->units_per_EM) * tm.font_size;
@@ -218,7 +218,7 @@ namespace idk {
 			/* you might as well save this value as it is needed later on */
 			w = std::max(mw, w);
 			h += mh;
-			font_handle->Size(ivec2(w, h));
+			font_handle->Size(uvec2(w, h));
 
 
 			//////////////////////////////////Custom Buffer//////////////////////////////////////////

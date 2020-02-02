@@ -15,7 +15,6 @@ namespace idk::vkn {
 	}
 	PresentationSignals& PresentationSignals::operator=(PresentationSignals&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		std::swap(image_available,rhs.image_available);
 		std::swap(render_finished,rhs.render_finished);
 		std::swap(_inflight_fence,rhs._inflight_fence);

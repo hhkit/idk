@@ -48,6 +48,8 @@
 
 #include <vkn/ColorPickRenderer.h>
 
+#include <vkn/graph_test.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<ThreadedRender>()
@@ -57,6 +59,8 @@ namespace idk::vkn
 		hash_table<RscHandle<Texture>, RscHandle<VknFrameBuffer>> deferred_buffers;
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
+		gt::GraphTest test;
+		uint32_t testing = 0;
 	};
 
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
@@ -180,7 +184,7 @@ namespace idk::vkn
 	};
 
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
+	std::pair<ivec2, uvec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
 		auto& [offset, size] = pair;
@@ -653,7 +657,7 @@ namespace idk::vkn
 
 				auto config = *obj.config;
 				config.viewport_offset = ivec2{ s_cast<uint32_t>(viewport.offset.x),s_cast<uint32_t>(viewport.offset.y) };
-				config.viewport_size = ivec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
+				config.viewport_size = uvec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
 
 				if (is_mesh_renderer)
 					config.buffer_descriptions.emplace_back(
@@ -800,6 +804,11 @@ namespace idk::vkn
 		cmd_buffer.end();
 	}
 //#pragma optimize("",off)
+	namespace gt
+	{
+
+		void GraphDeferredTest(const CoreGraphicsState& gfx_state, RenderStateV2& rs);
+	}
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_current_frame_index = frame_index;
@@ -815,7 +824,7 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
-		ivec2 max_size{};
+		uvec2 max_size{};
 		for (auto& gfx_state : gfx_states)
 		{
 			auto sz = gfx_state.camera.render_target->Size();
@@ -862,6 +871,9 @@ namespace idk::vkn
 				for (size_t j = 0; j < curr_concurrent; ++j) {
 					auto& state = gfx_states[i + j];
 					auto& rs = _states[i + j];
+					//gt::GraphDeferredTest(state, rs);
+					_pimpl->testing=1;// |= (i == 0 && j == 0);
+						
 					_render_threads[j]->Render(state, rs);
 					rendered = true;
 					//TODO submit command buffer here and signal the framebuffer's stuff.
@@ -1091,7 +1103,7 @@ namespace idk::vkn
 	}
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
 	//and command buffer hasn't ended
-	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, ivec2 vp_size)
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, uvec2 vp_size)
 	{
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
@@ -1169,7 +1181,7 @@ namespace idk::vkn
 	}
 
 
-	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size)
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const uvec2& size)
 	{
 		config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
 		config.viewport_offset = offset;
@@ -1379,7 +1391,7 @@ namespace idk::vkn
 			auto config = ConfigWithVP(skybox_render_config,camera,offset,size);
 			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
 			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
-			config.cull_face = s_cast<uint32_t>(CullFace::eNone);
+			config.cull_face = CullFace::eNone;
 			config.depth_test = false;
 			config.depth_write = false;
 			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
@@ -1424,6 +1436,8 @@ namespace idk::vkn
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
+		//if (_pimpl->testing&& state.range.inst_mesh_render_end- state.range.inst_mesh_render_begin>0)
+		//	_pimpl->test.DeferredTest(state, rs), _pimpl->testing=0;
 		bool still_rendering = (processed_ro.size() > 0) ||  camera.render_target->RenderDebug();
 		if (still_rendering)
 		{
@@ -1468,7 +1482,6 @@ namespace idk::vkn
 					prev_pipeline = &pipeline;
 				}
 				auto& pipeline = *prev_pipeline;
-				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 				//auto& mesh = obj.mesh.as<VulkanMesh>();
 				{
@@ -1527,15 +1540,8 @@ namespace idk::vkn
 
 	VulkanPipeline& FrameRenderer::GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& modules)
 	{
-		// TODO: Replace with something that actually gets the pipeline
 		return GetPipelineManager().GetPipeline(config,modules,_current_frame_index);
 	}
-
-	//PipelineHandle_t FrameRenderer::GetPipelineHandle()
-	//{
-	//	// TODO: Replace with something that actually figures out what pipeline to use
-	//	return PipelineHandle_t{};
-	//}
 
 	void FrameRenderer::NonThreadedRender::Init(FrameRenderer* renderer)
 	{

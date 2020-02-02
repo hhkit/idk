@@ -533,7 +533,7 @@ namespace idk
 		// create editor view
 		editor_view = Core::GetResourceManager().Create<RenderTarget>();
 		auto sz = editor_view->Size();
-		editor_view->Size(Core::GetSystem<Application>().GetScreenSize());
+		editor_view->Size(uvec2{ Core::GetSystem<Application>().GetScreenSize() });
 		//this->FindWindow<IGE_Console>()->PushMessage(std::to_string(sz.x) + "," + std::to_string(sz.y));
 		editor_view->Name("Editor View");
 		//editor_view->Size();

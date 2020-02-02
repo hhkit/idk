@@ -79,11 +79,11 @@ namespace idk::vkn
 	};
 
 
-	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size);
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const uvec2& size);
 	template<typename T, typename...Args>
 	using has_setstate = decltype(std::declval<T>().SetState(std::declval<Args>()...));
 	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders);
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp);
+	std::pair<ivec2, uvec2> ComputeVulkanViewport(const vec2& sz, const rect& vp);
 
 	void GBufferBarrier(vk::CommandBuffer cmd_buffer, DeferredGBuffer& gbuffer)
 	{
@@ -148,148 +148,7 @@ namespace idk::vkn
 		index_t depth_attachment;
 	};
 
-
-	RenderPassObj ConstructDeferredRenderPass(const FrameBufferInfo& gbuffer)
-	{
-		RenderPassInfo rp_info;
-		RpBindInfo metallic_buffer_indices[DeferredBindingIndex::size(DeferredBinding::eMetallicPass)];
-		RpBindInfo specular_buffer_indices[DeferredBindingIndex::size(DeferredBinding::eSpecularPass)];
-		RpBindInfo unlit_buffer_indices[DeferredBindingIndex::size(DeferredBinding::eUnlitPass)];
-		RpBindInfo depth_buffer_indices[DeferredBindingIndex::size(DeferredBinding::eDepths)];
-
-		auto BindAttachment = [](auto& rp_info, DeferredBinding binding, auto& buffer_indices, auto& attachments)
-		{
-			auto begin = DeferredBindingIndex::begin(binding);
-			for (uint32_t i = 0; i < DeferredBindingIndex::size(binding); ++i)
-			{
-				buffer_indices[i].index = rp_info.RegisterAttachment(attachments[begin + i], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-			}
-		};
-		auto BindDepth = [](auto& rp_info, DeferredBinding binding, auto& buffer_indices, auto& attachments)
-		{
-			auto i = (int)binding;
-			auto begin = DeferredBindingIndex::begin(DeferredBinding::eDepths);
-			buffer_indices[i].index = rp_info.RegisterAttachment(attachments[begin + i], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-
-		};
-		BindAttachment(rp_info,DeferredBinding::eMetallicPass, metallic_buffer_indices,gbuffer.attachments);
-		BindAttachment(rp_info,DeferredBinding::eSpecularPass, specular_buffer_indices,gbuffer.attachments);
-		BindAttachment(rp_info,DeferredBinding::eUnlitPass   , unlit_buffer_indices   ,gbuffer.attachments);
-
-		BindDepth(rp_info, DeferredBinding::eMetallicPass, depth_buffer_indices, gbuffer.attachments);
-		BindDepth(rp_info, DeferredBinding::eSpecularPass, depth_buffer_indices, gbuffer.attachments);
-		BindDepth(rp_info, DeferredBinding::eUnlitPass   , depth_buffer_indices, gbuffer.attachments);
-
-		//Add all the attachments
-		//auto met_alb_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc       ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto met_nor_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eNormal             ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto met_tan_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eTangent            ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto met_met_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eUvMetallicRoughness], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto met_vwp_idx= rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eViewPos            ], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto met_dep_idx= rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//
-		//auto spc_alb_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto spc_nor_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eNormal], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto spc_tan_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eTangent], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto spc_spc_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eUvMetallicRoughness], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto spc_vwp_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eViewPos], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto spc_dep_idx = rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//
-		//auto unlit_color_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc], vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//auto unlit_depth_idx = rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral);
-		//
-		//auto combine_color_idx = rp_info.RegisterAttachment(gbuffer.attachments[(int)GBufferBinding::eAlbedoAmbOcc], vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
-		//auto combine_depth_idx = rp_info.RegisterAttachment(*gbuffer.depth_attachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
-
-		auto AddOutputColors = [](SubPassConfig& config, DeferredBinding binding, auto& buffer_indices)
-		{
-			for (uint32_t i = 0; i < DeferredBindingIndex::size(binding); ++i)
-			{
-				config.AddOutputAttachment(buffer_indices[i].index, vk::ImageLayout::eColorAttachmentOptimal);
-			}
-		};
-		auto AddInputColors = [](SubPassConfig& config, DeferredBinding binding, auto& buffer_indices)
-		{
-			for (uint32_t i = 0; i < DeferredBindingIndex::size(binding); ++i)
-			{
-				config.AddInputAttachment(buffer_indices[i].index, vk::ImageLayout::eColorAttachmentOptimal);
-			}
-		};
-		auto AddDepthOutput = [](SubPassConfig& config, DeferredBinding binding, auto& depth_indices)
-		{
-			auto i = (int)binding;
-			config.AddOutputAttachment(depth_indices[i].index, vk::ImageLayout::eDepthStencilReadOnlyOptimal);
-
-		};
-		auto AddDepthInput = [](SubPassConfig& config, DeferredBinding binding, auto& depth_indices)
-		{
-			auto i = (int)binding;
-			config.AddInputAttachment(depth_indices[i].index, vk::ImageLayout::eDepthStencilReadOnlyOptimal);
-
-		};
-
-		SubPassConfig first_metal_config{};
-		AddOutputColors(first_metal_config, DeferredBinding::eMetallicPass, metallic_buffer_indices);
-		AddDepthOutput(first_metal_config, DeferredBinding::eMetallicPass, depth_buffer_indices);
-
-		SubPassConfig second_metal_config{};
-		AddInputColors(second_metal_config, DeferredBinding::eMetallicPass, metallic_buffer_indices);
-		AddDepthInput(second_metal_config, DeferredBinding::eMetallicPass, depth_buffer_indices);
-		AddOutputColors(second_metal_config, DeferredBinding::eUnlitPass, unlit_buffer_indices);
-		AddDepthOutput(second_metal_config, DeferredBinding::eUnlitPass, depth_buffer_indices);
-
-		SubPassConfig first_specular_config{};
-		AddOutputColors(first_specular_config, DeferredBinding::eSpecularPass, specular_buffer_indices);
-		AddDepthOutput(first_specular_config, DeferredBinding::eSpecularPass, depth_buffer_indices);
-
-		SubPassConfig second_specular_config{};
-		AddInputColors(second_specular_config, DeferredBinding::eSpecularPass, specular_buffer_indices);
-		AddDepthInput(second_specular_config, DeferredBinding::eSpecularPass, depth_buffer_indices);
-		AddOutputColors(second_specular_config, DeferredBinding::eUnlitPass, unlit_buffer_indices);
-		AddDepthOutput(second_specular_config, DeferredBinding::eUnlitPass, depth_buffer_indices);
-		
-		SubPassConfig unlit_config{};
-		AddOutputColors(unlit_config, DeferredBinding::eUnlitPass, unlit_buffer_indices);
-		AddDepthOutput(unlit_config, DeferredBinding::eUnlitPass, depth_buffer_indices);
-
-
-		auto first_metal_pass = rp_info.RegisterSubpass(
-			std::move(first_metal_config)
-		);
-		auto second_metal_pass = rp_info.RegisterSubpass(
-			std::move(second_metal_config)
-		);
-
-		auto first_specular_pass = rp_info.RegisterSubpass(
-			std::move(first_specular_config)
-		);
-		auto second_specular_pass = rp_info.RegisterSubpass(
-			std::move(second_specular_config)
-		);
-
-
-		auto unlit_pass = rp_info.RegisterSubpass(
-			std::move(unlit_config)
-		);
-
-		//metal    gbuffer
-		//specular gbuffer
-		//unlit buffer
-
-
-		rp_info.AddDependency(VK_SUBPASS_EXTERNAL , first_metal_pass     );
-		rp_info.AddDependency(VK_SUBPASS_EXTERNAL , first_specular_pass );
-		rp_info.AddDependency(VK_SUBPASS_EXTERNAL , unlit_pass          );
-		rp_info.AddDependency(unlit_pass          , second_metal_pass   );
-		rp_info.AddDependency(second_metal_pass   , second_specular_pass);
-		rp_info.AddDependency(first_metal_pass    , second_metal_pass   );
-		rp_info.AddDependency(first_specular_pass , second_specular_pass);
-
-		;
-
-		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
-	}
-	bool DeferredGBuffer::Init(ivec2 size)
+	bool DeferredGBuffer::Init(uvec2 size)
 	{
 		bool inited = false;
 		if (!gbuffer || gbuffer->Size()!=size)
@@ -530,11 +389,11 @@ namespace idk::vkn
 
 			light_config->attachment_configs.resize(1);
 			auto& blend = light_config->attachment_configs[0];
-			blend.blend_enable = true;
+			blend.blend_enable           = true;
 			blend.dst_color_blend_factor = BlendFactor::eOne;
 			blend.src_color_blend_factor = BlendFactor::eOne;
-			blend.color_blend_op = BlendOp::eAdd;
-			blend.alpha_blend_op = BlendOp::eMax;
+			blend.color_blend_op         = BlendOp::eAdd;
+			blend.alpha_blend_op         = BlendOp::eMax;
 			blend.dst_alpha_blend_factor = BlendFactor::eOne;
 			blend.src_alpha_blend_factor = BlendFactor::eOne;
 			light_config->depth_test = false;
@@ -625,7 +484,6 @@ namespace idk::vkn
 
 	void DeferredPass::LightPass(GBufferType type, PipelineThingy& the_interface, const GraphicsState& graphics_state, [[maybe_unused]]RenderStateV2& rs, std::optional<std::pair<size_t, size_t>> light_range,bool is_ambient)
 	{
-		//TODO: Prepare FSQ draw call + Forward Draw Calls
 		PbrDeferredPostBinding binding;
 		auto& def_bind = std::get<DeferredPostBinder>(binding.binders);
 		def_bind.type = type;
@@ -764,7 +622,7 @@ namespace idk::vkn
 		)
 	{
 		auto offset = ivec2{ rpbi.renderArea.offset.x,rpbi.renderArea.offset.y };
-		auto size= ivec2{ s_cast<uint32_t>(rpbi.renderArea.extent.width),s_cast<uint32_t>(rpbi.renderArea.extent.height )};
+		auto size= uvec2{ s_cast<uint32_t>(rpbi.renderArea.extent.width),s_cast<uint32_t>(rpbi.renderArea.extent.height )};
 		auto& view = View();
 		vector<RscHandle<ShaderProgram>> shaders;
 		VulkanPipeline* prev_pipeline = nullptr;
@@ -806,8 +664,6 @@ namespace idk::vkn
 				prev_pipeline = &pipeline;
 			}
 			auto& pipeline = *prev_pipeline;
-			//TODO Grab everything and render them
-			//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 			auto& mesh = obj.mesh.as<VulkanMesh>();
 			{
 				uint32_t set = 0;
@@ -884,7 +740,6 @@ namespace idk::vkn
 
 
 			std::array<float, 4> a{};
-			//TODO grab the appropriate framebuffer and begin renderpass
 
 			auto& camera = graphics_state.camera;
 			auto& g_buffer = *gbuffer.gbuffer;

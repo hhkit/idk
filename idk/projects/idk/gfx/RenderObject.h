@@ -13,11 +13,38 @@
 #include <core/Handle.h>//RenderObject::obj_id
 #undef near
 #undef far
+#include <ds/index_span.inl>
 
 namespace idk
 {
 	class Mesh;
 	class RenderTarget;
+
+	struct Uniforms
+	{
+		
+		hash_table<string, typed_index_span<string>> ubos;
+		hash_table<string, typed_index_span<RscHandle<Texture>>> tex;
+		template<typename T>
+		span<T> get_span(typed_index_span<T> span)const
+		{
+			if constexpr (is_same_v<T,string>)
+				return span.to_span(ubo_buffer);
+			else
+			{
+				return span.to_span(tex_buffer);
+			}
+		}
+
+		vector<string> ubo_buffer;
+		vector<RscHandle<Texture>> tex_buffer;
+	};
+	struct vbo_binding_t
+	{
+		uint32_t binding=0;
+		uint32_t offset=0;
+		uint32_t buffer_index=0;
+	};
 
 	struct RenderObject
 	{
@@ -44,6 +71,9 @@ namespace idk
 		//hash_table<uint32_t, vtx::Attrib> attrib_bindings;
 		shared_ptr<const pipeline_config> config{};
 		LayerMask layer_mask{ 0xFFFFFFFF };
+		//Processed data
+		Uniforms uniforms;
+		span<vbo_binding_t> vbo_bindings;
 	};
 	inline LayerMask layer_to_mask(char mask)
 	{

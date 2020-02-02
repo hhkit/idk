@@ -14,6 +14,7 @@ namespace idk
 			return (stored_result)?*stored_result: *(stored_result = result.get());
 		}
 		ColorPickResult(std::promise<result_t>& promise) : result{ promise.get_future() } {}
+		ColorPickResult(result_t derp) : stored_result{ derp } {}
 	private:
 		std::future<result_t> result;
 		std::optional<result_t> stored_result;

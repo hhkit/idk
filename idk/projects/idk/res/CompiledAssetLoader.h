@@ -3,6 +3,8 @@
 
 namespace idk
 {
+
+
 	template<typename CompiledAsset, typename EngineResource, bool Binary = true>
 	class CompiledAssetLoader
 		: public IAssetLoader

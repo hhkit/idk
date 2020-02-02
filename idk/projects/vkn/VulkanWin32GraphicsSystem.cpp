@@ -96,7 +96,6 @@ namespace idk::vkn
 			throw;
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();
-		_pm->View(instance_->View());
 
 		_pimpl = std::make_unique<Pimpl>();
 		_pimpl->allocator = std::make_unique<hlp::MemoryAllocator>(*instance_->View().Device(), instance_->View().PDevice());
@@ -255,7 +254,6 @@ namespace idk::vkn
 		pre_render_data.active_lights.reserve(lights.size());
 		pre_render_data.cameras = &curr_buffer.camera;
 
-		//TODO cull the unused lights
 		for (size_t i = 0; i < lights.size(); ++i)
 			if(lights[i].cast_shadow && lights[i].index!=0)
 				pre_render_data.active_lights.emplace_back(i);

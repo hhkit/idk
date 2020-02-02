@@ -72,7 +72,6 @@ namespace idk::vkn
 
 		index_t RegisterAttachment(AttachmentInfo attachment, vk::ImageLayout in, vk::ImageLayout out);
 		void SetAttachment(index_t index,AttachmentInfo attachment, vk::ImageLayout in, vk::ImageLayout out);
-		RenderPassFbInfo RegisterFrameBuffer(const FrameBufferInfo& fb_info);
 
 
 		uint32_t  RegisterSubpass(SubPassConfig config);

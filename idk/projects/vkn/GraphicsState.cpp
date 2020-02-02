@@ -77,7 +77,6 @@ namespace idk::vkn
 
 void GraphicsState::CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects)
 {
-	//TODO actuall cull
 	mesh_render.reserve(render_objects.size() + mesh_render.size());
 	for (auto& ro : render_objects)
 	{

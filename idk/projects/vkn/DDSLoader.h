@@ -66,6 +66,7 @@ namespace idk::vkn
 		DdsFile& operator=(const DdsFile& file) = default;
 		DdsFile& operator=(DdsFile&& file) = default;
 
+		size_t size()const { return _view.size()-(file->data - _view.data()); }
 
 		DdsFile& operator=(string _file)
 		{

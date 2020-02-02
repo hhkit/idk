@@ -41,10 +41,10 @@ namespace idk
 	{
 		PreReset(framebuffer);
 		framebuffer.attachments.clear();
-		framebuffer.size = ivec2{};
+		framebuffer.size = {};
 	}
 
-	FrameBufferBuilder& FrameBufferBuilder::Begin(const string& name,ivec2 size, size_t num_layers)
+	FrameBufferBuilder& FrameBufferBuilder::Begin(const string& name,uvec2 size, size_t num_layers)
 	{
 		info.name = name;
 		info.size = size;

@@ -12,11 +12,6 @@
 
 namespace idk::vkn
 {
-	VulkanView& View()
-	{
-		return Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
-	}
-
 	void VknRenderTarget::OnFinalize()
 	{
 		for (auto& elem : Textures())

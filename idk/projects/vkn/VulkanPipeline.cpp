@@ -218,6 +218,7 @@ namespace idk::vkn
 		}
 		Create(config2, info, std::move(layouts), vulkan, options);
 	}
+#pragma optimize ("",off)
 	void VulkanPipeline::Create(const config_t& config, vector<vk::PipelineShaderStageCreateInfo> info, hash_table<uint32_t, vk::DescriptorSetLayout> slayout, Vulkan_t& vulkan, const Options& options)
 	{
 		auto& m_device = vulkan.Device();
@@ -306,7 +307,7 @@ namespace idk::vkn
 			,&viewportState
 			,&rasterizer
 			,&multisampling
-			,(_has_depth_stencil) ? &dsci : nullptr
+			,(_has_depth_stencil|| config.depth_test|config.depth_write|config.stencil_test) ? &dsci : nullptr
 			,std::data(colorBlending)
 			,&dynamicState
 			,*m_pipelinelayout
@@ -473,7 +474,7 @@ namespace idk::vkn
 	{
 		auto sc = vulkan.Swapchain().extent;
 		ivec2 screen_offs = (config.viewport_offset) ? *config.viewport_offset : ivec2{ 0,0 };
-		ivec2 screen_size = (config.viewport_size) ? *config.viewport_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
+		uvec2 screen_size = (config.viewport_size) ? *config.viewport_size : uvec2{ sc.width,sc.height };
 		return vk::Viewport
 		{
 			s_cast<float>(screen_offs.x), s_cast<float>(screen_offs.y), //x,y
@@ -485,8 +486,8 @@ namespace idk::vkn
 	vk::Rect2D VulkanPipeline::GetScissor(const config_t& config, Vulkan_t& vulkan) const
 	{
 		auto sc = vulkan.Swapchain().extent;
-		ivec2 screen_offs = (config.viewport_offset) ? *config.viewport_offset : ivec2{ 0,0 };
-		ivec2 screen_size = (config.viewport_size) ? *config.viewport_size : ivec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
+		auto screen_offs = (config.viewport_offset) ? *config.viewport_offset : ivec2{ 0,0 };
+		auto screen_size = (config.viewport_size) ? *config.viewport_size : uvec2{ s_cast<int>(sc.width),s_cast<int>(sc.height) };
 		return vk::Rect2D{
 			{ screen_offs.x, screen_offs.y },
 		{ s_cast<uint32_t>(screen_size.x), s_cast<uint32_t>(screen_size.y) }
@@ -501,7 +502,7 @@ namespace idk::vkn
 			, VK_FALSE //depthClampEnable VK_FALSE discards fragments that are beyond the depth range, VK_TRUE clamps it instead.
 			, VK_FALSE //If rasterizerDiscardEnable is set to VK_TRUE, then geometry never passes through the rasterizer stage. This basically disables any output to the framebuffer.
 			, GetPolygonMode(config) //Any other mode requires enabling a GPU feature
-			, static_cast<vk::CullModeFlags>(config.cull_face)
+			, static_cast<vk::CullModeFlags>(static_cast<uint32_t>(config.cull_face))
 			, vk::FrontFace::eClockwise
 			, VK_FALSE
 			, 0.0f

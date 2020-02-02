@@ -26,4 +26,11 @@ void DescriptorUpdateData::SendUpdates()
 	device.updateDescriptorSets(descriptorWrite, nullptr, vk::DispatchLoaderDefault{});
 }
 
+void DescriptorUpdateData::Reset()
+{
+	descriptorWrite.clear();
+	image_infos.clear();
+	buffer_infos.clear();
+}
+
 }

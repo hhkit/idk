@@ -4,14 +4,6 @@
 #include <memory/ArenaAllocator.inl>
 namespace idk::vkn
 {
-	void PipelineManager::View(VulkanView& view)
-	{
-		_view = &view;
-	}
-	VulkanView& PipelineManager::View()
-	{
-		return *_view;
-	}
 	template<typename P>
 	bool LessChain(P clhs, P crhs)
 	{
@@ -57,7 +49,8 @@ namespace idk::vkn
 			rp = *render_pass;
 		string_view str{ r_cast<const char*>(&rp),sizeof(rp) };
 		combi += str; //Add renderpass as a part of the unique id.
-		ivec2 viewport_size{}, viewport_offset{};
+		uvec2 viewport_size{};
+		ivec2 viewport_offset{};
 		if (config.viewport_size)
 			viewport_size = *config.viewport_size;
 		if (config.viewport_offset)
@@ -242,6 +235,48 @@ namespace idk::vkn
 				override_attr_mapping[attr.location] = i;
 			}
 			++i;
+		}
+	}
+
+	//Does not help you store your overrides.
+#pragma optimize("",off)
+	void PipelineDescHelper::UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config)
+	{
+		config.buffer_descriptions.clear();
+		hash_set<uint32_t> layouts;
+		for (auto& module : shader_handles)
+		{
+			auto& mod = module.as<ShaderModule>();
+			if (!mod.HasCurrent())
+				continue;
+			//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
+			//	mod.UpdateCurrent(fo_index);
+			auto& desc = mod.AttribDescriptions();
+			for (auto& desc_set : desc)
+			{
+				bool skip = false;
+				for (auto attrib : desc_set.attributes)
+				{
+					if (attrib.fixed_location)
+					{
+						if (layouts.find(attrib.location) != layouts.end())
+						{
+							skip = true;
+							break;
+						}
+						layouts.emplace(attrib.location);
+					}
+				}
+				if(!skip)
+					config.buffer_descriptions.emplace_back(desc_set);
+			}
+			//shaders.emplace_back(mod.Stage(), mod.Module());
+			if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
+				config.frag_shader = module;
+
+			if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
+				config.vert_shader = module;
+			ApplyBufferDescOverrides(config);
 		}
 	}
 

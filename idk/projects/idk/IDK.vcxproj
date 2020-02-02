@@ -52,6 +52,7 @@
     <ClInclude Include="network\ElectronRigidbodyView.h" />
     <ClInclude Include="network\EventInvokeRPCMessage.h" />
     <ClInclude Include="network\EventLoadLevelMessage.h" />
+    <ClInclude Include="ds\Flags.h" />
     <ClInclude Include="gfx\ColorPickRequest.h" />
     <ClInclude Include="gfx\ColorPickResult.h" />
     <ClInclude Include="common\Layer.h" />
@@ -85,6 +86,8 @@
     <ClInclude Include="gfx\TextAlignment.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
     <ClInclude Include="gfx\TextureRenderMeta.h" />
+    <ClInclude Include="ds\index_span.h" />
+    <ClInclude Include="ds\lazy_vector.h" />
     <ClInclude Include="network\ClientMoveManager.h" />
     <ClInclude Include="network\EventTransferOwnershipMessage.h" />
     <ClInclude Include="network\GhostFlags.h" />
@@ -173,6 +176,7 @@
     <ClInclude Include="ReflectReg_Resources.inl" />
     <ClInclude Include="res\CompiledAssetLoader.h" />
     <ClInclude Include="res\CompiledAssets.h" />
+    <ClInclude Include="res\compiled_asset_tags.h" />
     <ClInclude Include="res\EasyFactory.h" />
     <ClInclude Include="res\FileLoader.h" />
     <ClInclude Include="res\GenericResourceHandle.h" />
@@ -552,6 +556,7 @@
     <None Include="ds\slow_tree.inl" />
     <None Include="ds\small_string.inl" />
     <None Include="event\Signal.inl" />
+    <None Include="ds\index_span.inl" />
     <None Include="math\color.inl" />
     <None Include="math\comparable.inl" />
     <None Include="math\linear.inl" />

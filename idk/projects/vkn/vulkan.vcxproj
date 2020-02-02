@@ -320,6 +320,8 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AttachmentDescription.h" />
+    <ClInclude Include="BaseRenderPass.h" />
     <ClInclude Include="BufferedObj.h" />
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="ColorPickRenderer.h" />
@@ -333,22 +335,38 @@
     <ClInclude Include="DescriptorUpdateData.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="FontRenderer.h" />
+    <ClInclude Include="FrameGraph.h" />
+    <ClInclude Include="FrameGraphBuilder.h" />
+    <ClInclude Include="FrameGraphDemo.h" />
+    <ClInclude Include="FrameGraphNode.h" />
+    <ClInclude Include="FrameGraphResource.h" />
+    <ClInclude Include="FrameGraphResourceManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="GraphicsState.h" />
+    <ClInclude Include="graph_test.h" />
+    <ClInclude Include="IdGenerator.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
     <ClInclude Include="ParticleRenderer.h" />
     <ClInclude Include="PipelineBinders.h" />
     <ClInclude Include="PipelineThingy.h" />
     <ClInclude Include="ProcessedRO.h" />
     <ClInclude Include="RegisterVulkanFactories.h" />
+    <ClInclude Include="RenderBundle.h" />
+    <ClInclude Include="RenderContext.h" />
+    <ClInclude Include="RenderPassCreateInfoBundle.h" />
     <ClInclude Include="RenderPassInfo.h" />
     <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderPassObj.h" />
     <ClInclude Include="RenderStateV2.h" />
+    <ClInclude Include="RenderTask.h" />
     <ClInclude Include="RenderUtil.h" />
+    <ClInclude Include="ResourceLifetimeManager.h" />
     <ClInclude Include="SpinLock.h" />
+    <ClInclude Include="TexturePool.h" />
     <ClInclude Include="TmpTest.h" />
+    <ClInclude Include="topological_sort.h" />
+    <ClInclude Include="UniformManager.h" />
     <ClInclude Include="utils\Flags.h" />
     <ClInclude Include="utils\FrameObjects.h" />
     <ClInclude Include="utils\GlslToSpirv.h" />
@@ -357,13 +375,17 @@
     <ClInclude Include="PipelineManager.h" />
     <ClInclude Include="RenderState.h" />
     <ClInclude Include="ShaderModule.h" />
+    <ClInclude Include="utils\GraphTraverser.h" />
     <ClInclude Include="utils\PresentationSignals.h" />
     <ClInclude Include="utils\SwapchainInfo.h" />
     <ClInclude Include="utils\TriBuffer.h" />
     <ClInclude Include="utils\VknUtil.h" />
+    <ClInclude Include="vector_span.h" />
+    <ClInclude Include="vector_span_builder.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
+    <ClInclude Include="VknTextureView.h" />
     <ClInclude Include="VulkanFontAtlasFactory.h" />
     <ClInclude Include="VknFontAtlasLoader.h" />
     <ClInclude Include="VknFrameBuffer.h" />
@@ -405,6 +427,7 @@
     <ClInclude Include="vulkan_state_fwd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseRenderPass.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
@@ -416,8 +439,13 @@
     <ClCompile Include="DescriptorUpdateData.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
+    <ClCompile Include="FrameGraph.cpp" />
+    <ClCompile Include="FrameGraphBuilder.cpp" />
+    <ClCompile Include="FrameGraphNode.cpp" />
+    <ClCompile Include="FrameGraphResourceManager.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
+    <ClCompile Include="graph_test.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="ParticleRenderer.cpp" />
     <ClCompile Include="PipelineBinders.cpp" />
@@ -429,9 +457,15 @@
     <ClCompile Include="RenderPassObj.cpp" />
     <ClCompile Include="RenderState.cpp" />
     <ClCompile Include="RenderStateV2.cpp" />
+    <ClCompile Include="RenderTask.cpp" />
     <ClCompile Include="RenderUtil.cpp" />
+    <ClCompile Include="ResourceLifetimeManager.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
+    <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="TmpTest.cpp" />
+    <ClCompile Include="topological_sort.cpp" />
+    <ClCompile Include="UniformManager.cpp" />
+    <ClCompile Include="VknTextureView.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />

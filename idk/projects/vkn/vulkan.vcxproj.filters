@@ -238,11 +238,75 @@
     <ClInclude Include="DebugUtil.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="topological_sort.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTask.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameGraphNode.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameGraphResource.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameGraphResourceManager.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="AttachmentDescription.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameGraphBuilder.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseRenderPass.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceLifetimeManager.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameGraph.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\GraphTraverser.h" />
+    <ClInclude Include="FrameGraphDemo.h">
+      <Filter>render\renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderContext.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
     <ClInclude Include="ColorPickRenderer.h">
       <Filter>render\renderers</Filter>
     </ClInclude>
     <ClInclude Include="utils\VknUtil.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="IdGenerator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTextureView.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="TexturePool.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassCreateInfoBundle.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBundle.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_span.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_span_builder.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="UniformManager.h">
+      <Filter>render\graph\util_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="graph_test.h">
+      <Filter>render\graph\test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -442,12 +506,37 @@
     <ClCompile Include="CanvasRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
+    <ClCompile Include="FrameGraph.cpp">
+      <Filter>render\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameGraphNode.cpp">
+      <Filter>render\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameGraphBuilder.cpp">
+      <Filter>render\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameGraphResourceManager.cpp">
+      <Filter>render\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceLifetimeManager.cpp">
+      <Filter>render\graph</Filter>
+    </ClCompile>
     <ClCompile Include="ColorPickRenderer.cpp">
       <Filter>render\renderers</Filter>
     </ClCompile>
-    <ClCompile Include="DebugUtil.cpp">
-      <Filter>utils</Filter>
+    <ClCompile Include="graph_test.cpp">
+      <Filter>render\graph\test</Filter>
     </ClCompile>
+    <ClCompile Include="BaseRenderPass.cpp">
+      <Filter>render\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="topological_sort.cpp" />
+    <ClCompile Include="VknTextureView.cpp">
+      <Filter>render\graph\util_objects</Filter>
+    </ClCompile>
+    <ClCompile Include="TexturePool.cpp" />
+    <ClCompile Include="RenderTask.cpp" />
+    <ClCompile Include="UniformManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -488,6 +577,15 @@
     </Filter>
     <Filter Include="render\renderers">
       <UniqueIdentifier>{a81b1306-cd13-4d9d-933a-0e4dacb5da3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\graph">
+      <UniqueIdentifier>{5f3cc1a0-c271-4aa7-af4f-337e3659978d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\graph\test">
+      <UniqueIdentifier>{06ce5f56-4411-4f6d-8f81-abc87db95a7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\graph\util_objects">
+      <UniqueIdentifier>{f2f7830d-f1f0-45b2-87f8-df255d3c1629}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

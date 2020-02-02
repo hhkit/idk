@@ -42,14 +42,14 @@ namespace idk {
 
 		// accessors
 		float AspectRatio() const;
-		ivec2 Size() const;
+		uvec2 Size() const;
 
 		// modifiers
-		virtual void Size(ivec2 newsize);
+		virtual void Size(uvec2 newsize);
 
         virtual void* ID() const { return 0; };
 
 	protected:
-		ivec2 _size{};
+		uvec2 _size{};
 	};
 }
