@@ -68,22 +68,15 @@ namespace idk
 		auto obj = prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
 		Core::GetSystem<NetworkSystem>().GetIDManager().CreateNewIDFor(ev);
+		ev->Setup();
 		auto& tfm = *obj->Transform();
 		if (position)
 			tfm.position = *position;
 		if (rotation)
 			tfm.rotation = *rotation;
-		if (auto tfm_view = obj->GetComponent<ElectronTransformView>())
-		{
-			tfm_view->network_data = ElectronTransformView::PreviousFrame
-			{
-				.position = tfm.position,
-				.rotation = tfm.rotation,
-				.scale = tfm.scale,
-				.state_mask = 0
-			};
-		}
 
+		ev->network_data = ElectronView::Master{};
+		ev->CacheMasterValues();
 
 		Core::GetSystem<NetworkSystem>().BroadcastMessage<EventInstantiatePrefabMessage>(GameChannel::RELIABLE,
 			[&](EventInstantiatePrefabMessage& msg)
@@ -144,18 +137,12 @@ namespace idk
 			for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
 			{
 				id_manager.CreateNewIDFor(elem.GetHandle());
-				auto& tfm = *elem.GetGameObject()->Transform();
-				if (auto tfm_view = elem.GetGameObject()->GetComponent<ElectronTransformView>())
-				{
-					tfm_view->network_data = ElectronTransformView::PreviousFrame
-					{
-						.position = tfm.position,
-						.rotation = tfm.rotation,
-						.scale = tfm.scale,
-						.state_mask = 0
-					};
-				}
+				elem.Setup();
+				elem.network_data = ElectronView::Master{};
+				elem.state_mask = 0;
+				elem.CacheMasterValues();
 			}
+
 			Core::GetSystem<NetworkSystem>().BroadcastMessage<EventLoadLevelMessage>(GameChannel::RELIABLE, 
 				[scene](EventLoadLevelMessage& msg)
 				{
@@ -176,6 +163,7 @@ namespace idk
 		auto obj = message->prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
 		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message->id, ev));
+		ev->Setup();
 		auto& tfm = *obj->Transform();
 		if (message->use_position)
 			tfm.position = message->position;
@@ -187,16 +175,9 @@ namespace idk
 	{
 		LOG_TO(LogPool::NETWORK, "Received transfer ownership event");
 		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(message->object_to_transfer);
-		ev->owner = Host::ME;
 
-		// remove ghost data
-		auto& tfm = *ev->GetGameObject()->Transform();
-		ev->GetGameObject()->GetComponent<ElectronTransformView>()->network_data = ElectronTransformView::ClientObject
-		{
-			.prev_position = tfm.position,
-			.prev_rotation = tfm.rotation,
-			.prev_scale    = tfm.scale
-		};
+		ev->owner = Host::ME;
+		ev->GetGameObject()->GetComponent<ElectronView>()->SetAsClientObject();
 	}
 	void EventManager::OnLoadLevelMessage(EventLoadLevelMessage* msg)
 	{
@@ -209,8 +190,10 @@ namespace idk
 		(RscHandle<Scene>)
 		{
 			for (auto [eview, view] : zip(Core::GetGameState().GetObjectsOfType<ElectronView>(), views))
+			{
 				id_manager.EmplaceID(view.id, eview.GetHandle());
-
+				eview.Setup();
+			}
 			Core::GetSystem<SceneManager>().OnSceneChange -= scene_change_slot;
 		};
 	}

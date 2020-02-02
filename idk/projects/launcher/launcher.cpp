@@ -79,7 +79,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		break;
 	default:
 		break;
-
 	}
 	gSys->is_deferred(true);
 
@@ -149,7 +148,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetResourceManager().LoadCompiledAsset(elem);
 
 
-	auto load_scene = RscHandle<Scene>{ Guid{ "f0cab184-ac53-4cc4-b191-74a8c65c4c84" } };
+	auto load_scene = RscHandle<Scene>{ Guid{ "bbfad356-fe76-4cac-8efa-dd49e2fc50c0" } };
 	Core::GetSystem<SceneManager>().SetActiveScene(load_scene);
 	load_scene->LoadFromResourcePath();
 	Core::GetScheduler().SetPauseState(UnpauseAll);
