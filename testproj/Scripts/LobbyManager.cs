@@ -42,6 +42,16 @@ namespace TestAndSeek
 
             ElectronNetwork.OnServerConnected += () => { Debug.Log("connected to server!"); };
             ElectronNetwork.OnServerDisconnected += () => { Debug.Log("disconnected from server!"); };
+
+            foreach (var p in players)
+            {
+                switch (p.ActorNumber)
+                {
+                    case 0: player1.GetComponent<ElectronView>().TransferOwnership(p); break;
+                    case 1: player2.GetComponent<ElectronView>().TransferOwnership(p); break;
+                    case 2: player3.GetComponent<ElectronView>().TransferOwnership(p); break;
+                }
+            }
         }
 
 
