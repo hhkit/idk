@@ -220,13 +220,11 @@ namespace idk::vkn
 
 	const VulkanDebugRenderer::debug_draw_calls_t &VulkanDebugRenderer::DbgDrawCalls()const
 	{
-		// TODO: insert return statement here
 		return impl->render_buffer;
 	}
 
 	const VulkanPipeline& VulkanDebugRenderer::GetPipeline() const
 	{
-		// TODO: insert return statement here
 		return impl->pipeline;
 	}
 	//RscHandle<Mesh> ShapeToMesh(DbgShape shape)

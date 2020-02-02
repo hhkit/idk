@@ -38,7 +38,6 @@ namespace idk::vkn {
 
 	SwapChainInfo& SwapChainInfo::operator=(SwapChainInfo&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		std::swap(swap_chain,rhs.swap_chain);
 		std::swap(present_mode,rhs.present_mode);
 		std::swap(surface_format,rhs.surface_format);

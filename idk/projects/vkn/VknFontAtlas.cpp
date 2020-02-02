@@ -25,14 +25,13 @@ namespace idk::vkn {
 	}
 	VknFontAtlas& VknFontAtlas::operator=(VknFontAtlas&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		FontAtlas::operator=(std::move(rhs));
 		std::swap(texture, rhs.texture);
 
 
 		return *this;
 	}
-	void VknFontAtlas::Size(ivec2 new_size)
+	void VknFontAtlas::Size(uvec2 new_size)
 	{
 		FontAtlas::Size(new_size);
 

@@ -5,8 +5,8 @@
 
 namespace idk
 {
-	template<typename Message, typename Func, typename>
-	void ServerConnectionManager::Subscribe(Func&& func)
+	template<typename Message, typename Func>
+	void ServerConnectionManager::Subscribe2(Func&& func)
 	{
 		OnMessageReceived_slots.push_back(EventSlot{ MessageID<Message>,
 			server.OnMessageReceived[clientID][MessageID<Message>].Listen([fn = std::forward<Func>(func)](yojimbo::Message* message)

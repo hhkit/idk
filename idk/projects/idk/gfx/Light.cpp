@@ -104,7 +104,6 @@ namespace idk
 
 	vector<Lightmap>& Light::GetLightMap()
 	{
-		// TODO: insert return statement here
 		return
 			std::visit([&](auto& light_variant) ->vector<Lightmap> &
 				{
@@ -114,7 +113,6 @@ namespace idk
 	}
 	const vector<Lightmap>& Light::GetLightMap() const
 	{
-		// TODO: insert return statement here
 		return
 			std::visit([&](auto& light_variant)-> const vector<Lightmap> &
 				{

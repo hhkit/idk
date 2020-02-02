@@ -87,7 +87,7 @@ namespace idk
 	{
 		vector<AttachmentInfo> attachments;
 		std::optional<AttachmentInfo> depth_attachment, stencil_attachment;
-		ivec2 size{};
+		uvec2 size{};
 		size_t num_layers{};
 		string name;
 	};
@@ -95,7 +95,7 @@ namespace idk
 	class FrameBufferBuilder
 	{
 	public:
-		FrameBufferBuilder& Begin(const string& name, ivec2 size, size_t num_layers = 1);
+		FrameBufferBuilder& Begin(const string& name, uvec2 size, size_t num_layers = 1);
 		FrameBufferBuilder& AddAttachment(AttachmentInfo att_info);
 		FrameBufferBuilder& SetDepthAttachment(AttachmentInfo att_info);
 		FrameBufferBuilder& ClearDepthAttachment();
@@ -112,7 +112,7 @@ namespace idk
 		void Update(const FrameBufferInfo& info, RscHandle<FrameBuffer> h_fb, SpecializedInfo* specialized_info);
 	protected:
 		//out must be assigned a make unique of the implementation version of attachment
-		virtual void CreateAttachment(AttachmentType type,const AttachmentInfo& info, ivec2 size, unique_ptr<Attachment>& out) = 0;
+		virtual void CreateAttachment(AttachmentType type,const AttachmentInfo& info, uvec2 size, unique_ptr<Attachment>& out) = 0;
 		virtual void PreReset(FrameBuffer& framebuffer) = 0;//resets the framebuffer (queue resource for destruction)
 		void Reset(FrameBuffer& framebuffer);
 		virtual void Finalize(FrameBuffer& h_fb, SpecializedInfo* specialized_info) = 0;

@@ -74,7 +74,7 @@ namespace idk::vkn::hlp
 			,attrib.offset
 		};
 	}
-
+#pragma optimize("",off)
 	std::pair<idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription>> ConvertVtxDesc(const vector<buffer_desc>& descs)
 	{
 		std::pair < idk::vector<vk::VertexInputBindingDescription>, idk::vector<vk::VertexInputAttributeDescription >>

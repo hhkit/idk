@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <iterator>
 namespace idk
 {
 	namespace detail
@@ -60,4 +61,7 @@ namespace idk
 		constexpr size_t size_bytes() const noexcept;
 		constexpr bool empty() const noexcept;
 	};
+	//User defined deduction guide (C++17 onwards)
+	template<typename Container>
+	span(Container&&)-> span < typename std::iterator_traits<decltype(std::declval<Container>().data())>::value_type>;
 }

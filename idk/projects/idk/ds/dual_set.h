@@ -37,12 +37,11 @@ namespace idk
 		const_iterator erase(const_iterator pos);
 	
 		// lookup
+		const_iterator find(const T1&) const;
 		template<typename = std::enable_if_t<!std::is_same_v<T1, T2>>>
-		const_iterator find(const T1&);
-		template<typename = std::enable_if_t<!std::is_same_v<T1, T2>>>
-		const_iterator find(const T2&);
-		const_iterator find_first(const T1&);
-		const_iterator find_second(const T2&);
+		const_iterator find(const T2&) const;
+		const_iterator find_first(const T1&) const;
+		const_iterator find_second(const T2&) const;
 	private:
 		table_p _table_first;
 		table_s _table_second;

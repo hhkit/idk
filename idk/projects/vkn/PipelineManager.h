@@ -17,28 +17,7 @@ namespace idk::vkn
 		//Store first
 		void StoreBufferDescOverrides(const pipeline_config& config);
 		//Does not help you store your overrides.
-		void UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config)
-		{
-			config.buffer_descriptions.clear();
-			for (auto& module : shader_handles)
-			{
-				auto& mod = module.as<ShaderModule>();
-				if (!mod.HasCurrent())
-					continue;
-				//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
-				//	mod.UpdateCurrent(fo_index);
-				auto& desc = mod.AttribDescriptions();
-				for (auto& desc_set : desc)
-					config.buffer_descriptions.emplace_back(desc_set);
-				//shaders.emplace_back(mod.Stage(), mod.Module());
-				if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
-					config.frag_shader = module;
-
-				if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
-					config.vert_shader = module;
-				ApplyBufferDescOverrides(config);
-			}
-		}
+		void UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config);
 	private:
 		void ApplyBufferDescOverrides(pipeline_config& config);
 	};
@@ -48,8 +27,6 @@ namespace idk::vkn
 		using container_t = object_pool<PipelineObject>;
 	public:
 		using handle_t = container_t::handle_t;
-		void View(VulkanView& view);
-		VulkanView& View();
 		//Assumes that shader programs are the only differing thing.
 		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass = {},bool has_depth_stencil=false);
 		void CheckForUpdates(uint32_t frame_index);

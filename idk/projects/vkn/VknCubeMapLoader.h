@@ -56,7 +56,7 @@ namespace idk::vkn
 	public:
 		//Will override TexCreateInfo's format if TextureOptions is set
 		void LoadCubemap(VknCubemap& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<CubemapOptions> ooptional, const CMCreateInfo& load_info, std::optional<InputCMInfo> in_info);
-		void LoadCubemap(VknCubemap& texture, TextureFormat input_pixel_format, std::optional<CubemapOptions> options, const char* rgba32, size_t len, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
-		void LoadCubemap(VknCubemap& texture, TextureFormat input_pixel_format, std::optional<CubemapOptions> options, string_view rgba32, ivec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
+		void LoadCubemap(VknCubemap& texture, TextureFormat input_pixel_format, std::optional<CubemapOptions> options, const char* rgba32, size_t len, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
+		void LoadCubemap(VknCubemap& texture, TextureFormat input_pixel_format, std::optional<CubemapOptions> options, string_view rgba32, uvec2 size, hlp::MemoryAllocator& allocator, vk::Fence load_fence, bool isRenderTarget = false);
 	};
 }

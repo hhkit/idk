@@ -15,6 +15,7 @@ namespace idk::vkn
 		uniform_layout_t::UniformStage stage;
 		uniform_layout_t::UniformType type;
 		uint32_t binding, set;
+		uint32_t input_attachment_index; //Only valid if type == Attachment
 		uint32_t size;
 
 		//static void AddToConfig(pipeline_config& config, const UboInfo& info)

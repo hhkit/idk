@@ -25,7 +25,7 @@ std::optional<ProcessedRO::AttachmentBinding> ProcessedRO::BindingInfo::GetAttac
 {
 	using Type = AttachmentBinding;
 	std::optional<Type> ret;
-	if (IsImage())
+	if (IsAttachment())
 		ret = std::get<Type>(ubuffer);
 	return ret;
 }

@@ -1047,6 +1047,9 @@
     <ClInclude Include="ReflectRegistration.inl">
       <Filter>reflect</Filter>
     </ClInclude>
+    <ClInclude Include="ds\index_span.h">
+      <Filter>ds</Filter>
+    </ClInclude>
     <ClInclude Include="common\LayerMask.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -1134,6 +1137,13 @@
       <Filter>network\messages</Filter>
     </ClInclude>
     <ClInclude Include="util\property_path.h" />
+    <ClInclude Include="ds\lazy_vector.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="ds\Flags.h">
+      <Filter>ds</Filter>
+    </ClInclude>
+    <ClInclude Include="res\compiled_asset_tags.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h">
       <Filter>network\views</Filter>
     </ClInclude>
@@ -1861,6 +1871,9 @@
     </None>
     <None Include="network\NetworkSystem.inl">
       <Filter>network\system</Filter>
+    </None>
+    <None Include="ds\index_span.inl">
+      <Filter>ds</Filter>
     </None>
     <None Include="network\ElectronView.inl">
       <Filter>network\views</Filter>

@@ -187,6 +187,12 @@ namespace idk
 			void BindAni(PipelineThingy& the_interface, const  AnimatedRenderObject& dc) override;
 		};
 		using PbrFwdMaterialBinding = CombinedBindings<StandardVertexBindings, StandardMaterialFragBindings, PbrFwdBindings, StandardMaterialBindings>;
+		
+		struct UnlitFilter :StandardBindings
+		{
+			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override;
+		};
+		using UnlitMaterialBinding = CombinedBindings<StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 		using ShadowBinding = CombinedBindings<StandardVertexBindings>;
 	}
 }

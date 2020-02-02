@@ -1084,7 +1084,8 @@ namespace idk::vkn
 				1
 				,&waitSemaphores
 				,waitStages,
-				hlp::arr_count(cmds),std::data(cmds)
+				0,nullptr
+				//hlp::arr_count(cmds),std::data(cmds)
 				,1,&readySemaphores
 			};
 			vk::SubmitInfo frame_submit[] = { render_state_submit_info };
@@ -1399,7 +1400,6 @@ namespace idk::vkn
 
 	VulkanResourceManager& VulkanState::ResourceManager()
 	{
-		// TODO: insert return statement here
 		return rsc_manager;
 	}
 

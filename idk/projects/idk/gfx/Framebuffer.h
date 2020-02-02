@@ -57,7 +57,7 @@ namespace idk
 	public:
 		vector<unique_ptr<Attachment>> attachments{};
 		unique_ptr<Attachment> depth_attachment{}, stencil_attachment{};
-		ivec2 size{};
+		uvec2 size{};
 		size_t num_layers{};
 		bool HasDepthAttachment()const { return s_cast<bool>(depth_attachment); }
 		const Attachment& DepthAttachment()const { return *depth_attachment; }
@@ -65,8 +65,8 @@ namespace idk
 		size_t NumColorAttachments()const {return attachments.size();}
 		size_t NumAttachments()const;
 		size_t NumLayers()const;
-		ivec2 Size()const { return size; };
-		ivec2 Size(ivec2 new_size)const { return new_size=size; };
+		uvec2 Size()const { return size; };
+		uvec2 Size(uvec2 new_size)const { return new_size=size; };
 
 
 		FrameBuffer() = default;
