@@ -31,7 +31,10 @@ namespace idk
             Guid guid{ handle.GetStem() };
             auto ptr = Core::GetResourceManager().LoaderEmplaceResource<EngineResource>(guid, std::move(*res));
             if constexpr (has_tag_v<EngineResource, Saveable>)
-                ptr->SetSaveableFlag(false);
+            {
+                if (handle.GetMountPath().starts_with("/build"))
+                    ptr->SetSaveableFlag(false);
+            }
         }
     }
 }

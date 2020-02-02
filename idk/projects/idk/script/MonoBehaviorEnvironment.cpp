@@ -19,6 +19,7 @@
 #include <script/ValueUnboxer.h>
 
 #include <core/GameObject.inl>
+#include <editor/IEditor.h>
 #include <scene/SceneManager.h>
 #include <file/FileSystem.h>
 #include <util/ioutils.h>
@@ -34,9 +35,13 @@ namespace idk::mono
 
 		// open file
 		{
-			auto tmp_file_name = string{ full_path_to_game_dll } +"a";
-			rename(full_path_to_game_dll.data(), tmp_file_name.data());
-			rename(tmp_file_name.data(), full_path_to_game_dll.data());
+			if (&Core::GetSystem<IEditor>())
+			{
+				// force the compiled dll to update with atomic move
+				auto tmp_file_name = string{ full_path_to_game_dll } +"a";
+				rename(full_path_to_game_dll.data(), tmp_file_name.data());
+				rename(tmp_file_name.data(), full_path_to_game_dll.data());
+			}
 			std::ifstream file{ full_path_to_game_dll, std::ios::binary };
 			assembly_data = binarify(file);
 		}

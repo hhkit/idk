@@ -315,7 +315,13 @@ namespace idk
 
 		if (obj.is<mono::ManagedObject>())
 		{
-			obj.get<mono::ManagedObject>() = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Type(node.tag())->Construct();
+			auto type = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Type(node.tag());
+			if (!type)
+			{
+				LOG_TO(LogPool::GAME, "Missing %s script!", node.tag());
+				return parse_error::type_cannot_be_parsed;
+			}
+			obj.get<mono::ManagedObject>() = type->Construct();
 			obj.get<mono::ManagedObject>().Visit(generic_visitor);
 		}
 		else

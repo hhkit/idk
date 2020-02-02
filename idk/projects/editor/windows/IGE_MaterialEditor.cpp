@@ -703,7 +703,7 @@ namespace idk
             return;
         }
 
-        auto g = &*_graph;
+        auto g = _graph;
 
 
         if (ImGui::BeginMenuBar())
@@ -712,7 +712,7 @@ namespace idk
             {
                 g->Compile();
                 Core::GetResourceManager().Save(_graph);
-				g = &*_graph;
+				g = _graph;
             }
             ImGui::EndMenuBar();
         }

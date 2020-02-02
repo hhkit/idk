@@ -116,11 +116,11 @@ namespace idk
 							if constexpr (Rs::autosave)
 								for (const auto& [guid, res_cb] : resource_man->GetTable<Rs>())
 								{
-									const auto h = RscHandle<Rs>{ guid };
-									if (h && h->IsDirty())
+									
+									if (res_cb.resource && res_cb.resource->IsDirty())
 									{
-										resource_man->Save(h);
-										h->Clean();
+										resource_man->Save(RscHandle<Rs>{guid});
+										res_cb.resource->Clean();
 									}
 								}
 						}
