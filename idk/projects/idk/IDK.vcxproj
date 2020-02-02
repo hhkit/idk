@@ -49,6 +49,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
+    <ClInclude Include="ElectronRigidbodyView.h" />
     <ClInclude Include="network\EventInvokeRPCMessage.h" />
     <ClInclude Include="network\EventLoadLevelMessage.h" />
     <ClInclude Include="gfx\ColorPickRequest.h" />
@@ -403,6 +404,7 @@
     <ClCompile Include="network\ClientConnectionManager.cpp" />
     <ClCompile Include="network\ClientMoveManager.cpp" />
     <ClCompile Include="network\ElectronTransformView.cpp" />
+    <ClCompile Include="network\ElectronView.cpp" />
     <ClCompile Include="network\EventLoadLevelMessage.cpp" />
     <ClCompile Include="network\EventManager.cpp" />
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
@@ -560,6 +562,7 @@
     <None Include="meta\variant.inl" />
     <None Include="network\ClientConnectionManager.inl" />
     <None Include="network\ConnectionManager.inl" />
+    <None Include="network\ElectronView.inl" />
     <None Include="network\NetworkSystem.inl" />
     <None Include="network\ServerConnectionManager.inl" />
     <None Include="network\SubstreamManager.inl" />

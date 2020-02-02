@@ -12,7 +12,7 @@ namespace idk
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
 	private:
-		void CachePreviousPositions(span<ElectronTransformView> views);
-		void SendMoves(span<ElectronTransformView> views);
+		void CachePreviousPositions(span<ElectronView> views);
+		void SendMoves(span<ElectronView> views);
 	};
 }

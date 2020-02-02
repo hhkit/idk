@@ -1126,6 +1126,9 @@
       <Filter>network\messages</Filter>
     </ClInclude>
     <ClInclude Include="util\property_path.h" />
+    <ClInclude Include="ElectronRigidbodyView.h">
+      <Filter>network\views</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1625,6 +1628,7 @@
     <ClCompile Include="network\EventLoadLevelMessage.cpp" />
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
     <ClCompile Include="util\property_path.cpp" />
+    <ClCompile Include="network\ElectronView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1842,6 +1846,9 @@
     </None>
     <None Include="network\NetworkSystem.inl">
       <Filter>network\system</Filter>
+    </None>
+    <None Include="network\ElectronView.inl">
+      <Filter>network\views</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
