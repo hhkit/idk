@@ -7,6 +7,8 @@
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/utils/utils.h> //ReverseMap
 #include <iostream>
+
+#include <vkn/DebugUtil.h>
 namespace std
 {
 
@@ -316,6 +318,7 @@ namespace idk::vkn
 		);
 	}
 	void DoNothing();
+#pragma optimize("",off)
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		auto format = load_info.internal_format, internal_format = load_info.internal_format;
@@ -351,7 +354,7 @@ namespace idk::vkn
 		imageInfo.extent.width = static_cast<uint32_t>(width);
 		imageInfo.extent.height = static_cast<uint32_t>(height);
 		imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
-		imageInfo.mipLevels = load_info.mipmap_level+1; //Currently no mipmapping
+		imageInfo.mipLevels = load_info.mipmap_level; //Currently no mipmapping
 		imageInfo.arrayLayers = load_info.layers;
 		imageInfo.format = internal_format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
@@ -376,7 +379,7 @@ namespace idk::vkn
 			vk::ImageSubresourceRange sub_range;
 			sub_range.aspectMask = img_aspect;
 			sub_range.baseMipLevel = 0;
-			sub_range.levelCount = load_info.mipmap_level + 1;
+			sub_range.levelCount = load_info.mipmap_level;
 			sub_range.baseArrayLayer = 0;
 			sub_range.layerCount = 1;
 
@@ -418,7 +421,7 @@ namespace idk::vkn
 			{
 
 				//Copy data from buffer to image
-				vector< vk::BufferImageCopy> copy_regions(load_info.mipmap_level+1);
+				vector< vk::BufferImageCopy> copy_regions(load_info.mipmap_level);
 				{
 					vk::BufferImageCopy region{};
 					region.bufferOffset = 0;
@@ -439,7 +442,7 @@ namespace idk::vkn
 					copy_regions[0] = (region);
 				}
 				size_t offset = single_level_size;
-				for (uint32_t i = 1; i <= load_info.mipmap_level; ++i)
+				for (uint32_t i = 1; i < load_info.mipmap_level; ++i)
 				{
 				vk::BufferImageCopy region{};
 				region.bufferOffset = offset;
@@ -470,13 +473,7 @@ namespace idk::vkn
 						DoNothing();
 					}
 					name += " Staging Dest";
-					vk::DebugUtilsObjectNameInfoEXT tmp
-					{
-						vk::ObjectType::eImage,reinterpret_cast<uint64_t>(copy_dest.operator VkImage()),name.c_str()
-					};
-					auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
-
-					View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+					dbg::NameObject(copy_dest, name);
 				}
 				cmd_buffer.copyBufferToImage(*stagingBuffer, copy_dest, vk::ImageLayout::eTransferDstOptimal, copy_regions, vk::DispatchLoaderDefault{});
 
@@ -493,13 +490,18 @@ namespace idk::vkn
 				TransitionImageLayout(cmd_buffer, {}, vk::PipelineStageFlagBits::eAllCommands , vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, * image, img_aspect, sub_range);
 				BlitConvert(cmd_buffer, img_aspect, *blit_src_img, *image, load_info.mipmap_level, width, height);
 			}
-			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect);
+			auto tmp = image->operator VkImage();
+			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect,sub_range);
 
 	
 		}else if(imageInfo.initialLayout!=load_info.layout)
 		{
 			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, * image, img_aspect);
 		}
+		//else
+		//{
+		//	TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, * image, img_aspect);
+		//}
 		device.resetFences(fence);
 		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
 		uint64_t wait_for_milli_seconds = 1;
@@ -514,13 +516,7 @@ namespace idk::vkn
 			{
 				DoNothing();
 			}
-			vk::DebugUtilsObjectNameInfoEXT tmp
-			{
-				vk::ObjectType::eImage,reinterpret_cast<uint64_t>(image->operator VkImage()),name.c_str()
-			};
-			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
-
-			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+			dbg::NameObject(*image, name);
 		}
 		result.first = std::move(image);
 		result.second = std::move(alloc);

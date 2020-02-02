@@ -10,6 +10,8 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 
+#include <vkn/DebugUtil.h>
+
 namespace idk::vkn
 {
 	void VknRenderTarget::OnFinalize()
@@ -39,6 +41,10 @@ namespace idk::vkn
 		dtci.image_usage |= vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eInputAttachment | vk::ImageUsageFlagBits::eDepthStencilAttachment;
 		loader.LoadTexture(*depth_texture, alloc, fence, {}, dtci, {});
 
+		auto& col = *color_texture;
+		auto& dep = *depth_texture;
+		dbg::NameObject(col.Image(), col.Name());
+		dbg::NameObject(dep.Image(), dep.Name());
 		{ 
 			VulkanView& vknView = View();
 			const vk::ImageView image_views[] = {color_texture->ImageView(),depth_texture->ImageView()};
@@ -63,8 +69,12 @@ namespace idk::vkn
 
 	void VknRenderTarget::PrepareDraw(vk::CommandBuffer& cmd_buffer)
 	{
-		TransitionTexture(cmd_buffer, vk::ImageLayout::eColorAttachmentOptimal       , GetColorBuffer().as<VknTexture>());
-		TransitionTexture(cmd_buffer, vk::ImageLayout::eDepthStencilAttachmentOptimal, GetDepthBuffer().as<VknTexture>());
+		auto& col = GetColorBuffer().as<VknTexture>();
+		auto& dep = GetDepthBuffer().as<VknTexture>();
+		dbg::NameObject(col.Image(), col.Name());
+		dbg::NameObject(dep.Image(), dep.Name());
+		TransitionTexture(cmd_buffer, vk::ImageLayout::eColorAttachmentOptimal       , col);
+		TransitionTexture(cmd_buffer, vk::ImageLayout::eDepthStencilAttachmentOptimal, dep);
 	}
 
 	RenderPassObj VknRenderTarget::GetRenderPass(bool clear_col , bool clear_depth ) const
