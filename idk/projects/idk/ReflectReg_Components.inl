@@ -52,4 +52,35 @@ REFLECT_BEGIN(idk::Collider, "Collider")
 REFLECT_VARS(enabled, shape, is_trigger, bounciness, dynamic_friction, static_friction)
 REFLECT_END()
 
+// PREFAB
+REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
+REFLECT_VARS(component_name, property_path, component_nth, value)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ComponentNth, "ComponentNth")
+REFLECT_VARS(component_name, component_nth)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::vector<idk::PropertyOverride>, "vector<PropertyOverride>")
+REFLECT_END()
+REFLECT_BEGIN(idk::vector<idk::ComponentNth>, "vector<ComponentNth>")
+REFLECT_END()
+
+REFLECT_BEGIN(idk::PrefabInstance, "PrefabInstance")
+REFLECT_VARS(prefab, overrides, object_index, removed_components)
+REFLECT_END()
+
+// TEST
+REFLECT_BEGIN(idk::TestComponent, "TestComponent")
+REFLECT_VARS(a, b, c, d, makeme, send_pos, send_rot)
+REFLECT_END()
+
+// NETWORKING
+REFLECT_BEGIN(idk::ElectronView, "ElectronView")
+REFLECT_VAR(network_id)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ElectronTransformView, "ElectronTransformView")
+REFLECT_VARS(sync_position, sync_rotation, sync_scale, send_threshold, snap_threshold, interp_over_seconds)
+REFLECT_END()
 #pragma endregion

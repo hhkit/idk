@@ -3,7 +3,11 @@
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <common/Layer.h>
+
 #include <gfx/DebugRenderer.h>
+
+#include <scene/SceneManager.h>
+
 #include <phys/RigidBody.h>
 #include <phys/Collider.h>
 #include <phys/collision_detection/collision_box.h>
@@ -483,9 +487,10 @@ namespace idk
         if (!debug_draw_colliders)
             return;
 
-		// static_tree.debug_draw();
+		
         // for (const auto& elem : static_info)
         //     debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+		static_tree.debug_draw();
         for (const auto& elem : dynamic_info)
             debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
         for (auto& elem : colliders)
@@ -851,6 +856,10 @@ namespace idk
 	void PhysicsSystem::Init()
 	{
 		static_tree.preallocate_nodes(2500); // Avg ~1030 static objects -> means (2 * 1030 - 1) total nodes in b-tree
+
+		// Changing scenes should reset physics
+		Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { Reset(); };
+		
 		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
 		{
 			if (!collider)

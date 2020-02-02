@@ -51,6 +51,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Owin, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Owin.4.0.0\lib\net451\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\AnimationState.cs" />
     <Compile Include="Components\Animator.cs" />
     <Compile Include="Components\AudioSource.cs" />
     <Compile Include="Components\Camera.cs" />
@@ -81,6 +88,14 @@
     <Compile Include="Core\IDK.cs" />
     <Compile Include="Core\Object.cs" />
     <Compile Include="Debug\NullRef.cs" />
+    <Compile Include="Electron\Address.cs" />
+    <Compile Include="Electron\ElectronStream.cs" />
+    <Compile Include="Electron\ElectronView.cs" />
+    <Compile Include="Electron\ElectronNetwork.cs" />
+    <Compile Include="Electron\IElectronObservable.cs" />
+    <Compile Include="Electron\Player.cs" />
+    <Compile Include="Electron\RPC.cs" />
+    <Compile Include="Electron\RPCTarget.cs" />
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />

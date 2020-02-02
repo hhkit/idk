@@ -2,9 +2,11 @@
 
 #include "CompiledAssetLoader.h"
 #include <res/ResourceManager.inl>
+#include <res/SaveableResource.h>
 #include <serialize/binary.inl>
 #include <serialize/text.inl>
 #include <util/ioutils.h>
+#include <meta/tag.inl>
 
 namespace idk
 {
@@ -27,7 +29,12 @@ namespace idk
         if (res)
         {
             Guid guid{ handle.GetStem() };
-            Core::GetResourceManager().LoaderEmplaceResource<EngineResource>(guid, std::move(*res));
+            auto ptr = Core::GetResourceManager().LoaderEmplaceResource<EngineResource>(guid, std::move(*res));
+            if constexpr (has_tag_v<EngineResource, Saveable>)
+            {
+                if (handle.GetMountPath().starts_with("/build"))
+                    ptr->SetSaveableFlag(false);
+            }
         }
     }
 }

@@ -56,8 +56,28 @@ namespace idk::mono
 			return false;
 
 		thunks.emplace(string{ method_name }, ManagedThunk{ method });
+		LOG_TO(LogPool::MONO, "Cached thunk %s", method_name.data());
 		return true;
 	}
+	void ManagedType::FindRPCs()
+	{
+		auto rpc = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElecRPC");
+		IDK_ASSERT_MSG(rpc, "could not find RPC class");
+		for (void* itr = nullptr; auto method = mono_class_get_methods(type, &itr);)
+		{
+			auto attr = mono_custom_attrs_from_method(method);
+			if (attr && mono_custom_attrs_has_attr(attr, rpc->Raw()))
+				rpcs.emplace(mono_method_get_name(method), method);
+		}
+
+		LOG_TO(LogPool::MONO, "Found %d rpcs in %s", (int) rpcs.size(), mono_class_get_name(type));
+	}
+	MonoMethod* ManagedType::GetRPC(string_view method) const
+	{
+		auto itr = rpcs.find(method.data());
+		return itr != rpcs.end() ? itr->second : nullptr;
+	}
+
 	std::variant<ManagedThunk, MonoMethod*, std::nullopt_t> ManagedType::GetMethod(string_view method_name, int param_count) const
 	{
 		{

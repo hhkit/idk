@@ -55,6 +55,7 @@
     <ClCompile Include="Reflect\ReflectReg_Resources.cpp" />
     <ClCompile Include="TestGeometry.cpp" />
     <ClCompile Include="TestSerializeBinary.cpp" />
+    <ClCompile Include="TestSlidingWindow.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />
     <ClCompile Include="TestAudio.cpp" />
     <ClCompile Include="TestDualSet.cpp" />
@@ -124,7 +125,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>$(UnitTestCmdLineDefines);TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;$(UnitTestCmdLineDefines);TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -137,6 +138,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(SolutionDir)dep\lib\yojimboD.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
@@ -165,7 +168,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>$(UnitTestCmdLineDefines);TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;$(UnitTestCmdLineDefines);TEST_DATA_PATH=R"($(ProjectDir)test_data)";TEST_BIN_DIR=R"($(OutDir))";X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -180,6 +183,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(SolutionDir)dep\lib\yojimbo.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>

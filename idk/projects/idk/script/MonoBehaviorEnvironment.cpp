@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "MonoBehaviorEnvironment.h"
 
-#include <iostream>
+#include <filesystem>
+#include <thread>
 
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
@@ -18,6 +19,7 @@
 #include <script/ValueUnboxer.h>
 
 #include <core/GameObject.inl>
+#include <editor/IEditor.h>
 #include <scene/SceneManager.h>
 #include <file/FileSystem.h>
 #include <util/ioutils.h>
@@ -32,9 +34,17 @@ namespace idk::mono
 		_domain = mono_domain_create_appdomain(std::data(domain_name), 0);
 
 		// open file
-		std::ifstream file{ full_path_to_game_dll, std::ios::binary };
-		assembly_data = stringify(file);
-
+		{
+			if (&Core::GetSystem<IEditor>())
+			{
+				// force the compiled dll to update with atomic move
+				auto tmp_file_name = string{ full_path_to_game_dll } +"a";
+				rename(full_path_to_game_dll.data(), tmp_file_name.data());
+				rename(tmp_file_name.data(), full_path_to_game_dll.data());
+			}
+			std::ifstream file{ full_path_to_game_dll, std::ios::binary };
+			assembly_data = binarify(file);
+		}
 		// load assembly
 		mono_domain_set(_domain, true);
 		MonoImageOpenStatus status;
@@ -109,7 +119,6 @@ namespace idk::mono
 					
 					LOG_TO(LogPool::MONO, "  CHECKING %s:%s @ %p", mono_class_get_namespace(check_parent), mono_class_get_name(check_parent), check_parent);
 					auto my_img = mono_class_get_image(check_parent);
-					LOG_TO(LogPool::MONO, "    IMAGE: %s @ %p - %s", mono_image_get_name(my_img), my_img, mono_image_get_filename(my_img));
 					if (mono_class_get_name(check_parent) == string_view{ "MonoBehavior" })
 						return true;
 					if (check_parent == monobehavior)
@@ -130,8 +139,6 @@ namespace idk::mono
 				constexpr auto find_method = [](ManagedType& type, string_view fn_name, int param_count = 0)
 				{
 					auto res = type.CacheThunk(fn_name, param_count);
-					if (res)
-						LOG_TO(LogPool::MONO, string{ "Found function " } +string{ fn_name });
 				};
 
 				//type.CacheMessages();
@@ -149,6 +156,7 @@ namespace idk::mono
 				find_method(type, "Update");
 				find_method(type, "PausedUpdate");
 				find_method(type, "UpdateCoroutines");
+				type.FindRPCs();
 				
 
 				//if (!Core::GetSystem<ScriptSystem>().Environment().IsAbstract(mono_class_get_type(type.Raw())))

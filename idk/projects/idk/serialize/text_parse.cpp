@@ -12,6 +12,8 @@
 #include <script/ScriptSystem.h>
 #include <script/ManagedObj.inl>
 #include <res/ResourceHandle.inl>
+#include <prefab/PrefabUtility.h>
+#include <prefab/PrefabInstance.h>
 
 #include <ds/span.inl>
 #include <ds/result.inl>
@@ -313,7 +315,13 @@ namespace idk
 
 		if (obj.is<mono::ManagedObject>())
 		{
-			obj.get<mono::ManagedObject>() = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Type(node.tag())->Construct();
+			auto type = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Type(node.tag());
+			if (!type)
+			{
+				LOG_TO(LogPool::GAME, "Missing %s script!", node.tag());
+				return parse_error::type_cannot_be_parsed;
+			}
+			obj.get<mono::ManagedObject>() = type->Construct();
 			obj.get<mono::ManagedObject>().Visit(generic_visitor);
 		}
 		else
@@ -383,7 +391,13 @@ namespace idk
 					trans.parent = new_trans.parent;
 				}
 				else if (type.is<Name>())
+				{
 					handle->GetComponent<Name>()->name = obj.get<Name>().name;
+				}
+				else if (type.is<PrefabInstance>())
+				{
+					PrefabUtility::InstantiateSpecific(handle, obj.get<PrefabInstance>());
+				}
 				else
 				{
 					handle->AddComponent(obj);

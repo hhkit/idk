@@ -69,7 +69,7 @@ namespace idk
             return "";
         }
 
-        public Object Clone()
+        public virtual Object Clone()
         {
             return (Object)MemberwiseClone();
         }

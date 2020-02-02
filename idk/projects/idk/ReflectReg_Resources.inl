@@ -79,6 +79,7 @@
 	REFLECT_VARS(material, uniforms)
 	REFLECT_END()
 
+
 	REFLECT_BEGIN(idk::PrefabData, "PrefabData")
 	REFLECT_VARS(parent_index, components)
 	REFLECT_END()
@@ -88,10 +89,6 @@
 
 	REFLECT_BEGIN(idk::Prefab, "Prefab")
 	REFLECT_VARS(data)
-	REFLECT_END()
-
-	REFLECT_BEGIN(idk::PropertyOverride, "PropertyOverride")
-	REFLECT_VARS(component_name, property_path, component_nth)
 	REFLECT_END()
 
 
@@ -196,7 +193,7 @@
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::shadergraph::Graph, "ShaderGraph")
-	REFLECT_VARS(_shader_program, master_node, nodes, links, parameters)
+	REFLECT_VARS(_shader_program, domain, blend, model, master_node, nodes, links, parameters)
 	REFLECT_END()
 
 #pragma endregion

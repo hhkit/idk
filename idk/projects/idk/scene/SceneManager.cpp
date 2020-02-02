@@ -99,6 +99,7 @@ namespace idk
 			_active_scene = _next_scene;
 			_active_scene->LoadFromResourcePath();
 			BuildSceneGraph(Core::GetGameState().GetObjectsOfType<const GameObject>());
+			OnSceneChange.Fire(_active_scene);
 			changing = false;
 		}
 	}

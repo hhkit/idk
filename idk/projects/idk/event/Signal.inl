@@ -13,13 +13,16 @@ namespace idk
 	template<typename ...Params>
 	inline void Signal<Params...>::Unlisten(SlotId id)
 	{
-		_slots.erase(id);
+		_removeus.push_back(id);
 	}
 
 	template<typename ... Params>
 	template<typename ... Args>
 	void Signal<Params...>::Fire(Args&& ... args)
 	{
+		for (auto& elem : _removeus)
+			_slots.erase(elem);
+		_removeus.clear();
 		for (auto& f : _slots)
 			f.second(std::forward<Args>(args)...);
 	}

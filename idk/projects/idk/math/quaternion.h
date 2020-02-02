@@ -38,6 +38,8 @@ namespace idk
 
 		// operator overloads
 		using linear<quaternion<T>, T>::operator*;
+		using linear<quaternion<T>, T>::operator==;
+		using linear<quaternion<T>, T>::operator!=;
 		using Base::operator[];
 		quaternion& operator*=(const quaternion&);
 		quaternion  operator*(const quaternion&) const;

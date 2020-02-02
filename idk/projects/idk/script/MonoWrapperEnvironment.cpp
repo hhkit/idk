@@ -10,6 +10,8 @@
 #include <mono/utils/mono-logger.h>
 #include <mono/metadata/reflection.h>
 
+#include <network/EventManager.h>
+
 #include <core/Scheduler.h>
 #include <core/NullHandleException.h>
 #include <IncludeComponents.h>
@@ -60,7 +62,12 @@ namespace idk::mono
 
 		auto mb_itr = _types.find("MonoBehavior");
 		IDK_ASSERT_MSG(mb_itr != _types.end(), "cannot find idk.MonoBehavior");
-		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache method");
+		IDK_ASSERT_MSG(mb_itr->second.CacheThunk("UpdateCoroutines"), "could not cache UpdateCoroutines");
+
+		auto ev_itr = _types.find("ElectronView");
+		IDK_ASSERT_MSG(ev_itr != _types.end(), "cannot find idk.ElectronView");
+		IDK_ASSERT_MSG(ev_itr->second.CacheThunk("Reserialize", 1), "could not cache Deserialize");
+
 	}
 
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
@@ -757,80 +764,179 @@ namespace idk::mono
 		// BIND_END();
 
 		// Animator
-		BIND_START("idk.Bindings::AnimatorPlay",  void, Handle<Animator> animator, MonoString* name)
+		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			animator->Play(s.get());
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->Play(s.get(), 0.0f, index);
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorCrossFade",  void, Handle<Animator> animator, MonoString* name, float time = 0.2f)
+		BIND_START("idk.Bindings::AnimatorCrossFade", bool, Handle<Animator> animator, MonoString* name, float time = 0.2f, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			animator->BlendTo(s.get(), time);
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->BlendTo(s.get(), time, index);
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorPause",  void, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorPause", bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			animator->Pause();
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->Pause(index);
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorResume",  void, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorResume", bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			animator->Resume();
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->Resume(index);
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorStop",  void, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorStop",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			animator->Stop();
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->Stop(index);
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorDefaultStateName", MonoString*, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorGetState", CSharpState, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
+		{
+			auto s = unbox(name);
+			int index = 0;
+			if (layer)
 			{
-				return mono_string_new(mono_domain_get(), animator->DefaultStateName().c_str());
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
 			}
+			return animator->GetState(s.get(), index);
+		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorCurrentStateName", MonoString*, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorDefaultStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
 			{
-				return mono_string_new(mono_domain_get(), animator->CurrentStateName().c_str());
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
 			}
+
+			return mono_string_new(mono_domain_get(), animator->DefaultStateName(index).c_str());
+		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorBlendStateName", MonoString*, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorCurrentStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
 			{
-				return mono_string_new(mono_domain_get(), animator->BlendStateName().c_str());
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
 			}
+			return mono_string_new(mono_domain_get(), animator->CurrentStateName(index).c_str());
+		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorIsPlaying",  bool, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorBlendStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
 			{
-				return animator->IsPlaying();
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
 			}
+			return mono_string_new(mono_domain_get(), animator->BlendStateName(index).c_str());
+		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorIsBlending",  bool, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorIsPlaying",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
 			{
-				return animator->IsBlending();
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
 			}
+			return animator->IsPlaying(index);
+		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorHasCurrAnimEnded",  bool, Handle<Animator> animator)
+		BIND_START("idk.Bindings::AnimatorIsBlending",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
 			{
-				return animator->HasCurrAnimEnded();
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
 			}
+			return animator->IsBlending(index);
+		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorHasState",  bool, Handle<Animator> animator, MonoString* name)
+		BIND_START("idk.Bindings::AnimatorHasCurrAnimEnded",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
 			{
-				auto s = unbox(name);
-				auto ret_val = animator->HasState(s.get());
-				return ret_val;
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
 			}
+			return animator->HasCurrAnimEnded(index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorHasState",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
+		{
+			auto s = unbox(name);
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			auto ret_val = animator->HasState(s.get(), index);
+			return ret_val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorGetWeight", float, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->GetWeight(index);
+		}
+
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorGetInt", int, Handle<Animator> animator, MonoString* name)
@@ -858,6 +964,18 @@ namespace idk::mono
 		{
 			auto s = unbox(name);
 			return animator->GetTrigger(s.get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorSetWeight", bool, Handle<Animator> animator, float weight, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = animator->FindLayerIndex(l.get());
+			}
+			return animator->SetWeight(weight, index);
 		}
 		BIND_END();
 
@@ -1638,6 +1756,90 @@ namespace idk::mono
 		BIND_START("idk.Bindings::LayerMaskNameToLayer", int, MonoString* s)
 		{
 			return Core::GetSystem<LayerManager>().NameToLayerIndex(unbox(s).get());
+		}
+		BIND_END();
+
+		// Networking
+
+		BIND_START("idk.Bindings::NetworkGetIsHost", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().IsHost();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetIsConnected", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().GetConnectionTo();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkDisconnect", void)
+		{
+			throw "have not written disconnect";
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkConnect", void, Address a)
+		{
+			Core::GetSystem<NetworkSystem>().ConnectToServer(a);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkCreateLobby", void)
+		{
+
+			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
+			Core::GetSystem<NetworkSystem>().InstantiateServer(devices[0].ip_addresses[0]);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkLoadScene", void, Guid g)
+		{
+			RscHandle<Scene> scene{ g };
+			EventManager::BroadcastLoadLevel(scene);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkInstantiatePrefabPosition", uint64_t, Guid g, vec3 pos)
+		{
+			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos).id;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkInstantiatePrefabPositionRotation", uint64_t, Guid g, vec3 pos, quat rot)
+		{
+			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, rot).id;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ViewGetNetworkId", NetworkID, Handle<ElectronView> ev)
+		{
+			return ev->network_id;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ViewTransferOwnership", void, Handle<ElectronView> ev, int newOwner)
+		{
+			EventManager::SendTransferOwnership(ev, static_cast<Host>(newOwner));
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ViewExecRPC", void, Handle<ElectronView> ev, MonoString* method_name, int rpc_target, MonoArray* params)
+		{
+			auto length = mono_array_length(params);
+			vector<vector<unsigned char>> param_vec;
+			for (int i = 0; i < length; ++i)
+			{
+				auto subarr = mono_array_get(params, MonoArray*, i);
+				auto subarr_len = mono_array_length(subarr);
+				auto& buffer = param_vec.emplace_back();
+
+				for (int j = 0; j < subarr_len; ++j)
+					buffer.push_back(mono_array_get(subarr, unsigned char, j));
+			}
+
+			// do things
+			EventManager::BroadcastRPC(ev, unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
 	}

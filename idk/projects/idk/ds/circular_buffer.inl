@@ -4,148 +4,6 @@
 
 namespace idk
 {
-	template <typename T, size_t SZ>
-	template<typename FwdIt>
-	circular_buffer<T, SZ>::circular_buffer(FwdIt start, FwdIt end)
-		: circular_buffer{}
-	{
-		while (start != end)
-			emplace_back(*start++);
-	}
-
-	template <typename T, size_t SZ>
-	circular_buffer<T, SZ>::circular_buffer(std::initializer_list<T> il)
-		: circular_buffer{ il.begin(), il.end() }
-	{}
-
-
-	template <typename T, size_t SZ>
-	circular_buffer<T, SZ>::circular_buffer(const circular_buffer& rhs)
-		: circular_buffer{ rhs.begin(), rhs.end() }
-	{}
-
-	template <typename T, size_t SZ>
-	auto& circular_buffer<T, SZ>::operator=(const circular_buffer& rhs)
-	{
-		~circular_buffer();
-		for (auto& elem : rhs)
-			emplace_back(elem);
-		return *this;
-	}
-
-	template <typename T, size_t SZ>
-	void circular_buffer<T, SZ>::erase(iterator start_erase, iterator end_erase)
-	{
-		iterator real_end = end();
-		while (end_erase != real_end)
-			* start_erase++ = std::move(*end_erase++);
-		_end = std::addressof(*start_erase);
-		while (start_erase != real_end)
-			std::destroy_at(std::addressof(*--real_end));
-	}
-
-	template<typename T, size_t SZ>
-	inline void circular_buffer<T, SZ>::move_end()
-	{
-		if (++_end == reinterpret_cast<T*>(_buf + byte_size))
-			_end = reinterpret_cast<T*>(_buf);
-	}
-
-	template <typename T, size_t SZ>
-	template<typename ... Args>
-	bool circular_buffer<T, SZ>::emplace_back(Args&& ... args)
-	{
-		new (_end) T{ std::forward<Args>(args)... };
-		move_end();
-		if (_end == _start)
-		{
-			pop_front();
-			return false;
-		}
-		return true;
-	}
-
-	template <typename T, size_t SZ>
-	bool circular_buffer<T, SZ>::push_back(T&& obj)
-	{
-		return emplace_back(std::move(obj));
-	}
-
-	template <typename T, size_t SZ>
-	bool circular_buffer<T, SZ>::push_back(const T& obj)
-	{
-		return emplace_back(obj);
-	}
-
-	template <typename T, size_t SZ>
-	void circular_buffer<T, SZ>::pop_front()
-	{
-		std::destroy_at(_start);
-		if (++_start == reinterpret_cast<T*>(_buf + byte_size))
-			_start = reinterpret_cast<T*>(_buf);
-	}
-
-	template <typename T, size_t SZ>
-	auto& circular_buffer<T, SZ>::front()
-	{
-		return *_start;
-	}
-
-	template <typename T, size_t SZ>
-	const auto& circular_buffer<T, SZ>::front() const
-	{
-		return *_start;
-	}
-
-	template <typename T, size_t SZ>
-	constexpr bool circular_buffer<T, SZ>::empty() const noexcept
-	{
-		return _start == _end;
-	}
-
-	template <typename T, size_t SZ>
-	constexpr auto circular_buffer<T, SZ>::size() const noexcept
-	{
-		return _end > _start ? _end - _start : SZ - (_end - _start + 1);
-	}
-
-	template <typename T, size_t SZ>
-	auto circular_buffer<T, SZ>::begin()
-	{
-		return iterator{ this, _start };
-	}
-
-	template <typename T, size_t SZ>
-	auto circular_buffer<T, SZ>::end()
-	{
-		return iterator{ this, _end };
-	}
-
-	template <typename T, size_t SZ>
-	auto circular_buffer<T, SZ>::begin() const
-	{
-		return const_iterator{ this, _start };
-	}
-
-	template <typename T, size_t SZ>
-	auto circular_buffer<T, SZ>::end() const
-	{
-		return const_iterator{ this, _end };
-	}
-
-	template <typename T, size_t SZ>
-	constexpr auto circular_buffer<T, SZ>::capacity() const noexcept
-	{
-		return SZ;
-	}
-
-	template <typename T, size_t SZ>
-	circular_buffer<T, SZ>::~circular_buffer() noexcept
-	{
-		while (!empty())
-			pop_front();
-	}
-
 	template<typename T, size_t SZ>
 	struct circular_buffer<T, SZ>::iterator
 	{
@@ -255,4 +113,169 @@ namespace idk
 			return ptr;
 		}
 	};
+
+	template <typename T, size_t SZ>
+	template<typename FwdIt>
+	circular_buffer<T, SZ>::circular_buffer(FwdIt start, FwdIt end)
+		: circular_buffer{}
+	{
+		while (start != end)
+			emplace_back(*start++);
+	}
+
+	template <typename T, size_t SZ>
+	circular_buffer<T, SZ>::circular_buffer(std::initializer_list<T> il)
+		: circular_buffer{ il.begin(), il.end() }
+	{}
+
+
+	template <typename T, size_t SZ>
+	circular_buffer<T, SZ>::circular_buffer(const circular_buffer& rhs)
+		: circular_buffer{ rhs.begin(), rhs.end() }
+	{}
+
+	template <typename T, size_t SZ>
+	auto& circular_buffer<T, SZ>::operator=(const circular_buffer& rhs)
+	{
+		~circular_buffer();
+		for (auto& elem : rhs)
+			emplace_back(elem);
+		return *this;
+	}
+
+	template <typename T, size_t SZ>
+	void circular_buffer<T, SZ>::erase(iterator start_erase, iterator end_erase)
+	{
+		iterator real_end = end();
+		while (end_erase != real_end)
+			* start_erase++ = std::move(*end_erase++);
+		_end = std::addressof(*start_erase);
+		while (start_erase != real_end)
+			std::destroy_at(std::addressof(*--real_end));
+	}
+
+	template<typename T, size_t SZ>
+	inline void circular_buffer<T, SZ>::move_end()
+	{
+		if (++_end == reinterpret_cast<T*>(_buf + byte_size))
+			_end = reinterpret_cast<T*>(_buf);
+	}
+
+	template <typename T, size_t SZ>
+	template<typename ... Args>
+	bool circular_buffer<T, SZ>::emplace_back(Args&& ... args)
+	{
+		new (_end) T{ std::forward<Args>(args)... };
+		move_end();
+		if (_end == _start)
+		{
+			pop_front();
+			return false;
+		}
+		return true;
+	}
+
+	template <typename T, size_t SZ>
+	bool circular_buffer<T, SZ>::push_back(T&& obj)
+	{
+		return emplace_back(std::move(obj));
+	}
+
+	template <typename T, size_t SZ>
+	bool circular_buffer<T, SZ>::push_back(const T& obj)
+	{
+		return emplace_back(obj);
+	}
+
+	template <typename T, size_t SZ>
+	void circular_buffer<T, SZ>::pop_front()
+	{
+		std::destroy_at(_start);
+		if (++_start == reinterpret_cast<T*>(_buf + byte_size))
+			_start = reinterpret_cast<T*>(_buf);
+	}
+
+	template <typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::reference circular_buffer<T, SZ>::front()
+	{
+		return *_start;
+	}
+
+	template <typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::const_reference circular_buffer<T, SZ>::front() const
+	{
+		return *_start;
+	}
+
+	template<typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::reference circular_buffer<T, SZ>::operator[](size_t index)
+	{
+		auto buf_end = reinterpret_cast<pointer>(std::end(_buf));
+		auto starting_arm = static_cast<size_t>(buf_end - _start);
+		if (starting_arm > index)
+			return _start[index];
+		else
+			return reinterpret_cast<pointer>(_buf)[index - starting_arm];
+	}
+
+	template<typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::const_reference circular_buffer<T, SZ>::operator[](size_t index) const
+	{
+		auto buf_end = reinterpret_cast<const_pointer>(std::end(_buf));
+		auto starting_arm = buf_end - _start;
+		if (starting_arm > index)
+			return _start[index];
+		else
+			return reinterpret_cast<const_pointer>(_buf)[index - starting_arm];
+	}
+
+	template <typename T, size_t SZ>
+	constexpr bool circular_buffer<T, SZ>::empty() const noexcept
+	{
+		return _start == _end;
+	}
+
+	template <typename T, size_t SZ>
+	constexpr typename circular_buffer<T, SZ>::size_t circular_buffer<T, SZ>::size() const noexcept
+	{
+		return _end > _start ? _end - _start : SZ - (_end - _start + 1);
+	}
+
+	template <typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::iterator circular_buffer<T, SZ>::begin()
+	{
+		return iterator{ this, _start };
+	}
+
+	template <typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::iterator  circular_buffer<T, SZ>::end()
+	{
+		return iterator{ this, _end };
+	}
+
+	template <typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::const_iterator  circular_buffer<T, SZ>::begin() const
+	{
+		return const_iterator{ this, _start };
+	}
+
+	template <typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::const_iterator  circular_buffer<T, SZ>::end() const
+	{
+		return const_iterator{ this, _end };
+	}
+
+	template <typename T, size_t SZ>
+	constexpr typename circular_buffer<T, SZ>::size_t circular_buffer<T, SZ>::capacity() const noexcept
+	{
+		return SZ;
+	}
+
+	template <typename T, size_t SZ>
+	circular_buffer<T, SZ>::~circular_buffer() noexcept
+	{
+		while (!empty())
+			pop_front();
+	}
+
 }

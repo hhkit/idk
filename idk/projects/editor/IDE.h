@@ -85,7 +85,8 @@ namespace idk
             auto iter = windows_by_type.find(reflect::typehash<T>());
             return iter != windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
         }
-		RscHandle<RenderTarget> GetEditorRenderTarget() { return editor_view; };
+		RscHandle<RenderTarget> GetEditorRenderTarget() const { return editor_view; }
+		bool IsGameRunning() const { return game_running; }
 
 		// selection
 		const ObjectSelection& GetSelectedObjects();
@@ -110,6 +111,7 @@ namespace idk
 		// Editor Scene
 		bool game_running = false;
 		bool game_frozen = true;
+		bool scripts_changed = false;
 		RscHandle<RenderTarget> editor_view;
 		void SetupEditorScene();
 

@@ -12,8 +12,10 @@
 #include <mono/utils/mono-logger.h>
 #include <mono/jit/jit.h>
 
+#include <app/Application.h>
 #include <proj/ProjectManager.h>
 
+#include <editor/IEditor.h>
 #include <script/MonoBehavior.h>
 #include <script/MonoEnvironment.h>
 #include <script/MonoBehaviorEnvironment.h>
@@ -29,27 +31,10 @@ namespace idk::mono
 		path_to_used_dll = string{ Core::GetSystem<FileSystem>().GetExeDir() } + "/" +
             string(std::filesystem::path{ GetConfig().path_to_game_dll.sv() }.stem().string()) + ".dll";
 
-		if(0)
 		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
 		{
-			// recompile
-			//auto stem = PathHandle{ GetConfig().path_to_game_dll }.GetStem();
-			//auto path_to_sln = PathHandle{ string{"/scripts/"} + string{stem} + ".sln" };
-			//_spawnl("")
-			//system((string{ "\"" } +string{ PathHandle{"/tools/build.bat"}.GetFullPath() } +string{ "\"" }).data());
-			//// copy dll to .exe location
-			auto src_file = Core::GetSystem<FileSystem>().Open(GetConfig().path_to_game_dll, FS_PERMISSIONS::READ, true);
-			std::ofstream dst_file;
-			dst_file.open(path_to_used_dll, std::ios::binary | std::ios::out);
-			dst_file << src_file.rdbuf();
-			dst_file.flush();
-		}
-		else
-			LOG_CRASH("Could not detect game dll!");
-		
-		if (Core::GetSystem<FileSystem>().Exists(GetConfig().path_to_game_dll))
-		{
-			script_environment = std::make_unique<MonoBehaviorEnvironment>(PathHandle{ GetConfig().path_to_game_dll }.GetFullPath());
+			script_environment = std::make_unique<MonoBehaviorEnvironment>(string{ Core::GetSystem<ProjectManager>().GetProjectDir() } 
+				+ string{ GetConfig().path_to_game_dll });
 			script_environment->Init();
 		}
 		else
@@ -89,6 +74,7 @@ namespace idk::mono
 					LOG_TO(LogPool::MONO, message);
 			}
 		, nullptr);
+
 		if (Core::GetSystem<FileSystem>().ExistsFull(exe_dir + "/engine_data/idk.dll"))
 		{
 			main_environment = std::make_unique<MonoWrapperEnvironment>(exe_dir + "/engine_data/idk.dll");
@@ -102,7 +88,8 @@ namespace idk::mono
 			string{ Core::GetSystem<ProjectManager>().GetProjectDir() } + "/Scripts",
 			"/scripts",
 			true);
-
+		if (&Core::GetSystem<IEditor>())
+			CompileGameScripts();
 		LoadGameScripts();
 	}
 
@@ -181,5 +168,28 @@ namespace idk::mono
 	{
 		UnloadGameScripts();
 		LoadGameScripts();
+	}
+	void ScriptSystem::CompileGameScripts()
+	{
+		auto proj_man = Core::GetSystem<ProjectManager>();
+		auto path_to_sln = string{ proj_man.GetProjectDir() } +'/' + string{ proj_man.GetProjectName() } +".sln";
+
+		vector<string> vals{ 
+			"/C",
+			string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/tools/" + "build.bat",
+			path_to_sln,
+			string{proj_man.GetProjectName()},
+			"Release",
+			string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/tools/" + "vswhere"
+		};
+		vector<const char*> nani;
+		for (auto& elem : vals)
+			nani.emplace_back(elem.data());
+
+		Core::GetSystem<Application>().Exec(
+			"cmd.exe",
+			nani,
+			true
+		);
 	}
 }

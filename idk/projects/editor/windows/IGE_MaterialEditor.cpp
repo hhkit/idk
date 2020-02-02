@@ -703,15 +703,16 @@ namespace idk
             return;
         }
 
-        auto& g = *_graph;
+        auto g = _graph;
 
 
         if (ImGui::BeginMenuBar())
         {
             if (ImGui::Button("Compile & Save"))
             {
-                g.Compile();
+                g->Compile();
                 Core::GetResourceManager().Save(_graph);
+				g = _graph;
             }
             ImGui::EndMenuBar();
         }
@@ -753,7 +754,7 @@ namespace idk
         for (auto& guid : _nodes_to_delete)
         {
             _node_order.erase(std::find(_node_order.begin(), _node_order.end(), guid));
-            g.nodes.erase(guid);
+            g->nodes.erase(guid);
         }
         _nodes_to_delete.clear();
 
@@ -767,7 +768,8 @@ namespace idk
         auto iter = _node_order.begin();
         while (iter != end)
         {
-            auto& node = g.nodes.at(*iter);
+			auto& deref = *iter;
+			auto& node = g->nodes.at(deref);
             bool was_selected = node.selected;
             drawNode(node);
             if (!was_selected && node.selected)
@@ -782,7 +784,7 @@ namespace idk
         }
 
         for(auto& guid : _nodes_to_delete)
-            g.nodes.erase(guid);
+            g->nodes.erase(guid);
 
         ImGui::PopStyleVar();
 

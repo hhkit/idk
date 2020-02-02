@@ -21,6 +21,30 @@
 
 namespace idk
 {
+	static bool valid_clip(AnimationState& state)
+	{
+		if (!state.valid)
+			return false;
+		bool has_valid_clip = true;
+		const auto anim_state = state.GetBasicState();
+		if (anim_state)
+		{
+			has_valid_clip = s_cast<bool>(anim_state->motion);
+		}
+		else
+		{
+			// All motions need to be valid for a blend tree to be valid
+			for (auto& m : state.GetBlendTree()->motions)
+			{
+				if (!m.motion)
+				{
+					has_valid_clip = false;
+					break;
+				}
+			}
+		}
+		return has_valid_clip;
+	}
 	void AnimationSystem::Init()
 	{
 		GameState::GetGameState().OnObjectCreate<Animator>() += [&](Handle<Animator> animator)
@@ -43,10 +67,11 @@ namespace idk
 				// SaveBindPose(elem);
 				for (auto& layer : elem.layers)
 				{
-					if (layer.curr_state.index != 0)
-						layer.Play(layer.curr_state.index);
+					auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
+					if(valid_clip(anim_state))
+							layer.Play(layer.curr_state.index);
+					
 				}
-
 			}
 			_was_paused = false;
 		}
@@ -78,8 +103,12 @@ namespace idk
 				size_t start_layer = 0;
 				for (size_t k = 0; k < animator.layers.size(); ++k)
 				{
-					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					auto& layer = animator.layers[k];
+					auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
+					if (!valid_clip(anim_state))
+						continue;
+
+					if (layer.IsPlaying() && layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -90,14 +119,20 @@ namespace idk
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
-
-					if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+					if (curr_layer.IsPlaying() && curr_layer.bone_mask[child_index])
 					{
-						// We do a blend from the curr layer to the final bone pose: 
-						// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
-						// This means we do Blend(curr_pose, layer_pose, 0.25);
-						BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
-						final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+						if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
+						{
+							// We do a blend from the curr layer to the final bone pose: 
+							// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
+							// This means we do Blend(curr_pose, layer_pose, 0.25);
+							BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
+
+							// The only reason why curr_state or blend_state should be stopping after this is if the state/motion is invalid
+							if (curr_layer.curr_state.is_stopping || curr_layer.blend_state.is_stopping)
+								continue;
+							final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
+						}
 					}
 				}
 
@@ -157,8 +192,11 @@ namespace idk
 				size_t start_layer = 0;
 				for (size_t k = 1; k < animator.layers.size(); ++k)
 				{
-					const auto& layer = animator.layers[k];
-					if (layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
+					auto& layer = animator.layers[k];
+					auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
+					if (!valid_clip(anim_state))
+						continue;
+					if (layer.IsPlaying() && layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
 						start_layer = k;
 				}
 
@@ -170,7 +208,7 @@ namespace idk
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
-					if (curr_layer.bone_mask[child_index])
+					if (curr_layer.IsPlaying() && curr_layer.bone_mask[child_index])
 					{
 						if (curr_layer.blend_type == AnimLayerBlend::Override_Blend)
 						{
@@ -178,6 +216,10 @@ namespace idk
 							// If curr layer weight = 0.25, means we override 0.25 of the previous layer's animation.
 							// This means we do Blend(curr_pose, layer_pose, 0.25);
 							BonePose layer_pose = AnimationPass(animator, curr_layer, child_index);
+
+							// The only reason why curr_state or blend_state should be stopping after this is if the state/motion is invalid
+							if (curr_layer.curr_state.is_stopping || curr_layer.blend_state.is_stopping)
+								continue;
 							final_bone_pose = BlendPose(final_bone_pose, layer_pose, curr_layer.weight);
 						}
 					}
@@ -332,16 +374,12 @@ namespace idk
 		// If a layer is not playing, we return the previous pose it was in 
 		const auto curr_index = layer.curr_state.index;
 		const auto blend_index = layer.blend_state.index;
-
-		if (!layer.IsPlaying())
-		{
-			return layer.prev_poses[bone_index];
-		}
 		
 		BonePose result = animator._bind_pose[bone_index];
 		result.rotation = quat{};
 		if (!layer.bone_mask[bone_index])
 		{
+			layer.prev_poses[bone_index] = result;
 			return result;
 		}
 
@@ -352,7 +390,7 @@ namespace idk
 			if (layer.curr_state.is_stopping)
 			{
 				layer.curr_state.normalized_time = 0.0f;
-				LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + serialize_text(curr_index) + ") in layer (" + layer.name + ") doesn't exist.");
+				// LOG_TO(LogPool::ANIM, "[Animator] Current animation (" + serialize_text(curr_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 
 			layer.blend_source[bone_index] = result;
@@ -369,7 +407,7 @@ namespace idk
 				layer.blend_state.elapsed_time = 0.0f;
 				layer.blend_interrupt = false;
 				layer.transition_index = 0;
-				LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + serialize_text(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
+				// LOG_TO(LogPool::ANIM, "[Animator] Target blend animation (" + serialize_text(blend_index) + ") in layer (" + layer.name + ") doesn't exist.");
 			}
 			else
 			{
@@ -409,7 +447,6 @@ namespace idk
 				return;
 			}
 				
-			
 			for (size_t i = 1; i < anim_state.transitions.size(); ++i)
 			{
 				// Skip invalid transitions
@@ -474,7 +511,7 @@ namespace idk
 
 				if (transit == true)
 				{
-					const bool blend_to_succeeded = layer.BlendTo(curr_transition.transition_to_index, curr_transition.transition_duration);
+					bool blend_to_succeeded = layer.BlendTo(curr_transition.transition_to_index, curr_transition.transition_duration);
 					if (blend_to_succeeded && layer.blend_state.is_playing)
 					{
 						layer.blend_state.normalized_time = curr_transition.transition_offset;
@@ -535,7 +572,7 @@ namespace idk
 				float delta = layer.blend_state.elapsed_time / layer.blend_duration;
 				if (delta >= 1.0f)
 				{
-					LOG("RESET HIT");
+					// LOG("RESET HIT");
 					layer.curr_state = layer.blend_state;
 					layer.ResetBlend();
 				}

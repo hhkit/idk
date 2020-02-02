@@ -38,4 +38,6 @@ public:
     string GetAppData() { return {}; };
     string GetCurrentWorkingDir() { return {}; };
     std::optional<string> OpenFileDialog(const idk::DialogOptions&) override { return {}; };
+
+    idk::vector<idk::Device> GetNetworkDevices() { return{}; };
 };

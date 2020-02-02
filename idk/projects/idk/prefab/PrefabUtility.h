@@ -14,6 +14,9 @@ namespace idk
         // for simplicity's sake only prefab roots have PrefabInstance component attached.
         static Handle<GameObject> Instantiate(RscHandle<Prefab> prefab, Scene& scene, Handle<GameObject> force_handle = {});
 
+        // instantiate given a particular PrefabInstance, really meant for parsing scene.
+        static Handle<GameObject> InstantiateSpecific(Handle<GameObject> handle, const PrefabInstance& prefab_inst);
+
         // create prefab from given game object, does not save it.
 		static Prefab CreateResourceManagerHack(Handle<GameObject> go, Guid guid);
         static RscHandle<Prefab> Create(Handle<GameObject> go);
@@ -45,12 +48,12 @@ namespace idk
         //   target:        target game object / child object of the prefab instance
         //   component:     handle to the component
         //   property_path: path of the property changed, delimited by '/'. eg. "position", or "position/x"
-        static void RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path);
+        static void RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path, reflect::dynamic val = {});
+        static void RecordPrefabInstanceRemoveComponent(Handle<GameObject> target, string_view component_name, int component_nth);
+        static void RecordDefaultOverrides(Handle<GameObject> target);
 
-        // reverts a single override of the given prefab instance.
-        static void RevertPropertyOverride(Handle<GameObject> instance_root, const PropertyOverride& override);
-
-        // reverts all overrides of the given prefab instance.
+        static void RevertPropertyOverride(Handle<GameObject> target, const PropertyOverride& override);
+        static void RevertRemovedComponent(Handle<GameObject> target, int component_index);
         static void RevertPrefabInstance(Handle<GameObject> instance_root);
 
 		static void ApplyAddedComponent(Handle<GameObject> target, GenericHandle component);

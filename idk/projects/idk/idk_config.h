@@ -44,6 +44,10 @@ namespace idk
         ,   class Image
         ,   class Text
 
+		/// NETWORKING
+		,	class ElectronView
+		,	class ElectronTransformView
+
 		/// SCRIPTING
 		,	class mono::Behavior
 
@@ -63,6 +67,7 @@ namespace idk
 		,	class FileSystem
 		,	class LogSystem
 		,	class GamepadSystem
+		,	class NetworkSystem
 
 		// logic
 		,	class mono::ScriptSystem

@@ -12,6 +12,7 @@ namespace idk
 		MONO,
 		GAME,
 		EDIT,
+		NETWORK,
 		COUNT
 	};
 
