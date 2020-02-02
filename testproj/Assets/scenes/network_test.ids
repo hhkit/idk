@@ -81,10 +81,10 @@
     enabled: 1
     script_data: !NetworkHostTester 
       instantiate: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+      movespeed: 35
       obj: {id: 0}
       scene: {guid: 522d0d0c-cbbe-4681-bd2c-816e649da50e}
-  - !MonoBehavior 
-    {enabled: 1, script_data: !NetworkDebugger ~}
+      turnspeed: 90
 - !12884967424 
   - active: 1
   - !Transform 

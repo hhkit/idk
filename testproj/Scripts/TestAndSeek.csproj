@@ -47,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="joseph.cs" />
+    <Compile Include="LobbyManager.cs" />
     <Compile Include="NetworkClientTester.cs" />
     <Compile Include="NetworkDebugger.cs" />
     <Compile Include="NetworkHostTester.cs" />
+    <Compile Include="PlayerController.cs" />
     <Compile Include="RaycastTest.cs" />
     <Compile Include="Test.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
