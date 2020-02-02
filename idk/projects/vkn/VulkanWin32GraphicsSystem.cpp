@@ -363,7 +363,7 @@ namespace idk::vkn
 		}
 #endif
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
-#if 1
+#if 0
 		{
 			auto str = dbg::DumpFrameBufferAllocs();
 		}
