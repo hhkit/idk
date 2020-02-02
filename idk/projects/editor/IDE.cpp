@@ -282,7 +282,7 @@ namespace idk
 
 		// scene controls
 		if (!game_running && ImGui::GetIO().KeyCtrl)
-		{ings 
+		{
 			if (ImGui::IsKeyPressed(static_cast<int>(Key::S)))
 			{
 				if (ImGui::GetIO().KeyShift)
