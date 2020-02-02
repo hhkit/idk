@@ -82,6 +82,7 @@ namespace idk
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
+		std::map<Handle<GameObject>, CamLightData> d_lightmaps;
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
@@ -158,13 +159,15 @@ namespace idk
 		//Todo: change to a thing with a free list thing.
 		pool<SpecialRenderBuffer> render_requests;
 
+
 		struct RenderBuffer
 		{
 			alignas(machine::cache_line_sz) vector<CameraData>   camera;
 			alignas(machine::cache_line_sz) vector<LightData>    lights;
 			alignas(machine::cache_line_sz) vector<size_t>       active_light_buffer;
 			alignas(machine::cache_line_sz) vector<size_t>       directional_light_buffer;
-			alignas(machine::cache_line_sz) vector<CameraData>   light_camera_data;
+			alignas(machine::cache_line_sz) std::map<Handle<GameObject>, CamLightData> d_lightmaps;
+			//alignas(machine::cache_line_sz) vector<CameraData>   light_camera_data;
 			alignas(machine::cache_line_sz) vector<RenderObject> mesh_render;
 			alignas(machine::cache_line_sz) vector<AnimatedRenderObject> skinned_mesh_render;
 			alignas(machine::cache_line_sz) vector<SkeletonTransforms> skeleton_transforms;

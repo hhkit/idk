@@ -107,7 +107,7 @@ namespace idk
 
 	struct CameraData
 	{
-		GenericHandle obj_id{};
+		Handle<GameObject> obj_id{};
 		LayerMask culling_flags{ 0xFFFFFFFF };
 		mat4 view_matrix{};
 		mat4 projection_matrix{};

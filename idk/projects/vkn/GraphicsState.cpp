@@ -10,11 +10,12 @@ namespace idk::vkn
 	{
 		return &shared_gfx_state->Lights()[light_index];
 	}
-	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
+	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light, const vector<LightData>& lights_data, const std::map<Handle<GameObject>, CamLightData>& d_lm, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
 	{
 		camera = data.camera;
 		range = data;
 		lights = &lights_data;
+		d_lightmaps = &d_lm;
 		mesh_render.clear();
 		skinned_mesh_render.clear();
 		active_lights.clear();

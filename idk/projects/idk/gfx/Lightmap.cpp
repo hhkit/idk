@@ -113,14 +113,14 @@ namespace idk {
 			mmc = { min(mmc.x,v.x),min(mmc.y,v.y) ,min(mmc.z,v.z) };
 			mmv = { max(mmv.x,v.x),max(mmv.y,v.y) ,max(mmv.z,v.z) };
 		}
-		Core::GetSystem<DebugRenderer>().Draw(aabb{ mmc, mmv }, color{ 1,1,1,1 }, seconds(0.5f));
+		Core::GetSystem<DebugRenderer>().Draw(aabb{ min_c, max_c }, color{ 1,1,1,1 }, seconds(0.5f));
 		//vec4 vView(0.0f, 0.0f, -far_plane, 1.0f);
 		//vec4 vClip = camData.projection_matrix * vView;
 		//bound_radius = max(max(min_c.x + max_c.x,abs(max_c.y - min_c.y)),min_c.z + max_c.z);
 
 		//texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / ( bound_radius)));
 
-		cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y,min_c.z,max_c.z);
+		cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y,-max_c.z,-min_c.z);
 		//clip_plane_z = vClip.z;
 	}
 

@@ -87,6 +87,20 @@ namespace idk
 		}
 		return light_map;
 	}
+
+	vector<Lightmap> DirectionalLight::InitShadowMap() const
+	{
+		vector<Lightmap> lm{};
+		lm.resize(cascade_count);
+		for (auto& elem : lm)
+		{
+			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
+
+			//if (elem.NeedLightMap())
+			elem.InitShadowMap();
+		}
+		return lm;
+	}
 	vector < Lightmap> SpotLight::InitShadowMap()
 	{
 		light_map.resize(1);

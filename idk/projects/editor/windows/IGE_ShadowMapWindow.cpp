@@ -105,15 +105,19 @@ namespace idk {
 			const vec2 size = vec2{ img.Size() };*/
 
 			//ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
-			for (auto& rt : light.data->light_maps)
+			if (light.data->index == 1)
 			{
-				auto& rtt = *rt.light_map;
-				auto& img = **rtt.DepthAttachment();
-				const vec2 size = vec2{ img.Size() };
+				ImGui::Text("%d", light.data->camDataRef.obj_id);
+				for (auto& rt : light.data->light_maps)
+				{
+					auto& rtt = *rt.light_map;
+					auto& img = **rtt.DepthAttachment();
+					const vec2 size = vec2{ img.Size() };
 
-				ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
+					ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
+				}
+				ImGui::NewLine();
 			}
-			ImGui::NewLine();
 		}
 
 		//ImGui::Image(, size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));

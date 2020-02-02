@@ -22,6 +22,12 @@ namespace idk
 		real  intensity{ 1.f };							  //84
 		int cast_shadow{ true };						  //88 ->96
 	};
+
+	struct CamLightData
+	{
+		CameraData cam_data;
+		vector<Lightmap> cam_lightmaps;
+	};
 	struct LightData :BaseLightData
 	{
 		alignas(16) mat4  vp {};						  //160

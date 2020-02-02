@@ -33,6 +33,8 @@
 #include <ds/span.inl>
 #include <ds/result.inl>
 
+#include <variant>
+
 struct guid_64
 {
 	uint64_t mem1;
@@ -348,7 +350,7 @@ namespace idk
 		return result;
 	}
 
-	void CullLights(const CameraData& camera,vector<LightData>& lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, GraphicsSystem::RenderRange& range)
+	void CullLights(const CameraData& camera,vector<LightData>& lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, std::map<Handle<GameObject>, CamLightData>& d_lightmaps, GraphicsSystem::RenderRange& range)
 	{
 		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		range.light_begin = active_light_buffer.size();
@@ -394,7 +396,8 @@ namespace idk
 				unsigned k = 0, j = 1;
 				light.camDataRef = camera;
 
-				for (auto& elem : light.light_maps)
+
+				for (auto& elem : d_lightmaps[camera.obj_id].cam_lightmaps)
 				{
 					elem.SetCascade(camera, light, cascadeiter[k], cascadeiter[j]);
 					directional_light_buffer.emplace_back(i);
@@ -412,7 +415,7 @@ namespace idk
 		range.light_end = active_light_buffer.size();
 		range.dir_light_end = directional_light_buffer.size();
 	}
-
+#pragma optimize("", off)
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -493,6 +496,10 @@ namespace idk
 			std::swap(tmp, rb); //reinitialize the stuff that don't need to be swapped.
 			ClearSwap(rb.camera, tmp.camera);//clear then swap the stuff back into rb
 			ClearSwap(rb.font_render_data, tmp.font_render_data);//clear then swap the stuff back into rb
+			ClearSwap(rb.active_light_buffer, tmp.active_light_buffer);
+			ClearSwap(rb.directional_light_buffer, tmp.directional_light_buffer);
+			ClearSwap(rb.d_lightmaps,tmp.d_lightmaps);
+			//ClearSwap(rb.light_camera_data, tmp.light_camera_data);
 			ClearSwap(rb.font_range, tmp.font_range);
 			ClearSwap(rb.font_buffer, tmp.font_buffer);
 			ClearSwap(rb.ui_render_per_canvas, tmp.ui_render_per_canvas);
@@ -508,7 +515,7 @@ namespace idk
 			ClearSwap(rb.inst_mesh_render_buffer, tmp.inst_mesh_render_buffer);//clear then swap the stuff back into rb
 			//ClearSwap(rb.inst_skinned_mesh_render_buffer,tmp.inst_skinned_mesh_render_buffer);//clear then swap the stuff back into rb
 			ClearSwap(rb.lights, tmp.lights);//clear then swap the stuff back into rb
-			ClearSwap(rb.light_camera_data, tmp.light_camera_data);//clear then swap the stuff back into rb
+			//ClearSwap(rb.light_camera_data, tmp.light_camera_data);//clear then swap the stuff back into rb
 			ClearSwap(rb.mesh_render, tmp.mesh_render);//clear then swap the stuff back into rb
 			ClearSwap(rb.skinned_mesh_render, tmp.skinned_mesh_render);//clear then swap the stuff back into rb
 			ClearSwap(rb.particle_render_data, tmp.particle_render_data);//clear then swap the stuff back into rb
@@ -536,6 +543,18 @@ namespace idk
 #define POST_END() }));
 
 		POST()
+			for (auto& camera : cameras)
+			{
+				if (camera.GetHandle().scene == Scene::prefab)
+					continue;
+				if (!camera.enabled)
+					continue;
+
+				if (camera.GetHandle().scene == Scene::editor)
+					result.curr_scene_camera_index = result.camera.size();
+				result.camera.emplace_back(camera.GenerateCameraData());
+			}
+		
 			for (auto& elem : lights)
 			{
 				if (isolate)
@@ -545,8 +564,28 @@ namespace idk
 				}
 				//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
 				if (elem.is_active_and_enabled())
-					result.lights.emplace_back(elem.GenerateLightData());
+				{
+					auto res = elem.GenerateLightData();
+					
+					if (res.index == 1)
+					{
+						auto& e = std::get<DirectionalLight>(elem.light);
+
+						for (auto& c : result.camera)
+						{
+							d_lightmaps[c.obj_id].cam_data = c;
+							if (d_lightmaps[c.obj_id].cam_lightmaps.empty())
+							{
+								d_lightmaps[c.obj_id].cam_lightmaps = e.InitShadowMap();
+							}
+						}
+
+					}
+					result.lights.emplace_back(res);
+				}
 			}
+
+			result.d_lightmaps = d_lightmaps;
 		POST_END();
 
 		POST()
@@ -562,20 +601,6 @@ namespace idk
 			if (ro)
 				result.skinned_mesh_render.emplace_back(std::move(*ro));
 		}
-		POST_END();
-
-		POST()
-			for (auto& camera : cameras)
-			{
-				if (camera.GetHandle().scene == Scene::prefab)
-					continue;
-				if (!camera.enabled)
-					continue;
-
-				if (camera.GetHandle().scene == Scene::editor)
-					result.curr_scene_camera_index = result.camera.size();
-				result.camera.emplace_back(camera.GenerateCameraData());
-			}
 		POST_END();
 
 		POST()
@@ -849,7 +874,7 @@ namespace idk
 				ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range,range);
 				ProcessFonts(result.font_render_data,result.font_buffer,result.font_range,range);
 
-				CullLights(camera,result.lights, result.active_light_buffer,result.directional_light_buffer,range);
+				CullLights(camera,result.lights, result.active_light_buffer,result.directional_light_buffer,result.d_lightmaps,range);
 
 			}
 			

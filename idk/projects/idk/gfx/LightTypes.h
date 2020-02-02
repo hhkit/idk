@@ -57,6 +57,7 @@ namespace idk
 		int cascade_count = CASCADE_COUNT;
 		//CascadedSet cascaded_light_maps;
 		vector<Lightmap> InitShadowMap();
+		vector<Lightmap> InitShadowMap() const;
 
 		vector<Lightmap>& GetShadowMap();
 		const vector<Lightmap>& GetShadowMap()const;

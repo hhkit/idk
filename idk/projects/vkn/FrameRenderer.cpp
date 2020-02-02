@@ -436,14 +436,15 @@ namespace idk::vkn
 	{
 		_pipeline_manager = &manager;
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
 		const size_t num_conv_states = 1;
 		const size_t num_instanced_buffer_state = 1;
 		const size_t num_color_pick_states = 1;
-		auto total_pre_states = lights.size()* 3  + state.active_dir_lights.size() + num_conv_states+ num_instanced_buffer_state + num_color_pick_states;
+		
+		auto total_pre_states = lights.size() + state.active_dir_lights.size() * state.cameras->size() + num_conv_states+ num_instanced_buffer_state + num_color_pick_states;
 		GrowStates(_pre_states, total_pre_states);
 		for (auto& pre_state : _pre_states)
 		{
@@ -726,60 +727,63 @@ namespace idk::vkn
 				
 				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
 				
-				for (auto& elem : light.light_maps)
+				for (auto& e : *state.d_lightmaps)
 				{
-					auto& rs = r[curr_state++];
-					auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, elem.cascade_projection * light.v };
-					ShadowBinding shadow_binding;
-					shadow_binding.for_each_binder<has_setstate>(
-						[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+					for (auto& elem : e.second.cam_lightmaps)
 					{
-						binder.SetState(cam, skel);
-					},
-						cam,
-						*state.skeleton_transforms);
-					GraphicsStateInterface gsi = { state };
-					gsi.range = (*state.shadow_ranges)[light_index];
-					auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-					the_interface.GenerateDS(rs.dpools);
+						auto& rs = r[curr_state++];
+						auto cam = CameraData{ Handle<GameObject>{}, LayerMask{0xFFFFFFFF }, light.v, elem.cascade_projection * light.v };
+						ShadowBinding shadow_binding;
+						shadow_binding.for_each_binder<has_setstate>(
+							[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+						{
+							binder.SetState(cam, skel);
+						},
+							cam,
+							*state.skeleton_transforms);
+						GraphicsStateInterface gsi = { state };
+						gsi.range = (*state.shadow_ranges)[light_index];
+						auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+						the_interface.GenerateDS(rs.dpools);
 
-					//auto& swapchain = view.Swapchain();
-					auto dispatcher = vk::DispatchLoaderDefault{};
-					vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-					vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+						//auto& swapchain = view.Swapchain();
+						auto dispatcher = vk::DispatchLoaderDefault{};
+						vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+						vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
-				
-					cmd_buffer.begin(begin_info, dispatcher);
-					auto lm = elem.light_map->DepthAttachment().buffer;
-					auto sz = elem.light_map->DepthAttachment().buffer->Size();
 
-					vk::Rect2D render_area
-					{
-						vk::Offset2D{},
-						vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
-					};
-					auto& rt = elem.light_map.as<VknFrameBuffer>();
-					vk::Framebuffer fb = rt.GetFramebuffer();
-					auto  rp = rt.GetRenderPass();
-					rt.PrepareDraw(cmd_buffer);
-					vector<vec4> clear_colors
-					{
-						vec4{1}
-					};
-					if (the_interface.DrawCalls().size())
-						rs.FlagRendered();
-					RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+						cmd_buffer.begin(begin_info, dispatcher);
+						auto lm = elem.light_map->DepthAttachment().buffer;
+						auto sz = elem.light_map->DepthAttachment().buffer->Size();
 
-					rs.ubo_manager.UpdateAllBuffers();
-					cmd_buffer.endRenderPass();
-					cmd_buffer.end();
+						vk::Rect2D render_area
+						{
+							vk::Offset2D{},
+							vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
+						};
+						auto& rt = elem.light_map.as<VknFrameBuffer>();
+						vk::Framebuffer fb = rt.GetFramebuffer();
+						auto  rp = rt.GetRenderPass();
+						rt.PrepareDraw(cmd_buffer);
+						vector<vec4> clear_colors
+						{
+							vec4{1}
+						};
+						if (the_interface.DrawCalls().size())
+							rs.FlagRendered();
+						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+
+						rs.ubo_manager.UpdateAllBuffers();
+						cmd_buffer.endRenderPass();
+						cmd_buffer.end();
+					}
 				}
 			}
 		}
 		else
 		{
 
-			auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.p };
+			auto cam = CameraData{ Handle<GameObject> {}, LayerMask{0xFFFFFFFF }, light.v, light.p };
 			ShadowBinding shadow_binding;
 			shadow_binding.for_each_binder<has_setstate>(
 				[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
