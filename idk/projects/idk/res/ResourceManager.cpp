@@ -114,15 +114,23 @@ namespace idk
 						if constexpr (has_tag_v<Rs, Saveable>)
 						{
 							if constexpr (Rs::autosave)
+							{
+								static vector<Guid> dirty;
 								for (const auto& [guid, res_cb] : resource_man->GetTable<Rs>())
 								{
 									
 									if (res_cb.resource && res_cb.resource->IsDirty())
 									{
-										resource_man->Save(RscHandle<Rs>{guid});
-										res_cb.resource->Clean();
+										dirty.emplace_back(guid);
 									}
 								}
+								for (auto& guid : dirty)
+								{
+									resource_man->Save(RscHandle<Rs>{guid});
+									RscHandle<Rs>{guid}->Clean();
+								}
+								dirty.clear();
+							}
 						}
 					}...
 				};

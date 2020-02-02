@@ -146,6 +146,7 @@ ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 		[[maybe_unused]] auto& mat = *mat_inst.material;
 		auto mat_cache = mat_inst.get_cache();
 		using offset_t =size_t;
+		data_block.reserve(std::max(data_block.size(), 32ui64));
 		hash_table<string, std::pair<offset_t, size_t>> ubo_stored;
 		ubo_stored.reserve(mat_cache.uniforms.size());
 		hash_table<string, std::pair<offset_t, size_t>> tex_stored;
