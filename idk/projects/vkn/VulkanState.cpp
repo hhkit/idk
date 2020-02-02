@@ -169,7 +169,7 @@ namespace idk::vkn
 		}
 		return total;
 	}
-//#pragma optimize("",off)
+// #pragma optimize("",off)
 	vk::PhysicalDevice VulkanState::SelectDevice(std::vector<vk::PhysicalDevice> const& devices)
 	{
 		float most_suitable = 0;

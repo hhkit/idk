@@ -6,7 +6,7 @@
 #include <res/MetaBundle.inl>
 namespace idk
 {
-//#pragma optimize("",off)
+// // #pragma optimize("",off)
 ResourceBundle ShaderSnippetLoader::LoadFile(PathHandle handle, const MetaBundle& bundle)
 {
 	auto meta = bundle.FetchMeta<ShaderSnippet>();

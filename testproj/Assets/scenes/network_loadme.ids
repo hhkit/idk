@@ -192,3 +192,36 @@
       value: !string NewPrefab
     prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
     removed_components: []
+- !30064836608 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: -4.684711, z: -4.6651144}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 12.23, y: 1.2302402, z: 12.23}
+  - !Name 
+    name: ""
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 0
+    shape: !box 
+      center: {x: 0, y: 0, z: 0}
+      extents: {x: 1, y: 1, z: 1}
+      rotation: 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    static_friction: 0.6
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 24cd7391-54aa-4823-bb11-dbf80c6cd5ea}
+    mesh: {guid: 5eacf9f1-9036-40da-a735-6b51e5294654}
+    receive_shadows: 1

@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="joseph.cs" />
     <Compile Include="NetworkClientTester.cs" />
+    <Compile Include="NetworkDebugger.cs" />
     <Compile Include="NetworkHostTester.cs" />
     <Compile Include="RaycastTest.cs" />
     <Compile Include="Test.cs" />

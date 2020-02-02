@@ -83,4 +83,8 @@ REFLECT_END()
 REFLECT_BEGIN(idk::ElectronTransformView, "ElectronTransformView")
 REFLECT_VARS(sync_position, sync_rotation, sync_scale, send_threshold, snap_threshold, interp_over_seconds)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::ElectronRigidbodyView, "ElectronRigidbodyView")
+REFLECT_VARS(sync_velocity)
+REFLECT_END()
 #pragma endregion

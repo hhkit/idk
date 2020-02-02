@@ -2,6 +2,7 @@
 #include "ElectronView.inl"
 #include <core/GameObject.inl>
 #include <network/ElectronTransformView.h>
+#include <network/ElectronRigidbodyView.h>
 namespace idk
 {
 	ElectronView::ElectronView(const ElectronView& rhs)
@@ -20,6 +21,8 @@ namespace idk
 	{
 		if (auto tfm_view = GetGameObject()->GetComponent<ElectronTransformView>())
 			tfm_view->Start();
+		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
+			rb_view->Start();
 	}
 
 	void ElectronView::SetAsClientObject()
@@ -97,6 +100,7 @@ namespace idk
 					auto packed = param->PackGhostData();
 					if (packed.size())
 						pack.emplace_back(std::move(packed));
+					param->CacheCurrValue();
 				}
 			}
 			return pack;
@@ -146,7 +150,6 @@ namespace idk
 			{
 				auto& param = parameters[i];
 				IDK_ASSERT(param);
-				param->CacheCurrValue();
 			}
 		}
 	}
