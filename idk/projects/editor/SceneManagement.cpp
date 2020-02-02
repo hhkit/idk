@@ -157,6 +157,7 @@ namespace idk
 			active_scene->Deactivate();
 			auto load_scene = Core::GetSystem<IDE>().curr_scene;
 			Core::GetSystem<SceneManager>().SetActiveScene(load_scene);
+			Core::GetGameState().DeactivateScene(0);
 			load_scene->Activate();
 			auto stream = Core::GetSystem<FileSystem>().Open(IDE::path_tmp_scene, FS_PERMISSIONS::READ);
 			auto deser = stringify(stream);
