@@ -458,14 +458,14 @@ namespace idk::vkn
 					1
 				};
 				copy_regions[i]=(region);
-				offset += single_level_size >> (2 * i);
+				offset += ComputeTextureLength(region.imageExtent.width,region.imageExtent.height,format);//single_level_size >> (2 * i);
 				}
 				//vector<vk::BufferImageCopy>
 
 				if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 				{
 					auto name = string{ *guid };
-					if (name == "d7e578ab-3254-4564-bee0-1555837861f7")
+					if (name == "21707462-3865-4559-b88b-f816025d22a2")
 					{
 						DoNothing();
 					}
