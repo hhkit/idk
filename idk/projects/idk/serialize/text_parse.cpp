@@ -318,7 +318,7 @@ namespace idk
 			auto type = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Type(node.tag());
 			if (!type)
 			{
-				LOG_TO(LogPool::GAME, "Missing %s script!", node.tag());
+				LOG_TO(LogPool::GAME, "Missing %s script!", node.tag().data());
 				return parse_error::type_cannot_be_parsed;
 			}
 			obj.get<mono::ManagedObject>() = type->Construct();

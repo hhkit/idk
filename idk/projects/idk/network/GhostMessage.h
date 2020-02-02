@@ -12,17 +12,7 @@ namespace idk
 		unsigned network_id;
 
 		StateMask state_mask{};
-		vec3 position;
-		quat rotation;
-		vec3 scale;
-
-		GhostMessage& AddPosition(vec3 trans);
-		GhostMessage& AddRotation(quat rot);
-		GhostMessage& AddScale(vec3 scl);
-
-		opt<vec3> GetPosition() const;
-		opt<quat> GetRotation() const;
-		opt<vec3> GetScale() const;
+		vector<string> pack;
 
 		template <typename Stream>
 		bool Serialize(Stream& stream)
@@ -30,26 +20,23 @@ namespace idk
 			serialize_int(stream, network_id, 0, 4096);
 			serialize_int(stream, state_mask, 0, std::numeric_limits<int>::max());
 
-			if (state_mask & GhostFlags::TRANSFORM_POS)
 			{
-				serialize_float(stream, position.x);
-				serialize_float(stream, position.y);
-				serialize_float(stream, position.z);
+				auto tmp_state_mask = state_mask;
+				unsigned count = 0;
+				while (tmp_state_mask)
+				{
+					if (tmp_state_mask & 0x1)
+						++count;
+					tmp_state_mask >>= 1;
+				}
+				pack.resize(count);
 			}
-
-			if (state_mask & GhostFlags::TRANSFORM_ROT)
+			for (auto& elem : pack)
 			{
-				serialize_float(stream, rotation.x);
-				serialize_float(stream, rotation.y);
-				serialize_float(stream, rotation.z);
-				serialize_float(stream, rotation.w);
-			}
-
-			if (state_mask & GhostFlags::TRANSFORM_SCALE)
-			{
-				serialize_float(stream, scale.x);
-				serialize_float(stream, scale.y);
-				serialize_float(stream, scale.z);
+				unsigned sz = s_cast<unsigned>(elem.size());
+				serialize_uint32(stream, sz);
+				elem.resize(sz);
+				serialize_bytes(stream, (uint8_t*)elem.data(), sz);
 			}
 
 			return true;

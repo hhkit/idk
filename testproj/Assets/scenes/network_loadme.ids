@@ -1,0 +1,194 @@
+- !65536 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 0.70710677
+      x: -0.70710677
+      y: -0
+      z: -0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Directional Light
+  - !Light 
+    casts_shadows: 1
+    light: !DirectionalLight 
+      bottom: -5
+      far: 5
+      intensity: 1
+      left: -5
+      light_color: 
+        a: 1
+        b: 1
+        g: 1
+        r: 1
+      near: -5
+      right: 5
+      top: 5
+    shadow_bias: 1.1920929e-07
+- !4295032832 
+  - active: 1
+  - !Transform 
+    parent: {id: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: 1
+      x: 0
+      y: 0
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: Camera
+  - !Camera 
+    clear: !color 
+      a: 1
+      b: 0
+      g: 0
+      r: 0
+    depth: 0
+    enabled: 1
+    far_plane: 100
+    field_of_view: {value: 0.7853982}
+    is_orthographic: 0
+    layer_mask: {mask: 4294967295}
+    near_plane: 0.1
+    render_target: {guid: 00000000-0000-0000-0000-000000000000}
+    viewport: 
+      position: {x: 0, y: 0}
+      size: {x: 1, y: 1}
+- !8590000128 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 0
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: position
+      value: !vec3 {x: 0, y: 0, z: 0}
+    - component_name: Transform
+      component_nth: 0
+      property_path: rotation
+      value: !quat 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 0}
+    - component_name: Name
+      component_nth: 0
+      property_path: name
+      value: !string ""
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+- !12884967424 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 0
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: position
+      value: !vec3 {x: -3.987343, y: -0.92294836, z: -4.3625813}
+    - component_name: Transform
+      component_nth: 0
+      property_path: rotation
+      value: !quat 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 0}
+    - component_name: Name
+      component_nth: 0
+      property_path: name
+      value: !string NewPrefab
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+- !17179934720 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 0
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: position
+      value: !vec3 {x: 1.8364685, y: -0.6103069, z: -5.0182934}
+    - component_name: Transform
+      component_nth: 0
+      property_path: rotation
+      value: !quat 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 0}
+    - component_name: Name
+      component_nth: 0
+      property_path: name
+      value: !string NewPrefab
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+- !21474902016 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 0
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: position
+      value: !vec3 {x: 4.559684, y: -1.166314, z: -4.07749}
+    - component_name: Transform
+      component_nth: 0
+      property_path: rotation
+      value: !quat 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 0}
+    - component_name: Name
+      component_nth: 0
+      property_path: name
+      value: !string NewPrefab
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+- !25769869312 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 0
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: position
+      value: !vec3 {x: 1.4830288, y: -2.933934, z: -4.667364}
+    - component_name: Transform
+      component_nth: 0
+      property_path: rotation
+      value: !quat 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 0}
+    - component_name: Name
+      component_nth: 0
+      property_path: name
+      value: !string NewPrefab
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []

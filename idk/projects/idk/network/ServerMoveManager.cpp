@@ -26,29 +26,8 @@ namespace idk
 		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(move->network_id);
 		if (view)
 		{
-			auto go = view->GetGameObject();
-			auto tfm_view = go->GetComponent<ElectronTransformView>();
-			if (tfm_view->sync_position)
-			{
-				if (auto trans = move->GetTranslation())
-					go->Transform()->position += *trans;
-			}
-
-			if (tfm_view->sync_rotation)
-			{
-				if (auto rot = move->GetRotation())
-				{
-					auto& r = go->Transform()->rotation;
-					r = *rot * r;
-				}
-			}
-
-
-			if (tfm_view->sync_scale)
-			{
-				if (auto scale = move->GetScale())
-					go->Transform()->scale *= *scale;
-			}
+			view->state_mask = move->state_mask;
+			view->UnpackMoveData(move->pack);
 		}
 	}
 }
