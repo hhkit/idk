@@ -200,6 +200,18 @@ namespace idk
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 		GetEditorRenderTarget()->render_debug = true;
 
+		Core::GetSystem<Application>().OnFocusGain += [this]()
+		{
+			if (game_running)
+				return;
+			if (scripts_changed)
+			{
+				Core::GetSystem<mono::ScriptSystem>().CompileGameScripts();
+				HotReloadDLL();
+				scripts_changed = false;
+			}
+		};
+
         { // try load recent scene / camera
             auto last_scene = reg_scene.get("scene");
             if (last_scene.size())
@@ -230,19 +242,6 @@ namespace idk
             else
                 NewScene(); 
         }
-
-		Core::GetSystem<Application>().OnFocusGain += [this]()
-		{
-			if (game_running)
-				return;
-
-			if (scripts_changed)
-			{
-				Core::GetSystem<mono::ScriptSystem>().CompileGameScripts();
-				HotReloadDLL();
-				scripts_changed = false;
-			}
-		};
 	}
 
     void IDE::EarlyShutdown()

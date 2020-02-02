@@ -47,6 +47,7 @@ namespace idk
 		/// NETWORKING
 		,	class ElectronView
 		,	class ElectronTransformView
+		,	class ElectronRigidbodyView
 
 		/// SCRIPTING
 		,	class mono::Behavior

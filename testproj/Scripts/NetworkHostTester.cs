@@ -14,11 +14,17 @@ namespace TestAndSeek
             if (Input.GetKeyDown(KeyCode.H))
                 ElectronNetwork.CreateLobby();
 
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.S))
                 ElectronNetwork.LoadScene(scene);
+
+            if (Input.GetKeyDown(KeyCode.V))
+                obj.GetComponent<RigidBody>().velocity = new Vector3(2,0,0);
 
             if (Input.GetKeyDown(KeyCode.P))
                 obj = ElectronNetwork.Instantiate(instantiate, transform.position);
+
+            if (Input.GetKeyDown(KeyCode.T))
+                obj.GetComponent<ElectronView>().TransferOwnership(0);
 
             if (Input.GetKeyDown(KeyCode.R))
             {

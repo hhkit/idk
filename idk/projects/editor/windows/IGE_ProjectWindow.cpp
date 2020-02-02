@@ -398,7 +398,7 @@ namespace idk {
                         if (aspect > 1.0f)
                             sz.y /= aspect;
                         else if (aspect < 1.0f)
-                            sz.x /= aspect;
+                            sz.x *= aspect;
                         if (handle.resource_id() == BaseResourceID<Texture>)
                         {
                             tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/

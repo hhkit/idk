@@ -765,6 +765,14 @@ namespace idk {
 
 	file_system_detail::fs_key FileSystem::requestFileSlot(file_system_detail::fs_mount& mount, int8_t depth)
 	{
+		if (!mount._is_valid)
+			return file_system_detail::fs_key{};
+		if (depth >= mount._path_tree.size())
+		{
+			file_system_detail::fs_collated new_depth{};
+			new_depth._depth = depth;
+			mount._path_tree.emplace_back(new_depth);
+		}
 		auto check_free_index = std::find_if(mount._path_tree[depth]._files.begin(),
 			mount._path_tree[depth]._files.end(),
 			[](const file_system_detail::fs_file& f) noexcept
@@ -797,7 +805,12 @@ namespace idk {
 	{
 		if (!mount._is_valid)
 			return file_system_detail::fs_key{};
-
+		if (depth >= mount._path_tree.size())
+		{
+			file_system_detail::fs_collated new_depth{};
+			new_depth._depth = depth;
+			mount._path_tree.emplace_back(new_depth);
+		}
 		auto check_free_index = std::find_if(mount._path_tree[depth]._dirs.begin(),
 			mount._path_tree[depth]._dirs.end(),
 			[](const file_system_detail::fs_dir& d) noexcept
