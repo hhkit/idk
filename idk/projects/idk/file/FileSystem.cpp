@@ -265,6 +265,31 @@ namespace idk {
 		return true;
 	}
 
+	bool FileSystem::Remount(string_view mountPath, bool watch)
+	{
+		string mount_path{ mountPath.data() };
+
+		if (mount_path[0] != '/')
+			return false;
+
+		const auto end_pos = mount_path.find_first_of('/', 1);
+
+		string mount_key = mount_path.substr(0, end_pos);
+		auto mount_index = _mount_table.find(mount_key);
+		if (mount_index == _mount_table.end())
+			return false;
+		auto& mount = _mounts[mount_index->second];
+		string fp = mount._full_path;
+
+		// Stop watching directory
+		if (mount._watching)
+			FindCloseChangeNotification(mount._path_tree[0]._dirs[0]._watch_handle);
+
+		mount._path_tree.clear();
+		initMount(mount._mount_index, fp, mount_path, watch);
+		return true;
+	}
+
 	bool FileSystem::Dismount(string_view mountPath)
 	{
 		string mount_path{ mountPath.data() };
@@ -295,6 +320,31 @@ namespace idk {
 		_mount_table.clear();
 		
 		// _mounts.clear();
+	}
+
+	bool FileSystem::WatchMount(string_view mountPath)
+	{
+		string mount_path{ mountPath.data() };
+
+		if (mount_path[0] != '/')
+			return false;
+
+		const auto end_pos = mount_path.find_first_of('/', 1);
+
+		string mount_key = mount_path.substr(0, end_pos);
+		auto mount_index = _mount_table.find(mount_key);
+		if (mount_index == _mount_table.end())
+			return false;
+
+		auto& mount = _mounts[mount_index->second];
+		if (mount._watching == true)
+			return false;
+
+		mount._watching = true;
+
+		auto& d = mount._path_tree[0]._dirs[0];
+		_directory_watcher.WatchDirectory(d);
+		return true;
 	}
 
 	FStreamWrapper FileSystem::Open(string_view mountPath, FS_PERMISSIONS perms, bool binary_stream)

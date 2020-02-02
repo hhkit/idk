@@ -370,7 +370,7 @@ namespace idk::vkn
 		}
 		return s_cast<bool>(info);
 	}
-#pragma optimize("",off)
+// // #pragma optimize("",off)
 	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound, vk::ImageLayout layout )
 	{
 		auto info = GetUniform(uniform_name);
@@ -417,7 +417,7 @@ namespace idk::vkn
 		draw_calls.back().num_instances = num_inst;
 		draw_calls.back().inst_offset = inst_offset;
 	}
-#pragma optimize("",off)
+// // #pragma optimize("",off)
 	void PipelineThingy::GenerateDS(DescriptorsManager& d_manager,bool update_ubo_buffers)
 	{
 		auto dsl = d_manager.Allocate(ref.collated_layouts);

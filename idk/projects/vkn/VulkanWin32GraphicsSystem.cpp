@@ -396,7 +396,7 @@ namespace idk::vkn
 			throw;
 		}
 	}
-#pragma optimize("",off)
+// #pragma optimize("",off)
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
 		try

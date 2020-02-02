@@ -49,8 +49,10 @@ namespace idk
 		// =====================================================================================================
 		
 		bool Mount(string_view fullPath, string_view mountPath, bool watch = true);
+		bool Remount(string_view mountPath, bool watch = true);
 		bool Dismount(string_view mountPath);
 		void DismountAll();
+		bool WatchMount(string_view mountPath);
 
 		// Open files
 		// =====================================================================================================

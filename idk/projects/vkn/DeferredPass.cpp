@@ -376,7 +376,7 @@ namespace idk::vkn
 		return inited;
 	}
 
-//#pragma optimize("",off)
+//// #pragma optimize("",off)
 	vk::UniqueRenderPass BuildAccumRenderPass(VknFrameBuffer& fb)
 	{
 		RenderPassInfo rp_info;
@@ -404,7 +404,7 @@ namespace idk::vkn
 		auto tmp = rp_info.BuildRenderPass();
 		return View().Device()->createRenderPassUnique(tmp);
 	}
-//#pragma optimize("",off)
+//// #pragma optimize("",off)
 	vk::UniqueRenderPass BuildHdrRenderPass(const FrameBufferInfo& hdr_out)
 	{
 		RenderPassInfo rp_info;
