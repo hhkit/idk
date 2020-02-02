@@ -18,10 +18,12 @@ namespace idk
 		function<T()>       getter;
 		function<void(const T&)> setter;
 		function <T(const T&, const T&, real)> lerper;
-		function<bool(const T&, const T&)> equater = std::equal_to{};
+		function<bool(const T&, const T&)> equater = std::equal_to<T>{};
+		function<bool(const T&, const T&)> send_condition;
 
 		template<typename Hnd, typename Mem>
-		DerivedParameter(Handle<Hnd> obj, T(Mem::* ptr))
+		DerivedParameter(Handle<Hnd> obj, T(Mem::* ptr), function<bool(const T&, const T&)> send_cond = std::not_equal_to<T>{})
+			: send_condition{send_cond}
 		{
 			getter = [obj, ptr]() -> T
 			{
@@ -41,13 +43,16 @@ namespace idk
 			cached_value = getter();
 		}
 
-		DerivedParameter(function<T()> get, function<void(const T&)> set)
-			: getter {get}, setter{set}
+		DerivedParameter(function<T()> get, function<void(const T&)> set, function<bool(const T&, const T&)> send_cond = std::not_equal_to<T>{})
+			: getter{ get }, setter{ set }, send_condition{send_cond}
 		{
 			if constexpr (std::is_same_v<T, vec3>)
 				lerper = &lerp<vec3, real>;
 			if constexpr (std::is_same_v<T, quat>)
-				lerper = static_cast<T(*)(const quat&, const quat&, real)>(slerp<quat, real>);
+				lerper = [](const quat& lhs, const quat& rhs, real t) 
+			{
+				return lerp(lhs, rhs, t).normalize();
+			};
 
 			cached_value = getter();
 		}
@@ -59,7 +64,7 @@ namespace idk
 
 		bool ValueChanged() const
 		{
-			return !equater(cached_value, getter());
+			return send_condition(cached_value, getter());
 		}
 
 		void UnpackGhost(string_view data) override
@@ -113,14 +118,16 @@ namespace idk
 
 	};
 
-	template<typename Hnd, typename Mem, typename Obj>
-	inline void ElectronView::RegisterMember(Handle<Hnd> obj, Obj(Mem::* ptr), float interp_over)
+	template<typename Hnd, typename Obj, typename Mem>
+	inline void ElectronView::RegisterMember(Handle<Hnd> obj, Obj(Mem::* ptr), float interp_over,
+		function<bool(const Obj&, const Obj&)> send)
 	{
-		parameters.emplace_back(std::make_unique<DerivedParameter<Obj>>(obj, ptr));
+		parameters.emplace_back(std::make_unique<DerivedParameter<Obj>>(obj, ptr, send))->interp_over = interp_over;
 	}
 	template<typename Val>
-	inline void ElectronView::RegisterMember(function<Val()> getter, function<void(const Val&)> setter, float interp)
+	inline void ElectronView::RegisterMember(function<Val()> getter, function<void(const Val&)> setter, float interp_over,
+		function<bool(const Val&, const Val&)> send)
 	{
-		parameters.emplace_back(std::make_unique<DerivedParameter<Val>>(getter, setter));
+		parameters.emplace_back(std::make_unique<DerivedParameter<Val>>(getter, setter, send))->interp_over = interp_over;
 	}
 }

@@ -60,6 +60,7 @@ namespace idk
 
 		void Init() override;
 		void LateInit() override;
+		void EarlyShutdown() override;
 		void Shutdown() override;
 
 		void ResetNetwork();

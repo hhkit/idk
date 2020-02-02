@@ -440,6 +440,7 @@ namespace idk
 	void file_system_detail::DirectoryWatcher::recurseAndAdd(file_system_detail::fs_dir& mountDir)
 	{
 		auto& vfs = Core::GetSystem<FileSystem>();
+		if (FS::exists(mountDir._full_path.sv()))
 		for (auto& file : FS::directory_iterator(mountDir._full_path.sv()))
 		{
 			FS::path tmp{ file.path() };
