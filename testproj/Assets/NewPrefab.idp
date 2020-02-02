@@ -21,8 +21,17 @@ data:
     dynamic_friction: 0.6
     enabled: 1
     is_trigger: 0
+    shape: !sphere 
+      center: {x: 0, y: 1, z: 0}
+      radius: 1
+    static_friction: 0.6
+  - !Collider 
+    bounciness: 0
+    dynamic_friction: 0.6
+    enabled: 1
+    is_trigger: 1
     shape: !box 
-      center: {x: 0, y: 0, z: 0}
+      center: {x: 0, y: 0.25, z: 0}
       extents: {x: 1, y: 1, z: 1}
       rotation: 
         w: 1
@@ -30,12 +39,6 @@ data:
         y: 0
         z: 0
     static_friction: 0.6
-  - !MeshRenderer 
-    cast_shadows: 1
-    enabled: 1
-    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
-    mesh: {guid: 55e37d7d-86ba-4bc6-b230-a86a250beaad}
-    receive_shadows: 1
   - !ElectronView 
     network_id: 0
   - !ElectronTransformView 
@@ -45,4 +48,31 @@ data:
     sync_position: 1
     sync_rotation: 1
     sync_scale: 0
+  - !MonoBehavior 
+    enabled: 1
+    script_data: !PlayerController 
+      air_move_control: 0.002
+      air_turn_control: 0.02
+      jump_force: 500
+      move_speed: 200
+      rot_speed: 450
   parent_index: -1
+- components: 
+  - !Transform 
+    parent: {id: 25769869312}
+    position: {x: 0, y: 0, z: 0}
+    rotation: 
+      w: -4.371139e-08
+      x: 0
+      y: 1
+      z: 0
+    scale: {x: 1, y: 1, z: 1}
+  - !Name 
+    name: ""
+  - !MeshRenderer 
+    cast_shadows: 1
+    enabled: 1
+    material_instance: {guid: 94070e6a-a197-4ebc-a7da-ef7e3f3c7615}
+    mesh: {guid: 55e37d7d-86ba-4bc6-b230-a86a250beaad}
+    receive_shadows: 1
+  parent_index: 0

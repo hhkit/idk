@@ -648,6 +648,9 @@ namespace idk
         public extern static uint ViewGetNetworkId(ulong handle);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ViewIsMine(ulong handle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ViewTransferOwnership(ulong handle, int newID);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
