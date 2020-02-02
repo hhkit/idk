@@ -235,6 +235,7 @@ namespace idk::vkn
 	{
 		ref.~Ref();
 		new (&ref) Ref{ &ubo_manager };
+		reserve(1000);
 	}
 	void PipelineThingy::UnbindShader(ShaderStage stage)
 	{
