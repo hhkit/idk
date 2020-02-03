@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "pch_common.h"
 #include <yojimbo/yojimbo.h>
 
