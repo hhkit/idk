@@ -168,7 +168,7 @@ namespace idk::vkn
 			counter++;
 			futures.emplace_back(Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs,&counter));
 		}
-//// #pragma optimize("",off)
+//// 
 		void Join() override
 		{
 			for(auto& future : futures)
@@ -440,7 +440,7 @@ namespace idk::vkn
 	{
 		_pipeline_manager = &manager;
 	}
-//#pragma optimize("",off)
+//
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
@@ -609,7 +609,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
-//// #pragma optimize("",off)
+//// 
 	void RenderPipelineThingy(
 		[[maybe_unused]] const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -718,7 +718,7 @@ namespace idk::vkn
 			}
 		}
 	}
-//#pragma optimize("", off)
+//
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
@@ -886,7 +886,7 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 	}
-//#pragma optimize("",off)
+//
 	namespace gt
 	{
 

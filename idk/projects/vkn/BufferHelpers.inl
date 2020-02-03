@@ -32,7 +32,7 @@ namespace idk::vkn::hlp
 	{
 		return CreateVertexBuffer(device, vertices.data(), vertices.data() + vertices.size(), dispatcher);
 	}
-// #pragma optimize("",off)
+// 
 	template<typename Dispatcher>
 	vk::UniqueDeviceMemory AllocateBuffer(
 		vk::PhysicalDevice pdevice, vk::Device device, vk::Buffer const& buffer, vk::MemoryPropertyFlags memory_flags, Dispatcher const& dispatcher)
@@ -133,7 +133,7 @@ namespace idk::vkn::hlp
 		template<typename T>
 		static constexpr bool has_data_v = std::is_same_v<decltype(has_data(std::declval<T>())), std::true_type>;
 	}
-// #pragma optimize("",off)
+// 
 	template<typename RT = size_t, typename T>
 	RT buffer_size(T const& vertices)
 	{

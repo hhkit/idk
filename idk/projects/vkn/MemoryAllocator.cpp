@@ -107,7 +107,7 @@ namespace idk::vkn::hlp
 
 	MemoryAllocator::Alloc::~Alloc() = default;
 
-//// #pragma optimize("",off)
+//// 
 	void Memories::Memory::Free(size_t offset, size_t size)
 	{
 		MemoryRange range{ MemoryRange{offset, offset + size} };

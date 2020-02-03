@@ -28,7 +28,7 @@ void ColorPickRequest::set_result(result_t value)
 	}
 }
 
-// // #pragma optimize("",off)
+// // 
 ColorPickResult::result_t ColorPickRequest::GetHandle(uint32_t id) const
 {
 	auto index = id - 1;

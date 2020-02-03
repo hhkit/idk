@@ -4,7 +4,7 @@
 namespace idk::vkn
 {
 	void DoNothing() {}
- #pragma optimize("",off)
+ 
 	VkBool32 ValHandler::processMsg(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, [[maybe_unused]]VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 	{
 		const char* prefix = "";

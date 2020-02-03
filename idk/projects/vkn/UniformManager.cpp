@@ -2,7 +2,7 @@
 #include "UniformManager.h"
 namespace idk::vkn
 {
-#pragma optimize("",off)
+
 	std::optional<UniformUtils::BufferBinding> UniformUtils::BindingInfo::GetBuffer() const
 	{
 		using T = UniformUtils::BufferBinding;

@@ -48,7 +48,7 @@ namespace idk::vkn
 		ShaderDirectionalData() = default;
 		ShaderDirectionalData(const DLightData& data) : vp{ data.vp }, far_plane{ data.far_plane } {}
 	};
-	//#pragma optimize("",off)
+	//
 	string PrepareDirectionalBlock(const vector<DLightData>& vp)
 	{
 		vector<ShaderDirectionalData> tmp_dlight(vp.size());
@@ -327,13 +327,13 @@ namespace idk::vkn
 		auto& mat = *mat_inst.material;
 		the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
 	}
-//// #pragma optimize("",off)
+//// 
 	void StandardMaterialBindings::SetState(const GraphicsState& vstate) {
 		_state = &vstate;
 		State();
 	}
 
-//// #pragma optimize("",off)
+//// 
 	//Assumes that the material is valid.
 	void StandardMaterialBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{

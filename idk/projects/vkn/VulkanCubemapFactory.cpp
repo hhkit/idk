@@ -23,7 +23,7 @@ namespace idk::vkn
 		fence = view.Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
 	}
 
-// #pragma optimize("",off)
+// 
 	unique_ptr<CubeMap> VulkanCubemapFactory::GenerateDefaultResource()
 	{
 		//2x2 image Checkered

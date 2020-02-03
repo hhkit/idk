@@ -13,7 +13,7 @@
 #include <gfx/Camera.h>
 
 #include <vkn/utils/utils.inl>
-#pragma optimize("",off)
+
 namespace idk::vkn::gt
 {
 	template<typename T>

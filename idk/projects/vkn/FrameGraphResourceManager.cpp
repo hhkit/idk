@@ -13,7 +13,7 @@ namespace idk::vkn
 	FrameGraphResourceManager::FrameGraphResourceManager(FrameGraphResourceManager&&)=default;
 	FrameGraphResourceManager& FrameGraphResourceManager::operator=(FrameGraphResourceManager&&)=default;
 	FrameGraphResourceManager::~FrameGraphResourceManager()=default;
-#pragma optimize("",off)
+
 	void FrameGraphResourceManager::Instantiate(fgr_id unique_id, fgr_id base)
 	{
 		concrete_resources.resize(std::max(unique_id+1, concrete_resources.size()));
@@ -37,7 +37,7 @@ namespace idk::vkn
 		//TODO
 		return vkn::TransitionInfo{};
 	}
-#pragma optimize("",off)
+
 	void FrameGraphResourceManager::MarkUsage(fgr_id rsc_id, vk::ImageUsageFlags usage)
 	{
 		auto o_prsc = GetResourceDescriptionPtr(rsc_id);
@@ -132,7 +132,7 @@ namespace idk::vkn
 			result = itr->first;
 		return result;
 	}
-#pragma optimize("",off)
+
 	std::optional<TextureDescription*> FrameGraphResourceManager::GetResourceDescriptionPtr(fgr_id rsc_id)
 	{
 		std::optional<TextureDescription*> result{};

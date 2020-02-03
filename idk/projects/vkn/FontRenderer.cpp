@@ -23,7 +23,7 @@ namespace idk::vkn
 			test
 		};
 	}
-//// #pragma optimize("",off)
+//// 
 	void FontRenderer::DrawFont(PipelineThingy& the_interface, const GraphicsState& state, [[maybe_unused]]RenderStateV2& rs)
 	{
 		auto& shared_state = *state.shared_gfx_state;

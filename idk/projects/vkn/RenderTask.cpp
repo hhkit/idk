@@ -12,7 +12,7 @@
 
 namespace idk::vkn
 {
-#pragma optimize("",off)
+
 	RenderTask::RenderTask() :ppm{std::make_unique<PipelineManager>()}
 	{
 	}

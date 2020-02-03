@@ -19,6 +19,9 @@ namespace TestAndSeek
 
         RigidBody rb;
         ElectronView ev;
+
+        internal bool transfer = false;
+        internal Player p = null;
         void Start()
         {
             rb = GetComponent<RigidBody>();
@@ -28,7 +31,11 @@ namespace TestAndSeek
         void OnTriggerEnter(Collider other)
         {
             if (other.tag == "futanari")
+            {
                 on_floor = true;
+                if (transfer && p != null)
+                        ev.TransferOwnership(p);
+            }
         }
         void OnTriggerExit(Collider other)
         {
