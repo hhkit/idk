@@ -361,8 +361,8 @@ namespace idk
 		float n_plane = camera.near_plane, f_plane = camera.far_plane;
 
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.2f * diff;
-		float second_end = n_plane + 0.4f * diff;
+		float first_end = n_plane + 0.3f * diff;
+		float second_end = n_plane + 0.5f * diff;
 
 		float cascadeiter[4] = { n_plane,first_end,second_end,f_plane };
 

@@ -37,6 +37,7 @@ namespace idk
 		vector<Lightmap> light_maps;
 		//alignas(16) mat4 w {};
 		CameraData camDataRef{};
+		vec3 v_up{};
 	};
 
 	class Light

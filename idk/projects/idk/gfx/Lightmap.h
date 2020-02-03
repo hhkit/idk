@@ -25,6 +25,7 @@ namespace idk {
 		RscHandle<FrameBuffer> light_map{};
 		mat4 cascade_projection{};
 		real far_plane = 1.f;
+		vec3 cam_max = {};
 	private:
 		
 		mat4 oldCamView{};
