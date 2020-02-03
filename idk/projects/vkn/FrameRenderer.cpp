@@ -1539,6 +1539,7 @@ namespace idk::vkn
 
 		if (processed_ro.size()>0)
 		{
+			dbg::BeginLabel(cmd_buffer, "non-deferred region", color{ 0,0.4f,0.2f });
 			bool is_particle_renderer = false;
 			for (auto& p_ro : processed_ro)
 			{
@@ -1607,10 +1608,13 @@ namespace idk::vkn
 					cmd_buffer.draw(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 			}
+			dbg::EndLabel(cmd_buffer);
 		}
 		if (camera.render_target->RenderDebug())
 		{
+			dbg::BeginLabel(cmd_buffer, "Debug Renderign", color{ 0,0.6f,0.0f });
 			RenderDebugStuff(state, rs, offset, size);
+			dbg::EndLabel(cmd_buffer);
 		}
 		if (still_rendering)
 		{

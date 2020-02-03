@@ -198,7 +198,7 @@ namespace idk
 			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override;
 			void SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel);
 		};
-		using UnlitMaterialBinding = CombinedBindings<StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+		using UnlitMaterialBinding = CombinedBindings<UnlitFilter,StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 		using ShadowBinding = CombinedBindings<ShadowFilter,StandardVertexBindings>;
 	}
 }
