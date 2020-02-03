@@ -99,7 +99,7 @@ namespace idk::vkn
 		//location
 		hash_table<uint32_t,buffer_desc> extracted_desc;
 	};
-//// #pragma optimize("",off)
+//// 
 	ExtractedMisc extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
 	{
 		ExtractedMisc result{};
@@ -176,6 +176,7 @@ namespace idk::vkn
 			auto type = code_reflector.get_type(ub.type_id);
 			info.binding = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationBinding);
 			info.set = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationDescriptorSet);
+			info.input_attachment_index = code_reflector.get_decoration(ub.id, spv::Decoration::DecorationInputAttachmentIndex);
 			info.stage = StageToUniformStage(single_stage);
 			info.size = (type.array.size()) ? type.array.back() : 1;
 			info.type = uniform_layout_t::UniformType::eAttachment;
@@ -225,7 +226,7 @@ namespace idk::vkn
 		}
 		return result;
 	}
-//// #pragma optimize("",off)
+//// 
 	void CreateLayouts(
 		hash_table<string, UboInfo>& ubo_info,
 		ShaderModule::LayoutTable& layouts,
@@ -386,9 +387,16 @@ ShaderModule::LayoutTable::const_iterator ShaderModule::LayoutsEnd() const
 const UboInfo& ShaderModule::GetLayout(const string& uniform_name) const
 {
 	auto itr = Current().ubo_info.find(uniform_name);
-	// TODO: insert return statement here
 	
 	return (itr!= Current().ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
+}
+std::optional<UboInfo> ShaderModule::TryGetLayout(const string& uniform_name) const
+{
+	std::optional<UboInfo> result{};
+	auto itr = Current().ubo_info.find(uniform_name);
+	if(itr != Current().ubo_info.end())
+		result = itr->second;
+	return result;
 }
 void DoNothing();
 ShaderModule::~ShaderModule()

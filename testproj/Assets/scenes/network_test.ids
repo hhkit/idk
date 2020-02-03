@@ -76,15 +76,15 @@
       a: 10
       b: 84
       c: 42
-      d: 103
+      d: 102
   - !MonoBehavior 
     enabled: 1
     script_data: !NetworkHostTester 
       instantiate: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+      movespeed: 35
       obj: {id: 0}
       scene: {guid: 522d0d0c-cbbe-4681-bd2c-816e649da50e}
-  - !MonoBehavior 
-    {enabled: 1, script_data: !NetworkDebugger ~}
+      turnspeed: 90
 - !12884967424 
   - active: 1
   - !Transform 
@@ -118,3 +118,59 @@
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 00000000-0000-0000-0000-000000000000}
     receive_shadows: 1
+- !17179934720 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 0
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: position
+      value: !vec3 {x: -3.041769, y: -3.4804416, z: -1.6117942}
+    - component_name: Transform
+      component_nth: 0
+      property_path: rotation
+      value: !quat 
+        w: 1
+        x: 0
+        y: 0
+        z: 0
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 0}
+    - component_name: Name
+      component_nth: 0
+      property_path: name
+      value: !string NewPrefab
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []
+  - !ElectronRigidbodyView 
+    sync_velocity: 1
+- !21474902016 
+  - active: 1
+  - !PrefabInstance 
+    object_index: 1
+    overrides: 
+    - component_name: Transform
+      component_nth: 0
+      property_path: position
+      value: !vec3 {x: 0, y: 0, z: 0}
+    - component_name: Transform
+      component_nth: 0
+      property_path: rotation
+      value: !quat 
+        w: -4.371139e-08
+        x: 0
+        y: 1
+        z: 0
+    - component_name: Transform
+      component_nth: 0
+      property_path: parent
+      value: !Handle<GameObject> {id: 17179934720}
+    - component_name: Name
+      component_nth: 0
+      property_path: name
+      value: !string ""
+    prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
+    removed_components: []

@@ -54,6 +54,8 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue,
 		f = *fence;
 	vk::DispatchLoaderDefault dispatcher{};
 	cmd_buffer.end(dispatcher);
+	try
+	{
 
 	//Submit commands to queue
 	vk::SubmitInfo submitInfo
@@ -67,6 +69,17 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue,
 		,(signal) ? &*signal : nullptr
 	};
 	queue.submit(submitInfo, f, dispatcher);
+
+	}
+	catch (std::exception& e )
+	{
+		DebugBreak();
+	}
+	catch (vk::Error & e)
+	{
+		DebugBreak();
+
+	}
 	//Not very efficient, would be better to use fences instead.
 	if(wait_for_idle)
 		queue.waitIdle(dispatcher);
@@ -148,7 +161,7 @@ void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer
 	EndSingleTimeCbufferCmd(cmd_buffer, queue);
 }
 
-// #pragma optimize("",off)
+// 
 
 
 void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<BeginInfo> begin, std::optional<SubmissionInfo> queue_sub_config)

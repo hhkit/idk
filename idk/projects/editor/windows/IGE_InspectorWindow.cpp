@@ -472,6 +472,32 @@ namespace idk {
 
         ImGui::EndChild();
     }
+    template<typename T>
+    auto SelectGO(Handle<GameObject> go, T&& arg)
+    {
+        return std::forward<T>(arg);
+    }
+    
+    auto SelectGO(Handle<GameObject> go, Handle<GameObject> arg)
+    {
+        return go;
+    }
+
+
+    template<typename Command,typename ...Args>
+    void IGE_InspectorWindow::ExecuteOnSelected(Args&&... args)
+    {
+        IDE& editor = Core::GetSystem<IDE>();
+        int execute_counter = 0;
+        for (auto go : editor.GetSelectedObjects().game_objects)
+        {
+            if (!go)
+                continue;
+            editor.command_controller.ExecuteCommand(COMMAND(Command, SelectGO(go,std::forward<Args>(args))...));
+            ++execute_counter;
+        }
+        editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+    }
 
 	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
 	{
@@ -587,7 +613,9 @@ namespace idk {
                 label += ": ";
                 label += layers[i];
                 if (ImGui::MenuItem(label.c_str()))
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, std::nullopt, i));
+                {
+                    ExecuteOnSelected<CMD_ModifyGameObjectHeader>(game_object, std::nullopt, std::nullopt, i);
+                }
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Layer##_add_layer_"))

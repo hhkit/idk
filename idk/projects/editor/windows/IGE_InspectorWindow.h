@@ -101,6 +101,9 @@ namespace idk {
         using CustomDrawFn = bool(*)(const reflect::dynamic& dyn);
         using InjectDrawTable = hash_table<string_view, CustomDrawFn>;
         bool DisplayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table = nullptr);
+
+        template<typename Command,typename ...Args>
+        void ExecuteOnSelected(Args&&...);
 	};
 
 

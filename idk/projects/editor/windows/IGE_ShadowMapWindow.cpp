@@ -86,7 +86,6 @@ namespace idk {
 
 
 	}
-#pragma optimize("" , off)
 	void IGE_ShadowMapWindow::Update()
 	{
 		ImGui::PopStyleVar(3);

@@ -42,7 +42,45 @@ namespace idk::vkn::dbg
 		if (View().DynDispatcher().vkCmdEndDebugUtilsLabelEXT)
 			cmd_buffer.endDebugUtilsLabelEXT(View().DynDispatcher());
 	}
-// #pragma optimize("",off)
+	void NameObject(vk::Image img, const string& name)
+	{
+		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eImage,reinterpret_cast<uint64_t>(img.operator VkImage()),name.c_str()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
+	}
+	void NameObject(vk::Buffer img, const string& name)
+	{
+		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eBuffer,reinterpret_cast<uint64_t>(img.operator VkBuffer()),name.c_str()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
+	}
+	void NameObject(uint64_t unk, const string& name)
+	{
+		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT && unk)//id must be valid if type is unknown
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eUnknown,unk,name.c_str()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
+	}
 	string DumpFrameBufferAllocs()
 	{
 		std::stringstream out;

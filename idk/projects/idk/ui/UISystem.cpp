@@ -84,7 +84,7 @@ namespace idk
     void UISystem::ComputeCanvasHierarchyRects(Handle<Canvas> canvas)
     {
         // assuming screen space
-        ivec2 screen_size = canvas->render_target->Size();
+        auto screen_size = canvas->render_target->Size();
 
         auto canvas_go = canvas->GetGameObject();
 
@@ -139,7 +139,7 @@ namespace idk
     void UISystem::FinalizeMatrices(Handle<Canvas> canvas)
     {
         // assuming screen space
-        ivec2 screen_size = canvas->render_target->Size();
+        auto screen_size = canvas->render_target->Size();
 
         auto canvas_go = canvas->GetGameObject();
 

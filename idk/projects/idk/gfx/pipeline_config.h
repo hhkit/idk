@@ -4,6 +4,7 @@
 #include <gfx/buffer_desc.h>
 #include <gfx/ShaderProgram.h>
 #include <gfx/BasicRenderPasses.h>
+#include <ds/Flags.h>
 namespace idk
 {
 
@@ -54,6 +55,7 @@ namespace idk
 		eFront = 1 << 0,
 		eBack  = 1 << 1,
 	};
+	using CullFaceFlags = Flags<CullFace>;
 	enum class BlendOp
 	{
 		eAdd              ,// = VK_BLEND_OP_ADD,
@@ -99,17 +101,18 @@ namespace idk
 		RscHandle<ShaderProgram> frag_shader{};
 		RscHandle<ShaderProgram> vert_shader{};
 		std::optional<ivec2> viewport_offset{};
-		std::optional<ivec2> viewport_size{};
+		std::optional<uvec2> viewport_size{};
 		vector<buffer_desc> buffer_descriptions;
 		FillType fill_type = eFill;
 		PrimitiveTopology prim_top = eTriangleList;
 		BasicRenderPasses render_pass_type = {};
 		//hash_table<uint32_t,uniform_layout_t> uniform_layouts; //Encapsulated in shader program.
 		bool restart_on_special_idx = false; //Set to true to allow strips to be restarted with special indices 0xFFFF or 0xFFFFFFFF
-		uint32_t cull_face = static_cast<uint32_t>(CullFace::eBack);
+		CullFaceFlags cull_face = CullFace::eBack;
 		bool depth_test  =true;
 		bool depth_write = true;
-		bool stencil_test =true;
+		bool stencil_test = true;
+		bool stencil_write =true;
 		vector<AttachmentBlendConfig> attachment_configs = { AttachmentBlendConfig{} };
 	};
 }

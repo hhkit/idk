@@ -31,7 +31,6 @@ namespace idk::vkn {
 	}
 	TriBuffer& TriBuffer::operator=(TriBuffer&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		std::swap(images,rhs.images);
 		std::swap(image_views,rhs.image_views);
 		std::swap(mems,rhs.mems);

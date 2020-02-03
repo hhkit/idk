@@ -29,7 +29,7 @@ namespace idk::vkn
 			config = { *pipline_conf }; //Attempt using default copy ctor to copy the external configs
 		else
 		{
-			config.cull_face = static_cast<uint32_t>(CullFace::eNone);
+			config.cull_face = CullFace::eNone;
 			config.depth_test = false;
 			config.depth_write = false;
 			config.render_pass_type = BasicRenderPasses::eRgbaColorOnly;
@@ -104,8 +104,7 @@ namespace idk::vkn
 
 	void CubemapRenderer::BeginQueue(UboManager& ubo_manager, std::optional<vk::Fence >ofence)
 	{
-		pipeline_manager().View(View());
-		//pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
+		pipeline = &pipeline_manager().GetPipeline(*config_, prog, 0);
 		if (ofence)
 		{
 			auto& fence = *ofence;
@@ -259,7 +258,7 @@ namespace idk::vkn
 		RenderImpl();
 		//thingy.FinalizeDrawCall(ro);
 	}
-//#pragma optimize("",off)
+//
 	void CubemapRenderer::ProcessQueue(vk::CommandBuffer cmd_buffer)
 	{
 		//if (pool.size() == pool.capacity())
@@ -343,8 +342,8 @@ namespace idk::vkn
 			cmd_buffer.endRenderPass();
 		}
 	}
-//#pragma optimize("",on)
-	void CubemapRenderer::ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos, const ivec2& vp_size)
+
+	void CubemapRenderer::ProcessQueueWithoutRP(vk::CommandBuffer cmd_buffer, const ivec2& vp_pos, const uvec2& vp_size)
 	{
 		//if (pool.size() == pool.capacity())
 		//{
@@ -366,7 +365,6 @@ namespace idk::vkn
 		{
 			auto& p_ro = p_ros[i];
 
-			//TODO set Viewport
 			SetViewport(cmd_buffer, vp_pos, vp_size);
 
 			//glDisable(GL_CULL_FACE); // vk::PipelineRasterizationStateCreateInfo

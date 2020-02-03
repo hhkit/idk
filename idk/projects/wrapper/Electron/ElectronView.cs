@@ -6,10 +6,11 @@ namespace idk
     public class ElectronView
         : Component
     {
-        private static BinaryFormatter formatter = new BinaryFormatter();   
+        private static BinaryFormatter formatter = new BinaryFormatter();
 
+        public bool IsMine { get => Bindings.ViewIsMine(handle); }
         public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
-        public void TransferOwnership(Player newOwner) => Bindings.ViewTransferOwnership(handle, newOwner.ActorNumber);
+        public void TransferOwnership(Player newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
         public void RPC(string methodName, RPCTarget target, params object[] parameters)
         {
             byte[][] bytes = new byte[parameters.Length][];

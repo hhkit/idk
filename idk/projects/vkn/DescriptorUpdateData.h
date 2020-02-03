@@ -16,5 +16,6 @@ namespace idk::vkn
 		std::forward_list<vk::DescriptorBufferInfo> scratch_buffer_infos;
 		void AbsorbFromScratch();
 		void SendUpdates();
+		void Reset();
 	};
 }

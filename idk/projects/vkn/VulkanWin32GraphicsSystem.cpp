@@ -96,7 +96,6 @@ namespace idk::vkn
 			throw;
 		RegisterFactories();
 		_pm = std::make_unique<PipelineManager>();
-		_pm->View(instance_->View());
 
 		_pimpl = std::make_unique<Pimpl>();
 		_pimpl->allocator = std::make_unique<hlp::MemoryAllocator>(*instance_->View().Device(), instance_->View().PDevice());
@@ -257,7 +256,6 @@ namespace idk::vkn
 		pre_render_data.cameras = &curr_buffer.camera;
 		pre_render_data.d_lightmaps = &curr_buffer.d_lightmaps;
 
-		//TODO cull the unused lights
 		for (size_t i = 0; i < lights.size(); ++i)
 			if(lights[i].cast_shadow && lights[i].index!=0)
 				pre_render_data.active_lights.emplace_back(i);
@@ -395,7 +393,7 @@ namespace idk::vkn
 		}
 #endif
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
-#if 1
+#if 0
 		{
 			auto str = dbg::DumpFrameBufferAllocs();
 		}
@@ -426,7 +424,7 @@ namespace idk::vkn
 			throw;
 		}
 	}
-//#pragma optimize("",off)
+//
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
 		try

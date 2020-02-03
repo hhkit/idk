@@ -36,6 +36,8 @@
 
 #include <variant>
 
+#include <gfx/RenderTarget.h>
+
 struct guid_64
 {
 	uint64_t mem1;
@@ -142,6 +144,14 @@ namespace idk
 
 	ColorPickResult GraphicsSystem::ColorPick(vec2 picking_pt, CameraData camera)
 	{
+		auto sz = camera.render_target->Size();
+		if (picking_pt.x > sz.x || picking_pt.x<0
+			||
+			picking_pt.y>sz.y || picking_pt.y < 0)
+		{
+			
+			return ColorPickResult{ ColorPickResult::result_t{} };
+		}
 		auto& req = request_stack.emplace_front();
 		
 		return req.promise(picking_pt,camera);
@@ -416,7 +426,7 @@ namespace idk
 		range.light_end = active_light_buffer.size();
 		range.dir_light_end = directional_light_buffer.size();
 	}
-//#pragma optimize("", off)
+//
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -1071,7 +1081,6 @@ namespace idk
 
 	GraphicsSystem::RenderBuffer& GraphicsSystem::GetWriteBuffer()
 	{
-		// TODO: insert return statement here
 		return object_buffer[curr_write_buffer];
 	}
 

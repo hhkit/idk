@@ -15,6 +15,7 @@ namespace idk::vkn
 		uniform_layout_t::UniformStage stage;
 		uniform_layout_t::UniformType type;
 		uint32_t binding, set;
+		uint32_t input_attachment_index; //Only valid if type == Attachment
 		uint32_t size;
 
 		//static void AddToConfig(pipeline_config& config, const UboInfo& info)
@@ -71,6 +72,7 @@ namespace idk::vkn
 		LayoutTable::const_iterator LayoutsEnd()const;
 		//UboInfo& GetLayout(string uniform_name);
 		const UboInfo& GetLayout(const string& uniform_name)const;
+		std::optional<UboInfo> TryGetLayout(const string& uniform_name)const;
 		bool NeedUpdate()const { return buf_obj.HasUpdate(); }
 		bool HasUpdate()const override { return buf_obj.HasUpdate(); }
 		void UpdateCurrent(size_t index)override { buf_obj.UpdateCurrent(index); }

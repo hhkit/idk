@@ -52,18 +52,18 @@ namespace idk::vkn
 
 		InputTexInfo iti;
 		iti.data = dds.Data().data();
-		iti.len = dds.Data().length();
+		iti.len = dds.size();
 		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
 		TexCreateInfo tci;
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
 		tci.width = dds.Dimensions().x;
 		tci.height = dds.Dimensions().y;
-		tci.mipmap_level = std::max(dds.File().header.mip_map_count, 0u);
+		tci.mipmap_level = std::max(dds.File().header.mip_map_count, 1u);
 		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width, tci.height);
 		tci.internal_format = iti.format;// MapFormat(to.internal_format);
 		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
 
-		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti);
+		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti,to.guid);
 	}
 	const hlp::MemoryAllocator& DdsLoader::Allocator() const
 	{

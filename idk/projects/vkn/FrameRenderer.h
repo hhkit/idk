@@ -81,7 +81,7 @@ namespace idk::vkn
 		void GrowStates(vector<RenderStateV2>& states, size_t new_min_size);
 
 		PipelineThingy ProcessRoUniforms(const GraphicsState& draw_calls, UboManager& ubo_manager);
-		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs ,ivec2 vp_pos, ivec2 vp_size);
+		void RenderDebugStuff(const GraphicsState& state,RenderStateV2& rs ,ivec2 vp_pos, uvec2 vp_size);
 
 		//PreRender
 		void PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& rs,size_t& curr_state, uint32_t frame_index);
@@ -125,7 +125,7 @@ namespace idk::vkn
 		CanvasRenderer _canvas_renderer;
 
 		DeferredGBuffer _gbuffers[EGBufferType::size()];
-		ivec2 _gbuffer_size{};
+		uvec2 _gbuffer_size{};
 
 		struct PImpl;
 		shared_ptr<PImpl> _pimpl;

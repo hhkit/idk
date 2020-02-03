@@ -57,7 +57,7 @@ namespace idk
 	using Alloc = ArenaAllocator<T>;
 
 	using included_t =std::unordered_set<string_view, std::hash<string_view>, std::equal_to<string_view>, Alloc<string_view>>;
-// // #pragma optimize("",off)
+// // 
 	void ProcessIncludesImpl(string_view glsl_code, string& final_result, included_t& included)
 	{
 		unsigned char pool[1 << 16];

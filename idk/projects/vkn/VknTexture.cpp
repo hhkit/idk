@@ -31,9 +31,17 @@ namespace idk::vkn {
 		loader.LoadTexture(*this,data,compiled_tex);
 		texture_bytes += this->sizeOnDevice;
 	}
-	vk::ImageAspectFlags VknTexture::ImageAspects()
+	vk::ImageAspectFlags VknTexture::ImageAspects() const
 	{
 		return img_aspect;
+	}
+	uint32_t& VknTexture::Layers(uint32_t layers) noexcept
+	{
+		return _layers = layers;
+	}
+	uint32_t VknTexture::Layers()const noexcept
+	{
+		return _layers;
 	}
 	VknTexture::~VknTexture()
 	{
@@ -56,7 +64,6 @@ namespace idk::vkn {
 
 	VknTexture& VknTexture::operator=(VknTexture&& rhs) noexcept
 	{
-		// TODO: insert return statement here
 		Texture::operator=(std::move(rhs));
 
 		std::swap(size, rhs.size);
@@ -72,7 +79,7 @@ namespace idk::vkn {
 		return *this;
 	}
 
-	ivec2 VknTexture::Size(ivec2 new_size)
+	uvec2 VknTexture::Size(uvec2 new_size)
 	{
 		return Texture::Size(new_size);
 

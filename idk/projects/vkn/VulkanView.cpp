@@ -4,7 +4,7 @@
 #include <vkn/BufferHelpers.h>
 #include <vkn/vector_buffer.h>
 #include <vkn/RenderState.h>
-
+#include <vkn/VulkanWin32GraphicsSystem.h>
 namespace idk::vkn
 {
 		struct VulkanView::pimpl
@@ -20,7 +20,6 @@ namespace idk::vkn
 		};
 		VulkanResourceManager& VulkanView::ResourceManager() const
 		{
-			// TODO: insert return statement here
 			return this->vulkan_->ResourceManager();
 		}
 		vk::DispatchLoaderDefault& VulkanView::Dispatcher() const { return vulkan().dispatcher; }
@@ -92,17 +91,14 @@ namespace idk::vkn
 		}
 		bool& VulkanView::ImguiResize()
 		{
-			// TODO: insert return statement here
 			return vulkan().m_ScreenResizedForImGui;
 		}
 		window_info& VulkanView::GetWindowsInfo() const
 		{
-			// TODO: insert return statement here
 			return vulkan().m_window;
 		}
 		PresentationSignals& VulkanView::GetCurrentSignals() const
 		{
-			// TODO: insert return statement here
 			return vulkan().m_swapchain->m_graphics.pSignals[vulkan().current_frame];
 		}
 		uint32_t VulkanView::CurrSemaphoreFrame() const
@@ -119,7 +115,6 @@ namespace idk::vkn
 		}
 		vk::Result& VulkanView::AcquiredImageResult() const
 		{
-			// TODO: insert return statement here
 			return vulkan().rvRes;
 		}
 		uint32_t VulkanView::MaxFrameInFlight() const
@@ -159,4 +154,9 @@ namespace idk::vkn
 		{
 			impl_.reset();
 		}
-	}
+
+		VulkanView& View()
+		{
+			return Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		}
+}

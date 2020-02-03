@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "pch_common.h"
 #include <yojimbo/yojimbo.h>
 
@@ -126,7 +127,8 @@ namespace idk
 	{
 		for (auto& device : Core::GetSystem<Application>().GetNetworkDevices())
 		{
-			LOG_TO(LogPool::NETWORK, "Found %s device (%s) with address %s.", device.name.c_str(), device.fullname.c_str(), string{ device.ip_addresses.front() }.c_str());
+			if(device.ip_addresses.size())
+				LOG_TO(LogPool::NETWORK, "Found %s device (%s) with address %s.", device.name.c_str(), device.fullname.c_str(), string{ device.ip_addresses.front() }.c_str());
 		}
 	}
 

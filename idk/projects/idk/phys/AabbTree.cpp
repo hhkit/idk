@@ -93,7 +93,7 @@ namespace idk
 		
 		return num_collisions;
 	}
-// #pragma optimize("", off)
+// 
 	int AabbTree::insert(Collider& collider, const aabb& bound, float margin)
 	{
 		auto res = _node_table.find(collider.GetHandle());

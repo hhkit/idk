@@ -17,7 +17,7 @@ namespace idk::vkn
 		fence = View().Device()->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlagBits::eSignaled });
 	}
 	vk::Format ToSrgb(vk::Format f);
-// #pragma optimize("",off)
+// 
 	void DoNothingUnopt()
 	{
 		int a = 0;

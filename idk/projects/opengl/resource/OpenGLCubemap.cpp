@@ -67,7 +67,6 @@ namespace idk::ogl
 
 	OpenGLCubemap& OpenGLCubemap::operator=(OpenGLCubemap&& rhs)
 	{
-		// TODO: insert return statement here
 		CubeMap::operator=(std::move(rhs));
 		std::swap(_id, rhs._id);
 		std::swap(texture, rhs.texture);
@@ -101,7 +100,7 @@ namespace idk::ogl
 		//GL_CHECK();
 	}
 
-	void OpenGLCubemap::Buffer(TextureTarget face_value, void* data, ivec2 size, TextureInternalFormat internal_format, GLenum color_components, GLenum incoming_type)
+	void OpenGLCubemap::Buffer(TextureTarget face_value, void* data, uvec2 size, TextureInternalFormat internal_format, GLenum color_components, GLenum incoming_type)
 	{
 		_size = size;
 		_internal_format = internal_format;
@@ -111,7 +110,7 @@ namespace idk::ogl
 	}
 
 
-	void OpenGLCubemap::Size(ivec2 new_size)
+	void OpenGLCubemap::Size(uvec2 new_size)
 	{
 		CubeMap::Size(new_size);
 		for (auto& i : TextureTarget::values)

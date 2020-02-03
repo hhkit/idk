@@ -36,17 +36,18 @@ namespace idk
 		using Vec_T = decltype(cos_theta);
 
 		// Shortest path
-		if (cos_theta < Vec_T{0})
+		if (cos_theta < Vec_T())
 		{
 			cos_theta  = -cos_theta;
-			rhs_copy.w = -rhs_copy.w;
-			rhs_copy.x = -rhs_copy.x;
-			rhs_copy.y = -rhs_copy.y;
-			rhs_copy.z = -rhs_copy.z;
+			rhs_copy = rhs*-1;
 		}
 
 		// Divide by 0
-		if (Vec_T(1) - cos_theta > constants::epsilon<Vec_T>())
+		if (cos_theta > Vec_T(1) - constants::epsilon<Vec_T>())
+		{
+			return idk::lerp(lhs, rhs_copy, lerp);
+		}
+		else
 		{
 			const auto ohm = acos(cos_theta);
 			const auto s_ohm = sin(ohm);
@@ -54,9 +55,7 @@ namespace idk
 			const auto scale_p = sin((LerpFactor(1) - lerp) * ohm) / s_ohm;
 			const auto scale_q = sin(lerp * ohm) / s_ohm;
 
-			return (scale_p * lhs) + (scale_q * rhs);
+			return (scale_p * lhs) + (scale_q * rhs_copy);
 		}
-		else
-			return idk::lerp(lhs, rhs_copy, lerp);	
 	}
 }

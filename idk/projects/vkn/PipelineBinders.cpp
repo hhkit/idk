@@ -21,6 +21,8 @@
 #include <res/ResourceHandle.inl>
 #include <ds/span.inl>
 
+#include <vkn/RenderUtil.h>
+
 namespace idk::vkn
 {
 	void BindCameraStuff(PipelineThingy& the_interface, const CameraData& cam)
@@ -35,47 +37,6 @@ namespace idk::vkn
 	}
 
 
-	template<typename T>
-	struct FakeMat4
-	{
-		static constexpr unsigned N = 4;
-		tvec<T, N> data[N];
-
-		FakeMat4() = default;
-		FakeMat4(const tmat<T, N, N>& m)
-		{
-			for (uint32_t i = 0; i < N; ++i)
-			{
-				data[i] = m[i];
-			}
-		}
-	};
-
-	struct ShaderLightData : BaseLightData
-	{
-		FakeMat4<float> vp;
-		ShaderLightData() = default;
-		ShaderLightData(const LightData& data) : BaseLightData{ data }, vp{ data.vp }{}
-	};
-
-
-	string PrepareLightBlock(const CameraData& cam, const vector<LightData>& lights)
-	{
-		vector<ShaderLightData> tmp_light(lights.size());
-		for (size_t i = 0; i < tmp_light.size(); ++i)
-		{
-			auto& light = tmp_light[i] = (lights)[i];
-			light.v_pos = cam.view_matrix * vec4{ light.v_pos,1 };
-			light.v_dir = (cam.view_matrix * vec4{ light.v_dir,0 }).get_normalized();
-		}
-
-		string light_block;
-		uint32_t len = s_cast<uint32_t>(tmp_light.size());
-		light_block += string{ reinterpret_cast<const char*>(&len),sizeof(len) };
-		light_block += string(16 - sizeof(len), '\0');
-		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
-		return light_block;
-	}
 	struct DLightData {
 		float far_plane{};
 		mat4 vp{};
@@ -85,9 +46,9 @@ namespace idk::vkn
 		alignas(16) float far_plane;
 		FakeMat4<float> vp;
 		ShaderDirectionalData() = default;
-		ShaderDirectionalData(const DLightData& data) : vp{ data.vp }, far_plane{data.far_plane} {}
+		ShaderDirectionalData(const DLightData& data) : vp{ data.vp }, far_plane{ data.far_plane } {}
 	};
-//#pragma optimize("",off)
+	//
 	string PrepareDirectionalBlock(const vector<DLightData>& vp)
 	{
 		vector<ShaderDirectionalData> tmp_dlight(vp.size());
@@ -99,7 +60,6 @@ namespace idk::vkn
 		d_block += string{ reinterpret_cast<const char*>(tmp_dlight.data()), hlp::buffer_size(tmp_dlight) };
 		return d_block;
 	}
-
 
 	void StandardBindings::Bind(PipelineThingy& ) {}
 
@@ -367,13 +327,13 @@ namespace idk::vkn
 		auto& mat = *mat_inst.material;
 		the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
 	}
-//// #pragma optimize("",off)
+//// 
 	void StandardMaterialBindings::SetState(const GraphicsState& vstate) {
 		_state = &vstate;
 		State();
 	}
 
-//// #pragma optimize("",off)
+//// 
 	//Assumes that the material is valid.
 	void StandardMaterialBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
@@ -504,6 +464,22 @@ namespace idk::vkn
 		UIBlockInfo block3[] = { { dc_one.color.as_vec4, 0 } };
 		the_interface.BindUniformBuffer("UIBlock", 0, block3);
 		the_interface.BindSampler("tex", 0, dc.texture.as<VknTexture>());
+	}
+
+	bool UnlitFilter::Skip(PipelineThingy& the_interface, const RenderObject& dc)
+	{
+
+		return !dc.material_instance|| !dc.material_instance->material|| dc.material_instance->material->model!=ShadingModel::Unlit;
+	}
+
+	bool ShadowFilter::Skip(PipelineThingy& , const RenderObject& dc)
+	{
+		return !(dc.layer_mask&filter);
+	}
+
+	void ShadowFilter::SetState(const CameraData& cam, const vector<SkeletonTransforms>& )
+	{
+		filter = cam.culling_flags;
 	}
 
 }

@@ -1,4 +1,7 @@
-﻿namespace idk
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace idk
 {
     public static class ElectronNetwork
     {
@@ -6,12 +9,19 @@
         public delegate void ClientConnectionSignal(Player id);
         public delegate void ServerConnectionSignal();
 
-        public static ClientConnectionSignal OnClientConnected;
-        public static ClientConnectionSignal OnClientDisconnected;
+        public static event ClientConnectionSignal OnClientConnected;
+        public static event ClientConnectionSignal OnClientDisconnected;
 
-        public static ServerConnectionSignal OnServerConnected;
-        public static ServerConnectionSignal OnServerDisconnected;
+        public static event ServerConnectionSignal OnServerConnected;
+        public static event ServerConnectionSignal OnServerDisconnected;
         #endregion
+
+        static List<Player> players = new List<Player>();
+
+        public static IList<Player> GetPlayers()
+        {
+            return players;
+        }
 
         public static bool IsHost { get => Bindings.NetworkGetIsHost(); }
         public static bool IsConnected { get => Bindings.NetworkGetIsConnected(); }
@@ -39,12 +49,18 @@
 
         internal static void ExecClientConnect(int id)
         {
-            OnClientConnected(new Player() { ActorNumber = id }) ;
+            Player p = new Player();
+            p.ActorNumber = id;
+            players.Add(p);
+            OnClientConnected(p) ;
         }
 
         internal static void ExecClientDisconnect(int id)
         {
-            OnClientDisconnected(new Player() { ActorNumber = id });
+            Player p = new Player();
+            p.ActorNumber = id;
+            players.Remove(p);
+            OnClientDisconnected(p);
         }
 
         internal static void ExecServerConnect()

@@ -31,8 +31,8 @@ namespace idk
 					return (lhs - rhs).length_sq() > dist;
 				});
 		if (sync_rotation)
-			view->RegisterMember(tfm, &Transform::rotation);
+			view->RegisterMember(tfm, &Transform::rotation, 0.1);
 		if (sync_scale)
-			view->RegisterMember(tfm, &Transform::scale);
+			view->RegisterMember(tfm, &Transform::scale, 0.2);
 	}
 }

@@ -24,9 +24,9 @@ namespace idk {
 		:component_name { Name }
 	{
 
+		game_object_handle = gameObject;
 		serialized_component.first = game_object_handle->GetComponent(reflect::get_type(component_name));
 		serialized_component.second.swap((*serialized_component.first).copy());
-		game_object_handle = gameObject;
 	}
 
 	bool CMD_DeleteComponent::execute()

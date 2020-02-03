@@ -65,7 +65,7 @@ namespace idk::vkn
 			return View().Device()->getFenceStatus(*fence)==vk::Result::eSuccess;
 		}
 		//Fulfill the promises
-// #pragma optimize("",off)
+// 
 		void Fulfill()
 		{
 			vk::Device d = *View().Device();
@@ -149,7 +149,7 @@ namespace idk::vkn
 				}
 			);
 		}
-// #pragma optimize("",off)
+// 
 		void UpdateModules(vector<RscHandle<ShaderProgram>>& shaders)
 		{
 			pipeline_modules.resize(shaders.size());
@@ -165,7 +165,7 @@ namespace idk::vkn
 		void ConfigureConfig()
 		{
 			config.fill_type = FillType::eFill;
-			config.cull_face = static_cast<uint32_t>(CullFace::eBack);
+			config.cull_face = CullFace::eBack;
 			config.depth_test = true;
 			config.depth_write = true;
 			config.prim_top = PrimitiveTopology::eTriangleList;
@@ -228,7 +228,7 @@ namespace idk::vkn
 			shared_gs.renderer_fragment_shaders[FragmentShaders::FPicking]
 		};
 		vector<uint32_t> id_buffer(total_num_insts,0);
-		ivec2 max_size{};
+		uvec2 max_size{};
 		for (auto& request : requests)
 		{
 			auto& render_data = request.data;
@@ -387,7 +387,6 @@ namespace idk::vkn
 					}
 				}
 			}
-			//TODO skinned stuff
 		}
 		size_t i = 0;
 		
@@ -430,10 +429,8 @@ namespace idk::vkn
 				static_cast<uint32_t>(clear_val.size()),clear_val.data()
 			};
 			cmd_buffer.beginRenderPass(rpbi,vk::SubpassContents::eInline);
-			//TODO Bind pipeline
 			SetViewport(cmd_buffer, vp_offset, vp_size);
 			SetScissor(cmd_buffer, vp_offset, vp_size);
-			//TODO DRAW
 
 			VulkanPipeline* prev_pipeline = nullptr;
 			vector<RscHandle<ShaderProgram>> shaders;
@@ -451,9 +448,6 @@ namespace idk::vkn
 					pipeline.Bind(cmd_buffer, View());
 					prev_pipeline = &pipeline;
 				}
-				//TODO Grab everything and render them
-				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-				//auto& mesh = obj.mesh.as<VulkanMesh>();
 				{
 					uint32_t set = 0;
 					for (auto& ods : p_ro.descriptor_sets)
@@ -466,7 +460,6 @@ namespace idk::vkn
 						++set;
 					}
 				}
-				//auto& renderer_req = *obj.renderer_req;
 
 				for (auto& [location, attrib] : p_ro.attrib_buffers)
 				{
@@ -496,7 +489,7 @@ namespace idk::vkn
 			ivec2 point = ivec2{ data.point * vec2{ vp_size } };
 			vk::BufferImageCopy copy
 			{
-				offset,0,0,layers,vk::Offset3D{point.x,(vp_size.y-1)-point.y,0},vk::Extent3D{1,1,1}
+				offset,0,0,layers,vk::Offset3D{point.x,static_cast<int32_t>(vp_size.y)-1-point.y,0},vk::Extent3D{1,1,1}
 			};
 			cmd_buffer.endRenderPass();
 			hlp::TransitionImageLayout(cmd_buffer, {}, tex.Image(), tex.format, vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal);

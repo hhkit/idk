@@ -37,7 +37,23 @@ namespace idk
 		vector<Lightmap> light_maps;
 		//alignas(16) mat4 w {};
 		CameraData camDataRef{};
-		vec3 v_up{};
+		bool update_shadow=true;
+		LayerMask shadow_layers; //Layers that contribute to shadows.
+	};
+
+	struct Uncopied
+	{
+		Uncopied() = default;
+		Uncopied(Uncopied&&) :_is_copied{ false } {}
+		Uncopied(const Uncopied&);
+		Uncopied& operator=(Uncopied&&) { return*this; }
+		Uncopied& operator=(const Uncopied&) { copied(true); return *this; }
+		bool copied()const noexcept { return _is_copied; }
+		void copied(bool val)noexcept { _is_copied = val; }
+		operator bool()const noexcept { return _is_copied; }
+		Uncopied& operator =(bool val)noexcept { _is_copied = val; return *this; }
+	private:
+		bool _is_copied = { false };
 	};
 
 	class Light
@@ -49,6 +65,8 @@ namespace idk
 		real         shadow_bias   { epsilon };
 		bool         casts_shadows { true };
 		bool         isolate       { false };
+		bool         update_shadow { true };
+		LayerMask    shadow_layers {~0};
 
 		bool is_active_and_enabled() const;
 
@@ -72,6 +90,8 @@ namespace idk
 		real GetShadowBias()const { return shadow_bias; }
 		void SetShadowBias(const real& i) { shadow_bias = i; }
 		//CameraData GenerateCameraData() const;
+	private:
+		Uncopied     _copied;
 	};
 }
 #pragma warning(pop )

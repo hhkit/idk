@@ -187,6 +187,18 @@ namespace idk
 			void BindAni(PipelineThingy& the_interface, const  AnimatedRenderObject& dc) override;
 		};
 		using PbrFwdMaterialBinding = CombinedBindings<StandardVertexBindings, StandardMaterialFragBindings, PbrFwdBindings, StandardMaterialBindings>;
-		using ShadowBinding = CombinedBindings<StandardVertexBindings>;
+		
+		struct UnlitFilter :StandardBindings
+		{
+			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override;
+		};
+		struct ShadowFilter :StandardBindings
+		{
+			LayerMask filter;
+			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override;
+			void SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel);
+		};
+		using UnlitMaterialBinding = CombinedBindings<UnlitFilter,StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+		using ShadowBinding = CombinedBindings<ShadowFilter,StandardVertexBindings>;
 	}
 }

@@ -13,6 +13,7 @@
 #include <gfx/RenderTarget.h>
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VknRenderTarget.h>
+#include <math/matrix.inl>
 #include <gfx/Light.h>
 
 #include <gfx/MeshRenderer.h>
@@ -48,6 +49,8 @@
 
 #include <vkn/ColorPickRenderer.h>
 
+#include <vkn/graph_test.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<ThreadedRender>()
@@ -57,6 +60,8 @@ namespace idk::vkn
 		hash_table<RscHandle<Texture>, RscHandle<VknFrameBuffer>> deferred_buffers;
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
+		gt::GraphTest test;
+		uint32_t testing = 0;
 	};
 
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
@@ -164,7 +169,7 @@ namespace idk::vkn
 			counter++;
 			futures.emplace_back(Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs,&counter));
 		}
-//// #pragma optimize("",off)
+//// 
 		void Join() override
 		{
 			for(auto& future : futures)
@@ -180,7 +185,7 @@ namespace idk::vkn
 	};
 
 	using collated_bindings_t = hash_table < uint32_t, vector<ProcessedRO::BindingInfo>>;//Set, bindings
-	std::pair<ivec2, ivec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
+	std::pair<ivec2, uvec2> ComputeVulkanViewport(const vec2& sz, const rect& vp)
 	{
 		auto pair = ComputeViewportExtents(sz, vp);
 		auto& [offset, size] = pair;
@@ -350,7 +355,7 @@ namespace idk::vkn
 			{
 				auto& dc = *ptr_dc;
 				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material && dc.layer_mask&state.mask || !binders.Skip(the_interface, dc))
+				if (mat_inst.material && dc.layer_mask&state.mask && !binders.Skip(the_interface, dc))
 				{
 					binders.Bind(the_interface, dc);
 					if(!the_interface.BindMeshBuffers(dc))
@@ -436,7 +441,7 @@ namespace idk::vkn
 	{
 		_pipeline_manager = &manager;
 	}
-//#pragma optimize("",off)
+//
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
@@ -538,7 +543,6 @@ namespace idk::vkn
 		for (auto light_idx : state.active_lights)
 		{
 			//auto& rs = _pre_states[curr_state++];
-
 			PreRenderShadow(light_idx, state, _pre_states, curr_state, frame_index);
 		}
 		
@@ -605,7 +609,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
-//// #pragma optimize("",off)
+//// 
 	void RenderPipelineThingy(
 		[[maybe_unused]] const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -662,7 +666,7 @@ namespace idk::vkn
 
 				auto config = *obj.config;
 				config.viewport_offset = ivec2{ s_cast<uint32_t>(viewport.offset.x),s_cast<uint32_t>(viewport.offset.y) };
-				config.viewport_size = ivec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
+				config.viewport_size = uvec2{ s_cast<uint32_t>(viewport.extent.width),s_cast<uint32_t>(viewport.extent.height) };
 
 				if (is_mesh_renderer)
 					config.buffer_descriptions.emplace_back(
@@ -714,11 +718,12 @@ namespace idk::vkn
 			}
 		}
 	}
-//#pragma optimize("", off)
+//
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
-
+		if (!light.update_shadow)
+			return;
 		if (light.index == 1)
 		{
 			//auto& camData = *state.cameras->begin();
@@ -732,7 +737,7 @@ namespace idk::vkn
 					for (auto& elem : e.second.cam_lightmaps)
 					{
 						auto& rs = r[curr_state++];
-						auto cam = CameraData{ Handle<GameObject>{}, LayerMask{0xFFFFFFFF }, light.v, elem.cascade_projection };
+						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, elem.cascade_projection };
 						ShadowBinding shadow_binding;
 						shadow_binding.for_each_binder<has_setstate>(
 							[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -769,10 +774,11 @@ namespace idk::vkn
 						{
 							vec4{1}
 						};
-						if (the_interface.DrawCalls().size())
+						//if (the_interface.DrawCalls().size())
 							rs.FlagRendered();
+						dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
 						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
-
+						dbg::EndLabel(cmd_buffer);
 						rs.ubo_manager.UpdateAllBuffers();
 						cmd_buffer.endRenderPass();
 						cmd_buffer.end();
@@ -783,7 +789,7 @@ namespace idk::vkn
 		else
 		{
 
-			auto cam = CameraData{ Handle<GameObject> {}, LayerMask{0xFFFFFFFF }, light.v, light.p };
+			auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
 			ShadowBinding shadow_binding;
 			shadow_binding.for_each_binder<has_setstate>(
 				[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -882,7 +888,12 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 	}
-//// #pragma optimize("",off)
+//
+	namespace gt
+	{
+
+		void GraphDeferredTest(const CoreGraphicsState& gfx_state, RenderStateV2& rs);
+	}
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_current_frame_index = frame_index;
@@ -898,7 +909,7 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
-		ivec2 max_size{};
+		uvec2 max_size{};
 		for (auto& gfx_state : gfx_states)
 		{
 			auto sz = gfx_state.camera.render_target->Size();
@@ -945,6 +956,9 @@ namespace idk::vkn
 				for (size_t j = 0; j < curr_concurrent; ++j) {
 					auto& state = gfx_states[i + j];
 					auto& rs = _states[i + j];
+					//gt::GraphDeferredTest(state, rs);
+					_pimpl->testing=1;// |= (i == 0 && j == 0);
+						
 					_render_threads[j]->Render(state, rs);
 					rendered = true;
 					//TODO submit command buffer here and signal the framebuffer's stuff.
@@ -1174,7 +1188,7 @@ namespace idk::vkn
 	}
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
 	//and command buffer hasn't ended
-	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, ivec2 vp_size)
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, uvec2 vp_size)
 	{
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
@@ -1252,7 +1266,7 @@ namespace idk::vkn
 	}
 
 
-	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const ivec2& size)
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const uvec2& size)
 	{
 		config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
 		config.viewport_offset = offset;
@@ -1354,10 +1368,17 @@ namespace idk::vkn
 
 		//Preprocess MeshRender's uniforms
 		//TODO make ProcessRoUniforms only render forward pass stuff.
-		auto&& the_interface = (is_deferred) ? [](auto& rs) {PipelineThingy ret{}; ret.SetRef(rs.ubo_manager); return std::move(ret); }(rs) : ProcessRoUniforms(state, rs.ubo_manager);
+		auto&& the_interface = (is_deferred) ? [](auto& state,auto& rs) {
+			UnlitMaterialBinding binders;
+			binders.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
+			return vkn::ProcessRoUniforms(state, rs.ubo_manager, binders);
+			//PipelineThingy the_interface{};
+			//the_interface.SetRef(rs.ubo_manager);
+			//return the_interface;
+		}(state,rs) : ProcessRoUniforms(state, rs.ubo_manager);
 		
 		//the_interface.SetRef(rs.ubo_manager);
-		
+
 		_particle_renderer.DrawParticles(the_interface, state, rs);
 		_font_renderer.DrawFont(the_interface,state,rs);
 
@@ -1462,7 +1483,7 @@ namespace idk::vkn
 			auto config = ConfigWithVP(skybox_render_config,camera,offset,size);
 			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
 			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
-			config.cull_face = s_cast<uint32_t>(CullFace::eNone);
+			config.cull_face = CullFace::eNone;
 			config.depth_test = false;
 			config.depth_write = false;
 			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
@@ -1507,7 +1528,9 @@ namespace idk::vkn
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
-		bool still_rendering = (processed_ro.size() > 0) ||  camera.render_target->RenderDebug();
+		//if (_pimpl->testing&& state.range.inst_mesh_render_end- state.range.inst_mesh_render_begin>0)
+		//	_pimpl->test.DeferredTest(state, rs), _pimpl->testing=0;
+		bool still_rendering = true;// (processed_ro.size() > 0) || camera.render_target->RenderDebug();
 		if (still_rendering)
 		{
 			TransitionFrameBuffer(camera, cmd_buffer, view);
@@ -1516,6 +1539,7 @@ namespace idk::vkn
 
 		if (processed_ro.size()>0)
 		{
+			dbg::BeginLabel(cmd_buffer, "non-deferred region", color{ 0,0.4f,0.2f });
 			bool is_particle_renderer = false;
 			for (auto& p_ro : processed_ro)
 			{
@@ -1551,7 +1575,6 @@ namespace idk::vkn
 					prev_pipeline = &pipeline;
 				}
 				auto& pipeline = *prev_pipeline;
-				//TODO Grab everything and render them
 				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
 				//auto& mesh = obj.mesh.as<VulkanMesh>();
 				{
@@ -1585,10 +1608,13 @@ namespace idk::vkn
 					cmd_buffer.draw(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 			}
+			dbg::EndLabel(cmd_buffer);
 		}
 		if (camera.render_target->RenderDebug())
 		{
+			dbg::BeginLabel(cmd_buffer, "Debug Renderign", color{ 0,0.6f,0.0f });
 			RenderDebugStuff(state, rs, offset, size);
+			dbg::EndLabel(cmd_buffer);
 		}
 		if (still_rendering)
 		{
@@ -1610,15 +1636,8 @@ namespace idk::vkn
 
 	VulkanPipeline& FrameRenderer::GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& modules)
 	{
-		// TODO: Replace with something that actually gets the pipeline
 		return GetPipelineManager().GetPipeline(config,modules,_current_frame_index);
 	}
-
-	//PipelineHandle_t FrameRenderer::GetPipelineHandle()
-	//{
-	//	// TODO: Replace with something that actually figures out what pipeline to use
-	//	return PipelineHandle_t{};
-	//}
 
 	void FrameRenderer::NonThreadedRender::Init(FrameRenderer* renderer)
 	{
