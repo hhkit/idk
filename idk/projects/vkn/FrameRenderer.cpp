@@ -719,14 +719,9 @@ namespace idk::vkn
 		}
 	}
 //
-#pragma optimize("",off)
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
-		auto& lights = state.shared_gfx_state->Lights();
-		auto lights_data = lights.data()+light_index;
-		size_t sz_ld = sizeof(*lights_data);
-		const LightData& light = *lights_data;
-		size_t sz_light= sizeof(light);
+		const LightData& light = state.shared_gfx_state->Lights()[light_index];
 		if (!light.update_shadow)
 			return;
 		if (light.index == 1)

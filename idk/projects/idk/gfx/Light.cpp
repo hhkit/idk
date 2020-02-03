@@ -91,7 +91,6 @@ namespace idk
 	{
 		return enabled && GetGameObject()->ActiveInHierarchy();
 	}
-#pragma optimize("",off)
 	Uncopied::Uncopied(const Uncopied&) :_is_copied{ true } {}
 	void Light::InitShadowMap()
 	{
