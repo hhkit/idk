@@ -142,7 +142,6 @@ namespace idk
 					const auto tfm = GetGameObject()->Transform();
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = vec3(0.f);
-					retval.v_up = tfm->Up();
 					retval.intensity = point_light.intensity;
 					retval.cos_inner = 1;
 					retval.cos_outer = 1;
@@ -157,7 +156,6 @@ namespace idk
 					const auto tfm = GetGameObject()->Transform();
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
-					retval.v_up = tfm->Up();
 					retval.intensity = dir_light.intensity;
 					retval.cos_inner = 0;
 					retval.cos_outer = 1.f;
@@ -171,7 +169,6 @@ namespace idk
 					const auto tfm = GetGameObject()->Transform();
 					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = tfm->Forward();
-					retval.v_up = tfm->Up();
 					retval.cos_inner = cos(spotlight.inner_angle);
 					retval.cos_outer = cos(spotlight.outer_angle);
 					retval.falloff = (spotlight.use_inv_sq_atten) ? (1.f / (spotlight.attenuation_radius * spotlight.attenuation_radius)) : spotlight.attenuation_radius;
