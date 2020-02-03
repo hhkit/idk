@@ -13,6 +13,7 @@
 #include <gfx/RenderTarget.h>
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VknRenderTarget.h>
+#include <math/matrix.inl>
 #include <gfx/Light.h>
 
 #include <gfx/MeshRenderer.h>
@@ -354,7 +355,7 @@ namespace idk::vkn
 			{
 				auto& dc = *ptr_dc;
 				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material && dc.layer_mask&state.mask || !binders.Skip(the_interface, dc))
+				if (mat_inst.material && dc.layer_mask&state.mask && !binders.Skip(the_interface, dc))
 				{
 					binders.Bind(the_interface, dc);
 					if(!the_interface.BindMeshBuffers(dc))
@@ -542,7 +543,6 @@ namespace idk::vkn
 		for (auto light_idx : state.active_lights)
 		{
 			//auto& rs = _pre_states[curr_state++];
-
 			PreRenderShadow(light_idx, state, _pre_states, curr_state, frame_index);
 		}
 		
@@ -719,10 +719,16 @@ namespace idk::vkn
 		}
 	}
 //
+#pragma optimize("",off)
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
-		const LightData& light = state.shared_gfx_state->Lights()[light_index];
-
+		auto& lights = state.shared_gfx_state->Lights();
+		auto lights_data = lights.data()+light_index;
+		size_t sz_ld = sizeof(*lights_data);
+		const LightData& light = *lights_data;
+		size_t sz_light= sizeof(light);
+		if (!light.update_shadow)
+			return;
 		if (light.index == 1)
 		{
 			//auto& camData = *state.cameras->begin();
@@ -736,7 +742,7 @@ namespace idk::vkn
 					for (auto& elem : e.second.cam_lightmaps)
 					{
 						auto& rs = r[curr_state++];
-						auto cam = CameraData{ Handle<GameObject>{}, LayerMask{0xFFFFFFFF }, light.v, elem.cascade_projection };
+						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, elem.cascade_projection };
 						ShadowBinding shadow_binding;
 						shadow_binding.for_each_binder<has_setstate>(
 							[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -773,10 +779,11 @@ namespace idk::vkn
 						{
 							vec4{1}
 						};
-						if (the_interface.DrawCalls().size())
+						//if (the_interface.DrawCalls().size())
 							rs.FlagRendered();
+						dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
 						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
-
+						dbg::EndLabel(cmd_buffer);
 						rs.ubo_manager.UpdateAllBuffers();
 						cmd_buffer.endRenderPass();
 						cmd_buffer.end();
@@ -787,7 +794,7 @@ namespace idk::vkn
 		else
 		{
 
-			auto cam = CameraData{ Handle<GameObject> {}, LayerMask{0xFFFFFFFF }, light.v, light.p };
+			auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
 			ShadowBinding shadow_binding;
 			shadow_binding.for_each_binder<has_setstate>(
 				[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)

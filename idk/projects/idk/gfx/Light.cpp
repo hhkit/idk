@@ -91,15 +91,20 @@ namespace idk
 	{
 		return enabled && GetGameObject()->ActiveInHierarchy();
 	}
-
+#pragma optimize("",off)
+	Uncopied::Uncopied(const Uncopied&) :_is_copied{ true } {}
 	void Light::InitShadowMap()
 	{
+		bool is_copied = _copied;
 		std::visit([&](auto& light_variant) 
 				{
-					if(NeedShadowMap(light_variant))
+					if(is_copied||NeedShadowMap(light_variant))
+					{
 						light_variant.InitShadowMap();
+					}
 				}
 		, light);
+		_copied = false;
 	}
 
 	vector<Lightmap>& Light::GetLightMap()
@@ -171,6 +176,8 @@ namespace idk
 					retval.intensity = spotlight.intensity;
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
+				retval.shadow_layers = shadow_layers;
+				retval.update_shadow = update_shadow;
 				retval.shadow_bias = shadow_bias;
 				retval.v = LightCameraView{ this }(light_variant);
 				retval.p = LightCameraProj{}(light_variant);

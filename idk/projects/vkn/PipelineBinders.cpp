@@ -472,4 +472,14 @@ namespace idk::vkn
 		return !dc.material_instance|| !dc.material_instance->material|| dc.material_instance->material->model!=ShadingModel::Unlit;
 	}
 
+	bool ShadowFilter::Skip(PipelineThingy& , const RenderObject& dc)
+	{
+		return !(dc.layer_mask&filter);
+	}
+
+	void ShadowFilter::SetState(const CameraData& cam, const vector<SkeletonTransforms>& )
+	{
+		filter = cam.culling_flags;
+	}
+
 }
