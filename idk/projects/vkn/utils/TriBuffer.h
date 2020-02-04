@@ -9,6 +9,7 @@ namespace idk::vkn
 {
 
 	struct TriBuffer {
+		vector<hlp::UniqueAlloc     > allocs{};
 		vector<vk::Image            > images{};
 		vector<vk::UniqueImageView  > image_views{};
 		vector<PresentationSignals>	  pSignals{};
