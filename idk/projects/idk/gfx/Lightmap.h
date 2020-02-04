@@ -20,7 +20,7 @@ namespace idk {
 		RscHandle<FrameBuffer> InitShadowMap();
 		RscHandle<FrameBuffer> GetShadowMap();
 		bool NeedLightMap();
-
+		void DeleteShadowMap();
 		unsigned GetShadowMapSize() const;
 
 		RscHandle<FrameBuffer> light_map{};

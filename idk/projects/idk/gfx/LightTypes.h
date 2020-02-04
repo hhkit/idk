@@ -29,6 +29,7 @@ namespace idk
 
 		const void* unique_id() const noexcept;
 		vector<Lightmap> InitShadowMap();
+		void DeleteShadowMap() noexcept;
 
 		vector<Lightmap>& GetShadowMap();
 		const vector<Lightmap>& GetShadowMap()const;
@@ -58,6 +59,7 @@ namespace idk
 		//CascadedSet cascaded_light_maps;
 		vector<Lightmap> InitShadowMap();
 		vector<Lightmap> InitShadowMap() const;
+		void DeleteShadowMap() noexcept;
 
 		vector<Lightmap>& GetShadowMap();
 		const vector<Lightmap>& GetShadowMap()const;
@@ -76,6 +78,7 @@ namespace idk
 
 		vector<Lightmap> light_map{};
 		vector<Lightmap> InitShadowMap();
+		void DeleteShadowMap() noexcept;
 
 		vector<Lightmap>& GetShadowMap();
 		const vector<Lightmap>& GetShadowMap()const;
