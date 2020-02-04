@@ -73,7 +73,7 @@ namespace idk
 		Light(const Light&) = default;
 		Light& operator=(Light&&) = default;
 		Light& operator=(const Light&) = default;
-		~Light();
+		virtual ~Light();
 
 		bool is_active_and_enabled() const;
 

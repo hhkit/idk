@@ -17,7 +17,8 @@
 #include <math/shapes/aabb.h>
 
 namespace idk {
-//#pragma optimize("",off)
+	
+	//#pragma optimize("",off)
 	void Lightmap::SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far)
 	{
 		if (oldCamView != camData.view_matrix)
