@@ -123,6 +123,12 @@ namespace idk::mono
 	{
 		using Actual = std::decay_t<T>;
 
+		if (!*this)
+		{
+			if constexpr (index_in_variant_v<Actual, CSharpObjectVariant> != std::variant_size_v<CSharpObjectVariant>)
+				_variables[fieldname] = obj;
+		}
+
 		auto me = Raw();
 		auto field = Field(fieldname);
 
@@ -179,6 +185,12 @@ namespace idk::mono
 	}
 
 	template<typename T>
+	inline T ManagedObject::Get(string_view field)
+	{
+		return T();
+	}
+
+	template<typename T>
 	void ManagedObject::Visit(T&& functor, bool ignore_privacy)
 	{
 		auto depth = int{};
@@ -197,6 +209,24 @@ namespace idk::mono
 	{
 		++depth;
 		auto last_children = -1;
+
+		if (!*this)
+		{
+			for (auto& [name, value]: _variables)
+			{
+				std::visit([&](auto& elem)
+					{
+						if (functor(name.data(), elem, -last_children))
+						{
+							reflect::dynamic{ elem }.visit(functor);
+							last_children = 1;
+						}
+						else
+							last_children = 0;
+					}, value);
+			}
+			return;
+		}
 
 		auto class_stack = [&]()
 		{

@@ -2,7 +2,7 @@
 
 namespace TestAndSeek
 {
-    class NetworkDebugger
+    class NetworkDbugger
         : MonoBehavior
     {
         public Player player;

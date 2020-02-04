@@ -27,6 +27,8 @@
       right: 5
       top: 5
     shadow_bias: 1.1920929e-07
+    shadow_layers: {mask: 4294967295}
+    update_shadow: 1
 - !4295032832 
   - active: 1
   - !Transform 
