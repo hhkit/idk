@@ -93,7 +93,7 @@ namespace idk {
 			};
 
 			//view -> world -> light
-			mat4 matrix = lightView * (perspective(camData.fov, camData.ap, near_plane, far_plane) * camData.view_matrix).inverse();
+			mat4 matrix = lightView*(perspective(camData.fov, camData.ap, near_plane, far_plane) * camData.view_matrix).inverse();
 
 			//real min_v = std::numeric_limits<real>::min();
 			vec3 min_c = vec3{ std::numeric_limits<float>::max() };
@@ -102,15 +102,15 @@ namespace idk {
 			for (auto& elem : corners)
 			{
 				auto v = matrix * elem;
-				v /= v.w;
-
+				v /= v.w;	
 				min_c = { min(min_c.x,v.x),min(min_c.y,v.y) ,min(min_c.z, v.z) };
 				max_c = { max(max_c.x,v.x),max(max_c.y,v.y) ,max(max_c.z,v.z) };
 			}
-			vec3 max_comp = max(min_c, max_c);
-			//float max_rad = max(max(max_comp.x, max_comp.y), max_comp.z);
 
-			texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / (2.f * max(max(max_comp.x, max_comp.y), max_comp.z))));
+			vec3 max_comp = max(min_c, max_c);
+			float max_rad = max(max(max_comp.x, max_comp.y), max_comp.z);
+
+			texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / max_rad));
 
 			//cascade_projection = ortho(-max_rad, max_rad, -max_rad, max_rad, -max_rad, max_rad);
 			cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y, min_c.z, max_c.z);
