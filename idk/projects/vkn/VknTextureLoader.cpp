@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <vkn/DebugUtil.h>
+#include <vkn/TextureTracker.h>
 namespace std
 {
 
@@ -372,6 +373,9 @@ namespace idk::vkn
 		hlp::UniqueAlloc blit_img_alloc;
 		vk::UniqueBuffer staging_buffer;
 		vk::UniqueDeviceMemory staging_memory;
+
+		if (image)
+			dbg::TextureTracker::Inst().reg_allocate(image->operator VkImage(),num_bytes);
 		if (in_info)
 		{
 

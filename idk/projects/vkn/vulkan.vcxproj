@@ -364,6 +364,7 @@
     <ClInclude Include="ResourceLifetimeManager.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TexturePool.h" />
+    <ClInclude Include="TextureTracker.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="topological_sort.h" />
     <ClInclude Include="UniformManager.h" />
@@ -462,6 +463,7 @@
     <ClCompile Include="ResourceLifetimeManager.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TexturePool.cpp" />
+    <ClCompile Include="TextureTracker.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="topological_sort.cpp" />
     <ClCompile Include="UniformManager.cpp" />

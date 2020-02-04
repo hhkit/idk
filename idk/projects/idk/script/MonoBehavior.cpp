@@ -10,7 +10,7 @@
 #include <concurrent_queue.h>
 namespace idk::mono
 {
-	string_view Behavior::TypeName() const
+	string Behavior::TypeName() const
 	{
 		return script_data.TypeName();
 	}
@@ -27,6 +27,7 @@ namespace idk::mono
 				_started = false;
 				return script_data.Raw();
 			}
+		script_data = ManagedObject{ type };
 		return nullptr;
 	}
 

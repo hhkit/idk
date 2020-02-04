@@ -11,6 +11,7 @@
 #include <res/ResourceHandle.inl>
 
 #include <vkn/VknTextureLoader.h>
+#include <vkn/TextureTracker.h>
 
 namespace idk::vkn
 {
@@ -392,7 +393,9 @@ namespace idk::vkn
 		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
 		auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
 		device.bindImageMemory(*image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
-
+		
+		if (image)
+			dbg::TextureTracker::Inst(dbg::TextureAllocTypes::eCubemap).reg_allocate(image->operator VkImage(), num_bytes);
 		const vk::ImageAspectFlagBits img_aspect = load_info.aspect;
 		result.aspect = img_aspect;
 		vk::UniqueImage blit_src_img;
@@ -564,6 +567,8 @@ namespace idk::vkn
 
 		auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
 
+		if (image)
+			dbg::TextureTracker::Inst(dbg::TextureAllocTypes::eFontAtlas).reg_allocate(image->operator VkImage(), num_bytes);
 		if (data)
 			hlp::MapMemory(device, *stagingMemory, 0, data, num_bytes, vk::DispatchLoaderDefault{});
 		vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
