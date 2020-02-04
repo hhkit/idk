@@ -102,7 +102,11 @@ namespace idk::vkn::hlp
 	MemoryAllocator::Alloc::Control::~Control()
 	{
 		if (src)
-			IntMemory().Free(unaligned_offset, size+(offset- unaligned_offset));
+		{
+			IntMemory().Free(unaligned_offset, size + (offset - unaligned_offset));
+			while (src->memories.size() && src->memories.back().curr_offset == 0)
+				src->memories.pop_back();
+		}
 		else
 		{
 			LOG_TO(LogPool::GFX, "Attempting to free weird shit");

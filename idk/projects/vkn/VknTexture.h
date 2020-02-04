@@ -5,6 +5,7 @@
 #include <vkn/MemoryAllocator.h>
 #include <gfx/CompiledTexture.h>
 #include <meta/stl_hack.h>
+#include <vkn/VulkanResourceManager.h>
 namespace idk::vkn {
 
 	struct VknTexture
@@ -14,14 +15,14 @@ namespace idk::vkn {
 		vk::DeviceSize			sizeOnDevice{};
 		void* rawData{};
 		string					path{ "" };
-		vk::UniqueImage			image_{ nullptr };
+		VulkanRsc<vk::Image>			image_{ nullptr };
 		vk::Format				format{};
 		vk::ImageUsageFlags     usage{};
 		vk::ImageAspectFlags    img_aspect;
 		vk::UniqueDeviceMemory  mem{ nullptr };
 		hlp::UniqueAlloc        mem_alloc{};
-		vk::UniqueImageView     imageView{ nullptr };
-		vk::UniqueSampler       sampler{ nullptr };
+		VulkanRsc<vk::ImageView>     imageView{ nullptr };
+		VulkanRsc<vk::Sampler>       sampler{ nullptr };
 		opt<vk::DescriptorSet>	descriptorSet{};
 
 		VknTexture() = default;
