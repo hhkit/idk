@@ -308,6 +308,9 @@
     <ClInclude Include="graph_test.h">
       <Filter>render\graph\test</Filter>
     </ClInclude>
+    <ClInclude Include="TextureTracker.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -537,6 +540,8 @@
     <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="RenderTask.cpp" />
     <ClCompile Include="UniformManager.cpp" />
+    <ClCompile Include="DebugUtil.cpp" />
+    <ClCompile Include="TextureTracker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

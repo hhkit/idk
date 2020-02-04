@@ -3,6 +3,7 @@
 #include <vkn/VknFontAtlas.h>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <vkn/TextureTracker.h>
 
 namespace idk::vkn {
 	RscHandle<Texture> VknFontAtlas::Tex() const noexcept
@@ -15,6 +16,8 @@ namespace idk::vkn {
 	}
 	VknFontAtlas::~VknFontAtlas()
 	{
+		if (texture)
+			dbg::TextureTracker::Inst(dbg::TextureAllocTypes::eCubemap).reg_deallocate(texture.as<VknTexture>().Image().operator VkImage());
 		Core::GetResourceManager().Release(texture);
 	}
 	VknFontAtlas::VknFontAtlas(VknFontAtlas&& rhs) noexcept

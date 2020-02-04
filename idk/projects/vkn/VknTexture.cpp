@@ -4,6 +4,7 @@
 #include <vkn/VulkanTextureFactory.h>
 #include <res/ResourceManager.inl>
 #include <sstream>
+#include <vkn/TextureTracker.h>
 namespace idk::vkn {
 	namespace hlp
 	{
@@ -47,6 +48,8 @@ namespace idk::vkn {
 	{
 		//vknData.reset();
 		//mem.reset();
+		if(image_)
+			dbg::TextureTracker::Inst().reg_deallocate(image_->operator VkImage());
 	}
 
 	VknTexture::VknTexture(VknTexture&& rhs) noexcept

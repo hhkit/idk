@@ -10,6 +10,8 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 
+#include <vkn/TextureTracker.h>
+
 //+x,-x,+y,-y,+z,-z
 
 namespace idk::vkn {
@@ -416,7 +418,9 @@ namespace idk::vkn {
 		sub_range.levelCount = load_info.mipmap_level + 1;
 		sub_range.baseArrayLayer = 0;
 		sub_range.layerCount = 6;
-		
+
+		if (image)
+			dbg::TextureTracker::Inst(dbg::TextureAllocTypes::eCubemap).reg_allocate(image->operator VkImage(), num_bytes);
 		if (in_info)
 		{
 
@@ -575,6 +579,9 @@ namespace idk::vkn {
 
 		auto&& [stagingBuffer, stagingMemory] = hlp::CreateAllocBindBuffer(pd, device, num_bytes, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vk::DispatchLoaderDefault{});
 
+
+		if (image)
+			dbg::TextureTracker::Inst(dbg::TextureAllocTypes::eCubemap).reg_allocate(image->operator VkImage(), num_bytes);
 		if (data)
 			hlp::MapMemory(device, *stagingMemory, 0, data, num_bytes, vk::DispatchLoaderDefault{});
 		vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
