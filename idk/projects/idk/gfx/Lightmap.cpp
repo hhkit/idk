@@ -116,6 +116,10 @@ namespace idk {
 	{
 		return !light_map;
 	}
+	void Lightmap::DeleteShadowMap()
+	{
+		Core::GetResourceManager().Release(light_map);
+	}
 	unsigned Lightmap::GetShadowMapSize() const
 	{
 		return texel_size;

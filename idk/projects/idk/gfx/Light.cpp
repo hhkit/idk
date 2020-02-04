@@ -87,6 +87,16 @@ namespace idk
 		mat4 operator()(T&) { return mat4{}; }
 	};
 
+	Light::~Light()
+	{
+		if (!_copied)
+		{
+			std::visit([](auto& light) {
+				light.DeleteShadowMap(); 
+				}, light);
+		}
+	}
+
 	bool Light::is_active_and_enabled() const
 	{
 		return enabled && GetGameObject()->ActiveInHierarchy();
