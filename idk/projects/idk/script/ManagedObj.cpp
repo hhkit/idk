@@ -5,6 +5,20 @@
 #include <script/MonoBehaviorEnvironment.h>
 namespace idk::mono
 {
+	ManagedObject::ManagedObject(string_view _typename)
+		: _typename{_typename}
+	{
+		auto& sv = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
+		if (&sv)
+		{
+			if (auto type = sv.Type(_typename))
+			{
+				_gc_handle = mono_gchandle_new(type->ConstructTemporary(), false);
+				return;
+			}
+		}
+	}
+
 	ManagedObject::ManagedObject(MonoObject* obj)
 		: _gc_handle{mono_gchandle_new(obj, false)}
 	{
@@ -63,7 +77,7 @@ namespace idk::mono
 
 	MonoObject* ManagedObject::Raw() const noexcept
 	{
-		return mono_gchandle_get_target(_gc_handle);
+		return _gc_handle ? mono_gchandle_get_target(_gc_handle) : nullptr;
 	}
 	ManagedObject::operator bool() const
 	{
@@ -89,13 +103,16 @@ namespace idk::mono
 		auto class_name = mono_class_get_name(klass);
 		return Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(class_name);
 	}
-	string_view ManagedObject::TypeName() const
+	string ManagedObject::TypeName() const
 	{
-		return mono_class_get_name(mono_object_get_class(Raw()));
+		return *this ? mono_class_get_name(mono_object_get_class(Raw())) : _typename;
 	}
 	MonoClassField* ManagedObject::Field(string_view fieldname)
 	{
 		auto me = Raw();
+		if (!me)
+			return nullptr;
+
 		auto klass = mono_object_get_class(me);
 		return mono_class_get_field_from_name(klass, fieldname.data());
 	}

@@ -1429,7 +1429,18 @@ namespace idk {
 		string displayingComponent = [&]() ->string
 		{
 			auto type = (*component).type;
-			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + " (Script)" : string{ type.name() };
+            if (type.is<mono::Behavior>())
+            {
+                auto mb = handle_cast<mono::Behavior>(component);
+                auto behavior_name = string{ mb->TypeName() };
+                if (mb->script_data)
+                    behavior_name += " (Script)";
+                else
+                    behavior_name += " (Missing Script)";
+                return behavior_name;
+            }
+            else
+                return string{ type.name() };
 		}();
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);
