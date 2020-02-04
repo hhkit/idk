@@ -140,6 +140,8 @@ namespace idk::vkn
 			end = _end;
 		}
 		vector<DLightData> directional_vp{};
+
+		mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 		for (;i<end;++i)
 		{
 			auto active_index = vstate.active_lights[i];
@@ -161,7 +163,7 @@ namespace idk::vkn
 				for (auto& elem : state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
 					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
-					directional_vp.emplace_back(DLightData{ elem.cam_max.z,mat4{vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1}}*elem.cascade_projection * light.v});
+					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat *elem.cascade_projection * light.v});
 				}
 			}
 		}
