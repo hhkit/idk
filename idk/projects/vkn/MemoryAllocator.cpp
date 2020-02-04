@@ -103,6 +103,10 @@ namespace idk::vkn::hlp
 	{
 		if (src)
 			IntMemory().Free(unaligned_offset, size+(offset- unaligned_offset));
+		else
+		{
+			LOG_TO(LogPool::GFX, "Attempting to free weird shit");
+		}
 	}
 
 	MemoryAllocator::Alloc::~Alloc() = default;
@@ -129,7 +133,10 @@ namespace idk::vkn::hlp
 				break;
 			}
 		}
-		free_list.emplace(range);
+		if (range.end == this->curr_offset)
+			curr_offset = range.start;
+		else
+			free_list.emplace(range);
 	}
 
 	size_t Aligned(size_t offset, size_t alignment)
