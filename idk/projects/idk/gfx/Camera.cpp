@@ -144,8 +144,6 @@ namespace idk
 			layer_mask,
 			ViewMatrix(),
 			ProjectionMatrix(),
-			getTightProjection(),
-			getTightProjectionCenter(),
 			render_target,
 			false,
 			clear,
@@ -158,6 +156,8 @@ namespace idk
 			GetGameObject()->Transform()->Forward(),
 			GetGameObject()->Transform()->position,
 			{tan(hfov),tan(vfov) },
+			field_of_view,
+			AspectRatio()
 		};
 	}
 	float Camera::AspectRatio() const

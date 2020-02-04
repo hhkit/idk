@@ -161,7 +161,7 @@ namespace idk::vkn
 				for (auto& elem : state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
 					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
-					directional_vp.emplace_back(DLightData{ elem.far_plane,elem.cascade_projection * light.v});
+					directional_vp.emplace_back(DLightData{ elem.cam_max.z,elem.cascade_projection * light.v});
 				}
 			}
 		}

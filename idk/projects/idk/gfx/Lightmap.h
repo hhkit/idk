@@ -14,6 +14,7 @@ namespace idk {
 
 	public:
 		Lightmap() = default;
+		virtual ~Lightmap() = default;
 		void SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far);
 		void UpdateResolution(const unsigned& res);
 		RscHandle<FrameBuffer> InitShadowMap();
@@ -25,6 +26,7 @@ namespace idk {
 		RscHandle<FrameBuffer> light_map{};
 		mat4 cascade_projection{};
 		real far_plane = 1.f;
+		vec3 cam_max = {};
 	private:
 		
 		mat4 oldCamView{};

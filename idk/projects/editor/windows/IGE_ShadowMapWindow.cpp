@@ -115,7 +115,7 @@ namespace idk {
 						auto& img = **rtt.DepthAttachment();
 						const vec2 size = vec2{ img.Size() };
 
-						ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(1, 0), ImVec2(0, 1));
+						ImGui::Image(img.ID(), size * ((this->window_size.x) / size.x), ImVec2(1, 1), ImVec2(0, 0));
 					}
 				}
 				ImGui::NewLine();

@@ -141,8 +141,6 @@ namespace idk
 		LayerMask culling_flags{ 0xFFFFFFFF };
 		mat4 view_matrix{};
 		mat4 projection_matrix{};
-		mat4 tight_projection_matrix{};
-		vec3 projection_center{};
 		RscHandle<RenderTarget> render_target{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
@@ -157,6 +155,8 @@ namespace idk
 		vec3 look;
 		vec3 pos;
 		vec2 tan_halfFOV;
+		rad fov{};
+		real ap;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 

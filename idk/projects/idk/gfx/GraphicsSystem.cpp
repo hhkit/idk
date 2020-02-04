@@ -371,8 +371,8 @@ namespace idk
 		float n_plane = camera.near_plane, f_plane = camera.far_plane;
 
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.2f * diff;
-		float second_end = n_plane + 0.4f * diff;
+		float first_end = n_plane + 0.3f * diff;
+		float second_end = n_plane + 0.5f * diff;
 
 		float cascadeiter[4] = { n_plane,first_end,second_end,f_plane };
 
@@ -581,6 +581,17 @@ namespace idk
 					if (res.index == 1)
 					{
 						Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
+							
+							for (auto& elem : d_lightmaps)
+							{
+								for (auto& e : elem.second.cam_lightmaps)
+								{
+									e.light_map->attachments.clear();
+									e.light_map->depth_attachment.reset();
+									e.light_map->stencil_attachment.reset();
+								}
+								elem.second.cam_lightmaps.clear();
+							}
 							d_lightmaps.clear();
 						};
 

@@ -149,7 +149,8 @@ namespace idk
 				{
 					const PointLight& point_light = light_variant;
 					retval.light_color = point_light.light_color * point_light.intensity;
-					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
+					const auto tfm = GetGameObject()->Transform();
+					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = vec3(0.f);
 					retval.intensity = point_light.intensity;
 					retval.cos_inner = 1;
