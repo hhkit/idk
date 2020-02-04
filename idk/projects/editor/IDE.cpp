@@ -346,7 +346,7 @@ namespace idk
 		_interface->ImGuiFrameRender();
 	}
 
-	Handle<Camera> IDE::getSceneEditorCam()
+	Handle<Camera> IDE::GetEditorCamera()
 	{
 		return _camera.current_camera;
 	}
