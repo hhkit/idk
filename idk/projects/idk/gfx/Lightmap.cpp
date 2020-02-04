@@ -80,7 +80,7 @@ namespace idk {
 			static vec4 corners[8] =
 			{
 				// Near plane
-				vec4{1.f},
+				{1.f, 1.f, 1.f, 1.f},
 				{ -1.f, 1.f, 1.f, 1.f },
 				{ 1.f, -1.f, 1.f, 1.f },
 				{ -1.f, -1.f, 1.f, 1.f },
@@ -91,18 +91,12 @@ namespace idk {
 				{ -1.f, -1.f, -1.f, 1.f }
 			};
 
-			mat4 proj = perspective(camData.fov,camData.ap,near_plane,far_plane);
-			
-			//To world
-			mat4 inv_vp = (proj * camData.view_matrix).inverse();
-
 			//view -> world -> light
-			mat4 matrix = lightView * inv_vp;
+			mat4 matrix = lightView * (perspective(camData.fov, camData.ap, near_plane, far_plane) * camData.view_matrix).inverse();
 
-			real max_v = std::numeric_limits<float>::max();
 			//real min_v = std::numeric_limits<real>::min();
-			vec3 min_c = vec3{ max_v };
-			vec3 max_c = vec3{ -max_v };
+			vec3 min_c = vec3{ std::numeric_limits<float>::max() };
+			vec3 max_c = -min_c;
 
 			for (auto& elem : corners)
 			{
@@ -120,9 +114,61 @@ namespace idk {
 			//cascade_projection = ortho(-max_rad, max_rad, -max_rad, max_rad, -max_rad, max_rad);
 			cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y, min_c.z, max_c.z);
 
-			vec4 clipz = vec4(0.f, 0.f, far_plane, 1.f);
-			cam_max = clipz;
 
+			//vec4 corners[8] =
+			//{
+			//	// Near plane
+			//	{-1.f, 1.f, -1.f, 1.f},
+			//	{ 1.f, 1.f, -1.f, 1.f },
+			//	{ 1.f, -1.f, -1.f, 1.f },
+			//	{ -1.f, -1.f, -1.f, 1.f },
+			//	// Far plane
+			//	{ -1.f, 1.f, 1.f, 1.f },
+			//	{ 1.f, 1.f, 1.f, 1.f },
+			//	{ 1.f, -1.f, 1.f, 1.f },
+			//	{ -1.f, -1.f, 1.f, 1.f }
+			//};
+
+			//mat4 matrix =  (camData.projection_matrix * camData.view_matrix).inverse();
+			//for (auto& elem : corners)
+			//{
+			//	auto c = matrix * elem;
+			//	elem = elem / elem.w;
+			//}
+
+			//for (unsigned i = 0; i < 4; ++i)
+			//{
+			//	vec3 dist = corners[i + 4].xyz - corners[i].xyz;
+			//	corners[i + 4].xyz = corners[i].xyz + (dist * far_plane);
+			//	corners[i].xyz = corners[i].xyz + (dist * near_plane);
+			//}
+
+			//for (auto& elem : corners)
+			//{
+			//	
+			//	center += elem.xyz;
+			//}
+
+			//center /= 8.f;
+
+			//float radius = 0.0f;
+			//for (auto& elem: corners) {
+			//	float distance = (elem.xyz - center).length();
+			//	radius = max(radius, distance);
+			//}
+			//radius = std::ceil(radius * 16.f) / 16.f;
+
+			//texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / (2.f * radius)));
+
+			//real max_v = std::numeric_limits<float>::max();
+			////real min_v = std::numeric_limits<real>::min();
+			//vec3 max_c = vec3{ radius};
+			//vec3 min_c = -max_c;
+
+			//light.v = look_at(center * min_c.z, vec3{ center }, vec3{0,1,0});
+			//cascade_projection = ortho(min_c.x,max_c.x,min_c.y,max_c.y,0.f,max_c.z - min_c.z);
+
+			cam_max = vec4(0.f, 0.f, far_plane, 1.f);
 
 			oldCamView = camData.view_matrix;
 		}
@@ -144,19 +190,31 @@ namespace idk {
 				FilterMode::_enum::Linear
 			}
 		);
+
+		if (light_map)
+		{
+			light_map->attachments.clear();
+			light_map->depth_attachment.reset();
+			light_map->stencil_attachment.reset();
+		}
+
 		auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
 		return shadow_map;
 	}
 	RscHandle<FrameBuffer> Lightmap::GetShadowMap()
 	{
-		//if (texel_size != cascade_resolution)
-			//return InitShadowMap();
+		if (texel_size != cascade_resolution)
+			return InitShadowMap();
 
 		return light_map;
 	}
 	bool Lightmap::NeedLightMap()
 	{
 		return !light_map;
+	}
+	void Lightmap::DeleteShadowMap()
+	{
+		Core::GetResourceManager().Release(light_map);
 	}
 	unsigned Lightmap::GetShadowMapSize() const
 	{
