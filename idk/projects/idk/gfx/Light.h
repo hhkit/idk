@@ -68,6 +68,13 @@ namespace idk
 		bool         update_shadow { true };
 		LayerMask    shadow_layers {~0};
 
+		Light() = default;
+		Light(Light&&) = default;
+		Light(const Light&) = default;
+		Light& operator=(Light&&) = default;
+		Light& operator=(const Light&) = default;
+		virtual ~Light();
+
 		bool is_active_and_enabled() const;
 
 		void InitShadowMap();

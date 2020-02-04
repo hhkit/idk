@@ -33,6 +33,9 @@ namespace idk {
 	{
 		if (repeated_commands.empty()) // first call
 		{
+			if (count <= 1)
+				return false;
+
 			CommandController& controller = Core::GetSystem<IDE>().command_controller;
 			for (auto i = 0; i < count; ++i)
 			{

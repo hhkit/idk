@@ -14,12 +14,13 @@ namespace idk {
 
 	public:
 		Lightmap() = default;
+		virtual ~Lightmap() = default;
 		void SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far);
 		void UpdateResolution(const unsigned& res);
 		RscHandle<FrameBuffer> InitShadowMap();
 		RscHandle<FrameBuffer> GetShadowMap();
 		bool NeedLightMap();
-
+		void DeleteShadowMap();
 		unsigned GetShadowMapSize() const;
 
 		RscHandle<FrameBuffer> light_map{};

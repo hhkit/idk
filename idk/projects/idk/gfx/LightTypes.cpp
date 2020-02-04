@@ -65,6 +65,13 @@ namespace idk
 		}
 		return light_map;
 	}
+	void PointLight::DeleteShadowMap() noexcept
+	{
+		for (auto& lmp : light_map)
+		{
+			lmp.DeleteShadowMap();
+		}
+	}
 	vector<Lightmap>& PointLight::GetShadowMap()
 	{
 		// TODO: insert return statement here
@@ -101,6 +108,13 @@ namespace idk
 		}
 		return lm;
 	}
+	void DirectionalLight::DeleteShadowMap() noexcept
+	{
+		for (auto& lmp : light_map)
+		{
+			lmp.DeleteShadowMap();
+		}
+	}
 	vector < Lightmap> SpotLight::InitShadowMap()
 	{
 		light_map.resize(1);
@@ -112,6 +126,13 @@ namespace idk
 			elem.InitShadowMap();
 		}
 		return light_map;
+	}
+	void SpotLight::DeleteShadowMap() noexcept
+	{
+		for (auto& lmp : light_map)
+		{
+			lmp.DeleteShadowMap();
+		}
 	}
 }
 

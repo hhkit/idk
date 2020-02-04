@@ -718,7 +718,7 @@ namespace idk::vkn
 			}
 		}
 	}
-//
+//#pragma optimize("", off)
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
@@ -758,13 +758,13 @@ namespace idk::vkn
 
 
 						cmd_buffer.begin(begin_info, dispatcher);
-						auto lm = elem.light_map->DepthAttachment().buffer;
+						//auto lm = elem.light_map->DepthAttachment().buffer;
 						auto sz = elem.light_map->DepthAttachment().buffer->Size();
 
 						vk::Rect2D render_area
 						{
 							vk::Offset2D{},
-							vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
+							vk::Extent2D{sz.x,sz.y}
 						};
 						auto& rt = elem.light_map.as<VknFrameBuffer>();
 						vk::Framebuffer fb = rt.GetFramebuffer();
@@ -820,7 +820,7 @@ namespace idk::vkn
 				vk::Rect2D render_area
 				{
 					vk::Offset2D{},
-					vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
+					vk::Extent2D{sz.x,sz.y}
 				};
 				auto& rt = elem.light_map.as<VknFrameBuffer>();
 				vk::Framebuffer fb = rt.GetFramebuffer();

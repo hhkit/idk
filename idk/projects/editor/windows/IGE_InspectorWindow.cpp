@@ -183,9 +183,26 @@ namespace idk {
 
         ImGui::BeginChild("_inspector_inner");
         if (const auto rect_transform = gos[0]->GetComponent<RectTransform>())
+        {
+            if (_debug_mode)
+                ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                    rect_transform.id,
+                    s_cast<int>(rect_transform.scene),
+                    s_cast<int>(rect_transform.index),
+                    s_cast<int>(rect_transform.gen));
             DisplayComponent(rect_transform);
+        }
         else
-            DisplayComponent(gos[0]->GetComponent<Transform>());
+        {
+            const auto transform = gos[0]->GetComponent<Transform>();
+            if (_debug_mode)
+                ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                    transform.id,
+                    s_cast<int>(transform.scene),
+                    s_cast<int>(transform.index),
+                    s_cast<int>(transform.gen));
+            DisplayComponent(transform);
+        }
 
         if (gameObjectsCount == 1)
         {
@@ -207,7 +224,12 @@ namespace idk {
                         continue;
 
                     //COMPONENT DISPLAY
-                    ImGui::Text("id: %lld", component.id);
+                    if (_debug_mode)
+                        ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                            component.id,
+                            s_cast<int>(component.scene),
+                            s_cast<int>(component.index),
+                            s_cast<int>(component.gen));
                     DisplayComponent(component);
                 }
             }
@@ -287,7 +309,12 @@ namespace idk {
 
                     _curr_component_is_added = std::find(added.begin(), added.end(), j) != added.end(); // j is newly added
 
-                    ImGui::Text("id: %lld", component.id);
+                    if (_debug_mode)
+                        ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                            component.id,
+                            s_cast<int>(component.scene),
+                            s_cast<int>(component.index),
+                            s_cast<int>(component.gen));
                     DisplayComponent(component);
                     ++j;
                 }
@@ -533,7 +560,7 @@ namespace idk {
 					outputString.append(")");
 				}
 
-                editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, outputString));
+                editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, go, outputString));
 				++execute_counter;
 			}
 
@@ -584,7 +611,7 @@ namespace idk {
             for (const auto& tag : Core::GetSystem<TagManager>().GetConfig().tags)
             {
                 if (ImGui::MenuItem(tag.data()))
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, tag));
+                    ExecuteOnSelected<CMD_ModifyGameObjectHeader>(game_object, std::nullopt, tag);
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Tag##_add_tag_"))
