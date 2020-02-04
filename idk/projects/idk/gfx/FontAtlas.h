@@ -40,6 +40,9 @@ namespace idk {
 
         PathHandle reload_path;
 
+		FontAtlas() = default;
+		virtual ~FontAtlas() = default;
+
 		// accessors
 		float AspectRatio() const;
 		uvec2 Size() const;

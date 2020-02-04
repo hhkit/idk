@@ -75,36 +75,41 @@ void main()
 		PerCamera.inverse_view_transform *
 		vec4(view_pos,1);
 	int j=0;
+	float view_z_abs = abs(view_pos.z);
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		vec3 result = pbr_specular(LightBlk.lights[i], view_pos.xyz, normal, reflected, albedo, specular, roughness, ambient_o); 
 		
+		vec4 cascade_c = vec4(0,0,0,0);
 		if (LightBlk.lights[i].type == 1)
 		{
 			if(LightBlk.lights[i].cast_shadow!=0)
-				//result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));
 			{
-				vec3 shadow_factor = vec3(0);
-				if(world_pos.z <= DirectionalBlk.directional_vp[j].far_plane)
+				//result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));			
+				
+				vec3 shadow_factor = vec3(1.f,1.f,1.f);
+				if(view_z_abs <= DirectionalBlk.directional_vp[j].far_plane)
 				{
-					shadow_factor += vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					//shadow_factor *= shadow_factor;
 					//cascade_c = vec4(0.1,0,0,0);
 				}
-				++j;
-				if(world_pos.z <= DirectionalBlk.directional_vp[j].far_plane)
+				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				{
-					shadow_factor += vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					//shadow_factor *= shadow_factor;
 					//cascade_c = vec4(0,0.1,0,0);
 				}
-				++j;
-				if(world_pos.z <= DirectionalBlk.directional_vp[j].far_plane)
+				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				{
-					shadow_factor += vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					//shadow_factor *= shadow_factor;
 					//cascade_c = vec4(0,0,0.1,0);
 				}
 				
 				result *= shadow_factor;
 				j = 0;
+				
 			}
 			//vvvp = LightBlk.lights[i].vp;
 		}
