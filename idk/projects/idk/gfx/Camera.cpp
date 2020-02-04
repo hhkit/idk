@@ -137,8 +137,8 @@ namespace idk
 	}
 	CameraData Camera::GenerateCameraData() const
 	{	
-		rad vfov{  field_of_view *0.5f };
-		rad hfov{ ( field_of_view  *AspectRatio()) * 0.5f };
+		//rad vfov{  field_of_view *0.5f };
+		//rad hfov{ ( field_of_view  *AspectRatio()) * 0.5f };
 		return CameraData{
 			GetGameObject(),
 			layer_mask,
@@ -151,11 +151,8 @@ namespace idk
 			viewport,
 			near_plane,
 			far_plane,
-			getBSphereRadius(),
-			getFarCorner(),
 			GetGameObject()->Transform()->Forward(),
 			GetGameObject()->Transform()->position,
-			{tan(hfov),tan(vfov) },
 			field_of_view,
 			AspectRatio()
 		};

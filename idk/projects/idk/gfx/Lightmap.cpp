@@ -77,7 +77,7 @@ namespace idk {
 			//cam_max = clipz;
 
 			//Using inv projection calculation
-			static vec4 corners[8] =
+			static const vec4 corners[8] =
 			{
 				// Near plane
 				{1.f, 1.f, 1.f, 1.f},
@@ -107,9 +107,9 @@ namespace idk {
 				max_c = { max(max_c.x,v.x),max(max_c.y,v.y) ,max(max_c.z,v.z) };
 			}
 			vec3 max_comp = max(min_c, max_c);
-			float max_rad = max(max(max_comp.x, max_comp.y), max_comp.z);
+			//float max_rad = max(max(max_comp.x, max_comp.y), max_comp.z);
 
-			texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / (2.f * max_rad)));
+			texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / (2.f * max(max(max_comp.x, max_comp.y), max_comp.z))));
 
 			//cascade_projection = ortho(-max_rad, max_rad, -max_rad, max_rad, -max_rad, max_rad);
 			cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y, min_c.z, max_c.z);

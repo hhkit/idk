@@ -150,11 +150,11 @@ namespace idk
 		rect viewport;
 		real near_plane;
 		real far_plane;
-		real b_sphere_radius;
-		vec3 far_corner;
+		//real b_sphere_radius;
+		//vec3 far_corner;
 		vec3 look;
 		vec3 pos;
-		vec2 tan_halfFOV;
+		//vec2 tan_halfFOV;
 		rad fov{};
 		real ap;
 	};
