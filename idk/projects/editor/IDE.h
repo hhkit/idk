@@ -71,7 +71,7 @@ namespace idk
 		void EditorUpdate() override;
 		void EditorDraw() override;
 
-		Handle<Camera> getSceneEditorCam();
+		Handle<Camera> GetEditorCamera();
 
 		void PollShortcutInputs();
 
