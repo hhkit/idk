@@ -285,7 +285,8 @@ namespace idk::mono
 				string_view findme = s.get();
 				for (auto& elem : go->GetComponents<mono::Behavior>())
 				{
-					if (elem->GetObject().Type()->IsOrDerivedFrom(findme))
+					const auto& e = elem->GetObject().Type();
+					if(e && e->IsOrDerivedFrom(findme))
 						return elem->GetObject().Raw();
 				}
 
