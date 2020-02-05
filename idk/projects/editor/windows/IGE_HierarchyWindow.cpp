@@ -97,14 +97,12 @@ namespace idk {
 				{
 					if (parent->GetComponent<Canvas>())
 						break;
-					parent = go->Parent();
+					parent = parent->Parent();
 				}
 				if (!parent)
 				{
 					if (ImGui::MenuItem("Canvas"))
-					{
 						editor.CreateGameObject(go, "Canvas", vector<string>{ "RectTransform", "Canvas" });
-					}
 				}
 				if (ImGui::MenuItem("Image"))
 					editor.CreateGameObject(go, "Image", vector<string>{ "RectTransform", "Image" });
