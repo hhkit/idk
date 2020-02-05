@@ -558,7 +558,7 @@ namespace idk
 			{
 				if (camera.GetHandle().scene == Scene::prefab)
 					continue;
-				if (!camera.enabled)
+				if (!camera.enabled || !camera.GetGameObject()->ActiveInHierarchy())
 					continue;
 
 				if (camera.GetHandle().scene == Scene::editor)
@@ -645,78 +645,80 @@ namespace idk
 		POST()
 			for (auto& elem : ps)
 			{
-				if (elem.renderer.enabled && elem.data.num_alive)
+				if (!elem.renderer.enabled || elem.data.num_alive == 0 || !elem.GetGameObject()->ActiveInHierarchy())
+					continue;
+
+				const auto sz = elem.data.num_alive;
+				auto& render_data = result.particle_render_data.emplace_back();
+
+				render_data.particles.resize(sz);
+
+				for (uint16_t i = 0; i < sz; ++i)
+					render_data.particles[i].position = elem.data.position[i] * elem.transform.scale;
+				if (!elem.main.in_world_space)
 				{
-					const auto sz = elem.data.num_alive;
-					auto& render_data = result.particle_render_data.emplace_back();
-
-					render_data.particles.resize(sz);
-
-					for (uint16_t i = 0; i < sz; ++i)
-						render_data.particles[i].position = elem.data.position[i] * elem.transform.scale;
-					if (!elem.main.in_world_space)
-					{
-						mat3 rot{ elem.transform.rotation };
-						for (auto& p : render_data.particles)
-							p.position = elem.transform.position + rot * p.position;
-					}
-
-					for (uint16_t i = 0; i < sz; ++i)
-						render_data.particles[i].rotation = elem.data.rotation[i];
-					for (uint16_t i = 0; i < sz; ++i)
-						render_data.particles[i].size = elem.data.size[i];
-					for (uint16_t i = 0; i < sz; ++i)
-						render_data.particles[i].color = elem.data.color[i];
-
-					render_data.material_instance = elem.renderer.material;
+					mat3 rot{ elem.transform.rotation };
+					for (auto& p : render_data.particles)
+						p.position = elem.transform.position + rot * p.position;
 				}
+
+				for (uint16_t i = 0; i < sz; ++i)
+					render_data.particles[i].rotation = elem.data.rotation[i];
+				for (uint16_t i = 0; i < sz; ++i)
+					render_data.particles[i].size = elem.data.size[i];
+				for (uint16_t i = 0; i < sz; ++i)
+					render_data.particles[i].color = elem.data.color[i];
+
+				render_data.material_instance = elem.renderer.material;
 			}
 		POST_END();
 
 		POST()
 			for (auto& f : fonts)
 			{
-				if (f.text != "" && f.font)
+				if (f.text.empty() || !f.font || !f.GetGameObject()->ActiveInHierarchy())
+					continue;
+
+				auto& render_data = result.font_render_data.emplace_back();
+				render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
+				render_data.color = f.color;
+				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+				render_data.atlas = f.font;
+			}
+
+			auto& ui = Core::GetSystem<UISystem>();
+			for (auto& im : images)
+			{
+				const auto& go = im.GetGameObject();
+				if (!go->ActiveInHierarchy())
+					continue;
+
+				const auto canvas = ui.FindCanvas(go);
+				if (!canvas)
 				{
-					auto& render_data = result.font_render_data.emplace_back();
-
-					render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
-
-					render_data.color = f.color;
-					render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
-					render_data.atlas = f.font;
+					LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
+					continue;
 				}
-			}
 
-		auto& ui = Core::GetSystem<UISystem>();
-		for (auto& im : images)
-		{
-			const auto& go = im.GetGameObject();
-			const auto& rt = *go->GetComponent<RectTransform>();
-
-			const auto canvas = ui.FindCanvas(go);
-			if (!canvas)
-			{
-				LOG_WARNING_TO(LogPool::GAME, "Image must be child of Canvas.");
-				continue;
-			}
-
-			auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
-
-			render_data.transform = rt._matrix *
-				mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
-			render_data.material = im.material;
-			render_data.color = im.tint;
-			render_data.data = ImageData{ im.texture };
-			render_data.depth = go->Transform()->Depth();
-		}
-
-		for (auto& text : texts)
-		{
-			if (text.text != "" && text.font)
-			{
-				const auto& go = text.GetGameObject();
 				const auto& rt = *go->GetComponent<RectTransform>();
+				auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
+
+				render_data.transform = rt._matrix *
+					mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+				render_data.material = im.material;
+				render_data.color = im.tint;
+				render_data.data = ImageData{ im.texture };
+				render_data.depth = go->Transform()->Depth();
+			}
+
+			for (auto& text : texts)
+			{
+				if (text.text.empty() || !text.font)
+					continue;
+
+				const auto& go = text.GetGameObject();
+				if(!go->ActiveInHierarchy())
+					continue;
 
 				const auto canvas = ui.FindCanvas(go);
 				if (!canvas)
@@ -724,6 +726,8 @@ namespace idk
 					LOG_WARNING_TO(LogPool::GAME, "Text must be child of Canvas. (Use TextMesh otherwise)");
 					continue;
 				}
+
+				const auto& rt = *go->GetComponent<RectTransform>();
 
 				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
 				++canvas->num_of_text;
@@ -744,7 +748,6 @@ namespace idk
 
 				const float sx = rt._local_rect.size.x;
 				const float sy = rt._local_rect.size.y;
-
 
 				const auto font_data = FontData::Generate(
 					text.text, text.font,
@@ -789,11 +792,10 @@ namespace idk
 				if (text.best_fit)
 					render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
 			}
-		}
 		POST_END()
 
-			for (auto& elem : futures)
-				elem.get();
+		for (auto& elem : futures)
+			elem.get();
 		futures.clear();
 
 		POST()
@@ -804,7 +806,6 @@ namespace idk
 			result.particle_range.reserve(result.particle_range.size() + size);
 			result.particle_buffer.reserve(result.particle_buffer.size() + size * avg_particle_count);
 		}
-
 		{
 			auto& unique_fonts = result.font_render_data;
 			const size_t avg_font_count = 100;
@@ -812,11 +813,10 @@ namespace idk
 			result.font_range.reserve(result.font_range.size() + size);
 			result.font_buffer.reserve(result.font_buffer.size() + size * avg_font_count);
 		}
-
-		std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
+			std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
 		POST_END()
 
-			POST()
+		POST()
 			std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
 		POST_END()
 
@@ -862,15 +862,14 @@ namespace idk
 				for (auto& elem : vec)
 				{
 					std::visit([&](const auto& data)
+					{
+						using T = std::decay_t<decltype(data)>;
+						if constexpr (!std::is_same_v<T, ImageData>)
 						{
-							using T = std::decay_t<decltype(data)>;
-							if constexpr (!std::is_same_v<T, ImageData>)
-							{
-								ProcessCanvas(data.coords, result.ui_text_buffer, result.ui_text_range, result.ui_total_num_of_text);
-								//result.canvas_render_range.emplace_back(range);
-							}
-
-						}, elem.data);
+							ProcessCanvas(data.coords, result.ui_text_buffer, result.ui_text_range, result.ui_total_num_of_text);
+							//result.canvas_render_range.emplace_back(range);
+						}
+					}, elem.data);
 				}
 
 

@@ -154,7 +154,7 @@ namespace idk
 		//vec3 far_corner;
 		vec3 look;
 		vec3 pos;
-		//vec2 tan_halfFOV;
+		vec2 tan_halfFOV;
 		rad fov{};
 		real ap;
 		real gamma=1.f;

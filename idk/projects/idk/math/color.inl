@@ -22,6 +22,10 @@ namespace idk
 		: as_vec4{ vec }
 	{
 	}
+	constexpr color::color(const float* rgba) noexcept
+		: as_vec4{ rgba }
+	{
+	}
 	constexpr float& color::operator[](size_t index) noexcept
 	{
 		return as_vec4[index];

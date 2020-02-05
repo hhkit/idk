@@ -480,7 +480,7 @@ namespace idk {
 			int execute_counter = 0;
 			for (const char* name : componentNames) {
 
-				if (!component_textFilter.PassFilter(name)) //skip if filtered
+				if (!script_textFilter.PassFilter(name)) //skip if filtered
 					continue;
 
 				if (ImGui::MenuItem(name)) {
@@ -499,18 +499,18 @@ namespace idk {
 
         ImGui::EndChild();
     }
+
+
+
     template<typename T>
-    auto SelectGO(Handle<GameObject> go, T&& arg)
+    auto SelectGO(Handle<GameObject>, T&& arg)
     {
         return std::forward<T>(arg);
     }
-    
-    auto SelectGO(Handle<GameObject> go, Handle<GameObject> arg)
+    auto SelectGO(Handle<GameObject> go, Handle<GameObject>)
     {
         return go;
     }
-
-
     template<typename Command,typename ...Args>
     void IGE_InspectorWindow::ExecuteOnSelected(Args&&... args)
     {
