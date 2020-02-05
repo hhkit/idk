@@ -781,6 +781,55 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		// capsule collider
+		BIND_START("idk.Bindings::ColliderCapsuleSetCenter", void, Handle<Collider> col, vec3 val)
+		{
+			std::get<idk::capsule>(col->shape).center = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetCenter", vec3, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).center;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleSetDirection", void, Handle<Collider> col, vec3 val)
+		{
+			std::get<idk::capsule>(col->shape).dir = val.get_normalized();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetDirection", vec3, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).dir;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleSetRadius", void, Handle<Collider> col, float val)
+		{
+			std::get<idk::capsule>(col->shape).radius = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetRadius", float, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).radius;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleSetHeight", void, Handle<Collider> col, float val)
+		{
+			std::get<idk::capsule>(col->shape).height = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetHeight", float, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).height;
+		}
+		BIND_END();
+
 		// Animator
 		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{

@@ -224,10 +224,10 @@ namespace idk
         public extern static void ColliderBoxSetSize(ulong id, Vector3 val);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector3 ColliderBoxGetSize(ulong id);
-        [MethodImpl(MethodImplOptions.InternalCall)]
         /*
          * SphereCollider
          */
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ColliderSphereSetCenter(ulong id, Vector3 val);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector3 ColliderSphereGetCenter(ulong id);
@@ -236,6 +236,29 @@ namespace idk
         public extern static void ColliderSphereSetRadius(ulong id, float val);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float ColliderSphereGetRadius(ulong id);
+        /*
+         * Capsule Collider
+         */
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetCenter(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderCapsuleGetCenter(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetDirection(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderCapsuleGetDirection(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetRadius(ulong id, float val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderCapsuleGetRadius(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetHeight(ulong id, float val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderCapsuleGetHeight(ulong id);
         /*
          * Animator
          */
