@@ -157,13 +157,16 @@ namespace idk::vkn
 			}
 			else if (light.index == 1)
 			{
-				if(!light.light_maps.empty())
-					shadow_maps.emplace_back(light.light_maps[2].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
-
-				for (auto& elem : state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
+				if (cam.obj_id == light.camDataRef.obj_id)
 				{
-					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
-					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat *elem.cascade_projection * light.v});
+					if (!light.light_maps.empty())
+						shadow_maps.emplace_back(light.light_maps[2].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+
+					for (auto& elem : light.light_maps)
+					{
+						shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+						directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat * elem.cascade_projection * light.v });
+					}
 				}
 			}
 		}

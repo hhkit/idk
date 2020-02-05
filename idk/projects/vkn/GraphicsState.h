@@ -111,7 +111,7 @@ namespace idk::vkn
 		vector<size_t> active_lights; //If we are somehow able to cull the lights that are completely not rendered.
 		vector<size_t> active_dir_lights; //If we are somehow able to cull the lights that are completely not rendered.
 		vector<size_t> active_canvas;
-		const std::map<Handle<GameObject>, CamLightData>* d_lightmaps;
+		//const std::map<Handle<GameObject>, CamLightData>* d_lightmaps;
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;
 		hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> material_instances;
@@ -145,7 +145,7 @@ namespace idk::vkn
 		vector<const DbgDrawCall*> dbg_render;
 		const VulkanPipeline* dbg_pipeline;
 
-		void Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light,const vector<LightData>& lights, const std::map<Handle<GameObject>, CamLightData>& d_lm, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
+		void Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light,const vector<LightData>& lights, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms);
 		void CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects);
 	};
 

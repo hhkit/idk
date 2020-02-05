@@ -408,7 +408,7 @@ namespace idk
 				unsigned k = 0, j = 1;
 				light.camDataRef = camera;
 
-				for (auto& elem : d_lightmaps[camera.obj_id].cam_lightmaps)
+				for (auto& elem : light.light_maps)
 				{
 					elem.SetCascade(camera, light, cascadeiter[k], cascadeiter[j]);
 					directional_light_buffer.emplace_back(i);
@@ -565,7 +565,8 @@ namespace idk
 					result.curr_scene_camera_index = result.camera.size();
 				result.camera.emplace_back(camera.GenerateCameraData());
 			}
-		
+			
+			vector<LightData> d_light_set{};
 			for (auto& elem : lights)
 			{
 				if (isolate)
@@ -601,14 +602,19 @@ namespace idk
 						{
 							if (d_lightmaps[c.obj_id].cam_lightmaps.empty())
 								d_lightmaps[c.obj_id].cam_lightmaps = e.InitShadowMap();
+
+							res.light_maps = d_lightmaps[c.obj_id].cam_lightmaps;
+							d_light_set.emplace_back(res);
 						}
 
 					}
-					result.lights.emplace_back(res);
+					else
+						result.lights.emplace_back(res);
 				}
 			}
 
-			result.d_lightmaps = d_lightmaps;
+			result.lights.insert(result.lights.end(),d_light_set.begin(),d_light_set.end());
+			//result.d_lightmaps = d_lightmaps;
 		POST_END();
 
 		POST()

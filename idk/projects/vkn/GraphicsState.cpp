@@ -10,12 +10,12 @@ namespace idk::vkn
 	{
 		return &shared_gfx_state->Lights()[light_index];
 	}
-	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light, const vector<LightData>& lights_data, const std::map<Handle<GameObject>, CamLightData>& d_lm, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
+	void GraphicsState::Init(const GraphicsSystem::RenderRange& data, const vector<size_t>& all_active_lights, const vector<size_t>& active_directional_light, const vector<LightData>& lights_data, const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects, const vector<SkeletonTransforms>& s_transforms)
 	{
 		camera = data.camera;
 		range = data;
 		lights = &lights_data;
-		d_lightmaps = &d_lm;
+		//d_lightmaps = &d_lm;
 		mesh_render.clear();
 		skinned_mesh_render.clear();
 		active_lights.clear();
@@ -30,9 +30,10 @@ namespace idk::vkn
 			active_dir_lights.insert(active_dir_lights.end(), active_directional_light.begin() + data.dir_light_begin, active_directional_light.begin() + data.dir_light_end);
 			shadow_maps_directional.resize(active_directional_light.size(), def_2d);
 			shadow_maps_cube.resize(active_lights.size(), def_cube);
-			for (auto& light_idx : active_lights)
+			
+			for(auto elem = active_lights.begin(); elem != active_lights.end(); ++elem)
 			{
-				auto& light = lights_data[light_idx];
+				auto& light = lights_data[*elem];
 				if (light.index == 2)//spotlight
 				{
 					for(auto& elem: light.light_maps)
@@ -41,11 +42,19 @@ namespace idk::vkn
 				}
 				else if(light.index == 1) //directional light
 				{
-					if(!light.light_maps.empty())
-						shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
-					for (auto& elem : light.light_maps)
-						shadow_maps_directional[j++] = (s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
-					++j;
+					if (camera.obj_id == light.camDataRef.obj_id)
+					{
+						if (!light.light_maps.empty())
+							shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
+						for (auto& elem : light.light_maps)
+							shadow_maps_directional[j++] = (s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
+						++j;
+					}
+					else
+					{
+						elem = active_lights.erase(elem);
+						continue;
+					}
 				}
 
 				++i;
