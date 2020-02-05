@@ -287,6 +287,9 @@ namespace idk
         public extern static string AnimatorCurrentStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AnimatorCurrentStateTime(ulong id, string layer = "");
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string AnimatorBlendStateName(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
