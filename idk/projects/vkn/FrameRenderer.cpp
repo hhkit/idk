@@ -936,14 +936,14 @@ namespace idk::vkn
 				deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
 				auto& rt = camera.render_target.as<VknRenderTarget>();
 				auto& deferred_buffers = _pimpl->deferred_buffers;
-				auto color_buffer = rt.GetColorBuffer();
-				auto hdr_itr = deferred_buffers.find(color_buffer);
-				if (hdr_itr != deferred_buffers.end())
-				{
-					deferred_pass.hdr_buffer = hdr_itr->second;
-				}
+				//auto color_buffer = rt.GetColorBuffer();
+				//auto hdr_itr = deferred_buffers.find(color_buffer);
+				//if (hdr_itr != deferred_buffers.end())
+				//{
+				//	deferred_pass.hdr_buffer = hdr_itr->second;
+				//}
 				deferred_pass.Init(rt,_gbuffers);
-				deferred_buffers[color_buffer] = deferred_pass.hdr_buffer;
+				//deferred_buffers[color_buffer] = deferred_pass.hdr_buffer;
 			}
 		}
 		bool rendered = false;
@@ -1268,7 +1268,6 @@ namespace idk::vkn
 
 	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const uvec2& size)
 	{
-		config.render_pass_type = camera.render_target.as<VknRenderTarget>().GetRenderPassType();
 		config.viewport_offset = offset;
 		config.viewport_size = size ;
 		return config;
@@ -1524,7 +1523,7 @@ namespace idk::vkn
 			dbg::EndLabel(cmd_buffer);
 		}
 		//Subsequent passes shouldn't clear the buffer any more.
-		rpbi.renderPass = *View().BasicRenderPass(rt.GetRenderPassType(),false,false);
+		rpbi.renderPass = *rt.GetRenderPass(false, false);// *View().BasicRenderPass(rt.GetRenderPassType(),false,false);
 		rs.FlagRendered();
 		
 		auto& processed_ro = the_interface.DrawCalls();
@@ -1569,7 +1568,7 @@ namespace idk::vkn
 								 }
 							}
 						);
-					auto& pipeline = GetPipeline(config, shaders);
+					auto& pipeline = GetPipeline(config, shaders,camera.render_target.as<VknRenderTarget>().GetRenderPass());
 					pipeline.Bind(cmd_buffer,view);
 					SetViewport(cmd_buffer, offset, size);
 					prev_pipeline = &pipeline;
@@ -1634,9 +1633,9 @@ namespace idk::vkn
 		return *_pipeline_manager;
 	}
 
-	VulkanPipeline& FrameRenderer::GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& modules)
+	VulkanPipeline& FrameRenderer::GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& modules, std::optional<RenderPassObj> rp)
 	{
-		return GetPipelineManager().GetPipeline(config,modules,_current_frame_index);
+		return GetPipelineManager().GetPipeline(config,modules,_current_frame_index,rp);
 	}
 
 	void FrameRenderer::NonThreadedRender::Init(FrameRenderer* renderer)
