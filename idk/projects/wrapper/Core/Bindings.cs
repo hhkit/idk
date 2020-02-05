@@ -198,6 +198,45 @@ namespace idk
         public extern static void RigidBodyAddForce(ulong id, Vector3 force);
 
         /*
+         * Collider
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetEnabled(ulong id, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ColliderGetEnabled(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetTrigger(ulong id, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ColliderGetTrigger(ulong id);
+
+        /*
+         * BoxCollider
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderBoxSetCenter(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderBoxGetCenter(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderBoxSetSize(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderBoxGetSize(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        /*
+         * SphereCollider
+         */
+        public extern static void ColliderSphereSetCenter(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderSphereGetCenter(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSphereSetRadius(ulong id, float val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderSphereGetRadius(ulong id);
+        /*
          * Animator
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -423,21 +462,6 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void LightSetIsInverseSqAtt(ulong id, bool i);
-
-        /*
-         * Collider
-         */
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void ColliderSetEnabled(ulong id, bool val);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool ColliderGetEnabled(ulong id);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void ColliderSetTrigger(ulong id, bool val);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool ColliderGetTrigger(ulong id);
 
         /*
          * Renderer
