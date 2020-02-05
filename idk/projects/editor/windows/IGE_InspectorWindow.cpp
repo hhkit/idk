@@ -480,7 +480,7 @@ namespace idk {
 			int execute_counter = 0;
 			for (const char* name : componentNames) {
 
-				if (!component_textFilter.PassFilter(name)) //skip if filtered
+				if (!script_textFilter.PassFilter(name)) //skip if filtered
 					continue;
 
 				if (ImGui::MenuItem(name)) {
