@@ -3,6 +3,8 @@
 
 #include <vkn/TextureTracker.h>
 
+#include <vkn/VknRenderTarget.h>
+
 namespace idk
 {
 	struct IGE_GfxDebugWindow::Pimpl
@@ -30,6 +32,11 @@ namespace idk
 				}
 			}
 			++i;
+		}
+		bool srgb = RscHandle<RenderTarget>{}->Srgb();
+		if (ImGui::Checkbox("Default Render Target SRGB", &srgb))
+		{
+			RscHandle<RenderTarget>{}->Srgb(srgb);
 		}
 	}
 	IGE_GfxDebugWindow::~IGE_GfxDebugWindow()

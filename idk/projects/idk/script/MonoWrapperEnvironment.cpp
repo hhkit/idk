@@ -771,6 +771,19 @@ namespace idk::mono
 		// }
 		// BIND_END();
 
+		// Graphics
+		BIND_START("idk.Bindings::DefRtSrgb", bool)
+		{
+			return RscHandle<RenderTarget>{}->Srgb();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ToggleDefRtSrgb", void, bool srgb)
+		{
+			RscHandle<RenderTarget>{}->Srgb(srgb);
+		}
+		BIND_END();
+
 		// Animator
 		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
@@ -1859,5 +1872,6 @@ namespace idk::mono
 			EventManager::BroadcastRPC(ev, unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
+
 	}
 }

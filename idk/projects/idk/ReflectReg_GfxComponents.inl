@@ -45,7 +45,7 @@ REFLECT_VARS(mask)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target)
+REFLECT_VARS(enabled, layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target,gamma)
 REFLECT_END()
 #pragma endregion Camera
 

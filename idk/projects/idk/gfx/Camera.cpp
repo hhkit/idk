@@ -154,7 +154,8 @@ namespace idk
 			GetGameObject()->Transform()->Forward(),
 			GetGameObject()->Transform()->position,
 			field_of_view,
-			AspectRatio()
+			AspectRatio(),
+			gamma
 		};
 	}
 	float Camera::AspectRatio() const

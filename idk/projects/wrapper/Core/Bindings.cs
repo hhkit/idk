@@ -196,6 +196,14 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RigidBodyAddForce(ulong id, Vector3 force);
+        /*
+         * Graphics 
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool DefRtSrgb();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ToggleDefRtSrgb(bool srgb);
 
         /*
          * Animator
@@ -655,5 +663,6 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[][] parameters);
+
     }
 }
