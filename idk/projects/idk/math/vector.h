@@ -30,7 +30,7 @@ namespace idk
 		>
 		constexpr explicit tvec(const Args& ...);
 
-		constexpr explicit tvec(T* ptr);
+		constexpr explicit tvec(const T* ptr);
 
 		template<unsigned D2, unsigned ... Indexes>
 		constexpr tvec(std::index_sequence<Indexes...>, const tvec<T, D2>&);

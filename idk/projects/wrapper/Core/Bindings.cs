@@ -206,6 +206,68 @@ namespace idk
         public extern static void ToggleDefRtSrgb(bool srgb);
 
         /*
+         * Collider
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetEnabled(ulong id, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ColliderGetEnabled(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetTrigger(ulong id, bool val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool ColliderGetTrigger(ulong id);
+
+        /*
+         * BoxCollider
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderBoxSetCenter(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderBoxGetCenter(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderBoxSetSize(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderBoxGetSize(ulong id);
+        /*
+         * SphereCollider
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSphereSetCenter(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderSphereGetCenter(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSphereSetRadius(ulong id, float val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderSphereGetRadius(ulong id);
+        /*
+         * Capsule Collider
+         */
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetCenter(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderCapsuleGetCenter(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetDirection(ulong id, Vector3 val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 ColliderCapsuleGetDirection(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetRadius(ulong id, float val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderCapsuleGetRadius(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderCapsuleSetHeight(ulong id, float val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderCapsuleGetHeight(ulong id);
+        /*
          * Animator
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -231,6 +293,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string AnimatorCurrentStateName(ulong id, string layer = "");
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AnimatorCurrentStateTime(ulong id, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string AnimatorBlendStateName(ulong id, string layer = "");
@@ -431,21 +496,6 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void LightSetIsInverseSqAtt(ulong id, bool i);
-
-        /*
-         * Collider
-         */
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void ColliderSetEnabled(ulong id, bool val);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool ColliderGetEnabled(ulong id);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void ColliderSetTrigger(ulong id, bool val);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool ColliderGetTrigger(ulong id);
 
         /*
          * Renderer

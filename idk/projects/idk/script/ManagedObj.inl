@@ -292,6 +292,7 @@ namespace idk::mono
 				MONO_COMPLEX_TYPE(vec2, envi.Type("Vector2")->Raw());
 				MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
 				MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
+				MONO_COMPLEX_TYPE(color, envi.Type("Color")->Raw());
 
 				MONO_RESOURCE_TYPE(MaterialInstance);
 				MONO_RESOURCE_TYPE(Prefab);
@@ -399,6 +400,7 @@ namespace idk::mono
 			MONO_BASE_TYPE_CONST(vec2, envi.Type("Vector2")->Raw());
 			MONO_BASE_TYPE_CONST(vec3, envi.Type("Vector3")->Raw());
 			MONO_BASE_TYPE_CONST(vec4, envi.Type("Vector4")->Raw());
+			MONO_BASE_TYPE_CONST(color, envi.Type("Color")->Raw());
 
 			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);
