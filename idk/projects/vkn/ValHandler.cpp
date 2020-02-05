@@ -4,7 +4,9 @@
 namespace idk::vkn
 {
 	void DoNothing() {}
-#pragma optimize("",off)
+
+	//DO NOT REMOVE THIS. IT WILL HAVE 0 IMPACT IF WE DON'T RUN WITH VALIDATION.
+#pragma optimize( "" , off )
 	VkBool32 ValHandler::processMsg(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, [[maybe_unused]]VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 	{
 		const char* prefix = "";

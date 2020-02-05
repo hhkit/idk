@@ -756,7 +756,7 @@ namespace idk::vkn
 			rs.RenderPass() = *m_crenderpass;
 	}
 
-	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format fmt, vk::ImageTiling tiling, vk::ImageUsageFlags usage, [[maybe_unused]] vk::MemoryPropertyFlags ppts, vk::Image& image, hlp::MemoryAllocator& allocator)
+	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format fmt, vk::ImageTiling tiling, vk::ImageUsageFlags usage, [[maybe_unused]] vk::MemoryPropertyFlags ppts, vk::Image& image, hlp::MemoryAllocator& allocator, hlp::UniqueAlloc& alloc)
 	{
 		if (!imageFence)
 			imageFence = m_device->createFenceUnique(vk::FenceCreateInfo{ vk::FenceCreateFlags{} });
@@ -789,7 +789,7 @@ namespace idk::vkn
 		//hlp::MemoryAllocator allocator = {*m_device,pdevice};
 
 		//vkGetImageMemoryRequirements(device, image, &memRequirements);
-		auto alloc = allocator.Allocate(image, vk::MemoryPropertyFlagBits::eDeviceLocal);
+		alloc = allocator.Allocate(image, vk::MemoryPropertyFlagBits::eDeviceLocal);
 		vk::DeviceSize num_bytes = (4 * sizeof(uint32_t));
 
 		device->bindImageMemory(image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
