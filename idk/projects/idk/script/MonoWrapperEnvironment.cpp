@@ -931,6 +931,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::AnimatorCurrentStateTime", float, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
+			}
+			return animator->CurrentStateTime(index);
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::AnimatorBlendStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
 			int index = 0;
