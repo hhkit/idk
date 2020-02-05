@@ -30,6 +30,7 @@ namespace idk
 		const void* unique_id() const noexcept;
 		vector<Lightmap> InitShadowMap();
 		void DeleteShadowMap() noexcept;
+		void ReleaseShadowMap() noexcept;
 
 		vector<Lightmap>& GetShadowMap();
 		const vector<Lightmap>& GetShadowMap()const;
@@ -60,6 +61,7 @@ namespace idk
 		vector<Lightmap> InitShadowMap();
 		vector<Lightmap> InitShadowMap() const;
 		void DeleteShadowMap() noexcept;
+		void ReleaseShadowMap() noexcept;
 
 		vector<Lightmap>& GetShadowMap();
 		const vector<Lightmap>& GetShadowMap()const;
@@ -79,6 +81,7 @@ namespace idk
 		vector<Lightmap> light_map{};
 		vector<Lightmap> InitShadowMap();
 		void DeleteShadowMap() noexcept;
+		void ReleaseShadowMap() noexcept;
 
 		vector<Lightmap>& GetShadowMap();
 		const vector<Lightmap>& GetShadowMap()const;
