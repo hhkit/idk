@@ -374,8 +374,8 @@ namespace idk
 		float first_end = n_plane + 0.2f * diff;
 		float second_end = n_plane + 0.45f * diff;
 
-		//float cascadeiter[4] = { n_plane,first_end,second_end,second_end };
-		float cascadeiter[3] = { n_plane,first_end,second_end };
+		float cascadeiter[4] = { n_plane,first_end,second_end,f_plane };
+		//float cascadeiter[3] = { n_plane,first_end,second_end };
 
 		for (size_t i = 0; i < lights.size(); ++i)
 		{
