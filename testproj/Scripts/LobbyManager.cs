@@ -1,13 +1,11 @@
 ﻿using idk;
-using System.Collections.Generic;
+using System.Collections;
 
 namespace TestAndSeek
 {
     public class LobbyManager
         : MonoBehavior
     {
-        static List<Player> players = new List<Player>();
-
         public GameObject player0; // 0 is host player
         public GameObject player1;
         public GameObject player2;
@@ -19,7 +17,6 @@ namespace TestAndSeek
                 (Player p) =>
                 {
                     Debug.Log("Player " + p.ActorNumber + " connected!");
-                    players.Add(p);
                     switch (p.ActorNumber)
                     {
                         case 0: player1.GetComponent<ElectronView>().TransferOwnership(p); break;
@@ -31,7 +28,6 @@ namespace TestAndSeek
                 (Player p) => 
                 { 
                     Debug.Log("Player " + p.ActorNumber + " disconnected!");
-                    players.Remove(p);
                     switch (p.ActorNumber)
                     {
                         case 0: player1.GetComponent<ElectronView>().TransferOwnership(null); break;
@@ -42,13 +38,35 @@ namespace TestAndSeek
 
             ElectronNetwork.OnServerConnected += () => { Debug.Log("connected to server!"); };
             ElectronNetwork.OnServerDisconnected += () => { Debug.Log("disconnected from server!"); };
+            StartCoroutine(TransferObjects());
+
         }
 
-
-
-        static IList<Player> GetPlayers()
+        IEnumerator TransferObjects()
         {
-            return players.AsReadOnly();
+            yield return null;
+            yield return null;
+            foreach (var p in ElectronNetwork.GetPlayers())
+            {
+                PlayerController c = null;
+                switch (p.ActorNumber)
+                {
+                    case 0: c = player1.GetComponent<PlayerController>(); break;
+                    case 1: c = player2.GetComponent<PlayerController>(); break;
+                    case 2: c = player3.GetComponent<PlayerController>(); break;
+                }
+
+                if (c != null)
+                {
+                    c.p = p;
+                    c.transfer = true;
+                }
+            }
+
+        }
+
+        void Update()
+        {
         }
     }
 }

@@ -133,7 +133,7 @@ struct serialize_this_bs
 REFLECT_BEGIN(decltype(serialize_this_bs::hashtable), "hash_table<Guid,string>")
 REFLECT_END()
 REFLECT_BEGIN(serialize_this_bs, "serialize_this_bs")
-REFLECT_VARS(start, string_vec, mid, hashtable, _end)
+REFLECT_VARS(start, string_vec, mid, hashtable, end)
 REFLECT_END()
 
 TEST(Serialize, TestSerializeComplex)
@@ -150,7 +150,7 @@ TEST(Serialize, TestSerializeComplex)
 	serialize_this_bs bs2 = *parse_text<serialize_this_bs>(str);
 	EXPECT_EQ(bs2.start, bs.start);
 	EXPECT_EQ(bs2.mid, bs.mid);
-	EXPECT_EQ(bs2._end, bs._end);
+	EXPECT_EQ(bs2.end, bs.end);
 	EXPECT_EQ(bs2.string_vec[0], bs.string_vec[0]);
 	EXPECT_EQ(bs2.string_vec[1], bs.string_vec[1]);
 	EXPECT_EQ(bs2.string_vec[2], bs.string_vec[2]);

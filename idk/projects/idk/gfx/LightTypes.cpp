@@ -52,6 +52,7 @@ namespace idk
 	bool NeedShadowMap(const PointLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const SpotLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const DirectionalLight&light){return NeedShadowMapImpl(light);};
+#pragma optimize("",off)
 	vector<Lightmap> PointLight::InitShadowMap()
 	{
 		light_map.resize(1);
@@ -61,9 +62,29 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			elem.InitShadowMap();
+			auto handle= elem.InitShadowMap();
+			auto& tmp = *handle;
 		}
 		return light_map;
+	}
+	void PointLight::DeleteShadowMap() noexcept
+	{
+		for (auto& lmp : light_map)
+		{
+			lmp.DeleteShadowMap();
+		}
+	}
+	void PointLight::ReleaseShadowMap() noexcept
+	{
+		light_map.clear();
+	}
+	void SpotLight::ReleaseShadowMap() noexcept
+	{
+		light_map.clear();
+	}
+	void DirectionalLight::ReleaseShadowMap() noexcept
+	{
+		light_map.clear();
 	}
 	vector<Lightmap>& PointLight::GetShadowMap()
 	{
@@ -101,6 +122,13 @@ namespace idk
 		}
 		return lm;
 	}
+	void DirectionalLight::DeleteShadowMap() noexcept
+	{
+		for (auto& lmp : light_map)
+		{
+			lmp.DeleteShadowMap();
+		}
+	}
 	vector < Lightmap> SpotLight::InitShadowMap()
 	{
 		light_map.resize(1);
@@ -112,6 +140,13 @@ namespace idk
 			elem.InitShadowMap();
 		}
 		return light_map;
+	}
+	void SpotLight::DeleteShadowMap() noexcept
+	{
+		for (auto& lmp : light_map)
+		{
+			lmp.DeleteShadowMap();
+		}
 	}
 }
 

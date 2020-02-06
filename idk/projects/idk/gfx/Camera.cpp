@@ -144,8 +144,6 @@ namespace idk
 			layer_mask,
 			ViewMatrix(),
 			ProjectionMatrix(),
-			getTightProjection(),
-			getTightProjectionCenter(),
 			render_target,
 			false,
 			clear,
@@ -153,11 +151,12 @@ namespace idk
 			viewport,
 			near_plane,
 			far_plane,
-			getBSphereRadius(),
-			getFarCorner(),
 			GetGameObject()->Transform()->Forward(),
 			GetGameObject()->Transform()->position,
 			{tan(hfov),tan(vfov) },
+			field_of_view,
+			AspectRatio(),
+			gamma
 		};
 	}
 	float Camera::AspectRatio() const

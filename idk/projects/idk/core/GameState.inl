@@ -45,7 +45,7 @@ namespace idk
 		_creation_queue.emplace_back(new_handle);
 		return new_handle;
 	}
-// // #pragma optimize("",off)
+// // 
 	template<typename T, typename ... Args>
 	inline Handle<T> GameState::CreateObject(const Handle<T>& handle, Args&& ... args)
 	{

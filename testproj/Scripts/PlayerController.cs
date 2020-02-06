@@ -1,4 +1,5 @@
 ﻿using idk;
+using System.Collections;
 
 namespace TestAndSeek
 {
@@ -14,9 +15,13 @@ namespace TestAndSeek
         public float rot_speed = 90f;
 
         bool on_floor = false;
+        int jump_count = 1;
 
         RigidBody rb;
         ElectronView ev;
+
+        internal bool transfer = false;
+        internal Player p = null;
         void Start()
         {
             rb = GetComponent<RigidBody>();
@@ -25,13 +30,22 @@ namespace TestAndSeek
 
         void OnTriggerEnter(Collider other)
         {
-            if (other.tag == "Floor")
+            if (other.tag == "futanari")
+            {
                 on_floor = true;
+                if (transfer && p != null)
+                        ev.TransferOwnership(p);
+            }
         }
         void OnTriggerExit(Collider other)
         {
-            if (other.tag == "Floor")
+            if (other.tag == "futanari")
                 on_floor = false;
+        }
+        IEnumerator JumpCooldown()
+        {
+            yield return new WaitForSeconds(0.05);
+            jump_count++;
         }
         void FixedUpdate()
         {
@@ -48,10 +62,14 @@ namespace TestAndSeek
                     if (Input.GetKey(KeyCode.W))
                         rb.AddForce(transform.forward * move_speed);
 
-                    if (Input.GetKeyDown(KeyCode.J))
+                    if (jump_count > 0)
                     {
-                        Debug.Log("jumping");
-                        rb.AddForce(Vector3.up * jump_force);
+                        if (Input.GetKey(KeyCode.J))
+                        {
+                            --jump_count;
+                            StartCoroutine(JumpCooldown());
+                            rb.AddForce(Vector3.up * jump_force);
+                        }
                     }
                 }
                 else

@@ -258,7 +258,7 @@ namespace idk::vkn
 		RenderImpl();
 		//thingy.FinalizeDrawCall(ro);
 	}
-//#pragma optimize("",off)
+//
 	void CubemapRenderer::ProcessQueue(vk::CommandBuffer cmd_buffer)
 	{
 		//if (pool.size() == pool.capacity())

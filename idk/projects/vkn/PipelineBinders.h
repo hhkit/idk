@@ -192,7 +192,13 @@ namespace idk
 		{
 			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override;
 		};
-		using UnlitMaterialBinding = CombinedBindings<StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
-		using ShadowBinding = CombinedBindings<StandardVertexBindings>;
+		struct ShadowFilter :StandardBindings
+		{
+			LayerMask filter;
+			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override;
+			void SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel);
+		};
+		using UnlitMaterialBinding = CombinedBindings<UnlitFilter,StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+		using ShadowBinding = CombinedBindings<ShadowFilter,StandardVertexBindings>;
 	}
 }

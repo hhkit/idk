@@ -22,7 +22,7 @@ namespace idk::vkn
 	TexturePool::TexturePool(TexturePool&&) = default;
 	TexturePool& TexturePool::operator=(TexturePool&&) = default;
 	TexturePool::~TexturePool() = default;
-#pragma optimize("",off)
+
 	bool desc_match(TextureDescription desc, VknTexture& texture)
 	{
 		return vk::ImageAspectFlags{ desc.aspect } == texture.img_aspect

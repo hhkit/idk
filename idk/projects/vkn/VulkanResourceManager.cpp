@@ -22,7 +22,8 @@ void VulkanResourceManager::QueueToDestroy(ptr_t obj_to_destroy)
 
 void VulkanResourceManager::ProcessQueue(uint32_t frame_index)
 {
-	std::swap(destroy_queue[frame_index], managed);
+	if(destroy_queue.size()!=0|| frame_index!=0)
+		std::swap(destroy_queue[frame_index], managed);
 	managed.clear();
 }
 

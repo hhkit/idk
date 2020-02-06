@@ -16,7 +16,7 @@ namespace idk::mono
 		bool enabled = true;
 		ManagedObject script_data;
 
-		string_view TypeName() const;
+		string TypeName() const;
 		MonoObject* EmplaceBehavior(string_view type);
 		void DisposeMonoObject();
 

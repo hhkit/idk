@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <vkn/DebugUtil.h>
+#include <vkn/TextureTracker.h>
 namespace std
 {
 
@@ -318,7 +319,6 @@ namespace idk::vkn
 		);
 	}
 	void DoNothing();
-#pragma optimize("",off)
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		auto format = load_info.internal_format, internal_format = load_info.internal_format;
@@ -373,9 +373,14 @@ namespace idk::vkn
 		hlp::UniqueAlloc blit_img_alloc;
 		vk::UniqueBuffer staging_buffer;
 		vk::UniqueDeviceMemory staging_memory;
+		
+		//Debugging
+		bool conditions[] = { false,false,false,false,false,false,false };
+		if (image)
+			dbg::TextureTracker::Inst().reg_allocate(image->operator VkImage(),num_bytes);
 		if (in_info)
 		{
-
+			conditions[0] = true;
 			vk::ImageSubresourceRange sub_range;
 			sub_range.aspectMask = img_aspect;
 			sub_range.baseMipLevel = 0;
@@ -486,6 +491,7 @@ namespace idk::vkn
 
 			if (internal_format != format)
 			{
+				conditions[1] = true;
 				TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, vk::AccessFlagBits::eTransferRead, vk::PipelineStageFlagBits::eTransfer, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal, copy_dest, img_aspect,sub_range);
 				TransitionImageLayout(cmd_buffer, {}, vk::PipelineStageFlagBits::eAllCommands , vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, * image, img_aspect, sub_range);
 				BlitConvert(cmd_buffer, img_aspect, *blit_src_img, *image, load_info.mipmap_level, width, height);
@@ -496,6 +502,7 @@ namespace idk::vkn
 	
 		}else if(imageInfo.initialLayout!=load_info.layout)
 		{
+			conditions[2] = true;
 			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, * image, img_aspect);
 		}
 		//else
@@ -508,7 +515,8 @@ namespace idk::vkn
 		[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
 		//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
 		while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
-
+		ucmd_buffer.reset();
+		device.resetCommandPool(*View().Commandpool(), {});
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
 			auto name = string{ *guid };

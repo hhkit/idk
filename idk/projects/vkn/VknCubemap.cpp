@@ -2,6 +2,7 @@
 #include "VknCubemap.h"
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
+#include <vkn/TextureTracker.h>
 namespace idk::vkn {
 	RscHandle<Texture> VknCubemap::Tex() const noexcept
 	{
@@ -9,6 +10,8 @@ namespace idk::vkn {
 	}
 	VknCubemap::~VknCubemap()
 	{
+		if (texture)
+			dbg::TextureTracker::Inst(dbg::TextureAllocTypes::eCubemap).reg_deallocate(texture.as<VknTexture>().Image().operator VkImage());
 		Core::GetResourceManager().Release(texture);
 	}
 

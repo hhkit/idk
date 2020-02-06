@@ -174,9 +174,10 @@ namespace idk
 
 	void EventManager::OnTransferOwnershipEvent(EventTransferOwnershipMessage* message)
 	{
+		auto id = std::make_shared<SignalBase::SlotId>();
 		LOG_TO(LogPool::NETWORK, "Received transfer ownership event");
-		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(message->object_to_transfer);
-
+		auto network_id = message->object_to_transfer;
+		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(network_id);
 		ev->owner = Host::ME;
 		ev->GetGameObject()->GetComponent<ElectronView>()->SetAsClientObject();
 	}

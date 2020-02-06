@@ -35,7 +35,7 @@ namespace idk
 		rect viewport;
 
         LayerMask layer_mask{ 0xFFFFFFFF };
-
+		real gamma = 2.2f;
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 
 		vec3	  currentPosition() const;

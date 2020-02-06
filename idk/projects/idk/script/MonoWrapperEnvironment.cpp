@@ -209,12 +209,15 @@ namespace idk::mono
 
 			vector<Handle<mono::Behavior>> behaviors;
 			for (auto& elem : Core::GetGameState().GetObjectsOfType<mono::Behavior>())
-				if (elem.GetObject().Type()->IsOrDerivedFrom(type_name))
-					behaviors.emplace_back(elem.GetHandle());
+				if (auto type = elem.GetObject().Type())
+					if (type && type->IsOrDerivedFrom(type_name))
+						behaviors.emplace_back(elem.GetHandle());
 
 			auto klass = Core::GetSystem<ScriptSystem>().ScriptEnvironment().Type(type_name);
 
-			IDK_ASSERT(klass);
+			if (!klass)
+				return nullptr;
+
 			auto retval = mono_array_new(mono_domain_get(), klass->Raw(), behaviors.size());
 			for (int i = 0; i < behaviors.size(); ++i)
 				mono_array_setref(retval, i, behaviors[i]->GetObject().Raw());
@@ -249,7 +252,32 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::GameObjectAddEngineComponent",uint64_t, Handle<GameObject> go, MonoString* component)
 			{
-				return go->AddComponent(string_view{ unbox(component).get() }).id;
+				auto str = unbox(component).get();
+				auto sv = string_view{ str };
+
+				switch (string_hash(sv))
+				{
+					case string_hash("BoxCollider"):
+					{
+						auto col = go->AddComponent<Collider>();
+						col->shape = idk::box{};
+						return col.id;
+					}
+					case string_hash("SphereCollider"):
+					{
+						auto col = go->AddComponent<Collider>();
+						col->shape = idk::sphere{};
+						return col.id;
+					}
+					case string_hash("CapsuleCollider"):
+					{
+						auto col = go->AddComponent<Collider>();
+						col->shape = idk::capsule{};
+						return col.id;
+					}
+					default:
+						return go->AddComponent(sv).id;
+				}
 			}
 		BIND_END();
 
@@ -257,11 +285,36 @@ namespace idk::mono
 			{
 				auto query = unbox(component);
 				auto str = string_view{ query.get() };
-				if (str == "Renderer")
+				switch (string_hash(str))
 				{
-					auto mrend = go->GetComponent<MeshRenderer>();
-					return mrend ? mrend.id : go->GetComponent<SkinnedMeshRenderer>().id;
+				case string_hash( "Renderer"):
+					{
+						auto mrend = go->GetComponent<MeshRenderer>();
+						return mrend ? mrend.id : go->GetComponent<SkinnedMeshRenderer>().id;
+					}
+					case string_hash("BoxCollider"):
+					{
+						for (auto& elem : go->GetComponents())
+							if (elem.is_type<Collider>() && std::get_if<idk::box>(&handle_cast<Collider>(elem)->shape))
+									return elem.id;
+						return 0;
+					}
+					case string_hash("SphereCollider"):
+					{
+						for (auto& elem : go->GetComponents())
+							if (elem.is_type<Collider>() && std::get_if<idk::sphere>(&handle_cast<Collider>(elem)->shape))
+								return elem.id;
+						return 0;
+					}
+					case string_hash("CapsuleCollider"):
+					{
+						for (auto& elem : go->GetComponents())
+							if (elem.is_type<Collider>() && std::get_if<idk::capsule>(&handle_cast<Collider>(elem)->shape))
+									return elem.id;
+						return 0;
+					}
 				}
+
 
 				return go->GetComponent(str).id;
 			}
@@ -285,8 +338,9 @@ namespace idk::mono
 				string_view findme = s.get();
 				for (auto& elem : go->GetComponents<mono::Behavior>())
 				{
-					if (elem->GetObject().Type()->IsOrDerivedFrom(findme))
-						return elem->GetObject().Raw();
+					if (auto type = elem->GetObject().Type())
+						if (type->IsOrDerivedFrom(findme))
+							return elem->GetObject().Raw();
 				}
 
 				return nullptr;
@@ -676,100 +730,118 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		// BoxCollider
 
-		// BIND_START("idk.Bindings::ColliderGetShape", MonoObject*, Handle<Collider> col)
-		// {
-		// 	return std::visit([&](auto& elem) -> MonoObject *
-		// 		{
-		// 			using T = std::decay_t<decltype(elem)>;
-		// 			
-		// 			if constexpr (std::is_same_v<T, idk::box>)
-		// 			{
-		// 				idk::box& shape = elem;
-		// 				auto box_klass = Core::GetSystem<ScriptSystem>().Environment().Type("Box");
-		// 				IDK_ASSERT(box_klass);
-		// 				auto box_obj = box_klass->Construct();
-		// 				box_obj.Visit([](const auto& key, auto& val, int depth)
-		// 					{
-		// 						using T = std::decay_t<decltype(val)>;
-		// 						if constexpr (std::is_same_v<T, vec3>)
-		// 						{
-		// 							if (key == "center")
-		// 								val = shape.center;
-		// 							if (key == "extents")
-		// 								val = shape.extents;
-		// 						}
-		// 					});
-		// 				return box_obj.Raw();
-		// 			}
-		// 
-		// 			if constexpr (std::is_same_v<T, idk::sphere>)
-		// 			{
-		// 				idk::sphere& shape = elem;
-		// 				auto sphere_klass = Core::GetSystem<ScriptSystem>().Environment().Type("Sphere");
-		// 				IDK_ASSERT(sphere_klass);
-		// 				auto sphere_obj = sphere_klass->Construct();
-		// 				sphere_obj.Visit([](const auto& key, auto& val, int depth)
-		// 					{
-		// 						using T = std::decay_t<decltype(val)>;
-		// 						if constexpr (std::is_same_v<T, vec3>)
-		// 						{
-		// 							if (key == "center")
-		// 								val = shape.center;
-		// 						}
-		// 						if constexpr (std::is_same_v<T, idk::real>)
-		// 						{
-		// 							if (key == "radius")
-		// 								val = shape.radius;
-		// 						}
-		// 					});
-		// 				return sphere_obj.Raw();
-		// 			}
-		// 		}, col->shape);
-		// }
-		// BIND_END();
-		// 
-		// BIND_START("idk.Bindings::ColliderSetShape", void, Handle<Collider> col, MonoObject* obj)
-		// {
-		// 	ManagedObject managed_shape{ obj };
-		// 	if (managed_shape.TypeName() == "Box")
-		// 	{
-		// 		idk::box box_obj;
-		// 		managed_shape.Visit([](const auto& key, auto& val, int depth)
-		// 			{
-		// 				using T = std::decay_t<decltype(val)>;
-		// 				if constexpr (std::is_same_v<T, vec3>)
-		// 				{
-		// 					if (key == "center")
-		// 						box_obj.center = val;
-		// 					if (key == "extents")
-		// 						box_obj.extents = val;
-		// 				}
-		// 			});
-		// 		col->shape = box_obj;
-		// 	}
-		// 
-		// 	if (managed_shape.TypeName() == "Sphere")
-		// 	{
-		// 		idk::sphere sphere_obj;
-		// 		managed_shape.Visit([](const auto& key, auto& val, int depth)
-		// 			{
-		// 				using T = std::decay_t<decltype(val)>;
-		// 				if constexpr (std::is_same_v<T, vec3>)
-		// 				{
-		// 					if (key == "center")
-		// 						sphere_obj.center = val;
-		// 				}
-		// 				if constexpr (std::is_same_v<T, idk::real>)
-		// 				{
-		// 					if (key == "radius")
-		// 						sphere_obj.radius = val;
-		// 				}
-		// 			});
-		// 		col->shape = sphere_obj;
-		// 	}
-		// }
-		// BIND_END();
+		BIND_START("idk.Bindings::ColliderBoxSetCenter", void, Handle<Collider> col, vec3 val)
+		{
+			std::get<idk::box>(col->shape).center = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderBoxGetCenter", vec3, Handle<Collider> col)
+		{
+			return std::get<idk::box>(col->shape).center;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderBoxSetSize", void, Handle<Collider> col, vec3 val)
+		{
+			std::get<idk::box>(col->shape).extents = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderBoxGetSize", vec3, Handle<Collider> col)
+		{
+			return std::get<idk::box>(col->shape).extents;
+		}
+		BIND_END();
+
+		// sphere collider
+		BIND_START("idk.Bindings::ColliderSphereSetCenter", void, Handle<Collider> col, vec3 val)
+		{
+			std::get<idk::sphere>(col->shape).center = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSphereGetCenter", vec3, Handle<Collider> col)
+		{
+			return std::get<idk::sphere>(col->shape).center;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSphereSetRadius", void, Handle<Collider> col, float val)
+		{
+			std::get<idk::sphere>(col->shape).radius = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSphereGetRadius", float, Handle<Collider> col)
+		{
+			return std::get<idk::sphere>(col->shape).radius;
+		}
+		BIND_END();
+
+		// capsule collider
+		BIND_START("idk.Bindings::ColliderCapsuleSetCenter", void, Handle<Collider> col, vec3 val)
+		{
+			std::get<idk::capsule>(col->shape).center = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetCenter", vec3, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).center;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleSetDirection", void, Handle<Collider> col, vec3 val)
+		{
+			std::get<idk::capsule>(col->shape).dir = val.get_normalized();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetDirection", vec3, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).dir;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleSetRadius", void, Handle<Collider> col, float val)
+		{
+			std::get<idk::capsule>(col->shape).radius = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetRadius", float, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).radius;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleSetHeight", void, Handle<Collider> col, float val)
+		{
+			std::get<idk::capsule>(col->shape).height = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderCapsuleGetHeight", float, Handle<Collider> col)
+		{
+			return std::get<idk::capsule>(col->shape).height;
+		}
+		BIND_END();
+
+		// Graphics
+		BIND_START("idk.Bindings::DefRtSrgb", bool)
+		{
+			return RscHandle<RenderTarget>{}->Srgb();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ToggleDefRtSrgb", void, bool srgb)
+		{
+			RscHandle<RenderTarget>{}->Srgb(srgb);
+		}
+		BIND_END();
 
 		// Animator
 		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
@@ -869,6 +941,18 @@ namespace idk::mono
 				index = s_cast<int>(animator->FindLayerIndex(l.get()));
 			}
 			return mono_string_new(mono_domain_get(), animator->CurrentStateName(index).c_str());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorCurrentStateTime", float, Handle<Animator> animator, MonoString* layer = nullptr)
+		{
+			int index = 0;
+			if (layer)
+			{
+				auto l = unbox(layer);
+				index = s_cast<int>(animator->FindLayerIndex(l.get()));
+			}
+			return animator->CurrentStateTime(index);
 		}
 		BIND_END();
 
@@ -1859,5 +1943,6 @@ namespace idk::mono
 			EventManager::BroadcastRPC(ev, unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
+
 	}
 }

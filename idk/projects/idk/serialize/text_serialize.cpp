@@ -212,9 +212,11 @@ namespace idk
 		if (obj.is<mono::ManagedObject>())
 		{
 			auto& managed_obj = obj.get<mono::ManagedObject>();
-			if (!managed_obj.Type())
-				return yaml::node();
-
+            if (!managed_obj.Type())
+            {
+                node.tag(managed_obj.TypeName());
+                return node;
+            }
 			managed_obj.Visit(yaml_visitor);
 			node.tag(managed_obj.TypeName());
 			return node;

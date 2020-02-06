@@ -51,6 +51,11 @@ namespace idk
         public string CurrentStateName(string layer)
            => Bindings.AnimatorCurrentStateName(handle, layer);
 
+        public float CurrentStateTime()
+           => Bindings.AnimatorCurrentStateTime(handle);
+        public float CurrentStateTime(string layer)
+           => Bindings.AnimatorCurrentStateTime(handle, layer);
+
         public string BlendStateName()
            => Bindings.AnimatorBlendStateName(handle);
         public string BlendStateName(string layer)

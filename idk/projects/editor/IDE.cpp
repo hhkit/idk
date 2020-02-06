@@ -57,6 +57,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/commands/CommandList.h>
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
+#include <editor/windows/IGE_GfxDebugWindow.h>
 
 // util
 #include <util/ioutils.h>
@@ -139,6 +140,7 @@ namespace idk
 		ADD_WINDOW(IGE_GameView);
 		ADD_WINDOW(IGE_SceneView);
 		ADD_WINDOW(IGE_ShadowMapWindow);
+		ADD_WINDOW(IGE_GfxDebugWindow);
 		ADD_WINDOW(IGE_Console);
 		ADD_WINDOW(IGE_ProgrammerConsole);
 		ADD_WINDOW(IGE_ProjectWindow);
@@ -346,7 +348,7 @@ namespace idk
 		_interface->ImGuiFrameRender();
 	}
 
-	Handle<Camera> IDE::getSceneEditorCam()
+	Handle<Camera> IDE::GetEditorCamera()
 	{
 		return _camera.current_camera;
 	}

@@ -48,7 +48,7 @@ namespace idk::vkn
 		ShaderDirectionalData() = default;
 		ShaderDirectionalData(const DLightData& data) : vp{ data.vp }, far_plane{ data.far_plane } {}
 	};
-	//#pragma optimize("",off)
+	//
 	string PrepareDirectionalBlock(const vector<DLightData>& vp)
 	{
 		vector<ShaderDirectionalData> tmp_dlight(vp.size());
@@ -140,6 +140,8 @@ namespace idk::vkn
 			end = _end;
 		}
 		vector<DLightData> directional_vp{};
+
+		mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 		for (;i<end;++i)
 		{
 			auto active_index = vstate.active_lights[i];
@@ -149,7 +151,9 @@ namespace idk::vkn
 			{
 				for (auto& elem : light.light_maps)
 				{
-					auto v = elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer;
+					auto& fb = elem.light_map.as<VknFrameBuffer>();
+					auto& db = fb.DepthAttachment();
+					auto v = db.buffer;
 					shadow_maps.emplace_back(v);
 				}
 			}
@@ -161,7 +165,7 @@ namespace idk::vkn
 				for (auto& elem : state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
 					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
-					directional_vp.emplace_back(DLightData{ elem.far_plane,elem.cascade_projection * light.v});
+					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat *elem.cascade_projection * light.v});
 				}
 			}
 		}
@@ -327,13 +331,13 @@ namespace idk::vkn
 		auto& mat = *mat_inst.material;
 		the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
 	}
-//// #pragma optimize("",off)
+//// 
 	void StandardMaterialBindings::SetState(const GraphicsState& vstate) {
 		_state = &vstate;
 		State();
 	}
 
-//// #pragma optimize("",off)
+//// 
 	//Assumes that the material is valid.
 	void StandardMaterialBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
 	{
@@ -470,6 +474,16 @@ namespace idk::vkn
 	{
 
 		return !dc.material_instance|| !dc.material_instance->material|| dc.material_instance->material->model!=ShadingModel::Unlit;
+	}
+
+	bool ShadowFilter::Skip(PipelineThingy& , const RenderObject& dc)
+	{
+		return !(dc.layer_mask&filter);
+	}
+
+	void ShadowFilter::SetState(const CameraData& cam, const vector<SkeletonTransforms>& )
+	{
+		filter = cam.culling_flags;
 	}
 
 }

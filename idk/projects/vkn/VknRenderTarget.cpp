@@ -34,6 +34,7 @@ namespace idk::vkn
 		//TODO store a framebuffer instead.
 		auto color_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetColorBuffer().guid);
 		auto ctci = ColorBufferTexInfo(s_cast<uint32_t>(size.x), s_cast<uint32_t>(size.y));
+		ctci.internal_format = (Srgb()) ? vk::Format::eB8G8R8A8Srgb : vk::Format::eB8G8R8A8Unorm;
 		ctci.image_usage |= vk::ImageUsageFlagBits::eInputAttachment;
 		loader.LoadTexture(*color_texture, alloc, fence, {}, ctci, {});
 		auto depth_texture = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(GetDepthBuffer().guid);

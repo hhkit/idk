@@ -13,6 +13,7 @@
 #include <gfx/RenderTarget.h>
 #include <vkn/VknFrameBuffer.h>
 #include <vkn/VknRenderTarget.h>
+#include <math/matrix.inl>
 #include <gfx/Light.h>
 
 #include <gfx/MeshRenderer.h>
@@ -168,7 +169,7 @@ namespace idk::vkn
 			counter++;
 			futures.emplace_back(Core::GetThreadPool().Post(&RunFunc, _renderer, &state, &rs,&counter));
 		}
-//// #pragma optimize("",off)
+//// 
 		void Join() override
 		{
 			for(auto& future : futures)
@@ -354,7 +355,7 @@ namespace idk::vkn
 			{
 				auto& dc = *ptr_dc;
 				auto& mat_inst = *dc.material_instance;
-				if (mat_inst.material && dc.layer_mask&state.mask || !binders.Skip(the_interface, dc))
+				if (mat_inst.material && dc.layer_mask&state.mask && !binders.Skip(the_interface, dc))
 				{
 					binders.Bind(the_interface, dc);
 					if(!the_interface.BindMeshBuffers(dc))
@@ -440,7 +441,7 @@ namespace idk::vkn
 	{
 		_pipeline_manager = &manager;
 	}
-//#pragma optimize("",off)
+//
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
 		auto& lights = *state.shared_gfx_state->lights;
@@ -542,7 +543,6 @@ namespace idk::vkn
 		for (auto light_idx : state.active_lights)
 		{
 			//auto& rs = _pre_states[curr_state++];
-
 			PreRenderShadow(light_idx, state, _pre_states, curr_state, frame_index);
 		}
 		
@@ -609,7 +609,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
-//// #pragma optimize("",off)
+//// 
 	void RenderPipelineThingy(
 		[[maybe_unused]] const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -722,7 +722,8 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
-
+		if (!light.update_shadow)
+			return;
 		if (light.index == 1)
 		{
 			//auto& camData = *state.cameras->begin();
@@ -730,13 +731,13 @@ namespace idk::vkn
 				
 				
 				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
-
+				mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 				for (auto& e : *state.d_lightmaps)
 				{
 					for (auto& elem : e.second.cam_lightmaps)
 					{
 						auto& rs = r[curr_state++];
-						auto cam = CameraData{ Handle<GameObject>{}, LayerMask{0xFFFFFFFF }, light.v, elem.cascade_projection };
+						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
 						ShadowBinding shadow_binding;
 						shadow_binding.for_each_binder<has_setstate>(
 							[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -757,13 +758,13 @@ namespace idk::vkn
 
 
 						cmd_buffer.begin(begin_info, dispatcher);
-						auto lm = elem.light_map->DepthAttachment().buffer;
+						//auto lm = elem.light_map->DepthAttachment().buffer;
 						auto sz = elem.light_map->DepthAttachment().buffer->Size();
 
 						vk::Rect2D render_area
 						{
 							vk::Offset2D{},
-							vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
+							vk::Extent2D{sz.x,sz.y}
 						};
 						auto& rt = elem.light_map.as<VknFrameBuffer>();
 						vk::Framebuffer fb = rt.GetFramebuffer();
@@ -773,10 +774,11 @@ namespace idk::vkn
 						{
 							vec4{1}
 						};
-						if (the_interface.DrawCalls().size())
+						//if (the_interface.DrawCalls().size())
 							rs.FlagRendered();
+						dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
 						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
-
+						dbg::EndLabel(cmd_buffer);
 						rs.ubo_manager.UpdateAllBuffers();
 						cmd_buffer.endRenderPass();
 						cmd_buffer.end();
@@ -787,7 +789,7 @@ namespace idk::vkn
 		else
 		{
 
-			auto cam = CameraData{ Handle<GameObject> {}, LayerMask{0xFFFFFFFF }, light.v, light.p };
+			auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
 			ShadowBinding shadow_binding;
 			shadow_binding.for_each_binder<has_setstate>(
 				[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
@@ -818,7 +820,7 @@ namespace idk::vkn
 				vk::Rect2D render_area
 				{
 					vk::Offset2D{},
-					vk::Extent2D{s_cast<uint32_t>(sz.x),s_cast<uint32_t>(sz.y)}
+					vk::Extent2D{sz.x,sz.y}
 				};
 				auto& rt = elem.light_map.as<VknFrameBuffer>();
 				vk::Framebuffer fb = rt.GetFramebuffer();
@@ -886,7 +888,7 @@ namespace idk::vkn
 		cmd_buffer.endRenderPass();
 		cmd_buffer.end();
 	}
-//#pragma optimize("",off)
+//
 	namespace gt
 	{
 
@@ -1537,6 +1539,7 @@ namespace idk::vkn
 
 		if (processed_ro.size()>0)
 		{
+			dbg::BeginLabel(cmd_buffer, "non-deferred region", color{ 0,0.4f,0.2f });
 			bool is_particle_renderer = false;
 			for (auto& p_ro : processed_ro)
 			{
@@ -1605,10 +1608,13 @@ namespace idk::vkn
 					cmd_buffer.draw(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
 				}
 			}
+			dbg::EndLabel(cmd_buffer);
 		}
 		if (camera.render_target->RenderDebug())
 		{
+			dbg::BeginLabel(cmd_buffer, "Debug Renderign", color{ 0,0.6f,0.0f });
 			RenderDebugStuff(state, rs, offset, size);
+			dbg::EndLabel(cmd_buffer);
 		}
 		if (still_rendering)
 		{

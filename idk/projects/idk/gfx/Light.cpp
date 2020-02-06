@@ -86,20 +86,44 @@ namespace idk
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
 	};
+#pragma optimize("",off)
+	Light::~Light()
+	{
+		if (!_copied)
+		{
+			std::visit([](auto& light) {
+				light.DeleteShadowMap(); 
+				}, light);
+		}
+	}
 
 	bool Light::is_active_and_enabled() const
 	{
 		return enabled && GetGameObject()->ActiveInHierarchy();
 	}
 
+	Uncopied::Uncopied(const Uncopied&) :_is_copied{ true } {}
+	Uncopied::Uncopied(Uncopied&& rhs) noexcept :_is_copied{ rhs._is_copied } { rhs._is_copied = true; }
+
+	Uncopied& Uncopied::operator=(Uncopied&& rhs) noexcept { std::swap(_is_copied, rhs._is_copied); return*this; }
+	bool Uncopied::copied() const noexcept { return _is_copied; }
+	void Uncopied::copied(bool val) noexcept { _is_copied = val; }
+	Uncopied& Uncopied::operator=(const Uncopied&) noexcept { copied(true); return *this; }
+	Uncopied& Uncopied::operator=(bool val)noexcept { _is_copied = val; return *this; }
+
 	void Light::InitShadowMap()
 	{
+		bool is_copied = _copied;
 		std::visit([&](auto& light_variant) 
 				{
-					if(NeedShadowMap(light_variant))
+					if(is_copied||NeedShadowMap(light_variant))
+					{
+						light_variant.ReleaseShadowMap();
 						light_variant.InitShadowMap();
+					}
 				}
 		, light);
+		_copied = false;
 	}
 
 	vector<Lightmap>& Light::GetLightMap()
@@ -135,7 +159,8 @@ namespace idk
 				{
 					const PointLight& point_light = light_variant;
 					retval.light_color = point_light.light_color * point_light.intensity;
-					retval.v_pos = GetGameObject()->Transform()->GlobalPosition();
+					const auto tfm = GetGameObject()->Transform();
+					retval.v_pos = tfm->GlobalPosition();
 					retval.v_dir = vec3(0.f);
 					retval.intensity = point_light.intensity;
 					retval.cos_inner = 1;
@@ -171,6 +196,8 @@ namespace idk
 					retval.intensity = spotlight.intensity;
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
+				retval.shadow_layers = shadow_layers;
+				retval.update_shadow = update_shadow;
 				retval.shadow_bias = shadow_bias;
 				retval.v = LightCameraView{ this }(light_variant);
 				retval.p = LightCameraProj{}(light_variant);

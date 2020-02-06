@@ -407,6 +407,6 @@ namespace idk
 		return detail::MatrixMatrixMult(lhs, rhs, std::make_index_sequence<I>{});
 	}
 #ifdef _DEBUG
-//#pragma optimize("",off)
+//
 #endif
 }

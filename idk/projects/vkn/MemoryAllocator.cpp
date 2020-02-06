@@ -102,12 +102,20 @@ namespace idk::vkn::hlp
 	MemoryAllocator::Alloc::Control::~Control()
 	{
 		if (src)
-			IntMemory().Free(unaligned_offset, size+(offset- unaligned_offset));
+		{
+			IntMemory().Free(unaligned_offset, size + (offset - unaligned_offset));
+			while (src->memories.size() && src->memories.back().curr_offset == 0)
+				src->memories.pop_back();
+		}
+		else
+		{
+			LOG_TO(LogPool::GFX, "Attempting to free weird shit");
+		}
 	}
 
 	MemoryAllocator::Alloc::~Alloc() = default;
 
-//// #pragma optimize("",off)
+//// 
 	void Memories::Memory::Free(size_t offset, size_t size)
 	{
 		MemoryRange range{ MemoryRange{offset, offset + size} };
@@ -129,7 +137,10 @@ namespace idk::vkn::hlp
 				break;
 			}
 		}
-		free_list.emplace(range);
+		if (range.end == this->curr_offset)
+			curr_offset = range.start;
+		else
+			free_list.emplace(range);
 	}
 
 	size_t Aligned(size_t offset, size_t alignment)

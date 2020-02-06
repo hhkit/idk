@@ -98,7 +98,7 @@ namespace idk::vkn
 		output_attachments.clear();
 		depth_attachment.reset();
 	}
-#pragma optimize("",off)
+
 	index_span NodeBuffer::StoreResources(vector<FrameGraphResource>& rsc)
 	{
 		index_span result{ resources.size(),resources.size() };

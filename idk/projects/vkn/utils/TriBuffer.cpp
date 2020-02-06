@@ -26,7 +26,7 @@ namespace idk::vkn {
 	}
 	*/
 	TriBuffer::TriBuffer(TriBuffer&& rhs) noexcept
-		:images{ std::move(rhs.images) }, image_views{ std::move(rhs.image_views) }, pSignals{ std::move(rhs.pSignals) }, mems{std::move(rhs.mems)}
+		:allocs{std::move(rhs.allocs)},images{ std::move(rhs.images) }, image_views{ std::move(rhs.image_views) }, pSignals{ std::move(rhs.pSignals) }, mems{std::move(rhs.mems)}
 	{
 	}
 	TriBuffer& TriBuffer::operator=(TriBuffer&& rhs) noexcept
@@ -41,6 +41,7 @@ namespace idk::vkn {
 	TriBuffer::~TriBuffer()
 	{
 		images.clear();
+		allocs.clear();
 		image_views.clear();
 		pSignals.clear();
 	}
@@ -70,12 +71,13 @@ namespace idk::vkn {
 	void TriBuffer::CreateImagePool(VulkanView& view)
 	{
 		images.clear();
+		allocs.clear();
 		for (unsigned int i = 0; i < view.vulkan().imageCount; ++i)
 		{
 			//auto ptr = std::make_unique<VknTexture>();
 			//auto&& [image, alloc] = TextureLoader::LoadTexture(allocator, load_fence, rgba, size.x, size.y, len, format, isRenderTarget);
 			images.emplace_back(vk::Image{});
-
+			auto& alloc = allocs.emplace_back();
 			view.vulkan().createImage(
 				view.vulkan().extent.width,
 				view.vulkan().extent.height,
@@ -84,7 +86,8 @@ namespace idk::vkn {
 				vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eInputAttachment,
 				vk::MemoryPropertyFlagBits::eDeviceLocal,
 				images[images.size() - 1],
-				mems
+				mems,
+				alloc
 			);
 
 		}

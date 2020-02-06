@@ -123,6 +123,12 @@ namespace idk::mono
 	{
 		using Actual = std::decay_t<T>;
 
+		if (!*this)
+		{
+			if constexpr (index_in_variant_v<Actual, CSharpObjectVariant> != std::variant_size_v<CSharpObjectVariant>)
+				_variables[fieldname] = obj;
+		}
+
 		auto me = Raw();
 		auto field = Field(fieldname);
 
@@ -179,6 +185,12 @@ namespace idk::mono
 	}
 
 	template<typename T>
+	inline T ManagedObject::Get(string_view field)
+	{
+		return T();
+	}
+
+	template<typename T>
 	void ManagedObject::Visit(T&& functor, bool ignore_privacy)
 	{
 		auto depth = int{};
@@ -197,6 +209,24 @@ namespace idk::mono
 	{
 		++depth;
 		auto last_children = -1;
+
+		if (!*this)
+		{
+			for (auto& [name, value]: _variables)
+			{
+				std::visit([&](auto& elem)
+					{
+						if (functor(name.data(), elem, -last_children))
+						{
+							reflect::dynamic{ elem }.visit(functor);
+							last_children = 1;
+						}
+						else
+							last_children = 0;
+					}, value);
+			}
+			return;
+		}
 
 		auto class_stack = [&]()
 		{
@@ -262,6 +292,7 @@ namespace idk::mono
 				MONO_COMPLEX_TYPE(vec2, envi.Type("Vector2")->Raw());
 				MONO_COMPLEX_TYPE(vec3, envi.Type("Vector3")->Raw());
 				MONO_COMPLEX_TYPE(vec4, envi.Type("Vector4")->Raw());
+				MONO_COMPLEX_TYPE(color, envi.Type("Color")->Raw());
 
 				MONO_RESOURCE_TYPE(MaterialInstance);
 				MONO_RESOURCE_TYPE(Prefab);
@@ -369,6 +400,7 @@ namespace idk::mono
 			MONO_BASE_TYPE_CONST(vec2, envi.Type("Vector2")->Raw());
 			MONO_BASE_TYPE_CONST(vec3, envi.Type("Vector3")->Raw());
 			MONO_BASE_TYPE_CONST(vec4, envi.Type("Vector4")->Raw());
+			MONO_BASE_TYPE_CONST(color, envi.Type("Color")->Raw());
 
 			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
 			MONO_RESOURCE_TYPE_CONST(Prefab);

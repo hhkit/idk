@@ -99,7 +99,7 @@ namespace idk::vkn
 		//location
 		hash_table<uint32_t,buffer_desc> extracted_desc;
 	};
-//// #pragma optimize("",off)
+//// 
 	ExtractedMisc extract_info(const vector<unsigned int>& buffer, hash_table<string, UboInfo>& ubo_info, vk::ShaderStageFlagBits single_stage)
 	{
 		ExtractedMisc result{};
@@ -226,7 +226,7 @@ namespace idk::vkn
 		}
 		return result;
 	}
-//// #pragma optimize("",off)
+//// 
 	void CreateLayouts(
 		hash_table<string, UboInfo>& ubo_info,
 		ShaderModule::LayoutTable& layouts,
@@ -389,6 +389,14 @@ const UboInfo& ShaderModule::GetLayout(const string& uniform_name) const
 	auto itr = Current().ubo_info.find(uniform_name);
 	
 	return (itr!= Current().ubo_info.end())?itr->second:(*(UboInfo*)nullptr);
+}
+std::optional<UboInfo> ShaderModule::TryGetLayout(const string& uniform_name) const
+{
+	std::optional<UboInfo> result{};
+	auto itr = Current().ubo_info.find(uniform_name);
+	if(itr != Current().ubo_info.end())
+		result = itr->second;
+	return result;
 }
 void DoNothing();
 ShaderModule::~ShaderModule()

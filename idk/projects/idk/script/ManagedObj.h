@@ -1,14 +1,19 @@
 #pragma once
 #include <mono/jit/jit.h>
+#include <idk.h>
+#include <meta/variant.inl>
 
 namespace idk::mono
 {
+	using CSharpObjectVariant = variant<bool, unsigned char, char, unsigned short, short, unsigned, int, unsigned long long, long long, float, double, string, Handle<GameObject>> ;
+
 	class ManagedType;
 
 	class ManagedObject
 	{
 	public:
-		ManagedObject() noexcept = default;
+		ManagedObject() = default;
+		explicit ManagedObject(string_view _typename);
 		ManagedObject(MonoObject* obj);
 		ManagedObject(const ManagedObject&);
 		ManagedObject(ManagedObject&&) noexcept;
@@ -20,7 +25,7 @@ namespace idk::mono
 		MonoObject*        Raw() const noexcept;
 		const ManagedType* Type() noexcept;
 		const ManagedType* Type() const noexcept;
-		string_view        TypeName() const;
+		string             TypeName() const;
 
 		// mutators
 		void Assign(string_view field, MonoObject* obj);
@@ -39,6 +44,8 @@ namespace idk::mono
 	private:
 		uint32_t _gc_handle{};
 		const ManagedType* _type{};
+		string _typename;
+		hash_table<string, CSharpObjectVariant> _variables;
 
 		MonoClassField* Field(string_view field);
 

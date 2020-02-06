@@ -183,9 +183,26 @@ namespace idk {
 
         ImGui::BeginChild("_inspector_inner");
         if (const auto rect_transform = gos[0]->GetComponent<RectTransform>())
+        {
+            if (_debug_mode)
+                ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                    rect_transform.id,
+                    s_cast<int>(rect_transform.scene),
+                    s_cast<int>(rect_transform.index),
+                    s_cast<int>(rect_transform.gen));
             DisplayComponent(rect_transform);
+        }
         else
-            DisplayComponent(gos[0]->GetComponent<Transform>());
+        {
+            const auto transform = gos[0]->GetComponent<Transform>();
+            if (_debug_mode)
+                ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                    transform.id,
+                    s_cast<int>(transform.scene),
+                    s_cast<int>(transform.index),
+                    s_cast<int>(transform.gen));
+            DisplayComponent(transform);
+        }
 
         if (gameObjectsCount == 1)
         {
@@ -207,7 +224,12 @@ namespace idk {
                         continue;
 
                     //COMPONENT DISPLAY
-                    ImGui::Text("id: %lld", component.id);
+                    if (_debug_mode)
+                        ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                            component.id,
+                            s_cast<int>(component.scene),
+                            s_cast<int>(component.index),
+                            s_cast<int>(component.gen));
                     DisplayComponent(component);
                 }
             }
@@ -287,7 +309,12 @@ namespace idk {
 
                     _curr_component_is_added = std::find(added.begin(), added.end(), j) != added.end(); // j is newly added
 
-                    ImGui::Text("id: %lld", component.id);
+                    if (_debug_mode)
+                        ImGui::Text("%lld (scene: %d, index: %d, gen: %d)",
+                            component.id,
+                            s_cast<int>(component.scene),
+                            s_cast<int>(component.index),
+                            s_cast<int>(component.gen));
                     DisplayComponent(component);
                     ++j;
                 }
@@ -453,7 +480,7 @@ namespace idk {
 			int execute_counter = 0;
 			for (const char* name : componentNames) {
 
-				if (!component_textFilter.PassFilter(name)) //skip if filtered
+				if (!script_textFilter.PassFilter(name)) //skip if filtered
 					continue;
 
 				if (ImGui::MenuItem(name)) {
@@ -471,6 +498,32 @@ namespace idk {
 		}
 
         ImGui::EndChild();
+    }
+
+
+
+    template<typename T>
+    auto SelectGO(Handle<GameObject>, T&& arg)
+    {
+        return std::forward<T>(arg);
+    }
+    auto SelectGO(Handle<GameObject> go, Handle<GameObject>)
+    {
+        return go;
+    }
+    template<typename Command,typename ...Args>
+    void IGE_InspectorWindow::ExecuteOnSelected(Args&&... args)
+    {
+        IDE& editor = Core::GetSystem<IDE>();
+        int execute_counter = 0;
+        for (auto go : editor.GetSelectedObjects().game_objects)
+        {
+            if (!go)
+                continue;
+            editor.command_controller.ExecuteCommand(COMMAND(Command, SelectGO(go,std::forward<Args>(args))...));
+            ++execute_counter;
+        }
+        editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
     }
 
 	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
@@ -507,7 +560,7 @@ namespace idk {
 					outputString.append(")");
 				}
 
-                editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, outputString));
+                editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, go, outputString));
 				++execute_counter;
 			}
 
@@ -558,7 +611,7 @@ namespace idk {
             for (const auto& tag : Core::GetSystem<TagManager>().GetConfig().tags)
             {
                 if (ImGui::MenuItem(tag.data()))
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, tag));
+                    ExecuteOnSelected<CMD_ModifyGameObjectHeader>(game_object, std::nullopt, tag);
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Tag##_add_tag_"))
@@ -587,7 +640,9 @@ namespace idk {
                 label += ": ";
                 label += layers[i];
                 if (ImGui::MenuItem(label.c_str()))
-                    editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, std::nullopt, i));
+                {
+                    ExecuteOnSelected<CMD_ModifyGameObjectHeader>(game_object, std::nullopt, std::nullopt, i);
+                }
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Add Layer##_add_layer_"))
@@ -1401,7 +1456,18 @@ namespace idk {
 		string displayingComponent = [&]() ->string
 		{
 			auto type = (*component).type;
-			return type.is<mono::Behavior>() ? string{ handle_cast<mono::Behavior>(component)->TypeName() } + " (Script)" : string{ type.name() };
+            if (type.is<mono::Behavior>())
+            {
+                auto mb = handle_cast<mono::Behavior>(component);
+                auto behavior_name = string{ mb->TypeName() };
+                if (mb->script_data)
+                    behavior_name += " (Script)";
+                else
+                    behavior_name += " (Missing Script)";
+                return behavior_name;
+            }
+            else
+                return string{ type.name() };
 		}();
 		const string fluffText{ "idk::" };
 		std::size_t found = displayingComponent.find(fluffText);

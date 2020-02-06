@@ -70,10 +70,13 @@
     <Compile Include="Components\AnimationState.cs" />
     <Compile Include="Components\Animator.cs" />
     <Compile Include="Components\AudioSource.cs" />
+    <Compile Include="Components\BoxCollider.cs" />
     <Compile Include="Components\Camera.cs" />
+    <Compile Include="Components\CapsuleCollider.cs" />
     <Compile Include="Components\Collider.cs" />
     <Compile Include="Components\Image.cs" />
     <Compile Include="Components\RectTransform.cs" />
+    <Compile Include="Components\SphereCollider.cs" />
     <Compile Include="Components\Text.cs" />
     <Compile Include="Components\TextMesh.cs" />
     <Compile Include="Components\Light.cs" />
@@ -96,6 +99,7 @@
     <Compile Include="Electron\Player.cs" />
     <Compile Include="Electron\RPC.cs" />
     <Compile Include="Electron\RPCTarget.cs" />
+    <Compile Include="Graphics.cs" />
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />

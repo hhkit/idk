@@ -22,7 +22,7 @@ namespace idk::vkn
 			tmp_graph.src_node.emplace(written_rsc.id, node.id);
 		return stored_node;
 	}
-#pragma optimize("",off)
+
 	void FrameGraph::ComputeLifetimes(const ActualGraph& ag, ResourceLifetimeManager& manager)
 	{
 		auto& exec_order = execution_order;
@@ -87,7 +87,7 @@ namespace idk::vkn
 		rsc_lifetime_mgr.ClearLifetimes();
 		GetResourceManager().Reset();
 	}
-#pragma optimize("",off)
+
 	void FrameGraph::Compile()
 	{
 		tmp_graph.buffer = &graph_builder.consumed_resources;

@@ -10,7 +10,7 @@
 #include <concurrent_queue.h>
 namespace idk::mono
 {
-	string_view Behavior::TypeName() const
+	string Behavior::TypeName() const
 	{
 		return script_data.TypeName();
 	}
@@ -27,6 +27,7 @@ namespace idk::mono
 				_started = false;
 				return script_data.Raw();
 			}
+		script_data = ManagedObject{ type };
 		return nullptr;
 	}
 
@@ -37,9 +38,12 @@ namespace idk::mono
 
 	void Behavior::FireMessage(string_view msg, [[maybe_unused]] void* args[])
 	{
-		auto thunk = script_data.Type()->GetThunk(msg);
-		if (thunk)
-			thunk->Invoke(script_data.Raw()); // handle args?
+		if (script_data)
+		{
+			auto thunk = script_data.Type()->GetThunk(msg);
+			if (thunk)
+				thunk->Invoke(script_data.Raw()); // handle args?
+		}
 	}
 
 	void Behavior::Awake()

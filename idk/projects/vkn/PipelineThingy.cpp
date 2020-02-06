@@ -235,6 +235,7 @@ namespace idk::vkn
 	{
 		ref.~Ref();
 		new (&ref) Ref{ &ubo_manager };
+		reserve(1000);
 	}
 	void PipelineThingy::UnbindShader(ShaderStage stage)
 	{
@@ -330,10 +331,14 @@ namespace idk::vkn
 			if (ohshader)
 			{
 				auto& shader = ohshader->as<ShaderModule>();
-				if (shader && shader.HasLayout(uniform_name))
+				if (shader)
 				{
-					result = shader.GetLayout(uniform_name);
-					break;
+					auto opt = shader.TryGetLayout(uniform_name);
+					if (opt)
+					{
+						result = *opt;
+						break;
+					}
 				}
 			}
 		}
@@ -370,7 +375,7 @@ namespace idk::vkn
 		}
 		return s_cast<bool>(info);
 	}
-// // #pragma optimize("",off)
+// // 
 	bool PipelineThingy::BindSampler(const string& uniform_name, uint32_t array_index, const VknCubemap& texture, bool skip_if_bound, vk::ImageLayout layout )
 	{
 		auto info = GetUniform(uniform_name);
@@ -417,7 +422,7 @@ namespace idk::vkn
 		draw_calls.back().num_instances = num_inst;
 		draw_calls.back().inst_offset = inst_offset;
 	}
-// // #pragma optimize("",off)
+// // 
 	void PipelineThingy::GenerateDS(DescriptorsManager& d_manager,bool update_ubo_buffers)
 	{
 		auto dsl = d_manager.Allocate(ref.collated_layouts);
