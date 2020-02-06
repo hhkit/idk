@@ -20,6 +20,8 @@ namespace idk::reflect::detail
 #include "uni_container.inl"
 #include "enum_type.inl"
 
+#include <ds/span.inl>
+
 namespace idk::reflect
 {
 	template<typename T>
