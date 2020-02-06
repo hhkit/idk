@@ -1,8 +1,10 @@
 #include <stdafx.h>
 #include <phys/AAbbTree.h>
+#include <phys/raycasts/collision_raycast.h>
 #include <gfx/DebugRenderer.h>
 #include <core/GameObject.h>
 #include <phys/PhysicsSystem.h>
+#include <math/shapes/ray.h>
 #include <stack>
 namespace idk
 {
@@ -92,6 +94,53 @@ namespace idk
 		}
 		
 		return num_collisions;
+	}
+	vector<RaycastHit> AabbTree::query_raycast(const ray& raycast, LayerMask mask)
+	{
+		if (_root_index < 0)
+			return {};
+		vector<RaycastHit> hitted;
+		const auto& phys_sys = Core::GetSystem<PhysicsSystem>();
+		int num_collisions = 0;
+		int sp = 1;
+		constexpr int max_size_stack = 4096;
+		int stack[max_size_stack];
+
+		*stack = _root_index;
+		while (sp)
+		{
+			const int index = stack[--sp];
+			const auto& node = _nodes[index];
+
+			// Check if the bounds of the leaf node collides against the other bounds
+			if (node.leaf())
+			{
+				auto layer = node.info.layer;
+				if (!(mask & LayerMask{ 1 << layer }))
+					continue;
+
+				++num_collision_tests;
+				if (auto res = phys::collide_ray_aabb(raycast, node.info.broad_phase))
+				{
+					hitted.emplace_back(RaycastHit{.collider = node.collider, .raycast_succ = *res});
+					++num_collisions;
+					continue;
+				}
+				else
+					continue;
+			}
+			else
+			{
+				if (phys::collide_ray_aabb(raycast, node.fat_aabb))
+				{
+					stack[sp++] = node.left;
+					stack[sp++] = node.right;
+				}
+				++num_collision_tests;
+			}
+		}
+
+		return hitted;
 	}
 // 
 	int AabbTree::insert(Collider& collider, const aabb& bound, float margin)
