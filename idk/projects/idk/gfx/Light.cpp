@@ -86,7 +86,7 @@ namespace idk
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
 	};
-
+#pragma optimize("",off)
 	Light::~Light()
 	{
 		if (!_copied)
@@ -101,7 +101,16 @@ namespace idk
 	{
 		return enabled && GetGameObject()->ActiveInHierarchy();
 	}
+
 	Uncopied::Uncopied(const Uncopied&) :_is_copied{ true } {}
+	Uncopied::Uncopied(Uncopied&& rhs) noexcept :_is_copied{ rhs._is_copied } { rhs._is_copied = true; }
+
+	Uncopied& Uncopied::operator=(Uncopied&& rhs) noexcept { std::swap(_is_copied, rhs._is_copied); return*this; }
+	bool Uncopied::copied() const noexcept { return _is_copied; }
+	void Uncopied::copied(bool val) noexcept { _is_copied = val; }
+	Uncopied& Uncopied::operator=(const Uncopied&) noexcept { copied(true); return *this; }
+	Uncopied& Uncopied::operator=(bool val)noexcept { _is_copied = val; return *this; }
+
 	void Light::InitShadowMap()
 	{
 		bool is_copied = _copied;
@@ -109,6 +118,7 @@ namespace idk
 				{
 					if(is_copied||NeedShadowMap(light_variant))
 					{
+						light_variant.ReleaseShadowMap();
 						light_variant.InitShadowMap();
 					}
 				}

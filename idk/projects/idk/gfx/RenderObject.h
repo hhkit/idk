@@ -157,6 +157,7 @@ namespace idk
 		vec2 tan_halfFOV;
 		rad fov{};
 		real ap;
+		real gamma=1.f;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 

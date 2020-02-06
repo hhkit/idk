@@ -44,14 +44,14 @@ namespace idk
 	struct Uncopied
 	{
 		Uncopied() = default;
-		Uncopied(Uncopied&&) :_is_copied{ false } {}
+		Uncopied(Uncopied&& rhs)noexcept;
 		Uncopied(const Uncopied&);
-		Uncopied& operator=(Uncopied&&) { return*this; }
-		Uncopied& operator=(const Uncopied&) { copied(true); return *this; }
-		bool copied()const noexcept { return _is_copied; }
-		void copied(bool val)noexcept { _is_copied = val; }
+		Uncopied& operator=(Uncopied&& rhs) noexcept;
+		Uncopied& operator=(const Uncopied&) noexcept;
+		bool copied()const noexcept;
+		void copied(bool val)noexcept;
 		operator bool()const noexcept { return _is_copied; }
-		Uncopied& operator =(bool val)noexcept { _is_copied = val; return *this; }
+		Uncopied& operator=(bool val)noexcept;
 	private:
 		bool _is_copied = { false };
 	};

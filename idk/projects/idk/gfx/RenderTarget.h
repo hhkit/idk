@@ -25,6 +25,7 @@ namespace idk
 		RscHandle<Texture> color_tex         { };
 		RscHandle<Texture> depth_tex         { };
 		bool               enable_mipmapping { false };
+		bool               is_srgb           {true};
 
 		// debug information
 		bool is_world_renderer { false };
@@ -39,9 +40,11 @@ namespace idk
 		virtual ~RenderTarget();
 
 		float AspectRatio() const noexcept;
-
+		
 		uvec2 Size() const noexcept                  { return size; }
 		void  Size(uvec2 new_size)            { size = new_size; Dirty(); }
+		bool  Srgb() const noexcept                  { return is_srgb; }
+		void  Srgb(bool  srgb)                { is_srgb = srgb; Dirty(); }
 
 		bool  IsWorldRenderer() const noexcept       { return is_world_renderer; }
 		void  IsWorldRenderer(bool new_val) noexcept { is_world_renderer = new_val; }

@@ -151,7 +151,9 @@ namespace idk::vkn
 			{
 				for (auto& elem : light.light_maps)
 				{
-					auto v = elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer;
+					auto& fb = elem.light_map.as<VknFrameBuffer>();
+					auto& db = fb.DepthAttachment();
+					auto v = db.buffer;
 					shadow_maps.emplace_back(v);
 				}
 			}

@@ -155,7 +155,8 @@ namespace idk
 			GetGameObject()->Transform()->position,
 			{tan(hfov),tan(vfov) },
 			field_of_view,
-			AspectRatio()
+			AspectRatio(),
+			gamma
 		};
 	}
 	float Camera::AspectRatio() const

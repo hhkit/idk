@@ -19,6 +19,7 @@ namespace idk
 		constexpr color(float r, float g, float b, float a = float{ 1 }) noexcept;
 		constexpr explicit color(const tvec<float, 3>&) noexcept;
 		constexpr explicit color(const tvec<float, 4>&) noexcept;
+		constexpr explicit color(const float*) noexcept;
 
 		// accessors
 		constexpr float& operator[](size_t) noexcept;

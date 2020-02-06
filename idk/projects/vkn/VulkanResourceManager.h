@@ -38,10 +38,61 @@ namespace idk::vkn
 			this->reset();
 		}
 	};
+	template<typename ManagedT>
+	struct ManagedRscDel : VulkanRscBase, ManagedT
+	{
+		using Base = ManagedT;
+		using Base::Base;
+		ManagedRscDel(Base&& base)noexcept :Base{ std::move(base) } {}
+		ManagedRscDel& operator=(ManagedRscDel&& rhs)
+		{
+			auto& tmp = s_cast<Base&>(*this);
+			std::swap(tmp, s_cast<Base&>(rhs));
+			return *this;
+		}
+		ManagedRscDel& operator=(Base&& rhs)
+		{
+			*this = ManagedRscDel{ std::move(rhs) };
+			return *this;
+		}
+		void Destroy() override
+		{
+			this->reset();
+		}
+	};
 	namespace impl
 	{
 		VulkanResourceManager* GetRscManager();
 	}
+	template<typename UniqueT>
+	struct ManagedRsc : UniqueT
+	{
+		using Base = UniqueT;
+		using Base::Base;
+		ManagedRsc() = default;
+		ManagedRsc(Base && base)noexcept :Base{ std::move(base) } {}
+		ManagedRsc(ManagedRsc<UniqueT> && base)noexcept :Base{ std::move(base) } {}
+
+		ManagedRsc& operator=(ManagedRsc && rhs)
+		{
+			auto& tmp = s_cast<Base&>(*this);
+			std::swap(tmp, s_cast<Base&>(rhs));
+			return *this;
+		}
+		ManagedRsc& operator=(Base && rhs)
+		{
+			ManagedRsc tmp{ std::move(rhs) };
+			//std::swap(static_cast<Base&>(*this),static_cast<Base&>(tmp)) ;
+			return *this = std::move(tmp);
+		}
+
+		//void Destroy() override
+		//{
+		//	reset();
+		//}
+		~ManagedRsc();
+	};
+
 	template<typename T>
 	struct VulkanRsc : vk::UniqueHandle<T, vk::DispatchLoaderDefault>
 	{
@@ -49,6 +100,7 @@ namespace idk::vkn
 		using Base::Base;
 		VulkanRsc() = default;
 		VulkanRsc(Base&& base)noexcept :Base{ std::move(base) } {}
+		VulkanRsc(VulkanRsc<T>&& base)noexcept :Base{ std::move(base) } {}
 
 		VulkanRsc& operator=(VulkanRsc&& rhs)
 		{
@@ -115,6 +167,18 @@ namespace idk::vkn
 		{
 			VulkanResourceManager* manager = impl::GetRscManager();
 			manager->QueueToDestroy(std::make_unique<VulkanRscDel<T>>(s_cast<Base&&>(std::move(*this))));
+
+		}
+	}
+
+	template<typename UniqueT>
+	ManagedRsc<UniqueT>::~ManagedRsc()
+	{
+		//If valid pointer
+		if (*this)
+		{
+			VulkanResourceManager* manager = impl::GetRscManager();
+			manager->QueueToDestroy(std::make_unique<ManagedRscDel<UniqueT>>(s_cast<Base&&>(std::move(*this))));
 
 		}
 	}

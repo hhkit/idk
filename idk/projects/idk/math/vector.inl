@@ -53,7 +53,7 @@ namespace idk
 	}
 
 	template<typename T, unsigned D>
-	inline constexpr tvec<T, D>::tvec(T* ptr)
+	inline constexpr tvec<T, D>::tvec(const T* ptr)
 	{
 		auto wrtr = begin();
 		const auto etr = end();
