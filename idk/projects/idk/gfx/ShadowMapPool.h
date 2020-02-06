@@ -27,6 +27,7 @@ namespace idk
 
 		void Restart();
 		vector<Lightmap> GetShadowMaps(const Light& light);
+		vector<Lightmap> GetShadowMaps(size_t light_index,const vector<Lightmap>& to_dup);
 
 	private:
 		//Maybe change to span
@@ -40,9 +41,9 @@ namespace idk
 		{
 			size_t next;
 			vector<Entry> entries;
-			void grow(const Light&);
+			void grow(const vector<Lightmap>&);
 			void reset();
-			vector<Lightmap> Get(const Light&);
+			vector<Lightmap> Get(const vector<Lightmap>&);
 		};
 
 		std::array<Subpool,detail::variant_count_v<LightVariant>> _lightmaps;

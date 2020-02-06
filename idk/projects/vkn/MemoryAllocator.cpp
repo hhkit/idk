@@ -104,8 +104,8 @@ namespace idk::vkn::hlp
 		if (src)
 		{
 			IntMemory().Free(unaligned_offset, size + (offset - unaligned_offset));
-			while (src->memories.size() && src->memories.back().curr_offset == 0)
-				src->memories.pop_back();
+			//while (src->memories.size() && src->memories.back().curr_offset == 0)
+			//	src->memories.pop_back();
 		}
 		else
 		{
