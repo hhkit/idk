@@ -116,6 +116,10 @@ namespace idk
                                   sz * cy * cx - cz * sy * sx,
                                   cz * cy * cx + sz * sy * sx);
         }
+        public static Quaternion Euler(Vector3 euler)
+        {
+            return Euler(euler.x, euler.y, euler.z);
+        }
 
         public static Quaternion FromToRotation(Vector3 from, Vector3 to)
         {
