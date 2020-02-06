@@ -12,7 +12,7 @@
 #undef near
 #undef far
 
-#define CASCADE_COUNT 3
+#define CASCADE_COUNT 2
 
 namespace idk
 {

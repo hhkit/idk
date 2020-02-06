@@ -160,7 +160,7 @@ namespace idk::vkn
 			else if (light.index == 1)
 			{
 				if(!light.light_maps.empty())
-					shadow_maps.emplace_back(light.light_maps[2].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+					shadow_maps.emplace_back(light.light_maps[0].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
 
 				for (auto& elem : state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
