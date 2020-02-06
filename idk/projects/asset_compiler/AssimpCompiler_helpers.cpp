@@ -934,15 +934,27 @@ namespace idk::ai_helpers
 		{
 			// Translation optimization
 			const anim::KeyFrame<vec3> t_back = anim_bone.translate_track.back();
-			anim_bone.translate_track.erase(
-				std::unique(anim_bone.translate_track.begin(), anim_bone.translate_track.end(), trans_pred), anim_bone.translate_track.end());
+			for (auto itr = anim_bone.translate_track.begin() + 1; itr != anim_bone.translate_track.end(); ++itr)
+			{
+				const auto next = itr + 1;
+				if (next != anim_bone.translate_track.end() && trans_pred(*itr, *next))
+				{
+					itr = anim_bone.translate_track.erase(itr);
+				}
+			}
 			if (anim_bone.translate_track.size() == 1)
 				anim_bone.translate_track.emplace_back(t_back);
 			
 			// Scale optimization
 			const anim::KeyFrame<vec3> s_back = anim_bone.scale_track.back();
-			anim_bone.scale_track.erase(
-				std::unique(anim_bone.scale_track.begin(), anim_bone.scale_track.end(), scale_pred), anim_bone.scale_track.end());
+			for (auto itr = anim_bone.scale_track.begin() + 1; itr != anim_bone.scale_track.end(); ++itr)
+			{
+				const auto next = itr + 1;
+				if (next != anim_bone.scale_track.end() && scale_pred(*itr, *next))
+				{
+					itr = anim_bone.scale_track.erase(itr);
+				}
+			}
 			if (anim_bone.scale_track.size() == 1)
 				anim_bone.scale_track.emplace_back(s_back);
 		}
