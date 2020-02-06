@@ -38,6 +38,7 @@
 
 #include <gfx/RenderTarget.h>
 
+
 struct guid_64
 {
 	uint64_t mem1;
@@ -535,6 +536,10 @@ namespace idk
 			ClearSwap(rb.culled_render_range, tmp.culled_render_range);//clear then swap the stuff back into rb
 			ClearSwap(rb.culled_light_render_range, tmp.culled_light_render_range);//clear then swap the stuff back into rb
 			ClearSwap(rb.canvas_render_range, tmp.canvas_render_range);//clear then swap the stuff back into rb
+
+			std::swap(rb.d_lightpool, tmp.d_lightpool);//swap back then restart
+			rb.d_lightpool.Restart();				   //
+
 		};
 
 		// todo: scenegraph traversal
@@ -567,7 +572,6 @@ namespace idk
 					result.curr_scene_camera_index = result.camera.size();
 				result.camera.emplace_back(camera.GenerateCameraData());
 			}
-		
 			for (auto& elem : lights)
 			{
 				if (isolate)
@@ -582,27 +586,28 @@ namespace idk
 					
 					if (res.index == 1)
 					{
-						Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
-							
-							for (auto& elem : d_lightmaps)
-							{
-								for (auto& e : elem.second.cam_lightmaps)
-								{
-									e.light_map->attachments.clear();
-									e.light_map->depth_attachment.reset();
-									e.light_map->stencil_attachment.reset();
-								}
-								elem.second.cam_lightmaps.clear();
-							}
-							d_lightmaps.clear();
-						};
+						//Dtor now frees the shadow maps.
+						//Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
+						//
+						//	//auto& e = std::get<DirectionalLight>(elem.light);							
+						//	for (auto& elem : d_lightmaps)
+						//	{
+						//		for (auto& e : elem.second.cam_lightmaps)
+						//		{
+						//			e.light_map->attachments.clear();
+						//			e.light_map->depth_attachment.reset();
+						//			e.light_map->stencil_attachment.reset();
+						//		}
+						//		elem.second.cam_lightmaps.clear();
+						//	}
+						//	d_lightmaps.clear();
+						//};
 
 						auto& e = std::get<DirectionalLight>(elem.light);
 
 						for (auto& c : result.camera)
 						{
-							if (d_lightmaps[c.obj_id].cam_lightmaps.empty())
-								d_lightmaps[c.obj_id].cam_lightmaps = e.InitShadowMap();
+							result.d_lightmaps[c.obj_id].cam_lightmaps = result.d_lightpool.GetShadowMaps(elem);
 						}
 
 					}
@@ -610,7 +615,8 @@ namespace idk
 				}
 			}
 
-			result.d_lightmaps = d_lightmaps;
+			d_lightmaps = result.d_lightmaps;
+			//result.d_lightmaps = d_lightmaps;
 		POST_END();
 
 		POST()
@@ -928,6 +934,10 @@ namespace idk
 			light_cam_info.view_matrix = { light.v };
 			light_cam_info.projection_matrix = { light.p };
 			LightRenderRange range{ ++i };
+			//TODO: Cull cascaded directional light
+			//if (light.index == 1)
+			//{
+			//}
 			{
 				if (!light.cast_shadow)
 				{

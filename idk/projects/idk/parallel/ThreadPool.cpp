@@ -51,7 +51,7 @@ namespace idk::mt
 		if (wait_for_job)
 		{
 			std::unique_lock m{ lock };
-			wait.wait(m, [this]()->bool { return job_count.load() != 0 && Core::IsRunning(); }); 
+			wait.wait(m, [this]()->bool { return job_count.load() != 0 || !Core::IsRunning(); }); 
 		}
 
 		auto job = jobs.pop_front();
