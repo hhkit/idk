@@ -72,7 +72,7 @@ namespace idk
 		shared_ptr<const pipeline_config> config{};
 		LayerMask layer_mask{ 0xFFFFFFFF };
 		//Processed data
-		Uniforms uniforms;
+		//Uniforms uniforms;
 		span<vbo_binding_t> vbo_bindings;
 	};
 	inline LayerMask layer_to_mask(char mask)

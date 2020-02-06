@@ -506,33 +506,35 @@ namespace idk
 			RenderBuffer tmp{};
 			std::swap(tmp, rb); //reinitialize the stuff that don't need to be swapped.
 			ClearSwap(rb.camera, tmp.camera);//clear then swap the stuff back into rb
-			ClearSwap(rb.font_render_data, tmp.font_render_data);//clear then swap the stuff back into rb
+			ClearSwap(rb.lights, tmp.lights);//clear then swap the stuff back into rb
 			ClearSwap(rb.active_light_buffer, tmp.active_light_buffer);
 			ClearSwap(rb.directional_light_buffer, tmp.directional_light_buffer);
 			ClearSwap(rb.d_lightmaps,tmp.d_lightmaps);
 			//ClearSwap(rb.light_camera_data, tmp.light_camera_data);
+			ClearSwap(rb.mesh_render, tmp.mesh_render);//clear then swap the stuff back into rb
+			ClearSwap(rb.skinned_mesh_render, tmp.skinned_mesh_render);//clear then swap the stuff back into rb
+			ClearSwap(rb.skeleton_transforms, tmp.skeleton_transforms);//clear then swap the stuff back into rb
+			ClearSwap(rb.particle_render_data, tmp.particle_render_data);//clear then swap the stuff back into rb
+			ClearSwap(rb.particle_buffer, tmp.particle_buffer);
+			ClearSwap(rb.particle_range, tmp.particle_range);
+			ClearSwap(rb.font_render_data, tmp.font_render_data);//clear then swap the stuff back into rb
+			
 			ClearSwap(rb.font_range, tmp.font_range);
 			ClearSwap(rb.font_buffer, tmp.font_buffer);
+			
 			ClearSwap(rb.ui_render_per_canvas, tmp.ui_render_per_canvas);
 			ClearSwap(rb.ui_canvas, tmp.ui_canvas);
 			ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
-			//ClearSwap(rb.ui_text_buffer.pos1, tmp.ui_text_buffer.pos1);
-			//ClearSwap(rb.ui_text_buffer.uv1, tmp.ui_text_buffer.uv1);
-			//ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
 			//ClearSwap(rb.ui_canvas_range, tmp.ui_canvas_range);
 			ClearSwap(rb.instanced_mesh_render, tmp.instanced_mesh_render);//clear then swap the stuff back into rb
 			//ClearSwap(rb.instanced_skinned_mesh_render  ,tmp.instanced_skinned_mesh_render  );//clear then swap the stuff back into rb
 			ClearSwap(rb.inst_mesh_render_buffer, tmp.inst_mesh_render_buffer);//clear then swap the stuff back into rb
 			//ClearSwap(rb.inst_skinned_mesh_render_buffer,tmp.inst_skinned_mesh_render_buffer);//clear then swap the stuff back into rb
-			ClearSwap(rb.lights, tmp.lights);//clear then swap the stuff back into rb
 			//ClearSwap(rb.light_camera_data, tmp.light_camera_data);//clear then swap the stuff back into rb
-			ClearSwap(rb.mesh_render, tmp.mesh_render);//clear then swap the stuff back into rb
-			ClearSwap(rb.skinned_mesh_render, tmp.skinned_mesh_render);//clear then swap the stuff back into rb
-			ClearSwap(rb.particle_render_data, tmp.particle_render_data);//clear then swap the stuff back into rb
-			ClearSwap(rb.particle_buffer, tmp.particle_buffer);
-			ClearSwap(rb.particle_range, tmp.particle_range);
-			ClearSwap(rb.skeleton_transforms, tmp.skeleton_transforms);//clear then swap the stuff back into rb
+			ClearSwap(rb.culled_render_range, tmp.culled_render_range);//clear then swap the stuff back into rb
+			ClearSwap(rb.culled_light_render_range, tmp.culled_light_render_range);//clear then swap the stuff back into rb
+			ClearSwap(rb.canvas_render_range, tmp.canvas_render_range);//clear then swap the stuff back into rb
 		};
 
 		// todo: scenegraph traversal

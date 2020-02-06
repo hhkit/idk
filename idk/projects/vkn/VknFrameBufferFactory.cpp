@@ -84,7 +84,6 @@ namespace std
 		}
 	};
 }
-#pragma optimize("",off)
 rp_type_t to_rp_type(idk::FrameBuffer& fb)
 {
 	rp_type_t result;

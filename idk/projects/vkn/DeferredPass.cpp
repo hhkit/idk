@@ -305,7 +305,6 @@ namespace idk::vkn
 	{
 	}
 
-#pragma optimize("",off)
 	void DeferredPass::Init(VknRenderTarget& rt,  DeferredGBuffer(&gbuf)[EGBufferType::size()])
 	{
 		_gbuffer = &gbuf;
@@ -857,20 +856,20 @@ namespace idk::vkn
 		
 		const auto& rp = hdr_pass;
 		auto& fb = *hdr_buffer;
-		vector<vk::Format> formats;
-		for (auto& b : fb.attachments)
-		{
-			formats.emplace_back(b->buffer.as<VknTexture>().format);
-		}
-		formats.emplace_back(rt.color_tex.as<VknTexture>().format);
-		formats.emplace_back(rt.depth_tex.as<VknTexture>().format);
+		///vector<vk::Format> formats;
+		///for (auto& b : fb.attachments)
+		///{
+		///	formats.emplace_back(b->buffer.as<VknTexture>().format);
+		///}
+		///formats.emplace_back(rt.color_tex.as<VknTexture>().format);
+		///formats.emplace_back(rt.depth_tex.as<VknTexture>().format);
 		vk::RenderPassBeginInfo rpbi
 		{
 			*rp, fb.GetFramebuffer(),
 			render_area,hlp::arr_count(v),std::data(v)
 		};
-		if (formats[0] != formats[fb.attachments.size()])
-			DoNothing();
+		//if (formats[0] != formats[fb.attachments.size()])
+		//	DoNothing();
 		//Transit depth buffer to general for sampling
 		
 		//Begin Depthless RT renderpass

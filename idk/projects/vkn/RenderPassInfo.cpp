@@ -103,7 +103,6 @@ void SubPassConfig::ProcessAttachments(uint32_t num, vector<attachment_t>& outpu
 		};
 	}
 }
-#pragma optimize("",off)
 index_t RenderPassInfo::RegisterAttachment(AttachmentInfo attachment, vk::ImageLayout in, vk::ImageLayout out)
 {
 	auto index = hlp::arr_count(attachments);
