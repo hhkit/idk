@@ -157,7 +157,7 @@ namespace idk::vkn
 			}
 			else if (light.index == 1)
 			{
-				if (cam.obj_id == light.camDataRef.obj_id)
+				//if (cam.obj_id == light.camDataRef.obj_id)
 				{
 					if (!light.light_maps.empty())
 						shadow_maps.emplace_back(light.light_maps[2].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);

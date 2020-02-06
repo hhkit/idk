@@ -252,7 +252,7 @@ namespace idk::vkn
 		PreRenderData pre_render_data;
 		pre_render_data.shared_gfx_state = &shared_graphics_state;
 		pre_render_data.active_lights.reserve(lights.size());
-		pre_render_data.active_dir_lights.reserve(curr_buffer.directional_light_buffer.size());
+		pre_render_data.active_dir_lights.reserve(curr_buffer.camera.size());
 		pre_render_data.cameras = &curr_buffer.camera;
 		//pre_render_data.d_lightmaps = &curr_buffer.d_lightmaps;
 
@@ -260,8 +260,8 @@ namespace idk::vkn
 			if(lights[i].cast_shadow && lights[i].index!=0)
 				pre_render_data.active_lights.emplace_back(i);
 
-		for (auto& elem : curr_buffer.directional_light_buffer)
-			pre_render_data.active_dir_lights.emplace_back(elem);
+		//for (auto& elem : curr_buffer.directional_light_buffer)
+			//pre_render_data.active_dir_lights.emplace_back(elem);
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;

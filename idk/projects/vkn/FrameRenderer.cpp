@@ -449,7 +449,7 @@ namespace idk::vkn
 		const size_t num_instanced_buffer_state = 1;
 		const size_t num_color_pick_states = 1;
 		
-		auto total_pre_states = lights.size() + state.active_dir_lights.size() * state.cameras->size() + num_conv_states+ num_instanced_buffer_state + num_color_pick_states;
+		auto total_pre_states = lights.size()  + state.active_dir_lights.size() + num_conv_states+ num_instanced_buffer_state + num_color_pick_states;
 		GrowStates(_pre_states, total_pre_states);
 		for (auto& pre_state : _pre_states)
 		{

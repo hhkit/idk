@@ -31,9 +31,9 @@ namespace idk::vkn
 			shadow_maps_directional.resize(active_directional_light.size(), def_2d);
 			shadow_maps_cube.resize(active_lights.size(), def_cube);
 			
-			for(auto elem = active_lights.begin(); elem != active_lights.end(); ++elem)
+			for(auto& elem : active_lights)
 			{
-				auto& light = lights_data[*elem];
+				auto& light = lights_data[elem];
 				if (light.index == 2)//spotlight
 				{
 					for(auto& elem: light.light_maps)
@@ -42,33 +42,16 @@ namespace idk::vkn
 				}
 				else if(light.index == 1) //directional light
 				{
-					if (camera.obj_id == light.camDataRef.obj_id)
-					{
-						if (!light.light_maps.empty())
-							shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
-						for (auto& elem : light.light_maps)
-							shadow_maps_directional[j++] = (s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
-						++j;
-					}
-					else
-					{
-						elem = active_lights.erase(elem);
-						continue;
-					}
+					if (!light.light_maps.empty())
+						shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
+					for (auto& e : light.light_maps)
+						shadow_maps_directional[j++] = (s_cast<RscHandle<Texture>>(e.light_map->DepthAttachment()));
+					//++j;
 				}
 
 				++i;
 				
 			}
-			//for (auto& dir_light_idx : active_directional_light)
-			//{
-			//	auto& light = lights_data[dir_light_idx];
-			//	//if (!light.light_maps.empty())
-			//		//shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
-			//	for (auto& elem : light.light_maps)
-			//		shadow_maps_directional[j++] = (s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
-			//	//++j;
-			//}
 		}
 		skeleton_transforms = &s_transforms;
 		CullAndAdd(render_objects, skinned_render_objects);

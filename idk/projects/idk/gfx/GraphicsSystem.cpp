@@ -888,7 +888,7 @@ namespace idk
             elem.get();
 
 		result.active_light_buffer.reserve(result.camera.size()* result.lights.size());
-		result.directional_light_buffer.reserve(result.camera.size());
+		result.directional_light_buffer.reserve(result.camera.size() * 3);
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
 		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
