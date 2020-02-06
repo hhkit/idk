@@ -28,10 +28,10 @@ namespace idk::mt
 
 	ThreadPool::ThreadPool(const int thread_count)
 	{
-		LOG_TO(LogPool::SYS, "spawning %d threads\n", thread_count);
+		const auto helper_thds = std::max(0, thread_count - 1);
+		LOG_TO(LogPool::SYS, "spawning %d threads\n", helper_thds);
 		//SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 		
-		const auto helper_thds = std::max(0, thread_count - 2);
 
 		for (int i = 1; i <= helper_thds; ++i)
 		{
@@ -41,19 +41,17 @@ namespace idk::mt
 
 	ThreadPool::~ThreadPool()
 	{
+		wait.notify_all();
 		for (auto& elem : threads)
 			elem.join();
 	}
-
-	static auto idle_threshold = std::chrono::microseconds{ 2 };
-	thread_local std::chrono::time_point<std::chrono::high_resolution_clock> idle_start{};
 
 	void ThreadPool::ExecuteJob([[maybe_unused]] const int thid, bool wait_for_job)
 	{
 		if (wait_for_job)
 		{
 			std::unique_lock m{ lock };
-			wait.wait(m, [this]()->bool { return job_count.load() != 0; }); 
+			wait.wait(m, [this]()->bool { return job_count.load() != 0 && Core::IsRunning(); }); 
 		}
 
 		auto job = jobs.pop_front();

@@ -78,7 +78,7 @@ namespace idk::mt
 	T ThreadPool::Future<T>::get()
 	{
 		IDK_ASSERT(pool);
-		while (future.wait_for(std::chrono::nanoseconds{10}) != std::future_status::ready)
+		while (future.wait_for(std::chrono::nanoseconds{5}) != std::future_status::ready)
 			pool->ExecuteJob(thread_id(), thread_id() != 0);
 		return future.get();
 	}
