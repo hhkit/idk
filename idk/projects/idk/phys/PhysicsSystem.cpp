@@ -672,8 +672,42 @@ namespace idk
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 		vector<RaycastHit> retval;
 
+		for (auto& static_check : static_tree.query_raycast(r, layer_mask))
+		{
+			if (!static_check.collider)
+				continue;
+
+			auto& c = *static_check.collider;
+			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
+				{
+					using RShape = std::decay_t<decltype(shape)>;
+
+					const auto rShape = calc_shape(shape, c);
+
+					if constexpr (std::is_same_v<RShape, sphere>)
+						return phys::collide_ray_sphere(
+							r, rShape);
+					else
+						if constexpr (std::is_same_v<RShape, box>)
+							return phys::collide_ray_box(
+								r, rShape);
+						else
+							if constexpr (std::is_same_v<RShape, capsule>)
+								return phys::collide_ray_capsule(
+									r, rShape);
+							else
+								return phys::raycast_failure{};
+				}, c.shape);
+
+			if (result)
+				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
+		}
+
 		for (auto& c : colliders)
 		{
+			if (c.is_static())
+				continue;
+
 			{
 				auto layer = c.GetGameObject()->GetComponent<Layer>();
 				auto mask = layer ? layer->mask() : LayerMask{ 1 << 0 };

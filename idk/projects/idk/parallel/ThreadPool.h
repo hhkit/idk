@@ -24,9 +24,13 @@ namespace idk::mt
 		template<typename T, typename ... Args>
 		auto Post(T&& func, Args&& ... args);
 
-		void ExecuteJob(const int thid);
+		void ExecuteJob(const int thid, bool wait_for_job = true);
 	private:
 		std::vector<std::thread> threads;
+
+		std::mutex lock; // this lock exists for the condition variable
+		std::condition_variable wait; // signals all threads to check the job_count
+		atomic<unsigned> job_count{0};
 		circular_buffer_lf<std::function<void()>> jobs;
 	};
 
@@ -48,12 +52,11 @@ namespace idk::mt
 		using Retval = decltype(std::apply(func, std::declval<std::tuple<Args...>>()));
 		auto promise = std::make_shared<std::promise<Retval>>();
 		auto future = promise->get_future();
-		
-		while (!jobs.emplace_back(
-			[ fn = func
+
+		auto job = [fn = func
 			, tuple = std::make_tuple(std::forward<Args>(args)...)
 			, promise
-			]() -> void
+		]() -> void
 		{
 			if constexpr (std::is_same_v<Retval, void>)
 			{
@@ -62,17 +65,21 @@ namespace idk::mt
 			}
 			else
 				promise->set_value(std::apply(fn, tuple));
-		}))
-			ExecuteJob(thread_id());
+		};
 		
+		while (!jobs.emplace_back(job))
+			ExecuteJob(thread_id(), thread_id() != 0);
+
+		++job_count;
+		wait.notify_one();
 		return Future{ this, std::move(future) };
 	}
 	template<typename T>
 	T ThreadPool::Future<T>::get()
 	{
 		IDK_ASSERT(pool);
-		while (future.wait_for(std::chrono::seconds{}) != std::future_status::ready)
-			pool->ExecuteJob(thread_id());
+		while (future.wait_for(std::chrono::nanoseconds{10}) != std::future_status::ready)
+			pool->ExecuteJob(thread_id(), thread_id() != 0);
 		return future.get();
 	}
 
