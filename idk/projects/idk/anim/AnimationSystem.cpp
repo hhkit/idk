@@ -77,7 +77,7 @@ namespace idk
 		}
 		for (auto& animator : animators)
 		{
-			if (!animator._initialized)
+			if (!animator._initialized || !animator.GetGameObject()->ActiveInHierarchy())
 				continue;
 
 			// Update the layer logic first. 
@@ -160,7 +160,7 @@ namespace idk
 		}
 		for (auto& animator : animators)
 		{
-			if (!animator._initialized)
+			if (!animator._initialized || !animator.GetGameObject()->ActiveInHierarchy())
 				continue;
 
 			if (!animator.preview_playback)
