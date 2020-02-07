@@ -125,7 +125,7 @@ void main()
 			}
 			//vvvp = LightBlk.lights[i].vp;
 		}
-		if (LightBlk.lights[i].type == 2)
+		else if (LightBlk.lights[i].type == 2)
 		{
 			if(LightBlk.lights[i].cast_shadow!=0)
 				result *= (vec3(1-ShadowCalculation(LightBlk.lights[i],shadow_maps[i],LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));

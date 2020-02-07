@@ -140,12 +140,12 @@ float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3
 			float curDepth = projCoords.z;
 				
 			//Bias calculation
-			float bias = max(0.005 * (1.0 - dot(normal,lightDir)),0.009);
-			bias = light.shadow_bias;
+			//float bias = max(0.005 * (1.0 - dot(normal,lightDir)),0.009);
+			float bias = light.shadow_bias;
 			
 			//PCF
 			float avgDepth = 0.f;
-			float	tDepth=0.f;
+			//float	tDepth=0.f;
 			vec2 texelSize = textureSize(shadow_tex,0);
 			texelSize = 1.f/texelSize;
 			float tc_z = projCoords.z - bias;
@@ -158,7 +158,7 @@ float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3
 
 			
 			//divide by 9 values
-			avgDepth /= 15.0f;
+			avgDepth /= 18.0f;
 			
 			return avgDepth;
 		}
