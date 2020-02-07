@@ -138,7 +138,6 @@ namespace idk::vkn
 		hlp::MemoryAllocator allocator;
 		vk::UniqueFence fence;
 		hash_table<rp_type_t, RenderPassObj> render_passes;//probably should move this to a manager
-#pragma optimize("",off)
 		vk::UniqueRenderPass CreateRenderPass(uint32_t num_col,const VknFrameBuffer& fb)
 		{
 

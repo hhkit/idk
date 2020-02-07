@@ -8,14 +8,15 @@ namespace idk
 {
 	ShadowMapPool::~ShadowMapPool()
 	{
-		for (auto& entries : _lightmaps)
-		{
-			for (auto& entry : entries.entries)
-			{
-				for (auto& sm : entry.shadows)
-					sm.DeleteShadowMap();
-			}
-		}
+		//I think this gets called too late, (after resource manager freed the shadows or smth.
+		//for (auto& entries : _lightmaps)
+		//{
+		//	for (auto& entry : entries.entries)
+		//	{
+		//		for (auto& sm : entry.shadows)
+		//			sm.DeleteShadowMap();
+		//	}
+		//}
 	}
 	void ShadowMapPool::Restart()
 	{

@@ -152,10 +152,17 @@ namespace idk::vkn
 			{
 				(*counter)--;
 				_renderer->RenderGraphicsState(*m, *rs);
+			}catch (std::exception& e)
+			{
+				LOG_TO(LogPool::GFX, "Exception thrown during threaded render: %s", e.what());
+			}
+			catch (vk::Error& e)
+			{
+				LOG_TO(LogPool::GFX, "Vk Exception thrown during threaded render: %s", e.what());
 			}
 			catch (...)
 			{
-
+				LOG_TO(LogPool::GFX, "Unknown Exception thrown during threaded render");
 			}
 		}
 		using Future_t =decltype(GetFuture(ThreadedRender::RunFunc));

@@ -416,12 +416,12 @@ namespace idk
 				for (auto& elem : copy_light.light_maps)
 				{
 					elem.SetCascade(camera, copy_light, cascadeiter[k], cascadeiter[j]);
-					auto new_index = new_lights.size();
-					new_lights.emplace_back(copy_light);
-					active_light_buffer.emplace_back(lights.size()+new_index); //new_lights is gonna be appended at the back of the set
-					directional_light_buffer.emplace_back(i);
 					++k; ++j;
 				}
+				auto new_index = new_lights.size();
+				new_lights.emplace_back(copy_light);
+				active_light_buffer.emplace_back(lights.size() + new_index); //new_lights is gonna be appended at the back of the set
+				directional_light_buffer.emplace_back(lights.size() + new_index);
 
 				//active_light_buffer.emplace_back(i);
 
@@ -959,10 +959,10 @@ namespace idk
 				}
 				else
 				{
-					//if (light.index == 1)
-					//{
-					//	light_cam_info.projection_matrix = { light.light_maps.front().cascade_projection };
-					//}
+					if (light.index == 1)
+					{
+						light_cam_info.projection_matrix = { light.light_maps.front().cascade_projection };
+					}
 					const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 					range.inst_mesh_render_begin = start_index;
 					range.inst_mesh_render_end = end_index;
