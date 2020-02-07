@@ -52,7 +52,6 @@ namespace idk
 	bool NeedShadowMap(const PointLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const SpotLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const DirectionalLight&light){return NeedShadowMapImpl(light);};
-#pragma optimize("",off)
 	vector<Lightmap> PointLight::InitShadowMap()
 	{
 		light_map.resize(1);

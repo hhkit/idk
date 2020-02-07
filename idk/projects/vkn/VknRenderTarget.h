@@ -5,6 +5,9 @@
 #include <vkn/VknImageData.h>
 #include <vkn/VulkanView.h>
 #include <vkn/ManagedVulkanObjs.h>
+
+#include <vkn/VknFrameBuffer.h>
+
 namespace idk::vkn
 {
 	class VknRenderTarget
@@ -27,13 +30,13 @@ namespace idk::vkn
 		vk::Semaphore ReadySignal();
 
 		//const ivec2& Size()const { return size; };
-		BasicRenderPasses GetRenderPassType() { return rp_type; }
 	private:
 		void OnFinalize() override;
 		static constexpr BasicRenderPasses     rp_type = BasicRenderPasses::eRgbaColorDepth;
-		UniqueSemaphore       ready_semaphore{};
-		UniqueFramebuffer     buffer{};
-		//ivec2				  size{};
-		bool				  uncreated{true};
+		UniqueSemaphore           ready_semaphore{};
+		RscHandle<FrameBuffer> _frame_buffer;
+		vector<RscHandle<FrameBuffer>> _permutations;
+		//ivec2				      size{};
+		bool				      uncreated{true};
 	};
 }

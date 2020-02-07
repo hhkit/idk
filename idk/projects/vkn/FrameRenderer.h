@@ -95,7 +95,7 @@ namespace idk::vkn
 		
 		RscHandle<ShaderProgram> GetMeshRendererShaderModule();
 		PipelineManager& GetPipelineManager();
-		VulkanPipeline&  GetPipeline(const pipeline_config& config,const vector<RscHandle<ShaderProgram>>& prog);
+		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& prog, std::optional<RenderPassObj> rp = {});
 		//PipelineHandle_t GetPipelineHandle();//Add arguments when we know what determines which pipeline to get.
 
 		uint32_t _current_frame_index;

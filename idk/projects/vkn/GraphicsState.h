@@ -54,6 +54,7 @@ namespace idk::vkn
 		vector<BufferUpdateInst> update_instructions;
 		RscHandle<Texture> BrdfLookupTable;
 		const vector<LightData>* lights;
+		vector<LightData> shadow_maps_directional;
 		hlp::vector_buffer inst_mesh_render_buffer;
 		const vector<InstRenderObjects>* instanced_ros;
 		const vector<ParticleObj>*        particle_data{};
@@ -127,7 +128,6 @@ namespace idk::vkn
 		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
 		vector<RscHandle<Texture>> shadow_maps_2d  ;
-		vector<RscHandle<Texture>> shadow_maps_directional;
 		vector<RscHandle<CubeMap>> shadow_maps_cube;
 
 		bool clear_render_target = false;

@@ -14,6 +14,7 @@ namespace idk::vkn
 	{
 		static void DrawRenderObject(const RenderObject& ro, FrameGraphDetail::Context_t context)
 		{
+			/*
 			for (auto& [name,data_idx_span] : ro.uniforms.ubos)
 			{
 				size_t i = 0;
@@ -41,7 +42,7 @@ namespace idk::vkn
 				context.DrawIndexed(ro.num_indices, num_inst, first_vert, ro.first_index, first_inst);
 			}
 			else
-				context.Draw(ro.num_vertices, num_inst, first_vert, first_inst);
+				context.Draw(ro.num_vertices, num_inst, first_vert, first_inst);*/
 		}
 	};
 	struct FrameGraphDemoPass : BaseRenderPass

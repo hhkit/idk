@@ -8,7 +8,7 @@ namespace idk
 	struct CompiledBuffer
 	{
 		vector<vtx::Descriptor> attribs;
-		vector<unsigned char>   data;
+		string   data;
 	};
 
 	struct CompiledMesh
