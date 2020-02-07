@@ -15,6 +15,7 @@
 #include <forward_list>
 
 #include <machine.h>
+#include <gfx/ShadowMapPool.h>
 
 namespace idk
 {
@@ -204,6 +205,8 @@ namespace idk
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 			alignas(machine::cache_line_sz) std::pair<size_t,size_t>   skinned_inst_range;
+
+			alignas(machine::cache_line_sz) ShadowMapPool d_lightpool;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;

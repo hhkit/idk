@@ -35,15 +35,16 @@ namespace idk
 				bool paused = false;
 				for (auto& pt : graph)
 				{
-					last = pt.time.count();
+					using ms = std::chrono::duration<float, std::ratio<1, 1000>>;
+					last = static_cast<ms>(pt.time).count();
 					history.push_back(last);
 					paused = pt.paused;
 				}
 				if (!paused)
-					sprintf_s(curr_fps, "%.5f s", last);
+					sprintf_s(curr_fps, "%.5f ms", last);
 				else
-					sprintf_s(curr_fps, "(PAUSED) %.5f s", last);
-				ImGui::PlotHistogram(pass.Name().data(), history.data(), static_cast<int>(history.size()), 0, curr_fps, 0.f, .025f);
+					sprintf_s(curr_fps, "(PAUSED) %.5f ms", last);
+				ImGui::PlotHistogram(pass.Name().data(), history.data(), static_cast<int>(history.size()), 0, curr_fps, 0.f, 25.f);
 			};
 		};
 

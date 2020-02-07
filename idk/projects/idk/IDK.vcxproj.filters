@@ -1147,6 +1147,7 @@
     <ClInclude Include="network\ElectronRigidbodyView.h">
       <Filter>network\views</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\ShadowMapPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1654,6 +1655,7 @@
     <ClCompile Include="util\property_path.cpp" />
     <ClCompile Include="network\ElectronView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
+    <ClCompile Include="gfx\ShadowMapPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
