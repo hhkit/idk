@@ -18,6 +18,7 @@ namespace idk::vkn::gt
 		GraphTest& operator=(GraphTest&&);
 		~GraphTest();
 		void DeferredTest(const GraphicsState&,RenderStateV2&);
+		void SrgbConversionTest(RenderStateV2&, RscHandle<Texture> );
 	private:
 		struct PImpl;
 		unique_ptr<PImpl> _pimpl;

@@ -1058,6 +1058,30 @@ namespace idk::vkn
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 		View().Swapchain().m_graphics.images[View().vulkan().rv] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
+
+	void ResizeTex(uvec2 sz, RscHandle<Texture> tex);
+	void CopyTempTex(RscHandle<Texture> src, RscHandle<Texture> target, vk::CommandBuffer cmd_buffer);
+
+
+	void ConvertToNonSRGB(RenderStateV2& rs,gt::GraphTest& gtest, RscHandle<Texture> temp_tex)
+	{
+		auto rt_col = RscHandle<RenderTarget>{}->GetColorBuffer();
+		auto sz = max(temp_tex->Size(), rt_col->Size());
+		if (sz != temp_tex->Size())
+		{
+			ResizeTex(sz,temp_tex);
+		}
+		vk::CommandBufferBeginInfo cbbi
+		{
+			vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+		};
+		rs.cmd_buffer->begin(cbbi);
+		CopyTempTex(rt_col, temp_tex,*rs.cmd_buffer);
+		gtest.SrgbConversionTest(rs,temp_tex);
+		rs.FlagRendered();
+		rs.cmd_buffer->end();
+	}
+
 //#pragma optimize ("",off)
 	void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
 	{
@@ -1066,7 +1090,8 @@ namespace idk::vkn
 		auto& canvas = *state.shared_gfx_state->ui_canvas;
 		size_t num_conv_states = 1;
 		size_t num_instanced_buffer_state = 1;
-		auto total_post_states = canvas.size() + num_conv_states + num_instanced_buffer_state;
+		size_t num_gamma_conv = 1;
+		auto total_post_states = canvas.size() + num_conv_states + num_instanced_buffer_state + num_gamma_conv;
 		GrowStates(_post_states, total_post_states);
 		for (auto& pos_state : _post_states)
 		{
@@ -1145,6 +1170,12 @@ namespace idk::vkn
 			//if(elem.render_target) //Default render target is null. Don't ignore it.
 			PostRenderCanvas(i,elem.render_target, elem.ui_ro, state, rs, frame_index);
 		}
+
+		if (!RscHandle<VknRenderTarget>{}->Srgb())
+		{
+			ConvertToNonSRGB(_post_states[curr_state++]);
+		}
+
 		//TODO: Submit the command buffers
 
 		vector<vk::CommandBuffer> buffers{};

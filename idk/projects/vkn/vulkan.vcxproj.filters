@@ -542,6 +542,9 @@
     <ClCompile Include="UniformManager.cpp" />
     <ClCompile Include="DebugUtil.cpp" />
     <ClCompile Include="TextureTracker.cpp" />
+    <ClCompile Include="GammaUtils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
