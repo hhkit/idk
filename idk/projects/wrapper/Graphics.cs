@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace idk
+﻿namespace idk
 {
-    class Graphics
+    public class Graphics
     {
-        public bool DefaultRenderTargetSrgb 
+        public bool useGammaCorrection
         {
             get
             {
-                return Bindings.DefRtSrgb();
+                return Bindings.GraphicsGetSRGB();
             }
             set
             {
-                Bindings.ToggleDefRtSrgb(value);
+                Bindings.GraphicsSetSRGB(value);
             }
         }
     }

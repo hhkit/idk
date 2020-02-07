@@ -929,6 +929,11 @@ namespace idk
 			}
 
 		};
+
+		Core::GetSystem<SceneManager>().OnSceneChange += [this](RscHandle<Scene>)
+		{
+			Reset();
+		};
 	}
 
 	void PhysicsSystem::Shutdown()
