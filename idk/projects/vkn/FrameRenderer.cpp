@@ -152,10 +152,17 @@ namespace idk::vkn
 			{
 				(*counter)--;
 				_renderer->RenderGraphicsState(*m, *rs);
+			}catch (std::exception& e)
+			{
+				LOG_TO(LogPool::GFX, "Exception thrown during threaded render: %s", e.what());
+			}
+			catch (vk::Error& e)
+			{
+				LOG_TO(LogPool::GFX, "Vk Exception thrown during threaded render: %s", e.what());
 			}
 			catch (...)
 			{
-
+				LOG_TO(LogPool::GFX, "Unknown Exception thrown during threaded render");
 			}
 		}
 		using Future_t =decltype(GetFuture(ThreadedRender::RunFunc));
@@ -732,11 +739,15 @@ namespace idk::vkn
 				
 				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
 				mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
-				for (auto& e : *state.d_lightmaps)
+				//for (auto& e : *state.d_lightmaps)
 				{
-					for (auto& elem : e.second.cam_lightmaps)
+					auto& rs = r[curr_state++];
+					auto dispatcher = vk::DispatchLoaderDefault{};
+					vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+					vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+					cmd_buffer.begin(begin_info, dispatcher);
+					for (auto& elem : light.light_maps)
 					{
-						auto& rs = r[curr_state++];
 						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
 						ShadowBinding shadow_binding;
 						shadow_binding.for_each_binder<has_setstate>(
@@ -749,15 +760,11 @@ namespace idk::vkn
 						GraphicsStateInterface gsi = { state };
 						gsi.range = (*state.shadow_ranges)[light_index];
 						auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-						the_interface.GenerateDS(rs.dpools);
+						the_interface.GenerateDS(rs.dpools,false);
 
 						//auto& swapchain = view.Swapchain();
-						auto dispatcher = vk::DispatchLoaderDefault{};
-						vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-						vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 
-						cmd_buffer.begin(begin_info, dispatcher);
 						//auto lm = elem.light_map->DepthAttachment().buffer;
 						auto sz = elem.light_map->DepthAttachment().buffer->Size();
 
@@ -779,10 +786,10 @@ namespace idk::vkn
 						dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
 						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
 						dbg::EndLabel(cmd_buffer);
-						rs.ubo_manager.UpdateAllBuffers();
 						cmd_buffer.endRenderPass();
-						cmd_buffer.end();
 					}
+					cmd_buffer.end();
+					rs.ubo_manager.UpdateAllBuffers();
 				}
 			}
 		}

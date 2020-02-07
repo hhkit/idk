@@ -25,6 +25,7 @@ namespace idk::vkn::dbg
 
 	void AddLabel(vk::CommandBuffer cmd_buffer, const char* label, const color& color)
 	{
+		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		auto dbg_label = CreateLabel(label, color);
 		if (View().DynDispatcher().vkCmdInsertDebugUtilsLabelEXT)
 			cmd_buffer.insertDebugUtilsLabelEXT(dbg_label, View().DynDispatcher());
@@ -32,6 +33,7 @@ namespace idk::vkn::dbg
 
 	void BeginLabel(vk::CommandBuffer cmd_buffer, const char* label, const color& color)
 	{
+		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		auto dbg_label = CreateLabel(label, color);
 		if (View().DynDispatcher().vkCmdBeginDebugUtilsLabelEXT)
 			cmd_buffer.beginDebugUtilsLabelEXT(dbg_label, View().DynDispatcher());
@@ -39,11 +41,17 @@ namespace idk::vkn::dbg
 
 	void EndLabel(vk::CommandBuffer cmd_buffer)
 	{
+		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		if (View().DynDispatcher().vkCmdEndDebugUtilsLabelEXT)
 			cmd_buffer.endDebugUtilsLabelEXT(View().DynDispatcher());
 	}
+
+
+
+
 	void NameObject(vk::Image img, const string& name)
 	{
+		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
 			vk::DebugUtilsObjectNameInfoEXT tmp
@@ -57,6 +65,7 @@ namespace idk::vkn::dbg
 	}
 	void NameObject(vk::Buffer img, const string& name)
 	{
+		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
 			vk::DebugUtilsObjectNameInfoEXT tmp
@@ -70,6 +79,7 @@ namespace idk::vkn::dbg
 	}
 	void NameObject(uint64_t unk, const string& name)
 	{
+		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT && unk)//id must be valid if type is unknown
 		{
 			vk::DebugUtilsObjectNameInfoEXT tmp

@@ -34,7 +34,6 @@ namespace idk
 	{
 		return light_map;
 	}
-#pragma optimize("",off)
 	const vector<Lightmap>& DirectionalLight::GetShadowMap() const
 	{
 		// TODO: insert return statement here

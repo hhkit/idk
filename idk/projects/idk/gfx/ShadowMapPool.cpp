@@ -8,14 +8,15 @@ namespace idk
 {
 	ShadowMapPool::~ShadowMapPool()
 	{
-		for (auto& entries : _lightmaps)
-		{
-			for (auto& entry : entries.entries)
-			{
-				for (auto& sm : entry.shadows)
-					sm.DeleteShadowMap();
-			}
-		}
+		//I think this gets called too late, (after resource manager freed the shadows or smth.
+		//for (auto& entries : _lightmaps)
+		//{
+		//	for (auto& entry : entries.entries)
+		//	{
+		//		for (auto& sm : entry.shadows)
+		//			sm.DeleteShadowMap();
+		//	}
+		//}
 	}
 	void ShadowMapPool::Restart()
 	{
@@ -24,7 +25,7 @@ namespace idk
 			entries.reset();
 		}
 	}
-	vector<Lightmap> ShadowMapPool::Subpool::Get(const Light& light)
+	vector<Lightmap> ShadowMapPool::Subpool::Get(const vector<Lightmap>& light)
 	{
 		if (next == entries.size())
 		{
@@ -34,19 +35,29 @@ namespace idk
 	}
 	vector<Lightmap> ShadowMapPool::GetShadowMaps(const Light& light)
 	{
-		return _lightmaps[light.light.index()].Get(light);
+		return _lightmaps[light.light.index()].Get(light.GetLightMap());
 	}
 
-	void ShadowMapPool::Subpool::grow(const Light& light)
+	vector<Lightmap> ShadowMapPool::GetShadowMaps(size_t light_index,const vector<Lightmap>& to_dup)
 	{
-		auto copy = light.light;
-		auto copied_lightmaps = std::visit([](auto& copy) {
-			copy.ReleaseShadowMap();
-			auto res = copy.InitShadowMap(); 
-			copy.ReleaseShadowMap();
-			return res;
-			}, copy);
-		entries.emplace_back(Entry{ copied_lightmaps });
+		return _lightmaps[light_index].Get(to_dup);
+	}
+
+	void ShadowMapPool::Subpool::grow(const vector<Lightmap>& shadows)
+	{
+		Entry entry{ vector<Lightmap>{shadows.size()} };
+		for (auto& l : entry.shadows)
+		{
+			l.light_map = {};
+			l.InitShadowMap();
+		}
+		//auto copied_lightmaps = std::visit([](auto& copy) {
+		//	copy.ReleaseShadowMap();
+		//	auto res = copy.InitShadowMap(); 
+		//	copy.ReleaseShadowMap();
+		//	return res;
+		//	}, copy);
+		entries.emplace_back(std::move(entry));
 	}
 
 	void ShadowMapPool::Subpool::reset()

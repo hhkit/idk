@@ -138,9 +138,9 @@ namespace idk::vkn
 		hlp::MemoryAllocator allocator;
 		vk::UniqueFence fence;
 		hash_table<rp_type_t, RenderPassObj> render_passes;//probably should move this to a manager
-
 		vk::UniqueRenderPass CreateRenderPass(uint32_t num_col,const VknFrameBuffer& fb)
 		{
+
 			//uint32_t num_col = fb.attachments.size();
 			const vector<unique_ptr<Attachment>>& col_attachments = fb.attachments;
 			vector< vk::AttachmentDescription> attachments_desc(num_col);
@@ -255,7 +255,9 @@ namespace idk::vkn
 				,1,&subpass
 				,1,&dependency
 			};
-			return View().Device()->createRenderPassUnique(renderPassInfo);
+			auto& device = *View().Device();
+			auto tmp = device.createRenderPassUnique(renderPassInfo);
+			return tmp;
 		}
 		//Gets or the appropriate renderpass, initalizes if not-present.
 		RenderPassObj GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
@@ -361,7 +363,7 @@ namespace idk::vkn
 		framebufferInfo.height = s_cast<uint32_t>(fb.size.y);
 		framebufferInfo.layers = fb.NumLayers();
 
-
+		
 		fb.SetFramebuffer(vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher()), (spec_info)? spec_info->render_pass:_pimpl->GetRenderPass(rp_type, fb));
 	}
 }
