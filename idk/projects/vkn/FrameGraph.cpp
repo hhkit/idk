@@ -37,8 +37,8 @@ namespace idk::vkn
 			auto& curr_node = graph_nodes[index];
 			size_t order = 0;
 			//TODO Get the dep_nodes from curr_node
-			auto dep_rsc = curr_node.GetInputSpan();
-			for (auto& dep_rsc : dep_rsc)
+			auto dep_rscs = curr_node.GetInputSpan();
+			for (auto& dep_rsc : dep_rscs)
 			{
 				auto dep_node = ag.src_node.find(dep_rsc.id)->second;
 				order = std::max(fat_order[dep_node], order);

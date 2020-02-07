@@ -73,10 +73,12 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue,
 	}
 	catch (std::exception& e )
 	{
+		LOG_TO(LogPool::GFX, "Exception while ending single time cmd buffer: %s", e.what());
 		DebugBreak();
 	}
 	catch (vk::Error & e)
 	{
+		LOG_TO(LogPool::GFX, "VkError while ending single time cmd buffer: %s", e.what());
 		DebugBreak();
 
 	}
@@ -164,7 +166,7 @@ void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer
 // 
 
 
-void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<BeginInfo> begin, std::optional<SubmissionInfo> queue_sub_config)
+void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format , vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<BeginInfo> begin, std::optional<SubmissionInfo> queue_sub_config)
 {
 	SubmissionInfo sub_info{};
 	if (queue_sub_config)

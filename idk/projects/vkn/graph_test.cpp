@@ -148,8 +148,8 @@ namespace idk::vkn::gt
 			};
 			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh]);
 			context.SetBufferDescriptions(description);
-			size_t i = 0;
-			for (auto& buffer : gbuffer_rscs)
+			uint32_t i = 0;
+			for ([[maybe_unused]]auto& buffer : gbuffer_rscs)
 			{
 				context.SetBlend(i);
 				context.SetClearColor(i, idk::color{0,0,0,0});
@@ -192,9 +192,9 @@ namespace idk::vkn::gt
 							auto img_block = mat_info.GetImageBlock(itr);
 							auto name = string_view{ itr->first };
 							name = name.substr(0, name.find_first_of('['));
-							for (size_t i = 0; i < img_block.size(); ++i)
+							for (size_t img_index = 0; img_index < img_block.size(); ++img_index)
 							{
-								context.BindUniform(name, i,img_block[i].as<VknTexture>() );
+								context.BindUniform(name, img_index,img_block[img_index].as<VknTexture>() );
 							}
 						}
 						++itr;
@@ -361,7 +361,7 @@ namespace idk::vkn::gt
 
 		RscHandle<ShaderProgram> hdr_shader;
 
-		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_,RscHandle<VknRenderTarget> rt, FullRenderData& rd) :PassUtil{ rd } ,accum{accum_}
+		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_,RscHandle<VknRenderTarget> , FullRenderData& rd) :PassUtil{ rd } ,accum{accum_}
 		{
 			hdr_rsc = CreateGBuffer(builder, "HDR", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
 			depth_att = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth);
@@ -483,7 +483,7 @@ namespace idk::vkn::gt
 				
 			context.BindShader(ShaderStage::Fragment, hdr_shader);
 			{
-				size_t i = 0;
+				uint32_t i = 0;
 
 				AttachmentBlendConfig blend{};
 				blend.blend_enable = true;
@@ -559,7 +559,7 @@ namespace idk::vkn::gt
 				size_t i = 0;
 				auto& cam_clear = gfx_state.camera.clear_data;
 				auto color_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, color>::value;
-				auto cube_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, RscHandle<CubeMap>>::value;
+				//auto cube_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, RscHandle<CubeMap>>::value;
 				color col = {};
 				if (color_index==cam_clear.index())
 				{
@@ -628,7 +628,7 @@ namespace idk::vkn::gt
 	struct ClearCombine : PassUtil, FsqUtil
 	{
 		static RscHandle<ShaderProgram> clear_merge;
-		ClearCombine(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, FrameGraphResource clear_color_buffer, FrameGraphResource scene_color, FrameGraphResource scene_depth, FullRenderData& frd) : PassUtil{ frd }
+		ClearCombine(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> , FrameGraphResource clear_color_buffer, FrameGraphResource scene_color, FrameGraphResource scene_depth, FullRenderData& frd) : PassUtil{ frd }
 		{
 			auto color_att = CreateGBuffer(builder, "ClearCombine", vk::Format::eR8G8B8A8Srgb,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{render_data.GetGfxState().camera.render_target->GetColorBuffer()});
 			//auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
@@ -758,18 +758,11 @@ namespace idk::vkn::gt
 
 	*/
 
-	struct CubeClearRendering
-	{
-		void MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, FrameGraphResource color,FrameGraphResource depth, const CoreGraphicsState& gfx_state, RenderStateV2& rs)
-		{
-		}
-	};
 
 	void GraphDeferredTest(FrameGraph& fg,const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		fg.Reset();
 		DeferredRendering dr;
-		CubeClearRendering ccr;
 		auto [color,depth] = dr.MakePass(fg, {}, gfx_state, rs);
 		//ccr.MakePass(fg, {}, color, depth, gfx_state, rs);
 		fg.Compile();

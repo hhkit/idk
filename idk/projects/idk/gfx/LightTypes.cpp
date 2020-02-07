@@ -61,8 +61,7 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			auto handle= elem.InitShadowMap();
-			auto& tmp = *handle;
+			elem.InitShadowMap();
 		}
 		return light_map;
 	}
