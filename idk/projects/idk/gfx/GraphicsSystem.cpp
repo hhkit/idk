@@ -963,7 +963,7 @@ namespace idk
 				{
 					if (light.index == 1)
 					{
-						light_cam_info.projection_matrix = { light.light_maps.front().cascade_projection };
+						light_cam_info.projection_matrix = { light.light_maps.back().cascade_projection };
 					}
 					const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 					range.inst_mesh_render_begin = start_index;
