@@ -741,9 +741,13 @@ namespace idk::vkn
 				mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 				//for (auto& e : *state.d_lightmaps)
 				{
+					auto& rs = r[curr_state++];
+					auto dispatcher = vk::DispatchLoaderDefault{};
+					vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+					vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+					cmd_buffer.begin(begin_info, dispatcher);
 					for (auto& elem : light.light_maps)
 					{
-						auto& rs = r[curr_state++];
 						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
 						ShadowBinding shadow_binding;
 						shadow_binding.for_each_binder<has_setstate>(
@@ -756,15 +760,11 @@ namespace idk::vkn
 						GraphicsStateInterface gsi = { state };
 						gsi.range = (*state.shadow_ranges)[light_index];
 						auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-						the_interface.GenerateDS(rs.dpools);
+						the_interface.GenerateDS(rs.dpools,false);
 
 						//auto& swapchain = view.Swapchain();
-						auto dispatcher = vk::DispatchLoaderDefault{};
-						vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-						vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 
 
-						cmd_buffer.begin(begin_info, dispatcher);
 						//auto lm = elem.light_map->DepthAttachment().buffer;
 						auto sz = elem.light_map->DepthAttachment().buffer->Size();
 
@@ -786,10 +786,10 @@ namespace idk::vkn
 						dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
 						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
 						dbg::EndLabel(cmd_buffer);
-						rs.ubo_manager.UpdateAllBuffers();
 						cmd_buffer.endRenderPass();
-						cmd_buffer.end();
 					}
+					cmd_buffer.end();
+					rs.ubo_manager.UpdateAllBuffers();
 				}
 			}
 		}
