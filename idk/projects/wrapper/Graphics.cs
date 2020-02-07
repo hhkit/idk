@@ -2,7 +2,7 @@
 {
     public class Graphics
     {
-        public bool use_gamma_correction
+        public bool useGammaCorrection
         {
             get
             {
