@@ -413,6 +413,11 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void GraphicsSetSRGB(bool srgb);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool GraphicsDisableGammaCorrection();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GraphicsSetGammaCorrection(float gamma_correction);
+
         /*
         * Camera
         */

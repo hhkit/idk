@@ -327,6 +327,7 @@
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
+    <ClInclude Include="util\ExtraVars.h" />
     <ClInclude Include="util\hash_combine.h" />
     <ClInclude Include="util\ioutils.h" />
     <ClInclude Include="util\macro_utils.h" />

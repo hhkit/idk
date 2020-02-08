@@ -17,6 +17,8 @@
 #include <machine.h>
 #include <gfx/ShadowMapPool.h>
 
+#include <util/ExtraVars.h>
+
 namespace idk
 {
 
@@ -64,6 +66,7 @@ namespace idk
 	};
 	struct RenderRequest;
 
+
 	class GraphicsSystem
 		: public ISystem
 	{
@@ -84,6 +87,8 @@ namespace idk
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
 		std::map<Handle<GameObject>, CamLightData> d_lightmaps;
+
+		ExtraVars extra_vars;
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;

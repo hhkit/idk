@@ -13,6 +13,12 @@
 #include <gfx/Camera.h>
 
 #include <vkn/utils/utils.inl>
+namespace idk::vkn
+{
+
+	void ResizeTex(uvec2 sz, RscHandle<Texture> tex);
+	void CopyTempTex(VknTextureView src, VknTextureView  target, vk::CommandBuffer cmd_buffer);
+}
 
 namespace idk::vkn::gt
 {
@@ -39,25 +45,28 @@ namespace idk::vkn::gt
 		FullRenderData render_data;
 
 		PassUtil(FullRenderData rd) :render_data{rd} {}
-
-		FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {})
+		static TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, uvec2 size = uvec2{1920,1080})
 		{
-			return builder.write(builder.CreateTexture(TextureDescription
-				{
-					.name = name,//string_view name);
-					.size = uvec2{1920,1080},//ivec2 size);
-					.format = format,//vk::Format format);
-					.aspect = flag,//vk::ImageAspectFlags aspect);
-					//vk::ImageType type = vk::ImageType::e2D);
-					//uint32_t layer_count = 1);
-					//vk::ImageTiling tiling_format);
-					.usage = usage,
-					.actual_rsc = target,
-				}
-			));
+			return TextureDescription
+			{
+				.name = name,//string_view name);
+				.size = size,//ivec2 size);
+				.format = format,//vk::Format format);
+				.aspect = flag,//vk::ImageAspectFlags aspect);
+				//vk::ImageType type = vk::ImageType::e2D);
+				//uint32_t layer_count = 1);
+				//vk::ImageTiling tiling_format);
+				.usage = usage,
+				.actual_rsc = target,
+			};
+			
+		}
+		static FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {})
+		{
+			return builder.write(builder.CreateTexture(CreateTextureInfo(builder, name, format, usage , flag , target )));
 
 		}
-		void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh)
+		static void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh)
 		{
 			for (auto& [attrib, buffer] : mesh.Buffers())
 			{
@@ -788,6 +797,116 @@ namespace idk::vkn::gt
 			rs.dpools
 		};
 		_pimpl->fg.ProcessBatches(rb);
+	}
+
+
+
+	struct GammaConv : BaseRenderPass, FsqUtil
+	{
+		static RscHandle<ShaderProgram> gamma_shd;
+		float linear_to_gamma=1/2.2f;
+		VknTextureView temp;
+		FrameGraphResource in_rsc;
+		GammaConv(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, float lin_to_gamma) : linear_to_gamma{lin_to_gamma}
+		{
+			auto col_tex = RscHandle<VknTexture>{ rt->GetColorBuffer() };
+			auto color_att = PassUtil::CreateGBuffer(builder, "Gamma Out Tex", col_tex->format, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, col_tex);
+			auto input_tex = builder.read(in_rsc = builder.CreateTexture(PassUtil::CreateTextureInfo(builder, "Gamma In Tex", col_tex->format, vk::ImageUsageFlagBits::eColorAttachment|vk::ImageUsageFlagBits::eTransferDst, vk::ImageAspectFlagBits::eColor, {},col_tex->Size())));
+
+			//auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
+			builder.set_output_attachment(color_att, 0,
+				AttachmentDescription
+				{
+						vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
+						vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
+						vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+						vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+						vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+						vk::ImageSubresourceRange
+						{
+							vk::ImageAspectFlagBits::eColor,0,1,0,1
+						}
+				}
+			);
+			builder.set_input_attachment(builder.read(input_tex), 0,
+				AttachmentDescription
+				{
+						vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+						vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp store_op;
+						vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+						vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+						vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+						vk::ImageSubresourceRange
+						{
+							vk::ImageAspectFlagBits::eColor,0,1,0,1
+						}
+				}
+			);
+
+		}
+		void Execute(Context_t context)override
+		{
+			auto rt_col = RscHandle<RenderTarget>{}->GetColorBuffer();
+			temp = context.Resources().Get<VknTextureView>(in_rsc.id);
+			context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Clear Combine");
+			
+			if (!gamma_shd)
+			{
+				auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/gamma_frag.frag");
+				if (tmp)
+					gamma_shd = *tmp;
+			}
+			auto& shd = gamma_shd.as<ShaderModule>();
+			context.SetViewport(rect{});
+			context.SetScissors(rect{});
+			if (shd.HasCurrent())
+			{
+
+				context.BindShader(ShaderStage::Fragment, gamma_shd);
+				context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+				auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+				context.BindUniform("linear_to_gamma", 0, to_data(linear_to_gamma));
+				PassUtil::BindMesh(context, this->fsq_requirements, mesh);
+
+				context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
+
+			}
+		}
+	};
+	RscHandle<ShaderProgram> GammaConv::gamma_shd = {};
+
+
+
+
+
+	void GraphTest::SrgbConversionTest(RenderStateV2& rs)
+	{
+		auto& fg = _pimpl->fg;
+		fg.Reset();
+
+		auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars;
+		string gamma_name = "gamma_correction";
+		vars.SetIfUnset(gamma_name,1 / 2.2f);
+		auto& rp = fg.addRenderPass<GammaConv>("Gamma Conv", RscHandle<VknRenderTarget>{},*vars.Get<float>(gamma_name));
+		auto rt_col = RscHandle<VknRenderTarget>{}->GetColorBuffer();
+		//ccr.MakePass(fg, {}, color, depth, gfx_state, rs);
+		fg.Compile();
+		fg.AllocateResources();
+		fg.BuildRenderPasses();
+		fg.SetDefaultUboManager(rs.ubo_manager);
+		fg.Execute();
+		RenderBundle rb{*rs.cmd_buffer,rs.dpools};
+
+		vk::CommandBufferBeginInfo cbbi
+		{
+			vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+		};
+		rs.cmd_buffer->begin(cbbi);
+		CopyTempTex(rt_col.as<VknTexture>(), rp.temp, *rs.cmd_buffer);
+		fg.ProcessBatches(rb);
+		rs.FlagRendered();
+		rs.cmd_buffer->end();
+		rs.ubo_manager.UpdateAllBuffers();
 	}
 	GraphTest::GraphTest(GraphTest&&) = default;
 	GraphTest& GraphTest::operator=(GraphTest&&) = default;

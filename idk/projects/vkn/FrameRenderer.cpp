@@ -1058,6 +1058,12 @@ namespace idk::vkn
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 		View().Swapchain().m_graphics.images[View().vulkan().rv] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
+
+	void ConvertToNonSRGB(RenderStateV2& rs,gt::GraphTest& gtest)
+	{
+		gtest.SrgbConversionTest(rs);
+	}
+
 //#pragma optimize ("",off)
 	void FrameRenderer::PostRenderGraphicsStates(const PostRenderData& state, uint32_t frame_index)
 	{
@@ -1066,7 +1072,8 @@ namespace idk::vkn
 		auto& canvas = *state.shared_gfx_state->ui_canvas;
 		size_t num_conv_states = 1;
 		size_t num_instanced_buffer_state = 1;
-		auto total_post_states = canvas.size() + num_conv_states + num_instanced_buffer_state;
+		size_t num_gamma_conv = 1;
+		auto total_post_states = canvas.size() + num_conv_states + num_instanced_buffer_state + num_gamma_conv;
 		GrowStates(_post_states, total_post_states);
 		for (auto& pos_state : _post_states)
 		{
@@ -1145,6 +1152,12 @@ namespace idk::vkn
 			//if(elem.render_target) //Default render target is null. Don't ignore it.
 			PostRenderCanvas(i,elem.render_target, elem.ui_ro, state, rs, frame_index);
 		}
+
+		if (Core::GetSystem<GraphicsSystem>().extra_vars.Get<float>("gamma_correction"))
+		{
+			ConvertToNonSRGB(_post_states[curr_state++],_pimpl->test);
+		}
+
 		//TODO: Submit the command buffers
 
 		vector<vk::CommandBuffer> buffers{};

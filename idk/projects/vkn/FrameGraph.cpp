@@ -143,6 +143,11 @@ namespace idk::vkn
 		CreateRenderPasses();
 	}
 
+	void FrameGraph::SetDefaultUboManager(UboManager& ubo_manager)
+	{
+		_default_ubo_manager = &ubo_manager;
+	}
+
 	void TransitionResource(FrameGraph::Context_t context, TransitionInfo info)
 	{
 		//TODO: Actually transition
@@ -160,6 +165,7 @@ namespace idk::vkn
 			//TODO: Thread this
 			{
 				auto& context= _contexts.emplace_back();
+				context.SetUboManager(*_default_ubo_manager);
 				//Transition all the resources that are gonna be read (and are not input attachments)
 				auto input_span = node.GetReadSpan();
 				for (auto& input : input_span)
