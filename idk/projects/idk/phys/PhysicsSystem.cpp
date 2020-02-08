@@ -667,17 +667,23 @@ namespace idk
 
 	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, LayerMask layer_mask, bool hit_triggers)
 	{
-		Core::GetSystem<DebugRenderer>().Draw(r, color{1,1,0});
+		Core::GetSystem<DebugRenderer>().Draw(r, color{ 1,1,0 });
 
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 		vector<RaycastHit> retval;
 
-		for (auto& static_check : static_tree.query_raycast(r, layer_mask))
+		for (auto& c : colliders)
 		{
-			if (!static_check.collider)
+			{
+				auto layer = c.GetGameObject()->GetComponent<Layer>();
+				auto mask = layer ? layer->mask() : LayerMask{ 1 << 0 };
+				if (!(mask & layer_mask))
+					continue;
+			}
+
+			if (c.is_trigger && hit_triggers == false)
 				continue;
 
-			auto& c = *static_check.collider;
 			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
 				{
 					using RShape = std::decay_t<decltype(shape)>;
@@ -703,49 +709,9 @@ namespace idk
 				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
 		}
 
-		for (auto& c : colliders)
-		{
-			if (c.is_static())
-				continue;
-
+		std::sort(retval.begin(), retval.end(),
+			[](const RaycastHit& lhs, const RaycastHit& rhs)
 			{
-				auto layer = c.GetGameObject()->GetComponent<Layer>();
-				auto mask = layer ? layer->mask() : LayerMask{ 1 << 0 };
-				if (!(mask & layer_mask))
-					continue;
-			}
-
-			if (c.is_trigger && hit_triggers == false)
-				continue;
-
-			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
-				{
-					using RShape = std::decay_t<decltype(shape)>;
-
-					const auto rShape = calc_shape(shape, c);
-
-					if constexpr (std::is_same_v<RShape, sphere>)
-						return phys::collide_ray_sphere(
-							r, rShape);
-					else
-						if constexpr (std::is_same_v<RShape, box>)
-							return phys::collide_ray_box(
-								r, rShape);
-					else
-						if constexpr (std::is_same_v<RShape, capsule>)
-							return phys::collide_ray_capsule(
-								r, rShape);
-					else
-						return phys::raycast_failure{};
-				}, c.shape);
-
-			if (result)
-				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
-		}
-
-		std::sort(retval.begin(), retval.end(), 
-			[](const RaycastHit& lhs, const RaycastHit& rhs) 
-			{ 
 				return abs(lhs.raycast_succ.distance_to_collision) < abs(rhs.raycast_succ.distance_to_collision);
 			}
 		);
