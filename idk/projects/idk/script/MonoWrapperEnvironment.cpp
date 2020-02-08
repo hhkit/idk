@@ -1404,9 +1404,20 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::GraphicsSetSRGB", void, bool srgb)
+		//BIND_START("idk.Bindings::GraphicsGetGammaCorrection", float)
+		//{
+		//	return Core::GetSystem<GraphicsSystem>().extra_vars.Get;
+		//}
+		//BIND_END();
+
+		BIND_START("idk.Bindings::GraphicsSetGammaCorrection", void, float gamma_correction)
 		{
-			RscHandle<RenderTarget>{}->Srgb(srgb);
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set("gamma_correction",gamma_correction);
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsDisableGammaCorrection", void)
+		{
+			Core::GetSystem<GraphicsSystem>().extra_vars.Unset("gamma_correction");
 		}
 		BIND_END();
 

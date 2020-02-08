@@ -1,12 +1,22 @@
+#version 450
 
 layout(input_attachment_index = 0 ,set=2, binding=0) uniform subpassInput color_input;
 
-U_LAYOUT(set = 3,binding =0) uniform float linear_to_gamma;
+U_LAYOUT(3,0) uniform BLOCK(linear_to_gamma)
+{
+	float Linear_to_gamma;
+};
 
-out vec4 out_color;
+layout(location=0) out vec4 out_color;
 
 void main()
 {
 	vec4 color = subpassLoad(color_input);
-	out_color = vec4(pow(color.rgb,linear_to_gamma),color.a);
+	vec3 conv_col =pow(color.rgb,vec3(Linear_to_gamma));
+	//vec3(
+	//	pow(color.r,Linear_to_gamma),
+	//	pow(color.g,Linear_to_gamma),
+	//	pow(color.b,Linear_to_gamma)
+	//	);
+	out_color = vec4(conv_col,color.a);
 }

@@ -1148,6 +1148,7 @@
       <Filter>network\views</Filter>
     </ClInclude>
     <ClInclude Include="gfx\ShadowMapPool.h" />
+    <ClInclude Include="util\ExtraVars.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

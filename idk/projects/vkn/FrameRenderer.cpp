@@ -1059,27 +1059,9 @@ namespace idk::vkn
 		View().Swapchain().m_graphics.images[View().vulkan().rv] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
 
-	void ResizeTex(uvec2 sz, RscHandle<Texture> tex);
-	void CopyTempTex(RscHandle<Texture> src, RscHandle<Texture> target, vk::CommandBuffer cmd_buffer);
-
-
-	void ConvertToNonSRGB(RenderStateV2& rs,gt::GraphTest& gtest, RscHandle<Texture> temp_tex)
+	void ConvertToNonSRGB(RenderStateV2& rs,gt::GraphTest& gtest)
 	{
-		auto rt_col = RscHandle<RenderTarget>{}->GetColorBuffer();
-		auto sz = max(temp_tex->Size(), rt_col->Size());
-		if (sz != temp_tex->Size())
-		{
-			ResizeTex(sz,temp_tex);
-		}
-		vk::CommandBufferBeginInfo cbbi
-		{
-			vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-		};
-		rs.cmd_buffer->begin(cbbi);
-		CopyTempTex(rt_col, temp_tex,*rs.cmd_buffer);
-		gtest.SrgbConversionTest(rs,temp_tex);
-		rs.FlagRendered();
-		rs.cmd_buffer->end();
+		gtest.SrgbConversionTest(rs);
 	}
 
 //#pragma optimize ("",off)
@@ -1171,9 +1153,9 @@ namespace idk::vkn
 			PostRenderCanvas(i,elem.render_target, elem.ui_ro, state, rs, frame_index);
 		}
 
-		if (!RscHandle<VknRenderTarget>{}->Srgb())
+		if (Core::GetSystem<GraphicsSystem>().extra_vars.Get<float>("gamma_correction"))
 		{
-			ConvertToNonSRGB(_post_states[curr_state++]);
+			ConvertToNonSRGB(_post_states[curr_state++],_pimpl->test);
 		}
 
 		//TODO: Submit the command buffers
