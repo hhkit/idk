@@ -21,7 +21,7 @@ namespace idk::vkn
 		active_lights.clear();
 		active_dir_lights.clear();
 		{
-			size_t i = 0, j =0;
+			size_t i = 0;
 			RscHandle<Texture> def_2d;
 			RscHandle<CubeMap> def_cube;
 
@@ -39,18 +39,7 @@ namespace idk::vkn
 						shadow_maps_2d[i]=(s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
 					//shadow_maps_cube[i]=(def_cube);
 				}
-				//else if(light.index == 1) //directional light
-				//{
-				//	if(!light.light_maps.empty())
-				//		shadow_maps_2d[i] = (s_cast<RscHandle<Texture>>(light.light_maps[0].light_map->DepthAttachment()));
-				//	for (auto& elem : light.light_maps)
-				//	{
-				//		shadow_maps_directional.at(j++) = (s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
-				//	}
-				//}
-
-				++i;
-				
+				++i;				
 			}
 			//for (auto& dir_light_idx : active_directional_light)
 			//{

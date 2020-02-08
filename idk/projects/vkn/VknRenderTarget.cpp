@@ -135,7 +135,7 @@ namespace idk::vkn
 		hlp::TransitionImageLayout(cmd_buffer, View().GraphicsQueue(), tex.Image(), tex.format, vk::ImageLayout::eUndefined, type);
 	}
 
-	void VknRenderTarget::PrepareDraw(vk::CommandBuffer& cmd_buffer)
+	void VknRenderTarget::PrepareDraw(vk::CommandBuffer& )
 	{
 		auto& col = GetColorBuffer().as<VknTexture>();
 		auto& dep = GetDepthBuffer().as<VknTexture>();

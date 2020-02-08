@@ -362,7 +362,7 @@ namespace idk
 		return result;
 	}
 
-	void CullLights(const CameraData& camera,ShadowMapPool& sm_pool,vector<LightData>& lights,vector<LightData>& new_lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, std::map<Handle<GameObject>, CamLightData>& d_lightmaps, GraphicsSystem::RenderRange& range)
+	void CullLights(const CameraData& camera,ShadowMapPool& sm_pool,vector<LightData>& lights,vector<LightData>& new_lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, GraphicsSystem::RenderRange& range)
 	{
 
 		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
@@ -915,7 +915,7 @@ namespace idk
 					ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range, range);
 					ProcessFonts(result.font_render_data, result.font_buffer, result.font_range, range);
 
-					CullLights(camera, result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, result.d_lightmaps, range);
+					CullLights(camera, result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range);
 
 				}
 				result.culled_render_range.emplace_back(range);

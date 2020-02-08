@@ -54,7 +54,7 @@ namespace idk::vkn
 		vector<ShaderDirectionalData> tmp_dlight(vp.size());
 		for (size_t i = 0; i < tmp_dlight.size(); ++i)
 		{
-			auto& matrix = tmp_dlight[i] = vp[i];
+			tmp_dlight[i] = vp[i];
 		}
 		string d_block;
 		d_block += string{ reinterpret_cast<const char*>(tmp_dlight.data()), hlp::buffer_size(tmp_dlight) };
@@ -132,7 +132,7 @@ namespace idk::vkn
 		cam = state.camera;
 		auto& all_lights = *state.lights;
 		vector<LightData> lights;
-		size_t i = 0, end = vstate.active_lights.size(), j = 0, d_end = vstate.active_dir_lights.size();
+		size_t i = 0, end = vstate.active_lights.size();
 		if (light_range)
 		{
 			auto& [start, _end] = *light_range;
@@ -259,7 +259,6 @@ namespace idk::vkn
 
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
 	{
-		auto& state = State();
 		the_interface.BindUniformBuffer("LightBlock", 0, light_block,!rebind_light);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
 
@@ -476,7 +475,7 @@ namespace idk::vkn
 		the_interface.BindSampler("tex", 0, dc.texture.as<VknTexture>());
 	}
 
-	bool UnlitFilter::Skip(PipelineThingy& the_interface, const RenderObject& dc)
+	bool UnlitFilter::Skip(PipelineThingy& , const RenderObject& dc)
 	{
 
 		return !dc.material_instance|| !dc.material_instance->material|| dc.material_instance->material->model!=ShadingModel::Unlit;
