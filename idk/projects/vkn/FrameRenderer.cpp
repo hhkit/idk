@@ -942,7 +942,7 @@ namespace idk::vkn
 				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eSpecular)]= Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostSpecular];
 				deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
 				auto& rt = camera.render_target.as<VknRenderTarget>();
-				auto& deferred_buffers = _pimpl->deferred_buffers;
+				//auto& deferred_buffers = _pimpl->deferred_buffers;
 				//auto color_buffer = rt.GetColorBuffer();
 				//auto hdr_itr = deferred_buffers.find(color_buffer);
 				//if (hdr_itr != deferred_buffers.end())
@@ -1273,7 +1273,7 @@ namespace idk::vkn
 	}
 
 
-	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& camera, const ivec2& offset, const uvec2& size)
+	pipeline_config ConfigWithVP(pipeline_config config, const CameraData& , const ivec2& offset, const uvec2& size)
 	{
 		config.viewport_offset = offset;
 		config.viewport_size = size ;

@@ -336,8 +336,6 @@ namespace idk::vkn
 			};
 			fbf.AddAttachment(ai);
 			
-			auto& derp = ai.buffer->as<VknTexture>();
-
 			auto add_src = [](FrameBufferBuilder& fbf, auto& gbuffer) {
 				auto& buffer = *gbuffer.accum_buffer;
 				auto accum_att = idk::AttachmentInfo{
