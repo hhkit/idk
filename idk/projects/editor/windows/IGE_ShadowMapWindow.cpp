@@ -104,18 +104,20 @@ namespace idk {
 			const vec2 size = vec2{ img.Size() };*/
 
 			//ImGui::Image(img.ID(), size * (this->window_size.y * 0.5f / size.y), ImVec2(0, 1), ImVec2(1, 0));
-			if (light.data->index == 1)
+			if (light.data->cast_shadow)//(light.data->index == 1)
 			{
-				for (auto& e : gfx_sys.d_lightmaps)
 				{
-					ImGui::Text("%d",e.first);
-					for (auto& rt : e.second.cam_lightmaps)
+					ImGui::Text("%s",light.name.c_str());
+					for (auto& rt : light.data->light_maps)
 					{
 						auto& rtt = *rt.light_map;
-						auto& img = **rtt.DepthAttachment();
-						const vec2 size = vec2{ img.Size() };
+						if (rt.light_map && rtt.HasDepthAttachment())
+						{
+							auto& img = **rtt.DepthAttachment();
+							const vec2 size = vec2{ img.Size() };
 
-						ImGui::Image(img.ID(), size * ((this->window_size.x) / size.x), ImVec2(1, 1), ImVec2(0, 0));
+							ImGui::Image(img.ID(), size * ((this->window_size.x) / size.x), ImVec2(1, 1), ImVec2(0, 0));
+						}
 					}
 				}
 				ImGui::NewLine();
