@@ -1144,7 +1144,21 @@ namespace idk::mono
 		}
 		BIND_END();
 		//----------------------------------------------------------------------------------------------------
+		//AudioSystem
+		BIND_START("idk.Bindings::AudioSystemSetVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Volume(newVolume);
+		}
+		BIND_END();
 
+		BIND_START("idk.Bindings::AudioSystemStopAll", void)
+		{
+			Core::GetSystem<AudioSystem>().StopAllAudio();
+		}
+		BIND_END();
+
+		//----------------------------------------------------------------------------------------------------
 		// Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {

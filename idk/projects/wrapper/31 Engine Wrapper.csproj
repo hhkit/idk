@@ -83,6 +83,7 @@
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />
     <Compile Include="Core\Application.cs" />
+    <Compile Include="Core\AudioSystem.cs" />
     <Compile Include="Core\Bindings.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Behavior\Coroutine.cs" />
