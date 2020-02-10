@@ -38,6 +38,9 @@ namespace idk
 			//FMOD_MODE tempMode;
 			//audio_clip_list[index]->_soundHandle->getMode(&tempMode);
 			//audio_clip_list[index]->_soundHandle->setMode(ConvertSettingToFMOD_MODE());
+
+
+			UpdateAudioClips(); //Update to fit audioclips with its channel!!!!
 			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[index]->_soundHandle, nullptr, false, &audio_clip_channels[index])); //Creates a channel for audio to use. Start as paused to edit stuff first.
 			//audio_clip_list[index]->_soundHandle->setMode(tempMode);
 		}

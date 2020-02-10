@@ -834,12 +834,9 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Play(s.get(), 0.0f, index);
 		}
 		BIND_END();
@@ -847,48 +844,36 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorCrossFade", bool, Handle<Animator> animator, MonoString* name, float time = 0.2f, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+			
 			return animator->BlendTo(s.get(), time, index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorPause", bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Pause(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorResume", bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Resume(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorStop",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Stop(index);
 		}
 		BIND_END();
@@ -896,24 +881,17 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorGetState", CSharpState, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->GetState(s.get(), index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorDefaultStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
 
 			return mono_string_new(mono_domain_get(), animator->DefaultStateName(index).c_str());
 		}
@@ -921,72 +899,54 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AnimatorCurrentStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return mono_string_new(mono_domain_get(), animator->CurrentStateName(index).c_str());
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorCurrentStateTime", float, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->CurrentStateTime(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorBlendStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return mono_string_new(mono_domain_get(), animator->BlendStateName(index).c_str());
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorIsPlaying",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->IsPlaying(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorIsBlending",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->IsBlending(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorHasCurrAnimEnded",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->HasCurrAnimEnded(index);
 		}
 		BIND_END();
@@ -994,12 +954,9 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorHasState",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			auto ret_val = animator->HasState(s.get(), index);
 			return ret_val;
 		}
@@ -1007,12 +964,9 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AnimatorGetWeight", float, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->GetWeight(index);
 		}
 
@@ -1048,12 +1002,9 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AnimatorSetWeight", bool, Handle<Animator> animator, float weight, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->SetWeight(weight, index);
 		}
 		BIND_END();
@@ -1193,7 +1144,21 @@ namespace idk::mono
 		}
 		BIND_END();
 		//----------------------------------------------------------------------------------------------------
+		//AudioSystem
+		BIND_START("idk.Bindings::AudioSystemSetVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Volume(newVolume);
+		}
+		BIND_END();
 
+		BIND_START("idk.Bindings::AudioSystemStopAll", void)
+		{
+			Core::GetSystem<AudioSystem>().StopAllAudio();
+		}
+		BIND_END();
+
+		//----------------------------------------------------------------------------------------------------
 		// Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
