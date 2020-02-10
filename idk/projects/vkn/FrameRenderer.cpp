@@ -281,6 +281,7 @@ namespace idk::vkn
 		LayerMask mask = ~(LayerMask{});
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+		array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
 		const vector<const RenderObject*>*         mesh_render;
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
 		const vector<InstRenderObjects>* inst_ro;
@@ -299,6 +300,7 @@ namespace idk::vkn
 		{
 			renderer_vertex_shaders =   state.shared_gfx_state->renderer_vertex_shaders;
 			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
+			renderer_geometry_shaders = state.shared_gfx_state->renderer_geometry_shaders;
 			range = state.range;
 
 			mask = state.camera.culling_flags;
@@ -307,11 +309,13 @@ namespace idk::vkn
 		{
 			renderer_vertex_shaders   = state.shared_gfx_state->renderer_vertex_shaders;
 			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
+			renderer_geometry_shaders = state.shared_gfx_state->renderer_geometry_shaders;
 		}
 		GraphicsStateInterface(const PostRenderData& state) : GraphicsStateInterface{ static_cast<const CoreGraphicsState&>(state) }
 		{
 			renderer_vertex_shaders   = state.shared_gfx_state->renderer_vertex_shaders;
 			renderer_fragment_shaders = state.shared_gfx_state->renderer_fragment_shaders;
+			renderer_geometry_shaders = state.shared_gfx_state->renderer_geometry_shaders;
 		}
 	};
 
@@ -366,6 +370,72 @@ namespace idk::vkn
 				{
 					binders.Bind(the_interface, dc);
 					if(!the_interface.BindMeshBuffers(dc))
+						continue;
+					the_interface.FinalizeDrawCall(dc);
+
+				}
+			}//End of draw_call loop
+		}
+
+
+		return std::move(the_interface);
+	}
+
+
+	PipelineThingy ShadowProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager, StandardBindings& binders)
+	{
+		auto& mesh_vtx = state.renderer_vertex_shaders[VNormalMeshShadow];
+		auto& skinned_mesh_vtx = state.renderer_vertex_shaders[VSkinnedMeshShadow];
+		auto& shadow_geom = state.renderer_geometry_shaders[GShadowCNM];
+		auto& skinned_shadow_geom = state.renderer_geometry_shaders[GShadowCSM];
+		auto& skinned_mesh_render = *state.skinned_mesh_render;
+
+		//auto& binders = *binder;
+		PipelineThingy the_interface{};
+		the_interface.SetRef(ubo_manager);
+
+		the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
+		the_interface.BindShader(ShaderStage::Geometry, shadow_geom);
+		the_interface.reserve(state.mesh_render->size() + state.skinned_mesh_render->size());
+		binders.Bind(the_interface);
+		{
+			//auto range_opt = state.range;
+			//if (!range_opt)
+			//	range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
+
+			//auto& inst_draw_range = *range_opt;
+			std::visit([&](auto& inst_draw_range) {
+				for (auto itr = state.inst_ro->data() + inst_draw_range.inst_mesh_render_begin,
+					end = state.inst_ro->data() + inst_draw_range.inst_mesh_render_end;
+					itr != end; ++itr
+					)
+				{
+					auto& dc = *itr;
+					auto& mat_inst = *dc.material_instance;
+					if (mat_inst.material && !binders.Skip(the_interface, dc))
+					{
+						binders.Bind(the_interface, dc);
+						the_interface.BindMeshBuffers(dc);
+						the_interface.BindAttrib(4, state.shared_state->inst_mesh_render_buffer.buffer(), 0);
+						the_interface.FinalizeDrawCall(dc, dc.num_instances, dc.instanced_index);
+					}
+				}
+			}, state.range);
+
+		}
+		{
+			const vector<const AnimatedRenderObject*>& draw_calls = skinned_mesh_render;
+			the_interface.BindShader(ShaderStage::Vertex, skinned_mesh_vtx);
+			the_interface.BindShader(ShaderStage::Geometry, skinned_shadow_geom);
+			binders.Bind(the_interface);
+			for (auto& ptr_dc : draw_calls)
+			{
+				auto& dc = *ptr_dc;
+				auto& mat_inst = *dc.material_instance;
+				if (mat_inst.material && dc.layer_mask & state.mask && !binders.Skip(the_interface, dc))
+				{
+					binders.Bind(the_interface, dc);
+					if (!the_interface.BindMeshBuffers(dc))
 						continue;
 					the_interface.FinalizeDrawCall(dc);
 
@@ -746,12 +816,17 @@ namespace idk::vkn
 					vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 					vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 					cmd_buffer.begin(begin_info, dispatcher);
+
+					vector<mat4> proj_mats;
 					for (auto& elem : light.light_maps)
 					{
-						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
+						proj_mats.emplace_back(clip_mat * elem.cascade_projection);
+					}
+
+						auto cam = ShadowCameraData{ Handle<GameObject>{}, light.shadow_layers, light.v,  proj_mats};
 						ShadowBinding shadow_binding;
 						shadow_binding.for_each_binder<has_setstate>(
-							[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+							[](auto& binder, const ShadowCameraData& cam, const vector<SkeletonTransforms>& skel)
 						{
 							binder.SetState(cam, skel);
 						},
@@ -766,14 +841,14 @@ namespace idk::vkn
 
 
 						//auto lm = elem.light_map->DepthAttachment().buffer;
-						auto sz = elem.light_map->DepthAttachment().buffer->Size();
+						auto sz = light.light_maps[0].light_map->DepthAttachment().buffer->Size();
 
 						vk::Rect2D render_area
 						{
 							vk::Offset2D{},
 							vk::Extent2D{sz.x,sz.y}
 						};
-						auto& rt = elem.light_map.as<VknFrameBuffer>();
+						auto& rt = light.light_maps[0].light_map.as<VknFrameBuffer>();
 						vk::Framebuffer fb = rt.GetFramebuffer();
 						auto  rp = rt.GetRenderPass();
 						rt.PrepareDraw(cmd_buffer);
@@ -787,7 +862,7 @@ namespace idk::vkn
 						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
 						dbg::EndLabel(cmd_buffer);
 						cmd_buffer.endRenderPass();
-					}
+					
 					cmd_buffer.end();
 					rs.ubo_manager.UpdateAllBuffers();
 				}

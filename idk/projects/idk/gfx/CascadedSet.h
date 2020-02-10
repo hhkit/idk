@@ -3,7 +3,6 @@
 
 #include "Lightmap.h"
 
-#define CASCADE_COUNT 3
 
 namespace idk {
 

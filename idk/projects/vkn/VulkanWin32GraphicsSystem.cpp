@@ -268,6 +268,7 @@ namespace idk::vkn
 
 		shared_graphics_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
 		shared_graphics_state.renderer_fragment_shaders = curr_buffer.renderer_fragment_shaders;
+		shared_graphics_state.renderer_geometry_shaders = curr_buffer.renderer_geometry_shaders;
 
 		PostRenderData post_render_data;
 		post_render_data.shared_gfx_state = &shared_graphics_state;

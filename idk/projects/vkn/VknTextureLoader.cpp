@@ -386,7 +386,7 @@ namespace idk::vkn
 			sub_range.baseMipLevel = 0;
 			sub_range.levelCount = load_info.mipmap_level;
 			sub_range.baseArrayLayer = 0;
-			sub_range.layerCount = 1;
+			sub_range.layerCount = load_info.layers;
 
 			//TODO update this part so that we check the usage flags and set access flags accordingly.
 			vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
@@ -436,7 +436,7 @@ namespace idk::vkn
 					region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 					region.imageSubresource.mipLevel = 0;// std::max(load_info.mipmap_level, 1u) - 1;
 					region.imageSubresource.baseArrayLayer = 0;
-					region.imageSubresource.layerCount = 1;
+					region.imageSubresource.layerCount = load_info.layers;
 
 					region.imageOffset = { 0, 0, 0 };
 					region.imageExtent = {
@@ -457,7 +457,7 @@ namespace idk::vkn
 				region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 				region.imageSubresource.mipLevel = i;// std::max(load_info.mipmap_level, 1u) - 1;
 				region.imageSubresource.baseArrayLayer = 0;
-				region.imageSubresource.layerCount = 1;
+				region.imageSubresource.layerCount = load_info.layers;
 
 				region.imageOffset = { 0, 0, 0 };
 				region.imageExtent = {

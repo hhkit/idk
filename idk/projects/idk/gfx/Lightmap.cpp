@@ -180,7 +180,7 @@ namespace idk {
 	{
 
 		FrameBufferBuilder builder;
-		builder.Begin("ShadowMap[" + std::to_string(texel_size) + ", " + std::to_string(texel_size) + "]", uvec2{ texel_size , texel_size});
+		builder.Begin("ShadowMap[" + std::to_string(texel_size) + ", " + std::to_string(texel_size) + "]", uvec2{ texel_size , texel_size},2);
 		builder.SetDepthAttachment(
 			AttachmentInfo
 			{

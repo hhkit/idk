@@ -75,6 +75,24 @@ namespace idk
 
 		};
 
+		//Standard binding for vertex stuff
+		struct ShadowVertexBindings : StandardBindings
+		{
+			//const GraphicsState* _state;
+			//const GraphicsState& State();
+			const vector<SkeletonTransforms>* skeletons;
+			mat4 view_trf{};
+			vector<mat4> proj_trf{};
+			void SetState(const GraphicsState& vstate);
+			void SetState(const ShadowCameraData& camera, const vector<SkeletonTransforms>& skel);
+
+			void Bind(PipelineThingy& the_interface)override;
+			void Bind(PipelineThingy& the_interface, const RenderObject& dc)override;
+			void Bind(PipelineThingy& the_interface, const  AnimatedRenderObject& dc);
+			void BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc)override;
+
+		};
+
 		struct ParticleVertexBindings : StandardBindings
 		{
 			//const GraphicsState* _state;
@@ -199,6 +217,6 @@ namespace idk
 			void SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel);
 		};
 		using UnlitMaterialBinding = CombinedBindings<UnlitFilter,StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
-		using ShadowBinding = CombinedBindings<ShadowFilter,StandardVertexBindings>;
+		using ShadowBinding = CombinedBindings<ShadowFilter, ShadowVertexBindings>;
 	}
 }

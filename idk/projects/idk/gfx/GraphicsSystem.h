@@ -34,8 +34,10 @@ namespace idk
 	{
 		VDebug,
 		VNormalMesh,
+		VNormalMeshShadow,
 		VNormalMeshPicker,
 		VSkinnedMesh,
+		VSkinnedMeshShadow,
 		VSkinnedMeshPicker,
         VParticle,
 		VSkyBox,
@@ -62,6 +64,8 @@ namespace idk
 	enum GeometryShaders
 	{
 		GSinglePassCube,
+		GShadowCNM,
+		GShadowCSM,
 		GMax
 	};
 	struct RenderRequest;
@@ -209,6 +213,7 @@ namespace idk
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
 			alignas(machine::cache_line_sz) std::pair<size_t,size_t>   skinned_inst_range;
 
 			alignas(machine::cache_line_sz) ShadowMapPool d_lightpool;

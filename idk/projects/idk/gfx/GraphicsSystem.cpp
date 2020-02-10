@@ -563,6 +563,7 @@ namespace idk
 
 		result.renderer_vertex_shaders = renderer_vertex_shaders;
 		result.renderer_fragment_shaders = renderer_fragment_shaders;
+		result.renderer_geometry_shaders = renderer_geometry_shaders;
 
 		// memcpy the lights until there is a smarter implementation
 		result.lights.reserve(lights.size());
@@ -1063,9 +1064,11 @@ namespace idk
 		///////////////////////Load vertex shaders
 		//renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
+		renderer_vertex_shaders[VNormalMeshShadow] = LoadShader("/engine_data/shaders/shadow_mesh.vert");
 		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
 		renderer_vertex_shaders[VSkinnedMesh] = LoadShader("/engine_data/shaders/skinned_mesh.vert");
+		renderer_vertex_shaders[VSkinnedMeshShadow] = LoadShader("/engine_data/shaders/shadow_skinned_mesh.vert");
 		renderer_vertex_shaders[VSkinnedMeshPicker] = LoadShader("/engine_data/shaders/skinned_mesh_picking.vert");
 		renderer_vertex_shaders[VSkyBox] = LoadShader("/engine_data/shaders/skybox.vert");
 		renderer_vertex_shaders[VPBRConvolute] = LoadShader("/engine_data/shaders/pbr_convolute.vert");
@@ -1090,8 +1093,8 @@ namespace idk
 
 		////////////////////Load geometry Shaders
 		renderer_geometry_shaders[GSinglePassCube] = LoadShader("/engine_data/shaders/single_pass_cube.geom");
-
-
+		renderer_geometry_shaders[GShadowCNM] = LoadShader("/engine_data/shaders/shadow_mesh.geom");
+		renderer_geometry_shaders[GShadowCSM] = LoadShader("/engine_data/shaders/shadow_skelemesh.geom");
 	}
 
 	void GraphicsSystem::MaterialInstToUniforms(const MaterialInstance& , hash_table<string, string>& , hash_table<string, RscHandle<Texture>>& )

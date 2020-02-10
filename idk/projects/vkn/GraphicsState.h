@@ -78,6 +78,7 @@ namespace idk::vkn
 		size_t total_num_of_text{ 0 };
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+		array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
 		//vector<FontPoint>* ui_text_data;
 
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);

@@ -32,11 +32,11 @@ layout (location = 0) out gl_PerVertex
 void main()
 {
 	mat4 V_Matrix = Mat4Blk.pv_matrices[gl_InvocationID];
+	gl_Layer = gl_InvocationID;
 	for (int i =0 ; i < gl_in.length(); ++i)
 	{
 		gs_out.position = vec3(V_Matrix * vec4(gs_in[i].position, 1));
 		gl_Position = Mat4Blk.perspective_mtx * vec4(gs_out.position, 1);
-		gl_Layer = gl_InvocationID;
 		
 		EmitVertex();
 	}
