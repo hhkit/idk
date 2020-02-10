@@ -947,30 +947,73 @@ namespace idk
 		}
 		size_t i = 0;
 		
+
+		auto draw_frustum = [](const frustum& frust, color col,seconds duration,bool depth_test=true)
+		{
+			auto intersection_point = [](halfspace a, halfspace b, halfspace c)
+			{
+				mat3 mat = mat3{ a.normal,b.normal,c.normal };
+				return mat.inverse() * vec3 { -a.dist, -b.dist, -c.dist };
+			};
+			vec3 points[8] =
+			{
+				vec3{-1, 1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
+				vec3{ 1, 1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
+				vec3{ 1,-1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+				vec3{-1,-1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
+				vec3{-1, 1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
+				vec3{ 1, 1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
+				vec3{ 1,-1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+				vec3{-1,-1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
+			};
+
+			Core::GetSystem<DebugRenderer>().Draw(points[0    ], points[4    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[1    ], points[5    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[2    ], points[6    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[3    ], points[7    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[0    ], points[1    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[1    ], points[2    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[2    ], points[3    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[3    ], points[0    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 0], points[4 + 1], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 1], points[4 + 2], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 2], points[4 + 3], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 3], points[4 + 0], col, duration, depth_test);
+
+		};
+
 		for (auto& light : result.lights)
 		{
 			CameraData light_cam_info{};
 			light_cam_info.view_matrix = { light.v };
 			light_cam_info.projection_matrix = { light.p };
-			LightRenderRange range{ ++i };
+			LightRenderRange range{ i++ };
 			// TODO: Cull cascaded directional light
+			size_t lm_i = 0;
+			for (auto& lightmap : light.light_maps)
 			{
-				if (!light.cast_shadow)
+				range.light_map_index = lm_i;
 				{
-					range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
-				}
-				else
-				{
-					if (light.index == 1)
+					if (!light.cast_shadow)
 					{
-						light_cam_info.projection_matrix = { light.light_maps.back().cascade_projection };
+						range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 					}
-					const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
-					range.inst_mesh_render_begin = start_index;
-					range.inst_mesh_render_end = end_index;
+					else
+					{
+						if (light.index == 1)
+						{
+							light_cam_info.projection_matrix = { lightmap.cascade_projection };
+							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
+							draw_frustum(frust, color{ 1,0,1,1 }, {});
+						}
+						const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+						range.inst_mesh_render_begin = start_index;
+						range.inst_mesh_render_end = end_index;
+					}
 				}
+				result.culled_light_render_range.emplace_back(range);
+				++lm_i;
 			}
-			result.culled_light_render_range.emplace_back(range);
 			//{
 			//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);
 			//	range.inst_mesh_render_begin = start_index;
