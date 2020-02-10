@@ -34,6 +34,7 @@ namespace idk
 		void FirePhysicsEvents();
 		void DrawCollider           (const Collider& collider) const;
 		void DebugDrawColliders     (span<Collider> colliders);
+		void DebugDrawContactPoints (span<Collider> colliders);
 		void Reset();
 
 		vector<RaycastHit> Raycast(const ray& r, LayerMask layer_mask, bool hit_triggers = false);

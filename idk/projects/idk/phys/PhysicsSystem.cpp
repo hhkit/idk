@@ -17,6 +17,7 @@
 #include <phys/collision_detection/collision_capsule_box.h>
 #include <phys/collision_detection/collision_capsule_sphere.h>
 #include <phys/collision_detection/ManagedCollision.h>
+#include <phys/collision_contact.h>
 
 #include <script/ManagedObj.inl>
 #include <script/MonoBehavior.h>
@@ -655,6 +656,10 @@ namespace idk
             DrawCollider(collider);
 
 		// static_tree.debug_draw();
+	}
+
+	void PhysicsSystem::DebugDrawContactPoints(span<Collider> colliders)
+	{
 	}
 
 	void PhysicsSystem::Reset()
