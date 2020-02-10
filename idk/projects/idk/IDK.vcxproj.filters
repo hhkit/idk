@@ -931,9 +931,6 @@
     <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\HazardPointerDL.h" />
-    <ClInclude Include="parallel\queue.h" />
-    <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="anim\AnimationTransition.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -959,7 +956,6 @@
     <ClInclude Include="gfx\ColorPickResult.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="network\Device.h" />
     <ClInclude Include="memory\ArenaAllocator.h">
       <Filter>memory</Filter>
     </ClInclude>
@@ -1136,7 +1132,6 @@
     <ClInclude Include="network\EventInvokeRPCMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
-    <ClInclude Include="util\property_path.h" />
     <ClInclude Include="ds\lazy_vector.h">
       <Filter>ds</Filter>
     </ClInclude>
@@ -1147,8 +1142,30 @@
     <ClInclude Include="network\ElectronRigidbodyView.h">
       <Filter>network\views</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\ShadowMapPool.h" />
-    <ClInclude Include="util\ExtraVars.h" />
+    <ClInclude Include="scene\SceneGraph.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShadowMapPool.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="util\property_path.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\queue.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\ThreadPool.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\HazardPointerDL.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="util\ExtraVars.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Device.h">
+      <Filter>network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1569,9 +1586,6 @@
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="ColorPickRequest.cpp">
-      <Filter>gfx</Filter>
-    </ClCompile>
     <ClCompile Include="network\Address.cpp">
       <Filter>network\data</Filter>
     </ClCompile>
@@ -1653,10 +1667,18 @@
     </ClCompile>
     <ClCompile Include="network\EventLoadLevelMessage.cpp" />
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
-    <ClCompile Include="util\property_path.cpp" />
     <ClCompile Include="network\ElectronView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
-    <ClCompile Include="gfx\ShadowMapPool.cpp" />
+    <ClCompile Include="gfx\ColorPickRequest.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShadowMapPool.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="util\property_path.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1880,6 +1902,9 @@
     </None>
     <None Include="network\ElectronView.inl">
       <Filter>network\views</Filter>
+    </None>
+    <None Include="scene\SceneGraph.inl">
+      <Filter>scene</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -19,7 +19,6 @@ namespace idk
 		: public ISystem
 	{
 	public:
-		using SceneGraph = SceneGraphBuilder::SceneGraph;
 		struct iterator;
 		Signal<RscHandle<Scene>> OnSceneChange;
 
@@ -42,8 +41,8 @@ namespace idk
 		void ChangeScene();
 		void DestroyQueuedObjects(span<GameObject> objs);
 		void BuildSceneGraph(span<const GameObject> objs);
-		SceneGraph& FetchSceneGraph();
-		SceneGraph* FetchSceneGraphFor(Handle<class GameObject>);
+		SceneGraphHandle FetchSceneGraph();
+		SceneGraphHandle FetchSceneGraphFor(Handle<class GameObject>);
 		void ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent);
 		void InsertObject(Handle<class GameObject> go);
 	private:

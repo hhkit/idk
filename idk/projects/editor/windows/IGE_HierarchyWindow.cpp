@@ -146,7 +146,7 @@ namespace idk {
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
+		auto sceneGraph = sceneManager.FetchSceneGraph();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
 		//ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
 		
@@ -183,8 +183,8 @@ namespace idk {
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
-			if (children->size() == 0)
+			auto children = sceneManager.FetchSceneGraphFor(handle);
+			if (children.GetNumChildren() == 0)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
 
 			bool is_its_child_been_selected = false;
