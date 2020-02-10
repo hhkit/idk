@@ -66,6 +66,11 @@ namespace idk
 		return static_cast<bool>(lobby);
 	}
 
+	SeqNo NetworkSystem::GetFrameNumber() const
+	{
+		return frame_counter;
+	}
+
 	ConnectionManager* NetworkSystem::GetConnectionTo(Host host)
 	{
 		switch (host)
@@ -89,7 +94,10 @@ namespace idk
 
 	void NetworkSystem::ReceivePackets()
 	{
-		++frame_counter;
+		if (frame_counter != 0xFFFF)
+			++frame_counter;
+		else
+			frame_counter = 0;
 		LOG_TO(LogPool::NETWORK, "Frame: %d ", (int) frame_counter);
 
 		if (lobby)

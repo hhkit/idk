@@ -916,9 +916,6 @@
     <ClInclude Include="ui\RectTransform.h">
       <Filter>ui</Filter>
     </ClInclude>
-    <ClInclude Include="multithread_control.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="meta\stl_hack.h">
       <Filter>meta</Filter>
     </ClInclude>
@@ -1153,6 +1150,9 @@
     <ClInclude Include="gfx\ShadowMapPool.h" />
     <ClInclude Include="util\ExtraVars.h" />
     <ClInclude Include="network\EventDataBlockFrameNumber.h" />
+    <ClInclude Include="parallel\multithread_control.h">
+      <Filter>util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1661,6 +1661,7 @@
     <ClCompile Include="network\ElectronView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
+    <ClCompile Include="parallel\multithread_control.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

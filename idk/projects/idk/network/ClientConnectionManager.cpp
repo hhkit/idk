@@ -6,11 +6,30 @@
 #include <network/ClientMoveManager.h>
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
+#include <reflect/reflect.inl>
 
 #undef SendMessage
 
 namespace idk
 {
+	namespace detail
+	{
+		template<typename T> struct NetworkTuple;
+
+		template<typename ... Ts> 
+		struct NetworkTuple<std::tuple<Ts...>>
+		{
+			static constexpr auto GenNames()
+			{
+				return std::array<string_view, sizeof...(Ts)>{
+					reflect::fully_qualified_nameof<Ts>()...
+				};
+			}
+		};
+
+		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
+	}
+
 	template<typename RealSubstreamManager>
 	inline RealSubstreamManager& ClientConnectionManager::AddSubstreamManager()
 	{
@@ -47,6 +66,9 @@ namespace idk
 
 	yojimbo::Message* ClientConnectionManager::CreateMessage(size_t id)
 	{
+		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+		
+		LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
 		return client.CreateMessage(static_cast<int>(id));
 	}
 

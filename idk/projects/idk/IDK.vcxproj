@@ -101,7 +101,7 @@
     <ClInclude Include="memory\ArenaAllocator.h" />
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
-    <ClInclude Include="multithread_control.h" />
+    <ClInclude Include="parallel\multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Address.h" />
     <ClInclude Include="network\ClassRep.h" />
@@ -431,6 +431,7 @@
     <ClCompile Include="network\ServerConnectionManager.cpp" />
     <ClCompile Include="network\ServerMoveManager.cpp" />
     <ClCompile Include="network\SubstreamManager.cpp" />
+    <ClCompile Include="parallel\multithread_control.cpp" />
     <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />

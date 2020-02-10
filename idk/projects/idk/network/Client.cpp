@@ -56,8 +56,6 @@ namespace idk
 			auto thunk = network->GetThunk("ExecServerConnect", 0);
 			if (thunk)
 				(*thunk).Invoke();
-			// use RTT to estimate frame
-			//rtt / Core::GetScheduler().GetUnscaledDeltaTime();
 		}
 		if (!connected_this_frame && connected_last_frame)
 		{
