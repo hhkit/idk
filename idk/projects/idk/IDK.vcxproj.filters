@@ -1149,6 +1149,7 @@
     </ClInclude>
     <ClInclude Include="gfx\ShadowMapPool.h" />
     <ClInclude Include="util\ExtraVars.h" />
+    <ClInclude Include="network\EventDataBlockFrameNumber.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

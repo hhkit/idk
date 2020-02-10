@@ -25,14 +25,18 @@ namespace idk
 
 		auto tfm = GetGameObject()->Transform();
 		if (sync_position)
-			view->RegisterMember<Transform, vec3>(tfm, &Transform::position, interp_over_seconds, 
-				[dist= this->send_threshold * this->send_threshold](const vec3& lhs, const vec3& rhs)  ->bool
-				{
-					return (lhs - rhs).length_sq() > dist;
-				});
+		{
+			ParameterImpl<vec3> param(tfm, &Transform::position);
+			param.send_condition = 
+				[dist = this->send_threshold * this->send_threshold](const vec3& lhs, const vec3& rhs) ->bool
+			{
+				return (lhs - rhs).length_sq() > dist;
+			};
+			view->RegisterMember(std::move(param), interp_over_seconds);
+		}
 		if (sync_rotation)
-			view->RegisterMember(tfm, &Transform::rotation, 0.1);
+			view->RegisterMember(ParameterImpl<quat>(tfm, &Transform::rotation), 0.1f);
 		if (sync_scale)
-			view->RegisterMember(tfm, &Transform::scale, 0.2);
+			view->RegisterMember(ParameterImpl<vec3>(tfm, &Transform::scale), 0.2f);
 	}
 }

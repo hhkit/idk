@@ -51,6 +51,7 @@
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\ShadowMapPool.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h" />
+    <ClInclude Include="network\EventDataBlockFrameNumber.h" />
     <ClInclude Include="network\EventInvokeRPCMessage.h" />
     <ClInclude Include="network\EventLoadLevelMessage.h" />
     <ClInclude Include="ds\Flags.h" />

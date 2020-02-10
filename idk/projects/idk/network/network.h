@@ -3,6 +3,7 @@
 namespace idk
 {
 	using NetworkID = unsigned;
+	using SeqNo     = unsigned short;
 	using StateMask = unsigned;
 
 	enum class Host

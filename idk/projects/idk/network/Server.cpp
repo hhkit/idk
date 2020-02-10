@@ -47,6 +47,7 @@ namespace idk
 	void Server::ReceivePackets()
 	{
 		server.AdvanceTime(server.GetTime() + Core::GetRealDT().count());
+		LOG_TO(LogPool::NETWORK, "Time: %lf ", server.GetTime());
 		server.ReceivePackets();
 		ProcessMessages();
 	}

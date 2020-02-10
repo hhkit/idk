@@ -58,6 +58,8 @@ namespace idk
 		vector<ResponseCallback> frame_start_callbacks;
 		vector<ResponseCallback> frame_end_callbacks;
 
+		SeqNo frame_counter{};
+
 		void Init() override;
 		void LateInit() override;
 		void EarlyShutdown() override;

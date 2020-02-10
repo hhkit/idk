@@ -4,6 +4,21 @@
 #include <network/network.h>
 namespace idk
 {
+	template<typename T>
+	struct ParameterImpl
+	{
+		function<T()>                          getter;
+		function<void(const T&)>               setter;
+		function <T(const T&, const T&, real)> interpolator;
+		function<bool(const T&, const T&)>     equater = std::equal_to<T>{};
+		function<bool(const T&, const T&)>     send_condition = std::not_equal_to<T>{};
+
+		ParameterImpl();
+
+		template<typename Hnd, typename Mem>
+		ParameterImpl(Handle<Hnd> obj, T(Mem::* ptr));
+	};
+
 	class ElectronView
 		: public Component<ElectronView>
 	{
@@ -39,12 +54,8 @@ namespace idk
 		void UnpackGhostData(span <string> data_pack);
 		void UnpackMoveData(span <string> data_pack);
 
-		template<typename Hnd, typename Obj, typename Mem>
-		void RegisterMember(Handle<Hnd> obj, Obj(Mem::*), float interp = 1.f, 
-			function<bool(const Obj&, const Obj&)> send_when = std::not_equal_to<Obj>{});
-		template<typename Val>
-		void RegisterMember(function<Val()> getter, function<void(const Val&)> setter, float interp = 1.f,
-			function<bool(const Val&, const Val&)> send_when = std::not_equal_to<Val>{});
+		template<typename T>
+		ParameterImpl<T>& RegisterMember(ParameterImpl<T> param, float interp = 1.f);
 	private:
 		struct BaseParameter;
 		template<typename T>
@@ -67,4 +78,26 @@ namespace idk
 		virtual string PackMoveData() = 0;
 		virtual ~BaseParameter() = default;
 	};
+	template<typename T>
+	template<typename Hnd, typename Mem>
+	inline ParameterImpl<T>::ParameterImpl(Handle<Hnd> obj, T(Mem::* ptr))
+		: ParameterImpl{}
+	{
+		getter = [obj, ptr]()->T { return std::invoke(ptr, *obj); };
+		setter = [obj, ptr](const T& val) { std::invoke(ptr, *obj) = val; };
+
+	}
+
+	template<typename T>
+	inline ParameterImpl<T>::ParameterImpl()
+	{
+		if constexpr (std::is_same_v<T, real>)
+			interpolator = &lerp<real, real>;
+
+		if constexpr (std::is_same_v<T, vec3>)
+			interpolator = &lerp<vec3, real>;
+
+		if constexpr (std::is_same_v<T, quat>)
+			interpolator = static_cast<quat(*)(const quat&, const quat&, real)>(&slerp<quat, real>);
+	}
 }
