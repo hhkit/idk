@@ -4,6 +4,9 @@
 #include <phys/AabbTree_utils.h>
 namespace idk
 {
+	struct ray;
+	struct RaycastHit;
+
 	class AabbTree
 	{
 	public:
@@ -14,6 +17,7 @@ namespace idk
 		int root() const { return _root_index; }
 		void debug_draw() const;
 		int query_collisions(const ColliderInfo& against, vector<ColliderInfoPair>& pairs) const;
+		vector<RaycastHit> query_raycast(const ray& raycast, LayerMask);
 
 		void preallocate_nodes(size_t num);
 		void update(Collider& collider, const ColliderInfo& info, float margin = 0.2f);

@@ -54,7 +54,7 @@ namespace idk::vkn
 		vector<ShaderDirectionalData> tmp_dlight(vp.size());
 		for (size_t i = 0; i < tmp_dlight.size(); ++i)
 		{
-			auto& matrix = tmp_dlight[i] = vp[i];
+			tmp_dlight[i] = vp[i];
 		}
 		string d_block;
 		d_block += string{ reinterpret_cast<const char*>(tmp_dlight.data()), hlp::buffer_size(tmp_dlight) };
@@ -132,7 +132,7 @@ namespace idk::vkn
 		cam = state.camera;
 		auto& all_lights = *state.lights;
 		vector<LightData> lights;
-		size_t i = 0, end = vstate.active_lights.size(), j = 0, d_end = vstate.active_dir_lights.size();
+		size_t i = 0, end = vstate.active_lights.size();
 		if (light_range)
 		{
 			auto& [start, _end] = *light_range;
@@ -160,15 +160,21 @@ namespace idk::vkn
 			else if (light.index == 1)
 			{
 				if(!light.light_maps.empty())
-					shadow_maps.emplace_back(light.light_maps[2].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+					shadow_maps.emplace_back(light.light_maps[0].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
 
-				for (auto& elem : state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
+				for (auto& elem : light.light_maps)//state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
 					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
 					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat *elem.cascade_projection * light.v});
 				}
 			}
 		}
+		//for (auto& dshadow_index : vstate.active_dir_lights)
+		//{
+		//	auto& dshadow= vstate.shared_gfx_state->shadow_maps_directional.at(dshadow_index);
+		//	directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat * elem.cascade_projection * light.v })
+		//	shadow_maps_directional.emplace_back(dshadow);
+		//}
 		light_block = PrepareLightBlock(cam, lights);
 		dlight_block = PrepareDirectionalBlock(directional_vp);
 		view_trf = cam.view_matrix;
@@ -253,7 +259,6 @@ namespace idk::vkn
 
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
 	{
-		auto& state = State();
 		the_interface.BindUniformBuffer("LightBlock", 0, light_block,!rebind_light);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
 
@@ -278,7 +283,7 @@ namespace idk::vkn
 				}
 			}
 			i = 0;
-			if (state.shadow_maps_directional.size() == 0)
+			if (shadow_maps_directional.size() == 0)
 			{
 				//Make sure that it's there.
 				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
@@ -470,7 +475,7 @@ namespace idk::vkn
 		the_interface.BindSampler("tex", 0, dc.texture.as<VknTexture>());
 	}
 
-	bool UnlitFilter::Skip(PipelineThingy& the_interface, const RenderObject& dc)
+	bool UnlitFilter::Skip(PipelineThingy& , const RenderObject& dc)
 	{
 
 		return !dc.material_instance|| !dc.material_instance->material|| dc.material_instance->material->model!=ShadingModel::Unlit;

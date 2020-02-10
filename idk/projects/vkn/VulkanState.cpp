@@ -987,10 +987,9 @@ namespace idk::vkn
 	void VulkanState::AcquireFrame(vk::Semaphore signal)
 	{
 		auto cf = current_frame;
-		auto& current_signal = m_swapchain->m_graphics.pSignals[current_frame];
+		auto& current_signal = m_swapchain->m_graphics.pSignals[cf];
 		m_device->waitForFences(1, &*current_signal.inflight_fence(), VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
 		m_device->resetFences(*current_signal.inflight_fence());
-		auto status = m_device->getFenceStatus(*current_signal.inflight_fence());
 		auto res = m_device->acquireNextImageKHR(*m_swapchain->swap_chain, std::numeric_limits<uint32_t>::max(), signal, {}, dispatcher);
 		rv = res.value;
 		rvRes = res.result;
@@ -1009,7 +1008,6 @@ namespace idk::vkn
 	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal, span<RscHandle<RenderTarget>> to_transition)
 	{
 		//AcquireFrame();
-		auto& current_signal = m_swapchain->m_graphics.pSignals[current_frame];
 
 		waitSemaphores = wait;//*current_signal.image_available;
 		readySemaphores = signal;//*current_signal.render_finished;
@@ -1049,7 +1047,6 @@ namespace idk::vkn
 			};
 			command_buffer.reset(vk::CommandBufferResetFlags{},dispatcher);
 			command_buffer.begin(begin_info);
-			auto& tex = vkn_fb.GetColorBuffer().as<VknTexture>();
 			//hlp::TransitionImageLayout(command_buffer, {}, tex.Image(),
 			//	tex.format, vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eGeneral
 			//);
@@ -1113,15 +1110,14 @@ namespace idk::vkn
 	}
 	void VulkanState::PresentFrame(vk::Semaphore wait)
 	{
-		auto& current_sc_signal = m_swapchain->m_graphics.pSignals[current_frame];
-		auto fence = *current_sc_signal.inflight_fence();
-		auto sz = m_present_trf_commandbuffers.size();
 		auto cf = current_frame;
-		auto& command_buffer = *m_present_trf_commandbuffers[current_frame];
+		auto& current_sc_signal = m_swapchain->m_graphics.pSignals[cf];
+		auto fence = *current_sc_signal.inflight_fence();
+		auto& command_buffer = *m_present_trf_commandbuffers[cf];
 		static auto tmp = CreateSemaphores(max_frames_in_flight);
 		auto& [blargptr,blaargh_span] = tmp;
 		auto blaargh = //CreateVkSemaphore(*View().Device());/* 
-		blaargh_span[current_frame];//*/
+		blaargh_span[cf];//*/
 		m_device->resetFences(1, &fence, dispatcher);
 		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::ePresentSrcKHR, hlp::BeginInfo{}, hlp::SubmissionInfo{ wait, vk::PipelineStageFlagBits::eBottomOfPipe, blaargh,fence});
 
@@ -1183,12 +1179,11 @@ namespace idk::vkn
 	void VulkanState::PresentFrame2()
 	{
 		auto cf = current_frame;
-		auto& current_sc_signal = m_swapchain->m_swapchainGraphics.pSignals[current_frame];
+		auto& current_sc_signal = m_swapchain->m_swapchainGraphics.pSignals[cf];
 
 		//Already done by acquire frame
 		//m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher); 
-		auto status = m_device->getFenceStatus(*current_sc_signal.inflight_fence());
-		auto& command_buffer = *m_blitz_commandbuffers[current_frame];
+		auto& command_buffer = *m_blitz_commandbuffers[cf];
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eBottomOfPipe// vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eTransfer
 	};
 

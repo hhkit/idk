@@ -274,7 +274,7 @@ namespace idk::vkn
 		int i = 0;
 		SubPassConfig spc{};
 		spc.AddOutputAttachment(i, vk::ImageLayout::eColorAttachmentOptimal);
-		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::eColorAttachmentOptimal);
+		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eGeneral, vk::ImageLayout::eGeneral);
 
 		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
 		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
@@ -286,7 +286,7 @@ namespace idk::vkn
 		spc.AddInputAttachment(i, vk::ImageLayout::eShaderReadOnlyOptimal);
 		rp_info.RegisterAttachment(hdr_out.attachments[i++], vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 		spc.SetDepthAttachment(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
-		rp_info.RegisterAttachment(*hdr_out.depth_attachment, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		rp_info.RegisterAttachment(*hdr_out.depth_attachment, vk::ImageLayout::eGeneral, vk::ImageLayout::eGeneral);
 
 		spc.BuildSubpass();
 		
@@ -328,14 +328,14 @@ namespace idk::vkn
 			auto& fb_factory = Core::GetResourceManager().GetFactory<FrameBufferFactory>();
 			FrameBufferBuilder fbf;
 			fbf.Begin("HDR Buffer",rt.Size());
-			fbf.AddAttachment(idk::AttachmentInfo{
+			auto ai = idk::AttachmentInfo{
 				LoadOp::eLoad,StoreOp::eStore,
 				TextureInternalFormat::SRGBA_8,
 				FilterMode::_enum::Nearest,false,
 				rt.GetColorBuffer()
-				});
-
-
+			};
+			fbf.AddAttachment(ai);
+			
 			auto add_src = [](FrameBufferBuilder& fbf, auto& gbuffer) {
 				auto& buffer = *gbuffer.accum_buffer;
 				auto accum_att = idk::AttachmentInfo{
@@ -370,8 +370,8 @@ namespace idk::vkn
 			if (hdr_buffer)
 				Core::GetResourceManager().Release(hdr_buffer);
 			auto hdr_info = fbf.End();
-
-			hdr_pass = BuildHdrRenderPass(hdr_info);
+			
+			hdr_pass = RenderPassObj{ BuildHdrRenderPass(hdr_info) };
 			auto tmp = VknSpecializedInfo{ hdr_pass };
 			hdr_buffer = RscHandle<VknFrameBuffer>{ fb_factory.Create(hdr_info,&tmp) };
 
@@ -831,7 +831,7 @@ namespace idk::vkn
 		//Copy depth buffer to render target's depth buffer
 
 	}
-
+	void DoNothing();
 	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, [[maybe_unused]]VknRenderTarget& rt, [[maybe_unused]]RenderStateV2& rs)
 	{
 		auto sz = camera.render_target->Size();
@@ -853,12 +853,21 @@ namespace idk::vkn
 		};
 		
 		const auto& rp = hdr_pass;
+		auto& fb = *hdr_buffer;
+		///vector<vk::Format> formats;
+		///for (auto& b : fb.attachments)
+		///{
+		///	formats.emplace_back(b->buffer.as<VknTexture>().format);
+		///}
+		///formats.emplace_back(rt.color_tex.as<VknTexture>().format);
+		///formats.emplace_back(rt.depth_tex.as<VknTexture>().format);
 		vk::RenderPassBeginInfo rpbi
 		{
-			*rp, hdr_buffer->GetFramebuffer(),
+			*rp, fb.GetFramebuffer(),
 			render_area,hlp::arr_count(v),std::data(v)
 		};
-
+		//if (formats[0] != formats[fb.attachments.size()])
+		//	DoNothing();
 		//Transit depth buffer to general for sampling
 		
 		//Begin Depthless RT renderpass

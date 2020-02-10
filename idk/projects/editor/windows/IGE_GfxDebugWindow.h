@@ -15,7 +15,7 @@ This window displays the editor window where you can view shadow maps.
 #include <editor/windows/IGE_IWindow.h>
 #include <imgui/imgui.h>
 #include <memory>
-
+#include <util/ExtraVars.h>
 namespace idk {
 	class IGE_GfxDebugWindow :
 		public IGE_IWindow
@@ -24,6 +24,7 @@ namespace idk {
 		IGE_GfxDebugWindow();
 
 		virtual void Update() override;
+		void RenderExtraVars(ExtraVars&);
 		~IGE_GfxDebugWindow();
 
 	protected:

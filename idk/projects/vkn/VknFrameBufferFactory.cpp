@@ -10,6 +10,7 @@
 #include <res/Guid.inl>
 #include <res/ResourceMeta.inl>
 
+
 struct AttachmentOps
 {
 	unsigned load   :  2;//take up 2bits
@@ -41,11 +42,21 @@ bool operator==(const AttachmentOps& lhs, const AttachmentOps& rhs)
 bool operator==(const idk::small_vector<AttachmentOps>& lhs, const idk::small_vector<AttachmentOps>& rhs)
 {
 	bool same = lhs.size() == rhs.size();
-	if (same)
-		for (auto litr = lhs.cbegin(), ritr = rhs.cbegin(); litr != lhs.cend(); ++litr, ++ritr)
-		{
-			same &= *litr == *ritr;
-		}
+	//if (same)
+	for (auto litr = lhs.cbegin(), ritr = rhs.cbegin(); same& (litr != lhs.cend()); ++litr, ++ritr)
+	{
+		same &= *litr == *ritr;
+	}
+	return same;
+}
+
+bool operator==(const idk::small_vector<vk::Format>& lhs, const idk::small_vector<vk::Format>& rhs)
+{
+	bool same = lhs.size() == rhs.size();
+	for (auto litr = lhs.cbegin(), ritr = rhs.cbegin(); same & (litr != lhs.cend()); ++litr, ++ritr)
+	{
+		same &= litr == ritr;
+	}
 	return same;
 }
 
@@ -55,9 +66,10 @@ struct rp_type_t
 	bool has_depth   = false;
 	bool has_stencil = false;
 	idk::small_vector<AttachmentOps> attachments;
+	idk::small_vector<vk::Format> formats;
 	bool operator==(const rp_type_t& rhs)const
 	{
-		return num_col == rhs.num_col && has_depth == rhs.has_depth && has_stencil == rhs.has_stencil && attachments == rhs.attachments;
+		return num_col == rhs.num_col && has_depth == rhs.has_depth && has_stencil == rhs.has_stencil && attachments == rhs.attachments && formats == rhs.formats;
 	}
 };
 
@@ -72,7 +84,6 @@ namespace std
 		}
 	};
 }
-
 rp_type_t to_rp_type(idk::FrameBuffer& fb)
 {
 	rp_type_t result;
@@ -83,6 +94,7 @@ rp_type_t to_rp_type(idk::FrameBuffer& fb)
 	for (auto& attachment : fb.attachments)
 	{
 		result.attachments.emplace_back(*attachment);
+		result.formats.emplace_back(attachment->buffer.as<idk::vkn::VknTexture>().format);
 	}
 	return result;
 }
@@ -126,9 +138,9 @@ namespace idk::vkn
 		hlp::MemoryAllocator allocator;
 		vk::UniqueFence fence;
 		hash_table<rp_type_t, RenderPassObj> render_passes;//probably should move this to a manager
-
 		vk::UniqueRenderPass CreateRenderPass(uint32_t num_col,const VknFrameBuffer& fb)
 		{
+
 			//uint32_t num_col = fb.attachments.size();
 			const vector<unique_ptr<Attachment>>& col_attachments = fb.attachments;
 			vector< vk::AttachmentDescription> attachments_desc(num_col);
@@ -243,7 +255,9 @@ namespace idk::vkn
 				,1,&subpass
 				,1,&dependency
 			};
-			return View().Device()->createRenderPassUnique(renderPassInfo);
+			auto& device = *View().Device();
+			auto tmp = device.createRenderPassUnique(renderPassInfo);
+			return tmp;
 		}
 		//Gets or the appropriate renderpass, initalizes if not-present.
 		RenderPassObj GetRenderPass(rp_type_t rp_type, const VknFrameBuffer& fb)
@@ -349,7 +363,7 @@ namespace idk::vkn
 		framebufferInfo.height = s_cast<uint32_t>(fb.size.y);
 		framebufferInfo.layers = fb.NumLayers();
 
-
+		
 		fb.SetFramebuffer(vknView.Device()->createFramebufferUnique(framebufferInfo, nullptr, vknView.Dispatcher()), (spec_info)? spec_info->render_pass:_pimpl->GetRenderPass(rp_type, fb));
 	}
 }

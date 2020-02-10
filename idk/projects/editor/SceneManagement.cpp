@@ -66,13 +66,8 @@ namespace idk
         if (!scene)
             return false;
 
-        auto active_scene = Core::GetSystem<SceneManager>().GetActiveScene();
-
-        if (active_scene)
-            active_scene->Deactivate();
-		Core::GetSystem<IDE>().curr_scene = scene;
-        Core::GetSystem<SceneManager>().SetActiveScene(scene);
-		scene->LoadFromResourcePath();
+        Core::GetSystem<IDE>().curr_scene = scene;
+        Core::GetSystem<SceneManager>().SetNextScene(scene);
 
         Core::GetSystem<IDE>().ClearScene();
         Core::GetSystem<IDE>().reg_scene.set("scene", string{ scene.guid });
@@ -132,11 +127,7 @@ namespace idk
 
 			auto res = Core::GetResourceManager().CopyTo(curr_scene, p);
 			if (res)
-			{
-				curr_scene->Deactivate();
-				Core::GetSystem<SceneManager>().SetActiveScene(res.value());
-				Core::GetSystem<SceneManager>().GetActiveScene()->LoadFromResourcePath();
-			}
+				Core::GetSystem<SceneManager>().SetNextScene(res.value());
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}

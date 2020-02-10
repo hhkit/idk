@@ -181,6 +181,8 @@ namespace idk::vkn
 		void AllocateResources();
 		void BuildRenderPasses();
 
+		void SetDefaultUboManager(UboManager& ubo_manager);
+
 		//Execute the renderpasses.
 		//Use the dependency graph to split the appropriate jobs into separate threads and sync those.
 		//Will not call ProcessBatches
@@ -205,6 +207,8 @@ namespace idk::vkn
 		hash_table<fg_id, size_t> node_lookup;
 		vector<size_t> execution_order;
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
+
+		UboManager* _default_ubo_manager = {};
 
 		TempGraph tmp_graph;
 		ResourceLifetimeManager rsc_lifetime_mgr;

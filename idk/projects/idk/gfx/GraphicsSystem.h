@@ -15,6 +15,9 @@
 #include <forward_list>
 
 #include <machine.h>
+#include <gfx/ShadowMapPool.h>
+
+#include <util/ExtraVars.h>
 
 namespace idk
 {
@@ -63,6 +66,7 @@ namespace idk
 	};
 	struct RenderRequest;
 
+
 	class GraphicsSystem
 		: public ISystem
 	{
@@ -83,6 +87,8 @@ namespace idk
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
 		std::map<Handle<GameObject>, CamLightData> d_lightmaps;
+
+		ExtraVars extra_vars;
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
@@ -204,6 +210,8 @@ namespace idk
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
 			alignas(machine::cache_line_sz) std::pair<size_t,size_t>   skinned_inst_range;
+
+			alignas(machine::cache_line_sz) ShadowMapPool d_lightpool;
 		};
 		// triple buffered render state
 		array<RenderBuffer, 3> object_buffer;

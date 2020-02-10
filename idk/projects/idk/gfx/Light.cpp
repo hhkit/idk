@@ -86,7 +86,6 @@ namespace idk
 		template<typename T>
 		mat4 operator()(T&) { return mat4{}; }
 	};
-#pragma optimize("",off)
 	Light::~Light()
 	{
 		if (!_copied)

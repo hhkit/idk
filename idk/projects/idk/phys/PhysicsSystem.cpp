@@ -667,7 +667,7 @@ namespace idk
 
 	vector<RaycastHit> PhysicsSystem::Raycast(const ray& r, LayerMask layer_mask, bool hit_triggers)
 	{
-		Core::GetSystem<DebugRenderer>().Draw(r, color{1,1,0});
+		Core::GetSystem<DebugRenderer>().Draw(r, color{ 1,1,0 });
 
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 		vector<RaycastHit> retval;
@@ -697,21 +697,21 @@ namespace idk
 						if constexpr (std::is_same_v<RShape, box>)
 							return phys::collide_ray_box(
 								r, rShape);
-					else
-						if constexpr (std::is_same_v<RShape, capsule>)
-							return phys::collide_ray_capsule(
-								r, rShape);
-					else
-						return phys::raycast_failure{};
+						else
+							if constexpr (std::is_same_v<RShape, capsule>)
+								return phys::collide_ray_capsule(
+									r, rShape);
+							else
+								return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)
 				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
 		}
 
-		std::sort(retval.begin(), retval.end(), 
-			[](const RaycastHit& lhs, const RaycastHit& rhs) 
-			{ 
+		std::sort(retval.begin(), retval.end(),
+			[](const RaycastHit& lhs, const RaycastHit& rhs)
+			{
 				return abs(lhs.raycast_succ.distance_to_collision) < abs(rhs.raycast_succ.distance_to_collision);
 			}
 		);
@@ -894,6 +894,11 @@ namespace idk
 				col._active_cache = false;
 			}
 
+		};
+
+		Core::GetSystem<SceneManager>().OnSceneChange += [this](RscHandle<Scene>)
+		{
+			Reset();
 		};
 	}
 

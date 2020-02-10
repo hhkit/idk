@@ -445,6 +445,7 @@
     <ClCompile Include="FrameGraphNode.cpp" />
     <ClCompile Include="FrameGraphResourceManager.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
+    <ClCompile Include="GammaUtils.cpp" />
     <ClCompile Include="GraphicsState.cpp" />
     <ClCompile Include="graph_test.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />

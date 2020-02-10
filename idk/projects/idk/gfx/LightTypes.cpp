@@ -52,7 +52,6 @@ namespace idk
 	bool NeedShadowMap(const PointLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const SpotLight&light){return NeedShadowMapImpl(light);};
 	bool NeedShadowMap(const DirectionalLight&light){return NeedShadowMapImpl(light);};
-#pragma optimize("",off)
 	vector<Lightmap> PointLight::InitShadowMap()
 	{
 		light_map.resize(1);
@@ -62,8 +61,7 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			auto handle= elem.InitShadowMap();
-			auto& tmp = *handle;
+			elem.InitShadowMap();
 		}
 		return light_map;
 	}

@@ -47,7 +47,8 @@ namespace idk::vkn
 		RenderPassObj rp = View().BasicRenderPass(config.render_pass_type);
 		if (render_pass)
 			rp = *render_pass;
-		string_view str{ r_cast<const char*>(&rp),sizeof(rp) };
+		auto rp_internal = (*rp).operator VkRenderPass();
+		string_view str{ r_cast<const char*>(&rp_internal),sizeof(rp_internal) };
 		combi += str; //Add renderpass as a part of the unique id.
 		uvec2 viewport_size{};
 		ivec2 viewport_offset{};

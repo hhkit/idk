@@ -42,7 +42,7 @@ namespace idk::vkn::hlp
 		uint32_t type;
 		vector<Memory> memories;
 		size_t chunk_size{};
-		static constexpr size_t default_chunk_size = 1 << 24; //64MB (2048*2048*4)
+		static constexpr size_t default_chunk_size = 8847360;/* Memory gets fragmented above this. */// 1 << 24; //64MB (2048*2048*4) 
 		Memories(
 			vk::Device d,
 			uint32_t mem_type,

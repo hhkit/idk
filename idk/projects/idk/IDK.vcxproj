@@ -49,6 +49,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
+    <ClInclude Include="gfx\ShadowMapPool.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h" />
     <ClInclude Include="network\EventInvokeRPCMessage.h" />
     <ClInclude Include="network\EventLoadLevelMessage.h" />
@@ -326,6 +327,7 @@
     <ClInclude Include="util\align.h" />
     <ClInclude Include="util\easing.h" />
     <ClInclude Include="util\enum.h" />
+    <ClInclude Include="util\ExtraVars.h" />
     <ClInclude Include="util\hash_combine.h" />
     <ClInclude Include="util\ioutils.h" />
     <ClInclude Include="util\macro_utils.h" />
@@ -373,6 +375,7 @@
     <ClCompile Include="debug\Log.cpp" />
     <ClCompile Include="debug\LogSingleton.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />
+    <ClCompile Include="gfx\ShadowMapPool.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\CameraFrustum.cpp" />

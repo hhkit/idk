@@ -21,7 +21,7 @@ namespace idk::vkn
 		context.SetInputAttachments(_input_attachments);
 	}
 
-	void BaseRenderPass::PostExecute(const FrameGraphNode& node, Context_t context)
+	void BaseRenderPass::PostExecute(const FrameGraphNode& , Context_t context)
 	{
 		EndRenderPass(context);
 	}

@@ -196,15 +196,7 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RigidBodyAddForce(ulong id, Vector3 force);
-        /*
-         * Graphics 
-         */
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool DefRtSrgb();
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void ToggleDefRtSrgb(bool srgb);
-
+        
         /*
          * Collider
          */
@@ -412,6 +404,19 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TextMeshSetColor(ulong id, Color c);
+        /*
+         * Graphics 
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool GraphicsGetSRGB();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GraphicsSetSRGB(bool srgb);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool GraphicsDisableGammaCorrection();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GraphicsSetGammaCorrection(float gamma_correction);
 
         /*
         * Camera

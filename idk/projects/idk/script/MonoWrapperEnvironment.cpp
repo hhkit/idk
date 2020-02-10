@@ -830,19 +830,6 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		// Graphics
-		BIND_START("idk.Bindings::DefRtSrgb", bool)
-		{
-			return RscHandle<RenderTarget>{}->Srgb();
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::ToggleDefRtSrgb", void, bool srgb)
-		{
-			RscHandle<RenderTarget>{}->Srgb(srgb);
-		}
-		BIND_END();
-
 		// Animator
 		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
@@ -1358,6 +1345,30 @@ namespace idk::mono
 		BIND_START("idk.Bindings::TextMeshSetColor", void, Handle<TextMesh> h, color r)
 		{
 			h->color = r;
+		}
+		BIND_END();
+
+		// Graphics
+		BIND_START("idk.Bindings::GraphicsGetSRGB", bool)
+		{
+			return RscHandle<RenderTarget>{}->Srgb();
+		}
+		BIND_END();
+
+		//BIND_START("idk.Bindings::GraphicsGetGammaCorrection", float)
+		//{
+		//	return Core::GetSystem<GraphicsSystem>().extra_vars.Get;
+		//}
+		//BIND_END();
+
+		BIND_START("idk.Bindings::GraphicsSetGammaCorrection", void, float gamma_correction)
+		{
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set("gamma_correction",gamma_correction);
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsDisableGammaCorrection", void)
+		{
+			Core::GetSystem<GraphicsSystem>().extra_vars.Unset("gamma_correction");
 		}
 		BIND_END();
 
