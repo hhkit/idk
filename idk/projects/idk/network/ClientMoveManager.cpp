@@ -43,7 +43,7 @@ namespace idk
 	{
 		for (auto& elem : views)
 		{
-			if (auto* move_data = std::get_if<ElectronView::ClientObject>(&elem.network_data))
+			if (auto* move_data = std::get_if<ElectronView::ClientObject>(&elem.move_state))
 			{
 				
 				if (elem.state_mask)
@@ -57,7 +57,6 @@ namespace idk
 							msg.pack = elem.PackMoveData();
 						});
 				}
-				elem.CacheMasterValues();
 			}
 		}
 	}

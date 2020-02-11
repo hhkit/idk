@@ -94,11 +94,13 @@ namespace idk
 
 	void NetworkSystem::ReceivePackets()
 	{
-		if (frame_counter != 0xFFFF)
-			++frame_counter;
-		else
-			frame_counter = 0;
-		LOG_TO(LogPool::NETWORK, "Frame: %d ", (int) frame_counter);
+		if (lobby || client)
+		{
+			if (frame_counter != 0xFFFF)
+				++frame_counter;
+			else
+				frame_counter = 0;
+		}
 
 		if (lobby)
 		{

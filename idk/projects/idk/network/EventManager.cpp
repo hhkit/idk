@@ -76,8 +76,7 @@ namespace idk
 		if (rotation)
 			tfm.rotation = *rotation;
 
-		ev->network_data = ElectronView::Master{};
-		ev->CacheMasterValues();
+		ev->ghost_state = ElectronView::Master{};
 
 		Core::GetSystem<NetworkSystem>().BroadcastMessage<EventInstantiatePrefabMessage>(GameChannel::RELIABLE,
 			[&](EventInstantiatePrefabMessage& msg)
@@ -139,9 +138,8 @@ namespace idk
 			{
 				id_manager.CreateNewIDFor(elem.GetHandle());
 				elem.Setup();
-				elem.network_data = ElectronView::Master{};
+				elem.ghost_state = ElectronView::Master{};
 				elem.state_mask = 0;
-				elem.CacheMasterValues();
 			}
 
 			Core::GetSystem<NetworkSystem>().BroadcastMessage<EventLoadLevelMessage>(GameChannel::RELIABLE, 

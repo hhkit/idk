@@ -46,7 +46,7 @@ namespace idk
 			if (view.owner != Host::SERVER)
 				continue;
 
-			if (auto network_data = std::get_if<ElectronView::Master>(&view.network_data))
+			if (auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
 			{
 				if (view.state_mask)
 				{
@@ -59,7 +59,6 @@ namespace idk
 							ghost_msg.pack = view.PackGhostData();
 						});
 				}
-				view.CacheMasterValues();
 			}
 		}
 	}
@@ -75,11 +74,12 @@ namespace idk
 			LOG_TO(LogPool::NETWORK, "Received Ghost Message for %d", view->network_id);
 			if (msg->state_mask)
 			{
-				if (!(std::get_if<ElectronView::Ghost>(&view->network_data)
-					|| std::get_if<void*>(&view->network_data)))
+				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))
+					return;
+				if (std::get_if<ElectronView::ControlObject>(&view->move_state))
 					return;
 
-				view->network_data = ElectronView::Ghost{};
+				view->ghost_state = ElectronView::Ghost{};
 				view->state_mask = msg->state_mask;
 				view->UnpackGhostData(msg->sequence_number, msg->pack);
 			}

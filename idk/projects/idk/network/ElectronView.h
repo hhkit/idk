@@ -23,9 +23,11 @@ namespace idk
 		: public Component<ElectronView>
 	{
 	public:
-		struct Master {};
-		struct Ghost {};
-		struct ClientObject {};
+		// state machines
+		struct Master {};        // master object for the server. server owns this regardless of object ownership
+		struct Ghost {};         // ghost object for clients
+		struct ClientObject {};  // when the client owns the object, the move_state is placed into clientobject
+		struct ControlObject {}; // the server holds the controlobject
 
 		ElectronView() = default;
 		ElectronView(const ElectronView&);
@@ -40,12 +42,12 @@ namespace idk
 
 		Host owner = Host::SERVER;
 
-		variant<void*, Master, Ghost, ClientObject> network_data;
+		variant<std::monostate, Master, Ghost> ghost_state;
+		variant<std::monostate, ClientObject, ControlObject> move_state;
 
 		void Setup();
 		void SetAsClientObject();
 
-		void CacheMasterValues();
 		void UpdateClient();
 		void UpdateMaster();
 		void UpdateGhost();

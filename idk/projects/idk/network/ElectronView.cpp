@@ -33,7 +33,7 @@ namespace idk
 
 	void ElectronView::SetAsClientObject()
 	{
-		network_data = ElectronView::ClientObject{};
+		move_state = ElectronView::ClientObject{};
 		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
 			auto& param = parameters[i];
@@ -43,7 +43,7 @@ namespace idk
 	}
 	void ElectronView::UpdateMaster()
 	{
-		if (auto* master = std::get_if<Master>(&network_data))
+		if (auto* master = std::get_if<Master>(&ghost_state))
 		{
 			state_mask = 0;
 			for (unsigned i = 0; i < parameters.size(); ++i)
@@ -57,7 +57,7 @@ namespace idk
 	}
 	void ElectronView::UpdateGhost()
 	{
-		if (auto ghost_ = std::get_if<Ghost>(&network_data))
+		if (auto ghost_ = std::get_if<Ghost>(&ghost_state))
 		{
 			Ghost& ghost = *ghost_;
 			auto advance = Core::GetDT().count();
@@ -73,7 +73,7 @@ namespace idk
 	vector<string> ElectronView::PackMoveData()
 	{
 		auto pack = vector<string>{};
-		if (auto* master = std::get_if<ClientObject>(&network_data))
+		if (auto* master = std::get_if<ClientObject>(&move_state))
 		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
@@ -95,7 +95,7 @@ namespace idk
 	vector<string> ElectronView::PackGhostData()
 	{
 		auto pack = vector<string>{};
-		if (auto* master = std::get_if<Master>(&network_data))
+		if (auto* master = std::get_if<Master>(&ghost_state))
 		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
@@ -116,7 +116,7 @@ namespace idk
 
 	void ElectronView::UnpackGhostData(SeqNo sequence_number, span<string> data_pack)
 	{
-		if (auto* ghost = std::get_if<Ghost>(&network_data))
+		if (auto* ghost = std::get_if<Ghost>(&ghost_state))
 		{
 			unsigned count = 0;
 			for (unsigned i = 0; i < parameters.size(); ++i)
@@ -125,12 +125,12 @@ namespace idk
 				IDK_ASSERT(param);
 				if (state_mask & (1 << i))
 				{
+					auto& pack = data_pack[count++];
 					if (seqno_greater_than(sequence_number, param->latest_seq))
 					{
 						param->latest_seq = sequence_number;
-						param->UnpackGhost(data_pack[count]);
+						param->UnpackGhost(pack);
 					}
-					++count;
 				}
 			}
 		}
@@ -138,7 +138,7 @@ namespace idk
 
 	void ElectronView::UnpackMoveData(SeqNo sequence_number, span<string> data_pack)
 	{
-		if (auto* master = std::get_if<Master>(&network_data))
+		if (auto* master = std::get_if<ControlObject>(&move_state))
 		{
 			unsigned count = 0;
 			for (unsigned i = 0; i < parameters.size(); ++i)
@@ -153,20 +153,9 @@ namespace idk
 		}
 	}
 
-	void ElectronView::CacheMasterValues()
-	{
-		if (std::get_if<Master>(&network_data) || std::get_if<ClientObject>(&network_data))
-		{
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				IDK_ASSERT(param);
-			}
-		}
-	}
 	void ElectronView::UpdateClient()
 	{
-		if (auto* master = std::get_if<ClientObject>(&network_data))
+		if (auto* master = std::get_if<ClientObject>(&move_state))
 		{
 			state_mask = 0;
 			for (unsigned i = 0; i < parameters.size(); ++i)
