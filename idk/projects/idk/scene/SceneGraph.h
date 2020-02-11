@@ -6,6 +6,7 @@
 namespace idk
 {
 	class SceneGraph;
+	class SceneGraphHandle;
 
 	class SceneGraphHandle
 	{
@@ -15,7 +16,29 @@ namespace idk
 
 		explicit operator bool() const;
 		size_t GetNumChildren() const;
-		Handle<GameObject> GetGameObject() const
+		Handle<GameObject> GetGameObject() const;
+
+		class iterator
+		{
+		public:
+			iterator(const SceneGraphHandle& handle, const GenericHandle::index_t* ptr);
+			~iterator() = default;
+			iterator(const iterator&) = default;
+			iterator& operator=(const iterator&) = default;
+
+			Handle<GameObject> operator*() const;
+			iterator& operator++(); //prefix increment
+			iterator operator++(int); //postfix increment
+			bool operator==(const iterator&) const;
+
+		private:
+			const SceneGraph* _scene_graph;
+			Handle<GameObject> _root;
+			const GenericHandle::index_t* ptr;
+		};
+
+		iterator begin() const;
+		iterator end() const;
 
 	private:
 		const SceneGraph* _scene_graph;

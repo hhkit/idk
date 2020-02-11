@@ -33,6 +33,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <script/ScriptSystem.h>
 
 // resource importing

@@ -4,6 +4,7 @@
 #include <core/GameState.inl>
 #include <common/Transform.h>
 #include <ds/span.inl>
+#include <scene/SceneGraph.inl>
 
 namespace idk
 {

@@ -24,13 +24,14 @@ namespace idk
 					continue;
 
 				++depth;
-				for (GenericHandle::index_t index = 0; index < _per_scene[scn].nodes.size(); ++i)
+				for (GenericHandle::index_t index = 0; index < _per_scene[scn].nodes.size(); ++index)
 					VisitImpl(std::forward<Visitor>(visitor), Handle<GameObject>{index, _per_scene[scn].gens[index], scn}, depth, last_depth);
 				--depth;
 			}
+			return;
 		}
 
-		VisitImpl(std::forward<Visitor>(visitor), root, depth, last_visit_depth);
+		VisitImpl(std::forward<Visitor>(visitor), root, depth, last_depth);
 	}
 
 	template<typename Visitor>
@@ -52,7 +53,7 @@ namespace idk
 		{
 			++depth;
 			for (auto index : _per_scene[root.scene].nodes[root.index])
-				VisitImpl(std::forward<Visitor>(visitor), Handle<GameObject>{index, _per_scene[scn].gens[index], scn}, depth, last_depth);
+				VisitImpl(std::forward<Visitor>(visitor), Handle<GameObject>{index, _per_scene[root.scene].gens[index], root.scene}, depth, last_depth);
 			--depth;
 		}
 	}

@@ -26,8 +26,50 @@ namespace idk
         return _root;
     }
 
-	void SceneGraph::Build(span<const GameObject> objs)
+	SceneGraphHandle::iterator SceneGraphHandle::begin() const
 	{
+        return iterator{ *this, _scene_graph->_per_scene[_root.scene].nodes[_root.index].begin() };
+	}
+
+    SceneGraphHandle::iterator SceneGraphHandle::end() const
+    {
+        return iterator{ *this, _scene_graph->_per_scene[_root.scene].nodes[_root.index].end() };
+    }
+
+
+
+    SceneGraphHandle::iterator::iterator(const SceneGraphHandle& handle, const GenericHandle::index_t* ptr)
+        : _scene_graph{ handle._scene_graph }, _root{ handle._root }, ptr{ ptr }
+    {
+    }
+
+    Handle<GameObject> SceneGraphHandle::iterator::operator*() const
+    {
+        return Handle<GameObject>{ *ptr, _root.gen, _root.scene };
+    }
+
+    SceneGraphHandle::iterator& SceneGraphHandle::iterator::operator++()
+    {
+        ++ptr;
+        return *this;
+    }
+
+    SceneGraphHandle::iterator SceneGraphHandle::iterator::operator++(int)
+    {
+        auto copy = *this;
+        ++ptr;
+        return copy;
+    }
+
+    bool SceneGraphHandle::iterator::operator==(const SceneGraphHandle::iterator& other) const
+    {
+        return ptr == other.ptr;
+    }
+
+
+
+    void SceneGraph::Build(span<const GameObject> objs)
+    {
         for (auto& ps : _per_scene)
         {
             ps.nodes.clear();
@@ -47,11 +89,10 @@ namespace idk
             if (const auto parent = o.Parent())
                 _per_scene[handle.scene].nodes[parent.index] += handle.index;
         }
-	}
+    }
 
     SceneGraphHandle SceneGraph::GetHandle(Handle<GameObject> root)
     {
         return SceneGraphHandle{ this, root };
     }
-
 }
