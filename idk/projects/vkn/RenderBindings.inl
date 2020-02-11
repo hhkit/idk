@@ -35,7 +35,7 @@ namespace idk::vkn::bindings
 	template<typename ...Args>
 	void CombinedBindings<Args...>::Bind(RenderInterface& the_interface)
 	{
-		meta::for_each_tuple_element(binders, [](StandardBindings& binder, auto& the_interface)
+		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface)
 			{
 				binder.Bind(the_interface);
 			}, the_interface);
@@ -43,14 +43,14 @@ namespace idk::vkn::bindings
 	template<typename ...Args>
 	void CombinedBindings<Args...>::Bind(RenderInterface& the_interface, const RenderObject& dc)
 	{
-		meta::for_each_tuple_element(binders, [](StandardBindings& binder, auto& the_interface, auto& dc) {
+		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface, auto& dc) {
 			binder.Bind(the_interface, dc);
 			}, the_interface, dc);
 	}
 	template<typename ...Args>
 	void CombinedBindings<Args...>::BindAni(RenderInterface& the_interface, const AnimatedRenderObject& dc)
 	{
-		meta::for_each_tuple_element(binders, [](StandardBindings& binder, auto& the_interface, auto& dc) {
+		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface, auto& dc) {
 			binder.BindAni(the_interface, dc);
 			}, the_interface, dc);
 	}
