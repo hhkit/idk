@@ -50,7 +50,7 @@ namespace idk
 				{
 					frame_counter = event->frame_count;
 
-					auto frames_late = static_cast<int>(client->GetRTT() / Core::GetDT().count()) / 2; // attempt to synchronize frame time with the server
+					auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
 					frame_counter += frames_late;
 				});
 		};
