@@ -79,23 +79,35 @@ namespace idk
 
         for (const auto& o : objs)
         {
-            const auto handle = o.GetHandle();
-
-            if (static_cast<size_t>(handle.index) >= _per_scene[handle.scene].children.size())
-            {
-                _per_scene[handle.scene].children.resize(handle.index + 1);
-                _per_scene[handle.scene].gens.resize(handle.index + 1);
-            }
-            _per_scene[handle.scene].gens[handle.index] = handle.gen;
-
-            if (const auto parent = o.Parent())
-                _per_scene[handle.scene].children[parent.index] += handle.index;
-            else
-                _per_scene[handle.scene].root += handle.index;
+            Insert(o.GetHandle());
         }
     }
 
-    SceneGraphHandle SceneGraph::GetHandle(Handle<GameObject> root)
+    void SceneGraph::Insert(Handle<GameObject> handle)
+    {
+        if (static_cast<size_t>(handle.index) >= _per_scene[handle.scene].children.size())
+        {
+            _per_scene[handle.scene].children.resize(handle.index + 1);
+            _per_scene[handle.scene].gens.resize(handle.index + 1);
+        }
+        _per_scene[handle.scene].gens[handle.index] = handle.gen;
+
+        if (const auto parent = handle->Parent())
+            _per_scene[handle.scene].children[parent.index] += handle.index;
+        else
+            _per_scene[handle.scene].root += handle.index;
+    }
+
+    void SceneGraph::Reparent(Handle<GameObject> handle, Handle<GameObject> old_parent)
+    {
+        auto& children = _per_scene[old_parent.scene].children[old_parent.index];
+        const auto pos = children.find(handle.index);
+        if (pos != string::npos)
+            children.erase(pos, 1);
+        Insert(handle);
+    }
+
+    SceneGraphHandle SceneGraph::GetHandle(Handle<GameObject> root) const
     {
         return SceneGraphHandle{ this, root };
     }

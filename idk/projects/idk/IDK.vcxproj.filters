@@ -545,9 +545,6 @@
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="scene\SceneGraphBuilder.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="anim\AnimationSystem.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -1058,12 +1055,6 @@
     <ClInclude Include="res\ResourceExtension.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\RenderTargetMeta.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\TextureInternalFormat.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
     <ClInclude Include="parallel\queue.h">
       <Filter>parallel</Filter>
     </ClInclude>
@@ -1138,7 +1129,6 @@
     <ClInclude Include="ds\Flags.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="res\compiled_asset_tags.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h">
       <Filter>network\views</Filter>
     </ClInclude>
@@ -1163,12 +1153,21 @@
     <ClInclude Include="util\ExtraVars.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="network\Device.h">
-      <Filter>network</Filter>
-    </ClInclude>
     <ClInclude Include="network\EventDataBlockFrameNumber.h" />
     <ClInclude Include="parallel\multithread_control.h">
       <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextureInternalFormat.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderTargetMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="res\compiled_asset_tags.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Device.h">
+      <Filter>network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1328,9 +1327,6 @@
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
       <Filter>gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\SceneGraphBuilder.cpp">
-      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="anim\AnimationSystem.cpp">
       <Filter>anim</Filter>
@@ -1629,9 +1625,6 @@
     <ClCompile Include="res\ResourceMeta.cpp">
       <Filter>res</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\TextureInternalFormat.cpp">
-      <Filter>gfx</Filter>
-    </ClCompile>
     <ClCompile Include="test\TestComponent.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -1682,9 +1675,18 @@
     <ClCompile Include="util\property_path.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="scene\SceneGraph.cpp" />
-    <ClCompile Include="parallel\multithread_control.cpp" />
-    <ClCompile Include="network\network.cpp" />
+    <ClCompile Include="scene\SceneGraph.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\TextureInternalFormat.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="network\network.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="parallel\multithread_control.cpp">
+      <Filter>parallel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <idk_config.h>
 #include <core/ISystem.h>
-#include <scene/SceneGraphBuilder.h>
+#include <scene/SceneGraph.h>
 #include <res/ResourceHandle.h>
 
 namespace idk
@@ -42,9 +42,9 @@ namespace idk
 		void DestroyQueuedObjects(span<GameObject> objs);
 		void BuildSceneGraph(span<const GameObject> objs);
 		SceneGraphHandle FetchSceneGraph();
-		SceneGraphHandle FetchSceneGraphFor(Handle<class GameObject>);
-		void ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent);
-		void InsertObject(Handle<class GameObject> go);
+		SceneGraphHandle FetchSceneGraphFor(Handle<GameObject>);
+		void ReparentObject(Handle<GameObject> go, Handle<GameObject> old_parent);
+		void InsertObject(Handle<GameObject> go);
 	private:
 		friend class Scene;
 		void Init() override;
@@ -53,7 +53,7 @@ namespace idk
 		void Shutdown() override;
 
 		GameState*         _gs { nullptr };
-		SceneGraphBuilder  _sg_builder;
+		SceneGraph		   _scene_graph;
 		RscHandle<Scene>   _prefab_scene;
 		bool changing = false;
 		RscHandle<Scene>   _next_scene;

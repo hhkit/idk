@@ -49,7 +49,10 @@ namespace idk
 	{
 	public:
 		void Build(span<const GameObject> objs);
-		SceneGraphHandle GetHandle(Handle<GameObject> root = {});
+		void Insert(Handle<GameObject> handle);
+		void Reparent(Handle<GameObject> handle, Handle<GameObject> old_parent);
+
+		SceneGraphHandle GetHandle(Handle<GameObject> root = {}) const;
 		template<typename Visitor> void Visit(Visitor&& visitor, Handle<GameObject> root = {}) const;
 
 	private:

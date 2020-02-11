@@ -194,7 +194,6 @@
     <ClInclude Include="res\SaveableResourceLoader.h" />
     <ClInclude Include="proj\ProjectManager.h" />
     <ClInclude Include="scene\SceneGraph.h" />
-    <ClInclude Include="scene\SceneGraphBuilder.h" />
     <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
@@ -461,7 +460,6 @@
     <ClCompile Include="proj\ProjectManager.cpp" />
     <ClCompile Include="res\ResourceMeta.cpp" />
     <ClCompile Include="scene\SceneGraph.cpp" />
-    <ClCompile Include="scene\SceneGraphBuilder.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
