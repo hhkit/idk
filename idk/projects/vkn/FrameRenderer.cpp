@@ -51,6 +51,8 @@
 
 #include <vkn/graph_test.h>
 
+#include <vkn/FrameGraph.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<ThreadedRender>()
@@ -61,6 +63,9 @@ namespace idk::vkn
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
 		gt::GraphTest test;
+
+		
+
 		uint32_t testing = 0;
 	};
 

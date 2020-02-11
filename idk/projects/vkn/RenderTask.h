@@ -18,45 +18,19 @@
 #include <vkn/UniformManager.h>
 #include <vkn/PipelineManager.h>
 
+#include <vkn/RenderInterface.h>
 
 namespace idk::vkn
 {
-	using VknRenderPass = RenderPassObj;
-
+	
 
 	struct UboManager;
 
 	struct RenderBundle;// holds the stuff required to actually draw/submit
 
-	enum LoadOp {};
-	enum StoreOp {};
-	//enum class IndexType { e16, e32 };
-	using IndexType = vk::IndexType;
-	using Framebuffer = vk::Framebuffer;
-	using VertexBuffer = vk::Buffer;
-	using IndexBuffer = vk::Buffer;
-	class ShaderModule;
 	using TextureID  = Guid;
 
-	struct indexed_draw_info
-	{
-		uint32_t num_indices;
-		uint32_t num_instances;
-		uint32_t first_vertex;
-		uint32_t first_index;
-		uint32_t first_instance;
-	};
-	struct vertex_draw_info
-	{
-		uint32_t num_vertices;
-		uint32_t num_instances;
-		uint32_t first_vertex;
-		uint32_t first_instance;
-	};
-
-	using draw_info = std::variant<indexed_draw_info, vertex_draw_info>;
-
-
+	
 	struct Shaders 
 	{
 		std::array< std::optional<RscHandle<ShaderProgram>>, static_cast<size_t>(ShaderStage::Size)> shaders;
@@ -68,7 +42,7 @@ namespace idk::vkn
 		std::optional<AttachmentBlendConfig> config;
 	};
 
-	struct RenderTask
+	struct RenderTask : RenderInterface
 	{
 		//hack
 		int32_t attachment_offset = 0;
@@ -94,22 +68,22 @@ namespace idk::vkn
 		void SetUboManager(UboManager& ubo_manager);
 
 
-		void BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset);
-		void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType);
+		void BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)override;
+		void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)override;
 
 #pragma region Uniforms
-		void BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound=false);
-		void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false,vk::ImageLayout layout= vk::ImageLayout::eGeneral);
+		void BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound=false)override;
+		void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false,vk::ImageLayout layout= vk::ImageLayout::eGeneral)override;
 #pragma endregion
 
-		void BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader);
-		void UnbindShader(ShaderStage shader_stage);
+		void BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader)override;
+		void UnbindShader(ShaderStage shader_stage)override;
 		void SetRenderPass(RenderPassObj render_pass);
 		void SetFrameBuffer(const Framebuffer& fb,uvec2 size);
 
 #pragma region Draw
-		void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance);
-		void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_index, uint32_t first_instance);
+		void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance)override;
+		void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_index, uint32_t first_instance)override;
 #pragma endregion
 
 #pragma region PipelineConfigurations
@@ -118,78 +92,23 @@ namespace idk::vkn
 		{
 			_current_batch.pipeline = config;
 		}
-		void SetBufferDescriptions(span<buffer_desc>);
-		void SetBlend(uint32_t attachment_index, AttachmentBlendConfig blend_config = {});
+		void SetBufferDescriptions(span<buffer_desc>)override;
+		void SetBlend(uint32_t attachment_index, AttachmentBlendConfig blend_config = {})override;
 		//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
 		//If col is nullopt, we clear all the colors from attachment_index onwards.
-		void SetClearColor(uint32_t attachment_index, std::optional<color> col)
-		{
-			if (col)
-				clear_colors[attachment_index] = *col;
-			else
-				clear_colors.resize(attachment_index);
-		}
-		void SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil = {})
-		{
-			clear_depths = depth;
-			clear_stencil = stencil;
-		}
-		void SetScissors(rect r)
-		{
-			StartNewBatch();
-			r.Scale(fb_size);
-			_rect_builder.start();
-			_rect_builder.emplace_back(r);
-			_current_batch.scissor =_rect_builder.end();
-		}
-		void SetViewport(rect r)
-		{
-			StartNewBatch();
-			r.Scale(fb_size);
-
-			_rect_builder.start();
-			_rect_builder.emplace_back(r);
-			_current_batch.viewport = _rect_builder.end();
-		}
-		void SetFillType(FillType type)
-		{
-			StartNewBatch();
-			_current_batch.pipeline.fill_type = type;
-		}
-		void SetCullFace(CullFaceFlags cf)
-		{
-			StartNewBatch();
-			_current_batch.pipeline.cull_face = cf;
-		}
-		void SetPrimitiveTopology(PrimitiveTopology pt)
-		{
-			StartNewBatch();
-			_current_batch.pipeline.prim_top= pt;
-		}
-		void SetDepthTest(bool enabled)
-		{
-			StartNewBatch();
-			_current_batch.pipeline.depth_test= enabled;
-		}
-		void SetDepthWrite(bool enabled){
-			StartNewBatch();
-			_current_batch.pipeline.depth_write = enabled;
-		}
-		void SetStencilTest(bool enabled)
-		{
-			StartNewBatch();
-			_current_batch.pipeline.stencil_test= enabled;
-		}
-		void SetStencilWrite(bool enabled)
-		{
-			StartNewBatch();
-			_current_batch.pipeline.stencil_write= enabled;
-		}
+		void SetClearColor(uint32_t attachment_index, std::optional<color> col)override;
+		void SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil = {})override;
+		void SetScissors(rect r)override;
+		void SetViewport(rect r)override;
+		void SetFillType(FillType type)override;
+		void SetCullFace(CullFaceFlags cf)override;
+		void SetPrimitiveTopology(PrimitiveTopology pt)override;
+		void SetDepthTest(bool enabled)override;
+		void SetDepthWrite(bool enabled)override;
+		void SetStencilTest(bool enabled)override;
+		void SetStencilWrite(bool enabled)override;
 #pragma endregion 
-		const pipeline_config GetCurrentConfig()const noexcept
-		{
-			return _current_batch.pipeline;
-		}
+		const pipeline_config& GetCurrentConfig()const noexcept;
 
 		
 		void SetInputAttachments(span<VknTextureView> input_attachments) noexcept;

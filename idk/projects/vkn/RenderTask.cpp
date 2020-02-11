@@ -131,6 +131,77 @@ namespace idk::vkn
 		configs.resize(std::max(size, attachment_index + 1));
 		configs[attachment_index] = blend_config;
 	}
+
+	//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
+	//If col is nullopt, we clear all the colors from attachment_index onwards.
+
+	void RenderTask::SetClearColor(uint32_t attachment_index, std::optional<color> col)
+	{
+		if (col)
+			clear_colors[attachment_index] = *col;
+		else
+			clear_colors.resize(attachment_index);
+	}
+	void RenderTask::SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil)
+	{
+		clear_depths = depth;
+		clear_stencil = stencil;
+	}
+	void RenderTask::SetScissors(rect r)
+	{
+		StartNewBatch();
+		r.Scale(fb_size);
+		_rect_builder.start();
+		_rect_builder.emplace_back(r);
+		_current_batch.scissor = _rect_builder.end();
+	}
+	void RenderTask::SetViewport(rect r)
+	{
+		StartNewBatch();
+		r.Scale(fb_size);
+
+		_rect_builder.start();
+		_rect_builder.emplace_back(r);
+		_current_batch.viewport = _rect_builder.end();
+	}
+	void RenderTask::SetFillType(FillType type)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.fill_type = type;
+	}
+	void RenderTask::SetCullFace(CullFaceFlags cf)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.cull_face = cf;
+	}
+	void RenderTask::SetPrimitiveTopology(PrimitiveTopology pt)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.prim_top = pt;
+	}
+	void RenderTask::SetDepthTest(bool enabled)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.depth_test = enabled;
+	}
+	void RenderTask::SetDepthWrite(bool enabled) {
+		StartNewBatch();
+		_current_batch.pipeline.depth_write = enabled;
+	}
+	void RenderTask::SetStencilTest(bool enabled)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.stencil_test = enabled;
+	}
+	void RenderTask::SetStencilWrite(bool enabled)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.stencil_write = enabled;
+	}
+	const pipeline_config& RenderTask::GetCurrentConfig() const noexcept
+	{
+		return _current_batch.pipeline;
+	}
 	void RenderTask::SetInputAttachments(span<VknTextureView> input_attachments) noexcept
 	{
 		_input_attachments = input_attachments;

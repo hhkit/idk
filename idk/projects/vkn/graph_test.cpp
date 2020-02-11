@@ -13,6 +13,7 @@
 #include <gfx/Camera.h>
 
 #include <vkn/utils/utils.inl>
+#include <vkn/utils/VknUtil.h>
 namespace idk::vkn
 {
 
@@ -22,11 +23,7 @@ namespace idk::vkn
 
 namespace idk::vkn::gt
 {
-	template<typename T>
-	string_view to_data(const T& obj)
-	{
-		return string_view{ reinterpret_cast<const char*>(hlp::buffer_data(obj)), hlp::buffer_size(obj) };
-	}
+	using hlp::to_data;
 	struct PassUtil : BaseRenderPass
 	{
 		struct FullRenderData

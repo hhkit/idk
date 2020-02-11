@@ -311,6 +311,36 @@
     <ClInclude Include="TextureTracker.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="RenderInterface.h">
+      <Filter>render\new_testament</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardVertexBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="PbrFwdBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="FontVertexBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="CanvasVertexBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardMaterialBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="UnlitBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -545,6 +575,33 @@
     <ClCompile Include="GammaUtils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="CanvasVertexBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="FontVertexBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="PbrFwdBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardMaterialBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardVertexBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="UnlitBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -595,6 +652,12 @@
     <Filter Include="render\graph\util_objects">
       <UniqueIdentifier>{f2f7830d-f1f0-45b2-87f8-df255d3c1629}</UniqueIdentifier>
     </Filter>
+    <Filter Include="render\new_testament">
+      <UniqueIdentifier>{204836c8-8881-4cd4-b800-0094ccb5946d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\new_testament\Bindings">
+      <UniqueIdentifier>{d0301621-96fe-4d74-b97f-e269c87f892e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="BufferHelpers.inl">
@@ -617,6 +680,9 @@
     </None>
     <None Include="PipelineBinders.inl">
       <Filter>render\objects</Filter>
+    </None>
+    <None Include="RenderBindings.inl">
+      <Filter>render\new_testament\Bindings</Filter>
     </None>
   </ItemGroup>
 </Project>
