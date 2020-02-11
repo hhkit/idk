@@ -54,32 +54,32 @@ namespace idk::phys
 
 		// a's x axis
 		s = abs(t.x) - (eA.x + absC[0].dot(eB));
-		if (track_face_axis(&aAxis, 0, s, &aMax, atx.rotation.ex, &nA))
+		if (track_face_axis(&aAxis, 0, s, &aMax, atx.rotation[0], &nA))
 			return;
 
 		// a's y axis
 		s = abs(t.y) - (eA.y + q3Dot(absC.Column1(), eB));
-		if (track_face_axis(&aAxis, 1, s, &aMax, atx.rotation.ey, &nA))
+		if (track_face_axis(&aAxis, 1, s, &aMax, atx.rotation[1], &nA))
 			return;
 
 		// a's z axis
 		s = abs(t.z) - (eA.z + q3Dot(absC.Column2(), eB));
-		if (track_face_axis(&aAxis, 2, s, &aMax, atx.rotation.ez, &nA))
+		if (track_face_axis(&aAxis, 2, s, &aMax, atx.rotation[2], &nA))
 			return;
 
 		// b's x axis
-		s = abs(q3Dot(t, C.ex)) - (eB.x + q3Dot(absC.ex, eA));
-		if (track_face_axis(&bAxis, 3, s, &bMax, btx.rotation.ex, &nB))
+		s = abs(q3Dot(t, C[0])) - (eB.x + q3Dot(absC[0], eA));
+		if (track_face_axis(&bAxis, 3, s, &bMax, btx.rotation[0], &nB))
 			return;
 
 		// b's y axis
-		s = abs(q3Dot(t, C.ey)) - (eB.y + q3Dot(absC.ey, eA));
-		if (track_face_axis(&bAxis, 4, s, &bMax, btx.rotation.ey, &nB))
+		s = abs(q3Dot(t, C[1])) - (eB.y + q3Dot(absC[1], eA));
+		if (track_face_axis(&bAxis, 4, s, &bMax, btx.rotation[1], &nB))
 			return;
 
 		// b's z axis
-		s = abs(q3Dot(t, C.ez)) - (eB.z + q3Dot(absC.ez, eA));
-		if (track_face_axis(&bAxis, 5, s, &bMax, btx.rotation.ez, &nB))
+		s = abs(q3Dot(t, C[2])) - (eB.z + q3Dot(absC[2], eA));
+		if (track_face_axis(&bAxis, 5, s, &bMax, btx.rotation[2], &nB))
 			return;
 
 		if (!parallel)
