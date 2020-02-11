@@ -164,6 +164,9 @@
     <Filter Include="phys\aabb tree">
       <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="phys\rotational">
+      <UniqueIdentifier>{84056225-9a38-47b7-8a53-ab3d256bbdcb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
