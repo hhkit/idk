@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "multithread_control.h"
 
 namespace idk

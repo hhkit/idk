@@ -9,10 +9,12 @@
 #include <network/Client.h>
 #include <network/ServerConnectionManager.h>
 #include <network/ClientConnectionManager.h>
+#include <network/ConnectionManager.inl>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
 #include <network/EventDataBlockFrameNumber.h>
 #include <core/GameState.h>
+
 namespace idk
 {
 	NetworkSystem::NetworkSystem() = default;
