@@ -953,20 +953,20 @@ namespace idk
 			auto intersection_point = [](halfspace a, halfspace b, halfspace c)
 			{
 				mat3 mat = mat3{ a.normal,b.normal,c.normal };
-				return mat.inverse() * vec3 { -a.dist, -b.dist, -c.dist };
+				return mat.transpose().inverse() * vec3 { -a.dist, -b.dist, -c.dist };
 			};
 			vec3 points[8] =
 			{
-				vec3{-1, 1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
-				vec3{ 1, 1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
-				vec3{ 1,-1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
-				vec3{-1,-1,-1},//intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
-				vec3{-1, 1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
-				vec3{ 1, 1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
-				vec3{ 1,-1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
-				vec3{-1,-1, 1},//intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
+				/*vec3{-1, 1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
+				/*vec3{ 1, 1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
+				/*vec3{ 1,-1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+				/*vec3{-1,-1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
+				/*vec3{-1, 1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
+				/*vec3{ 1, 1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
+				/*vec3{ 1,-1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+				/*vec3{-1,-1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
 			};
-
+			//Yes I'm too scrub to write some smart code to do this for me.
 			Core::GetSystem<DebugRenderer>().Draw(points[0    ], points[4    ], col, duration, depth_test);
 			Core::GetSystem<DebugRenderer>().Draw(points[1    ], points[5    ], col, duration, depth_test);
 			Core::GetSystem<DebugRenderer>().Draw(points[2    ], points[6    ], col, duration, depth_test);
@@ -981,7 +981,7 @@ namespace idk
 			Core::GetSystem<DebugRenderer>().Draw(points[4 + 3], points[4 + 0], col, duration, depth_test);
 
 		};
-
+		size_t derp = 0;
 		for (auto& light : result.lights)
 		{
 			CameraData light_cam_info{};
@@ -1004,7 +1004,7 @@ namespace idk
 						{
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
 							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-							draw_frustum(frust, color{ 1,0,1,1 }, {});
+							draw_frustum(frust, color{ ((float)++derp)/result.camera.size(),0,(lm_i+1.0f)/light.light_maps.size(),1 }, {});
 						}
 						const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 						range.inst_mesh_render_begin = start_index;
