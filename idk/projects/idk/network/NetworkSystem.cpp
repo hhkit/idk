@@ -50,7 +50,7 @@ namespace idk
 				{
 					frame_counter = event->frame_count;
 
-					auto frames_late = static_cast<int>(client->GetRTT() / Core::GetDT().count()) / 2; // attempt to synchronize frame time with the server
+					auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
 					frame_counter += frames_late;
 				});
 		};
@@ -66,7 +66,7 @@ namespace idk
 		return static_cast<bool>(lobby);
 	}
 
-	SeqNo NetworkSystem::GetFrameNumber() const
+	SeqNo NetworkSystem::GetSequenceNumber() const
 	{
 		return frame_counter;
 	}
@@ -94,11 +94,13 @@ namespace idk
 
 	void NetworkSystem::ReceivePackets()
 	{
-		if (frame_counter != 0xFFFF)
-			++frame_counter;
-		else
-			frame_counter = 0;
-		LOG_TO(LogPool::NETWORK, "Frame: %d ", (int) frame_counter);
+		if (lobby || client)
+		{
+			if (frame_counter != 0xFFFF)
+				++frame_counter;
+			else
+				frame_counter = 0;
+		}
 
 		if (lobby)
 		{

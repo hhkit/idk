@@ -23,9 +23,11 @@ namespace idk
 		: public Component<ElectronView>
 	{
 	public:
-		struct Master {};
-		struct Ghost {};
-		struct ClientObject {};
+		// state machines
+		struct Master {};        // master object for the server. server owns this regardless of object ownership
+		struct Ghost {};         // ghost object for clients
+		struct ClientObject {};  // when the client owns the object, the move_state is placed into clientobject
+		struct ControlObject {}; // the server holds the controlobject
 
 		ElectronView() = default;
 		ElectronView(const ElectronView&);
@@ -40,19 +42,19 @@ namespace idk
 
 		Host owner = Host::SERVER;
 
-		variant<void*, Master, Ghost, ClientObject> network_data;
+		variant<std::monostate, Master, Ghost> ghost_state;
+		variant<std::monostate, ClientObject, ControlObject> move_state;
 
 		void Setup();
 		void SetAsClientObject();
 
-		void CacheMasterValues();
 		void UpdateClient();
 		void UpdateMaster();
 		void UpdateGhost();
 		vector<string> PackMoveData();
 		vector<string> PackGhostData();
-		void UnpackGhostData(span <string> data_pack);
-		void UnpackMoveData(span <string> data_pack);
+		void UnpackGhostData(SeqNo sequence_number, span <string> data_pack);
+		void UnpackMoveData(SeqNo sequence_number, span <string> data_pack);
 
 		template<typename T>
 		ParameterImpl<T>& RegisterMember(ParameterImpl<T> param, float interp = 1.f);
@@ -68,12 +70,13 @@ namespace idk
 	{
 		real t = 1;
 		real interp_over = 1;
+		SeqNo latest_seq;
 
 		virtual void CacheCurrValue() = 0;
 		virtual bool ValueChanged() const = 0;
 		virtual void ApplyLerp(real delta_t) = 0;
 		virtual void UnpackGhost(string_view) = 0;
-		virtual void UnpackMove(string_view) = 0;
+		virtual void UnpackMove(SeqNo, string_view) = 0;
 		virtual string PackGhostData() = 0;
 		virtual string PackMoveData() = 0;
 		virtual ~BaseParameter() = default;

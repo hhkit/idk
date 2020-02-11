@@ -43,7 +43,7 @@ namespace idk
 	{
 		for (auto& elem : views)
 		{
-			if (auto* move_data = std::get_if<ElectronView::ClientObject>(&elem.network_data))
+			if (auto* move_data = std::get_if<ElectronView::ClientObject>(&elem.move_state))
 			{
 				
 				if (elem.state_mask)
@@ -51,12 +51,12 @@ namespace idk
 					LOG_TO(LogPool::NETWORK, "Sending client move message for %d", elem.network_id);
 					connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::FASTEST_GUARANTEED, [&](MoveClientMessage& msg)
 						{
+							msg.sequence_number = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 							msg.state_mask = elem.state_mask;
 							msg.network_id = elem.network_id;
 							msg.pack = elem.PackMoveData();
 						});
 				}
-				elem.CacheMasterValues();
 			}
 		}
 	}

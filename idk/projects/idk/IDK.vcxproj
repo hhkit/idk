@@ -426,6 +426,7 @@
     <ClCompile Include="network\GhostMessage.cpp" />
     <ClCompile Include="network\IDManager.cpp" />
     <ClCompile Include="network\MoveClientMessage.cpp" />
+    <ClCompile Include="network\network.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\Server.cpp" />
     <ClCompile Include="network\ServerConnectionManager.cpp" />

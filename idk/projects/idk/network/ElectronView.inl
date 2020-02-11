@@ -35,6 +35,7 @@ namespace idk
 
 		void UnpackGhost(string_view data) override
 		{
+			// if we already have the latest information, ignore the incoming info
 			if (auto deser = parse_binary<T>(data))
 			{
 				if (interp_over != 0)
@@ -51,7 +52,7 @@ namespace idk
 			}
 		}
 
-		void UnpackMove(string_view data) override
+		void UnpackMove(SeqNo seq_number, string_view data) override
 		{
 			if (auto deser = parse_binary<T>(data))
 				param.setter(param.getter() + *deser);
