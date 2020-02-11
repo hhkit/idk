@@ -3,6 +3,7 @@
 #include <core/GameObject.inl>
 #include <network/ElectronTransformView.h>
 #include <network/ElectronRigidbodyView.h>
+#include <network/NetworkSystem.h>
 namespace idk
 {
 	ElectronView::ElectronView(const ElectronView& rhs)
@@ -23,6 +24,11 @@ namespace idk
 			tfm_view->Start();
 		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
 			rb_view->Start();
+
+		for (auto& elem : parameters)
+		{
+			elem->latest_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+		}
 	}
 
 	void ElectronView::SetAsClientObject()
@@ -108,7 +114,7 @@ namespace idk
 		return pack;
 	}
 
-	void ElectronView::UnpackGhostData(span<string> data_pack)
+	void ElectronView::UnpackGhostData(SeqNo sequence_number, span<string> data_pack)
 	{
 		if (auto* ghost = std::get_if<Ghost>(&network_data))
 		{
@@ -119,13 +125,18 @@ namespace idk
 				IDK_ASSERT(param);
 				if (state_mask & (1 << i))
 				{
-					param->UnpackGhost(data_pack[count++]);
+					if (seqno_greater_than(sequence_number, param->latest_seq))
+					{
+						param->latest_seq = sequence_number;
+						param->UnpackGhost(data_pack[count]);
+					}
+					++count;
 				}
 			}
 		}
 	}
 
-	void ElectronView::UnpackMoveData(span<string> data_pack)
+	void ElectronView::UnpackMoveData(SeqNo sequence_number, span<string> data_pack)
 	{
 		if (auto* master = std::get_if<Master>(&network_data))
 		{
@@ -136,7 +147,7 @@ namespace idk
 				IDK_ASSERT(param);
 				if (state_mask & (1 << i))
 				{
-					param->UnpackMove(data_pack[count++]);
+					param->UnpackMove(sequence_number, data_pack[count++]);
 				}
 			}
 		}

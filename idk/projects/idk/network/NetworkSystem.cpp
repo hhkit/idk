@@ -66,7 +66,7 @@ namespace idk
 		return static_cast<bool>(lobby);
 	}
 
-	SeqNo NetworkSystem::GetFrameNumber() const
+	SeqNo NetworkSystem::GetSequenceNumber() const
 	{
 		return frame_counter;
 	}

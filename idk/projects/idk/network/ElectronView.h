@@ -51,8 +51,8 @@ namespace idk
 		void UpdateGhost();
 		vector<string> PackMoveData();
 		vector<string> PackGhostData();
-		void UnpackGhostData(span <string> data_pack);
-		void UnpackMoveData(span <string> data_pack);
+		void UnpackGhostData(SeqNo sequence_number, span <string> data_pack);
+		void UnpackMoveData(SeqNo sequence_number, span <string> data_pack);
 
 		template<typename T>
 		ParameterImpl<T>& RegisterMember(ParameterImpl<T> param, float interp = 1.f);
@@ -68,12 +68,13 @@ namespace idk
 	{
 		real t = 1;
 		real interp_over = 1;
+		SeqNo latest_seq;
 
 		virtual void CacheCurrValue() = 0;
 		virtual bool ValueChanged() const = 0;
 		virtual void ApplyLerp(real delta_t) = 0;
 		virtual void UnpackGhost(string_view) = 0;
-		virtual void UnpackMove(string_view) = 0;
+		virtual void UnpackMove(SeqNo, string_view) = 0;
 		virtual string PackGhostData() = 0;
 		virtual string PackMoveData() = 0;
 		virtual ~BaseParameter() = default;

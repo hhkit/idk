@@ -11,11 +11,6 @@ data:
     scale: {x: 1, y: 1, z: 1}
   - !Name 
     name: ""
-  - !RigidBody 
-    initial_velocity: {x: 0, y: 0, z: 0}
-    inv_mass: 1
-    is_kinematic: 0
-    use_gravity: 1
   - !Collider 
     bounciness: 0
     dynamic_friction: 0.6

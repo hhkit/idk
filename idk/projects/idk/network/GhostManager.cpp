@@ -51,9 +51,10 @@ namespace idk
 				if (view.state_mask)
 				{
 					LOG_TO(LogPool::NETWORK, "Sending Ghost Message for %d", view.network_id);
-					connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::RELIABLE, [&](GhostMessage& ghost_msg)
+					connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::UNRELIABLE, [&](GhostMessage& ghost_msg)
 						{
 							ghost_msg.network_id = view.network_id;
+							ghost_msg.sequence_number = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 							ghost_msg.state_mask = view.state_mask;
 							ghost_msg.pack = view.PackGhostData();
 						});
@@ -80,7 +81,7 @@ namespace idk
 
 				view->network_data = ElectronView::Ghost{};
 				view->state_mask = msg->state_mask;
-				view->UnpackGhostData(msg->pack);
+				view->UnpackGhostData(msg->sequence_number, msg->pack);
 			}
 		}
 	}

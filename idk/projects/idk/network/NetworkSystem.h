@@ -30,7 +30,7 @@ namespace idk
 		Server& GetServer() { return *lobby; }
 
 		bool IsHost();
-		SeqNo GetFrameNumber() const;
+		SeqNo GetSequenceNumber() const;
 		ConnectionManager* GetConnectionTo(Host host = Host::ANY);
 		template<typename Message, typename InstantiationFunc, typename = sfinae<std::is_invocable_v<InstantiationFunc, Message&>>>
 		void BroadcastMessage(GameChannel channel, InstantiationFunc&& func);

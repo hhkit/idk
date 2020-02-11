@@ -27,7 +27,7 @@ namespace idk
 		if (view)
 		{
 			view->state_mask = move->state_mask;
-			view->UnpackMoveData(move->pack);
+			view->UnpackMoveData(move->sequence_number, move->pack);
 		}
 	}
 }
