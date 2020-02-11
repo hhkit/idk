@@ -11,6 +11,7 @@ namespace idk
 	{
 	public:
 		NetworkID network_id;
+		SeqNo sequence_number;
 		unsigned state_mask{};
 		vector<string> pack;
 
@@ -19,6 +20,7 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_int(stream, network_id, 0, 4096);
+			serialize_int(stream, sequence_number, 0, 65535);
 			serialize_int(stream, state_mask, 0, std::numeric_limits<int>::max());
 
 			{

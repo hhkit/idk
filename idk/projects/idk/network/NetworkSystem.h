@@ -30,6 +30,7 @@ namespace idk
 		Server& GetServer() { return *lobby; }
 
 		bool IsHost();
+		SeqNo GetSequenceNumber() const;
 		ConnectionManager* GetConnectionTo(Host host = Host::ANY);
 		template<typename Message, typename InstantiationFunc, typename = sfinae<std::is_invocable_v<InstantiationFunc, Message&>>>
 		void BroadcastMessage(GameChannel channel, InstantiationFunc&& func);
@@ -57,6 +58,8 @@ namespace idk
 
 		vector<ResponseCallback> frame_start_callbacks;
 		vector<ResponseCallback> frame_end_callbacks;
+
+		SeqNo frame_counter{};
 
 		void Init() override;
 		void LateInit() override;

@@ -335,12 +335,7 @@ namespace idk
 	{
 		_result = e;
 		if (_result != FMOD_OK)
-		{
-			std::ostringstream stringStream;
-			stringStream << "FMOD error! (" << _result << ") " << FMOD_ErrorString(_result) << std::endl; //Puts string into stream
-			EXCEPTION_AudioSystem exception;
-			exception.exceptionDetails = stringStream.str();
-		}
+			LOG_WARNING_TO(LogPool::PHYS, "FMOD error! (%s)", FMOD_ErrorString(_result));
 	}
 
 	void AudioSystem::SetChannel_MASTER_Volume(const float& newVolume)

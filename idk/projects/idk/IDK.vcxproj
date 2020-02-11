@@ -51,6 +51,7 @@
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\ShadowMapPool.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h" />
+    <ClInclude Include="network\EventDataBlockFrameNumber.h" />
     <ClInclude Include="network\EventInvokeRPCMessage.h" />
     <ClInclude Include="network\EventLoadLevelMessage.h" />
     <ClInclude Include="ds\Flags.h" />
@@ -100,7 +101,7 @@
     <ClInclude Include="memory\ArenaAllocator.h" />
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
-    <ClInclude Include="multithread_control.h" />
+    <ClInclude Include="parallel\multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Address.h" />
     <ClInclude Include="network\ClassRep.h" />
@@ -426,11 +427,13 @@
     <ClCompile Include="network\GhostMessage.cpp" />
     <ClCompile Include="network\IDManager.cpp" />
     <ClCompile Include="network\MoveClientMessage.cpp" />
+    <ClCompile Include="network\network.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\Server.cpp" />
     <ClCompile Include="network\ServerConnectionManager.cpp" />
     <ClCompile Include="network\ServerMoveManager.cpp" />
     <ClCompile Include="network\SubstreamManager.cpp" />
+    <ClCompile Include="parallel\multithread_control.cpp" />
     <ClCompile Include="parallel\ThreadPool.cpp" />
     <ClCompile Include="particle\ParticleData.cpp" />
     <ClCompile Include="particle\ParticleSystem.cpp" />

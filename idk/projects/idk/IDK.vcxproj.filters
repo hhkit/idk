@@ -916,9 +916,6 @@
     <ClInclude Include="ui\RectTransform.h">
       <Filter>ui</Filter>
     </ClInclude>
-    <ClInclude Include="multithread_control.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="meta\stl_hack.h">
       <Filter>meta</Filter>
     </ClInclude>
@@ -1168,6 +1165,10 @@
     </ClInclude>
     <ClInclude Include="network\Device.h">
       <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventDataBlockFrameNumber.h" />
+    <ClInclude Include="parallel\multithread_control.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1682,6 +1683,8 @@
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="scene\SceneGraph.cpp" />
+    <ClCompile Include="parallel\multithread_control.cpp" />
+    <ClCompile Include="network\network.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

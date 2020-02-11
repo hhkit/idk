@@ -126,7 +126,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)build\game\$(Configuration)\</IntDir>
     <LibraryPath>$(SolutionDir)dep\lib\;$(SolutionDir)engine\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
-    <TargetName>editorz</TargetName>
+    <TargetName>editory</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">
     <LinkIncremental>false</LinkIncremental>
