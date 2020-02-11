@@ -55,7 +55,8 @@ namespace idk
 	private:
 		struct FlatHierarchy
 		{
-			vector<small_string<GenericHandle::index_t>> nodes;
+			small_string<GenericHandle::index_t> root;
+			vector<small_string<GenericHandle::index_t>> children;
 			vector<GenericHandle::gen_t> gens;
 		} _per_scene[MaxScene];
 

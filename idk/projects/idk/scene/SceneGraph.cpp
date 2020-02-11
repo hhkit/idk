@@ -13,12 +13,12 @@ namespace idk
 	{
         return _scene_graph && 
             (_root || _root == Handle<GameObject>{}) &&
-            _scene_graph->_per_scene[_root.scene].nodes.size() > _root.index;
+            _scene_graph->_per_scene[_root.scene].children.size() > _root.index;
 	}
 
     size_t SceneGraphHandle::GetNumChildren() const
     {
-        return _scene_graph->_per_scene[_root.scene].nodes[_root.index].size();
+        return _scene_graph->_per_scene[_root.scene].children[_root.index].size();
     }
 
     Handle<GameObject> SceneGraphHandle::GetGameObject() const
@@ -28,12 +28,12 @@ namespace idk
 
 	SceneGraphHandle::iterator SceneGraphHandle::begin() const
 	{
-        return iterator{ *this, _scene_graph->_per_scene[_root.scene].nodes[_root.index].begin() };
+        return iterator{ *this, _scene_graph->_per_scene[_root.scene].children[_root.index].begin() };
 	}
 
     SceneGraphHandle::iterator SceneGraphHandle::end() const
     {
-        return iterator{ *this, _scene_graph->_per_scene[_root.scene].nodes[_root.index].end() };
+        return iterator{ *this, _scene_graph->_per_scene[_root.scene].children[_root.index].end() };
     }
 
 
@@ -45,7 +45,7 @@ namespace idk
 
     Handle<GameObject> SceneGraphHandle::iterator::operator*() const
     {
-        return Handle<GameObject>{ *ptr, _root.gen, _root.scene };
+        return Handle<GameObject>{ *ptr, _scene_graph->_per_scene[_root.scene].gens[*ptr], _root.scene };
     }
 
     SceneGraphHandle::iterator& SceneGraphHandle::iterator::operator++()
@@ -72,22 +72,26 @@ namespace idk
     {
         for (auto& ps : _per_scene)
         {
-            ps.nodes.clear();
+            ps.children.clear();
             ps.gens.clear();
+            ps.root.clear();
         }
 
         for (const auto& o : objs)
         {
             const auto handle = o.GetHandle();
 
-            if (static_cast<size_t>(handle.index) >= _per_scene[handle.scene].nodes.size())
+            if (static_cast<size_t>(handle.index) >= _per_scene[handle.scene].children.size())
             {
-                _per_scene[handle.scene].nodes.resize(handle.index + 1);
+                _per_scene[handle.scene].children.resize(handle.index + 1);
                 _per_scene[handle.scene].gens.resize(handle.index + 1);
             }
             _per_scene[handle.scene].gens[handle.index] = handle.gen;
+
             if (const auto parent = o.Parent())
-                _per_scene[handle.scene].nodes[parent.index] += handle.index;
+                _per_scene[handle.scene].children[parent.index] += handle.index;
+            else
+                _per_scene[handle.scene].root += handle.index;
         }
     }
 

@@ -20,11 +20,11 @@ namespace idk
 		{
 			for (GenericHandle::scene_t scn = 0; scn < MaxScene; ++scn)
 			{
-				if (_per_scene->nodes.empty())
+				if (_per_scene[scn].children.empty())
 					continue;
 
 				++depth;
-				for (GenericHandle::index_t index = 0; index < _per_scene[scn].nodes.size(); ++index)
+				for (auto index : _per_scene[scn].root)
 					VisitImpl(std::forward<Visitor>(visitor), Handle<GameObject>{index, _per_scene[scn].gens[index], scn}, depth, last_depth);
 				--depth;
 			}
@@ -52,7 +52,7 @@ namespace idk
 		if (recurse)
 		{
 			++depth;
-			for (auto index : _per_scene[root.scene].nodes[root.index])
+			for (auto index : _per_scene[root.scene].children[root.index])
 				VisitImpl(std::forward<Visitor>(visitor), Handle<GameObject>{index, _per_scene[root.scene].gens[index], root.scene}, depth, last_depth);
 			--depth;
 		}

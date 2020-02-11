@@ -106,14 +106,14 @@ namespace idk
 
 	void SceneManager::DestroyQueuedObjects(span<GameObject> objs)
 	{
-		GameState::GetGameState().SortObjectsOfType<GameObject>(
-			[](const auto& lhs, const auto& rhs)
-			{
-				return lhs.Transform()->Depth() == rhs.Transform()->Depth()
-					? lhs.GetHandle().id < rhs.GetHandle().id
-					: lhs.Transform()->Depth() < rhs.Transform()->Depth();
-			}
-		);
+		//GameState::GetGameState().SortObjectsOfType<GameObject>(
+		//	[](const auto& lhs, const auto& rhs)
+		//	{
+		//		return lhs.Transform()->Depth() == rhs.Transform()->Depth()
+		//			? lhs.GetHandle().id < rhs.GetHandle().id
+		//			: lhs.Transform()->Depth() < rhs.Transform()->Depth();
+		//	}
+		//);
 
 		for (auto& elem : objs)
 		{
