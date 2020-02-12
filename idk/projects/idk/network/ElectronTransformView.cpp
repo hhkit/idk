@@ -28,11 +28,13 @@ namespace idk
 		if (sync_position)
 		{
 			ParameterImpl<vec3> param( tfm, &Transform::position);
+			/*
 			if (auto rb = GetGameObject()->GetComponent<RigidBody>())
 			{
 				param.getter = [rb]()-> vec3 { return rb->position(); };
 				param.setter = [rb](const vec3& new_val) {rb->position(new_val); };
 			}
+			*/
 			param.send_condition = 
 				[dist = this->send_threshold * this->send_threshold](const vec3& lhs, const vec3& rhs) ->bool
 			{

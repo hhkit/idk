@@ -177,16 +177,19 @@ namespace idk
                     rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz - rigidbody.initial_velocity * dt;
                     rigidbody.initial_velocity = vec3{};
                 }
-                else if (!rigidbody.is_kinematic)
+				else
 				{
-					const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
+					if (!rigidbody.is_kinematic)
+					{
+						const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
 
-					// verlet integrate towards new position
-					//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-					auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
-					rigidbody._accum_accel = vec3{};
-					rigidbody._prev_pos = curr_pos;
-                    rigidbody._pred_tfm[3].xyz = new_pos;
+						// verlet integrate towards new position
+						//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
+						auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+						rigidbody._accum_accel = vec3{};
+						rigidbody._prev_pos = curr_pos;
+						rigidbody._pred_tfm[3].xyz = new_pos;
+					}
 				}
 			}
 		};

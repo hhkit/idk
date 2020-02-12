@@ -21,8 +21,9 @@ namespace idk
 			return;
 
 		auto rb = GetGameObject()->GetComponent<RigidBody>();
-		if (sync_velocity)
+		if (sync_velocity && std::get_if<ElectronView::Ghost>(&view->ghost_state))
 		{
+			rb->is_kinematic = true;
 			//ParameterImpl<vec3> param;
 			//param.getter = [rb]() -> vec3 { return rb->velocity(); };
 			//param.setter = [rb](const vec3& v) -> void { rb->velocity(v);  };
