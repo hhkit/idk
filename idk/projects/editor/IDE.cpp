@@ -327,11 +327,14 @@ namespace idk
 		//}
         for (const auto go : _selected_objects.game_objects)
         {
-			if (go)
+			if (!go)
+				return;
+
+			Core::GetSystem<SceneManager>().FetchSceneGraphFor(go).Visit([](Handle<GameObject> h, int)
 			{
-				if (const auto col = go->GetComponent<Collider>())
+				for(const auto col : h->GetComponents<Collider>())
 					Core::GetSystem<PhysicsSystem>().DrawCollider(*col);
-			}
+			});
         }
 		
 		for (auto& i : ige_windows)
