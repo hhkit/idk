@@ -23,7 +23,7 @@ namespace idk
 		auto rb = GetGameObject()->GetComponent<RigidBody>();
 		if (sync_velocity)
 		{
-			ParameterImpl<vec3> param;
+			ParameterImpl<vec3> param{"Velocity"};
 			param.getter = [rb]() -> vec3 { return rb->velocity(); };
 			param.setter = [rb](const vec3& v) -> void { rb->velocity(v);  };
 			view->RegisterMember(std::move(param), 0);

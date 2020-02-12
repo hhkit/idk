@@ -27,7 +27,7 @@ namespace idk
 		auto tfm = GetGameObject()->Transform();
 		if (sync_position)
 		{
-			ParameterImpl<vec3> param(tfm, &Transform::position);
+			ParameterImpl<vec3> param("Position", tfm, &Transform::position);
 			if (auto rb = GetGameObject()->GetComponent<RigidBody>())
 			{
 				param.getter = [rb]()-> vec3 { return rb->position(); };
@@ -41,8 +41,8 @@ namespace idk
 			view->RegisterMember(std::move(param), interp_over_seconds);
 		}
 		if (sync_rotation)
-			view->RegisterMember(ParameterImpl<quat>(tfm, &Transform::rotation), 0.1f);
+			view->RegisterMember(ParameterImpl<quat>("Rotation", tfm, &Transform::rotation), 0.1f);
 		if (sync_scale)
-			view->RegisterMember(ParameterImpl<vec3>(tfm, &Transform::scale), 0.2f);
+			view->RegisterMember(ParameterImpl<vec3>("Scale", tfm, &Transform::scale), 0.2f);
 	}
 }

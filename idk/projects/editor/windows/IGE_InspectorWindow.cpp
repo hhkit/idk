@@ -1448,6 +1448,38 @@ namespace idk {
         ImGui::PopFont();
     }
 
+    template<>
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronView> c_ev)
+    {
+        switch (auto val = c_ev->owner)
+        {
+        case Host::ME: ImGui::Text("Owner: Me"); break;
+        case Host::SERVER: ImGui::Text("Owner: SERVER"); break;
+        default: ImGui::Text("Owner: %d", (int) val); break;
+        }
+
+
+        for (auto [name, param] : c_ev->GetParameters())
+        {
+            ImGui::Text(name.data());
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
+            if (param.is<vec3>())
+            {
+                auto v = param.get<vec3>();
+                ImGui::DragFloat3(name.data(), v.data());
+            }
+
+            if (param.is<quat>())
+            {
+                auto euler = euler_angles{ param.get<quat>() };
+                auto v = vec3{ euler.x.value, euler.y.value, euler.z.value };
+                ImGui::DragFloat3(name.data(), v.data());
+            }
+            ImGui::NewLine();
+        }
+    }
+
 	void IGE_InspectorWindow::DisplayComponent(GenericHandle component)
 	{
 		//COMPONENT DISPLAY

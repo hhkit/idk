@@ -52,6 +52,7 @@
     enabled: 1
     far_plane: 100
     field_of_view: {value: 0.7853982}
+    gamma: 2.2
     is_orthographic: 0
     layer_mask: {mask: 4294967295}
     near_plane: 0.1
@@ -78,7 +79,7 @@
       a: 10
       b: 84
       c: 42
-      d: 102
+      d: 103
   - !MonoBehavior 
     enabled: 1
     script_data: !NetworkHostTester 
@@ -147,8 +148,6 @@
       value: !string NewPrefab
     prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
     removed_components: []
-  - !ElectronRigidbodyView 
-    sync_velocity: 1
 - !21474902016 
   - active: 1
   - !PrefabInstance 
@@ -156,23 +155,7 @@
     overrides: 
     - component_name: Transform
       component_nth: 0
-      property_path: position
-      value: !vec3 {x: 0, y: 0, z: 0}
-    - component_name: Transform
-      component_nth: 0
-      property_path: rotation
-      value: !quat 
-        w: -4.371139e-08
-        x: 0
-        y: 1
-        z: 0
-    - component_name: Transform
-      component_nth: 0
       property_path: parent
       value: !Handle<GameObject> {id: 17179934720}
-    - component_name: Name
-      component_nth: 0
-      property_path: name
-      value: !string ""
     prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
     removed_components: []

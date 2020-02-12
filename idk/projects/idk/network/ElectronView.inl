@@ -4,6 +4,7 @@
 #include <math/arith.inl>
 #include <ds/result.inl>
 #include <serialize/binary.inl>
+#include <reflect/reflect.inl>
 
 namespace idk
 {
@@ -81,12 +82,18 @@ namespace idk
 			else
 				return { };
 		}
+
+		reflect::dynamic GetParam() override
+		{
+			return param.getter();
+		}
 	};
 
 	template<typename T>
-	inline ParameterImpl<T>& ElectronView::RegisterMember(ParameterImpl<T> param, float interp)
+	inline ParameterImpl<T>& ElectronView::RegisterMember(string_view name, ParameterImpl<T> param, float interp)
 	{
 		auto ptr = std::make_unique<DerivedParameter<T>>(param);
+		ptr->name = string{ name };
 		auto& impl = ptr->param;
 		parameters.emplace_back(std::move(ptr))->interp_over = interp;
 		return impl;

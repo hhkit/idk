@@ -56,8 +56,10 @@ namespace idk
 		void UnpackGhostData(SeqNo sequence_number, span <string> data_pack);
 		void UnpackMoveData(SeqNo sequence_number, span <string> data_pack);
 
+		hash_table<string, reflect::dynamic> GetParameters() const;
+
 		template<typename T>
-		ParameterImpl<T>& RegisterMember(ParameterImpl<T> param, float interp = 1.f);
+		ParameterImpl<T>& RegisterMember(string_view name, ParameterImpl<T> param, float interp = 1.f);
 	private:
 		struct BaseParameter;
 		template<typename T>
@@ -68,6 +70,7 @@ namespace idk
 
 	struct ElectronView::BaseParameter
 	{
+		string param_name;
 		real t = 1;
 		real interp_over = 1;
 		SeqNo latest_seq;
@@ -79,12 +82,12 @@ namespace idk
 		virtual void UnpackMove(SeqNo, string_view) = 0;
 		virtual string PackGhostData() = 0;
 		virtual string PackMoveData() = 0;
+		virtual reflect::dynamic GetParam() = 0;
 		virtual ~BaseParameter() = default;
 	};
 	template<typename T>
 	template<typename Hnd, typename Mem>
 	inline ParameterImpl<T>::ParameterImpl(Handle<Hnd> obj, T(Mem::* ptr))
-		: ParameterImpl{}
 	{
 		getter = [obj, ptr]()->T { return std::invoke(ptr, *obj); };
 		setter = [obj, ptr](const T& val) { std::invoke(ptr, *obj) = val; };

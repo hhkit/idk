@@ -83,6 +83,7 @@ namespace idk {
 		template<> void DisplayComponentInner(Handle<TextMesh> c_font);	
 		template<> void DisplayComponentInner(Handle<Text> c_text);	
         template<> void DisplayComponentInner(Handle<ParticleSystem> c_ps);
+        template<> void DisplayComponentInner(Handle<ElectronView> c_ev);
 
 		void MenuItem_RemoveComponent(GenericHandle i);
 		void MenuItem_CopyComponent(GenericHandle i);

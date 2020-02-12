@@ -20,10 +20,10 @@ namespace idk
 	
 	void ElectronView::Setup()
 	{
-		if (auto tfm_view = GetGameObject()->GetComponent<ElectronTransformView>())
-			tfm_view->Start();
 		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
 			rb_view->Start();
+		if (auto tfm_view = GetGameObject()->GetComponent<ElectronTransformView>())
+			tfm_view->Start();
 
 		for (auto& elem : parameters)
 		{
@@ -151,6 +151,15 @@ namespace idk
 				}
 			}
 		}
+	}
+
+	hash_table<string, reflect::dynamic> ElectronView::GetParameters() const
+	{
+		auto retval = hash_table<string, reflect::dynamic>();
+		retval.reserve(parameters.size());
+		for (auto& elem : parameters)
+			retval.emplace(elem->param_name, elem->GetParam());
+		return retval;
 	}
 
 	void ElectronView::UpdateClient()

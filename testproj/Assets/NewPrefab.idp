@@ -49,7 +49,7 @@ data:
     sync_rotation: 1
     sync_scale: 0
   - !ElectronRigidbodyView 
-    sync_velocity: 0
+    sync_velocity: 1
   - !MonoBehavior 
     enabled: 1
     script_data: !PlayerController 
