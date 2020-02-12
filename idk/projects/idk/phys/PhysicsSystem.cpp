@@ -261,7 +261,7 @@ namespace idk
             {
 				d_info.predicted_shape = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, d_info.collider->shape);
 				d_info.broad_phase = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, d_info.collider->shape);
-                const auto& vel = d_info.collider->_rigidbody->velocity();
+                auto vel = d_info.collider->_rigidbody->velocity() / dt;
 				d_info.broad_phase.grow(vel);
 				d_info.broad_phase.grow(-vel);
             }

@@ -161,8 +161,13 @@ namespace idk
 		LOG_TO(LogPool::NETWORK, "Received instantiate prefab event");
 		auto obj = message->prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
+
+		// set to ghost state
+		ev->ghost_state = ElectronView::Ghost{};
+
 		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message->id, ev));
 		ev->Setup();
+
 		auto& tfm = *obj->Transform();
 		if (message->use_position)
 			tfm.position = message->position;

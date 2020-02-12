@@ -26,7 +26,7 @@ namespace idk
 	}
 	vec3 RigidBody::velocity() const
 	{
-		return GetGameObject()->Transform()->GlobalPosition() - _prev_pos;
+		return (GetGameObject()->Transform()->GlobalPosition() - _prev_pos) * Core::GetDT().count();
 	}
 	void RigidBody::velocity(const vec3& new_vel)
 	{
