@@ -136,7 +136,6 @@ Variables:
 
 namespace idk
 {
-	//FMOD_RESULT AudioSystem::_result = FMOD_OK; //Static var
 
 	AudioSystem::AudioSystem() {}
 
@@ -227,14 +226,7 @@ namespace idk
 
 	void AudioSystem::Update(span<AudioSource> audio_sources)
 	{
-		for (int i = 0; i < _max_channels; ++i) {
-			FMOD::Channel* channelPtr;
-			_result = _Core_System->getChannel(i, &channelPtr);
 
-			if (_result == FMOD_OK && channelPtr) {
-				ParseFMOD_RESULT(channelPtr->setPaused(_system_paused));
-			}
-		}
 
 		//Update all the audio source here too!
 		for (auto& elem : audio_sources)
@@ -276,11 +268,18 @@ namespace idk
 	}
 	void AudioSystem::StopAllAudio()
 	{
-		for (int i = 0; i < _max_channels; ++i) {
+		int numOfChannelsPlaying = 0; //A gate to reduce calls
+		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numOfChannelsPlaying));
+
+
+		for (int i = 0; i < _max_channels && numOfChannelsPlaying; ++i) {
 			FMOD::Channel* channelPtr;
 			_result = _Core_System->getChannel(i, &channelPtr);
 
-			if (_result == FMOD_OK && channelPtr) {
+			bool isPlaying = false;
+			_result = channelPtr->isPlaying(&isPlaying); //This channel pointer can never be null after calling getChannel! It can be invalid, so calling isPlaying can result in invalid handle, but its ok
+
+			if (_result == FMOD_OK && isPlaying) {
 				ParseFMOD_RESULT(channelPtr->stop());
 			}
 		}
@@ -289,7 +288,25 @@ namespace idk
 	{
 		_system_paused = is_system_paused;
 
+		int numOfChannelsPlaying = 0; //A gate to reduce calls
+		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numOfChannelsPlaying));
+
+		for (int i = 0; i < _max_channels && numOfChannelsPlaying; ++i) {
+			FMOD::Channel* channelPtr = nullptr;
+			_result = _Core_System->getChannel(i, &channelPtr); //getChannel does not point to a nullptr, rather an allocated empty space in FMOD
+
+			bool isPlaying = false;
+			_result = channelPtr->isPlaying(&isPlaying); //This channel pointer can never be null after calling getChannel! It can be invalid, so calling isPlaying can result in invalid handle, but its ok
+
+			if (_result == FMOD_OK && isPlaying) {
+				ParseFMOD_RESULT(channelPtr->setPaused(_system_paused));
+				--numOfChannelsPlaying;
+			}
+		}
+
+
 	}
+
 	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
 	{
 		//Zero denotes the listener id. Since there is only one listener, this is always zero.
@@ -334,9 +351,16 @@ namespace idk
 	void AudioSystem::ParseFMOD_RESULT(FMOD_RESULT e)
 	{
 		_result = e;
-		if (_result != FMOD_OK)
-			LOG_WARNING_TO(LogPool::PHYS, "FMOD error! (%s)", FMOD_ErrorString(_result));
+		ParseFMOD_RESULT_2(_result);
 	}
+
+
+	void AudioSystem::ParseFMOD_RESULT_2(FMOD_RESULT e)
+	{
+		if (e != FMOD_OK)
+			LOG_WARNING_TO(LogPool::AUDIO, "FMOD error! (%s)", FMOD_ErrorString(_result));
+	}
+
 
 	void AudioSystem::SetChannel_MASTER_Volume(const float& newVolume)
 	{
