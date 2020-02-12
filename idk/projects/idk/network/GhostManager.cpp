@@ -76,10 +76,9 @@ namespace idk
 			{
 				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))
 					return;
-				if (std::get_if<ElectronView::ControlObject>(&view->move_state))
+				if (std::get_if<ElectronView::ClientObject>(&view->move_state))
 					return;
 
-				view->ghost_state = ElectronView::Ghost{};
 				view->state_mask = msg->state_mask;
 				view->UnpackGhostData(msg->sequence_number, msg->pack);
 			}
