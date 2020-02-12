@@ -643,7 +643,7 @@ namespace idk
 
     void PhysicsSystem::DrawCollider(const Collider& collider) const
     {
-		const float a = collider.enabled ? 1.0f : 0.5f;
+		const float a = collider.enabled ? 1.0f : 0.25f;
 		const auto col = (collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }) * a;
         std::visit([&](const auto& shape)
         {
