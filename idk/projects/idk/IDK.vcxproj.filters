@@ -1169,6 +1169,9 @@
     <ClInclude Include="network\Device.h">
       <Filter>network</Filter>
     </ClInclude>
+    <ClInclude Include="network\NetworkTuple.inl">
+      <Filter>network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
