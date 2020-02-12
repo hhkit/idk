@@ -7,11 +7,14 @@
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 
+#include <phys/RigidBody.h>
+
 #include <network/ConnectionManager.inl>
 #include <network/TestMessage.h>
 #include <network/NetworkSystem.inl>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
+#include <network/ElectronRigidbodyView.h>
 #include <network/ElectronTransformView.h>
 #include <network/EventLoadLevelMessage.h>
 #include <network/EventInstantiatePrefabMessage.h>
@@ -118,6 +121,16 @@ namespace idk
 		}
 
 		transfer->owner = target_host;
+		transfer->move_state = ElectronView::ControlObject{};
+
+		auto go = transfer->GetGameObject();
+
+		if (auto e_rb = go->GetComponent<ElectronRigidbodyView>())
+		{
+			if (e_rb->sync_velocity)
+				if (const auto rb = go->GetComponent<RigidBody>())
+					rb->is_kinematic = true;
+		}
 
 		conn_man->CreateAndSendMessage<EventTransferOwnershipMessage>(GameChannel::RELIABLE, 
 			[&](EventTransferOwnershipMessage& msg)
