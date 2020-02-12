@@ -23,8 +23,6 @@
 #include <idk.h>
 
 #include "FMOD/core/fmod_common.h" //FMOD Enums. This is included in the header file only because this is the only thing that should be exposed.
-#include <map> //map
-#include <list> //list. TEMPORARY TODO. Will switch to a faster container.
 #include <core/Handle.h>
 
 //External Forward Declarations
@@ -139,6 +137,7 @@ namespace idk
 		Handle<AudioListener> _mainListener;
 
 		void ParseFMOD_RESULT(FMOD_RESULT);			//All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
+		void ParseFMOD_RESULT_2(FMOD_RESULT);		//This does not update _result
 
 	};
 

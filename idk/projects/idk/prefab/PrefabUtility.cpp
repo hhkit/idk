@@ -9,6 +9,7 @@
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <ds/slow_tree.inl>
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl> //Assign
@@ -869,8 +870,8 @@ namespace idk
         prefab_inst.overrides.clear();
 
         vector<Handle<GameObject>> objs;
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
-        tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
+        tree.Visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
         // find missing objs
         for (int i = 0; i < prefab_inst.prefab->data.size(); ++i)
@@ -1033,8 +1034,8 @@ namespace idk
         const auto& prefab = prefab_inst_handle->prefab;
 
         vector<Handle<GameObject>> objs;
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
-        tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
+        tree.Visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
         // find missing objs
         for (int i = 0; i < prefab->data.size(); ++i)

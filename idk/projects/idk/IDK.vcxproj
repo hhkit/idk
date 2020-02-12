@@ -193,7 +193,7 @@
     <ClInclude Include="res\SaveableResource.h" />
     <ClInclude Include="res\SaveableResourceLoader.h" />
     <ClInclude Include="proj\ProjectManager.h" />
-    <ClInclude Include="scene\SceneGraphBuilder.h" />
+    <ClInclude Include="scene\SceneGraph.h" />
     <ClInclude Include="core\ComponentTags.h" />
     <ClInclude Include="ds\circular_buffer.h" />
     <ClInclude Include="ds\compressed_pair.h" />
@@ -366,7 +366,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
-    <ClCompile Include="ColorPickRequest.cpp" />
+    <ClCompile Include="gfx\ColorPickRequest.cpp" />
     <ClCompile Include="common\Layer.cpp" />
     <ClCompile Include="common\LayerManager.cpp" />
     <ClCompile Include="common\Name.cpp" />
@@ -459,7 +459,7 @@
     </ClCompile>
     <ClCompile Include="proj\ProjectManager.cpp" />
     <ClCompile Include="res\ResourceMeta.cpp" />
-    <ClCompile Include="scene\SceneGraphBuilder.cpp" />
+    <ClCompile Include="scene\SceneGraph.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
@@ -596,6 +596,7 @@
     <None Include="res\ResourceMeta.inl" />
     <None Include="res\ResourceUtils.inl" />
     <None Include="res\SaveableResourceLoader.inl" />
+    <None Include="scene\SceneGraph.inl" />
     <None Include="scene\Scene.inl" />
     <None Include="core\SystemManager.inl" />
     <None Include="event\Dispatcher.inl" />

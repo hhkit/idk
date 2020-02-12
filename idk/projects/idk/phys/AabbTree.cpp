@@ -5,6 +5,7 @@
 #include <core/GameObject.h>
 #include <phys/PhysicsSystem.h>
 #include <math/shapes/ray.h>
+#include <ds/result.inl>
 #include <stack>
 namespace idk
 {

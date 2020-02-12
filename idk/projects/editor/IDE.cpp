@@ -33,6 +33,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <opengl/system/OpenGLGraphicsSystem.h>
 
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <script/ScriptSystem.h>
 
 // resource importing
@@ -627,12 +628,12 @@ namespace idk
 			newObject.vector_of_components.emplace_back((*c).copy());
 
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-		SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(i);
+		auto children = sceneManager.FetchSceneGraphFor(i);
 
 		if (children) {
 
 			//If there is no children, it will stop
-			children->visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
+			children.Visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
 				(void)depth;
 
 				//Skip parent

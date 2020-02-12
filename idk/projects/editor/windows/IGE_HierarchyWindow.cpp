@@ -30,6 +30,7 @@ of the editor.
 #include <IDE.h>		//IDE
 #include <iostream>
 #include <res/ResourceHandle.inl>
+#include <scene/SceneGraph.inl>
 
 namespace idk {
 
@@ -146,7 +147,7 @@ namespace idk {
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
+		auto sceneGraph = sceneManager.FetchSceneGraph();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
 		//ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
 		
@@ -164,7 +165,7 @@ namespace idk {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
 
 		//Display gameobjects
-		sceneGraph.visit([&](const Handle<GameObject> handle, int depth) -> bool 
+		sceneGraph.Visit([&](const Handle<GameObject> handle, int depth) -> bool 
 		{
 			if (depth > 0) {
 				for (int i = 0; i < depth; ++i)
@@ -183,8 +184,8 @@ namespace idk {
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
-			if (children->size() == 0)
+			auto children = sceneManager.FetchSceneGraphFor(handle);
+			if (children.GetNumChildren() == 0)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
 
 			bool is_its_child_been_selected = false;
@@ -454,21 +455,21 @@ namespace idk {
 		scroll_focused_gameObject = gameObject;
 	}
 
-	bool IGE_HierarchyWindow::CheckIfChildrenIsSelected(SceneManager::SceneGraph* childrenGraph, Handle<GameObject> comparingGameObject)
+	bool IGE_HierarchyWindow::CheckIfChildrenIsSelected(SceneGraphHandle childrenGraph, Handle<GameObject> comparingGameObject)
 	{
 		if (!childrenGraph)
 			return false;
-		if (childrenGraph->size() == 0)
+		if (childrenGraph.GetNumChildren() == 0)
 			return false;
 
 		bool is_child_selected = false;
-		for (auto j = childrenGraph->begin(); j != childrenGraph->end(); ++j) {
-			if ((*j).obj == comparingGameObject) {
+		for (auto j = childrenGraph.begin(); j != childrenGraph.end(); ++j) {
+			if (*j == comparingGameObject) {
 				is_child_selected = true;
 			}
 			else {
 				SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-				is_child_selected = CheckIfChildrenIsSelected(sceneManager.FetchSceneGraphFor((*j).obj), comparingGameObject);
+				is_child_selected = CheckIfChildrenIsSelected(sceneManager.FetchSceneGraphFor(*j), comparingGameObject);
 			}
 
 			if (is_child_selected)

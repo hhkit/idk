@@ -544,8 +544,9 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetParent",  void, Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
 			{
+				auto old_parent = h->parent;
 				h->SetParent(parent_gameobject, preserve_global);
-				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), parent_gameobject);
+				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), old_parent);
 			}
 		BIND_END();
 
@@ -555,16 +556,17 @@ namespace idk::mono
 
 			auto go_klass = Core::GetSystem<mono::ScriptSystem>().Environment().Type("GameObject");
 
-			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg->size() : 0);
+			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg.GetNumChildren() : 0);
 			if (sg)
 			{
-				auto sz = sg->size();
-				auto ptr = sg->begin();
+				auto sz = sg.GetNumChildren();
+				auto ptr = sg.begin();
 				for (int i = 0; i < sz; ++i)
 				{
 					auto mo = mono_object_new(mono_domain_get(), go_klass->Raw());
 					auto method = mono_class_get_method_from_name(go_klass->Raw(), ".ctor", 1);
-					void* args[] = { &ptr++->obj.id };
+					auto child_go = *ptr++;
+					void* args[] = { &child_go.id };
 					mono_runtime_invoke(method, mo, args, nullptr);
 					mono_array_setref(retval, i, mo);
 				}
