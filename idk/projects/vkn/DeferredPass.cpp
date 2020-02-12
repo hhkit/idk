@@ -26,6 +26,7 @@
 #include <res/ResourceHandle.inl>
 #include <res/ResourceMeta.inl>
 #include <ds/result.inl>
+#include "renderpasses\DeferredPass.h"
 
 #if 1
 namespace idk::vkn
@@ -883,3 +884,6 @@ namespace idk::vkn
 	}
 }
 #endif
+
+//returns color and depth
+

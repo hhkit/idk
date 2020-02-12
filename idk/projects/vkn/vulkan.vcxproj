@@ -334,6 +334,7 @@
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
     <ClInclude Include="DescriptorUpdateData.h" />
+    <ClInclude Include="DrawSet.h" />
     <ClInclude Include="draw_call.h" />
     <ClInclude Include="FontRenderer.h" />
     <ClInclude Include="FontVertexBindings.h" />
@@ -361,6 +362,7 @@
     <ClInclude Include="RenderContext.h" />
     <ClInclude Include="RenderInterface.h" />
     <ClInclude Include="RenderPassCreateInfoBundle.h" />
+    <ClInclude Include="renderpasses\DeferredPasses.h" />
     <ClInclude Include="RenderPassInfo.h" />
     <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderPassObj.h" />
@@ -449,6 +451,7 @@
     <ClCompile Include="DescriptorPoolsManager.cpp" />
     <ClCompile Include="DescriptorsManager.cpp" />
     <ClCompile Include="DescriptorUpdateData.cpp" />
+    <ClCompile Include="DrawSet.cpp" />
     <ClCompile Include="draw_call.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
     <ClCompile Include="FontVertexBindings.cpp" />
@@ -470,6 +473,7 @@
     <ClCompile Include="ProcessedRO.cpp" />
     <ClCompile Include="RegisterVulkanFactories.cpp" />
     <ClCompile Include="RenderBindings.cpp" />
+    <ClCompile Include="renderpasses\DeferredPasses.cpp" />
     <ClCompile Include="RenderPassInfo.cpp" />
     <ClCompile Include="RenderPassObj.cpp" />
     <ClCompile Include="RenderState.cpp" />

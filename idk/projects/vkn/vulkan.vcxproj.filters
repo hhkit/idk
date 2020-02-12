@@ -341,6 +341,12 @@
     <ClInclude Include="UnlitBindings.h">
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
+    <ClInclude Include="DrawSet.h">
+      <Filter>render\new_testament</Filter>
+    </ClInclude>
+    <ClInclude Include="renderpasses\DeferredPasses.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -602,6 +608,10 @@
     <ClCompile Include="UnlitBindings.cpp">
       <Filter>render\new_testament\Bindings</Filter>
     </ClCompile>
+    <ClCompile Include="DrawSet.cpp" />
+    <ClCompile Include="renderpasses\DeferredPasses.cpp">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -657,6 +667,9 @@
     </Filter>
     <Filter Include="render\new_testament\Bindings">
       <UniqueIdentifier>{d0301621-96fe-4d74-b97f-e269c87f892e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\new_testament\Renderpasses">
+      <UniqueIdentifier>{6eda1c5e-209c-4d33-b915-038c8fb91f97}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
