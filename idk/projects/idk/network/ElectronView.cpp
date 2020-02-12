@@ -20,10 +20,10 @@ namespace idk
 	
 	void ElectronView::Setup()
 	{
-		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
-			rb_view->Start();
 		if (auto tfm_view = GetGameObject()->GetComponent<ElectronTransformView>())
 			tfm_view->Start();
+		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
+			rb_view->Start();
 
 		for (auto& elem : parameters)
 		{

@@ -26,11 +26,11 @@ namespace idk
 	}
 	vec3 RigidBody::velocity() const
 	{
-		return (GetGameObject()->Transform()->GlobalPosition() - _prev_pos) * Core::GetDT().count();
+		return (GetGameObject()->Transform()->GlobalPosition() - _prev_pos) / Core::GetDT().count();
 	}
 	void RigidBody::velocity(const vec3& new_vel)
 	{
-		_prev_pos = GetGameObject()->Transform()->GlobalPosition() - new_vel / Core::GetDT().count();
+		_prev_pos = GetGameObject()->Transform()->GlobalPosition() - new_vel * Core::GetDT().count();
 	}
 	bool RigidBody::sleeping() const
 	{
