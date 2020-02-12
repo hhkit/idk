@@ -36,6 +36,7 @@ namespace idk
 
 	void ElectronView::SetAsClientObject()
 	{
+		ghost_state = std::monostate{};
 		move_state = ElectronView::ClientObject{};
 		if (auto e_rb = GetGameObject()->GetComponent<ElectronRigidbodyView>())
 		{
