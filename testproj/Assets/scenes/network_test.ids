@@ -101,6 +101,9 @@
     scale: {x: 29.087101, y: 0.7105797, z: 29.087101}
   - !Name 
     name: ""
+  - !Tag futanari
+  - !Layer 
+    index: 0
   - !Collider 
     bounciness: 0
     dynamic_friction: 0.6
