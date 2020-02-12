@@ -643,7 +643,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::RigidBodyGetVelocity",  vec3, Handle<RigidBody> rb)
 		{
-			return rb->velocity() * Core::GetDT().count();
+			return rb->velocity();
 		}
 		BIND_END();
 

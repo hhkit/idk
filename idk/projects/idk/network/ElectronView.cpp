@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "ElectronView.inl"
 #include <core/GameObject.inl>
+
+#include <phys/RigidBody.h>
+
 #include <network/ElectronTransformView.h>
 #include <network/ElectronRigidbodyView.h>
 #include <network/NetworkSystem.h>
@@ -33,7 +36,14 @@ namespace idk
 
 	void ElectronView::SetAsClientObject()
 	{
+		ghost_state = std::monostate{};
 		move_state = ElectronView::ClientObject{};
+		if (auto e_rb = GetGameObject()->GetComponent<ElectronRigidbodyView>())
+		{
+			if (e_rb->sync_velocity)
+				if (const auto rb = GetGameObject()->GetComponent<RigidBody>())
+					rb->is_kinematic = false;
+		}
 		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
 			auto& param = parameters[i];
@@ -151,6 +161,15 @@ namespace idk
 				}
 			}
 		}
+	}
+
+	hash_table<string, reflect::dynamic> ElectronView::GetParameters() const
+	{
+		auto retval = hash_table<string, reflect::dynamic>();
+		retval.reserve(parameters.size());
+		for (auto& elem : parameters)
+			retval.emplace(elem->param_name, elem->GetParam());
+		return retval;
 	}
 
 	void ElectronView::UpdateClient()

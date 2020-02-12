@@ -11,6 +11,11 @@ data:
     scale: {x: 1, y: 1, z: 1}
   - !Name 
     name: ""
+  - !RigidBody 
+    initial_velocity: {x: 0, y: 0, z: 0}
+    inv_mass: 1
+    is_kinematic: 0
+    use_gravity: 1
   - !Collider 
     bounciness: 0
     dynamic_friction: 0.6
@@ -37,12 +42,14 @@ data:
   - !ElectronView 
     network_id: 0
   - !ElectronTransformView 
-    interp_over_seconds: 0.01
+    interp_over_seconds: 0.1
     send_threshold: 0.1
     snap_threshold: 0.5
     sync_position: 1
     sync_rotation: 1
     sync_scale: 0
+  - !ElectronRigidbodyView 
+    sync_velocity: 1
   - !MonoBehavior 
     enabled: 1
     script_data: !PlayerController 

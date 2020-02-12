@@ -4,6 +4,7 @@
 #include <math/arith.inl>
 #include <ds/result.inl>
 #include <serialize/binary.inl>
+#include <reflect/reflect.inl>
 
 namespace idk
 {
@@ -60,9 +61,14 @@ namespace idk
 
 		void ApplyLerp(real delta_t) override
 		{
-			delta_t /= interp_over;
-			t = std::min(t + delta_t, real{ 1 });
-			param.setter(param.interpolator(start_value, end_value, t));
+			if (interp_over != 0 && param.interpolator)
+			{
+				delta_t /= interp_over;
+				t = std::min(t + delta_t, real{ 1 });
+				param.setter(param.interpolator(start_value, end_value, t));
+			}
+			else
+				param.setter(end_value);
 		}
 
 		string PackMoveData() override
@@ -81,12 +87,18 @@ namespace idk
 			else
 				return { };
 		}
+
+		reflect::dynamic GetParam() override
+		{
+			return param.getter();
+		}
 	};
 
 	template<typename T>
-	inline ParameterImpl<T>& ElectronView::RegisterMember(ParameterImpl<T> param, float interp)
+	inline ParameterImpl<T>& ElectronView::RegisterMember(string_view name, ParameterImpl<T> param, float interp)
 	{
 		auto ptr = std::make_unique<DerivedParameter<T>>(param);
+		ptr->param_name = string{ name };
 		auto& impl = ptr->param;
 		parameters.emplace_back(std::move(ptr))->interp_over = interp;
 		return impl;
