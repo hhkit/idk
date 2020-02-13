@@ -119,6 +119,14 @@ namespace idk::vkn
 		auto uniforms = _uniform_manager.FinalizeCurrent(_uniform_sets);
 		AddToBatch(_dc_builder.end(di, uniforms));
 	}
+	void RenderTask::Copy(CopyCommand&& copy)
+	{
+		_copy_commands.emplace_back(std::move(copy));
+	}
+	void RenderTask::Copy(const CopyCommand& copy)
+	{
+		_copy_commands.emplace_back(copy);
+	}
 	void RenderTask::SetBufferDescriptions(span<buffer_desc> descriptions)
 	{
 		StartNewBatch();
@@ -238,6 +246,7 @@ namespace idk::vkn
 	{
 		//AddToBatch(_current_batch);
 		StartNewBatch();//flush the current batch
+		ProcessCopies(render_bundle);
 		auto cmd_buffer = render_bundle._cmd_buffer;
 		auto& d_manager = render_bundle._d_manager;
 		vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
@@ -385,6 +394,39 @@ namespace idk::vkn
 			_current_batch.label.reset();
 		}
 		_start_new_batch = start;
+	}
+	void RenderTask::ProcessCopies(RenderBundle& render_bundle)
+	{
+		auto cmd_buffer = render_bundle._cmd_buffer;
+		for (auto& copy_cmd : _copy_commands)
+		{
+			auto src_img = copy_cmd.src.Image();
+			auto dst_img = copy_cmd.dst.Image();
+			//Transition from their original layouts to eGeneral
+			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, vk::ImageLayout::eGeneral);
+			}
+			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), copy_cmd.dst_layout, vk::ImageLayout::eGeneral);
+			}
+			cmd_buffer.copyImage(copy_cmd.src.Image(), vk::ImageLayout::eGeneral, copy_cmd.dst.Image(), vk::ImageLayout::eGeneral, copy_cmd.regions);
+			//Transition from their eGeneral to original layouts 
+			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), vk::ImageLayout::eGeneral, copy_cmd.src_layout);
+			}
+			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eGeneral, copy_cmd.dst_layout);
+			}
+		}
+
 	}
 	RenderTask::DrawCallBuilder::DrawCallBuilder(vector<VertexBindingData>& vtx) : _vb_builder{vtx}
 	{

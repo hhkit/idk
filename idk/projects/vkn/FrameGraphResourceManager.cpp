@@ -56,6 +56,7 @@ namespace idk::vkn
 		resources.emplace_back(dsc);
 		auto id = NextID();
 		resource_handles.emplace(id, rsc_index);
+		renamed_original.emplace(id, id);
 		return FrameGraphResource{ id };
 	}
 
@@ -63,10 +64,12 @@ namespace idk::vkn
 	{
 		auto next_id = NextID();
 		auto itr = resource_handles.find(rsc.id);
-		if (itr == resource_handles.end())
+		auto oitr = renamed_original.find(rsc.id);
+		if (itr == resource_handles.end() || oitr ==resource_handles.end())
 			throw;
 		resource_handles.emplace(next_id, itr->second);
 		renamed_resources.emplace(next_id, rsc.id);
+		renamed_original.emplace(next_id, oitr->second);
 		return FrameGraphResource{ next_id };
 	}
 
@@ -131,6 +134,11 @@ namespace idk::vkn
 		if (itr != renamed_resources.end())
 			result = itr->first;
 		return result;
+	}
+
+	fgr_id FrameGraphResourceManager::GetOriginal(fgr_id curr) const
+	{
+		return renamed_original.find(curr)->second;
 	}
 
 	std::optional<TextureDescription*> FrameGraphResourceManager::GetResourceDescriptionPtr(fgr_id rsc_id)

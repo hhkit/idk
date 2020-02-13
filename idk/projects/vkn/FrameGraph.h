@@ -161,7 +161,7 @@ namespace idk::vkn
 			return obj;
 
 		}
-
+		
 		FrameGraphNode& StoreNode(FrameGraphNode&& node);
 
 
@@ -191,7 +191,8 @@ namespace idk::vkn
 		void ProcessBatches(RenderBundle& bundle);
 	private:
 		void CreateRenderPasses();
-
+		const FrameGraphNode* GetSourceNode(fgr_id id)const;
+		vk::ImageLayout GetSourceLayout(fgr_id)const;
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
 		RenderPassCreateInfoBundle  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);

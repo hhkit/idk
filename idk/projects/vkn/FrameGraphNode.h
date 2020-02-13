@@ -14,11 +14,14 @@ namespace idk::vkn
 		string name;
 
 		const vector<FrameGraphResource>* buffer;
+		const vector<struct FrameGraphCopyResource>* copy_buffer;
 
 		index_span input_resources; //The stuff that flow into the node here
 		index_span read_resources; //The stuff that will be used here (paired)
 		index_span output_resources;
 		index_span modified_resources;
+		
+		index_span copied_resources;
 
 		vector<std::optional<FrameGraphAttachmentInfo>> input_attachments;
 		vector<std::optional<FrameGraphAttachmentInfo>> output_attachments;
@@ -27,6 +30,7 @@ namespace idk::vkn
 		auto GetReadSpan()const { return read_resources.to_span(*buffer); }
 		auto GetInputSpan()const { return input_resources.to_span(*buffer); }
 		auto GetOutputSpan()const { return output_resources.to_span(*buffer); }
+		span<const FrameGraphCopyResource> GetCopySpan()const;
 
 		bool resource_present(index_span span, FrameGraphResource rsc)const;
 

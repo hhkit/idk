@@ -41,6 +41,14 @@ namespace idk::vkn
 		TextureID target;
 		std::optional<AttachmentBlendConfig> config;
 	};
+	struct CopyCommand
+	{
+		VknTextureView src;
+		vk::ImageLayout src_layout;
+		VknTextureView dst;
+		vk::ImageLayout dst_layout;
+		vector<vk::ImageCopy> regions;
+	};
 
 	struct RenderTask : RenderInterface
 	{
@@ -86,6 +94,9 @@ namespace idk::vkn
 		void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_index, uint32_t first_instance)override;
 #pragma endregion
 
+		void Copy(const CopyCommand& copy);
+		void Copy(CopyCommand&& copy);
+
 #pragma region PipelineConfigurations
 		//void Inherit(const pipeline_config& config);
 		void SetPipelineConfig(const pipeline_config& config)
@@ -123,6 +134,8 @@ namespace idk::vkn
 
 		void AddToBatch(const DrawCall& draw_call);
 		void StartNewBatch(bool start = true);
+
+		void ProcessCopies(RenderBundle& render_bundle);
 
 		struct VertexBindingData
 		{
@@ -213,6 +226,8 @@ namespace idk::vkn
 		DrawCallBuilder _dc_builder{_vertex_bindings};
 
 		vector<RenderBatch> batches;
+
+		vector<CopyCommand> _copy_commands;
 	};
 
 
