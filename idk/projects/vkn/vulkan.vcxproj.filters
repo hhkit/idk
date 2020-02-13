@@ -347,6 +347,9 @@
     <ClInclude Include="renderpasses\DeferredPasses.h">
       <Filter>render\new_testament\Renderpasses</Filter>
     </ClInclude>
+    <ClInclude Include="FrameGraphCopyResource.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

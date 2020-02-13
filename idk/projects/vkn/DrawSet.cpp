@@ -30,7 +30,7 @@ namespace idk::vkn
 
 	bool BindMeshBuffers(RenderInterface& the_interface, const RenderObject& ro)
 	{
-		BindMeshBuffers(the_interface, ro.mesh.as<VulkanMesh>(), *ro.renderer_req);
+		return BindMeshBuffers(the_interface, ro.mesh.as<VulkanMesh>(), *ro.renderer_req);
 	}
 	bool DrawMeshBuffers(RenderInterface& the_interface, const RenderObject& ro)
 	{

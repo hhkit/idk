@@ -49,36 +49,26 @@ namespace idk::vkn::renderpasses
 	template<typename Pass, typename DrawSet>
 	struct PassSetPair : BaseRenderPass
 	{
-		template<typename Arg,
-			typename = std::enable_if_t<
-				!std::is_same_v<
-				PassSetPair,
-				std::decay_t<Arg>
-				>
-			>,
-			typename ... Args>
-			PassSetPair(Arg&& arg, DrawSet&& ds, Args&&... args) :
-			_render_pass{ std::forward<Arg>(arg),std::forward<Args>(args)... },
+		template<typename ... Args>
+			PassSetPair(DrawSet&& ds, Args&&... args) :
+			_render_pass{ std::forward<Args>(args)... },
 			_draw_set{ std::move(ds) }
 		{
 		}
-		template<typename Arg, 
-			typename = std::enable_if_t<
-				!std::is_same_v<
-					PassSetPair,
-					std::decay_t<Arg>
-				>
-			>,
-			typename ... Args>
-		PassSetPair(Arg&& arg, const DrawSet& ds,Args&&... args) 
+		template<typename ... Args>
+		PassSetPair(const DrawSet& ds,Args&&... args) 
 			: 
-			_render_pass{std::forward<Arg>(arg),std::forward<Args>(args)...},
+			_render_pass{std::forward<Args>(args)...},
 			_draw_set{ds}
 		{
 		}
 		void Execute(FrameGraphDetail::Context_t context)
 		{
 			Execute(context, _render_pass);
+		}
+		Pass& RenderPass()
+		{
+			return _render_pass;
 		}
 	private:
 		void Execute(Context_t context, DrawSetRenderPass& rp)
@@ -93,7 +83,10 @@ namespace idk::vkn::renderpasses
 	{
 		FrameGraphResourceMutable gbuffer_rscs[6];
 		FrameGraphResourceMutable depth_rsc;
-		GBufferPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, bool clear_depth);
+
+		uvec2 rt_size;
+
+		GBufferPass(FrameGraphBuilder& builder, uvec2 size, FrameGraphResource depth);
 		void Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set) override;
 	};
 
@@ -116,11 +109,13 @@ namespace idk::vkn::renderpasses
 
 		FragmentShaders deferred_post;
 
+		uvec2 rt_size;
+
 		AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers);
 		void Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set) override;
 	};
 
-	struct HdrPass : PassUtil, FsqUtil
+	struct HdrPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable hdr_rsc;
 		AccumPass& accum;
@@ -129,10 +124,11 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> hdr_shader;
 
-		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_, RscHandle<VknRenderTarget>, FullRenderData& rd);
+		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_, rect viewport, FrameGraphResource color_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
+		rect _viewport;
 	};
-	struct CubeClearPass : PassUtil, FsqUtil
+	struct CubeClearPass : DrawSetRenderPass, FsqUtil
 	{
 
 		renderer_attributes req = { {
@@ -141,17 +137,11 @@ namespace idk::vkn::renderpasses
 			std::make_pair(vtx::Attrib::UV, 2) }
 		};
 		FrameGraphResource render_target;
-		CubeClearPass(FrameGraphBuilder& builder, FullRenderData& frd);
-		void Execute(Context_t context)override;
+		FrameGraphResource depth;
+		uvec2 rt_size;
+		CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt,std::optional<color>clear_color, std::optional<float> clear_depth);
+		void Execute(Context_t context, BaseDrawSet& draw_set)override;
 	};
-
-	struct ClearCombine : PassUtil, FsqUtil
-	{
-		static RscHandle<ShaderProgram> clear_merge;
-		ClearCombine(FrameGraphBuilder& builder, RscHandle<VknRenderTarget>, FrameGraphResource clear_color_buffer, FrameGraphResource scene_color, FrameGraphResource scene_depth, FullRenderData& frd);
-		void Execute(Context_t context)override;
-	};
-	RscHandle<ShaderProgram> ClearCombine::clear_merge = {};
 
 	struct DeferredRendering
 	{

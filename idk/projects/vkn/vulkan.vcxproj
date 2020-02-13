@@ -340,6 +340,7 @@
     <ClInclude Include="FontVertexBindings.h" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="FrameGraphBuilder.h" />
+    <ClInclude Include="FrameGraphCopyResource.h" />
     <ClInclude Include="FrameGraphDemo.h" />
     <ClInclude Include="FrameGraphNode.h" />
     <ClInclude Include="FrameGraphResource.h" />

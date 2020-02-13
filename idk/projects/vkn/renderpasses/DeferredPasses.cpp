@@ -12,16 +12,18 @@ namespace idk::vkn::renderpasses
 {
 	using Context_t = PassUtil::Context_t;
 
-	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, uvec2 size = uvec2{ 1920,1080 });
-	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {});
+	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size={});
+	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size = {});
 	void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh);
 
-	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, uvec2 size)
+	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2> size)
 	{
+		if (!size)
+			size = uvec2{ 1920,1080 };
 		return TextureDescription
 		{
 			.name = name,//string_view name);
-			.size = size,//ivec2 size);
+			.size = *size,//ivec2 size);
 			.format = format,//vk::Format format);
 			.aspect = flag,//vk::ImageAspectFlags aspect);
 						   //vk::ImageType type = vk::ImageType::e2D);
@@ -33,9 +35,9 @@ namespace idk::vkn::renderpasses
 
 	}
 
-	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target)
+	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2>  size)
 	{
-		return builder.write(builder.CreateTexture(CreateTextureInfo(builder, name, format, usage, flag, target)));
+		return builder.write(builder.CreateTexture(CreateTextureInfo(builder, name, format, usage, flag, target,size)));
 
 	}
 
@@ -59,15 +61,15 @@ namespace idk::vkn::renderpasses
 		}
 	}
 
-	GBufferPass::GBufferPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, bool clear_depth)
+	GBufferPass::GBufferPass(FrameGraphBuilder& builder, uvec2 size, FrameGraphResource depth) : rt_size{size}
 	{
-		gbuffer_rscs[0] = CreateGBuffer(builder, "AlbedoAmbOcc", vk::Format::eR8G8B8A8Unorm);
-		gbuffer_rscs[1] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm);
-		gbuffer_rscs[2] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat);
-		gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm);
-		gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm);
-		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb);
-		depth_rsc = CreateGBuffer(builder, "GDepth", vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
+		gbuffer_rscs[0] = CreateGBuffer(builder, "AlbedoAmbOcc", vk::Format::eR8G8B8A8Unorm        ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		gbuffer_rscs[1] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		gbuffer_rscs[2] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat        ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm              ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		depth_rsc = builder.write(depth);
 		uint32_t index = 0;
 		for (auto& gbuffer_rsc : gbuffer_rscs)
 		{
@@ -91,7 +93,7 @@ namespace idk::vkn::renderpasses
 		}
 		builder.set_depth_stencil_attachment(depth_rsc, AttachmentDescription
 			{
-				(clear_depth)?vk::AttachmentLoadOp::eClear: vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -190,13 +192,13 @@ namespace idk::vkn::renderpasses
 
 
 
-	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_, RscHandle<VknRenderTarget>, FullRenderData& rd) :PassUtil{ rd }, accum{ accum_ }
+	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_, rect viewport, FrameGraphResource color_tex) : accum{ accum_ }, _viewport{viewport}
 	{
-		hdr_rsc = CreateGBuffer(builder, "HDR", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
-		depth_att = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth);
+		hdr_rsc = builder.write(color_tex);
+		depth_att = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_.rt_size);
 		builder.set_output_attachment(hdr_rsc, 0, AttachmentDescription
 			{
-				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -299,8 +301,6 @@ namespace idk::vkn::renderpasses
 	}
 	void HdrPass::Execute(FrameGraphDetail::Context_t context)
 	{
-		context.SetUboManager(this->render_data.rs_state->ubo_manager);
-		auto& gfx_state = this->render_data.GetGfxState();
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: HDR Pass");
 		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 		if (!hdr_shader)
@@ -327,8 +327,8 @@ namespace idk::vkn::renderpasses
 			context.SetClearDepthStencil(1.0f);
 			++i;
 		}
-		context.SetViewport(gfx_state.camera.viewport);
-		context.SetScissors(gfx_state.camera.viewport);
+		context.SetViewport(_viewport);
+		context.SetScissors(_viewport);
 
 		context.SetCullFace({});
 		//context.SetDepthTest(false);
@@ -343,19 +343,23 @@ namespace idk::vkn::renderpasses
 
 
 
-	CubeClearPass::CubeClearPass(FrameGraphBuilder& builder, FullRenderData& frd) : PassUtil{ frd }
+	CubeClearPass::CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt, std::optional<color>clear_col, std::optional<float> clear_dep) : rt_size{rt->Size()}
 	{
-		auto& gfx_state = this->render_data.GetGfxState();
-		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
+		auto color_buffer = RscHandle<VknTexture>{rt->GetColorBuffer()};
+		auto depth_buffer = RscHandle<VknTexture>{rt->GetDepthBuffer()};
+		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer);
+		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer);
 		render_target = color_att;
+		depth = depth_att;
 		std::array<float, 4> clear_color{};
-		auto& cam_clear = gfx_state.camera.clear_data;
-		auto dc_val = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, DontClear>::value;
-		auto do_val = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, DepthOnly>::value;
+		float clear_depth = (clear_dep)?*clear_dep:0;
+		if (clear_col)
+			std::copy(clear_col->begin(), clear_col->end(), clear_color.begin());
+
 		builder.set_output_attachment(color_att, 0,
 			AttachmentDescription
 			{
-					(dc_val != cam_clear.index() && do_val != cam_clear.index()) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+					(clear_col) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
 					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -370,14 +374,33 @@ namespace idk::vkn::renderpasses
 					//vk::ComponentMapping mapping{};
 			}
 		);
+		builder.set_depth_stencil_attachment(depth_att, 
+			AttachmentDescription
+			{
+					(clear_dep) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
+					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+					vk::ImageSubresourceRange
+					{
+						vk::ImageAspectFlagBits::eColor,0,1,0,1
+					},//vk::ImageSubresourceRange sub_resource_range{};
+					vk::ClearDepthStencilValue{clear_depth}//std::optional<vk::ClearValue> clear_value;
+					//std::optional<vk::Format> format{};
+					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+					//vk::ComponentMapping mapping{};
+			}
+		);
 	}
-	void CubeClearPass::Execute(Context_t context)
+	void CubeClearPass::Execute(Context_t context,BaseDrawSet& draw_set)
 	{
-		context.SetUboManager(this->render_data.rs_state->ubo_manager);
-		auto& gfx_state = this->render_data.GetGfxState();
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Cube Clear");
-		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 
+		draw_set.Render(context);
+		//TODO: Move into a draw_set/draw_logic
+		/*
+		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 		{
 			size_t i = 0;
 			auto& cam_clear = gfx_state.camera.clear_data;
@@ -445,131 +468,63 @@ namespace idk::vkn::renderpasses
 
 		//DrawFSQ
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
+		*/
 	}
 
 
-
-
-	ClearCombine::ClearCombine(FrameGraphBuilder& builder, RscHandle<VknRenderTarget>, FrameGraphResource clear_color_buffer, FrameGraphResource scene_color, FrameGraphResource scene_depth, FullRenderData& frd) : PassUtil{ frd }
+	struct clear_info
 	{
-		auto color_att = CreateGBuffer(builder, "ClearCombine", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, RscHandle<VknTexture>{render_data.GetGfxState().camera.render_target->GetColorBuffer()});
-		//auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
-		builder.set_output_attachment(color_att, 0,
-			AttachmentDescription
-			{
-					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
-					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
-					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-					vk::ImageSubresourceRange
-					{
-						vk::ImageAspectFlagBits::eColor,0,1,0,1
-					}
-			}
-		);
-		builder.set_input_attachment(builder.read(clear_color_buffer), 0,
-			AttachmentDescription
-			{
-					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp store_op;
-					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-					vk::ImageSubresourceRange
-					{
-						vk::ImageAspectFlagBits::eColor,0,1,0,1
-					}
-			}
-		);
-		builder.set_input_attachment(builder.read(scene_color), 1,
-			AttachmentDescription
-			{
-					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp store_op;
-					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-					vk::ImageSubresourceRange
-					{
-						vk::ImageAspectFlagBits::eColor,0,1,0,1
-					}
-			}
-		);
-		builder.set_input_attachment(builder.read(scene_depth), 2,
-			AttachmentDescription
-			{
-					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp store_op;
-					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-					vk::ImageSubresourceRange
-					{
-						vk::ImageAspectFlagBits::eDepth,0,1,0,1
-					}
-			}
-		);
-		//builder.set_depth_stencil_attachment(depth_att,
-		//	AttachmentDescription
-		//	{
-		//			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
-		//			vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
-		//			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-		//			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-		//			vk::ImageLayout::eDepthStencilAttachmentOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-		//			vk::ImageSubresourceRange
-		//			{
-		//				vk::ImageAspectFlagBits::eDepth,0,1,0,1
-		//			}
-		//	}
-		//);
+		std::optional<color> clear_color={};
+		std::optional<float> clear_depth={};
+	};
 
-	}
-	void ClearCombine::Execute(Context_t context)
+	struct ClearInfoVisitor
 	{
-		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Clear Combine");
-
-		auto& gfx_state = this->render_data.GetGfxState();
-		if (!clear_merge)
+		clear_info operator()(color col)const
 		{
-			auto tmp = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/clear_merge.frag");
-			if (tmp)
-				clear_merge = *tmp;
+			return clear_info{ col,1.0f };
 		}
-		auto& shd = clear_merge.as<ShaderModule>();
-		context.SetViewport(gfx_state.camera.viewport);
-		context.SetScissors(gfx_state.camera.viewport);
-		if (shd.HasCurrent())
+		clear_info operator()(RscHandle<CubeMap> cube)const
 		{
-
-			context.BindShader(ShaderStage::Fragment, clear_merge);
-			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
-			auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
-			BindMesh(context, this->fsq_requirements, mesh);
-
-			context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
-
+			return clear_info{ {},1.0f };
 		}
+		clear_info operator()(DepthOnly )const
+		{
+			return clear_info{ {},1.0f };
+		}
+		clear_info operator()(DontClear )const
+		{
+			return clear_info{};
+		}
+	};
+
+	clear_info ExtractClearInfo(const CameraData& camera)
+	{
+		return std::visit(ClearInfoVisitor{},camera.clear_data);
 	}
 
+	using DeferredPbrInstDrawSet = GenericDrawSet<DeferredPbrRoBind, InstMeshDrawSet>;
+	using DeferredPbrAniDrawSet = GenericDrawSet<DeferredPbrAniBind, SkinnedMeshDrawSet>;
+	using AccumDrawSet = GenericDrawSet<LightBind, PerLightDrawSet>;
+
+	using ClearCubeSet = GenericDrawSet<CubeBinding, FsqDrawLogic>;
+	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrInstDrawSet, DeferredPbrAniDrawSet>;
 
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		PassUtil::FullRenderData rd{ &gfx_state,&rs };
-		auto& gbuffer_pass = graph.addRenderPass<GBufferPass>("GBufferPass", rt, rd);
-		auto& cube_clear = graph.addRenderPass<CubeClearPass>("Cube Clear", rd);
-		auto& accum_pass = graph.addRenderPass<AccumPass>("Accum pass", gbuffer_pass, rd);
-		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, rt, rd);
-
-
-		[[maybe_unused]] auto& clear_combine = graph.addRenderPass<ClearCombine>("Clear Combine", rt, cube_clear.render_target, hdr_pass.hdr_rsc, hdr_pass.depth_att, rd);
+		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
+		//TODO: 
+		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{},gfx_state.camera.render_target,clr_col, clr_dep).RenderPass();
+		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{}, cube_clear.rt_size, cube_clear.depth_rsc).RenderPass();
+		auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{},gbuffer_pass);
+		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport,cube_clear.render_target);
 
 		return { hdr_pass.hdr_rsc,hdr_pass.depth_att };
 	}
 
 
-	AccumPass::AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers) : gbuffer_pass{ gbuffers }
+	AccumPass::AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers) : gbuffer_pass{ gbuffers }, rt_size{gbuffers.rt_size}
 	{
 		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat);
 		uint32_t index = 0;
@@ -658,8 +613,5 @@ namespace idk::vkn::renderpasses
 		//context.SetScissors(gfx_state.camera.viewport);
 
 		draw_set.Render(context);
-	}
-	void HdrPass::Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set)
-	{
 	}
 }
