@@ -579,7 +579,17 @@ namespace idk
             }
             return false;
         };
-        InjectDrawTable table{ { "text", draw_text } };
+        constexpr CustomDrawFn draw_anchor = [](const reflect::dynamic& val)
+        {
+            auto& anchor = val.get<TextAnchor>();
+            return ImGuidk::EnumCombo("", &anchor);
+        };
+        constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
+        {
+            auto& alignment = val.get<TextAlignment>();
+            return ImGuidk::EnumCombo("", &alignment);
+        };
+        InjectDrawTable table{ { "text", draw_text }, { "anchor", draw_anchor }, { "alignment", draw_alignment } };
         DisplayVal(*c_font, &table);
     }
 

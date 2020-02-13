@@ -696,9 +696,50 @@ namespace idk
 					continue;
 
 				auto& render_data = result.font_render_data.emplace_back();
-				render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
+				const auto font_data = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, f.alignment, 0);
+
+				const float w = font_data.width;
+				const float h = font_data.height;
+				float ox = 0, oy = 0;
+
+				switch (f.anchor)
+				{
+				case TextAnchor::UpperLeft: case TextAnchor::UpperCenter: case TextAnchor::UpperRight: oy = 0; break;
+				case TextAnchor::MiddleLeft: case TextAnchor::MiddleCenter: case TextAnchor::MiddleRight: oy = h * 0.5f; break;
+				case TextAnchor::LowerLeft: case TextAnchor::LowerCenter: case TextAnchor::LowerRight: oy = h; break;
+				}
+
+				switch (f.anchor)
+				{
+				case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft: 
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = 0; break;
+					case TextAlignment::Center: ox = w * 0.5f; break;
+					case TextAlignment::Right: ox = w; break;
+					}
+					break;
+				case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = -w * 0.5f; break;
+					case TextAlignment::Center: ox = 0; break;
+					case TextAlignment::Right: ox = w * 0.5f; break;
+					}
+					break;
+				case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = -w; break;
+					case TextAlignment::Center: ox = -w * 0.5f; break;
+					case TextAlignment::Right: ox = 0; break;
+					}
+					break;
+				}
+
+				render_data.coords = font_data.coords;
 				render_data.color = f.color;
-				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * translate(vec3{ ox, oy, 0 });
 				render_data.atlas = f.font;
 			}
 
