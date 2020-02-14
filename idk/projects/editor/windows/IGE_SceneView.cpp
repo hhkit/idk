@@ -121,14 +121,19 @@ namespace idk {
 	{
         ImGui::PopStyleVar(3);
 
+		auto& ide = Core::GetSystem<IDE>();
+
         if (!is_window_displayed)
         {
-            Core::GetSystem<IDE>()._camera.current_camera->enabled = false;
+            ide._camera.current_camera->enabled = false;
             Core::GetSystem<GraphicsSystem>().enable_picking = false;
             return;
         }
         else
-            Core::GetSystem<IDE>()._camera.current_camera->enabled = true;
+            ide._camera.current_camera->enabled = true;
+
+		if (ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+			ide.DeleteSelectedGameObjects();
 
         if (ImGui::BeginMenuBar())
         {
@@ -136,12 +141,12 @@ namespace idk {
                                  ImGui::CalcTextSize("Gizmos").x - ImGui::GetStyle().FramePadding.y * 2 -
                                  ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
 
-            ImGui::Checkbox("Gizmos", &Core::GetSystem<IDE>().GetEditorRenderTarget()->render_debug);
+            ImGui::Checkbox("Gizmos", &ide.GetEditorRenderTarget()->render_debug);
             ImGui::EndMenuBar();
         }
         
 		auto imageSize = vec2{ GetScreenSize() };
-		auto meta = Core::GetSystem<IDE>().GetEditorRenderTarget();
+		auto meta = ide.GetEditorRenderTarget();
         auto screen_tex = meta->GetColorBuffer();
         auto rendertex_aspect = screen_tex->AspectRatio();
         auto windowframe_aspect = imageSize.x / imageSize.y;
@@ -162,7 +167,7 @@ namespace idk {
         {
 			//Draw where it is going to be created in at
 
-			Handle<Camera> cam = Core::GetSystem<IDE>()._camera.current_camera;
+			Handle<Camera> cam = ide._camera.current_camera;
 			vec3 objectFinalPos{};
 
 			currRay = GenerateRayFromCurrentScreen();
@@ -195,10 +200,6 @@ namespace idk {
 			pointingRay.velocity.y = 1;
 			Core::GetSystem<DebugRenderer>().Draw(pointingRay, color{ 0.0f,1.0f,0.0f,0.5f }, Core::GetDT());
 
-
-
-
-
             if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
             {
                 auto res_payload = DragDrop::GetResourcePayloadData();
@@ -210,9 +211,9 @@ namespace idk {
                     if (!payload->IsDelivery())
                         continue;
 
-                    auto* cmd = Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
-					Core::GetSystem<IDE>().SelectGameObject(cmd->GetGameObject(), false, true);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+                    auto* cmd = ide.command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
+					ide.SelectGameObject(cmd->GetGameObject(), false, true);
+					ide.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
                     break;
                 }
             }
@@ -238,7 +239,7 @@ namespace idk {
 			//	LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
 			//}
 			//Select gameobject here!
-			CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
+			CameraControls& main_camera = ide._camera;
 			Handle<Camera> currCamera = main_camera.current_camera;
 			last_pick = 
 			{
@@ -254,7 +255,7 @@ namespace idk {
 			{
 				//Sort the obj by closest dist to point
 				//get the first obj
-				auto& editor = Core::GetSystem<IDE>();
+				auto& editor = ide;
 				Handle<GameObject> closestGameObject = obj.front();
 				auto cameraPos = editor._camera.current_camera->currentPosition();
 				float distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
@@ -297,7 +298,7 @@ namespace idk {
 			}
 			if (closestGameObject)
 			{
-				auto& editor = Core::GetSystem<IDE>();
+				auto& editor = ide;
 				auto sel = editor.GetSelectedObjects();
 				auto& selected_gameObjects = sel.game_objects;
 
@@ -309,7 +310,7 @@ namespace idk {
 						if (closestGameObject == selected_gameObjects[i])
 						{
 							selected_gameObjects.erase(selected_gameObjects.begin() + i);
-							Core::GetSystem<IDE>().SetSelection(sel);
+							ide.SetSelection(sel);
 							hasSelected = true;
 							break;
 						}
@@ -317,19 +318,19 @@ namespace idk {
 					if (!hasSelected)
 					{
 						selected_gameObjects.insert(selected_gameObjects.begin(), closestGameObject);
-						Core::GetSystem<IDE>().SetSelection(sel);
+						ide.SetSelection(sel);
 						editor.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 					}
 				}
 				else //Select as normal
 				{
-					Core::GetSystem<IDE>().SelectGameObject(closestGameObject);
+					ide.SelectGameObject(closestGameObject);
 					editor.FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(closestGameObject);
 				}
 			}
 			else // If raycast hits nothing, we should clear the selected objects
 			{
-				Core::GetSystem<IDE>().Unselect();
+				ide.Unselect();
 			}
 		}
 
@@ -341,7 +342,7 @@ namespace idk {
 		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1) && !ImGui::GetIO().KeyAlt) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
-				Handle<Transform> tfm = Core::GetSystem<IDE>()._camera.current_camera->GetGameObject()->GetComponent<Transform>();
+				Handle<Transform> tfm = ide._camera.current_camera->GetGameObject()->GetComponent<Transform>();
 				distance_to_focused_vector = focused_vector.distance(tfm->position);
 				cachedMouseScreenPos = currMouseScreenPos;
 				ImGui::SetWindowFocus();

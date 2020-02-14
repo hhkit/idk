@@ -364,56 +364,29 @@ namespace idk
 		if (ImGui::IsAnyMouseDown()) //Disable shortcut whenever mouse is pressed
 			return;
 
-		//CTRL + Z
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)) && ImGui::GetIO().KeyCtrl) {
-			command_controller.UndoCommand();
-		}
-
-		//CTRL + Y
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Y)) && ImGui::GetIO().KeyCtrl) {
-			command_controller.RedoCommand();
-		}
-
-		//CTRL + C
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)) && ImGui::GetIO().KeyCtrl) 
+		if (!ImGui::GetIO().KeyCtrl)
 		{
-			Copy();
+			if (ImGui::IsKeyPressed('Q'))
+				gizmo_operation = GizmoOperation::Null;
+			else if (ImGui::IsKeyPressed('W'))
+				gizmo_operation = GizmoOperation::Translate;
+			else if (ImGui::IsKeyPressed('E'))
+				gizmo_operation = GizmoOperation::Rotate;
+			else if (ImGui::IsKeyPressed('R'))
+				gizmo_operation = GizmoOperation::Scale;
+			else if (ImGui::IsKeyPressed('F'))
+				FocusOnSelectedGameObjects();
 		}
-
-		//CTRL + V
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)) && ImGui::GetIO().KeyCtrl) 
+		else
 		{
-			Paste();
-		}
-
-
-		//Q = Move
-		if (ImGui::IsKeyPressed('Q')) {
-			gizmo_operation = GizmoOperation::Null;
-		}
-		//W = Translate
-		else if (ImGui::IsKeyPressed('W')) {
-			gizmo_operation = GizmoOperation::Translate;
-		}
-		//E = Rotate
-		else if (ImGui::IsKeyPressed('E')) {
-			gizmo_operation = GizmoOperation::Rotate;
-		}
-		//R = Scale
-		else if (ImGui::IsKeyPressed('R')) {
-			gizmo_operation = GizmoOperation::Scale;
-		}
-
-		//DEL = Delete
-		else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
-		{
-			DeleteSelectedGameObjects();
-		}
-
-		//F = Focus on GameObject
-		else if (ImGui::IsKeyPressed('F'))
-		{
-			FocusOnSelectedGameObjects();
+			if (ImGui::IsKeyPressed('Z'))
+				command_controller.UndoCommand();
+			else if (ImGui::IsKeyPressed('Y'))
+				command_controller.RedoCommand();
+			else if (ImGui::IsKeyPressed('C'))
+				Copy();
+			else if (ImGui::IsKeyPressed('V'))
+				Paste();
 		}
 	}
 

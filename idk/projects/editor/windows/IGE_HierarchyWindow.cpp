@@ -55,6 +55,7 @@ namespace idk {
 
 
 		ImGuiStyle& style = ImGui::GetStyle();
+		auto& editor = Core::GetSystem<IDE>();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBgActive]);
 
@@ -75,8 +76,6 @@ namespace idk {
 		}
 		if (ImGui::BeginPopup("CreatePopup")) 
 		{
-            IDE& editor = Core::GetSystem<IDE>();
-
 			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N"))
 			{
 				editor.CreateGameObject();
@@ -156,7 +155,7 @@ namespace idk {
 
 		Handle<GameObject> scroll_focus_next_frame;
 		bool shift_selecting = false;
-		ObjectSelection selection = Core::GetSystem<IDE>().GetSelectedObjects();
+		ObjectSelection selection = editor.GetSelectedObjects();
 		vector<Handle<GameObject>>& selected_gameObjects = selection.game_objects;
 
 		if (shift_select_anchors[0] && shift_select_anchors[1])
@@ -264,7 +263,7 @@ namespace idk {
 					if (handle == shift_select_anchors[0] || handle == shift_select_anchors[1])
 					{
 						shift_selecting = false;
-						Core::GetSystem<IDE>().SetSelection(selection);
+						editor.SetSelection(selection);
 						shift_select_anchors[1] = {}; // keep the start anchor which is [0]
 					}
 				}
@@ -287,10 +286,10 @@ namespace idk {
 
 					if (hasBeenSelected) {
 						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
-						Core::GetSystem<IDE>().SetSelection(selection);
+						editor.SetSelection(selection);
 					}
 					else {
-						Core::GetSystem<IDE>().SelectGameObject(handle, true);
+						editor.SelectGameObject(handle, true);
 					}
 
 					shift_select_anchors[0] = handle;
@@ -302,14 +301,14 @@ namespace idk {
 				}
 				else
 				{
-					Core::GetSystem<IDE>().SelectGameObject(handle);
+					editor.SelectGameObject(handle);
 					shift_select_anchors[0] = handle;
 				}
 			}
 
 			if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered())
 			{
-				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+				editor.FocusOnSelectedGameObjects();
 			}
 
 			//If the drag drops target on to the handle...
@@ -344,13 +343,13 @@ namespace idk {
 
 							//If im draging to my parent, unparent
 							if (i->Parent() == handle)
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
 							else //Else parent normally
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
 							++execute_counter;
 						}
 
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 					}
 					else
 					{
@@ -367,11 +366,11 @@ namespace idk {
 						if (!isParentingToChild)
 						{
 							if (i->Parent() == handle)
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
 							else //Else parent normally
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
-							Core::GetSystem<IDE>().SelectGameObject(i, false, true);
-							Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+							editor.SelectGameObject(i, false, true);
+							editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 						}
 					}
 
@@ -417,7 +416,7 @@ namespace idk {
 
 		if (ImGui::InvisibleButton("empty_space", ImGui::GetContentRegionAvail()))
 		{
-			Core::GetSystem<IDE>().Unselect();
+			editor.Unselect();
 		}
 		if (ImGui::BeginDragDropTarget()) // drag onto empty space unparents gameobjects
 		{
@@ -434,19 +433,22 @@ namespace idk {
 					{
 						if (!h)
 							continue;
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, h, Handle<GameObject>{}));
+						editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, h, Handle<GameObject>{}));
 						++execute_counter;
 					}
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
 				}
 				else
 				{
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, drop_payload, Handle<GameObject>{}));
-					Core::GetSystem<IDE>().SelectGameObject(drop_payload, false, true);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, drop_payload, Handle<GameObject>{}));
+					editor.SelectGameObject(drop_payload, false, true);
+					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
 				}
 			}
 		}
+
+		if (ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+			editor.DeleteSelectedGameObjects();
 	}
 
 	void IGE_HierarchyWindow::ScrollToSelectedInHierarchy(Handle<GameObject> gameObject)
