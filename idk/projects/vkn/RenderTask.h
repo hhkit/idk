@@ -123,6 +123,7 @@ namespace idk::vkn
 
 		
 		void SetInputAttachments(span<VknTextureView> input_attachments) noexcept;
+		void SetOutputAttachmentSize(size_t size);
 
 		void ProcessBatches(RenderBundle& render_bundle);
 
@@ -207,6 +208,7 @@ namespace idk::vkn
 		vector<rect> _rect_buffer;
 		vector_span_builder<rect> _rect_builder{ _rect_buffer };
 		span<VknTextureView> _input_attachments;
+		size_t _num_output_attachments;
 		rect render_area;
 #pragma endregion
 

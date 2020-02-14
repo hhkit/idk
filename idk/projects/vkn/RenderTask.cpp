@@ -215,15 +215,24 @@ namespace idk::vkn
 		_input_attachments = input_attachments;
 	}
 
-	uint32_t compute_clear_info(span<const color> clear_colors, std::optional<float> clear_depth, std::optional<uint8_t> clear_stencil,
+	void RenderTask::SetOutputAttachmentSize(size_t size)
+	{
+		_num_output_attachments = size;
+	}
+
+	uint32_t compute_clear_info(size_t num_output_attachments,span<const color> clear_colors, std::optional<float> clear_depth, std::optional<uint8_t> clear_stencil,
 		vector<vk::ClearValue>& clear
 		)
 	{
 		clear.clear();
-		clear.reserve(clear_colors.size() + ((clear_depth|| clear_stencil) ? 1 : 0));
+		clear.reserve(num_output_attachments + ((clear_depth|| clear_stencil) ? 1 : 0));
 		for (auto color : clear_colors)
 		{
 			clear.emplace_back(std::array<float, 4> { color.r,color.g,color.b,color.a });
+		}
+		while (clear.size() < num_output_attachments)
+		{
+			clear.emplace_back(std::array<float, 4> { 0, 0, 0, 0 });
 		}
 		bool clear_other = false;
 		float depth{};
@@ -257,7 +266,7 @@ namespace idk::vkn
 		vector<vk::Viewport> viewports;
 		std::optional<RenderPassObj> prev_rp;
 		vector<vk::ClearValue> clear_values;
-		compute_clear_info(clear_colors, clear_depths, clear_stencil,clear_values);
+		compute_clear_info(_num_output_attachments, clear_colors, clear_depths, clear_stencil,clear_values);
 		vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
 		if (_label)
 		{

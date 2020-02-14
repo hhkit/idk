@@ -30,6 +30,7 @@ namespace idk::vkn
 		auto GetReadSpan()const { return read_resources.to_span(*buffer); }
 		auto GetInputSpan()const { return input_resources.to_span(*buffer); }
 		auto GetOutputSpan()const { return output_resources.to_span(*buffer); }
+		auto GetOutputAtt()const { return output_attachments; }
 		span<const FrameGraphCopyResource> GetCopySpan()const;
 
 		bool resource_present(index_span span, FrameGraphResource rsc)const;
