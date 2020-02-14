@@ -323,6 +323,7 @@
     <ClInclude Include="AttachmentDescription.h" />
     <ClInclude Include="BaseRenderPass.h" />
     <ClInclude Include="BufferedObj.h" />
+    <ClInclude Include="CameraViewportBindings.h" />
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CanvasVertexBindings.h" />
     <ClInclude Include="ColorPickRenderer.h" />
@@ -330,6 +331,7 @@
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DebugUtil.h" />
     <ClInclude Include="DeferredPass.h" />
+    <ClInclude Include="DeferredPbrRoBind.h" />
     <ClInclude Include="DescriptorCountArray.h" />
     <ClInclude Include="DescriptorPoolsManager.h" />
     <ClInclude Include="DescriptorsManager.h" />
@@ -350,6 +352,7 @@
     <ClInclude Include="GraphicsState.h" />
     <ClInclude Include="graph_test.h" />
     <ClInclude Include="IdGenerator.h" />
+    <ClInclude Include="LightBinding.h" />
     <ClInclude Include="ManagedVulkanObjs.h" />
     <ClInclude Include="ParticleBindings.h" />
     <ClInclude Include="ParticleRenderer.h" />

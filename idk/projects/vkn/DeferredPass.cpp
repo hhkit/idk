@@ -719,7 +719,7 @@ namespace idk::vkn
 		}
 	};
 	
-	using PbrDeferredGbufferBinding = CombinedBindings<TypeCheck, StandardVertexBindings, StandardMaterialFragBindings, PbrFwdBindings, StandardMaterialBindings>;
+	using PbrDeferredGbufferBinding = CombinedBindings<TypeCheck, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 
 	static ShadingModel gbuffer_type_to_model[] = {ShadingModel::DefaultLit,ShadingModel::Specular};
 

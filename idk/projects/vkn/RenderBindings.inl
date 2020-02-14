@@ -28,6 +28,12 @@ namespace idk::vkn::bindings
 		, f, args...);
 	}
 	template<typename ...Args>
+	template<typename Binding, typename Result>
+	Result& CombinedBindings<Args...>::Get()
+	{
+		return std::get<Binding>(binders);
+	}
+	template<typename ...Args>
 	inline bool CombinedBindings<Args...>::Skip(RenderInterface& the_interface, const RenderObject& dc)
 	{
 		return (std::get<Args>(binders).Skip(the_interface, dc) | ...);

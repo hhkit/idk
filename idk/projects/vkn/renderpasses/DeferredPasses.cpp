@@ -8,6 +8,10 @@
 #include <gfx/GraphicsSystem.h>
 #include <vkn/BufferHelpers.inl>
 #include <vkn/FrameGraph.h>
+
+#include <vkn/DeferredPbrRoBind.h>
+#include <vkn/LightBinding.h>
+
 namespace idk::vkn::renderpasses
 {
 	using Context_t = PassUtil::Context_t;
@@ -503,9 +507,9 @@ namespace idk::vkn::renderpasses
 		return std::visit(ClearInfoVisitor{},camera.clear_data);
 	}
 
-	using DeferredPbrInstDrawSet = GenericDrawSet<DeferredPbrRoBind, InstMeshDrawSet>;
-	using DeferredPbrAniDrawSet = GenericDrawSet<DeferredPbrAniBind, SkinnedMeshDrawSet>;
-	using AccumDrawSet = GenericDrawSet<LightBind, PerLightDrawSet>;
+	using DeferredPbrInstDrawSet = GenericDrawSet<bindings::DeferredPbrRoBind, InstMeshDrawSet>;
+	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
+	using AccumDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
 
 	using ClearCubeSet = GenericDrawSet<CubeBinding, FsqDrawLogic>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrInstDrawSet, DeferredPbrAniDrawSet>;

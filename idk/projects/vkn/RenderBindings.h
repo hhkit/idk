@@ -72,6 +72,9 @@ namespace idk::vkn
 		void Bind(RenderInterface& the_interface) override;
 		void Bind(RenderInterface& the_interface, const RenderObject& dc) override;
 		void BindAni(RenderInterface& the_interface, const  AnimatedRenderObject& dc) override;
+
+		template<typename Binding, typename Result = decltype(std::get<Binding>(std::declval<CombinedBindings>().binders))>
+		Result& Get();
 	};
 
 	}

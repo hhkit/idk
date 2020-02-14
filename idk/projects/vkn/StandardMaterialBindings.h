@@ -11,11 +11,10 @@ namespace idk::vkn::bindings
 	};
 	struct StandardMaterialBindings : RenderBindings
 	{
-		const GraphicsState* _state;
-		const GraphicsState& State() { return *_state; }
-		RscHandle<MaterialInstance> prev_material_inst{};
-		void SetState(const GraphicsState& vstate);
+		using mat_inst_lookup_t = hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>;
 
+		RscHandle<MaterialInstance> prev_material_inst{};
+		mat_inst_lookup_t* p_material_instances;
 		//Assumes that the material is valid.
 		void Bind(RenderInterface& the_interface, const RenderObject& dc) override;
 

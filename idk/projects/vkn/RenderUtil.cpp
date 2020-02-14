@@ -22,14 +22,14 @@ namespace idk::vkn
 		ShaderLightData() = default;
 		ShaderLightData(const LightData& data) : BaseLightData{ data }, vp{ data.vp }{}
 	};
-	string PrepareLightBlock(const CameraData& cam, const vector<LightData>& lights)
+	string PrepareLightBlock(const mat4 view, const vector<LightData>& lights)
 	{
 		vector<ShaderLightData> tmp_light(lights.size());
 		for (size_t i = 0; i < tmp_light.size(); ++i)
 		{
 			auto& light = tmp_light[i] = (lights)[i];
-			light.v_pos = cam.view_matrix * vec4{ light.v_pos,1 };
-			light.v_dir = (cam.view_matrix * vec4{ light.v_dir,0 }).get_normalized();
+			light.v_pos = view * vec4{ light.v_pos,1 };
+			light.v_dir = (view * vec4{ light.v_dir,0 }).get_normalized();
 		}
 
 		string light_block;
@@ -38,5 +38,9 @@ namespace idk::vkn
 		light_block += string(16 - sizeof(len), '\0');
 		light_block += string{ reinterpret_cast<const char*>(tmp_light.data()), hlp::buffer_size(tmp_light) };
 		return light_block;
+	}
+	string PrepareLightBlock(const CameraData& cam, const vector<LightData>& lights)
+	{
+		return PrepareLightBlock(cam.view_matrix, lights);
 	}
 }

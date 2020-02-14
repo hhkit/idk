@@ -350,6 +350,15 @@
     <ClInclude Include="FrameGraphCopyResource.h">
       <Filter>render\graph</Filter>
     </ClInclude>
+    <ClInclude Include="DeferredPbrRoBind.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraViewportBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="LightBinding.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
