@@ -113,7 +113,7 @@ namespace idk
 
 			if (ImGui::Selectable(name.data()))
 			{
-				Core::GetSystem<IDE>().SelectGameObject(go);
+				editor.SelectGameObject(go);
 			}
 			ImGui::NextColumn();
 
@@ -158,8 +158,8 @@ namespace idk
 
 			if (ImGui::Button("Focus"))
 			{
-				Core::GetSystem<IDE>().SelectGameObject(go);
-				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+				editor.SelectGameObject(go);
+				editor.FocusOnSelectedGameObjects();
 			}
 			ImGui::NextColumn();
 

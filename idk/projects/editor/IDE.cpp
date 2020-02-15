@@ -137,7 +137,7 @@ namespace idk
 		LoadEditorFonts();
 
 		//Window Initializations
-#define ADD_WINDOW(type) windows_by_type.emplace(reflect::typehash<type>(), ige_windows.emplace_back(std::make_unique<type>()).get());
+#define ADD_WINDOW(type) _windows_by_type.emplace(reflect::typehash<type>(), _ige_windows.emplace_back(std::make_unique<type>()).get());
 		ADD_WINDOW(IGE_MainWindow);
 		ADD_WINDOW(IGE_GameView);
 		ADD_WINDOW(IGE_SceneView);
@@ -156,7 +156,7 @@ namespace idk
 		ADD_WINDOW(IGE_HelpWindow);	
 #undef ADD_WINDOW
 
-		for (auto& i : ige_windows)
+		for (auto& i : _ige_windows)
 			i->Initialize();
 
 		Core::GetSystem<SceneManager>().OnSceneChange +=
@@ -185,7 +185,7 @@ namespace idk
                 OpenScene(h.AsHandle<Scene>());
         };
 
-		Core::GetSystem<Application>().OnClosed.Listen([&]() { closing = true; });
+		Core::GetSystem<Application>().OnClosed.Listen([&]() { _closing = true; });
 
 		//Core::GetGameState().OnObjectDestroy<GameObject>().Listen([&](Handle<GameObject> h)
 		//{
@@ -215,13 +215,13 @@ namespace idk
 
 		Core::GetSystem<Application>().OnFocusGain += [this]()
 		{
-			if (game_running)
+			if (_game_running)
 				return;
-			if (scripts_changed)
+			if (_scripts_changed)
 			{
 				Core::GetSystem<mono::ScriptSystem>().CompileGameScripts();
 				HotReloadDLL();
-				scripts_changed = false;
+				_scripts_changed = false;
 			}
 		};
 
@@ -249,6 +249,7 @@ namespace idk
                         t.position = last_t.position;
                         t.rotation = last_t.rotation;
                         t.scale = last_t.scale;
+						FindWindow<IGE_SceneView>()->SetOrbitPoint(t.position + t.Forward() * 20.0f);
                     }
                 }
             }
@@ -263,7 +264,7 @@ namespace idk
 
         ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
         Core::GetSystem<ProjectManager>().SaveConfigs();
-        ige_windows.clear();
+        _ige_windows.clear();
         _interface->Shutdown();
         _interface.reset();
     }
@@ -274,7 +275,7 @@ namespace idk
 
 	void IDE::EditorUpdate()
 	{
-        if (closing)
+        if (_closing)
             return;
 
         auto& app = Core::GetSystem<Application>();
@@ -288,13 +289,13 @@ namespace idk
 		{
 			if (elem.GetExtension() == ".cs")
 			{
-				scripts_changed = true;
+				_scripts_changed = true;
 				break;
 			}
 		}
 
 		// scene controls
-		if (!game_running && ImGui::GetIO().KeyCtrl)
+		if (!_game_running && ImGui::GetIO().KeyCtrl)
 		{
 			if (ImGui::IsKeyPressed(static_cast<int>(Key::S)))
 			{
@@ -313,19 +314,6 @@ namespace idk
 		_interface->ImGuiFrameBegin();
 		ImGuizmo::BeginFrame();
 
-		//{ //Erase the nullptrs.
-		//	vector<size_t> null_objects;
-		//	size_t index = 0;
-		//	for (const auto go : selected_gameObjects)
-		//	{
-		//		if (!go)
-		//			null_objects.emplace_back(index);
-		//		++index;
-		//	}
-		//	std::reverse(null_objects.begin(), null_objects.end());
-		//	for (auto i : null_objects)
-		//		selected_gameObjects.erase(selected_gameObjects.begin() + i); //erase in reverse order to ensure that the indices don't change.
-		//}
         for (const auto go : _selected_objects.game_objects)
         {
 			if (!go)
@@ -338,11 +326,23 @@ namespace idk
 			});
         }
 		
-		for (auto& i : ige_windows)
-			i->DrawWindow();
+		if (_maximized_window)
+		{
+			_ige_windows[0]->DrawWindow();
+			for (auto& i : _ige_windows)
+			{
+				if (i.get() == _maximized_window)
+					i->DrawWindow();
+			}
+		}
+		else
+		{
+			for (auto& i : _ige_windows)
+				i->DrawWindow();
+		}
 
-		if (bool_demo_window)
-			ImGui::ShowDemoWindow(&bool_demo_window);
+		if (_show_demo_window)
+			ImGui::ShowDemoWindow(&_show_demo_window);
 
 		_interface->ImGuiFrameEnd();
 	}
@@ -381,9 +381,9 @@ namespace idk
 		else
 		{
 			if (ImGui::IsKeyPressed('Z'))
-				command_controller.UndoCommand();
+				_command_controller.UndoCommand();
 			else if (ImGui::IsKeyPressed('Y'))
-				command_controller.RedoCommand();
+				_command_controller.RedoCommand();
 			else if (ImGui::IsKeyPressed('C'))
 				Copy();
 			else if (ImGui::IsKeyPressed('V'))
@@ -567,23 +567,27 @@ namespace idk
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
 		Core::GetSystem<PhysicsSystem>().Reset();
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
-		game_running = true;
-		if (game_frozen)
+		ImGui::SetWindowFocus(FindWindow<IGE_GameView>()->window_name);
+		_game_running = true;
+		if (_game_frozen)
 			Pause();
 	}
 
 	void IDE::Pause()
 	{
-		Core::GetScheduler().SetPauseState(EditorPause);
+		Core::GetScheduler().SetPauseState(GamePause);
 		Core::GetSystem<AudioSystem>().SetSystemPaused(true);
-		game_frozen = true;
+		_game_frozen = true;
 	}
 
 	void IDE::Unpause()
 	{
-		Core::GetScheduler().SetPauseState(UnpauseAll);
-		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
-		game_frozen = false;
+		if (_game_running)
+		{
+			Core::GetScheduler().SetPauseState(UnpauseAll);
+			Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+		}
+		_game_frozen = false;
 	}
 
 	void IDE::Stop()
@@ -594,7 +598,8 @@ namespace idk
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
 		Core::GetSystem<AudioSystem>().StopAllAudio();
 		Core::GetSystem<PhysicsSystem>().Reset();
-		game_running = false;
+		_game_running = false;
+		_game_frozen = false;
 	}
 
 	void IDE::ClearScene()
@@ -608,19 +613,24 @@ namespace idk
 		}
 
 		//Clear IDE values
-		Core::GetSystem<IDE>().command_controller.ClearUndoRedoStack();
+		Core::GetSystem<IDE>()._command_controller.ClearUndoRedoStack();
 		Core::GetSystem<IDE>()._selected_objects.game_objects.clear();
 		Core::GetSystem<IDE>()._selected_objects.assets.clear();
+	}
+
+	void IDE::MaximizeWindow(IGE_IWindow* window)
+	{
+		_maximized_window = window;
 	}
 
 	void IDE::SetupEditorScene()
 	{
 		// create editor view
-		editor_view = Core::GetResourceManager().Create<RenderTarget>();
-		auto sz = editor_view->Size();
-		editor_view->Size(uvec2{ Core::GetSystem<Application>().GetScreenSize() });
+		_editor_view = Core::GetResourceManager().Create<RenderTarget>();
+		auto sz = _editor_view->Size();
+		_editor_view->Size(uvec2{ Core::GetSystem<Application>().GetScreenSize() });
 		//this->FindWindow<IGE_Console>()->PushMessage(std::to_string(sz.x) + "," + std::to_string(sz.y));
-		editor_view->Name("Editor View");
+		_editor_view->Name("Editor View");
 		//editor_view->Size();
 		// create editor camera
 		RscHandle<Scene> scene{};
@@ -630,7 +640,7 @@ namespace idk
 			camera->GetComponent<Name>()->name = "Editor Camera";
 			camera->Transform()->position = vec3{ 0, 0, 5 };
 			camHandle->far_plane = 100.f;
-			camHandle->render_target = editor_view;
+			camHandle->render_target = _editor_view;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);

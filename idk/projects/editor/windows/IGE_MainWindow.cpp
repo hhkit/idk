@@ -116,7 +116,7 @@ namespace idk {
 
             ImGui::Separator();
 
-			auto game_playing = Core::GetSystem<IDE>().game_running;
+			auto game_playing = Core::GetSystem<IDE>().IsGameRunning();
 
 			if (ImGui::MenuItem("New Scene", "CTRL+N", false, !game_playing))
 				NewScene();
@@ -126,21 +126,20 @@ namespace idk {
 
 			ImGui::Separator();
 
-
-
 			if (ImGui::MenuItem("Save", "CTRL+S", false, !game_playing))
 				SaveScene();
-
-
 
 			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !game_playing))
 				SaveSceneAs();
 
 			ImGui::Separator();
-			if (ImGui::MenuItem("Exit", "ALT+F4")) {
+
+			if (ImGui::MenuItem("Exit", "ALT+F4")) 
+			{
 				std::cout << "Quit Window\n";
 				Core::Shutdown();
 			}
+
 			ImGui::EndMenu(); //BeginMenu("File")
 		}
 	}
@@ -149,7 +148,7 @@ namespace idk {
 	{
 		if (ImGui::BeginMenu("Edit"))
 		{
-			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
+			CommandController& commandController = Core::GetSystem<IDE>()._command_controller;
 			bool canUndo = commandController.CanUndo();
 			bool canRedo = commandController.CanRedo();
 			if (ImGui::MenuItem("Undo", "CTRL+Z", nullptr, canUndo)) {
@@ -278,7 +277,7 @@ namespace idk {
 
 		if (ImGui::BeginMenu("Window"))
 		{
-			for (auto& i : editor.ige_windows) {
+			for (auto& i : editor._ige_windows) {
 				ImGui::PushID(&i);
 				if (ImGui::MenuItem(i->window_name, NULL, &i->is_open)) {
 					//Do other stuff if needed
@@ -286,7 +285,7 @@ namespace idk {
 
 				ImGui::PopID();
 			}
-			if (ImGui::MenuItem("ImGui Demo Window", NULL, &editor.bool_demo_window)) {
+			if (ImGui::MenuItem("ImGui Demo Window", NULL, &editor._show_demo_window)) {
 
 			}
 
@@ -385,22 +384,20 @@ namespace idk {
 
 
 
-        ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
+        ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.0f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
 		ImGui::PushID(1337);
 		if (!Core::GetSystem<IDE>().IsGameRunning())
 		{
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
-			{
 				Core::GetSystem<IDE>().Play();
-			}
 		}
 		else
 		{
+			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
-			{
 				Core::GetSystem<IDE>().Stop();
-			}
+			ImGui::PopStyleColor();
 		}
 
 		ImGui::SameLine(0, 0);
@@ -408,16 +405,14 @@ namespace idk {
 		if (!Core::GetSystem<IDE>().IsGameFrozen())
 		{
 			if (ImGui::Button(ICON_FA_PAUSE, toolButtonSize))
-			{
 				Core::GetSystem<IDE>().Pause();
-			}
 		}
 		else
 		{
+			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
 			if (ImGui::Button(ICON_FA_PAUSE, toolButtonSize))
-			{
 				Core::GetSystem<IDE>().Unpause();
-			}
+			ImGui::PopStyleColor();
 		}
 		ImGui::PopID();
 		

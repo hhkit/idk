@@ -36,7 +36,7 @@ namespace idk {
 			if (count <= 1)
 				return false;
 
-			CommandController& controller = Core::GetSystem<IDE>().command_controller;
+			CommandController& controller = Core::GetSystem<IDE>()._command_controller;
 			for (auto i = 0; i < count; ++i)
 			{
 				repeated_commands.push_back(std::move(controller.undoStack.back()));

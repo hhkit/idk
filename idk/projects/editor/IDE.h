@@ -81,17 +81,17 @@ namespace idk
         template <typename T> // move into .inl if there are more template fns
         T* FindWindow()
         {
-            auto iter = windows_by_type.find(reflect::typehash<T>());
-            return iter != windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
+            auto iter = _windows_by_type.find(reflect::typehash<T>());
+            return iter != _windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
         }
-		RscHandle<RenderTarget> GetEditorRenderTarget() const { return editor_view; }
-		bool IsGameRunning() const { return game_running; }
-		bool IsGameFrozen() const { return game_frozen; }
+		RscHandle<RenderTarget> GetEditorRenderTarget() const { return _editor_view; }
+		bool IsGameRunning() const { return _game_running; }
+		bool IsGameFrozen() const { return _game_frozen; }
 
 		template <typename Cmd, typename... Args>
 		Cmd* ExecuteCommand(Args&&... args)
 		{
-			return static_cast<Cmd*>(command_controller.ExecuteCommand(std::make_unique<Cmd>(std::forward<Args>(args)...)));
+			return static_cast<Cmd*>(_command_controller.ExecuteCommand(std::make_unique<Cmd>(std::forward<Args>(args)...)));
 		}
 
 		// selection
@@ -119,24 +119,27 @@ namespace idk
 
 		void ClearScene();
 
+		void MaximizeWindow(IGE_IWindow* window);
+
 	private:
 		unique_ptr<imgui_interface> _interface;
 		Handle<Camera> _camera;
-		CommandController command_controller; //For editor commands
+		CommandController _command_controller; //For editor commands
 
 		// Editor Scene
-		bool game_running = false;
-		bool game_frozen = true;
-		bool scripts_changed = false;
-		RscHandle<RenderTarget> editor_view;
+		bool _game_running = false;
+		bool _game_frozen = false;
+		bool _scripts_changed = false;
+		RscHandle<RenderTarget> _editor_view;
 		void SetupEditorScene();
 
 		//Editor Windows
-		vector<unique_ptr<IGE_IWindow>>	ige_windows;
-		hash_table<size_t, IGE_IWindow*> windows_by_type;
+		vector<unique_ptr<IGE_IWindow>>	_ige_windows;
+		hash_table<size_t, IGE_IWindow*> _windows_by_type;
+		IGE_IWindow* _maximized_window = nullptr;
 
-		bool bool_demo_window = false;
-        bool closing = false;
+		bool _show_demo_window = false;
+        bool _closing = false;
 
 		//For selecting and displaying in inspector.
 		ObjectSelection _selected_objects{};
@@ -147,5 +150,6 @@ namespace idk
 		friend class CMD_SelectObject;
 		friend class CMD_CollateCommands;
 		friend class IGE_MainWindow;
+		friend class IGE_IWindow;
 	};
 }

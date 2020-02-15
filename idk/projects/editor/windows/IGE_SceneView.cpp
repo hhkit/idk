@@ -144,7 +144,10 @@ namespace idk {
             ImGui::Checkbox("Gizmos", &ide.GetEditorRenderTarget()->render_debug);
             ImGui::EndMenuBar();
         }
-        
+
+		ImGui::SetCursorPosY(ImGui::GetWindowContentRegionMin().y);
+		ImGui::BeginChild("##scenetex", {}, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
 		auto imageSize = vec2{ GetScreenSize() };
 		auto meta = ide.GetEditorRenderTarget();
         auto screen_tex = meta->GetColorBuffer();
@@ -157,7 +160,6 @@ namespace idk {
         draw_rect_size = imageSize;
 
         draw_rect_offset = (GetScreenSize() - imageSize) * 0.5f;
-        ImGui::SetCursorPos(vec2(0, ImGui::GetFrameHeight()) + draw_rect_offset);
 
 		//imageSize.y = (imageSize.x * (9 / 16));
 		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
@@ -211,7 +213,8 @@ namespace idk {
 		//Raycast Selection
 		std::optional< std::pair<GenericHandle,PickState>> result;
 
-		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
+		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGui::GetIO().KeyAlt &&
+			!ImGuizmo::IsUsing())
 		{
 			last_pick = 
 			{
@@ -387,18 +390,19 @@ namespace idk {
 		DrawGlobalAxes();
 		DrawSnapControl();
 		//DrawGridControl();
+
+		ImGui::EndChild();
 	}
 
 	vec2 IGE_SceneView::GetScreenSize()
 	{
         //return vec2{ ImGui::GetWindowContentRegionMax() } - ImGui::GetWindowContentRegionMin();
-        return vec2{ ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - ImGui::GetFrameHeight() };
+        return vec2{ ImGui::GetWindowWidth(),ImGui::GetWindowHeight() };
 	}
 
 	vec2 IGE_SceneView::GetMousePosInWindow()
 	{
 		ImVec2 v = ImGui::GetWindowPos();
-		v.y += ImGui::GetFrameHeight();
 		ImVec2 i = ImGui::GetMousePos();
 		
 		return vec2(i.x - v.x, i.y - v.y);
@@ -430,7 +434,7 @@ namespace idk {
 	{
 		auto originalCursorPos = ImGui::GetCursorPos();
 		auto windowWidth = ImGui::GetWindowContentRegionWidth();
-		ImGui::SetCursorPos(ImVec2{ windowWidth - 250,30 });
+		ImGui::SetCursorPos(ImVec2{ windowWidth - 158.0f - ImGui::CalcTextSize("Snapping ").x, 8.0f });
 		std::stringstream translateTxt	{};
 		std::stringstream rotateTxt		{};
 		std::stringstream scaleTxt		{};
@@ -440,18 +444,17 @@ namespace idk {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
-		ImGui::Text("Snapping:");
+		ImGui::Text("Snapping ");
 		ImGui::SameLine();
-		if (ImGui::Button(translateTxt.str().c_str(),ImVec2(55,0))) {
+		if (ImGui::Button(translateTxt.str().c_str(),ImVec2(50,0))) {
 			ImGui::OpenPopup("TranslateSnap");
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(rotateTxt.str().c_str(), ImVec2(55, 0))) {
+		if (ImGui::Button(rotateTxt.str().c_str(), ImVec2(50, 0))) {
 			ImGui::OpenPopup("RotateSnap");
-
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(scaleTxt.str().c_str(), ImVec2(55, 0))) {
+		if (ImGui::Button(scaleTxt.str().c_str(), ImVec2(50, 0))) {
 			ImGui::OpenPopup("ScaleSnap");
 		}
 
