@@ -125,12 +125,12 @@ namespace idk {
 
         if (!is_window_displayed)
         {
-            ide._camera.current_camera->enabled = false;
+            ide.GetEditorCamera()->enabled = false;
             Core::GetSystem<GraphicsSystem>().enable_picking = false;
             return;
         }
         else
-            ide._camera.current_camera->enabled = true;
+            ide.GetEditorCamera()->enabled = true;
 
 		if (ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
 			ide.DeleteSelectedGameObjects();
@@ -165,24 +165,16 @@ namespace idk {
 
         if (ImGui::BeginDragDropTarget())
         {
-			//Draw where it is going to be created in at
-
-			Handle<Camera> cam = ide._camera.current_camera;
+			Handle<Camera> cam = ide.GetEditorCamera();
 			vec3 objectFinalPos{};
 
 			currRay = GenerateRayFromCurrentScreen();
-			vector<Handle<GameObject>> objs;
-			vector<phys::raycast_result> rayList;
+			auto objs = Core::GetSystem<PhysicsSystem>().Raycast(currRay, LayerMask{ 0xFFFFFFFF });
 
-			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, objs, rayList))
-			{
-				auto gameObjectRayPair = GetClosestGameObjectFromCamera(objs, rayList);
-				objectFinalPos = gameObjectRayPair.second->point_of_collision; //WIP, does not work with spheres proper
-			
-			}
-			else {
+			if (objs.size())
+				objectFinalPos = objs[0].raycast_succ.point_of_collision; //WIP, does not work with spheres proper
+			else
 				objectFinalPos = currRay.origin + currRay.direction() * 10;
-			}
 
 			ray pointingRay{};
 			pointingRay.origin = objectFinalPos; //z
@@ -211,9 +203,9 @@ namespace idk {
                     if (!payload->IsDelivery())
                         continue;
 
-                    auto* cmd = ide.command_controller.ExecuteCommand(COMMAND(CMD_InstantiatePrefab, h.AsHandle<Prefab>(), objectFinalPos));
+                    auto* cmd = ide.ExecuteCommand<CMD_InstantiatePrefab>(h.AsHandle<Prefab>(), objectFinalPos);
 					ide.SelectGameObject(cmd->GetGameObject(), false, true);
-					ide.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+					ide.ExecuteCommand<CMD_CollateCommands>(2);
                     break;
                 }
             }
@@ -232,21 +224,10 @@ namespace idk {
 
 		if (ImGui::IsMouseReleased(0) && ImGui::IsWindowHovered() && !ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && !ImGui::IsKeyDown(static_cast<int>(Key::Alt))) 
 		{
-			//if (Core::GetSystem<GraphicsSystem>().GetAPI() == GraphicsAPI::OpenGL)
-			//{
-			//	auto ray = Core::GetSystem<ogl::Win32GraphicsSystem>().SelectObjViewport(GetMousePosInWindowNormalized());
-			//
-			//	LOG_TO(LogPool::SYS, "Found %lld", ray.id.id);
-			//}
-			//Select gameobject here!
-			CameraControls& main_camera = ide._camera;
-			Handle<Camera> currCamera = main_camera.current_camera;
 			last_pick = 
 			{
-				Core::GetSystem<GraphicsSystem>().ColorPick(GetMousePosInWindowNormalized(),currCamera->GenerateCameraData()),
-				PickState{
-					.is_multi_select = ImGui::IsKeyDown(static_cast<int>(Key::Control))
-				}
+				Core::GetSystem<GraphicsSystem>().ColorPick(GetMousePosInWindowNormalized(), ide.GetEditorCamera()->GenerateCameraData()),
+				PickState { .is_multi_select = ImGui::IsKeyDown(static_cast<int>(Key::Control)) }
 			};
 			
 			currRay = GenerateRayFromCurrentScreen();
@@ -257,13 +238,15 @@ namespace idk {
 				//get the first obj
 				auto& editor = ide;
 				Handle<GameObject> closestGameObject = obj.front();
-				auto cameraPos = editor._camera.current_camera->currentPosition();
-				float distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
-				for (auto& iObject : obj) {
-					float comparingDistance = cameraPos.distance(iObject->GetComponent<Transform>()->position);
-					if (comparingDistance < distanceToCamera) {
+				auto cameraPos = editor.GetEditorCamera()->GetGameObject()->GetComponent<Transform>()->GlobalPosition();
+				float distanceToCamera = closestGameObject->GetComponent<Transform>()->GlobalPosition().distance(cameraPos); //Setup first
+				for (auto& iObject : obj)
+				{
+					float comparingDistance = cameraPos.distance(iObject->GetComponent<Transform>()->GlobalPosition());
+					if (comparingDistance < distanceToCamera) 
+					{
 						closestGameObject = iObject;
-						distanceToCamera = closestGameObject->GetComponent<Transform>()->position.distance(cameraPos); //Replace
+						distanceToCamera = closestGameObject->GetComponent<Transform>()->GlobalPosition().distance(cameraPos); //Replace
 					}
 				}
 				//result = closestGameObject;
@@ -287,15 +270,10 @@ namespace idk {
 		{
 			auto [closestRenderer,picked_state] = *result;
 			Handle<GameObject> closestGameObject{};
-			if (closestRenderer)
-			{
-				Handle<SkinnedMeshRenderer> test1;
-				Handle<MeshRenderer> test2;
 
-				closestGameObject = closestRenderer.visit([](auto handle) {
-					return GetGameObject(handle);
-				});
-			}
+			if (closestRenderer)
+				closestGameObject = closestRenderer.visit([](auto handle) { return GetGameObject(handle); });
+
 			if (closestGameObject)
 			{
 				auto& editor = ide;
@@ -342,8 +320,8 @@ namespace idk {
 		//Right Mouse WASD control
 		if (ImGui::IsMouseDown(1) && !ImGui::GetIO().KeyAlt) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
-				Handle<Transform> tfm = ide._camera.current_camera->GetGameObject()->GetComponent<Transform>();
-				distance_to_focused_vector = focused_vector.distance(tfm->position);
+				Handle<Transform> tfm = ide.GetEditorCamera()->GetGameObject()->GetComponent<Transform>();
+				distance_to_focused_vector = orbit_point.distance(tfm->position);
 				cachedMouseScreenPos = currMouseScreenPos;
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
@@ -414,22 +392,12 @@ namespace idk {
 		}
 		prevMouseScreenPos = currMouseScreenPos;
 
-		Core::GetSystem<DebugRenderer>().Draw(currRay, color{ 0,0.8f,0,1 }, Core::GetDT());
-
-
+		Core::GetSystem<DebugRenderer>().Draw(currRay, color{ 0, 0.8f, 0 });
 
 		UpdateGizmoControl();
-
-		// draw current global axes
 		DrawGlobalAxes();
-
 		DrawSnapControl();
 		//DrawGridControl();
-	}
-
-	void IGE_SceneView::SetTexture(void* textureToRender)
-	{
-		sceneTexture = textureToRender;
 	}
 
 	vec2 IGE_SceneView::GetScreenSize()
@@ -455,6 +423,11 @@ namespace idk {
 		i.x = v.x != 0.0f ? i.x / v.x : 0.0f;
 		i.y = v.y != 0.0f ? i.y / v.y : 0.0f;
 		return i;
+	}
+
+	void IGE_SceneView::SetOrbitPoint(vec3 pt)
+	{
+		orbit_point = pt;
 	}
 
 	//void IGE_SceneView::DrawGridControl()
@@ -545,10 +518,7 @@ namespace idk {
 		const auto bottom_right = vec2(ImGui::GetWindowPos()) + vec2(ImGui::GetWindowContentRegionMax()) - vec2(32.0f, 32.0f);
 		const float axis_len = 24.0f;
 		IDE& editor = Core::GetSystem<IDE>();
-		CameraControls& main_camera = editor._camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
-		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		auto view = currCamera->ViewMatrix();
+		auto view = editor.GetEditorCamera()->ViewMatrix();
 
 		vec2 right = (view * vec4(1.0f, 0, 0, 0)).xy;
 		right.x *= -1;
@@ -564,28 +534,30 @@ namespace idk {
 			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
 	}
 
-	std::pair<Handle<GameObject>, phys::raycast_result> IGE_SceneView::GetClosestGameObjectFromCamera(vector<Handle<GameObject>>& refVector, vector<phys::raycast_result>& rayResult)
+	ray IGE_SceneView::WindowsPointToRay(vec2 vp_pos)
 	{
-		std::pair<Handle<GameObject>, phys::raycast_result> output{};
-		if (refVector.size() == 0)
-			return output;
+		const auto view_mtx = Core::GetSystem<IDE>().GetEditorCamera()->ViewMatrix();
+		const auto pers_mtx = Core::GetSystem<IDE>().GetEditorCamera()->ProjectionMatrix();
 
-		IDE& editor = Core::GetSystem<IDE>();
+		//-1 to 1 (ndc)
+		vp_pos -= vec2(0.5f, 0.5f);
+		vp_pos /= 0.5f;
 
-		int counter = 0;
-		auto cameraPos = editor._camera.current_camera->currentPosition();
-		float distanceToCamera = refVector[counter]->GetComponent<Transform>()->position.distance(cameraPos); //Setup first
-		for (int i = 0; i < refVector.size(); ++i) {
-			float comparingDistance = cameraPos.distance(refVector[i]->GetComponent<Transform>()->position);
-			if (comparingDistance < distanceToCamera) {
-				counter = i;
-				distanceToCamera = refVector[counter]->GetComponent<Transform>()->position.distance(cameraPos); //Replace
-			}
-		}
-		output.first = refVector[counter];
-		output.second = rayResult[counter];
+		vp_pos = vec2(vp_pos.x, -vp_pos.y);
 
-		return output;
+		vec4 vfPos = pers_mtx.inverse() * vec4(vp_pos.x, vp_pos.y, 0, 1);
+		vfPos *= 1.f / vfPos.w;
+		vec4 wfPos = view_mtx.inverse() * vfPos;
+
+		vec4 vbPos = pers_mtx.inverse() * vec4(vp_pos.x, vp_pos.y, 1, 1);
+		vbPos *= 1.f / vbPos.w;
+		vec4 wbPos = view_mtx.inverse() * vbPos;
+
+		ray newRay;
+		newRay.origin = wfPos;
+		newRay.velocity = (wbPos - wfPos);
+
+		return newRay;
 	}
 
 	void IGE_SceneView::UpdateWASDMouseControl()
@@ -593,24 +565,16 @@ namespace idk {
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 		auto& app_sys = Core::GetSystem<Application>();
 
-		auto scroll = app_sys.GetMouseScroll().y;
-		//IDE& editor = Core::GetSystem<IDE>();
+		const auto scroll = app_sys.GetMouseScroll().y;
+		if (scroll > 0)
+			cam_vel += cam_vel_additive * scroll;
+		else if (scroll < 0)
+			cam_vel = std::max(cam_vel + cam_vel_additive * scroll, min_cam_vel);
 
-		if (scroll > 0) {
-			cam_vel += cam_vel_additive;
-		}
-		else if (scroll < 0) {
-			cam_vel = (cam_vel - cam_vel_additive) < min_cam_vel ? min_cam_vel : (cam_vel - cam_vel_additive);
-		}
-
-
-
-		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Camera> currCamera = Core::GetSystem<IDE>().GetEditorCamera();
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
 
-		//Left shift = 16
-		const float finalCamVel = ImGui::IsKeyDown(16) ? cam_vel * cam_vel_shift_multiplier : cam_vel;
+		const float finalCamVel = ImGui::GetIO().KeyShift ? cam_vel * cam_vel_shift_multiplier : cam_vel;
 		//WASD MOVEMENT
 		if (app_sys.GetKey(Key::A))	tfm->position += -finalCamVel * Core::GetRealDT().count() * tfm->Right();
 		if (app_sys.GetKey(Key::D))	tfm->position += +finalCamVel * Core::GetRealDT().count() * tfm->Right();
@@ -621,13 +585,7 @@ namespace idk {
 		if (app_sys.GetKey(Key::E))	tfm->position += +finalCamVel * Core::GetRealDT().count() * vec3 { 0, 1, 0 };
 
 		//Mouse Controls
-		//int drag_X{};
-		//int drag_Y{};
-		//drag_X = currPos.x - prevPos.x;
-		//drag_Y = currPos.y - prevPos.y;
-		//std::cout << "Drag:" << drag_X << "," << drag_Y << std::endl;
-
-		vec2 delta{};// = ImGui::GetMouseDragDelta(1, 0.1f);
+		vec2 delta;// = ImGui::GetMouseDragDelta(1, 0.1f);
 		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x);
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y);
 		//ImGui::ResetMouseDragDelta(1);
@@ -639,7 +597,7 @@ namespace idk {
 		//MOUSE PITCH
 		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
-		focused_vector = tfm->position + tfm->Forward() * distance_to_focused_vector;
+		orbit_point = tfm->position + tfm->Forward() * distance_to_focused_vector;
 
 		// MoveMouseToWindow();
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
@@ -656,15 +614,14 @@ namespace idk {
 		
 		IDE& editor = Core::GetSystem<IDE>();
 
-		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
+		Handle<Camera> currCamera = Core::GetSystem<IDE>().GetEditorCamera();
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		vec3 localY =  tfm->Up()	* delta.y*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localy axis
-		vec3 localX = -tfm->Right()	* delta.x*	pan_multiplier	* editor.scroll_max* 0.5f; //Amount to move in localx axis
+		vec3 localY =  tfm->Up()	* delta.y * pan_multiplier; //Amount to move in localy axis
+		vec3 localX = -tfm->Right()	* delta.x * pan_multiplier; //Amount to move in localx axis
 		tfm->position += localY;
 		tfm->position += localX;
-		focused_vector += localY;
-		focused_vector += localX;
+		orbit_point += localY;
+		orbit_point += localX;
 
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
 		currMouseScreenPos = cachedMouseScreenPos;
@@ -672,58 +629,44 @@ namespace idk {
 
 	void IGE_SceneView::UpdateScrollMouseControl()
 	{
-		
-		auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
-		auto cam = Core::GetSystem<IDE>()._camera;
-		auto tfm = cam.current_camera->GetGameObject()->Transform();
-		IDE& editor = Core::GetSystem<IDE>();
-		if (ImGui::IsWindowHovered() && abs(scroll) > epsilon)
-			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * (float(scroll) / (1200.f)) * editor.scroll_max);
+		const auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
+		auto tfm = Core::GetSystem<IDE>().GetEditorCamera()->GetGameObject()->Transform();
 
-		//std::cout << scroll << "\n";
-		//else
-			//editor.scroll_multiplier = 2.f;
-
+		if (ImGui::IsWindowHovered() && scroll)
+			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * scroll * 0.01f);
 	}
 
 	void IGE_SceneView::UpdateScrollMouseControl2()
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-		//vec2 delta{ static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) , static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) };
-
-		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
-		Handle<Camera> currCamera = main_camera.current_camera;
-		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-
-		tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x)*0.5f);
+		auto tfm = Core::GetSystem<IDE>().GetEditorCamera()->GetGameObject()->Transform();
+		tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x));
 
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
 		currMouseScreenPos = cachedMouseScreenPos;
-
 	}
 
 	void IGE_SceneView::UpdateOrbitControl()
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-		const float orbit_strength = 0.5f;
+
 		vec2 delta{};
 		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) * orbit_strength; //Global Y Axis
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) * -orbit_strength; //Local X Axis
+
 		//Getting camera datas
-		Handle<Camera>		currCamera = Core::GetSystem<IDE>()._camera.current_camera;
-		Handle<Transform>	tfm = currCamera->GetGameObject()->GetComponent<Transform>();
-		mat4				cam_matrix = tfm->GlobalMatrix();
+		auto tfm = Core::GetSystem<IDE>().GetEditorCamera()->GetGameObject()->GetComponent<Transform>();
+		mat4 cam_matrix = tfm->GlobalMatrix();
 
-
-		const vec3 cam_to_point_vector = tfm->position - focused_vector;
+		const vec3 cam_to_point_vector = tfm->position - orbit_point;
 		const mat4 rotation_mat4 = rotate(vec3{ 0,1,0 }, rad(deg{ delta.x })) * rotate(tfm->Right(), rad(deg{ delta.y }));
 
-		const vec3 final_cam_pos = focused_vector + vec3{ rotation_mat4 * vec4{ cam_to_point_vector, 0 } };
+		const vec3 final_cam_pos = orbit_point + vec3{ rotation_mat4 * vec4{ cam_to_point_vector, 0 } };
 		const mat4 final_position_mat4 = mat4{ translate(final_cam_pos) };
 		const mat4 inverse_position_mat4 = mat4{ translate(tfm->position) }.inverse();
 		
-		cam_matrix = final_position_mat4 * rotation_mat4 * inverse_position_mat4 * cam_matrix;	//T*R*T^-1
+		cam_matrix = final_position_mat4 * rotation_mat4 * inverse_position_mat4 * cam_matrix; //T*R*T^-1
 		tfm->GlobalMatrix(cam_matrix);
 
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
@@ -734,8 +677,7 @@ namespace idk {
 	{
 		//Getting camera datas
 		IDE&				editor			 = Core::GetSystem<IDE>();
-		CameraControls&		main_camera		 = editor._camera;
-		Handle<Camera>		currCamera		 = main_camera.current_camera;
+		Handle<Camera>		currCamera		 = editor.GetEditorCamera();
 		Handle<Transform>	tfm				 = currCamera->GetGameObject()->GetComponent<Transform>();
 		const auto			view_mtx		 = currCamera->ViewMatrix();
 		const float*		viewMatrix		 = view_mtx.data();
@@ -794,10 +736,10 @@ namespace idk {
 					int execute_counter = 0;
 					for (int i = 0; i < editor.GetSelectedObjects().game_objects.size(); ++i) {
 						mat4 modifiedMat = editor.GetSelectedObjects().game_objects[i]->GetComponent<Transform>()->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, editor.GetSelectedObjects().game_objects[i], original_matrices[i], modifiedMat));
+						editor.ExecuteCommand<CMD_TransformGameObject>(editor.GetSelectedObjects().game_objects[i], original_matrices[i], modifiedMat);
 						++execute_counter;
 					}
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+					editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 
 					is_being_modified = false;
 				}
@@ -863,12 +805,7 @@ namespace idk {
 
 	ray IGE_SceneView::GenerateRayFromCurrentScreen()
 	{
-		//auto& app_sys = Core::GetSystem<Application>();
-
-		CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
-		//Handle<Camera> currCamera = main_camera.current_camera;
-
-		return main_camera.WindowsPointToRay(GetMousePosInWindowNormalized());
+		return WindowsPointToRay(GetMousePosInWindowNormalized());
 	}
 
 	

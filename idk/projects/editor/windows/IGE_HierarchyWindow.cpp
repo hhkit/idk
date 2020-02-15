@@ -343,13 +343,13 @@ namespace idk {
 
 							//If im draging to my parent, unparent
 							if (i->Parent() == handle)
-								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, Handle<GameObject>{});
 							else //Else parent normally
-								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, handle);
 							++execute_counter;
 						}
 
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+						editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 					}
 					else
 					{
@@ -366,11 +366,11 @@ namespace idk {
 						if (!isParentingToChild)
 						{
 							if (i->Parent() == handle)
-								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, Handle<GameObject>{});
 							else //Else parent normally
-								editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, handle);
 							editor.SelectGameObject(i, false, true);
-							editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+							editor.ExecuteCommand<CMD_CollateCommands>(2);
 						}
 					}
 
@@ -433,16 +433,16 @@ namespace idk {
 					{
 						if (!h)
 							continue;
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, h, Handle<GameObject>{}));
+						editor.ExecuteCommand<CMD_ParentGameObject>(h, Handle<GameObject>{});
 						++execute_counter;
 					}
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+					editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 				}
 				else
 				{
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, drop_payload, Handle<GameObject>{}));
+					editor.ExecuteCommand<CMD_ParentGameObject>(drop_payload, Handle<GameObject>{});
 					editor.SelectGameObject(drop_payload, false, true);
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+					editor.ExecuteCommand<CMD_CollateCommands>(2);
 				}
 			}
 		}

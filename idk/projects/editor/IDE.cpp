@@ -35,6 +35,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <scene/SceneManager.h>
 #include <scene/SceneGraph.inl>
 #include <script/ScriptSystem.h>
+#include <audio/AudioSystem.h>
 
 // resource importing
 #include <res/ResourceHandle.inl>
@@ -240,7 +241,7 @@ namespace idk
                 auto cam = reg_scene.get("camera");
                 if (cam.size())
                 {
-                    auto& t = *_camera.current_camera->GetGameObject()->Transform();
+                    auto& t = *_camera->GetGameObject()->Transform();
                     auto res = parse_text<Transform>(cam);
                     if (res)
                     {
@@ -258,7 +259,7 @@ namespace idk
 
     void IDE::EarlyShutdown()
     {
-        reg_scene.set("camera", serialize_text(*_camera.current_camera->GetGameObject()->Transform()));
+        reg_scene.set("camera", serialize_text(*_camera->GetGameObject()->Transform()));
 
         ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
         Core::GetSystem<ProjectManager>().SaveConfigs();
@@ -354,7 +355,7 @@ namespace idk
 
 	Handle<Camera> IDE::GetEditorCamera()
 	{
-		return _camera.current_camera;
+		return _camera;
 	}
 
 	void IDE::PollShortcutInputs()
@@ -403,13 +404,13 @@ namespace idk
 			ObjectSelection sel;
 			sel.game_objects.push_back(handle);
 			if (force || sel != _selected_objects)
-				command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
+				ExecuteCommand<CMD_SelectObject>(sel);
 		}
 		else
 		{
 			auto copy = _selected_objects;
 			copy.game_objects.push_back(handle);
-			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, copy));
+			ExecuteCommand<CMD_SelectObject>(copy);
 		}
     }
 	void IDE::SelectAsset(GenericResourceHandle handle, bool multiselect, bool force)
@@ -421,32 +422,58 @@ namespace idk
 			ObjectSelection sel;
 			sel.assets.push_back(handle);
 			if (force || sel != _selected_objects)
-				command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, sel));
+				ExecuteCommand<CMD_SelectObject>(sel);
 		}
 		else
 		{
 			auto copy = _selected_objects;
 			copy.assets.push_back(handle);
-			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, copy));
+			ExecuteCommand<CMD_SelectObject>(copy);
 		}
 	}
 	void IDE::SetSelection(ObjectSelection selection, bool force)
 	{
 		if (force || selection != _selected_objects)
-			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, selection));
+			ExecuteCommand<CMD_SelectObject>(selection);
 	}
 	void IDE::Unselect(bool force)
 	{
 		if (force || !_selected_objects.empty())
-			command_controller.ExecuteCommand(COMMAND(CMD_SelectObject, ObjectSelection{}));
+			ExecuteCommand<CMD_SelectObject>(ObjectSelection{});
+	}
+
+	void IDE::FocusOnSelectedGameObjects()
+	{
+		if (_selected_objects.game_objects.size())
+		{
+			vec3 finalCamPos{};
+			for (const auto& go : _selected_objects.game_objects)
+			{
+				if (go)
+					finalCamPos += go->GetComponent<Transform>()->GlobalPosition();
+			}
+			finalCamPos /= static_cast<float>(_selected_objects.game_objects.size());
+
+			/*
+			Needs to find how much space the object pixels takes on screen, then this distance is based on that.
+			If single object, object pixels should take 50% of screen.
+			If multiple objects, the ends of each object pixels on screen plus some padding should be used as anchor points to determine distance.
+			But this is lazy method. 20.
+			*/
+			const float distanceFromObject = 20;
+			const Handle<Transform> camTransform = Core::GetSystem<IDE>().GetEditorCamera()->GetGameObject()->GetComponent<Transform>();
+			camTransform->position = finalCamPos - camTransform->Forward() * distanceFromObject;
+
+			FindWindow<IGE_SceneView>()->SetOrbitPoint(finalCamPos);
+		}
 	}
 
 	void IDE::CreateGameObject(Handle<GameObject> parent, string name, vector<string> initial_components)
 	{
-		auto* cmd = command_controller.ExecuteCommand(
-			COMMAND(CMD_CreateGameObject, parent, std::move(name), std::move(initial_components)));
+		auto* cmd = ExecuteCommand<CMD_CreateGameObject>(parent, std::move(name), std::move(initial_components));
 		SelectGameObject(cmd->GetGameObject(), false, true);
-		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+		ExecuteCommand<CMD_CollateCommands>(2);
+
 		FindWindow<IGE_HierarchyWindow>()->ScrollToSelectedInHierarchy(cmd->GetGameObject());
 	}
 
@@ -461,13 +488,13 @@ namespace idk
 		{
 			if (h)
 			{
-				command_controller.ExecuteCommand(COMMAND(CMD_DeleteGameObject, h));
+				ExecuteCommand<CMD_DeleteGameObject>(h);
 				++execute_counter;
 			}
 		}
 
 		Unselect(true); ++execute_counter;
-		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+		ExecuteCommand<CMD_CollateCommands>(execute_counter);
     }
 
 	void IDE::Copy()
@@ -490,7 +517,7 @@ namespace idk
 		{
 			if (v.size() && v[0].original_handle)
 			{
-				auto* cmd = command_controller.ExecuteCommand(COMMAND(CMD_CreateGameObject, v));
+				auto* cmd = ExecuteCommand<CMD_CreateGameObject>(v);
 				sel.game_objects.push_back(cmd->GetGameObject());
 				++execute_counter;
 			}
@@ -502,7 +529,72 @@ namespace idk
 			++execute_counter;
 		}
 
-		command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+		ExecuteCommand<CMD_CollateCommands>(execute_counter);
+	}
+
+	void IDE::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
+	{
+		RecursiveObjects newObject{};
+		newObject.original_handle = i;
+
+		//Copy all components from this gameobject
+		for (auto& c : i->GetComponents())
+			newObject.vector_of_components.emplace_back((*c).copy());
+
+		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
+		auto children = sceneManager.FetchSceneGraphFor(i);
+
+		if (children)
+		{
+			//If there is no children, it will stop
+			children.Visit([&](const Handle<GameObject>& handle, int) -> bool //Recurse through one level only
+			{
+				if (handle == i) //Skip parent
+					return true;
+
+				RecursiveCollectObjects(handle, newObject.children); //Depth first recursive
+				return false;
+			});
+		}
+		vector_ref.push_back(newObject);
+	}
+
+	void IDE::Play()
+	{
+		HotReloadDLL();
+		FindWindow<IGE_InspectorWindow>()->Reset();
+		Core::GetScheduler().SetPauseState(UnpauseAll);
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
+		Core::GetSystem<PhysicsSystem>().Reset();
+		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+		game_running = true;
+		if (game_frozen)
+			Pause();
+	}
+
+	void IDE::Pause()
+	{
+		Core::GetScheduler().SetPauseState(EditorPause);
+		Core::GetSystem<AudioSystem>().SetSystemPaused(true);
+		game_frozen = true;
+	}
+
+	void IDE::Unpause()
+	{
+		Core::GetScheduler().SetPauseState(UnpauseAll);
+		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+		game_frozen = false;
+	}
+
+	void IDE::Stop()
+	{
+		RestoreFromTemporaryScene();
+		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
+		Core::GetScheduler().SetPauseState(EditorPause);
+		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+		Core::GetSystem<AudioSystem>().StopAllAudio();
+		Core::GetSystem<PhysicsSystem>().Reset();
+		game_running = false;
 	}
 
 	void IDE::ClearScene()
@@ -543,88 +635,8 @@ namespace idk
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 				camHandle->clear = *Core::GetResourceManager().Load<CubeMap>("/engine_data/textures/skybox/space.png.cbm", false);
 
-			_camera.current_camera = camHandle;
+			_camera = camHandle;
 		}
 	}
-
-	void IDE::FocusOnSelectedGameObjects()
-	{
-		if (_selected_objects.game_objects.size()) {
-			vec3 finalCamPos{};
-			for (const auto& i : _selected_objects.game_objects) {
-
-				const auto transform = i->GetComponent<Transform>();
-				if (transform) {
-					finalCamPos += transform->GlobalPosition();
-				}
-
-			}
-
-            finalCamPos /= static_cast<float>(_selected_objects.game_objects.size());
-
-			/*
-			Needs to find how much space the object pixels takes on screen, then this distance is based on that.
-			If single object, object pixels should take 50% of screen.
-			If multiple objects, the ends of each object pixels on screen plus some padding should be used as anchor points to determine distance.
-			But this is lazy method. 20.
-			*/
-			const float distanceFromObject = 20; 
-
-			const CameraControls& main_camera = Core::GetSystem<IDE>()._camera;
-			const Handle<Camera> currCamera = main_camera.current_camera;
-			const Handle<Transform> camTransform = currCamera->GetGameObject()->GetComponent<Transform>();
-			camTransform->position = finalCamPos;
-			if (auto* sceneViewPtr = FindWindow<IGE_SceneView>())
-				sceneViewPtr->focused_vector = finalCamPos;
-			scroll_multiplier = default_scroll_multiplier;
-			camTransform->position -= camTransform->Forward() * distanceFromObject;
-		}
-	}
-
-	void IDE::IncreaseScrollPower()
-	{
-		scroll_multiplier += scroll_additive;
-		scroll_multiplier = scroll_multiplier > scroll_max ? scroll_max : scroll_multiplier;
-
-	}
-
-	void IDE::DecreaseScrollPower()
-	{
-		scroll_multiplier -= scroll_subtractive;
-		scroll_multiplier = scroll_multiplier < scroll_min ? scroll_min : scroll_multiplier;
-	}
-
-	void IDE::RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref)
-	{
-
-		RecursiveObjects newObject{};
-		newObject.original_handle = i;
-		//Copy all components from this gameobject
-		for (auto& c : i->GetComponents())
-			newObject.vector_of_components.emplace_back((*c).copy());
-
-		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-		auto children = sceneManager.FetchSceneGraphFor(i);
-
-		if (children) {
-
-			//If there is no children, it will stop
-			children.Visit([&](const Handle<GameObject>& handle, int depth) -> bool { //Recurse through one level only
-				(void)depth;
-
-				//Skip parent
-				if (handle == i)
-					return true;
-
-				RecursiveCollectObjects(handle, newObject.children); //Depth first recursive
-
-				return false;
-
-				});
-		}
-		vector_ref.push_back(newObject);
-	}
-
-
 
 }

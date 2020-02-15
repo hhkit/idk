@@ -239,7 +239,8 @@ namespace idk {
 			bool canSelect = editor.GetSelectedObjects().game_objects.size();
 
 			span componentNames = GameState::GetComponentNames();
-			for (const char* name : componentNames) {
+			for (const char* name : componentNames)
+			{
 				string displayName = name;
 				if (displayName == "Transform")
 					continue;
@@ -253,29 +254,20 @@ namespace idk {
 				if (found != std::string::npos)
 					displayName.erase(found, fluffText.size());
 
-				/*
-				const string fluffText2{ ">(void)" };
-				found = displayName.find(fluffText2);
-				if (found != std::string::npos)
-					displayName.erase(found, fluffText2.size());
-
-				*/
-
-				if (ImGui::MenuItem(displayName.c_str(),nullptr,nullptr,canSelect)) {
-					//Add component
+				if (ImGui::MenuItem(displayName.c_str(), nullptr, nullptr, canSelect)) 
+				{
 					int execute_counter = 0;
-					for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects) {
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+					for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects) 
+					{
+						editor.ExecuteCommand<CMD_AddComponent>(i, string{ name });
 						++execute_counter;
 					}
-
-					CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-					commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+					Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
 				}
 			}
+
 			//Each button is disabled if gameobject is not selected!
 			ImGui::EndMenu(); 
-
 		}
 	}
 
@@ -396,60 +388,35 @@ namespace idk {
         ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.5f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
 		ImGui::PushID(1337);
-		if (Core::GetSystem<IDE>().game_running == false)
+		if (!Core::GetSystem<IDE>().IsGameRunning())
 		{
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 			{
-				// IDE& editor = Core::GetSystem<IDE>();
-				// for (auto& i : editor.ige_windows)
-				// 	if (i->window_name != "Game")
-				// 		i->is_open = false;
-				// editor._camera.current_camera->enabled = false;
-				HotReloadDLL();
-				Core::GetSystem<IDE>().FindWindow<IGE_InspectorWindow>()->Reset();
-				Core::GetScheduler().SetPauseState(UnpauseAll);
-				Core::GetSystem<IDE>().game_running = true;
-				Core::GetSystem<IDE>().game_frozen = false;
-				Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
-				Core::GetSystem<PhysicsSystem>().Reset();
-				Core::GetSystem<AudioSystem>().SetSystemPaused(false);
-
+				Core::GetSystem<IDE>().Play();
 			}
-			ImGui::SameLine(0, 0);
-			if (ImGui::Button("Reload DLL", toolButtonSize))
-				HotReloadDLL();
 		}
 		else
 		{
-			if (Core::GetSystem<IDE>().game_frozen == false)
+			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 			{
-				if (ImGui::Button("Pause", toolButtonSize))
-				{
-					Core::GetScheduler().SetPauseState(EditorPause);
-					Core::GetSystem<IDE>().game_frozen = true;
-					Core::GetSystem<AudioSystem>().SetSystemPaused(true);
-				}
+				Core::GetSystem<IDE>().Stop();
 			}
-			else
-			{
-				if (ImGui::Button("Unpause", toolButtonSize))
-				{
-					Core::GetScheduler().SetPauseState(UnpauseAll); 
-					Core::GetSystem<IDE>().game_frozen = false;
-					Core::GetSystem<AudioSystem>().SetSystemPaused(false);
+		}
 
-				}
-			}
-			ImGui::SameLine(0, 0);
-			if (ImGui::Button("Stop", toolButtonSize))
+		ImGui::SameLine(0, 0);
+
+		if (!Core::GetSystem<IDE>().IsGameFrozen())
+		{
+			if (ImGui::Button(ICON_FA_PAUSE, toolButtonSize))
 			{
-				RestoreFromTemporaryScene();
-				Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
-				Core::GetScheduler().SetPauseState(EditorPause);
-				Core::GetSystem<IDE>().game_running = false;
-				Core::GetSystem<AudioSystem>().SetSystemPaused(false);
-				Core::GetSystem<AudioSystem>().StopAllAudio();
-				Core::GetSystem<PhysicsSystem>().Reset();
+				Core::GetSystem<IDE>().Pause();
+			}
+		}
+		else
+		{
+			if (ImGui::Button(ICON_FA_PAUSE, toolButtonSize))
+			{
+				Core::GetSystem<IDE>().Unpause();
 			}
 		}
 		ImGui::PopID();

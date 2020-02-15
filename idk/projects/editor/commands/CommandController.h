@@ -23,8 +23,6 @@ To change list to circular buffer soon-ish.
 #include <queue>
 #include <editor/commands/ICommand.h>
 
-#define COMMAND(COMMAND_CLASSNAME,...) std::make_unique<COMMAND_CLASSNAME>(__VA_ARGS__)
-
 namespace idk 
 {
 

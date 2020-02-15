@@ -172,11 +172,10 @@ namespace idk
                 if (!h)
                     continue;
                 const mat4 modified_mat = h->GetComponent<Transform>()->GlobalMatrix();
-                editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, h, original_matrices[i], modified_mat));
+                editor.ExecuteCommand<CMD_TransformGameObject>(h, original_matrices[i], modified_mat);
                 ++execute_counter;
             }
-            CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-            commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+            Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
         }
     }
 

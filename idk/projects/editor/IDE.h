@@ -20,12 +20,9 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/imgui_interface.h>
 #include <editor/commands/CommandController.h>
 #include <editor/Registry.h>
-#include <editor/CameraControls.h>
 #include <editor/ObjectSelection.h>
 
 #undef FindWindow
-
-
 
 namespace idk
 {
@@ -89,6 +86,13 @@ namespace idk
         }
 		RscHandle<RenderTarget> GetEditorRenderTarget() const { return editor_view; }
 		bool IsGameRunning() const { return game_running; }
+		bool IsGameFrozen() const { return game_frozen; }
+
+		template <typename Cmd, typename... Args>
+		Cmd* ExecuteCommand(Args&&... args)
+		{
+			return static_cast<Cmd*>(command_controller.ExecuteCommand(std::make_unique<Cmd>(std::forward<Args>(args)...)));
+		}
 
 		// selection
 		const ObjectSelection& GetSelectedObjects();
@@ -97,17 +101,27 @@ namespace idk
 		void SetSelection(ObjectSelection selection, bool force = false);
 		void Unselect(bool force = false);
 
+		void FocusOnSelectedGameObjects();
+
 		// game object operations
 		void CreateGameObject(Handle<GameObject> parent = {}, string name = "", vector<string> initial_components = {});
 		void DeleteSelectedGameObjects();
 		void Copy();
 		void Paste();
 
+		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
+
+		// play/pause/stop operations
+		void Play();
+		void Pause();
+		void Unpause();
+		void Stop();
+
 		void ClearScene();
 
 	private:
 		unique_ptr<imgui_interface> _interface;
-		CameraControls _camera;
+		Handle<Camera> _camera;
 		CommandController command_controller; //For editor commands
 
 		// Editor Scene
@@ -124,39 +138,14 @@ namespace idk
 		bool bool_demo_window = false;
         bool closing = false;
 
-		//For Gizmo controls
-		void FocusOnSelectedGameObjects();
-
-		//Scrolling
-		float		scroll_multiplier			= 2.0f;			//AFfects pan and scrolling intensity
-		const float default_scroll_multiplier	= 2.0f;			//When on focus, this resets the scroll_multiplier
-		const float scroll_additive				= 0.90f;		//Amount of multiplication when scrolling farther.This adds to scroll_multiplier
-		const float scroll_subtractive			= 0.2f;			//Amount of multiplication when scrolling nearer .This adds to scroll_multiplier
-		const float scroll_max					= 10.0f;
-		const float scroll_min					= 0.1f;
-		void IncreaseScrollPower();
-		void DecreaseScrollPower();
-
 		//For selecting and displaying in inspector.
-		ObjectSelection				_selected_objects{};
+		ObjectSelection _selected_objects{};
 
 		//For copy commands
-		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
 		vector<vector<RecursiveObjects>> _copied_game_objects; // A vector of data containing gameobject data.
 
-
-
-		friend class IGE_MainWindow;
-		friend class IGE_SceneView;
-		friend class IGE_ProjectWindow;
-		friend class IGE_HierarchyWindow;
-		friend class IGE_InspectorWindow;
-		friend class IGE_AnimatorWindow;
-		friend class IGE_LightLister;
-		friend class CMD_DeleteGameObject;
-		friend class CMD_CreateGameObject;
-		friend class CMD_CollateCommands;
 		friend class CMD_SelectObject;
-		friend class CommandController;
+		friend class CMD_CollateCommands;
+		friend class IGE_MainWindow;
 	};
 }
