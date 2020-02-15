@@ -43,7 +43,7 @@ namespace idk
         vec2 draw_rect_size;
 
 		vec3 orbit_point;
-		float distance_to_focused_vector;	//When WASD control is activated, this is used to move the focused_vector! Only used for WASD control
+		float distance_to_orbit_point;	//When WASD control is activated, this is used to move the orbit_point! Only used for WASD control
 
 		bool is_controlling_WASDcam   = false;
 		bool is_controlling_Pancam	  = false;
@@ -60,7 +60,7 @@ namespace idk
 		static constexpr float orbit_strength				= 0.5f;
 		static constexpr float pan_multiplier				= 0.1f;
 
-		bool	display_grid						= false;
+		//bool	display_grid						= false;
 		//void	DrawGridControl();
 
 		float	translate_snap_val[3]				= {0.0f,0.0f,0.0f};
@@ -72,14 +72,16 @@ namespace idk
 
 		std::optional<std::pair<ColorPickResult,PickState>> last_pick;
 
+		float gizmo_matrix[16]{};
+		vector<mat4> original_matrices;
+
+		bool is_being_modified = false;
+		ivec2 cachedMouseScreenPos{};
+		ivec2 prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+		ivec2 currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+
 		void DrawSnapControl();
 		void DrawGlobalAxes();
-
-		//Debug ray
-		ray currRay;
-
-
-		ray WindowsPointToRay(vec2 vp_pos);
 
 		void UpdateWASDMouseControl();
 		void UpdatePanMouseControl(); //MiddleMouse
@@ -89,22 +91,13 @@ namespace idk
 		
 		void UpdateGizmoControl();
 
-		void MoveMouseToWindow(); //Moves the mouse to the middle of the sceneView
+		void CenterMouseInWindow();
 
 		void ImGuizmoManipulateUpdate(Handle<Transform>& originalTransform); //Call after ImGuizmo::Manipulate
-
-
-		float gizmo_matrix[16]{};
-		vector<mat4> original_matrices;
-
 		mat4 GenerateMat4FromGizmoMatrix();
 
-		bool is_being_modified = false;
-
+		ray WindowsPointToRay(vec2 vp_pos);
 		ray GenerateRayFromCurrentScreen();
-		ivec2 cachedMouseScreenPos{};
-        ivec2 prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
-        ivec2 currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
 		
 	};
 

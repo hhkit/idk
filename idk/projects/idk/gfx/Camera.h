@@ -3,9 +3,9 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <gfx/RenderObject.h>
-#include <gfx/CameraFrustum.h>
 #include <gfx/CameraClear.h>
 #include <math/rect.h>
+#include <math/shapes/frustum.h>
 #include <common/LayerMask.h>
 
 namespace idk
@@ -40,7 +40,7 @@ namespace idk
 
 		mat4	   ViewMatrix() const;
 		mat4	   ProjectionMatrix() const;
-		Frustum    GetFrustum() const;
+		frustum    GetFrustum() const;
 		float      AspectRatio() const;
 		CameraData GenerateCameraData() const;
 	};

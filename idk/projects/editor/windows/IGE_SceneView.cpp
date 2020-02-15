@@ -168,7 +168,7 @@ namespace idk {
 			Handle<Camera> cam = ide.GetEditorCamera();
 			vec3 objectFinalPos{};
 
-			currRay = GenerateRayFromCurrentScreen();
+			ray currRay = GenerateRayFromCurrentScreen();
 			auto objs = Core::GetSystem<PhysicsSystem>().Raycast(currRay, LayerMask{ 0xFFFFFFFF });
 
 			if (objs.size())
@@ -176,21 +176,10 @@ namespace idk {
 			else
 				objectFinalPos = currRay.origin + currRay.direction() * 10;
 
-			ray pointingRay{};
-			pointingRay.origin = objectFinalPos; //z
-			pointingRay.origin.z -= 0.5f;
-			pointingRay.velocity.z = 1;
-			Core::GetSystem<DebugRenderer>().Draw(pointingRay, color{ 0.0f,0.0f,1.0f,0.5f }, Core::GetDT());
-			pointingRay.origin.z += 0.5f; //x
-			pointingRay.velocity.z = 0;
-			pointingRay.origin.x -= 0.5f;
-			pointingRay.velocity.x = 1;
-			Core::GetSystem<DebugRenderer>().Draw(pointingRay, color{ 1.0f,0.0f,0.0f,0.5f }, Core::GetDT());
-			pointingRay.origin.x += 0.5f; //y
-			pointingRay.velocity.x = 0;
-			pointingRay.origin.y -= 0.5f;
-			pointingRay.velocity.y = 1;
-			Core::GetSystem<DebugRenderer>().Draw(pointingRay, color{ 0.0f,1.0f,0.0f,0.5f }, Core::GetDT());
+			// draw axes on where prefab will be spawned
+			Core::GetSystem<DebugRenderer>().Draw(objectFinalPos, objectFinalPos + vec3(0, 0, 0.5f), color{ 0.0f,0.0f,1.0f });
+			Core::GetSystem<DebugRenderer>().Draw(objectFinalPos, objectFinalPos + vec3(0.5f, 0, 0), color{ 1.0f,0.0f,0.0f });
+			Core::GetSystem<DebugRenderer>().Draw(objectFinalPos, objectFinalPos + vec3(0, 0.5f, 0), color{ 0.0f,1.0f,0.0f });
 
             if (const auto* payload = ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptPeekOnly))
             {
@@ -230,7 +219,7 @@ namespace idk {
 				PickState { .is_multi_select = ImGui::IsKeyDown(static_cast<int>(Key::Control)) }
 			};
 			
-			currRay = GenerateRayFromCurrentScreen();
+			ray currRay = GenerateRayFromCurrentScreen();
 			vector<Handle<GameObject>> obj;
 			if (Core::GetSystem<PhysicsSystem>().RayCastAllObj(currRay, obj))
 			{
@@ -321,7 +310,7 @@ namespace idk {
 		if (ImGui::IsMouseDown(1) && !ImGui::GetIO().KeyAlt) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) { //Check if it is clicked here first!
 				Handle<Transform> tfm = ide.GetEditorCamera()->GetGameObject()->GetComponent<Transform>();
-				distance_to_focused_vector = orbit_point.distance(tfm->position);
+				distance_to_orbit_point = orbit_point.distance(tfm->position);
 				cachedMouseScreenPos = currMouseScreenPos;
 				ImGui::SetWindowFocus();
 				is_controlling_WASDcam = true;
@@ -364,6 +353,8 @@ namespace idk {
 		if (ImGui::IsKeyDown(static_cast<int>(Key::Alt)) && ImGui::IsMouseDown(0)) {
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0)) { //Check if it is clicked here first!
 				cachedMouseScreenPos = currMouseScreenPos;
+				Handle<Transform> tfm = ide.GetEditorCamera()->GetGameObject()->GetComponent<Transform>();
+				distance_to_orbit_point = orbit_point.distance(tfm->position);
 				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				ImGui::SetWindowFocus();
 				is_controlling_ALTorbit = true;
@@ -391,8 +382,6 @@ namespace idk {
 			UpdateScrollMouseControl(); //Enable mouse control only if no WASD or Pan is in effect
 		}
 		prevMouseScreenPos = currMouseScreenPos;
-
-		Core::GetSystem<DebugRenderer>().Draw(currRay, color{ 0, 0.8f, 0 });
 
 		UpdateGizmoControl();
 		DrawGlobalAxes();
@@ -534,32 +523,6 @@ namespace idk {
 			ImGui::GetWindowDrawList()->AddLine(bottom_right, bottom_right - axis_len * forw, 0xffff0000, 2.0f);
 	}
 
-	ray IGE_SceneView::WindowsPointToRay(vec2 vp_pos)
-	{
-		const auto view_mtx = Core::GetSystem<IDE>().GetEditorCamera()->ViewMatrix();
-		const auto pers_mtx = Core::GetSystem<IDE>().GetEditorCamera()->ProjectionMatrix();
-
-		//-1 to 1 (ndc)
-		vp_pos -= vec2(0.5f, 0.5f);
-		vp_pos /= 0.5f;
-
-		vp_pos = vec2(vp_pos.x, -vp_pos.y);
-
-		vec4 vfPos = pers_mtx.inverse() * vec4(vp_pos.x, vp_pos.y, 0, 1);
-		vfPos *= 1.f / vfPos.w;
-		vec4 wfPos = view_mtx.inverse() * vfPos;
-
-		vec4 vbPos = pers_mtx.inverse() * vec4(vp_pos.x, vp_pos.y, 1, 1);
-		vbPos *= 1.f / vbPos.w;
-		vec4 wbPos = view_mtx.inverse() * vbPos;
-
-		ray newRay;
-		newRay.origin = wfPos;
-		newRay.velocity = (wbPos - wfPos);
-
-		return newRay;
-	}
-
 	void IGE_SceneView::UpdateWASDMouseControl()
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
@@ -597,7 +560,7 @@ namespace idk {
 		//MOUSE PITCH
 		tfm->rotation = (tfm->rotation * quat{ vec3{1,0,0}, deg{90 * delta.y * -pitch_rotation_multiplier} *Core::GetDT().count() }).normalize(); //Local Rotation
 
-		orbit_point = tfm->position + tfm->Forward() * distance_to_focused_vector;
+		orbit_point = tfm->position + tfm->Forward() * distance_to_orbit_point;
 
 		// MoveMouseToWindow();
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
@@ -608,11 +571,9 @@ namespace idk {
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-		vec2 delta{};
+		vec2 delta;
 		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x);
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y);
-		
-		IDE& editor = Core::GetSystem<IDE>();
 
 		Handle<Camera> currCamera = Core::GetSystem<IDE>().GetEditorCamera();
 		Handle<Transform> tfm = currCamera->GetGameObject()->GetComponent<Transform>();
@@ -633,7 +594,7 @@ namespace idk {
 		auto tfm = Core::GetSystem<IDE>().GetEditorCamera()->GetGameObject()->Transform();
 
 		if (ImGui::IsWindowHovered() && scroll)
-			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * scroll * 0.01f);
+			tfm->GlobalPosition(tfm->GlobalPosition() + tfm->Forward() * static_cast<float>(scroll));
 	}
 
 	void IGE_SceneView::UpdateScrollMouseControl2()
@@ -651,23 +612,17 @@ namespace idk {
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-		vec2 delta{};
+		vec2 delta;
 		delta.x = static_cast<float>(currMouseScreenPos.x - prevMouseScreenPos.x) * orbit_strength; //Global Y Axis
 		delta.y = static_cast<float>(currMouseScreenPos.y - prevMouseScreenPos.y) * -orbit_strength; //Local X Axis
 
-		//Getting camera datas
 		auto tfm = Core::GetSystem<IDE>().GetEditorCamera()->GetGameObject()->GetComponent<Transform>();
-		mat4 cam_matrix = tfm->GlobalMatrix();
-
-		const vec3 cam_to_point_vector = tfm->position - orbit_point;
+		const vec3 orbit_pt_to_cam = tfm->position - orbit_point;
 		const mat4 rotation_mat4 = rotate(vec3{ 0,1,0 }, rad(deg{ delta.x })) * rotate(tfm->Right(), rad(deg{ delta.y }));
 
-		const vec3 final_cam_pos = orbit_point + vec3{ rotation_mat4 * vec4{ cam_to_point_vector, 0 } };
-		const mat4 final_position_mat4 = mat4{ translate(final_cam_pos) };
-		const mat4 inverse_position_mat4 = mat4{ translate(tfm->position) }.inverse();
-		
-		cam_matrix = final_position_mat4 * rotation_mat4 * inverse_position_mat4 * cam_matrix; //T*R*T^-1
-		tfm->GlobalMatrix(cam_matrix);
+		// normalize then mul by distance to preserve distance (in case of float calculation errors added over frames)
+		tfm->position = orbit_point + (rotation_mat4 * vec4{ orbit_pt_to_cam, 1.0f }).normalize() * distance_to_orbit_point;
+		Core::GetSystem<IDE>().GetEditorCamera()->LookAt(orbit_point);
 
 		SetCursorPos(cachedMouseScreenPos.x, cachedMouseScreenPos.y);
 		currMouseScreenPos = cachedMouseScreenPos;
@@ -750,7 +705,7 @@ namespace idk {
 
 	}
 
-	void IGE_SceneView::MoveMouseToWindow()
+	void IGE_SceneView::CenterMouseInWindow()
 	{
 
 		RECT rect = { NULL };
@@ -801,6 +756,32 @@ namespace idk {
 			}
 		}
 		return dumper;
+	}
+
+	ray IGE_SceneView::WindowsPointToRay(vec2 vp_pos)
+	{
+		const auto view_mtx = Core::GetSystem<IDE>().GetEditorCamera()->ViewMatrix();
+		const auto pers_mtx = Core::GetSystem<IDE>().GetEditorCamera()->ProjectionMatrix();
+
+		//-1 to 1 (ndc)
+		vp_pos -= vec2(0.5f, 0.5f);
+		vp_pos /= 0.5f;
+
+		vp_pos = vec2(vp_pos.x, -vp_pos.y);
+
+		vec4 vfPos = pers_mtx.inverse() * vec4(vp_pos.x, vp_pos.y, 0, 1);
+		vfPos *= 1.f / vfPos.w;
+		vec4 wfPos = view_mtx.inverse() * vfPos;
+
+		vec4 vbPos = pers_mtx.inverse() * vec4(vp_pos.x, vp_pos.y, 1, 1);
+		vbPos *= 1.f / vbPos.w;
+		vec4 wbPos = view_mtx.inverse() * vbPos;
+
+		ray newRay;
+		newRay.origin = wfPos;
+		newRay.velocity = (wbPos - wfPos);
+
+		return newRay;
 	}
 
 	ray IGE_SceneView::GenerateRayFromCurrentScreen()

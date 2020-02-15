@@ -7,8 +7,6 @@
 #include <gfx/Mesh.h>
 #include <gfx/RenderTarget.h>
 #include <res/ResourceHandle.inl>
-//Test
-#include <app/Application.h>
 
 namespace idk
 {
@@ -36,9 +34,9 @@ namespace idk
 			: perspective(field_of_view, AspectRatio(), near_plane, far_plane);
 	}
 
-	Frustum Camera::GetFrustum() const
+	frustum Camera::GetFrustum() const
 	{
-		return Frustum(ProjectionMatrix() * ViewMatrix());
+		return camera_vp_to_frustum(ProjectionMatrix() * ViewMatrix());
 	}
 
 	float Camera::AspectRatio() const
