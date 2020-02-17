@@ -49,28 +49,39 @@ namespace idk
 
         internal static void ExecClientConnect(int id)
         {
-            Player p = new Player();
-            p.ActorNumber = id;
-            players.Add(p);
-            OnClientConnected(p) ;
+            //Player p = new Player(id);
+            //players.Add(p);
+            //OnClientConnected(p) ;
         }
 
         internal static void ExecClientDisconnect(int id)
         {
-            Player p = new Player();
-            p.ActorNumber = id;
-            players.Remove(p);
-            OnClientDisconnected(p);
+            /*
+            foreach (var p in players)
+                if (p.ActorNumber == id)
+                {
+                    players.Remove(p);
+                    //OnClientDisconnected(p);
+                    break;
+                }
+                */
         }
 
         internal static void ExecServerConnect()
         {
-            OnServerConnected();
+            //OnServerConnected();
         }
 
         internal static void ExecServerDisconnect()
         {
-            OnServerDisconnected();
+        //    OnServerDisconnected();
+        }
+
+        internal static void Initialize()
+        {
+            players = new List<Player>();
+            foreach (var id in Bindings.NetworkGetPlayers())
+                players.Add(new Player(id));
         }
     }
 }

@@ -33,10 +33,14 @@ namespace idk
 
 	void Server::ProcessMessages()
 	{
-		for (int i = 0; i < GameConfiguration::MAX_CLIENTS; i++) {
-			if (server.IsClientConnected(i)) {
-				for (int j = 0; j < config.numChannels; j++) {
-					while (auto message = server.ReceiveMessage(i, j)) {
+		for (int i = 0; i < GameConfiguration::MAX_CLIENTS; i++) 
+		{
+			if (server.IsClientConnected(i)) 
+			{
+				for (int j = 0; j < config.numChannels; j++) 
+				{
+					while (auto message = server.ReceiveMessage(i, j)) 
+					{
 						ProcessMessage(i, message);
 						server.ReleaseMessage(i, message);
 					}
