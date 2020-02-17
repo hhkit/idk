@@ -321,8 +321,8 @@ namespace idk {
 		ImGui::PopStyleColor();
 
 
-		const ImVec2 toolButtonSize = ImVec2{ 40.0f,20.0f };
-		const ImVec2 toolButtonStartPos = ImVec2{ 6.0f,4.0f };
+		const ImVec2 toolButtonSize{ 40.0f,20.0f };
+		const ImVec2 toolButtonStartPos{ 6.0f,4.0f };
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f); //Have the buttons look like buttons
 		ImGui::SetCursorPos(toolButtonStartPos);
@@ -334,53 +334,47 @@ namespace idk {
 
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Null);
 		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Null ? activeColor : inactiveColor);
-		if (ImGui::Button("Hand##Tool", toolButtonSize)) {
+		if (ImGui::Button(ICON_FA_HAND_PAPER, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Null;
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
 
-		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 1);
-		ImGui::SetCursorPosY(toolButtonStartPos.y);
+		ImGui::SameLine(0, 0);
 
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Translate);
 		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Translate ? activeColor : inactiveColor);
-		if (ImGui::Button("Move##Tool", toolButtonSize)) {
+		if (ImGui::Button(ICON_FA_ARROWS_ALT, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Translate;
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
 
-		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 2);
-		ImGui::SetCursorPosY(toolButtonStartPos.y);
+		ImGui::SameLine(0, 0);
 
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Rotate);
 		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Rotate ? activeColor : inactiveColor);
-		if (ImGui::Button("Rotate##Tool", toolButtonSize)) {
+		if (ImGui::Button(ICON_FA_SYNC, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Rotate;
 		}
-		ImGui::PopItemFlag();
-		ImGui::PopStyleColor();
 
-		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 3);
-		ImGui::SetCursorPosY(toolButtonStartPos.y);
+		ImGui::SameLine(0, 0);
 
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, gizmo_operation == GizmoOperation::Scale);
 		ImGui::PushStyleColor(ImGuiCol_Button, gizmo_operation == GizmoOperation::Scale ? activeColor : inactiveColor);
-		if (ImGui::Button("Scale##Tool", toolButtonSize)) {
+		if (ImGui::Button(ICON_FA_EXPAND, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Scale;
 		}
 		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
 
-		ImGui::SetCursorPosX(toolButtonStartPos.x + toolButtonSize.x * 6);
-		ImGui::SetCursorPosY(toolButtonStartPos.y+3);
+		ImGui::SameLine(0, 16.0f);
+		ImGui::SetCursorPosY(toolButtonStartPos.y + 3.0f);
 
 		auto& gizmo_mode = Core::GetSystem<IDE>().gizmo_mode;
-		string localGlobal = gizmo_mode == GizmoMode::World ? "Global##Tool" : "Local##Tool";
-		if (ImGui::Button(localGlobal.c_str(), ImVec2{ toolButtonSize.x+20.0f,toolButtonSize.y-6.0f })) {
+		string localGlobal = gizmo_mode == GizmoMode::World ? "Global" : "Local";
+		if (ImGui::Button(localGlobal.c_str(), toolButtonSize + ImVec2{ 20.0f, -6.0f }))
 			gizmo_mode = gizmo_mode == GizmoMode::World ? GizmoMode::Local : GizmoMode::World;
-		}
 
 
 
@@ -394,7 +388,7 @@ namespace idk {
 		}
 		else
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+			ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 				Core::GetSystem<IDE>().Stop();
 			ImGui::PopStyleColor();
@@ -409,7 +403,7 @@ namespace idk {
 		}
 		else
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+			ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
 			if (ImGui::Button(ICON_FA_PAUSE, toolButtonSize))
 				Core::GetSystem<IDE>().Unpause();
 			ImGui::PopStyleColor();
@@ -418,20 +412,17 @@ namespace idk {
 		
 		ImGui::PopStyleVar();
 
-		// ImGui::SameLine();
-		// if (ImGui::Button("Build Tree"))
-		// 	Core::GetSystem<PhysicsSystem>().BuildStaticTree();
-		// ImGui::SameLine();
-		// if (ImGui::Button("Clear Tree"))
-		// 	Core::GetSystem<PhysicsSystem>().ClearStaticTree();
 
-        ImGui::SameLine(ImGui::GetWindowContentRegionWidth() -
-            ImGui::CalcTextSize("Draw All Colliders").x - ImGui::GetStyle().FramePadding.y * 2 - ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.x * 2);
+        ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - toolButtonStartPos.x - 
+						ImGui::CalcTextSize("Draw All Colliders").x - ImGui::GetStyle().FramePadding.x * 2);
+		ImGui::SetCursorPosY(toolButtonStartPos.y + 3.0f);
 
-        ImGui::Checkbox("Draw All Colliders", &Core::GetSystem<PhysicsSystem>().debug_draw_colliders);
+		ImGui::PushStyleColor(ImGuiCol_Button, Core::GetSystem<PhysicsSystem>().debug_draw_colliders ? activeColor : inactiveColor);
+		if (ImGui::Button("Draw All Colliders", ImVec2(0, toolButtonSize.y - 6.0f)))
+			Core::GetSystem<PhysicsSystem>().debug_draw_colliders = !Core::GetSystem<PhysicsSystem>().debug_draw_colliders;
+		ImGui::PopStyleColor();
 		
 		ImGui::EndChild();
-
 	}
 
 	void IGE_MainWindow::DisplayHintBarChildWindow()
