@@ -28,7 +28,6 @@ TEST(Audio, AudioSystemClassTest)
 	using namespace idk;
     INIT_CORE();
 	auto& test = core.GetSystem<AudioSystem>();
-    EXPECT_NO_THROW(core.Setup());
 
     core.GetSystem<FileSystem>().Mount(TEST_DATA_PATH, "/assets");
 

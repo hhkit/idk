@@ -696,15 +696,59 @@ namespace idk
 					continue;
 
 				auto& render_data = result.font_render_data.emplace_back();
-				render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
+				const auto font_data = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, f.alignment, 0);
+
+				const float w = font_data.width;
+				const float h = font_data.height;
+				float ox = 0, oy = 0;
+
+				switch (f.anchor)
+				{
+				case TextAnchor::UpperLeft: case TextAnchor::UpperCenter: case TextAnchor::UpperRight: oy = 0; break;
+				case TextAnchor::MiddleLeft: case TextAnchor::MiddleCenter: case TextAnchor::MiddleRight: oy = h * 0.5f; break;
+				case TextAnchor::LowerLeft: case TextAnchor::LowerCenter: case TextAnchor::LowerRight: oy = h; break;
+				}
+
+				switch (f.anchor)
+				{
+				case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft: 
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = 0; break;
+					case TextAlignment::Center: ox = w * 0.5f; break;
+					case TextAlignment::Right: ox = w; break;
+					}
+					break;
+				case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = -w * 0.5f; break;
+					case TextAlignment::Center: ox = 0; break;
+					case TextAlignment::Right: ox = w * 0.5f; break;
+					}
+					break;
+				case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = -w; break;
+					case TextAlignment::Center: ox = -w * 0.5f; break;
+					case TextAlignment::Right: ox = 0; break;
+					}
+					break;
+				}
+
+				render_data.coords = font_data.coords;
 				render_data.color = f.color;
-				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * translate(vec3{ ox, oy, 0 });
 				render_data.atlas = f.font;
 			}
 
 			auto& ui = Core::GetSystem<UISystem>();
 			for (auto& im : images)
 			{
+				if (!im.texture)
+					continue;
+
 				const auto& go = im.GetGameObject();
 				if (!go->ActiveInHierarchy())
 					continue;
@@ -719,8 +763,19 @@ namespace idk
 				const auto& rt = *go->GetComponent<RectTransform>();
 				auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
-				render_data.transform = rt._matrix *
-					mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+				auto sz = rt._local_rect.size * 0.5f;
+
+				if (im.preserve_aspect)
+				{
+					const float tex_aspect = im.texture->AspectRatio();
+					const float rt_aspect = rt._local_rect.size.x / rt._local_rect.size.y;
+					if (tex_aspect > rt_aspect) // horizontally longer
+						sz.y = sz.x / tex_aspect;
+					else if (tex_aspect < rt_aspect) // vertically longer
+						sz.x = sz.y * tex_aspect;
+				}
+
+				render_data.transform = rt._matrix * mat4{ scale(vec3{sz, 1.0f}) };
 				render_data.material = im.material;
 				render_data.color = im.tint;
 				render_data.data = ImageData{ im.texture };

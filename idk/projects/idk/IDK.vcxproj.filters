@@ -808,9 +808,6 @@
     <ClInclude Include="anim\AnimationLayer.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\CameraFrustum.h">
-      <Filter>gfx\camera</Filter>
-    </ClInclude>
     <ClInclude Include="anim\AnimationUtils.h">
       <Filter>anim\utils</Filter>
     </ClInclude>
@@ -1504,9 +1501,6 @@
     </ClCompile>
     <ClCompile Include="anim\AnimationLayer.cpp">
       <Filter>anim</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\CameraFrustum.cpp">
-      <Filter>gfx\camera</Filter>
     </ClCompile>
     <ClCompile Include="anim\AnimationState.cpp">
       <Filter>anim</Filter>

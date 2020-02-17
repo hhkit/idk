@@ -406,7 +406,8 @@ namespace idk {
 			ImGui::Separator();
 
             span componentNames = GameState::GetComponentNames();
-            for (const char* name : componentNames) {
+            for (const char* name : componentNames)
+            {
                 string displayName = name;
                 if (displayName == "Transform" ||
                     displayName == "Name" ||
@@ -426,33 +427,27 @@ namespace idk {
 				if (!component_textFilter.PassFilter(displayName.c_str())) //skip if filtered
 					continue;
 
-
-                if (ImGui::MenuItem(displayName.c_str())) {
-                    //Add component
+                if (ImGui::MenuItem(displayName.c_str()))
+                {
 					int execute_counter = 0;
-					CommandController& commandController = Core::GetSystem<IDE>().command_controller;
                     for (Handle<GameObject> i : gos)
                     {
-                        commandController.ExecuteCommand(COMMAND(CMD_AddComponent, i, string{ name }));
+                        Core::GetSystem<IDE>().ExecuteCommand<CMD_AddComponent>(i, string{ name });
 						++execute_counter;
                     }
-
-					commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+                    Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
                 }
             }
             ImGui::EndPopup();
         }
 
-		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) {
-
-
-
+		if (ImGui::BeginPopup("AddScript", ImGuiWindowFlags_None)) 
+        {
 			ImGui::Text("Search bar:");
 			ImGui::SameLine();
 			bool value_changed = ImGui::InputTextEx("##script_textFilter", NULL, script_textFilter.InputBuf, IM_ARRAYSIZE(script_textFilter.InputBuf), ImVec2{ 100,0 }, ImGuiInputTextFlags_None);
 			if (value_changed)
 				script_textFilter.Build();
-
 
 
 			string deco_text = "Scripts";
@@ -478,22 +473,24 @@ namespace idk {
 
 			span componentNames = script_env->GetBehaviorList();
 			int execute_counter = 0;
-			for (const char* name : componentNames) {
-
+			for (const char* name : componentNames) 
+            {
 				if (!script_textFilter.PassFilter(name)) //skip if filtered
 					continue;
 
-				if (ImGui::MenuItem(name)) {
-					for (Handle<GameObject> i : gos) {
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_AddBehavior, i, string{ name }));
+				if (ImGui::MenuItem(name))
+                {
+					for (Handle<GameObject> i : gos) 
+                    {
+						Core::GetSystem<IDE>().ExecuteCommand<CMD_AddBehavior>(i, string{ name });
 						++execute_counter;
 					}
 				}
 			}
-			if (execute_counter > 0) {
-				CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
-			}
+
+			if (execute_counter > 0)
+                Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
+
 			ImGui::EndPopup();
 		}
 
@@ -520,10 +517,10 @@ namespace idk {
         {
             if (!go)
                 continue;
-            editor.command_controller.ExecuteCommand(COMMAND(Command, SelectGO(go,std::forward<Args>(args))...));
+            editor.ExecuteCommand<Command>(SelectGO(go, std::forward<Args>(args))...);
             ++execute_counter;
         }
-        editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+        editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
     }
 
 	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
@@ -538,7 +535,7 @@ namespace idk {
         ImGui::SetCursorPosX(left_offset - ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.y * 2);
         bool is_active = game_object->ActiveSelf();
         if (ImGui::Checkbox("##Active", &is_active))
-            editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, game_object, std::nullopt, std::nullopt, std::nullopt, is_active));
+            editor.ExecuteCommand<CMD_ModifyGameObjectHeader>(game_object, std::nullopt, std::nullopt, std::nullopt, is_active);
 		ImGui::SameLine();
         ImGui::PushItemWidth(-8.0f);
         if (game_object.scene == Scene::prefab)
@@ -560,11 +557,11 @@ namespace idk {
 					outputString.append(")");
 				}
 
-                editor.command_controller.ExecuteCommand(COMMAND(CMD_ModifyGameObjectHeader, go, outputString));
+                editor.ExecuteCommand<CMD_ModifyGameObjectHeader>(go, outputString);
 				++execute_counter;
 			}
 
-            editor.command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+            editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 		}
 
         if (game_object.scene == Scene::prefab)
@@ -828,7 +825,6 @@ namespace idk {
 		if (ImGui::MenuItem("Remove Component")) 
         {
 			IDE& editor = Core::GetSystem<IDE>();
-            CommandController& commandController = Core::GetSystem<IDE>().command_controller;
 
 			if (editor.GetSelectedObjects().game_objects.size() == 1)
             {
@@ -839,15 +835,14 @@ namespace idk {
                     else
                         return Handle<GameObject>();
                 });
-                commandController.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, i));
+                editor.ExecuteCommand<CMD_DeleteComponent>(go, i);
 
                 if (_prefab_inst && !_curr_component_is_added)
                 {
                     auto old = _prefab_inst->removed_components;
                     PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _curr_component_nth);
-                    commandController.ExecuteCommand(
-                        COMMAND(CMD_ModifyProperty, _prefab_inst, "removed_components", old, _prefab_inst->removed_components));
-                    commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+                    editor.ExecuteCommand<CMD_ModifyProperty>(_prefab_inst, "removed_components", old, _prefab_inst->removed_components);
+                    editor.ExecuteCommand<CMD_CollateCommands>(2);
                 }
 			}
 			else 
@@ -855,10 +850,10 @@ namespace idk {
 				int execute_counter = 0;
 				for (auto go : editor.GetSelectedObjects().game_objects) 
                 {
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, go, string((*i).type.name())));
+					Core::GetSystem<IDE>().ExecuteCommand<CMD_DeleteComponent>(go, string((*i).type.name()));
 					++execute_counter;
 				}
-				commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+                editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 			}
 		}
 	}
@@ -898,28 +893,27 @@ namespace idk {
 							gameObjectTransform->GlobalMatrix(copiedTransform.GlobalMatrix());
 
 						mat4 modifiedMat = gameObjectTransform->GlobalMatrix();
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, gameObject, originalMatrix, modifiedMat));
+						editor.ExecuteCommand<CMD_TransformGameObject>(gameObject, originalMatrix, modifiedMat);
 						++execute_counter;
 					}
 					else 
                     {
 						//Mark to remove Component
 						string compName = string((*componentToMod).type.name());
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_DeleteComponent, gameObject, compName));
-						editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, _copied_component)); //Remember commands are flushed at end of each update!
+						Core::GetSystem<IDE>().ExecuteCommand<CMD_DeleteComponent>(gameObject, compName);
+						editor.ExecuteCommand<CMD_AddComponent>(gameObject, _copied_component); //Remember commands are flushed at end of each update!
 						execute_counter += 2;
 					}
 				}
 				else 
                 {
 					//Add component
-					editor.command_controller.ExecuteCommand(COMMAND(CMD_AddComponent, gameObject, _copied_component));
+					editor.ExecuteCommand<CMD_AddComponent>(gameObject, _copied_component);
 					++execute_counter;
 				}
 			}
 
-			CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-			commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+            editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 		}
 	}
 
@@ -1187,9 +1181,8 @@ namespace idk {
                         {
                             if (c.type == _curr_component.type && nth-- == 0)
                             {
-                                Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                                    COMMAND(CMD_ModifyProperty, c, display.curr_prop_path, 
-                                            resolve_property_path(*c, display.curr_prop_path), new_value));
+                                Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
+                                    c, display.curr_prop_path, resolve_property_path(*c, display.curr_prop_path), new_value);
                                 if (obj->HasComponent<PrefabInstance>())
                                     PrefabUtility::RecordPrefabInstanceChange(obj, c, display.curr_prop_path, new_value);
                                 ++execute_counter;
@@ -1198,14 +1191,13 @@ namespace idk {
                         }
                     }
 
-                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                        COMMAND(CMD_ModifyProperty, _curr_component, display.curr_prop_path, original_value, new_value));
+                    Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
+                        _curr_component, display.curr_prop_path, original_value, new_value);
                     if (execute_counter > 1)
-                        Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, ++execute_counter));
+                        Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(++execute_counter);
                 }
                 else // displaying prefab game object
-                    Core::GetSystem<IDE>().command_controller.ExecuteCommand(
-                        COMMAND(CMD_ModifyProperty, new_value, original_value));
+                    Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(new_value, original_value);
                 original_value.swap(reflect::dynamic());
             }
 

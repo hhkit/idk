@@ -15,6 +15,10 @@ jobs:
         fetch-depth: 1
     - uses: warrenbuckley/Setup-MSBuild@v1
     - uses: nuget/setup-nuget@v1
+    - uses: actions/cache@v1
+      with:
+        path: idk\build
+        key: ${{ runner.os }}-build
 
     - name: Pre-build
       run: nuget restore idk\IDK.sln
