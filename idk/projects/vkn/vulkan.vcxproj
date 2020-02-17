@@ -327,6 +327,7 @@
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CanvasVertexBindings.h" />
     <ClInclude Include="ColorPickRenderer.h" />
+    <ClInclude Include="SkyboxBinding.h" />
     <ClInclude Include="CubemapRenderer.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DebugUtil.h" />
@@ -448,6 +449,7 @@
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CanvasVertexBindings.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
+    <ClCompile Include="SkyboxBinding.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
     <ClCompile Include="DDSLoader.cpp" />
     <ClCompile Include="DebugUtil.cpp" />

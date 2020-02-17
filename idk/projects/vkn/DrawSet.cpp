@@ -96,4 +96,34 @@ namespace idk::vkn
 			}
 		}//End of draw_call loop
 	}
+	FsqDrawSet::FsqDrawSet(MeshType mesh_type):_mesh_type{mesh_type}
+	{
+		_fsq_ro.mesh = Mesh::defaults[_mesh_type];
+		_fsq_ro.renderer_req = &_req;
+	}
+	void FsqDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)
+	{
+		bindings.Bind(the_interface);
+		BindRo(the_interface, bindings);
+		
+	}
+	bool FsqDrawSet::BindRo(RenderInterface& the_interface, bindings::RenderBindings& bindings)
+	{
+		auto& fsq_ro = _fsq_ro;
+		bool rendering = !bindings.Skip(the_interface, fsq_ro);
+		if (rendering)
+		{
+			bindings.Bind(the_interface, fsq_ro);
+			DrawMeshBuffers(the_interface, fsq_ro);
+		};
+		return rendering;
+	}
+	PerLightDrawSet::PerLightDrawSet()
+	{
+	}
+	void PerLightDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)
+	{
+		bindings.Bind(the_interface);
+		while (BindRo(the_interface, bindings));
+	}
 }

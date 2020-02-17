@@ -26,7 +26,7 @@
 #include <res/ResourceHandle.inl>
 #include <res/ResourceMeta.inl>
 #include <ds/result.inl>
-#include "DeferredPasses.h"
+#include "DeferredPass.h"
 
 #if 1
 namespace idk::vkn

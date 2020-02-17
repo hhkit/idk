@@ -314,13 +314,7 @@
     <ClInclude Include="RenderInterface.h">
       <Filter>render\new_testament</Filter>
     </ClInclude>
-    <ClInclude Include="RenderBindings.h">
-      <Filter>render\new_testament\Bindings</Filter>
-    </ClInclude>
     <ClInclude Include="ShadowBindings.h">
-      <Filter>render\new_testament\Bindings</Filter>
-    </ClInclude>
-    <ClInclude Include="StandardVertexBindings.h">
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
     <ClInclude Include="PbrFwdBindings.h">
@@ -333,9 +327,6 @@
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
     <ClInclude Include="CanvasVertexBindings.h">
-      <Filter>render\new_testament\Bindings</Filter>
-    </ClInclude>
-    <ClInclude Include="StandardMaterialBindings.h">
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
     <ClInclude Include="UnlitBindings.h">
@@ -357,6 +348,18 @@
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
     <ClInclude Include="LightBinding.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBindings.h">
+      <Filter>render\new_testament\Bindings\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardMaterialBindings.h">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardVertexBindings.h">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxBinding.h">
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
   </ItemGroup>
@@ -588,7 +591,6 @@
     <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="RenderTask.cpp" />
     <ClCompile Include="UniformManager.cpp" />
-    <ClCompile Include="DebugUtil.cpp" />
     <ClCompile Include="TextureTracker.cpp" />
     <ClCompile Include="GammaUtils.cpp">
       <Filter>utils</Filter>
@@ -605,24 +607,32 @@
     <ClCompile Include="PbrFwdBindings.cpp">
       <Filter>render\new_testament\Bindings</Filter>
     </ClCompile>
-    <ClCompile Include="StandardMaterialBindings.cpp">
-      <Filter>render\new_testament\Bindings</Filter>
-    </ClCompile>
     <ClCompile Include="ShadowBindings.cpp">
-      <Filter>render\new_testament\Bindings</Filter>
-    </ClCompile>
-    <ClCompile Include="StandardVertexBindings.cpp">
-      <Filter>render\new_testament\Bindings</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderBindings.cpp">
       <Filter>render\new_testament\Bindings</Filter>
     </ClCompile>
     <ClCompile Include="UnlitBindings.cpp">
       <Filter>render\new_testament\Bindings</Filter>
     </ClCompile>
-    <ClCompile Include="DrawSet.cpp" />
     <ClCompile Include="renderpasses\DeferredPasses.cpp">
       <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderBindings.cpp">
+      <Filter>render\new_testament\Bindings\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardMaterialBindings.cpp">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardVertexBindings.cpp">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugUtil.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxBinding.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawSet.cpp">
+      <Filter>render\new_testament</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -683,6 +693,12 @@
     <Filter Include="render\new_testament\Renderpasses">
       <UniqueIdentifier>{6eda1c5e-209c-4d33-b915-038c8fb91f97}</UniqueIdentifier>
     </Filter>
+    <Filter Include="render\new_testament\Bindings\Base">
+      <UniqueIdentifier>{03050e72-3fad-4b1f-9705-fa834facc61e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\new_testament\Bindings\Standard">
+      <UniqueIdentifier>{4a6c78a0-a8b5-47cd-b918-a9e326886fb0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="BufferHelpers.inl">
@@ -707,7 +723,7 @@
       <Filter>render\objects</Filter>
     </None>
     <None Include="RenderBindings.inl">
-      <Filter>render\new_testament\Bindings</Filter>
+      <Filter>render\new_testament\Bindings\Base</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
 #pragma once
 #include <vkn/RenderBindings.h>
 
+#include <vkn/GraphicsState.h>
+
 namespace idk::vkn::bindings
 {
 	struct StandardMaterialFragBindings : RenderBindings

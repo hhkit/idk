@@ -11,6 +11,7 @@
 
 #include <vkn/DeferredPbrRoBind.h>
 #include <vkn/LightBinding.h>
+#include <vkn/SkyboxBinding.h>
 
 namespace idk::vkn::renderpasses
 {
@@ -511,7 +512,7 @@ namespace idk::vkn::renderpasses
 	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
 	using AccumDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
 
-	using ClearCubeSet = GenericDrawSet<CubeBinding, FsqDrawLogic>;
+	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrInstDrawSet, DeferredPbrAniDrawSet>;
 
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
@@ -520,7 +521,7 @@ namespace idk::vkn::renderpasses
 		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
 		//TODO: 
 		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{},gfx_state.camera.render_target,clr_col, clr_dep).RenderPass();
-		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{}, cube_clear.rt_size, cube_clear.depth_rsc).RenderPass();
+		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{}, cube_clear.rt_size, cube_clear.depth).RenderPass();
 		auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{},gbuffer_pass);
 		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport,cube_clear.render_target);
 

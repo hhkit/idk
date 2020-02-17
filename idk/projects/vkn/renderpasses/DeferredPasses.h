@@ -2,6 +2,7 @@
 #include <vkn/BaseRenderPass.h>
 #include <vkn/FrameGraphBuilder.h>
 #include <vkn/DrawSet.h>
+#include <gfx/DefaultShaders.h>
 namespace idk
 {
 	struct renderer_attributes;

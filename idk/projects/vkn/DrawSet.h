@@ -1,5 +1,6 @@
 #pragma once
 #include <vkn/RenderBindings.h>
+#include <gfx/Mesh.h>
 namespace idk::vkn
 {
 	template<typename T>
@@ -30,7 +31,8 @@ namespace idk::vkn
 	class GenericDrawSet : public DrawSet<Binding>
 	{
 	public:
-		GenericDrawSet(Binding, DrawLogic);
+		GenericDrawSet(Binding = {}, DrawLogic = {});
+		GenericDrawSet(DrawLogic);
 		void Render(RenderInterface& the_interface)override
 		{
 			_logic.Render(the_interface, this->GetBinding());
@@ -41,11 +43,14 @@ namespace idk::vkn
 
 	template<typename ... GenericDrawSets>
 	class CombinedMeshDrawSet;
+
+
+
 	template<typename ... GenericDrawSets,typename ... GenericDrawLogics>
 	class CombinedMeshDrawSet<GenericDrawSet<GenericDrawSets,GenericDrawLogics>...>:public BaseDrawSet
 	{
 	public:
-		CombinedMeshDrawSet(GenericDrawSet<GenericDrawSets, GenericDrawLogics>&&... sets);
+		CombinedMeshDrawSet(GenericDrawSet<GenericDrawSets, GenericDrawLogics>&&... sets = {});
 		void Render(RenderInterface&  the_interface)override
 		{
 			using index_seq_t = std::make_index_sequence<sizeof...(GenericDrawSets)>;
@@ -62,6 +67,12 @@ namespace idk::vkn
 
 	template<typename Binding, typename DrawLogic>
 	GenericDrawSet<Binding, DrawLogic>::GenericDrawSet(Binding binding, DrawLogic logic) : DrawSet{ std::move(binding) }, _logic{ std::move(logic) }
+	{
+	}
+
+
+	template<typename Binding, typename DrawLogic>
+	GenericDrawSet<Binding, DrawLogic>::GenericDrawSet(DrawLogic logic) : GenericDrawSet{ Binding{},std::move(logic)}
 	{
 	}
 
@@ -92,5 +103,29 @@ namespace idk::vkn
 		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
 	private:
 		span<const AnimatedRenderObject*>  _draw_calls;
+	};
+
+	class FsqDrawSet : public BaseDrawLogic
+	{
+	public:
+		FsqDrawSet(MeshType mesh_type = MeshType::FSQ);
+		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
+	protected:
+		bool BindRo(RenderInterface& the_interface, bindings::RenderBindings& bindings);
+		RenderObject _fsq_ro;
+		renderer_attributes _req = { {
+			std::make_pair(vtx::Attrib::Position, 0),
+			std::make_pair(vtx::Attrib::Normal, 1),
+			std::make_pair(vtx::Attrib::UV, 2) }
+		};
+		MeshType _mesh_type;
+	};
+
+	class PerLightDrawSet : public FsqDrawSet
+	{
+	public:
+		PerLightDrawSet();
+		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
+	private:
 	};
 }
