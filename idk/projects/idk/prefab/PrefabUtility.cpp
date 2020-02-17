@@ -1073,7 +1073,7 @@ namespace idk
                 auto parent = obj->Parent();
                 auto parent_inst = parent->GetComponent<PrefabInstance>();
                 obj_prefab_inst = obj->AddComponent<PrefabInstance>();
-                obj_prefab_inst->object_index = prefab->data.size();
+                obj_prefab_inst->object_index = static_cast<int>(prefab->data.size());
                 obj_prefab_inst->prefab = prefab;
                 auto& obj_prefab_data = prefab->data.emplace_back();
                 for (auto& c : obj->GetComponents())

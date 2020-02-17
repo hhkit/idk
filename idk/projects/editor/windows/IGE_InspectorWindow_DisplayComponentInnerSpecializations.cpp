@@ -172,11 +172,10 @@ namespace idk
                 if (!h)
                     continue;
                 const mat4 modified_mat = h->GetComponent<Transform>()->GlobalMatrix();
-                editor.command_controller.ExecuteCommand(COMMAND(CMD_TransformGameObject, h, original_matrices[i], modified_mat));
+                editor.ExecuteCommand<CMD_TransformGameObject>(h, original_matrices[i], modified_mat);
                 ++execute_counter;
             }
-            CommandController& commandController = Core::GetSystem<IDE>().command_controller;
-            commandController.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+            Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
         }
     }
 
@@ -579,7 +578,17 @@ namespace idk
             }
             return false;
         };
-        InjectDrawTable table{ { "text", draw_text } };
+        constexpr CustomDrawFn draw_anchor = [](const reflect::dynamic& val)
+        {
+            auto& anchor = val.get<TextAnchor>();
+            return ImGuidk::EnumCombo("", &anchor);
+        };
+        constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
+        {
+            auto& alignment = val.get<TextAlignment>();
+            return ImGuidk::EnumCombo("", &alignment);
+        };
+        InjectDrawTable table{ { "text", draw_text }, { "anchor", draw_anchor }, { "alignment", draw_alignment } };
         DisplayVal(*c_font, &table);
     }
 

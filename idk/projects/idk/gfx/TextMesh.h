@@ -1,9 +1,9 @@
 #pragma once
 #include <idk.h>
 #include <core/Component.h>
-#include <util/enum.h>
 #include <gfx/FontAtlas.h>
-#include <gfx/FontData.h>
+#include <gfx/TextAnchor.h>
+#include <gfx/TextAlignment.h>
 
 namespace idk {
 	class TextMesh
@@ -15,6 +15,8 @@ namespace idk {
 		color color = {1.f,1.f,1.f,1.f};
 		unsigned font_size = 48;
 		RscHandle<FontAtlas> font = FontAtlas::defaults[FontDefault::SourceSansPro];
+		TextAnchor anchor = TextAnchor::UpperLeft;
+		TextAlignment alignment = TextAlignment::Left;
 
 		string text;
 

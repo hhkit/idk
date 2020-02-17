@@ -18,11 +18,10 @@
 
 */
 //////////////////////////////////////////////////////////////////////////////////
-
 #include "pch.h"
+#include "IGE_IWindow.h"
+
 #undef DrawText
-#include <editor/windows/IGE_IWindow.h>
-#include <iostream>
 
 namespace idk {
 	IGE_IWindow::IGE_IWindow(char const* wName, bool isWindowOpenByDefault, ImVec2 size, ImVec2 position, ImVec2 pivot)
@@ -183,6 +182,7 @@ namespace idk {
 		if (!is_open) {
 			return;
 		}
+
 		BeginWindow_V();
 
 		Update();

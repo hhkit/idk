@@ -101,7 +101,7 @@ namespace idk
 		if (_root_index < 0)
 			return {};
 		vector<RaycastHit> hitted;
-		const auto& phys_sys = Core::GetSystem<PhysicsSystem>();
+
 		int num_collisions = 0;
 		int sp = 1;
 		constexpr int max_size_stack = 4096;
@@ -143,7 +143,7 @@ namespace idk
 
 		return hitted;
 	}
-// 
+
 	int AabbTree::insert(Collider& collider, const aabb& bound, float margin)
 	{
 		auto res = _node_table.find(collider.GetHandle());

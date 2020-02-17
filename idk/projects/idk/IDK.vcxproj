@@ -70,7 +70,6 @@
     <ClInclude Include="debug\LogSystem.h" />
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
-    <ClInclude Include="gfx\CameraFrustum.h" />
     <ClInclude Include="gfx\Lightmap.h" />
     <ClInclude Include="gfx\CascadedSet.h" />
     <ClInclude Include="gfx\CompiledMesh.h" />
@@ -380,7 +379,6 @@
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
-    <ClCompile Include="gfx\CameraFrustum.cpp" />
     <ClCompile Include="gfx\Lightmap.cpp" />
     <ClCompile Include="gfx\CascadedSet.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
