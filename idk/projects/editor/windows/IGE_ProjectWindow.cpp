@@ -51,7 +51,19 @@ namespace idk {
         current_dir = "/assets";
 	}
 
-	void IGE_ProjectWindow::BeginWindow()
+    void IGE_ProjectWindow::Initialize()
+    {
+        Core::GetSystem<IDE>().OnSelectionChanged += [&]()
+        {
+            const auto& selected_assets = Core::GetSystem<IDE>().GetSelectedObjects().assets;
+            if (selected_assets.empty())
+                selected_path = "";
+            else
+                selected_path = selected_assets[0].visit([](auto h) { return *Core::GetResourceManager().GetPath(h); });
+        };
+    }
+
+    void IGE_ProjectWindow::BeginWindow()
 	{
         ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 50.0f,100.0f });
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
@@ -75,6 +87,7 @@ namespace idk {
             ImGui::TreeNodeEx(dir.GetFileName().data(), flags);
             if (ImGui::IsItemClicked())
                 current_dir = dir;
+            folderDragDropTarget(dir);
         }
         else
         {
@@ -83,6 +96,7 @@ namespace idk {
                                           ImGuiTreeNodeFlags_DefaultOpen | (selected ? ImGuiTreeNodeFlags_Selected : 0));
             if (ImGui::IsItemClicked())
                 current_dir = dir;
+            folderDragDropTarget(dir);
             if (open)
             {
                 for (const auto& path : dir.GetEntries())
@@ -137,14 +151,6 @@ namespace idk {
 	void IGE_ProjectWindow::Update()
 	{
         ImGui::PopStyleVar(2);
-
-        {
-            const auto& selected_assets = Core::GetSystem<IDE>().GetSelectedObjects().assets;
-            if (selected_assets.empty())
-                selected_path = "";
-            else
-                selected_path = selected_assets[0].visit([](auto h) { return *Core::GetResourceManager().GetPath(h); });
-        }
 
         ImGui::BeginMenuBar();
         {
@@ -299,10 +305,13 @@ namespace idk {
             auto vec = current_dir.GetEntries(FS_FILTERS::RECURSE_DIRS | FS_FILTERS::DIR | FS_FILTERS::FILE);
             vec.erase(std::remove_if(vec.begin(), vec.end(),
                 [&filter = filter](PathHandle p) { return !filter.PassFilter(p.GetFileName().data()); }), vec.end());
-            draw_contents(vec, spacing, icons_per_row);
+            drawContents(vec, spacing, icons_per_row);
         }
         else
-            draw_contents(current_dir.GetEntries(), spacing, icons_per_row);
+        {
+            auto vec = current_dir.GetEntries();
+            drawContents(vec, spacing, icons_per_row);
+        }
 
         ImGui::PopFont();
 
@@ -324,8 +333,86 @@ namespace idk {
 
 	}
 
-    void IGE_ProjectWindow::draw_contents(const vector<PathHandle>& paths, ImVec2 spacing, int icons_per_row)
+    void IGE_ProjectWindow::drawThumbnail(PathHandle path)
     {
+        void* id = 0;
+        vec2 sz{ icon_size, icon_size };
+        ImVec4 tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
+        ImVec4 selected_tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered);
+
+        if (path.IsDir())
+        {
+            static auto folder_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
+            //IDK_ASSERT_MSG(folder_icon, "THIS SHOULD BE LOADED");
+            id = folder_icon->ID();
+        }
+        else
+        {
+            auto handle = getOrLoadFirstAsset(path);
+            RscHandle<Texture> tex = std::visit([](auto h)
+            {
+                using T = typename decltype(h)::Resource;
+
+                if (!h)
+                    return RscHandle<Texture>();
+                if constexpr (std::is_same_v<T, Texture>)
+                    return h;
+                else if constexpr (std::is_same_v<T, Material> || std::is_same_v<T, shadergraph::Graph>)
+                {
+                    static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/material.png");
+                    return material_icon;
+                }
+                else if constexpr (std::is_same_v<T, MaterialInstance>)
+                {
+                    static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/matinst.png");
+                    return material_icon;
+                }
+                else if constexpr (std::is_same_v<T, Scene>)
+                {
+                    static auto scene_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/scene.png");
+                    return scene_icon;
+                }
+                else
+                    return RscHandle<Texture>();
+            }, handle);
+
+            if (tex)
+            {
+                id = tex->ID();
+                float aspect = tex->AspectRatio();
+                if (aspect > 1.0f)
+                    sz.y /= aspect;
+                else if (aspect < 1.0f)
+                    sz.x *= aspect;
+                if (handle.resource_id() == BaseResourceID<Texture>)
+                {
+                    tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/
+                        selected_tint = ImVec4(1, 1, 1, 1);
+                }
+            }
+        }
+
+        auto cursorpos = ImGui::GetCursorPos();
+        auto offset = (ImVec2(icon_size, icon_size) - sz) * 0.5f;
+        ImGui::SetCursorPos(cursorpos + offset);
+        if (id)
+            ImGui::Image(id, sz, ImVec2(0, 0), ImVec2(1, 1), selected_path == path ? selected_tint : tint);
+        else
+            ImGui::InvisibleButton("preview", sz);
+        ImGui::SetCursorPos(cursorpos + ImVec2(0, icon_size + ImGui::GetStyle().ItemSpacing.y));
+
+        // todo: open arrow for bundle
+    }
+
+    void IGE_ProjectWindow::drawContents(vector<PathHandle>& paths, ImVec2 spacing, int icons_per_row)
+    {
+        // sort paths by folders then lexicographically
+        std::sort(paths.begin(), paths.end(), [](PathHandle a, PathHandle b)
+        {
+            if (a.IsDir()) return b.IsDir() ? a.GetFileName() < b.GetFileName() : true;
+            else           return b.IsDir() ? false : a.GetFileName() < b.GetFileName();
+        });
+
         int col = 0;
         for (const auto& path : paths)
         {
@@ -349,88 +436,19 @@ namespace idk {
             ImGui::BeginGroup();
             ImGui::PushID(name.c_str());
 
-            { // preview image / icon
-                void* id = 0;
-                vec2 sz{ icon_size, icon_size };
-                ImVec4 tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
-                ImVec4 selected_tint = ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered);
-
-                if (path.IsDir())
-                {
-                    static auto folder_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/folder.png");
-                    //IDK_ASSERT_MSG(folder_icon, "THIS SHOULD BE LOADED");
-                    id = folder_icon->ID();
-                }
-                else
-                {
-                    auto handle = getOrLoadFirstAsset(path);
-                    RscHandle<Texture> tex = std::visit([](auto h)
-                    {
-                        using T = typename decltype(h)::Resource;
-
-                        if (!h)
-                            return RscHandle<Texture>();
-                        if constexpr (std::is_same_v<T, Texture>)
-                            return h;
-                        else if constexpr (std::is_same_v<T, Material> || std::is_same_v<T, shadergraph::Graph>)
-                        {
-                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/material.png");
-                            return material_icon;
-                        }
-                        else if constexpr (std::is_same_v<T, MaterialInstance>)
-                        {
-                            static auto material_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/matinst.png");
-                            return material_icon;
-                        }
-                        else if constexpr (std::is_same_v<T, Scene>)
-                        {
-                            static auto scene_icon = *Core::GetResourceManager().Load<Texture>("/editor_data/icons/scene.png");
-                            return scene_icon;
-                        }
-                        else
-                            return RscHandle<Texture>();
-                    }, handle);
-
-                    if (tex)
-                    {
-                        id = tex->ID();
-                        float aspect = tex->AspectRatio();
-                        if (aspect > 1.0f)
-                            sz.y /= aspect;
-                        else if (aspect < 1.0f)
-                            sz.x *= aspect;
-                        if (handle.resource_id() == BaseResourceID<Texture>)
-                        {
-                            tint = /*ImVec4(0.9f, 0.9f, 0.9f, 1);*/
-                                selected_tint = ImVec4(1, 1, 1, 1);
-                        }
-                    }
-                }
-
-                auto cursorpos = ImGui::GetCursorPos();
-                auto offset = (ImVec2(icon_size, icon_size) - sz) * 0.5f;
-                ImGui::SetCursorPos(cursorpos + offset);
-                if (id)
-                    ImGui::Image(id, sz, ImVec2(0, 0), ImVec2(1, 1), selected_path == path ? selected_tint : tint);
-                else
-                    ImGui::InvisibleButton("preview", sz);
-                ImGui::SetCursorPos(cursorpos + ImVec2(0, icon_size + ImGui::GetStyle().ItemSpacing.y));
-
-                // todo: open arrow for bundle
-            }
-
+            drawThumbnail(path);
             ImVec2 text_frame_sz{ icon_size, ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2 };
+
+            static char rename_buf[256];
 
             if (selected_path == path)
             {
-                static char buf[256];
-
                 if (renaming_selected_asset)
                 {
                     ImGui::SetNextItemWidth(icon_size);
-                    if (ImGui::InputText("##nolabel", buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
+                    if (ImGui::InputText("##nolabel", rename_buf, 256, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue))
                     {
-                        name = buf;
+                        name = rename_buf;
                         renaming_selected_asset = false;
 
                         fs::path old_path = selected_path.GetFullPath();
@@ -467,7 +485,7 @@ namespace idk {
                     {
                         renaming_selected_asset = true;
                         just_rename = true;
-                        strcpy_s(buf, name.c_str());
+                        strcpy_s(rename_buf, name.c_str());
                     }
 
                     ImGui::SetCursorPosY(cursor_y + ImGui::GetStyle().FramePadding.y);
@@ -503,38 +521,7 @@ namespace idk {
             }
             else
             {
-                if (ImGui::BeginDragDropTarget())
-                {
-                    if (ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
-                    {
-                        const auto& vec = DragDrop::GetResourcePayloadData();
-                        auto res_path = std::visit([](auto h) { return Core::GetResourceManager().GetPath(h); }, vec[0]);
-                        if (res_path)
-                        {
-                            PathHandle old_path_handle = *res_path;
-                            fs::path old_path = old_path_handle.GetFullPath();
-
-                            fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(
-                                unique_new_mount_path(old_path_handle.GetStem(), old_path_handle.GetExtension(), path)).sv();
-                            fs::rename(old_path, new_path);
-
-                            // move meta file as well
-                            old_path += ".meta";
-                            if (fs::exists(old_path))
-                            {
-                                new_path += ".meta";
-                                fs::rename(old_path, new_path);
-                            }
-                        }
-                    }
-                    auto get_res = Core::GetResourceManager().Get(path);
-                    if (get_res && get_res->Count())
-                    {
-                        DragDrop::SetResourcePayload(*get_res);
-                        ImGui::Text(path.GetMountPath().data());
-                    }
-                    ImGui::EndDragDropTarget();
-                }
+                folderDragDropTarget(path);
             }
 
             if (ImGui::IsItemClicked())
@@ -598,11 +585,12 @@ namespace idk {
                 ImGui::Separator();
 #endif
 
-                //if (ImGui::MenuItem("Rename"))
-                //{
-                //    just_rename = true;
-                //    renaming_selected_asset = true;
-                //}
+                if (ImGui::MenuItem("Rename"))
+                {
+                    just_rename = true;
+                    renaming_selected_asset = true;
+                    strcpy_s(rename_buf, name.c_str());
+                }
                 if (ImGui::MenuItem("Delete"))
                 {
                     fs::path full_path = path.GetFullPath();
@@ -632,6 +620,42 @@ namespace idk {
             }
 
         } // for each paths in dir
+    }
+
+    void IGE_ProjectWindow::folderDragDropTarget(PathHandle path)
+    {
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (ImGui::AcceptDragDropPayload(DragDrop::RESOURCE, ImGuiDragDropFlags_AcceptNoDrawDefaultRect))
+            {
+                const auto& vec = DragDrop::GetResourcePayloadData();
+                auto res_path = std::visit([](auto h) { return Core::GetResourceManager().GetPath(h); }, vec[0]);
+                if (res_path)
+                {
+                    PathHandle old_path_handle = *res_path;
+                    fs::path old_path = old_path_handle.GetFullPath();
+
+                    fs::path new_path = Core::GetSystem<FileSystem>().GetFullPath(
+                        unique_new_mount_path(old_path_handle.GetStem(), old_path_handle.GetExtension(), path)).sv();
+                    fs::rename(old_path, new_path);
+
+                    // move meta file as well
+                    old_path += ".meta";
+                    if (fs::exists(old_path))
+                    {
+                        new_path += ".meta";
+                        fs::rename(old_path, new_path);
+                    }
+                }
+            }
+            auto get_res = Core::GetResourceManager().Get(path);
+            if (get_res && get_res->Count())
+            {
+                DragDrop::SetResourcePayload(*get_res);
+                ImGui::Text(path.GetMountPath().data());
+            }
+            ImGui::EndDragDropTarget();
+        }
     }
 
 }
