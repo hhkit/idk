@@ -68,7 +68,11 @@ namespace idk::mono
 	}
 	void MonoBehaviorEnvironment::Init()
 	{
+		auto type = Core::GetSystem<ScriptSystem>().Environment().Type("IDK");
 		FindMonoBehaviors();
+
+		void* args[] = { nullptr };
+		mono_runtime_invoke(std::get<MonoMethod*>(type->GetMethod("OnHotReload")), nullptr, args, nullptr);
 	}
 	ManagedType* MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
 	{
@@ -116,9 +120,7 @@ namespace idk::mono
 
 				do
 				{
-					
 					LOG_TO(LogPool::MONO, "  CHECKING %s:%s @ %p", mono_class_get_namespace(check_parent), mono_class_get_name(check_parent), check_parent);
-					auto my_img = mono_class_get_image(check_parent);
 					if (mono_class_get_name(check_parent) == string_view{ "MonoBehavior" })
 						return true;
 					if (check_parent == monobehavior)

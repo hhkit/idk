@@ -21,7 +21,7 @@ namespace idk
 		return true;
 	}
 
-	void ClientMoveManager::SubscribeEvents(ClientConnectionManager& client)
+	void ClientMoveManager::SubscribeEvents(ClientConnectionManager&)
 	{
 		//OnFrameStart(&ClientMoveManager::CachePreviousPositions);
 		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&ClientMoveManager::CachePreviousPositions);

@@ -52,18 +52,18 @@ namespace idk
 		if (connected_this_frame && !connected_last_frame)
 		{
 			OnConnectionToServer.Fire();
-			auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-			auto thunk = network->GetThunk("ExecServerConnect", 0);
-			if (thunk)
-				(*thunk).Invoke();
+		//	auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
+		//	auto thunk = network->GetThunk("ExecServerConnect", 0);
+		//	if (thunk)
+		//		(*thunk).Invoke();
 		}
 		if (!connected_this_frame && connected_last_frame)
 		{
 			OnDisconnectionFromServer.Fire();
-			auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-			auto thunk = network->GetThunk("ExecServerDisconnect", 0);
-			if (thunk)
-				(*thunk).Invoke();
+		//	auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
+		//	auto thunk = network->GetThunk("ExecServerDisconnect", 0);
+		//	if (thunk)
+		//		(*thunk).Invoke();
 		}
 		if (connected_this_frame)
 			ProcessMessages();

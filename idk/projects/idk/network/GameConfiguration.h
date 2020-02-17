@@ -21,9 +21,9 @@ namespace idk
 	static constexpr auto MessageID = index_in_tuple_v<T, NetworkMessageTuple>;
 
 	enum class GameChannel {
+		FASTEST_GUARANTEED,
 		RELIABLE,
 		UNRELIABLE,
-		FASTEST_GUARANTEED,
 		COUNT
 	};
 

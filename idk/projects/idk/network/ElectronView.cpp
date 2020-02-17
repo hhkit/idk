@@ -9,11 +9,11 @@
 #include <network/NetworkSystem.h>
 namespace idk
 {
-	ElectronView::ElectronView(const ElectronView& rhs)
+	ElectronView::ElectronView(const ElectronView&)
 	{
 	}
 	ElectronView::ElectronView(ElectronView&&) noexcept = default;
-	ElectronView& ElectronView::operator=(const ElectronView& rhs)
+	ElectronView& ElectronView::operator=(const ElectronView&)
 	{
 		throw;
 	}
@@ -69,7 +69,6 @@ namespace idk
 	{
 		if (auto ghost_ = std::get_if<Ghost>(&ghost_state))
 		{
-			Ghost& ghost = *ghost_;
 			auto advance = Core::GetDT().count();
 
 			for (unsigned i = 0; i < parameters.size(); ++i)
