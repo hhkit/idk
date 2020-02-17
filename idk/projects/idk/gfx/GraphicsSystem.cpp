@@ -746,6 +746,9 @@ namespace idk
 			auto& ui = Core::GetSystem<UISystem>();
 			for (auto& im : images)
 			{
+				if (!im.texture)
+					continue;
+
 				const auto& go = im.GetGameObject();
 				if (!go->ActiveInHierarchy())
 					continue;
@@ -760,8 +763,19 @@ namespace idk
 				const auto& rt = *go->GetComponent<RectTransform>();
 				auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
-				render_data.transform = rt._matrix *
-					mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+				auto sz = rt._local_rect.size * 0.5f;
+
+				if (im.preserve_aspect)
+				{
+					const float tex_aspect = im.texture->AspectRatio();
+					const float rt_aspect = rt._local_rect.size.x / rt._local_rect.size.y;
+					if (tex_aspect > rt_aspect) // horizontally longer
+						sz.y = sz.x / tex_aspect;
+					else if (tex_aspect < rt_aspect) // vertically longer
+						sz.x = sz.y * tex_aspect;
+				}
+
+				render_data.transform = rt._matrix * mat4{ scale(vec3{sz, 1.0f}) };
 				render_data.material = im.material;
 				render_data.color = im.tint;
 				render_data.data = ImageData{ im.texture };

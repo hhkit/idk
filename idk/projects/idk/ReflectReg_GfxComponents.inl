@@ -2,10 +2,8 @@
 #include <ReflectReg_Common.inl>
 #include <IncludeComponents.h>
 
-
-#pragma region Graphics
-
 // GRAPHICS
+#pragma region Graphics
 REFLECT_BEGIN(idk::MeshRenderer, "MeshRenderer")
 REFLECT_VARS(enabled, mesh, material_instance, cast_shadows, receive_shadows)
 REFLECT_END()
@@ -36,8 +34,10 @@ REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
 REFLECT_BEGIN(idk::TextMesh, "TextMesh")
 REFLECT_VARS(text, letter_spacing, line_height, anchor, alignment, color, font_size, font)
 REFLECT_END()
-#pragma region Camera
+#pragma endregion
+
 // CAMERA
+#pragma region Camera
 REFLECT_BEGIN(idk::DontClear, "Don'tClear")
 REFLECT_END()
 REFLECT_BEGIN(idk::DepthOnly, "DepthOnly")
@@ -50,7 +50,7 @@ REFLECT_END()
 REFLECT_BEGIN(idk::Camera, "Camera")
 REFLECT_VARS(enabled, layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target,gamma)
 REFLECT_END()
-#pragma endregion Camera
+#pragma endregion
 
 // PARTICLE SYSTEM
 #pragma region Particle System
@@ -58,7 +58,7 @@ REFLECT_BEGIN(idk::MainModule, "MainModule")
 REFLECT_VARS(duration, looping, prewarm, max_particles,
 	start_delay, start_lifetime, start_speed, start_size, start_rotation, start_color,
 	gravity_modifier, in_world_space, play_on_awake, destroy_on_finish)
-	REFLECT_END();
+REFLECT_END();
 
 REFLECT_BEGIN(idk::EmissionModule::Burst, "EmissionBurst")
 REFLECT_VARS(time, count, cycles, interval, probability)
@@ -117,11 +117,10 @@ REFLECT_VARS(render_target)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Image, "Image")
-REFLECT_VARS(texture, tint, material)
+REFLECT_VARS(texture, tint, material, preserve_aspect)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Text, "Text")
 REFLECT_VARS(text, font, font_size, letter_spacing, line_height, alignment, wrap, best_fit, color, material)
 REFLECT_END()
-#pragma endregion
 #pragma endregion
