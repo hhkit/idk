@@ -37,6 +37,7 @@ namespace idk
 		StoreOp stencil_store_op{};
 		bool own_buffer = false;
 		RscHandle<Texture> buffer;
+
 		RscHandle<Texture> operator*()const { return buffer; }
 		operator RscHandle<Texture>()const { return buffer; }
 		const RscHandle<Texture>* operator->()const { return &buffer; }

@@ -16,6 +16,8 @@ End Header --------------------------------------------------------*/
 //#define BLOCK(X) X
 //#endif
 
+#define SHADOW_CASCADES 2
+
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
@@ -28,6 +30,11 @@ layout (location = 8) in mat4 normal_transform;
 //	mat4 object_transform;
 //	mat4 normal_transform;
 //} ObjectMat4s;
+
+U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
+{
+	mat4 perspective_transform[SHADOW_CASCADES];
+} PerCamera;
 
 layout(location = 1) out VS_OUT
 {

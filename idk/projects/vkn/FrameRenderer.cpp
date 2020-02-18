@@ -381,8 +381,8 @@ namespace idk::vkn
 		return std::move(the_interface);
 	}
 
-
-	PipelineThingy ShadowProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager, StandardBindings& binders)
+#pragma optimize("",off)
+	PipelineThingy ShadowProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager, ShadowBinding& binders)
 	{
 		auto& mesh_vtx = state.renderer_vertex_shaders[VNormalMeshShadow];
 		auto& skinned_mesh_vtx = state.renderer_vertex_shaders[VSkinnedMeshShadow];
@@ -686,7 +686,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
-//// 
+#pragma optimize("",off)
 	void RenderPipelineThingy(
 		[[maybe_unused]] const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -795,7 +795,7 @@ namespace idk::vkn
 			}
 		}
 	}
-//#pragma optimize("", off)
+#pragma optimize("", off)
 	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[light_index];
@@ -823,45 +823,45 @@ namespace idk::vkn
 						proj_mats.emplace_back(clip_mat * elem.cascade_projection);
 					}
 
-						auto cam = ShadowCameraData{ Handle<GameObject>{}, light.shadow_layers, light.v,  proj_mats};
-						ShadowBinding shadow_binding;
-						shadow_binding.for_each_binder<has_setstate>(
-							[](auto& binder, const ShadowCameraData& cam, const vector<SkeletonTransforms>& skel)
-						{
-							binder.SetState(cam, skel);
-						},
-							cam,
-							*state.skeleton_transforms);
-						GraphicsStateInterface gsi = { state };
-						gsi.range = (*state.shadow_ranges)[light_index];
-						auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-						the_interface.GenerateDS(rs.dpools,false);
+					auto cam = ShadowCameraData{ Handle<GameObject>{}, light.shadow_layers, light.v,  proj_mats};
+					ShadowBinding shadow_binding;
+					shadow_binding.for_each_binder<has_setstate>(
+						[](auto& binder, const ShadowCameraData& cam, const vector<SkeletonTransforms>& skel)
+					{
+						binder.SetState(cam, skel);
+					},
+						cam,
+						*state.skeleton_transforms);
+					GraphicsStateInterface gsi = { state };
+					gsi.range = (*state.shadow_ranges)[light_index];
+					auto the_interface = vkn::ShadowProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+					the_interface.GenerateDS(rs.dpools,false);
 
-						//auto& swapchain = view.Swapchain();
+					//auto& swapchain = view.Swapchain();
 
 
-						//auto lm = elem.light_map->DepthAttachment().buffer;
-						auto sz = light.light_maps[0].light_map->DepthAttachment().buffer->Size();
+					//auto lm = elem.light_map->DepthAttachment().buffer;
+					auto sz = light.light_maps[0].light_map->DepthAttachment().buffer->Size();
 
-						vk::Rect2D render_area
-						{
-							vk::Offset2D{},
-							vk::Extent2D{sz.x,sz.y}
-						};
-						auto& rt = light.light_maps[0].light_map.as<VknFrameBuffer>();
-						vk::Framebuffer fb = rt.GetFramebuffer();
-						auto  rp = rt.GetRenderPass();
-						rt.PrepareDraw(cmd_buffer);
-						vector<vec4> clear_colors
-						{
-							vec4{1}
-						};
-						//if (the_interface.DrawCalls().size())
-							rs.FlagRendered();
-						dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
-						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
-						dbg::EndLabel(cmd_buffer);
-						cmd_buffer.endRenderPass();
+					vk::Rect2D render_area
+					{
+						vk::Offset2D{},
+						vk::Extent2D{sz.x,sz.y}
+					};
+					auto& rt = light.light_maps[0].light_map.as<VknFrameBuffer>();
+					vk::Framebuffer fb = rt.GetFramebuffer();
+					auto  rp = rt.GetRenderPass();
+					rt.PrepareDraw(cmd_buffer);
+					vector<vec4> clear_colors
+					{
+						vec4{1}
+					};
+					//if (the_interface.DrawCalls().size())
+						rs.FlagRendered();
+					dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
+					RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+					dbg::EndLabel(cmd_buffer);
+					cmd_buffer.endRenderPass();
 					
 					cmd_buffer.end();
 					rs.ubo_manager.UpdateAllBuffers();

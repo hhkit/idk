@@ -124,6 +124,55 @@ namespace idk::vkn
 		the_interface.BindUniformBuffer("BoneMat4Block", 0, (*skeletons)[dc.skeleton_index].bones_transforms);
 	}
 
+	void ShadowVertexBindings::SetState(const GraphicsState& vstate) {
+		//Better not come here
+		vstate;
+		return;
+		//auto& cam = vstate.camera;
+		//SetState(cam, vstate.GetSkeletonTransforms());
+	}
+
+	void ShadowVertexBindings::SetState(const ShadowCameraData& cam, const vector<SkeletonTransforms>& skel)
+	{
+		view_trf = cam.view_matrix;
+		proj_trf = cam.projection_matrix;
+		skeletons = &skel;
+	}
+#pragma optimize("",off)
+	void ShadowVertexBindings::Bind(PipelineThingy& the_interface)
+	{
+		//map back into z: (0,1)
+		mat4 projection_trf = mat4{ 1,0,0,0,
+							0,1,0,0,
+							0,0,0.5f,0.5f,
+							0,0,0,1
+		};//map back into z: (0,1)
+
+		for (auto& elem : proj_trf)
+			elem = elem * projection_trf;
+		the_interface.BindUniformBuffer("CameraBlock", 0, proj_trf);
+	}
+
+	void ShadowVertexBindings::Bind(PipelineThingy& the_interface, const RenderObject& dc)
+	{
+		mat4 obj_trf = view_trf * dc.transform;
+		mat4 obj_ivt = obj_trf.inverse().transpose();
+		vector<mat4> mat4_block{ obj_trf,obj_ivt };
+		the_interface.BindUniformBuffer("ObjectMat4Block", 0, mat4_block);
+	}
+
+	void ShadowVertexBindings::Bind(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
+	{
+		Bind(the_interface, s_cast<const RenderObject&>(dc));
+		BindAni(the_interface, dc);
+	}
+
+	void ShadowVertexBindings::BindAni(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
+	{
+		//auto& state = State();
+		the_interface.BindUniformBuffer("BoneMat4Block", 0, (*skeletons)[dc.skeleton_index].bones_transforms);
+	}
+
 	const GraphicsState& PbrFwdBindings::State() { return *_state; }
 
 	void PbrFwdBindings::SetState(const GraphicsState& vstate) {
@@ -486,7 +535,7 @@ namespace idk::vkn
 		return !(dc.layer_mask&filter);
 	}
 
-	void ShadowFilter::SetState(const CameraData& cam, const vector<SkeletonTransforms>& )
+	void ShadowFilter::SetState(const ShadowCameraData& cam, const vector<SkeletonTransforms>& )
 	{
 		filter = cam.culling_flags;
 	}

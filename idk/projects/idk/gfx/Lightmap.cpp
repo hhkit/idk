@@ -178,17 +178,20 @@ namespace idk {
 
 	RscHandle<FrameBuffer> Lightmap::InitShadowMap()
 	{
-
+		size_t layer_c = 2;
 		FrameBufferBuilder builder;
-		builder.Begin("ShadowMap[" + std::to_string(texel_size) + ", " + std::to_string(texel_size) + "]", uvec2{ texel_size , texel_size},2);
+		builder.Begin("ShadowMap[" + std::to_string(texel_size) + ", " + std::to_string(texel_size) + "]", uvec2{ texel_size , texel_size}, layer_c);
 		builder.SetDepthAttachment(
 			AttachmentInfo
 			{
 				LoadOp::eClear,
 				StoreOp::eStore,
 				DepthBufferMode::Depth16,
+				true,
+				FilterMode::_enum::Linear,
 				false,
-				FilterMode::_enum::Linear
+				std::nullopt,
+				layer_c
 			}
 		);
 

@@ -5,7 +5,7 @@
 layout(invocations = 6, triangles) in;
 layout(triangle_strip, max_vertices = 12) out;
 
-U_LAYOUT(0,0) uniform BLOCK(CameraBlock)
+U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
 {
 	mat4 perspective_transform[SHADOW_CASCADES];
 } PerCamera;
@@ -24,7 +24,7 @@ void main()
 		gl_Layer = i;
 		for(int k=0; k < gl_in.length(); ++k)
         {
-			gl_Position = PerCamera.perspective_transform[i] * gl_in[k].position;
+			gl_Position = PerCamera.perspective_transform[i] * gl_in[k].gl_Position;
 			
 			EmitVertex();
 		}

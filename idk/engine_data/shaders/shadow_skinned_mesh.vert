@@ -16,6 +16,7 @@ End Header --------------------------------------------------------*/
 //#define BLOCK(X) X
 //#endif
 #define MAX_BONES 100
+#define SHADOW_CASCADES 2
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -29,6 +30,11 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 	mat4 object_transform;
 	mat4 normal_transform;
 } ObjectMat4s;
+
+U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
+{
+	mat4 perspective_transform[SHADOW_CASCADES];
+} PerCamera;
 
 U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
 {

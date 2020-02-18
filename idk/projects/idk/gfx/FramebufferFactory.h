@@ -15,10 +15,12 @@ namespace idk
 
 		TextureInternalFormat internal_format = TextureInternalFormat::RGBA_32_F;
 		FilterMode  filter_mode = FilterMode::Linear;
+		std::optional<size_t> layer_count;
 		std::optional<RscHandle<Texture>> buffer;
 		bool isCubeMap = false;
 		bool override_as_depth = false;
 		bool is_input_att = false;
+
 
 		AttachmentInfo() = default;
 
@@ -28,14 +30,16 @@ namespace idk
 			TextureInternalFormat int_format,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
-			std::optional<RscHandle<Texture>> buffer_ = std::nullopt
+			std::optional<RscHandle<Texture>> buffer_ = std::nullopt,
+			std::optional<size_t> layer_count_ = 1
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
 			internal_format{ int_format },
 			filter_mode{ filter_mode_ },
 			isCubeMap{ isCubeMap_ },
-			buffer{ buffer_ }
+			buffer{ buffer_ },
+			layer_count{ layer_count_ }
 		{};
 
 		AttachmentInfo(
@@ -44,14 +48,16 @@ namespace idk
 			ColorFormat color_format,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
-			std::optional<RscHandle<Texture>> buffer_= std::nullopt
+			std::optional<RscHandle<Texture>> buffer_= std::nullopt,
+			std::optional<size_t> layer_count_ = 1
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
 			internal_format{ ToInternalFormat(color_format, false) },
 			filter_mode{ filter_mode_ },
 			isCubeMap{ isCubeMap_},
-			buffer{ buffer_ }
+			buffer{ buffer_ },
+			layer_count{ layer_count_ }
 		{};
 
 		AttachmentInfo(
@@ -61,14 +67,16 @@ namespace idk
 			bool enable_stencil,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
-			std::optional<RscHandle<Texture>> buffer_ = std::nullopt
+			std::optional<RscHandle<Texture>> buffer_ = std::nullopt,
+			std::optional<size_t> layer_count_ = 1
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
 			internal_format{ ToInternalFormat(depth_format, enable_stencil) },
 			filter_mode{ filter_mode_ },
 			isCubeMap{ isCubeMap_ },
-			buffer{ buffer_ }
+			buffer{ buffer_ },
+			layer_count{ layer_count_ }
 		{};
 
 		AttachmentInfo(const Attachment& attachment)
@@ -77,6 +85,7 @@ namespace idk
 			, internal_format{ attachment.buffer->InternalFormat()}
 			, filter_mode{ attachment.buffer->Filter() }
 			, buffer{attachment.buffer}
+			, layer_count{ 1 }
 		{
 		}
 	};

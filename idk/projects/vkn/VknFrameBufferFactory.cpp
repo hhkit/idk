@@ -324,6 +324,7 @@ namespace idk::vkn
 			tci.image_usage |= vk::ImageUsageFlagBits::eTransferSrc| vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eInputAttachment;
 			opt.internal_format = info.internal_format;
 			opt.filter_mode = info.filter_mode;
+			tci.layers = *info.layer_count; 
 			tci.internal_format = MapFormat(opt.internal_format);
 			loader.LoadTexture(t, allocator, fence, opt, tci, {});
 		}

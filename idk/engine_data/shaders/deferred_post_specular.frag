@@ -94,12 +94,12 @@ void main()
 					//shadow_factor *= shadow_factor;
 					//cascade_c = vec4(0.1,0,0,0);
 				}
-				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
-				{
-					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-					//shadow_factor *= shadow_factor;
-					//cascade_c = vec4(0,0.1,0,0);
-				}
+				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
+				//{
+				//	shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+				//	//shadow_factor *= shadow_factor;
+				//	//cascade_c = vec4(0,0.1,0,0);
+				//}
 				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				//{
 				//	shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
