@@ -98,7 +98,6 @@ namespace idk
                 t_ori.position = t_prefab.position;
                 t_ori.rotation = t_prefab.rotation;
                 t_ori.scale = t_prefab.scale;
-                t_ori.parent = t_prefab.parent;
             }
             else if (prefab_comp.is<Name>())
                 go->Name(prefab_comp.get<Name>().name);

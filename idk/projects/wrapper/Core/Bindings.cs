@@ -700,6 +700,9 @@ namespace idk
         public extern static void NetworkCreateLobby();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int[] NetworkGetPlayers();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkConnect(Address a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]

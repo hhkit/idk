@@ -13,7 +13,7 @@ namespace idk
 		static void UpdateGhosts(span<ElectronView>);
 		static void UpdateMasters(span<ElectronView>);
 
-		void SendGhosts(span<ElectronView> views); // by right should be just ElectronView but we deal with that later
+		void SendGhosts(span<ElectronView> views);
 	private:
 		void OnGhostReceived(class GhostMessage* msg);
 	};

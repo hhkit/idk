@@ -54,12 +54,12 @@ namespace idk
 		SubSoundGroup	soundGroup	{ SubSoundGroup::SubSoundGroup_SFX };
 
 
+		void ResizeAudioClipListData();
 	private:
 		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode. Collates the current setting given.
 
 
 		void FMOD_RES(FMOD_RESULT e); //Throws string on fail
-		void ResizeAudioClipListData();
 	};
 
 }

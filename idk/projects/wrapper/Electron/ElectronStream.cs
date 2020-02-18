@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace idk
 {
-    public class ElectronStream
+    class ElectronStream
     {
         internal IntPtr cppstream;
 

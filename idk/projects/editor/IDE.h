@@ -58,6 +58,8 @@ namespace idk
 		GizmoOperation	gizmo_operation = GizmoOperation::Translate;
 		GizmoMode		gizmo_mode = GizmoMode::Local; //World is might not work properly for scaling for now.
 
+		Signal<> OnSelectionChanged;
+
 		IDE();
 
 		// lifetime

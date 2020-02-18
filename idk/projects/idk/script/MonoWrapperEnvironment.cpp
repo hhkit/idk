@@ -202,9 +202,9 @@ namespace idk::mono
 		BIND_END();
 
 		
-		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* type)
+		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* raw_type)
 		{
-			auto s = unbox(type);
+			auto s = unbox(raw_type);
 			string_view type_name = s.get();
 
 			vector<Handle<mono::Behavior>> behaviors;
@@ -1834,6 +1834,22 @@ namespace idk::mono
 		BIND_START("idk.Bindings::NetworkGetIsHost", bool)
 		{
 			return Core::GetSystem<NetworkSystem>().IsHost();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetPlayers", MonoArray*)
+		{
+			vector<int> players;
+			auto& network = Core::GetSystem<NetworkSystem>();
+			for (auto host = s_cast<int>(Host::CLIENT0); host < s_cast<int>(Host::CLIENT_MAX); ++host)
+				if (network.GetConnectionTo(s_cast<Host>(host))) // has connection
+					players.emplace_back(host);
+
+			auto retval = mono_array_new(mono_domain_get(), mono_get_int32_class(), players.size());
+			for (int i = 0; i < players.size(); ++i)
+				mono_array_set(retval, int, i, players[i]);
+
+			return retval;
 		}
 		BIND_END();
 

@@ -56,7 +56,7 @@ namespace idk
 
     string_view TagManager::GetTagFromIndex(tag_t index) const
     {
-        if (index > GetConfig().tags.size())
+        if (index == 0 || index > GetConfig().tags.size())
             return "";
         return GetConfig().tags[index - 1];
     }

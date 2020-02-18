@@ -65,9 +65,8 @@ namespace idk
 
 	void GhostManager::OnGhostReceived(GhostMessage* msg)
 	{
-		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
-		auto view = id_man.GetViewFromId(msg->network_id);
-		auto& tfm = *view->GetGameObject()->Transform();
+		const auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+		const auto view = id_man.GetViewFromId(msg->network_id);
 		if (view)
 		{
 			// push the ghost data into the view
