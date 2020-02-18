@@ -1003,8 +1003,19 @@ namespace idk
 		size_t i = 0;
 		
 
-		auto draw_frustum = [](const frustum& frust, color col,seconds duration,bool depth_test=true)
+		auto draw_frustum = [this](const frustum& frust, color col,seconds duration,bool depth_test=true)
 		{
+
+			auto dbg_cascade_name = "debug_cascade";
+			auto active_opt = this->extra_vars.Get<bool>(dbg_cascade_name);
+
+			if (!active_opt)
+			{
+				extra_vars.Set(dbg_cascade_name,false);
+				active_opt = false;
+			}
+			if (!*active_opt) return;
+
 			auto intersection_point = [](halfspace a, halfspace b, halfspace c)
 			{
 				mat3 mat = mat3{ a.normal,b.normal,c.normal };
