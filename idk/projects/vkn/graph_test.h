@@ -5,12 +5,14 @@ namespace idk::vkn
 {
 	struct GraphicsState;
 	struct RenderStateV2;
+	class FrameGraph;
 }
 
 namespace idk::vkn::gt
 {
 	struct GraphTest
 	{
+		GraphTest(FrameGraph&);
 		GraphTest();
 		GraphTest(const GraphTest&) = delete;
 		GraphTest(GraphTest&&);

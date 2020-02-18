@@ -151,7 +151,7 @@ namespace idk::vkn::renderpasses
 	struct DeferredRendering
 	{
 		//returns color and depth
-		std::pair<FrameGraphResource, FrameGraphResource> MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs);
+		static std::pair<FrameGraphResource, FrameGraphResource> MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs);
 	};
 
 }

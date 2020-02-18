@@ -53,6 +53,10 @@
 
 #include <vkn/FrameGraph.h>
 
+#include <vkn/RenderBundle.h>
+
+#include <vkn/renderpasses/DeferredPasses.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<ThreadedRender>()
@@ -62,9 +66,9 @@ namespace idk::vkn
 		hash_table<RscHandle<Texture>, RscHandle<VknFrameBuffer>> deferred_buffers;
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
-		gt::GraphTest test;
+		FrameGraph graph;
+		gt::GraphTest test{ graph };
 
-		
 
 		uint32_t testing = 0;
 	};
@@ -915,10 +919,12 @@ namespace idk::vkn
 	}
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
+		_pimpl->graph.Reset();
 		_current_frame_index = frame_index;
 		//Update all the resources that need to be updated.
 		auto& curr_frame = *this;
-		GrowStates(_states, gfx_states.size());
+		const auto frame_graph_count = 1;
+		GrowStates(_states, gfx_states.size() + frame_graph_count);
 		size_t num_concurrent = curr_frame._render_threads.size();
 		auto& pri_buffer = curr_frame._pri_buffer;
 		auto& transition_buffer = curr_frame._transition_buffer;
@@ -943,6 +949,7 @@ namespace idk::vkn
 					_pimpl->deferred_buffers.clear();
 			}
 		}
+		/*
 		for (auto i = gfx_states.size(); i-- > 0;)
 		{
 			if (Core::GetSystem<GraphicsSystem>().is_deferred())
@@ -965,6 +972,7 @@ namespace idk::vkn
 				//deferred_buffers[color_buffer] = deferred_pass.hdr_buffer;
 			}
 		}
+		*/
 		bool rendered = false;
 		{
 			;
@@ -992,6 +1000,15 @@ namespace idk::vkn
 		for (size_t j = 0; j < _render_threads.size(); ++j) {
 			auto& thread = _render_threads[j];
 			thread->Join();
+		}
+		{
+			_pimpl->graph.Compile();
+			_pimpl->graph.Execute();
+			auto& state = _states.back();
+
+			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
+			_pimpl->graph.ProcessBatches(rb);
+			state.FlagRendered();
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
 		vector<vk::CommandBuffer> buffers{};
@@ -1376,289 +1393,292 @@ namespace idk::vkn
 	}
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
-		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
-
-		auto& view = View();
-		//auto& swapchain = view.Swapchain();
-		auto& camera = state.camera;
-		auto sz = camera.render_target->Size();
-		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
-
-		auto dispatcher = vk::DispatchLoaderDefault{};
-		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-
-		cmd_buffer.begin(begin_info, dispatcher);
-		VulkanPipeline* prev_pipeline = nullptr;
-		vector<RscHandle<ShaderProgram>> shaders;
-		auto& deferred_pass = rs.deferred_pass;
-		if (is_deferred)
-		{
-			deferred_pass.pipeline_manager(GetPipelineManager());
-			deferred_pass.frame_index(_current_frame_index);
-			dbg::BeginLabel(cmd_buffer, "DrawToGbuffers");
-			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
-			dbg::EndLabel(cmd_buffer);
-		}
-				
-
-		//Preprocess MeshRender's uniforms
-		//TODO make ProcessRoUniforms only render forward pass stuff.
-		auto&& the_interface = (is_deferred) ? [](auto& state,auto& rs) {
-			UnlitMaterialBinding binders;
-			binders.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
-			return vkn::ProcessRoUniforms(state, rs.ubo_manager, binders);
-			//PipelineThingy the_interface{};
-			//the_interface.SetRef(rs.ubo_manager);
-			//return the_interface;
-		}(state,rs) : ProcessRoUniforms(state, rs.ubo_manager);
-		
-		//the_interface.SetRef(rs.ubo_manager);
-
-		_particle_renderer.DrawParticles(the_interface, state, rs);
-		_font_renderer.DrawFont(the_interface,state,rs);
-
-
-		//if(!is_deferred)
-		the_interface.GenerateDS(rs.dpools, false);//*/
-		the_interface.SetRef(rs.ubo_manager);
-		PipelineThingy deferred_interface_light[EGBufferType::size()]{};
-		PipelineThingy deferred_interface_hdr  {};
-		if (is_deferred)
-		{
-			GBufferType types[] = { GBufferType::eMetallic,GBufferType::eSpecular };
-			for (auto& type : types)
-			{
-				const size_t max_lights = 7;
-				auto deferred_interface = PipelineThingy{};
-				deferred_interface.SetRef(rs.ubo_manager);
-				rs.deferred_pass.LightPass(type,deferred_interface, state, rs, std::make_pair(0, 0), true);
-				for (size_t i = 0; i < state.active_lights.size(); )
-				{
-					auto num = std::min(max_lights, state.active_lights.size() - i);
-					rs.deferred_pass.LightPass(type,deferred_interface,state, rs, std::make_pair(i, i+num),false);
-					i += num;
-				}
-				deferred_interface.GenerateDS(rs.dpools, false);
-				deferred_interface_light[EGBufferType::map(type)].~PipelineThingy();
-				new (&deferred_interface_light[EGBufferType::map(type)]) PipelineThingy{ std::move(deferred_interface) };
-
-			}
-			deferred_interface_hdr.~PipelineThingy();
-			auto& hdr_interface = *(new (&deferred_interface_hdr) PipelineThingy{ rs.deferred_pass.HdrPass(state, rs) });
-			hdr_interface.GenerateDS(rs.dpools, false);
-
-		}
-		
-		//rs.ubo_manager.UpdateAllBuffers();
-		std::array<float, 4> a{};
-
-		//auto& cd = std::get<vec4>(state.camera.clear_data);
-		//TODO grab the appropriate framebuffer and begin renderpass
-		std::optional<color> clear_col;
-		std::optional<RscHandle<CubeMap>> sb_cm;
-
-		auto& clear_data = state.camera.clear_data;
-		switch (clear_data.index())
-		{
-		case index_in_variant_v<color, CameraClear>:
-			clear_col = std::get<color>(clear_data);
-			break;
-		case index_in_variant_v<RscHandle<CubeMap>, CameraClear>:
-			sb_cm = std::get<RscHandle<CubeMap>>(clear_data);
-			break;
-		case index_in_variant_v<DontClear, CameraClear>:
-			//TODO: set dont clear settings.
-			break;
-		}
-
-
-		vk::ClearValue clearColor = clear_col ?
-			vk::ClearValue{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) } }
-			:
-			vk::ClearValue{ vk::ClearColorValue{ std::array < float, 4>{0.f,0.f,0.f,0.f} } };
-		vk::ClearValue v[]{
-			clearColor,
-			vk::ClearDepthStencilValue{ 1.0f}
-		};
-		
-		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
-		
-		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
-		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
-		TransitionFrameBuffer(camera, cmd_buffer, view);
-
-		
-
-		vk::Rect2D render_area
-		{
-			vk::Offset2D
-			{
-				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
-			},vk::Extent2D
-			{
-				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
-			}
-		};
-		vk::RenderPassBeginInfo rpbi
-		{
-			GetRenderPass(state,view), frame_buffer,
-			render_area,hlp::arr_count(v),std::data(v)
-		};			
-		//Begin Clear Pass
-		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
-		SetViewport(cmd_buffer, offset, size);
-		//SetScissor(cmd_buffer,  offset, size);
-		//////////////////Skybox rendering
-		if (sb_cm)
-		{
-			pipeline_config skybox_render_config;
-			DescriptorsManager skybox_ds_manager(view);
-			skybox_render_config.fill_type = FillType::eFill;
-			skybox_render_config.prim_top = PrimitiveTopology::eTriangleList;
-			auto config = ConfigWithVP(skybox_render_config,camera,offset,size);
-			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
-			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
-			config.cull_face = CullFace::eNone;
-			config.depth_test = false;
-			config.depth_write = false;
-			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
-
-			//No idea if this is expensive....if really so I will try shift up to init
-			rs.skyboxRenderer.pipeline_manager(*_pipeline_manager);
-			rs.skyboxRenderer.Init(
-				Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox],
-				Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox],
-				{},
-				&config,
-				*camera.CubeMapMesh
-			);
-			rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, * sb_cm, camera.projection_matrix* mat4{ mat3{camera.view_matrix} });
-			
-			/*cmd_buffer.begin(vk::CommandBufferBeginInfo
-				{
-					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-				});*/
-			rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
-
-		}
-		cmd_buffer.endRenderPass();//beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
-		auto& rt = camera.render_target.as<VknRenderTarget>();
-
-		//Draw Deferred stuff
-		if (is_deferred)
-		{
-			TransitionFrameBuffer(camera, cmd_buffer, view);
-			//for(auto& deferred_interface : deferred_interfaces)
-			//Accumulator
-			dbg::BeginLabel(cmd_buffer, "DrawToAccum");
-			deferred_pass.DrawToAccum(cmd_buffer, deferred_interface_light, camera, rs);
-			dbg::EndLabel(cmd_buffer);
-			//HDR
-			dbg::BeginLabel(cmd_buffer, "DrawToRenderTarget");
-			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface_hdr, camera, rt, rs);
-			dbg::EndLabel(cmd_buffer);
-		}
-		//Subsequent passes shouldn't clear the buffer any more.
-		rpbi.renderPass = *rt.GetRenderPass(false, false);// *View().BasicRenderPass(rt.GetRenderPassType(),false,false);
-		rs.FlagRendered();
-		
-		auto& processed_ro = the_interface.DrawCalls();
-		//if (_pimpl->testing&& state.range.inst_mesh_render_end- state.range.inst_mesh_render_begin>0)
-		//	_pimpl->test.DeferredTest(state, rs), _pimpl->testing=0;
-		bool still_rendering = true;// (processed_ro.size() > 0) || camera.render_target->RenderDebug();
-		if (still_rendering)
-		{
-			TransitionFrameBuffer(camera, cmd_buffer, view);
-			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);;
-		}
-
-		if (processed_ro.size()>0)
-		{
-			dbg::BeginLabel(cmd_buffer, "non-deferred region", color{ 0,0.4f,0.2f });
-			bool is_particle_renderer = false;
-			for (auto& p_ro : processed_ro)
-			{
-				bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
-				is_particle_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
-				//auto& obj = p_ro.Object();
-				if (!p_ro.config)
-					continue;
-				if (p_ro.rebind_shaders)
-				{
-					shaders.resize(0);
-					if (p_ro.frag_shader)
-						shaders.emplace_back(*p_ro.frag_shader);
-					if(p_ro.vertex_shader)
-						shaders.emplace_back(*p_ro.vertex_shader);
-					if(p_ro.geom_shader)
-						shaders.emplace_back(*p_ro.geom_shader);
-
-					auto config = ConfigWithVP(*p_ro.config, camera, offset, size);
-					if (is_mesh_renderer)
-						config.buffer_descriptions.emplace_back(
-							buffer_desc
-							{
-								buffer_desc::binding_info{ std::nullopt,sizeof(mat4)*2,VertexRate::eInstance},
-								{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true},
-								 buffer_desc::attribute_info{AttribFormat::eMat4,8,sizeof(mat4),true}
-								 }
-							}
-						);
-					auto& pipeline = GetPipeline(config, shaders,camera.render_target.as<VknRenderTarget>().GetRenderPass());
-					pipeline.Bind(cmd_buffer,view);
-					SetViewport(cmd_buffer, offset, size);
-					prev_pipeline = &pipeline;
-				}
-				auto& pipeline = *prev_pipeline;
-				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
-				//auto& mesh = obj.mesh.as<VulkanMesh>();
-				{
-					uint32_t set = 0;
-					for (auto& ods : p_ro.descriptor_sets)
-					{
-						if (ods)
-						{
-							auto& ds = *ods;
-							cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
-						}
-						++set;
-					}
-				}
-				//auto& renderer_req = *obj.renderer_req;
-			
-				for (auto& [location, attrib] : p_ro.attrib_buffers)
-				{
-					auto opt = pipeline.GetBinding(location);
-					if (opt)
-						cmd_buffer.bindVertexBuffers(*opt, attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
-				}
-				auto& oidx = p_ro.index_buffer;
-				if (oidx)
-				{
-					cmd_buffer.bindIndexBuffer(oidx->buffer, oidx->offset, oidx->index_type, vk::DispatchLoaderDefault{});
-					cmd_buffer.drawIndexed(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
-				}
-				else
-				{
-					cmd_buffer.draw(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
-				}
-			}
-			dbg::EndLabel(cmd_buffer);
-		}
-		if (camera.render_target->RenderDebug())
-		{
-			dbg::BeginLabel(cmd_buffer, "Debug Renderign", color{ 0,0.6f,0.0f });
-			RenderDebugStuff(state, rs, offset, size);
-			dbg::EndLabel(cmd_buffer);
-		}
-		if (still_rendering)
-		{
-			cmd_buffer.endRenderPass();
-		}
-		rs.ubo_manager.UpdateAllBuffers();
-		cmd_buffer.end();
-		Track(0);
+		//TODO, account for forward.
+		renderpasses::DeferredRendering::MakePass(_pimpl->graph, RscHandle<VknRenderTarget>{ state.camera.render_target }, state, rs);
+//
+//		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
+//
+//		auto& view = View();
+//		//auto& swapchain = view.Swapchain();
+//		auto& camera = state.camera;
+//		auto sz = camera.render_target->Size();
+//		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+//
+//		auto dispatcher = vk::DispatchLoaderDefault{};
+//		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+//		vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+//
+//		cmd_buffer.begin(begin_info, dispatcher);
+//		VulkanPipeline* prev_pipeline = nullptr;
+//		vector<RscHandle<ShaderProgram>> shaders;
+//		auto& deferred_pass = rs.deferred_pass;
+//		if (is_deferred)
+//		{
+//			deferred_pass.pipeline_manager(GetPipelineManager());
+//			deferred_pass.frame_index(_current_frame_index);
+//			dbg::BeginLabel(cmd_buffer, "DrawToGbuffers");
+//			deferred_pass.DrawToGBuffers(cmd_buffer, state, rs);
+//			dbg::EndLabel(cmd_buffer);
+//		}
+//				
+//
+//		//Preprocess MeshRender's uniforms
+//		//TODO make ProcessRoUniforms only render forward pass stuff.
+//		auto&& the_interface = (is_deferred) ? [](auto& state,auto& rs) {
+//			UnlitMaterialBinding binders;
+//			binders.for_each_binder<has_setstate>([](auto& binder, const GraphicsState& state) {binder.SetState(state); }, state);
+//			return vkn::ProcessRoUniforms(state, rs.ubo_manager, binders);
+//			//PipelineThingy the_interface{};
+//			//the_interface.SetRef(rs.ubo_manager);
+//			//return the_interface;
+//		}(state,rs) : ProcessRoUniforms(state, rs.ubo_manager);
+//		
+//		//the_interface.SetRef(rs.ubo_manager);
+//
+//		_particle_renderer.DrawParticles(the_interface, state, rs);
+//		_font_renderer.DrawFont(the_interface,state,rs);
+//
+//
+//		//if(!is_deferred)
+//		the_interface.GenerateDS(rs.dpools, false);//*/
+//		the_interface.SetRef(rs.ubo_manager);
+//		PipelineThingy deferred_interface_light[EGBufferType::size()]{};
+//		PipelineThingy deferred_interface_hdr  {};
+//		if (is_deferred)
+//		{
+//			GBufferType types[] = { GBufferType::eMetallic,GBufferType::eSpecular };
+//			for (auto& type : types)
+//			{
+//				const size_t max_lights = 7;
+//				auto deferred_interface = PipelineThingy{};
+//				deferred_interface.SetRef(rs.ubo_manager);
+//				rs.deferred_pass.LightPass(type,deferred_interface, state, rs, std::make_pair(0, 0), true);
+//				for (size_t i = 0; i < state.active_lights.size(); )
+//				{
+//					auto num = std::min(max_lights, state.active_lights.size() - i);
+//					rs.deferred_pass.LightPass(type,deferred_interface,state, rs, std::make_pair(i, i+num),false);
+//					i += num;
+//				}
+//				deferred_interface.GenerateDS(rs.dpools, false);
+//				deferred_interface_light[EGBufferType::map(type)].~PipelineThingy();
+//				new (&deferred_interface_light[EGBufferType::map(type)]) PipelineThingy{ std::move(deferred_interface) };
+//
+//			}
+//			deferred_interface_hdr.~PipelineThingy();
+//			auto& hdr_interface = *(new (&deferred_interface_hdr) PipelineThingy{ rs.deferred_pass.HdrPass(state, rs) });
+//			hdr_interface.GenerateDS(rs.dpools, false);
+//
+//		}
+//		
+//		//rs.ubo_manager.UpdateAllBuffers();
+//		std::array<float, 4> a{};
+//
+//		//auto& cd = std::get<vec4>(state.camera.clear_data);
+//		//TODO grab the appropriate framebuffer and begin renderpass
+//		std::optional<color> clear_col;
+//		std::optional<RscHandle<CubeMap>> sb_cm;
+//
+//		auto& clear_data = state.camera.clear_data;
+//		switch (clear_data.index())
+//		{
+//		case index_in_variant_v<color, CameraClear>:
+//			clear_col = std::get<color>(clear_data);
+//			break;
+//		case index_in_variant_v<RscHandle<CubeMap>, CameraClear>:
+//			sb_cm = std::get<RscHandle<CubeMap>>(clear_data);
+//			break;
+//		case index_in_variant_v<DontClear, CameraClear>:
+//			//TODO: set dont clear settings.
+//			break;
+//		}
+//
+//
+//		vk::ClearValue clearColor = clear_col ?
+//			vk::ClearValue{ vk::ClearColorValue{ r_cast<const std::array<float,4>&>(clear_col) } }
+//			:
+//			vk::ClearValue{ vk::ClearColorValue{ std::array < float, 4>{0.f,0.f,0.f,0.f} } };
+//		vk::ClearValue v[]{
+//			clearColor,
+//			vk::ClearDepthStencilValue{ 1.0f}
+//		};
+//		
+//		//auto& vvv = state.camera.render_target.as<VknFrameBuffer>();
+//		
+//		//auto default_frame_buffer = *swapchain.frame_buffers[swapchain.curr_index];
+//		auto frame_buffer = GetFrameBuffer(camera, view.CurrFrame());
+//		TransitionFrameBuffer(camera, cmd_buffer, view);
+//
+//		
+//
+//		vk::Rect2D render_area
+//		{
+//			vk::Offset2D
+//			{
+//				s_cast<int32_t>(offset.x),s_cast<int32_t>(offset.y)
+//			},vk::Extent2D
+//			{
+//				s_cast<uint32_t>(size.x),s_cast<uint32_t>(size.y)
+//			}
+//		};
+//		vk::RenderPassBeginInfo rpbi
+//		{
+//			GetRenderPass(state,view), frame_buffer,
+//			render_area,hlp::arr_count(v),std::data(v)
+//		};			
+//		//Begin Clear Pass
+//		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
+//		SetViewport(cmd_buffer, offset, size);
+//		//SetScissor(cmd_buffer,  offset, size);
+//		//////////////////Skybox rendering
+//		if (sb_cm)
+//		{
+//			pipeline_config skybox_render_config;
+//			DescriptorsManager skybox_ds_manager(view);
+//			skybox_render_config.fill_type = FillType::eFill;
+//			skybox_render_config.prim_top = PrimitiveTopology::eTriangleList;
+//			auto config = ConfigWithVP(skybox_render_config,camera,offset,size);
+//			config.vert_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox];
+//			config.frag_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox];
+//			config.cull_face = CullFace::eNone;
+//			config.depth_test = false;
+//			config.depth_write = false;
+//			config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
+//
+//			//No idea if this is expensive....if really so I will try shift up to init
+//			rs.skyboxRenderer.pipeline_manager(*_pipeline_manager);
+//			rs.skyboxRenderer.Init(
+//				Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox],
+//				Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox],
+//				{},
+//				&config,
+//				*camera.CubeMapMesh
+//			);
+//			rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, * sb_cm, camera.projection_matrix* mat4{ mat3{camera.view_matrix} });
+//			
+//			/*cmd_buffer.begin(vk::CommandBufferBeginInfo
+//				{
+//					vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+//				});*/
+//			rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
+//
+//		}
+//		cmd_buffer.endRenderPass();//beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);
+//		auto& rt = camera.render_target.as<VknRenderTarget>();
+//
+//		//Draw Deferred stuff
+//		if (is_deferred)
+//		{
+//			TransitionFrameBuffer(camera, cmd_buffer, view);
+//			//for(auto& deferred_interface : deferred_interfaces)
+//			//Accumulator
+//			dbg::BeginLabel(cmd_buffer, "DrawToAccum");
+//			deferred_pass.DrawToAccum(cmd_buffer, deferred_interface_light, camera, rs);
+//			dbg::EndLabel(cmd_buffer);
+//			//HDR
+//			dbg::BeginLabel(cmd_buffer, "DrawToRenderTarget");
+//			deferred_pass.DrawToRenderTarget(cmd_buffer, deferred_interface_hdr, camera, rt, rs);
+//			dbg::EndLabel(cmd_buffer);
+//		}
+//		//Subsequent passes shouldn't clear the buffer any more.
+//		rpbi.renderPass = *rt.GetRenderPass(false, false);// *View().BasicRenderPass(rt.GetRenderPassType(),false,false);
+//		rs.FlagRendered();
+//		
+//		auto& processed_ro = the_interface.DrawCalls();
+//		//if (_pimpl->testing&& state.range.inst_mesh_render_end- state.range.inst_mesh_render_begin>0)
+//		//	_pimpl->test.DeferredTest(state, rs), _pimpl->testing=0;
+//		bool still_rendering = true;// (processed_ro.size() > 0) || camera.render_target->RenderDebug();
+//		if (still_rendering)
+//		{
+//			TransitionFrameBuffer(camera, cmd_buffer, view);
+//			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline, dispatcher);;
+//		}
+//
+//		if (processed_ro.size()>0)
+//		{
+//			dbg::BeginLabel(cmd_buffer, "non-deferred region", color{ 0,0.4f,0.2f });
+//			bool is_particle_renderer = false;
+//			for (auto& p_ro : processed_ro)
+//			{
+//				bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
+//				is_particle_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
+//				//auto& obj = p_ro.Object();
+//				if (!p_ro.config)
+//					continue;
+//				if (p_ro.rebind_shaders)
+//				{
+//					shaders.resize(0);
+//					if (p_ro.frag_shader)
+//						shaders.emplace_back(*p_ro.frag_shader);
+//					if(p_ro.vertex_shader)
+//						shaders.emplace_back(*p_ro.vertex_shader);
+//					if(p_ro.geom_shader)
+//						shaders.emplace_back(*p_ro.geom_shader);
+//
+//					auto config = ConfigWithVP(*p_ro.config, camera, offset, size);
+//					if (is_mesh_renderer)
+//						config.buffer_descriptions.emplace_back(
+//							buffer_desc
+//							{
+//								buffer_desc::binding_info{ std::nullopt,sizeof(mat4)*2,VertexRate::eInstance},
+//								{buffer_desc::attribute_info{AttribFormat::eMat4,4,0,true},
+//								 buffer_desc::attribute_info{AttribFormat::eMat4,8,sizeof(mat4),true}
+//								 }
+//							}
+//						);
+//					auto& pipeline = GetPipeline(config, shaders,camera.render_target.as<VknRenderTarget>().GetRenderPass());
+//					pipeline.Bind(cmd_buffer,view);
+//					SetViewport(cmd_buffer, offset, size);
+//					prev_pipeline = &pipeline;
+//				}
+//				auto& pipeline = *prev_pipeline;
+//				//auto& mat = obj.material_instance.material.as<VulkanMaterial>();
+//				//auto& mesh = obj.mesh.as<VulkanMesh>();
+//				{
+//					uint32_t set = 0;
+//					for (auto& ods : p_ro.descriptor_sets)
+//					{
+//						if (ods)
+//						{
+//							auto& ds = *ods;
+//							cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline.pipelinelayout, set, ds, {});
+//						}
+//						++set;
+//					}
+//				}
+//				//auto& renderer_req = *obj.renderer_req;
+//			
+//				for (auto& [location, attrib] : p_ro.attrib_buffers)
+//				{
+//					auto opt = pipeline.GetBinding(location);
+//					if (opt)
+//						cmd_buffer.bindVertexBuffers(*opt, attrib.buffer, vk::DeviceSize{ attrib.offset }, vk::DispatchLoaderDefault{});
+//				}
+//				auto& oidx = p_ro.index_buffer;
+//				if (oidx)
+//				{
+//					cmd_buffer.bindIndexBuffer(oidx->buffer, oidx->offset, oidx->index_type, vk::DispatchLoaderDefault{});
+//					cmd_buffer.drawIndexed(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+//				}
+//				else
+//				{
+//					cmd_buffer.draw(s_cast<uint32_t>(p_ro.num_vertices), s_cast<uint32_t>(p_ro.num_instances), 0, s_cast<uint32_t>(p_ro.inst_offset), vk::DispatchLoaderDefault{});
+//				}
+//			}
+//			dbg::EndLabel(cmd_buffer);
+//		}
+//		if (camera.render_target->RenderDebug())
+//		{
+//			dbg::BeginLabel(cmd_buffer, "Debug Renderign", color{ 0,0.6f,0.0f });
+//			RenderDebugStuff(state, rs, offset, size);
+//			dbg::EndLabel(cmd_buffer);
+//		}
+//		if (still_rendering)
+//		{
+//			cmd_buffer.endRenderPass();
+//		}
+//		rs.ubo_manager.UpdateAllBuffers();
+//		cmd_buffer.end();
+//		Track(0);
 	}
 
 	FrameRenderer::FrameRenderer(FrameRenderer&&)= default;
