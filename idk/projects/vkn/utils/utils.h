@@ -14,8 +14,6 @@ namespace idk::vkn::meta
 	template<typename V, typename T>
 	struct IndexOf;
 
-	template<typename V, typename T>
-	using IndexOf_v = IndexOf<V,T>::value;
 	template<typename T, T v, typename Pack>
 	struct IndexInPack;
 	template<typename Pack>

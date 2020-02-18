@@ -521,8 +521,31 @@ namespace idk::vkn::renderpasses
 		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
 		//TODO: 
 		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{},gfx_state.camera.render_target,clr_col, clr_dep).RenderPass();
-		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{}, cube_clear.rt_size, cube_clear.depth).RenderPass();
-		auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{},gbuffer_pass);
+		bindings::StandardVertexBindings::StateInfo state;
+		state.SetState(gfx_state);
+		bindings::DeferredPbrInfo info{
+			.viewport = gfx_state.camera.viewport,
+			.blend = BlendMode::Opaque,
+			.model = ShadingModel::Specular,
+			.material_instances = gfx_state.material_instances,
+			.vertex_state_info = state,
+		};
+		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{ 
+				{
+					DeferredPbrInstDrawSet{bindings::make_deferred_pbr_ro_bind(info),
+										   InstMeshDrawSet{
+												span{
+												  gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_begin,gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_end},
+												  gfx_state.shared_gfx_state->inst_mesh_render_buffer.buffer()
+											}
+						},
+					DeferredPbrAniDrawSet{
+							bindings::make_deferred_pbr_ani_bind(info),
+							SkinnedMeshDrawSet{span{gfx_state.skinned_mesh_render}}
+					}
+				}
+			}, cube_clear.rt_size, cube_clear.depth).RenderPass();
+		auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{},gbuffer_pass).RenderPass();
 		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport,cube_clear.render_target);
 
 		return { hdr_pass.hdr_rsc,hdr_pass.depth_att };

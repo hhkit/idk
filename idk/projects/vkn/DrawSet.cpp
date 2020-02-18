@@ -78,7 +78,7 @@ namespace idk::vkn
 
 
 	}
-	SkinnedMeshDrawSet::SkinnedMeshDrawSet(span<const AnimatedRenderObject*> draw_calls):_draw_calls{draw_calls}
+	SkinnedMeshDrawSet::SkinnedMeshDrawSet(span<const AnimatedRenderObject* const> draw_calls):_draw_calls{draw_calls}
 	{
 	}
 	void SkinnedMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)

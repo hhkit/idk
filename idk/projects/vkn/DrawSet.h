@@ -31,8 +31,10 @@ namespace idk::vkn
 	class GenericDrawSet : public DrawSet<Binding>
 	{
 	public:
+		using Base = DrawSet<Binding>;
 		GenericDrawSet(Binding = {}, DrawLogic = {});
 		GenericDrawSet(DrawLogic);
+
 		void Render(RenderInterface& the_interface)override
 		{
 			_logic.Render(the_interface, this->GetBinding());
@@ -50,7 +52,8 @@ namespace idk::vkn
 	class CombinedMeshDrawSet<GenericDrawSet<GenericDrawSets,GenericDrawLogics>...>:public BaseDrawSet
 	{
 	public:
-		CombinedMeshDrawSet(GenericDrawSet<GenericDrawSets, GenericDrawLogics>&&... sets = {});
+		using storage_t = std::tuple<GenericDrawSet<GenericDrawSets, GenericDrawLogics>...>;
+		CombinedMeshDrawSet(storage_t&& sets = storage_t{});
 		void Render(RenderInterface&  the_interface)override
 		{
 			using index_seq_t = std::make_index_sequence<sizeof...(GenericDrawSets)>;
@@ -62,11 +65,11 @@ namespace idk::vkn
 		{
 			(std::get<Indices>(_draw_sets).Render(the_interface), ...);
 		}
-		std::tuple<GenericDrawSet<GenericDrawSets, GenericDrawLogics>...> _draw_sets;
+		storage_t _draw_sets;
 	};
 
 	template<typename Binding, typename DrawLogic>
-	GenericDrawSet<Binding, DrawLogic>::GenericDrawSet(Binding binding, DrawLogic logic) : DrawSet{ std::move(binding) }, _logic{ std::move(logic) }
+	GenericDrawSet<Binding, DrawLogic>::GenericDrawSet(Binding binding, DrawLogic logic) : Base{ std::move(binding) }, _logic{ std::move(logic) }
 	{
 	}
 
@@ -76,8 +79,9 @@ namespace idk::vkn
 	{
 	}
 
+
 	template<typename ...GenericDrawSets, typename ...GenericDrawLogics>
-	CombinedMeshDrawSet<GenericDrawSet<GenericDrawSets, GenericDrawLogics>...>::CombinedMeshDrawSet(GenericDrawSet<GenericDrawSets, GenericDrawLogics>&& ...sets) : _draw_sets{ std::move(sets)... }
+	CombinedMeshDrawSet<GenericDrawSet<GenericDrawSets, GenericDrawLogics>...>::CombinedMeshDrawSet(storage_t&& sets) : _draw_sets{ std::move(sets)}
 	{
 	}
 	template<typename Binding,typename V>
@@ -99,10 +103,10 @@ namespace idk::vkn
 	class SkinnedMeshDrawSet : public BaseDrawLogic
 	{
 	public:
-		SkinnedMeshDrawSet(span<const AnimatedRenderObject*> inst_draw_range);
+		SkinnedMeshDrawSet(span<const AnimatedRenderObject* const> inst_draw_range);
 		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
 	private:
-		span<const AnimatedRenderObject*>  _draw_calls;
+		span<const AnimatedRenderObject* const>  _draw_calls;
 	};
 
 	class FsqDrawSet : public BaseDrawLogic

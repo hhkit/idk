@@ -124,13 +124,27 @@ namespace idk::vkn
 		depth_attachment.reset();
 	}
 
+	template<typename Buffer,typename Src>
+	index_span StoreResourceInBuffer(Buffer& buffer, Src& rsc)
+	{
+		const  auto start_sz = buffer.size();
+		index_span result{ start_sz,start_sz };
+		buffer.reserve(rsc.size() + start_sz);
+		std::copy(rsc.begin(), rsc.end(), std::back_inserter(buffer));
+		result._end = buffer.size();
+		return result;
+	}
+
 	index_span NodeBuffer::StoreResources(vector<FrameGraphResource>& rsc)
 	{
-		index_span result{ resources.size(),resources.size() };
-		resources.reserve(rsc.size() + resources.size());
-		std::copy(rsc.begin(), rsc.end(), std::back_inserter(resources));
-		result._end = resources.size();
-		return result;
+		return StoreResourceInBuffer(resources, rsc);
+	}
+
+
+	index_span NodeBuffer::StoreCopies(vector<FrameGraphCopyResource>& rsc)
+	{
+		auto& buffer = copies;
+		return StoreResourceInBuffer(buffer, rsc);
 	}
 
 }

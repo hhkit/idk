@@ -40,7 +40,7 @@ namespace idk::vkn::bindings
 		rect viewport;
 		BlendMode blend; 
 		ShadingModel model; 
-		StandardMaterialBindings::mat_inst_lookup_t& material_instances;
+		const StandardMaterialBindings::mat_inst_lookup_t& material_instances;
 		StandardVertexBindings::StateInfo vertex_state_info;
 	};
 

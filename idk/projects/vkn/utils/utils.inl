@@ -274,4 +274,6 @@ namespace idk::vkn::meta
 		};
 
 
+		template<typename V, typename T>
+		static inline constexpr auto IndexOf_v = IndexOf<V, T>::value;
 }

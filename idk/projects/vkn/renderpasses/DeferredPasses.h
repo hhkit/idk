@@ -50,16 +50,16 @@ namespace idk::vkn::renderpasses
 	template<typename Pass, typename DrawSet>
 	struct PassSetPair : BaseRenderPass
 	{
-		template<typename ... Args>
-			PassSetPair(DrawSet&& ds, Args&&... args) :
-			_render_pass{ std::forward<Args>(args)... },
+		template<typename Arg,typename ... Args>
+			PassSetPair(Arg&& arg,DrawSet&& ds, Args&&... args) :
+			_render_pass{ std::forward<Arg>(arg), std::forward<Args>(args)... },
 			_draw_set{ std::move(ds) }
 		{
 		}
-		template<typename ... Args>
-		PassSetPair(const DrawSet& ds,Args&&... args) 
+		template<typename Arg,typename ... Args>
+		PassSetPair(Arg&& arg,const DrawSet& ds,Args&&... args) 
 			: 
-			_render_pass{std::forward<Args>(args)...},
+			_render_pass{std::forward<Arg>(arg),std::forward<Args>(args)...},
 			_draw_set{ds}
 		{
 		}
@@ -67,9 +67,13 @@ namespace idk::vkn::renderpasses
 		{
 			Execute(context, _render_pass);
 		}
-		Pass& RenderPass()
+		Pass& RenderPass()noexcept
 		{
 			return _render_pass;
+		}
+		operator Pass& ()noexcept
+		{
+			return RenderPass();
 		}
 	private:
 		void Execute(Context_t context, DrawSetRenderPass& rp)
