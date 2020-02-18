@@ -736,10 +736,10 @@ namespace idk::vkn
 				shaders.resize(0);
 				if (p_ro.frag_shader)
 					shaders.emplace_back(*p_ro.frag_shader);
-				if (p_ro.vertex_shader)
-					shaders.emplace_back(*p_ro.vertex_shader);
 				if (p_ro.geom_shader)
 					shaders.emplace_back(*p_ro.geom_shader);
+				if (p_ro.vertex_shader)
+					shaders.emplace_back(*p_ro.vertex_shader);
 
 				auto config = *obj.config;
 				config.viewport_offset = ivec2{ s_cast<uint32_t>(viewport.offset.x),s_cast<uint32_t>(viewport.offset.y) };

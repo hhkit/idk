@@ -447,9 +447,9 @@ namespace idk::vkn
 					return layout;
 					//bindings.front().layout;
 				}(bindings);
-				auto itr = dsl.find(layout);
-				if (itr == dsl.end()) continue;
-				auto& ds = itr->second.GetNext();
+				//auto itr = dsl.find(layout);
+				//if (itr == dsl.end()) continue;
+				auto& ds = dsl.find(layout)->second.GetNext();
 				vk::Device device = *View().Device();
 				UpdateUniformDS( ds, bindings,dud);
 				p_ro.SetDescriptorSet(set,ds);

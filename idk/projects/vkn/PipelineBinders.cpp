@@ -150,6 +150,7 @@ namespace idk::vkn
 
 		for (auto& elem : proj_trf)
 			elem = elem * projection_trf;
+
 		the_interface.BindUniformBuffer("CameraBlock", 0, proj_trf);
 	}
 

@@ -31,10 +31,10 @@ U_LAYOUT(4, 0) uniform BLOCK(ObjectMat4Block)
 	mat4 normal_transform;
 } ObjectMat4s;
 
-U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
-{
-	mat4 perspective_transform[SHADOW_CASCADES];
-} PerCamera;
+//U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
+//{
+//	mat4 perspective_transform[SHADOW_CASCADES];
+//} PerCamera;
 
 U_LAYOUT(4, 1) uniform BLOCK(BoneMat4Block)
 {
