@@ -271,7 +271,7 @@ namespace idk::vkn
 			auto& dcall = impl->render_buffer[mesh];
 			//RscHandle<Mesh> mesh = ShapeToMesh(shape);
 
-			dcall.pipeline = &impl->pipelines[(mesh == Mesh::defaults[MeshType::Line]) ? (int)DbgPipelineType::eLine : (int)DbgPipelineType::eTri];
+			dcall.pipeline = &impl->pipelines[(int)DbgPipelineType::eLine];
 			//Bind vtx buffers
 			auto& buffer_data = impl->buffer_data[impl->curr_frame][mesh];
 			auto& inst_v_buffer = buffer_data.inst_buffer;
@@ -341,8 +341,8 @@ namespace idk::vkn
 		DrawShape(MeshType::Line, line_tfm, color);
 
 		const auto orient_tfm = orient(ray.velocity.get_normalized());
-		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient(ray.velocity.get_normalized())* scale(vec3{ 0.025f }) };
-		DrawShape(MeshType::Tetrahedron, arrow_tfm, color);
+		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient_tfm * scale(vec3{ 0.025f }) };
+		DrawShape(MeshType::DbgArrow, arrow_tfm, color);
 	}
 	void VulkanDebugRenderer::Draw(const sphere& sphere, const color& color)
 	{

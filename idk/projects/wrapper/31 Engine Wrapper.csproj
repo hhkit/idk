@@ -83,7 +83,7 @@
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />
     <Compile Include="Core\Application.cs" />
-    <Compile Include="Core\AudioSystem.cs" />
+    <Compile Include="Systems\Audio.cs" />
     <Compile Include="Core\Bindings.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Behavior\Coroutine.cs" />
@@ -103,11 +103,11 @@
     <Compile Include="Electron\Player.cs" />
     <Compile Include="Electron\RPC.cs" />
     <Compile Include="Electron\RPCTarget.cs" />
-    <Compile Include="Graphics.cs" />
+    <Compile Include="Systems\Graphics.cs" />
     <Compile Include="Input\Axis.cs" />
     <Compile Include="Input\Input.cs" />
     <Compile Include="Input\KeyCode.cs" />
-    <Compile Include="LayerMask.cs" />
+    <Compile Include="Systems\LayerMask.cs" />
     <Compile Include="Math\Box.cs" />
     <Compile Include="Math\Color.cs" />
     <Compile Include="Math\Deg.cs" />
