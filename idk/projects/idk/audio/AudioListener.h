@@ -19,8 +19,7 @@ namespace idk
 	public:
 		bool is_active{ false };
 
-		void SetAsActive();
-		void UpdateListenerPosition();
+		void UpdateListenerPosition(const int& id);
 	};
 
 }

@@ -149,8 +149,6 @@ namespace idk {
             ImGui::BeginGroup();
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
-            DisplayGameObjectHeader(gos[0]);
-
             if (gos[0].scene == Scene::prefab)
             {
                 if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
@@ -158,13 +156,15 @@ namespace idk {
                     if (prefab_inst->prefab)
                         _prefab_inst = gos[0]->GetComponent<PrefabInstance>();
                 }
+                DisplayGameObjectHeader(gos[0]);
             }
             else if (const auto prefab_inst = gos[0]->GetComponent<PrefabInstance>())
             {
+                if (prefab_inst->prefab)
+                    _prefab_inst = prefab_inst;
+                DisplayGameObjectHeader(gos[0]);
                 if (prefab_inst->object_index == 0)
-                    DisplayPrefabInstanceControls(prefab_inst);
-				if (prefab_inst->prefab)
-					_prefab_inst = prefab_inst;
+                    DisplayPrefabInstanceControls(_prefab_inst);
             }
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
@@ -328,6 +328,7 @@ namespace idk {
             for (GenericHandle component : componentSpan) {
 				if (component.is_type<Name>() ||
                     component.is_type<Transform>() ||
+                    component.is_type<RectTransform>() ||
                     component.is_type<Layer>() ||
                     component.is_type<Tag>() ||
                     component.is_type<PrefabInstance>()
@@ -541,6 +542,12 @@ namespace idk {
         if (game_object.scene == Scene::prefab)
             ImGuidk::PushDisabled();
 
+        bool has_override = false;
+        if (_prefab_inst)
+            has_override = _prefab_inst->HasOverride("Name", "name", 0);
+
+        if (has_override)
+            ImGuidk::PushFont(FontType::Bold);
 		if (ImGui::InputText("##Name", &stringBuf, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoUndoRedo)) 
         {
 			int execute_counter = 0;
@@ -563,6 +570,13 @@ namespace idk {
 
             editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 		}
+        if (has_override)
+        {
+            ImGui::PopFont();
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0),
+                ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0) + ImVec2(4.0f, ImGui::GetItemRectSize().y),
+                ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
 
         if (game_object.scene == Scene::prefab)
             ImGuidk::PopDisabled();
@@ -595,9 +609,15 @@ namespace idk {
         }
 
 
+
         ImGui::SetCursorPosX(left_offset - ImGui::CalcTextSize("Tag").x);
 		ImGui::Text("Tag");
 		ImGui::SameLine();
+
+        if (_prefab_inst)
+            has_override = _prefab_inst->HasOverride("Tag", "", 0);
+        if (has_override)
+            ImGuidk::PushFont(FontType::Bold);
 
         ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth() * 0.5f - ImGui::GetCursorPosX());
         const auto curr_tag = game_object->Tag();
@@ -619,9 +639,22 @@ namespace idk {
         }
         ImGui::PopItemWidth();
         ImGui::SameLine();
+        
+        if (has_override)
+        {
+            ImGui::PopFont();
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0),
+                ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0) + ImVec2(4.0f, ImGui::GetItemRectSize().y),
+                ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
 
         ImGui::Text("Layer");
         ImGui::SameLine();
+
+        if (_prefab_inst)
+            has_override = _prefab_inst->HasOverride("Layer", "index", 0);
+        if (has_override)
+            ImGuidk::PushFont(FontType::Bold);
 
         ImGui::PushItemWidth(-8.0f);
         const auto curr_layer = game_object->Layer();
@@ -649,6 +682,14 @@ namespace idk {
             ImGui::EndCombo();
         }
         ImGui::PopItemWidth();
+        
+        if (has_override)
+        {
+            ImGui::PopFont();
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0),
+                ImVec2(ImGui::GetWindowPos().x, ImGui::GetItemRectMin().y) + ImVec2(4.0f, 0) + ImVec2(4.0f, ImGui::GetItemRectSize().y),
+                ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+        }
 	}
 
     void IGE_InspectorWindow::DisplayPrefabInstanceControls(Handle<PrefabInstance> c_prefab)
@@ -836,14 +877,6 @@ namespace idk {
                         return Handle<GameObject>();
                 });
                 editor.ExecuteCommand<CMD_DeleteComponent>(go, i);
-
-                if (_prefab_inst && !_curr_component_is_added)
-                {
-                    auto old = _prefab_inst->removed_components;
-                    PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _curr_component_nth);
-                    editor.ExecuteCommand<CMD_ModifyProperty>(_prefab_inst, "removed_components", old, _prefab_inst->removed_components);
-                    editor.ExecuteCommand<CMD_CollateCommands>(2);
-                }
 			}
 			else 
             {
@@ -924,7 +957,6 @@ namespace idk {
     {
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
-        static reflect::dynamic original_value;
         bool outer_changed = false;
         vector<char> indent_stack;
 
@@ -1054,7 +1086,7 @@ namespace idk {
                     changed |= ImGuidk::InputResource("", &val);
                     if (changed)
                     {
-                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        StoreOriginalValues(display.curr_prop_path);
                         changed_and_deactivated = true;
                     }
                 }
@@ -1064,7 +1096,7 @@ namespace idk {
                     changed |= ImGuidk::InputGameObject("", &val);
                     if (changed)
                     {
-                        original_value.swap(reflect::dynamic{ ori }.copy());
+                        StoreOriginalValues(display.curr_prop_path);
                         changed_and_deactivated = true;
                     }
                 }
@@ -1157,52 +1189,37 @@ namespace idk {
             display.ItemEnd();
 
             if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
-                original_value.swap(reflect::dynamic(val).copy());
+                StoreOriginalValues(display.curr_prop_path);
             else if (ImGui::IsItemDeactivatedAfterEdit())
                 changed_and_deactivated = true;
-
-            if (!original_value.valid()) // no change?
-                changed_and_deactivated = false;
-
             if (changed_and_deactivated)
-            {
-                auto new_value = reflect::dynamic(val).copy();
-                if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
-                {
-                    int execute_counter = 0;
-                    const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
-                    for (size_t i = 1; i < sel_obj.size(); ++i)
-                    {
-                        auto obj = sel_obj[i];
+                ExecuteModify(display.curr_prop_path, reflect::dynamic(val).copy());
 
-                        auto components = obj->GetComponents();
-                        auto nth = _curr_component_nth;
-                        for (auto c : components)
+            // assign changed value to all other selected objects
+            if (changed)
+            {
+                const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
+
+                // execute for similar components, i == 0 is the current displaying component
+                for (size_t i = 1; i < sel_obj.size(); ++i)
+                {
+                    auto obj = sel_obj[i];
+
+                    auto components = obj->GetComponents();
+                    auto nth = _curr_component_nth;
+                    for (auto c : components)
+                    {
+                        if (c.type == _curr_component.type && nth-- == 0)
                         {
-                            if (c.type == _curr_component.type && nth-- == 0)
-                            {
-                                Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
-                                    c, display.curr_prop_path, resolve_property_path(*c, display.curr_prop_path), new_value);
-                                if (obj->HasComponent<PrefabInstance>())
-                                    PrefabUtility::RecordPrefabInstanceChange(obj, c, display.curr_prop_path, new_value);
-                                ++execute_counter;
-                                break;
-                            }
+                            assign_property_path(*c, display.curr_prop_path, val);
+                            break;
                         }
                     }
-
-                    Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
-                        _curr_component, display.curr_prop_path, original_value, new_value);
-                    if (execute_counter > 1)
-                        Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(++execute_counter);
                 }
-                else // displaying prefab game object
-                    Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(new_value, original_value);
-                original_value.swap(reflect::dynamic());
             }
 
             outer_changed |= changed;
-            display.GroupEnd(changed, val);
+            display.GroupEnd();
 
             indent_stack.push_back(indent);
             if (indent)
@@ -1245,6 +1262,69 @@ namespace idk {
         return outer_changed;
     }
 
+    void IGE_InspectorWindow::StoreOriginalValues(string_view property_path)
+    {
+        _original_values.clear();
+        for (auto obj : Core::GetSystem<IDE>().GetSelectedObjects().game_objects)
+        {
+            auto components = obj->GetComponents();
+            auto nth = _curr_component_nth;
+            for (auto c : components)
+            {
+                if (c.type == _curr_component.type && nth-- == 0)
+                {
+                    _original_values.push_back(resolve_property_path(*c, property_path).copy());
+                    break;
+                }
+            }
+            if (nth >= 0) // component not found
+                _original_values.emplace_back();
+        }
+    }
+
+    void IGE_InspectorWindow::ExecuteModify(string_view property_path, reflect::dynamic new_value)
+    {
+        if (_original_values.empty()) // no change
+            return;
+
+        if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
+        {
+            int execute_counter = 0;
+            const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
+
+            // execute for similar components, i == 0 is the current displaying component
+            for (size_t i = 1; i < sel_obj.size(); ++i)
+            {
+                auto obj = sel_obj[i];
+
+                auto components = obj->GetComponents();
+                auto nth = _curr_component_nth;
+                for (auto c : components)
+                {
+                    if (c.type == _curr_component.type && nth-- == 0)
+                    {
+                        Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
+                            c, property_path, _original_values[i], new_value);
+                        ++execute_counter;
+                        break;
+                    }
+                }
+            }
+
+            Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
+                _curr_component, property_path, _original_values[0], new_value);
+            ++execute_counter;
+            if (execute_counter > 1)
+                Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
+        }
+        else // displaying prefab game object
+        {
+            Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(_curr_component, property_path, _original_values[0], new_value);
+        }
+
+        _original_values.clear();
+    }
+
 
     void IGE_InspectorWindow::DisplayStack::ItemBegin(bool align)
     {
@@ -1283,7 +1363,7 @@ namespace idk {
         ImGui::BeginGroup();
     }
 
-    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed, reflect::dynamic val)
+    void IGE_InspectorWindow::DisplayStack::GroupEnd()
     {
         ImGui::EndGroup();
 
@@ -1300,11 +1380,6 @@ namespace idk {
                 PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             ImGui::EndPopup();
-        }
-
-        if (changed && self._prefab_inst)
-        {
-            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path, val);
         }
 
         if (has_override)
