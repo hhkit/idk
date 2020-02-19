@@ -6,8 +6,10 @@ namespace idk
 	{
 		VDebug,
 		VNormalMesh,
+		VNormalMeshShadow,
 		VNormalMeshPicker,
 		VSkinnedMesh,
+		VSkinnedMeshShadow,
 		VSkinnedMeshPicker,
 		VParticle,
 		VSkyBox,
@@ -34,6 +36,8 @@ namespace idk
 	enum GeometryShaders
 	{
 		GSinglePassCube,
+		GShadowCNM,
+		GShadowCSM,
 		GMax
 	};
 }

@@ -811,7 +811,7 @@ namespace idk::vkn
 		}
 	}
 #pragma optimize("", off)
-	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
+	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 		auto& rs = r[curr_state];
