@@ -12,13 +12,17 @@
 #include <audio/AudioSource.h>
 #include <res/Resource.h>
 #include <file/FileSystem.h>
+
 #include <FMOD/core/fmod.hpp> //FMOD Core
 #include <FMOD/core/fmod_errors.h> //ErrorString
 #include <audio/AudioSystem.h> //AudioSystem
 #include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
-#include <sstream> //AudioSystem
+
+#include <core/GameObject.inl>
+#include <common/Transform.h>
+
 #include <ds/result.inl>
 
 namespace idk
@@ -158,7 +162,20 @@ namespace idk
 				FMOD_RES(audio_clip_channels[i]->setMode(mode));
 
 				//Update Priority
+
+
 				//Update Position
+				//If the sound is not unique, the position will not be updated when the sound is replayed.
+				if (is3Dsound) {
+					if (const Handle<GameObject> go = GetGameObject()) {
+						if (const Handle<Transform> transform = go->GetComponent<Transform>()) {
+							const auto globalPos = transform->GlobalPosition();
+							FMOD_VECTOR position = { globalPos.x,globalPos.y ,globalPos.z };
+							FMOD_VECTOR vel = {  }; //Disable doppler effect
+							audio_clip_channels[i]->set3DAttributes(&position, &vel);
+						}
+					}
+				}
 			}
 		}
 	}
