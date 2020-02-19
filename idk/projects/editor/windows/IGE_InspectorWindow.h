@@ -62,6 +62,9 @@ namespace idk {
         // spawn prefab instances in prefab scene so prefab assets can be displayed.
         hash_table<RscHandle<Prefab>, Handle<GameObject>> _prefab_store;
 
+        // for previewing particle systems
+        Handle<ParticleSystem> _mocked_ps;
+
         vector<reflect::dynamic> _original_values;
 
         reflect::dynamic _copied_component;

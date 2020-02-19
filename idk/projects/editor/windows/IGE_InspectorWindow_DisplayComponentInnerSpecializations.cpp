@@ -732,6 +732,8 @@ namespace idk
     
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ParticleSystem> c_ps)
     {
+        _mocked_ps = c_ps;
+
         if (c_ps->state == ParticleSystem::Playing && ImGui::Button("Pause"))
             c_ps->Pause();
         else if (c_ps->state != ParticleSystem::Playing && ImGui::Button("Play"))
@@ -745,6 +747,15 @@ namespace idk
         ImGui::SameLine();
         if (ImGui::Button("Stop"))
             c_ps->Stop();
+
+        if(c_ps->state == ParticleSystem::Playing && !Core::GetSystem<IDE>().IsGameRunning())
+        {
+            bool destroy_on_finish = c_ps->main.destroy_on_finish;
+            c_ps->transform = decompose(c_ps->GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+            c_ps->main.destroy_on_finish = false;
+            c_ps->Step(Core::GetRealDT().count());
+            c_ps->main.destroy_on_finish = destroy_on_finish;
+        }
 
         if (c_ps->state > ParticleSystem::Stopped)
         {

@@ -117,8 +117,16 @@ namespace idk {
         if (selection.game_objects.size() && selection.assets.size())
             return;
 
-        if(selection.game_objects.size())
+        if (selection.game_objects.size())
+        {
+            if (_mocked_ps && _mocked_ps->GetGameObject() != selection.game_objects[0])
+            {
+                _mocked_ps->Stop();
+                _mocked_ps->state = ParticleSystem::Awake;
+                _mocked_ps = {};
+            }
             DisplayGameObjects(selection.game_objects);
+        }
         else
         {
             const bool valid = std::visit([](auto h) { return bool(h); }, selection.assets[0]);
