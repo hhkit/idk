@@ -626,6 +626,7 @@ namespace idk
             auto& audio_clip_list = dyn.get<vector<RscHandle<AudioClip>>>();
             if (ImGui::Button("Add AudioClip")) {
                 audio_clip_list.emplace_back(RscHandle<AudioClip>());
+                static_audiosource->ResizeAudioClipListData();
                 changed = true;
             }
 

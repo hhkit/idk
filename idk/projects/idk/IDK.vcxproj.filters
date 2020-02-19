@@ -1169,6 +1169,7 @@
     <ClInclude Include="network\NetworkTuple.inl">
       <Filter>network</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\DefaultShaders.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

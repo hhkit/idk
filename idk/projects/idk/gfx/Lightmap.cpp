@@ -69,10 +69,10 @@ namespace idk {
 
 			texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / (2.f * max_rad)));
 
-			
+			const float magic_number = 1.0f;//3;//3 helped get rid of the clipping issue on level 1, but I haven't found out exactly why. Idea is still to lengthen the near and far planes to prevent wrong clipping.
 
 			//cascade_projection = ortho(-max_rad, max_rad, -max_rad, max_rad, -max_rad, max_rad);
-			cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y, min_c.z, max_c.z);
+			cascade_projection = ortho(min_c.x, max_c.x, min_c.y, max_c.y, min_c.z*magic_number, max_c.z*magic_number);
 
 			//vec4 clipz = vec4(0.f,0.f, far_plane, 1.f);
 			//cam_max = clipz;

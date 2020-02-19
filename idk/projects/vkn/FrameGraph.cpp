@@ -164,7 +164,7 @@ namespace idk::vkn
 			auto& rp = *render_passes[node.id];
 			//TODO: Thread this
 			{
-				auto& context= _contexts.emplace_back();
+				auto& context = _contexts.emplace_back();
 				context.SetUboManager(*_default_ubo_manager);
 				//Transition all the resources that are gonna be read (and are not input attachments)
 				auto input_span = node.GetReadSpan();
@@ -174,6 +174,14 @@ namespace idk::vkn
 				}
 				context.SetRscManager(rsc_manager);
 				rp.PreExecute(node, context);
+				auto copy_span = node.GetCopySpan();
+				for (auto& copy_req : copy_span)
+				{
+					CopyCommand cmd;
+					auto src_layout = GetSourceLayout(copy_req.src.id);
+					auto dst_layout = copy_req.options.dest_layout;
+					context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.regions});
+				}
 				rp.Execute(context);
 				rp.PostExecute(node, context);
 			}
@@ -362,6 +370,42 @@ namespace idk::vkn
 			rp.frame_buffer = fb;
 			rp.fb_size = size;
 		}
+	}
+
+	const FrameGraphNode* FrameGraph::GetSourceNode(fgr_id id) const
+	{
+		auto src_node_id = this->graph_builder.GetSourceNode(id);
+		if (!src_node_id)
+		{
+			return nullptr;
+		}
+		auto node_itr = this->node_lookup.find(*src_node_id);
+
+		if (node_itr == this->node_lookup.end())
+			return nullptr;
+		
+		auto& node = this->nodes[node_itr->second];
+		return &node;
+	}
+
+	vk::ImageLayout FrameGraph::GetSourceLayout(fgr_id id) const
+	{
+		vk::ImageLayout result = {};
+		auto src_id = GetResourceManager().GetOriginal(id);
+		auto node_ptr = GetSourceNode(src_id);
+		if (node_ptr)
+		{
+			auto& node = *node_ptr;
+			auto output_nodes = node.GetOutputSpan();
+			auto output_ptr = std::find(output_nodes.begin(), output_nodes.end(), FrameGraphResource{ src_id });
+			auto output_index = output_ptr - output_nodes.begin();
+			if (output_ptr < output_nodes.end())
+			{
+				auto& att_info = node.output_attachments[output_index];
+				result = att_info->second.layout;
+			}
+		}
+		return result;
 	}
 
 	FrameGraphResourceManager& FrameGraph::GetResourceManager()

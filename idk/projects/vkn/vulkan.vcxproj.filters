@@ -311,6 +311,57 @@
     <ClInclude Include="TextureTracker.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="RenderInterface.h">
+      <Filter>render\new_testament</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="PbrFwdBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="FontVertexBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="CanvasVertexBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="UnlitBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawSet.h">
+      <Filter>render\new_testament</Filter>
+    </ClInclude>
+    <ClInclude Include="renderpasses\DeferredPasses.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameGraphCopyResource.h">
+      <Filter>render\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredPbrRoBind.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraViewportBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="LightBinding.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBindings.h">
+      <Filter>render\new_testament\Bindings\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardMaterialBindings.h">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardVertexBindings.h">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxBinding.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -540,10 +591,48 @@
     <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="RenderTask.cpp" />
     <ClCompile Include="UniformManager.cpp" />
-    <ClCompile Include="DebugUtil.cpp" />
     <ClCompile Include="TextureTracker.cpp" />
     <ClCompile Include="GammaUtils.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="CanvasVertexBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="FontVertexBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="PbrFwdBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="UnlitBindings.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="renderpasses\DeferredPasses.cpp">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderBindings.cpp">
+      <Filter>render\new_testament\Bindings\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardMaterialBindings.cpp">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardVertexBindings.cpp">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugUtil.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxBinding.cpp">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawSet.cpp">
+      <Filter>render\new_testament</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -595,6 +684,21 @@
     <Filter Include="render\graph\util_objects">
       <UniqueIdentifier>{f2f7830d-f1f0-45b2-87f8-df255d3c1629}</UniqueIdentifier>
     </Filter>
+    <Filter Include="render\new_testament">
+      <UniqueIdentifier>{204836c8-8881-4cd4-b800-0094ccb5946d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\new_testament\Bindings">
+      <UniqueIdentifier>{d0301621-96fe-4d74-b97f-e269c87f892e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\new_testament\Renderpasses">
+      <UniqueIdentifier>{6eda1c5e-209c-4d33-b915-038c8fb91f97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\new_testament\Bindings\Base">
+      <UniqueIdentifier>{03050e72-3fad-4b1f-9705-fa834facc61e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\new_testament\Bindings\Standard">
+      <UniqueIdentifier>{4a6c78a0-a8b5-47cd-b918-a9e326886fb0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="BufferHelpers.inl">
@@ -617,6 +721,9 @@
     </None>
     <None Include="PipelineBinders.inl">
       <Filter>render\objects</Filter>
+    </None>
+    <None Include="RenderBindings.inl">
+      <Filter>render\new_testament\Bindings\Base</Filter>
     </None>
   </ItemGroup>
 </Project>

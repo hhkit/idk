@@ -45,6 +45,19 @@ namespace idk::vkn
 		return rsc;
 	}
 
+	FrameGraphResource FrameGraphBuilder::copy(FrameGraphResource target_rsc, CopyOptions opt)
+	{
+		auto copy_desc = rsc_manager.GetResourceDescription(target_rsc.id);
+		FrameGraphResource result = target_rsc;
+		if (copy_desc)
+		{
+			result= CreateTexture(*copy_desc);
+			result = write(result, WriteOptions{ .clear = false });
+			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result});
+		}
+		return target_rsc;
+	}
+
 	void FrameGraphBuilder::set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{
 		auto size = std::max(curr_rsc.input_attachments.size(), static_cast<size_t>(attachment_index + 1));
@@ -79,12 +92,23 @@ namespace idk::vkn
 		{
 			origin_nodes.emplace(rsc.id, id);
 		}
-		auto input_span = consumed_resources.StoreResources(curr_rsc.input_resources);
-		auto read_span = consumed_resources.StoreResources(curr_rsc.read_resources);
-		auto output_span = consumed_resources.StoreResources(curr_rsc.output_resources);
+		auto input_span    = consumed_resources.StoreResources(curr_rsc.input_resources);
+		auto read_span     = consumed_resources.StoreResources(curr_rsc.read_resources);
+		auto output_span   = consumed_resources.StoreResources(curr_rsc.output_resources);
 		auto modified_span = consumed_resources.StoreResources(curr_rsc.modified_resources);
+		auto copied_span   = consumed_resources.StoreCopies(curr_rsc.copies);
 
-		return FrameGraphNode{ id,std::move(curr_rsc.name),&consumed_resources.resources,input_span,read_span,output_span,modified_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment };
+		return FrameGraphNode{ id,std::move(curr_rsc.name),&consumed_resources.resources,&consumed_resources.copies,input_span,read_span,output_span,modified_span,copied_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment };
+	}
+
+	std::optional<fg_id> FrameGraphBuilder::GetSourceNode(fgr_id aliased_rsc) const
+	{
+		std::optional < fg_id> result{};
+		auto rsc = rsc_manager.GetOriginal(aliased_rsc);
+		auto itr = origin_nodes.find(rsc);
+		if (itr != origin_nodes.end())
+			result = itr->second;
+		return result;
 	}
 
 	void FrameGraphBuilder::PreObject::reset()
@@ -93,19 +117,34 @@ namespace idk::vkn
 		read_resources.clear();
 		output_resources.clear();
 		modified_resources.clear();
+		copies.clear();
 
 		input_attachments.clear();
 		output_attachments.clear();
 		depth_attachment.reset();
 	}
 
+	template<typename Buffer,typename Src>
+	index_span StoreResourceInBuffer(Buffer& buffer, Src& rsc)
+	{
+		const  auto start_sz = buffer.size();
+		index_span result{ start_sz,start_sz };
+		buffer.reserve(rsc.size() + start_sz);
+		std::copy(rsc.begin(), rsc.end(), std::back_inserter(buffer));
+		result._end = buffer.size();
+		return result;
+	}
+
 	index_span NodeBuffer::StoreResources(vector<FrameGraphResource>& rsc)
 	{
-		index_span result{ resources.size(),resources.size() };
-		resources.reserve(rsc.size() + resources.size());
-		std::copy(rsc.begin(), rsc.end(), std::back_inserter(resources));
-		result._end = resources.size();
-		return result;
+		return StoreResourceInBuffer(resources, rsc);
+	}
+
+
+	index_span NodeBuffer::StoreCopies(vector<FrameGraphCopyResource>& rsc)
+	{
+		auto& buffer = copies;
+		return StoreResourceInBuffer(buffer, rsc);
 	}
 
 }

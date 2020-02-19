@@ -64,7 +64,11 @@ namespace idk::vkn
 			);
 		}
 	};
-
+	enum class DbgPipelineType
+	{
+		eTri,
+		eLine
+	};
 	struct VulkanDebugRenderer::pimpl
 	{
 		using update_pair_t =std::pair<hlp::vector_buffer*, string_view>;
@@ -77,7 +81,7 @@ namespace idk::vkn
 		};
 
 		VulkanView& detail;
-		VulkanPipeline pipeline{};
+		VulkanPipeline pipelines[2]{};
 		//uniform_info uniforms{};
 		hash_table<DbgShape, vbo> shape_buffers{};
 		hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
@@ -148,14 +152,17 @@ namespace idk::vkn
 				}
 			});
 		config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
-		Init(config);
+		auto line_copy = config;
+		line_copy.prim_top = idk::PrimitiveTopology::eLineList;
+		Init(config,line_copy);
 	}
 
-	void VulkanDebugRenderer::Init(const idk::pipeline_config& config)//, const idk::uniform_info& uniform_info)
+	void VulkanDebugRenderer::Init(const idk::pipeline_config& tri_config, const idk::pipeline_config& line_config)//, const idk::uniform_info& uniform_info)
 	{
 		auto& system = *vulkan_;
 		impl = std::make_unique<pimpl>(system.View());
-		impl->pipeline.Create(config, impl->detail);
+		impl->pipelines[(int)DbgPipelineType::eTri].Create(tri_config, impl->detail);
+		impl->pipelines[(int)DbgPipelineType::eLine].Create(line_config, impl->detail);
 
 		impl->buffer_ready = system.View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{ vk::SemaphoreCreateFlags{} });
 
@@ -225,7 +232,7 @@ namespace idk::vkn
 
 	const VulkanPipeline& VulkanDebugRenderer::GetPipeline() const
 	{
-		return impl->pipeline;
+		return impl->pipelines[0];
 	}
 	//RscHandle<Mesh> ShapeToMesh(DbgShape shape)
 	//{
@@ -264,6 +271,7 @@ namespace idk::vkn
 			auto& dcall = impl->render_buffer[mesh];
 			//RscHandle<Mesh> mesh = ShapeToMesh(shape);
 
+			dcall.pipeline = &impl->pipelines[(mesh == Mesh::defaults[MeshType::Line]) ? (int)DbgPipelineType::eLine : (int)DbgPipelineType::eTri];
 			//Bind vtx buffers
 			auto& buffer_data = impl->buffer_data[impl->curr_frame][mesh];
 			auto& inst_v_buffer = buffer_data.inst_buffer;
