@@ -508,50 +508,6 @@ namespace idk::vkn::renderpasses
 		return std::visit(ClearInfoVisitor{},camera.clear_data);
 	}
 
-	using DeferredPbrInstDrawSet = GenericDrawSet<bindings::DeferredPbrRoBind, InstMeshDrawSet>;
-	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
-	using AccumDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
-
-	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
-	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrInstDrawSet, DeferredPbrAniDrawSet>;
-
-	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
-	{
-		PassUtil::FullRenderData rd{ &gfx_state,&rs };
-		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
-		//TODO: 
-		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{},gfx_state.camera.render_target,clr_col, clr_dep).RenderPass();
-		bindings::StandardVertexBindings::StateInfo state;
-		state.SetState(gfx_state);
-		bindings::DeferredPbrInfo info{
-			.viewport = gfx_state.camera.viewport,
-			.blend = BlendMode::Opaque,
-			.model = ShadingModel::Specular,
-			.material_instances = gfx_state.material_instances,
-			.vertex_state_info = state,
-		};
-		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{ 
-				{
-					DeferredPbrInstDrawSet{bindings::make_deferred_pbr_ro_bind(info),
-										   InstMeshDrawSet{
-												span{
-												  gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_begin,gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_end},
-												  gfx_state.shared_gfx_state->inst_mesh_render_buffer.buffer()
-											}
-						},
-					DeferredPbrAniDrawSet{
-							bindings::make_deferred_pbr_ani_bind(info),
-							SkinnedMeshDrawSet{span{gfx_state.skinned_mesh_render}}
-					}
-				}
-			}, cube_clear.rt_size, cube_clear.depth).RenderPass();
-		auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{},gbuffer_pass).RenderPass();
-		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport,cube_clear.render_target);
-
-		return { hdr_pass.hdr_rsc,hdr_pass.depth_att };
-	}
-
-
 	AccumPass::AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers) : gbuffer_pass{ gbuffers }, rt_size{gbuffers.rt_size}
 	{
 		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat);
@@ -642,4 +598,52 @@ namespace idk::vkn::renderpasses
 
 		draw_set.Render(context);
 	}
+	void DrawSetRenderPass::Execute(Context_t& context)
+	{
+		LOG_ERROR_TO(LogPool::GFX, "DrawSetRenderPass::Execute(Context_t) should not be executed.");
+	}
+	using DeferredPbrInstDrawSet = GenericDrawSet<bindings::DeferredPbrRoBind, InstMeshDrawSet>;
+	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
+	using AccumDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
+
+	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
+	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrInstDrawSet, DeferredPbrAniDrawSet>;
+
+	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
+	{
+		PassUtil::FullRenderData rd{ &gfx_state,&rs };
+		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
+		//TODO: 
+		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{}, gfx_state.camera.render_target, clr_col, clr_dep).RenderPass();
+		bindings::StandardVertexBindings::StateInfo state;
+		state.SetState(gfx_state);
+		bindings::DeferredPbrInfo info{
+			.viewport = gfx_state.camera.viewport,
+			.blend = BlendMode::Opaque,
+			.model = ShadingModel::Specular,
+			.material_instances = gfx_state.material_instances,
+			.vertex_state_info = state,
+		};
+		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{
+				{
+					DeferredPbrInstDrawSet{bindings::make_deferred_pbr_ro_bind(info),
+										   InstMeshDrawSet{
+												span{
+												  gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_begin,gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_end},
+												  gfx_state.shared_gfx_state->inst_mesh_render_buffer.buffer()
+											}
+						},
+					DeferredPbrAniDrawSet{
+							bindings::make_deferred_pbr_ani_bind(info),
+							SkinnedMeshDrawSet{span{gfx_state.skinned_mesh_render}}
+					}
+				}
+			}, cube_clear.rt_size, cube_clear.depth).RenderPass();
+			auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{}, gbuffer_pass).RenderPass();
+			auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport, cube_clear.render_target);
+
+			return { hdr_pass.hdr_rsc,hdr_pass.depth_att };
+	}
+
+
 }

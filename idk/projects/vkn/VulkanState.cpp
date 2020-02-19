@@ -508,7 +508,7 @@ namespace idk::vkn
 		m_swapchain->present_mode = presentMode;
 
 	}
-
+#pragma optimize("",off)
 	void VulkanState::createFrameObjects()
 	{
 		for ([[maybe_unused]]auto& image : m_swapchain->m_swapchainGraphics.images)

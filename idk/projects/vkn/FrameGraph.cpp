@@ -71,6 +71,7 @@ namespace idk::vkn
 		{
 			rm.Instantiate(resource_template.id, resource_template.base_rsc);
 		}
+		rm.FinishInstantiation();
 		auto& aliases = rlm.Aliases();
 		//Register the aliases.
 		for (auto& [r_id, ar_id] : aliases)

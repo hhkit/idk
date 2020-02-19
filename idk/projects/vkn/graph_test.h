@@ -5,7 +5,7 @@ namespace idk::vkn
 {
 	struct GraphicsState;
 	struct RenderStateV2;
-	class FrameGraph;
+	struct FrameGraph;
 }
 
 namespace idk::vkn::gt

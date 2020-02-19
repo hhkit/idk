@@ -8,7 +8,10 @@
 //Stuff that should be bound at the start, before the renderobject/animated renderobject loop.
 namespace idk::vkn::bindings
 {
-
+	bool SkyboxBindings::Skip(RenderInterface& , const RenderObject& )
+	{
+		return _camera.clear_data.index()!=meta::IndexOf_v<decltype(_camera.clear_data),RscHandle<CubeMap>>;
+	}
 	void SkyboxBindings::Bind(RenderInterface& the_interface)
 	{
 		the_interface.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);

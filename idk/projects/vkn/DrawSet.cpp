@@ -2,6 +2,7 @@
 #include "DrawSet.h"
 #include <gfx/GraphicsSystem.h>
 #include <vkn/VulkanMesh.h>
+#include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
 	InstMeshDrawSet::InstMeshDrawSet(span<const InstRenderObjects> inst_draw_range, vk::Buffer inst_mesh_render_buffer) : 

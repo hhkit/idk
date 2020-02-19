@@ -10,6 +10,9 @@
 
 #include <vkn/DebugUtil.h>
 #include <vkn/TextureTracker.h>
+
+#include <parallel/ThreadPool.h>
+
 namespace std
 {
 
@@ -30,8 +33,9 @@ namespace idk::vkn
 		vk::ImageAspectFlags aspect;
 		size_t size_on_device = 0;
 	};
+	TextureResult LoadTexture(TextureLoader::SubmissionObjs sub, hlp::MemoryAllocator& allocator, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid);
-	
+
 
 
 	enum class UvAxis
@@ -41,7 +45,7 @@ namespace idk::vkn
 		eW,
 	};
 
-	vk::SamplerAddressMode GetRepeatMode(TextureOptions options, [[maybe_unused]]UvAxis axis)
+	vk::SamplerAddressMode GetRepeatMode(TextureOptions options, [[maybe_unused]] UvAxis axis)
 	{
 		auto repeat_mode = options.uv_mode;
 		vk::SamplerAddressMode mode = vk::SamplerAddressMode::eClampToEdge;
@@ -80,9 +84,10 @@ namespace idk::vkn
 		return mode;
 	}
 
-	
-	void TextureLoader::LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence,std::optional<TextureOptions> ooptions, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+
+	void TextureLoader::LoadTexture(SubmissionObjs sub, VknTexture& texture, hlp::MemoryAllocator& allocator, std::optional<TextureOptions> ooptions, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
+		auto load_fence = sub.load_fence;
 		TextureOptions options{};
 		auto format = load_info.internal_format;
 		//auto nformat = NearestBlittableFormat(format, BlitCompatUsageMasks::eDst);
@@ -92,14 +97,14 @@ namespace idk::vkn
 		if (ooptions)
 		{
 			options = *ooptions;
-		//	format = MapFormat(options.internal_format);
+			//	format = MapFormat(options.internal_format);
 		}
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
 
 		auto ptr = &texture;
-		auto&& [image, alloc, aspect,sz] = vkn::LoadTexture(allocator, load_fence, load_info,in_info,guid);
-		ptr->Size(uvec2{load_info.width,load_info.height});
+		auto&& [image, alloc, aspect, sz] = vkn::LoadTexture(sub,allocator,  load_info, in_info, guid);
+		ptr->Size(uvec2{ load_info.width,load_info.height });
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->usage = load_info.image_usage;
@@ -110,7 +115,7 @@ namespace idk::vkn
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect, 
+		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect,
 			ImageViewInfo
 			{
 				0,
@@ -125,7 +130,7 @@ namespace idk::vkn
 			GetFilterMode(options,FilterType::eMin),
 			GetFilterMode(options,FilterType::eMag),
 			//vk::SamplerMipmapMode::eNearest,//
-			(options.filter_mode==FilterMode::Nearest) ? vk::SamplerMipmapMode::eNearest :vk::SamplerMipmapMode::eLinear,
+			(options.filter_mode == FilterMode::Nearest) ? vk::SamplerMipmapMode::eNearest : vk::SamplerMipmapMode::eLinear,
 			GetRepeatMode(options,UvAxis::eU),
 			GetRepeatMode(options,UvAxis::eV),
 			GetRepeatMode(options,UvAxis::eW),
@@ -134,13 +139,57 @@ namespace idk::vkn
 			options.anisoptrophy,
 			s_cast<bool>(options.compare_op),//Used for percentage close filtering
 			(options.compare_op) ? MapCompareOp(*options.compare_op) : vk::CompareOp::eNever,
-			0.0f,0.0f+load_info.mipmap_level,
+			0.0f,0.0f + load_info.mipmap_level,
 			vk::BorderColor::eFloatOpaqueBlack,
 			VK_FALSE
 
 		};
 		ptr->sampler = device.createSamplerUnique(sampler_info);
 
+	}
+	void TextureLoader::LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	{
+		LoadTexture(SubmissionObjs{ {},load_fence }, texture, allocator, ooptional, load_info, in_info, guid);
+	}
+	namespace Nope
+	{
+		struct Derp
+		{
+			VknTexture& texture;
+			hlp::MemoryAllocator& allocator;
+			FenceObj load_fence;
+			CmdBufferObj cmd_buffer;
+			std::optional<TextureOptions> ooptional;
+			TexCreateInfo load_info;
+			std::optional<InputTexInfo> in_info;
+			std::optional<Guid> guid;
+		};
+	}
+	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	{
+		auto fence = load_fence.AcquireFence();
+		auto cmd_buffer = cmd_buffers.AcquireCmdBuffer();
+
+		return Core::GetThreadPool().Post(
+			[this](const shared_ptr<Nope::Derp>& _derp) ->void
+			{
+				auto& derp = *_derp;
+				auto cmd_buffer = (*derp.cmd_buffer);
+				cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+				this->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, derp.texture, derp.allocator,  derp.ooptional, derp.load_info, derp.in_info, derp.guid);
+				auto device = *View().Device();
+				auto fence = *derp.load_fence;
+				device.resetFences(fence);
+				lock.Lock();
+				hlp::EndSingleTimeCbufferCmd(cmd_buffer, View().GraphicsQueue(), false, fence);
+				lock.Unlock();
+				uint64_t wait_for_milli_seconds = 1;
+				[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
+				//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
+				while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout) std::this_thread::yield();
+				return (void)0;
+			},
+			std::make_shared<Nope::Derp>(Nope::Derp{ texture, allocator, std::move(fence), std::move(cmd_buffer), ooptional, load_info, in_info, guid }));
 	}
 	hash_table<TextureFormat, vk::Format> FormatMap();
 
@@ -319,15 +368,28 @@ namespace idk::vkn
 		);
 	}
 	void DoNothing();
-	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	TextureResult LoadTexture(TextureLoader::SubmissionObjs sub,hlp::MemoryAllocator& allocator,  const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
+		vk::CommandBuffer cmd_buffer;
+		vk::UniqueCommandBuffer ucmd_buffer;
+		if (!sub.cmd_buffer)
+		{
+			VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+			vk::PhysicalDevice pd = view.PDevice();
+			vk::Device device = *view.Device();
+			ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
+			cmd_buffer = *ucmd_buffer;
+		}
+		else
+		{
+			cmd_buffer = *sub.cmd_buffer;;
+		}
+		vk::Fence fence = sub.load_fence;
 		auto format = load_info.internal_format, internal_format = load_info.internal_format;
 		TextureResult result;
-		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		VulkanView& view = View();
 		vk::PhysicalDevice pd = view.PDevice();
 		vk::Device device = *view.Device();
-		auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
-		auto cmd_buffer = *ucmd_buffer;
 		//auto format = load_info.internal_format;
 		//bool is_render_target = isRenderTarget;
 		size_t len;
@@ -508,14 +570,20 @@ namespace idk::vkn
 		//{
 		//	TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, * image, img_aspect);
 		//}
-		device.resetFences(fence);
-		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
-		uint64_t wait_for_milli_seconds = 1;
-		[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
-		//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
-		while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
-		ucmd_buffer.reset();
-		device.resetCommandPool(*View().Commandpool(), {});
+		if (sub.end_and_submit)
+		{
+			device.resetFences(fence);
+			hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
+			uint64_t wait_for_milli_seconds = 1;
+			[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
+			//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
+			while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
+		}
+		if (!sub.cmd_buffer)
+		{
+			ucmd_buffer.reset();
+			device.resetCommandPool(*View().Commandpool(), {});
+		}
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
 			auto name = string{ *guid };
@@ -525,6 +593,7 @@ namespace idk::vkn
 			}
 			dbg::NameObject(*image, name);
 		}
+
 		result.first = std::move(image);
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };

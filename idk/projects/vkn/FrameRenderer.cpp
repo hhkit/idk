@@ -59,7 +59,7 @@
 
 namespace idk::vkn
 {
-#define CreateRenderThread() std::make_unique<ThreadedRender>()
+#define CreateRenderThread() std::make_unique<NonThreadedRender>()
 
 	struct FrameRenderer::PImpl
 	{
@@ -934,6 +934,7 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
+		/*
 		uvec2 max_size{};
 		for (auto& gfx_state : gfx_states)
 		{
@@ -949,7 +950,6 @@ namespace idk::vkn
 					_pimpl->deferred_buffers.clear();
 			}
 		}
-		/*
 		for (auto i = gfx_states.size(); i-- > 0;)
 		{
 			if (Core::GetSystem<GraphicsSystem>().is_deferred())
@@ -1003,8 +1003,11 @@ namespace idk::vkn
 		}
 		{
 			_pimpl->graph.Compile();
-			_pimpl->graph.Execute();
 			auto& state = _states.back();
+			_pimpl->graph.SetDefaultUboManager(state.ubo_manager);
+			_pimpl->graph.AllocateResources();
+			_pimpl->graph.BuildRenderPasses();
+			_pimpl->graph.Execute();
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			_pimpl->graph.ProcessBatches(rb);

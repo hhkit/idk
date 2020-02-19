@@ -8,6 +8,7 @@
 namespace idk::vkn
 {
 //
+#pragma optimize("",off)
 	void BaseRenderPass::PreExecute(const FrameGraphNode& node, Context_t context)
 	{
 		BeginRenderPass(context);

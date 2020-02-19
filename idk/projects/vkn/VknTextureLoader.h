@@ -5,6 +5,8 @@
 #include <vkn/VknTexture.h>
 
 #include <vkn/VknTextureRenderMeta.h>
+#include <vkn/FencePool.h>
+#include <parallel/ThreadPool.h>
 namespace idk
 {
 	struct CompiledTexture;
@@ -68,11 +70,22 @@ namespace idk::vkn
 	};
 	TexCreateInfo ColorBufferTexInfo(uint32_t width, uint32_t height);
 	TexCreateInfo DepthBufferTexInfo(uint32_t width, uint32_t height);
+
 	class TextureLoader
 	{
 	public:
 		//Will override TexCreateInfo's format if TextureOptions is set
-		void LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+		struct SubmissionObjs
+		{
+			std::optional<vk::CommandBuffer> cmd_buffer;
+			vk::Fence load_fence;
+			bool end_and_submit = true;
+		};
+		void LoadTexture(SubmissionObjs sub,VknTexture& texture, hlp::MemoryAllocator& allocator,std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+		void LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence,std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+		mt::ThreadPool::Future<void> LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+
+		hlp::SimpleLock lock;
 	};
 
 	struct ImageViewInfo

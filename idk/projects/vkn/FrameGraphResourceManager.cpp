@@ -50,6 +50,7 @@ namespace idk::vkn
 			(*o_prsc)->usage |= usage;
 		}
 	}
+#pragma optimize ("",off)
 	FrameGraphResource FrameGraphResourceManager::CreateTexture(TextureDescription dsc)
 	{
 		auto rsc_index = resources.size();
@@ -168,13 +169,26 @@ namespace idk::vkn
 		if (!desc.actual_rsc)
 		{
 			desc.usage = mark_sampled(desc.usage, is_shader_sampled);
-			result = pool.allocate(desc);
+			result = pool.allocate_async(desc);
 		}
 		else
 		{
 			result = **desc.actual_rsc;
 		}
 		return result;
+	}
+	void FrameGraphResourceManager::FinishInstantiation()
+	{
+		this->pool.collate_async();
+		for(auto& concrete_resource : concrete_resources)
+		{
+			if (concrete_resource.index() == index_in_variant_v < std::future<VknTextureView>, std::remove_reference_t<decltype(concrete_resource)>>)
+			{
+				auto future = std::move(std::get< std::future<VknTextureView>>(concrete_resource));
+				auto result = future.get();
+				concrete_resource = result;
+			}
+		}
 	}
 	void FrameGraphResourceManager::Reset()
 	{

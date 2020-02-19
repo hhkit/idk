@@ -21,7 +21,7 @@ namespace idk::vkn
 	{
 		using rsc_index_t = size_t;
 		using actual_rsc_index_t = size_t;
-		using actual_resource_t = variant<VknTextureView>;
+		using actual_resource_t = variant<VknTextureView,std::future<VknTextureView>>;
 
 		FrameGraphResourceManager();
 		FrameGraphResourceManager(const FrameGraphResourceManager&) = delete;
@@ -68,6 +68,7 @@ namespace idk::vkn
 		std::optional<TextureDescription> GetResourceDescription(fgr_id rsc_id)const;
 
 		actual_resource_t InstantiateConcrete(TextureDescription desc, bool is_shader_sampled);
+		void FinishInstantiation();
 		void Reset();
 
 		vector<TextureDescription> resources;

@@ -362,6 +362,9 @@
     <ClInclude Include="SkyboxBinding.h">
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
+    <ClInclude Include="FencePool.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -634,6 +637,7 @@
     <ClCompile Include="DrawSet.cpp">
       <Filter>render\new_testament</Filter>
     </ClCompile>
+    <ClCompile Include="FencePool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

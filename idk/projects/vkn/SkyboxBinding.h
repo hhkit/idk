@@ -12,7 +12,7 @@ namespace idk::vkn::bindings
 			_camera = cam_data;
 		}
 
-
+		bool Skip(RenderInterface& the_interface, const  RenderObject& dc) override;
 		//bool Skip(RenderInterface&, const  RenderObject&) override { return false; }
 		//Stuff that should be bound at the start, before the renderobject/animated renderobject loop.
 		void Bind(RenderInterface& the_interface) override;
