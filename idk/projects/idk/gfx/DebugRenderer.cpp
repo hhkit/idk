@@ -4,6 +4,8 @@
 #include <gfx/MeshFactory.h>
 #include <math/matrix_transforms.inl>
 #include <ds/span.inl>
+#include <gfx/Camera.h>
+
 
 namespace idk
 {
@@ -18,7 +20,8 @@ namespace idk
 	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
 	{
 		const mat4 tfm = translate(oriented_box.center) * mat4 { oriented_box.axes() } * scale(oriented_box.extents);
-		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
+		Draw(Mesh::defaults[MeshType::DbgBox], tfm, c, duration, depth_test);
+		// Draw(ray{ vec3{0, 0,0}, vec3{1,1,1} });
 	}
 
 	void DebugRenderer::Draw(const capsule& capsule, const color& c, seconds duration, bool depth_test)
@@ -70,9 +73,13 @@ namespace idk
 		const auto line_tfm = look_at(ray.origin + ray.velocity / 2, ray.origin + ray.velocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.velocity.length() / 2 }) };
 		Draw(Mesh::defaults[MeshType::Line], line_tfm, c, duration, depth_test);
 
-		const auto orient_tfm = orient(ray.velocity.get_normalized());
-		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient(ray.velocity.get_normalized()) } *scale(vec3{ 0.025f });
-		Draw(Mesh::defaults[MeshType::Tetrahedron], arrow_tfm, c, duration, depth_test);
+		const auto len = ray.velocity.length();
+		const auto dir = ray.velocity / len;
+		
+		const float offset = min(len * 0.2f, 0.2f);
+		const auto orient_tfm = orient(dir);
+		const auto arrow_tfm = translate(ray.origin + dir * (len - offset)) * orient_tfm * scale(vec3{ offset * 0.5f, offset * 0.5f, offset });
+		Draw(Mesh::defaults[MeshType::DbgArrow], arrow_tfm, c, duration, depth_test);
 		
 	}
 
