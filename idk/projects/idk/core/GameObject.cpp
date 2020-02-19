@@ -32,7 +32,7 @@ namespace idk
 			return false;
 
 		// find the handle
-		auto curr = 0U;
+		unsigned char curr = 0U;
 		for (; curr != range.count; ++curr)
 			if (_components[range.begin + curr] == component_handle)
 				break;

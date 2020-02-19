@@ -63,6 +63,11 @@ namespace idk
 		id_manager = std::make_unique<IDManager>();
 	}
 
+	void NetworkSystem::Disconnect()
+	{
+		ResetNetwork();
+	}
+
 	bool NetworkSystem::IsHost()
 	{
 		return static_cast<bool>(lobby);
@@ -150,6 +155,22 @@ namespace idk
 			if (elem)
 				elem->FrameEndManagers();
 	}
+
+	void NetworkSystem::AddCallbackTarget(Handle<mono::Behavior> behavior)
+	{
+		callback_objects.emplace_back(behavior);
+	}
+
+	void NetworkSystem::RemoveCallbackTarget(Handle<mono::Behavior> behavior)
+	{
+		callback_objects.erase(std::remove(callback_objects.begin(), callback_objects.end(), behavior), callback_objects.end());
+	}
+
+	span<const Handle<mono::Behavior>> NetworkSystem::GetCallbackTargets() const
+	{
+		return callback_objects;
+	}
+
 
 	void NetworkSystem::Init()
 	{
