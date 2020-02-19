@@ -15,12 +15,12 @@ namespace idk
         public static float value { get => (float)((double)rand.Next() / int.MaxValue); }
 
         /// <summary>
-        /// Random integer in range [min, max].
+        /// Random float in range [min, max]. (Including min and max)
         /// </summary>
         public static float Range(float min, float max) { return Mathf.LerpUnclamped(min, max, value); }
 
         /// <summary>
-        /// Random integer in range [min, max).
+        /// Random integer in range [min, max). (Including min, excluding max)
         /// </summary>
         public static int Range(int min, int max) { return rand.Next(min, max); }
 
