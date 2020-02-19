@@ -175,7 +175,7 @@ namespace idk::ogl
 			pipeline.SetUniform("BoneMat4s.bone_transform", skeleton.bones_transforms);
 		};
 
-		const auto SetLightUniforms = [this](span<LightData> lights, GLuint& texture_units)
+		const auto SetLightUniforms = [this](span<LightData> lights, [[maybe_unused]] GLuint& texture_units)
 		{
 			// shader uniforms
 			pipeline.SetUniform("LightBlk.light_count", (int)lights.size());

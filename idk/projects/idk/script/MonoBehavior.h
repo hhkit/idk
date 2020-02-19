@@ -38,7 +38,7 @@ namespace idk::mono
 		Behavior(Behavior&& rhs) = default;
 		Behavior& operator=(const Behavior&);
 		Behavior& operator=(Behavior&& rhs) = default;
-		~Behavior() = default;
+		~Behavior();
 	private:
 		string        _serialized;
 		bool          _awake{};

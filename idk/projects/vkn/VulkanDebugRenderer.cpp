@@ -267,11 +267,13 @@ namespace idk::vkn
 			//auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
 
 			//const auto shape_index = EnumInfo::DbgShapeI::map(shape);
+			DbgPipelineType index = DbgPipelineType::eTri;
+			if (mesh == Mesh::defaults[MeshType::Circle] || mesh == Mesh::defaults[MeshType::DbgArrow] || mesh == Mesh::defaults[MeshType::DbgBox] || mesh == Mesh::defaults[MeshType::Line])
+				index = DbgPipelineType::eLine;
 
 			auto& dcall = impl->render_buffer[mesh];
 			//RscHandle<Mesh> mesh = ShapeToMesh(shape);
-
-			dcall.pipeline = &impl->pipelines[(int)DbgPipelineType::eLine];
+			dcall.pipeline = &impl->pipelines[(int)index];
 			//Bind vtx buffers
 			auto& buffer_data = impl->buffer_data[impl->curr_frame][mesh];
 			auto& inst_v_buffer = buffer_data.inst_buffer;
@@ -352,12 +354,12 @@ namespace idk::vkn
 	void VulkanDebugRenderer::Draw(const box& box, const color& color)
 	{
 		const mat4 tfm = translate(box.center) * mat4 { box.axes() } *scale(box.extents);
-		DrawShape(MeshType::Box, tfm, color);
+		DrawShape(MeshType::DbgBox, tfm, color);
 	}
 	void VulkanDebugRenderer::Draw(const aabb& box, const color& color)
 	{
 		const mat4 tfm = translate(box.center()) * mat4 { scale(box.extents()) };
-		DrawShape(MeshType::Box, tfm, color);
+		DrawShape(MeshType::DbgBox, tfm, color);
 	}
 	const std::vector<vec3>& GetSquareFace(bool is_line_list)
 	{

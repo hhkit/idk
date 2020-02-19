@@ -21,7 +21,7 @@ namespace idk
 	{
 		const mat4 tfm = translate(oriented_box.center) * mat4 { oriented_box.axes() } * scale(oriented_box.extents);
 		Draw(Mesh::defaults[MeshType::DbgBox], tfm, c, duration, depth_test);
-		// Draw(ray{ vec3{0, 0,0}, vec3{1,1,1} });
+		// Draw(ray{ vec3{0, 0,0}, vec3{-1,1,1} });
 	}
 
 	void DebugRenderer::Draw(const capsule& capsule, const color& c, seconds duration, bool depth_test)
@@ -76,9 +76,9 @@ namespace idk
 		const auto len = ray.velocity.length();
 		const auto dir = ray.velocity / len;
 		
-		const float offset = min(len * 0.2f, 0.2f);
+		// const float offset = min(len * 0.2f, 0.2f);
 		const auto orient_tfm = orient(dir);
-		const auto arrow_tfm = translate(ray.origin + dir * (len - offset)) * orient_tfm * scale(vec3{ offset * 0.5f, offset * 0.5f, offset });
+		const auto arrow_tfm = translate(ray.origin + ray.velocity) * orient_tfm * scale(vec3{ 1, 1, 1 });
 		Draw(Mesh::defaults[MeshType::DbgArrow], arrow_tfm, c, duration, depth_test);
 		
 	}

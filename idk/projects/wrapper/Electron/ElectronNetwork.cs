@@ -5,34 +5,29 @@ namespace idk
 {
     public static class ElectronNetwork
     {
-        #region Delegates
-        public delegate void ClientConnectionSignal(Player id);
-        public delegate void ServerConnectionSignal();
 
-        public static event ClientConnectionSignal OnClientConnected;
-        public static event ClientConnectionSignal OnClientDisconnected;
-
-        public static event ServerConnectionSignal OnServerConnected;
-        public static event ServerConnectionSignal OnServerDisconnected;
-        #endregion
-
-        static List<Player> players = new List<Player>();
-
-        public static IList<Player> GetPlayers()
-        {
-            return players;
+        public static IList<Player> players 
+        { get
+            {
+                var retval = new List<Player>();
+                foreach (var id in Bindings.NetworkGetPlayers())
+                    retval.Add(new Player(id));
+                return retval;
+            } 
         }
 
-        public static bool IsHost { get => Bindings.NetworkGetIsHost(); }
-        public static bool IsConnected { get => Bindings.NetworkGetIsConnected(); }
-        public static int GetPing { get => Bindings.NetworkGetPing(); }
+        public static bool isHost { get => Bindings.NetworkGetIsHost(); }
+        public static bool isConnected { get => Bindings.NetworkGetIsConnected(); }
+        public static int ping { get => Bindings.NetworkGetPing(); }
+        public static Device[] devices { get => Bindings.NetworkGetDevices(); }
+
         public static void Disconnect() => Bindings.NetworkDisconnect();
         public static void CreateLobby() => Bindings.NetworkCreateLobby();
         public static void Connect(Address a) => Bindings.NetworkConnect(a);
         public static void LoadScene(Scene scene) => Bindings.NetworkLoadScene(scene.guid);
         public static GameObject Instantiate(Prefab prefab, Vector3 position)
         {
-            if (!IsHost)
+            if (!isHost)
                 return null;
 
             var id = Bindings.NetworkInstantiatePrefabPosition(prefab.guid, position);
@@ -40,48 +35,20 @@ namespace idk
         }
         public static GameObject Instantiate(Prefab prefab, Vector3 position, Quaternion rotation)
         {
-            if (!IsHost)
+            if (!isHost)
                 return null;
 
             var id = Bindings.NetworkInstantiatePrefabPositionRotation(prefab.guid, position, rotation);
             return id != 0 ? new GameObject(id) : null;
         }
 
-        internal static void ExecClientConnect(int id)
+        public static void AddCallbackTarget(MonoBehavior target)
         {
-            //Player p = new Player(id);
-            //players.Add(p);
-            //OnClientConnected(p) ;
+            Bindings.NetworkAddCallback(target.handle);
         }
-
-        internal static void ExecClientDisconnect(int id)
+        public static void RemoveCallbackTarget(MonoBehavior target)
         {
-            /*
-            foreach (var p in players)
-                if (p.ActorNumber == id)
-                {
-                    players.Remove(p);
-                    //OnClientDisconnected(p);
-                    break;
-                }
-                */
-        }
-
-        internal static void ExecServerConnect()
-        {
-            //OnServerConnected();
-        }
-
-        internal static void ExecServerDisconnect()
-        {
-        //    OnServerDisconnected();
-        }
-
-        internal static void Initialize()
-        {
-            players = new List<Player>();
-            foreach (var id in Bindings.NetworkGetPlayers())
-                players.Add(new Player(id));
+            Bindings.NetworkRemoveCallback(target.handle);
         }
     }
 }

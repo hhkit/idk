@@ -549,20 +549,23 @@ namespace idk::vkn
 	}
 	auto GenerateArrowBuffers()
 	{
-		constexpr float radius = 0.2f;
+		constexpr float radius = 0.05f;
 		std::vector<vec3> pos;
 		std::vector<uint16_t> indices;
-		const auto delta = (2.0f * static_cast<float>(pi)) / 5;
+		const auto delta = (2.0f * static_cast<float>(pi)) / 6;
 
 		// Rotation matrix. This is so we only do 1 sine and cosine operation.
-		const vec3 normal = vec3{ 0,0,1 };
+		const vec3 normal = vec3{ 0,0,0.2f };
 		const auto mat = rotate(normal, rad(delta));
 
 		auto perp = vec3{ 0,1,0 } * radius;
 
 		auto start = perp;
 		pos.emplace_back(normal);
-		for (int i = 0; i < 5; ++i)
+		pos.emplace_back(vec3{0,0,0});
+		indices.emplace_back(0);
+		indices.emplace_back(1); // base to tip
+		for (int i = 0; i < 6; ++i)
 		{
 			perp = mat * vec4{ perp, 0 };
 			const auto end = perp;

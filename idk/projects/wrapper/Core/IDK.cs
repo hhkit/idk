@@ -14,11 +14,6 @@ namespace idk
             return t != null ? t.IsAbstract : true;
         }
 
-        static void OnHotReload()
-        {
-            ElectronNetwork.Initialize();
-        }
-
         static void Main(string[] args)
         {
             Console.WriteLine("loaded IDK lib");

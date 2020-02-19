@@ -36,6 +36,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <scene/SceneGraph.inl>
 #include <script/ScriptSystem.h>
 #include <audio/AudioSystem.h>
+#include <network/NetworkSystem.h>
 
 // resource importing
 #include <res/ResourceHandle.inl>
@@ -598,6 +599,7 @@ namespace idk
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
 		Core::GetSystem<AudioSystem>().StopAllAudio();
 		Core::GetSystem<PhysicsSystem>().Reset();
+		Core::GetSystem<NetworkSystem>().Disconnect();
 		_game_running = false;
 		_game_frozen = false;
 	}
