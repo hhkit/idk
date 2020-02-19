@@ -177,16 +177,19 @@ namespace idk
                     rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz - rigidbody.initial_velocity * dt;
                     rigidbody.initial_velocity = vec3{};
                 }
-                else if (!rigidbody.is_kinematic)
+				else
 				{
-					const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
+					if (!rigidbody.is_kinematic)
+					{
+						const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
 
-					// verlet integrate towards new position
-					//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-					auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
-					rigidbody._accum_accel = vec3{};
-					rigidbody._prev_pos = curr_pos;
-                    rigidbody._pred_tfm[3].xyz = new_pos;
+						// verlet integrate towards new position
+						//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
+						auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+						rigidbody._accum_accel = vec3{};
+						rigidbody._prev_pos = curr_pos;
+						rigidbody._pred_tfm[3].xyz = new_pos;
+					}
 				}
 			}
 		};
@@ -261,7 +264,7 @@ namespace idk
             {
 				d_info.predicted_shape = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, d_info.collider->shape);
 				d_info.broad_phase = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, d_info.collider->shape);
-                const auto& vel = d_info.collider->_rigidbody->velocity();
+                auto vel = d_info.collider->_rigidbody->velocity() / dt;
 				d_info.broad_phase.grow(vel);
 				d_info.broad_phase.grow(-vel);
             }
@@ -640,10 +643,11 @@ namespace idk
 
     void PhysicsSystem::DrawCollider(const Collider& collider) const
     {
+		const float a = collider.enabled ? 1.0f : 0.25f;
+		const auto col = (collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }) * a;
         std::visit([&](const auto& shape)
         {
-            Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider),
-                collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }, Core::GetDT());
+            Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider), col, Core::GetDT());
         }, collider.shape);
     }
 

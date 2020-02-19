@@ -20,12 +20,14 @@ namespace idk
 	bool CMD_SelectObject::execute()
 	{
 		Core::GetSystem<IDE>()._selected_objects = new_selection;
+		Core::GetSystem<IDE>().OnSelectionChanged.Fire();
 		return true;
 	}
 
 	bool CMD_SelectObject::undo()  
 	{
 		Core::GetSystem<IDE>()._selected_objects = old_selection;
+		Core::GetSystem<IDE>().OnSelectionChanged.Fire();
 		return true;
 	}
 }

@@ -4,6 +4,7 @@
 #include <core/Core.h>
 #include <core/GameObject.inl>
 #include <editor/IDE.h>
+#include <editor/commands/CommandList.h>
 #include <common/Transform.h>
 #include <gfx/Light.h>
 #include <gfx/GraphicsSystem.h>
@@ -48,6 +49,14 @@ namespace idk
 			light->light = SpotLight{};
 		}
 
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disable All Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+				elem.enabled = false;
+		}
+
 		struct ColumnHeader
 		{
 			const char* label;
@@ -89,6 +98,8 @@ namespace idk
 		ImGui::Separator();
 		bool isolate = false;
 
+		auto& editor = Core::GetSystem<IDE>();
+
 		for (auto& light : Core::GetGameState().GetObjectsOfType<Light>())
 		{
 			ImGui::Columns(s_cast<int>(std::size(headers)), "", true);
@@ -102,20 +113,22 @@ namespace idk
 
 			if (ImGui::Selectable(name.data()))
 			{
-				Core::GetSystem<IDE>().SelectGameObject(go);
+				editor.SelectGameObject(go);
 			}
 			ImGui::NextColumn();
 
-			auto color = light.GetColor();
-			if (ImGui::ColorEdit3("##col", color.as_vec3.data(), ImGuiColorEditFlags_NoInputs))
-				light.SetColor(color);
-			ImGui::NextColumn();
-
-			auto intens = light.GetLightIntensity();
-			if (ImGui::DragFloat("##intens", &intens, 0.1f, 0.f, 1500.f, "%.3f", 1.1f))
-				light.SetLightIntensity(intens);
-			ImGui::NextColumn();
-
+			{
+				auto color = light.GetColor();
+				if (ImGui::ColorEdit3("##col", color.as_vec3.data(), ImGuiColorEditFlags_NoInputs))
+					light.SetColor(color);
+				ImGui::NextColumn();
+			}
+			{
+				auto intens = light.GetLightIntensity();
+				if (ImGui::DragFloat("##intens", &intens, 0.1f, 0.f, 1500.f, "%.3f", 1.1f))
+					light.SetLightIntensity(intens);
+				ImGui::NextColumn();
+			}
 			std::visit([](auto& light) 
 				{
 					if constexpr (!std::is_same_v<std::decay_t<decltype(light)>, DirectionalLight>)
@@ -145,8 +158,8 @@ namespace idk
 
 			if (ImGui::Button("Focus"))
 			{
-				Core::GetSystem<IDE>().SelectGameObject(go);
-				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+				editor.SelectGameObject(go);
+				editor.FocusOnSelectedGameObjects();
 			}
 			ImGui::NextColumn();
 

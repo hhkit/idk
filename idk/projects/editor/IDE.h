@@ -20,12 +20,9 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/imgui_interface.h>
 #include <editor/commands/CommandController.h>
 #include <editor/Registry.h>
-#include <editor/CameraControls.h>
 #include <editor/ObjectSelection.h>
 
 #undef FindWindow
-
-
 
 namespace idk
 {
@@ -61,6 +58,8 @@ namespace idk
 		GizmoOperation	gizmo_operation = GizmoOperation::Translate;
 		GizmoMode		gizmo_mode = GizmoMode::Local; //World is might not work properly for scaling for now.
 
+		Signal<> OnSelectionChanged;
+
 		IDE();
 
 		// lifetime
@@ -84,11 +83,18 @@ namespace idk
         template <typename T> // move into .inl if there are more template fns
         T* FindWindow()
         {
-            auto iter = windows_by_type.find(reflect::typehash<T>());
-            return iter != windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
+            auto iter = _windows_by_type.find(reflect::typehash<T>());
+            return iter != _windows_by_type.end() ? static_cast<T*>(iter->second) : nullptr;
         }
-		RscHandle<RenderTarget> GetEditorRenderTarget() const { return editor_view; }
-		bool IsGameRunning() const { return game_running; }
+		RscHandle<RenderTarget> GetEditorRenderTarget() const { return _editor_view; }
+		bool IsGameRunning() const { return _game_running; }
+		bool IsGameFrozen() const { return _game_frozen; }
+
+		template <typename Cmd, typename... Args>
+		Cmd* ExecuteCommand(Args&&... args)
+		{
+			return static_cast<Cmd*>(_command_controller.ExecuteCommand(std::make_unique<Cmd>(std::forward<Args>(args)...)));
+		}
 
 		// selection
 		const ObjectSelection& GetSelectedObjects();
@@ -97,66 +103,55 @@ namespace idk
 		void SetSelection(ObjectSelection selection, bool force = false);
 		void Unselect(bool force = false);
 
+		void FocusOnSelectedGameObjects();
+
 		// game object operations
 		void CreateGameObject(Handle<GameObject> parent = {}, string name = "", vector<string> initial_components = {});
 		void DeleteSelectedGameObjects();
 		void Copy();
 		void Paste();
 
+		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
+
+		// play/pause/stop operations
+		void Play();
+		void Pause();
+		void Unpause();
+		void Stop();
+
 		void ClearScene();
+
+		void MaximizeWindow(IGE_IWindow* window);
 
 	private:
 		unique_ptr<imgui_interface> _interface;
-		CameraControls _camera;
-		CommandController command_controller; //For editor commands
+		Handle<Camera> _camera;
+		CommandController _command_controller; //For editor commands
 
 		// Editor Scene
-		bool game_running = false;
-		bool game_frozen = true;
-		bool scripts_changed = false;
-		RscHandle<RenderTarget> editor_view;
+		bool _game_running = false;
+		bool _game_frozen = false;
+		bool _scripts_changed = false;
+		RscHandle<RenderTarget> _editor_view;
 		void SetupEditorScene();
 
 		//Editor Windows
-		vector<unique_ptr<IGE_IWindow>>	ige_windows;
-		hash_table<size_t, IGE_IWindow*> windows_by_type;
+		vector<unique_ptr<IGE_IWindow>>	_ige_windows;
+		hash_table<size_t, IGE_IWindow*> _windows_by_type;
+		IGE_IWindow* _maximized_window = nullptr;
 
-		bool bool_demo_window = false;
-        bool closing = false;
-
-		//For Gizmo controls
-		void FocusOnSelectedGameObjects();
-
-		//Scrolling
-		float		scroll_multiplier			= 2.0f;			//AFfects pan and scrolling intensity
-		const float default_scroll_multiplier	= 2.0f;			//When on focus, this resets the scroll_multiplier
-		const float scroll_additive				= 0.90f;		//Amount of multiplication when scrolling farther.This adds to scroll_multiplier
-		const float scroll_subtractive			= 0.2f;			//Amount of multiplication when scrolling nearer .This adds to scroll_multiplier
-		const float scroll_max					= 10.0f;
-		const float scroll_min					= 0.1f;
-		void IncreaseScrollPower();
-		void DecreaseScrollPower();
+		bool _show_demo_window = false;
+        bool _closing = false;
 
 		//For selecting and displaying in inspector.
-		ObjectSelection				_selected_objects{};
+		ObjectSelection _selected_objects{};
 
 		//For copy commands
-		void RecursiveCollectObjects(Handle<GameObject> i, vector<RecursiveObjects>& vector_ref); //i object to copy, vector_ref = vector to dump into
 		vector<vector<RecursiveObjects>> _copied_game_objects; // A vector of data containing gameobject data.
 
-
-
-		friend class IGE_MainWindow;
-		friend class IGE_SceneView;
-		friend class IGE_ProjectWindow;
-		friend class IGE_HierarchyWindow;
-		friend class IGE_InspectorWindow;
-		friend class IGE_AnimatorWindow;
-		friend class IGE_LightLister;
-		friend class CMD_DeleteGameObject;
-		friend class CMD_CreateGameObject;
-		friend class CMD_CollateCommands;
 		friend class CMD_SelectObject;
-		friend class CommandController;
+		friend class CMD_CollateCommands;
+		friend class IGE_MainWindow;
+		friend class IGE_IWindow;
 	};
 }

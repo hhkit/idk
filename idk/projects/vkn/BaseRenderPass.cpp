@@ -12,6 +12,7 @@ namespace idk::vkn
 	{
 		BeginRenderPass(context);
 		BindFrameBuffer(context);
+		auto output_atts = node.GetOutputAtt();
 		auto span = node.GetInputSpan();
 		for (auto& input : span)
 		{
@@ -19,6 +20,7 @@ namespace idk::vkn
 			_input_attachment_names.emplace_back(context.Resources().Name(input));
 		}
 		context.SetInputAttachments(_input_attachments);
+		context.SetOutputAttachmentSize(output_atts.size());
 	}
 
 	void BaseRenderPass::PostExecute(const FrameGraphNode& , Context_t context)

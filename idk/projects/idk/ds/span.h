@@ -63,5 +63,5 @@ namespace idk
 	};
 	//User defined deduction guide (C++17 onwards)
 	template<typename Container>
-	span(Container&&)-> span < typename std::iterator_traits<decltype(std::declval<Container>().data())>::value_type>;
+	span(Container&&)-> span < std::remove_reference_t<decltype(*std::declval<Container>().data())>>;
 }

@@ -106,15 +106,6 @@ namespace idk
 
 	void SceneManager::DestroyQueuedObjects(span<GameObject> objs)
 	{
-		GameState::GetGameState().SortObjectsOfType<GameObject>(
-			[](const auto& lhs, const auto& rhs)
-			{
-				return lhs.Transform()->Depth() == rhs.Transform()->Depth()
-					? lhs.GetHandle().id < rhs.GetHandle().id
-					: lhs.Transform()->Depth() < rhs.Transform()->Depth();
-			}
-		);
-
 		for (auto& elem : objs)
 		{
 			if (elem.HierarchyIsQueuedForDestruction())
@@ -126,27 +117,27 @@ namespace idk
 
 	void SceneManager::BuildSceneGraph(span<const GameObject> objs)
 	{
-		_sg_builder.BuildSceneGraph(objs);
+		_scene_graph.Build(objs);
 	}
 
-	SceneManager::SceneGraph& SceneManager::FetchSceneGraph()
+	SceneGraphHandle SceneManager::FetchSceneGraph()
 	{
-		return _sg_builder.FetchSceneGraph();
+		return _scene_graph.GetHandle();
 	}
 
-	SceneManager::SceneGraph* SceneManager::FetchSceneGraphFor(Handle<class GameObject> handle)
+	SceneGraphHandle SceneManager::FetchSceneGraphFor(Handle<GameObject> handle)
 	{
-		return _sg_builder.FetchSceneGraphFor(handle);
+		return _scene_graph.GetHandle(handle);
 	}
 
-	void SceneManager::ReparentObject(Handle<class GameObject> go, Handle<class GameObject> new_parent)
+	void SceneManager::ReparentObject(Handle<GameObject> go, Handle<GameObject> old_parent)
 	{
-		_sg_builder.ReparentObject(go, new_parent);
+		_scene_graph.Reparent(go, old_parent);
 	}
 
-	void SceneManager::InsertObject(Handle<class GameObject> go)
+	void SceneManager::InsertObject(Handle<GameObject> go)
 	{
-		_sg_builder.InsertObject(go);
+		_scene_graph.Insert(go);
 	}
 
 }

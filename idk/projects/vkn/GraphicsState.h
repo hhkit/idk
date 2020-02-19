@@ -34,6 +34,7 @@ namespace idk::vkn
 	struct DbgDrawCall
 	{
 		//set 0 = vtx, set 1 = instance
+		const VulkanPipeline* pipeline = {};
 		hash_table<uint32_t, buffer_info> mesh_buffer; //may be simplified
 		buffer_info index_buffer;
 		uint32_t num_indices   {};

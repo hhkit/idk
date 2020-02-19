@@ -39,10 +39,11 @@ namespace idk::reflect
 
 	struct dynamic::voidptr : dynamic::base
 	{
+		reflect::type t;
 		void* obj;
 
-		voidptr(void* obj)
-			: obj{ obj }
+		voidptr(reflect::type t, void* obj)
+			: t{ t }, obj{ obj }
 		{}
 
 		void* get() const override
@@ -52,7 +53,7 @@ namespace idk::reflect
 
 		dynamic copy() const override
 		{
-			return dynamic(std::move(obj));
+			return dynamic(t, obj);
 		}
 	};
 

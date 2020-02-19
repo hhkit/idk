@@ -40,6 +40,6 @@ namespace idk
 		Handle<GameObject> scroll_focused_gameObject;
 
 		//Checks if its children is selected or not. This is recursive.
-		bool CheckIfChildrenIsSelected(SceneManager::SceneGraph* childrenGraph, Handle<GameObject> comparingGameObject);
+		bool CheckIfChildrenIsSelected(SceneGraphHandle childrenGraph, Handle<GameObject> comparingGameObject);
 	};
 }

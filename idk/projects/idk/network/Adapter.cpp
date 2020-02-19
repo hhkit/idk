@@ -9,6 +9,7 @@ namespace idk
 
 	YOJIMBO_MESSAGE_FACTORY_START(GameMessageFactory, MessageCount);
 	ADD_MESSAGE(TestMessage);
+	ADD_MESSAGE(EventDataBlockFrameNumber);
 	ADD_MESSAGE(EventInstantiatePrefabMessage);
 	ADD_MESSAGE(EventTransferOwnershipMessage);
 	ADD_MESSAGE(EventInvokeRPCMessage);

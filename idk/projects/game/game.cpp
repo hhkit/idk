@@ -48,7 +48,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	if (!HasArg(L"--nodoc", command_lines, num_args)) //Additional check to allow disabling of renderdoc without changing game.cpp
+	if (HasArg(L"--rdoc", command_lines, num_args)) //Additional check to allow disabling of renderdoc without changing game.cpp
 	{
 		RENDERDOC_API_1_1_2* rdoc_api = NULL;
 

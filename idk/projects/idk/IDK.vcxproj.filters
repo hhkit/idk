@@ -164,6 +164,9 @@
     <Filter Include="phys\aabb tree">
       <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="phys\rotational">
+      <UniqueIdentifier>{84056225-9a38-47b7-8a53-ab3d256bbdcb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix.h">
@@ -542,9 +545,6 @@
     <ClInclude Include="ds\slow_tree.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="scene\SceneGraphBuilder.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="anim\AnimationSystem.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -808,9 +808,6 @@
     <ClInclude Include="anim\AnimationLayer.h">
       <Filter>anim</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\CameraFrustum.h">
-      <Filter>gfx\camera</Filter>
-    </ClInclude>
     <ClInclude Include="anim\AnimationUtils.h">
       <Filter>anim\utils</Filter>
     </ClInclude>
@@ -913,9 +910,6 @@
     <ClInclude Include="ui\RectTransform.h">
       <Filter>ui</Filter>
     </ClInclude>
-    <ClInclude Include="multithread_control.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="meta\stl_hack.h">
       <Filter>meta</Filter>
     </ClInclude>
@@ -931,9 +925,6 @@
     <ClInclude Include="gfx\TextMesh.h">
       <Filter>gfx\font</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\HazardPointerDL.h" />
-    <ClInclude Include="parallel\queue.h" />
-    <ClInclude Include="parallel\ThreadPool.h" />
     <ClInclude Include="anim\AnimationTransition.h">
       <Filter>anim</Filter>
     </ClInclude>
@@ -959,7 +950,6 @@
     <ClInclude Include="gfx\ColorPickResult.h">
       <Filter>gfx\object</Filter>
     </ClInclude>
-    <ClInclude Include="network\Device.h" />
     <ClInclude Include="memory\ArenaAllocator.h">
       <Filter>memory</Filter>
     </ClInclude>
@@ -1062,12 +1052,6 @@
     <ClInclude Include="res\ResourceExtension.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\RenderTargetMeta.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\TextureInternalFormat.h">
-      <Filter>gfx</Filter>
-    </ClInclude>
     <ClInclude Include="parallel\queue.h">
       <Filter>parallel</Filter>
     </ClInclude>
@@ -1136,19 +1120,56 @@
     <ClInclude Include="network\EventInvokeRPCMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
-    <ClInclude Include="util\property_path.h" />
     <ClInclude Include="ds\lazy_vector.h">
       <Filter>ds</Filter>
     </ClInclude>
     <ClInclude Include="ds\Flags.h">
       <Filter>ds</Filter>
     </ClInclude>
-    <ClInclude Include="res\compiled_asset_tags.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h">
       <Filter>network\views</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\ShadowMapPool.h" />
-    <ClInclude Include="util\ExtraVars.h" />
+    <ClInclude Include="scene\SceneGraph.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShadowMapPool.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="util\property_path.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\queue.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\ThreadPool.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\HazardPointerDL.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="util\ExtraVars.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventDataBlockFrameNumber.h" />
+    <ClInclude Include="parallel\multithread_control.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\TextureInternalFormat.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderTargetMeta.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="res\compiled_asset_tags.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="network\Device.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\NetworkTuple.inl">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\DefaultShaders.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1307,9 +1328,6 @@
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplateFactory.cpp">
       <Filter>gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\SceneGraphBuilder.cpp">
-      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="anim\AnimationSystem.cpp">
       <Filter>anim</Filter>
@@ -1485,9 +1503,6 @@
     <ClCompile Include="anim\AnimationLayer.cpp">
       <Filter>anim</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\CameraFrustum.cpp">
-      <Filter>gfx\camera</Filter>
-    </ClCompile>
     <ClCompile Include="anim\AnimationState.cpp">
       <Filter>anim</Filter>
     </ClCompile>
@@ -1569,9 +1584,6 @@
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="ColorPickRequest.cpp">
-      <Filter>gfx</Filter>
-    </ClCompile>
     <ClCompile Include="network\Address.cpp">
       <Filter>network\data</Filter>
     </ClCompile>
@@ -1610,9 +1622,6 @@
     </ClCompile>
     <ClCompile Include="res\ResourceMeta.cpp">
       <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\TextureInternalFormat.cpp">
-      <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="test\TestComponent.cpp">
       <Filter>test</Filter>
@@ -1653,10 +1662,29 @@
     </ClCompile>
     <ClCompile Include="network\EventLoadLevelMessage.cpp" />
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
-    <ClCompile Include="util\property_path.cpp" />
     <ClCompile Include="network\ElectronView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
-    <ClCompile Include="gfx\ShadowMapPool.cpp" />
+    <ClCompile Include="gfx\ColorPickRequest.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShadowMapPool.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="util\property_path.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneGraph.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\TextureInternalFormat.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="network\network.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="parallel\multithread_control.cpp">
+      <Filter>parallel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1880,6 +1908,9 @@
     </None>
     <None Include="network\ElectronView.inl">
       <Filter>network\views</Filter>
+    </None>
+    <None Include="scene\SceneGraph.inl">
+      <Filter>scene</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

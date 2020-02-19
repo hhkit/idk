@@ -12,6 +12,7 @@
 #include <math/matrix_transforms.inl>
 #include <math/matrix_decomposition.inl>
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <ds/slow_tree.inl>
 #include <serialize/text.inl>
 #include <math/arith.inl>
@@ -833,7 +834,7 @@ namespace idk
 		for(auto& animator : _creation_queue)
 		{
 			const auto scene = Core::GetSystem<SceneManager>().GetSceneByBuildIndex(animator->GetHandle().scene);
-			auto* sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(animator->GetGameObject());
+			auto sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(animator->GetGameObject());
 
 			if (!sg)
 			{
@@ -863,7 +864,7 @@ namespace idk
 				animator->final_bone_transforms.resize(num_bones);
 
 				// Init child objects
-				sg->visit(initialize_children);
+				sg.Visit(initialize_children);
 
 				// Init bone component's children vector
 				auto& skeleton_data = animator->skeleton->data();

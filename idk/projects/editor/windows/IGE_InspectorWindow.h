@@ -75,14 +75,16 @@ namespace idk {
         //If multiple objects are selected, this will only display the first gameObject.
         void DisplayComponent(GenericHandle component);
         template<typename T> void DisplayComponentInner(Handle<T> component) { DisplayVal(*component); }
-        template<> void DisplayComponentInner(Handle<Transform> c_transform);
-        template<> void DisplayComponentInner(Handle<RectTransform> c_rt);
-        template<> void DisplayComponentInner(Handle<Animator> c_anim);	
-        template<> void DisplayComponentInner(Handle<Bone> c_bone);		
-        template<> void DisplayComponentInner(Handle<AudioSource> c_audio);	
-		template<> void DisplayComponentInner(Handle<TextMesh> c_font);	
-		template<> void DisplayComponentInner(Handle<Text> c_text);	
-        template<> void DisplayComponentInner(Handle<ParticleSystem> c_ps);
+        void DisplayComponentInner(Handle<Transform> c_transform);
+        void DisplayComponentInner(Handle<RectTransform> c_rt);
+        void DisplayComponentInner(Handle<RigidBody> c_rigidbody);
+        void DisplayComponentInner(Handle<Animator> c_anim);	
+        void DisplayComponentInner(Handle<Bone> c_bone);		
+        void DisplayComponentInner(Handle<AudioSource> c_audio);	
+		void DisplayComponentInner(Handle<TextMesh> c_font);	
+		void DisplayComponentInner(Handle<Text> c_text);	
+        void DisplayComponentInner(Handle<ParticleSystem> c_ps);
+        void DisplayComponentInner(Handle<ElectronView> c_ev);
 
 		void MenuItem_RemoveComponent(GenericHandle i);
 		void MenuItem_CopyComponent(GenericHandle i);

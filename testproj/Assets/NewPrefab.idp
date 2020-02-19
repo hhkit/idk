@@ -42,12 +42,14 @@ data:
   - !ElectronView 
     network_id: 0
   - !ElectronTransformView 
-    interp_over_seconds: 0.01
+    interp_over_seconds: 0.1
     send_threshold: 0.1
     snap_threshold: 0.5
     sync_position: 1
     sync_rotation: 1
     sync_scale: 0
+  - !ElectronRigidbodyView 
+    sync_velocity: 1
   - !MonoBehavior 
     enabled: 1
     script_data: !PlayerController 

@@ -19,6 +19,8 @@
 
 #include <util/ExtraVars.h>
 
+#include <gfx/DefaultShaders.h>
+
 namespace idk
 {
 
@@ -30,44 +32,6 @@ namespace idk
 		Default = OpenGL
 	};
 
-	enum VertexShaders
-	{
-		VDebug,
-		VNormalMesh,
-		VNormalMeshShadow,
-		VNormalMeshPicker,
-		VSkinnedMesh,
-		VSkinnedMeshShadow,
-		VSkinnedMeshPicker,
-        VParticle,
-		VSkyBox,
-		VPBRConvolute,
-		VFsq,
-		VFont,
-        VUi,
-		VMax
-	};
-	enum FragmentShaders
-	{
-		FDebug,
-		FSkyBox,
-		FShadow,
-		FPicking,
-		FPBRConvolute,
-		FBrdf,
-		FFont,
-		FDeferredPost,
-		FDeferredPostSpecular,
-		FDeferredPostAmbient,
-		FMax
-	};
-	enum GeometryShaders
-	{
-		GSinglePassCube,
-		GShadowCNM,
-		GShadowCSM,
-		GMax
-	};
 	struct RenderRequest;
 
 
@@ -87,6 +51,7 @@ namespace idk
 		struct LightRenderRange
 		{
 			size_t light_index;
+			size_t light_map_index;
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
@@ -213,7 +178,6 @@ namespace idk
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
-			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
 			alignas(machine::cache_line_sz) std::pair<size_t,size_t>   skinned_inst_range;
 
 			alignas(machine::cache_line_sz) ShadowMapPool d_lightpool;

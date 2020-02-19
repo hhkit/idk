@@ -171,4 +171,10 @@ namespace idk::vkn::hlp
 		return reinterpret_cast<RT>(buffer_data(obj));
 	}
 #pragma optimize("",on)
+	template<typename T>
+	string_view to_data(const T& obj)
+	{
+		static_assert(!std::is_pointer_v<T>, "Pointers should not be read as data. Convert to intptr_t if that is indeed the intention.");
+		return string_view{ reinterpret_cast<const char*>(hlp::buffer_data(obj)), hlp::buffer_size(obj) };
+	}
 }

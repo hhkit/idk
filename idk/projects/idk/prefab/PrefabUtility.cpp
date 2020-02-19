@@ -9,6 +9,7 @@
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <ds/slow_tree.inl>
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl> //Assign
@@ -97,7 +98,6 @@ namespace idk
                 t_ori.position = t_prefab.position;
                 t_ori.rotation = t_prefab.rotation;
                 t_ori.scale = t_prefab.scale;
-                t_ori.parent = t_prefab.parent;
             }
             else if (prefab_comp.is<Name>())
                 go->Name(prefab_comp.get<Name>().name);
@@ -869,8 +869,8 @@ namespace idk
         prefab_inst.overrides.clear();
 
         vector<Handle<GameObject>> objs;
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
-        tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
+        tree.Visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
         // find missing objs
         for (int i = 0; i < prefab_inst.prefab->data.size(); ++i)
@@ -1033,8 +1033,8 @@ namespace idk
         const auto& prefab = prefab_inst_handle->prefab;
 
         vector<Handle<GameObject>> objs;
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
-        tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
+        tree.Visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
         // find missing objs
         for (int i = 0; i < prefab->data.size(); ++i)
@@ -1072,7 +1072,7 @@ namespace idk
                 auto parent = obj->Parent();
                 auto parent_inst = parent->GetComponent<PrefabInstance>();
                 obj_prefab_inst = obj->AddComponent<PrefabInstance>();
-                obj_prefab_inst->object_index = prefab->data.size();
+                obj_prefab_inst->object_index = static_cast<int>(prefab->data.size());
                 obj_prefab_inst->prefab = prefab;
                 auto& obj_prefab_data = prefab->data.emplace_back();
                 for (auto& c : obj->GetComponents())

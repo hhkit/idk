@@ -7,7 +7,7 @@
 namespace idk::reflect
 {
 	dynamic::dynamic(reflect::type type, void* obj)
-		: type{ type }, _ptr{ std::make_shared<voidptr>(obj) }
+		: type{ type }, _ptr{ std::make_shared<voidptr>(type, obj) }
 	{}
 
 	dynamic::dynamic()

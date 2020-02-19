@@ -3,6 +3,7 @@
 namespace idk
 {
 	using NetworkID = unsigned;
+	using SeqNo     = unsigned short;
 	using StateMask = unsigned;
 
 	enum class Host
@@ -16,4 +17,6 @@ namespace idk
 		CLIENT_MAX,
 		ANY = CLIENT_MAX,
 	};
+
+	bool seqno_greater_than(SeqNo lhs, SeqNo rhs);
 }

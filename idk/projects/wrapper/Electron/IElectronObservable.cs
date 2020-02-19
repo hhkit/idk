@@ -1,6 +1,6 @@
 ﻿namespace idk
 {
-    public interface IElectronObservable
+     interface IElectronObservable
     {
         void OnElectronSerializeView();
     }

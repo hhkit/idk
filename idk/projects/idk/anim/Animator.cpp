@@ -72,7 +72,7 @@ namespace idk
 
 	size_t Animator::FindLayerIndex(string_view name)
 	{
-		size_t index;
+		size_t index = 0;
 		for (index = 0; index < layers.size(); ++index)
 		{
 			if (layers[index].name == name)

@@ -202,9 +202,9 @@ namespace idk::mono
 		BIND_END();
 
 		
-		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* type)
+		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* raw_type)
 		{
-			auto s = unbox(type);
+			auto s = unbox(raw_type);
 			string_view type_name = s.get();
 
 			vector<Handle<mono::Behavior>> behaviors;
@@ -544,8 +544,9 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetParent",  void, Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
 			{
+				auto old_parent = h->parent;
 				h->SetParent(parent_gameobject, preserve_global);
-				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), parent_gameobject);
+				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), old_parent);
 			}
 		BIND_END();
 
@@ -555,16 +556,17 @@ namespace idk::mono
 
 			auto go_klass = Core::GetSystem<mono::ScriptSystem>().Environment().Type("GameObject");
 
-			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg->size() : 0);
+			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg.GetNumChildren() : 0);
 			if (sg)
 			{
-				auto sz = sg->size();
-				auto ptr = sg->begin();
+				auto sz = sg.GetNumChildren();
+				auto ptr = sg.begin();
 				for (int i = 0; i < sz; ++i)
 				{
 					auto mo = mono_object_new(mono_domain_get(), go_klass->Raw());
 					auto method = mono_class_get_method_from_name(go_klass->Raw(), ".ctor", 1);
-					void* args[] = { &ptr++->obj.id };
+					auto child_go = *ptr++;
+					void* args[] = { &child_go.id };
 					mono_runtime_invoke(method, mo, args, nullptr);
 					mono_array_setref(retval, i, mo);
 				}
@@ -641,7 +643,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::RigidBodyGetVelocity",  vec3, Handle<RigidBody> rb)
 		{
-			return rb->velocity() * Core::GetDT().count();
+			return rb->velocity();
 		}
 		BIND_END();
 
@@ -834,12 +836,9 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorPlay",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Play(s.get(), 0.0f, index);
 		}
 		BIND_END();
@@ -847,48 +846,36 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorCrossFade", bool, Handle<Animator> animator, MonoString* name, float time = 0.2f, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+			
 			return animator->BlendTo(s.get(), time, index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorPause", bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Pause(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorResume", bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Resume(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorStop",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->Stop(index);
 		}
 		BIND_END();
@@ -896,24 +883,17 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorGetState", CSharpState, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->GetState(s.get(), index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorDefaultStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
 
 			return mono_string_new(mono_domain_get(), animator->DefaultStateName(index).c_str());
 		}
@@ -921,72 +901,54 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AnimatorCurrentStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return mono_string_new(mono_domain_get(), animator->CurrentStateName(index).c_str());
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorCurrentStateTime", float, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->CurrentStateTime(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorBlendStateName", MonoString*, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return mono_string_new(mono_domain_get(), animator->BlendStateName(index).c_str());
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorIsPlaying",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->IsPlaying(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorIsBlending",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->IsBlending(index);
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::AnimatorHasCurrAnimEnded",  bool, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->HasCurrAnimEnded(index);
 		}
 		BIND_END();
@@ -994,12 +956,9 @@ namespace idk::mono
 		BIND_START("idk.Bindings::AnimatorHasState",  bool, Handle<Animator> animator, MonoString* name, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			auto ret_val = animator->HasState(s.get(), index);
 			return ret_val;
 		}
@@ -1007,12 +966,9 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AnimatorGetWeight", float, Handle<Animator> animator, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->GetWeight(index);
 		}
 
@@ -1048,12 +1004,9 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::AnimatorSetWeight", bool, Handle<Animator> animator, float weight, MonoString* layer = nullptr)
 		{
-			int index = 0;
-			if (layer)
-			{
-				auto l = unbox(layer);
-				index = s_cast<int>(animator->FindLayerIndex(l.get()));
-			}
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+
 			return animator->SetWeight(weight, index);
 		}
 		BIND_END();
@@ -1193,7 +1146,21 @@ namespace idk::mono
 		}
 		BIND_END();
 		//----------------------------------------------------------------------------------------------------
+		//AudioSystem
+		BIND_START("idk.Bindings::AudioSystemSetVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Volume(newVolume);
+		}
+		BIND_END();
 
+		BIND_START("idk.Bindings::AudioSystemStopAll", void)
+		{
+			Core::GetSystem<AudioSystem>().StopAllAudio();
+		}
+		BIND_END();
+
+		//----------------------------------------------------------------------------------------------------
 		// Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
@@ -1867,6 +1834,22 @@ namespace idk::mono
 		BIND_START("idk.Bindings::NetworkGetIsHost", bool)
 		{
 			return Core::GetSystem<NetworkSystem>().IsHost();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetPlayers", MonoArray*)
+		{
+			vector<int> players;
+			auto& network = Core::GetSystem<NetworkSystem>();
+			for (auto host = s_cast<int>(Host::CLIENT0); host < s_cast<int>(Host::CLIENT_MAX); ++host)
+				if (network.GetConnectionTo(s_cast<Host>(host))) // has connection
+					players.emplace_back(host);
+
+			auto retval = mono_array_new(mono_domain_get(), mono_get_int32_class(), players.size());
+			for (int i = 0; i < players.size(); ++i)
+				mono_array_set(retval, int, i, players[i]);
+
+			return retval;
 		}
 		BIND_END();
 

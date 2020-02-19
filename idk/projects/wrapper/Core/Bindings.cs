@@ -389,6 +389,16 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int AddAudioClip(ulong id, string name);
+        /*
+         * AudioSystem
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemStopAll();
+
+
 
         /*
         * TextMesh
@@ -688,6 +698,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkCreateLobby();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int[] NetworkGetPlayers();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkConnect(Address a);

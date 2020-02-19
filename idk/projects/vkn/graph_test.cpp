@@ -13,6 +13,7 @@
 #include <gfx/Camera.h>
 
 #include <vkn/utils/utils.inl>
+#include <vkn/utils/VknUtil.h>
 namespace idk::vkn
 {
 
@@ -22,11 +23,7 @@ namespace idk::vkn
 
 namespace idk::vkn::gt
 {
-	template<typename T>
-	string_view to_data(const T& obj)
-	{
-		return string_view{ reinterpret_cast<const char*>(hlp::buffer_data(obj)), hlp::buffer_size(obj) };
-	}
+	using hlp::to_data;
 	struct PassUtil : BaseRenderPass
 	{
 		struct FullRenderData
@@ -336,16 +333,18 @@ namespace idk::vkn::gt
 			auto& light_indices = gfx_state.active_lights;
 			vector<LightData> lights;
 			vector<VknTextureView> shadow_maps;
-			lights.reserve(8);
-			shadow_maps.reserve(8);
+			constexpr size_t stride = 8;
+			lights.reserve(stride);
+			shadow_maps.reserve(stride);
 			FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
 			auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
 			BindMesh(context, fsq_requirements, mesh);
-
-			for (size_t i = 0; i < light_indices.size();i+=8)
+			
+			context.BindUniform("PBRBlock", 0, string_view{ hlp::buffer_data<const char*>(pbr_trf),hlp::buffer_size(pbr_trf) });
+			for (size_t i = 0; i < light_indices.size();i+= stride)
 			{
 				lights.clear();
-				for (size_t j = 0; j + i < light_indices.size() && j < 8; ++j)
+				for (size_t j = 0; j + i < light_indices.size() && j < stride; ++j)
 				{
 					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[i+j]]);
 					context.BindUniform("shadow_maps",j,gfx_state.shadow_maps_2d[i+j].as<VknTexture>());
@@ -354,7 +353,6 @@ namespace idk::vkn::gt
 				auto light_data = PrepareLightBlock(gfx_state.camera, lights);
 				context.BindUniform("LightBlock", 0, light_data);
 				//Bind all the other uniforms
-				context.BindUniform("PBRBlock", 0, string_view{ hlp::buffer_data<const char*>(pbr_trf),hlp::buffer_size(pbr_trf) });
 				//DrawFSQ
 				context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 			}

@@ -23,8 +23,6 @@
 #include <idk.h>
 
 #include "FMOD/core/fmod_common.h" //FMOD Enums. This is included in the header file only because this is the only thing that should be exposed.
-#include <map> //map
-#include <list> //list. TEMPORARY TODO. Will switch to a faster container.
 #include <core/Handle.h>
 
 //External Forward Declarations
@@ -59,7 +57,7 @@ namespace idk
 		~AudioSystem();//Destructor
 
 		virtual void Init() override; //Initializes the FMOD Core System
-		void Update(span<AudioSource>);
+		void Update(span<AudioSource>, span<AudioListener>);
 		void UpdateTestCaseOnly(); //Remove after test!
 		void StopAllAudio();
 
@@ -91,8 +89,7 @@ namespace idk
 
 		//Listener Controls
 		///////////////////////////////////////////////
-		void Set3DListenerAttributes(const vec3& position, const vec3& velocity, const vec3& forwardVec, const vec3& upVec); //forwardVec and upVec has to be unit vectors!
-		void SetMainAudioListener(Handle<AudioListener> listenerComponent);
+		void Set3DListenerAttributes(const int& id, const vec3& position, const vec3& velocity, const vec3& forwardVec, const vec3& upVec); //forwardVec and upVec has to be unit vectors!
 		///////////////////////////////////////////////
 
 		//Get Data Functions
@@ -136,9 +133,8 @@ namespace idk
 		FMOD::SoundGroup*	_soundGroup_AMBIENT		{ nullptr };	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
 		FMOD::SoundGroup*	_soundGroup_DIALOGUE	{ nullptr };	//Dialogue/Voice Overs. This is OPTIONAL.
 
-		Handle<AudioListener> _mainListener;
-
 		void ParseFMOD_RESULT(FMOD_RESULT);			//All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
+		void ParseFMOD_RESULT_2(FMOD_RESULT);		//This does not update _result
 
 	};
 

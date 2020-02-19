@@ -5,11 +5,17 @@
 #include <network/ServerMoveManager.h>
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
+#include <network/NetworkTuple.inl>
 
 #undef SendMessage
 
 namespace idk
 {
+	namespace detail
+	{
+		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
+	}
+
 	template<typename RealSubstreamManager>
 	inline RealSubstreamManager& ServerConnectionManager::AddSubstreamManager()
 	{
@@ -46,6 +52,9 @@ namespace idk
 
 	yojimbo::Message* ServerConnectionManager::CreateMessage(size_t id)
 	{
+		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+
+		LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), id);
 		return server.CreateMessage(clientID, static_cast<int>(id));
 	}
 

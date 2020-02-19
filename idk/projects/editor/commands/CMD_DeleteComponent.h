@@ -5,7 +5,7 @@
 //@date		26 OCT 2019
 //@brief	Adds components to gameobjects
 //////////////////////////////////////////////////////////////////////////////////
-
+#pragma once
 
 #include <editor/commands/ICommand.h>
 #include <core/GameObject.h>
