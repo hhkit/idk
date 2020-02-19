@@ -224,7 +224,7 @@ namespace idk
 
 	}
 
-	void AudioSystem::Update(span<AudioSource> audio_sources)
+	void AudioSystem::Update(span<AudioSource> audio_sources, span<AudioListener> audio_listeners)
 	{
 
 
@@ -233,34 +233,43 @@ namespace idk
 		{
 			
 			elem.UpdateAudioClips();
-
 			
 
 		}
 
-		//Only one listener component will update FMODs listener
-		//THIS is also important when in editor mode! Listener should be at the editor camera's view
-		if (_mainListener) {
-			_mainListener->UpdateListenerPosition();
+		//Check which listeners are active. At best there will always be at most, 4 listeners in the game. And it is not going to be constantly toggable.
+		//Best case O(1), Worst case O(2N)
+		int num_active_listeners = 0;
+		for (auto& elem : audio_listeners)
+		{
+			if (elem.is_active)
+				++num_active_listeners;
+		}
+
+		if (num_active_listeners) {
+			_Core_System->set3DNumListeners(num_active_listeners);
+			int listener_index = 0;
+			for (auto& elem : audio_listeners)
+			{
+				if (elem.is_active) {
+					elem.UpdateListenerPosition(listener_index);
+					++listener_index;
+				}
+			}
 		}
 		else {
-			//Do nothing or set Listener to 0,0,0
-
+			_Core_System->set3DNumListeners(1); //Default to 1.
+			Set3DListenerAttributes(0,vec3{}, vec3{}, vec3{}, vec3{});
 		}
+
+
 
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
 	}
+
 	void AudioSystem::UpdateTestCaseOnly()
 	{
-		//Only one listener component will update FMODs listener
-		//THIS is also important when in editor mode! Listener should be at the editor camera's view
-		if (_mainListener) {
-			_mainListener->UpdateListenerPosition();
-		}
-		else {
-			//Do nothing or set Listener to 0,0,0
-		}
 
 		// Get Updates the core system by a tick
 		ParseFMOD_RESULT(_Core_System->update());
@@ -307,7 +316,7 @@ namespace idk
 
 	}
 
-	void AudioSystem::Set3DListenerAttributes(const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
+	void AudioSystem::Set3DListenerAttributes(const int& id, const vec3& pos, const vec3&vel,const vec3& forwardVec, const vec3& upVec)
 	{
 		//Zero denotes the listener id. Since there is only one listener, this is always zero.
 		FMOD_VECTOR fmodPos			{ pos.x,pos.y,pos.z };
@@ -316,7 +325,7 @@ namespace idk
 		FMOD_VECTOR fmodUpVec		{ upVec.x,upVec.y,upVec.z };
 
 		//NOTES: Forward is axisZ+, Up is axisY+
-		ParseFMOD_RESULT(_Core_System->set3DListenerAttributes(0, &fmodPos, &fmodVel, &fmodForwardVec, &fmodUpVec));
+		ParseFMOD_RESULT(_Core_System->set3DListenerAttributes(id, &fmodPos, &fmodVel, &fmodForwardVec, &fmodUpVec));
 	}
 
 	void AudioSystem::Shutdown()
@@ -399,11 +408,6 @@ namespace idk
 			//Do nothing if out of bounds
 			return;
 		}
-	}
-
-	void AudioSystem::SetMainAudioListener(Handle<AudioListener> listenerComponent)
-	{
-		_mainListener = listenerComponent;
 	}
 
 	float AudioSystem::GetCPUPercentUsage()
