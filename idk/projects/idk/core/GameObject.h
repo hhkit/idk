@@ -68,7 +68,7 @@ namespace idk
 	private:
 		struct component_range
 		{
-			char begin{}, count{};
+			unsigned char begin{}, count{};
 		};
 
 		vector<GenericHandle> _components;
