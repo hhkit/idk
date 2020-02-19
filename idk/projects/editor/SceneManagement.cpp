@@ -103,6 +103,7 @@ namespace idk
 
 			Core::GetResourceManager().Rename(curr_scene, p);
 			Core::GetResourceManager().Save(curr_scene);
+			curr_scene->Activate();
 			Core::GetSystem<ProjectManager>().SaveProject();
 		}
 	}
