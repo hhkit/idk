@@ -852,28 +852,7 @@ namespace idk
             }
         }
 
-        { // reassign all same type components from n, so that new component is slotted into the correct index
-            auto n = nth;
-            auto comps = target->GetComponents();
-            int i = 0;
-            for (auto h : comps)
-            {
-                if ((*h).type == data.components[component_index].type)
-                {
-                    if (n == 0)
-                    {
-                        if (i == 0)
-                            comp = h;
-                        *h = data.components[component_index + i];
-                        ++i;
-                    }
-                    else
-                    {
-                        --n;
-                    }
-                }
-            }
-        }
+        target->SetComponentIndex(comp, nth);
 
         for (const auto& ov : prefab_inst->overrides)
         {

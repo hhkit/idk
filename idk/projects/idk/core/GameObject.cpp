@@ -27,23 +27,23 @@ namespace idk
 	}
 	bool GameObject::SetComponentIndex(GenericHandle component_handle, unsigned pos)
 	{
-		auto& range = _component_ranges[component_handle.type];
-		if (range.count <= pos) // out of range
+		auto& range = _component_ranges[component_handle.type - 1];
+		if (static_cast<unsigned>(range.count) <= pos) // out of range
 			return false;
 
 		// find the handle
 		auto curr = 0U;
-		for (; curr != range.count; ++curr)
+		for (; curr != static_cast<unsigned>(range.count); ++curr)
 			if (_components[range.begin + curr] == component_handle)
 				break;
 
-		if (curr == range.count) // could not find handle
+		if (curr == static_cast<unsigned>(range.count)) // could not find handle
 			return false;
 
 		// if less than, we swap forward
 		if (curr < pos)
 		{
-			while (curr + 1 != pos)
+			while (curr != pos)
 			{
 				std::swap(_components[range.begin + curr], _components[range.begin + pos]);
 				++curr;
@@ -52,7 +52,7 @@ namespace idk
 		else // swap backward
 		if (curr > pos)
 		{
-			while (curr - 1 != pos)
+			while (curr != pos)
 			{
 				std::swap(_components[range.begin + curr], _components[range.begin + pos]);
 				--curr;
