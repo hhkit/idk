@@ -43,7 +43,7 @@ namespace idk
 		// if less than, we swap forward
 		if (curr < pos)
 		{
-			while (curr + 1 != pos)
+			while (curr != pos)
 			{
 				std::swap(_components[range.begin + curr], _components[range.begin + pos]);
 				++curr;
@@ -52,7 +52,7 @@ namespace idk
 		else // swap backward
 		if (curr > pos)
 		{
-			while (curr - 1 != pos)
+			while (curr != pos)
 			{
 				std::swap(_components[range.begin + curr], _components[range.begin + pos]);
 				--curr;
