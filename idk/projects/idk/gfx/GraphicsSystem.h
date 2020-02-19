@@ -52,6 +52,8 @@ namespace idk
 		{
 			size_t light_index;
 			size_t light_map_index;
+			vector<size_t> d_light_map_indexes{};
+			bool noDuplicate = true;
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};
@@ -178,6 +180,8 @@ namespace idk
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
+
 			alignas(machine::cache_line_sz) std::pair<size_t,size_t>   skinned_inst_range;
 
 			alignas(machine::cache_line_sz) ShadowMapPool d_lightpool;

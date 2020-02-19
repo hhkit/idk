@@ -1057,6 +1057,7 @@ namespace idk
 			LightRenderRange range{ i++ };
 			// TODO: Cull cascaded directional light
 			size_t lm_i = 0;
+			bool isFirst = true;
 			for (auto& lightmap : light.light_maps)
 			{
 				range.light_map_index = lm_i;
@@ -1069,6 +1070,12 @@ namespace idk
 					{
 						if (light.index == 1)
 						{
+							if (isFirst)
+							{
+								range.noDuplicate = false;
+								isFirst = false;
+							}
+							range.d_light_map_indexes.emplace_back(lm_i);
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
 							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
 							draw_frustum(frust, color{ ((float)++derp)/result.camera.size(),0,(lm_i+1.0f)/light.light_maps.size(),1 }, {});
@@ -1173,11 +1180,9 @@ namespace idk
 		///////////////////////Load vertex shaders
 		//renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/debug.vert");
 		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
-		renderer_vertex_shaders[VNormalMeshShadow] = LoadShader("/engine_data/shaders/shadow_mesh.vert");
 		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
 		renderer_vertex_shaders[VSkinnedMesh] = LoadShader("/engine_data/shaders/skinned_mesh.vert");
-		renderer_vertex_shaders[VSkinnedMeshShadow] = LoadShader("/engine_data/shaders/shadow_skinned_mesh.vert");
 		renderer_vertex_shaders[VSkinnedMeshPicker] = LoadShader("/engine_data/shaders/skinned_mesh_picking.vert");
 		renderer_vertex_shaders[VSkyBox] = LoadShader("/engine_data/shaders/skybox.vert");
 		renderer_vertex_shaders[VPBRConvolute] = LoadShader("/engine_data/shaders/pbr_convolute.vert");
@@ -1202,8 +1207,8 @@ namespace idk
 
 		////////////////////Load geometry Shaders
 		renderer_geometry_shaders[GSinglePassCube] = LoadShader("/engine_data/shaders/single_pass_cube.geom");
-		renderer_geometry_shaders[GShadowCNM] = LoadShader("/engine_data/shaders/shadow_mesh.geom");
-		renderer_geometry_shaders[GShadowCSM] = LoadShader("/engine_data/shaders/shadow_skelemesh.geom");
+
+
 	}
 
 	void GraphicsSystem::MaterialInstToUniforms(const MaterialInstance& , hash_table<string, string>& , hash_table<string, RscHandle<Texture>>& )
