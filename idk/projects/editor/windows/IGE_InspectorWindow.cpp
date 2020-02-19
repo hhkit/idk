@@ -836,14 +836,6 @@ namespace idk {
                         return Handle<GameObject>();
                 });
                 editor.ExecuteCommand<CMD_DeleteComponent>(go, i);
-
-                if (_prefab_inst && !_curr_component_is_added)
-                {
-                    auto old = _prefab_inst->removed_components;
-                    PrefabUtility::RecordPrefabInstanceRemoveComponent(go, (*i).type.name(), _curr_component_nth);
-                    editor.ExecuteCommand<CMD_ModifyProperty>(_prefab_inst, "removed_components", old, _prefab_inst->removed_components);
-                    editor.ExecuteCommand<CMD_CollateCommands>(2);
-                }
 			}
 			else 
             {
@@ -1183,8 +1175,6 @@ namespace idk {
                             {
                                 Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
                                     c, display.curr_prop_path, resolve_property_path(*c, display.curr_prop_path), new_value);
-                                if (obj->HasComponent<PrefabInstance>())
-                                    PrefabUtility::RecordPrefabInstanceChange(obj, c, display.curr_prop_path, new_value);
                                 ++execute_counter;
                                 break;
                             }
@@ -1197,12 +1187,14 @@ namespace idk {
                         Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(++execute_counter);
                 }
                 else // displaying prefab game object
-                    Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(new_value, original_value);
+                {
+                    Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(_curr_component, display.curr_prop_path, original_value, new_value);
+                }
                 original_value.swap(reflect::dynamic());
             }
 
             outer_changed |= changed;
-            display.GroupEnd(changed, val);
+            display.GroupEnd();
 
             indent_stack.push_back(indent);
             if (indent)
@@ -1283,7 +1275,7 @@ namespace idk {
         ImGui::BeginGroup();
     }
 
-    void IGE_InspectorWindow::DisplayStack::GroupEnd(bool changed, reflect::dynamic val)
+    void IGE_InspectorWindow::DisplayStack::GroupEnd()
     {
         ImGui::EndGroup();
 
@@ -1300,11 +1292,6 @@ namespace idk {
                 PrefabUtility::RevertPropertyOverride(self._prefab_inst->GetGameObject(), ov);
             }
             ImGui::EndPopup();
-        }
-
-        if (changed && self._prefab_inst)
-        {
-            PrefabUtility::RecordPrefabInstanceChange(self._prefab_inst->GetGameObject(), self._curr_component, curr_prop_path, val);
         }
 
         if (has_override)

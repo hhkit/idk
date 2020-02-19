@@ -48,7 +48,7 @@ namespace idk {
             void Label(const char* key);
             void ItemBegin(bool align = false);
             void ItemEnd();
-            void GroupEnd(bool changed, reflect::dynamic val = {});
+            void GroupEnd();
         };
 
 

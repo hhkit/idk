@@ -1,5 +1,3 @@
-
-
 #include "pch.h"
 #include "IGE_InspectorWindow.h"
 
@@ -48,10 +46,10 @@
 #include <gfx/GraphicsSystem.h>
 #include <ds/span.inl>
 #include <ds/result.inl>
+
 namespace idk
 {
 
-    
     void IGE_InspectorWindow::DisplayComponentInner(Handle<Transform> c_transform)
     {
         ImVec2 cursorPos = ImGui::GetCursorPos();
@@ -332,15 +330,15 @@ namespace idk
 
         _curr_property_stack.push_back("anchor_min"); display.GroupBegin(); display.Label("Anchor Min"); display.ItemBegin(true);
         changed = ImGuidk::DragVec2("##anchor_min", &c_rt->anchor_min);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
 
         _curr_property_stack.push_back("anchor_max"); display.GroupBegin(); display.Label("Anchor Max"); display.ItemBegin(true);
         changed = ImGuidk::DragVec2("##anchor_max", &c_rt->anchor_max);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
 
         _curr_property_stack.push_back("pivot"); display.GroupBegin(); display.Label("Pivot"); display.ItemBegin(true);
         changed = ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
 
 
 
@@ -358,7 +356,7 @@ namespace idk
         _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
         display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
         changed = ImGui::DragFloat("##pos_z", &c.position.z);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back(); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back(); _curr_property_stack.pop_back();
 
         changed = false;
         _curr_property_stack.push_back("rotation");
@@ -369,7 +367,7 @@ namespace idk
             for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
                 i->GetComponent<Transform>()->rotation = c.rotation;
         }
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
 
         changed = false;
         _curr_property_stack.push_back("scale");
@@ -380,7 +378,7 @@ namespace idk
             for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
                 i->GetComponent<Transform>()->rotation = c.rotation;
         }
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
     }
 
     void IGE_InspectorWindow::DisplayComponentInner(Handle<RigidBody> c_rb)
@@ -428,7 +426,7 @@ namespace idk
             }
             ImGui::Unindent();
         }
-        display.GroupEnd(false);
+        display.GroupEnd();
         _curr_property_stack.pop_back();
 
         static char buf[50];
@@ -536,7 +534,7 @@ namespace idk
         }
         ImGui::Unindent();
         // ImGui::Separator(false);
-        display.GroupEnd(params_changed);
+        display.GroupEnd();
         _curr_property_stack.pop_back();
 
         ImGui::NewLine();
