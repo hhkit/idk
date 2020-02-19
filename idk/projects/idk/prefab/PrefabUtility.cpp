@@ -753,6 +753,24 @@ namespace idk
         prefab_inst->overrides[ov_i].value.swap(val.copy());
     }
 
+    void PrefabUtility::RecordPrefabInstanceChangeForced(
+        Handle<GameObject> target, string_view component_name, int component_nth, string_view property_path, reflect::dynamic val)
+    {
+        auto prefab_inst = target->GetComponent<PrefabInstance>();
+        IDK_ASSERT(prefab_inst);
+
+        component_nth = helpers::instance_component_nth_to_prefab_data_component_nth(target, component_name, component_nth);
+
+        int ov_i = helpers::find_override(*prefab_inst, component_name, property_path, component_nth);
+        if (ov_i == -1) // override not found
+        {
+            ov_i = static_cast<int>(prefab_inst->overrides.size());
+            prefab_inst->overrides.push_back({ string(component_name), string(property_path), component_nth });
+        }
+
+        prefab_inst->overrides[ov_i].value.swap(val.copy());
+    }
+
     bool PrefabUtility::RecordPrefabInstanceRemoveComponent(Handle<GameObject> target, string_view component_name, int component_nth)
     {
         auto prefab_inst = target->GetComponent<PrefabInstance>();

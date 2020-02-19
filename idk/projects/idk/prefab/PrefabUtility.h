@@ -49,6 +49,8 @@ namespace idk
         //   component:     handle to the component
         //   property_path: path of the property changed, delimited by '/'. eg. "position", or "position/x"
         static void RecordPrefabInstanceChange(Handle<GameObject> target, GenericHandle component, string_view property_path, reflect::dynamic val = {});
+        static void RecordPrefabInstanceChangeForced(
+            Handle<GameObject> target, string_view component_name, int component_nth, string_view property_path, reflect::dynamic val);
         static bool RecordPrefabInstanceRemoveComponent(Handle<GameObject> target, string_view component_name, int component_nth);
         static void RecordDefaultOverrides(Handle<GameObject> target);
 

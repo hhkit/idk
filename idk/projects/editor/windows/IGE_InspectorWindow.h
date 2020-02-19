@@ -62,6 +62,8 @@ namespace idk {
         // spawn prefab instances in prefab scene so prefab assets can be displayed.
         hash_table<RscHandle<Prefab>, Handle<GameObject>> _prefab_store;
 
+        vector<reflect::dynamic> _original_values;
+
         reflect::dynamic _copied_component;
 
         ImGuiTextFilter component_textFilter{};
@@ -106,6 +108,8 @@ namespace idk {
 
         template<typename Command,typename ...Args>
         void ExecuteOnSelected(Args&&...);
+        void StoreOriginalValues(string_view property_path);
+        void ExecuteModify(string_view property_path, reflect::dynamic new_value);
 	};
 
 
