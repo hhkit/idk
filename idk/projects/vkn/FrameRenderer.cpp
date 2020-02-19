@@ -900,7 +900,7 @@ namespace idk::vkn
 
 			for (auto& elem : light.light_maps)
 			{
-				auto& rs = r[curr_state];
+				//auto& rs = r[curr_state];
 				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
 				the_interface.GenerateDS(rs.dpools,false);
 

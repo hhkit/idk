@@ -138,6 +138,13 @@ namespace idk::vkn
 		proj_trf = cam.projection_matrix;
 		skeletons = &skel;
 	}
+
+	void ShadowVertexBindings::SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel)
+	{
+		view_trf = cam.view_matrix;
+		proj_trf.emplace_back(cam.projection_matrix);
+		skeletons = &skel;
+	}
 #pragma optimize("",off)
 	void ShadowVertexBindings::Bind(PipelineThingy& the_interface)
 	{
@@ -537,6 +544,11 @@ namespace idk::vkn
 	}
 
 	void ShadowFilter::SetState(const ShadowCameraData& cam, const vector<SkeletonTransforms>& )
+	{
+		filter = cam.culling_flags;
+	}
+
+	void ShadowFilter::SetState(const CameraData& cam, const vector<SkeletonTransforms>&)
 	{
 		filter = cam.culling_flags;
 	}

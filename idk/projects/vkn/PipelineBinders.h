@@ -85,6 +85,7 @@ namespace idk
 			vector<mat4> proj_trf{};
 			void SetState(const GraphicsState& vstate);
 			void SetState(const ShadowCameraData& camera, const vector<SkeletonTransforms>& skel);
+			void SetState(const CameraData& camera, const vector<SkeletonTransforms>& skel);
 
 			void Bind(PipelineThingy& the_interface)override;
 			void Bind(PipelineThingy& the_interface, const RenderObject& dc)override;
@@ -215,6 +216,8 @@ namespace idk
 			LayerMask filter;
 			bool Skip(PipelineThingy& the_interface, const  RenderObject& dc) override;
 			void SetState(const ShadowCameraData& cam, const vector<SkeletonTransforms>& skel);
+			void SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel);
+
 		};
 		using UnlitMaterialBinding = CombinedBindings<UnlitFilter,StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 		using ShadowBinding = CombinedBindings<ShadowFilter, ShadowVertexBindings>;
