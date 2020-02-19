@@ -514,15 +514,90 @@ namespace idk {
     {
         IDE& editor = Core::GetSystem<IDE>();
         int execute_counter = 0;
-        for (auto go : editor.GetSelectedObjects().game_objects)
+
+        if (editor.GetSelectedObjects().game_objects.size())
         {
-            if (!go)
-                continue;
-            editor.ExecuteCommand<Command>(SelectGO(go, std::forward<Args>(args))...);
+            for (auto go : editor.GetSelectedObjects().game_objects)
+            {
+                if (!go)
+                    continue;
+                editor.ExecuteCommand<Command>(SelectGO(go, std::forward<Args>(args))...);
+                ++execute_counter;
+            }
+        }
+        else
+        {
+            editor.ExecuteCommand<Command>(std::forward<Args>(args)...);
             ++execute_counter;
         }
-        editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
+
+        if (execute_counter > 1)
+            editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
     }
+    void IGE_InspectorWindow::StoreOriginalValues(string_view property_path)
+    {
+        _original_values.clear();
+        for (auto obj : Core::GetSystem<IDE>().GetSelectedObjects().game_objects)
+        {
+            auto components = obj->GetComponents();
+            auto nth = _curr_component_nth;
+            for (auto c : components)
+            {
+                if (c.type == _curr_component.type && nth-- == 0)
+                {
+                    _original_values.push_back(resolve_property_path(*c, property_path).copy());
+                    break;
+                }
+            }
+            if (nth >= 0) // component not found
+                _original_values.emplace_back();
+        }
+    }
+
+    void IGE_InspectorWindow::ExecuteModify(string_view property_path, reflect::dynamic new_value)
+    {
+        if (_original_values.empty()) // no change
+            return;
+
+        if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
+        {
+            int execute_counter = 0;
+            const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
+
+            // execute for similar components, i == 0 is the current displaying component
+            for (size_t i = 1; i < sel_obj.size(); ++i)
+            {
+                auto obj = sel_obj[i];
+
+                auto components = obj->GetComponents();
+                auto nth = _curr_component_nth;
+                for (auto c : components)
+                {
+                    if (c.type == _curr_component.type && nth-- == 0)
+                    {
+                        Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
+                            c, property_path, _original_values[i], new_value);
+                        ++execute_counter;
+                        break;
+                    }
+                }
+            }
+
+            Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
+                _curr_component, property_path, _original_values[0], new_value);
+            ++execute_counter;
+            if (execute_counter > 1)
+                Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
+        }
+        else // displaying prefab game object
+        {
+            Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(_curr_component, property_path, _original_values[0], new_value);
+        }
+
+        _original_values.clear();
+    }
+
+
 
 	void IGE_InspectorWindow::DisplayGameObjectHeader(Handle<GameObject> game_object)
 	{
@@ -1262,68 +1337,6 @@ namespace idk {
         return outer_changed;
     }
 
-    void IGE_InspectorWindow::StoreOriginalValues(string_view property_path)
-    {
-        _original_values.clear();
-        for (auto obj : Core::GetSystem<IDE>().GetSelectedObjects().game_objects)
-        {
-            auto components = obj->GetComponents();
-            auto nth = _curr_component_nth;
-            for (auto c : components)
-            {
-                if (c.type == _curr_component.type && nth-- == 0)
-                {
-                    _original_values.push_back(resolve_property_path(*c, property_path).copy());
-                    break;
-                }
-            }
-            if (nth >= 0) // component not found
-                _original_values.emplace_back();
-        }
-    }
-
-    void IGE_InspectorWindow::ExecuteModify(string_view property_path, reflect::dynamic new_value)
-    {
-        if (_original_values.empty()) // no change
-            return;
-
-        if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
-        {
-            int execute_counter = 0;
-            const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
-
-            // execute for similar components, i == 0 is the current displaying component
-            for (size_t i = 1; i < sel_obj.size(); ++i)
-            {
-                auto obj = sel_obj[i];
-
-                auto components = obj->GetComponents();
-                auto nth = _curr_component_nth;
-                for (auto c : components)
-                {
-                    if (c.type == _curr_component.type && nth-- == 0)
-                    {
-                        Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
-                            c, property_path, _original_values[i], new_value);
-                        ++execute_counter;
-                        break;
-                    }
-                }
-            }
-
-            Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(
-                _curr_component, property_path, _original_values[0], new_value);
-            ++execute_counter;
-            if (execute_counter > 1)
-                Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
-        }
-        else // displaying prefab game object
-        {
-            Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(_curr_component, property_path, _original_values[0], new_value);
-        }
-
-        _original_values.clear();
-    }
 
 
     void IGE_InspectorWindow::DisplayStack::ItemBegin(bool align)
