@@ -25,6 +25,43 @@ namespace idk
 	{
 		return GameState::GetGameState().CreateComponent(GetHandle(), component_handle, dyn);
 	}
+	bool GameObject::SetComponentIndex(GenericHandle component_handle, unsigned pos)
+	{
+		auto& range = _component_ranges[component_handle.type];
+		if (range.count <= pos) // out of range
+			return false;
+
+		// find the handle
+		auto curr = 0U;
+		for (; curr != range.count; ++curr)
+			if (_components[range.begin + curr] == component_handle)
+				break;
+
+		if (curr == range.count) // could not find handle
+			return false;
+
+		// if less than, we swap forward
+		if (curr < pos)
+		{
+			while (curr + 1 != pos)
+			{
+				std::swap(_components[range.begin + curr], _components[range.begin + pos]);
+				++curr;
+			}
+		}
+		else // swap backward
+		if (curr > pos)
+		{
+			while (curr - 1 != pos)
+			{
+				std::swap(_components[range.begin + curr], _components[range.begin + pos]);
+				--curr;
+			}
+		}
+
+		return true;
+	}
+
 	GenericHandle GameObject::GetComponent(reflect::type type)
 	{
 		const auto tid = GameState::GetGameState().GetTypeID(type);
