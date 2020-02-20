@@ -30,6 +30,7 @@ of the editor.
 #include <IDE.h>		//IDE
 #include <iostream>
 #include <res/ResourceHandle.inl>
+#include <scene/SceneGraph.inl>
 
 namespace idk {
 
@@ -54,6 +55,7 @@ namespace idk {
 
 
 		ImGuiStyle& style = ImGui::GetStyle();
+		auto& editor = Core::GetSystem<IDE>();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBgActive]);
 
@@ -74,8 +76,6 @@ namespace idk {
 		}
 		if (ImGui::BeginPopup("CreatePopup")) 
 		{
-            IDE& editor = Core::GetSystem<IDE>();
-
 			if (ImGui::MenuItem("Create Empty", "CTRL+SHIFT+N"))
 			{
 				editor.CreateGameObject();
@@ -146,7 +146,7 @@ namespace idk {
 
 		//Hierarchy Display
 		SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-		SceneManager::SceneGraph& sceneGraph = sceneManager.FetchSceneGraph();
+		auto sceneGraph = sceneManager.FetchSceneGraph();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f,0.0f });
 		//ImGui::Checkbox("Show Editor Objs", &show_editor_objects);
 		
@@ -155,7 +155,7 @@ namespace idk {
 
 		Handle<GameObject> scroll_focus_next_frame;
 		bool shift_selecting = false;
-		ObjectSelection selection = Core::GetSystem<IDE>().GetSelectedObjects();
+		ObjectSelection selection = editor.GetSelectedObjects();
 		vector<Handle<GameObject>>& selected_gameObjects = selection.game_objects;
 
 		if (shift_select_anchors[0] && shift_select_anchors[1])
@@ -164,7 +164,7 @@ namespace idk {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
 
 		//Display gameobjects
-		sceneGraph.visit([&](const Handle<GameObject> handle, int depth) -> bool 
+		sceneGraph.Visit([&](const Handle<GameObject> handle, int depth) -> bool 
 		{
 			if (depth > 0) {
 				for (int i = 0; i < depth; ++i)
@@ -183,8 +183,8 @@ namespace idk {
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-			SceneManager::SceneGraph* children = sceneManager.FetchSceneGraphFor(handle);
-			if (children->size() == 0)
+			auto children = sceneManager.FetchSceneGraphFor(handle);
+			if (children.GetNumChildren() == 0)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
 
 			bool is_its_child_been_selected = false;
@@ -263,7 +263,7 @@ namespace idk {
 					if (handle == shift_select_anchors[0] || handle == shift_select_anchors[1])
 					{
 						shift_selecting = false;
-						Core::GetSystem<IDE>().SetSelection(selection);
+						editor.SetSelection(selection);
 						shift_select_anchors[1] = {}; // keep the start anchor which is [0]
 					}
 				}
@@ -286,10 +286,10 @@ namespace idk {
 
 					if (hasBeenSelected) {
 						selected_gameObjects.erase(selected_gameObjects.begin() + counter);
-						Core::GetSystem<IDE>().SetSelection(selection);
+						editor.SetSelection(selection);
 					}
 					else {
-						Core::GetSystem<IDE>().SelectGameObject(handle, true);
+						editor.SelectGameObject(handle, true);
 					}
 
 					shift_select_anchors[0] = handle;
@@ -301,14 +301,14 @@ namespace idk {
 				}
 				else
 				{
-					Core::GetSystem<IDE>().SelectGameObject(handle);
+					editor.SelectGameObject(handle);
 					shift_select_anchors[0] = handle;
 				}
 			}
 
 			if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered())
 			{
-				Core::GetSystem<IDE>().FocusOnSelectedGameObjects();
+				editor.FocusOnSelectedGameObjects();
 			}
 
 			//If the drag drops target on to the handle...
@@ -343,13 +343,13 @@ namespace idk {
 
 							//If im draging to my parent, unparent
 							if (i->Parent() == handle)
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, Handle<GameObject>{});
 							else //Else parent normally
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, handle);
 							++execute_counter;
 						}
 
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+						editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 					}
 					else
 					{
@@ -366,11 +366,11 @@ namespace idk {
 						if (!isParentingToChild)
 						{
 							if (i->Parent() == handle)
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, Handle<GameObject>{}));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, Handle<GameObject>{});
 							else //Else parent normally
-								Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, i, handle));
-							Core::GetSystem<IDE>().SelectGameObject(i, false, true);
-							Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+								editor.ExecuteCommand<CMD_ParentGameObject>(i, handle);
+							editor.SelectGameObject(i, false, true);
+							editor.ExecuteCommand<CMD_CollateCommands>(2);
 						}
 					}
 
@@ -416,7 +416,7 @@ namespace idk {
 
 		if (ImGui::InvisibleButton("empty_space", ImGui::GetContentRegionAvail()))
 		{
-			Core::GetSystem<IDE>().Unselect();
+			editor.Unselect();
 		}
 		if (ImGui::BeginDragDropTarget()) // drag onto empty space unparents gameobjects
 		{
@@ -433,19 +433,22 @@ namespace idk {
 					{
 						if (!h)
 							continue;
-						Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, h, Handle<GameObject>{}));
+						editor.ExecuteCommand<CMD_ParentGameObject>(h, Handle<GameObject>{});
 						++execute_counter;
 					}
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, execute_counter));
+					editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
 				}
 				else
 				{
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_ParentGameObject, drop_payload, Handle<GameObject>{}));
-					Core::GetSystem<IDE>().SelectGameObject(drop_payload, false, true);
-					Core::GetSystem<IDE>().command_controller.ExecuteCommand(COMMAND(CMD_CollateCommands, 2));
+					editor.ExecuteCommand<CMD_ParentGameObject>(drop_payload, Handle<GameObject>{});
+					editor.SelectGameObject(drop_payload, false, true);
+					editor.ExecuteCommand<CMD_CollateCommands>(2);
 				}
 			}
 		}
+
+		if (ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+			editor.DeleteSelectedGameObjects();
 	}
 
 	void IGE_HierarchyWindow::ScrollToSelectedInHierarchy(Handle<GameObject> gameObject)
@@ -454,21 +457,21 @@ namespace idk {
 		scroll_focused_gameObject = gameObject;
 	}
 
-	bool IGE_HierarchyWindow::CheckIfChildrenIsSelected(SceneManager::SceneGraph* childrenGraph, Handle<GameObject> comparingGameObject)
+	bool IGE_HierarchyWindow::CheckIfChildrenIsSelected(SceneGraphHandle childrenGraph, Handle<GameObject> comparingGameObject)
 	{
 		if (!childrenGraph)
 			return false;
-		if (childrenGraph->size() == 0)
+		if (childrenGraph.GetNumChildren() == 0)
 			return false;
 
 		bool is_child_selected = false;
-		for (auto j = childrenGraph->begin(); j != childrenGraph->end(); ++j) {
-			if ((*j).obj == comparingGameObject) {
+		for (auto j = childrenGraph.begin(); j != childrenGraph.end(); ++j) {
+			if (*j == comparingGameObject) {
 				is_child_selected = true;
 			}
 			else {
 				SceneManager& sceneManager = Core::GetSystem<SceneManager>();
-				is_child_selected = CheckIfChildrenIsSelected(sceneManager.FetchSceneGraphFor((*j).obj), comparingGameObject);
+				is_child_selected = CheckIfChildrenIsSelected(sceneManager.FetchSceneGraphFor(*j), comparingGameObject);
 			}
 
 			if (is_child_selected)

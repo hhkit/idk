@@ -12,6 +12,7 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <math/angle.inl>
+#include <math/matrix_transforms.inl>
 
 namespace idk::vkn
 {
@@ -324,6 +325,53 @@ namespace idk::vkn
 		mesh_modder.SetIndexBuffer16(mesh, index_buffer, s_cast<uint32_t>(indices.size()));
 	}
 
+	void SetMesh(
+		VulkanMesh& mesh,
+		MeshModder& mesh_modder,
+		const vector<uint16_t>& indices,
+		const vector<vec3>& pos_buffer)
+	{
+		hash_table<attrib_index, std::pair<std::shared_ptr<MeshBuffer::Managed>, offset_t>> attribs;
+		{
+			auto& buffer = pos_buffer;
+			//Use CreateData to create the buffer, then store the result with the offset.
+			//Since it's a shared ptr, you may share the result of CreateData with multiple attrib buffers
+			attribs[attrib_index::Position] = std::make_pair(mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) }), offset_t{ 0 });
+		}
+		auto& buffer = indices;
+		auto index_buffer = mesh_modder.CreateBuffer(string_view{ r_cast<const char*>(std::data(buffer)),hlp::buffer_size(buffer) });
+
+		mesh_modder.RegisterAttribs(mesh, attribs);
+		mesh_modder.SetIndexBuffer16(mesh, index_buffer, s_cast<uint32_t>(indices.size()));
+	}
+
+	void AddCircle(vector<vec3>& pos, vector<uint16_t>& indices, const vec3& normal, int iters = 20)
+	{
+		const auto delta = (2.0f * static_cast<float>(pi)) / iters;
+
+		// Rotation matrix. This is so we only do 1 sine and cosine operation.
+		const auto mat = rotate(normal, rad(delta));
+
+		vec3 perp = normal.cross(vec3{ 0,1,0 });
+		if (abs(perp.dot(perp)) <= FLT_EPSILON)
+		{
+			perp = normal.cross(vec3{ 1,0,0 });
+		}
+		perp = perp.normalize();
+
+		auto start = perp;
+		for (int i = 0; i < iters; ++i)
+		{
+			perp = mat * vec4{ perp, 0 };
+			const auto end = perp;
+			pos.emplace_back(start);
+			pos.emplace_back(perp);
+
+			indices.emplace_back(pos.size() - 2);
+			indices.emplace_back(pos.size() - 1);
+			start = end;
+		}
+	}
 	void CreateSphere(VulkanMesh& sphere_mesh,MeshModder& mesh_modder)
 	{
 
@@ -403,10 +451,10 @@ namespace idk::vkn
 			//real angle = (2.f * pi) / numberOfTri;
 
 			std::vector<Vertex> vertices{
-				Vertex{ vec3{  sz, sz, 0}, vec3{0, 1,0}, vec2{0, 0} },  // front
-				Vertex{ vec3{  sz,-sz, 0}, vec3{0, 1,0}, vec2{0, 1} },  // front
-				Vertex{ vec3{-sz, -sz, 0},  vec3{0, 1,0}, vec2{1, 1} },  // front
-				Vertex{ vec3{-sz,  sz, 0},  vec3{0, 1,0}, vec2{1, 0} },  // front
+				Vertex{ vec3{  sz, sz, 0}, vec3{0, 1,0}, vec2{1, 0} },  // front
+				Vertex{ vec3{  sz,-sz, 0}, vec3{0, 1,0}, vec2{1, 1} },  // front
+				Vertex{ vec3{-sz, -sz, 0},  vec3{0, 1,0}, vec2{0, 1} },  // front
+				Vertex{ vec3{-sz,  sz, 0},  vec3{0, 1,0}, vec2{0, 0} },  // front
 			};
 
 			std::vector<uint16_t> indices{
@@ -450,6 +498,94 @@ namespace idk::vkn
 		return std::make_pair(std::move(vertices),std::move(indices));
 
 	}
+	auto GenerateDebugCubeBuffers()
+	{
+		constexpr float sz = 0.5f;
+		std::vector<vec3> vertices
+		{
+			// right quad
+			vec3{ sz, sz, sz},
+			vec3{ sz, -sz, sz},
+			vec3{ sz, -sz, -sz},
+			vec3{ sz, sz, -sz},
+
+			// left quad
+			vec3{ -sz, sz, sz},
+			vec3{ -sz, -sz, sz},
+			vec3{ -sz, -sz, -sz},
+			vec3{ -sz, sz, -sz},
+		};
+		std::vector<uint16_t> indices
+		{
+			// right quad
+			0,1,
+			1,2,
+			2,3,
+			3,0,
+
+			// left quad
+			4,5,
+			5,6,
+			6,7,
+			7,4,
+
+			// quad connections
+			0,4,
+			1,5,
+			2,6,
+			3,7
+		};
+		return std::make_pair(std::move(vertices), std::move(indices));
+	}
+	auto GenerateDebugSphereBuffers()
+	{
+		std::vector<vec3> vertices;
+		std::vector<uint16_t> indices;
+		AddCircle(vertices, indices, vec3{ 1, 0, 0 });
+		AddCircle(vertices, indices, vec3{ 0, 1, 0 });
+		AddCircle(vertices, indices, vec3{ 0, 0, 1 });
+		return std::make_pair(std::move(vertices), std::move(indices));
+
+	}
+	auto GenerateArrowBuffers()
+	{
+		constexpr float radius = 0.05f;
+		std::vector<vec3> pos;
+		std::vector<uint16_t> indices;
+		const auto delta = (2.0f * static_cast<float>(pi)) / 6;
+
+		// Rotation matrix. This is so we only do 1 sine and cosine operation.
+		const vec3 normal = vec3{ 0,0,0.2f };
+		const auto mat = rotate(normal, rad(delta));
+
+		auto perp = vec3{ 0,1,0 } * radius;
+
+		auto start = perp;
+		pos.emplace_back(normal);
+		pos.emplace_back(vec3{0,0,0});
+		indices.emplace_back(0);
+		indices.emplace_back(1); // base to tip
+		for (int i = 0; i < 6; ++i)
+		{
+			perp = mat * vec4{ perp, 0 };
+			const auto end = perp;
+			const auto start_index = pos.size();
+			pos.emplace_back(start);
+			pos.emplace_back(perp);
+
+			indices.emplace_back(pos.size() - 2);
+			indices.emplace_back(pos.size() - 1);
+
+			// For each point on the circle add a line segment to the point of the arrow and to origin
+			pos.emplace_back(start);
+
+			indices.emplace_back(start_index);
+			indices.emplace_back(0); // tip of the arrow
+
+			start = end;
+		}
+		return std::make_pair(std::move(pos), std::move(indices));
+	}
 	template<typename T>
 	void RotateBuffer(T& buffer, const size_t n)
 	{
@@ -468,7 +604,7 @@ namespace idk::vkn
 		//		std::swap(hold,buffer[i+j*n];
 		//}
 	}
-
+// #pragma optimize("", off)
 	void MeshFactory::GenerateDefaultMeshes()
 	{
 		const auto sphere_mesh = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(Mesh::defaults[MeshType::Sphere].guid);
@@ -665,6 +801,31 @@ namespace idk::vkn
 			auto& [interleaved_buffer, indices] = pair;
 			ConvertInterleaved(interleaved_buffer, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
 			SetMesh(*mesh_handle, mesh_modder, indices, pos_buffer, normal_buffer, tangent_buffer, uv_buffer);
+
+		}
+
+		const auto dbg_box_mesh = Mesh::defaults[MeshType::DbgBox];
+		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(dbg_box_mesh.guid);
+		auto dbg_pair = GenerateDebugCubeBuffers();
+		{
+			auto& [buffer, indices] = dbg_pair;
+			SetMesh(*mesh_handle, mesh_modder, indices, buffer);
+		}
+
+		const auto dbg_sphere_mesh = Mesh::defaults[MeshType::DbgSphere];
+		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(dbg_sphere_mesh.guid);
+		dbg_pair = GenerateDebugSphereBuffers();
+		{
+			auto& [buffer, indices] = dbg_pair;
+			SetMesh(*mesh_handle, mesh_modder, indices, buffer);
+		}
+
+		const auto dbg_arrow_mesh = Mesh::defaults[MeshType::DbgArrow];
+		mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(dbg_arrow_mesh.guid);
+		dbg_pair = GenerateArrowBuffers();
+		{
+			auto& [buffer, indices] = dbg_pair;
+			SetMesh(*mesh_handle, mesh_modder, indices, buffer);
 		}
 	}
 	vec3 compute_tangent(vec3 p0, vec3 p1, vec3 p2, vec2 uv0, vec2 uv1, vec2 uv2)

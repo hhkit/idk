@@ -2,6 +2,10 @@
 #include "Server.h"
 #include <event/Signal.inl>
 #include <script/ScriptSystem.h>
+#include <network/NetworkSystem.h>
+#include <core/Handle.inl>
+#include <script/MonoBehavior.h>
+#include <script/ManagedObj.inl>
 
 #undef SendMessage
 
@@ -33,10 +37,14 @@ namespace idk
 
 	void Server::ProcessMessages()
 	{
-		for (int i = 0; i < GameConfiguration::MAX_CLIENTS; i++) {
-			if (server.IsClientConnected(i)) {
-				for (int j = 0; j < config.numChannels; j++) {
-					while (auto message = server.ReceiveMessage(i, j)) {
+		for (int i = 0; i < GameConfiguration::MAX_CLIENTS; i++) 
+		{
+			if (server.IsClientConnected(i)) 
+			{
+				for (int j = 0; j < config.numChannels; j++) 
+				{
+					while (auto message = server.ReceiveMessage(i, j)) 
+					{
 						ProcessMessage(i, message);
 						server.ReleaseMessage(i, message);
 					}
@@ -73,19 +81,34 @@ namespace idk
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d connected", clientIndex);
 		OnClientConnect.Fire(clientIndex);
-		auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-		auto thunk = network->GetThunk("ExecClientConnect", 1);
-		if (thunk)
-			(*thunk).Invoke(clientIndex);
+		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+		{
+			mono::ManagedObject obj{"Player"};
+			obj.Assign("connectionId", clientIndex);
+			if (auto type = target->GetObject().Type())
+			{
+				if (auto thunk = type->GetThunk("OnConnectedToServer"))
+					thunk->Invoke(target->GetObject().Raw(), obj.Raw());
+			}
+		}
 	}
 
 	void Server::ClientDisconnected(int clientIndex)
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d disconnected", clientIndex);
-		OnClientDisconnect.Fire(clientIndex);;
-		auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-		auto thunk = network->GetThunk("ExecClientDisconnect", 1);
-		if (thunk)
-			(*thunk).Invoke(clientIndex);
+		OnClientDisconnect.Fire(clientIndex);
+		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+		{
+			auto type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+			auto obj  = mono_object_new(mono_domain_get(), type->Raw());
+			auto method = mono_class_get_method_from_name(type->Raw(), ".ctor", 1);
+			void* args[] = { &clientIndex, nullptr };
+			
+			if (auto type = target->GetObject().Type())
+			{
+				if (auto thunk = type->GetThunk("OnDisconnectedFromServer"))
+					thunk->Invoke(target->GetObject().Raw(), mono_runtime_invoke(method, obj, args, nullptr));
+			}
+		}
 	}
 }

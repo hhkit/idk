@@ -239,8 +239,8 @@ namespace idk::vkn::meta
 		return Get<static_cast<size_t>(n), Tuple>::value();
 	}
 
-		template<typename ...Args, typename T>
-		struct IndexOf< variant<Args...>, T>
+		template<typename ...Args,template <typename ...> typename V, typename T>
+		struct IndexOf< V<Args...>, T>
 		{
 			static constexpr uint32_t value = detail::MatchIndex<T, Args...>::value();
 		};
@@ -274,4 +274,6 @@ namespace idk::vkn::meta
 		};
 
 
+		template<typename V, typename T>
+		static inline constexpr auto IndexOf_v = IndexOf<V, T>::value;
 }

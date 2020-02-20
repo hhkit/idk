@@ -22,8 +22,7 @@
 
 #pragma once
 
-#include <editorstatic/imgui/imgui.h>
-//#include <imgui_stl.h>
+#include <imgui/imgui.h>
 #include <string>
 
 namespace idk {

@@ -1,6 +1,7 @@
 #include <editor/commands/ICommand.h>
 #include <core/GameObject.h>
 #include <reflect/reflect.h>
+#include <prefab/PrefabInstance.h>
 
 namespace idk {
 	class CMD_ModifyProperty
@@ -8,8 +9,8 @@ namespace idk {
     {
 	public:
 		CMD_ModifyProperty(GenericHandle component, string_view property_path, reflect::dynamic old_value, reflect::dynamic new_value);
-
 		CMD_ModifyProperty(reflect::dynamic object, reflect::dynamic old_value);
+
 		virtual bool execute() override;
 		virtual bool undo() override;
 
@@ -20,5 +21,6 @@ namespace idk {
         string property_path;
         reflect::dynamic old_value;
         reflect::dynamic new_value;
+		vector<PropertyOverride> overrides_old;
 	};
 }

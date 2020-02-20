@@ -9,21 +9,20 @@
 This window displays the editor window where you can select and modify gameobjects.
 */
 //////////////////////////////////////////////////////////////////////////////////
-
-
-
 #pragma once
+
 #include <editor/windows/IGE_IWindow.h>
 #include <imgui/imgui.h>
 #include <phys/PhysicsSystem.h>
 #include <gfx/ColorPickResult.h>
 
-namespace idk {
-
+namespace idk 
+{
 	struct PickState
 	{
 		bool is_multi_select = false;
 	};
+
 	class IGE_SceneView :
 		public IGE_IWindow
 	{
@@ -33,43 +32,35 @@ namespace idk {
 		virtual void BeginWindow() override;
 		virtual void Update() override;
 
-		void SetTexture(void* textureToRender); //Place the camera texture here. EG: SetTexture((void*)(intptr_t)myGluintTexture);
-
 		vec2 GetScreenSize(); //To get the size of the frame being drawn onto the window.
-
 		vec2 GetMousePosInWindow();
 		vec2 GetMousePosInWindowNormalized();
 
-
-		vec3 focused_vector{}; //Updated everytime FocusOnSelectedGameObjects is called. For orbiting
-		float distance_to_focused_vector;	//When WASD control is activated, this is used to move the focused_vector! Only used for WASD control
-
-
-	protected:
-
+		void SetOrbitPoint(vec3 pt);
 
 	private:
-
-		ImTextureID sceneTexture = nullptr;
         vec2 draw_rect_offset;
         vec2 draw_rect_size;
+
+		vec3 orbit_point;
+		float distance_to_orbit_point;	//When WASD control is activated, this is used to move the orbit_point! Only used for WASD control
 
 		bool is_controlling_WASDcam   = false;
 		bool is_controlling_Pancam	  = false;
 		bool is_controlling_ALTscroll = false;
 		bool is_controlling_ALTorbit  = false;
 
-		const float yaw_rotation_multiplier		= 0.1f; //When you hold right click and move mouse sideways
-		const float pitch_rotation_multiplier	= 0.05f; //When you hold right click and move mouse up/downwards
-		float cam_vel							= 1.f;
-		const float cam_vel_additive			= 0.5f;
-		const float min_cam_vel					= 0.1f;
-		const float cam_vel_shift_multiplier	= 4.f;
+		float cam_vel = 1.f;
 
+		static constexpr float yaw_rotation_multiplier		= 0.1f; //When you hold right click and move mouse sideways
+		static constexpr float pitch_rotation_multiplier	= 0.05f; //When you hold right click and move mouse up/downwards
+		static constexpr float cam_vel_additive				= 0.5f;
+		static constexpr float min_cam_vel					= 0.1f;
+		static constexpr float cam_vel_shift_multiplier		= 4.f;
+		static constexpr float orbit_strength				= 0.5f;
+		static constexpr float pan_multiplier				= 0.1f;
 
-		const float pan_multiplier				= 0.01f;
-
-		bool	display_grid						= false;
+		//bool	display_grid						= false;
 		//void	DrawGridControl();
 
 		float	translate_snap_val[3]				= {0.0f,0.0f,0.0f};
@@ -81,14 +72,16 @@ namespace idk {
 
 		std::optional<std::pair<ColorPickResult,PickState>> last_pick;
 
+		float gizmo_matrix[16]{};
+		vector<mat4> original_matrices;
+
+		bool is_being_modified = false;
+		ivec2 cachedMouseScreenPos{};
+		ivec2 prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+		ivec2 currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
+
 		void DrawSnapControl();
 		void DrawGlobalAxes();
-
-
-		std::pair<Handle<GameObject>, phys::raycast_result> GetClosestGameObjectFromCamera(vector<Handle<GameObject>>& refVector, vector<phys::raycast_result>& rayResult);
-		//Debug ray
-		ray currRay;
-
 
 		void UpdateWASDMouseControl();
 		void UpdatePanMouseControl(); //MiddleMouse
@@ -98,22 +91,13 @@ namespace idk {
 		
 		void UpdateGizmoControl();
 
-		void MoveMouseToWindow(); //Moves the mouse to the middle of the sceneView
+		void CenterMouseInWindow();
 
 		void ImGuizmoManipulateUpdate(Handle<Transform>& originalTransform); //Call after ImGuizmo::Manipulate
-
-
-		float gizmo_matrix[16]{};
-		vector<mat4> original_matrices;
-
 		mat4 GenerateMat4FromGizmoMatrix();
 
-		bool is_being_modified = false;
-
+		ray WindowsPointToRay(vec2 vp_pos);
 		ray GenerateRayFromCurrentScreen();
-		ivec2 cachedMouseScreenPos{};
-        ivec2 prevMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
-        ivec2 currMouseScreenPos{};	 //Using windows getcursor instead of imgui cos its being a meanie
 		
 	};
 

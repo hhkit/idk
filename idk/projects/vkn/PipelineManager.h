@@ -5,7 +5,7 @@
 #include <gfx/pipeline_config.h>
 #include <vkn/ShaderModule.h>
 #include <vkn/VulkanPipeline.h>
-#include <multithread_control.h>
+#include <parallel/multithread_control.h>
 namespace idk::vkn
 {
 	struct PipelineDescHelper

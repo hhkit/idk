@@ -41,23 +41,18 @@ bool operator==(const AttachmentOps& lhs, const AttachmentOps& rhs)
 }
 bool operator==(const idk::small_vector<AttachmentOps>& lhs, const idk::small_vector<AttachmentOps>& rhs)
 {
-	bool same = lhs.size() == rhs.size();
-	//if (same)
-	for (auto litr = lhs.cbegin(), ritr = rhs.cbegin(); same& (litr != lhs.cend()); ++litr, ++ritr)
-	{
-		same &= *litr == *ritr;
-	}
-	return same;
+	if (lhs.size() != rhs.size())
+		return false;
+	
+	return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 bool operator==(const idk::small_vector<vk::Format>& lhs, const idk::small_vector<vk::Format>& rhs)
 {
-	bool same = lhs.size() == rhs.size();
-	for (auto litr = lhs.cbegin(), ritr = rhs.cbegin(); same & (litr != lhs.cend()); ++litr, ++ritr)
-	{
-		same &= litr == ritr;
-	}
-	return same;
+	if (lhs.size() != rhs.size())
+		return false;
+
+	return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 struct rp_type_t

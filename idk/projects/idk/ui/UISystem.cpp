@@ -6,6 +6,7 @@
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <ds/slow_tree.inl>
 #include <gfx/MaterialInstance.h>
 #include <gfx/Camera.h>
@@ -96,9 +97,9 @@ namespace idk
         }
 
         canvas_go->GetComponent<RectTransform>()->_local_rect = rect{ vec2{0,0}, vec2{screen_size} };
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
 
-        tree->visit([canvas](Handle<GameObject> child, int)
+        tree.Visit([canvas](Handle<GameObject> child, int)
         {
             if (child->HasComponent<Canvas>())
             {
@@ -154,9 +155,9 @@ namespace idk
         canvas_rt._local_rect = rect{ vec2{0,0}, vec2{screen_size} };
         canvas_rt._matrix = mat4{ scale(vec3(2.0f / screen_size.x, 2.0f / screen_size.y, 1.0f)) };
 
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
         
-        tree->visit([canvas](Handle<GameObject> child, int)
+        tree.Visit([canvas](Handle<GameObject> child, int)
         {
             if (child->HasComponent<Canvas>())
             {

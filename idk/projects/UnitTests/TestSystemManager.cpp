@@ -5,6 +5,7 @@
 #include <app/Application.h>
 #include <editor/IEditor.h>
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <res/ResourceManager.inl>
 #include <common/Transform.h>
 #include <res/ResourceHandle.inl>
@@ -41,10 +42,10 @@ TEST(System, TestCore)
 	curr_scene->CreateGameObject();
 
 	core.GetSystem<SceneManager>().BuildSceneGraph(GameState::GetGameState().GetObjectsOfType<const GameObject>());
-	auto& sg = core.GetSystem<SceneManager>().FetchSceneGraph();
+	auto sg = core.GetSystem<SceneManager>().FetchSceneGraph();
 
 	int indent = 0;
-	sg.visit([&indent](const auto& handle, int depth) {
+	sg.Visit([&indent](const auto& handle, int depth) {
 		indent += depth;
 		for (int i = 0; i < indent; ++i)
 			std::cout << ' ';

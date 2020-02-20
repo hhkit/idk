@@ -11,6 +11,9 @@ namespace idk
         public bool IsMine { get => Bindings.ViewIsMine(handle); }
         public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
         public void TransferOwnership(Player newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
+
+        public void DestroyObject() => Bindings.ViewDestroy(handle);
+
         public void RPC(string methodName, RPCTarget target, params object[] parameters)
         {
             byte[][] bytes = new byte[parameters.Length][];
@@ -27,15 +30,12 @@ namespace idk
         }
         internal static object[] Reserialize(byte[][] bytes)
         {
-            Debug.Log("OBJ SIZE: " + bytes.Length);
             object[] output = new object[bytes.Length];
             for (int count = 0; count < bytes.Length; ++count)
             {
-                Debug.Log("TEST1" + bytes.Length);
                 var formatter = new BinaryFormatter();
                 using (MemoryStream stream = new MemoryStream(bytes[count]))
                 {
-                    Debug.Log("TEST2" + bytes.Length);
                     output[count] = formatter.Deserialize(stream);
                 }
             }

@@ -2,6 +2,11 @@
 {
     public class Player
     {
-        public int ActorNumber { get; internal set; }
+        int connectionId;
+        public int ActorNumber { get => connectionId; }
+        internal Player(int i)
+        {
+            connectionId = i;
+        }
     }
 }

@@ -309,6 +309,9 @@
     <ClCompile Include="windows\IGE_GfxDebugWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
+    <ClCompile Include="windows\IGE_InspectorWindow_DisplayComponentInnerSpecializations.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

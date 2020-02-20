@@ -62,6 +62,7 @@ namespace idk::vkn
 		void ResetIDs();
 
 		std::optional<fgr_id> GetPrevious(fgr_id curr)const;
+		fgr_id GetOriginal(fgr_id curr)const;
 
 		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
 		std::optional<TextureDescription> GetResourceDescription(fgr_id rsc_id)const;
@@ -79,6 +80,7 @@ namespace idk::vkn
 		dual_set<fgr_id, fgr_id> write_renamed;
 		//new to old(second)
 		hash_table<fgr_id, fgr_id> renamed_resources;
+		hash_table<fgr_id, fgr_id> renamed_original;
 		hlp::IdGenerator<fgr_id> _fgr_generator;
 		TexturePool pool;
 	};

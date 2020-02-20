@@ -59,7 +59,7 @@ namespace idk::vkn
 		~VulkanDebugRenderer();
 
 		void Init();
-		void Init(const pipeline_config& pipeline_config);
+		void Init(const pipeline_config& tri_pipeline_config, const pipeline_config& line_pipeline_config);
 		void Shutdown();
 		void DrawShape(DbgShape shape, const mat4& tfm, const color& color);
 		void DrawShape(MeshType shape, const mat4& tfm, const color& color);

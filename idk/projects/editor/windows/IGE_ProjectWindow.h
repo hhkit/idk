@@ -24,6 +24,7 @@ namespace idk
 	public:
 		IGE_ProjectWindow();
 
+        virtual void Initialize() override;
 		virtual void BeginWindow() override;
         virtual void Update() override;
 
@@ -39,9 +40,11 @@ namespace idk
         float icon_size = 64.0f;
         ImGuiTextFilter filter;
 
-        void draw_contents(const vector<PathHandle>& paths, ImVec2 spacing, int icons_per_row);
-
         void displayDir(PathHandle dir);
+        void drawThumbnail(PathHandle path);
+        void drawContents(vector<PathHandle>& paths, ImVec2 spacing, int icons_per_row);
+        void folderDragDropTarget(PathHandle path);
+
         GenericResourceHandle getOrLoadFirstAsset(PathHandle path);
         string unique_new_mount_path(string_view name, string_view ext);
         string unique_new_mount_path(string_view name, string_view ext, PathHandle dir);

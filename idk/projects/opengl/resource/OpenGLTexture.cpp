@@ -19,7 +19,7 @@ namespace idk::ogl
 		Buffer(nullptr, 0, _size, _internal_format);
 	}
 
-	OpenGLTexture::OpenGLTexture(TextureInternalFormat format, uvec2 size, unsigned mip_level)
+	OpenGLTexture::OpenGLTexture(TextureInternalFormat format, uvec2 size, unsigned)
 	{
 		glGenTextures(1, &_id);
 		Bind();
@@ -89,7 +89,7 @@ namespace idk::ogl
 		Bind();
 	}
 
-	void OpenGLTexture::Buffer(void* data, size_t buffer_size, uvec2 texture_size, TextureInternalFormat format, GLenum incoming_components, GLenum incoming_type)
+	void OpenGLTexture::Buffer(void* data, size_t, uvec2 texture_size, TextureInternalFormat format, GLenum, GLenum incoming_type)
 	{
 		_size = texture_size;
 		_internal_format = format;
@@ -130,14 +130,14 @@ namespace idk::ogl
 			switch (format)
 			{
 			case ColorFormat::Alpha_8:
-				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, buffer_size, data);
+				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, (GLsizei) buffer_size, data);
 				break;
 			case ColorFormat::RGB_16bit:
 			case ColorFormat::RGB_24bit:
-				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, buffer_size, data);
+				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, (GLsizei) buffer_size, data);
 				break;
 			case ColorFormat::RGBA_32bit:
-				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, buffer_size, data);
+				glCompressedTexImage2D(GL_TEXTURE_2D, 0, gl_format, size.x, size.y, 0, (GLsizei) buffer_size, data);
 				break;
 			}
 		}

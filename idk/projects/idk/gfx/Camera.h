@@ -3,9 +3,9 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <gfx/RenderObject.h>
-#include <gfx/CameraFrustum.h>
 #include <gfx/CameraClear.h>
 #include <math/rect.h>
+#include <math/shapes/frustum.h>
 #include <common/LayerMask.h>
 
 namespace idk
@@ -38,26 +38,10 @@ namespace idk
 		real gamma = 2.2f;
 		void LookAt(vec3 target_point, vec3 up = vec3{ 0, 1, 0 });
 
-		vec3	  currentPosition() const;
-		vec3	  currentDirection() const;
-
-		Frustum   getFrustum() const;
-
-		mat4      getTightProjection() const;
-		vec3      getFarCorner() const;
-		real	  getBSphereRadius() const;
-
-		vec3 getTightProjectionCenter() const;
-
-		mat4	  ViewMatrix() const;
-		mat4	  ProjectionMatrix() const;
-
+		mat4	   ViewMatrix() const;
+		mat4	   ProjectionMatrix() const;
+		frustum    GetFrustum() const;
+		float      AspectRatio() const;
 		CameraData GenerateCameraData() const;
-		float      AspectRatio()const;
-	private:
-		//Basic controls parameter
-
-		mat4 _viewMatrix;
-		mat4 _projectionMatrix;
 	};
 }

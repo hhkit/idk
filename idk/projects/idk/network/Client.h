@@ -20,9 +20,11 @@ namespace idk
 		Client(const Address& addr);
 		~Client();
 
+		bool IsConnected() const;
 		void ProcessMessages();
 		void ReceivePackets();
 		void SendPackets();
+		float GetRTT();
 
 		yojimbo::Message* CreateMessage(int id);
 		void SendMessage(yojimbo::Message* message, GameChannel delivery_mode);

@@ -355,6 +355,7 @@
     <ClCompile Include="commands\CMD_CreateGameObject.cpp" />
     <ClCompile Include="commands\CommandController.cpp" />
     <ClCompile Include="IDE_Style.cpp" />
+    <ClCompile Include="windows\IGE_InspectorWindow_DisplayComponentInnerSpecializations.cpp" />
     <ClCompile Include="imguidk.cpp" />
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />

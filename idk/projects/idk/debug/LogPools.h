@@ -7,6 +7,7 @@ namespace idk
 		ANY,
 		SYS,
 		PHYS,
+		AUDIO,
 		GFX,
 		ANIM,
 		MONO,

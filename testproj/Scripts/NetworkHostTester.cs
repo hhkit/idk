@@ -3,13 +3,33 @@
 namespace TestAndSeek
 {
     public class NetworkHostTester
-        : MonoBehavior
+        : MonoBehavior, ILobbyCallbacks
     {
         public Scene scene;
         public Prefab instantiate;
         public GameObject obj;
         public float turnspeed = 90;
         public float movespeed = 35;
+
+        public void OnClientConnect(Player p)
+        {
+            Debug.Log("Player " + p.ActorNumber + " connected");
+        }
+
+        public void OnClientDisconnect(Player p)
+        {
+            Debug.Log("Player " + p.ActorNumber + " disconnected");
+        }
+
+        void Start()
+        {
+            ElectronNetwork.AddCallbackTarget(this);
+        }
+
+        void OnDestroy()
+        {
+            ElectronNetwork.RemoveCallbackTarget(this);
+        }
 
         void Update()
         {
@@ -26,6 +46,9 @@ namespace TestAndSeek
 
                 if (Input.GetKeyDown(KeyCode.R))
                     obj?.GetComponent<ElectronView>().RPC("ExecuteMeWithArgs", RPCTarget.All, "hello", 5, "oh no");
+
+                if (Input.GetKeyDown(KeyCode.T))
+                    obj?.GetComponent<ElectronView>().TransferOwnership(ElectronNetwork.players[0]);
             }
         }
     }

@@ -9,7 +9,7 @@ namespace idk::vkn
 	void SetScissor(vk::CommandBuffer cmd_buffer, ivec2 vp_pos, uvec2 vp_size);
 
 
-	template<typename T>
+	template<typename T=float>
 	struct FakeMat4
 	{
 		static constexpr unsigned N = 4;
@@ -28,4 +28,5 @@ namespace idk::vkn
 
 
 	string PrepareLightBlock(const CameraData& cam, const vector<LightData>& lights);
+	string PrepareLightBlock(const mat4 view, const vector<LightData>& lights);
 }

@@ -104,5 +104,8 @@ namespace idk::vkn::hlp
 	};
 	template<typename T>
 	uint32_t arr_count(T&& arr) { return ArrCount<T>::count(arr); }
+
+	template<typename T>
+	string_view to_data(const T& obj);
 }
 

@@ -39,7 +39,8 @@ namespace idk
 		GenericHandle AddComponent(string_view);
 		GenericHandle AddComponent(reflect::type);
 		GenericHandle AddComponent(reflect::dynamic);
-		GenericHandle AddComponent(GenericHandle, reflect::dynamic);
+		GenericHandle AddComponent(GenericHandle target_handle, reflect::dynamic);
+		bool          SetComponentIndex(GenericHandle component, unsigned pos); // returns false if unsuccessful
 		GenericHandle GetComponent(reflect::type);
 		GenericHandle GetComponent(string_view);
 		void          RemoveComponent(GenericHandle);
@@ -67,7 +68,7 @@ namespace idk
 	private:
 		struct component_range
 		{
-			char begin{}, count{};
+			unsigned char begin{}, count{};
 		};
 
 		vector<GenericHandle> _components;
