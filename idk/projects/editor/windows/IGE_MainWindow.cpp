@@ -308,18 +308,13 @@ namespace idk {
 
 	void IGE_MainWindow::DisplayToolBarChildWindow()
 	{
-
 		const ImVec2 toolBarSize{ window_size.x, toolBarHeight };
 
 		ImGuiStyle& style = ImGui::GetStyle();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBg]);
-
-
-		//Tool bar
 		ImGui::BeginChild("ToolBar", toolBarSize, false, childFlags);
 		ImGui::PopStyleColor();
-
 
 		const ImVec2 toolButtonSize{ 40.0f,20.0f };
 		const ImVec2 toolButtonStartPos{ 6.0f,4.0f };
@@ -357,6 +352,8 @@ namespace idk {
 		if (ImGui::Button(ICON_FA_SYNC, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Rotate;
 		}
+		ImGui::PopStyleColor();
+		ImGui::PopItemFlag();
 
 		ImGui::SameLine(0, 0);
 
@@ -365,8 +362,8 @@ namespace idk {
 		if (ImGui::Button(ICON_FA_EXPAND, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Scale;
 		}
-		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
+		ImGui::PopItemFlag();
 
 		ImGui::SameLine(0, 16.0f);
 		ImGui::SetCursorPosY(toolButtonStartPos.y + 3.0f);
