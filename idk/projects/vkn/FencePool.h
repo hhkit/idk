@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/VulkanView.h>
+#include <vkn/SimpleLock.h>
 namespace idk::vkn
 {
 	class FencePool;
@@ -40,14 +41,13 @@ namespace idk::vkn
 	struct CmdBufferObj
 	{
 		using handle_t = size_t;
-		CmdBufferObj(vk::CommandBuffer CmdBuffer, handle_t id, CmdBufferPool* src) : _CmdBuffer{ CmdBuffer }, _id{ id }, _src{ src }{}
-		CmdBufferObj(CmdBufferObj&& rhs) noexcept : _CmdBuffer{ rhs._CmdBuffer }, _id{ rhs._id }, _src{ rhs._src }{rhs._src = nullptr; rhs._src = {}; }
+		CmdBufferObj( handle_t id, CmdBufferPool* src) : _id{ id }, _src{ src }{}
+		CmdBufferObj(CmdBufferObj&& rhs) noexcept : _id{ rhs._id }, _src{ rhs._src }{rhs._src = nullptr; rhs._src = {}; }
 		vk::CommandBuffer operator*() const;
 		~CmdBufferObj();
 
 		handle_t Id()const { return _id; }
 	private:
-		vk::CommandBuffer _CmdBuffer;
 		handle_t _id;
 		CmdBufferPool* _src;
 	};
@@ -61,11 +61,11 @@ namespace idk::vkn
 		vk::CommandBuffer Get(size_t id)const;
 	private:
 		size_t growth_amount()const;
-		vk::UniqueCommandBuffer MakeCmdBuffer();
 		void GrowCmdBuffers();
 		vector<size_t> _handles;
-		vector<vk::UniqueCommandBuffer> _CmdBuffers;
-		vk::UniqueCommandPool _CmdPool;
+		vector<vk::UniqueCommandBuffer> _cmd_buffer;
+		vector < vk::UniqueCommandPool> _cmd_pools;
+		hlp::SimpleLock _acquire_lock;
 	};
 
 }

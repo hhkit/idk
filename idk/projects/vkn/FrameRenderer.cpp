@@ -1010,7 +1010,9 @@ namespace idk::vkn
 			_pimpl->graph.Execute();
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
+			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 			_pimpl->graph.ProcessBatches(rb);
+			rb._cmd_buffer.end();
 			state.FlagRendered();
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});

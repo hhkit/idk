@@ -260,18 +260,5 @@ namespace idk::vkn::hlp
 	{
 		return start > end;
 	}
-#pragma optimize("",off)
-	void SimpleLock::Lock() {
-		std::unique_lock lock{ _data->mutex };
-		if (_data->locked)
-			_data->cv.wait(lock);
-		_data->locked = true;
-	}
-
-	void SimpleLock::Unlock()
-	{
-		_data->locked = false;
-		_data->cv.notify_one();
-	}
 
 }

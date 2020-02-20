@@ -86,6 +86,7 @@ namespace idk::vkn
 		mt::ThreadPool::Future<void> LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
 
 		hlp::SimpleLock lock;
+		int abc = 0;
 	};
 
 	struct ImageViewInfo

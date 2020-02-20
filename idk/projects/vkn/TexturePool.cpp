@@ -11,6 +11,8 @@ namespace idk::vkn
 		vk::Fence load_fence;
 		FencePool _fences;
 		CmdBufferPool _cmd_buffers;
+
+		TextureLoader loader;
 		vector<std::tuple<mt::ThreadPool::Future<void>,size_t, std::promise<VknTextureView>>> _futures;
 		Pimpl() :uload_fence{ View().Device()->createFenceUnique(vk::FenceCreateInfo{}) }, load_fence{ *uload_fence }
 		{
@@ -88,6 +90,7 @@ namespace idk::vkn
 			future.get();
 			promise.set_value(*allocated_textures[index]);
 		}
+		_pimpl->_futures.clear();
 	}
 	VknTextureView TexturePool::create(const TextureDescription& desc)
 	{
@@ -119,7 +122,7 @@ namespace idk::vkn
 		tci.layout = vk::ImageLayout::eUndefined;
 		tci.mipmap_level = desc.mipmap_level;
 		tci.image_usage = desc.usage;
-		TextureLoader loader;
+		TextureLoader& loader = _pimpl->loader;
 		auto promise = std::promise<VknTextureView>();
 		auto future = promise.get_future();
 		_pimpl->_futures.emplace_back(loader.LoadTextureAsync(*rsc_ptr, _pimpl->allocator, _pimpl->_fences,_pimpl->_cmd_buffers, {}, tci, {}),allocated_textures.size(),std::move(promise));

@@ -64,6 +64,7 @@ namespace idk::vkn
 
 	CmdBufferObj CmdBufferPool::AcquireCmdBuffer()
 	{
+		_acquire_lock.Lock();
 		if (_handles.empty())
 		{
 			GrowCmdBuffers();
@@ -71,28 +72,28 @@ namespace idk::vkn
 
 		auto index = _handles.back();
 		_handles.pop_back();
-		return CmdBufferObj{ *_CmdBuffers[index],index,this };
+		_acquire_lock.Unlock();
+		return CmdBufferObj{ index,this };
 	}
 
 	vk::CommandBuffer CmdBufferObj::operator*() const
 	{
 		return _src->Get(_id);
 	}
-	CmdBufferPool::CmdBufferPool() :_CmdPool{View().Device()->createCommandPoolUnique(vk::CommandPoolCreateInfo
-			{
-				vk::CommandPoolCreateFlagBits::eResetCommandBuffer,*View().QueueFamily().graphics_family
-			})}
+	CmdBufferPool::CmdBufferPool() :_cmd_pools{}
 	{
 	}
 	void CmdBufferPool::Free(CmdBufferObj&& obj)
 	{
-		_CmdBuffers[obj.Id()]->reset({});
+		_cmd_buffer[obj.Id()]->reset({});
+		_acquire_lock.Lock();
 		_handles.emplace_back(obj.Id());
+		_acquire_lock.Unlock();
 	}
 
 	CmdBufferPool::~CmdBufferPool()
 	{
-		if (_handles.size() != _CmdBuffers.size())
+		if (_handles.size() != _cmd_buffer.size())
 		{
 			LOG_ERROR_TO(LogPool::GFX, "CmdBuffer pool getting destroyed before CmdBufferObjs are destroyed.");
 		}
@@ -100,28 +101,35 @@ namespace idk::vkn
 
 	vk::CommandBuffer idk::vkn::CmdBufferPool::Get(size_t id) const
 	{
-		return *_CmdBuffers[id];
+		return *_cmd_buffer[id];
 	}
 
 	size_t CmdBufferPool::growth_amount() const
 	{
-		return std::max(_CmdBuffers.size(), 1ull);
+		return std::max(_cmd_buffer.size(), 1ull);
 	}
 
 
 	void CmdBufferPool::GrowCmdBuffers()
 	{
 		auto growth_amt = growth_amount();
-		auto new_size = _CmdBuffers.size() +growth_amt;
-		_CmdBuffers.reserve(new_size);
-		auto tmp = View().Device()->allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo
-			{
-				*_CmdPool,vk::CommandBufferLevel::ePrimary,static_cast<uint32_t>(growth_amt)
-			});
-		for (auto& cmd_buffer : tmp)
+		auto new_size = _cmd_buffer.size() +growth_amt;
+		_cmd_buffer.reserve(new_size);
+		_cmd_pools.reserve(new_size);
+		for (size_t i = 0; i < growth_amt;++i)
 		{
-			_handles.emplace_back(_CmdBuffers.size());
-			_CmdBuffers.emplace_back(std::move(cmd_buffer));
+			_cmd_pools.emplace_back(View().Device()->createCommandPoolUnique(vk::CommandPoolCreateInfo
+				{
+					vk::CommandPoolCreateFlagBits::eResetCommandBuffer,*View().QueueFamily().graphics_family
+				}));
+			auto& _cmd_pool = _cmd_pools.back();
+			auto tmp = View().Device()->allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo
+				{
+					*_cmd_pool,vk::CommandBufferLevel::ePrimary,1
+				});
+			_handles.emplace_back(_cmd_buffer.size());
+			_cmd_buffer.emplace_back(std::move(tmp.back()));
 		}
+
 	}
 }

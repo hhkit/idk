@@ -24,6 +24,7 @@ namespace idk::vkn {
 		VulkanRsc<vk::ImageView>     imageView{ nullptr };
 		VulkanRsc<vk::Sampler>       sampler{ nullptr };
 		opt<vk::DescriptorSet>	descriptorSet{};
+		string dbg_name;
 
 		VknTexture() = default;
 		~VknTexture();
@@ -31,6 +32,7 @@ namespace idk::vkn {
 		VknTexture(VknTexture && rhs) noexcept;
 		//VknTexture(const VknTexture& rhs);
 		VknTexture(const CompiledTexture&);
+
 
 		VknTexture& operator=(VknTexture&&) noexcept;
 		vk::Sampler Sampler()const { return *sampler; }

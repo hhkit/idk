@@ -10,6 +10,27 @@
 
 #include <vkn/DebugUtil.h>
 
+#pragma optimize("",off)
+static void DoNothing()
+{
+
+}
+
+void dbg_chk(vk::Image img)
+{
+	if (
+		reinterpret_cast<size_t>(img.operator VkImage()) == 0x3672
+		||
+		reinterpret_cast<size_t>(img.operator VkImage()) == 0x3669
+		||
+		reinterpret_cast<size_t>(img.operator VkImage()) == 0x3678
+		)
+	{
+		DoNothing();
+	}
+}
+#pragma optimize("",on)
+
 namespace idk::vkn
 {
 
@@ -49,8 +70,11 @@ namespace idk::vkn
 	{
 		_uniform_manager.BindUniformBuffer(name, index, data,skip_if_bound);
 	}
+#pragma optimize("",off)
+	static void DoNothing() {}
 	void RenderTask::BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
+		dbg_chk(texture.Image());
 		_uniform_manager.BindSampler(name, index, texture, skip_if_bound,layout);
 	}
 	void RenderTask::BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader_handle)
@@ -382,7 +406,10 @@ namespace idk::vkn
 			auto input_att_index = info.input_attachment_index + attachment_offset;
 			if (info.type == uniform_layout_t::UniformType::eAttachment && input_att_index <input_attachments.size())
 			{
-				_uniform_manager.BindAttachment(UniformManager::UniInfo{ info.set,info.binding,info.size,info.layout }, 0, input_attachments[input_att_index]);
+				auto texture = input_attachments[input_att_index];
+				if (texture.Image().operator VkImage() == (VkImage)0x3684)
+					DoNothing();
+				_uniform_manager.BindAttachment(UniformManager::UniInfo{ info.set,info.binding,info.size,info.layout }, 0, texture);
 			}
 			++itr;
 		}
@@ -411,6 +438,8 @@ namespace idk::vkn
 		{
 			auto src_img = copy_cmd.src.Image();
 			auto dst_img = copy_cmd.dst.Image();
+			dbg_chk(src_img);
+			dbg_chk(dst_img);
 			//Transition from their original layouts to eGeneral
 			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
 			{

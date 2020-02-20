@@ -23,6 +23,7 @@ namespace std
 	};
 }
 
+void dbg_chk(vk::Image img);
 namespace idk::vkn
 {
 
@@ -32,6 +33,7 @@ namespace idk::vkn
 		hlp::UniqueAlloc second;
 		vk::ImageAspectFlags aspect;
 		size_t size_on_device = 0;
+		string name;
 	};
 	TextureResult LoadTexture(TextureLoader::SubmissionObjs sub, hlp::MemoryAllocator& allocator, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid);
@@ -103,7 +105,7 @@ namespace idk::vkn
 		//2x2 image Checkered
 
 		auto ptr = &texture;
-		auto&& [image, alloc, aspect, sz] = vkn::LoadTexture(sub,allocator,  load_info, in_info, guid);
+		auto&& [image, alloc, aspect, sz,name] = vkn::LoadTexture(sub,allocator,  load_info, in_info, guid);
 		ptr->Size(uvec2{ load_info.width,load_info.height });
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
@@ -112,6 +114,7 @@ namespace idk::vkn
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		ptr->sizeOnDevice = sz;
+		ptr->dbg_name = std::move(name);
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
@@ -165,24 +168,30 @@ namespace idk::vkn
 			std::optional<Guid> guid;
 		};
 	}
+#pragma optimize("",off)
+	static void DoNothing() {}
 	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		auto fence = load_fence.AcquireFence();
 		auto cmd_buffer = cmd_buffers.AcquireCmdBuffer();
-
+		abc++;
 		return Core::GetThreadPool().Post(
-			[this](const shared_ptr<Nope::Derp>& _derp) ->void
+			[loader  = this](const shared_ptr<Nope::Derp>& _derp) ->void
 			{
 				auto& derp = *_derp;
 				auto cmd_buffer = (*derp.cmd_buffer);
+				auto& lock = loader->lock;
+				lock.Lock();
 				cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-				this->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, derp.texture, derp.allocator,  derp.ooptional, derp.load_info, derp.in_info, derp.guid);
+				lock.Unlock();
+				loader->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, derp.texture, derp.allocator,  derp.ooptional, derp.load_info, derp.in_info, derp.guid);
 				auto device = *View().Device();
 				auto fence = *derp.load_fence;
 				device.resetFences(fence);
 				lock.Lock();
 				hlp::EndSingleTimeCbufferCmd(cmd_buffer, View().GraphicsQueue(), false, fence);
 				lock.Unlock();
+				dbg_chk(derp.texture.Image());
 				uint64_t wait_for_milli_seconds = 1;
 				[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
 				//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
@@ -532,16 +541,16 @@ namespace idk::vkn
 				}
 				//vector<vk::BufferImageCopy>
 
-				if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
-				{
-					auto name = string{ *guid };
-					if (name == "21707462-3865-4559-b88b-f816025d22a2")
-					{
-						DoNothing();
-					}
-					name += " Staging Dest";
-					dbg::NameObject(copy_dest, name);
-				}
+				//if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+				//{
+				//	auto name = string{ *guid };
+				//	if (name == "21707462-3865-4559-b88b-f816025d22a2")
+				//	{
+				//		DoNothing();
+				//	}
+				//	name += " Staging Dest";
+				//	dbg::NameObject(copy_dest, name);
+				//}
 				cmd_buffer.copyBufferToImage(*stagingBuffer, copy_dest, vk::ImageLayout::eTransferDstOptimal, copy_regions, vk::DispatchLoaderDefault{});
 
 				staging_buffer = std::move(stagingBuffer);
@@ -586,7 +595,7 @@ namespace idk::vkn
 		}
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
-			auto name = string{ *guid };
+			auto& name = result.name =  string{ *guid };
 			if (name == "d7e578ab-3254-4564-bee0-1555837861f7")
 			{
 				DoNothing();

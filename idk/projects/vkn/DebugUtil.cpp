@@ -48,7 +48,7 @@ namespace idk::vkn::dbg
 
 	void NameObject(vk::Image img, const string& name)
 	{
-		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
 			vk::DebugUtilsObjectNameInfoEXT tmp
@@ -62,7 +62,7 @@ namespace idk::vkn::dbg
 	}
 	void NameObject(vk::Buffer img, const string& name)
 	{
-		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
 			vk::DebugUtilsObjectNameInfoEXT tmp
@@ -76,7 +76,7 @@ namespace idk::vkn::dbg
 	}
 	void NameObject(uint64_t unk, const string& name)
 	{
-		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT && unk)//id must be valid if type is unknown
 		{
 			vk::DebugUtilsObjectNameInfoEXT tmp
