@@ -36,6 +36,7 @@ namespace idk::win
             {
                 // Controller is not connected 
                 _connected_users &= ~(1 << i);
+                _curr_buf()[i] = _prev_buf()[i] = x_gamepad_state{ 0, 0, 0, 0, 0, 0, 0 };
             }
         }
 
@@ -80,6 +81,7 @@ namespace idk::win
             {
                 // Controller is not connected 
                 _connected_users &= ~(1 << i);
+                _curr_buf()[i] = _prev_buf()[i] = x_gamepad_state{ 0, 0, 0, 0, 0, 0, 0 };
             }
         }
     }

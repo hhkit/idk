@@ -403,9 +403,23 @@ namespace idk
 
     void IGE_InspectorWindow::DisplayComponentInner(Handle<RigidBody> c_rb)
     {
-        auto v = c_rb->velocity();
-        ImGui::DragFloat3("Velocity:", v.data());
         DisplayVal(*c_rb);
+
+        auto v = c_rb->velocity();
+        DisplayStack display{ *this };
+        ImGui::BeginGroup(); display.Label("Velocity"); display.ItemBegin(true);
+        if (!_debug_mode)
+        {
+            ImGuidk::PushDisabled();
+            ImGui::DragFloat3("Velocity:", v.data());
+            ImGuidk::PopDisabled();
+        }
+        else
+        {
+            if (ImGui::DragFloat3("Velocity:", v.data()))
+                c_rb->velocity(v);
+        }
+        display.ItemEnd(); ImGui::EndGroup();
     }
 
     

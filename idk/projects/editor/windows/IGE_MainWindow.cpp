@@ -378,6 +378,7 @@ namespace idk {
         ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.0f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
 		ImGui::PushID(1337);
+
 		if (!Core::GetSystem<IDE>().IsGameRunning())
 		{
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
@@ -386,13 +387,16 @@ namespace idk {
 		else
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 				Core::GetSystem<IDE>().Stop();
-			ImGui::PopStyleColor();
+			ImGui::PopStyleColor(2);
 		}
 
 		ImGui::SameLine(0, 0);
 
+		ImGui::PushStyleColor(ImGuiCol_Text, Core::GetSystem<IDE>().IsGameRunning() ? 
+			ImGui::GetColorU32(ImGuiCol_PlotLinesHovered) : ImGui::GetColorU32(ImGuiCol_Text));
 		if (!Core::GetSystem<IDE>().IsGameFrozen())
 		{
 			if (ImGui::Button(ICON_FA_PAUSE, toolButtonSize))
@@ -405,6 +409,8 @@ namespace idk {
 				Core::GetSystem<IDE>().Unpause();
 			ImGui::PopStyleColor();
 		}
+		ImGui::PopStyleColor();
+
 		ImGui::PopID();
 		
 		ImGui::PopStyleVar();
