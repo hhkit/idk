@@ -202,9 +202,9 @@ namespace idk::mono
 		BIND_END();
 
 		
-		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* type)
+		BIND_START("idk.Bindings::ObjectGetObjectsOfType", MonoArray*, MonoString* raw_type)
 		{
-			auto s = unbox(type);
+			auto s = unbox(raw_type);
 			string_view type_name = s.get();
 
 			vector<Handle<mono::Behavior>> behaviors;
@@ -544,8 +544,9 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TransformSetParent",  void, Handle<Transform> h, Handle<GameObject> parent_gameobject, bool preserve_global)
 			{
+				auto old_parent = h->parent;
 				h->SetParent(parent_gameobject, preserve_global);
-				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), parent_gameobject);
+				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), old_parent);
 			}
 		BIND_END();
 
@@ -555,16 +556,17 @@ namespace idk::mono
 
 			auto go_klass = Core::GetSystem<mono::ScriptSystem>().Environment().Type("GameObject");
 
-			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg->size() : 0);
+			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), sg ? sg.GetNumChildren() : 0);
 			if (sg)
 			{
-				auto sz = sg->size();
-				auto ptr = sg->begin();
+				auto sz = sg.GetNumChildren();
+				auto ptr = sg.begin();
 				for (int i = 0; i < sz; ++i)
 				{
 					auto mo = mono_object_new(mono_domain_get(), go_klass->Raw());
 					auto method = mono_class_get_method_from_name(go_klass->Raw(), ".ctor", 1);
-					void* args[] = { &ptr++->obj.id };
+					auto child_go = *ptr++;
+					void* args[] = { &child_go.id };
 					mono_runtime_invoke(method, mo, args, nullptr);
 					mono_array_setref(retval, i, mo);
 				}
@@ -641,7 +643,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::RigidBodyGetVelocity",  vec3, Handle<RigidBody> rb)
 		{
-			return rb->velocity() * Core::GetDT().count();
+			return rb->velocity();
 		}
 		BIND_END();
 
@@ -1144,7 +1146,21 @@ namespace idk::mono
 		}
 		BIND_END();
 		//----------------------------------------------------------------------------------------------------
+		//AudioSystem
+		BIND_START("idk.Bindings::AudioSystemSetVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Volume(newVolume);
+		}
+		BIND_END();
 
+		BIND_START("idk.Bindings::AudioSystemStopAll", void)
+		{
+			Core::GetSystem<AudioSystem>().StopAllAudio();
+		}
+		BIND_END();
+
+		//----------------------------------------------------------------------------------------------------
 		// Renderer
         BIND_START("idk.Bindings::RendererGetMaterialInstance",  Guid, GenericHandle renderer)
         {
@@ -1821,6 +1837,22 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkGetPlayers", MonoArray*)
+		{
+			vector<int> players;
+			auto& network = Core::GetSystem<NetworkSystem>();
+			for (auto host = s_cast<int>(Host::CLIENT0); host < s_cast<int>(Host::CLIENT_MAX); ++host)
+				if (network.GetConnectionTo(s_cast<Host>(host))) // has connection
+					players.emplace_back(host);
+
+			auto retval = mono_array_new(mono_domain_get(), mono_get_int32_class(), players.size());
+			for (int i = 0; i < players.size(); ++i)
+				mono_array_set(retval, int, i, players[i]);
+
+			return retval;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::NetworkGetIsConnected", bool)
 		{
 			return Core::GetSystem<NetworkSystem>().GetConnectionTo();
@@ -1829,7 +1861,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
-			throw "have not written disconnect";
+			Core::GetSystem<NetworkSystem>().Disconnect();
 		}
 		BIND_END();
 
@@ -1863,6 +1895,18 @@ namespace idk::mono
 		BIND_START("idk.Bindings::NetworkInstantiatePrefabPositionRotation", uint64_t, Guid g, vec3 pos, quat rot)
 		{
 			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, rot).id;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkAddCallback", void, uint64_t g)
+		{
+			Core::GetSystem<NetworkSystem>().AddCallbackTarget(Handle<mono::Behavior>{g});
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkRemoveCallback", void, uint64_t g)
+		{
+			Core::GetSystem<NetworkSystem>().RemoveCallbackTarget(Handle<mono::Behavior>{g});
 		}
 		BIND_END();
 

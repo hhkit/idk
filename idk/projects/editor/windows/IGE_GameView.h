@@ -15,8 +15,10 @@ namespace idk
 		virtual void Update() override;
 
 		vec2 GetScreenSize(); //To get the size of the frame being drawn onto the window.
+
 	private:
-		vec2 draw_rect_offset;
-		vec2 draw_rect_size;
+		vec2 _draw_rect_offset;
+		vec2 _draw_rect_size;
+		bool _maximize_on_play = true;
 	};
 }

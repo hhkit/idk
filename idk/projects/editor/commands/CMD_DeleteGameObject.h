@@ -5,7 +5,7 @@
 //@date		02 OCT 2019
 //@brief	Delete gameobjects
 //////////////////////////////////////////////////////////////////////////////////
-
+#pragma once
 
 #include <editor/commands/ICommand.h>
 #include <core/GameObject.h>

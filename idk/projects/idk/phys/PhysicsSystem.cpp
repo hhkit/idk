@@ -44,7 +44,7 @@ namespace idk
     {
         return shape * col.GetGameObject()->Transform()->GlobalMatrix();
     };
-
+#pragma optimize("", off)
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
 
@@ -178,16 +178,19 @@ namespace idk
                     rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz - rigidbody.initial_velocity * dt;
                     rigidbody.initial_velocity = vec3{};
                 }
-                else if (!rigidbody.is_kinematic)
+				else
 				{
-					const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
+					if (!rigidbody.is_kinematic)
+					{
+						const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
 
-					// verlet integrate towards new position
-					//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-					auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
-					rigidbody._accum_accel = vec3{};
-					rigidbody._prev_pos = curr_pos;
-                    rigidbody._pred_tfm[3].xyz = new_pos;
+						// verlet integrate towards new position
+						//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
+						auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+						rigidbody._accum_accel = vec3{};
+						rigidbody._prev_pos = curr_pos;
+						rigidbody._pred_tfm[3].xyz = new_pos;
+					}
 				}
 			}
 		};
@@ -262,7 +265,7 @@ namespace idk
             {
 				d_info.predicted_shape = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, d_info.collider->shape);
 				d_info.broad_phase = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, d_info.collider->shape);
-                const auto& vel = d_info.collider->_rigidbody->velocity();
+                auto vel = d_info.collider->_rigidbody->velocity() / dt;
 				d_info.broad_phase.grow(vel);
 				d_info.broad_phase.grow(-vel);
             }
@@ -391,77 +394,77 @@ namespace idk
 					}
 				}
 			}
-			for (const auto& [i, j, result] : collision_frame)
-			{
-				const auto& lcollider = *i->collider;
-				const auto& rcollider = *j->collider;
-
-				auto lrigidbody = lcollider._rigidbody;
-				auto rrigidbody = rcollider._rigidbody;
-
-				// triggers do not require resolution
-				if (lcollider.is_trigger || rcollider.is_trigger)
-					continue;
-
-				struct RigidBodyInfo
-				{
-					vec3 velocity = {};
-					real inv_mass = 0.f;
-					RigidBody* ref = nullptr;
-				};
-
-				const auto [lvel, linv_mass, lrb_ptr] =
-                    RigidBodyInfo{ lrigidbody->_pred_tfm[3].xyz - lrigidbody->_prev_pos, lrigidbody->inv_mass, &*lrigidbody };
-                const auto [rvel, rinv_mass, rrb_ptr] = rrigidbody ?
-                    RigidBodyInfo{ rrigidbody->_pred_tfm[3].xyz - rrigidbody->_prev_pos, rrigidbody->inv_mass, &*rrigidbody } : RigidBodyInfo{};
-
-				auto rel_v = rvel - lvel; // a is not moving
-				auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
-
-				if (contact_v < +epsilon)
-					continue;
-
-				// determine collision distribution
-				auto restitution = (lcollider.bounciness, rcollider.bounciness) * .5f;
-				restitution = std::max(restitution - restitution_slop, 0.f);
-				IDK_ASSERT(result.penetration_depth > -epsilon);
-
-				// determine friction disribution
-
-				{
-					const auto sum_inv_mass = linv_mass + rinv_mass;
-					const auto collision_impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
-					const auto collision_impulse = damping * collision_impulse_scalar * result.normal_of_collision;
-
-					const auto penetration = std::max(result.penetration_depth - penetration_min_slop, 0.0f);
-					const auto correction_vector = penetration * penetration_max_slop * result.normal_of_collision;
-
-					const auto tangent = (rel_v - (rel_v.dot(result.normal_of_collision)) * result.normal_of_collision).normalize();
-					const auto frictional_impulse_scalar = (1.0f + restitution) * rel_v.dot(tangent) / sum_inv_mass;
-					const auto mu = (lcollider.static_friction + rcollider.static_friction) * .5f;
-					const auto jtangential = -rel_v.dot(tangent) / sum_inv_mass;
-
-					const auto frictional_impulse = abs(jtangential) < frictional_impulse_scalar * mu
-						? frictional_impulse_scalar * tangent
-						: (lcollider.dynamic_friction, rcollider.dynamic_friction) * .5f * frictional_impulse_scalar * tangent;
-
-					if (lrb_ptr && !lrb_ptr->is_kinematic)
-					{
-                        auto& predicted_pos = lrb_ptr->_pred_tfm[3].xyz;
-						predicted_pos = predicted_pos + correction_vector;
-						const auto new_vel = lvel + (collision_impulse + frictional_impulse) * lrb_ptr->inv_mass;
-                        lrb_ptr->_prev_pos = predicted_pos - new_vel;
-					}
-
-					if (rrb_ptr && !rrb_ptr->is_kinematic)
-					{
-                        auto& predicted_pos = rrb_ptr->_pred_tfm[3].xyz;
-                        predicted_pos = predicted_pos - correction_vector;
-						const auto new_vel = rvel - (collision_impulse + frictional_impulse) * rrb_ptr->inv_mass;
-                        rrb_ptr->_prev_pos = predicted_pos - new_vel;
-					}
-				}
-			}
+			// for (const auto& [i, j, result] : collision_frame)
+			// {
+			// 	const auto& lcollider = *i->collider;
+			// 	const auto& rcollider = *j->collider;
+			// 
+			// 	auto lrigidbody = lcollider._rigidbody;
+			// 	auto rrigidbody = rcollider._rigidbody;
+			// 
+			// 	// triggers do not require resolution
+			// 	if (lcollider.is_trigger || rcollider.is_trigger)
+			// 		continue;
+			// 
+			// 	struct RigidBodyInfo
+			// 	{
+			// 		vec3 velocity = {};
+			// 		real inv_mass = 0.f;
+			// 		RigidBody* ref = nullptr;
+			// 	};
+			// 
+			// 	const auto [lvel, linv_mass, lrb_ptr] =
+            //         RigidBodyInfo{ lrigidbody->_pred_tfm[3].xyz - lrigidbody->_prev_pos, lrigidbody->inv_mass, &*lrigidbody };
+            //     const auto [rvel, rinv_mass, rrb_ptr] = rrigidbody ?
+            //         RigidBodyInfo{ rrigidbody->_pred_tfm[3].xyz - rrigidbody->_prev_pos, rrigidbody->inv_mass, &*rrigidbody } : RigidBodyInfo{};
+			// 
+			// 	auto rel_v = rvel - lvel; // a is not moving
+			// 	auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
+			// 
+			// 	if (contact_v < +epsilon)
+			// 		continue;
+			// 
+			// 	// determine collision distribution
+			// 	auto restitution = (lcollider.bounciness, rcollider.bounciness) * .5f;
+			// 	restitution = std::max(restitution - restitution_slop, 0.f);
+			// 	IDK_ASSERT(result.penetration_depth > -epsilon);
+			// 
+			// 	// determine friction disribution
+			// 
+			// 	{
+			// 		const auto sum_inv_mass = linv_mass + rinv_mass;
+			// 		const auto collision_impulse_scalar = (1.0f + restitution) * contact_v / sum_inv_mass;
+			// 		const auto collision_impulse = damping * collision_impulse_scalar * result.normal_of_collision;
+			// 
+			// 		const auto penetration = std::max(result.penetration_depth - penetration_min_slop, 0.0f);
+			// 		const auto correction_vector = penetration * penetration_max_slop * result.normal_of_collision;
+			// 
+			// 		const auto tangent = (rel_v - (rel_v.dot(result.normal_of_collision)) * result.normal_of_collision).normalize();
+			// 		const auto frictional_impulse_scalar = (1.0f + restitution) * rel_v.dot(tangent) / sum_inv_mass;
+			// 		const auto mu = (lcollider.static_friction + rcollider.static_friction) * .5f;
+			// 		const auto jtangential = -rel_v.dot(tangent) / sum_inv_mass;
+			// 
+			// 		const auto frictional_impulse = abs(jtangential) < frictional_impulse_scalar * mu
+			// 			? frictional_impulse_scalar * tangent
+			// 			: (lcollider.dynamic_friction, rcollider.dynamic_friction) * .5f * frictional_impulse_scalar * tangent;
+			// 
+			// 		if (lrb_ptr && !lrb_ptr->is_kinematic)
+			// 		{
+            //             auto& predicted_pos = lrb_ptr->_pred_tfm[3].xyz;
+			// 			predicted_pos = predicted_pos + correction_vector;
+			// 			const auto new_vel = lvel + (collision_impulse + frictional_impulse) * lrb_ptr->inv_mass;
+            //             lrb_ptr->_prev_pos = predicted_pos - new_vel;
+			// 		}
+			// 
+			// 		if (rrb_ptr && !rrb_ptr->is_kinematic)
+			// 		{
+            //             auto& predicted_pos = rrb_ptr->_pred_tfm[3].xyz;
+            //             predicted_pos = predicted_pos - correction_vector;
+			// 			const auto new_vel = rvel - (collision_impulse + frictional_impulse) * rrb_ptr->inv_mass;
+            //             rrb_ptr->_prev_pos = predicted_pos - new_vel;
+			// 		}
+			// 	}
+			// }
 		};
 
 		const auto FinalizePositions = [&]()
@@ -469,20 +472,40 @@ namespace idk
             for (const auto& elem : dynamic_info)
             {
                 auto& rigidbody = *elem.collider->_rigidbody;
-                if (!rigidbody.is_kinematic)
-                    rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
-                else
-                    rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz;
+                // if (!rigidbody.is_kinematic)
+                //     rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
+                // else
+                //     rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz;
                 rigidbody.sleep_next_frame = false;
             }
+		};
+
+		const auto DebugDraw = [&]()
+		{
+			for (const auto& col : collisions)
+			{
+				for (int i = 0; i < col.second.manifold.contactCount; ++i)
+				{
+					const auto& c = col.second.manifold.contacts[i];
+					Core::GetSystem<DebugRenderer>().Draw(c.position, color{ 0,1,0,1 }, seconds{ 0.5f });
+					Core::GetSystem<DebugRenderer>().Draw(ray{ c.position, col.second.manifold.normal }, color{ 0,1,0,1 }, seconds{ 0.5f });
+					Core::GetSystem<DebugRenderer>().Draw(ray{ c.position, col.second.manifold.tangentVectors[0]}, color{ 0,0,1,1 }, seconds{ 0.5f });
+					Core::GetSystem<DebugRenderer>().Draw(ray{ c.position, col.second.manifold.tangentVectors[0]}, color{ 0,0,1,1 }, seconds{ 0.5f });
+				}
+				LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.manifold.contactCount);
+			}
 		};
 
 		collisions.clear();
 
 		ApplyGravity();
 		PredictTransform();
-		for (int i = 0; i < 4;++i)
+		for (int i = 0; i < 1; ++i)
+		{
 			CollideObjects();
+			DebugDraw();
+		}
+
 		FinalizePositions();
 		
         if (!debug_draw_colliders)
@@ -493,7 +516,7 @@ namespace idk
         //     debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
 		static_tree.debug_draw();
         for (const auto& elem : dynamic_info)
-            debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+			debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 }, seconds{0.5f});
         for (auto& elem : colliders)
         {
             if (!elem._active_cache)
@@ -641,10 +664,11 @@ namespace idk
 
     void PhysicsSystem::DrawCollider(const Collider& collider) const
     {
+		const float a = collider.enabled ? 1.0f : 0.25f;
+		const auto col = (collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }) * a;
         std::visit([&](const auto& shape)
         {
-            Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider),
-                collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }, Core::GetDT());
+            Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider), col, Core::GetDT());
         }, collider.shape);
     }
 

@@ -64,7 +64,11 @@ namespace idk::vkn
 			);
 		}
 	};
-
+	enum class DbgPipelineType
+	{
+		eTri,
+		eLine
+	};
 	struct VulkanDebugRenderer::pimpl
 	{
 		using update_pair_t =std::pair<hlp::vector_buffer*, string_view>;
@@ -77,7 +81,7 @@ namespace idk::vkn
 		};
 
 		VulkanView& detail;
-		VulkanPipeline pipeline{};
+		VulkanPipeline pipelines[2]{};
 		//uniform_info uniforms{};
 		hash_table<DbgShape, vbo> shape_buffers{};
 		hash_table<DbgShape, vector<debug_instance>> instance_buffers{};
@@ -148,14 +152,17 @@ namespace idk::vkn
 				}
 			});
 		config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
-		Init(config);
+		auto line_copy = config;
+		line_copy.prim_top = idk::PrimitiveTopology::eLineList;
+		Init(config,line_copy);
 	}
 
-	void VulkanDebugRenderer::Init(const idk::pipeline_config& config)//, const idk::uniform_info& uniform_info)
+	void VulkanDebugRenderer::Init(const idk::pipeline_config& tri_config, const idk::pipeline_config& line_config)//, const idk::uniform_info& uniform_info)
 	{
 		auto& system = *vulkan_;
 		impl = std::make_unique<pimpl>(system.View());
-		impl->pipeline.Create(config, impl->detail);
+		impl->pipelines[(int)DbgPipelineType::eTri].Create(tri_config, impl->detail);
+		impl->pipelines[(int)DbgPipelineType::eLine].Create(line_config, impl->detail);
 
 		impl->buffer_ready = system.View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{ vk::SemaphoreCreateFlags{} });
 
@@ -225,7 +232,7 @@ namespace idk::vkn
 
 	const VulkanPipeline& VulkanDebugRenderer::GetPipeline() const
 	{
-		return impl->pipeline;
+		return impl->pipelines[0];
 	}
 	//RscHandle<Mesh> ShapeToMesh(DbgShape shape)
 	//{
@@ -260,10 +267,13 @@ namespace idk::vkn
 			//auto&& shape_buffer_proxy = impl->shape_buffers.find(shape)->second.ToProxy();
 
 			//const auto shape_index = EnumInfo::DbgShapeI::map(shape);
+			DbgPipelineType index = DbgPipelineType::eTri;
+			if (mesh == Mesh::defaults[MeshType::Circle] || mesh == Mesh::defaults[MeshType::DbgArrow] || mesh == Mesh::defaults[MeshType::DbgBox] || mesh == Mesh::defaults[MeshType::Line])
+				index = DbgPipelineType::eLine;
 
 			auto& dcall = impl->render_buffer[mesh];
 			//RscHandle<Mesh> mesh = ShapeToMesh(shape);
-
+			dcall.pipeline = &impl->pipelines[(int)index];
 			//Bind vtx buffers
 			auto& buffer_data = impl->buffer_data[impl->curr_frame][mesh];
 			auto& inst_v_buffer = buffer_data.inst_buffer;
@@ -333,8 +343,8 @@ namespace idk::vkn
 		DrawShape(MeshType::Line, line_tfm, color);
 
 		const auto orient_tfm = orient(ray.velocity.get_normalized());
-		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient(ray.velocity.get_normalized())* scale(vec3{ 0.025f }) };
-		DrawShape(MeshType::Tetrahedron, arrow_tfm, color);
+		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient_tfm * scale(vec3{ 0.025f }) };
+		DrawShape(MeshType::DbgArrow, arrow_tfm, color);
 	}
 	void VulkanDebugRenderer::Draw(const sphere& sphere, const color& color)
 	{
@@ -344,12 +354,12 @@ namespace idk::vkn
 	void VulkanDebugRenderer::Draw(const box& box, const color& color)
 	{
 		const mat4 tfm = translate(box.center) * mat4 { box.axes() } *scale(box.extents);
-		DrawShape(MeshType::Box, tfm, color);
+		DrawShape(MeshType::DbgBox, tfm, color);
 	}
 	void VulkanDebugRenderer::Draw(const aabb& box, const color& color)
 	{
 		const mat4 tfm = translate(box.center()) * mat4 { scale(box.extents()) };
-		DrawShape(MeshType::Box, tfm, color);
+		DrawShape(MeshType::DbgBox, tfm, color);
 	}
 	const std::vector<vec3>& GetSquareFace(bool is_line_list)
 	{

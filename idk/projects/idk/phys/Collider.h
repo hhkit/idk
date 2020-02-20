@@ -31,5 +31,6 @@ namespace idk
         bool _active_cache = false;
 		
 		friend class PhysicsSystem;
+		friend class CollisionManager;
 	};
 }

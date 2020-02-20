@@ -11,6 +11,6 @@ namespace idk::vkn::hlp
 	inline vk::Rect2D ToRect2D(ivec2 offset, ivec2 sz)noexcept { return ToRect2D(offset, uvec2{ sz }); }
 
 	inline vk::Extent3D ToExtent3D(uvec3 size  )noexcept { return vk::Extent3D{ (size.x), (size.y), (size.z) };  }
-	inline vk::Offset3D ToOffset3D(ivec3 offset)noexcept { return vk::Offset3D{ offset.x,offset.y,offset.z };
-	}
+	inline vk::Offset3D ToOffset3D(ivec3 offset)noexcept { return vk::Offset3D{ offset.x,offset.y,offset.z };}
+
 }

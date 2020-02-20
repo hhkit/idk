@@ -130,16 +130,24 @@ namespace idk
 
 		std::visit([&](auto h)
 		{
-				using T = typename decltype(h)::Resource;
-				if constexpr (std::is_same_v<T, idk::Texture>)
+			using T = typename decltype(h)::Resource;
+			if constexpr (std::is_same_v<T, idk::Texture>)
+			{
+				if (h && hovered)
 				{
-					if (hovered)
-					{
-						ImGui::BeginTooltip();
-						ImGui::Image(h->ID(), ImVec2{ 512, 512 }, ImVec2(0, 1), ImVec2(1, 0));
-						ImGui::EndTooltip();
-					}
+                    ImVec2 sz{ 512, 512 };
+
+                    float aspect = h->AspectRatio();
+                    if (aspect > 1.0f)
+                        sz.y /= aspect;
+                    else if (aspect < 1.0f)
+                        sz.x *= aspect;
+
+					ImGui::BeginTooltip();
+					ImGui::Image(h->ID(), sz);
+					ImGui::EndTooltip();
 				}
+			}
 		}, *handle);
 
         return dropped;

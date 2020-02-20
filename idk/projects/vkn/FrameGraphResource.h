@@ -13,4 +13,5 @@ namespace idk::vkn
 	}
 	using FrameGraphResourceReadOnly = FrameGraphResource;
 	using FrameGraphResourceMutable = FrameGraphResource;
+
 }

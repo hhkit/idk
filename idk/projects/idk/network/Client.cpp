@@ -5,7 +5,10 @@
 #include <scene/SceneManager.h>
 #include <core/GameObject.inl>
 #include <common/Transform.h>
+#include <network/NetworkSystem.h>
+#include <core/Scheduler.h>
 #include <script/ScriptSystem.h>
+#include <script/MonoBehavior.h>
 #undef SendMessage
 
 namespace idk
@@ -27,6 +30,11 @@ namespace idk
 		client.Disconnect();
 	}
 
+	bool Client::IsConnected() const
+	{
+		return client.IsConnected();
+	}
+
 	void Client::ProcessMessages()
 	{
 		for (int i = 0; i < config.numChannels; i++) 
@@ -37,29 +45,28 @@ namespace idk
 				client.ReleaseMessage(message);
 			}
 		}
+
 	}
 
 	void Client::ReceivePackets()
 	{
 		client.AdvanceTime(client.GetTime() + Core::GetRealDT().count());
 		client.ReceivePackets();
-		
+
+		// get rtt
+
 		auto connected_this_frame = client.IsConnected();
 		if (connected_this_frame && !connected_last_frame)
 		{
 			OnConnectionToServer.Fire();
-			auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-			auto thunk = network->GetThunk("ExecServerConnect", 0);
-			if (thunk)
-				(*thunk).Invoke();
+			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+				target->FireMessage("OnDisconnectedFromServer");
 		}
 		if (!connected_this_frame && connected_last_frame)
 		{
 			OnDisconnectionFromServer.Fire();
-			auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-			auto thunk = network->GetThunk("ExecServerDisconnect", 0);
-			if (thunk)
-				(*thunk).Invoke();
+			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+				target->FireMessage("OnDisconnectedFromServer");
 		}
 		if (connected_this_frame)
 			ProcessMessages();
@@ -69,6 +76,13 @@ namespace idk
 	void Client::SendPackets()
 	{
 		client.SendPackets();
+	}
+
+	float Client::GetRTT()
+	{
+		yojimbo::NetworkInfo info;
+		client.GetNetworkInfo(info);
+		return info.RTT;
 	}
 
 	yojimbo::Message* Client::CreateMessage(int id)

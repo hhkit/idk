@@ -6,11 +6,17 @@
 #include <network/ClientMoveManager.h>
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
+#include <network/NetworkTuple.inl>
 
 #undef SendMessage
 
 namespace idk
 {
+	namespace detail
+	{
+		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
+	}
+
 	template<typename RealSubstreamManager>
 	inline RealSubstreamManager& ClientConnectionManager::AddSubstreamManager()
 	{
@@ -29,6 +35,8 @@ namespace idk
 
 	ClientConnectionManager::~ClientConnectionManager()
 	{
+		if (client.IsConnected())
+			client.OnDisconnectionFromServer.Fire();
 		for (const auto& [type, slot] : OnMessageReceived_slots)
 			client.OnMessageReceived[(int) type].Unlisten(slot);
 	}
@@ -47,6 +55,9 @@ namespace idk
 
 	yojimbo::Message* ClientConnectionManager::CreateMessage(size_t id)
 	{
+		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+		
+		LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
 		return client.CreateMessage(static_cast<int>(id));
 	}
 

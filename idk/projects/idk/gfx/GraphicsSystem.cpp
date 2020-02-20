@@ -696,15 +696,59 @@ namespace idk
 					continue;
 
 				auto& render_data = result.font_render_data.emplace_back();
-				render_data.coords = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, TextAlignment::Left, 0).coords;
+				const auto font_data = FontData::Generate(f.text, f.font, f.font_size, f.letter_spacing, f.line_height, f.alignment, 0);
+
+				const float w = font_data.width;
+				const float h = font_data.height;
+				float ox = 0, oy = 0;
+
+				switch (f.anchor)
+				{
+				case TextAnchor::UpperLeft: case TextAnchor::UpperCenter: case TextAnchor::UpperRight: oy = 0; break;
+				case TextAnchor::MiddleLeft: case TextAnchor::MiddleCenter: case TextAnchor::MiddleRight: oy = h * 0.5f; break;
+				case TextAnchor::LowerLeft: case TextAnchor::LowerCenter: case TextAnchor::LowerRight: oy = h; break;
+				}
+
+				switch (f.anchor)
+				{
+				case TextAnchor::UpperLeft: case TextAnchor::MiddleLeft: case TextAnchor::LowerLeft: 
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = 0; break;
+					case TextAlignment::Center: ox = w * 0.5f; break;
+					case TextAlignment::Right: ox = w; break;
+					}
+					break;
+				case TextAnchor::UpperCenter: case TextAnchor::MiddleCenter: case TextAnchor::LowerCenter:
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = -w * 0.5f; break;
+					case TextAlignment::Center: ox = 0; break;
+					case TextAlignment::Right: ox = w * 0.5f; break;
+					}
+					break;
+				case TextAnchor::UpperRight: case TextAnchor::MiddleRight: case TextAnchor::LowerRight:
+					switch (f.alignment)
+					{
+					case TextAlignment::Left: ox = -w; break;
+					case TextAlignment::Center: ox = -w * 0.5f; break;
+					case TextAlignment::Right: ox = 0; break;
+					}
+					break;
+				}
+
+				render_data.coords = font_data.coords;
 				render_data.color = f.color;
-				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix();
+				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * translate(vec3{ ox, oy, 0 });
 				render_data.atlas = f.font;
 			}
 
 			auto& ui = Core::GetSystem<UISystem>();
 			for (auto& im : images)
 			{
+				if (!im.texture)
+					continue;
+
 				const auto& go = im.GetGameObject();
 				if (!go->ActiveInHierarchy())
 					continue;
@@ -719,8 +763,19 @@ namespace idk
 				const auto& rt = *go->GetComponent<RectTransform>();
 				auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
-				render_data.transform = rt._matrix *
-					mat4{ scale(vec3{rt._local_rect.size * 0.5f, 1.0f}) };
+				auto sz = rt._local_rect.size * 0.5f;
+
+				if (im.preserve_aspect)
+				{
+					const float tex_aspect = im.texture->AspectRatio();
+					const float rt_aspect = rt._local_rect.size.x / rt._local_rect.size.y;
+					if (tex_aspect > rt_aspect) // horizontally longer
+						sz.y = sz.x / tex_aspect;
+					else if (tex_aspect < rt_aspect) // vertically longer
+						sz.x = sz.y * tex_aspect;
+				}
+
+				render_data.transform = rt._matrix * mat4{ scale(vec3{sz, 1.0f}) };
 				render_data.material = im.material;
 				render_data.color = im.tint;
 				render_data.data = ImageData{ im.texture };
@@ -947,30 +1002,84 @@ namespace idk
 		}
 		size_t i = 0;
 		
+
+		auto draw_frustum = [this](const frustum& frust, color col,seconds duration,bool depth_test=true)
+		{
+
+			auto dbg_cascade_name = "debug_cascade";
+			auto active_opt = this->extra_vars.Get<bool>(dbg_cascade_name);
+
+			if (!active_opt)
+			{
+				extra_vars.Set(dbg_cascade_name,false);
+				active_opt = false;
+			}
+			if (!*active_opt) return;
+
+			auto intersection_point = [](halfspace a, halfspace b, halfspace c)
+			{
+				mat3 mat = mat3{ a.normal,b.normal,c.normal };
+				return mat.transpose().inverse() * vec3 { -a.dist, -b.dist, -c.dist };
+			};
+			vec3 points[8] =
+			{
+				/*vec3{-1, 1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
+				/*vec3{ 1, 1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
+				/*vec3{ 1,-1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+				/*vec3{-1,-1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
+				/*vec3{-1, 1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
+				/*vec3{ 1, 1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
+				/*vec3{ 1,-1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+				/*vec3{-1,-1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
+			};
+			//Yes I'm too scrub to write some smart code to do this for me.
+			Core::GetSystem<DebugRenderer>().Draw(points[0    ], points[4    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[1    ], points[5    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[2    ], points[6    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[3    ], points[7    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[0    ], points[1    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[1    ], points[2    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[2    ], points[3    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[3    ], points[0    ], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 0], points[4 + 1], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 1], points[4 + 2], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 2], points[4 + 3], col, duration, depth_test);
+			Core::GetSystem<DebugRenderer>().Draw(points[4 + 3], points[4 + 0], col, duration, depth_test);
+
+		};
+		size_t derp = 0;
 		for (auto& light : result.lights)
 		{
 			CameraData light_cam_info{};
 			light_cam_info.view_matrix = { light.v };
 			light_cam_info.projection_matrix = { light.p };
-			LightRenderRange range{ ++i };
+			LightRenderRange range{ i++ };
 			// TODO: Cull cascaded directional light
+			size_t lm_i = 0;
+			for (auto& lightmap : light.light_maps)
 			{
-				if (!light.cast_shadow)
+				range.light_map_index = lm_i;
 				{
-					range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
-				}
-				else
-				{
-					if (light.index == 1)
+					if (!light.cast_shadow)
 					{
-						light_cam_info.projection_matrix = { light.light_maps.back().cascade_projection };
+						range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 					}
-					const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
-					range.inst_mesh_render_begin = start_index;
-					range.inst_mesh_render_end = end_index;
+					else
+					{
+						if (light.index == 1)
+						{
+							light_cam_info.projection_matrix = { lightmap.cascade_projection };
+							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
+							draw_frustum(frust, color{ ((float)++derp)/result.camera.size(),0,(lm_i+1.0f)/light.light_maps.size(),1 }, {});
+						}
+						const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+						range.inst_mesh_render_begin = start_index;
+						range.inst_mesh_render_end = end_index;
+					}
 				}
+				result.culled_light_render_range.emplace_back(range);
+				++lm_i;
 			}
-			result.culled_light_render_range.emplace_back(range);
 			//{
 			//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);
 			//	range.inst_mesh_render_begin = start_index;

@@ -6,6 +6,7 @@ namespace idk
 
 	using NetworkMessageTuple = std::tuple<
 		class TestMessage
+	,	class EventDataBlockFrameNumber
 	,	class EventInstantiatePrefabMessage
 	,	class EventLoadLevelMessage
 	,	class EventTransferOwnershipMessage
@@ -20,9 +21,9 @@ namespace idk
 	static constexpr auto MessageID = index_in_tuple_v<T, NetworkMessageTuple>;
 
 	enum class GameChannel {
+		FASTEST_GUARANTEED,
 		RELIABLE,
 		UNRELIABLE,
-		FASTEST_GUARANTEED,
 		COUNT
 	};
 

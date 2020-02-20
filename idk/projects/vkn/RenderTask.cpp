@@ -119,6 +119,14 @@ namespace idk::vkn
 		auto uniforms = _uniform_manager.FinalizeCurrent(_uniform_sets);
 		AddToBatch(_dc_builder.end(di, uniforms));
 	}
+	void RenderTask::Copy(CopyCommand&& copy)
+	{
+		_copy_commands.emplace_back(std::move(copy));
+	}
+	void RenderTask::Copy(const CopyCommand& copy)
+	{
+		_copy_commands.emplace_back(copy);
+	}
 	void RenderTask::SetBufferDescriptions(span<buffer_desc> descriptions)
 	{
 		StartNewBatch();
@@ -131,20 +139,100 @@ namespace idk::vkn
 		configs.resize(std::max(size, attachment_index + 1));
 		configs[attachment_index] = blend_config;
 	}
+
+	//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
+	//If col is nullopt, we clear all the colors from attachment_index onwards.
+
+	void RenderTask::SetClearColor(uint32_t attachment_index, std::optional<color> col)
+	{
+		if (col)
+			clear_colors[attachment_index] = *col;
+		else
+			clear_colors.resize(attachment_index);
+	}
+	void RenderTask::SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil)
+	{
+		clear_depths = depth;
+		clear_stencil = stencil;
+	}
+	void RenderTask::SetScissors(rect r)
+	{
+		StartNewBatch();
+		r.Scale(fb_size);
+		_rect_builder.start();
+		_rect_builder.emplace_back(r);
+		_current_batch.scissor = _rect_builder.end();
+	}
+	void RenderTask::SetViewport(rect r)
+	{
+		StartNewBatch();
+		r.Scale(fb_size);
+
+		_rect_builder.start();
+		_rect_builder.emplace_back(r);
+		_current_batch.viewport = _rect_builder.end();
+	}
+	void RenderTask::SetFillType(FillType type)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.fill_type = type;
+	}
+	void RenderTask::SetCullFace(CullFaceFlags cf)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.cull_face = cf;
+	}
+	void RenderTask::SetPrimitiveTopology(PrimitiveTopology pt)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.prim_top = pt;
+	}
+	void RenderTask::SetDepthTest(bool enabled)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.depth_test = enabled;
+	}
+	void RenderTask::SetDepthWrite(bool enabled) {
+		StartNewBatch();
+		_current_batch.pipeline.depth_write = enabled;
+	}
+	void RenderTask::SetStencilTest(bool enabled)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.stencil_test = enabled;
+	}
+	void RenderTask::SetStencilWrite(bool enabled)
+	{
+		StartNewBatch();
+		_current_batch.pipeline.stencil_write = enabled;
+	}
+	const pipeline_config& RenderTask::GetCurrentConfig() const noexcept
+	{
+		return _current_batch.pipeline;
+	}
 	void RenderTask::SetInputAttachments(span<VknTextureView> input_attachments) noexcept
 	{
 		_input_attachments = input_attachments;
 	}
 
-	uint32_t compute_clear_info(span<const color> clear_colors, std::optional<float> clear_depth, std::optional<uint8_t> clear_stencil,
+	void RenderTask::SetOutputAttachmentSize(size_t size)
+	{
+		_num_output_attachments = size;
+	}
+
+	uint32_t compute_clear_info(size_t num_output_attachments,span<const color> clear_colors, std::optional<float> clear_depth, std::optional<uint8_t> clear_stencil,
 		vector<vk::ClearValue>& clear
 		)
 	{
 		clear.clear();
-		clear.reserve(clear_colors.size() + ((clear_depth|| clear_stencil) ? 1 : 0));
+		clear.reserve(num_output_attachments + ((clear_depth|| clear_stencil) ? 1 : 0));
 		for (auto color : clear_colors)
 		{
 			clear.emplace_back(std::array<float, 4> { color.r,color.g,color.b,color.a });
+		}
+		while (clear.size() < num_output_attachments)
+		{
+			clear.emplace_back(std::array<float, 4> { 0, 0, 0, 0 });
 		}
 		bool clear_other = false;
 		float depth{};
@@ -167,6 +255,7 @@ namespace idk::vkn
 	{
 		//AddToBatch(_current_batch);
 		StartNewBatch();//flush the current batch
+		ProcessCopies(render_bundle);
 		auto cmd_buffer = render_bundle._cmd_buffer;
 		auto& d_manager = render_bundle._d_manager;
 		vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
@@ -177,7 +266,7 @@ namespace idk::vkn
 		vector<vk::Viewport> viewports;
 		std::optional<RenderPassObj> prev_rp;
 		vector<vk::ClearValue> clear_values;
-		compute_clear_info(clear_colors, clear_depths, clear_stencil,clear_values);
+		compute_clear_info(_num_output_attachments, clear_colors, clear_depths, clear_stencil,clear_values);
 		vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
 		if (_label)
 		{
@@ -314,6 +403,39 @@ namespace idk::vkn
 			_current_batch.label.reset();
 		}
 		_start_new_batch = start;
+	}
+	void RenderTask::ProcessCopies(RenderBundle& render_bundle)
+	{
+		auto cmd_buffer = render_bundle._cmd_buffer;
+		for (auto& copy_cmd : _copy_commands)
+		{
+			auto src_img = copy_cmd.src.Image();
+			auto dst_img = copy_cmd.dst.Image();
+			//Transition from their original layouts to eGeneral
+			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, vk::ImageLayout::eGeneral);
+			}
+			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), copy_cmd.dst_layout, vk::ImageLayout::eGeneral);
+			}
+			cmd_buffer.copyImage(copy_cmd.src.Image(), vk::ImageLayout::eGeneral, copy_cmd.dst.Image(), vk::ImageLayout::eGeneral, copy_cmd.regions);
+			//Transition from their eGeneral to original layouts 
+			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), vk::ImageLayout::eGeneral, copy_cmd.src_layout);
+			}
+			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
+			{
+				//cmd_buffer.pipelineBarrier();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eGeneral, copy_cmd.dst_layout);
+			}
+		}
+
 	}
 	RenderTask::DrawCallBuilder::DrawCallBuilder(vector<VertexBindingData>& vtx) : _vb_builder{vtx}
 	{

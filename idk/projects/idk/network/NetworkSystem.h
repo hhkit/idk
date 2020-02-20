@@ -26,10 +26,13 @@ namespace idk
 		void InstantiateServer(const Address& d);
 		void ConnectToServer(const Address& d);
 
+		void Disconnect();
+
 		Client& GetClient() { return *client; }
 		Server& GetServer() { return *lobby; }
 
 		bool IsHost();
+		SeqNo GetSequenceNumber() const;
 		ConnectionManager* GetConnectionTo(Host host = Host::ANY);
 		template<typename Message, typename InstantiationFunc, typename = sfinae<std::is_invocable_v<InstantiationFunc, Message&>>>
 		void BroadcastMessage(GameChannel channel, InstantiationFunc&& func);
@@ -40,6 +43,10 @@ namespace idk
 
 		void RespondToPackets();
 		void PreparePackets();
+
+		void AddCallbackTarget(Handle<mono::Behavior> behavior);
+		void RemoveCallbackTarget(Handle<mono::Behavior> behavior);
+		span<const Handle<mono::Behavior>> GetCallbackTargets() const;
 
 		template<typename ... Objects> void SubscribePacketResponse(void(*fn)(span<Objects...>));
 	private:
@@ -57,6 +64,10 @@ namespace idk
 
 		vector<ResponseCallback> frame_start_callbacks;
 		vector<ResponseCallback> frame_end_callbacks;
+
+		vector<Handle<mono::Behavior>> callback_objects;
+
+		SeqNo frame_counter{};
 
 		void Init() override;
 		void LateInit() override;

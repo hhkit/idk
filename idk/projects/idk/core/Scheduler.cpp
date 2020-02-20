@@ -40,9 +40,9 @@ namespace idk
 				elem.previous_frames.push_back(Pass::Call{ duration_cast<seconds>(end - pt), paused });
 			}
 		};
-		while (_accumulated_real_dt > _real_dt)
+		while (_accumulated_real_dt > _game_update)
 		{
-			_accumulated_real_dt -= _real_dt;
+			_accumulated_real_dt -= _game_update;
 			execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
 
 			while (_accumulated_fixed_dt > _fixed_dt)
@@ -65,11 +65,11 @@ namespace idk
 	}
 	seconds Scheduler::GetDeltaTime()noexcept
 	{
-		return _real_dt * time_scale;
+		return _game_update * time_scale;
 	}
 	seconds Scheduler::GetUnscaledDeltaTime() noexcept
 	{
-		return _real_dt;
+		return _game_update;
 	}
 	seconds Scheduler::GetRemainingTime() noexcept
 	{

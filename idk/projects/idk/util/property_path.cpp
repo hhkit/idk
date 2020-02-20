@@ -15,6 +15,8 @@ namespace idk
 
         if (!obj.valid())
             return curr;
+        if (path.empty())
+            return obj;
 
         while (offset < path.size())
         {
@@ -80,6 +82,11 @@ namespace idk
     {
         if (!value.valid() || !obj.valid())
             return;
+        if (path.empty())
+        {
+            reflect::dynamic{ obj } = value;
+            return;
+        }
 
         size_t offset = 0;
         reflect::dynamic curr;

@@ -13,6 +13,7 @@ namespace idk::vkn::meta
 {
 	template<typename V, typename T>
 	struct IndexOf;
+
 	template<typename T, T v, typename Pack>
 	struct IndexInPack;
 	template<typename Pack>

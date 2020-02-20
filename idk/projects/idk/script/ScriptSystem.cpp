@@ -39,6 +39,7 @@ namespace idk::mono
 		}
 		else
 			LOG_CRASH("Could not copy game dll!");
+
 	}
 
 	void ScriptSystem::UnloadGameScripts()

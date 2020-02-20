@@ -27,6 +27,7 @@
 
 namespace idk::win
 {
+#define _DEBUG
 	Windows::Windows(HINSTANCE _hInstance, int nCmdShow)
 		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}
 	{
@@ -444,7 +445,7 @@ namespace idk::win
 			grabScreenCoordinates(lParam);
 			break;
 		case WM_MOUSEWHEEL:
-			_input_manager->SetMouseScroll(ivec2{ 0, GET_WHEEL_DELTA_WPARAM(wParam) });
+			_input_manager->SetMouseScroll(ivec2{ 0, GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA });
 			break;
 		case WM_PAINT:
 			ValidateRect(hWnd, 0);

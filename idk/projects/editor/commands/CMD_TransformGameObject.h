@@ -10,6 +10,7 @@
 
 #include <editor/commands/ICommand.h>
 #include <core/GameObject.h>
+#include <prefab/PrefabInstance.h>
 
 namespace idk {
 
@@ -23,6 +24,7 @@ namespace idk {
 	private:
 		mat4		original_values			{};
 		mat4		new_values				{};
+		vector<PropertyOverride> overrides_old;
 	};
 
 }

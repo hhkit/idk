@@ -51,6 +51,8 @@
 
 #include <vkn/graph_test.h>
 
+#include <vkn/FrameGraph.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<ThreadedRender>()
@@ -61,6 +63,9 @@ namespace idk::vkn
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
 		gt::GraphTest test;
+
+		
+
 		uint32_t testing = 0;
 	};
 
@@ -451,7 +456,7 @@ namespace idk::vkn
 //
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
-		auto& lights = *state.shared_gfx_state->lights;
+		auto& lights = (*state.shadow_ranges);
 		const size_t num_conv_states = 1;
 		const size_t num_instanced_buffer_state = 1;
 		const size_t num_color_pick_states = 1;
@@ -547,11 +552,21 @@ namespace idk::vkn
 		//calculate the cascade projection matrix
 		auto& cameras = *state.cameras;
 
-		for (auto light_idx : state.active_lights)
+		auto& rs = _pre_states[curr_state];
 		{
-			//auto& rs = _pre_states[curr_state++];
-			PreRenderShadow(light_idx, state, _pre_states, curr_state, frame_index);
+
+			auto dispatcher = vk::DispatchLoaderDefault{};
+			vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+			vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+			cmd_buffer.begin(begin_info, dispatcher);
+			for (auto range : lights)
+			{
+				PreRenderShadow(range, state, _pre_states, curr_state, frame_index);
+			}
+			cmd_buffer.end();
+			rs.ubo_manager.UpdateAllBuffers();
 		}
+		++curr_state;
 		
 		//TODO: Submit the command buffers
 
@@ -726,9 +741,11 @@ namespace idk::vkn
 		}
 	}
 //#pragma optimize("", off)
-	void FrameRenderer::PreRenderShadow(size_t light_index, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
+	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
-		const LightData& light = state.shared_gfx_state->Lights()[light_index];
+		const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
+		auto& rs = r[curr_state];
+		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		if (!light.update_shadow)
 			return;
 		if (light.index == 1)
@@ -741,12 +758,8 @@ namespace idk::vkn
 				mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 				//for (auto& e : *state.d_lightmaps)
 				{
-					auto& rs = r[curr_state++];
-					auto dispatcher = vk::DispatchLoaderDefault{};
-					vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-					vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-					cmd_buffer.begin(begin_info, dispatcher);
-					for (auto& elem : light.light_maps)
+					//for (auto& elem : light.light_maps)
+					auto& elem = light.light_maps[shadow_range.light_map_index];
 					{
 						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
 						ShadowBinding shadow_binding;
@@ -758,7 +771,7 @@ namespace idk::vkn
 							cam,
 							*state.skeleton_transforms);
 						GraphicsStateInterface gsi = { state };
-						gsi.range = (*state.shadow_ranges)[light_index];
+						gsi.range = shadow_range;
 						auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
 						the_interface.GenerateDS(rs.dpools,false);
 
@@ -788,8 +801,8 @@ namespace idk::vkn
 						dbg::EndLabel(cmd_buffer);
 						cmd_buffer.endRenderPass();
 					}
-					cmd_buffer.end();
-					rs.ubo_manager.UpdateAllBuffers();
+					//cmd_buffer.end();
+					//rs.ubo_manager.UpdateAllBuffers();
 				}
 			}
 		}
@@ -807,22 +820,22 @@ namespace idk::vkn
 				*state.skeleton_transforms);
 
 			GraphicsStateInterface gsi = { state };
-			gsi.range = (*state.shadow_ranges)[light_index];
+			gsi.range = shadow_range;
 
 			for (auto& elem : light.light_maps)
 			{
-				auto& rs = r[curr_state++];
+				auto& rs = r[curr_state];
 				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-				the_interface.GenerateDS(rs.dpools);
+				the_interface.GenerateDS(rs.dpools,false);
 
 
 				//auto& swapchain = view.Swapchain();
-				auto dispatcher = vk::DispatchLoaderDefault{};
-				vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-				vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-
-			
-				cmd_buffer.begin(begin_info, dispatcher);
+				//auto dispatcher = vk::DispatchLoaderDefault{};
+				//vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+				//vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+				//
+				//
+				//cmd_buffer.begin(begin_info, dispatcher);
 				auto sz = elem.light_map->DepthAttachment().buffer->Size();
 				vk::Rect2D render_area
 				{
@@ -841,9 +854,8 @@ namespace idk::vkn
 					rs.FlagRendered();
 				RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
 
-				rs.ubo_manager.UpdateAllBuffers();
 				cmd_buffer.endRenderPass();
-				cmd_buffer.end();
+				//cmd_buffer.end();
 
 			}
 		}
@@ -1213,45 +1225,50 @@ namespace idk::vkn
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		//TODO: figure out inheritance pipeline inheritance and inherit from dbg_pipeline for various viewport sizes
-		auto& pipeline = state.dbg_pipeline;
+		//auto& pipelines = state.dbg_pipeline;
 
 		//Preprocess MeshRender's uniforms
 		//auto&& [processed_ro, layout_count] = ProcessRoUniforms(state, rs.ubo_manager);
 		//rs.ubo_manager.UpdateAllBuffers();
 		//auto alloced_dsets = rs.dpools.Allocate(layout_count);
 		rs.FlagRendered();
-		pipeline->Bind(cmd_buffer, *_view);
-		SetViewport(cmd_buffer, vp_pos, vp_size);
-		//Bind the uniforms
-		auto& layouts = pipeline->uniform_layouts;
-		uint32_t trf_set = 0;
-		auto itr = layouts.find(trf_set);
-		if (itr != layouts.end())
-		{
-			DescriptorUpdateData dud;
-			auto ds_layout = itr->second;
-			auto allocated =rs.dpools.Allocate(hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>{ {ds_layout, {vk::DescriptorType::eUniformBuffer,2}}});
-			auto aitr = allocated.find(ds_layout);
-			if (aitr != allocated.end())
-			{
-				auto&& [view_buffer, vb_offset] = rs.ubo_manager.Add(state.camera.view_matrix);
-				auto&& [proj_buffer, pb_offset] = rs.ubo_manager.Add(mat4{ 1,0,0,0,   0,1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix);
-				auto ds = aitr->second.GetNext();
-				UpdateUniformDS(ds, vector<ProcessedRO::BindingInfo>{ 
-					ProcessedRO::BindingInfo{
-						0,view_buffer,vb_offset,0,sizeof(mat4),itr->second
-					},
-					ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
-				},dud
-				);
-				dud.SendUpdates();
-				cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->pipelinelayout, 0, ds, {});
-			}
-		}
-		
+		const VulkanPipeline* prev = nullptr;
 		for (auto& p_dc : state.dbg_render)
 		{
-			
+			if (prev!=p_dc->pipeline)
+			{
+				auto pipeline = p_dc->pipeline;
+				pipeline->Bind(cmd_buffer, *_view);
+				SetViewport(cmd_buffer, vp_pos, vp_size);
+				//Bind the uniforms
+				auto& layouts = pipeline->uniform_layouts;
+				uint32_t trf_set = 0;
+				auto itr = layouts.find(trf_set);
+				if (itr != layouts.end())
+				{
+					DescriptorUpdateData dud;
+					auto ds_layout = itr->second;
+					auto allocated = rs.dpools.Allocate(hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>{ {ds_layout, { vk::DescriptorType::eUniformBuffer,2 }}});
+					auto aitr = allocated.find(ds_layout);
+					if (aitr != allocated.end())
+					{
+						auto&& [view_buffer, vb_offset] = rs.ubo_manager.Add(state.camera.view_matrix);
+						auto&& [proj_buffer, pb_offset] = rs.ubo_manager.Add(mat4{ 1,0,0,0,   0,1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix);
+						auto ds = aitr->second.GetNext();
+						UpdateUniformDS(ds, vector<ProcessedRO::BindingInfo>{
+							ProcessedRO::BindingInfo{
+								0,view_buffer,vb_offset,0,sizeof(mat4),itr->second
+							},
+								ProcessedRO::BindingInfo{ 1,proj_buffer,pb_offset,0,sizeof(mat4),itr->second }
+						}, dud
+						);
+						dud.SendUpdates();
+						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->pipelinelayout, 0, ds, {});
+					}
+				}
+				prev = pipeline;
+
+			}
 			auto& dc = *p_dc;
 			dc.Bind(cmd_buffer);
 			//cmd_buffer.bindVertexBuffers(0,

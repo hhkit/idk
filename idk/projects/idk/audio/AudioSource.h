@@ -33,9 +33,9 @@ namespace idk
 		//bool IsAudioPaused(int index)
 		bool IsAudioClipPlaying(int index);
 		bool IsAnyAudioClipPlaying();
-		void UpdateAudioClips();
 		int  FindAudio(string_view name);
 
+		void UpdateAudioClips();
 
 		vector<RscHandle<AudioClip>> audio_clip_list;
 		vector<float>				 audio_clip_volume;	//This is tightly updated with the list, like a pair
@@ -54,6 +54,7 @@ namespace idk
 		SubSoundGroup	soundGroup	{ SubSoundGroup::SubSoundGroup_SFX };
 
 
+		void ResizeAudioClipListData();
 	private:
 		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode. Collates the current setting given.
 

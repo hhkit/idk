@@ -9,9 +9,12 @@
 #include <network/Client.h>
 #include <network/ServerConnectionManager.h>
 #include <network/ClientConnectionManager.h>
+#include <network/ConnectionManager.inl>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
+#include <network/EventDataBlockFrameNumber.h>
 #include <core/GameState.h>
+
 namespace idk
 {
 	NetworkSystem::NetworkSystem() = default;
@@ -20,10 +23,15 @@ namespace idk
 	void NetworkSystem::InstantiateServer(const Address& d)
 	{
 		ResetNetwork();
+		frame_counter = 0;
 		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
 		lobby->OnClientConnect += [this](int clientid)
 		{
 			server_connection_manager[clientid] = std::make_unique<ServerConnectionManager>(clientid, *lobby);
+			server_connection_manager[clientid]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [this](EventDataBlockFrameNumber& msg)
+				{
+					msg.frame_count = frame_counter;
+				});
 		};
 		lobby->OnClientDisconnect += [this](int clientid)
 		{
@@ -35,10 +43,18 @@ namespace idk
 	void NetworkSystem::ConnectToServer(const Address& d)
 	{
 		ResetNetwork();
+		frame_counter = 0;
 		client = std::make_unique<Client>(Address{ d.a,d.b,d.c,d.d, server_listen_port });
 		client->OnConnectionToServer += [this]()
 		{
 			client_connection_manager = std::make_unique<ClientConnectionManager>(*client);
+			client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber* event)
+				{
+					frame_counter = event->frame_count;
+
+					auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
+					frame_counter += frames_late;
+				});
 		};
 		client->OnDisconnectionFromServer += [this]()
 		{
@@ -47,9 +63,19 @@ namespace idk
 		id_manager = std::make_unique<IDManager>();
 	}
 
+	void NetworkSystem::Disconnect()
+	{
+		ResetNetwork();
+	}
+
 	bool NetworkSystem::IsHost()
 	{
 		return static_cast<bool>(lobby);
+	}
+
+	SeqNo NetworkSystem::GetSequenceNumber() const
+	{
+		return frame_counter;
 	}
 
 	ConnectionManager* NetworkSystem::GetConnectionTo(Host host)
@@ -75,10 +101,22 @@ namespace idk
 
 	void NetworkSystem::ReceivePackets()
 	{
+		if (lobby || client)
+		{
+			if (frame_counter != 0xFFFF)
+				++frame_counter;
+			else
+				frame_counter = 0;
+		}
+
 		if (lobby)
+		{
 			lobby->ReceivePackets();
+		}
 		if (client)
+		{
 			client->ReceivePackets();
+		}
 	}
 
 	void NetworkSystem::SendPackets()
@@ -117,6 +155,22 @@ namespace idk
 			if (elem)
 				elem->FrameEndManagers();
 	}
+
+	void NetworkSystem::AddCallbackTarget(Handle<mono::Behavior> behavior)
+	{
+		callback_objects.emplace_back(behavior);
+	}
+
+	void NetworkSystem::RemoveCallbackTarget(Handle<mono::Behavior> behavior)
+	{
+		callback_objects.erase(std::remove(callback_objects.begin(), callback_objects.end(), behavior), callback_objects.end());
+	}
+
+	span<const Handle<mono::Behavior>> NetworkSystem::GetCallbackTargets() const
+	{
+		return callback_objects;
+	}
+
 
 	void NetworkSystem::Init()
 	{

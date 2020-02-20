@@ -19,6 +19,8 @@
 
 #include <util/ExtraVars.h>
 
+#include <gfx/DefaultShaders.h>
+
 namespace idk
 {
 
@@ -30,40 +32,6 @@ namespace idk
 		Default = OpenGL
 	};
 
-	enum VertexShaders
-	{
-		VDebug,
-		VNormalMesh,
-		VNormalMeshPicker,
-		VSkinnedMesh,
-		VSkinnedMeshPicker,
-        VParticle,
-		VSkyBox,
-		VPBRConvolute,
-		VFsq,
-		VFont,
-        VUi,
-		VMax
-	};
-	enum FragmentShaders
-	{
-		FDebug,
-		FSkyBox,
-		FShadow,
-		FPicking,
-		FPBRConvolute,
-		FBrdf,
-		FFont,
-		FDeferredPost,
-		FDeferredPostSpecular,
-		FDeferredPostAmbient,
-		FMax
-	};
-	enum GeometryShaders
-	{
-		GSinglePassCube,
-		GMax
-	};
 	struct RenderRequest;
 
 
@@ -83,6 +51,7 @@ namespace idk
 		struct LightRenderRange
 		{
 			size_t light_index;
+			size_t light_map_index;
 			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
 			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
 		};

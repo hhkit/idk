@@ -10,7 +10,7 @@ namespace idk::ImGuidk
     {
         bool ret = false;
 
-        if (ImGui::BeginCombo(label, e->to_string().data()))
+        if (ImGui::BeginCombo(label, string(e->to_string()).c_str()))
         {
             for (auto name : EnumT::names)
             {

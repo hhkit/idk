@@ -13,6 +13,7 @@ namespace TestAndSeek
 
         void Start()
         {
+            /*
             ElectronNetwork.OnClientConnected += 
                 (Player p) =>
                 {
@@ -38,6 +39,7 @@ namespace TestAndSeek
 
             ElectronNetwork.OnServerConnected += () => { Debug.Log("connected to server!"); };
             ElectronNetwork.OnServerDisconnected += () => { Debug.Log("disconnected from server!"); };
+            */
             StartCoroutine(TransferObjects());
 
         }
@@ -46,7 +48,7 @@ namespace TestAndSeek
         {
             yield return null;
             yield return null;
-            foreach (var p in ElectronNetwork.GetPlayers())
+            foreach (var p in ElectronNetwork.players)
             {
                 PlayerController c = null;
                 switch (p.ActorNumber)

@@ -48,6 +48,7 @@ namespace idk
 			};
 		};
 
+		display_plots("Frame Start", UpdatePhase::FrameStart);
 		display_plots("Fixed Update", UpdatePhase::Fixed);
 		display_plots("Always Update", UpdatePhase::MainUpdate);
 		display_plots("Prerender", UpdatePhase::PreRender);

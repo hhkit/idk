@@ -80,6 +80,7 @@ namespace idk
 		make_button(LogPool::ANY, "All");
 		make_button(LogPool::SYS, "System");
 		make_button(LogPool::PHYS, "Physics");
+		make_button(LogPool::AUDIO, "Audio");
 		make_button(LogPool::GFX, "Graphics");
 		make_button(LogPool::ANIM, "Animation");
 		make_button(LogPool::MONO, "Mono");

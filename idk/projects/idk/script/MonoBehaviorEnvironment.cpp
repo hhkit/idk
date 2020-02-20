@@ -68,6 +68,7 @@ namespace idk::mono
 	}
 	void MonoBehaviorEnvironment::Init()
 	{
+		auto type = Core::GetSystem<ScriptSystem>().Environment().Type("IDK");
 		FindMonoBehaviors();
 	}
 	ManagedType* MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
@@ -116,9 +117,7 @@ namespace idk::mono
 
 				do
 				{
-					
 					LOG_TO(LogPool::MONO, "  CHECKING %s:%s @ %p", mono_class_get_namespace(check_parent), mono_class_get_name(check_parent), check_parent);
-					auto my_img = mono_class_get_image(check_parent);
 					if (mono_class_get_name(check_parent) == string_view{ "MonoBehavior" })
 						return true;
 					if (check_parent == monobehavior)
@@ -147,6 +146,11 @@ namespace idk::mono
 				find_method(type, "Awake");
 				find_method(type, "Start");
 				find_method(type, "FixedUpdate");
+				find_method(type, "OnConnectedToServer");
+				find_method(type, "OnDisconnectedFromServer");
+				find_method(type, "OnClientConnect", 1);
+				find_method(type, "OnClientDisconnect", 1);
+				find_method(type, "OnDestroy");
 				find_method(type, "OnTriggerEnter", 1);
 				find_method(type, "OnTriggerStay", 1);
 				find_method(type, "OnTriggerExit", 1);

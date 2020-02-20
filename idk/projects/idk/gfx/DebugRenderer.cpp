@@ -4,12 +4,19 @@
 #include <gfx/MeshFactory.h>
 #include <math/matrix_transforms.inl>
 #include <ds/span.inl>
+#include <gfx/Camera.h>
+
 
 namespace idk
 {
 	void DebugRenderer::Draw(RscHandle<Mesh> mesh, const mat4& transform, const color& c, seconds duration, bool depth_test)
 	{
 		debug_info.emplace_back(DebugInfo{ mesh, transform, c, duration, depth_test });
+	}
+	void DebugRenderer::Draw(const vec3& point, const color& c, seconds duration, bool depth_test)
+	{
+		const mat4 tfm = translate(point) * mat4 { scale(vec3{ 0.1f }) };
+		Draw(Mesh::defaults[MeshType::Sphere], tfm, c, duration, depth_test);
 	}
 	void DebugRenderer::Draw(const aabb& bounding_box, const color& c, seconds duration, bool depth_test)
 	{
@@ -18,7 +25,8 @@ namespace idk
 	void DebugRenderer::Draw(const box& oriented_box, const color& c, seconds duration, bool depth_test)
 	{
 		const mat4 tfm = translate(oriented_box.center) * mat4 { oriented_box.axes() } * scale(oriented_box.extents);
-		Draw(Mesh::defaults[MeshType::Box], tfm, c, duration, depth_test);
+		Draw(Mesh::defaults[MeshType::DbgBox], tfm, c, duration, depth_test);
+		// Draw(ray{ vec3{0, 0,0},  oriented_box.axes() * vec3{1,0,0} });
 	}
 
 	void DebugRenderer::Draw(const capsule& capsule, const color& c, seconds duration, bool depth_test)
@@ -70,9 +78,20 @@ namespace idk
 		const auto line_tfm = look_at(ray.origin + ray.velocity / 2, ray.origin + ray.velocity, vec3{ 0,1,0 }) * mat4 { scale(vec3{ ray.velocity.length() / 2 }) };
 		Draw(Mesh::defaults[MeshType::Line], line_tfm, c, duration, depth_test);
 
-		const auto orient_tfm = orient(ray.velocity.get_normalized());
-		const auto arrow_tfm = translate(ray.origin + ray.velocity) * mat4 { orient(ray.velocity.get_normalized()) } *scale(vec3{ 0.025f });
-		Draw(Mesh::defaults[MeshType::Tetrahedron], arrow_tfm, c, duration, depth_test);
+		const auto len = ray.velocity.length();
+		const auto dir = ray.velocity / len;
+		
+		// const float offset = min(len * 0.2f, 0.2f);
+		const auto orient_fk = [](auto z_prime)
+		{
+			const auto axis = vec3{ 0, 0, 1 }.cross(z_prime);
+			const auto angle = acos(z_prime.z);
+			return rotate(axis, angle);
+		};
+		
+		const auto orient_tfm = mat4{ mat3{ orient(dir) } };
+		const auto arrow_tfm = translate(ray.origin + ray.velocity) * orient_tfm * scale(vec3{ 1, 1, 1 });
+		Draw(Mesh::defaults[MeshType::DbgArrow], arrow_tfm, c, duration, depth_test);
 		
 	}
 

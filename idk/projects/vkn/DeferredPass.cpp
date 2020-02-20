@@ -26,6 +26,7 @@
 #include <res/ResourceHandle.inl>
 #include <res/ResourceMeta.inl>
 #include <ds/result.inl>
+#include "DeferredPass.h"
 
 #if 1
 namespace idk::vkn
@@ -718,7 +719,7 @@ namespace idk::vkn
 		}
 	};
 	
-	using PbrDeferredGbufferBinding = CombinedBindings<TypeCheck, StandardVertexBindings, StandardMaterialFragBindings, PbrFwdBindings, StandardMaterialBindings>;
+	using PbrDeferredGbufferBinding = CombinedBindings<TypeCheck, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 
 	static ShadingModel gbuffer_type_to_model[] = {ShadingModel::DefaultLit,ShadingModel::Specular};
 
@@ -883,3 +884,6 @@ namespace idk::vkn
 	}
 }
 #endif
+
+//returns color and depth
+

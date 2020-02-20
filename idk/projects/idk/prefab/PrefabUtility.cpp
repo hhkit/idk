@@ -9,6 +9,7 @@
 #include <common/Transform.h>
 #include <common/Name.h>
 #include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <ds/slow_tree.inl>
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl> //Assign
@@ -97,7 +98,6 @@ namespace idk
                 t_ori.position = t_prefab.position;
                 t_ori.rotation = t_prefab.rotation;
                 t_ori.scale = t_prefab.scale;
-                t_ori.parent = t_prefab.parent;
             }
             else if (prefab_comp.is<Name>())
                 go->Name(prefab_comp.get<Name>().name);
@@ -753,13 +753,39 @@ namespace idk
         prefab_inst->overrides[ov_i].value.swap(val.copy());
     }
 
-    void PrefabUtility::RecordPrefabInstanceRemoveComponent(Handle<GameObject> target, string_view component_name, int component_nth)
+    void PrefabUtility::RecordPrefabInstanceChangeForced(
+        Handle<GameObject> target, string_view component_name, int component_nth, string_view property_path, reflect::dynamic val)
     {
         auto prefab_inst = target->GetComponent<PrefabInstance>();
         IDK_ASSERT(prefab_inst);
 
         component_nth = helpers::instance_component_nth_to_prefab_data_component_nth(target, component_name, component_nth);
-        prefab_inst->removed_components.push_back({ component_name, component_nth });
+
+        int ov_i = helpers::find_override(*prefab_inst, component_name, property_path, component_nth);
+        if (ov_i == -1) // override not found
+        {
+            ov_i = static_cast<int>(prefab_inst->overrides.size());
+            prefab_inst->overrides.push_back({ string(component_name), string(property_path), component_nth });
+        }
+
+        prefab_inst->overrides[ov_i].value.swap(val.copy());
+    }
+
+    bool PrefabUtility::RecordPrefabInstanceRemoveComponent(Handle<GameObject> target, string_view component_name, int component_nth)
+    {
+        auto prefab_inst = target->GetComponent<PrefabInstance>();
+        IDK_ASSERT(prefab_inst);
+
+        component_nth = helpers::instance_component_nth_to_prefab_data_component_nth(target, component_name, component_nth);
+
+        // if -1, component is not part of prefab
+        if (prefab_inst->prefab->data[prefab_inst->object_index].GetComponentIndex(component_name, component_nth) >= 0)
+        {
+            prefab_inst->removed_components.push_back({ component_name, component_nth });
+            return true;
+        }
+
+        return false;
     }
 
     void PrefabUtility::RecordDefaultOverrides(Handle<GameObject> target)
@@ -804,13 +830,15 @@ namespace idk
         }
     }
 
-    void PrefabUtility::RevertRemovedComponent(Handle<GameObject> target, int component_index)
+    void PrefabUtility::RevertRemovedComponent(Handle<GameObject> target, int component_index, GenericHandle force_handle)
     {
         auto prefab_inst = target->GetComponent<PrefabInstance>();
         IDK_ASSERT(prefab_inst);
 
         auto data = prefab_inst->prefab->data[prefab_inst->object_index];
-        auto comp = target->AddComponent(data.components[component_index]);
+        GenericHandle comp = force_handle == GenericHandle{} ?
+            comp = target->AddComponent(data.components[component_index]) :
+            comp = target->AddComponent(force_handle, data.components[component_index]);
 
         const auto cname = data.components[component_index].type.name();
         const auto nth = data.GetComponentNth(component_index);
@@ -824,28 +852,7 @@ namespace idk
             }
         }
 
-        { // reassign all same type components from n, so that new component is slotted into the correct index
-            auto n = nth;
-            auto comps = target->GetComponents();
-            int i = 0;
-            for (auto h : comps)
-            {
-                if ((*h).type == data.components[component_index].type)
-                {
-                    if (n == 0)
-                    {
-                        if (i == 0)
-                            comp = h;
-                        *h = data.components[component_index + i];
-                        ++i;
-                    }
-                    else
-                    {
-                        --n;
-                    }
-                }
-            }
-        }
+        target->SetComponentIndex(comp, nth);
 
         for (const auto& ov : prefab_inst->overrides)
         {
@@ -869,8 +876,8 @@ namespace idk
         prefab_inst.overrides.clear();
 
         vector<Handle<GameObject>> objs;
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
-        tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
+        tree.Visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
         // find missing objs
         for (int i = 0; i < prefab_inst.prefab->data.size(); ++i)
@@ -1033,8 +1040,8 @@ namespace idk
         const auto& prefab = prefab_inst_handle->prefab;
 
         vector<Handle<GameObject>> objs;
-        auto* tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
-        tree->visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(instance_root);
+        tree.Visit([&objs](Handle<GameObject> child, int) { objs.push_back(child); });
 
         // find missing objs
         for (int i = 0; i < prefab->data.size(); ++i)
@@ -1072,7 +1079,7 @@ namespace idk
                 auto parent = obj->Parent();
                 auto parent_inst = parent->GetComponent<PrefabInstance>();
                 obj_prefab_inst = obj->AddComponent<PrefabInstance>();
-                obj_prefab_inst->object_index = prefab->data.size();
+                obj_prefab_inst->object_index = static_cast<int>(prefab->data.size());
                 obj_prefab_inst->prefab = prefab;
                 auto& obj_prefab_data = prefab->data.emplace_back();
                 for (auto& c : obj->GetComponents())
