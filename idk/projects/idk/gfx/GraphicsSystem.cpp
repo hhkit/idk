@@ -1179,6 +1179,8 @@ namespace idk
 		//}
 		///////////////////////Load vertex shaders
 		//renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/debug.vert");
+		renderer_vertex_shaders[VNormalMeshShadow] = LoadShader("/engine_data/shaders/shadow_mesh.vert");
+		renderer_vertex_shaders[VSkinnedMeshShadow] = LoadShader("/engine_data/shaders/shadow_skinned_mesh.vert");
 		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
 		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
@@ -1207,6 +1209,8 @@ namespace idk
 
 		////////////////////Load geometry Shaders
 		renderer_geometry_shaders[GSinglePassCube] = LoadShader("/engine_data/shaders/single_pass_cube.geom");
+		renderer_geometry_shaders[GShadowCNM] = LoadShader("/engine_data/shaders/shadow_mesh.geom");
+		renderer_geometry_shaders[GShadowCSM] = LoadShader("/engine_data/shaders/shadow_skelemesh.geom");
 
 
 	}

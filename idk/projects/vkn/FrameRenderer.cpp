@@ -389,10 +389,12 @@ namespace idk::vkn
 #pragma optimize("",off)
 	PipelineThingy ShadowProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager, ShadowBinding& binders)
 	{
-		auto& mesh_vtx = state.renderer_vertex_shaders[VNormalMeshShadow];
-		auto& skinned_mesh_vtx = state.renderer_vertex_shaders[VSkinnedMeshShadow];
-		auto& shadow_geom = state.renderer_geometry_shaders[GShadowCNM];
-		auto& skinned_shadow_geom = state.renderer_geometry_shaders[GShadowCSM];
+		auto vert_shaders = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders;
+		auto geom_shaders = Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders;
+		auto& mesh_vtx         = vert_shaders[VNormalMeshShadow];
+		auto& skinned_mesh_vtx = vert_shaders[VSkinnedMeshShadow];
+		auto& shadow_geom         = geom_shaders[GShadowCNM];
+		auto& skinned_shadow_geom = geom_shaders[GShadowCSM];
 		auto& skinned_mesh_render = *state.skinned_mesh_render;
 
 		//auto& binders = *binder;
@@ -743,7 +745,9 @@ namespace idk::vkn
 		shared_ptr<const pipeline_config> prev_config{};
 		for (auto& p_ro : processed_ro)
 		{
-			bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
+			bool is_mesh_renderer = p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh]
+									||
+									 p_ro.vertex_shader == Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMeshShadow];
 			auto& obj = p_ro.Object();
 			if (p_ro.rebind_shaders||prev_config!=obj.config)
 			{

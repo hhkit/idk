@@ -10,6 +10,10 @@ U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
 	mat4 perspective_transform[SHADOW_CASCADES];
 } PerCamera;
 
+layout (location = 0) in gl_PerVertex
+{
+  vec4 gl_Position;
+} gl_in[];
 
 layout (location = 0) out gl_PerVertex
 {
