@@ -11,6 +11,5 @@ namespace idk
         virtual void LateInit();
         virtual void Shutdown() {};
         virtual void Update(span<class ParticleSystem>);
-        virtual void EditorUpdate(span<class ParticleSystem>);
     };
 }

@@ -27,6 +27,7 @@
 
 namespace idk::win
 {
+#define _DEBUG
 	Windows::Windows(HINSTANCE _hInstance, int nCmdShow)
 		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}
 	{

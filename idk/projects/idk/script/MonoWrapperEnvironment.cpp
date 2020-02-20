@@ -1214,7 +1214,6 @@ namespace idk::mono
             auto s = unbox(type);
             auto hash = string_hash(s.get());
 
-			LOG_TO(LogPool::GAME, string{ guid }.data());
             switch (hash)
             {
 				VALIDATE_RESOURCE(Material);
@@ -1861,7 +1860,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
-			throw "have not written disconnect";
+			Core::GetSystem<NetworkSystem>().Disconnect();
 		}
 		BIND_END();
 
@@ -1895,6 +1894,18 @@ namespace idk::mono
 		BIND_START("idk.Bindings::NetworkInstantiatePrefabPositionRotation", uint64_t, Guid g, vec3 pos, quat rot)
 		{
 			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, rot).id;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkAddCallback", void, uint64_t g)
+		{
+			Core::GetSystem<NetworkSystem>().AddCallbackTarget(Handle<mono::Behavior>{g});
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkRemoveCallback", void, uint64_t g)
+		{
+			Core::GetSystem<NetworkSystem>().RemoveCallbackTarget(Handle<mono::Behavior>{g});
 		}
 		BIND_END();
 

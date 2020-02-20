@@ -40,8 +40,7 @@ namespace idk::mono
 	{
 		if (script_data)
 		{
-			auto thunk = script_data.Type()->GetThunk(msg);
-			if (thunk)
+			if (auto thunk = script_data.Type()->GetThunk(msg))
 				thunk->Invoke(script_data.Raw()); // handle args?
 		}
 	}
@@ -51,8 +50,7 @@ namespace idk::mono
 		if (!_awake && script_data)
 		{
 			_awake = true;
-			auto method = script_data.Type()->GetThunk("Awake");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("Awake"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -62,8 +60,7 @@ namespace idk::mono
 		if (!_started && script_data)
 		{
 			_started = true;
-			auto method = script_data.Type()->GetThunk("Start");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("Start"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -72,8 +69,7 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto method = script_data.Type()->GetThunk("FixedUpdate");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("FixedUpdate"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -82,8 +78,7 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto method = script_data.Type()->GetThunk("Update");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("Update"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -92,9 +87,7 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto thunk = script_data.Type()->GetThunk("UpdateCoroutines");
-
-			if (thunk)
+			if (auto thunk = script_data.Type()->GetThunk("UpdateCoroutines"))
 				thunk->Invoke(script_data.Raw());
 		}
 	}
@@ -136,6 +129,15 @@ namespace idk::mono
 		}
 
 		return *this;
+	}
+
+	Behavior::~Behavior()
+	{
+		if (const auto* type = script_data.Type())
+		{
+			if (auto thunk = type->GetThunk("OnDestroy"))
+				thunk->Invoke(script_data.Raw());
+		}
 	}
 	
 }

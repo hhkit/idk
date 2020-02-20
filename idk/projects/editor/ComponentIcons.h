@@ -11,7 +11,7 @@ namespace idk
 
     template<> static constexpr inline auto ComponentIcon<Transform> = ICON_FA_CUBE;
 
-    template<> static constexpr inline auto ComponentIcon<RigidBody> = ICON_FA_CERTIFICATE;
+    template<> static constexpr inline auto ComponentIcon<RigidBody> = ICON_FA_ROCKET;
     template<> static constexpr inline auto ComponentIcon<Collider> = ICON_FA_VECTOR_SQUARE;
 
     template<> static constexpr inline auto ComponentIcon<MeshRenderer> = ICON_FA_GLOBE;
@@ -34,5 +34,9 @@ namespace idk
 
     template<> static constexpr inline auto ComponentIcon<AudioSource> = ICON_FA_VOLUME_UP;
     template<> static constexpr inline auto ComponentIcon<AudioListener> = ICON_FA_MICROPHONE;
+
+    template<> static constexpr inline auto ComponentIcon<ElectronTransformView> = ICON_FA_CUBE;
+    template<> static constexpr inline auto ComponentIcon<ElectronRigidbodyView> = ICON_FA_ROCKET;
+    template<> static constexpr inline auto ComponentIcon<ElectronView> = ICON_FA_BOLT;
 
 }

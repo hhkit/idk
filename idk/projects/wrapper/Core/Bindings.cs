@@ -703,6 +703,18 @@ namespace idk
         public extern static int[] NetworkGetPlayers();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkAddCallback(ulong handle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkRemoveCallback(ulong handle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Device[] NetworkGetDevices();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Address[] NetworkDeviceGetAddresses(string device);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkConnect(Address a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -731,6 +743,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[][] parameters);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int ViewDestroy(ulong handle);
 
     }
 }

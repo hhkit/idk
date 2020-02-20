@@ -34,6 +34,7 @@ namespace idk
 
 	ServerConnectionManager::~ServerConnectionManager()
 	{
+		server.OnClientDisconnect.Fire(clientID);
 		for (const auto& [type, slot] : OnMessageReceived_slots)
 			server.OnMessageReceived[clientID][(int)type].Unlisten(slot);
 	}

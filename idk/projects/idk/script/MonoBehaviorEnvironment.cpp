@@ -70,9 +70,6 @@ namespace idk::mono
 	{
 		auto type = Core::GetSystem<ScriptSystem>().Environment().Type("IDK");
 		FindMonoBehaviors();
-
-		void* args[] = { nullptr };
-		mono_runtime_invoke(std::get<MonoMethod*>(type->GetMethod("OnHotReload")), nullptr, args, nullptr);
 	}
 	ManagedType* MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
 	{
@@ -149,6 +146,11 @@ namespace idk::mono
 				find_method(type, "Awake");
 				find_method(type, "Start");
 				find_method(type, "FixedUpdate");
+				find_method(type, "OnConnectedToServer");
+				find_method(type, "OnDisconnectedFromServer");
+				find_method(type, "OnClientConnect", 1);
+				find_method(type, "OnClientDisconnect", 1);
+				find_method(type, "OnDestroy");
 				find_method(type, "OnTriggerEnter", 1);
 				find_method(type, "OnTriggerStay", 1);
 				find_method(type, "OnTriggerExit", 1);

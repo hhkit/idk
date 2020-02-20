@@ -20,6 +20,7 @@ namespace idk
 		Client(const Address& addr);
 		~Client();
 
+		bool IsConnected() const;
 		void ProcessMessages();
 		void ReceivePackets();
 		void SendPackets();
