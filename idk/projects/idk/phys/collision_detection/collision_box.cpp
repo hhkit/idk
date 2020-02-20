@@ -5,6 +5,7 @@
 #include <phys/collision_rotational.h>
 namespace idk::phys
 {
+#pragma optimize("", off)
 	Manifold generate_contacts(const box& lhs, const box& rhs)
 	{
 		Manifold m;
@@ -36,7 +37,7 @@ namespace idk::phys
 		}
 
 		// Vector from center A to center B in A's space
-		vec3 t = atx.rotation * (btx.position - atx.position);
+		vec3 t = atx.rotation.transpose() * (btx.position - atx.position);
 
 		// Query states
 		float s;
@@ -51,36 +52,40 @@ namespace idk::phys
 		vec3 nE;
 
 		// Face axis checks
+		const auto column = [](const mat3& m, size_t num) -> vec3
+		{
+			return vec3{ m[0][num], m[1][num] ,m[2][num] };
+		};
 
 		// a's x axis
-		s = abs(t.x) - (eA.x + absC[0].dot(eB));
+		s = abs(t.x) - (eA.x + eB.dot(column(absC, 0)));
 		if (track_face_axis(&aAxis, 0, s, &aMax, atx.rotation[0], &nA))
-			return;
+			return m;
 
 		// a's y axis
-		s = abs(t.y) - (eA.y + q3Dot(absC.Column1(), eB));
+		s = abs(t.y) - (eA.y + eB.dot(column(absC, 1)));
 		if (track_face_axis(&aAxis, 1, s, &aMax, atx.rotation[1], &nA))
-			return;
+			return m;
 
 		// a's z axis
-		s = abs(t.z) - (eA.z + q3Dot(absC.Column2(), eB));
+		s = abs(t.z) - (eA.z + eB.dot(column(absC, 2)));
 		if (track_face_axis(&aAxis, 2, s, &aMax, atx.rotation[2], &nA))
-			return;
+			return m;
 
 		// b's x axis
-		s = abs(q3Dot(t, C[0])) - (eB.x + q3Dot(absC[0], eA));
+		s = abs(t.dot(C[0])) - (eB.x + absC[0].dot(eA));
 		if (track_face_axis(&bAxis, 3, s, &bMax, btx.rotation[0], &nB))
-			return;
+			return m;
 
 		// b's y axis
-		s = abs(q3Dot(t, C[1])) - (eB.y + q3Dot(absC[1], eA));
+		s = abs(t.dot(C[1])) - (eB.y + absC[1].dot(eA));
 		if (track_face_axis(&bAxis, 4, s, &bMax, btx.rotation[1], &nB))
-			return;
+			return m;
 
 		// b's z axis
-		s = abs(q3Dot(t, C[2])) - (eB.z + q3Dot(absC[2], eA));
+		s = abs(t.dot(C[2])) - (eB.z + absC[2].dot(eA));
 		if (track_face_axis(&bAxis, 5, s, &bMax, btx.rotation[2], &nB))
-			return;
+			return m;
 
 		if (!parallel)
 		{
@@ -93,63 +98,63 @@ namespace idk::phys
 			rB = eB.y * absC[2][0] + eB.z * absC[1][0];
 			s = abs(t.z * C[0][1] - t.y * C[0][2]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 6, s, &eMax, vec3(float(0.0), -C[0][2], C[0][1]), &nE))
-				return;
+				return m;
 
 			// Cross( a.x, b.y )
 			rA = eA.y * absC[1][2] + eA.z * absC[1][1];
 			rB = eB.x * absC[2][0] + eB.z * absC[0][0];
 			s = abs(t.z * C[1][1] - t.y * C[1][2]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 7, s, &eMax, vec3(float(0.0), -C[1][2], C[1][1]), &nE))
-				return;
+				return m;
 
 			// Cross( a.x, b.z )
 			rA = eA.y * absC[2][2] + eA.z * absC[2][1];
 			rB = eB.x * absC[1][0] + eB.y * absC[0][0];
 			s = abs(t.z * C[2][1] - t.y * C[2][2]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 8, s, &eMax, vec3(float(0.0), -C[2][2], C[2][1]), &nE))
-				return;
+				return m;
 
 			// Cross( a.y, b.x )
 			rA = eA.x * absC[0][2] + eA.z * absC[0][0];
 			rB = eB.y * absC[2][1] + eB.z * absC[1][1];
 			s = abs(t.x * C[0][2] - t.z * C[0][0]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 9, s, &eMax, vec3(C[0][2], float(0.0), -C[0][0]), &nE))
-				return;
+				return m;
 
 			// Cross( a.y, b.y )
 			rA = eA.x * absC[1][2] + eA.z * absC[1][0];
 			rB = eB.x * absC[2][1] + eB.z * absC[0][1];
 			s = abs(t.x * C[1][2] - t.z * C[1][0]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 10, s, &eMax, vec3(C[1][2], float(0.0), -C[1][0]), &nE))
-				return;
+				return m;
 
 			// Cross( a.y, b.z )
 			rA = eA.x * absC[2][2] + eA.z * absC[2][0];
 			rB = eB.x * absC[1][1] + eB.y * absC[0][1];
 			s = abs(t.x * C[2][2] - t.z * C[2][0]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 11, s, &eMax, vec3(C[2][2], float(0.0), -C[2][0]), &nE))
-				return;
+				return m;
 
 			// Cross( a.z, b.x )
 			rA = eA.x * absC[0][1] + eA.y * absC[0][0];
 			rB = eB.y * absC[2][2] + eB.z * absC[1][2];
 			s = abs(t.y * C[0][0] - t.x * C[0][1]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 12, s, &eMax, vec3(-C[0][1], C[0][0], float(0.0)), &nE))
-				return;
+				return m;
 
 			// Cross( a.z, b.y )
 			rA = eA.x * absC[1][1] + eA.y * absC[1][0];
 			rB = eB.x * absC[2][2] + eB.z * absC[0][2];
 			s = abs(t.y * C[1][0] - t.x * C[1][1]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 13, s, &eMax, vec3(-C[1][1], C[1][0], float(0.0)), &nE))
-				return;
+				return m;
 
 			// Cross( a.z, b.z )
 			rA = eA.x * absC[2][1] + eA.y * absC[2][0];
 			rB = eB.x * absC[1][2] + eB.y * absC[0][2];
 			s = abs(t.y * C[2][0] - t.x * C[2][1]) - (rA + rB);
 			if (track_edge_axis(&eAxis, 14, s, &eMax, vec3(-C[2][1], C[2][0], float(0.0)), &nE))
-				return;
+				return m;
 		}
 
 		// Artificial axis bias to improve frame coherence
@@ -158,7 +163,7 @@ namespace idk::phys
 		int axis;
 		float sMax;
 		vec3 n;
-		float faceMax = q3Max(aMax, bMax);
+		float faceMax = max(aMax, bMax);
 		if (kRelTol * eMax > faceMax + kAbsTol)
 		{
 			axis = eAxis;
@@ -183,15 +188,15 @@ namespace idk::phys
 			}
 		}
 
-		if (q3Dot(n, btx.position - atx.position) < float(0.0))
+		if (n.dot(btx.position - atx.position) < float(0.0))
 			n = -n;
 
 		assert(axis != ~0);
 
 		if (axis < 6)
 		{
-			q3Transform rtx;
-			q3Transform itx;
+			collision_transform rtx;
+			collision_transform itx;
 			vec3 eR;
 			vec3 eI;
 			bool flip;
@@ -216,38 +221,38 @@ namespace idk::phys
 			}
 
 			// Compute reference and incident edge information necessary for clipping
-			q3ClipVertex incident[4];
-			q3ComputeIncidentFace(itx, eI, n, incident);
-			u8 clipEdges[4];
+			vec3 incident[4];
+			compute_incident_face(itx, eI, n, incident);
+			unsigned clipEdges[4];
 			mat3 basis;
 			vec3 e;
-			q3ComputeReferenceEdgesAndBasis(eR, rtx, n, axis, clipEdges, &basis, &e);
+			compute_edges_and_basis(eR, rtx, n, axis, clipEdges, &basis, &e);
 
 			// Clip the incident face against the reference face side planes
-			q3ClipVertex out[8];
+			vec3 out[8];
 			float depths[8];
 			int outNum;
-			outNum = q3Clip(rtx.position, e, clipEdges, basis, incident, out, depths);
+			outNum = clip(rtx.position, e, clipEdges, basis, incident, out, depths);
 
 			if (outNum)
 			{
-				m->contactCount = outNum;
-				m->normal = flip ? -n : n;
+				m.contactCount = outNum;
+				m.normal = flip ? -n : n;
 
 				for (int i = 0; i < outNum; ++i)
 				{
-					q3Contact* c = m->contacts + i;
+					ContactPoint* c = m.contacts + i;
 
-					q3FeaturePair pair = out[i].f;
+					// q3FeaturePair pair = out[i].f;
 
-					if (flip)
-					{
-						std::swap(pair.inI, pair.inR);
-						std::swap(pair.outI, pair.outR);
-					}
+					// if (flip)
+					// {
+					// 	std::swap(pair.inI, pair.inR);
+					// 	std::swap(pair.outI, pair.outR);
+					// }
 
-					c->fp = out[i].f;
-					c->position = out[i].v;
+					// c->fp = out[i].f;
+					c->position = out[i];
 					c->penetration = depths[i];
 				}
 			}
@@ -257,29 +262,45 @@ namespace idk::phys
 		{
 			n = atx.rotation * n;
 
-			if (q3Dot(n, btx.position - atx.position) < float(0.0))
+			if (n.dot(btx.position - atx.position) < 0.0f)
 				n = -n;
 
 			vec3 PA, QA;
 			vec3 PB, QB;
-			q3SupportEdge(atx, eA, n, &PA, &QA);
-			q3SupportEdge(btx, eB, -n, &PB, &QB);
+			support_edge(atx, eA, n, &PA, &QA);
+			support_edge(btx, eB, -n, &PB, &QB);
 
 			vec3 CA, CB;
-			q3EdgesContact(&CA, &CB, PA, QA, PB, QB);
+			edges_contact(&CA, &CB, PA, QA, PB, QB);
 
-			m->normal = n;
-			m->contactCount = 1;
+			m.normal = n;
+			m.contactCount = 1;
 
-			q3Contact* c = m->contacts;
-			q3FeaturePair pair;
-			pair.key = axis;
-			c->fp = pair;
+			ContactPoint* c = m.contacts;
+			// q3FeaturePair pair;
+			// pair.key = axis;
+			// c->fp = pair;
 			c->penetration = sMax;
 			c->position = (CA + CB) * float(0.5);
 		}
+
+		return m;
 	}
 
+	void compute_basis(const vec3& a, vec3* __restrict b, vec3* __restrict c)
+	{
+		// Suppose vector a has all equal components and is a unit vector: a = (s, s, s)
+		// Then 3*s*s = 1, s = sqrt(1/3) = 0.57735027. This means that at least one component of a
+		// unit vector must be greater or equal to 0.57735027. Can use SIMD select operation.
+
+		if (abs(a.x) >= 0.57735027f)
+			*b = vec3(a.y, -a.x, 0.0f);
+		else
+			*b = vec3(0.0f, a.z, -a.y);
+
+		b->normalize();
+		*c = a.cross(*b);
+	}
 	col_result collide_box_box_discrete(const box& lhs, const box& rhs)
 	{
 		auto disp = rhs.center - lhs.center;
@@ -357,6 +378,8 @@ namespace idk::phys
 			result.normal_of_collision = (rhs.center - lhs.center).dot(normal_collision) > 0 ? -normal_collision : normal_collision;
 			result.penetration_depth = max_pen;
 			result.point_of_collision; // todo
+			result.manifold = generate_contacts(lhs, rhs);
+			compute_basis(result.manifold.normal, result.manifold.tangentVectors, result.manifold.tangentVectors + 1);
 			return result;
 		}
 	}

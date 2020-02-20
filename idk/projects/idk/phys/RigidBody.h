@@ -44,6 +44,7 @@ namespace idk
         mat4 _pred_tfm{};
 
 		friend class PhysicsSystem;
+		friend class CollisionManager;
 		friend class Collider;
 	};
 }

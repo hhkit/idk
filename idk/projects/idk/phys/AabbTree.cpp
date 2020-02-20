@@ -386,7 +386,7 @@ namespace idk
 			{
 				std::visit([&](const auto& shape)
 					{
-						Core::GetSystem<DebugRenderer>().Draw(shape, node.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 }, Core::GetDT());
+						Core::GetSystem<DebugRenderer>().Draw(shape, node.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 }, seconds{ 0.5f });
 					}, node.info.predicted_shape);
 				// color col = node.leaf() ? color{ 0,1,0,1 } : color{ 1,1,1,0 };
 				// Core::GetSystem<DebugRenderer>().Draw(node.fat_aabb, col, seconds{1.0f / 60.0f}, false);

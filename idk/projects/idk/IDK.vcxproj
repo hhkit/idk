@@ -137,6 +137,7 @@
     <ClInclude Include="pch_common.h" />
     <ClInclude Include="phys\AAbbTree.h" />
     <ClInclude Include="phys\AabbTree_utils.h" />
+    <ClInclude Include="phys\CollisionManager.h" />
     <ClInclude Include="phys\collision_contact.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule.h" />
     <ClInclude Include="phys\collision_detection\collision_capsule_box.h" />
@@ -174,6 +175,8 @@
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h" />
     <ClInclude Include="phys\collision_rotational.h" />
     <ClInclude Include="phys\collision_rotation_utils.h" />
+    <ClInclude Include="phys\Collision_utils.h" />
+    <ClInclude Include="phys\ContactSolver.h" />
     <ClInclude Include="phys\raycasts\collision_raycast.h" />
     <ClInclude Include="phys\collision_result.h" />
     <ClInclude Include="phys\collision_detection\collision_sphere.h" />
@@ -443,6 +446,7 @@
     <ClCompile Include="particle\ParticleSystemUpdater.cpp" />
     <ClCompile Include="phys\AabbTree.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
+    <ClCompile Include="phys\CollisionManager.cpp" />
     <ClCompile Include="phys\collision_contacts.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
@@ -450,6 +454,7 @@
     <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp" />
     <ClCompile Include="phys\collision_rotational.cpp" />
+    <ClCompile Include="phys\ContactSolver.cpp" />
     <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
     <ClCompile Include="phys\collision_result.cpp" />
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp" />

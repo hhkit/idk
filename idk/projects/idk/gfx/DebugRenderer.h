@@ -25,6 +25,7 @@ public:
 	
 	// world space debug render
 	void Draw(RscHandle<Mesh> mesh, const mat4& transform  , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
+	void Draw(const vec3&     point		                   , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 	void Draw(const aabb&     bounding_box                 , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 	void Draw(const box&      oriented_box                 , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 	void Draw(const capsule&  capsule                      , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
