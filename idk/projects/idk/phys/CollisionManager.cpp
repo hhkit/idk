@@ -248,7 +248,7 @@ namespace idk
 
 	void CollisionManager::DebugDrawColliders(span<class Collider> colliders, float dt)
 	{
-		constexpr auto debug_draw = [&](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
+		constexpr auto debug_draw = [&](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT() + seconds{ 0.02f })
 		{
 			std::visit([&](const auto& shape)
 				{
