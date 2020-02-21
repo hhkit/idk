@@ -1,9 +1,15 @@
 #pragma once
 #include <idk.h>
-
+#include <phys/Collision_utils.h>
 
 namespace idk
 {
+	struct ContactSolution
+	{
+		CollisionPair collision;
+
+	};
+
 	class ContactSolver
 	{
 	public:
@@ -13,7 +19,7 @@ namespace idk
 	private:
 		void ApplyGravity();
 
-		int _iterations{ 1 };
+		int _iterations{ 5 };
 		friend class PhysicsSystem;
 	};
 }

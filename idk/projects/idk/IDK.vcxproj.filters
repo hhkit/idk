@@ -1170,9 +1170,6 @@
       <Filter>network</Filter>
     </ClInclude>
     <ClInclude Include="gfx\DefaultShaders.h" />
-    <ClInclude Include="phys\collision_contact.h">
-      <Filter>phys\collision</Filter>
-    </ClInclude>
     <ClInclude Include="phys\collision_rotational.h">
       <Filter>phys\rotational</Filter>
     </ClInclude>
@@ -1187,6 +1184,9 @@
     </ClInclude>
     <ClInclude Include="phys\Collision_utils.h">
       <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_contact.h">
+      <Filter>phys\rotational</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

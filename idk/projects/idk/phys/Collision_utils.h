@@ -22,6 +22,7 @@ namespace idk
 		const ColliderInfo* rhs;
 	};
 
+	// ContactConstraint == CollisionPair
 	struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
 
 	struct pair_hasher { size_t operator()(const CollisionPair&) const; };

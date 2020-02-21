@@ -46,6 +46,10 @@ namespace idk
 		_accum_accel += added;
 		return added;
 	}
+	vec3 RigidBody::AddTorque(const vec3& t)
+	{
+		torque += t;
+	}
 	void RigidBody::TeleportBy(const vec3& translation)
 	{
 		auto& tfm = *GetGameObject()->Transform();

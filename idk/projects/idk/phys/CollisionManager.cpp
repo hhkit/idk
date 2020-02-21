@@ -181,6 +181,14 @@ namespace idk
 		}
 	}
 
+	void CollisionManager::PreSolve()
+	{
+	}
+
+	void CollisionManager::Solve()
+	{
+	}
+
 	void CollisionManager::Init()
 	{
 		_static_broadphase.preallocate_nodes(2500); // Avg ~1030 static objects -> means (2 * 1030 - 1) total nodes in b-tree

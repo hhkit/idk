@@ -15,9 +15,11 @@ namespace idk
 		real inv_inertia      { 1.f };
 		vec3 center_of_mass   {};
 
-		vec3 linear_velocity{};
-		rad  angular_velocity {};
-		vec3 axis_of_angular_velocity{ 1, 0, 0 };
+		vec3 linear_velocity{ 0.0f };
+		float linear_damping{ 0.0f };
+		vec3 angular_velocity{ 0.0f };
+		float angular_damping{ 0.0f };
+		vec3 torque{ 0.0f };
 		
 
 		bool use_gravity  { true  };
@@ -39,6 +41,7 @@ namespace idk
 		void sleeping(bool new_bool);
 
 		vec3 AddForce(const vec3& newtons);
+		vec3 AddTorque(const vec3& t);
 		void TeleportBy(const vec3& translation);
 
 	private:

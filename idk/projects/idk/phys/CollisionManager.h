@@ -12,6 +12,8 @@ namespace idk
 		// Will also cache all dynamic bodies for TestCollisions.
 		void UpdatePairs(span<class RigidBody> rbs, span<class Collider> colliders);
 		void TestCollisions();
+		void PreSolve();
+		void Solve();
 		void Reset();
 
 		void DebugDrawContactPoints(float dt);
