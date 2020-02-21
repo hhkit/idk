@@ -837,7 +837,7 @@ namespace idk::vkn
 					vector<mat4> p_mats;
 
 					for (auto& elem : shadow_range.d_light_map_indexes)
-						p_mats = { clip_mat * light.light_maps[elem].cascade_projection };
+						p_mats.emplace_back(mat4{ clip_mat * light.light_maps[elem].cascade_projection });
 
 					auto& elem = light.light_maps[shadow_range.light_map_index];
 					{
@@ -872,6 +872,7 @@ namespace idk::vkn
 						rt.PrepareDraw(cmd_buffer);
 						vector<vec4> clear_colors
 						{
+							vec4{1},
 							vec4{1}
 						};
 						//if (the_interface.DrawCalls().size())

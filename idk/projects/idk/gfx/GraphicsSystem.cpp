@@ -436,7 +436,7 @@ namespace idk
 		range.light_end = active_light_buffer.size();
 		range.dir_light_end = directional_light_buffer.size();
 	}
-//
+#pragma optimize("",off)
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -1058,35 +1058,60 @@ namespace idk
 			// TODO: Cull cascaded directional light
 			size_t lm_i = 0;
 			bool isFirst = true;
-			for (auto& lightmap : light.light_maps)
+			if (light.index == 1)
 			{
-				range.light_map_index = lm_i;
+				for (auto& lightmap : light.light_maps)
 				{
-					if (!light.cast_shadow)
+					range.light_map_index = lm_i;
 					{
-						range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
-					}
-					else
-					{
-						if (light.index == 1)
+						if (!light.cast_shadow)
+						{
+							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+						}
+						else
 						{
 							if (isFirst)
 							{
 								range.noDuplicate = false;
 								isFirst = false;
+								auto dl_index = lm_i;
+
+								for(auto& elem: light.light_maps)
+									range.d_light_map_indexes.emplace_back(dl_index++);
 							}
-							range.d_light_map_indexes.emplace_back(lm_i);
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
 							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-							draw_frustum(frust, color{ ((float)++derp)/result.camera.size(),0,(lm_i+1.0f)/light.light_maps.size(),1 }, {});
+							draw_frustum(frust, color{ ((float)++derp) / result.camera.size(),0,(lm_i + 1.0f) / light.light_maps.size(),1 }, {});
+
+							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+							range.inst_mesh_render_begin = start_index;
+							range.inst_mesh_render_end = end_index;
 						}
-						const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
-						range.inst_mesh_render_begin = start_index;
-						range.inst_mesh_render_end = end_index;
 					}
+					result.culled_light_render_range.emplace_back(range);
+					++lm_i;
 				}
-				result.culled_light_render_range.emplace_back(range);
-				++lm_i;
+			}
+			else
+			{
+				for (auto& lightmap : light.light_maps)
+				{
+					range.light_map_index = lm_i;
+					{
+						if (!light.cast_shadow)
+						{
+							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+						}
+						else
+						{
+							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+							range.inst_mesh_render_begin = start_index;
+							range.inst_mesh_render_end = end_index;
+						}
+					}
+					result.culled_light_render_range.emplace_back(range);
+					++lm_i;
+				}
 			}
 			//{
 			//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);

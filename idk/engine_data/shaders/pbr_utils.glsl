@@ -53,6 +53,27 @@ float GeometrySmith(vec3 normal, vec3 view, vec3 light, float roughness)
 //   vec3( 1,  0), vec3(-1,  0), vec3( 0,  1), vec3( 0, -1)
 //);   
 
+float computePCF(sampler2DArray tex, vec2 tc, vec3 texelSize, float tc_z, float bias, float curDepth, int x, int lod)
+{
+	//float z_depth = tc_z/tc.w;
+	
+	//float iLod = lod;
+	vec4 sampleShadow = texture(tex,  vec3(tc.xy + vec2(x,-1) * texelSize.xy,1));
+	vec4 sampleShadow1 = texture(tex, vec3(tc.xy + vec2(x,0 ) * texelSize.xy,1));
+	vec4 sampleShadow2 = texture(tex, vec3(tc.xy + vec2(x,1 ) * texelSize.xy,1));
+	
+	float avgDepth = 0.f, biasedCDepth = curDepth - bias;
+	if(biasedCDepth > sampleShadow.r) 
+		avgDepth = 1.f;
+	
+	if(biasedCDepth > sampleShadow1.r) 
+		avgDepth += 1.f;
+	
+	if(biasedCDepth > sampleShadow2.r) 
+		avgDepth += 1.f;
+		
+	return avgDepth;
+} 
 float computePCF(sampler2D tex, vec2 tc, vec2 texelSize, float tc_z, float bias, float curDepth, int x)
 {
 	//float z_depth = tc_z/tc.w;
@@ -72,7 +93,7 @@ float computePCF(sampler2D tex, vec2 tc, vec2 texelSize, float tc_z, float bias,
 		avgDepth += 1.f;
 		
 	return avgDepth;
-} 
+}
 
 vec2 poissonDisk[16] = vec2[]( 
    vec2( -0.94201624, -0.39906216 ), 
@@ -97,6 +118,24 @@ float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
+float computeStratifiedPoisson(sampler2DArray shadow_tex, vec2 tc, vec3 texelSize, float tc_z, float bias, int x, int lod)
+{
+	//int index = x;
+	//float z_depth = tc_z/tc.w;
+	
+	int index = int(16.f*rand(tc.xy*x))%16;
+	vec2 poissonTC = poissonDisk[index]/700.f;
+	//float iLod = lod;
+	vec4 sampleShadow =  texture(shadow_tex,vec3(tc.xy + vec2(x,-1) * texelSize.xy + poissonTC, 1));
+	vec4 sampleShadow1 = texture(shadow_tex,vec3(tc.xy + vec2(x,0 ) * texelSize.xy + poissonTC, 1));
+	vec4 sampleShadow2 = texture(shadow_tex,vec3(tc.xy + vec2(x,1 ) * texelSize.xy + poissonTC, 1));
+	
+	//0.2f*(1.f - sampleShadow) - 0.2f*(1.f - sampleShadow1) - 0.2f*(1.f - sampleShadow2)
+	//return 0.2f*(-1.f + (-sampleShadow.r + sampleShadow1.r + sampleShadow2.r));
+	
+	return 0.2f*(3.f-sampleShadow.r - sampleShadow1.r - sampleShadow2.r);
+}
+
 float computeStratifiedPoisson(sampler2D shadow_tex, vec2 tc, vec2 texelSize, float tc_z, float bias, int x)
 {
 	//int index = x;
@@ -104,9 +143,10 @@ float computeStratifiedPoisson(sampler2D shadow_tex, vec2 tc, vec2 texelSize, fl
 	
 	int index = int(16.f*rand(tc.xy*x))%16;
 	vec2 poissonTC = poissonDisk[index]/700.f;
-	vec4 sampleShadow = texture(shadow_tex,tc.xy + vec2(x,-1) * texelSize + poissonTC);
-	vec4 sampleShadow1 = texture(shadow_tex,tc.xy + vec2(x,0) * texelSize + poissonTC);
-	vec4 sampleShadow2 = texture(shadow_tex,tc.xy + vec2(x,1) * texelSize + poissonTC);
+
+	vec4 sampleShadow =  texture(shadow_tex,tc.xy + vec2(x,-1) * texelSize + poissonTC);
+	vec4 sampleShadow1 = texture(shadow_tex,tc.xy + vec2(x,0) * texelSize + poissonTC );
+	vec4 sampleShadow2 = texture(shadow_tex,tc.xy + vec2(x,1) * texelSize + poissonTC );
 	
 	//0.2f*(1.f - sampleShadow) - 0.2f*(1.f - sampleShadow1) - 0.2f*(1.f - sampleShadow2)
 	//return 0.2f*(-1.f + (-sampleShadow.r + sampleShadow1.r + sampleShadow2.r));
@@ -125,6 +165,50 @@ vec3 ShadowCoords(vec4 fPosInLS)
 	
 	return projCoords.xyz ;
 }
+float ShadowCalculation(Light light, sampler2DArray shadow_tex , vec3 lightDir , vec3 normal,vec4 fPosInLS, int lod)
+{
+	vec3 projCoords = ShadowCoords(fPosInLS);
+	
+	if(projCoords.x>0.f && projCoords.y > 0.f)
+	{					
+		{//Other
+		
+			//Oversampling check
+			if(projCoords.z > 1.0f)
+				return 0.f;
+				
+			float curDepth = projCoords.z;
+				
+			//Bias calculation
+			//float bias = max(0.005 * (1.0 - dot(normal,lightDir)),0.009);
+			float bias = light.shadow_bias;
+			
+			//PCF
+			float avgDepth = 0.f;
+			//float	tDepth=0.f;
+			vec3 texelSize = textureSize(shadow_tex,lod);
+			texelSize = 1.f/texelSize;
+			float tc_z = projCoords.z - bias;
+			
+			for(int x = -2; x <= 2; ++x)
+			{		
+				avgDepth += computePCF(shadow_tex,projCoords.xy, texelSize,tc_z,bias,curDepth,x, lod);
+				avgDepth -= computeStratifiedPoisson(shadow_tex,projCoords.xy,texelSize, tc_z, bias,x, lod);
+			}
+
+			
+			//divide by 9 values
+			avgDepth /= 18.0f;
+			
+			return avgDepth;
+		}
+	}else{
+		return 0.0f;
+	}
+	//return 0;
+	//return 0;
+}
+
 float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3 normal,vec4 fPosInLS)
 {
 	vec3 projCoords = ShadowCoords(fPosInLS);

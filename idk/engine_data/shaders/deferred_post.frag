@@ -33,7 +33,7 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
-S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_LIGHTS];
+S_LAYOUT(9, 1) uniform sampler2DArray shadow_map_directional[MAX_LIGHTS];
 
 S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
 {
@@ -97,26 +97,19 @@ void main()
 		{
 			if(LightBlk.lights[i].cast_shadow!=0)
 			{
-				//result *= vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_maps[i],(LightBlk.lights[i].v_dir) ,normal ,LightBlk.lights[i].vp * world_pos));			
-				
 				vec3 shadow_factor = vec3(1.f,1.f,1.f);
+				int map_index = j;
 				if(view_z_abs <= DirectionalBlk.directional_vp[j].far_plane)
 				{
-					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-					//shadow_factor *= shadow_factor;
-					//cascade_c = vec4(0.1,0,0,0);
+					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[map_index],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos, 0));
+				}
+				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
+				{
+					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[map_index],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos, 1));
 				}
 				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				//{
-				//	shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-				//	//shadow_factor *= shadow_factor;
-				//	//cascade_c = vec4(0,0.1,0,0);
-				//}
-				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
-				//{
-				//	shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-				//	//shadow_factor *= shadow_factor;
-				//	//cascade_c = vec4(0,0,0.1,0);
+				//	shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[map_index],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos, 2));
 				//}
 				
 				result *= shadow_factor;
@@ -128,7 +121,7 @@ void main()
 		else if (LightBlk.lights[i].type == 2)
 		{
 			if(LightBlk.lights[i].cast_shadow!=0)
-				result *= (vec3(1-ShadowCalculation(LightBlk.lights[i],shadow_maps[i],LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
+				result *= vec3(1-ShadowCalculation(LightBlk.lights[i],shadow_maps[i],LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos));
 		}
 		
 		light_accum += result + cascade_c.xyz;
