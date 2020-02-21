@@ -19,4 +19,9 @@ namespace idk
 		const ColliderInfo* lhs;
 		const ColliderInfo* rhs;
 	};
+
+	struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
+
+	struct pair_hasher { size_t operator()(const CollisionPair&) const; };
+	using CollisionList = hash_table<CollisionPair, phys::col_success, pair_hasher>;
 }

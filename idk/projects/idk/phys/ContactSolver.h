@@ -2,7 +2,7 @@
 #include <idk.h>
 
 
-namespace idk::phys
+namespace idk
 {
 	class ContactSolver
 	{
@@ -11,6 +11,8 @@ namespace idk::phys
 		void PreSolve(float dt);
 		void Solve(float dt);
 	private:
+		void ApplyGravity();
+
 		int _iterations{ 1 };
 		friend class PhysicsSystem;
 	};

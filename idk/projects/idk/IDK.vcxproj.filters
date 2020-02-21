@@ -1716,6 +1716,9 @@
     <ClCompile Include="phys\CollisionManager.cpp">
       <Filter>phys</Filter>
     </ClCompile>
+    <ClCompile Include="phys\Collision_utils.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

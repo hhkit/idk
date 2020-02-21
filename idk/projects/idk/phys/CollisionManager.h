@@ -7,21 +7,30 @@ namespace idk
 	class CollisionManager
 	{
 	public:
+		void Init();
+
 		// Will also cache all dynamic bodies for TestCollisions.
-		void UpdatePairs(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
+		void UpdatePairs(span<class RigidBody> rbs, span<class Collider> colliders);
 		void TestCollisions();
 		void Reset();
 
-		void DebugDraw();
-	private:
-		void BuildStaticTree();
-		void BuildStaticTree(span<Collider> colliders);
-
-		vector<ColliderInfo> _dynamic_info;
-
-		bool _first_update{ true };
-		AabbTree _static_broadphase;
+		void DebugDrawContactPoints(float dt);
+		void DebugDrawColliders(span<class Collider> colliders, float dt);
+		void DebugDrawTree();
 
 		friend class PhysicsSystem;
+	private:
+		// for broadphase
+		vector<ColliderInfo> _dynamic_info;
+		AabbTree _static_broadphase;
+		vector<ColliderInfoPair> _info; 
+
+		CollisionList _collisions;
+
+		void BuildStaticTree();
+		void BuildStaticTree(span<Collider> colliders);
+		phys::col_result CollideShapes(const CollidableShapes& lhs, const CollidableShapes& rhs);
+
+		
 	};
 }

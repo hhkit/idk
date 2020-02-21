@@ -32,13 +32,6 @@
 
 namespace idk
 {
-// #define AABB_TREE 1
-	constexpr float restitution_slop = 0.01f;
-	constexpr float penetration_min_slop = 0.001f;
-	constexpr float penetration_max_slop = 0.5f;
-	constexpr float damping = 0.99f;
-	constexpr float margin = 0.2f;
-	constexpr int	collision_threshold = 64;
 
     constexpr auto calc_shape = [](const auto& shape, const Collider& col)
     {
@@ -47,110 +40,15 @@ namespace idk
 #pragma optimize("", off)
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
-
+		const auto dt = Core::GetDT().count();
 		if (_rebuild_tree)
 		{
-			BuildStaticTree(colliders);
+			_col_manager.BuildStaticTree(colliders);
 			_rebuild_tree = false;
 		}
 
-        // vector<ColliderInfo> static_info;
-		// static_info.reserve(colliders.size() - rbs.size());
-        vector<ColliderInfo> dynamic_info;
-
-        for (auto& elem : colliders)
-        {
-			// bool to_insert = false;
-			bool to_insert = false;
-			bool to_remove = false;
-
-			// Active/Enabled
-            const bool is_active =  elem.is_enabled_and_active();
-			const bool was_active = elem._active_cache;
-			elem._active_cache = is_active;
-
-			// Static/non-static
-			const bool was_static = elem._static_cache;
-			elem.find_rigidbody();
-			const bool is_static = elem._static_cache;
-			
-			const bool is_prefab = elem.GetHandle().scene == Scene::prefab;
-			// Update tree based on colliders that are active
-			if (!is_prefab)
-			{
-				// deactivated this frame
-				if (was_active && !is_active)
-				{
-					// make sure its static
-					if (is_static || was_static)
-					{
-						to_remove = true;
-					}
-				}
-				// Activated this frame
-				else if (is_active && !was_active)
-				{
-					// Check to see if it is static or not
-					to_insert = true;
-				}
-				// Was neither activated nor deactivated
-				else if (is_active)
-				{
-					// Check if the had a rigidbody added to it
-					if (was_static && !is_static)
-					{
-						to_remove = true;
-
-					}
-					// Rigidbody removed
-					else if (is_static && !was_static)
-					{
-						to_insert = true;
-					}
-				}
-			}
-
-			if (to_remove)
-			{
-				if (static_tree.remove(elem.node_id))
-				{
-					// LOG_TO(LogPool::PHYS, "REMOVED from tick: %u, %u, %u", elem.GetHandle().index, elem.GetHandle().gen, elem.GetHandle().scene);
-					elem.node_id = -1;
-				}
-			}
-			
-			if (!is_active || is_prefab)
-				continue;
-
-            if (is_static)
-            {
-				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {
-					auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-					return ColliderInfo{ .collider = &elem, .broad_phase = pred_shape.bounds(), .predicted_shape = pred_shape, .layer = elem.GetGameObject()->Layer() };
-				}, elem.shape);
-				// static_info.emplace_back(collider_info);
-				if (to_insert)
-				{
-					// inserted_within_tick.emplace(elem.GetHandle());
-					// LOG_TO(LogPool::PHYS, "INSERTED from TICK: %u, %u, %u", elem.GetHandle().index, elem.GetHandle().gen, elem.GetHandle().scene);
-					static_tree.insert(elem, collider_info, margin);
-				}
-				else
-					static_tree.update(elem, collider_info, margin);
-            }
-            else
-                dynamic_info.emplace_back(ColliderInfo{ .collider = &elem, .layer = elem.GetGameObject()->Layer() });
-		}
-		// LOG_TO(LogPool::PHYS, "static_info: %d, tree: %d", static_info.size(), static_tree.leaf_count());
-		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
-		{
-			std::visit([&](const auto& shape)
-			{
-				Core::GetSystem<DebugRenderer>().Draw(shape, c, dur);
-			}, pred_shape);
-		};
-
-
+		_col_manager.UpdatePairs(rbs, colliders);
+		
 		// phases
 		const auto ApplyGravity = [&]()
 		{
@@ -195,51 +93,6 @@ namespace idk
 			}
 		};
 
-        constexpr auto CollideShapes = [](const auto& lshape, const auto& rshape) -> phys::col_result
-	    {
-		    using LShape = std::decay_t<decltype(lshape)>;
-		    using RShape = std::decay_t<decltype(rshape)>;
-
-		    // static collisions
-		    if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, box>)
-			    return phys::collide_box_box_discrete(
-				    lshape, rshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, box>)
-			    return -phys::collide_box_sphere_discrete(
-				    rshape, lshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, sphere>)
-			    return phys::collide_sphere_sphere_discrete(
-				    lshape, rshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, sphere>)
-			    return phys::collide_box_sphere_discrete(
-				    lshape, rshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, sphere>)
-			    return phys::collide_capsule_sphere_discrete(
-				    lshape, rshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, sphere>&& std::is_same_v<RShape, capsule>)
-			    return phys::collide_capsule_sphere_discrete(
-				    rshape, lshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, box>)
-			    return phys::collide_capsule_box_discrete(
-				    lshape, rshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, box>&& std::is_same_v<RShape, capsule>)
-			    return phys::collide_capsule_box_discrete(
-				    rshape, lshape);
-		    else
-		    if constexpr (std::is_same_v<LShape, capsule>&& std::is_same_v<RShape, capsule>)
-			    return phys::collide_capsule_capsule_discrete(
-				    lshape, rshape);
-		    else
-			    return phys::col_failure{};
-	    };
-
 		struct CollisionInfo
 		{
 			const ColliderInfo* a;
@@ -247,153 +100,78 @@ namespace idk
 			phys::col_success res;
 		};
 
-		vector<ColliderInfoPair> info;
-		info.reserve(dynamic_info.size() * 4);
-		vector<CollisionInfo> collision_frame;
-		collision_frame.reserve(dynamic_info.size()); //guess
+		// vector<ColliderInfoPair> info;
+		// vector<CollisionInfo> collision_frame;
+		// collision_frame.reserve(dynamic_info.size()); //guess
 
 		const auto CollideObjects = [&]()
 		{
-			info.clear();
-			collision_frame.clear();
-			
-
-			const auto dt = Core::GetDT().count();
-
-            // setup predict for dynamic objects
-            for (auto& d_info : dynamic_info)
-            {
-				d_info.predicted_shape = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) -> CollidableShapes { return shape * pred_tfm; }, d_info.collider->shape);
-				d_info.broad_phase = std::visit([&pred_tfm = d_info.collider->_rigidbody->_pred_tfm](const auto& shape) { return (shape * pred_tfm).bounds(); }, d_info.collider->shape);
-                auto vel = d_info.collider->_rigidbody->velocity() / dt;
-				d_info.broad_phase.grow(vel);
-				d_info.broad_phase.grow(-vel);
-            }
-
-            // O(N^2) collision check
-            // all objects confirmed to be active (but may be sleeping)
-            // dynamic vs dynamic
-			auto dynamic_end = dynamic_info.end();
-            for (auto i = dynamic_info.begin(); i != dynamic_end; ++i)
-            {
-				const auto& lrigidbody = *i->collider->_rigidbody;
-				const bool lrb_sleeping = lrigidbody.sleeping();
-                for (auto j = i + 1; j != dynamic_end; ++j)
-                {                    
-                    const auto& rrigidbody = *j->collider->_rigidbody;
-
-                    if (lrb_sleeping && rrigidbody.sleeping())
-                        continue;
-                    if (!AreLayersCollidable(i->layer, j->layer))
-                        continue;
-                    if (!i->broad_phase.overlaps(j->broad_phase))
-                        continue;
-
-					info.emplace_back(ColliderInfoPair{ &*i, &*j });
-					/*
-                    const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
-                    if (collision)
-                    {
-                        collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-                        collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
-                    }
-					*/
-                }
-            }
-			// vector<ColliderInfoPair> tree_cols;
-			// int tree_num_cols = 0;
-			// int notree_num_tests = 0;
-			// int notree_num_cols = 0;
-            // dynamic vs static
-            for (const auto& i : dynamic_info)
-            {
-				const auto& lrigidbody = *i.collider->_rigidbody;
-
-				if (lrigidbody.sleeping())
-					continue;
-				static_tree.query_collisions(i, info);
-				//for (const auto& j : static_info)
-				//{
-				//	if (!AreLayersCollidable(i.layer, j.layer))
-				//		continue;
-				//	++notree_num_tests;
-				//	if (!i.broad_phase.overlaps(j.broad_phase))
-				//		continue;
-				//	++notree_num_cols;
-				//	info.emplace_back(ColliderInfoPair{ &i,&j });
-				//	/*
-				//	const auto collision = std::visit(CollideShapes, i.predicted_shape, j.predicted_shape);
-				//	if (collision)
-				//	{
-				//		collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-				//		collisions.emplace(CollisionPair{ i.collider.GetHandle(), j.collider.GetHandle() }, collision.value());
-				//	}
-				//	*/
-				//}
-            }
+			// info.clear();
+			// collision_frame.clear();
+			_col_manager.TestCollisions();
 			
 			// LOG_TO(LogPool::PHYS, "Num Tests: %d/%d    |    %d/%d", static_tree.num_tests(), notree_num_tests, tree_num_cols, notree_num_cols);
 			// static_tree.reset_stats();
 
-			using CollisionJobResult = std::tuple<vector<CollisionInfo>, CollisionList>;
-			vector<mt::Future<CollisionJobResult>> batches;
-
-			if (info.size() >= collision_threshold)
-			{
-				const auto sz = info.size();
-				const auto batch_sz = GetConfig().batch_size;
-				batches.reserve(sz / batch_sz + (sz % batch_sz ? 1 : 0));
-				// LOG("Size | Batches: %d   |   %d", batch_sz, batches.capacity());
-				for (size_t i = 0; i < sz; i += batch_sz)
-				{
-					batches.push_back(Core::GetThreadPool().Post(
-						[batch_sz, CollideShapes](ColliderInfoPair* begin_itr, ColliderInfoPair* end_itr) -> CollisionJobResult
-						{
-							vector<CollisionInfo> collision_frame;
-							CollisionList batch_collisions;
-							collision_frame.reserve(batch_sz);
-							batch_collisions.reserve(batch_sz);
-							while (begin_itr != end_itr)
-							{
-								auto& [i, j] = *begin_itr;
-								const auto collision = std::visit(CollideShapes, i->predicted_shape, j->predicted_shape);
-								if (collision)
-								{
-									collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-									batch_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, collision.value());
-								}
-								++begin_itr;
-							}
-							return std::make_tuple(collision_frame, batch_collisions);
-						},
-						info.data() + i,
-						info.data() + std::min(i + batch_sz, sz)
-						));
-				}
-
-				for (auto& elem : batches)
-				{
-					auto [batch_frame, collision_list] = elem.get();
-					collision_frame.insert(collision_frame.end(), batch_frame.begin(), batch_frame.end());
-					collisions.merge(collision_list);
-				}
-			}
-			else
-			{
-				collision_frame.reserve(info.size());
-				collisions.reserve(info.size());
-				for(auto& pair : info)
-				{
-					auto& i = pair.lhs;
-					auto& j = pair.rhs;
-					const auto collision = std::visit(CollideShapes, i->predicted_shape, j->predicted_shape);
-					if (collision)
-					{
-						collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
-						collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, collision.value());
-					}
-				}
-			}
+			// using CollisionJobResult = std::tuple<vector<CollisionInfo>, CollisionList>;
+			// vector<mt::Future<CollisionJobResult>> batches;
+			// 
+			// if (info.size() >= collision_threshold)
+			// {
+			// 	const auto sz = info.size();
+			// 	const auto batch_sz = GetConfig().batch_size;
+			// 	batches.reserve(sz / batch_sz + (sz % batch_sz ? 1 : 0));
+			// 	// LOG("Size | Batches: %d   |   %d", batch_sz, batches.capacity());
+			// 	for (size_t i = 0; i < sz; i += batch_sz)
+			// 	{
+			// 		batches.push_back(Core::GetThreadPool().Post(
+			// 			[batch_sz, CollideShapes](ColliderInfoPair* begin_itr, ColliderInfoPair* end_itr) -> CollisionJobResult
+			// 			{
+			// 				vector<CollisionInfo> collision_frame;
+			// 				CollisionList batch_collisions;
+			// 				collision_frame.reserve(batch_sz);
+			// 				batch_collisions.reserve(batch_sz);
+			// 				while (begin_itr != end_itr)
+			// 				{
+			// 					auto& [i, j] = *begin_itr;
+			// 					const auto collision = std::visit(CollideShapes, i->predicted_shape, j->predicted_shape);
+			// 					if (collision)
+			// 					{
+			// 						collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+			// 						batch_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, collision.value());
+			// 					}
+			// 					++begin_itr;
+			// 				}
+			// 				return std::make_tuple(collision_frame, batch_collisions);
+			// 			},
+			// 			info.data() + i,
+			// 			info.data() + std::min(i + batch_sz, sz)
+			// 			));
+			// 	}
+			// 
+			// 	for (auto& elem : batches)
+			// 	{
+			// 		auto [batch_frame, collision_list] = elem.get();
+			// 		collision_frame.insert(collision_frame.end(), batch_frame.begin(), batch_frame.end());
+			// 		collisions.merge(collision_list);
+			// 	}
+			// }
+			// else
+			// {
+			// 	collision_frame.reserve(info.size());
+			// 	collisions.reserve(info.size());
+			// 	for(auto& pair : info)
+			// 	{
+			// 		auto& i = pair.lhs;
+			// 		auto& j = pair.rhs;
+			// 		const auto collision = std::visit(CollideShapes, i->predicted_shape, j->predicted_shape);
+			// 		if (collision)
+			// 		{
+			// 			collision_frame.emplace_back(CollisionInfo{ i, j, collision.value() });
+			// 			collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, collision.value());
+			// 		}
+			// 	}
+			// }
 			// for (const auto& [i, j, result] : collision_frame)
 			// {
 			// 	const auto& lcollider = *i->collider;
@@ -467,6 +245,7 @@ namespace idk
 			// }
 		};
 
+		const auto& dynamic_info = _col_manager._dynamic_info;
 		const auto FinalizePositions = [&]()
 		{
             for (const auto& elem : dynamic_info)
@@ -480,61 +259,28 @@ namespace idk
             }
 		};
 
-		const auto DebugDraw = [&]()
-		{
-			for (const auto& col : collisions)
-			{
-				for (int i = 0; i < col.second.manifold.contactCount; ++i)
-				{
-					const auto& c = col.second.manifold.contacts[i];
-					Core::GetSystem<DebugRenderer>().Draw(c.position, color{ 0,1,0,1 }, seconds{ 0.5f });
-					Core::GetSystem<DebugRenderer>().Draw(ray{ c.position, col.second.manifold.normal }, color{ 0,1,0,1 }, seconds{ 0.5f });
-					Core::GetSystem<DebugRenderer>().Draw(ray{ c.position, col.second.manifold.tangentVectors[0]}, color{ 0,0,1,1 }, seconds{ 0.5f });
-					Core::GetSystem<DebugRenderer>().Draw(ray{ c.position, col.second.manifold.tangentVectors[0]}, color{ 0,0,1,1 }, seconds{ 0.5f });
-				}
-				LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.manifold.contactCount);
-			}
-		};
-
-		collisions.clear();
-
 		ApplyGravity();
 		PredictTransform();
 		for (int i = 0; i < 1; ++i)
 		{
 			CollideObjects();
-			DebugDraw();
+			_col_manager.DebugDrawContactPoints(dt);
 		}
 
 		FinalizePositions();
 		
         if (!debug_draw_colliders)
             return;
-
-		
-        // for (const auto& elem : static_info)
-        //     debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
-		static_tree.debug_draw();
-        for (const auto& elem : dynamic_info)
-			debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 }, seconds{0.5f});
-        for (auto& elem : colliders)
-        {
-            if (!elem._active_cache)
-            {
-                std::visit([&](const auto& shape)
-                {
-                    debug_draw(calc_shape(shape, elem), color{ 0.5 });
-                }, elem.shape);
-            }
-        }
+		_col_manager.DebugDrawColliders(colliders, dt);
 	}
 
 	void PhysicsSystem::FirePhysicsEvents()
 	{
+		auto& curr_collisions = _col_manager._collisions;
 		CollisionList all_collisions = [&]()
 		{
-			auto retval = previous_collisions;
-			auto clone = collisions;
+			auto retval = _prev_collisions;
+			auto clone = curr_collisions;
 			retval.merge(clone);
 			return retval;
 		}();
@@ -546,8 +292,6 @@ namespace idk
 		PairList col_stay;  col_stay.reserve(sz);
 		PairList col_exit;  col_exit.reserve(sz);
 		
-		auto& curr_collisions = collisions;
-
 		// find all entering
 		for (auto& [pair, collision] : all_collisions)
 		{
@@ -560,7 +304,7 @@ namespace idk
 			}
 
 			// find entering
-			if (previous_collisions.find(pair) == previous_collisions.end())
+			if (_prev_collisions.find(pair) == _prev_collisions.end())
 			{
 				col_enter.emplace(pair);
 				continue;
@@ -568,7 +312,7 @@ namespace idk
 
 			col_stay.emplace(pair);
 		}
-		previous_collisions = std::move(collisions);
+		_prev_collisions = _col_manager._collisions;
 		
 		// fire events
 
@@ -688,9 +432,8 @@ namespace idk
 
 	void PhysicsSystem::Reset()
 	{
-		previous_collisions.clear();
-		collisions.clear();
-		static_tree.clear();
+		_prev_collisions.clear();
+		_col_manager.Reset();
 		_rebuild_tree = true;
 	}
 
@@ -852,93 +595,13 @@ namespace idk
         return GetConfig().matrix[a] & LayerMask(1 << b);
     }
 
-	void PhysicsSystem::BuildStaticTree()
-	{
-		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
-		BuildStaticTree(colliders);
-	}
-
-	void PhysicsSystem::BuildStaticTree(span<Collider> colliders)
-	{
-		static_tree.clear();
-		for (auto& col : colliders)
-		{
-			col._active_cache = col.is_enabled_and_active();
-			if (!col._active_cache || col.GetHandle().scene == Scene::prefab)
-				return;
-
-			col.find_rigidbody();
-			if (col._static_cache)
-			{
-				static_tree.insert(col, col.bounds(), 0.2f);
-				// inserted_within_tick.emplace(col.GetHandle());
-			}
-		}
-	}
-
-	void PhysicsSystem::ClearStaticTree()
-	{
-		static_tree.clear();
-	}
-
-
 	void PhysicsSystem::Init()
 	{
-		static_tree.preallocate_nodes(2500); // Avg ~1030 static objects -> means (2 * 1030 - 1) total nodes in b-tree
-
-		// Changing scenes should reset physics
-		Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { Reset(); };
-		
-		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
-		{
-			if (!collider)
-				return;
-
-			auto& col = *collider;
-			col._static_cache = col.is_enabled_and_active();
-			if (!col._static_cache || col.GetHandle().scene == Scene::prefab)
-				return;
-
-			col.find_rigidbody();
-			if (col._static_cache)
-			{
-				static_tree.insert(col, col.bounds(), 0.2f);
-				// LOG_TO(LogPool::PHYS, "INSERTED from object create: %u, %u, %u", collider.index, collider.gen, collider.scene);
-			}
-		};
-
-		GameState::GetGameState().OnObjectDestroy<Collider>() += [&](Handle<Collider> collider)
-		{
-			if (!collider)
-				return;
-
-			auto& col = *collider;
-			if (!col._static_cache)
-				return;
-
-			if (static_tree.remove(col.node_id))
-			{
-				// LOG_TO(LogPool::PHYS, "REMOVED from object create: %u, %u, %u", collider.index, collider.gen, collider.scene);
-				col.node_id = -1;
-				col._active_cache = false;
-			}
-
-		};
-
-		Core::GetSystem<SceneManager>().OnSceneChange += [this](RscHandle<Scene>)
-		{
-			Reset();
-		};
+		_col_manager.Init();
 	}
 
 	void PhysicsSystem::Shutdown()
 	{
 	}
 
-	size_t PhysicsSystem::pair_hasher::operator()(const CollisionPair& collision_pair) const
-	{
-		auto hash = std::hash<size_t>{}(collision_pair.lhs.id);
-		hash_combine(hash, collision_pair.rhs.id);
-		return hash;
-	}
 }

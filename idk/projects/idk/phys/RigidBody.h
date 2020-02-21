@@ -8,17 +8,21 @@ namespace idk
 		: public Component<RigidBody>
 	{
 	public:
-		vec3 initial_velocity {};
+		vec3 initial_velocity { 0.f };
 		real drag             { 0.f };
 
 		real inv_mass         { 1.f };
+		real inv_inertia      { 1.f };
 		vec3 center_of_mass   {};
 
-		vec3 axis_of_angular_velocity { 1, 0, 0 };
+		vec3 linear_velocity{};
 		rad  angular_velocity {};
+		vec3 axis_of_angular_velocity{ 1, 0, 0 };
+		
 
 		bool use_gravity  { true  };
 		bool is_kinematic { false };
+		bool freeze_rotation{ false };
 
 		// sleeping
 		real sleep_threshold  { +epsilon };

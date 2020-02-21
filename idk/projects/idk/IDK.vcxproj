@@ -454,6 +454,7 @@
     <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp" />
     <ClCompile Include="phys\collision_rotational.cpp" />
+    <ClCompile Include="phys\Collision_utils.cpp" />
     <ClCompile Include="phys\ContactSolver.cpp" />
     <ClCompile Include="phys\raycasts\collision_raycast.cpp" />
     <ClCompile Include="phys\collision_result.cpp" />
