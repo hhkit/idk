@@ -176,17 +176,11 @@ namespace idk {
 		//clip_plane_z = vClip.z;
 	}
 
-	RscHandle<FrameBuffer> Lightmap::InitShadowMap()
+	RscHandle<FrameBuffer> Lightmap::InitShadowMap(LightmapConfig config)
 	{
-		return InitShadowMap(_layer_count, _view_type);
-	}
-
-	RscHandle<FrameBuffer> Lightmap::InitShadowMap(size_t layers, AttachmentViewType type)
-	{
-		size_t layer_c = _layer_count = layers;
-		_view_type = type;
+		_config = config;
 		FrameBufferBuilder builder;
-		builder.Begin("ShadowMap[" + std::to_string(texel_size) + ", " + std::to_string(texel_size) + "]", uvec2{ texel_size , texel_size}, layer_c);
+		builder.Begin("ShadowMap[" + std::to_string(texel_size) + ", " + std::to_string(texel_size) + "]", uvec2{ texel_size , texel_size }, config.layer_count);
 		builder.SetDepthAttachment(
 			AttachmentInfo
 			{
@@ -197,8 +191,8 @@ namespace idk {
 				FilterMode::_enum::Linear,
 				false,
 				std::nullopt,
-				layer_c,
-				type
+				_config.layer_count,
+				_config.view_type
 			}
 		);
 
@@ -212,12 +206,21 @@ namespace idk {
 		auto& shadow_map = light_map = Core::GetResourceManager().GetFactory<FrameBufferFactory>().Create(builder.End());//Core::GetResourceManager().Create<FrameBuffer>();
 		return shadow_map;
 	}
+
+	RscHandle<FrameBuffer> Lightmap::InitShadowMap(size_t layers, AttachmentViewType type)
+	{
+		return InitShadowMap(LightmapConfig{ layers,type });
+	}
 	RscHandle<FrameBuffer> Lightmap::GetShadowMap()
 	{
 		if (texel_size != cascade_resolution)
-			return InitShadowMap(_layer_count,_view_type);
+			return InitShadowMap(_config);
 
 		return light_map;
+	}
+	LightmapConfig Lightmap::GetConfig() const
+	{
+		return _config;
 	}
 	bool Lightmap::NeedLightMap()
 	{

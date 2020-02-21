@@ -10,6 +10,13 @@
 
 namespace idk {
 	struct LightData;
+
+	struct LightmapConfig
+	{
+		size_t layer_count = 1;
+		AttachmentViewType view_type = AttachmentViewType::e2D;
+	};
+
 	class Lightmap {
 
 	public:
@@ -17,9 +24,10 @@ namespace idk {
 		virtual ~Lightmap() = default;
 		void SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far);
 		void UpdateResolution(const unsigned& res);
-		RscHandle<FrameBuffer> InitShadowMap();
+		RscHandle<FrameBuffer> InitShadowMap(LightmapConfig config = {});
 		RscHandle<FrameBuffer> InitShadowMap(size_t layers, AttachmentViewType type);
 		RscHandle<FrameBuffer> GetShadowMap();
+		LightmapConfig GetConfig()const;
 		bool NeedLightMap();
 		void DeleteShadowMap();
 		unsigned GetShadowMapSize() const;
@@ -40,8 +48,6 @@ namespace idk {
 		unsigned cascade_resolution = 1024;
 		unsigned texel_size = cascade_resolution;
 
-		size_t _layer_count=1;
-		AttachmentViewType _view_type = AttachmentViewType::e2D;
-		
+		LightmapConfig _config;
 	};
 };
