@@ -1918,10 +1918,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::ViewIsMine", bool, Handle<ElectronView> ev)
 		{
-			if (&Core::GetSystem<NetworkSystem>().GetServer())
-				return ev->owner == Host::SERVER;
-			else
-				return ev->owner == Host::ME;
+			return ev->IsMine();
 		}
 		BIND_END();
 
@@ -1945,8 +1942,7 @@ namespace idk::mono
 					buffer.push_back(mono_array_get(subarr, unsigned char, j));
 			}
 
-			// do things
-			EventManager::BroadcastRPC(ev, unbox(method_name).get(), param_vec);
+			EventManager::BroadcastRPC(ev, static_cast<RPCTarget>(rpc_target), unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
 

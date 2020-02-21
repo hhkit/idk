@@ -24,13 +24,15 @@ namespace idk
 	{
 		ResetNetwork();
 		frame_counter = 0;
+		my_id = Host::SERVER;
 		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
 		lobby->OnClientConnect += [this](int clientid)
 		{
 			server_connection_manager[clientid] = std::make_unique<ServerConnectionManager>(clientid, *lobby);
-			server_connection_manager[clientid]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [this](EventDataBlockFrameNumber& msg)
+			server_connection_manager[clientid]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [&](EventDataBlockFrameNumber& msg)
 				{
 					msg.frame_count = frame_counter;
+					msg.player_id = static_cast<Host>(clientid);
 				});
 		};
 		lobby->OnClientDisconnect += [this](int clientid)
@@ -48,16 +50,19 @@ namespace idk
 		client->OnConnectionToServer += [this]()
 		{
 			client_connection_manager = std::make_unique<ClientConnectionManager>(*client);
-			client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber* event)
+			client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber& event)
 				{
-					frame_counter = event->frame_count;
+					frame_counter = event.frame_count;
+					my_id = event.player_id;
 
 					auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
 					frame_counter += frames_late;
 				});
 		};
+
 		client->OnDisconnectionFromServer += [this]()
 		{
+			my_id = Host::NONE;
 			client_connection_manager.reset();
 		};
 		id_manager = std::make_unique<IDManager>();
@@ -71,6 +76,11 @@ namespace idk
 	bool NetworkSystem::IsHost()
 	{
 		return static_cast<bool>(lobby);
+	}
+
+	Host NetworkSystem::GetMe()
+	{
+		return my_id;
 	}
 
 	SeqNo NetworkSystem::GetSequenceNumber() const
@@ -197,6 +207,7 @@ namespace idk
 	}
 	void NetworkSystem::ResetNetwork()
 	{
+		my_id = Host::NONE;
 		for (auto& elem : server_connection_manager)
 			elem.reset();
 		lobby.reset();

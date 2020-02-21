@@ -12,6 +12,6 @@ namespace idk
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
 	private:
-		void OnMoveReceived(MoveClientMessage*);
+		void OnMoveReceived(MoveClientMessage&);
 	};
 }

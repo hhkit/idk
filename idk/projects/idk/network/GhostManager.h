@@ -15,6 +15,6 @@ namespace idk
 
 		void SendGhosts(span<ElectronView> views);
 	private:
-		void OnGhostReceived(class GhostMessage* msg);
+		void OnGhostReceived(class GhostMessage& msg);
 	};
 }

@@ -21,6 +21,11 @@ namespace idk
 
 	ElectronView::~ElectronView() = default;
 	
+	bool ElectronView::IsMine() const
+	{
+		return Core::GetSystem<NetworkSystem>().GetMe() == owner;
+	}
+
 	void ElectronView::Setup()
 	{
 		if (auto tfm_view = GetGameObject()->GetComponent<ElectronTransformView>())

@@ -16,6 +16,16 @@ namespace idk
 
         public void RPC(string methodName, RPCTarget target, params object[] parameters)
         {
+            if (ElectronNetwork.isHost)
+            {
+                // placeholder for exceptions
+            }
+            else
+            {
+                if (target != RPCTarget.Server)
+                    throw new InvalidRPCTargetException("Client may only target server");
+            }
+
             byte[][] bytes = new byte[parameters.Length][];
             var formatter = new BinaryFormatter();
             for (int count = 0; count < parameters.Length; ++count)
@@ -27,6 +37,24 @@ namespace idk
                 }
             }
             Bindings.ViewExecRPC(handle, methodName, target, bytes);
+        }
+
+        public void RPC(string methodName, Player targetPlayer, params object[] parameters)
+        {
+            if (!ElectronNetwork.isHost)
+                throw new InvalidRPCTargetException("Only the host may target players.");
+
+            byte[][] bytes = new byte[parameters.Length][];
+            var formatter = new BinaryFormatter();
+            for (int count = 0; count < parameters.Length; ++count)
+            {
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    formatter.Serialize(stream, parameters[count]);
+                    bytes[count] = stream.ToArray();
+                }
+            }
+            throw new System.NotImplementedException();
         }
         internal static object[] Reserialize(byte[][] bytes)
         {

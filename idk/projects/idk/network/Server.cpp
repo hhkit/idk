@@ -99,9 +99,9 @@ namespace idk
 		OnClientDisconnect.Fire(clientIndex);
 		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
 		{
-			auto type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
-			auto obj  = mono_object_new(mono_domain_get(), type->Raw());
-			auto method = mono_class_get_method_from_name(type->Raw(), ".ctor", 1);
+			auto monotype = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+			auto obj  = mono_object_new(mono_domain_get(), monotype->Raw());
+			auto method = mono_class_get_method_from_name(monotype->Raw(), ".ctor", 1);
 			void* args[] = { &clientIndex, nullptr };
 			
 			if (auto type = target->GetObject().Type())

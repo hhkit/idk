@@ -6,9 +6,9 @@ namespace idk
 	using SeqNo     = unsigned short;
 	using StateMask = unsigned;
 
-	enum class Host
+	enum class Host : int
 	{
-		ME = -2,
+		NONE = -2,
 		SERVER = -1,
 		CLIENT0 = 0,
 		CLIENT1,

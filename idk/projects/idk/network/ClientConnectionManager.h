@@ -1,6 +1,8 @@
 #pragma once
 #include <idk.h>
 #include <network/ConnectionManager.h>
+#include <network/network.h>
+
 namespace idk
 {
 	class Client;
@@ -18,7 +20,7 @@ namespace idk
 		using ConnectionManager::GetManager;
 
 
-		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType*>>>
+		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType&>>>
 		void Subscribe(Func&& func)
 		{
 			Subscribe2<MessageType>(std::forward<Func>(func)); //Forward hack cause MSVC bug? in 16.2.3
@@ -31,6 +33,8 @@ namespace idk
 		Client& client;
 		vector<EventSlot> OnMessageReceived_slots;
 		vector<unique_ptr<BaseSubstreamManager>> substream_managers;
+
+		Host GetConnectedHost() const override;
 
 		template<typename MessageType, typename Func>
 		void Subscribe2(Func&& func);
