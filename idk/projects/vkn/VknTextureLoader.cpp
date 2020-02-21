@@ -195,6 +195,8 @@ namespace idk::vkn
 				loader->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, derp.texture, derp.allocator,  derp.ooptional, derp.load_info, derp.in_info, derp.guid);
 				auto device = *View().Device();
 				auto fence = *derp.load_fence;
+				derp.texture.dbg_name = derp.texture.Name();
+				dbg::NameObject(derp.texture.Image(), derp.texture.dbg_name);
 				device.resetFences(fence);
 				lock.Lock();
 				hlp::EndSingleTimeCbufferCmd(cmd_buffer, View().GraphicsQueue(), false, fence);

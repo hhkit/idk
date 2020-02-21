@@ -7,7 +7,7 @@ namespace idk::vkn
 
 	struct TextureDescription
 	{
-		string_view name;
+		string name;
 		uvec2 size;
 		vk::Format format;
 		vk::ImageAspectFlagBits aspect;

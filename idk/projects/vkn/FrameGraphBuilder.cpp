@@ -15,6 +15,7 @@ namespace idk::vkn
 		ResetIDs();
 		consumed_resources.resources.clear();
 		origin_nodes.clear();
+		_region_name.clear();
 	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
@@ -89,10 +90,15 @@ namespace idk::vkn
 		rsc_manager.MarkUsage(out_rsc.id, vk::ImageUsageFlagBits::eDepthStencilAttachment);
 	}
 
+	void FrameGraphBuilder::MarkNodeRegion(string name)
+	{
+		_region_name = std::move(name);
+	}
+
 	void FrameGraphBuilder::BeginNode(string name)
 	{
 		curr_rsc.reset();
-		curr_rsc.name = std::move(name);
+		curr_rsc.name = std::move(_region_name+":"+name);
 	}
 
 	FrameGraphNode FrameGraphBuilder::EndNode()

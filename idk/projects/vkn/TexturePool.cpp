@@ -2,6 +2,8 @@
 #include "TexturePool.h"
 #include <vkn/VulkanView.h>
 #include <vkn/VknTextureLoader.h>
+
+#include <vkn/DebugUtil.h>
 namespace idk::vkn
 {
 	struct TexturePool::Pimpl
@@ -73,6 +75,8 @@ namespace idk::vkn
 		{
 			std::promise<VknTextureView> derp{};
 			result = derp.get_future();
+			free_result->Name(desc.name);
+			dbg::NameObject(free_result->Image(), free_result->Name());
 			derp.set_value(std::move(*free_result));
 		}
 		else
@@ -113,7 +117,7 @@ namespace idk::vkn
 	std::future<VknTextureView> TexturePool::create_async(const TextureDescription& desc)
 	{
 		auto rsc_ptr = std::make_unique<VknTexture>();
-
+		rsc_ptr->Name(desc.name);
 		TexCreateInfo tci{};
 		tci.internal_format = desc.format;
 		tci.width = desc.size.x;

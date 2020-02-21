@@ -42,6 +42,7 @@ namespace idk::vkn
 		void set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc);
 		void set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, AttachmentDescription attachment_desc);
 
+		void MarkNodeRegion(string name);
 		void BeginNode(string name);
 		FrameGraphNode EndNode();
 
@@ -71,6 +72,7 @@ namespace idk::vkn
 		};
 
 		//Consumed resources
+		string _region_name;
 		PreObject curr_rsc;
 		hlp::IdGenerator<fg_id> _fgid_generator;
 	};

@@ -14,6 +14,8 @@ namespace idk::vkn
 		,_aspects   {tex.ImageAspects()}
 		,_layers    {tex.Layers()}
 		,_range     {tex.FullRange()}
+		,_name      {tex.Name()}
+		
 	{
 	}
 	VknTextureView::VknTextureView(const VknCubemap& tex) noexcept:
@@ -69,5 +71,13 @@ namespace idk::vkn
 	vk::ImageSubresourceRange VknTextureView::FullRange() const noexcept
 	{
 		return _range;
+	}
+	const string& VknTextureView::Name() const noexcept
+	{
+		return _name;
+	}
+	void VknTextureView::Name(string name) noexcept
+	{
+		_name = std::move(name);
 	}
 }

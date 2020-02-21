@@ -18,6 +18,7 @@ static void DoNothing()
 
 void dbg_chk(vk::Image img)
 {
+	return;
 	if (
 		reinterpret_cast<size_t>(img.operator VkImage()) == 0x3672
 		||

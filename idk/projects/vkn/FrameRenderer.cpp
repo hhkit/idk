@@ -69,6 +69,7 @@ namespace idk::vkn
 		FrameGraph graph;
 		gt::GraphTest test{ graph };
 
+		uint32_t gfx_state_index = 0;
 
 		uint32_t testing = 0;
 	};
@@ -919,6 +920,7 @@ namespace idk::vkn
 	}
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
+		_pimpl->gfx_state_index = 0;
 		_pimpl->graph.Reset();
 		_current_frame_index = frame_index;
 		//Update all the resources that need to be updated.
@@ -1399,6 +1401,7 @@ namespace idk::vkn
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		//TODO, account for forward.
+		_pimpl->graph.MarkRegion(std::to_string(_pimpl->gfx_state_index++));
 		renderpasses::DeferredRendering::MakePass(_pimpl->graph, RscHandle<VknRenderTarget>{ state.camera.render_target }, state, rs);
 //
 //		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();

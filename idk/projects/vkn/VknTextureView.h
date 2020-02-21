@@ -23,6 +23,9 @@ namespace idk::vkn
 		vk::ImageAspectFlags      ImageAspects()const noexcept;
 		uint32_t                  Layers      ()const noexcept;
 		vk::ImageSubresourceRange FullRange   ()const noexcept;
+		
+		const string&                    Name        ()const noexcept;
+		void                      Name        (string ) noexcept; //moved, so noexcept
 
 	private:
 		vk::Image                 _image     {};
@@ -33,5 +36,6 @@ namespace idk::vkn
 		vk::ImageAspectFlags      _aspects   {};
 		uint32_t                  _layers    {};
 		vk::ImageSubresourceRange _range     {};
+		string                    _name      {};
 	};
 }

@@ -13,6 +13,11 @@ namespace idk::vkn
 	//Insert new nodes to help transit concrete resources to their corresponding virtual resources
 	//Generate dependency graph
 
+	void FrameGraph::MarkRegion(string region_name)
+	{
+		graph_builder.MarkNodeRegion(std::move(region_name));
+	}
+
 	FrameGraphNode& FrameGraph::StoreNode(FrameGraphNode&& node)
 	{
 		node_lookup.emplace(node.id, nodes.size());
@@ -132,6 +137,12 @@ namespace idk::vkn
 			IDK_ASSERT_MSG(success, "Cyclic dependency detected.");
 			//Maybe use copy_if to filter out useless nodes.
 			execution_order = std::move(sorted_order);
+			_dbg_execution_order.clear();
+			for (auto index : execution_order)
+			{
+				auto& node = nodes[index];
+				_dbg_execution_order.emplace_back(&*render_passes.at(node.id),&node);
+			}
 		}
 		ComputeLifetimes(graph, rsc_lifetime_mgr);
 	}
