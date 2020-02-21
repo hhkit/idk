@@ -217,15 +217,20 @@ namespace idk::vkn
 			else if (light.index == 1)
 			{
 				if(!light.light_maps.empty())
-					shadow_maps.emplace_back(light.light_maps[0].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+					shadow_maps.emplace_back(RscHandle<VknTexture>{});
 
 				for (auto& elem : light.light_maps)//state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
-					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+					//auto& v = elem.light_map.as<VknFrameBuffer>().DepthAttachment();
+					//auto& t = v.buffer.as<VknTexture>();
+					
 					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat *elem.cascade_projection * light.v});
 				}
+				shadow_maps_directional.emplace_back(light.light_maps[0].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
 			}
 		}
+		while (shadow_maps_directional.size() < 8 && shadow_maps_directional.size())
+			shadow_maps_directional.emplace_back(shadow_maps_directional.back());
 		//for (auto& dshadow_index : vstate.active_dir_lights)
 		//{
 		//	auto& dshadow= vstate.shared_gfx_state->shadow_maps_directional.at(dshadow_index);

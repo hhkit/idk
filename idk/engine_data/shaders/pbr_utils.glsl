@@ -58,9 +58,9 @@ float computePCF(sampler2DArray tex, vec2 tc, vec3 texelSize, float tc_z, float 
 	//float z_depth = tc_z/tc.w;
 	
 	//float iLod = lod;
-	vec4 sampleShadow = texture(tex,  vec3(tc.xy + vec2(x,-1) * texelSize.xy,1));
-	vec4 sampleShadow1 = texture(tex, vec3(tc.xy + vec2(x,0 ) * texelSize.xy,1));
-	vec4 sampleShadow2 = texture(tex, vec3(tc.xy + vec2(x,1 ) * texelSize.xy,1));
+	vec4 sampleShadow = texture(tex,  vec3(tc.xy + vec2(x,-1) * texelSize.xy,lod));
+	vec4 sampleShadow1 = texture(tex, vec3(tc.xy + vec2(x,0 ) * texelSize.xy,lod));
+	vec4 sampleShadow2 = texture(tex, vec3(tc.xy + vec2(x,1 ) * texelSize.xy,lod));
 	
 	float avgDepth = 0.f, biasedCDepth = curDepth - bias;
 	if(biasedCDepth > sampleShadow.r) 
@@ -126,9 +126,9 @@ float computeStratifiedPoisson(sampler2DArray shadow_tex, vec2 tc, vec3 texelSiz
 	int index = int(16.f*rand(tc.xy*x))%16;
 	vec2 poissonTC = poissonDisk[index]/700.f;
 	//float iLod = lod;
-	vec4 sampleShadow =  texture(shadow_tex,vec3(tc.xy + vec2(x,-1) * texelSize.xy + poissonTC, 1));
-	vec4 sampleShadow1 = texture(shadow_tex,vec3(tc.xy + vec2(x,0 ) * texelSize.xy + poissonTC, 1));
-	vec4 sampleShadow2 = texture(shadow_tex,vec3(tc.xy + vec2(x,1 ) * texelSize.xy + poissonTC, 1));
+	vec4 sampleShadow =  texture(shadow_tex,vec3(tc.xy + vec2(x,-1) * texelSize.xy + poissonTC, lod));
+	vec4 sampleShadow1 = texture(shadow_tex,vec3(tc.xy + vec2(x,0 ) * texelSize.xy + poissonTC, lod));
+	vec4 sampleShadow2 = texture(shadow_tex,vec3(tc.xy + vec2(x,1 ) * texelSize.xy + poissonTC, lod));
 	
 	//0.2f*(1.f - sampleShadow) - 0.2f*(1.f - sampleShadow1) - 0.2f*(1.f - sampleShadow2)
 	//return 0.2f*(-1.f + (-sampleShadow.r + sampleShadow1.r + sampleShadow2.r));
