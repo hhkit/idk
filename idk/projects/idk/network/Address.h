@@ -8,7 +8,7 @@ namespace idk
 	{
 		union
 		{
-			unsigned char nums[6];
+			unsigned char nums[4];
 			struct { unsigned char a, b, c, d; };
 		};
 		unsigned short port;
