@@ -10,7 +10,6 @@
 #include <res/Guid.inl>
 #include <res/ResourceMeta.inl>
 
-
 struct AttachmentOps
 {
 	unsigned load   :  2;//take up 2bits
@@ -96,7 +95,26 @@ rp_type_t to_rp_type(idk::FrameBuffer& fb)
 
 namespace idk::vkn
 {
-
+	vk::ImageViewType map_view_type(AttachmentViewType view_type)
+	{
+		const static vk::ImageViewType map[] =
+		{
+			vk::ImageViewType::e1D , //= VK_IMAGE_VIEW_TYPE_1D,
+			vk::ImageViewType::e2D , //= VK_IMAGE_VIEW_TYPE_2D,
+			vk::ImageViewType::e3D , //= VK_IMAGE_VIEW_TYPE_3D,
+			vk::ImageViewType::eCube , //= VK_IMAGE_VIEW_TYPE_CUBE,
+			vk::ImageViewType::e1DArray , //= VK_IMAGE_VIEW_TYPE_1D_ARRAY,
+			vk::ImageViewType::e2DArray , //= VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			vk::ImageViewType::eCubeArray  //= VK_IMAGE_VIEW_TYPE_CUBE_ARRAY
+		};
+		auto index = static_cast<int>(view_type);
+		if (index > std::size(map))
+		{
+			LOG_ERROR_TO(LogPool::GFX, "Invalid Attachment View type detected, %d, expected < %llu",index,std::size(map));
+			return vk::ImageViewType::e2D;
+		}
+		return map[index];
+	}
 
 	VulkanView& View();
 
@@ -321,6 +339,7 @@ namespace idk::vkn
 			opt.filter_mode = info.filter_mode;
 			tci.layers = *info.layer_count; 
 			tci.internal_format = MapFormat(opt.internal_format);
+			tci.view_type = map_view_type(info.view_type);
 			loader.LoadTexture(t, allocator, fence, opt, tci, {});
 		}
 		out->own_buffer = !preset;

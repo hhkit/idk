@@ -178,7 +178,13 @@ namespace idk {
 
 	RscHandle<FrameBuffer> Lightmap::InitShadowMap()
 	{
-		size_t layer_c = 2;
+		return InitShadowMap(_layer_count, _view_type);
+	}
+
+	RscHandle<FrameBuffer> Lightmap::InitShadowMap(size_t layers, AttachmentViewType type)
+	{
+		size_t layer_c = _layer_count = layers;
+		_view_type = type;
 		FrameBufferBuilder builder;
 		builder.Begin("ShadowMap[" + std::to_string(texel_size) + ", " + std::to_string(texel_size) + "]", uvec2{ texel_size , texel_size}, layer_c);
 		builder.SetDepthAttachment(
@@ -191,7 +197,8 @@ namespace idk {
 				FilterMode::_enum::Linear,
 				false,
 				std::nullopt,
-				layer_c
+				layer_c,
+				type
 			}
 		);
 
@@ -208,7 +215,7 @@ namespace idk {
 	RscHandle<FrameBuffer> Lightmap::GetShadowMap()
 	{
 		if (texel_size != cascade_resolution)
-			return InitShadowMap();
+			return InitShadowMap(_layer_count,_view_type);
 
 		return light_map;
 	}

@@ -6,7 +6,7 @@
 
 #include <math/matrix.h>
 
-
+#include <gfx/AttachmentViewType.h>
 
 namespace idk {
 	struct LightData;
@@ -18,6 +18,7 @@ namespace idk {
 		void SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far);
 		void UpdateResolution(const unsigned& res);
 		RscHandle<FrameBuffer> InitShadowMap();
+		RscHandle<FrameBuffer> InitShadowMap(size_t layers, AttachmentViewType type);
 		RscHandle<FrameBuffer> GetShadowMap();
 		bool NeedLightMap();
 		void DeleteShadowMap();
@@ -39,6 +40,8 @@ namespace idk {
 		unsigned cascade_resolution = 1024;
 		unsigned texel_size = cascade_resolution;
 
+		size_t _layer_count=1;
+		AttachmentViewType _view_type = AttachmentViewType::e2D;
 		
 	};
 };

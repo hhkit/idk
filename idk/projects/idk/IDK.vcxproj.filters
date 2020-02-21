@@ -1170,6 +1170,9 @@
       <Filter>network</Filter>
     </ClInclude>
     <ClInclude Include="gfx\DefaultShaders.h" />
+    <ClInclude Include="gfx\AttachmentViewType.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

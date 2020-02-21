@@ -4,10 +4,11 @@
 #include <gfx/Texture.h>
 #include <gfx/TextureInternalFormat.h>
 #include <res/ResourceFactory.h>
-
+#include <gfx/AttachmentViewType.h>
 namespace idk
 {
 	//using AttachmentInfo = int;
+
 	struct AttachmentInfo
 	{
 		LoadOp  load_op = LoadOp::eClear;
@@ -20,7 +21,7 @@ namespace idk
 		bool isCubeMap = false;
 		bool override_as_depth = false;
 		bool is_input_att = false;
-
+		AttachmentViewType view_type = AttachmentViewType::e2D;
 
 		AttachmentInfo() = default;
 
@@ -31,7 +32,8 @@ namespace idk
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
 			std::optional<RscHandle<Texture>> buffer_ = std::nullopt,
-			std::optional<size_t> layer_count_ = 1
+			std::optional<size_t> layer_count_ = 1,
+			AttachmentViewType view_type_  = AttachmentViewType::e2D
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
@@ -39,7 +41,8 @@ namespace idk
 			filter_mode{ filter_mode_ },
 			isCubeMap{ isCubeMap_ },
 			buffer{ buffer_ },
-			layer_count{ layer_count_ }
+			layer_count{ layer_count_ },
+			view_type{ view_type_ }
 		{};
 
 		AttachmentInfo(
@@ -49,7 +52,8 @@ namespace idk
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
 			std::optional<RscHandle<Texture>> buffer_= std::nullopt,
-			std::optional<size_t> layer_count_ = 1
+			std::optional<size_t> layer_count_ = 1,
+			AttachmentViewType view_type_ = AttachmentViewType::e2D
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
@@ -57,7 +61,8 @@ namespace idk
 			filter_mode{ filter_mode_ },
 			isCubeMap{ isCubeMap_},
 			buffer{ buffer_ },
-			layer_count{ layer_count_ }
+			layer_count{ layer_count_ },
+			view_type{ view_type_ }
 		{};
 
 		AttachmentInfo(
@@ -68,7 +73,8 @@ namespace idk
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
 			std::optional<RscHandle<Texture>> buffer_ = std::nullopt,
-			std::optional<size_t> layer_count_ = 1
+			std::optional<size_t> layer_count_ = 1,
+			AttachmentViewType view_type_ = AttachmentViewType::e2D
 		) :
 			load_op{ load_op_ },
 			store_op{ store_op_ },
@@ -76,7 +82,8 @@ namespace idk
 			filter_mode{ filter_mode_ },
 			isCubeMap{ isCubeMap_ },
 			buffer{ buffer_ },
-			layer_count{ layer_count_ }
+			layer_count{ layer_count_ },
+			view_type{ view_type_ }
 		{};
 
 		AttachmentInfo(const Attachment& attachment)
