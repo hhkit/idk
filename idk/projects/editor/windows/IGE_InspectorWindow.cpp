@@ -112,13 +112,27 @@ namespace idk {
 
         auto& ide = Core::GetSystem<IDE>();
         const auto& selection = ide.GetSelectedObjects();
+
+        // reset mocked particle system to default state
+        if (_mocked_ps)
+        {
+            if(selection.game_objects.empty() || _mocked_ps->GetGameObject() != selection.game_objects[0])
+            {
+                _mocked_ps->Stop();
+                _mocked_ps->state = ParticleSystem::Awake;
+                _mocked_ps = {};
+            }
+        }
+
         if (selection.game_objects.empty() && selection.assets.empty())
             return;
         if (selection.game_objects.size() && selection.assets.size())
             return;
 
-        if(selection.game_objects.size())
+        if (selection.game_objects.size())
+        {
             DisplayGameObjects(selection.game_objects);
+        }
         else
         {
             const bool valid = std::visit([](auto h) { return bool(h); }, selection.assets[0]);
@@ -166,6 +180,8 @@ namespace idk {
                 if (prefab_inst->object_index == 0)
                     DisplayPrefabInstanceControls(_prefab_inst);
             }
+            else
+                DisplayGameObjectHeader(gos[0]);
 
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
             ImGui::Dummy(ImVec2(ImGui::GetWindowContentRegionWidth(), 4.0f));

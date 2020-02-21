@@ -93,7 +93,14 @@ namespace idk
         _per_scene[handle.scene].gens[handle.index] = handle.gen;
 
         if (const auto parent = handle->Parent())
+        {
+            if (static_cast<size_t>(parent.index) >= _per_scene[handle.scene].children.size())
+            {
+                _per_scene[handle.scene].children.resize(parent.index + 1);
+                _per_scene[handle.scene].gens.resize(parent.index + 1);
+            }
             _per_scene[handle.scene].children[parent.index] += handle.index;
+        }
         else
             _per_scene[handle.scene].root += handle.index;
     }

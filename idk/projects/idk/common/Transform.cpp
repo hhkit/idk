@@ -14,7 +14,7 @@ namespace idk
 			auto curr_global = GlobalMatrix();
 			const auto new_local = [&]() {
 				if (new_parent)
-					return curr_global * new_parent->Transform()->GlobalMatrix().inverse();
+					return new_parent->Transform()->GlobalMatrix().inverse() * curr_global;
 				else
 					return curr_global;
 			}();

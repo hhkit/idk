@@ -259,7 +259,7 @@ namespace idk
 		}
 		else {
 			_Core_System->set3DNumListeners(1); //Default to 1.
-			Set3DListenerAttributes(0,vec3{}, vec3{}, vec3{}, vec3{});
+			//Set3DListenerAttributes(0,vec3{}, vec3{}, vec3{}, vec3{}); //If there is no active listener, dont need to update the default listener position!
 		}
 
 

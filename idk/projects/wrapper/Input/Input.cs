@@ -73,7 +73,7 @@
         /// <returns></returns>
         public static float SetRumble(int player, float low_freq, float high_freq) => Bindings.InputSetRumble((sbyte)player, low_freq, high_freq);
 
-        public static int[] ConnectedPlayers
+        public static int[] connectedPlayers
         {
             get
             {

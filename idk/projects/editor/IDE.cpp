@@ -318,7 +318,7 @@ namespace idk
         for (const auto go : _selected_objects.game_objects)
         {
 			if (!go)
-				return;
+				break;
 
 			Core::GetSystem<SceneManager>().FetchSceneGraphFor(go).Visit([](Handle<GameObject> h, int)
 			{

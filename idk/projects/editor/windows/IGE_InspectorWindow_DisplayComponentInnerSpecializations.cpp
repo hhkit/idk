@@ -404,9 +404,23 @@ namespace idk
 
     void IGE_InspectorWindow::DisplayComponentInner(Handle<RigidBody> c_rb)
     {
-        auto v = c_rb->velocity();
-        ImGui::DragFloat3("Velocity:", v.data());
         DisplayVal(*c_rb);
+
+        auto v = c_rb->velocity();
+        DisplayStack display{ *this };
+        ImGui::BeginGroup(); display.Label("Velocity"); display.ItemBegin(true);
+        if (!_debug_mode)
+        {
+            ImGuidk::PushDisabled();
+            ImGui::DragFloat3("Velocity:", v.data());
+            ImGuidk::PopDisabled();
+        }
+        else
+        {
+            if (ImGui::DragFloat3("Velocity:", v.data()))
+                c_rb->velocity(v);
+        }
+        display.ItemEnd(); ImGui::EndGroup();
     }
 
     
@@ -733,6 +747,8 @@ namespace idk
     
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ParticleSystem> c_ps)
     {
+        _mocked_ps = c_ps;
+
         if (c_ps->state == ParticleSystem::Playing && ImGui::Button("Pause"))
             c_ps->Pause();
         else if (c_ps->state != ParticleSystem::Playing && ImGui::Button("Play"))
@@ -746,6 +762,15 @@ namespace idk
         ImGui::SameLine();
         if (ImGui::Button("Stop"))
             c_ps->Stop();
+
+        if(c_ps->state == ParticleSystem::Playing && !Core::GetSystem<IDE>().IsGameRunning())
+        {
+            bool destroy_on_finish = c_ps->main.destroy_on_finish;
+            c_ps->transform = decompose(c_ps->GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+            c_ps->main.destroy_on_finish = false;
+            c_ps->Step(Core::GetRealDT().count());
+            c_ps->main.destroy_on_finish = destroy_on_finish;
+        }
 
         if (c_ps->state > ParticleSystem::Stopped)
         {

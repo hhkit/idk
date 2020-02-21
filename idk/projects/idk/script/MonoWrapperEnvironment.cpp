@@ -1214,7 +1214,6 @@ namespace idk::mono
             auto s = unbox(type);
             auto hash = string_hash(s.get());
 
-			LOG_TO(LogPool::GAME, string{ guid }.data());
             switch (hash)
             {
 				VALIDATE_RESOURCE(Material);
