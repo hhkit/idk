@@ -191,8 +191,7 @@ namespace idk
 	{
 		for (auto& device : Core::GetSystem<Application>().GetNetworkDevices())
 		{
-			if(device.ip_addresses.size())
-				LOG_TO(LogPool::NETWORK, "Found %s device (%s) with address %s.", device.name.c_str(), device.fullname.c_str(), string{ device.ip_addresses.front() }.c_str());
+			LOG_TO(LogPool::NETWORK, "Found %s device (%s) with address %s.", device.name.c_str(), device.description.c_str(), string{ device.ip_addresses[0] }.c_str());
 		}
 	}
 
