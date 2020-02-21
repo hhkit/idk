@@ -86,7 +86,7 @@ namespace idk
 			const auto& env = Core::GetSystem<mono::ScriptSystem>().Environment();
 			// get monobehaviors
 			auto thunk = env.Type("ElectronView")->GetThunk("Reserialize", 1);
-			const auto arr_sz = msg.param_buffer.size() + 1;
+			const auto arr_sz = msg.param_buffer.size();
 			auto arr = mono_array_new(mono_domain_get(), mono_get_array_class(), arr_sz);
 
 			for (int i = 0; i < msg.param_buffer.size(); ++i)
@@ -99,17 +99,16 @@ namespace idk
 				mono_array_setref(arr, i, subarr);
 			}
 
-			auto message_info_type = env.Type("ElectronMessageInfo");
-			auto data = message_info_type->Construct();
-			int sender_as_int = static_cast<int>(sender);
-			data.Assign("sender", sender_as_int);
-			data.Assign("view_handle", view.id);
-			mono_array_setref(arr, arr_sz - 1, data.Raw()); // set the info
-
 			using Reserialize = MonoArray * (*)(MonoArray*, MonoException**);
 
 			MonoException* exc;
 			auto params = static_cast<Reserialize>(thunk->get())(arr, &exc);
+
+			auto message_info_type = env.Type("ElectronMessageInfo");
+			auto message_info = message_info_type->Construct();
+			int sender_as_int = static_cast<int>(sender);
+			message_info.Assign("fromID", sender_as_int);
+			message_info.Assign("view_handle", view.id);
 			if (exc)
 			{
 				auto idk = Core::GetSystem<mono::ScriptSystem>().Environment().Type("IDK");
@@ -120,7 +119,7 @@ namespace idk
 
 			IDK_ASSERT_MSG(params, "parameters could not be instantiated");
 			for (auto& elem : view->GetGameObject()->GetComponents<mono::Behavior>())
-				elem->InvokeRPC(msg.method_name, params);
+				elem->InvokeRPC(msg.method_name, params, message_info.Raw());
 		}
 	}
 }

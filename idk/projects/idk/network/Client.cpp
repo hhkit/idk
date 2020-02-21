@@ -60,7 +60,7 @@ namespace idk
 		{
 			OnConnectionToServer.Fire();
 			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-				target->FireMessage("OnDisconnectedFromServer");
+				target->FireMessage("OnConnectedToServer");
 		}
 		if (!connected_this_frame && connected_last_frame)
 		{

@@ -42,6 +42,7 @@ namespace idk
 					msg.i = message.i + 1;
 				});
 			});
+		server.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage& msg) { OnInvokeRPCMessage(msg); });
 
 		// the server should never be told to instantiate prefabs
 		//server.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });

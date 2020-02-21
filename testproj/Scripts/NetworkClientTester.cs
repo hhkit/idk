@@ -17,17 +17,6 @@ namespace TestAndSeek
             Debug.Log("Disconnected to server");
         }
 
-        [ElecRPC]
-        void ExecuteMe()
-        {
-            Debug.Log("RPC executed");
-        }
-        [ElecRPC]
-        void ExecuteMeWithArgs(string param, int val, string param2)
-        {
-            Debug.Log("RPC executed " + param + "," + val + "," + param2);
-        }
-
         void Start()
         {
             ElectronNetwork.AddCallbackTarget(this);

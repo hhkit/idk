@@ -878,7 +878,7 @@ namespace idk
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronView> c_ev)
     {
         bool is_me = Core::GetSystem<NetworkSystem>().GetMe() == c_ev->owner;
-        std::string owner_str = "Owner:";
+        std::string owner_str = "Owner: ";
         switch (auto val = c_ev->owner)
         {
         case Host::NONE: owner_str += "NONE"; break;
@@ -887,9 +887,10 @@ namespace idk
         }
 
         if (is_me)
-            owner_str += "(Me)";
+            owner_str += " (Me)";
 
         ImGui::Text(owner_str.data());
+        ImGui::Text("Network ID: %d", c_ev->network_id);
 
         for (auto [name, param] : c_ev->GetParameters())
         {

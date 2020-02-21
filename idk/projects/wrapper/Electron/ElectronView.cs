@@ -56,15 +56,20 @@ namespace idk
             }
             throw new System.NotImplementedException();
         }
+
         internal static object[] Reserialize(byte[][] bytes)
         {
             object[] output = new object[bytes.Length];
+
             for (int count = 0; count < bytes.Length; ++count)
             {
                 var formatter = new BinaryFormatter();
-                using (MemoryStream stream = new MemoryStream(bytes[count]))
+                if (bytes[count] != null)
                 {
-                    output[count] = formatter.Deserialize(stream);
+                    using (MemoryStream stream = new MemoryStream(bytes[count]))
+                    {
+                        output[count] = formatter.Deserialize(stream);
+                    }
                 }
             }
             return output;

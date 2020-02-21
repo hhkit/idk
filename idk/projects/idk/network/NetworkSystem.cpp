@@ -97,7 +97,7 @@ namespace idk
 		case Host::CLIENT1: return server_connection_manager[1].get();
 		case Host::CLIENT2: return server_connection_manager[2].get();
 		case Host::CLIENT3: return server_connection_manager[3].get();
-		case Host::CLIENT_MAX:
+		case Host::ANY:
 		{
 			if (client_connection_manager)
 				return client_connection_manager.get();

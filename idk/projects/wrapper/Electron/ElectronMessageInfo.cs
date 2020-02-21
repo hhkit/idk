@@ -1,13 +1,23 @@
 ﻿
 namespace idk
 {
-    struct ElectronMessageInfo
+    /// <summary>
+    /// User can check the message info of the message through this data struct.
+    /// </summary>
+    public struct ElectronMessageInfo
     {
         private int    fromID;
         private ulong  view_handle;
         private ushort frameStamp;
 
+        /// <summary>
+        /// The sender of the message.
+        /// </summary>
         public Player sender { get=> new Player(fromID); }
+
+        /// <summary>
+        /// The view on which the RPC was executed on.
+        /// </summary>
         public ElectronView electronView { get => new ElectronView() { handle = view_handle }; }
     }
 }
