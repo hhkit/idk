@@ -74,7 +74,25 @@ namespace idk::vkn::renderpasses
 		gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm              ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		depth_rsc = builder.write(depth);
+		depth_rsc = builder.copy(depth, CopyOptions{ vk::ImageLayout::eDepthStencilAttachmentOptimal,
+			{
+				vk::ImageCopy
+				{
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eDepth,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eDepth,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::Extent3D{size.x,size.y,1},
+				}
+			} });
 		uint32_t index = 0;
 		for (auto& gbuffer_rsc : gbuffer_rscs)
 		{
@@ -352,8 +370,8 @@ namespace idk::vkn::renderpasses
 	{
 		auto color_buffer = RscHandle<VknTexture>{rt->GetColorBuffer()};
 		auto depth_buffer = RscHandle<VknTexture>{rt->GetDepthBuffer()};
-		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer);
-		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer);
+		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer,rt_size);
+		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer,rt_size);
 		render_target = color_att;
 		depth = depth_att;
 		std::array<float, 4> clear_color{};
@@ -614,7 +632,9 @@ namespace idk::vkn::renderpasses
 		PassUtil::FullRenderData rd{ &gfx_state,&rs };
 		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
 		//TODO: 
-		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{}, gfx_state.camera.render_target, clr_col, clr_dep).RenderPass();
+		bindings::SkyboxBindings skybox_binding{};
+		skybox_binding.SetCamera(gfx_state.camera);
+		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding }, gfx_state.camera.render_target, clr_col, clr_dep).RenderPass();
 		bindings::StandardVertexBindings::StateInfo state;
 		state.SetState(gfx_state);
 		bindings::DeferredPbrInfo info{

@@ -178,6 +178,16 @@ namespace idk::vkn
 	{
 		clear_depths = depth;
 		clear_stencil = stencil;
+		auto depth_value = (depth) ? *depth : 1.0f;
+		auto stencil_value =(stencil) ? *stencil : 0ui8;
+		if (clear_depths || clear_stencil)
+		{
+			_clear_depth_stencil = vk::ClearDepthStencilValue{ depth_value,stencil_value};
+		}
+		else
+		{
+			_clear_depth_stencil = {};
+		}
 	}
 	void RenderTask::SetScissors(rect r)
 	{
@@ -195,6 +205,11 @@ namespace idk::vkn
 		_rect_builder.start();
 		_rect_builder.emplace_back(r);
 		_current_batch.viewport = _rect_builder.end();
+	}
+	void RenderTask::SetScissorsViewport(rect r)
+	{
+		SetScissors(r);
+		SetViewport(r);
 	}
 	void RenderTask::SetFillType(FillType type)
 	{
@@ -244,12 +259,17 @@ namespace idk::vkn
 		_num_output_attachments = size;
 	}
 
-	uint32_t compute_clear_info(size_t num_output_attachments,span<const color> clear_colors, std::optional<float> clear_depth, std::optional<uint8_t> clear_stencil,
+	void RenderTask::SetClearDepthStencil(std::optional<vk::ClearValue> clear_value)
+	{
+		_clear_depth_stencil = clear_value;
+	}
+
+	uint32_t compute_clear_info(size_t num_output_attachments,span<const color> clear_colors, std::optional<vk::ClearValue> clear_depth_stencil,
 		vector<vk::ClearValue>& clear
 		)
 	{
 		clear.clear();
-		clear.reserve(num_output_attachments + ((clear_depth|| clear_stencil) ? 1 : 0));
+		clear.reserve(num_output_attachments + ((clear_depth_stencil) ? 1 : 0));
 		for (auto color : clear_colors)
 		{
 			clear.emplace_back(std::array<float, 4> { color.r,color.g,color.b,color.a });
@@ -258,29 +278,23 @@ namespace idk::vkn
 		{
 			clear.emplace_back(std::array<float, 4> { 0, 0, 0, 0 });
 		}
-		bool clear_other = false;
-		float depth{};
-		uint8_t stencil{};
-		if (clear_depth)
-		{
-			clear_other = true;
-			depth = *clear_depth;
-		}
-		if (clear_stencil)
-		{
-			clear_other = true;
-			stencil = *clear_stencil;
-		}
-		if(clear_other)
-			clear.emplace_back(vk::ClearDepthStencilValue{depth,stencil});
+		if(clear_depth_stencil)
+			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
 		StartNewBatch();//flush the current batch
-		ProcessCopies(render_bundle);
 		auto cmd_buffer = render_bundle._cmd_buffer;
+		if (_label)
+		{
+			dbg::BeginLabel(cmd_buffer, _label->c_str());
+			dbg::BeginLabel(cmd_buffer, "BeginCopyStage");
+		}
+		ProcessCopies(render_bundle);
+		if (_label)
+			dbg::EndLabel(cmd_buffer);
 		auto& d_manager = render_bundle._d_manager;
 		vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
 
@@ -290,12 +304,8 @@ namespace idk::vkn
 		vector<vk::Viewport> viewports;
 		std::optional<RenderPassObj> prev_rp;
 		vector<vk::ClearValue> clear_values;
-		compute_clear_info(_num_output_attachments, clear_colors, clear_depths, clear_stencil,clear_values);
+		compute_clear_info(_num_output_attachments, clear_colors, _clear_depth_stencil,clear_values);
 		vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
-		if (_label)
-		{
-			dbg::BeginLabel(cmd_buffer, _label->c_str());
-		}
 		if (batches.size())
 		{
 
@@ -443,25 +453,36 @@ namespace idk::vkn
 			//Transition from their original layouts to eGeneral
 			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
 			{
-				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, vk::ImageLayout::eGeneral);
+				auto range = copy_cmd.src_range;
+				if (!range)
+					range = copy_cmd.src.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, vk::ImageLayout::eGeneral, hlp::TransitionOptions{ {},{},range});
 			}
 			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
 			{
 				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), copy_cmd.dst_layout, vk::ImageLayout::eGeneral);
+				auto range = copy_cmd.dst_range;
+				if (!range)
+					range = copy_cmd.dst.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, hlp::TransitionOptions{ {},{},range });
 			}
-			cmd_buffer.copyImage(copy_cmd.src.Image(), vk::ImageLayout::eGeneral, copy_cmd.dst.Image(), vk::ImageLayout::eGeneral, copy_cmd.regions);
+			cmd_buffer.copyImage(copy_cmd.src.Image(), vk::ImageLayout::eGeneral, copy_cmd.dst.Image(), vk::ImageLayout::eTransferDstOptimal, copy_cmd.regions);
 			//Transition from their eGeneral to original layouts 
-			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral && copy_cmd.src_layout != vk::ImageLayout::eUndefined)
 			{
 				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), vk::ImageLayout::eGeneral, copy_cmd.src_layout);
+				auto range = copy_cmd.src_range;
+				if (!range)
+					range = copy_cmd.src.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), vk::ImageLayout::eGeneral, copy_cmd.src_layout, hlp::TransitionOptions{ {},{},range });
 			}
 			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
 			{
 				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eGeneral, copy_cmd.dst_layout);
+				auto range = copy_cmd.dst_range;
+				if (!range)
+					range = copy_cmd.dst.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eTransferDstOptimal, copy_cmd.dst_layout, hlp::TransitionOptions{ {},{},range});
 			}
 		}
 

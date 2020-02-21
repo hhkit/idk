@@ -19,7 +19,6 @@ namespace idk::vkn::hlp
 	};
 	*/
 
-#pragma optimize("",off)
 	void SimpleLock::Lock() {
 		std::unique_lock lock{ _data->mutex };
 		while (_data->locked)

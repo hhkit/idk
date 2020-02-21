@@ -162,6 +162,17 @@ namespace idk::vkn
 		}
 		return result;
 	}
+	bool FrameGraphResourceManager::UpdateResourceDescription(fgr_id rsc_id, TextureDescription desc)
+	{
+		bool result=false;
+		auto itr = resource_handles.find(rsc_id);
+		if (itr != resource_handles.end())
+		{
+			resources[itr->second] = desc;
+			result = true;;
+		}
+		return result;
+	}
 	FrameGraphResourceManager::actual_resource_t FrameGraphResourceManager::InstantiateConcrete(TextureDescription desc,bool is_shader_sampled)
 	{
 		FrameGraphResourceManager::actual_resource_t result{};

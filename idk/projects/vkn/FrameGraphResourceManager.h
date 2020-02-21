@@ -66,6 +66,7 @@ namespace idk::vkn
 
 		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
 		std::optional<TextureDescription> GetResourceDescription(fgr_id rsc_id)const;
+		bool UpdateResourceDescription(fgr_id rsc_id, TextureDescription desc);
 
 		actual_resource_t InstantiateConcrete(TextureDescription desc, bool is_shader_sampled);
 		void FinishInstantiation();

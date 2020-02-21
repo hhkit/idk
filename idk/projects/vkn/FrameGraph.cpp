@@ -88,7 +88,7 @@ namespace idk::vkn
 		rsc_lifetime_mgr.ClearLifetimes();
 		GetResourceManager().Reset();
 	}
-
+#pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
 		tmp_graph.buffer = &graph_builder.consumed_resources;
@@ -112,7 +112,8 @@ namespace idk::vkn
 				for (auto in_rsc : id_adj_buffer)
 				{
 					auto src_node = in_rsc;
-					derp[src_node].emplace_back(dst);
+					if (src_node != dst)
+						derp[src_node].emplace_back(dst);
 				}
 			}
 
@@ -153,7 +154,47 @@ namespace idk::vkn
 	{
 		//TODO: Actually transition
 	}
-
+	bool ValidateImageLayout(vk::ImageLayout layout)
+	{
+		bool valid = true;
+		switch (layout)
+		{
+		case vk::ImageLayout::eUndefined:
+			break;
+		case vk::ImageLayout::eGeneral:
+			break;
+		case vk::ImageLayout::eColorAttachmentOptimal:
+			break;
+		case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+			break;
+		case vk::ImageLayout::eDepthStencilReadOnlyOptimal:
+			break;
+		case vk::ImageLayout::eShaderReadOnlyOptimal:
+			break;
+		case vk::ImageLayout::eTransferSrcOptimal:
+			break;
+		case vk::ImageLayout::eTransferDstOptimal:
+			break;
+		case vk::ImageLayout::ePreinitialized:
+			break;
+		case vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal:
+			break;
+		case vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal:
+			break;
+		case vk::ImageLayout::ePresentSrcKHR:
+			break;
+		case vk::ImageLayout::eSharedPresentKHR:
+			break;
+		case vk::ImageLayout::eShadingRateOptimalNV:
+			break;
+		case vk::ImageLayout::eFragmentDensityMapOptimalEXT:
+			break;
+		default:
+			valid = false;
+			break;
+		}
+		return valid;
+	}
 	void FrameGraph::Execute()
 	{
 		_contexts.clear();
@@ -180,8 +221,10 @@ namespace idk::vkn
 				{
 					CopyCommand cmd;
 					auto src_layout = GetSourceLayout(copy_req.src.id);
+					if (!ValidateImageLayout(src_layout))
+						src_layout = src_layout;
 					auto dst_layout = copy_req.options.dest_layout;
-					context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.regions});
+					context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,copy_req.options.src_range,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.dst_range,copy_req.options.regions});
 				}
 				rp.Execute(context);
 				rp.PostExecute(node, context);
@@ -400,11 +443,15 @@ namespace idk::vkn
 			auto output_nodes = node.GetOutputSpan();
 			auto output_ptr = std::find(output_nodes.begin(), output_nodes.end(), FrameGraphResource{ src_id });
 			auto output_index = output_ptr - output_nodes.begin();
-			if (output_ptr < output_nodes.end())
+			if (output_ptr < output_nodes.end()&& output_index < node.output_attachments.size())
 			{
 				auto& att_info = node.output_attachments[output_index];
 				result = att_info->second.layout;
 			}
+		}
+		else
+		{
+			__debugbreak();
 		}
 		return result;
 	}

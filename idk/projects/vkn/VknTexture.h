@@ -24,6 +24,7 @@ namespace idk::vkn {
 		VulkanRsc<vk::ImageView>     imageView{ nullptr };
 		VulkanRsc<vk::Sampler>       sampler{ nullptr };
 		opt<vk::DescriptorSet>	descriptorSet{};
+		vk::ImageSubresourceRange range;
 		string dbg_name;
 
 		VknTexture() = default;
@@ -41,6 +42,10 @@ namespace idk::vkn {
 		vk::ImageAspectFlags ImageAspects()const;
 		uint32_t& Layers(uint32_t layers)noexcept;
 		uint32_t Layers()const noexcept;
+
+		vk::ImageSubresourceRange FullRange()const;
+		void FullRange(vk::ImageSubresourceRange range);
+
 		using Texture::Size;
 		uvec2 Size(uvec2 new_size) override;
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)

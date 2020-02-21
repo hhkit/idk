@@ -18,7 +18,9 @@ namespace idk::vkn
 	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
-		return rsc_manager.CreateTexture(desc);
+		auto rsc = rsc_manager.CreateTexture(desc);
+		curr_rsc.output_resources.emplace_back(rsc);
+		return rsc;
 	}
 
 	FrameGraphResourceReadOnly FrameGraphBuilder::read(FrameGraphResource in_rsc,[[maybe_unused]] bool may_shader_sample)
@@ -47,13 +49,21 @@ namespace idk::vkn
 
 	FrameGraphResource FrameGraphBuilder::copy(FrameGraphResource target_rsc, CopyOptions opt)
 	{
-		auto copy_desc = rsc_manager.GetResourceDescription(target_rsc.id);
+		auto src_id = target_rsc.id;
+		auto copy_desc = rsc_manager.GetResourceDescription(src_id);
 		FrameGraphResource result = target_rsc;
 		if (copy_desc)
 		{
+			auto usage = copy_desc->usage;
+			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferSrc;
+			rsc_manager.UpdateResourceDescription(src_id, *copy_desc);
+			if (copy_desc->actual_rsc)
+				copy_desc->actual_rsc = {};
+			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferDst;
 			result= CreateTexture(*copy_desc);
 			result = write(result, WriteOptions{ .clear = false });
-			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result});
+			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result,opt});
+			read(target_rsc,false);
 		}
 		return target_rsc;
 	}

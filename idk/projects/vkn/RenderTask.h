@@ -45,8 +45,11 @@ namespace idk::vkn
 	{
 		VknTextureView src;
 		vk::ImageLayout src_layout;
+		std::optional<vk::ImageSubresourceRange> src_range;
 		VknTextureView dst;
 		vk::ImageLayout dst_layout;
+		std::optional<vk::ImageSubresourceRange> dst_range;
+		
 		vector<vk::ImageCopy> regions;
 	};
 
@@ -111,6 +114,7 @@ namespace idk::vkn
 		void SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil = {})override;
 		void SetScissors(rect r)override;
 		void SetViewport(rect r)override;
+		void SetScissorsViewport(rect r)override;
 		void SetFillType(FillType type)override;
 		void SetCullFace(CullFaceFlags cf)override;
 		void SetPrimitiveTopology(PrimitiveTopology pt)override;
@@ -124,6 +128,7 @@ namespace idk::vkn
 		
 		void SetInputAttachments(span<VknTextureView> input_attachments) noexcept;
 		void SetOutputAttachmentSize(size_t size);
+		void SetClearDepthStencil(std::optional<vk::ClearValue> clear_value = {});
 
 		void ProcessBatches(RenderBundle& render_bundle);
 
@@ -201,6 +206,7 @@ namespace idk::vkn
 		lazy_vector<color> clear_colors;
 		std::optional<float> clear_depths;
 		std::optional<uint8_t> clear_stencil;
+		std::optional<vk::ClearValue> _clear_depth_stencil = {};
 #pragma endregion Clear Info
 
 #pragma region Pipeline State

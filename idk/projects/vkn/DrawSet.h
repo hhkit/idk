@@ -117,11 +117,7 @@ namespace idk::vkn
 	protected:
 		bool BindRo(RenderInterface& the_interface, bindings::RenderBindings& bindings);
 		RenderObject _fsq_ro;
-		renderer_attributes _req = { {
-			std::make_pair(vtx::Attrib::Position, 0),
-			std::make_pair(vtx::Attrib::Normal, 1),
-			std::make_pair(vtx::Attrib::UV, 2) }
-		};
+		static renderer_attributes _req;
 		MeshType _mesh_type;
 	};
 

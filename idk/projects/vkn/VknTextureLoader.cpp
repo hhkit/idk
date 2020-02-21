@@ -115,6 +115,14 @@ namespace idk::vkn
 		ptr->mem_alloc = std::move(alloc);
 		ptr->sizeOnDevice = sz;
 		ptr->dbg_name = std::move(name);
+		ptr->range = vk::ImageSubresourceRange
+		{
+			aspect,
+			0,
+			load_info.mipmap_level,
+			0,
+			load_info.layers,
+		};
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
@@ -596,6 +604,7 @@ namespace idk::vkn
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
 			auto& name = result.name =  string{ *guid };
+			result.name.reserve(32);
 			if (name == "d7e578ab-3254-4564-bee0-1555837861f7")
 			{
 				DoNothing();

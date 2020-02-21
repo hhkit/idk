@@ -97,6 +97,13 @@ namespace idk::vkn
 			}
 		}//End of draw_call loop
 	}
+#pragma optimize("",off)
+	
+	renderer_attributes FsqDrawSet::_req = { {
+			std::make_pair(vtx::Attrib::Position, 0),
+			std::make_pair(vtx::Attrib::Normal, 1),
+			std::make_pair(vtx::Attrib::UV, 2) }
+	};
 	FsqDrawSet::FsqDrawSet(MeshType mesh_type):_mesh_type{mesh_type}
 	{
 		_fsq_ro.mesh = Mesh::defaults[_mesh_type];

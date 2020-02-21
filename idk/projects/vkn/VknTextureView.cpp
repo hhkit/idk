@@ -13,6 +13,7 @@ namespace idk::vkn
 		,_format    {tex.format}
 		,_aspects   {tex.ImageAspects()}
 		,_layers    {tex.Layers()}
+		,_range     {tex.FullRange()}
 	{
 	}
 	VknTextureView::VknTextureView(const VknCubemap& tex) noexcept:
@@ -64,5 +65,9 @@ namespace idk::vkn
 	uint32_t VknTextureView::Layers() const noexcept
 	{
 		return _layers;
+	}
+	vk::ImageSubresourceRange VknTextureView::FullRange() const noexcept
+	{
+		return _range;
 	}
 }
