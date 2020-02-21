@@ -3,6 +3,8 @@
 #include <phys/Collider.h>
 #include <phys/collidable_shapes.h>
 #include <common/LayerManager.h>
+#include <phys/collision_result.h>
+#include <compare>
 
 namespace idk
 {
@@ -24,4 +26,9 @@ namespace idk
 
 	struct pair_hasher { size_t operator()(const CollisionPair&) const; };
 	using CollisionList = hash_table<CollisionPair, phys::col_success, pair_hasher>;
+
+	constexpr auto calc_shape = [](const auto& shape, const Collider& col)
+	{
+		return shape * col.GetGameObject()->Transform()->GlobalMatrix();
+	};
 }

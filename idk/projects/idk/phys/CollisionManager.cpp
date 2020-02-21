@@ -10,7 +10,6 @@
 #include <phys/Collider.h>
 #include <phys/RigidBody.h>
 #include <phys/Collision_utils.h>
-#include <phys/collision_result.h>
 #include <phys/raycasts/collision_raycast.h>
 #include <phys/collision_detection/collision_box.h>
 #include <phys/collision_detection/collision_sphere.h>
@@ -33,11 +32,6 @@ namespace idk
 	constexpr float damping = 0.99f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
-
-	constexpr auto calc_shape = [](const auto& shape, const Collider& col)
-	{
-		return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-	};
 
 	void CollisionManager::UpdatePairs(span<class RigidBody> rbs, span<class Collider> colliders)
 	{
@@ -254,12 +248,11 @@ namespace idk
 
 	void CollisionManager::DebugDrawColliders(span<class Collider> colliders, float dt)
 	{
-		auto& dbg = Core::GetSystem<DebugRenderer>();
-		constexpr auto debug_draw = [](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
+		constexpr auto debug_draw = [&](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
 		{
 			std::visit([&](const auto& shape)
 				{
-					dbg.Draw(shape, c, dur);
+					Core::GetSystem<DebugRenderer>().Draw(shape, c, dur);
 				}, pred_shape);
 		};
 

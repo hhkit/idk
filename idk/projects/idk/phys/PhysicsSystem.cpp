@@ -32,11 +32,6 @@
 
 namespace idk
 {
-
-    constexpr auto calc_shape = [](const auto& shape, const Collider& col)
-    {
-        return shape * col.GetGameObject()->Transform()->GlobalMatrix();
-    };
 #pragma optimize("", off)
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
@@ -405,16 +400,6 @@ namespace idk
 		FireEvent(col_exit, "OnTriggerExit", "OnCollisionExit");
 
 	}
-
-    void PhysicsSystem::DrawCollider(const Collider& collider) const
-    {
-		const float a = collider.enabled ? 1.0f : 0.25f;
-		const auto col = (collider.is_trigger ? color{ 0,1,1 } : color{ 1,0,0 }) * a;
-        std::visit([&](const auto& shape)
-        {
-            Core::GetSystem<DebugRenderer>().Draw(calc_shape(shape, collider), col, Core::GetDT());
-        }, collider.shape);
-    }
 
 	void PhysicsSystem::DebugDrawColliders(span<class Collider> colliders)
 	{
