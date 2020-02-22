@@ -3,19 +3,28 @@
 namespace TestAndSeek
 {
     public class NetworkClientTester
-        : MonoBehavior
+        : MonoBehavior, IConnectionCallbacks
     {
         public int a, b, c, d;
 
-        [ElecRPC]
-        void ExecuteMe()
+        public void OnConnectedToServer()
         {
-            Debug.Log("RPC executed");
+            Debug.Log("Connected to server");
         }
-        [ElecRPC]
-        void ExecuteMeWithArgs(string param, int val, string param2)
+
+        public void OnDisconnectionFromServer()
         {
-            Debug.Log("RPC executed " + param + "," + val + "," + param2);
+            Debug.Log("Disconnected to server");
+        }
+
+        void Start()
+        {
+            ElectronNetwork.AddCallbackTarget(this);
+        }
+
+        void OnDestroy()
+        {
+            ElectronNetwork.RemoveCallbackTarget(this);
         }
 
         void Update()

@@ -3,6 +3,7 @@
 #include <core/GameObject.h>
 #include <common/LayerManager.h>
 #include <common/TagManager.h>
+#include <prefab/PrefabInstance.h>
 
 namespace idk 
 {
@@ -25,6 +26,7 @@ namespace idk
 		const string old_tag, new_tag;
 		const LayerManager::layer_t old_layer, new_layer;
 		const bool old_active, new_active;
+		vector<PropertyOverride> overrides_old;
 	};
 
 }

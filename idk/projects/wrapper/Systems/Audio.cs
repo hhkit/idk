@@ -10,15 +10,15 @@
 
 namespace idk
 {
-    public class AudioSystem
+    public class Audio
     {
-
-
         //------------------
         //Public Functions
         //------------------
 
-        //Clamps to 0..1.
+        /// <summary>
+        /// Clamps to 0...1
+        /// </summary>
         public static void SetMasterVolume(float newVolume)
             => Bindings.AudioSystemSetVolume(newVolume);
 

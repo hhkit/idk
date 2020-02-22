@@ -68,12 +68,9 @@ namespace idk::mono
 	}
 	void MonoBehaviorEnvironment::Init()
 	{
-		auto type = Core::GetSystem<ScriptSystem>().Environment().Type("IDK");
 		FindMonoBehaviors();
-
-		void* args[] = { nullptr };
-		mono_runtime_invoke(std::get<MonoMethod*>(type->GetMethod("OnHotReload")), nullptr, args, nullptr);
 	}
+
 	ManagedType* MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
 	{
 		auto itr = mono_behaviors.find(string{ name });
@@ -140,7 +137,7 @@ namespace idk::mono
 				//LOG_TO(LogPool::MONO, string{ "Investigating " } +class_name);
 				constexpr auto find_method = [](ManagedType& type, string_view fn_name, int param_count = 0)
 				{
-					auto res = type.CacheThunk(fn_name, param_count);
+					return type.CacheThunk(fn_name, param_count);
 				};
 
 				//type.CacheMessages();
@@ -149,6 +146,11 @@ namespace idk::mono
 				find_method(type, "Awake");
 				find_method(type, "Start");
 				find_method(type, "FixedUpdate");
+				find_method(type, "OnConnectedToServer");
+				find_method(type, "OnDisconnectedFromServer");
+				find_method(type, "OnClientConnect", 1);
+				find_method(type, "OnClientDisconnect", 1);
+				find_method(type, "OnDestroy");
 				find_method(type, "OnTriggerEnter", 1);
 				find_method(type, "OnTriggerStay", 1);
 				find_method(type, "OnTriggerExit", 1);

@@ -40,8 +40,7 @@ namespace idk::mono
 	{
 		if (script_data)
 		{
-			auto thunk = script_data.Type()->GetThunk(msg);
-			if (thunk)
+			if (auto thunk = script_data.Type()->GetThunk(msg))
 				thunk->Invoke(script_data.Raw()); // handle args?
 		}
 	}
@@ -51,8 +50,7 @@ namespace idk::mono
 		if (!_awake && script_data)
 		{
 			_awake = true;
-			auto method = script_data.Type()->GetThunk("Awake");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("Awake"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -62,8 +60,7 @@ namespace idk::mono
 		if (!_started && script_data)
 		{
 			_started = true;
-			auto method = script_data.Type()->GetThunk("Start");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("Start"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -72,8 +69,7 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto method = script_data.Type()->GetThunk("FixedUpdate");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("FixedUpdate"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -82,8 +78,7 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto method = script_data.Type()->GetThunk("Update");
-			if (method)
+			if (auto method = script_data.Type()->GetThunk("Update"))
 				method->Invoke(script_data.Raw());
 		}
 	}
@@ -92,18 +87,31 @@ namespace idk::mono
 	{
 		if (enabled && script_data)
 		{
-			auto thunk = script_data.Type()->GetThunk("UpdateCoroutines");
-
-			if (thunk)
+			if (auto thunk = script_data.Type()->GetThunk("UpdateCoroutines"))
 				thunk->Invoke(script_data.Raw());
 		}
 	}
 
-	void Behavior::InvokeRPC(string_view rpc, MonoArray* params)
+	void Behavior::InvokeRPC(string_view rpc, MonoArray* params, MonoObject* message_info)
 	{
 		auto rpc_method = script_data.Type()->GetRPC(rpc);
 		if (rpc_method)
-			mono_runtime_invoke_array(rpc_method, script_data.Raw(), params, nullptr);
+		{
+			if (rpc_method.has_message_info_arg)
+			{
+				auto param_length = mono_array_length(params);
+				auto arr = mono_array_new(mono_domain_get(), mono_get_object_class(), param_length + 1);
+				
+				mono_array_memcpy_refs(arr, 0, params, 0, param_length);
+
+				mono_array_setref(arr, param_length - 1, message_info);
+				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), arr, nullptr);
+			}
+			else
+			{
+				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), params, nullptr);
+			}
+		}
 	}
 	
 	Behavior::Behavior(const Behavior& rhs)
@@ -136,6 +144,15 @@ namespace idk::mono
 		}
 
 		return *this;
+	}
+
+	Behavior::~Behavior()
+	{
+		if (const auto* type = script_data.Type())
+		{
+			if (auto thunk = type->GetThunk("OnDestroy"))
+				thunk->Invoke(script_data.Raw());
+		}
 	}
 	
 }

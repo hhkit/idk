@@ -19,13 +19,8 @@
 
 namespace idk
 {
-	void AudioListener::SetAsActive()
-	{
-		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-		audioSystem.SetMainAudioListener(GetHandle());
-		is_active = true;
-	}
-	void AudioListener::UpdateListenerPosition()
+
+	void AudioListener::UpdateListenerPosition(const int& id)
 	{
 		if (const Handle<GameObject> parent = GetGameObject()) 
 		{
@@ -33,10 +28,11 @@ namespace idk
 			{
 				AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
 
-				if (const Handle<RigidBody> rigidbody = parent->GetComponent<RigidBody>())
-					audioSystem.Set3DListenerAttributes(transform->position, rigidbody->velocity(), transform->Forward(), transform->Up());
-				else
-					audioSystem.Set3DListenerAttributes(transform->position, vec3{}, transform->Forward(), transform->Up());
+				//if (const Handle<RigidBody> rigidbody = parent->GetComponent<RigidBody>())
+				//	audioSystem.Set3DListenerAttributes(transform->position, rigidbody->velocity(), transform->Forward(), transform->Up());
+				//else
+				//	audioSystem.Set3DListenerAttributes(transform->position, vec3{}, transform->Forward(), transform->Up());
+				audioSystem.Set3DListenerAttributes(id, transform->GlobalPosition(), vec3{}, -transform->Forward(), transform->Up());
 
 			}
 		}

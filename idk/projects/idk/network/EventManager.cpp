@@ -25,23 +25,24 @@ namespace idk
 {
 	void EventManager::SubscribeEvents(ClientConnectionManager& client)
 	{
-		client.Subscribe<TestMessage>([](TestMessage* message) { LOG_TO(LogPool::NETWORK, "Received message %d", message->i); });
-		client.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });
-		client.Subscribe<EventTransferOwnershipMessage>([this](EventTransferOwnershipMessage* msg) { OnTransferOwnershipEvent(msg); });
-		client.Subscribe<EventLoadLevelMessage>([this](EventLoadLevelMessage* msg) { OnLoadLevelMessage(msg); });
-		client.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage* msg) { OnInvokeRPCMessage(msg); });
+		client.Subscribe<TestMessage>([](TestMessage& message) { LOG_TO(LogPool::NETWORK, "Received message %d", message.i); });
+		client.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage& msg) { OnInstantiatePrefabEvent(msg); });
+		client.Subscribe<EventTransferOwnershipMessage>([this](EventTransferOwnershipMessage& msg) { OnTransferOwnershipEvent(msg); });
+		client.Subscribe<EventLoadLevelMessage>([this](EventLoadLevelMessage& msg) { OnLoadLevelMessage(msg); });
+		client.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage& msg) { OnInvokeRPCMessage(msg); });
 	}
 
 	void EventManager::SubscribeEvents(ServerConnectionManager& server)
 	{
-		server.Subscribe<TestMessage>([&server](TestMessage* message)
+		server.Subscribe<TestMessage>([&server](TestMessage& message)
 			{
-				LOG_TO(LogPool::NETWORK, "Received message %d", message->i);
+				LOG_TO(LogPool::NETWORK, "Received message %d", message.i);
 				server.CreateAndSendMessage<TestMessage>(GameChannel::RELIABLE, [&](TestMessage& msg)
 				{
-					msg.i = message->i + 1;
+					msg.i = message.i + 1;
 				});
 			});
+		server.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage& msg) { OnInvokeRPCMessage(msg); });
 
 		// the server should never be told to instantiate prefabs
 		//server.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });
@@ -123,9 +124,9 @@ namespace idk
 		transfer->owner = target_host;
 		transfer->move_state = ElectronView::ControlObject{};
 
-		auto go = transfer->GetGameObject();
+		const auto go = transfer->GetGameObject();
 
-		if (auto e_rb = go->GetComponent<ElectronRigidbodyView>())
+		if (const auto e_rb = go->GetComponent<ElectronRigidbodyView>())
 		{
 			if (e_rb->sync_velocity)
 				if (const auto rb = go->GetComponent<RigidBody>())
@@ -169,39 +170,46 @@ namespace idk
 	}
 
 	// targets
-	void EventManager::OnInstantiatePrefabEvent(EventInstantiatePrefabMessage* message)
+	void EventManager::OnInstantiatePrefabEvent(EventInstantiatePrefabMessage& message)
 	{
 		LOG_TO(LogPool::NETWORK, "Received instantiate prefab event");
-		auto obj = message->prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
+		if (!message.prefab)
+		{
+			LOG_TO(LogPool::NETWORK, "Prefab %s does not exist", static_cast<string>(message.prefab.guid).c_str());
+			return;
+		}
+
+		auto obj = message.prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
 
 		// set to ghost state
 		ev->ghost_state = ElectronView::Ghost{};
 
-		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message->id, ev));
+		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message.id, ev));
 		ev->Setup();
 
 		auto& tfm = *obj->Transform();
-		if (message->use_position)
-			tfm.position = message->position;
-		if (message->use_rotation)
-			tfm.rotation = message->rotation;
+		if (message.use_position)
+			tfm.position = message.position;
+		if (message.use_rotation)
+			tfm.rotation = message.rotation;
 	}
 
-	void EventManager::OnTransferOwnershipEvent(EventTransferOwnershipMessage* message)
+	void EventManager::OnTransferOwnershipEvent(EventTransferOwnershipMessage& message)
 	{
 		auto id = std::make_shared<SignalBase::SlotId>();
 		LOG_TO(LogPool::NETWORK, "Received transfer ownership event");
-		auto network_id = message->object_to_transfer;
+		auto network_id = message.object_to_transfer;
 		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(network_id);
-		ev->owner = Host::ME;
+		ev->owner = Core::GetSystem<NetworkSystem>().GetMe();
 		ev->GetGameObject()->GetComponent<ElectronView>()->SetAsClientObject();
 	}
-	void EventManager::OnLoadLevelMessage(EventLoadLevelMessage* msg)
+
+	void EventManager::OnLoadLevelMessage(EventLoadLevelMessage& msg)
 	{
 		static auto scene_change_slot = 0;
-		Core::GetSystem<SceneManager>().SetNextScene(msg->GetScene());
-		vector<EventLoadLevelMessage::ViewMapping> views( msg->GetObjects().begin(), msg->GetObjects().end() );
+		Core::GetSystem<SceneManager>().SetNextScene(msg.GetScene());
+		vector<EventLoadLevelMessage::ViewMapping> views( msg.GetObjects().begin(), msg.GetObjects().end() );
 		scene_change_slot = Core::GetSystem<SceneManager>().OnSceneChange +=
 			[&id_manager = Core::GetSystem<NetworkSystem>().GetIDManager(),
 			views = std::move(views)]

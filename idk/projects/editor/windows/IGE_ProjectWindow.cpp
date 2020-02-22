@@ -602,7 +602,7 @@ namespace idk {
 
                     if (fs::is_directory(full_path))
                         fs::remove_all(full_path);
-                    //fs::remove(full_path);
+                    fs::remove(full_path);
                 }
 
                 ImGui::EndPopup();

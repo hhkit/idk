@@ -12,5 +12,6 @@
     <ClCompile Include="WindowsApplication.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="XInputSystem.cpp" />
+    <ClCompile Include="WindowsApplication_GetNetworkDevices.cpp" />
   </ItemGroup>
 </Project>

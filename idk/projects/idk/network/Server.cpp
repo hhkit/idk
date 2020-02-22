@@ -2,6 +2,10 @@
 #include "Server.h"
 #include <event/Signal.inl>
 #include <script/ScriptSystem.h>
+#include <network/NetworkSystem.h>
+#include <core/Handle.inl>
+#include <script/MonoBehavior.h>
+#include <script/ManagedObj.inl>
 
 #undef SendMessage
 
@@ -77,19 +81,33 @@ namespace idk
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d connected", clientIndex);
 		OnClientConnect.Fire(clientIndex);
-		auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-		auto thunk = network->GetThunk("ExecClientConnect", 1);
-		if (thunk)
-			(*thunk).Invoke(clientIndex);
+
+		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+		auto player = player_type->ConstructTemporary(clientIndex);
+		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+		{
+			if (auto type = target->GetObject().Type())
+			{
+				if (auto thunk = type->GetThunk("OnClientConnect"))
+					thunk->Invoke(target->GetObject().Raw(), player);
+			}
+		}
 	}
 
 	void Server::ClientDisconnected(int clientIndex)
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d disconnected", clientIndex);
-		OnClientDisconnect.Fire(clientIndex);;
-		auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-		auto thunk = network->GetThunk("ExecClientDisconnect", 1);
-		if (thunk)
-			(*thunk).Invoke(clientIndex);
+		OnClientDisconnect.Fire(clientIndex);
+
+		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+		auto player = player_type->ConstructTemporary(clientIndex);
+		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+		{
+			if (auto type = target->GetObject().Type())
+			{
+				if (auto thunk = type->GetThunk("OnClientDisconnect"))
+					thunk->Invoke(target->GetObject().Raw(), player);
+			}
+		}
 	}
 }

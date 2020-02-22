@@ -5,8 +5,10 @@
 #include <scene/SceneManager.h>
 #include <core/GameObject.inl>
 #include <common/Transform.h>
+#include <network/NetworkSystem.h>
 #include <core/Scheduler.h>
 #include <script/ScriptSystem.h>
+#include <script/MonoBehavior.h>
 #undef SendMessage
 
 namespace idk
@@ -26,6 +28,11 @@ namespace idk
 	Client::~Client()
 	{
 		client.Disconnect();
+	}
+
+	bool Client::IsConnected() const
+	{
+		return client.IsConnected();
 	}
 
 	void Client::ProcessMessages()
@@ -52,18 +59,14 @@ namespace idk
 		if (connected_this_frame && !connected_last_frame)
 		{
 			OnConnectionToServer.Fire();
-		//	auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-		//	auto thunk = network->GetThunk("ExecServerConnect", 0);
-		//	if (thunk)
-		//		(*thunk).Invoke();
+			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+				target->FireMessage("OnConnectedToServer");
 		}
 		if (!connected_this_frame && connected_last_frame)
 		{
 			OnDisconnectionFromServer.Fire();
-		//	auto network = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ElectronNetwork");
-		//	auto thunk = network->GetThunk("ExecServerDisconnect", 0);
-		//	if (thunk)
-		//		(*thunk).Invoke();
+			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+				target->FireMessage("OnDisconnectedFromServer");
 		}
 		if (connected_this_frame)
 			ProcessMessages();

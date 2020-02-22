@@ -20,7 +20,7 @@ namespace idk::vkn::bindings
 	}
 
 	//Stuff that needs to be bound with every renderobject/animated renderobject
-	void SkyboxBindings::Bind(RenderInterface& the_interface, const RenderObject& dc)
+	void SkyboxBindings::Bind(RenderInterface& the_interface, [[maybe_unused]] const RenderObject& dc)
 	{
 		auto& camera = _camera;
 		auto mat4block = FakeMat4{ camera.projection_matrix * mat4{ mat3{ camera.view_matrix } } };

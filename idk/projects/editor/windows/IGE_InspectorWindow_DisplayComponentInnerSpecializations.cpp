@@ -1,5 +1,3 @@
-
-
 #include "pch.h"
 #include "IGE_InspectorWindow.h"
 
@@ -30,6 +28,7 @@
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>
 #include <meta/variant.h>
+#include <network/NetworkSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <prefab/PrefabUtility.h>
 #include <core/Handle.inl>
@@ -48,10 +47,10 @@
 #include <gfx/GraphicsSystem.h>
 #include <ds/span.inl>
 #include <ds/result.inl>
+
 namespace idk
 {
 
-    
     void IGE_InspectorWindow::DisplayComponentInner(Handle<Transform> c_transform)
     {
         ImVec2 cursorPos = ImGui::GetCursorPos();
@@ -109,10 +108,6 @@ namespace idk
                 if (i)
                     i->GetComponent<Transform>()->position = c.position;
             }
-            if (_prefab_inst)
-            {
-                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "position");
-            }
         }
         check_modify();
 
@@ -131,10 +126,6 @@ namespace idk
                 if (i)
                     i->GetComponent<Transform>()->rotation = c.rotation;
             }
-            if (_prefab_inst)
-            {
-                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "rotation");
-            }
         }
         check_modify();
 
@@ -152,10 +143,6 @@ namespace idk
             {
                 if (i)
                     i->GetComponent<Transform>()->scale = c.scale;
-            }
-            if (_prefab_inst)
-            {
-                PrefabUtility::RecordPrefabInstanceChange(c_transform->GetGameObject(), c_transform, "scale");
             }
         }
         check_modify();
@@ -185,9 +172,7 @@ namespace idk
     {
         if (c_rt->GetGameObject()->HasComponent<Canvas>())
         {
-            ImGuidk::PushDisabled();
-            ImGui::Text("Values driven by Canvas.");
-            ImGuidk::PopDisabled();
+            ImGui::TextDisabled("Values driven by Canvas.");
             return;
         }
 
@@ -200,8 +185,6 @@ namespace idk
             (_prefab_inst->HasOverride((*_curr_component).type.name(), "offset_min", 0) ||
                 _prefab_inst->HasOverride((*_curr_component).type.name(), "offset_max", 0));
 
-        bool changed = false;
-
         ImGui::BeginGroup();
 
         if (c_rt->anchor_min.y != c_rt->anchor_max.y)
@@ -209,7 +192,7 @@ namespace idk
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("T").x * 0.5f);
             ImGui::Text("T");
             ImGui::SetCursorPosX(region_width * 0.35f);
-            changed |= ImGui::DragFloat("##top", &c_rt->offset_max.y);
+            ImGui::DragFloat("##top", &c_rt->offset_max.y);
         }
         else
         {
@@ -223,7 +206,6 @@ namespace idk
                 float dy = pos_y - pivot_y;
                 c_rt->offset_min.y += dy;
                 c_rt->offset_max.y += dy;
-                changed = true;
             }
         }
 
@@ -232,10 +214,10 @@ namespace idk
             ImGui::SetCursorPosX(region_width * 0.35f - w * 0.75f - ImGui::CalcTextSize("L").x - ImGui::GetStyle().ItemSpacing.x);
             ImGui::Text("L");
             ImGui::SameLine();
-            changed |= ImGui::DragFloat("##left", &c_rt->offset_min.x);
+            ImGui::DragFloat("##left", &c_rt->offset_min.x);
             ImGui::SameLine();
             ImGui::SetCursorPosX(region_width * 0.35f + w * 0.75f);
-            changed |= ImGui::DragFloat("##right", &c_rt->offset_max.x);
+            ImGui::DragFloat("##right", &c_rt->offset_max.x);
             ImGui::SameLine();
             ImGui::Text("R");
         }
@@ -252,7 +234,6 @@ namespace idk
                 float dx = pos_x - pivot_x;
                 c_rt->offset_min.x += dx;
                 c_rt->offset_max.x += dx;
-                changed = true;
             }
             ImGui::SameLine();
 
@@ -262,7 +243,6 @@ namespace idk
             {
                 c_rt->offset_min.x = pos_x - c_rt->pivot.x * width;
                 c_rt->offset_max.x = pos_x + (1.0f - c_rt->pivot.x) * width;
-                changed = true;
             }
             ImGui::SameLine();
             ImGui::Text("W");
@@ -271,7 +251,7 @@ namespace idk
         if (c_rt->anchor_min.y != c_rt->anchor_max.y)
         {
             ImGui::SetCursorPosX(region_width * 0.35f);
-            changed |= ImGui::DragFloat("##bot", &c_rt->offset_min.y);
+            ImGui::DragFloat("##bot", &c_rt->offset_min.y);
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
             ImGui::Text("B");
         }
@@ -284,7 +264,6 @@ namespace idk
                 const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
                 c_rt->offset_min.y = pivot_y - c_rt->pivot.y * height;
                 c_rt->offset_max.y = pivot_y + (1.0f - c_rt->pivot.y) * height;
-                changed = true;
             }
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
             ImGui::Text("H");
@@ -313,10 +292,23 @@ namespace idk
             ImGui::EndPopup();
         }
 
-        if (changed && _prefab_inst)
         {
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_min");
-            PrefabUtility::RecordPrefabInstanceChange(_prefab_inst->GetGameObject(), _curr_component, "offset_max");
+            static vector<reflect::dynamic> original_values_2;
+
+            if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            {
+                StoreOriginalValues("offset_min");
+                std::swap(_original_values, original_values_2);
+                StoreOriginalValues("offset_max");
+                std::swap(_original_values, original_values_2);
+            }
+            else if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                ExecuteModify("offset_min", std::move(c_rt->offset_min));
+                std::swap(_original_values, original_values_2);
+                ExecuteModify("offset_max", std::move(c_rt->offset_max));
+                Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(2);
+            }
         }
 
         if (has_override)
@@ -331,17 +323,30 @@ namespace idk
         DisplayStack display(*this);
 
         _curr_property_stack.push_back("anchor_min"); display.GroupBegin(); display.Label("Anchor Min"); display.ItemBegin(true);
-        changed = ImGuidk::DragVec2("##anchor_min", &c_rt->anchor_min);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        ImGuidk::DragVec2("##anchor_min", &c_rt->anchor_min);
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
+        if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            StoreOriginalValues("anchor_min");
+        else if (ImGui::IsItemDeactivatedAfterEdit())
+            ExecuteModify("anchor_min", std::move(c_rt->anchor_min));
+
 
         _curr_property_stack.push_back("anchor_max"); display.GroupBegin(); display.Label("Anchor Max"); display.ItemBegin(true);
-        changed = ImGuidk::DragVec2("##anchor_max", &c_rt->anchor_max);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        ImGuidk::DragVec2("##anchor_max", &c_rt->anchor_max);
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
+        if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            StoreOriginalValues("anchor_max");
+        else if (ImGui::IsItemDeactivatedAfterEdit())
+            ExecuteModify("anchor_max", std::move(c_rt->anchor_max));
+
 
         _curr_property_stack.push_back("pivot"); display.GroupBegin(); display.Label("Pivot"); display.ItemBegin(true);
-        changed = ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
-
+        ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
+        if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            StoreOriginalValues("pivot");
+        else if (ImGui::IsItemDeactivatedAfterEdit())
+            ExecuteModify("pivot", std::move(c_rt->pivot));
 
 
         // z, scale, rot
@@ -355,39 +360,67 @@ namespace idk
 
         _curr_component = c.GetHandle();
         _curr_component_nth = 0;
-        _curr_property_stack.push_back("position"); _curr_property_stack.push_back("z");
+        _curr_property_stack.push_back("position");
         display.GroupBegin(); display.Label("Pos Z"); display.ItemBegin(true);
-        changed = ImGui::DragFloat("##pos_z", &c.position.z);
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back(); _curr_property_stack.pop_back();
+        if (ImGui::DragFloat("##pos_z", &c.position.z))
+        {
+            for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
+                i->GetComponent<Transform>()->position.z = c.position.z;
+        }
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
+        if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            StoreOriginalValues("position");
+        else if (ImGui::IsItemDeactivatedAfterEdit())
+            ExecuteModify("position", std::move(c.position));
 
-        changed = false;
+
         _curr_property_stack.push_back("rotation");
         display.GroupBegin(); display.Label("Rotation"); display.ItemBegin(true);
         if (ImGuidk::DragQuat("##rot", &c.rotation))
         {
-            changed = true;
             for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
                 i->GetComponent<Transform>()->rotation = c.rotation;
         }
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
+        if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            StoreOriginalValues("rotation");
+        else if (ImGui::IsItemDeactivatedAfterEdit())
+            ExecuteModify("rotation", std::move(c.rotation));
 
-        changed = false;
+
         _curr_property_stack.push_back("scale");
         display.GroupBegin(); display.Label("Scale"); display.ItemBegin(true);
         if (ImGuidk::DragVec3("##scl", &c.scale))
         {
-            changed = true;
             for (Handle<GameObject> i : editor.GetSelectedObjects().game_objects)
-                i->GetComponent<Transform>()->rotation = c.rotation;
+                i->GetComponent<Transform>()->scale = c.scale;
         }
-        display.ItemEnd(); display.GroupEnd(changed); _curr_property_stack.pop_back();
+        display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
+        if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+            StoreOriginalValues("scale");
+        else if (ImGui::IsItemDeactivatedAfterEdit())
+            ExecuteModify("scale", std::move(c.scale));
     }
 
     void IGE_InspectorWindow::DisplayComponentInner(Handle<RigidBody> c_rb)
     {
-        auto v = c_rb->velocity();
-        ImGui::DragFloat3("Velocity:", v.data());
         DisplayVal(*c_rb);
+
+        auto v = c_rb->velocity();
+        DisplayStack display{ *this };
+        ImGui::BeginGroup(); display.Label("Velocity"); display.ItemBegin(true);
+        if (!_debug_mode)
+        {
+            ImGuidk::PushDisabled();
+            ImGui::DragFloat3("Velocity:", v.data());
+            ImGuidk::PopDisabled();
+        }
+        else
+        {
+            if (ImGui::DragFloat3("Velocity:", v.data()))
+                c_rb->velocity(v);
+        }
+        display.ItemEnd(); ImGui::EndGroup();
     }
 
     
@@ -428,7 +461,7 @@ namespace idk
             }
             ImGui::Unindent();
         }
-        display.GroupEnd(false);
+        display.GroupEnd();
         _curr_property_stack.pop_back();
 
         static char buf[50];
@@ -536,7 +569,7 @@ namespace idk
         }
         ImGui::Unindent();
         // ImGui::Separator(false);
-        display.GroupEnd(params_changed);
+        display.GroupEnd();
         _curr_property_stack.pop_back();
 
         ImGui::NewLine();
@@ -714,6 +747,8 @@ namespace idk
     
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ParticleSystem> c_ps)
     {
+        _mocked_ps = c_ps;
+
         if (c_ps->state == ParticleSystem::Playing && ImGui::Button("Pause"))
             c_ps->Pause();
         else if (c_ps->state != ParticleSystem::Playing && ImGui::Button("Play"))
@@ -727,6 +762,15 @@ namespace idk
         ImGui::SameLine();
         if (ImGui::Button("Stop"))
             c_ps->Stop();
+
+        if(c_ps->state == ParticleSystem::Playing && !Core::GetSystem<IDE>().IsGameRunning())
+        {
+            bool destroy_on_finish = c_ps->main.destroy_on_finish;
+            c_ps->transform = decompose(c_ps->GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+            c_ps->main.destroy_on_finish = false;
+            c_ps->Step(Core::GetRealDT().count());
+            c_ps->main.destroy_on_finish = destroy_on_finish;
+        }
 
         if (c_ps->state > ParticleSystem::Stopped)
         {
@@ -833,13 +877,20 @@ namespace idk
     
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronView> c_ev)
     {
+        bool is_me = Core::GetSystem<NetworkSystem>().GetMe() == c_ev->owner;
+        std::string owner_str = "Owner: ";
         switch (auto val = c_ev->owner)
         {
-        case Host::ME: ImGui::Text("Owner: Me"); break;
-        case Host::SERVER: ImGui::Text("Owner: SERVER"); break;
-        default: ImGui::Text("Owner: %d", (int)val); break;
+        case Host::NONE: owner_str += "NONE"; break;
+        case Host::SERVER: owner_str += "SERVER"; break;
+        default: owner_str += std::to_string((int) val);
         }
 
+        if (is_me)
+            owner_str += " (Me)";
+
+        ImGui::Text(owner_str.data());
+        ImGui::Text("Network ID: %d", c_ev->network_id);
 
         for (auto [name, param] : c_ev->GetParameters())
         {

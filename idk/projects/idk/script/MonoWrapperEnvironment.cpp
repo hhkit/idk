@@ -68,14 +68,6 @@ namespace idk::mono
 		IDK_ASSERT_MSG(ev_itr != _types.end(), "cannot find idk.ElectronView");
 		IDK_ASSERT_MSG(ev_itr->second.CacheThunk("Reserialize", 1), "could not cache Deserialize");
 
-
-		auto en_itr = _types.find("ElectronNetwork");
-		IDK_ASSERT_MSG(en_itr != _types.end(), "cannot find idk.ElectronNetwork");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecClientConnect"   , 1), "could not cache network");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecClientDisconnect", 1), "could not cache network");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecServerConnect"   , 0), "could not cache network");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecServerDisconnect", 0), "could not cache network");
-
 	}
 
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
@@ -1214,7 +1206,6 @@ namespace idk::mono
             auto s = unbox(type);
             auto hash = string_hash(s.get());
 
-			LOG_TO(LogPool::GAME, string{ guid }.data());
             switch (hash)
             {
 				VALIDATE_RESOURCE(Material);
@@ -1861,7 +1852,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
-			throw "have not written disconnect";
+			Core::GetSystem<NetworkSystem>().Disconnect();
 		}
 		BIND_END();
 
@@ -1898,6 +1889,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkAddCallback", void, uint64_t g)
+		{
+			Core::GetSystem<NetworkSystem>().AddCallbackTarget(Handle<mono::Behavior>{g});
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkRemoveCallback", void, uint64_t g)
+		{
+			Core::GetSystem<NetworkSystem>().RemoveCallbackTarget(Handle<mono::Behavior>{g});
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::ViewGetNetworkId", NetworkID, Handle<ElectronView> ev)
 		{
 			return ev->network_id;
@@ -1906,10 +1909,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::ViewIsMine", bool, Handle<ElectronView> ev)
 		{
-			if (&Core::GetSystem<NetworkSystem>().GetServer())
-				return ev->owner == Host::SERVER;
-			else
-				return ev->owner == Host::ME;
+			return ev->IsMine();
 		}
 		BIND_END();
 
@@ -1933,8 +1933,7 @@ namespace idk::mono
 					buffer.push_back(mono_array_get(subarr, unsigned char, j));
 			}
 
-			// do things
-			EventManager::BroadcastRPC(ev, unbox(method_name).get(), param_vec);
+			EventManager::BroadcastRPC(ev, static_cast<RPCTarget>(rpc_target), unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
 

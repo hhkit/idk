@@ -2,6 +2,7 @@
 #include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/GameConfiguration.h>
+#include <network/network.h>
 
 #undef SendMessage
 namespace idk
@@ -11,6 +12,7 @@ namespace idk
 	class ConnectionManager
 	{
 	public:
+		virtual Host GetConnectedHost() const = 0;
 		virtual ~ConnectionManager() = default;
 
 		virtual void FrameStartManagers() = 0;

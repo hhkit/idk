@@ -35,6 +35,8 @@ namespace idk
 
 	ClientConnectionManager::~ClientConnectionManager()
 	{
+		if (client.IsConnected())
+			client.OnDisconnectionFromServer.Fire();
 		for (const auto& [type, slot] : OnMessageReceived_slots)
 			client.OnMessageReceived[(int) type].Unlisten(slot);
 	}
@@ -49,6 +51,11 @@ namespace idk
 	{
 		for (auto& elem : substream_managers)
 			elem->NetworkFrameEnd();
+	}
+
+	Host ClientConnectionManager::GetConnectedHost() const
+	{
+		return Host::SERVER;
 	}
 
 	yojimbo::Message* ClientConnectionManager::CreateMessage(size_t id)
