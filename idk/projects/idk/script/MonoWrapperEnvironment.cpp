@@ -11,6 +11,7 @@
 #include <mono/metadata/reflection.h>
 
 #include <network/EventManager.h>
+#include <network/ConnectionManager.h>
 
 #include <core/Scheduler.h>
 #include <core/NullHandleException.h>
@@ -1937,5 +1938,31 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::ViewExecRPCOnPlayer", void, Handle<ElectronView> ev, MonoString* method_name, int player_target, MonoArray* params)
+		{
+			auto connection = Core::GetSystem<NetworkSystem>().GetConnectionTo((Host)player_target);
+			if (!connection)
+			{
+				LOG_TO(LogPool::NETWORK, "Tried to execute RPC on disconnected player");
+				return;
+			}
+
+			auto* event_manager = connection->GetManager<EventManager>();
+
+			auto length = mono_array_length(params);
+			vector<vector<unsigned char>> param_vec;
+			for (int i = 0; i < length; ++i)
+			{
+				auto subarr = mono_array_get(params, MonoArray*, i);
+				auto subarr_len = mono_array_length(subarr);
+				auto& buffer = param_vec.emplace_back();
+
+				for (int j = 0; j < subarr_len; ++j)
+					buffer.push_back(mono_array_get(subarr, unsigned char, j));
+			}
+
+			event_manager->SendRPC(ev, unbox(method_name).get(), param_vec);
+		}
+		BIND_END();
 	}
 }

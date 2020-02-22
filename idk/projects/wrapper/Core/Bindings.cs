@@ -745,6 +745,9 @@ namespace idk
         public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[][] parameters);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int ViewExecRPCOnPlayer(ulong handle, string method, int target, byte[][] parameters);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int ViewDestroy(ulong handle);
 
     }

@@ -8,7 +8,7 @@
         /// <summary>
         /// The Server's ActorNumber is hardcoded to -1.
         /// </summary>
-        public static int ServerNumber { get => -1; }
+        public static Player Server { get => new Player(-1); }
 
         int connectionId;
 
@@ -29,6 +29,31 @@
                 return "Server";
             else
                 return "Client " + connectionId;
+        }
+
+        public static bool operator ==(Player lhs, Player rhs)
+        {
+            if (lhs != null && rhs != null)
+                return lhs.connectionId == rhs.connectionId;
+            else
+                return (object)lhs == null && (object)rhs == null;
+        }
+
+        public static bool operator !=(Player lhs, Player rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                return this.connectionId == ((Player)obj).connectionId;
+            }
         }
     }
 }

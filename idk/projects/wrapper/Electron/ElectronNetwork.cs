@@ -19,7 +19,14 @@ namespace idk
         public static bool isHost { get => Bindings.NetworkGetIsHost(); }
         public static bool isConnected { get => Bindings.NetworkGetIsConnected(); }
         public static int ping { get => Bindings.NetworkGetPing(); }
-        public static Device[] devices { get => Bindings.NetworkGetDevices(); }
+        public static Device[] devices 
+        {
+            get
+            {
+                throw new System.NotImplementedException(); 
+                return Bindings.NetworkGetDevices();
+            }
+        }
 
         public static void Disconnect() => Bindings.NetworkDisconnect();
         public static void CreateLobby() => Bindings.NetworkCreateLobby();

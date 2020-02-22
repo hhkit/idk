@@ -56,6 +56,7 @@ namespace idk
 			});
 	}
 
+
 	Handle<GameObject> EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> rotation)
 	{
 		LOG_TO(LogPool::NETWORK, "Broadcasting instantiate prefab message %s", string(prefab.guid).c_str());
