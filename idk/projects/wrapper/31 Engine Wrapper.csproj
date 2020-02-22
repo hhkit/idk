@@ -83,6 +83,8 @@
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />
     <Compile Include="Core\Application.cs" />
+    <Compile Include="Electron\ElectronMessageInfo.cs" />
+    <Compile Include="Electron\InvalidRPCTargetException.cs" />
     <Compile Include="Systems\Audio.cs" />
     <Compile Include="Core\Bindings.cs" />
     <Compile Include="Core\Component.cs" />

@@ -22,6 +22,24 @@ namespace TestAndSeek
 
         internal bool transfer = false;
         internal Player p = null;
+
+        [ElecRPC]
+        void ExecuteMe()
+        {
+            Debug.Log("RPC executed");
+        }
+        [ElecRPC]
+        void ExecuteMeWithArgs(string param, int val, string param2)
+        {
+            Debug.Log("RPC executed " + param + "," + val + "," + param2);
+        }
+
+        [ElecRPC]
+        void ExecuteMeCheckingForSender(string param, ElectronMessageInfo info)
+        {
+            Debug.Log("RPC from " + info.sender + " executed");
+        }
+
         void Start()
         {
             rb = GetComponent<RigidBody>();
@@ -49,6 +67,12 @@ namespace TestAndSeek
         }
         void FixedUpdate()
         {
+            if (Input.GetKey(KeyCode.Shift))
+            {
+                if (Input.GetKeyDown(KeyCode.E))
+                    ev.RPC("ExecuteMeCheckingForSender", RPCTarget.Server,  "help me");
+            }
+
             if (ev.IsMine) // ev.owner == me
             {
                 if (on_floor)

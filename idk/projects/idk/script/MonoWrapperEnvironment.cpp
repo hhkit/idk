@@ -68,14 +68,6 @@ namespace idk::mono
 		IDK_ASSERT_MSG(ev_itr != _types.end(), "cannot find idk.ElectronView");
 		IDK_ASSERT_MSG(ev_itr->second.CacheThunk("Reserialize", 1), "could not cache Deserialize");
 
-
-		auto en_itr = _types.find("ElectronNetwork");
-		IDK_ASSERT_MSG(en_itr != _types.end(), "cannot find idk.ElectronNetwork");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecClientConnect"   , 1), "could not cache network");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecClientDisconnect", 1), "could not cache network");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecServerConnect"   , 0), "could not cache network");
-		IDK_ASSERT_MSG(en_itr->second.CacheThunk("ExecServerDisconnect", 0), "could not cache network");
-
 	}
 
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
@@ -1917,10 +1909,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::ViewIsMine", bool, Handle<ElectronView> ev)
 		{
-			if (&Core::GetSystem<NetworkSystem>().GetServer())
-				return ev->owner == Host::SERVER;
-			else
-				return ev->owner == Host::ME;
+			return ev->IsMine();
 		}
 		BIND_END();
 
@@ -1944,8 +1933,7 @@ namespace idk::mono
 					buffer.push_back(mono_array_get(subarr, unsigned char, j));
 			}
 
-			// do things
-			EventManager::BroadcastRPC(ev, unbox(method_name).get(), param_vec);
+			EventManager::BroadcastRPC(ev, static_cast<RPCTarget>(rpc_target), unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
 

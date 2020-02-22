@@ -53,6 +53,11 @@ namespace idk
 			elem->NetworkFrameEnd();
 	}
 
+	Host ClientConnectionManager::GetConnectedHost() const
+	{
+		return Host::SERVER;
+	}
+
 	yojimbo::Message* ClientConnectionManager::CreateMessage(size_t id)
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();

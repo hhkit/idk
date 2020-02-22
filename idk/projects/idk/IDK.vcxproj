@@ -52,6 +52,7 @@
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\DefaultShaders.h" />
     <ClInclude Include="gfx\ShadowMapPool.h" />
+    <ClInclude Include="network\ElectronMessageInfo.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h" />
     <ClInclude Include="network\EventDataBlockFrameNumber.h" />
     <ClInclude Include="network\EventInvokeRPCMessage.h" />
@@ -103,6 +104,7 @@
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
     <ClInclude Include="network\NetworkTuple.inl" />
+    <ClInclude Include="network\RPCTarget.h" />
     <ClInclude Include="parallel\multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Address.h" />

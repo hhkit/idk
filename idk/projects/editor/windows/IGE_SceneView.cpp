@@ -163,6 +163,7 @@ namespace idk {
 
 		//imageSize.y = (imageSize.x * (9 / 16));
 		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
+		ImGui::SetCursorPos(draw_rect_offset);
 		ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0,1),ImVec2(1,0));
 
         if (ImGui::BeginDragDropTarget())

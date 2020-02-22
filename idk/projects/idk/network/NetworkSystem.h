@@ -32,6 +32,7 @@ namespace idk
 		Server& GetServer() { return *lobby; }
 
 		bool IsHost();
+		Host GetMe();
 		SeqNo GetSequenceNumber() const;
 		ConnectionManager* GetConnectionTo(Host host = Host::ANY);
 		template<typename Message, typename InstantiationFunc, typename = sfinae<std::is_invocable_v<InstantiationFunc, Message&>>>
@@ -68,6 +69,7 @@ namespace idk
 		vector<Handle<mono::Behavior>> callback_objects;
 
 		SeqNo frame_counter{};
+		Host my_id = Host::NONE;
 
 		void Init() override;
 		void LateInit() override;

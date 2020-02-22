@@ -68,9 +68,9 @@ namespace idk::mono
 	}
 	void MonoBehaviorEnvironment::Init()
 	{
-		auto type = Core::GetSystem<ScriptSystem>().Environment().Type("IDK");
 		FindMonoBehaviors();
 	}
+
 	ManagedType* MonoBehaviorEnvironment::GetBehaviorMetadata(string_view name)
 	{
 		auto itr = mono_behaviors.find(string{ name });
@@ -137,7 +137,7 @@ namespace idk::mono
 				//LOG_TO(LogPool::MONO, string{ "Investigating " } +class_name);
 				constexpr auto find_method = [](ManagedType& type, string_view fn_name, int param_count = 0)
 				{
-					auto res = type.CacheThunk(fn_name, param_count);
+					return type.CacheThunk(fn_name, param_count);
 				};
 
 				//type.CacheMessages();

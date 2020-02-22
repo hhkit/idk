@@ -552,21 +552,30 @@ namespace idk {
     }
     void IGE_InspectorWindow::StoreOriginalValues(string_view property_path)
     {
+        const auto& sel = Core::GetSystem<IDE>().GetSelectedObjects();
         _original_values.clear();
-        for (auto obj : Core::GetSystem<IDE>().GetSelectedObjects().game_objects)
+
+        if (sel.game_objects.size())
         {
-            auto components = obj->GetComponents();
-            auto nth = _curr_component_nth;
-            for (auto c : components)
+            for (auto obj : sel.game_objects)
             {
-                if (c.type == _curr_component.type && nth-- == 0)
+                auto components = obj->GetComponents();
+                auto nth = _curr_component_nth;
+                for (auto c : components)
                 {
-                    _original_values.push_back(resolve_property_path(*c, property_path).copy());
-                    break;
+                    if (c.type == _curr_component.type && nth-- == 0)
+                    {
+                        _original_values.push_back(resolve_property_path(*c, property_path).copy());
+                        break;
+                    }
                 }
+                if (nth >= 0) // component not found
+                    _original_values.emplace_back();
             }
-            if (nth >= 0) // component not found
-                _original_values.emplace_back();
+        }
+        else // showing prefab directly
+        {
+            _original_values.push_back(resolve_property_path(*_curr_component, property_path).copy());
         }
     }
 

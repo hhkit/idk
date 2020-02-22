@@ -15,21 +15,23 @@ namespace idk
 			int size = 0;
 			vector<unsigned char> buffer;
 		};
-		NetworkID invoke_on_id = 0;
-		char method_name[64];
-		unsigned param_count = 0;
-		vector<Param> param_buffer;
-
+		struct Data
+		{
+			NetworkID invoke_on_id = 0;
+			char method_name[64];
+			unsigned param_count = 0;
+			vector<Param> param_buffer;
+		} payload;
 
 		template <typename Stream>
 		bool Serialize(Stream& stream)
 		{
-			serialize_int(stream, invoke_on_id, 0, 4096);
-			serialize_string(stream, method_name, 64);
-			serialize_uint32(stream, param_count);
-			param_buffer.resize(param_count);
+			serialize_int(stream, payload.invoke_on_id, 0, 4096);
+			serialize_string(stream, payload.method_name, 64);
+			serialize_uint32(stream, payload.param_count);
+			payload.param_buffer.resize(payload.param_count);
 
-			for (auto& elem : param_buffer)
+			for (auto& elem : payload.param_buffer)
 			{
 				serialize_int(stream, elem.size, 0, 0x7FFF);
 				elem.buffer.resize(elem.size);

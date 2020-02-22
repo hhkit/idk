@@ -7,7 +7,7 @@ namespace idk
 	struct Device
 	{
 		idk::small_string<char> name;
-		idk::small_string<char> fullname;
+		idk::small_string<char> description;
 		vector<Address> ip_addresses;
 	};
 }

@@ -81,14 +81,15 @@ namespace idk
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d connected", clientIndex);
 		OnClientConnect.Fire(clientIndex);
+
+		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+		auto player = player_type->ConstructTemporary(clientIndex);
 		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
 		{
-			mono::ManagedObject obj{"Player"};
-			obj.Assign("connectionId", clientIndex);
 			if (auto type = target->GetObject().Type())
 			{
-				if (auto thunk = type->GetThunk("OnConnectedToServer"))
-					thunk->Invoke(target->GetObject().Raw(), obj.Raw());
+				if (auto thunk = type->GetThunk("OnClientConnect"))
+					thunk->Invoke(target->GetObject().Raw(), player);
 			}
 		}
 	}
@@ -97,17 +98,15 @@ namespace idk
 	{
 		LOG_TO(LogPool::NETWORK, "Client %d disconnected", clientIndex);
 		OnClientDisconnect.Fire(clientIndex);
+
+		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+		auto player = player_type->ConstructTemporary(clientIndex);
 		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
 		{
-			auto type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
-			auto obj  = mono_object_new(mono_domain_get(), type->Raw());
-			auto method = mono_class_get_method_from_name(type->Raw(), ".ctor", 1);
-			void* args[] = { &clientIndex, nullptr };
-			
 			if (auto type = target->GetObject().Type())
 			{
-				if (auto thunk = type->GetThunk("OnDisconnectedFromServer"))
-					thunk->Invoke(target->GetObject().Raw(), mono_runtime_invoke(method, obj, args, nullptr));
+				if (auto thunk = type->GetThunk("OnClientDisconnect"))
+					thunk->Invoke(target->GetObject().Raw(), player);
 			}
 		}
 	}

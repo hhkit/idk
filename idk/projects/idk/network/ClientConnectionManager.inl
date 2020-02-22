@@ -10,7 +10,7 @@ namespace idk
 		OnMessageReceived_slots.push_back(EventSlot{ MessageID<Message>, 
 			client.OnMessageReceived[MessageID<Message>].Listen([fn = std::forward<Func>(func)](yojimbo::Message* message)
 			{
-				return fn(static_cast<Message*>(message));
+				return fn(*static_cast<Message*>(message));
 			})
 		}
 		);
