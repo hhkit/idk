@@ -402,13 +402,32 @@ namespace idk::mono
 		}
 		BIND_END();
 
-        BIND_START("idk.Bindings::GameObjectFindWithTag",  uint64_t, MonoString* tag)
+        BIND_START("idk.Bindings::GameObjectFindWithTag", uint64_t, MonoString* tag)
         {
-            char* s = mono_string_to_utf8(tag);
-            auto ret = Core::GetSystem<TagManager>().Find(s);
-            mono_free(s);
+			const auto s = unbox(tag);
+            auto ret = Core::GetSystem<TagManager>().Find(s.get());
             return ret.id;
         }
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectFindGameObjectsWithTag", MonoArray*, MonoString* tag)
+		{
+			const auto go_klass = Core::GetSystem<mono::ScriptSystem>().Environment().Type("GameObject");
+			const auto s = unbox(tag);
+
+			auto vec = Core::GetSystem<TagManager>().FindAll(s.get());
+			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), vec.size() ? vec.size() : 0);
+			for (size_t i = 0; i < vec.size(); ++i)
+			{
+				auto mo = mono_object_new(mono_domain_get(), go_klass->Raw());
+				auto method = mono_class_get_method_from_name(go_klass->Raw(), ".ctor", 1);
+				void* args[] = { &vec[i].id };
+				mono_runtime_invoke(method, mo, args, nullptr);
+				mono_array_setref(retval, i, mo);
+			}
+
+			return retval;
+		}
 		BIND_END();
 
 
