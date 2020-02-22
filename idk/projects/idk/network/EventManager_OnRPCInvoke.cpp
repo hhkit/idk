@@ -77,6 +77,13 @@ namespace idk
 		InvokeRPC(connection_manager->GetConnectedHost(), raw_msg.payload);
 	}
 
+	struct ElectronMessageInfo
+	{
+		unsigned long long view_handle;
+		int host;
+		unsigned short frameStamp;
+	};
+
 	static void InvokeRPC(Host sender, const EventInvokeRPCMessage::Data& msg)
 	{
 		LOG_TO(LogPool::NETWORK, "Received RPC for object %d to invoke %s", msg.invoke_on_id, msg.method_name);
@@ -104,11 +111,10 @@ namespace idk
 			MonoException* exc;
 			auto params = static_cast<Reserialize>(thunk->get())(arr, &exc);
 
-			auto message_info_type = env.Type("ElectronMessageInfo");
-			auto message_info = message_info_type->Construct();
-			int sender_as_int = static_cast<int>(sender);
-			message_info.Assign("fromID", sender_as_int);
+			auto message_info = env.Type("ElectronMessageInfo")->Construct();
+			message_info.Assign("fromID", static_cast<int>(sender));
 			message_info.Assign("view_handle", view.id);
+
 			if (exc)
 			{
 				auto idk = Core::GetSystem<mono::ScriptSystem>().Environment().Type("IDK");
