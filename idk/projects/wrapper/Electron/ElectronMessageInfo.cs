@@ -6,8 +6,8 @@ namespace idk
     /// </summary>
     public struct ElectronMessageInfo
     {
-        private int    fromID;
         private ulong  view_handle;
+        private int fromID;
         private ushort frameStamp;
 
         /// <summary>

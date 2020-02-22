@@ -11,6 +11,7 @@
 #include <mono/metadata/reflection.h>
 
 #include <network/EventManager.h>
+#include <network/ConnectionManager.h>
 
 #include <core/Scheduler.h>
 #include <core/NullHandleException.h>
@@ -402,13 +403,32 @@ namespace idk::mono
 		}
 		BIND_END();
 
-        BIND_START("idk.Bindings::GameObjectFindWithTag",  uint64_t, MonoString* tag)
+        BIND_START("idk.Bindings::GameObjectFindWithTag", uint64_t, MonoString* tag)
         {
-            char* s = mono_string_to_utf8(tag);
-            auto ret = Core::GetSystem<TagManager>().Find(s);
-            mono_free(s);
+			const auto s = unbox(tag);
+            auto ret = Core::GetSystem<TagManager>().Find(s.get());
             return ret.id;
         }
+		BIND_END();
+
+		BIND_START("idk.Bindings::GameObjectFindGameObjectsWithTag", MonoArray*, MonoString* tag)
+		{
+			const auto go_klass = Core::GetSystem<mono::ScriptSystem>().Environment().Type("GameObject");
+			const auto s = unbox(tag);
+
+			auto vec = Core::GetSystem<TagManager>().FindAll(s.get());
+			auto retval = mono_array_new(mono_domain_get(), go_klass->Raw(), vec.size() ? vec.size() : 0);
+			for (size_t i = 0; i < vec.size(); ++i)
+			{
+				auto mo = mono_object_new(mono_domain_get(), go_klass->Raw());
+				auto method = mono_class_get_method_from_name(go_klass->Raw(), ".ctor", 1);
+				void* args[] = { &vec[i].id };
+				mono_runtime_invoke(method, mo, args, nullptr);
+				mono_array_setref(retval, i, mo);
+			}
+
+			return retval;
+		}
 		BIND_END();
 
 
@@ -1850,6 +1870,48 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkGetDevices", MonoArray*)
+		{
+			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
+			auto retval = mono_array_new(mono_domain_get(), mono_get_object_class(), devices.size());
+
+			const auto device_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Device");
+
+			for (unsigned i = 0; i < devices.size(); ++i)
+			{
+				const auto& elem = devices[i];
+				auto csh_device = device_type->Construct();
+				auto str = (MonoObject*) mono_string_new(mono_domain_get(), elem.name.data());
+				csh_device.Assign("mac_addr", str);
+
+				mono_array_setref(retval, i, csh_device.Raw());
+			}
+
+			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkDeviceGetAddresses", MonoArray*, MonoString* mac_address)
+		{
+			auto mac_addr_str = unbox(mac_address);
+			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
+			const auto address_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Address");
+
+			for (auto& elem : devices)
+			{
+				if (elem.name == mac_addr_str.get())
+				{
+					auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), devices.size());
+					for (unsigned j = 0; j < elem.ip_addresses.size(); ++j)
+						mono_array_set(retval, Address, j, elem.ip_addresses[j]);
+					return retval;
+				}
+			}
+
+			return nullptr;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
 			Core::GetSystem<NetworkSystem>().Disconnect();
@@ -1862,11 +1924,26 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkCreateLobby", void)
+		BIND_START("idk.Bindings::NetworkCreateLobby", bool, MonoString* mac_address)
 		{
-
-			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
-			Core::GetSystem<NetworkSystem>().InstantiateServer(devices[0].ip_addresses[0]);
+			auto mac_addr = unbox(mac_address);
+			for (auto& elem : Core::GetSystem<Application>().GetNetworkDevices())
+			{
+				if (elem.name == mac_addr.get())
+				{
+					try
+					{
+						Core::GetSystem<NetworkSystem>().InstantiateServer(elem.ip_addresses[0]);
+						return true;
+					}
+					catch (...)
+					{
+						LOG_TO(LogPool::NETWORK, "Failed to create server.");
+						return false;
+					}
+				}
+			}
+			return false;
 		}
 		BIND_END();
 
@@ -1937,5 +2014,31 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::ViewExecRPCOnPlayer", void, Handle<ElectronView> ev, MonoString* method_name, int player_target, MonoArray* params)
+		{
+			auto connection = Core::GetSystem<NetworkSystem>().GetConnectionTo((Host)player_target);
+			if (!connection)
+			{
+				LOG_TO(LogPool::NETWORK, "Tried to execute RPC on disconnected player");
+				return;
+			}
+
+			auto* event_manager = connection->GetManager<EventManager>();
+
+			auto length = mono_array_length(params);
+			vector<vector<unsigned char>> param_vec;
+			for (int i = 0; i < length; ++i)
+			{
+				auto subarr = mono_array_get(params, MonoArray*, i);
+				auto subarr_len = mono_array_length(subarr);
+				auto& buffer = param_vec.emplace_back();
+
+				for (int j = 0; j < subarr_len; ++j)
+					buffer.push_back(mono_array_get(subarr, unsigned char, j));
+			}
+
+			event_manager->SendRPC(ev, unbox(method_name).get(), param_vec);
+		}
+		BIND_END();
 	}
 }

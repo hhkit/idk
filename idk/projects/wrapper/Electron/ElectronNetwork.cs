@@ -16,13 +16,13 @@ namespace idk
             } 
         }
 
-        public static bool isHost { get => Bindings.NetworkGetIsHost(); }
-        public static bool isConnected { get => Bindings.NetworkGetIsConnected(); }
-        public static int ping { get => Bindings.NetworkGetPing(); }
-        public static Device[] devices { get => Bindings.NetworkGetDevices(); }
+        public static bool     isHost      { get => Bindings.NetworkGetIsHost(); }
+        public static bool     isConnected { get => Bindings.NetworkGetIsConnected(); }
+        public static int      ping        { get => Bindings.NetworkGetPing(); }
+        public static Device[] devices     { get => Bindings.NetworkGetDevices(); }
 
         public static void Disconnect() => Bindings.NetworkDisconnect();
-        public static void CreateLobby() => Bindings.NetworkCreateLobby();
+        public static void CreateLobby() => Bindings.NetworkCreateLobby(devices[0].mac_addr);
         public static void Connect(Address a) => Bindings.NetworkConnect(a);
         public static void LoadScene(Scene scene) => Bindings.NetworkLoadScene(scene.guid);
         public static GameObject Instantiate(Prefab prefab, Vector3 position)

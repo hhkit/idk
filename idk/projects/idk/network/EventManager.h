@@ -19,6 +19,7 @@ namespace idk
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
 		void SendTestMessage(int i);
+		void SendRPC(Handle<ElectronView> ev, string_view method_name, span<vector<unsigned char>> buffer);
 		static Handle<GameObject> BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> quaternion = {});
 		static void SendTransferOwnership(Handle<ElectronView> transfer, Host target_host);
 		static void BroadcastLoadLevel(RscHandle<Scene> scene);

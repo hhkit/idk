@@ -94,5 +94,17 @@ namespace idk
 
         public void SetActive(bool new_active)
             => Bindings.GameObjectSetActive(handle, new_active);
+
+
+        // statics
+        public static GameObject FindWithTag(string tag)
+        {
+            var id = Bindings.GameObjectFindWithTag(tag);
+            return id != 0 ? new GameObject(id) : null;
+        }
+        public static GameObject[] FindGameObjectsWithTag(string tag)
+        {
+            return Bindings.GameObjectFindGameObjectsWithTag(tag);
+        }
     }
 }

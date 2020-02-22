@@ -39,10 +39,16 @@ namespace idk
             Bindings.ViewExecRPC(handle, methodName, target, bytes);
         }
 
+        /// <summary>
+        /// Force one player's instance of the object to execute an RPC.
+        /// </summary>
+        /// <param name="methodName">Name of the method</param>
+        /// <param name="targetPlayer">The player you're trying to target the RPC at</param>
+        /// <param name="parameters">Parameters for the method</param>
         public void RPC(string methodName, Player targetPlayer, params object[] parameters)
         {
             if (!ElectronNetwork.isHost)
-                throw new InvalidRPCTargetException("Only the host may target players.");
+                throw new InvalidRPCTargetException("Only the server may target players.");
 
             byte[][] bytes = new byte[parameters.Length][];
             var formatter = new BinaryFormatter();
@@ -54,7 +60,7 @@ namespace idk
                     bytes[count] = stream.ToArray();
                 }
             }
-            throw new System.NotImplementedException();
+            Bindings.ViewExecRPCOnPlayer(handle, methodName, targetPlayer.ActorNumber, bytes);
         }
 
         internal static object[] Reserialize(byte[][] bytes)

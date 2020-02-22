@@ -74,6 +74,9 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong GameObjectFindWithTag(string tag);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static GameObject[] GameObjectFindGameObjectsWithTag(string tag);
+
         /*
          * Component
          */
@@ -697,7 +700,7 @@ namespace idk
         public extern static int NetworkGetPing();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkCreateLobby();
+        public extern static bool NetworkCreateLobby(string mac_address);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int[] NetworkGetPlayers();
@@ -743,6 +746,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int ViewExecRPC(ulong handle, string method, RPCTarget target, byte[][] parameters);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int ViewExecRPCOnPlayer(ulong handle, string method, int target, byte[][] parameters);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int ViewDestroy(ulong handle);
