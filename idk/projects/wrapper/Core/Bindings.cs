@@ -74,6 +74,9 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong GameObjectFindWithTag(string tag);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static GameObject[] GameObjectFindGameObjectsWithTag(string tag);
+
         /*
          * Component
          */

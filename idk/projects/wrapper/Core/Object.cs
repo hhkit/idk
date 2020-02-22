@@ -47,16 +47,6 @@ namespace idk
             return handle.GetHashCode() << 2;
         }
 
-        // statics
-        public static GameObject FindWithTag(string tag)
-        {
-            var id = Bindings.GameObjectFindWithTag(tag);
-            return id != 0 ? new GameObject(id) : null;
-        }
-
-        public static void Destroy(Object o)
-            => Bindings.ObjectDestroy(o.handle);
-
         public virtual string Serialize()
         {
             var type = GetType();
@@ -74,6 +64,16 @@ namespace idk
             return (Object)MemberwiseClone();
         }
 
+        public override string ToString()
+        {
+            return GetType().Name + "{" + handle.ToString("X8") + "}";
+        }
+
+        // statics
+
+        public static void Destroy(Object o)
+            => Bindings.ObjectDestroy(o.handle);
+
         public static T[] FindObjectsOfType<T>() where T : MonoBehavior
         {
             return (T[])Bindings.ObjectGetObjectsOfType(typeof(T).Name);
@@ -83,11 +83,6 @@ namespace idk
         {
             var search = FindObjectsOfType<T>();
             return search.Length > 0 ? search[0] : null;
-        }
-
-        public override string ToString()
-        {
-            return GetType().Name + "{" + handle.ToString("X8") + "}";
         }
     }
 }
