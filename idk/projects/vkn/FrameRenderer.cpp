@@ -386,7 +386,7 @@ namespace idk::vkn
 		return std::move(the_interface);
 	}
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	PipelineThingy ShadowProcessRoUniforms(const GraphicsStateInterface& state, UboManager& ubo_manager, ShadowBinding& binders)
 	{
 		auto vert_shaders = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders;
@@ -442,6 +442,7 @@ namespace idk::vkn
 				if (mat_inst.material && dc.layer_mask & state.mask && !binders.Skip(the_interface, dc))
 				{
 					binders.Bind(the_interface, dc);
+					binders.BindAni(the_interface, dc);
 					if (!the_interface.BindMeshBuffers(dc))
 						continue;
 					the_interface.FinalizeDrawCall(dc);
@@ -703,7 +704,7 @@ namespace idk::vkn
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 	}
 	VulkanView& View();
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void RenderPipelineThingy(
 		[[maybe_unused]] const SharedGraphicsState& shared_state,
 		PipelineThingy&     the_interface      ,
@@ -814,7 +815,7 @@ namespace idk::vkn
 			}
 		}
 	}
-#pragma optimize("", off)
+//#pragma optimize("", off)
 	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
@@ -822,6 +823,7 @@ namespace idk::vkn
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		if (!light.update_shadow)
 			return;
+		vector<mat4> p_mats;
 		if (light.index == 1)
 		{
 			//auto& camData = *state.cameras->begin();
@@ -834,7 +836,6 @@ namespace idk::vkn
 				//for (auto& e : *state.d_lightmaps)
 				{
 					//for (auto& elem : light.light_maps)
-					vector<mat4> p_mats;
 
 					for (auto& elem : shadow_range.d_light_map_indexes)
 						p_mats.emplace_back(mat4{ clip_mat * light.light_maps[elem].cascade_projection });
@@ -889,11 +890,11 @@ namespace idk::vkn
 		}
 		else
 		{
-
-			auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
+			p_mats.emplace_back(light.p);
+			auto cam = ShadowCameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, p_mats };
 			ShadowBinding shadow_binding;
 			shadow_binding.for_each_binder<has_setstate>(
-				[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+				[](auto& binder, const ShadowCameraData& cam, const vector<SkeletonTransforms>& skel)
 			{
 				binder.SetState(cam, skel);
 			},
@@ -906,7 +907,7 @@ namespace idk::vkn
 			for (auto& elem : light.light_maps)
 			{
 				//auto& rs = r[curr_state];
-				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+				auto the_interface = vkn::ShadowProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
 				the_interface.GenerateDS(rs.dpools,false);
 
 
