@@ -30,7 +30,7 @@ namespace idk::mono
 		// mutators
 		void Assign(string_view field, MonoObject* obj);
 		template<typename T>
-		void Assign(string_view field, T& obj);
+		void Assign(string_view field, T&& obj);
 		template<typename T>
 		T Get(string_view field);
 

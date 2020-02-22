@@ -27,6 +27,29 @@ namespace idk
 {
 	static void InvokeRPC(Host sender, const EventInvokeRPCMessage::Data& payload);
 
+	void EventManager::SendRPC(Handle<ElectronView> ev, string_view method_name, span<vector<unsigned char>> buffer)
+	{
+		LOG_TO(LogPool::NETWORK, "Sending RPC for %d and method %s to client %d", ev->network_id, method_name.data(), (int) connection_manager->GetConnectedHost());
+		EventInvokeRPCMessage::Data prototype_message;
+		{
+			prototype_message.invoke_on_id = ev->network_id;
+			strncpy_s(prototype_message.method_name, method_name.data(), method_name.size());
+			prototype_message.param_count = (int)buffer.size();
+			prototype_message.param_buffer.clear();
+			prototype_message.param_buffer.resize(prototype_message.param_count);
+			for (unsigned i = 0; i < prototype_message.param_count; ++i)
+			{
+				prototype_message.param_buffer[i].size = (int)buffer[i].size();
+				prototype_message.param_buffer[i].buffer = buffer[i];
+			};
+		}
+		
+		connection_manager->CreateAndSendMessage<EventInvokeRPCMessage>(GameChannel::RELIABLE, [&](EventInvokeRPCMessage& msg)
+		{
+			msg.payload = prototype_message;
+		});
+	}
+
 	void EventManager::BroadcastRPC(Handle<ElectronView> ev, RPCTarget target, string_view method_name, span<vector<unsigned char>> buffer)
 	{
 		LOG_TO(LogPool::NETWORK, "Broadcasting RPC for %d and method %s", ev->network_id, method_name.data());
@@ -77,6 +100,13 @@ namespace idk
 		InvokeRPC(connection_manager->GetConnectedHost(), raw_msg.payload);
 	}
 
+	struct ElectronMessageInfo
+	{
+		unsigned long long view_handle;
+		int host;
+		unsigned short frameStamp;
+	};
+
 	static void InvokeRPC(Host sender, const EventInvokeRPCMessage::Data& msg)
 	{
 		LOG_TO(LogPool::NETWORK, "Received RPC for object %d to invoke %s", msg.invoke_on_id, msg.method_name);
@@ -104,11 +134,10 @@ namespace idk
 			MonoException* exc;
 			auto params = static_cast<Reserialize>(thunk->get())(arr, &exc);
 
-			auto message_info_type = env.Type("ElectronMessageInfo");
-			auto message_info = message_info_type->Construct();
-			int sender_as_int = static_cast<int>(sender);
-			message_info.Assign("fromID", sender_as_int);
+			auto message_info = env.Type("ElectronMessageInfo")->Construct();
+			message_info.Assign("fromID", static_cast<int>(sender));
 			message_info.Assign("view_handle", view.id);
+
 			if (exc)
 			{
 				auto idk = Core::GetSystem<mono::ScriptSystem>().Environment().Type("IDK");

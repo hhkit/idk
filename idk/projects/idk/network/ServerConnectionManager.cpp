@@ -60,7 +60,7 @@ namespace idk
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
 
-		LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), id);
+		LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), clientID);
 		return server.CreateMessage(clientID, static_cast<int>(id));
 	}
 

@@ -31,7 +31,7 @@ namespace idk::mt
 		const auto helper_thds = std::max(0, thread_count - 1);
 		LOG_TO(LogPool::SYS, "spawning %d threads\n", helper_thds);
 		//SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-		
+		if(0)
 		for (int i = 1; i <= helper_thds; ++i)
 		{
 			threads.emplace_back(std::thread{ &thread_main, this, i });

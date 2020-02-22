@@ -119,7 +119,7 @@ if (klass == MONO_CLASS)      \
 namespace idk::mono
 {
 	template<typename T>
-	inline void ManagedObject::Assign(string_view fieldname, T& obj)
+	inline void ManagedObject::Assign(string_view fieldname, T&& obj)
 	{
 		using Actual = std::decay_t<T>;
 

@@ -76,10 +76,10 @@
   - !MonoBehavior 
     enabled: 1
     script_data: !NetworkClientTester 
-      a: 10
-      b: 84
-      c: 42
-      d: 103
+      a: 192
+      b: 168
+      c: 72
+      d: 57
   - !MonoBehavior 
     enabled: 1
     script_data: !NetworkHostTester 
