@@ -6,6 +6,7 @@
 #include <gfx/pipeline_config.h>
 #include <vkn/BufferedObj.h>
 #include <vkn/DescriptorCountArray.h>
+#include <vkn/VulkanResourceManager.h>
 namespace idk::vkn
 {
 
@@ -56,7 +57,7 @@ namespace idk::vkn
 		using LayoutTable = hash_table<uint32_t, DsLayoutInfo>;
 
 
-		operator bool()const { return buf_obj.HasCurrent(); }
+		operator bool()const { return buf_obj->HasCurrent(); }
 
 		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& byte_code);
 		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors,string_view byte_code);
@@ -73,11 +74,11 @@ namespace idk::vkn
 		//UboInfo& GetLayout(string uniform_name);
 		const UboInfo& GetLayout(const string& uniform_name)const;
 		std::optional<UboInfo> TryGetLayout(const string& uniform_name)const;
-		bool NeedUpdate()const { return buf_obj.HasUpdate(); }
-		bool HasUpdate()const override { return buf_obj.HasUpdate(); }
-		void UpdateCurrent(size_t index)override { buf_obj.UpdateCurrent(index); }
-		bool HasCurrent()const { return buf_obj.HasCurrent(); }
-		std::optional<uint32_t> GetBinding(uint32_t location)const { return buf_obj.Current().GetBinding(location); }
+		bool NeedUpdate()const { return buf_obj->HasUpdate(); }
+		bool HasUpdate()const override { return buf_obj->HasUpdate(); }
+		void UpdateCurrent(size_t index)override { buf_obj->UpdateCurrent(index); }
+		bool HasCurrent()const { return buf_obj->HasCurrent(); }
+		std::optional<uint32_t> GetBinding(uint32_t location)const { return buf_obj->Current().GetBinding(location); }
 
 		bool NewlyLoaded()const { return _newly_loaded_flag; }
 		void NewlyLoaded(bool val){ _newly_loaded_flag = val; }
@@ -103,13 +104,13 @@ namespace idk::vkn
 		};
 		Data& Current()
 		{
-			return buf_obj.Current();
+			return buf_obj->Current();
 		}
 		const Data& Current()const
 		{
-			return buf_obj.Current();
+			return buf_obj->Current();
 		}
-		BufferedObj<Data> buf_obj;
+		ManagedRsc<unique_ptr<BufferedObj<Data>>> buf_obj = std::make_unique<BufferedObj<Data>>();
 		//vk::UniqueShaderModule back_module;//To load into, will move into module when no buffers are using it
 	};
 }

@@ -640,7 +640,7 @@ namespace idk::vkn::renderpasses
 		bindings::DeferredPbrInfo info{
 			.viewport = gfx_state.camera.viewport,
 			.blend = BlendMode::Opaque,
-			.model = ShadingModel::Specular,
+			.model = ShadingModel::DefaultLit,
 			.material_instances = gfx_state.material_instances,
 			.vertex_state_info = state,
 		};
@@ -659,7 +659,14 @@ namespace idk::vkn::renderpasses
 					}
 				}
 			}, cube_clear.rt_size, cube_clear.depth).RenderPass();
-			auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{}, gbuffer_pass).RenderPass();
+			bindings::LightBind light_bindings;
+			auto& vp_bindings = light_bindings.Get<bindings::CameraViewportBindings>();
+			auto& ls_bindings = light_bindings.Get<bindings::LightShadowBinding>();
+			auto& accum_fsq_bindings = light_bindings.Get<bindings::DeferredLightFsq>();
+			vp_bindings.viewport = gfx_state.camera.viewport;
+			ls_bindings.SetState(bindings::LightShadowBinding::State{gfx_state.active_lights,*gfx_state.lights,gfx_state.shadow_maps_2d,gfx_state.camera.view_matrix,gfx_state.camera.projection_matrix});
+			accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost: FDeferredPostSpecular];
+			auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{light_bindings}, gbuffer_pass).RenderPass();
 			auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport, cube_clear.render_target);
 
 			return { hdr_pass.hdr_rsc,hdr_pass.depth_att };

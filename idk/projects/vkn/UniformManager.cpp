@@ -286,7 +286,10 @@ namespace idk::vkn
 		auto set_info = bindings.find(set);
 		bool can_set = set_info != bindings.end();
 		if (can_set)
+		{
 			_uniform_names[std::move(name)] = UniInfo{ set,binding,size,set_info->second.layout };
+			_dbg.RegisterRequiredBinding(set, binding);
+		}
 		return can_set;
 	}
 	void UniformManager::RemoveBinding(binding_manager::set_t set)
@@ -300,6 +303,7 @@ namespace idk::vkn
 			else
 				itr++;
 		}
+		_dbg.RemoveRequiredSet(set);
 	}
 	namespace detail
 	{
@@ -318,6 +322,8 @@ namespace idk::vkn
 		{
 			auto& info = itr->second;
 			bound = BindUniformBuffer(info, array_index, data, skip_if_bound);
+			if (bound)
+				_dbg.MarkBinding(info.set, info.binding);
 		}
 		return bound;
 	}
@@ -329,6 +335,8 @@ namespace idk::vkn
 		{
 			auto& info = itr->second;
 			bound = BindSampler(info, array_index, texture, skip_if_bound, layout);
+			if (bound)
+				_dbg.MarkBinding(info.set, info.binding);
 		}
 		return bound;
 	}
@@ -340,6 +348,8 @@ namespace idk::vkn
 		{
 			auto& info = itr->second;
 			bound = BindAttachment(info, array_index, texture, skip_if_bound, layout);
+			if (bound)
+				_dbg.MarkBinding(info.set,info.binding);
 		}
 		return bound;
 	}
@@ -360,6 +370,12 @@ namespace idk::vkn
 	{
 		vector_span_builder builder{ all_sets };
 		builder.start();
+		
+		if (!_dbg.Validate(_bindings))
+		{
+			return{};
+		}
+
 		for (auto& [index, set] : _bindings.curr_bindings)
 		{
 			auto bindings = set.FinalizeDC(_collated_layouts,_buffer_builder);
@@ -469,5 +485,51 @@ namespace idk::vkn
 		auto& bindings = existing_bindings.bindings;
 		auto itr = bindings.find(binding_index);
 		return  itr != bindings.end() && itr->second.size() > array_index && itr->second[array_index];
+	}
+	void UniformManager::DebugInfo::RegisterRequiredBinding(uint32_t set_idx, uint32_t binding_idx)
+	{
+		auto& set = sets[set_idx];
+		auto& binding = set.bindings[binding_idx];
+		if(!binding)
+			set.bound++;
+		binding = true;
+	}
+	void UniformManager::DebugInfo::RemoveRequiredSet(uint32_t set)
+	{
+		sets[set].bindings.clear();
+		sets[set].bound =0;
+	}
+	void UniformManager::DebugInfo::MarkBinding(uint32_t set, uint32_t binding)
+	{
+		sets[set].bindings[binding] = false;
+	}
+	bool UniformManager::DebugInfo::Validate(const binding_manager& _bindings) const
+	{
+		uint32_t set_index = 0;
+		for (auto& set : sets)
+		{
+			if (set.bindings.size())
+			{
+				auto itr = _bindings.curr_bindings.find(set_index);
+				if (itr == _bindings.curr_bindings.end())
+				{
+					LOG_ERROR_TO(LogPool::GFX, "Required Set #%u not bound", set_index);
+					return false;
+				}
+				auto& curr_set_bindings = itr->second;
+				if (set.bound != curr_set_bindings.bindings.size())
+					for (uint32_t binding_index = 0; binding_index < set.bindings.size(); ++binding_index)
+					{
+						auto required = set.bindings[binding_index];
+						if (required)
+						{
+							LOG_ERROR_TO(LogPool::GFX, "Required Binding %u in Set #%u not bound", binding_index, set_index);
+							return false;
+						}
+					}
+			}
+			++set_index;
+		}
+		return true;
 	}
 }

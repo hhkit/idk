@@ -9,6 +9,9 @@
 #include <vkn/vector_span_builder.h>
 #include <vkn/DescriptorsManager.h>
 #include <vkn/DescriptorUpdateData.h>
+
+#include <ds/lazy_vector.h>
+
 namespace idk::vkn
 {
 
@@ -150,5 +153,20 @@ namespace idk::vkn
 		vector<BindingInfo> _buffer;
 		vector_span_builder<BindingInfo> _buffer_builder{ _buffer };
 		DescriptorUpdateData _dud;
+		struct DebugInfo
+		{
+			struct Set
+			{
+				lazy_vector<uint32_t> bindings;
+				size_t bound = 0;
+			};
+			lazy_vector<Set> sets;
+			void RegisterRequiredBinding(uint32_t set, uint32_t binding);
+			void RemoveRequiredSet(uint32_t set);
+			void MarkBinding(uint32_t set, uint32_t binding);
+
+			bool Validate(const binding_manager& _bindings)const;
+		};
+		DebugInfo _dbg;
 	};
 }

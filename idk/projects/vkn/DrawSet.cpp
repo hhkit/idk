@@ -3,8 +3,10 @@
 #include <gfx/GraphicsSystem.h>
 #include <vkn/VulkanMesh.h>
 #include <res/ResourceHandle.inl>
+#include <ds/span.inl>
 namespace idk::vkn
 {
+#pragma optimize("",off)
 	InstMeshDrawSet::InstMeshDrawSet(span<const InstRenderObjects> inst_draw_range, vk::Buffer inst_mesh_render_buffer) : 
 		_inst_draw_range{ inst_draw_range },
 		_inst_mesh_render_buffer{ inst_mesh_render_buffer }
@@ -81,6 +83,7 @@ namespace idk::vkn
 	}
 	SkinnedMeshDrawSet::SkinnedMeshDrawSet(span<const AnimatedRenderObject* const> draw_calls):_draw_calls{draw_calls}
 	{
+		_draw_calls = _draw_calls;
 	}
 	void SkinnedMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)
 	{

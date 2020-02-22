@@ -118,7 +118,7 @@ void main()
 				//	//shadow_factor *= shadow_factor;
 				//	//cascade_c = vec4(0,0,0.1,0);
 				//}
-				
+				shadow_factor = vec3(1.0f);
 				result *= shadow_factor;
 				j = 0;
 				
@@ -131,11 +131,12 @@ void main()
 				result *= (vec3(1-ShadowCalculation(LightBlk.lights[i],shadow_maps[i],LightBlk.lights[i].v_dir,normal ,LightBlk.lights[i].vp * world_pos)));
 		}
 		
-		light_accum += result + cascade_c.xyz;
+		light_accum += result;// + cascade_c.xyz;
 	}
 	vec3 F = mix(vec3(0.04), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
 import /engine_data/shaders/pbr_end.glsl
+out_color = vec4(1.0);
 }

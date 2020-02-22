@@ -19,6 +19,8 @@ namespace idk::vkn::bindings
 		the_interface.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox]);
 		the_interface.SetScissorsViewport(_camera.viewport);
 		the_interface.SetCullFace(CullFace::eNone);
+		the_interface.SetDepthWrite(false);
+		the_interface.SetDepthTest(false);
 	}
 
 	//Stuff that needs to be bound with every renderobject/animated renderobject
