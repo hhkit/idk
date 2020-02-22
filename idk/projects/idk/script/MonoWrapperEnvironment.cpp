@@ -1851,6 +1851,48 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkGetDevices", MonoArray*)
+		{
+			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
+			auto retval = mono_array_new(mono_domain_get(), mono_get_object_class(), devices.size());
+
+			const auto device_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Device");
+
+			for (unsigned i = 0; i < devices.size(); ++i)
+			{
+				const auto& elem = devices[i];
+				auto csh_device = device_type->Construct();
+				auto str = (MonoObject*) mono_string_new(mono_domain_get(), elem.name.data());
+				csh_device.Assign("mac_addr", str);
+
+				mono_array_setref(retval, i, csh_device.Raw());
+			}
+
+			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkDeviceGetAddresses", MonoArray*, MonoString* mac_address)
+		{
+			auto mac_addr_str = unbox(mac_address);
+			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
+			const auto address_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Address");
+
+			for (auto& elem : devices)
+			{
+				if (elem.name == mac_addr_str.get())
+				{
+					auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), devices.size());
+					for (unsigned j = 0; j < elem.ip_addresses.size(); ++j)
+						mono_array_set(retval, Address, j, elem.ip_addresses[j]);
+					return retval;
+				}
+			}
+
+			return nullptr;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
 			Core::GetSystem<NetworkSystem>().Disconnect();
@@ -1863,11 +1905,26 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkCreateLobby", void)
+		BIND_START("idk.Bindings::NetworkCreateLobby", bool, MonoString* mac_address)
 		{
-
-			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
-			Core::GetSystem<NetworkSystem>().InstantiateServer(devices[0].ip_addresses[0]);
+			auto mac_addr = unbox(mac_address);
+			for (auto& elem : Core::GetSystem<Application>().GetNetworkDevices())
+			{
+				if (elem.name == mac_addr.get())
+				{
+					try
+					{
+						Core::GetSystem<NetworkSystem>().InstantiateServer(elem.ip_addresses[0]);
+						return true;
+					}
+					catch (...)
+					{
+						LOG_TO(LogPool::NETWORK, "Failed to create server.");
+						return false;
+					}
+				}
+			}
+			return false;
 		}
 		BIND_END();
 

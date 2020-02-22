@@ -8,7 +8,8 @@
         /// <summary>
         /// The Server's ActorNumber is hardcoded to -1.
         /// </summary>
-        public static Player Server { get => new Player(-1); }
+        public static int ServerId { get => -1; }
+        public static Player Server { get => new Player(ServerId); }
 
         int connectionId;
 
@@ -25,7 +26,7 @@
 
         public override string ToString()
         {
-            if (connectionId == ServerNumber)
+            if (connectionId == ServerId)
                 return "Server";
             else
                 return "Client " + connectionId;
