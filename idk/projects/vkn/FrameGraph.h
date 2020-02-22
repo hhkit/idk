@@ -209,7 +209,7 @@ namespace idk::vkn
 		//fg id to index in nodes;
 		hash_table<fg_id, size_t> node_lookup;
 		vector<size_t> execution_order;
-		vector<std::pair<BaseRenderPass*, FrameGraphNode*>> _dbg_execution_order;
+		vector<std::tuple<string_view,BaseRenderPass*, FrameGraphNode*>> _dbg_execution_order;
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
 
 		UboManager* _default_ubo_manager = {};

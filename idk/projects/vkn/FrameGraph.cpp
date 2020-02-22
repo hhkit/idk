@@ -141,7 +141,7 @@ namespace idk::vkn
 			for (auto index : execution_order)
 			{
 				auto& node = nodes[index];
-				_dbg_execution_order.emplace_back(&*render_passes.at(node.id),&node);
+				_dbg_execution_order.emplace_back(node.name,&*render_passes.at(node.id),&node);
 			}
 		}
 		ComputeLifetimes(graph, rsc_lifetime_mgr);
@@ -454,6 +454,9 @@ namespace idk::vkn
 			auto output_nodes = node.GetOutputSpan();
 			auto output_ptr = std::find(output_nodes.begin(), output_nodes.end(), FrameGraphResource{ src_id });
 			auto output_index = output_ptr - output_nodes.begin();
+			if (node.depth_stencil && src_id == node.depth_stencil->first|| id == node.depth_stencil->first)
+				result = node.depth_stencil->second.layout;
+			else
 			if (output_ptr < output_nodes.end()&& output_index < node.output_attachments.size())
 			{
 				auto& att_info = node.output_attachments[output_index];

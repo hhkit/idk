@@ -1014,6 +1014,7 @@ namespace idk::vkn
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 			_pimpl->graph.ProcessBatches(rb);
+			state.ubo_manager.UpdateAllBuffers();
 			rb._cmd_buffer.end();
 			state.FlagRendered();
 		}

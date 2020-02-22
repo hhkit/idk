@@ -634,7 +634,7 @@ namespace idk::vkn::renderpasses
 		//TODO: 
 		bindings::SkyboxBindings skybox_binding{};
 		skybox_binding.SetCamera(gfx_state.camera);
-		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding }, gfx_state.camera.render_target, clr_col, clr_dep).RenderPass();
+		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding,FsqDrawSet{MeshType::Box} }, gfx_state.camera.render_target, clr_col, clr_dep).RenderPass();
 		bindings::StandardVertexBindings::StateInfo state;
 		state.SetState(gfx_state);
 		bindings::DeferredPbrInfo info{
