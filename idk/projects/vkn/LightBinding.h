@@ -178,6 +178,7 @@ namespace idk::vkn::bindings
 		void SetCamera(CameraData cam, RscHandle<Texture> brdfLookupTable)
 		{
 			camera = cam ;
+			brdf_lut = brdfLookupTable;
 		}
 		CameraData camera;
 		RscHandle<Texture> brdf_lut;

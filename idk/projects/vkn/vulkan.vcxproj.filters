@@ -368,6 +368,12 @@
     <ClInclude Include="utils\FrameObjects.h">
       <Filter>utils\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="PipelineDescHelper.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBindingTracker.h">
+      <Filter>render\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -646,6 +652,8 @@
     <ClCompile Include="utils\TriBuffer.cpp">
       <Filter>utils\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineDescHelper.cpp" />
+    <ClCompile Include="VertexBindingTracker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

@@ -138,5 +138,4 @@ void main()
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
 import /engine_data/shaders/pbr_end.glsl
-out_color = vec4(1.0);
 }

@@ -20,6 +20,8 @@
 
 #include <vkn/RenderInterface.h>
 
+#include <vkn/VertexBindingTracker.h>
+
 namespace idk::vkn
 {
 	
@@ -79,7 +81,7 @@ namespace idk::vkn
 		void SetUboManager(UboManager& ubo_manager);
 
 
-		void BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)override;
+		void BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset)override;
 		void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)override;
 
 #pragma region Uniforms
@@ -236,6 +238,7 @@ namespace idk::vkn
 		vector<RenderBatch> batches;
 
 		vector<CopyCommand> _copy_commands;
+		VertexBindingTracker _vtx_binding_tracker;
 	};
 
 

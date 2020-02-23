@@ -183,13 +183,15 @@ namespace idk::vkn
 		auto fence = load_fence.AcquireFence();
 		auto cmd_buffer = cmd_buffers.AcquireCmdBuffer();
 		abc++;
+		if (!*cmd_buffer)
+			__debugbreak();
 		return Core::GetThreadPool().Post(
 			[loader  = this](const shared_ptr<Nope::Derp>& _derp) ->void
 			{
 				auto& derp = *_derp;
-				auto cmd_buffer = (*derp.cmd_buffer);
 				auto& lock = loader->lock;
 				lock.Lock();
+				auto cmd_buffer = (*derp.cmd_buffer);
 				cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 				lock.Unlock();
 				loader->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, derp.texture, derp.allocator,  derp.ooptional, derp.load_info, derp.in_info, derp.guid);

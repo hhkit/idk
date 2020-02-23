@@ -169,6 +169,8 @@ namespace idk::vkn
 		layout{ layout_ },
 		type_index{ desc_type_idx<vk::DescriptorType::eUniformBuffer> }
 	{
+		if (buffer_offset_ + size_ > 65536)
+			throw;
 	}
 	UniformUtils::BindingInfo::BindingInfo(
 		uint32_t binding_,
@@ -356,7 +358,7 @@ namespace idk::vkn
 	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
 		auto [buffer, offset] = _ubo_manager->Add(data);
-		return _bindings.BindUniformBuffer(info, array_index, buffer, offset, skip_if_bound);
+		return _bindings.BindUniformBuffer(info, array_index, buffer, offset,data.size(), skip_if_bound);
 	}
 	bool UniformManager::BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
@@ -440,7 +442,7 @@ namespace idk::vkn
 		for (auto& [set, bindings] : curr_bindings)
 			bindings.dirty = true;
 	}
-	bool UniformUtils::binding_manager::BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset, bool skip_if_bound)
+	bool UniformUtils::binding_manager::BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset,size_t size, bool skip_if_bound)
 	{
 		bool bound = false;
 
@@ -448,7 +450,7 @@ namespace idk::vkn
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
 
-			curr_bindings[info.set].Bind(BindingInfo{ info.binding,buffer,offset, array_index, info.size,info.layout });
+			curr_bindings[info.set].Bind(BindingInfo{ info.binding,buffer,offset, array_index, size,info.layout });
 			bound = true;
 		}
 		return bound;

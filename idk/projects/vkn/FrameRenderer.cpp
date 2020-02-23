@@ -491,6 +491,7 @@ namespace idk::vkn
 			{
 				state.shared_gfx_state->inst_mesh_render_buffer.resize(hlp::buffer_size(instanced_data));
 				state.shared_gfx_state->inst_mesh_render_buffer.update<const InstancedData>(vk::DeviceSize{ 0 }, instanced_data, cmd_buffer);
+				dbg::NameObject(state.shared_gfx_state->inst_mesh_render_buffer.buffer(), "InstMeshrenderBuffer");
 				for (auto& [buffer, data,offset] : state.shared_gfx_state->update_instructions)
 				{
 					if (data.size())

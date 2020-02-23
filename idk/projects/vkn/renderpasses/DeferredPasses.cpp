@@ -625,7 +625,7 @@ namespace idk::vkn::renderpasses
 	using AccumDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
 
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
-	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrInstDrawSet, DeferredPbrAniDrawSet>;
+	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
 
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
@@ -646,6 +646,10 @@ namespace idk::vkn::renderpasses
 		};
 		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{
 				{
+					DeferredPbrAniDrawSet{
+							bindings::make_deferred_pbr_ani_bind(info),
+							SkinnedMeshDrawSet{span{gfx_state.skinned_mesh_render}}
+					},
 					DeferredPbrInstDrawSet{bindings::make_deferred_pbr_ro_bind(info),
 										   InstMeshDrawSet{
 												span{
@@ -653,10 +657,6 @@ namespace idk::vkn::renderpasses
 												  gfx_state.shared_gfx_state->inst_mesh_render_buffer.buffer()
 											}
 						},
-					DeferredPbrAniDrawSet{
-							bindings::make_deferred_pbr_ani_bind(info),
-							SkinnedMeshDrawSet{span{gfx_state.skinned_mesh_render}}
-					}
 				}
 			}, cube_clear.rt_size, cube_clear.depth).RenderPass();
 			bindings::LightBind light_bindings;

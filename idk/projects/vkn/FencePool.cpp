@@ -75,10 +75,13 @@ namespace idk::vkn
 		_acquire_lock.Unlock();
 		return CmdBufferObj{ index,this };
 	}
-
+#pragma optimize("",off)
 	vk::CommandBuffer CmdBufferObj::operator*() const
 	{
-		return _src->Get(_id);
+		auto cmd_buffer = _src->Get(_id);
+		if (!cmd_buffer)
+			throw;
+		return cmd_buffer;
 	}
 	CmdBufferPool::CmdBufferPool() :_cmd_pools{}
 	{

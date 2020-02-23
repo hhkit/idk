@@ -113,7 +113,7 @@ namespace idk::vkn
 			void RemoveBinding(set_t set);
 			void MarkDirty();
 
-			bool BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset, bool skip_if_bound = false);
+			bool BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset, size_t size, bool skip_if_bound = false);
 			bool BindSampler(UniInfo info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 			bool BindAttachment(UniInfo info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 

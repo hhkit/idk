@@ -15,6 +15,8 @@
 #undef far
 #include <ds/index_span.inl>
 
+#include <gfx/FakeMat4.h>
+
 namespace idk
 {
 	class Mesh;
@@ -112,8 +114,8 @@ namespace idk
 	struct InstancedData
 	{
 		//vec3 velocity  {};
-		mat4 transforms{};
-		mat4 normal_transforms{};
+		FakeMat4<float> transforms{};
+		FakeMat4<float> normal_transforms{};
 	};
 	struct AnimatedInstancedData :InstancedData
 	{

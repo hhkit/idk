@@ -4,6 +4,7 @@
 #include <vkn/VulkanMesh.h>
 #include <res/ResourceHandle.inl>
 #include <ds/span.inl>
+#include <vkn/RenderUtil.h>
 namespace idk::vkn
 {
 #pragma optimize("",off)
@@ -53,9 +54,19 @@ namespace idk::vkn
 	}
 	void InstMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)
 	{
-		span<const AnimatedRenderObject> draw_calls;
+		
+		std::array description{
+			buffer_desc
+		{
+			buffer_desc::binding_info{ std::nullopt,sizeof(FakeMat4<float>) * 2,VertexRate::eInstance },
+		{ buffer_desc::attribute_info{ AttribFormat::eMat4,4,0,true },
+		buffer_desc::attribute_info{ AttribFormat::eMat4,8,sizeof(FakeMat4<float>),true }
+		}
+		}
+		};
 		{
 			binders.Bind(the_interface);
+			the_interface.SetBufferDescriptions(description);
 			{
 				//auto range_opt = state.range;
 				//if (!range_opt)
@@ -69,7 +80,8 @@ namespace idk::vkn
 					{
 						binders.Bind(the_interface, dc);
 						auto& mesh = dc.mesh.as<VulkanMesh>();
-						the_interface.BindVertexBuffer(4, _inst_mesh_render_buffer, 0);
+						auto& req = *dc.renderer_req;
+						the_interface.BindVertexBuffer(req.instanced_requirements.at(vtx::InstAttrib::ModelTransform), _inst_mesh_render_buffer, 0);
 						//BindMeshBuffers(the_interface, mesh, *dc.renderer_req);
 						//the_interface.DrawIndexed(mesh.IndexCount(), dc.num_instances, 0, 0, dc.instanced_index);
 						DrawMeshBuffers(the_interface, dc);
@@ -88,6 +100,7 @@ namespace idk::vkn
 	void SkinnedMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)
 	{
 
+		the_interface.SetBufferDescriptions({});
 		binders.Bind(the_interface);
 		for (auto& ptr_dc : _draw_calls)
 		{

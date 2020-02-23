@@ -328,6 +328,7 @@
     <ClInclude Include="CanvasVertexBindings.h" />
     <ClInclude Include="ColorPickRenderer.h" />
     <ClInclude Include="FencePool.h" />
+    <ClInclude Include="PipelineDescHelper.h" />
     <ClInclude Include="SimpleLock.h" />
     <ClInclude Include="SkyboxBinding.h" />
     <ClInclude Include="CubemapRenderer.h" />
@@ -402,6 +403,7 @@
     <ClInclude Include="utils\VknUtil.h" />
     <ClInclude Include="vector_span.h" />
     <ClInclude Include="vector_span_builder.h" />
+    <ClInclude Include="VertexBindingTracker.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
@@ -452,6 +454,7 @@
     <ClCompile Include="CanvasVertexBindings.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
     <ClCompile Include="FencePool.cpp" />
+    <ClCompile Include="PipelineDescHelper.cpp" />
     <ClCompile Include="SimpleLock.cpp" />
     <ClCompile Include="SkyboxBinding.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
@@ -501,6 +504,7 @@
     <ClCompile Include="topological_sort.cpp" />
     <ClCompile Include="UniformManager.cpp" />
     <ClCompile Include="UnlitBindings.cpp" />
+    <ClCompile Include="VertexBindingTracker.cpp" />
     <ClCompile Include="VknTextureView.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />

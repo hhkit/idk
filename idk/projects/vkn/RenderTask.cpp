@@ -59,9 +59,24 @@ namespace idk::vkn
 	{
 		_uniform_manager.SetUboManager(ubo_manager);
 	}
-	void RenderTask::BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)
+
+
+#pragma optimize("",off)
+
+	void RenderTask::BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset)
 	{
-		_dc_builder.AddVertexBuffer(VertexBindingData{vertex_buffer,binding,byte_offset});
+		auto binding = _vtx_binding_tracker.GetBinding(location);
+		if (binding)
+		{
+			if (!vertex_buffer)
+				DoNothing();
+			_dc_builder.AddVertexBuffer(VertexBindingData{ vertex_buffer,*binding,byte_offset });
+		}
+		else
+		{
+
+			DoNothing();
+		}
 	}
 	void RenderTask::BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)
 	{
@@ -96,8 +111,10 @@ namespace idk::vkn
 			_uniform_manager.RegisterUniforms(name, info.set, info.binding, info.size);
 		}
 		bound_shader = shader_handle;
-		if(stage==ShaderStage::Fragment)
+		if (stage == ShaderStage::Fragment)
 			BindInputAttachmentToCurrent();
+		else if (stage == ShaderStage::Vertex)
+			_vtx_binding_tracker.Update(_current_batch.pipeline,shader_handle);
 	}
 	void RenderTask::UnbindShader(ShaderStage stage)
 	{
@@ -156,6 +173,9 @@ namespace idk::vkn
 	{
 		StartNewBatch();
 		_current_batch.pipeline.buffer_descriptions = {descriptions.begin(),descriptions.end()};
+		auto& vtx_shader = _current_batch.shaders.shaders[static_cast<int>(ShaderStage::Vertex)];
+		if(vtx_shader)
+			_vtx_binding_tracker.Update(_current_batch.pipeline,*vtx_shader);
 	}
 	void RenderTask::SetBlend(uint32_t attachment_index, AttachmentBlendConfig blend_config)
 	{
@@ -283,6 +303,7 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
+#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
@@ -374,10 +395,12 @@ namespace idk::vkn
 
 					for (auto& vb : p_ro.vertex_buffers)
 					{
-						auto opt_binding = pipeline.GetBinding(vb.binding);
-						if (opt_binding)
+						//auto opt_binding = pipeline.GetBinding(vb.binding);
+						//if (opt_binding)
 						{
-							cmd_buffer.bindVertexBuffers(*opt_binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
+							if (!vb.buffer) //Don't bind null buffers.
+								continue;
+							cmd_buffer.bindVertexBuffers(vb.binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
 						}
 					}
 					
@@ -436,6 +459,7 @@ namespace idk::vkn
 		if (!_start_new_batch && start)
 		{
 			//Retire the current batch
+			_current_batch.pipeline.buffer_descriptions = _vtx_binding_tracker.GetDescriptors();
 			batches.emplace_back(_current_batch);
 			_current_batch.draw_calls.clear();
 			_current_batch.label.reset();
