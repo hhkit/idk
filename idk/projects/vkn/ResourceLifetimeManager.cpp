@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "ResourceLifetimeManager.h"
+#include <ds/index_span.inl>
+#include <ds/lazy_vector.h>
+#include <vkn/FrameGraphResourceManager.h>
 namespace idk::vkn
 {
 	void ResourceLifetimeManager::ClearLifetimes()
@@ -39,6 +42,25 @@ namespace idk::vkn
 	const hash_table<fgr_id, ResourceLifetimeManager::actual_resource_id> ResourceLifetimeManager::Aliases() const
 	{
 		return resource_alias;
+	}
+#pragma optimize("",off)
+	void ResourceLifetimeManager::DebugArrange(FrameGraphResourceManager& rsc_manager) const
+	{
+		struct Debug
+		{
+			vector<std::tuple<string, fgr_id,index_span>> resources;
+		};
+		lazy_vector<Debug> test;
+		for (auto& [r_id, index] : map)
+		{
+			auto& rsc_lifetime = resource_lifetimes.at(index);
+			auto itr = resource_alias.find(r_id);
+			
+			auto derp = rsc_manager.GetResourceDescription(r_id);
+			auto actual_index = itr->second;
+			test[actual_index].resources.emplace_back(derp->name, r_id,index_span{ rsc_lifetime.start,rsc_lifetime.end });
+		}
+		test.clear();
 	}
 
 	bool ResourceLifetimeManager::overlap_lifetime(const actual_resource_t& rsc, order_t start, order_t end)

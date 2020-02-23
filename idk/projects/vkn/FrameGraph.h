@@ -24,7 +24,6 @@ namespace idk::vkn
 	struct ActualGraph
 	{
 		hash_table<fgr_id, fg_id>  src_node;
-		hash_table<fgr_id, fg_id>  end_node;
 		hash_table<fg_id, span<const FrameGraphResource>> in_rsc_nodes;
 		hash_table<fg_id, index_span> in_nodes;
 

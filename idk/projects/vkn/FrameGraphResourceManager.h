@@ -17,8 +17,9 @@ namespace idk::vkn
 
 
 
-	struct FrameGraphResourceManager
+	class FrameGraphResourceManager
 	{
+	public:
 		using rsc_index_t = size_t;
 		using actual_rsc_index_t = size_t;
 		using actual_resource_t = variant<VknTextureView,std::future<VknTextureView>>;

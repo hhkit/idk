@@ -3,6 +3,7 @@
 #include "FrameGraphResource.h"
 namespace idk::vkn
 {
+	class FrameGraphResourceManager;
 	struct ResourceLifetime
 	{
 		fg_id start, end; //Fixed order
@@ -30,20 +31,69 @@ namespace idk::vkn
 		};
 
 		void ExtendLifetime(fgr_id rsc_id, order_t order);
-		template<typename Func>
-		void CombineAllLifetimes(Func&& compatibility_checker)
+		template< typename Dealias>
+		void CollapseLifetimes(Dealias&& get_original_id)
 		{
+			mappings.clear();
+			collapsed.clear();
+			mappings.reserve(map.size());
 			for (auto& [id, index] : map)
 			{
 				auto& lifetime = resource_lifetimes[index];
+				auto original_id = get_original_id(id);
+				mappings.emplace_back(Mapping{ id, original_id });
+				auto& collapsed_lifetime = collapsed[original_id];
+				collapsed_lifetime.start = std::min(collapsed_lifetime.start, lifetime.start);
+				collapsed_lifetime.end   = std::max(collapsed_lifetime.end, lifetime.end);
+			}
+		}
+		template<typename Func>
+		void CombineAllLifetimes(Func&& compatibility_checker)
+		{
+			for (auto& [id, lifetime] : collapsed)
+			{
 				CombineLifetimes(id, lifetime.start, lifetime.end, compatibility_checker);
 			}
+			for (auto& [rsc, original] : mappings)
+			{
+				auto concrete_itr = GetConcrete(original);
+				auto& lifetime = collapsed.at(original);
+				Alias(rsc, lifetime.start, lifetime.end, *concrete_itr);
+			}
+			/*
+			for (auto& [id, index] : map)
+			{
+				auto& lifetime = resource_lifetimes[index];
+				auto original_id = get_original_id(id);
+				auto concrete_itr = GetConcrete(original_id);
+				//If the original resource has been assigned a concrete resource
+				if (concrete_itr != concrete_resources.end())
+				{
+					Alias(id, lifetime.start, lifetime.end, *concrete_itr); //Alias this to said resource
+				}
+				else
+				{
+					CombineLifetimes(id, lifetime.start, lifetime.end, compatibility_checker);
+				}
+			}
+			*/
 		}
 
 		span<const actual_resource_t> GetActualResources()const;
 		const hash_table<fgr_id, actual_resource_id> Aliases()const;
 
+		void DebugArrange(FrameGraphResourceManager& rsc_manager)const;
+
 	private:
+		auto GetConcrete(fgr_id r_id )
+		{
+			auto itr = resource_alias.find(r_id);
+			if (itr == resource_alias.end())
+			{
+				return concrete_resources.end();
+			}
+			return concrete_resources.begin() + itr->second;
+		}
 		auto NewNode(fgr_id r_id)
 		{
 			auto index = resource_lifetimes.size();
@@ -81,6 +131,13 @@ namespace idk::vkn
 
 		vector<actual_resource_t> concrete_resources;
 		hash_table<fgr_id, actual_resource_id> resource_alias;
+		hash_table<fgr_id, ResourceLifetime> collapsed{};
+		struct Mapping
+		{
+			fgr_id rsc;
+			fgr_id original;
+		};
+		vector<Mapping> mappings;
 	};
 
 

@@ -19,6 +19,7 @@ namespace idk::vkn
 	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
+		desc.name = curr_rsc.name +":"+ desc.name;
 		auto rsc = rsc_manager.CreateTexture(desc);
 		curr_rsc.output_resources.emplace_back(rsc);
 		return rsc;

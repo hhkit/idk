@@ -7,7 +7,6 @@
 namespace idk::vkn
 {
 
-
 	//Process nodes and cull away unnecessary nodes.
 	//Figure out dependencies and synchronization points
 	//Insert new nodes to help transit concrete resources to their corresponding virtual resources
@@ -37,6 +36,8 @@ namespace idk::vkn
 		//Because of the sorting of the execution order, 
 		//we can count on having ordered all dependencies before encountering the current node.
 		size_t max_order = 0;
+		auto& rsc_manager = GetResourceManager();
+		auto original_id = [&rsc_manager](fgr_id id) {return rsc_manager.GetOriginal(id); };
 		for (auto index : exec_order)
 		{
 			auto& curr_node = graph_nodes[index];
@@ -45,6 +46,7 @@ namespace idk::vkn
 			auto dep_rscs = curr_node.GetInputSpan();
 			for (auto& dep_rsc : dep_rscs)
 			{
+				
 				auto dep_node = ag.src_node.find(dep_rsc.id)->second;
 				order = std::max(fat_order[dep_node], order);
 			}
@@ -65,7 +67,11 @@ namespace idk::vkn
 				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
 			}
 		}
+		manager.CollapseLifetimes(original_id);
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
+		
+		//auto& rsc_manager = GetResourceManager();
+		manager.DebugArrange(rsc_manager);
 	}
 
 	void FrameGraph::CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm)
@@ -108,7 +114,8 @@ namespace idk::vkn
 			vector<size_t> index_buffer;
 
 			//src,dst
-			hash_table<fg_id, vector<fg_id>> derp;
+			hash_table<fg_id, hash_set<fg_id>> dependant_nodes;
+			hash_table<fg_id, std::pair<string,vector<string>>> dbg_dependant_nodes;
 
 			for (auto [dst, index] : id_to_indices)
 			{
@@ -118,7 +125,16 @@ namespace idk::vkn
 				{
 					auto src_node = in_rsc;
 					if (src_node != dst)
-						derp[src_node].emplace_back(dst);
+						dependant_nodes[src_node].emplace(dst);
+				}
+			}
+			auto get_name = [this,&id_to_indices](fgr_id node_id) {return nodes[id_to_indices.at(node_id)].name; };
+			for (auto [node_id, dep_nodes] : dependant_nodes)
+			{
+				dbg_dependant_nodes[node_id].first = get_name(node_id);
+					for (auto dep_node_id : dep_nodes)
+				{
+						dbg_dependant_nodes[node_id].second.emplace_back(get_name(dep_node_id));
 				}
 			}
 
@@ -128,7 +144,7 @@ namespace idk::vkn
 				//auto oid_adj_buffer = graph.get_input_nodes(id); //input resources
 				//auto id_adj_buffer = *oid_adj_buffer;
 				//auto& lookup_table = graph_builder.origin_nodes;
-				auto& id_adj_buffer = derp[id];
+				auto& id_adj_buffer = dependant_nodes[id];
 				index_buffer.resize(id_adj_buffer.size());
 				std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&id_to_indices](fg_id id) {return id_to_indices.find(id)->second; });
 				dependency_graph.SetAdjacentNodes(src_index, index_buffer.begin(), index_buffer.end());
@@ -483,7 +499,6 @@ namespace idk::vkn
 	{
 		ActualGraph result{
 			.src_node = std::move(tmp.src_node)
-			,.end_node = std::move(tmp.end_node)
 		};
 		vector<fg_id> node_accum;
 		for (auto& [id, idx_span] : tmp.in_nodes)

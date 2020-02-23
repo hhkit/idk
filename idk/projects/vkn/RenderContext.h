@@ -4,7 +4,7 @@
 
 namespace idk::vkn
 {
-	struct FrameGraphResourceManager;
+	class FrameGraphResourceManager;
 	namespace FrameGraphDetail
 	{
 		struct Context : RenderTask
