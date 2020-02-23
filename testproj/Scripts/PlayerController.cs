@@ -21,7 +21,7 @@ namespace TestAndSeek
         ElectronView ev;
 
         internal bool transfer = false;
-        internal Player p = null;
+        internal Client p = null;
 
         [ElecRPC]
         void ExecuteMe()

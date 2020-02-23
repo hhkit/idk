@@ -48,7 +48,7 @@ namespace TestAndSeek
         {
             yield return null;
             yield return null;
-            foreach (var p in ElectronNetwork.players)
+            foreach (var p in ElectronNetwork.clients)
             {
                 PlayerController c = null;
                 switch (p.ActorNumber)
