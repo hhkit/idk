@@ -42,8 +42,10 @@ namespace TestAndSeek
                     ElectronNetwork.LoadScene(scene);
 
                 if (Input.GetKeyDown(KeyCode.P))
+                {
                     obj = ElectronNetwork.Instantiate(instantiate, transform.position);
-
+                    obj.GetComponent<ElectronView>().TransferOwnership(ElectronNetwork.players[0]);
+                }
                 if (Input.GetKeyDown(KeyCode.R))
                     obj?.GetComponent<ElectronView>().RPC("ExecuteMeWithArgs", RPCTarget.All, "hello", 5, "oh no");
 
