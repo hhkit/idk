@@ -11,9 +11,6 @@ namespace idk
 	}
 	void RigidBody::position(const vec3& new_pos)
 	{
-		auto curr_pos = GetGameObject()->Transform()->GlobalPosition();
-		auto vel = curr_pos - _prev_pos;
-		_prev_pos = new_pos - vel;
 		GetGameObject()->Transform()->GlobalPosition(new_pos);
 	}
 	real RigidBody::mass() const
@@ -26,11 +23,11 @@ namespace idk
 	}
 	vec3 RigidBody::velocity() const
 	{
-		return (GetGameObject()->Transform()->GlobalPosition() - _prev_pos) / Core::GetDT().count();
+		return linear_velocity;
 	}
 	void RigidBody::velocity(const vec3& new_vel)
 	{
-		_prev_pos = GetGameObject()->Transform()->GlobalPosition() - new_vel * Core::GetDT().count();
+		linear_velocity = new_vel;
 	}
 	bool RigidBody::sleeping() const
 	{
@@ -42,8 +39,8 @@ namespace idk
 	}
 	vec3 RigidBody::AddForce(const vec3& newtons)
 	{
-		auto added = newtons * inv_mass;
-		_accum_accel += added;
+		const auto added = newtons * inv_mass;
+		force += added;
 		return added;
 	}
 	vec3 RigidBody::AddTorque(const vec3& t)
@@ -53,8 +50,6 @@ namespace idk
 	void RigidBody::TeleportBy(const vec3& translation)
 	{
 		auto& tfm = *GetGameObject()->Transform();
-
-		_prev_pos += translation;
 		tfm.GlobalPosition(tfm.GlobalPosition() + translation);
 	}
 }

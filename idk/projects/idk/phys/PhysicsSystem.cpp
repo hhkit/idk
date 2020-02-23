@@ -62,27 +62,34 @@ namespace idk
 			for (auto& rigidbody : rbs)
 			{
 				const auto tfm = rigidbody.GetGameObject()->Transform();
-				rigidbody._pred_tfm = tfm->GlobalMatrix();
+				rigidbody._global_cache = tfm->GlobalMatrix();
 
 				if (rigidbody.sleeping())
 				{
-					rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz - rigidbody.initial_velocity * dt;
+					rigidbody.linear_velocity = rigidbody.initial_velocity * dt;
+					// rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
 					rigidbody.initial_velocity = vec3{};
 				}
 				else
 				{
 					if (!rigidbody.is_kinematic)
 					{
-						const vec3 curr_pos = rigidbody._pred_tfm[3].xyz;
+						const vec3 curr_pos = rigidbody._global_cache[3].xyz;
+						rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
+						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
+						rigidbody._pred_translation = rigidbody.linear_velocity * dt;
 
-						// verlet integrate towards new position
-						//auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-						auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
-						rigidbody._accum_accel = vec3{};
-						rigidbody._prev_pos = curr_pos;
-						rigidbody._pred_tfm[3].xyz = new_pos;
+						//// verlet integrate towards new position
+						////auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
+						//auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
+						//rigidbody._accum_accel = vec3{};
+						//rigidbody._prev_pos = curr_pos;
+						//rigidbody._pred_tfm[3].xyz = new_pos;
 					}
 				}
+
+				// Clear all forces
+				rigidbody.force = vec3{};
 			}
 		};
 
@@ -91,9 +98,9 @@ namespace idk
 		_col_manager.UpdatePairs(rbs, colliders);
 		_col_manager.TestCollisions();
 		_col_manager.DebugDrawContactPoints(dt);
-		_col_manager.PreSolve();
-		for (int i = 0; i < 3; ++i)
-			_col_manager.Solve();
+		// _col_manager.PreSolve();
+		// for (int i = 0; i < 3; ++i)
+		// 	_col_manager.Solve();
 		
 		const auto CollideObjects = [&]()
 		{
@@ -179,9 +186,9 @@ namespace idk
 				};
 			
 				const auto [lvel, linv_mass, lrb_ptr] =
-                    RigidBodyInfo{ lrigidbody->_pred_tfm[3].xyz - lrigidbody->_prev_pos, lrigidbody->inv_mass, &*lrigidbody };
+                    RigidBodyInfo{ lrigidbody->linear_velocity, lrigidbody->inv_mass, &*lrigidbody };
                 const auto [rvel, rinv_mass, rrb_ptr] = rrigidbody ?
-                    RigidBodyInfo{ rrigidbody->_pred_tfm[3].xyz - rrigidbody->_prev_pos, rrigidbody->inv_mass, &*rrigidbody } : RigidBodyInfo{};
+                    RigidBodyInfo{ rrigidbody->linear_velocity, rrigidbody->inv_mass, &*rrigidbody } : RigidBodyInfo{};
 			
 				auto rel_v = rvel - lvel; // a is not moving
 				auto contact_v = rel_v.dot(result.normal_of_collision); // normal points towards A
@@ -238,10 +245,13 @@ namespace idk
             for (const auto& elem : dynamic_info)
             {
                 auto& rigidbody = *elem.collider->_rigidbody;
-                if (!rigidbody.is_kinematic)
-                    rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._pred_tfm);
-                else
-                    rigidbody._prev_pos = rigidbody._pred_tfm[3].xyz;
+				if (!rigidbody.is_kinematic)
+				{
+					const auto t = translate(rigidbody._pred_translation);
+					const auto r = quat_cast<mat4>(rigidbody._pred_rotate);
+					rigidbody.GetGameObject()->Transform()->GlobalMatrix(t * r * rigidbody._global_cache);
+				}
+               
                 rigidbody.sleep_next_frame = false;
             }
 		};

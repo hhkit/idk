@@ -15,12 +15,13 @@ namespace idk
 		real inv_inertia      { 1.f };
 		vec3 center_of_mass   {};
 
+		vec3 force{ 0.0f };
 		vec3 linear_velocity{ 0.0f };
 		float linear_damping{ 0.0f };
+
+		vec3 torque{ 0.0f };
 		vec3 angular_velocity{ 0.0f };
 		float angular_damping{ 0.0f };
-		vec3 torque{ 0.0f };
-		
 
 		bool use_gravity  { true  };
 		bool is_kinematic { false };
@@ -45,10 +46,12 @@ namespace idk
 		void TeleportBy(const vec3& translation);
 
 	private:
-		vec3 _accum_accel{};
-		vec3 _prev_pos;
+		// vec3 _accum_accel{};
+		// vec3 _prev_pos;
 		bool _sleeping = false;
-        mat4 _pred_tfm{};
+        mat4 _global_cache{};
+		vec3 _pred_translation{ 0.0f };
+		quat _pred_rotate{ };
 
 		friend class PhysicsSystem;
 		friend class CollisionManager;
