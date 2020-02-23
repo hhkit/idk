@@ -34,7 +34,7 @@
 
         public static bool operator ==(Player lhs, Player rhs)
         {
-            if (lhs != null && rhs != null)
+            if ((object) lhs != null && (object) rhs != null)
                 return lhs.connectionId == rhs.connectionId;
             else
                 return (object)lhs == null && (object)rhs == null;
