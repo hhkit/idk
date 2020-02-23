@@ -30,37 +30,18 @@ struct BoxStack : public Demo
 	virtual void Init( )
 	{
 		// Create the floor
-		
+		q3BodyDef bodyDef;
 		//bodyDef.axis.Set( q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f ) );
 		//bodyDef.angle = q3PI * q3RandomFloat( -1.0f, 1.0f );
-		{
-			q3BodyDef bodyDef;
-			bodyDef.bodyType = eDynamicBody;
-			q3Body* body = scene.CreateBody(bodyDef);
+		q3Body* body = scene.CreateBody( bodyDef );
 
-			q3BoxDef boxDef;
-			boxDef.SetRestitution(0);
-			q3Transform tx;
-			q3Identity(tx);
-			tx.position = q3Vec3(0.25, 0, 0);
-			boxDef.Set(tx, q3Vec3(1, 1.0f, 1));
-			
-			body->AddBox(boxDef);
-		}
-		{
-			q3BodyDef bodyDef;
-			bodyDef.bodyType = eDynamicBody;
-			q3Body* body = scene.CreateBody(bodyDef);
+		q3BoxDef boxDef;
+		boxDef.SetRestitution( 0 );
+		q3Transform tx;
+		q3Identity( tx );
+		boxDef.Set( tx, q3Vec3( 50.0f, 1.0f, 50.0f ) );
+		body->AddBox( boxDef );
 
-			q3BoxDef boxDef;
-			boxDef.SetRestitution(0);
-			q3Transform tx;
-			q3Identity(tx);
-			tx.position = q3Vec3(-0.25, 0, 0);
-			boxDef.Set(tx, q3Vec3(1, 1.0f, 1));
-			
-			body->AddBox(boxDef);
-		}
 		// Create boxes
 		//for ( i32 i = 0; i < 10; ++i )
 		//{
@@ -75,21 +56,21 @@ struct BoxStack : public Demo
 		//	body->AddBox( boxDef );
 		//}
 
-		// bodyDef.bodyType = eDynamicBody;
-		// boxDef.Set( tx, q3Vec3( 1.0f, 1.0f, 1.0f ) );
-		// 
-		// for ( i32 i = 0; i < 8; ++i )
-		// {
-		// 	for ( i32 j = 0; j < 8; ++j )
-		// 	{
-		// 		for ( i32 k = 0; k < 10; ++k )
-		// 		{
-		// 			bodyDef.position.Set( -16.0f + 1.0f * j, 1.0f * i + 5.0f, -16.0f + 1.0f * k );
-		// 			body = scene.CreateBody( bodyDef );
-		// 			body->AddBox( boxDef );
-		// 		}
-		// 	}
-		// }
+		bodyDef.bodyType = eDynamicBody;
+		boxDef.Set( tx, q3Vec3( 1, 1.0f, 1 ) );
+
+		// for ( i32 i = 0; i < 1; ++i )
+		{
+			// for ( i32 j = 0; j < 1; ++j )
+			{
+				// for ( i32 k = 0; k < 1; ++k )
+				{
+					bodyDef.position.Set( 0, 5, 0 );
+					body = scene.CreateBody( bodyDef );
+					body->AddBox( boxDef );
+				}
+			}
+		}
 	}
 
 	virtual void Shutdown( )

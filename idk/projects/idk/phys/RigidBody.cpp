@@ -39,13 +39,14 @@ namespace idk
 	}
 	vec3 RigidBody::AddForce(const vec3& newtons)
 	{
-		const auto added = newtons * inv_mass;
+		const auto added = newtons;
 		force += added;
 		return added;
 	}
 	vec3 RigidBody::AddTorque(const vec3& t)
 	{
 		torque += t;
+		return torque;
 	}
 	void RigidBody::TeleportBy(const vec3& translation)
 	{

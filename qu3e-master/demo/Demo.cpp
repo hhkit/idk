@@ -539,12 +539,12 @@ int InitApp( int argc, char** argv )
 	glEnable( GL_LIGHT0 );
 	glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
 
-	demos[ 0 ] = new BoxStack(); 
+	demos[ 0 ] = new DropBoxes( );
 	demos[ 1 ] = new RayPush( );
-	demos[ 2 ] = new DropBoxes();
+	demos[ 2 ] = new BoxStack( );
 	demos[ 3 ] = new Test( );
 	demoCount = 4;
-	currentDemo = 0;
+	currentDemo = 2;
 	demos[ currentDemo ]->Init( );
 	sprintf( sceneFileName, "q3dump.txt" );
 

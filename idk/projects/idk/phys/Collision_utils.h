@@ -10,10 +10,11 @@ namespace idk
 {
 	struct ColliderInfo
 	{
-		Collider* collider;
-		aabb broad_phase;
-		CollidableShapes predicted_shape;
-		LayerManager::layer_t layer;
+		Collider* collider{ nullptr };
+		RigidBody* rb{ nullptr };
+		aabb broad_phase{};
+		CollidableShapes predicted_shape{};
+		LayerManager::layer_t layer{};
 	};
 
 	struct ColliderInfoPair

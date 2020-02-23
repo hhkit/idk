@@ -21,7 +21,7 @@ namespace idk
 
 		vec3 torque{ 0.0f };
 		vec3 angular_velocity{ 0.0f };
-		float angular_damping{ 0.0f };
+		float angular_damping{ 0.1f };
 
 		bool use_gravity  { true  };
 		bool is_kinematic { false };

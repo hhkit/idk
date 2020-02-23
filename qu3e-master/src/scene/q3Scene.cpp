@@ -46,7 +46,7 @@ q3Scene::q3Scene( r32 dt, const q3Vec3& gravity, i32 iterations )
 	, m_dt( dt )
 	, m_iterations( iterations )
 	, m_newBox( false )
-	, m_allowSleep( true )
+	, m_allowSleep( false )
 	, m_enableFriction( true )
 {
 }

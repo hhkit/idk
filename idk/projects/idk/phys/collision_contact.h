@@ -9,12 +9,7 @@ namespace idk::phys
 	struct ContactPoint
 	{
 		vec3 position{ 0, 0, 0 };				// World coordinate of contact
-		float penetration{0};			// Depth of penetration from collision
-		float normalImpulse{ 0 };		// Accumulated normal impulse
-		float tangentImpulse[2]{ 0 };	// Accumulated friction impulse
-		float bias{ 0 };					// Restitution + baumgarte
-		float normalMass{ 0 };			// Normal constraint mass
-		float tangentMass[2];		// Tangent constraint mass
+		float penetration{0};					// Depth of penetration from collision
 	};
 
 	struct Manifold

@@ -657,7 +657,8 @@ void q3BoxtoBox( q3Manifold* m, q3Box* a, q3Box* b )
 	if ( q3Dot( n, btx.position - atx.position ) < r32( 0.0 ) )
 		n = -n;
 
-	assert( axis != ~0 );
+	if ( axis == ~0 )
+		return;
 
 	if ( axis < 6 )
 	{
@@ -717,7 +718,7 @@ void q3BoxtoBox( q3Manifold* m, q3Box* a, q3Box* b )
 					std::swap( pair.outI, pair.outR );
 				}
 
-				c->fp = out[ i ].f;
+				// c->fp = out[ i ].f;
 				c->position = out[ i ].v;
 				c->penetration = depths[ i ];
 			}
@@ -745,7 +746,7 @@ void q3BoxtoBox( q3Manifold* m, q3Box* a, q3Box* b )
 		q3Contact* c = m->contacts;
 		q3FeaturePair pair;
 		pair.key = axis;
-		c->fp = pair;
+		// c->fp = pair;
 		c->penetration = sMax;
 		c->position = (CA + CB) * r32( 0.5 );
 	}

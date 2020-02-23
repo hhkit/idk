@@ -3,6 +3,11 @@
 
 namespace idk
 {
+	void ContactSolver::Initialize(const CollisionList& collisions)
+	{
+		
+	}
+
 	void ContactSolver::Solve(float dt)
 	{
 		// for (const auto& [i, j, result] : collision_frame)

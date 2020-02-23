@@ -30,6 +30,7 @@
 #include "q3Contact.h"
 #include "../scene/q3Scene.h"
 #include "../debug/q3Render.h"
+#include <iostream>
 
 //--------------------------------------------------------------------------------------------------
 // q3ContactManager
@@ -234,6 +235,7 @@ void q3ContactManager::TestCollisions( void )
 		q3Vec3 ot0 = oldManifold.tangentVectors[ 0 ];
 		q3Vec3 ot1 = oldManifold.tangentVectors[ 1 ];
 		constraint->SolveCollision( );
+		std::cout << constraint->manifold.contactCount << std::endl;
 		q3ComputeBasis( manifold->normal, manifold->tangentVectors, manifold->tangentVectors + 1 );
 
 		for ( i32 i = 0; i < manifold->contactCount; ++i )
@@ -243,21 +245,21 @@ void q3ContactManager::TestCollisions( void )
 			u8 oldWarmStart = c->warmStarted;
 			c->warmStarted = u8( 0 );
 
-			for ( i32 j = 0; j < oldManifold.contactCount; ++j )
-			{
-				q3Contact *oc = oldManifold.contacts + j;
-				if ( c->fp.key == oc->fp.key )
-				{
-					c->normalImpulse = oc->normalImpulse;
-
-					// Attempt to re-project old friction solutions
-					q3Vec3 friction = ot0 * oc->tangentImpulse[ 0 ] + ot1 * oc->tangentImpulse[ 1 ];
-					c->tangentImpulse[ 0 ] = q3Dot( friction, manifold->tangentVectors[ 0 ] );
-					c->tangentImpulse[ 1 ] = q3Dot( friction, manifold->tangentVectors[ 1 ] );
-					c->warmStarted = q3Max( oldWarmStart, u8( oldWarmStart + 1 ) );
-					break;
-				}
-			}
+			// for ( i32 j = 0; j < oldManifold.contactCount; ++j )
+			// {
+			// 	q3Contact *oc = oldManifold.contacts + j;
+			// 	if ( c->fp.key == oc->fp.key )
+			// 	{
+			// 		c->normalImpulse = oc->normalImpulse;
+			// 
+			// 		// Attempt to re-project old friction solutions
+			// 		q3Vec3 friction = ot0 * oc->tangentImpulse[ 0 ] + ot1 * oc->tangentImpulse[ 1 ];
+			// 		c->tangentImpulse[ 0 ] = q3Dot( friction, manifold->tangentVectors[ 0 ] );
+			// 		c->tangentImpulse[ 1 ] = q3Dot( friction, manifold->tangentVectors[ 1 ] );
+			// 		c->warmStarted = q3Max( oldWarmStart, u8( oldWarmStart + 1 ) );
+			// 		break;
+			// 	}
+			// }
 		}
 
 		if ( m_contactListener )
