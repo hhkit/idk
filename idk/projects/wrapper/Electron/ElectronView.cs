@@ -10,7 +10,7 @@ namespace idk
 
         public bool IsMine { get => Bindings.ViewIsMine(handle); }
         public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
-        public void TransferOwnership(Player newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
+        public void TransferOwnership(Client newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
 
         public void DestroyObject() => Bindings.ViewDestroy(handle);
 
@@ -45,7 +45,7 @@ namespace idk
         /// <param name="methodName">Name of the method</param>
         /// <param name="targetPlayer">The player you're trying to target the RPC at</param>
         /// <param name="parameters">Parameters for the method</param>
-        public void RPC(string methodName, Player targetPlayer, params object[] parameters)
+        public void RPC(string methodName, Client targetPlayer, params object[] parameters)
         {
             if (!ElectronNetwork.isHost)
                 throw new InvalidRPCTargetException("Only the server may target players.");

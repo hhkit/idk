@@ -1848,17 +1848,17 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkGetPlayers", MonoArray*)
+		BIND_START("idk.Bindings::NetworkGetClients", MonoArray*)
 		{
-			vector<int> players;
+			vector<int> clients;
 			auto& network = Core::GetSystem<NetworkSystem>();
 			for (auto host = s_cast<int>(Host::CLIENT0); host < s_cast<int>(Host::CLIENT_MAX); ++host)
 				if (network.GetConnectionTo(s_cast<Host>(host))) // has connection
-					players.emplace_back(host);
+					clients.emplace_back(host);
 
-			auto retval = mono_array_new(mono_domain_get(), mono_get_int32_class(), players.size());
-			for (int i = 0; i < players.size(); ++i)
-				mono_array_set(retval, int, i, players[i]);
+			auto retval = mono_array_new(mono_domain_get(), mono_get_int32_class(), clients.size());
+			for (int i = 0; i < clients.size(); ++i)
+				mono_array_set(retval, int, i, clients[i]);
 
 			return retval;
 		}

@@ -6,12 +6,13 @@ namespace idk
     public static class ElectronNetwork
     {
 
-        public static IList<Player> players 
-        { get
+        public static IList<Client> clients 
+        { 
+            get
             {
-                var retval = new List<Player>();
-                foreach (var id in Bindings.NetworkGetPlayers())
-                    retval.Add(new Player(id));
+                var retval = new List<Client>();
+                foreach (var id in Bindings.NetworkGetClients())
+                    retval.Add(new Client(id));
                 return retval;
             } 
         }

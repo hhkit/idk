@@ -703,7 +703,7 @@ namespace idk
         public extern static bool NetworkCreateLobby(string mac_address);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static int[] NetworkGetPlayers();
+        public extern static int[] NetworkGetClients();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkAddCallback(ulong handle);
