@@ -186,8 +186,9 @@ float ShadowCalculation(Light light, sampler2DArray shadow_tex , vec3 lightDir ,
 			//PCF
 			float avgDepth = 0.f;
 			//float	tDepth=0.f;
-			vec3 texelSize = textureSize(shadow_tex,lod);
-			texelSize = 1.f/texelSize;
+			vec3 texelSize = textureSize(shadow_tex,0);
+			vec2 ts = 1.f/texelSize.xy;
+			texelSize = vec3(ts,texelSize.z);
 			float tc_z = projCoords.z - bias;
 			
 			for(int x = -2; x <= 2; ++x)

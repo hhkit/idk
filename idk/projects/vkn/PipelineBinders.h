@@ -85,7 +85,7 @@ namespace idk
 			vector<mat4> proj_trf{};
 			void SetState(const GraphicsState& vstate);
 			void SetState(const ShadowCameraData& camera, const vector<SkeletonTransforms>& skel);
-			void SetState(const CameraData& camera, const vector<SkeletonTransforms>& skel);
+			//void SetState(const CameraData& camera, const vector<SkeletonTransforms>& skel);
 
 			void Bind(PipelineThingy& the_interface)override;
 			void Bind(PipelineThingy& the_interface, const RenderObject& dc)override;
@@ -220,6 +220,7 @@ namespace idk
 
 		};
 		using UnlitMaterialBinding = CombinedBindings<UnlitFilter,StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+		
 		using ShadowBinding = CombinedBindings<ShadowFilter, ShadowVertexBindings>;
 	}
 }

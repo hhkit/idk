@@ -138,7 +138,7 @@ namespace idk::vkn
 	}
 
 	*/
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
 		vector<ProcessedRO::BindingInfo> bindings,

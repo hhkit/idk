@@ -139,13 +139,13 @@ namespace idk::vkn
 		skeletons = &skel;
 	}
 
-	void ShadowVertexBindings::SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel)
+	/*void ShadowVertexBindings::SetState(const CameraData& cam, const vector<SkeletonTransforms>& skel)
 	{
 		view_trf = cam.view_matrix;
 		proj_trf.emplace_back(cam.projection_matrix);
 		skeletons = &skel;
-	}
-#pragma optimize("",off)
+	}*/
+//#pragma optimize("",off)
 	void ShadowVertexBindings::Bind(PipelineThingy& the_interface)
 	{
 		//map back into z: (0,1)
@@ -168,7 +168,7 @@ namespace idk::vkn
 		vector<mat4> mat4_block{ obj_trf,obj_ivt };
 		the_interface.BindUniformBuffer("ObjectMat4Block", 0, mat4_block);
 	}
-
+//#pragma optimize("",off)
 	void ShadowVertexBindings::Bind(PipelineThingy& the_interface, const AnimatedRenderObject& dc)
 	{
 		Bind(the_interface, s_cast<const RenderObject&>(dc));

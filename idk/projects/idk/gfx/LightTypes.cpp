@@ -95,7 +95,7 @@ namespace idk
 		// TODO: insert return statement here
 		return light_map;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	vector <Lightmap> DirectionalLight::InitShadowMap()
 	{
 		light_map.resize(cascade_count);
