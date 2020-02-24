@@ -399,7 +399,7 @@ namespace idk::vkn
 	{
 		vk::Device device = *View().Device();
 		auto info = CreateRenderPassInfo(input_rscs, output_rscs, depth);
-		return device.createRenderPassUnique(info);
+		return _rp_pool.GetRenderPass(info);
 	}
 	std::pair<Framebuffer, uvec2> FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
@@ -439,9 +439,9 @@ namespace idk::vkn
 			}
 		}
 		//TODO shift this into a pool and use unique
-		return { d.createFramebuffer(vk::FramebufferCreateInfo
+		return { _fb_pool.GetFramebuffer(vk::FramebufferCreateInfo
 			{
-				{},*rp,
+				{},rp,
 				static_cast<uint32_t>(targets.size()),
 				std::data(targets),
 				size.x,size.y,num_layers

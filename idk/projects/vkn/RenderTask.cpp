@@ -101,7 +101,7 @@ namespace idk::vkn
 	void RenderTask::BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader_handle)
 	{
 		auto& bound_shader = _current_batch.shaders.shaders[static_cast<size_t>(stage)];
-		if (bound_shader == shader_handle)
+		if (bound_shader == shader_handle || shader_handle.guid == Guid{})
 			return;
 		UnbindShader(stage);
 		auto& shader = shader_handle.as<ShaderModule>();
@@ -136,7 +136,7 @@ namespace idk::vkn
 			oshader.reset();
 		}
 	}
-	void RenderTask::SetRenderPass(RenderPassObj render_pass)
+	void RenderTask::SetRenderPass(VknRenderPass render_pass)
 	{
 		curr_rp = render_pass;
 	}
@@ -354,7 +354,7 @@ namespace idk::vkn
 
 		vk::RenderPassBeginInfo rpbi
 		{
-			*rp,fb,
+			rp,fb,
 			hlp::ToRect2D(render_area),
 			static_cast<uint32_t>(clear_values.size()),
 			std::data(clear_values),

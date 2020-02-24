@@ -9,6 +9,10 @@
 #include <vkn/utils/GraphTraverser.h>
 #include <vkn/topological_sort.h>
 #include <vkn/RenderPassCreateInfoBundle.h>
+
+
+#include <vkn/RenderPassPool.h>
+
 //MARK_NON_COPY_CTORABLE(idk::vkn::FrameGraphDetail::Context);
 namespace idk::vkn
 {
@@ -221,6 +225,8 @@ namespace idk::vkn
 		ResourceLifetimeManager rsc_lifetime_mgr;
 
 		vector<std::remove_reference_t<Context_t>> _contexts;
+		RenderPassPool _rp_pool;
+		FramebufferPool _fb_pool;
 	};
 
 }

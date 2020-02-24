@@ -374,6 +374,9 @@
     <ClInclude Include="VertexBindingTracker.h">
       <Filter>render\utils</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPassPool.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -654,6 +657,7 @@
     </ClCompile>
     <ClCompile Include="PipelineDescHelper.cpp" />
     <ClCompile Include="VertexBindingTracker.cpp" />
+    <ClCompile Include="RenderPassPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

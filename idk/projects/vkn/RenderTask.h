@@ -93,7 +93,7 @@ namespace idk::vkn
 
 		void BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader)override;
 		void UnbindShader(ShaderStage shader_stage)override;
-		void SetRenderPass(RenderPassObj render_pass);
+		void SetRenderPass(VknRenderPass render_pass);
 		void SetFrameBuffer(const Framebuffer& fb,uvec2 size);
 
 #pragma region Draw
@@ -222,7 +222,7 @@ namespace idk::vkn
 		rect render_area;
 #pragma endregion
 
-		RenderPassObj curr_rp;
+		VknRenderPass curr_rp;
 		vk::Framebuffer curr_frame_buffer;
 		uvec2 fb_size;
 
