@@ -897,8 +897,8 @@ namespace idk::vkn
 		{
 			//auto& camData = *state.cameras->begin();
 			{
-				//if (shadow_range.noDuplicate)
-					//return;
+				if (shadow_range.noDuplicate)
+					return;
 				
 				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
 				mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
@@ -906,11 +906,11 @@ namespace idk::vkn
 				{
 					//for (auto& elem : light.light_maps)
 
-					//for (auto& elem : shadow_range.d_light_map_indexes)
-						//p_mats.emplace_back(mat4{ clip_mat * light.light_maps[elem].cascade_projection });
+					for (auto& elem : shadow_range.d_light_map_indexes)
+						p_mats.emplace_back(mat4{ clip_mat * light.light_maps[elem].cascade_projection });
 
 					auto& elem = light.light_maps[shadow_range.light_map_index];
-					p_mats.emplace_back(clip_mat * elem.cascade_projection);
+					//p_mats.emplace_back(clip_mat * elem.cascade_projection);
 					{
 						auto cam = ShadowCameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, p_mats };
 						ShadowBinding shadow_binding;
@@ -923,7 +923,7 @@ namespace idk::vkn
 							*state.skeleton_transforms);
 						GraphicsStateInterface gsi = { state };
 						gsi.range = shadow_range;
-						auto the_interface = vkn::ShadowProcessRoUniformsWOGeom(gsi, rs.ubo_manager, shadow_binding);
+						auto the_interface = vkn::ShadowProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
 						the_interface.GenerateDS(rs.dpools,false);
 
 					//auto& swapchain = view.Swapchain();

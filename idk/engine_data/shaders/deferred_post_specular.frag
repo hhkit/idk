@@ -31,7 +31,7 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
-S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_LIGHTS];
+S_LAYOUT(9, 1) uniform sampler2DArray shadow_map_directional[MAX_LIGHTS];
 
 S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
 {
@@ -91,11 +91,11 @@ void main()
 				int map_index = j;
 				if(view_z_abs <= DirectionalBlk.directional_vp[j].far_plane)
 				{
-					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[map_index],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos, 0));
 				}
 				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				{
-					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[j],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
+					shadow_factor = vec3(1.f - ShadowCalculation(LightBlk.lights[i],shadow_map_directional[map_index],(LightBlk.lights[i].v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos, 1));
 				}
 				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				//{

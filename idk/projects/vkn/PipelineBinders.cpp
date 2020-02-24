@@ -225,8 +225,8 @@ namespace idk::vkn
 					//auto& t = v.buffer.as<VknTexture>();
 					
 					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat *elem.cascade_projection * light.v});
-					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
 				}
+				shadow_maps_directional.emplace_back(light.light_maps[0].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
 			}
 		}
 		while (shadow_maps_directional.size() < 8 && shadow_maps_directional.size())
