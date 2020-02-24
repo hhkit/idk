@@ -123,13 +123,14 @@ namespace idk::vkn::renderpasses
 	struct HdrPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable hdr_rsc;
-		AccumPass& accum;
+		AccumPass &accum_def, &accum_spec;
 
-		FrameGraphResourceMutable accum_att, depth_att;
+		FrameGraphResourceMutable accum_att_def, depth_att_def;
+		FrameGraphResourceMutable accum_att_spec, depth_att_spec;
 
 		RscHandle<ShaderProgram> hdr_shader;
 
-		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_, rect viewport, FrameGraphResource color_tex);
+		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};

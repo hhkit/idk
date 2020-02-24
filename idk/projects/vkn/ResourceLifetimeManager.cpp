@@ -46,10 +46,11 @@ namespace idk::vkn
 #pragma optimize("",off)
 	void ResourceLifetimeManager::DebugArrange(FrameGraphResourceManager& rsc_manager) const
 	{
-		struct Debug
-		{
-			vector<std::tuple<string, fgr_id,index_span>> resources;
-		};
+		using Debug =vector<std::tuple<string, fgr_id, index_span>>;
+		//struct Debug
+		//{
+		//	 resources;
+		//};
 		lazy_vector<Debug> test;
 		for (auto& [r_id, index] : map)
 		{
@@ -58,7 +59,7 @@ namespace idk::vkn
 			
 			auto derp = rsc_manager.GetResourceDescription(r_id);
 			auto actual_index = itr->second;
-			test[actual_index].resources.emplace_back(derp->name, r_id,index_span{ rsc_lifetime.start,rsc_lifetime.end });
+			test[actual_index].emplace_back(derp->name, r_id,index_span{ rsc_lifetime.start,rsc_lifetime.end });
 		}
 		test.clear();
 	}

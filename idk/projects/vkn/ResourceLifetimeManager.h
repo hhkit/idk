@@ -6,7 +6,7 @@ namespace idk::vkn
 	class FrameGraphResourceManager;
 	struct ResourceLifetime
 	{
-		fg_id start, end; //Fixed order
+		fg_id start = std::numeric_limits<fg_id>::max(), end= std::numeric_limits<fg_id>::min(); //Fixed order
 		vector<fg_id> inbetween; //Undetermined order
 	};
 	struct ResourceLifetimeManager
@@ -16,6 +16,14 @@ namespace idk::vkn
 		hash_table<fgr_id, lifetime_index> map;
 
 		void ClearLifetimes();
+
+		std::optional<ResourceLifetime> GetLifetime(fgr_id r_id) const
+		{
+			auto itr = map.find(r_id);
+			if (itr == map.end())
+				return{};
+			return resource_lifetimes.at(itr->second);
+		}
 
 		void EndLifetime(fgr_id rsc_id, const fg_id& node_id);
 		void InbetweenLifetime(fgr_id rsc_id, const fg_id& node_id);

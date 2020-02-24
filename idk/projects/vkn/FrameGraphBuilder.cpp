@@ -67,7 +67,7 @@ namespace idk::vkn
 			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result,opt});
 			read(target_rsc,false);
 		}
-		return target_rsc;
+		return result;
 	}
 
 	void FrameGraphBuilder::set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)

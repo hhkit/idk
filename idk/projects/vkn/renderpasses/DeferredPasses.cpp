@@ -215,10 +215,10 @@ namespace idk::vkn::renderpasses
 
 
 
-	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_, rect viewport, FrameGraphResource color_tex) : accum{ accum_ }, _viewport{viewport}
+	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex) : accum_def{ accum_def_ }, accum_spec{ accum_spec_ }, _viewport{viewport}
 	{
 		hdr_rsc = builder.write(color_tex);
-		depth_att = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_.rt_size);
+		depth_att_def = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		builder.set_output_attachment(hdr_rsc, 0, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -236,11 +236,11 @@ namespace idk::vkn::renderpasses
 				//vk::ComponentMapping mapping{};
 			}
 		);
-		auto derp1 = builder.read(accum.accum_rsc);
-		auto derp2 = builder.read(accum.depth_rsc);
-		auto derp3 = builder.read(accum.accum_rsc);
-		auto derp4 = builder.read(accum.depth_rsc);
-		builder.set_input_attachment(accum_att = derp1, 0, AttachmentDescription
+		auto derp1 = builder.read(accum_def.accum_rsc);
+		auto derp2 = builder.read(accum_def.depth_rsc);
+		auto derp3 = builder.read(accum_spec.accum_rsc);
+		auto derp4 = builder.read(accum_spec.depth_rsc);
+		builder.set_input_attachment(accum_att_def = derp1, 0, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -305,7 +305,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_depth_stencil_attachment(depth_att, AttachmentDescription
+		builder.set_depth_stencil_attachment(depth_att_def, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
@@ -644,7 +644,7 @@ namespace idk::vkn::renderpasses
 			.material_instances = gfx_state.material_instances,
 			.vertex_state_info = state,
 		};
-		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{
+		auto gbuffer_set = DeferredPbrSet{
 				{
 					DeferredPbrAniDrawSet{
 							bindings::make_deferred_pbr_ani_bind(info),
@@ -658,18 +658,26 @@ namespace idk::vkn::renderpasses
 											}
 						},
 				}
-			}, cube_clear.rt_size, cube_clear.depth).RenderPass();
-			bindings::LightBind light_bindings;
-			auto& vp_bindings = light_bindings.Get<bindings::CameraViewportBindings>();
-			auto& ls_bindings = light_bindings.Get<bindings::LightShadowBinding>();
-			auto& accum_fsq_bindings = light_bindings.Get<bindings::DeferredLightFsq>();
-			vp_bindings.viewport = gfx_state.camera.viewport;
-			ls_bindings.SetState(bindings::LightShadowBinding::State{gfx_state.active_lights,*gfx_state.lights,gfx_state.shadow_maps_2d,gfx_state.camera.view_matrix,gfx_state.camera.projection_matrix});
-			accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost: FDeferredPostSpecular];
-			auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{light_bindings}, gbuffer_pass).RenderPass();
-			auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport, cube_clear.render_target);
+		};
+		auto& gbuffer_pass_def = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassDeferred", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
+		bindings::LightBind light_bindings;
+		auto& vp_bindings = light_bindings.Get<bindings::CameraViewportBindings>();
+		auto& ls_bindings = light_bindings.Get<bindings::LightShadowBinding>();
+		auto& accum_fsq_bindings = light_bindings.Get<bindings::DeferredLightFsq>();
+		vp_bindings.viewport = gfx_state.camera.viewport;
+		ls_bindings.SetState(bindings::LightShadowBinding::State{ gfx_state.active_lights,*gfx_state.lights,gfx_state.shadow_maps_2d,gfx_state.camera.view_matrix,gfx_state.camera.projection_matrix });
+		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
+		auto& accum_pass_def = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Default", AccumDrawSet{ light_bindings }, gbuffer_pass_def).RenderPass();
 
-			return { hdr_pass.hdr_rsc,hdr_pass.depth_att };
+		info.model = ShadingModel::Specular;
+		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
+		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
+		auto& accum_pass_spec = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Specular", AccumDrawSet{ light_bindings }, gbuffer_pass_spec).RenderPass();
+
+
+		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, cube_clear.render_target);
+
+		return { hdr_pass.hdr_rsc,hdr_pass.depth_att_def };
 	}
 
 

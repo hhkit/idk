@@ -38,6 +38,7 @@ namespace idk::vkn
 		size_t max_order = 0;
 		auto& rsc_manager = GetResourceManager();
 		auto original_id = [&rsc_manager](fgr_id id) {return rsc_manager.GetOriginal(id); };
+		size_t serial_order=0;
 		for (auto index : exec_order)
 		{
 			auto& curr_node = graph_nodes[index];
@@ -51,7 +52,7 @@ namespace idk::vkn
 				order = std::max(fat_order[dep_node], order);
 			}
 			order = order + 1;
-			fat_order[curr_node.id] = order;
+			fat_order[curr_node.id] = serial_order++; //Change back to order to revert to fat ordering.
 			max_order = std::max(order, max_order);
 		}
 
@@ -67,6 +68,15 @@ namespace idk::vkn
 				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
 			}
 		}
+		vector<std::pair<string, ResourceLifetime>> lifetimes;
+		for (auto& [id, index] : manager.map)
+		{
+			auto odesc = rsc_manager.GetResourceDescription(id);
+			auto lifetime = manager.resource_lifetimes.at(index);
+			lifetimes.emplace_back(odesc->name, lifetime);
+		}
+
+
 		manager.CollapseLifetimes(original_id);
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
 		
