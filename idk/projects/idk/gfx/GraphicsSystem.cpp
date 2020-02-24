@@ -1075,10 +1075,10 @@ namespace idk
 							{
 								range.noDuplicate = false;
 								isFirst = false;
-								auto dl_index = lm_i;
+								//auto dl_index = lm_i;
 
-								for(auto& elem: light.light_maps)
-									range.d_light_map_indexes.emplace_back(dl_index++);
+								//for(auto& elem: light.light_maps)
+									//range.d_light_map_indexes.emplace_back(dl_index++);
 							}
 							else
 							{

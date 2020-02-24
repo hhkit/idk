@@ -214,7 +214,10 @@ namespace idk {
 	RscHandle<FrameBuffer> Lightmap::GetShadowMap()
 	{
 		if (texel_size != cascade_resolution)
+		{
+			cascade_resolution = texel_size;
 			return InitShadowMap(_config);
+		}
 
 		return light_map;
 	}

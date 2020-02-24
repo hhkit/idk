@@ -104,7 +104,7 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			elem.InitShadowMap(cascade_count,AttachmentViewType::e2DArray);
+			elem.InitShadowMap(1,AttachmentViewType::e2D);
 		}
 		return light_map;
 	}
