@@ -6,14 +6,14 @@ namespace idk
     /// </summary>
     public struct ElectronMessageInfo
     {
-        private int    fromID;
         private ulong  view_handle;
+        private int fromID;
         private ushort frameStamp;
 
         /// <summary>
         /// The sender of the message.
         /// </summary>
-        public Player sender { get=> new Player(fromID); }
+        public Client sender { get=> new Client(fromID); }
 
         /// <summary>
         /// The view on which the RPC was executed on.

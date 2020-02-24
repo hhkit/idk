@@ -99,7 +99,9 @@ namespace idk {
             folderDragDropTarget(dir);
             if (open)
             {
-                for (const auto& path : dir.GetEntries())
+                auto dirs = dir.GetEntries(FS_FILTERS::DIR); // sort lexicographically
+                std::sort(dirs.begin(), dirs.end(), [](const PathHandle& a, const PathHandle& b) { return a.GetFileName() < b.GetFileName(); });
+                for (const auto& path : dirs)
                     displayDir(path);
                 ImGui::TreePop();
             }

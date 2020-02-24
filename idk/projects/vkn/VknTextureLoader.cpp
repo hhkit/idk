@@ -132,7 +132,9 @@ namespace idk::vkn
 				0,
 				load_info.mipmap_level,
 				0,
-				load_info.layers
+				load_info.layers,
+				load_info.view_type,
+				load_info.component_mapping
 			});
 
 		vk::SamplerCreateInfo sampler_info
@@ -240,9 +242,9 @@ namespace idk::vkn
 		vk::ImageViewCreateInfo viewInfo{
 			vk::ImageViewCreateFlags{},
 			image						   ,//image                           
-			vk::ImageViewType::e2D		   ,//viewType                        
+			info.type		   ,//viewType                        
 			format	   ,//format                          
-			vk::ComponentMapping{},
+			info.component_mapping,
 			vk::ImageSubresourceRange
 		{
 			aspect                         ,//aspectMask     

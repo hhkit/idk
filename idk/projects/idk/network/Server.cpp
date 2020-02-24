@@ -82,7 +82,7 @@ namespace idk
 		LOG_TO(LogPool::NETWORK, "Client %d connected", clientIndex);
 		OnClientConnect.Fire(clientIndex);
 
-		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
 		auto player = player_type->ConstructTemporary(clientIndex);
 		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
 		{
@@ -99,7 +99,7 @@ namespace idk
 		LOG_TO(LogPool::NETWORK, "Client %d disconnected", clientIndex);
 		OnClientDisconnect.Fire(clientIndex);
 
-		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Player");
+		auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
 		auto player = player_type->ConstructTemporary(clientIndex);
 		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
 		{

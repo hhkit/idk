@@ -11,9 +11,10 @@ namespace idk
 	ADD_MESSAGE(TestMessage);
 	ADD_MESSAGE(EventDataBlockFrameNumber);
 	ADD_MESSAGE(EventInstantiatePrefabMessage);
+	ADD_MESSAGE(EventLoadLevelMessage);
 	ADD_MESSAGE(EventTransferOwnershipMessage);
 	ADD_MESSAGE(EventInvokeRPCMessage);
-	ADD_MESSAGE(EventLoadLevelMessage);
+	ADD_MESSAGE(EventDestroyObjectMessage);
 	ADD_MESSAGE(GhostMessage);
 	ADD_MESSAGE(MoveClientMessage);
 	YOJIMBO_MESSAGE_FACTORY_FINISH();

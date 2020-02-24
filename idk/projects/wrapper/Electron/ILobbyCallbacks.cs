@@ -15,11 +15,11 @@ namespace idk
         /// Fires event when a single player joins the server
         /// </summary>
         /// <param name="p"></param>
-        void OnClientConnect(Player p);
+        void OnClientConnect(Client p);
         /// <summary>
         /// Fires event when a player disconnects from the server
         /// </summary>
         /// <param name="p"></param>
-        void OnClientDisconnect(Player p);
+        void OnClientDisconnect(Client p);
     }
 }

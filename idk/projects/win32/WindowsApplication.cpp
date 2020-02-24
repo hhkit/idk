@@ -30,7 +30,7 @@ namespace idk::win
 		// Initialize global strings
 		//LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 		//LoadStringW(hInstance, IDC_GAME, szWindowClass, MAX_LOADSTRING);
-
+		/*
 		#ifdef _DEBUG
 		{
 			AllocConsole();
@@ -41,7 +41,7 @@ namespace idk::win
 			SetConsoleTitle(L"IDK 0.1a");
 		}
 		#endif
-
+		*/
 		MyRegisterClass();
 
 		InitInstance(nCmdShow); 

@@ -1,18 +1,33 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace idk
 {
+    [Serializable]
     public class ElectronView
-        : Component
+        : Component, ISerializable
     {
         private static BinaryFormatter formatter = new BinaryFormatter();
 
+        public static ElectronView FindViewByInstantiationid(uint id)
+        {
+            var new_handle = Bindings.ViewIdGetView(id);
+            return new_handle != 0 ? new ElectronView() { handle = new_handle } : null;
+        }
+
         public bool IsMine { get => Bindings.ViewIsMine(handle); }
         public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
-        public void TransferOwnership(Player newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
+        public void TransferOwnership(Client newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
 
-        public void DestroyObject() => Bindings.ViewDestroy(handle);
+        public void DestroyObject()
+        {
+            if (!ElectronNetwork.isHost)
+                throw new InvalidNetworkOperationException("Only the Server may destroy objects");
+
+            Bindings.ViewDestroy(handle);
+        }
 
         public void RPC(string methodName, RPCTarget target, params object[] parameters)
         {
@@ -39,10 +54,16 @@ namespace idk
             Bindings.ViewExecRPC(handle, methodName, target, bytes);
         }
 
-        public void RPC(string methodName, Player targetPlayer, params object[] parameters)
+        /// <summary>
+        /// Force one player's instance of the object to execute an RPC.
+        /// </summary>
+        /// <param name="methodName">Name of the method</param>
+        /// <param name="targetPlayer">The player you're trying to target the RPC at</param>
+        /// <param name="parameters">Parameters for the method</param>
+        public void RPC(string methodName, Client targetPlayer, params object[] parameters)
         {
             if (!ElectronNetwork.isHost)
-                throw new InvalidRPCTargetException("Only the host may target players.");
+                throw new InvalidRPCTargetException("Only the server may target players.");
 
             byte[][] bytes = new byte[parameters.Length][];
             var formatter = new BinaryFormatter();
@@ -54,7 +75,7 @@ namespace idk
                     bytes[count] = stream.ToArray();
                 }
             }
-            throw new System.NotImplementedException();
+            Bindings.ViewExecRPCOnPlayer(handle, methodName, targetPlayer.ActorNumber, bytes);
         }
 
         internal static object[] Reserialize(byte[][] bytes)
@@ -73,6 +94,21 @@ namespace idk
                 }
             }
             return output;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("viewID", InstantiationId, typeof(uint));
+        }
+        public ElectronView()
+        {
+            handle = 0;
+        }
+
+        public ElectronView(SerializationInfo info, StreamingContext context)
+        {
+            var id = (uint) info.GetValue("viewID", typeof(uint));
+            handle = Bindings.ViewIdGetView(id);
         }
     }
 }
