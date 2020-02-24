@@ -5,7 +5,7 @@ namespace TestAndSeek
     class NetworkDbugger
         : MonoBehavior
     {
-        public Player player;
+        public Client player;
         void Start()
         {
             //ElectronNetwork.OnClientConnected += (Player p) => { player = p; Debug.Log("Player " + p.ActorNumber + " connected!"); };

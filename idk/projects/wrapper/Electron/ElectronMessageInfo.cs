@@ -13,7 +13,7 @@ namespace idk
         /// <summary>
         /// The sender of the message.
         /// </summary>
-        public Player sender { get=> new Player(fromID); }
+        public Client sender { get=> new Client(fromID); }
 
         /// <summary>
         /// The view on which the RPC was executed on.

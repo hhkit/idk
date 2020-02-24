@@ -16,7 +16,7 @@ namespace idk
 		bool use_position;
 		vec3 position;
 		bool use_rotation;
-		quat rotation;
+		float rotation[4];
 
 		template <typename Stream>
 		bool Serialize(Stream& stream) 
@@ -33,10 +33,10 @@ namespace idk
 			serialize_bool(stream, use_rotation);
 			if (use_rotation)
 			{
-				serialize_float(stream, rotation.x);
-				serialize_float(stream, rotation.y);
-				serialize_float(stream, rotation.z);
-				serialize_float(stream, rotation.w);
+				serialize_float(stream, rotation[0]);
+				serialize_float(stream, rotation[1]);
+				serialize_float(stream, rotation[2]);
+				serialize_float(stream, rotation[3]);
 			}
 			return true;
 		}

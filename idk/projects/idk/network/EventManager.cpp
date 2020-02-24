@@ -92,12 +92,13 @@ namespace idk
 				if (position)
 				{
 					msg.use_position = true;
-					msg.position = *position;
+					msg.position = tfm.position;
 				}
 				if (rotation)
 				{
 					msg.use_rotation = true;
-					msg.rotation = *rotation;
+					for (unsigned i = 0; i < 4; ++i)
+						msg.rotation[i] = tfm.rotation[i];
 				}
 			});
 
@@ -193,7 +194,8 @@ namespace idk
 		if (message.use_position)
 			tfm.position = message.position;
 		if (message.use_rotation)
-			tfm.rotation = message.rotation;
+			for (unsigned i = 0; i < 4; ++i)
+				tfm.rotation[i] = message.rotation[i];
 	}
 
 	void EventManager::OnTransferOwnershipEvent(EventTransferOwnershipMessage& message)

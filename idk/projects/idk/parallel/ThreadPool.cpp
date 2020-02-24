@@ -5,8 +5,8 @@
 #include <mono/metadata/threads.h>
 #include <script/ScriptSystem.h>
 #include <parallel/circular_buffer.h>
-//#include <Windows.h>
-
+// #include <Windows.h>
+// #undef max
 namespace idk::mt
 {
 	thread_local int _thread_id = 0;
@@ -31,7 +31,7 @@ namespace idk::mt
 		const auto helper_thds = std::max(0, thread_count - 1);
 		LOG_TO(LogPool::SYS, "spawning %d threads\n", helper_thds);
 		//SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-		if(0)
+		
 		for (int i = 1; i <= helper_thds; ++i)
 		{
 			threads.emplace_back(std::thread{ &thread_main, this, i });

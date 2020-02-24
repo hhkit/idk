@@ -21,7 +21,7 @@ namespace TestAndSeek
         ElectronView ev;
 
         internal bool transfer = false;
-        internal Player p = null;
+        internal Client p = null;
 
         [ElecRPC]
         void ExecuteMe()
@@ -32,6 +32,12 @@ namespace TestAndSeek
         void ExecuteMeWithArgs(string param, int val, string param2)
         {
             Debug.Log("RPC executed " + param + "," + val + "," + param2);
+        }
+
+        [ElecRPC]
+        void InformMe(ElectronView view)
+        {
+            Debug.Log("Inform me about " + view.InstantiationId);
         }
 
         [ElecRPC]
@@ -67,14 +73,15 @@ namespace TestAndSeek
         }
         void FixedUpdate()
         {
-            if (Input.GetKey(KeyCode.Shift))
-            {
-                if (Input.GetKeyDown(KeyCode.E))
-                    ev.RPC("ExecuteMeCheckingForSender", RPCTarget.Server,  "help me");
-            }
 
             if (ev.IsMine) // ev.owner == me
             {
+                if (Input.GetKey(KeyCode.Shift))
+                {
+                    if (Input.GetKeyDown(KeyCode.E))
+                        ev.RPC("ExecuteMeCheckingForSender", RPCTarget.Server, "help me");
+                }
+
                 if (on_floor)
                 {
                     if (Input.GetKey(KeyCode.A))
