@@ -454,6 +454,73 @@ namespace idk::vkn
 
 		return std::move(the_interface);
 	}
+	PipelineThingy ShadowProcessRoUniformsWOGeom(const GraphicsStateInterface& state, UboManager& ubo_manager, ShadowBinding& binders)
+	{
+		auto vert_shaders = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders;
+		//auto geom_shaders = Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders;
+		auto& mesh_vtx = vert_shaders[VNormalMesh];
+		auto& skinned_mesh_vtx = vert_shaders[VSkinnedMesh];
+		//auto& shadow_geom = geom_shaders[GShadowCNM];
+		//auto& skinned_shadow_geom = geom_shaders[GShadowCSM];
+		auto& skinned_mesh_render = *state.skinned_mesh_render;
+
+		//auto& binders = *binder;
+		PipelineThingy the_interface{};
+		the_interface.SetRef(ubo_manager);
+
+		the_interface.BindShader(ShaderStage::Vertex, mesh_vtx);
+		//the_interface.BindShader(ShaderStage::Geometry, shadow_geom);
+		the_interface.reserve(state.mesh_render->size() + state.skinned_mesh_render->size());
+		binders.Bind(the_interface);
+		{
+			//auto range_opt = state.range;
+			//if (!range_opt)
+			//	range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
+
+			//auto& inst_draw_range = *range_opt;
+			std::visit([&](auto& inst_draw_range) {
+				for (auto itr = state.inst_ro->data() + inst_draw_range.inst_mesh_render_begin,
+					end = state.inst_ro->data() + inst_draw_range.inst_mesh_render_end;
+					itr != end; ++itr
+					)
+				{
+					auto& dc = *itr;
+					auto& mat_inst = *dc.material_instance;
+					if (mat_inst.material && !binders.Skip(the_interface, dc))
+					{
+						binders.Bind(the_interface, dc);
+						the_interface.BindMeshBuffers(dc);
+						the_interface.BindAttrib(4, state.shared_state->inst_mesh_render_buffer.buffer(), 0);
+						the_interface.FinalizeDrawCall(dc, dc.num_instances, dc.instanced_index);
+					}
+				}
+			}, state.range);
+
+		}
+		{
+			const vector<const AnimatedRenderObject*>& draw_calls = skinned_mesh_render;
+			the_interface.BindShader(ShaderStage::Vertex, skinned_mesh_vtx);
+			//the_interface.BindShader(ShaderStage::Geometry, skinned_shadow_geom);
+			binders.Bind(the_interface);
+			for (auto& ptr_dc : draw_calls)
+			{
+				auto& dc = *ptr_dc;
+				auto& mat_inst = *dc.material_instance;
+				if (mat_inst.material && dc.layer_mask & state.mask && !binders.Skip(the_interface, dc))
+				{
+					binders.Bind(the_interface, dc);
+					binders.BindAni(the_interface, dc);
+					if (!the_interface.BindMeshBuffers(dc))
+						continue;
+					the_interface.FinalizeDrawCall(dc);
+
+				}
+			}//End of draw_call loop
+		}
+
+
+		return std::move(the_interface);
+	}
 	PipelineThingy ProcessRoUniforms(const GraphicsState& state, UboManager& ubo_manager, StandardBindings& binders)
 	{
 		return ProcessRoUniforms(GraphicsStateInterface{ state }, ubo_manager, binders);
@@ -819,6 +886,8 @@ namespace idk::vkn
 	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
 		const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
+		
+		//auto& help = state.shared_gfx_state->Lights();
 		auto& rs = r[curr_state];
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		if (!light.update_shadow)
@@ -907,7 +976,7 @@ namespace idk::vkn
 			for (auto& elem : light.light_maps)
 			{
 				//auto& rs = r[curr_state];
-				auto the_interface = vkn::ShadowProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+				auto the_interface = vkn::ShadowProcessRoUniformsWOGeom(gsi, rs.ubo_manager, shadow_binding);
 				the_interface.GenerateDS(rs.dpools,false);
 
 

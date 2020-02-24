@@ -952,14 +952,14 @@ namespace idk
         for (auto& elem : futures)
             elem.get();
 
-		result.active_light_buffer.reserve(result.camera.size()* result.lights.size());
+		result.active_light_buffer.reserve(result.camera.size() +  result.lights.size());
 		result.directional_light_buffer.reserve(result.camera.size());
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
 		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
 		{
 			vector<LightData> new_lights;
-			new_lights.reserve(result.camera.size() * 3);
+			new_lights.reserve(result.camera.size() * 2);
 			for (auto& cam : result.camera)
 			{
 				auto& camera = cam;
@@ -1058,6 +1058,7 @@ namespace idk
 			// TODO: Cull cascaded directional light
 			size_t lm_i = 0;
 			bool isFirst = true;
+			//range.light_type_index = light.index;
 			if (light.index == 1)
 			{
 				for (auto& lightmap : light.light_maps)
@@ -1078,6 +1079,10 @@ namespace idk
 
 								for(auto& elem: light.light_maps)
 									range.d_light_map_indexes.emplace_back(dl_index++);
+							}
+							else
+							{
+								range.noDuplicate = true;
 							}
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
 							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
