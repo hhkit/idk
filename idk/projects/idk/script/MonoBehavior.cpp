@@ -92,11 +92,26 @@ namespace idk::mono
 		}
 	}
 
-	void Behavior::InvokeRPC(string_view rpc, MonoArray* params)
+	void Behavior::InvokeRPC(string_view rpc, MonoArray* params, void* message_info)
 	{
 		auto rpc_method = script_data.Type()->GetRPC(rpc);
 		if (rpc_method)
-			mono_runtime_invoke_array(rpc_method, script_data.Raw(), params, nullptr);
+		{
+			if (rpc_method.has_message_info_arg)
+			{
+				const auto param_length = mono_array_length(params);
+				auto arr = mono_array_new(mono_domain_get(), mono_get_object_class(), param_length + 1);
+				
+				mono_array_memcpy_refs(arr, 0, params, 0, param_length);
+
+				mono_array_setref(arr, param_length, message_info);
+				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), arr, nullptr);
+			}
+			else
+			{
+				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), params, nullptr);
+			}
+		}
 	}
 	
 	Behavior::Behavior(const Behavior& rhs)

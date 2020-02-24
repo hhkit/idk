@@ -17,17 +17,17 @@ namespace idk
 
 	void ServerMoveManager::SubscribeEvents(ServerConnectionManager& server)
 	{
-		server.Subscribe<MoveClientMessage>([this](MoveClientMessage* msg) { OnMoveReceived(msg); });
+		server.Subscribe<MoveClientMessage>([this](MoveClientMessage& msg) { OnMoveReceived(msg); });
 	}
 
-	void ServerMoveManager::OnMoveReceived(MoveClientMessage* move)
+	void ServerMoveManager::OnMoveReceived(MoveClientMessage& move)
 	{
 		LOG_TO(LogPool::NETWORK, "Received move event");
-		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(move->network_id);
+		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(move.network_id);
 		if (view)
 		{
-			view->state_mask = move->state_mask;
-			view->UnpackMoveData(move->sequence_number, move->pack);
+			view->state_mask = move.state_mask;
+			view->UnpackMoveData(move.sequence_number, move.pack);
 		}
 	}
 }

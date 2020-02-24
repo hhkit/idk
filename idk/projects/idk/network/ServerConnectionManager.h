@@ -18,11 +18,8 @@ namespace idk
 		using ConnectionManager::SendMessage;
 		using ConnectionManager::GetManager;
 
-		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType*>>>
-		void Subscribe(Func&& func)
-		{
-			Subscribe2<MessageType>(std::forward<Func>(func));
-		}
+		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType&>>>
+		void Subscribe(Func&& func) { Subscribe2<MessageType>(std::forward<Func>(func)); }
 
 		void FrameStartManagers() override;
 		void FrameEndManagers() override;
@@ -34,6 +31,7 @@ namespace idk
 		vector<EventSlot> OnMessageReceived_slots;
 		vector<unique_ptr<BaseSubstreamManager>> substream_managers;
 
+		Host GetConnectedHost() const override;
 
 		template<typename MessageType, typename Func>
 		void Subscribe2(Func&& func);

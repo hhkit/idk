@@ -45,6 +45,8 @@ namespace idk
 		variant<std::monostate, Master, Ghost> ghost_state;
 		variant<std::monostate, ClientObject, ControlObject> move_state;
 
+		bool IsMine() const;
+
 		void Setup();
 		void SetAsClientObject();
 

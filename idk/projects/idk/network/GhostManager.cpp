@@ -14,7 +14,7 @@ namespace idk
 {
 	void GhostManager::SubscribeEvents(ClientConnectionManager& client)
 	{
-		client.Subscribe<GhostMessage>([this](GhostMessage* msg) { OnGhostReceived(msg); });
+		client.Subscribe<GhostMessage>([this](GhostMessage& msg) { OnGhostReceived(msg); });
 		
 		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&GhostManager::UpdateGhosts);
 	}
@@ -63,23 +63,23 @@ namespace idk
 		}
 	}
 
-	void GhostManager::OnGhostReceived(GhostMessage* msg)
+	void GhostManager::OnGhostReceived(GhostMessage& msg)
 	{
 		const auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
-		const auto view = id_man.GetViewFromId(msg->network_id);
+		const auto view = id_man.GetViewFromId(msg.network_id);
 		if (view)
 		{
 			// push the ghost data into the view
 			LOG_TO(LogPool::NETWORK, "Received Ghost Message for %d", view->network_id);
-			if (msg->state_mask)
+			if (msg.state_mask)
 			{
 				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))
 					return;
 				if (std::get_if<ElectronView::ClientObject>(&view->move_state))
 					return;
 
-				view->state_mask = msg->state_mask;
-				view->UnpackGhostData(msg->sequence_number, msg->pack);
+				view->state_mask = msg.state_mask;
+				view->UnpackGhostData(msg.sequence_number, msg.pack);
 			}
 		}
 	}

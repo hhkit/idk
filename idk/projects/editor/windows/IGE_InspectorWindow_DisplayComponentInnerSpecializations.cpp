@@ -28,6 +28,7 @@
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>
 #include <meta/variant.h>
+#include <network/NetworkSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
 #include <prefab/PrefabUtility.h>
 #include <core/Handle.inl>
@@ -403,9 +404,23 @@ namespace idk
 
     void IGE_InspectorWindow::DisplayComponentInner(Handle<RigidBody> c_rb)
     {
-        auto v = c_rb->velocity();
-        ImGui::DragFloat3("Velocity:", v.data());
         DisplayVal(*c_rb);
+
+        auto v = c_rb->velocity();
+        DisplayStack display{ *this };
+        ImGui::BeginGroup(); display.Label("Velocity"); display.ItemBegin(true);
+        if (!_debug_mode)
+        {
+            ImGuidk::PushDisabled();
+            ImGui::DragFloat3("Velocity:", v.data());
+            ImGuidk::PopDisabled();
+        }
+        else
+        {
+            if (ImGui::DragFloat3("Velocity:", v.data()))
+                c_rb->velocity(v);
+        }
+        display.ItemEnd(); ImGui::EndGroup();
     }
 
     
@@ -862,13 +877,20 @@ namespace idk
     
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronView> c_ev)
     {
+        bool is_me = Core::GetSystem<NetworkSystem>().GetMe() == c_ev->owner;
+        std::string owner_str = "Owner: ";
         switch (auto val = c_ev->owner)
         {
-        case Host::ME: ImGui::Text("Owner: Me"); break;
-        case Host::SERVER: ImGui::Text("Owner: SERVER"); break;
-        default: ImGui::Text("Owner: %d", (int)val); break;
+        case Host::NONE: owner_str += "NONE"; break;
+        case Host::SERVER: owner_str += "SERVER"; break;
+        default: owner_str += std::to_string((int) val);
         }
 
+        if (is_me)
+            owner_str += " (Me)";
+
+        ImGui::Text(owner_str.data());
+        ImGui::Text("Network ID: %d", c_ev->network_id);
 
         for (auto [name, param] : c_ev->GetParameters())
         {

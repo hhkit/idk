@@ -10,13 +10,15 @@ namespace idk
 	{
 	public:
 		SeqNo frame_count;
+		Host player_id;
 
 		template <typename Stream>
 		bool Serialize(Stream& stream)
 		{
-			int val = frame_count;
-			serialize_int(stream, val, 0, 0xFFFF);
-			frame_count = val;
+			int player_id_conv = static_cast<int>(player_id);
+			serialize_int(stream, frame_count, 0, 0xFFFF);
+			serialize_int(stream, player_id_conv, 0, (int)Host::CLIENT_MAX);
+			player_id = static_cast<Host>(player_id_conv);
 			return true;
 		}
 

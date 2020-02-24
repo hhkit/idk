@@ -1153,7 +1153,6 @@
     <ClInclude Include="util\ExtraVars.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="network\EventDataBlockFrameNumber.h" />
     <ClInclude Include="parallel\multithread_control.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -1173,6 +1172,15 @@
       <Filter>network</Filter>
     </ClInclude>
     <ClInclude Include="gfx\DefaultShaders.h" />
+    <ClInclude Include="network\RPCTarget.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ElectronMessageInfo.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventDataBlockFrameNumber.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
     <ClInclude Include="phys\collision_rotational.h">
       <Filter>phys\rotational</Filter>
     </ClInclude>
@@ -1681,10 +1689,6 @@
     <ClCompile Include="phys\AabbTree.cpp">
       <Filter>phys\broadphase</Filter>
     </ClCompile>
-    <ClCompile Include="network\EventLoadLevelMessage.cpp" />
-    <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
-    <ClCompile Include="network\ElectronView.cpp" />
-    <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="gfx\ColorPickRequest.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
@@ -1705,6 +1709,18 @@
     </ClCompile>
     <ClCompile Include="parallel\multithread_control.cpp">
       <Filter>parallel</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ElectronRigidbodyView.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ElectronView.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\EventLoadLevelMessage.cpp">
+      <Filter>network\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="network\EventManager_OnRPCInvoke.cpp">
+      <Filter>network\substream managers</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
     <ClCompile Include="phys\collision_contacts.cpp">

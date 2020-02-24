@@ -308,18 +308,13 @@ namespace idk {
 
 	void IGE_MainWindow::DisplayToolBarChildWindow()
 	{
-
 		const ImVec2 toolBarSize{ window_size.x, toolBarHeight };
 
 		ImGuiStyle& style = ImGui::GetStyle();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_TitleBg]);
-
-
-		//Tool bar
 		ImGui::BeginChild("ToolBar", toolBarSize, false, childFlags);
 		ImGui::PopStyleColor();
-
 
 		const ImVec2 toolButtonSize{ 40.0f,20.0f };
 		const ImVec2 toolButtonStartPos{ 6.0f,4.0f };
@@ -357,6 +352,8 @@ namespace idk {
 		if (ImGui::Button(ICON_FA_SYNC, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Rotate;
 		}
+		ImGui::PopStyleColor();
+		ImGui::PopItemFlag();
 
 		ImGui::SameLine(0, 0);
 
@@ -365,8 +362,8 @@ namespace idk {
 		if (ImGui::Button(ICON_FA_EXPAND, toolButtonSize)) {
 			gizmo_operation = GizmoOperation::Scale;
 		}
-		ImGui::PopItemFlag();
 		ImGui::PopStyleColor();
+		ImGui::PopItemFlag();
 
 		ImGui::SameLine(0, 16.0f);
 		ImGui::SetCursorPosY(toolButtonStartPos.y + 3.0f);
@@ -381,6 +378,7 @@ namespace idk {
         ImGui::SetCursorPosX(toolBarSize.x * 0.5f - toolButtonSize.x * 1.0f);
         ImGui::SetCursorPosY(toolButtonStartPos.y);
 		ImGui::PushID(1337);
+
 		if (!Core::GetSystem<IDE>().IsGameRunning())
 		{
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
@@ -389,13 +387,16 @@ namespace idk {
 		else
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
 			if (ImGui::Button(ICON_FA_PLAY, toolButtonSize))
 				Core::GetSystem<IDE>().Stop();
-			ImGui::PopStyleColor();
+			ImGui::PopStyleColor(2);
 		}
 
 		ImGui::SameLine(0, 0);
 
+		ImGui::PushStyleColor(ImGuiCol_Text, Core::GetSystem<IDE>().IsGameRunning() ? 
+			ImGui::GetColorU32(ImGuiCol_PlotLinesHovered) : ImGui::GetColorU32(ImGuiCol_Text));
 		if (!Core::GetSystem<IDE>().IsGameFrozen())
 		{
 			if (ImGui::Button(ICON_FA_PAUSE, toolButtonSize))
@@ -408,6 +409,8 @@ namespace idk {
 				Core::GetSystem<IDE>().Unpause();
 			ImGui::PopStyleColor();
 		}
+		ImGui::PopStyleColor();
+
 		ImGui::PopID();
 		
 		ImGui::PopStyleVar();

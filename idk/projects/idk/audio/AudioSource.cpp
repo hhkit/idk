@@ -158,7 +158,6 @@ namespace idk
 				FMOD_RES(audio_clip_channels[i]->setVolume(volume * audio_clip_volume[i]));
 				pitch = pitch < 0 ? 0 : pitch;
 				FMOD_RES(audio_clip_channels[i]->setPitch(pitch));
-				FMOD_RES(audio_clip_channels[i]->set3DMinMaxDistance(minDistance, maxDistance));
 				FMOD_RES(audio_clip_channels[i]->setMode(mode));
 
 				//Update Priority
@@ -172,7 +171,8 @@ namespace idk
 							const auto globalPos = transform->GlobalPosition();
 							FMOD_VECTOR position = { globalPos.x,globalPos.y ,globalPos.z };
 							FMOD_VECTOR vel = {  }; //Disable doppler effect
-							audio_clip_channels[i]->set3DAttributes(&position, &vel);
+							FMOD_RES(audio_clip_channels[i]->set3DMinMaxDistance(minDistance, maxDistance));
+							FMOD_RES(audio_clip_channels[i]->set3DAttributes(&position, &vel));
 						}
 					}
 				}
