@@ -644,7 +644,9 @@ namespace idk::vkn::renderpasses
 			.material_instances = gfx_state.material_instances,
 			.vertex_state_info = state,
 		};
-		auto gbuffer_set = DeferredPbrSet{
+		auto make_gbuffer_set = [&](bindings::DeferredPbrInfo& info)
+		{ 
+			return DeferredPbrSet{
 				{
 					DeferredPbrAniDrawSet{
 							bindings::make_deferred_pbr_ani_bind(info),
@@ -658,7 +660,9 @@ namespace idk::vkn::renderpasses
 											}
 						},
 				}
+			};
 		};
+		auto gbuffer_set =make_gbuffer_set(info);
 		auto& gbuffer_pass_def = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassDeferred", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
 		bindings::LightBind light_bindings;
 		auto& vp_bindings = light_bindings.Get<bindings::CameraViewportBindings>();
@@ -671,7 +675,7 @@ namespace idk::vkn::renderpasses
 
 		auto spec_info = info;
 		spec_info.model = ShadingModel::Specular;
-		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
+		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", make_gbuffer_set(spec_info), cube_clear.rt_size, cube_clear.depth).RenderPass();
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(spec_info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_spec = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Specular", AccumDrawSet{ light_bindings }, gbuffer_pass_spec).RenderPass();
 
