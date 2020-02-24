@@ -5,8 +5,8 @@
 #include <mono/metadata/threads.h>
 #include <script/ScriptSystem.h>
 #include <parallel/circular_buffer.h>
-//#include <Windows.h>
-
+// #include <Windows.h>
+// #undef max
 namespace idk::mt
 {
 	thread_local int _thread_id = 0;

@@ -3,12 +3,13 @@
     /// <summary>
     /// An identifier for a player on the network.
     /// </summary>
-    public class Player
+    public class Client
     {
         /// <summary>
         /// The Server's ActorNumber is hardcoded to -1.
         /// </summary>
-        public static int ServerNumber { get => -1; }
+        public static int ServerId { get => -1; }
+        public static Client Server { get => new Client(ServerId); }
 
         int connectionId;
 
@@ -18,17 +19,42 @@
         /// </summary>
         public int ActorNumber { get => connectionId; }
 
-        internal Player(int i)
+        internal Client(int i)
         {
             connectionId = i;
         }
 
         public override string ToString()
         {
-            if (connectionId == ServerNumber)
+            if (connectionId == ServerId)
                 return "Server";
             else
                 return "Client " + connectionId;
+        }
+
+        public static bool operator ==(Client lhs, Client rhs)
+        {
+            if ((object) lhs != null && (object) rhs != null)
+                return lhs.connectionId == rhs.connectionId;
+            else
+                return (object)lhs == null && (object)rhs == null;
+        }
+
+        public static bool operator !=(Client lhs, Client rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                return this.connectionId == ((Client)obj).connectionId;
+            }
         }
     }
 }

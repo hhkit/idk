@@ -11,12 +11,12 @@ namespace TestAndSeek
         public float turnspeed = 90;
         public float movespeed = 35;
 
-        public void OnClientConnect(Player p)
+        public void OnClientConnect(Client p)
         {
             Debug.Log("Player " + p.ActorNumber + " connected");
         }
 
-        public void OnClientDisconnect(Player p)
+        public void OnClientDisconnect(Client p)
         {
             Debug.Log("Player " + p.ActorNumber + " disconnected");
         }
@@ -42,8 +42,10 @@ namespace TestAndSeek
                     ElectronNetwork.LoadScene(scene);
 
                 if (Input.GetKeyDown(KeyCode.P))
+                {
                     obj = ElectronNetwork.Instantiate(instantiate, transform.position);
-
+                    obj.GetComponent<ElectronView>().TransferOwnership(ElectronNetwork.clients[0]);
+                }
                 if (Input.GetKeyDown(KeyCode.R))
                     obj?.GetComponent<ElectronView>().RPC("ExecuteMeWithArgs", RPCTarget.All, "hello", 5, "oh no");
 
@@ -51,7 +53,7 @@ namespace TestAndSeek
                     obj?.GetComponent<ElectronView>().RPC("ExecuteMeCheckingForSender", RPCTarget.All, "oh dear");
 
                 if (Input.GetKeyDown(KeyCode.T))
-                    obj?.GetComponent<ElectronView>().TransferOwnership(ElectronNetwork.players[0]);
+                    obj?.GetComponent<ElectronView>().TransferOwnership(ElectronNetwork.clients[0]);
             }
         }
     }
