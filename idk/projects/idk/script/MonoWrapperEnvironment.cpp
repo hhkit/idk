@@ -1991,6 +1991,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::ViewDestroy", void, Handle<ElectronView> network_id)
+		{
+			EventManager::BroadcastDestroyView(network_id);
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::ViewIsMine", bool, Handle<ElectronView> ev)
 		{
 			return ev->IsMine();

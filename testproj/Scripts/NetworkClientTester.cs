@@ -36,10 +36,10 @@ namespace TestAndSeek
                 ElectronNetwork.Connect(addr);
             }
 
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                GetComponent<ElectronView>().RPC("LOL", RPCTarget.All, 0, 5);
-            }
+            //if (Input.GetKeyDown(KeyCode.D))
+            //{
+            //    GetComponent<ElectronView>().RPC("LOL", RPCTarget.All, 0, 5);
+            //}
         }
     }
 }

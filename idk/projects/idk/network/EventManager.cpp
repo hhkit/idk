@@ -17,6 +17,7 @@
 #include <network/ElectronRigidbodyView.h>
 #include <network/ElectronTransformView.h>
 #include <network/EventLoadLevelMessage.h>
+#include <network/EventDestroyObjectMessage.h>
 #include <network/EventInstantiatePrefabMessage.h>
 #include <network/EventTransferOwnershipMessage.h>
 #include <network/EventInvokeRPCMessage.h>
@@ -30,6 +31,7 @@ namespace idk
 		client.Subscribe<EventTransferOwnershipMessage>([this](EventTransferOwnershipMessage& msg) { OnTransferOwnershipEvent(msg); });
 		client.Subscribe<EventLoadLevelMessage>([this](EventLoadLevelMessage& msg) { OnLoadLevelMessage(msg); });
 		client.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage& msg) { OnInvokeRPCMessage(msg); });
+		client.Subscribe<EventDestroyObjectMessage>([this](EventDestroyObjectMessage& msg) {OnDestroyObjectMessage(msg); });
 	}
 
 	void EventManager::SubscribeEvents(ServerConnectionManager& server)
@@ -171,6 +173,18 @@ namespace idk
 		};
 	}
 
+	void EventManager::BroadcastDestroyView(Handle<ElectronView> view)
+	{
+		LOG_TO(LogPool::NETWORK, "");
+		auto id = view->network_id;
+		Core::GetSystem<NetworkSystem>().BroadcastMessage<EventDestroyObjectMessage>(GameChannel::RELIABLE, [&](EventDestroyObjectMessage& msg)
+			{
+				msg.id = id;
+			});
+
+		Core::GetGameState().DestroyObject(view->GetGameObject());
+	}
+
 	// targets
 	void EventManager::OnInstantiatePrefabEvent(EventInstantiatePrefabMessage& message)
 	{
@@ -206,6 +220,12 @@ namespace idk
 		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(network_id);
 		ev->owner = Core::GetSystem<NetworkSystem>().GetMe();
 		ev->GetGameObject()->GetComponent<ElectronView>()->SetAsClientObject();
+	}
+
+	void EventManager::OnDestroyObjectMessage(EventDestroyObjectMessage& message)
+	{
+		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(message.id);
+		Core::GetGameState().DestroyObject(view->GetGameObject());
 	}
 
 	void EventManager::OnLoadLevelMessage(EventLoadLevelMessage& msg)

@@ -4,6 +4,7 @@
 #include <network/EventInstantiatePrefabMessage.h>
 #include <network/EventTransferOwnershipMessage.h>
 #include <network/EventLoadLevelMessage.h>
+#include <network/EventDestroyObjectMessage.h>
 #include <network/EventInvokeRPCMessage.h>
 #include <network/GhostMessage.h>
 #include <network/MoveClientMessage.h>

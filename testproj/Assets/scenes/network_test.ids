@@ -78,7 +78,7 @@
     script_data: !NetworkClientTester 
       a: 10
       b: 84
-      c: 45
+      c: 42
       d: 103
   - !MonoBehavior 
     enabled: 1
