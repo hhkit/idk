@@ -43,6 +43,35 @@ namespace idk
 		return copy.normalize();
 	}
 	template<typename T>
+	quaternion<T> quaternion<T>::integrate(const tvec<T, 3>& dv) const
+	{
+		quaternion res = *this;
+		quaternion q{ dv.x, dv.y, dv.z, 0.0f };
+		
+		q = q * res;
+		res.x += q.x * T{ 0.5 };
+		res.y += q.y * T{ 0.5 };
+		res.z += q.z * T{ 0.5 };
+		res.w += q.w * T{ 0.5 };
+
+		T d = res.w * res.w + res.x * res.x + res.y * res.y + res.z * res.z;
+
+		if (d == 0)
+			res.w = T{ 1.0 };
+
+		d = T{ 1.0 } / T{ std::sqrt(d) };
+
+		if (d > T{ 1.0e-8 })
+		{
+			res.x *= d;
+			res.y *= d;
+			res.z *= d;
+			res.w *= d;
+		}
+
+		return res;
+	}
+	template<typename T>
 	quaternion<T>& quaternion<T>::normalize()
 	{
 		return static_cast<quaternion<T>&>(Base::normalize());

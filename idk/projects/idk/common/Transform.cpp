@@ -91,10 +91,10 @@ namespace idk
 
 	quat Transform::GlobalRotation() const
 	{
-		if (!parent)
-			return rotation;
+		if (parent)
+			return parent->Transform()->rotation * rotation;
 		else
-			return decompose(GlobalMatrix()).rotation;
+			return rotation;
 	}
 
 	vec3 Transform::GlobalScale() const

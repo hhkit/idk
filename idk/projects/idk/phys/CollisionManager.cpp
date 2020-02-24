@@ -5,6 +5,7 @@
 #include <common/Layer.h>
 
 #include <math/matrix_decomposition.h>
+#include <math/matrix_transforms.h>
 
 #include <phys/PhysicsSystem.h>
 #include <phys/CollisionManager.h>
@@ -392,15 +393,27 @@ namespace idk
 			auto& rigidbody = *elem.collider->_rigidbody;
 			if (!rigidbody.is_kinematic)
 			{
+				// Translate
 				const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
-				// REMINDER
+
+				// Only do if there is angular velocity
 				if (rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > epsilon)
 				{
-					const quat q = decompose(rigidbody._global_cache).rotation;
-					const mat4 r = quat_cast<mat4>(q.get_normalized());
-					rigidbody._global_cache[3].xyz = vec3{ 0.0f };
-					rigidbody._global_cache = r * rigidbody._global_cache;
+					// Scale
+					const vec3 s = [](const mat4& mat)
+					{
+						auto det = mat.determinant();
+						return vec3(det < -epsilon ? -mat[0].length() : mat[0].length(), mat[1].length(), mat[2].length());
+					}(rigidbody._global_cache);
+
+					// Rotation
+					quat q = rigidbody.GetGameObject()->Transform()->GlobalRotation();
+					q = q.integrate(rigidbody.angular_velocity * dt);
+					const mat4 r = quat_cast<mat4>(q);
+
+					rigidbody._global_cache = r * scale(s);
 				}
+
 				rigidbody._global_cache[3].xyz = t;
 				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._global_cache);
 			}

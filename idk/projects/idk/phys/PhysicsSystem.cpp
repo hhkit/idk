@@ -83,7 +83,7 @@ namespace idk
 						// Compute inertia world tensor
 						// body->m_invInertiaWorld = r * body->m_invInertiaModel * q3Transpose(r);
 						// body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * m_dt;
-						// body->m_angularVelocity *= r32(1.0) / (r32(1.0) + m_dt * body->m_angularDamping);
+						rigidbody.angular_velocity *= 1.0f / (1.0f + dt * rigidbody.angular_damping);
 
 						//// verlet integrate towards new position
 						////auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
@@ -247,7 +247,7 @@ namespace idk
 			// }
 		};
 
-		const auto& dynamic_info = _col_manager._dynamic_info;
+		// const auto& dynamic_info = _col_manager._dynamic_info;
 		// const auto FinalizePositions = [&]()
 		// {
         //     for (const auto& elem : dynamic_info)
