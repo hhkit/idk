@@ -33,7 +33,7 @@ namespace idk::phys
 			if (collisionRes) {
 
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
-				Core::GetSystem<DebugRenderer>().Draw(lhs.center, lhs.center + collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
+				Core::GetSystem<DebugRenderer>().Draw(lhs.center, lhs.center + collisionRes.value().normal, color{ 0,0,1,1 });
 
 			}
 			return collisionRes;
@@ -60,7 +60,7 @@ namespace idk::phys
 			if (collisionRes) {
 				//printf("Bot Cap Collision Success!\n");
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
-				Core::GetSystem<DebugRenderer>().Draw(bot_line_point, bot_line_point+ collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
+				Core::GetSystem<DebugRenderer>().Draw(bot_line_point, bot_line_point+ collisionRes.value().normal, color{ 0,0,1,1 });
 			}
 			return collisionRes;
 		}
@@ -70,7 +70,7 @@ namespace idk::phys
 			if (collisionRes) {
 				//printf("Top Cap Collision Success!\n");
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
-				Core::GetSystem<DebugRenderer>().Draw(top_line_point, top_line_point + collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
+				Core::GetSystem<DebugRenderer>().Draw(top_line_point, top_line_point + collisionRes.value().normal, color{ 0,0,1,1 });
 
 			}
 			return collisionRes;
@@ -87,7 +87,7 @@ namespace idk::phys
 			if (collisionRes) {
 				//printf("Mid Cap Collision Success!\n");
 				Core::GetSystem<DebugRenderer>().Draw(makeshiftSphere, color{ 0,1,0,1 });
-				Core::GetSystem<DebugRenderer>().Draw(normal_point, normal_point + collisionRes.value().normal_of_collision, color{ 0,0,1,1 });
+				Core::GetSystem<DebugRenderer>().Draw(normal_point, normal_point + collisionRes.value().normal, color{ 0,0,1,1 });
 			}
 			return collisionRes;
 		}

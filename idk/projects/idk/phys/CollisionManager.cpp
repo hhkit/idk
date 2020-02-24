@@ -30,10 +30,9 @@
 namespace idk
 {
 	constexpr float baumgarte = 0.2f;
-	constexpr float restitution_slop = 0.01f;
+	constexpr float restitution_slop = 0.2f;
 	constexpr float penetration_slop = 0.05f;
 	constexpr float penetration_max_slop = 0.5f;
-	constexpr float damping = 0.99f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
 
@@ -137,6 +136,8 @@ namespace idk
 					auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
 					return ColliderInfo{ .collider = &elem,.rb = &*elem._rigidbody, .broad_phase = pred_shape.bounds(), .predicted_shape = pred_shape, .layer = elem.GetGameObject()->Layer() };
 					}, elem.shape);
+				// Compute the world inertia tensor
+				
 				_dynamic_info.emplace_back(collider_info);
 			}
 		}
@@ -167,17 +168,21 @@ namespace idk
 
 				_info.emplace_back(ColliderInfoPair{ &*i, &*j });
 			}
-		}
-
-		// Static vs Dynamic Broadphase
-		for (const auto& i : _dynamic_info)
-		{
-			const auto& lrigidbody = *i.rb;
 
 			if (lrigidbody.sleeping())
 				continue;
-			_static_broadphase.query_collisions(i, _info);
+			_static_broadphase.query_collisions(*i, _info);
 		}
+
+		// Static vs Dynamic Broadphase
+		// for (const auto& i : _dynamic_info)
+		// {
+		// 	const auto& lrigidbody = *i.rb;
+		// 
+		// 	if (lrigidbody.sleeping())
+		// 		continue;
+		// 	_static_broadphase.query_collisions(i, _info);
+		// }
 
 		// Narrow phase.
 		_collisions.clear();
@@ -195,24 +200,37 @@ namespace idk
 				ContactConstraintState ccs;
 
 				// broadphase center and world center are the same
-				ccs.centerA = i->broad_phase.center();	
-				ccs.centerB = j->broad_phase.center();
+				ccs.centerA = col_val.centerA;	
+				ccs.centerB = col_val.centerB;
 				ccs.rbA = i->rb;
 				ccs.rbB = j->rb;
 				ccs.mA = i->rb->inv_mass;
 				ccs.mB = j->rb ? j->rb->inv_mass : 0.0f;
+				// ccs.iA = [&]()
+				// {
+				// 	const float ex2 = float(4.0);
+				// 	const float ey2 = float(4.0);
+				// 	const float ez2 = float(4.0);
+				// 	// const float mass = float(8.0) * e.x * e.y * e.z * density;
+				// 	const float x = float(1.0 / 12.0) * 1 * (ey2 + ez2);
+				// 	const float y = float(1.0 / 12.0) * 1 * (ex2 + ez2);
+				// 	const float z = float(1.0 / 12.0) * 1 * (ex2 + ey2);
+				// 	mat3 I = mat3{ scale(vec3{x, y, z}) };
+				// 	return I;
+				// }();
+				// ccs.iB = mat3{ scale(vec3{ 0.4f }) };
 				ccs.restitution = max(i->collider->bounciness, j->collider->bounciness);
 				ccs.friction = std::sqrt(i->collider->static_friction * j->collider->static_friction);
 				
-				ccs.tangentVectors[0] = col_val.manifold.tangentVectors[0];
-				ccs.tangentVectors[1] = col_val.manifold.tangentVectors[1];
-				ccs.normal = col_val.manifold.normal;
+				ccs.tangentVectors[0] = col_val.tangentVectors[0];
+				ccs.tangentVectors[1] = col_val.tangentVectors[1];
+				ccs.normal = col_val.normal;
 
-				ccs.contactCount = col_val.manifold.contactCount;
+				ccs.contactCount = col_val.contactCount;
 				for (int k = 0; k < ccs.contactCount; ++k)
 				{
 					ContactState* s = ccs.contacts + k;
-					const phys::ContactPoint* cp = col_val.manifold.contacts + k;
+					const phys::ContactPoint* cp = col_val.contacts + k;
 
 					s->ra = cp->position - ccs.centerA;
 					s->rb = cp->position - ccs.centerB;
@@ -395,9 +413,9 @@ namespace idk
 			{
 				// Translate
 				const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
-
+				LOG_TO(LogPool::PHYS, "Velocity: (%f, %f, %f)", rigidbody.linear_velocity.x, rigidbody.linear_velocity.y, rigidbody.linear_velocity.z);
 				// Only do if there is angular velocity
-				if (rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > epsilon)
+				if (rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > 0.0001f)
 				{
 					// Scale
 					const vec3 s = [](const mat4& mat)
@@ -407,11 +425,15 @@ namespace idk
 					}(rigidbody._global_cache);
 
 					// Rotation
-					quat q = rigidbody.GetGameObject()->Transform()->GlobalRotation();
+					quat q = rigidbody._rotate_cache;
 					q = q.integrate(rigidbody.angular_velocity * dt);
 					const mat4 r = quat_cast<mat4>(q);
 
 					rigidbody._global_cache = r * scale(s);
+				}
+				else
+				{
+					rigidbody.angular_velocity = vec3{ 0.0f };
 				}
 
 				rigidbody._global_cache[3].xyz = t;
@@ -476,15 +498,15 @@ namespace idk
 		auto& dbg = Core::GetSystem<DebugRenderer>();
 		for (auto col : _collisions)
 		{
-			for (int i = 0; i < col.second.manifold.contactCount; ++i)
+			for (int i = 0; i < col.second.contactCount; ++i)
 			{
-				const auto& c = col.second.manifold.contacts[i];
+				const auto& c = col.second.contacts[i];
 				dbg.Draw(c.position, color{ 0,1,0,1 }, seconds{ 0.5f });
-				dbg.Draw(ray{ c.position, col.second.manifold.normal }, color{ 0,1,0,1 }, seconds{ dt });
-				dbg.Draw(ray{ c.position, col.second.manifold.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
-				dbg.Draw(ray{ c.position, col.second.manifold.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
+				dbg.Draw(ray{ c.position, col.second.normal }, color{ 0,1,0,1 }, seconds{ dt });
+				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
+				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
 			}
-			LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.manifold.contactCount);
+			// LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.contactCount);
 		}
 	}
 

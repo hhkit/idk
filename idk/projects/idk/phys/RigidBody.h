@@ -17,7 +17,7 @@ namespace idk
 
 		vec3 force{ 0.0f };
 		vec3 linear_velocity{ 0.0f };
-		float linear_damping{ 0.0f };
+		float linear_damping{ 1.0f };
 
 		vec3 torque{ 0.0f };
 		vec3 angular_velocity{ 0.0f };
@@ -50,8 +50,7 @@ namespace idk
 		// vec3 _prev_pos;
 		bool _sleeping = false;
         mat4 _global_cache{};
-		vec3 _pred_translation{ 0.0f };
-		quat _pred_rotate{ };
+		quat _rotate_cache{ };
 
 		friend class PhysicsSystem;
 		friend class CollisionManager;

@@ -431,4 +431,19 @@ namespace idk::phys
 
 		return outCount;
 	}
+
+	void compute_basis(const vec3& a, vec3* __restrict b, vec3* __restrict c)
+	{
+		// Suppose vector a has all equal components and is a unit vector: a = (s, s, s)
+		// Then 3*s*s = 1, s = sqrt(1/3) = 0.57735027. This means that at least one component of a
+		// unit vector must be greater or equal to 0.57735027. Can use SIMD select operation.
+
+		if (abs(a.x) >= 0.57735027f)
+			*b = vec3(a.y, -a.x, 0.0f);
+		else
+			*b = vec3(0.0f, a.z, -a.y);
+
+		b->normalize();
+		*c = a.cross(*b);
+	}
 }

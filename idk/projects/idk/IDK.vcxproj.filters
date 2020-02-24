@@ -1190,13 +1190,13 @@
     <ClInclude Include="phys\CollisionManager.h">
       <Filter>phys</Filter>
     </ClInclude>
-    <ClInclude Include="phys\Collision_utils.h">
-      <Filter>phys</Filter>
-    </ClInclude>
     <ClInclude Include="phys\collision_contact.h">
       <Filter>phys\rotational</Filter>
     </ClInclude>
     <ClInclude Include="phys\ContactSolver.h">
+      <Filter>phys\collision resolution</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\Collision_utils.h">
       <Filter>phys\collision resolution</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1723,19 +1723,16 @@
       <Filter>network\substream managers</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
-    <ClCompile Include="phys\collision_contacts.cpp">
-      <Filter>phys\rotational</Filter>
-    </ClCompile>
     <ClCompile Include="phys\collision_rotational.cpp">
       <Filter>phys\rotational</Filter>
     </ClCompile>
     <ClCompile Include="phys\CollisionManager.cpp">
       <Filter>phys</Filter>
     </ClCompile>
-    <ClCompile Include="phys\Collision_utils.cpp">
-      <Filter>phys</Filter>
-    </ClCompile>
     <ClCompile Include="phys\ContactSolver.cpp">
+      <Filter>phys\collision resolution</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\Collision_utils.cpp">
       <Filter>phys\collision resolution</Filter>
     </ClCompile>
   </ItemGroup>

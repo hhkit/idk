@@ -39,7 +39,7 @@ namespace idk
 	}
 	vec3 RigidBody::AddForce(const vec3& newtons)
 	{
-		const auto added = newtons;
+		const auto added = newtons * mass();
 		force += added;
 		return added;
 	}

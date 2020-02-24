@@ -12,5 +12,6 @@ namespace idk::phys
 	void edges_contact(vec3* CA, vec3* CB, const vec3& PA, const vec3& QA, const vec3& PB, const vec3& QB);
 	int orthographic(float sign, float e, int axis, int clipEdge, vec3* in, int inCount, vec3* out);
 	int clip(const vec3& rPos, const vec3& e, unsigned* clipEdges, const mat3& basis, vec3* incident, vec3* outVerts, float* outDepths);
+	void compute_basis(const vec3& a, vec3* __restrict b, vec3* __restrict c);
 	
 }

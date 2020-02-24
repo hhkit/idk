@@ -63,6 +63,7 @@ namespace idk
 			{
 				const auto tfm = rigidbody.GetGameObject()->Transform();
 				rigidbody._global_cache = tfm->GlobalMatrix();
+				rigidbody._rotate_cache = tfm->GlobalRotation();
 
 				if (rigidbody.sleeping())
 				{
@@ -74,10 +75,9 @@ namespace idk
 				{
 					if (!rigidbody.is_kinematic)
 					{
-						const vec3 curr_pos = rigidbody._global_cache[3].xyz;
 						rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
-						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
-						rigidbody._pred_translation = rigidbody.linear_velocity * dt;
+						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * 0.0f);// rigidbody.linear_damping);
+						// rigidbody._pred_translation = rigidbody.linear_velocity * dt;
 
 						// Compute the angular stuff here too. 
 						// Compute inertia world tensor
@@ -368,8 +368,8 @@ namespace idk
 						ManagedCollision right_collision
 						{
 							.collider_id = rhs.id, 
-							.normal = result.normal_of_collision, 
-							.contact_pt = result.point_of_collision
+							.normal = result.normal, 
+							.contact_pt = result.contact_centroid
 						};
 
 						for (auto& mb : lhs->GetGameObject()->GetComponents<mono::Behavior>())
@@ -387,8 +387,8 @@ namespace idk
 						ManagedCollision left_collision
 						{
 							.collider_id = lhs.id,
-							.normal      = -result.normal_of_collision,
-							.contact_pt  = result.point_of_collision
+							.normal      = -result.normal,
+							.contact_pt  = result.contact_centroid
 						};
 
 						for (auto& mb : rhs->GetGameObject()->GetComponents<mono::Behavior>())

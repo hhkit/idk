@@ -126,7 +126,7 @@ namespace idk::phys
 			if (dist > -epsilon)
 			{
 				col_success succ;
-				succ.point_of_collision = lhs.origin + tmp;
+				succ.contacts[0].position = lhs.origin + tmp;
 				return succ;
 			}
 			else
@@ -144,7 +144,7 @@ namespace idk::phys
 			if (epsilon_equal(perp_dist, 0))
 			{
 				col_success result;
-				result.point_of_collision = lhs.origin;
+				result.contacts[0].position = lhs.origin;
 				return result;
 			}
 			else

@@ -10,10 +10,19 @@ namespace idk::phys
 	std::pair<vec3, vec3> ClosestPairPointsLineSegmentToLineSegment(const vec3& lineA_1, const vec3& lineA_2, const vec3& lineB_1, const vec3& lineB_2); //need to move this declaration somewhere more fitting. else get linking error
 	struct col_success
 	{
-		vec3 point_of_collision  {};
-		vec3 normal_of_collision {}; // normal points towards lhs
-		real penetration_depth   {};
-		Manifold manifold		 {};
+		vec3 centerA{0.0f};
+		vec3 centerB{0.0f};
+
+		vec3 normal{ 0.0f };								// From A to B
+		vec3 contact_centroid{ 0.0f };						// centroid of all the contact points
+
+		ContactPoint contacts[8]{};
+		int contactCount{ 0 };
+
+		float max_penetration{ 0.0f };
+
+		vec3 tangentVectors[2]{ vec3{0.0f}, vec3{0.0f} };	// Tangent vectors
+		
 
 		col_success operator-() const;
 	};
