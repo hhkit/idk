@@ -198,7 +198,7 @@ namespace idk
 			{
 				const auto col_val = collision.value();
 				ContactConstraintState ccs;
-
+				const auto r = quat_cast<mat3>(i->rb->_rotate_cache);
 				// broadphase center and world center are the same
 				ccs.centerA = col_val.centerA;	
 				ccs.centerB = col_val.centerB;
@@ -206,6 +206,8 @@ namespace idk
 				ccs.rbB = j->rb;
 				ccs.mA = i->rb->inv_mass;
 				ccs.mB = j->rb ? j->rb->inv_mass : 0.0f;
+				ccs.iA = r * mat3{ scale(vec3{0.4f * 0.5f * 0.5f}) } * r.transpose();
+				ccs.iB = j->rb ? mat3{} : mat3{ scale(vec3{0.0f}) };
 				// ccs.iA = [&]()
 				// {
 				// 	const float ex2 = float(4.0);
@@ -413,7 +415,7 @@ namespace idk
 			{
 				// Translate
 				const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
-				LOG_TO(LogPool::PHYS, "Velocity: (%f, %f, %f)", rigidbody.linear_velocity.x, rigidbody.linear_velocity.y, rigidbody.linear_velocity.z);
+				LOG_TO(LogPool::PHYS, "Angular: (%f, %f, %f)", rigidbody.angular_velocity.x, rigidbody.angular_velocity.y, rigidbody.angular_velocity.z);
 				// Only do if there is angular velocity
 				if (rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > 0.0001f)
 				{
@@ -502,9 +504,9 @@ namespace idk
 			{
 				const auto& c = col.second.contacts[i];
 				dbg.Draw(c.position, color{ 0,1,0,1 }, seconds{ 0.5f });
-				dbg.Draw(ray{ c.position, col.second.normal }, color{ 0,1,0,1 }, seconds{ dt });
-				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
-				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
+				dbg.Draw(ray{ c.position, col.second.normal }, color{ 0,1,0,1 }, seconds{ 0.5 });
+				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ 0.5 });
+				dbg.Draw(ray{ c.position, col.second.tangentVectors[1] }, color{ 0,0,1,1 }, seconds{ 0.5 });
 			}
 			LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.contactCount);
 		}

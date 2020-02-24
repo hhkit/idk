@@ -11,9 +11,12 @@ namespace idk::phys
 			succ.centerA = lhs.center;
 			succ.centerB = rhs.center;
 
-			succ.normal = (lhs.center - rhs.center).normalize();
-			succ.contacts[0].position = (rhs.center + lhs.center) / 2;
-			succ.contacts[0].penetration = abs(lhs.radius + rhs.radius - lhs.center.distance(rhs.center));
+			succ.normal = (rhs.center - lhs.center);
+			const float normal_len = succ.normal.length();
+			succ.normal /= normal_len;
+			succ.contacts[0].position = rhs.center - succ.normal * rhs.radius;
+			succ.contacts[0].penetration = (normal_len - (rhs.radius + lhs.radius)) * 0.5f;
+			LOG("%f", succ.contacts[0].penetration);
 			succ.contactCount = 1;
 			succ.max_penetration = succ.contacts[0].penetration;
 			

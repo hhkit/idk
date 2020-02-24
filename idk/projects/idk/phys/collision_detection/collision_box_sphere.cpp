@@ -38,18 +38,18 @@ namespace idk::phys
 			result.contacts[0].penetration = rhs.radius;
 			result.contacts[0].position = rhs.center;
 			result.normal = vec3{0, 1, 0};
-			LOG("INSIDE");
 		}
 		else
 		{
-			const auto penetration_depth = rhs.radius - distance;
+			const auto penetration_depth = distance - rhs.radius;
 			result.contacts[0].penetration = penetration_depth;
 			result.contacts[0].position = (mat3{ l_axes } * closest_pt) + lhs.center;
 			result.normal = (rhs.center - result.contacts[0].position).get_normalized();
+			// result.contacts[0].position = rhs.center - result.normal * rhs.radius;
 		}
 		result.max_penetration = result.contacts[0].penetration;
 		compute_basis(result.normal, result.tangentVectors, result.tangentVectors + 1);
-
+		LOG("Norm: %f, %f, %f", result.normal.x, result.normal.y, result.normal.z);
 		return result;
 	}
 }

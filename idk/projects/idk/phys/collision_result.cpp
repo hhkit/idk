@@ -20,6 +20,7 @@ namespace idk::phys
 	{
 		auto copy = *this;
 		copy.normal = -copy.normal;
+		std::swap(copy.centerA, copy.centerB);
 		return copy;
 	}
 }
