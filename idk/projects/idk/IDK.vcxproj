@@ -49,6 +49,7 @@
     <ClInclude Include="audio\AudioSystem.h" />
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
+    <ClInclude Include="gfx\AttachmentViewType.h" />
     <ClInclude Include="network\EventDestroyObjectMessage.h" />
     <ClInclude Include="gfx\DefaultShaders.h" />
     <ClInclude Include="gfx\ShadowMapPool.h" />
