@@ -35,7 +35,7 @@ void dbg_chk(vk::Image img)
 namespace idk::vkn
 {
 
-	RenderTask::RenderTask() :ppm{std::make_unique<PipelineManager>()}
+	RenderTask::RenderTask() //:ppm{std::make_unique<PipelineManager>()}
 	{
 	}
 	void RenderTask::DebugLabel(LabelLevel type, string label)
@@ -58,6 +58,11 @@ namespace idk::vkn
 	void RenderTask::SetUboManager(UboManager& ubo_manager)
 	{
 		_uniform_manager.SetUboManager(ubo_manager);
+	}
+
+	void RenderTask::SetPipelineManager(PipelineManager& pipeline_manager)
+	{
+		ppm = &pipeline_manager;
 	}
 
 

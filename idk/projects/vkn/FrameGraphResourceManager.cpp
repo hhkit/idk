@@ -14,7 +14,7 @@ namespace idk::vkn
 	FrameGraphResourceManager& FrameGraphResourceManager::operator=(FrameGraphResourceManager&&)=default;
 	FrameGraphResourceManager::~FrameGraphResourceManager()=default;
 
-	void FrameGraphResourceManager::Instantiate(fgr_id unique_id, fgr_id base)
+	void FrameGraphResourceManager::Instantiate(size_t unique_id, fgr_id base)
 	{
 		concrete_resources.resize(std::max(unique_id+1, concrete_resources.size()));
 		//Create Resource at the back of concrete_resources
@@ -107,6 +107,11 @@ namespace idk::vkn
 		if (l_itr == r_itr)
 			return true;
 		auto& l_desc = resources[l_itr->second], &r_desc = resources[r_itr->second];
+
+		if (l_desc.actual_rsc || r_desc.actual_rsc)
+			return false;
+
+		[[maybe_unused]] string_view lhs_name = l_desc.name, rhs_name= r_desc.name;
 
 		return l_desc.format == r_desc.format && l_desc.type == r_desc.type && l_desc.layer_count == r_desc.layer_count && l_desc.aspect == r_desc.aspect;
 	}

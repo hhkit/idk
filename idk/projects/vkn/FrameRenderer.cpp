@@ -69,6 +69,8 @@ namespace idk::vkn
 		FrameGraph graph;
 		gt::GraphTest test{ graph };
 
+		gfxdbg::FgRscLifetimes _dbg_lifetimes;
+
 		uint32_t gfx_state_index = 0;
 
 		uint32_t testing = 0;
@@ -1006,10 +1008,15 @@ namespace idk::vkn
 		}
 		{
 			_pimpl->graph.Compile();
+			const auto& graph = _pimpl->graph;
+			_pimpl->graph.GetLifetimeManager().DebugArrange(_pimpl->_dbg_lifetimes, graph.GetResourceManager());
+
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set(gfxdbg::kLifetimeName, static_cast<void*>(&_pimpl->_dbg_lifetimes));
 			auto& state = _states.back();
 			_pimpl->graph.SetDefaultUboManager(state.ubo_manager);
 			_pimpl->graph.AllocateResources();
 			_pimpl->graph.BuildRenderPasses();
+			_pimpl->graph.SetPipelineManager(*this->_pipeline_manager);
 			_pimpl->graph.Execute();
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };

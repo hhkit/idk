@@ -80,6 +80,7 @@ namespace idk::vkn
 		manager.CollapseLifetimes(original_id);
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
 		
+		
 		//auto& rsc_manager = GetResourceManager();
 		manager.DebugArrange(rsc_manager);
 	}
@@ -90,7 +91,7 @@ namespace idk::vkn
 		
 		for (auto& resource_template : resource_templates)
 		{
-			rm.Instantiate(resource_template.id, resource_template.base_rsc);
+			rm.Instantiate(resource_template.index, resource_template.base_rsc);
 		}
 		rm.FinishInstantiation();
 		auto& aliases = rlm.Aliases();
@@ -99,6 +100,10 @@ namespace idk::vkn
 		{
 			rm.Alias(r_id, ar_id);
 		}
+	}
+	const ResourceLifetimeManager& FrameGraph::GetLifetimeManager() const
+	{
+		return rsc_lifetime_mgr;
 	}
 	void FrameGraph::Reset()
 	{
@@ -187,6 +192,11 @@ namespace idk::vkn
 		_default_ubo_manager = &ubo_manager;
 	}
 
+	void FrameGraph::SetPipelineManager(PipelineManager& pipeline_manager)
+	{
+		_default_pipeline_manager = &pipeline_manager;
+	}
+
 	void TransitionResource(FrameGraph::Context_t context, TransitionInfo info)
 	{
 		//TODO: Actually transition
@@ -244,6 +254,7 @@ namespace idk::vkn
 			//TODO: Thread this
 			{
 				auto& context = _contexts.emplace_back();
+				context.SetPipelineManager(*_default_pipeline_manager);
 				context.SetUboManager(*_default_ubo_manager);
 				//Transition all the resources that are gonna be read (and are not input attachments)
 				auto input_span = node.GetReadSpan();

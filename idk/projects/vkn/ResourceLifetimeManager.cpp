@@ -44,14 +44,29 @@ namespace idk::vkn
 		return resource_alias;
 	}
 #pragma optimize("",off)
-	void ResourceLifetimeManager::DebugArrange(FrameGraphResourceManager& rsc_manager) const
+	void ResourceLifetimeManager::DebugArrange(const FrameGraphResourceManager& rsc_manager) const
 	{
-		using Debug =vector<std::tuple<string, fgr_id, index_span>>;
+		gfxdbg::FgRscLifetimes tmp;
+		DebugArrange(tmp, rsc_manager);
+		vector<std::pair<string, string>> derp;
+		for (auto& [rsc, original] : mappings)
+		{
+			derp.emplace_back(rsc_manager.GetResourceDescription(rsc)->name, rsc_manager.GetResourceDescription(original)->name);
+		}
+		tmp.clear();
+	}
+	void ResourceLifetimeManager::DebugArrange(gfxdbg::FgRscLifetimes& dbg, const FrameGraphResourceManager& rsc_manager) const
+	{
+		using Debug = vector<std::tuple<string, fgr_id, index_span>>;
+		auto& test = dbg;
 		//struct Debug
 		//{
 		//	 resources;
 		//};
-		lazy_vector<Debug> test;
+		for (auto& line : dbg)
+		{
+			line.clear();
+		}
 		for (auto& [r_id, index] : map)
 		{
 			auto& rsc_lifetime = resource_lifetimes.at(index);
@@ -59,9 +74,19 @@ namespace idk::vkn
 			
 			auto derp = rsc_manager.GetResourceDescription(r_id);
 			auto actual_index = itr->second;
-			test[actual_index].emplace_back(derp->name, r_id,index_span{ rsc_lifetime.start,rsc_lifetime.end });
+			test[actual_index].emplace_back(gfxdbg::DbgLifetime{ derp->name, r_id,rsc_lifetime.start,rsc_lifetime.end });
 		}
-		test.clear();
+
+		for (auto& [rsc_id, concrete_index] : resource_alias)
+		{
+			auto& resource = concrete_resources[concrete_index];
+			auto base_desc = rsc_manager.GetResourceDescription(resource.base_rsc);
+			auto rsc_desc = rsc_manager.GetResourceDescription(rsc_id);
+			if (base_desc->format != rsc_desc->format)
+			{
+				throw;
+			}
+		}
 	}
 
 	bool ResourceLifetimeManager::overlap_lifetime(const actual_resource_t& rsc, order_t start, order_t end)
@@ -71,7 +96,7 @@ namespace idk::vkn
 
 	void ResourceLifetimeManager::Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc)
 	{
-		resource_alias[id] = rsc.id;
+		resource_alias[id] = rsc.index;
 		rsc.start = std::min(start, rsc.start);
 		rsc.end = std::max(end, rsc.end);
 	}

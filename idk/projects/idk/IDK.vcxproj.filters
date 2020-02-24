@@ -1179,6 +1179,7 @@
       <Filter>network\messages</Filter>
     </ClInclude>
     <ClInclude Include="gfx\FakeMat4.h" />
+    <ClInclude Include="gfx\GfxDebugData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -33,7 +33,7 @@ namespace idk::vkn
 
 
 		//Instantiates an actual resource using base's configuration and associate it with unique_id
-		void Instantiate(fgr_id unique_id, fgr_id base);
+		void Instantiate(size_t unique_id, fgr_id base);
 
 		//Associate fgr_id with unique_id
 		void Alias(fgr_id unique_id, fgr_id id);

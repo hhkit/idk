@@ -170,6 +170,9 @@ namespace idk::vkn
 
 		void CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm);
 
+		const ResourceLifetimeManager& GetLifetimeManager()const;
+		const FrameGraphResourceManager& GetResourceManager()const;
+
 		void Reset();
 
 		//Process nodes and cull away unnecessary nodes.
@@ -183,6 +186,7 @@ namespace idk::vkn
 		void BuildRenderPasses();
 
 		void SetDefaultUboManager(UboManager& ubo_manager);
+		void SetPipelineManager(PipelineManager& pipeline_manager);
 
 		//Execute the renderpasses.
 		//Use the dependency graph to split the appropriate jobs into separate threads and sync those.
@@ -201,7 +205,6 @@ namespace idk::vkn
 
 
 		FrameGraphResourceManager& GetResourceManager();
-		const FrameGraphResourceManager& GetResourceManager()const ;
 
 		FrameGraphBuilder graph_builder;
 		vector<FrameGraphNode> nodes;
@@ -212,6 +215,7 @@ namespace idk::vkn
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
 
 		UboManager* _default_ubo_manager = {};
+		PipelineManager* _default_pipeline_manager= {};
 
 		TempGraph tmp_graph;
 		ResourceLifetimeManager rsc_lifetime_mgr;

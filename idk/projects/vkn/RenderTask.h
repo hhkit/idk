@@ -27,6 +27,7 @@ namespace idk::vkn
 	
 
 	struct UboManager;
+	class PipelineManager;
 
 	struct RenderBundle;// holds the stuff required to actually draw/submit
 
@@ -79,6 +80,7 @@ namespace idk::vkn
 		//void Associate(size_t subpass_index);
 
 		void SetUboManager(UboManager& ubo_manager);
+		void SetPipelineManager(PipelineManager& pipeline_manager);
 
 
 		void BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset)override;
@@ -202,7 +204,7 @@ namespace idk::vkn
 			std::optional<std::string> label;
 		};
 
-		unique_ptr<PipelineManager> ppm;
+		PipelineManager* ppm;
 
 #pragma region Clear Info
 		lazy_vector<color> clear_colors;

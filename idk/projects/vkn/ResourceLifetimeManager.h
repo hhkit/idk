@@ -1,6 +1,9 @@
 #pragma once
 #include "FrameGraphNode.h"
 #include "FrameGraphResource.h"
+
+#include <gfx/GfxDebugData.h>
+
 namespace idk::vkn
 {
 	class FrameGraphResourceManager;
@@ -33,7 +36,7 @@ namespace idk::vkn
 		using actual_resource_id = size_t;
 		struct actual_resource_t
 		{
-			actual_resource_id id;
+			actual_resource_id index;
 			fgr_id base_rsc;
 			order_t start, end;
 		};
@@ -68,6 +71,8 @@ namespace idk::vkn
 				auto& lifetime = collapsed.at(original);
 				Alias(rsc, lifetime.start, lifetime.end, *concrete_itr);
 			}
+
+
 			/*
 			for (auto& [id, index] : map)
 			{
@@ -90,7 +95,8 @@ namespace idk::vkn
 		span<const actual_resource_t> GetActualResources()const;
 		const hash_table<fgr_id, actual_resource_id> Aliases()const;
 
-		void DebugArrange(FrameGraphResourceManager& rsc_manager)const;
+		void DebugArrange(const FrameGraphResourceManager& rsc_manager)const;
+		void DebugArrange(gfxdbg::FgRscLifetimes& dbg, const FrameGraphResourceManager& rsc_manager)const;
 
 	private:
 		auto GetConcrete(fgr_id r_id )
