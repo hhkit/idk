@@ -28,7 +28,7 @@ namespace idk
 		, public Saveable<Material, false_type>
 	{
 	public:
-		RscHandle<ShaderProgram>            _shader_program  ;
+		RscHandle<ShaderProgram>            _shader_program = Guid::Make()  ;
 		RscHandle<MaterialInstance>         _default_instance;
         std::map<string, UniformInstance> uniforms         ;
         vector<UniformInstance>             hidden_uniforms  ;
