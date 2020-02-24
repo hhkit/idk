@@ -83,6 +83,7 @@
     <Compile Include="Components\MeshRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />
     <Compile Include="Core\Application.cs" />
+    <Compile Include="Electron\InvalidNetworkOperationException.cs" />
     <Compile Include="Electron\MonoBehaviorElec.cs" />
     <Compile Include="Electron\ElectronMessageInfo.cs" />
     <Compile Include="Electron\InvalidRPCTargetException.cs" />
@@ -103,7 +104,7 @@
     <Compile Include="Electron\IConnectionCallbacks.cs" />
     <Compile Include="Electron\IElectronObservable.cs" />
     <Compile Include="Electron\ILobbyCallbacks.cs" />
-    <Compile Include="Electron\Player.cs" />
+    <Compile Include="Electron\Client.cs" />
     <Compile Include="Electron\RPC.cs" />
     <Compile Include="Electron\RPCTarget.cs" />
     <Compile Include="Systems\Graphics.cs" />

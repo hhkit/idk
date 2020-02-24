@@ -12,6 +12,7 @@
 
 #include <network/EventManager.h>
 #include <network/ConnectionManager.h>
+#include <network/IDManager.h>
 
 #include <core/Scheduler.h>
 #include <core/NullHandleException.h>
@@ -1962,7 +1963,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::NetworkInstantiatePrefabPositionRotation", uint64_t, Guid g, vec3 pos, quat rot)
 		{
-			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, rot).id;
+			return EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab>{g}, pos, idk::quat{ rot }).id;
 		}
 		BIND_END();
 
@@ -1981,6 +1982,12 @@ namespace idk::mono
 		BIND_START("idk.Bindings::ViewGetNetworkId", NetworkID, Handle<ElectronView> ev)
 		{
 			return ev->network_id;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ViewIdGetView", uint64_t, NetworkID id)
+		{
+			return Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(id).id;
 		}
 		BIND_END();
 
