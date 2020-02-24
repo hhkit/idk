@@ -18,7 +18,7 @@ namespace idk::phys
 		closest_pt.z = std::clamp(closest_pt.z, -half_extents.z, half_extents.z);
 
 		const float distance_sq = circle_local_pos.distance_sq(closest_pt);
-		if (distance_sq > rhs.radius* rhs.radius)
+		if (distance_sq > rhs.radius * rhs.radius)
 		{
 			col_failure error;
 			error.perp_dist = sqrt(distance_sq);
@@ -28,15 +28,25 @@ namespace idk::phys
 
 		col_success result;
 
-		const auto penetration_depth = rhs.radius - sqrtf(distance_sq);
+		const auto distance = sqrtf(distance_sq);
 
 		result.centerA = lhs.center;
 		result.centerB = rhs.center;
-
-		result.contacts[0].penetration = penetration_depth;
-		result.contacts[0].position = mat3{ l_axes } * closest_pt;
-		result.normal = (rhs.center - result.contacts[0].position).get_normalized();
 		result.contactCount = 1;
+		if (distance < epsilon)
+		{
+			result.contacts[0].penetration = rhs.radius;
+			result.contacts[0].position = rhs.center;
+			result.normal = vec3{0, 1, 0};
+			LOG("INSIDE");
+		}
+		else
+		{
+			const auto penetration_depth = rhs.radius - distance;
+			result.contacts[0].penetration = penetration_depth;
+			result.contacts[0].position = (mat3{ l_axes } * closest_pt) + lhs.center;
+			result.normal = (rhs.center - result.contacts[0].position).get_normalized();
+		}
 		result.max_penetration = result.contacts[0].penetration;
 		compute_basis(result.normal, result.tangentVectors, result.tangentVectors + 1);
 

@@ -76,7 +76,7 @@ namespace idk
 					if (!rigidbody.is_kinematic)
 					{
 						rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
-						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * 0.0f);// rigidbody.linear_damping);
+						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
 						// rigidbody._pred_translation = rigidbody.linear_velocity * dt;
 
 						// Compute the angular stuff here too. 

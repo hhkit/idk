@@ -506,7 +506,7 @@ namespace idk
 				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
 				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ dt });
 			}
-			// LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.contactCount);
+			LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.contactCount);
 		}
 	}
 
