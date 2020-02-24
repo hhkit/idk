@@ -61,7 +61,7 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			elem.InitShadowMap();
+			elem.InitShadowMap(1,AttachmentViewType::e2D);
 		}
 		return light_map;
 	}
@@ -102,24 +102,24 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			elem.InitShadowMap();
+			elem.InitShadowMap(1, AttachmentViewType::e2D);
 		}
 		return light_map;
 	}
 
-	vector<Lightmap> DirectionalLight::InitShadowMap() const
-	{
-		vector<Lightmap> lm{};
-		lm.resize(cascade_count);
-		for (auto& elem : lm)
-		{
-			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
+	//vector<Lightmap> DirectionalLight::InitShadowMap() const
+	//{
+	//	//vector<Lightmap> lm{};
+	//	//lm.resize(cascade_count);
+	//	//for (auto& elem : lm)
+	//	//{
+	//	//	//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
-			//if (elem.NeedLightMap())
-			elem.InitShadowMap();
-		}
-		return lm;
-	}
+	//	//	//if (elem.NeedLightMap())
+	//	//	elem.InitShadowMap(1, AttachmentViewType::e2D);
+	//	//}
+	//	//return lm;
+	//}
 	void DirectionalLight::DeleteShadowMap() noexcept
 	{
 		for (auto& lmp : light_map)
@@ -135,7 +135,7 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			elem.InitShadowMap();
+			elem.InitShadowMap(1, AttachmentViewType::e2D);
 		}
 		return light_map;
 	}

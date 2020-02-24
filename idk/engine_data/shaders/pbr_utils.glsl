@@ -57,9 +57,9 @@ float computePCF(sampler2D tex, vec2 tc, vec2 texelSize, float tc_z, float bias,
 {
 	//float z_depth = tc_z/tc.w;
 	
-	vec4 sampleShadow = texture(tex,  tc.xy + vec2(x,-1) * texelSize);
-	vec4 sampleShadow1 = texture(tex, tc.xy + vec2(x,0) * texelSize );
-	vec4 sampleShadow2 = texture(tex, tc.xy + vec2(x,1) * texelSize );
+	vec4 sampleShadow = texture(tex,  tc + vec2(x,-1) * texelSize);
+	vec4 sampleShadow1 = texture(tex, tc + vec2(x,0) * texelSize );
+	vec4 sampleShadow2 = texture(tex, tc + vec2(x,1) * texelSize );
 	
 	float avgDepth = 0.f, biasedCDepth = curDepth - bias;
 	if(biasedCDepth > sampleShadow.r) 
@@ -102,11 +102,12 @@ float computeStratifiedPoisson(sampler2D shadow_tex, vec2 tc, vec2 texelSize, fl
 	//int index = x;
 	//float z_depth = tc_z/tc.w;
 	
-	int index = int(16.f*rand(tc.xy*x))%16;
+	int index = int(16.f*rand(tc*x))%16;
 	vec2 poissonTC = poissonDisk[index]/700.f;
-	vec4 sampleShadow = texture(shadow_tex,tc.xy + vec2(x,-1) * texelSize + poissonTC);
-	vec4 sampleShadow1 = texture(shadow_tex,tc.xy + vec2(x,0) * texelSize + poissonTC);
-	vec4 sampleShadow2 = texture(shadow_tex,tc.xy + vec2(x,1) * texelSize + poissonTC);
+	vec2 tcc = tc + poissonTC;
+	vec4 sampleShadow = texture(shadow_tex,tcc + vec2(x,-1) * texelSize);
+	vec4 sampleShadow1 = texture(shadow_tex,tcc + vec2(x,0) * texelSize);
+	vec4 sampleShadow2 = texture(shadow_tex,tcc + vec2(x,1) * texelSize);
 	
 	//0.2f*(1.f - sampleShadow) - 0.2f*(1.f - sampleShadow1) - 0.2f*(1.f - sampleShadow2)
 	//return 0.2f*(-1.f + (-sampleShadow.r + sampleShadow1.r + sampleShadow2.r));
@@ -149,11 +150,13 @@ float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3
 			vec2 texelSize = textureSize(shadow_tex,0);
 			texelSize = 1.f/texelSize;
 			float tc_z = projCoords.z - bias;
+			vec2 pc = projCoords.xy;
+			
 			
 			for(int x = -2; x <= 2; ++x)
 			{		
-				avgDepth += computePCF(shadow_tex,projCoords.xy, texelSize,tc_z,bias,curDepth,x);
-				avgDepth -= computeStratifiedPoisson(shadow_tex,projCoords.xy,texelSize, tc_z, bias,x);
+				avgDepth += computePCF(shadow_tex,pc, texelSize,tc_z,bias,curDepth,x);
+				avgDepth -= computeStratifiedPoisson(shadow_tex,pc,texelSize, tc_z, bias,x);
 			}
 
 			
