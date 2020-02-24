@@ -669,9 +669,10 @@ namespace idk::vkn::renderpasses
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_def = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Default", AccumDrawSet{ light_bindings }, gbuffer_pass_def).RenderPass();
 
-		info.model = ShadingModel::Specular;
+		auto spec_info = info;
+		spec_info.model = ShadingModel::Specular;
 		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
-		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
+		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(spec_info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_spec = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Specular", AccumDrawSet{ light_bindings }, gbuffer_pass_spec).RenderPass();
 
 
