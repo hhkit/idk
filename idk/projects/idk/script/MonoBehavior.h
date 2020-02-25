@@ -31,7 +31,7 @@ namespace idk::mono
 		void Update();
 		void UpdateCoroutines();
 
-		void InvokeRPC(string_view rpc, MonoArray* params, void* electron_message);
+		bool InvokeRPC(string_view rpc, MonoArray* params, void* electron_message);
 
 		Behavior() = default;
 		Behavior(const Behavior&);

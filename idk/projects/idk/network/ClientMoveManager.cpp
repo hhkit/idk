@@ -48,7 +48,7 @@ namespace idk
 				
 				if (elem.state_mask)
 				{
-					LOG_TO(LogPool::NETWORK, "Sending client move message for %d", elem.network_id);
+					//LOG_TO(LogPool::NETWORK, "Sending client move message for %d", elem.network_id);
 					connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::FASTEST_GUARANTEED, [&](MoveClientMessage& msg)
 						{
 							msg.sequence_number = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
