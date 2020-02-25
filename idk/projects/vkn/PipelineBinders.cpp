@@ -168,6 +168,9 @@ namespace idk::vkn
 				}
 			}
 		}
+
+		while (shadow_maps_directional.size() < 8 && shadow_maps_directional.size())
+			shadow_maps_directional.emplace_back(shadow_maps_directional.back());
 		//for (auto& dshadow_index : vstate.active_dir_lights)
 		//{
 		//	auto& dshadow= vstate.shared_gfx_state->shadow_maps_directional.at(dshadow_index);

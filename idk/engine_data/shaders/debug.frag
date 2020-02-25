@@ -12,7 +12,7 @@ Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 #version 450
 
-uniform struct Color {vec3 color;} ColorBlk;
+U_LAYOUT(1, 0) uniform BLOCK(Color) {vec3 color;} ColorBlk;
 
 layout(location = 2) in VS_OUT
 {
