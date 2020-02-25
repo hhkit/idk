@@ -86,6 +86,39 @@ namespace idk::vkn
 			{
 				throw;
 			}
+			{
+				auto& desc = *base_desc;
+				switch (desc.format)
+				{
+				case vk::Format::eD16Unorm:
+				case vk::Format::eD16UnormS8Uint:
+				case vk::Format::eD24UnormS8Uint:
+				case vk::Format::eD32Sfloat:
+				case vk::Format::eD32SfloatS8Uint:
+					break;
+				default:
+					if (desc.usage & vk::ImageUsageFlagBits::eDepthStencilAttachment)
+						throw;
+					break;
+				}
+			}
+			{
+				auto& desc = *rsc_desc;
+				switch (desc.format)
+				{
+				case vk::Format::eD16Unorm:
+				case vk::Format::eD16UnormS8Uint:
+				case vk::Format::eD24UnormS8Uint:
+				case vk::Format::eD32Sfloat:
+				case vk::Format::eD32SfloatS8Uint:
+					break;
+				default:
+					if (desc.usage & vk::ImageUsageFlagBits::eDepthStencilAttachment)
+						throw;
+					break;
+				}
+
+			}
 		}
 	}
 

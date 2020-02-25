@@ -160,6 +160,7 @@ namespace idk::vkn
 		{
 			graph_builder.BeginNode(name);
 			auto render_pass = std::make_unique<T>(T{ graph_builder, std::forward <CtorArgs>(args)... });
+			render_pass->name = name;
 			auto& node = StoreNode(graph_builder.EndNode());
 			T& obj = *render_pass;
 			render_passes.emplace(node.id, std::move(render_pass));
@@ -204,7 +205,7 @@ namespace idk::vkn
 		vk::ImageLayout GetSourceLayout(fgr_id)const;
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
 		RenderPassCreateInfoBundle  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
-		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
+		VknRenderPass  CreateRenderPass(string_view name,span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
 		std::pair<Framebuffer,uvec2> CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 
 

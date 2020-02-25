@@ -4,6 +4,8 @@
 #include <vkn/VulkanView.h>
 #include <vkn/VknTextureView.h>
 #include <res/ResourceHandle.inl>
+
+#include <vkn/DebugUtil.h>
 namespace idk::vkn
 {
 
@@ -395,11 +397,13 @@ namespace idk::vkn
 		return bundle;
 	}
 
-	VknRenderPass FrameGraph::CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
+	VknRenderPass FrameGraph::CreateRenderPass(string_view name,span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
 		vk::Device device = *View().Device();
 		auto info = CreateRenderPassInfo(input_rscs, output_rscs, depth);
-		return _rp_pool.GetRenderPass(info);
+		auto result =_rp_pool.GetRenderPass(info);
+		dbg::NameObject(*result, name);
+		return result;
 	}
 	std::pair<Framebuffer, uvec2> FrameGraph::CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
@@ -457,7 +461,7 @@ namespace idk::vkn
 			auto& rp = *itr->second;
 			auto input_attachments = span{ node.input_attachments };
 			auto output_attachments = span{ node.output_attachments };
-			rp.render_pass = CreateRenderPass(input_attachments, output_attachments,node.depth_stencil);
+			rp.render_pass = CreateRenderPass(node.name,input_attachments, output_attachments,node.depth_stencil);
 			auto [fb,size]= CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments, node.depth_stencil);
 			rp.frame_buffer = fb;
 			rp.fb_size = size;

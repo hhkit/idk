@@ -8,6 +8,27 @@
 #include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
+	bool ValidateUsage(const TextureDescription& desc,vk::ImageUsageFlags usage)
+	{
+		bool result = true;
+		switch (desc.format)
+		{
+		case vk::Format::eD16Unorm:
+		case vk::Format::eD16UnormS8Uint:
+		case vk::Format::eD24UnormS8Uint:
+		case vk::Format::eD32Sfloat:
+		case vk::Format::eD32SfloatS8Uint:
+			break;
+		default:
+			if ((desc.usage | usage) & vk::ImageUsageFlagBits::eDepthStencilAttachment)
+			{
+				LOG_ERROR_TO(LogPool::GFX, "Attempting to use a non-depth-stencil texture as a depth-stencil attachment");
+				result=false;
+			}
+			break;
+		}
+		return result;
+	}
 	VulkanView& View();
 	FrameGraphResourceManager::FrameGraphResourceManager() = default;
 	FrameGraphResourceManager::FrameGraphResourceManager(FrameGraphResourceManager&&)=default;
@@ -47,7 +68,9 @@ namespace idk::vkn
 		}
 		else
 		{
-			(*o_prsc)->usage |= usage;
+			auto& desc = **o_prsc;
+			if(ValidateUsage(desc,usage))
+				(*o_prsc)->usage |= usage;
 		}
 	}
 #pragma optimize ("",off)
@@ -173,8 +196,11 @@ namespace idk::vkn
 		auto itr = resource_handles.find(rsc_id);
 		if (itr != resource_handles.end())
 		{
-			resources[itr->second] = desc;
-			result = true;;
+			if (ValidateUsage(desc, {}))
+			{
+				resources[itr->second] = desc;
+				result = true;;
+			}
 		}
 		return result;
 	}

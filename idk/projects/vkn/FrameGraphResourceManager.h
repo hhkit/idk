@@ -65,7 +65,6 @@ namespace idk::vkn
 		std::optional<fgr_id> GetPrevious(fgr_id curr)const;
 		fgr_id GetOriginal(fgr_id curr)const;
 
-		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
 		std::optional<TextureDescription> GetResourceDescription(fgr_id rsc_id)const;
 		bool UpdateResourceDescription(fgr_id rsc_id, TextureDescription desc);
 
@@ -86,6 +85,8 @@ namespace idk::vkn
 		hash_table<fgr_id, fgr_id> renamed_original;
 		hlp::IdGenerator<fgr_id> _fgr_generator;
 		TexturePool pool;
+	private:
+		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
 	};
 
 }

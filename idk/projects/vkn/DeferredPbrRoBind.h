@@ -20,12 +20,14 @@ namespace idk::vkn::bindings
 		ShadingModel model;
 		bool Skip([[maybe_unused]] RenderInterface& the_interface, const  RenderObject& dc)  override
 		{
+			
 			if (dc.material_instance)
 			{
 				auto& mat_inst = *dc.material_instance;
 				if (mat_inst.material)
 				{
 					auto& mat = *mat_inst.material;
+					if (mat.model = ShadingModel::Unlit) return true;
 					return mat.model != model || mat.blend != blend;
 				}
 			}
@@ -34,6 +36,9 @@ namespace idk::vkn::bindings
 	};
 	using DeferredPbrRoBind  = CombinedBindings<TypeCheck, CameraViewportBindings,VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 	using DeferredPbrAniBind = CombinedBindings<TypeCheck, CameraViewportBindings,VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+
+	using DeferredUnlitRoBind = CombinedBindings<TypeCheck, CameraViewportBindings, VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+	using DeferredUnlitAniBind = CombinedBindings<TypeCheck, CameraViewportBindings, VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 
 	struct DeferredPbrInfo
 	{

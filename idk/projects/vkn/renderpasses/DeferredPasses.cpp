@@ -215,10 +215,10 @@ namespace idk::vkn::renderpasses
 
 
 
-	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex) : accum_def{ accum_def_ }, accum_spec{ accum_spec_ }, _viewport{viewport}
+	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex) : accum_def{ accum_def_ }, accum_spec{ accum_spec_ }, _viewport{viewport}
 	{
 		hdr_rsc = builder.write(color_tex);
-		depth_att_def = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
+		hdr_depth_rsc = builder.write(depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		builder.set_output_attachment(hdr_rsc, 0, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -256,7 +256,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_input_attachment(derp2, 1, AttachmentDescription
+		builder.set_input_attachment(depth_att_def = derp2, 1, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -273,7 +273,7 @@ namespace idk::vkn::renderpasses
 				//vk::ComponentMapping mapping{};
 			});
 
-		builder.set_input_attachment(derp3, 2, AttachmentDescription
+		builder.set_input_attachment(accum_att_spec = derp3, 2, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -289,7 +289,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_input_attachment(derp4, 3, AttachmentDescription
+		builder.set_input_attachment(depth_att_spec = derp4, 3, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -305,7 +305,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_depth_stencil_attachment(depth_att_def, AttachmentDescription
+		builder.set_depth_stencil_attachment(hdr_depth_rsc, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
@@ -616,6 +616,65 @@ namespace idk::vkn::renderpasses
 
 		draw_set.Render(context);
 	}
+	UnlitPass::UnlitPass(FrameGraphBuilder& builder, FrameGraphResource color_tex, FrameGraphResource depth_tex)
+	{
+		color_rsc = builder.write(color_tex);
+		depth_rsc = builder.write(depth_tex);
+
+		builder.set_output_attachment(color_rsc, 3, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+		builder.set_depth_stencil_attachment(depth_rsc, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eDepth,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+	}
+
+	void UnlitPass::Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set)
+	{
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, name);
+		{
+			size_t i = 0;
+
+			AttachmentBlendConfig blend{};
+			blend.blend_enable = true;
+			blend.dst_color_blend_factor = BlendFactor::eOne;
+			blend.src_color_blend_factor = BlendFactor::eOne;
+			blend.color_blend_op = BlendOp::eAdd;
+			blend.alpha_blend_op = BlendOp::eMax;
+			blend.dst_alpha_blend_factor = BlendFactor::eOne;
+			blend.src_alpha_blend_factor = BlendFactor::eOne;
+			context.SetBlend(i, blend);
+			++i;
+		}
+		draw_set.Render(context);
+	}
+
 	void DrawSetRenderPass::Execute(Context_t& context)
 	{
 		LOG_ERROR_TO(LogPool::GFX, "DrawSetRenderPass::Execute(Context_t) should not be executed.");
@@ -680,10 +739,13 @@ namespace idk::vkn::renderpasses
 		auto& accum_pass_spec = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Specular", AccumDrawSet{ light_bindings }, gbuffer_pass_spec).RenderPass();
 
 
-		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, cube_clear.render_target);
+		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, cube_clear.render_target,cube_clear.depth);
+		spec_info.model = ShadingModel::Unlit;
+		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),hdr_pass.hdr_rsc,hdr_pass.depth_att_def).RenderPass();
 
-		return { hdr_pass.hdr_rsc,hdr_pass.depth_att_def };
+		return { unlit_pass.color_rsc,unlit_pass.depth_rsc};
 	}
+
 
 
 }
