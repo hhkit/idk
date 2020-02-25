@@ -52,7 +52,8 @@ namespace idk
 
 	void EventManager::BroadcastRPC(Handle<ElectronView> ev, RPCTarget target, string_view method_name, span<vector<unsigned char>> buffer)
 	{
-		LOG_TO(LogPool::NETWORK, "Broadcasting RPC for %d and method %s", ev->network_id, method_name.data());
+		constexpr std::string_view RPCLookup[] = {"All", "Others", "Server"};
+		LOG_TO(LogPool::NETWORK, "Broadcasting RPC for %d and method %s to the %s", ev->network_id, method_name.data(), RPCLookup[static_cast<int>(target)].data());
 		EventInvokeRPCMessage::Data prototype_message;
 		{
 			prototype_message.invoke_on_id = ev->network_id;
