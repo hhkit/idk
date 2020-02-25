@@ -87,10 +87,11 @@ namespace idk::vkn
 	}
 
 
-	void TextureLoader::LoadTexture(SubmissionObjs sub, VknTexture& texture, hlp::MemoryAllocator& allocator, std::optional<TextureOptions> ooptions, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	void TextureLoader::LoadTexture(SubmissionObjs sub, VknTexture& texture, hlp::MemoryAllocator& allocator, std::optional<TextureOptions> ooptions, const TexCreateInfo& _load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		auto load_fence = sub.load_fence;
 		TextureOptions options{};
+		auto load_info = _load_info;
 		auto format = load_info.internal_format;
 		//auto nformat = NearestBlittableFormat(format, BlitCompatUsageMasks::eDst);
 		//if (nformat)
@@ -103,6 +104,8 @@ namespace idk::vkn
 		}
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
+		load_info.layers = std::max(load_info.layers, 1ui32);
+
 
 		auto ptr = &texture;
 		auto&& [image, alloc, aspect, sz,name] = vkn::LoadTexture(sub,allocator,  load_info, in_info, guid);
@@ -434,13 +437,16 @@ namespace idk::vkn
 
 		std::optional<vk::ImageSubresourceRange> range{};
 
+		if (load_info.layers == 0)
+			throw;
+
 		vk::ImageCreateInfo imageInfo{};
 		imageInfo.imageType = vk::ImageType::e2D;
 		imageInfo.extent.width = static_cast<uint32_t>(width);
 		imageInfo.extent.height = static_cast<uint32_t>(height);
 		imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
 		imageInfo.mipLevels = load_info.mipmap_level; //Currently no mipmapping
-		imageInfo.arrayLayers = load_info.layers;
+		imageInfo.arrayLayers =  load_info.layers;
 		imageInfo.format = internal_format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
