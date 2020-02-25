@@ -455,11 +455,11 @@ namespace idk::vkn
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
 		instance_->View().Device()->waitIdle();
-		_pimpl.reset();
+		_frame_renderers.clear();
 		_debug_renderer->Shutdown();
 
 		this->_pm.reset();
-		_frame_renderers.clear();
+		_pimpl.reset();
 		instance_.reset();
 		ShFinalize();
 	}

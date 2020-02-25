@@ -60,6 +60,8 @@ namespace idk::vkn
 		uint32_t mipmap_level = 1;
 		vk::ImageAspectFlagBits aspect;
 		vk::ImageLayout layout = vk::ImageLayout::eGeneral;
+		vk::ImageViewType view_type = vk::ImageViewType::e2D;
+		vk::ComponentMapping component_mapping{};
 		bool read_after = false;//True if you intend to copy the memory back out for reading.
 		uint32_t layers = 1;
 		//True if you intend to sample with a shader
@@ -95,6 +97,8 @@ namespace idk::vkn
 		uint32_t level_count = 1;
 		uint32_t base_array_layer = 0;
 		uint32_t array_layer_count = 1;
+		vk::ImageViewType type = vk::ImageViewType::e2D;
+		vk::ComponentMapping component_mapping{};
 	};
 
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect, ImageViewInfo = {});

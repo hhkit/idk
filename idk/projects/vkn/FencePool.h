@@ -63,8 +63,8 @@ namespace idk::vkn
 		size_t growth_amount()const;
 		void GrowCmdBuffers();
 		vector<size_t> _handles;
-		vector<vk::UniqueCommandBuffer> _cmd_buffer;
 		vector < vk::UniqueCommandPool> _cmd_pools;
+		vector<vk::UniqueCommandBuffer> _cmd_buffer;
 		hlp::SimpleLock _acquire_lock;
 	};
 

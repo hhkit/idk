@@ -11,6 +11,7 @@ namespace idk
 	,	class EventLoadLevelMessage
 	,	class EventTransferOwnershipMessage
 	,	class EventInvokeRPCMessage
+	,	class EventDestroyObjectMessage
 	,	class GhostMessage
 	,	class MoveClientMessage
 	,	class MoveReturnMessage

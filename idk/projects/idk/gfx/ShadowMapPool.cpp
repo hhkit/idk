@@ -46,10 +46,12 @@ namespace idk
 	void ShadowMapPool::Subpool::grow(const vector<Lightmap>& shadows)
 	{
 		Entry entry{ vector<Lightmap>{shadows.size()} };
+		size_t i = 0;
 		for (auto& l : entry.shadows)
 		{
 			l.light_map = {};
-			l.InitShadowMap();
+			l.InitShadowMap(shadows[i].GetConfig());
+			++i;
 		}
 		//auto copied_lightmaps = std::visit([](auto& copy) {
 		//	copy.ReleaseShadowMap();

@@ -751,7 +751,11 @@ namespace idk
         public extern static int ViewExecRPCOnPlayer(ulong handle, string method, int target, byte[][] parameters);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static int ViewDestroy(ulong handle);
+        public extern static ulong ViewIdGetView(uint id);
+
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ViewDestroy(ulong handle);
 
     }
 }

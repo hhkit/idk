@@ -10,8 +10,9 @@ namespace idk
 		: public yojimbo::Message
 	{
 	public:
-		NetworkID network_id;
 		SeqNo sequence_number;
+
+		NetworkID network_id;
 		unsigned state_mask{};
 		vector<string> pack;
 

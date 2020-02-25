@@ -468,7 +468,7 @@ namespace idk::vkn
 		const size_t num_instanced_buffer_state = 1;
 		const size_t num_color_pick_states = 1;
 		
-		auto total_pre_states = lights.size() + state.active_dir_lights.size() * state.cameras->size() + num_conv_states+ num_instanced_buffer_state + num_color_pick_states;
+		auto total_pre_states = lights.size() + state.active_dir_lights.size() + num_conv_states+ num_instanced_buffer_state + num_color_pick_states;
 		GrowStates(_pre_states, total_pre_states);
 		for (auto& pre_state : _pre_states)
 		{
@@ -763,7 +763,7 @@ namespace idk::vkn
 				
 				
 				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
-				mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
+				static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 				//for (auto& e : *state.d_lightmaps)
 				{
 					//for (auto& elem : light.light_maps)
@@ -830,9 +830,10 @@ namespace idk::vkn
 			GraphicsStateInterface gsi = { state };
 			gsi.range = shadow_range;
 
-			for (auto& elem : light.light_maps)
+			//for (auto& elem : light.light_maps)
+			auto& elem = light.light_maps[shadow_range.light_map_index];
 			{
-				auto& rs = r[curr_state];
+				//auto& rs = r[curr_state];
 				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
 				the_interface.GenerateDS(rs.dpools,false);
 

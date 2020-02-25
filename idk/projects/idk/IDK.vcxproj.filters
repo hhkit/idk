@@ -1178,6 +1178,12 @@
     <ClInclude Include="network\EventDataBlockFrameNumber.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\AttachmentViewType.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventDestroyObjectMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
     <ClInclude Include="gfx\FakeMat4.h" />
     <ClInclude Include="gfx\GfxDebugData.h" />
   </ItemGroup>
