@@ -47,7 +47,7 @@ namespace idk
         for (auto& ps : span_ps)
         {
             if (ps.state >= ParticleSystem::Playing)
-                ps.transform = decompose(ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+                ps.transform = ps.GetGameObject()->GetComponent<Transform>()->GlobalMatrix();
             ps.Step(dt);
         }
     }

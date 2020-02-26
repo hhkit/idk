@@ -27,7 +27,7 @@ namespace idk
         random rnd;
         float time = 0;
         float cycle_time = 0;
-        matrix_decomposition<real> transform;
+        mat4 transform;
         char state = Awake;
 
         void Play();

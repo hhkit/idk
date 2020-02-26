@@ -83,7 +83,8 @@ namespace idk
         idk_app_data /= "idk";
         Core::GetSystem<FileSystem>().Mount(idk_app_data.string(), path_idk_app_data, false);
 
-		auto tmp_path = idk_app_data / "tmp";
+		_editor_id = serialize_text(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+		auto tmp_path = idk_app_data / ("tmp" + _editor_id).sv();
 		if (!fs::exists(tmp_path))
 			fs::create_directory(tmp_path);
 		Core::GetSystem<FileSystem>().Mount(tmp_path.string(), path_tmp, false);
@@ -264,6 +265,7 @@ namespace idk
         reg_scene.set("camera", serialize_text(*_camera->GetGameObject()->Transform()));
 
         ImGui::SaveIniSettingsToDisk(Core::GetSystem<FileSystem>().GetFullPath("/idk/imgui.ini").c_str());
+		fs::remove_all(Core::GetSystem<FileSystem>().GetFullPath(path_tmp).sv());
         Core::GetSystem<ProjectManager>().SaveConfigs();
         _ige_windows.clear();
         _interface->Shutdown();
