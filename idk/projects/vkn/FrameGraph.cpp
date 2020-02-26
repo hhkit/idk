@@ -8,7 +8,7 @@
 #include <vkn/DebugUtil.h>
 namespace idk::vkn
 {
-
+	bool frame_graph_debug = false;
 	//Process nodes and cull away unnecessary nodes.
 	//Figure out dependencies and synchronization points
 	//Insert new nodes to help transit concrete resources to their corresponding virtual resources
@@ -116,6 +116,39 @@ namespace idk::vkn
 		rsc_lifetime_mgr.ClearLifetimes();
 		GetResourceManager().Reset();
 	}
+
+	namespace dbg
+	{
+		namespace fg
+		{
+
+			struct NodeDependencies
+			{
+				string node_name;
+				vector<string> resource_names;
+			};
+
+			struct DependencyDebugger
+			{
+				vector<NodeDependencies> nodes;
+
+				template<typename FgConvFunc, typename FgrConvFunc>
+				DependencyDebugger(const ActualGraph& graph, FgConvFunc&& fgid_name, FgrConvFunc&& fgrid_name)
+				{
+					for (auto [node_id, rsc_span] : graph.in_rsc_nodes)
+					{
+						auto& [name,rsc_names]=nodes.emplace_back(NodeDependencies{ fgid_name(node_id) });
+						for (auto rsc: rsc_span)
+						{
+							rsc_names.emplace_back(fgrid_name(rsc.id));
+						}
+					}
+
+				}
+			};
+		}
+
+	}
 #pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
@@ -123,10 +156,16 @@ namespace idk::vkn
 		auto graph = ConvertTempGraph(std::move(tmp_graph));
 		graph_theory::IntermediateGraph dependency_graph{ nodes.size() };
 		hash_table<fg_id, size_t> id_to_indices;
+
 		for (size_t i = 0; i < nodes.size(); ++i)
 		{
 			id_to_indices[nodes[i].id] = i;
 		}
+		auto& nodes_ = nodes;
+		auto& rsc_manager = GetResourceManager();
+		auto fg_id_to_name = [&id_to_indices, &nodes_](fg_id id) ->string { return nodes_.at(id_to_indices.at(id)).name; };
+		auto fgr_id_to_name = [&rsc_manager](fgr_id id) ->string { return rsc_manager.GetResourceDescription(id)->name; };
+
 		{
 			vector<size_t> index_buffer;
 
@@ -165,6 +204,10 @@ namespace idk::vkn
 				index_buffer.resize(id_adj_buffer.size());
 				std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&id_to_indices](fg_id id) {return id_to_indices.find(id)->second; });
 				dependency_graph.SetAdjacentNodes(src_index, index_buffer.begin(), index_buffer.end());
+			}
+			if (frame_graph_debug)
+			{
+				dbg::fg::DependencyDebugger dep_dbg{ graph,fg_id_to_name,fgr_id_to_name };
 			}
 			auto [sorted_order, success] = graph_theory::KahnsAlgorithm(dependency_graph);
 			IDK_ASSERT_MSG(success, "Cyclic dependency detected.");

@@ -20,7 +20,6 @@ namespace idk::vkn
 	struct TempGraph
 	{
 		hash_table<fgr_id, fg_id> src_node;
-		hash_table<fgr_id, fg_id> end_node;
 		using fgr_span = index_span;
 		hash_table<fg_id, fgr_span> in_nodes;
 		const NodeBuffer* buffer;

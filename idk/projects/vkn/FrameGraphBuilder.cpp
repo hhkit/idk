@@ -2,6 +2,28 @@
 #include "FrameGraphBuilder.h"
 namespace idk::vkn
 {
+
+	namespace validate
+	{
+		bool OutputAttachment(fgr_id att_id, AttachmentDescription att, span<const FrameGraphResource> input_resources)
+		{
+			bool result = true;
+			if (att.load_op == vk::AttachmentLoadOp::eLoad)
+			{
+				result = false;
+				for (auto rsc : input_resources)
+				{
+					if (rsc.id == att_id)
+					{
+						result = true;
+						break;
+					}
+				}
+			}
+			return result;
+		}
+	}
+
 	fg_id FrameGraphBuilder::NextID()
 	{
 		return _fgid_generator.gen_next();
@@ -43,8 +65,8 @@ namespace idk::vkn
 		auto rsc = rsc_manager.WriteRename(target_rsc);
 		if (!opt.clear)
 			curr_rsc.input_resources.emplace_back(target_rsc);
-		else
-			curr_rsc.modified_resources.emplace_back(target_rsc);
+		
+		curr_rsc.modified_resources.emplace_back(target_rsc);
 		curr_rsc.output_resources.emplace_back(rsc);
 		return rsc;
 	}
@@ -80,6 +102,10 @@ namespace idk::vkn
 
 	void FrameGraphBuilder::set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{
+		if (!validate::OutputAttachment(out_rsc.id, attachment_desc, curr_rsc.input_resources))
+		{
+			LOG_ERROR_TO(LogPool::GFX, "Attachment is loading from a resource without calling read on it.");
+		}
 		auto size = std::max(curr_rsc.output_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.output_attachments.resize(size);
 		curr_rsc.output_attachments[attachment_index] = { out_rsc.id,attachment_desc };

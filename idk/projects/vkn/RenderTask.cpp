@@ -312,6 +312,7 @@ namespace idk::vkn
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
+		_start_new_batch = false;
 		StartNewBatch();//flush the current batch
 		auto cmd_buffer = render_bundle._cmd_buffer;
 		if (_label)
@@ -333,8 +334,6 @@ namespace idk::vkn
 		vector<vk::ClearValue> clear_values;
 		compute_clear_info(_num_output_attachments, clear_colors, _clear_depth_stencil,clear_values);
 		vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
-		if (batches.size())
-		{
 
 		auto rp = curr_rp;
 		auto fb = curr_frame_buffer;
@@ -344,13 +343,13 @@ namespace idk::vkn
 		{
 			for (auto& sc : batch.scissor.to_span())
 			{
-				auto vmin= sc.position;
-				auto vmax= vmin + sc.size;
+				auto vmin = sc.position;
+				auto vmax = vmin + sc.size;
 				ra_max = max(ra_max, vmax);
 				ra_min = min(ra_min, vmin);
 			}
 		}
-		render_area = {ra_min,ra_max-ra_min};
+		render_area = { ra_min,ra_max - ra_min };
 
 		vk::RenderPassBeginInfo rpbi
 		{
@@ -360,6 +359,8 @@ namespace idk::vkn
 			std::data(clear_values),
 		};
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+		if (batches.size())
+		{
 		for (auto& batch : this->batches)
 		{
 			if (batch.label)
@@ -423,9 +424,9 @@ namespace idk::vkn
 				dbg::EndLabel(cmd_buffer);
 			}
 		}
-		cmd_buffer.endRenderPass();
-
 		}
+
+		cmd_buffer.endRenderPass();
 		if (_label)
 		{
 			dbg::EndLabel(cmd_buffer);

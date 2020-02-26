@@ -63,15 +63,15 @@ namespace idk
 		};
 		auto desc_func = [](auto& sublifetime)
 		{
-			return std::to_string(sublifetime.rsc_id);/*
+			return string{ std::to_string(sublifetime.rsc_id) };/*
 				sublifetime.rsc_name;//*/
 		};
 		for (auto& lifetime : lifetimes)
 		{
 			for (auto& sublifetime : lifetime)
 			{
-				auto name = name_func(sublifetime);
-				max_len = std::max(max_len, name.length());
+				auto name = name_func(sublifetime)+desc_func(sublifetime);
+				max_len = std::max(max_len, name.length()+2);
 				max_lifetime = std::max(max_lifetime, sublifetime.end);
 			}
 		}
@@ -113,7 +113,8 @@ namespace idk
 					if(!desc.empty())
 						ImGui::SetTooltip(desc.data());
 				}
-				dump += name;
+				auto derp = ":" + desc;
+				dump += name.replace(name.size()-derp.size()-2,derp.size(),derp);
 				ImGui::SameLine();
 			}
 			ImGui::NewLine();

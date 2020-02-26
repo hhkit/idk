@@ -18,7 +18,7 @@ namespace idk::vkn::renderpasses
 	using Context_t = PassUtil::Context_t;
 
 	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size={});
-	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size = {});
+	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size = {}, std::optional<WriteOptions> write_opt = {});
 	void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh);
 
 	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2> size)
@@ -40,9 +40,12 @@ namespace idk::vkn::renderpasses
 
 	}
 
-	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2>  size)
+	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2>  size, std::optional<WriteOptions> write_opt)
 	{
-		return builder.write(builder.CreateTexture(CreateTextureInfo(builder, name, format, usage, flag, target,size)));
+		WriteOptions opt = {};
+		if (write_opt)
+			opt = *write_opt;
+		return builder.write(builder.CreateTexture(CreateTextureInfo(builder, name, format, usage, flag, target,size)),opt);
 
 	}
 
@@ -93,6 +96,7 @@ namespace idk::vkn::renderpasses
 					vk::Extent3D{size.x,size.y,1},
 				}
 			} });
+		depth_rsc = builder.write(depth_rsc, WriteOptions{ false });
 		uint32_t index = 0;
 		for (auto& gbuffer_rsc : gbuffer_rscs)
 		{
@@ -217,7 +221,7 @@ namespace idk::vkn::renderpasses
 
 	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex) : accum_def{ accum_def_ }, accum_spec{ accum_spec_ }, _viewport{viewport}
 	{
-		hdr_rsc = builder.write(color_tex);
+		hdr_rsc = builder.write(color_tex, WriteOptions{ false });
 		hdr_depth_rsc = builder.write(depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		builder.set_output_attachment(hdr_rsc, 0, AttachmentDescription
 			{
@@ -240,7 +244,7 @@ namespace idk::vkn::renderpasses
 		auto derp2 = builder.read(accum_def.depth_rsc);
 		auto derp3 = builder.read(accum_spec.accum_rsc);
 		auto derp4 = builder.read(accum_spec.depth_rsc);
-		builder.set_input_attachment(accum_att_def = derp1, 0, AttachmentDescription
+		builder.set_input_attachment(accum_att_def = derp1, 1, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -256,7 +260,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_input_attachment(depth_att_def = derp2, 1, AttachmentDescription
+		builder.set_input_attachment(depth_att_def = derp2, 2, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -273,7 +277,7 @@ namespace idk::vkn::renderpasses
 				//vk::ComponentMapping mapping{};
 			});
 
-		builder.set_input_attachment(accum_att_spec = derp3, 2, AttachmentDescription
+		builder.set_input_attachment(accum_att_spec = derp3, 3, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -289,7 +293,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_input_attachment(depth_att_spec = derp4, 3, AttachmentDescription
+		builder.set_input_attachment(depth_att_spec = derp4, 4, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -370,8 +374,14 @@ namespace idk::vkn::renderpasses
 	{
 		auto color_buffer = RscHandle<VknTexture>{rt->GetColorBuffer()};
 		auto depth_buffer = RscHandle<VknTexture>{rt->GetDepthBuffer()};
-		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer,rt_size);
-		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer,rt_size);
+		std::optional<WriteOptions> col_opt{};
+		std::optional<WriteOptions> dep_opt{};
+		if (clear_col)
+			col_opt = WriteOptions{ false };
+		if (clear_dep)
+			dep_opt = WriteOptions{ false };
+		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer,rt_size, col_opt);
+		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer,rt_size, dep_opt);
 		render_target = color_att;
 		depth = depth_att;
 		std::array<float, 4> clear_color{};
@@ -618,10 +628,10 @@ namespace idk::vkn::renderpasses
 	}
 	UnlitPass::UnlitPass(FrameGraphBuilder& builder, FrameGraphResource color_tex, FrameGraphResource depth_tex)
 	{
-		color_rsc = builder.write(color_tex);
-		depth_rsc = builder.write(depth_tex);
+		color_rsc = builder.write(color_tex,WriteOptions{false});
+		depth_rsc = builder.write(depth_tex,WriteOptions{false});
 
-		builder.set_output_attachment(color_rsc, 3, AttachmentDescription
+		builder.set_output_attachment(color_rsc, 0, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
@@ -648,21 +658,21 @@ namespace idk::vkn::renderpasses
 				{
 					vk::ImageAspectFlagBits::eDepth,0,1,0,1
 				},//vk::ImageSubresourceRange sub_resource_range{};
-				vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
+				//vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
 				//std::optional<vk::Format> format{};
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
 	}
 
-	void UnlitPass::Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set)
+	void UnlitPass::Execute(Context_t context, BaseDrawSet& draw_set)
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, name);
 		{
 			size_t i = 0;
 
 			AttachmentBlendConfig blend{};
-			blend.blend_enable = true;
+			blend.blend_enable = false;
 			blend.dst_color_blend_factor = BlendFactor::eOne;
 			blend.src_color_blend_factor = BlendFactor::eOne;
 			blend.color_blend_op = BlendOp::eAdd;
@@ -670,6 +680,7 @@ namespace idk::vkn::renderpasses
 			blend.dst_alpha_blend_factor = BlendFactor::eOne;
 			blend.src_alpha_blend_factor = BlendFactor::eOne;
 			context.SetBlend(i, blend);
+			//context.SetDepthTest(false);
 			++i;
 		}
 		draw_set.Render(context);
@@ -703,7 +714,7 @@ namespace idk::vkn::renderpasses
 			.material_instances = gfx_state.material_instances,
 			.vertex_state_info = state,
 		};
-		auto make_gbuffer_set = [&](bindings::DeferredPbrInfo& info)
+		auto make_gbuffer_set = [&](const bindings::DeferredPbrInfo& info)
 		{ 
 			return DeferredPbrSet{
 				{

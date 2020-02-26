@@ -1,9 +1,9 @@
 #version 460
 
-layout (input_attachment_index=0, set=2, binding=0) uniform subpassInput metallic_light_accum_input;
-layout (input_attachment_index=1, set=2, binding=1) uniform subpassInput metallic_depth_input;
-layout (input_attachment_index=2, set=2, binding=2) uniform subpassInput specular_light_accum_input;
-layout (input_attachment_index=3, set=2, binding=3) uniform subpassInput specular_depth_input;
+layout (input_attachment_index=1, set=2, binding=0) uniform subpassInput metallic_light_accum_input;
+layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput metallic_depth_input;
+layout (input_attachment_index=3, set=2, binding=2) uniform subpassInput specular_light_accum_input;
+layout (input_attachment_index=4, set=2, binding=3) uniform subpassInput specular_depth_input;
 
 
 layout(location=0) out vec4 out_color;

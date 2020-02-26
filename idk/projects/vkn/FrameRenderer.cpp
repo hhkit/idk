@@ -66,7 +66,7 @@ namespace idk::vkn
 		hash_table<RscHandle<Texture>, RscHandle<VknFrameBuffer>> deferred_buffers;
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
-		FrameGraph graph;
+		FrameGraph graph{};
 		gt::GraphTest test{ graph };
 
 		gfxdbg::FgRscLifetimes _dbg_lifetimes;

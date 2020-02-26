@@ -143,7 +143,7 @@ namespace idk::vkn::renderpasses
 		FrameGraphResourceMutable depth_rsc;
 
 		UnlitPass(FrameGraphBuilder& builder, FrameGraphResource color_tex, FrameGraphResource depth_rsc);
-		void Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set) override;
+		void Execute(Context_t context, BaseDrawSet& draw_set) override;
 		rect _viewport;
 	};
 	struct CubeClearPass : DrawSetRenderPass, FsqUtil

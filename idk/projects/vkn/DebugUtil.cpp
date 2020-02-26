@@ -14,7 +14,7 @@ namespace idk::vkn
 }
 namespace idk::vkn::dbg
 {
-	static bool enable_named_object = true;;
+	static bool enable_named_object = false;;
 	auto CreateLabel(const char* label, const color& col)
 	{
 		return vk::DebugUtilsLabelEXT

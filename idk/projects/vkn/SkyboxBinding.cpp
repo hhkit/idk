@@ -9,9 +9,13 @@
 //Stuff that should be bound at the start, before the renderobject/animated renderobject loop.
 namespace idk::vkn::bindings
 {
+	bool SkyboxBindings::Skip() const
+	{
+		return _camera.clear_data.index() != meta::IndexOf_v<decltype(_camera.clear_data), RscHandle<CubeMap>>;
+	}
 	bool SkyboxBindings::Skip(RenderInterface& , const RenderObject& )
 	{
-		return _camera.clear_data.index()!=meta::IndexOf_v<decltype(_camera.clear_data),RscHandle<CubeMap>>;
+		return Skip();
 	}
 	void SkyboxBindings::Bind(RenderInterface& the_interface)
 	{
@@ -21,6 +25,8 @@ namespace idk::vkn::bindings
 		the_interface.SetCullFace(CullFace::eNone);
 		the_interface.SetDepthWrite(false);
 		the_interface.SetDepthTest(false);
+		if (Skip())
+			BindClear(the_interface);
 	}
 
 	//Stuff that needs to be bound with every renderobject/animated renderobject
@@ -36,6 +42,22 @@ namespace idk::vkn::bindings
 		auto sb_cm = std::get<RscHandle<CubeMap>>(camera.clear_data);
 		the_interface.BindUniform("sb", 0, sb_cm.as<VknCubemap>());
 		the_interface.BindUniform("CameraBlock", 0, string_view{ hlp::buffer_data<const char*>(mat4block),hlp::buffer_size(mat4block) });
+	}
+	struct ClearBinder
+	{
+		RenderInterface& the_interface;
+		template<typename T>
+		void operator()(T&& t) {} //Catchall
+
+		void operator()(color col)
+		{
+			the_interface.SetClearColor(0, col);
+		}
+	};
+	void SkyboxBindings::BindClear(RenderInterface& the_interface) const
+	{
+		ClearBinder clear{ the_interface };
+		std::visit(clear, _camera.clear_data);
 	}
 
 }

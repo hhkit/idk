@@ -27,7 +27,7 @@ namespace idk::vkn::bindings
 				if (mat_inst.material)
 				{
 					auto& mat = *mat_inst.material;
-					if (mat.model = ShadingModel::Unlit) return true;
+					//if (mat.model == ShadingModel::Unlit) return true;
 					return mat.model != model || mat.blend != blend;
 				}
 			}
