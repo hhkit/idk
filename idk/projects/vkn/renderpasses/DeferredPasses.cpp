@@ -376,9 +376,9 @@ namespace idk::vkn::renderpasses
 		auto depth_buffer = RscHandle<VknTexture>{rt->GetDepthBuffer()};
 		std::optional<WriteOptions> col_opt{};
 		std::optional<WriteOptions> dep_opt{};
-		if (clear_col)
+		if (!clear_col)
 			col_opt = WriteOptions{ false };
-		if (clear_dep)
+		if (!clear_dep)
 			dep_opt = WriteOptions{ false };
 		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer,rt_size, col_opt);
 		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer,rt_size, dep_opt);
@@ -696,7 +696,7 @@ namespace idk::vkn::renderpasses
 
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
-
+//#pragma optimize("",off)
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		PassUtil::FullRenderData rd{ &gfx_state,&rs };

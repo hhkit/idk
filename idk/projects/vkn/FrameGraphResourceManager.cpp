@@ -73,7 +73,7 @@ namespace idk::vkn
 				(*o_prsc)->usage |= usage;
 		}
 	}
-#pragma optimize ("",off)
+//#pragma optimize ("",off)
 	FrameGraphResource FrameGraphResourceManager::CreateTexture(TextureDescription dsc)
 	{
 		auto rsc_index = resources.size();
@@ -107,6 +107,15 @@ namespace idk::vkn
 	FrameGraphResource FrameGraphResourceManager::WriteRenamed(FrameGraphResource rsc)const
 	{
 		return FrameGraphResource{ write_renamed.find(rsc.id)->second };
+	}
+
+	std::optional<fgr_id> FrameGraphResourceManager::BeforeWriteRenamed(FrameGraphResource rsc) const
+	{
+		std::optional<fgr_id> result = {};
+		auto itr = write_renamed.find_second(rsc.id);
+		if (itr != write_renamed.end())
+			result = itr->first;
+		return result;
 	}
 
 

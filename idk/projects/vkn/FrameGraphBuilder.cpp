@@ -5,11 +5,12 @@ namespace idk::vkn
 
 	namespace validate
 	{
-		bool OutputAttachment(fgr_id att_id, AttachmentDescription att, span<const FrameGraphResource> input_resources)
+		bool OutputAttachment(fgr_id att_id,std::optional<fgr_id> before_write, AttachmentDescription att, span<const FrameGraphResource> input_resources)
 		{
 			bool result = true;
-			if (att.load_op == vk::AttachmentLoadOp::eLoad)
+			if (att.load_op == vk::AttachmentLoadOp::eLoad && before_write)
 			{
+				att_id = *before_write;
 				result = false;
 				for (auto rsc : input_resources)
 				{
@@ -35,7 +36,7 @@ namespace idk::vkn
 	void FrameGraphBuilder::Reset()
 	{
 		ResetIDs();
-		consumed_resources.resources.clear();
+		consumed_resources.Reset();
 		origin_nodes.clear();
 		_region_name.clear();
 	}
@@ -66,7 +67,7 @@ namespace idk::vkn
 		if (!opt.clear)
 			curr_rsc.input_resources.emplace_back(target_rsc);
 		
-		curr_rsc.modified_resources.emplace_back(target_rsc);
+		curr_rsc.modified_resources.emplace_back(target_rsc); 
 		curr_rsc.output_resources.emplace_back(rsc);
 		return rsc;
 	}
@@ -99,12 +100,14 @@ namespace idk::vkn
 		curr_rsc.input_attachments[attachment_index] = { in_rsc.id,attachment_desc };
 		rsc_manager.MarkUsage(in_rsc.id, vk::ImageUsageFlagBits::eInputAttachment);
 	}
+//#pragma optimize("",off)
 
 	void FrameGraphBuilder::set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{
-		if (!validate::OutputAttachment(out_rsc.id, attachment_desc, curr_rsc.input_resources))
+		auto read = rsc_manager.BeforeWriteRenamed(out_rsc);
+		if (!validate::OutputAttachment(out_rsc.id,read, attachment_desc, curr_rsc.input_resources))
 		{
-			LOG_ERROR_TO(LogPool::GFX, "Attachment is loading from a resource without calling read on it.");
+			LOG_ERROR_TO(LogPool::GFX, "Attachment is loading from a resource without calling read on it. \nYou probably forgot to specify clear = false when calling write.");
 		}
 		auto size = std::max(curr_rsc.output_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.output_attachments.resize(size);
@@ -188,6 +191,12 @@ namespace idk::vkn
 	{
 		auto& buffer = copies;
 		return StoreResourceInBuffer(buffer, rsc);
+	}
+
+	void NodeBuffer::Reset()
+	{
+		resources.clear();
+		copies.clear();
 	}
 
 }

@@ -46,6 +46,7 @@ namespace idk::vkn
 		FrameGraphResource Rename(FrameGraphResource rsc);
 		FrameGraphResource WriteRename(FrameGraphResource rsc);
 		FrameGraphResource WriteRenamed(FrameGraphResource rsc)const;
+		std::optional<fgr_id> BeforeWriteRenamed(FrameGraphResource rsc)const;
 		bool IsWriteRenamed(FrameGraphResource rsc)const;
 		string_view Name(FrameGraphResource fg)const;
 

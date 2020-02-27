@@ -135,21 +135,22 @@ namespace idk::vkn
 				template<typename FgConvFunc, typename FgrConvFunc>
 				DependencyDebugger(const ActualGraph& graph, FgConvFunc&& fgid_name, FgrConvFunc&& fgrid_name)
 				{
-					for (auto [node_id, rsc_span] : graph.in_rsc_nodes)
-					{
-						auto& [name,rsc_names]=nodes.emplace_back(NodeDependencies{ fgid_name(node_id) });
-						for (auto rsc: rsc_span)
+					if(frame_graph_debug)
+						for (auto [node_id, rsc_span] : graph.in_rsc_nodes)
 						{
-							rsc_names.emplace_back(fgrid_name(rsc.id));
+							auto& [name,rsc_names]=nodes.emplace_back(NodeDependencies{ fgid_name(node_id) });
+							for (auto rsc: rsc_span)
+							{
+								rsc_names.emplace_back(fgrid_name(rsc.id));
+							}
 						}
-					}
 
 				}
 			};
 		}
 
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
 		tmp_graph.buffer = &graph_builder.consumed_resources;
@@ -185,14 +186,15 @@ namespace idk::vkn
 				}
 			}
 			auto get_name = [this,&id_to_indices](fgr_id node_id) {return nodes[id_to_indices.at(node_id)].name; };
-			for (auto [node_id, dep_nodes] : dependant_nodes)
-			{
-				dbg_dependant_nodes[node_id].first = get_name(node_id);
-					for (auto dep_node_id : dep_nodes)
+			if(frame_graph_debug)
+				for (auto [node_id, dep_nodes] : dependant_nodes)
 				{
-						dbg_dependant_nodes[node_id].second.emplace_back(get_name(dep_node_id));
+					dbg_dependant_nodes[node_id].first = get_name(node_id);
+						for (auto dep_node_id : dep_nodes)
+					{
+							dbg_dependant_nodes[node_id].second.emplace_back(get_name(dep_node_id));
+					}
 				}
-			}
 
 			index_buffer.reserve(nodes.size());
 			for (auto& [id, src_index] : id_to_indices)
@@ -214,11 +216,12 @@ namespace idk::vkn
 			//Maybe use copy_if to filter out useless nodes.
 			execution_order = std::move(sorted_order);
 			_dbg_execution_order.clear();
-			for (auto index : execution_order)
-			{
-				auto& node = nodes[index];
-				_dbg_execution_order.emplace_back(node.name,&*render_passes.at(node.id),&node);
-			}
+			if(frame_graph_debug)
+				for (auto index : execution_order)
+				{
+					auto& node = nodes[index];
+					_dbg_execution_order.emplace_back(node.name,&*render_passes.at(node.id),&node);
+				}
 		}
 		ComputeLifetimes(graph, rsc_lifetime_mgr);
 	}

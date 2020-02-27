@@ -7,7 +7,7 @@
 #include <vkn/RenderUtil.h>
 namespace idk::vkn
 {
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	InstMeshDrawSet::InstMeshDrawSet(span<const InstRenderObjects> inst_draw_range, vk::Buffer inst_mesh_render_buffer) : 
 		_inst_draw_range{ inst_draw_range },
 		_inst_mesh_render_buffer{ inst_mesh_render_buffer }
@@ -113,7 +113,7 @@ namespace idk::vkn
 			}
 		}//End of draw_call loop
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	
 	renderer_attributes FsqDrawSet::_req = { {
 			std::make_pair(vtx::Attrib::Position, 0),

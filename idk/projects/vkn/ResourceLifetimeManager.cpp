@@ -43,17 +43,22 @@ namespace idk::vkn
 	{
 		return resource_alias;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void ResourceLifetimeManager::DebugArrange(const FrameGraphResourceManager& rsc_manager) const
 	{
-		gfxdbg::FgRscLifetimes tmp;
-		DebugArrange(tmp, rsc_manager);
-		vector<std::pair<string, string>> derp;
-		for (auto& [rsc, original] : mappings)
+		bool dbg_enabled = false;
+
+		if (dbg_enabled)
 		{
-			derp.emplace_back(rsc_manager.GetResourceDescription(rsc)->name, rsc_manager.GetResourceDescription(original)->name);
+			gfxdbg::FgRscLifetimes tmp;
+			DebugArrange(tmp, rsc_manager);
+			vector<std::pair<string, string>> derp;
+			for (auto& [rsc, original] : mappings)
+			{
+				derp.emplace_back(rsc_manager.GetResourceDescription(rsc)->name, rsc_manager.GetResourceDescription(original)->name);
+			}
+			tmp.clear();
 		}
-		tmp.clear();
 	}
 	void ResourceLifetimeManager::DebugArrange(gfxdbg::FgRscLifetimes& dbg, const FrameGraphResourceManager& rsc_manager) const
 	{

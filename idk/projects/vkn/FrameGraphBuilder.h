@@ -15,6 +15,7 @@ namespace idk::vkn
 
 		vector<FrameGraphCopyResource> copies;
 		index_span StoreCopies(vector<FrameGraphCopyResource>& rsc);
+		void Reset();
 	};
 
 	struct WriteOptions

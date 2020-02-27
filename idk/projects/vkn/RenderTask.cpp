@@ -10,7 +10,7 @@
 
 #include <vkn/DebugUtil.h>
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
 static void DoNothing()
 {
 
@@ -19,18 +19,8 @@ static void DoNothing()
 void dbg_chk(vk::Image img)
 {
 	return;
-	if (
-		reinterpret_cast<size_t>(img.operator VkImage()) == 0x3672
-		||
-		reinterpret_cast<size_t>(img.operator VkImage()) == 0x3669
-		||
-		reinterpret_cast<size_t>(img.operator VkImage()) == 0x3678
-		)
-	{
-		DoNothing();
-	}
 }
-#pragma optimize("",on)
+//#pragma optimize("",on)
 
 namespace idk::vkn
 {
@@ -66,7 +56,7 @@ namespace idk::vkn
 	}
 
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
 
 	void RenderTask::BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset)
 	{
@@ -91,7 +81,7 @@ namespace idk::vkn
 	{
 		_uniform_manager.BindUniformBuffer(name, index, data,skip_if_bound);
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	static void DoNothing() {}
 	void RenderTask::BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
@@ -308,7 +298,7 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);

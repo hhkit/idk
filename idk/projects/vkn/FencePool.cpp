@@ -75,7 +75,7 @@ namespace idk::vkn
 		_acquire_lock.Unlock();
 		return CmdBufferObj{ index,this };
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	vk::CommandBuffer CmdBufferObj::operator*() const
 	{
 		auto cmd_buffer = _src->Get(_id);
