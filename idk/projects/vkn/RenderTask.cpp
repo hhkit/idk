@@ -472,32 +472,34 @@ namespace idk::vkn
 			dbg_chk(src_img);
 			dbg_chk(dst_img);
 			//Transition from their original layouts to eGeneral
-			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			auto target_src_format = vk::ImageLayout::eTransferSrcOptimal;
+			auto target_dst_format = vk::ImageLayout::eTransferDstOptimal;
+			if (copy_cmd.src_layout != target_src_format)
 			{
 				auto range = copy_cmd.src_range;
 				if (!range)
 					range = copy_cmd.src.FullRange();
-				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, vk::ImageLayout::eGeneral, hlp::TransitionOptions{ {},{},range});
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, target_src_format, hlp::TransitionOptions{ {},{},range});
 			}
-			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
+			if (copy_cmd.dst_layout != target_dst_format)
 			{
 				//cmd_buffer.pipelineBarrier();
 				auto range = copy_cmd.dst_range;
 				if (!range)
 					range = copy_cmd.dst.FullRange();
-				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, hlp::TransitionOptions{ {},{},range });
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eUndefined, target_dst_format , hlp::TransitionOptions{ {},{},range });
 			}
-			cmd_buffer.copyImage(copy_cmd.src.Image(), vk::ImageLayout::eGeneral, copy_cmd.dst.Image(), vk::ImageLayout::eTransferDstOptimal, copy_cmd.regions);
+			cmd_buffer.copyImage(copy_cmd.src.Image(), target_src_format, copy_cmd.dst.Image(), target_dst_format, copy_cmd.regions);
 			//Transition from their eGeneral to original layouts 
-			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral && copy_cmd.src_layout != vk::ImageLayout::eUndefined)
+			if (copy_cmd.src_layout != target_src_format && copy_cmd.src_layout != vk::ImageLayout::eUndefined)
 			{
 				//cmd_buffer.pipelineBarrier();
 				auto range = copy_cmd.src_range;
 				if (!range)
 					range = copy_cmd.src.FullRange();
-				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), vk::ImageLayout::eGeneral, copy_cmd.src_layout, hlp::TransitionOptions{ {},{},range });
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), target_src_format, copy_cmd.src_layout, hlp::TransitionOptions{ {},{},range });
 			}
-			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
+			if (copy_cmd.dst_layout != target_src_format)
 			{
 				//cmd_buffer.pipelineBarrier();
 				auto range = copy_cmd.dst_range;

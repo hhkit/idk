@@ -86,7 +86,7 @@ namespace idk::vkn
 				copy_desc->actual_rsc = {};
 			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferDst;
 			result= CreateTexture(*copy_desc);
-			result = write(result, WriteOptions{ .clear = false });
+			//result = write(result, WriteOptions{ .clear = false }); //Create already puts it into output resources
 			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result,opt});
 			read(target_rsc,false);
 		}

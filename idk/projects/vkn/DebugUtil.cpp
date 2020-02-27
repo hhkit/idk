@@ -43,6 +43,19 @@ namespace idk::vkn::dbg
 			cmd_buffer.endDebugUtilsLabelEXT(View().DynDispatcher());
 	}
 
+	void BeginLabel(vk::Queue queue, const char* label, const color& col)
+	{
+		auto dbg_label = CreateLabel(label, col);
+		if (View().DynDispatcher().vkQueueBeginDebugUtilsLabelEXT)
+			queue.beginDebugUtilsLabelEXT(dbg_label, View().DynDispatcher());
+	}
+
+	void EndLabel(vk::Queue queue)
+	{
+		if (View().DynDispatcher().vkQueueEndDebugUtilsLabelEXT)
+			queue.endDebugUtilsLabelEXT(View().DynDispatcher());
+	}
+
 
 
 

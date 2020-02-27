@@ -336,7 +336,7 @@ namespace idk::vkn
 		}
 	}
 
-
+#pragma optimize("",off)
 
 
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
@@ -377,7 +377,16 @@ namespace idk::vkn
 				
 				vk::ImageLayout prev_layout = att_opt.layout;
 				if (prev_id)
-					prev_layout = find_input_layout(nodes_buffer[nodes_lookup.find(src_nodes.find(*prev_id)->second)->second], *prev_id);
+				{
+					auto src_itr = src_nodes.find(*prev_id);
+					auto node_to_index = nodes_lookup.find(src_itr->second);
+					auto node_index = node_to_index->second;
+					auto& node = nodes_buffer[node_index];
+					auto copy_span = node.GetCopySpan();
+					auto outp_span = node.GetOutputSpan();
+					auto inpu_span = node.GetInputSpan();
+					prev_layout = find_input_layout(node, *prev_id);
+				}
 				attachments.emplace_back(vk::AttachmentDescription
 					{
 						//vk::AttachmentDescriptionFlagBits::eMayAlias

@@ -463,6 +463,7 @@ namespace idk::vkn
 //
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
+
 		auto& lights = (*state.shadow_ranges);
 		const size_t num_conv_states = 1;
 		const size_t num_instanced_buffer_state = 1;
@@ -480,6 +481,7 @@ namespace idk::vkn
 		std::optional<vk::Semaphore> copy_semaphore{};
 		{
 
+			dbg::BeginLabel(View().GraphicsQueue(), "PreRender GraphicsStates", color{ 0.3f,0.0f,0.3f });
 			auto copy_state_ind = curr_state++;
 			auto& copy_state = _pre_states[copy_state_ind];
 
@@ -637,6 +639,7 @@ namespace idk::vkn
 
 		auto queue = View().GraphicsQueue();
 		queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
+		dbg::EndLabel(queue);
 	}
 	VulkanView& View();
 //// 
@@ -854,6 +857,7 @@ namespace idk::vkn
 				auto& rt = elem.light_map.as<VknFrameBuffer>();
 				vk::Framebuffer fb = rt.GetFramebuffer();
 				auto  rp = rt.GetRenderPass();
+				dbg::BeginLabel(cmd_buffer, "other shadow", color{ 0,0.2f,0.4f,1 });
 				rt.PrepareDraw(cmd_buffer);
 				vector<vec4> clear_colors
 				{
@@ -864,6 +868,8 @@ namespace idk::vkn
 				RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
 
 				cmd_buffer.endRenderPass();
+				dbg::EndLabel(cmd_buffer);
+
 				//cmd_buffer.end();
 
 			}
@@ -1026,8 +1032,10 @@ namespace idk::vkn
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+			dbg::BeginLabel(rb._cmd_buffer, "Framegraph in RenderGraphicsStates starting.", color{ 0.3,0.4,0 });
 			_pimpl->graph.ProcessBatches(rb);
 			state.ubo_manager.UpdateAllBuffers();
+			dbg::EndLabel(rb._cmd_buffer);
 			rb._cmd_buffer.end();
 			state.FlagRendered();
 		}
@@ -1105,7 +1113,9 @@ namespace idk::vkn
 
 
 		View().Device()->resetFences(1, &inflight_fence, vk::DispatchLoaderDefault{});
+		dbg::BeginLabel(queue, "Render GraphicsStates", color{ 0.3f,0.0f,0.3f });
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
+		dbg::EndLabel(queue);
 		View().Swapchain().m_graphics.images[View().vulkan().rv] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 	}
 

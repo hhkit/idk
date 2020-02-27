@@ -157,7 +157,7 @@ namespace idk::vkn::renderpasses
 		FrameGraphResource render_target;
 		FrameGraphResource depth;
 		uvec2 rt_size;
-		CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt,std::optional<color>clear_color, std::optional<float> clear_depth);
+		CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt, bool col_dont_care,std::optional<color>clear_color, std::optional<float> clear_depth);
 		void Execute(Context_t context, BaseDrawSet& draw_set)override;
 	};
 

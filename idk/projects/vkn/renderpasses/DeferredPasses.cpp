@@ -77,7 +77,7 @@ namespace idk::vkn::renderpasses
 		gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm              ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		depth_rsc = builder.copy(depth, CopyOptions{ vk::ImageLayout::eDepthStencilAttachmentOptimal,
+		depth_rsc = builder.copy(depth, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,
 			{
 				vk::ImageCopy
 				{
@@ -370,13 +370,13 @@ namespace idk::vkn::renderpasses
 
 
 
-	CubeClearPass::CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt, std::optional<color>clear_col, std::optional<float> clear_dep) : rt_size{rt->Size()}
+	CubeClearPass::CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt, bool col_dont_care, std::optional<color>clear_col, std::optional<float> clear_dep) : rt_size{rt->Size()}
 	{
 		auto color_buffer = RscHandle<VknTexture>{rt->GetColorBuffer()};
 		auto depth_buffer = RscHandle<VknTexture>{rt->GetDepthBuffer()};
 		std::optional<WriteOptions> col_opt{};
 		std::optional<WriteOptions> dep_opt{};
-		if (!clear_col)
+		if (!clear_col&&!col_dont_care)
 			col_opt = WriteOptions{ false };
 		if (!clear_dep)
 			dep_opt = WriteOptions{ false };
@@ -392,7 +392,7 @@ namespace idk::vkn::renderpasses
 		builder.set_output_attachment(color_att, 0,
 			AttachmentDescription
 			{
-					(clear_col) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+					(clear_col) ? vk::AttachmentLoadOp::eClear : col_dont_care? vk::AttachmentLoadOp::eDontCare: vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
 					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -509,6 +509,7 @@ namespace idk::vkn::renderpasses
 	{
 		std::optional<color> clear_color={};
 		std::optional<float> clear_depth={};
+		bool ignore_color = false;
 	};
 
 	struct ClearInfoVisitor
@@ -519,7 +520,7 @@ namespace idk::vkn::renderpasses
 		}
 		clear_info operator()(RscHandle<CubeMap> cube)const
 		{
-			return clear_info{ {},1.0f };
+			return clear_info{ {},1.0f,true };
 		}
 		clear_info operator()(DepthOnly )const
 		{
@@ -637,7 +638,7 @@ namespace idk::vkn::renderpasses
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
 				vk::ImageSubresourceRange
 				{
 					vk::ImageAspectFlagBits::eColor,0,1,0,1
@@ -653,7 +654,7 @@ namespace idk::vkn::renderpasses
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
 				vk::ImageSubresourceRange
 				{
 					vk::ImageAspectFlagBits::eDepth,0,1,0,1
@@ -700,11 +701,11 @@ namespace idk::vkn::renderpasses
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		PassUtil::FullRenderData rd{ &gfx_state,&rs };
-		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
+		auto [clr_col, clr_dep,ignore_clear] = ExtractClearInfo(gfx_state.camera);
 		//TODO: 
 		bindings::SkyboxBindings skybox_binding{};
 		skybox_binding.SetCamera(gfx_state.camera);
-		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding,FsqDrawSet{MeshType::Box} }, gfx_state.camera.render_target, clr_col, clr_dep).RenderPass();
+		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding,FsqDrawSet{MeshType::Box} }, gfx_state.camera.render_target, ignore_clear,clr_col, clr_dep).RenderPass();
 		bindings::StandardVertexBindings::StateInfo state;
 		state.SetState(gfx_state);
 		bindings::DeferredPbrInfo info{

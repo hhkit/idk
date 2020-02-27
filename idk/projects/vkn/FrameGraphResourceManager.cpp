@@ -167,10 +167,18 @@ namespace idk::vkn
 
 	std::optional<fgr_id> FrameGraphResourceManager::GetPrevious(fgr_id curr) const
 	{
-		auto itr = renamed_resources.find(curr);
-		std::optional<fgr_id> result{};
-		if (itr != renamed_resources.end())
-			result = itr->first;
+		std::optional<fgr_id> result = curr;
+		auto wr = BeforeWriteRenamed(FrameGraphResource{ curr });
+		if (wr)
+		{
+			curr = *wr;
+		}
+		{
+			result = {};
+			auto itr = renamed_original.find(curr);
+			if (itr != renamed_original.end() && itr->second != curr)
+				result = itr->second;
+		}
 		return result;
 	}
 
