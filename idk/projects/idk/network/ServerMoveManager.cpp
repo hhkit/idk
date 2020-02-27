@@ -22,7 +22,7 @@ namespace idk
 
 	void ServerMoveManager::OnMoveReceived(MoveClientMessage& move)
 	{
-		LOG_TO(LogPool::NETWORK, "Received move event");
+		//LOG_TO(LogPool::NETWORK, "Received move event");
 		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(move.network_id);
 		if (view)
 		{

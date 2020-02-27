@@ -669,13 +669,13 @@ namespace idk
 
 				render_data.particles.resize(sz);
 
+				auto decomposed = decompose(elem.transform);
 				for (uint16_t i = 0; i < sz; ++i)
-					render_data.particles[i].position = elem.data.position[i] * elem.transform.scale;
+					render_data.particles[i].position = elem.data.position[i];
 				if (!elem.main.in_world_space)
 				{
-					mat3 rot{ elem.transform.rotation };
 					for (auto& p : render_data.particles)
-						p.position = elem.transform.position + rot * p.position;
+						p.position = elem.transform * vec4{ p.position, 1.0f };
 				}
 
 				for (uint16_t i = 0; i < sz; ++i)

@@ -92,11 +92,12 @@ namespace idk::mono
 		}
 	}
 
-	void Behavior::InvokeRPC(string_view rpc, MonoArray* params, void* message_info)
+	bool Behavior::InvokeRPC(string_view rpc, MonoArray* params, void* message_info)
 	{
 		auto rpc_method = script_data.Type()->GetRPC(rpc);
 		if (rpc_method)
 		{
+			MonoObject* exc = nullptr;
 			if (rpc_method.has_message_info_arg)
 			{
 				const auto param_length = mono_array_length(params);
@@ -105,13 +106,22 @@ namespace idk::mono
 				mono_array_memcpy_refs(arr, 0, params, 0, param_length);
 
 				mono_array_setref(arr, param_length, message_info);
-				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), arr, nullptr);
+				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), arr, &exc);
 			}
 			else
 			{
-				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), params, nullptr);
+				mono_runtime_invoke_array(rpc_method.method, script_data.Raw(), params, &exc);
 			}
+
+			if (exc)
+			{
+				Core::GetSystem<mono::ScriptSystem>().HandleException(exc);
+				return false;
+			}
+
+			return true;
 		}
+		return false;
 	}
 	
 	Behavior::Behavior(const Behavior& rhs)

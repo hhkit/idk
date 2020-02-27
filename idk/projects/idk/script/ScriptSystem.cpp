@@ -165,6 +165,14 @@ namespace idk::mono
 		return *script_environment;
 	}
 
+	void ScriptSystem::HandleException(MonoObject* exc) const
+	{
+		auto idk = Environment().Type("IDK");
+		auto method = std::get<1>(idk->GetMethod("PrintException", 1));
+		void* args[] = { exc, 0 };
+		mono_runtime_invoke(method, nullptr, args, nullptr);
+	}
+
 	void ScriptSystem::RefreshGameScripts()
 	{
 		UnloadGameScripts();

@@ -31,12 +31,14 @@ namespace idk {
 
 	bool CMD_CreateGameObject::execute()
 	{
+		auto& scene_manager = Core::GetSystem<SceneManager>();
 		if (copied_object.empty()) // create new game object, not a copy
 		{
 			if (game_object_handle == Handle<GameObject>{})
-				game_object_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+				game_object_handle = scene_manager.GetActiveScene()->CreateGameObject();
 			else
-				Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject(game_object_handle);
+				scene_manager.GetActiveScene()->CreateGameObject(game_object_handle);
+			scene_manager.InsertObject(game_object_handle);
 
 			if (parenting_gameobject) {
 				game_object_handle->GetComponent<Transform>()->SetParent(parenting_gameobject, false);
@@ -81,12 +83,14 @@ namespace idk {
             }
         }
 
+		auto& scene_manager = Core::GetSystem<SceneManager>();
 		for (RecursiveObjects& object : vector_ref) 
 		{
 			if (object.preserved_handle == Handle<GameObject>{})
-				object.preserved_handle = Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject();
+				object.preserved_handle = scene_manager.GetActiveScene()->CreateGameObject();
 			else
-				Core::GetSystem<SceneManager>().GetActiveScene()->CreateGameObject(object.preserved_handle);
+				scene_manager.GetActiveScene()->CreateGameObject(object.preserved_handle);
+			scene_manager.InsertObject(object.preserved_handle);
 
 			auto i = object.preserved_handle;
 			if (isRoot) 

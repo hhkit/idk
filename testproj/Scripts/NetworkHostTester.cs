@@ -59,6 +59,9 @@ namespace TestAndSeek
                     obj.GetComponent<ElectronView>().TransferOwnership(ElectronNetwork.clients[0]);
                 }
                 if (Input.GetKeyDown(KeyCode.R))
+                    obj?.GetComponent<ElectronView>().RPC("ExecuteMe", RPCTarget.All);
+
+                if (Input.GetKeyDown(KeyCode.R))
                     obj?.GetComponent<ElectronView>().RPC("ExecuteMeWithArgs", RPCTarget.All, "hello", 5, "oh no");
 
                 if (Input.GetKeyDown(KeyCode.R))

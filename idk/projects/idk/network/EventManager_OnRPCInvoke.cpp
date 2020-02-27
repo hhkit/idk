@@ -52,7 +52,8 @@ namespace idk
 
 	void EventManager::BroadcastRPC(Handle<ElectronView> ev, RPCTarget target, string_view method_name, span<vector<unsigned char>> buffer)
 	{
-		LOG_TO(LogPool::NETWORK, "Broadcasting RPC for %d and method %s", ev->network_id, method_name.data());
+		constexpr std::string_view RPCLookup[] = {"All", "Others", "Server"};
+		LOG_TO(LogPool::NETWORK, "Broadcasting RPC for %d and method %s to the %s", ev->network_id, method_name.data(), RPCLookup[static_cast<int>(target)].data());
 		EventInvokeRPCMessage::Data prototype_message;
 		{
 			prototype_message.invoke_on_id = ev->network_id;
@@ -129,9 +130,9 @@ namespace idk
 				mono_array_setref(arr, i, subarr);
 			}
 
-			using Reserialize = MonoArray * (*)(MonoArray*, MonoException**);
+			using Reserialize = MonoArray * (*)(MonoArray*, MonoObject**);
 
-			MonoException* exc;
+			MonoObject* exc;
 			auto params = static_cast<Reserialize>(thunk->get())(arr, &exc);
 
 			auto message_info = env.Type("ElectronMessageInfo")->Construct();
@@ -140,15 +141,20 @@ namespace idk
 
 			if (exc)
 			{
-				auto idk = Core::GetSystem<mono::ScriptSystem>().Environment().Type("IDK");
-				auto method = std::get<1>(idk->GetMethod("PrintException", 1));
-				void* args[] = { exc, 0 };
-				mono_runtime_invoke(method, nullptr, args, nullptr);
+				Core::GetSystem<mono::ScriptSystem>().HandleException(exc);
 			}
 
 			IDK_ASSERT_MSG(params, "parameters could not be instantiated");
+			unsigned successes{};
 			for (auto& elem : view->GetGameObject()->GetComponents<mono::Behavior>())
-				elem->InvokeRPC(msg.method_name, params, message_info.Raw());
+			{
+				if (elem->InvokeRPC(msg.method_name, params, message_info.Raw()))
+					++successes;
+			}
+			if (successes == 0)
+				LOG_TO(LogPool::NETWORK, "Called nonexistent RPC (%s)", msg.method_name);
+			else
+				LOG_TO(LogPool::NETWORK, "Executed RPC (%s) %d times ", msg.method_name, successes);
 		}
 	}
 }

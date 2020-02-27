@@ -31,6 +31,9 @@ namespace idk
 
         public void RPC(string methodName, RPCTarget target, params object[] parameters)
         {
+            if (InstantiationId == 0)
+                throw new InvalidOperationException("ElectronView has ID == 0. It is not synced on the network!");
+
             if (ElectronNetwork.isHost)
             {
                 // placeholder for exceptions

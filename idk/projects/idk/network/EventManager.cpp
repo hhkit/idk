@@ -175,7 +175,7 @@ namespace idk
 
 	void EventManager::BroadcastDestroyView(Handle<ElectronView> view)
 	{
-		LOG_TO(LogPool::NETWORK, "");
+		LOG_TO(LogPool::NETWORK, "Destroy item");
 		auto id = view->network_id;
 		Core::GetSystem<NetworkSystem>().BroadcastMessage<EventDestroyObjectMessage>(GameChannel::RELIABLE, [&](EventDestroyObjectMessage& msg)
 			{
