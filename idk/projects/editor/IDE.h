@@ -127,6 +127,7 @@ namespace idk
 		unique_ptr<imgui_interface> _interface;
 		Handle<Camera> _camera;
 		CommandController _command_controller; //For editor commands
+		string _editor_id;
 
 		// Editor Scene
 		bool _game_running = false;

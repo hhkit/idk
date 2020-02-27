@@ -766,7 +766,7 @@ namespace idk
         if(c_ps->state == ParticleSystem::Playing && !Core::GetSystem<IDE>().IsGameRunning())
         {
             bool destroy_on_finish = c_ps->main.destroy_on_finish;
-            c_ps->transform = decompose(c_ps->GetGameObject()->GetComponent<Transform>()->GlobalMatrix());
+            c_ps->transform = c_ps->GetGameObject()->GetComponent<Transform>()->GlobalMatrix();
             c_ps->main.destroy_on_finish = false;
             c_ps->Step(Core::GetRealDT().count());
             c_ps->main.destroy_on_finish = destroy_on_finish;

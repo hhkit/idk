@@ -143,7 +143,7 @@ namespace idk
         }
 
         if (main.in_world_space)
-            data.position[i] = transform.position + mat3(transform.rotation) * data.position[i];
+            data.position[i] = transform * vec4(data.position[i], 1.0f);
     }
 
 }

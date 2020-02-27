@@ -86,7 +86,14 @@ namespace idk
 		if (!FS::exists(path))
 			return;
 
-		CheckFileChanges(dir);
+		try
+		{
+			CheckFileChanges(dir);
+		}
+		catch (...)
+		{
+			LOG_TO(LogPool::SYS, "Joseph pls fix");
+		}
 		CheckDirChanges(dir);
 
 		for (auto& sub_dir_index : dir._sub_dirs)

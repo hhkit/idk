@@ -41,11 +41,26 @@ namespace TestAndSeek
                 if (Input.GetKeyDown(KeyCode.S))
                     ElectronNetwork.LoadScene(scene);
 
+                if (Input.GetKeyDown(KeyCode.I))
+                {
+                    var view = obj?.GetComponent<ElectronView>();
+                    view.RPC("InformMe", RPCTarget.All, view);
+                }
+
+                if (Input.GetKeyDown(KeyCode.D))
+                {
+                    var view = obj?.GetComponent<ElectronView>();
+                    view.DestroyObject();
+                }
+
                 if (Input.GetKeyDown(KeyCode.P))
                 {
                     obj = ElectronNetwork.Instantiate(instantiate, transform.position);
                     obj.GetComponent<ElectronView>().TransferOwnership(ElectronNetwork.clients[0]);
                 }
+                if (Input.GetKeyDown(KeyCode.R))
+                    obj?.GetComponent<ElectronView>().RPC("ExecuteMe", RPCTarget.All);
+
                 if (Input.GetKeyDown(KeyCode.R))
                     obj?.GetComponent<ElectronView>().RPC("ExecuteMeWithArgs", RPCTarget.All, "hello", 5, "oh no");
 

@@ -66,34 +66,42 @@ namespace idk::mono
 
 		auto rpc = envi.Type("ElecRPC");
 		IDK_ASSERT_MSG(rpc, "could not find RPC class");
-		for (void* itr = nullptr; auto method = mono_class_get_methods(type, &itr);)
-		{
-			auto attr = mono_custom_attrs_from_method(method);
-			if (attr && mono_custom_attrs_has_attr(attr, rpc->Raw()))
-			{
-				auto sig = mono_method_get_signature(method, Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Image(), 0);
-				auto param_count = mono_signature_get_param_count(sig);
-				void* jtr{};
-				MonoType* param_type{};
-				if (param_count)
-				{
-					for (unsigned i = 0; i < param_count; ++i)
-						param_type = mono_signature_get_params(sig, &jtr);
 
-					if (param_type)
+		auto klass = Raw();
+		auto end_klass = envi.Type("Object")->Raw();
+
+		while (klass != end_klass)
+		{
+			for (void* itr = nullptr; auto method = mono_class_get_methods(klass, &itr);)
+			{
+				auto attr = mono_custom_attrs_from_method(method);
+				if (attr && mono_custom_attrs_has_attr(attr, rpc->Raw()))
+				{
+					auto sig = mono_method_get_signature(method, Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().Image(), 0);
+					auto param_count = mono_signature_get_param_count(sig);
+					void* jtr{};
+					MonoType* param_type{};
+					if (param_count)
 					{
-						RPCMethod rpc_method{ method, mono_type_get_class(param_type) == message_info_type->Raw() };
+						for (unsigned i = 0; i < param_count; ++i)
+							param_type = mono_signature_get_params(sig, &jtr);
+
+						if (param_type)
+						{
+							RPCMethod rpc_method{ method, mono_type_get_class(param_type) == message_info_type->Raw() };
+							rpcs.emplace(mono_method_get_name(method), rpc_method);
+						}
+					}
+					else
+					{
+						RPCMethod rpc_method{ method, false };
 						rpcs.emplace(mono_method_get_name(method), rpc_method);
 					}
 				}
-				else
-				{
-					RPCMethod rpc_method{ method, false };
-					rpcs.emplace(mono_method_get_name(method), rpc_method);
-				}
 			}
-		}
 
+			klass = mono_class_get_parent(klass);
+		}
 		LOG_TO(LogPool::MONO, "Found %d rpcs in %s", (int) rpcs.size(), mono_class_get_name(type));
 	}
 	RPCMethod ManagedType::GetRPC(string_view method) const

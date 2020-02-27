@@ -669,13 +669,13 @@ namespace idk
 
 				render_data.particles.resize(sz);
 
+				auto decomposed = decompose(elem.transform);
 				for (uint16_t i = 0; i < sz; ++i)
-					render_data.particles[i].position = elem.data.position[i] * elem.transform.scale;
+					render_data.particles[i].position = elem.data.position[i];
 				if (!elem.main.in_world_space)
 				{
-					mat3 rot{ elem.transform.rotation };
 					for (auto& p : render_data.particles)
-						p.position = elem.transform.position + rot * p.position;
+						p.position = elem.transform * vec4{ p.position, 1.0f };
 				}
 
 				for (uint16_t i = 0; i < sz; ++i)
@@ -951,14 +951,14 @@ namespace idk
         for (auto& elem : futures)
             elem.get();
 
-		result.active_light_buffer.reserve(result.camera.size()* result.lights.size());
+		result.active_light_buffer.reserve(result.camera.size()+ result.lights.size());
 		result.directional_light_buffer.reserve(result.camera.size());
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
 		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
 		{
 			vector<LightData> new_lights;
-			new_lights.reserve(result.camera.size() * 3);
+			new_lights.reserve(result.camera.size() * 2);
 			for (auto& cam : result.camera)
 			{
 				auto& camera = cam;
@@ -1056,29 +1056,51 @@ namespace idk
 			LightRenderRange range{ i++ };
 			// TODO: Cull cascaded directional light
 			size_t lm_i = 0;
-			for (auto& lightmap : light.light_maps)
+			if (light.index == 1)
 			{
-				range.light_map_index = lm_i;
+				for (auto& lightmap : light.light_maps)
 				{
-					if (!light.cast_shadow)
+					range.light_map_index = lm_i;
 					{
-						range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
-					}
-					else
-					{
-						if (light.index == 1)
+						if (!light.cast_shadow)
+						{
+							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+						}
+						else
 						{
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
 							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-							draw_frustum(frust, color{ ((float)++derp)/result.camera.size(),0,(lm_i+1.0f)/light.light_maps.size(),1 }, {});
+							draw_frustum(frust, color{ ((float)++derp) / result.camera.size(),0,(lm_i + 1.0f) / light.light_maps.size(),1 }, {});
+
+							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+							range.inst_mesh_render_begin = start_index;
+							range.inst_mesh_render_end = end_index;
 						}
-						const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
-						range.inst_mesh_render_begin = start_index;
-						range.inst_mesh_render_end = end_index;
 					}
+					result.culled_light_render_range.emplace_back(range);
+					++lm_i;
 				}
-				result.culled_light_render_range.emplace_back(range);
-				++lm_i;
+			}
+			else
+			{
+				for (auto& lightmap : light.light_maps)
+				{
+					range.light_map_index = lm_i;
+					{
+						if (!light.cast_shadow)
+						{
+							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+						}
+						else
+						{
+							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+							range.inst_mesh_render_begin = start_index;
+							range.inst_mesh_render_end = end_index;
+						}
+					}
+					result.culled_light_render_range.emplace_back(range);
+					++lm_i;
+				}
 			}
 			//{
 			//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);

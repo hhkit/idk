@@ -35,6 +35,12 @@ namespace TestAndSeek
         }
 
         [ElecRPC]
+        void InformMe(ElectronView view)
+        {
+            Debug.Log("Inform me about " + view.InstantiationId);
+        }
+
+        [ElecRPC]
         void ExecuteMeCheckingForSender(string param, ElectronMessageInfo info)
         {
             Debug.Log("RPC from " + info.sender + " executed");
@@ -67,14 +73,15 @@ namespace TestAndSeek
         }
         void FixedUpdate()
         {
-            if (Input.GetKey(KeyCode.Shift))
-            {
-                if (Input.GetKeyDown(KeyCode.E))
-                    ev.RPC("ExecuteMeCheckingForSender", RPCTarget.Server,  "help me");
-            }
 
             if (ev.IsMine) // ev.owner == me
             {
+                if (Input.GetKey(KeyCode.Shift))
+                {
+                    if (Input.GetKeyDown(KeyCode.E))
+                        ev.RPC("ExecuteMeCheckingForSender", RPCTarget.Server, "help me");
+                }
+
                 if (on_floor)
                 {
                     if (Input.GetKey(KeyCode.A))

@@ -50,7 +50,7 @@ namespace idk
 			{
 				if (view.state_mask)
 				{
-					LOG_TO(LogPool::NETWORK, "Sending Ghost Message for %d", view.network_id);
+					//LOG_TO(LogPool::NETWORK, "Sending Ghost Message for %d", view.network_id);
 					connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::UNRELIABLE, [&](GhostMessage& ghost_msg)
 						{
 							ghost_msg.network_id = view.network_id;
@@ -70,7 +70,7 @@ namespace idk
 		if (view)
 		{
 			// push the ghost data into the view
-			LOG_TO(LogPool::NETWORK, "Received Ghost Message for %d", view->network_id);
+			// LOG_TO(LogPool::NETWORK, "Received Ghost Message for %d", view->network_id);
 			if (msg.state_mask)
 			{
 				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))

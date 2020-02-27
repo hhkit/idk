@@ -1,21 +1,39 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace idk
 {
+    [Serializable]
     public class ElectronView
-        : Component
+        : Component, ISerializable
     {
         private static BinaryFormatter formatter = new BinaryFormatter();
+
+        public static ElectronView FindViewByInstantiationid(uint id)
+        {
+            var new_handle = Bindings.ViewIdGetView(id);
+            return new_handle != 0 ? new ElectronView() { handle = new_handle } : null;
+        }
 
         public bool IsMine { get => Bindings.ViewIsMine(handle); }
         public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
         public void TransferOwnership(Client newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
 
-        public void DestroyObject() => Bindings.ViewDestroy(handle);
+        public void DestroyObject()
+        {
+            if (!ElectronNetwork.isHost)
+                throw new InvalidNetworkOperationException("Only the Server may destroy objects");
+
+            Bindings.ViewDestroy(handle);
+        }
 
         public void RPC(string methodName, RPCTarget target, params object[] parameters)
         {
+            if (InstantiationId == 0)
+                throw new InvalidOperationException("ElectronView has ID == 0. It is not synced on the network!");
+
             if (ElectronNetwork.isHost)
             {
                 // placeholder for exceptions
@@ -79,6 +97,21 @@ namespace idk
                 }
             }
             return output;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("viewID", InstantiationId, typeof(uint));
+        }
+        public ElectronView()
+        {
+            handle = 0;
+        }
+
+        public ElectronView(SerializationInfo info, StreamingContext context)
+        {
+            var id = (uint) info.GetValue("viewID", typeof(uint));
+            handle = Bindings.ViewIdGetView(id);
         }
     }
 }

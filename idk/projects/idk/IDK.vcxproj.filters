@@ -1181,6 +1181,12 @@
     <ClInclude Include="network\EventDataBlockFrameNumber.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\AttachmentViewType.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventDestroyObjectMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
     <ClInclude Include="phys\collision_rotational.h">
       <Filter>phys\rotational</Filter>
     </ClInclude>

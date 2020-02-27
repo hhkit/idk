@@ -141,7 +141,7 @@ namespace idk::vkn
 		}
 		vector<DLightData> directional_vp{};
 
-		mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
+		static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 		for (;i<end;++i)
 		{
 			auto active_index = vstate.active_lights[i];
@@ -153,14 +153,13 @@ namespace idk::vkn
 				{
 					auto& fb = elem.light_map.as<VknFrameBuffer>();
 					auto& db = fb.DepthAttachment();
-					auto v = db.buffer;
-					shadow_maps.emplace_back(v);
+					shadow_maps.emplace_back(db.buffer);
 				}
 			}
 			else if (light.index == 1)
 			{
 				if(!light.light_maps.empty())
-					shadow_maps.emplace_back(light.light_maps[0].light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
+					shadow_maps.emplace_back(RscHandle<VknTexture>());
 
 				for (auto& elem : light.light_maps)//state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
@@ -169,6 +168,9 @@ namespace idk::vkn
 				}
 			}
 		}
+
+		while (shadow_maps_directional.size() < 8 && shadow_maps_directional.size())
+			shadow_maps_directional.emplace_back(shadow_maps_directional.back());
 		//for (auto& dshadow_index : vstate.active_dir_lights)
 		//{
 		//	auto& dshadow= vstate.shared_gfx_state->shadow_maps_directional.at(dshadow_index);

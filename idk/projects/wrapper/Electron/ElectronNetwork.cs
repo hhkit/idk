@@ -25,11 +25,17 @@ namespace idk
         public static void Disconnect() => Bindings.NetworkDisconnect();
         public static void CreateLobby() => Bindings.NetworkCreateLobby(devices[0].mac_addr);
         public static void Connect(Address a) => Bindings.NetworkConnect(a);
-        public static void LoadScene(Scene scene) => Bindings.NetworkLoadScene(scene.guid);
+        public static void LoadScene(Scene scene)
+        {
+            if (!isHost)
+                throw new InvalidNetworkOperationException("Only the Server can change the scene.");
+
+            Bindings.NetworkLoadScene(scene.guid);
+        }
         public static GameObject Instantiate(Prefab prefab, Vector3 position)
         {
             if (!isHost)
-                return null;
+                throw new InvalidNetworkOperationException("Only the Host can instantiate prefabs");
 
             var id = Bindings.NetworkInstantiatePrefabPosition(prefab.guid, position);
             return id != 0 ? new GameObject(id) : null;
@@ -37,7 +43,7 @@ namespace idk
         public static GameObject Instantiate(Prefab prefab, Vector3 position, Quaternion rotation)
         {
             if (!isHost)
-                return null;
+                throw new InvalidNetworkOperationException("Only the Host can instantiate prefabs");
 
             var id = Bindings.NetworkInstantiatePrefabPositionRotation(prefab.guid, position, rotation);
             return id != 0 ? new GameObject(id) : null;

@@ -39,6 +39,7 @@ namespace idk::mono
 
 		MonoWrapperEnvironment& Environment() const;
 		MonoBehaviorEnvironment& ScriptEnvironment() const;
+		void HandleException(MonoObject* exc) const;
 
 		void ApplyConfig(Config& config) override;
 		void RefreshGameScripts();
