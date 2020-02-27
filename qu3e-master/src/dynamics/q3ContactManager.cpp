@@ -231,9 +231,9 @@ void q3ContactManager::TestCollisions( void )
 			continue;
 		}
 		q3Manifold* manifold = &constraint->manifold;
-		q3Manifold oldManifold = constraint->manifold;
-		q3Vec3 ot0 = oldManifold.tangentVectors[ 0 ];
-		q3Vec3 ot1 = oldManifold.tangentVectors[ 1 ];
+		// q3Manifold oldManifold = constraint->manifold;
+		// q3Vec3 ot0 = oldManifold.tangentVectors[ 0 ];
+		// q3Vec3 ot1 = oldManifold.tangentVectors[ 1 ];
 		constraint->SolveCollision( );
 		std::cout << constraint->manifold.contactCount << std::endl;
 		q3ComputeBasis( manifold->normal, manifold->tangentVectors, manifold->tangentVectors + 1 );
@@ -242,8 +242,8 @@ void q3ContactManager::TestCollisions( void )
 		{
 			q3Contact *c = manifold->contacts + i;
 			c->tangentImpulse[ 0 ] = c->tangentImpulse[ 1 ] = c->normalImpulse = r32( 0.0 );
-			u8 oldWarmStart = c->warmStarted;
-			c->warmStarted = u8( 0 );
+			// u8 oldWarmStart = c->warmStarted;
+			// c->warmStarted = u8( 0 );
 
 			// for ( i32 j = 0; j < oldManifold.contactCount; ++j )
 			// {

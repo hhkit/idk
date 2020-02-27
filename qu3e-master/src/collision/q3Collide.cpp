@@ -27,7 +27,7 @@
 #include "q3Collide.h"
 #include "../dynamics/q3Body.h"
 #include "../dynamics/q3Contact.h"
-
+#include <iostream>
 //--------------------------------------------------------------------------------------------------
 // qBoxtoBox
 //--------------------------------------------------------------------------------------------------
@@ -176,14 +176,14 @@ void q3ComputeIncidentFace( const q3Transform& itx, const q3Vec3& e, q3Vec3 n, q
 			out[ 2 ].v.Set(  e.x, -e.y,  e.z );
 			out[ 3 ].v.Set(  e.x, -e.y, -e.z );
 
-			out[ 0 ].f.inI = 9;
-			out[ 0 ].f.outI = 1;
-			out[ 1 ].f.inI = 1;
-			out[ 1 ].f.outI = 8;
-			out[ 2 ].f.inI = 8;
-			out[ 2 ].f.outI = 7;
-			out[ 3 ].f.inI = 7;
-			out[ 3 ].f.outI = 9;
+			// out[ 0 ].f.inI = 9;
+			// out[ 0 ].f.outI = 1;
+			// out[ 1 ].f.inI = 1;
+			// out[ 1 ].f.outI = 8;
+			// out[ 2 ].f.inI = 8;
+			// out[ 2 ].f.outI = 7;
+			// out[ 3 ].f.inI = 7;
+			// out[ 3 ].f.outI = 9;
 		}
 
 		else
@@ -193,14 +193,14 @@ void q3ComputeIncidentFace( const q3Transform& itx, const q3Vec3& e, q3Vec3 n, q
 			out[ 2 ].v.Set( -e.x,  e.y, -e.z );
 			out[ 3 ].v.Set( -e.x, -e.y, -e.z );
 
-			out[ 0 ].f.inI = 5;
-			out[ 0 ].f.outI = 11;
-			out[ 1 ].f.inI = 11;
-			out[ 1 ].f.outI = 3;
-			out[ 2 ].f.inI = 3;
-			out[ 2 ].f.outI = 10;
-			out[ 3 ].f.inI = 10;
-			out[ 3 ].f.outI = 5;
+			// out[ 0 ].f.inI = 5;
+			// out[ 0 ].f.outI = 11;
+			// out[ 1 ].f.inI = 11;
+			// out[ 1 ].f.outI = 3;
+			// out[ 2 ].f.inI = 3;
+			// out[ 2 ].f.outI = 10;
+			// out[ 3 ].f.inI = 10;
+			// out[ 3 ].f.outI = 5;
 		}
 	}
 
@@ -213,14 +213,14 @@ void q3ComputeIncidentFace( const q3Transform& itx, const q3Vec3& e, q3Vec3 n, q
 			out[ 2 ].v.Set(  e.x,  e.y, -e.z );
 			out[ 3 ].v.Set( -e.x,  e.y, -e.z );
 
-			out[ 0 ].f.inI = 3;
-			out[ 0 ].f.outI = 0;
-			out[ 1 ].f.inI = 0;
-			out[ 1 ].f.outI = 1;
-			out[ 2 ].f.inI = 1;
-			out[ 2 ].f.outI = 2;
-			out[ 3 ].f.inI = 2;
-			out[ 3 ].f.outI = 3;
+			// out[ 0 ].f.inI = 3;
+			// out[ 0 ].f.outI = 0;
+			// out[ 1 ].f.inI = 0;
+			// out[ 1 ].f.outI = 1;
+			// out[ 2 ].f.inI = 1;
+			// out[ 2 ].f.outI = 2;
+			// out[ 3 ].f.inI = 2;
+			// out[ 3 ].f.outI = 3;
 		}
 
 		else
@@ -230,14 +230,14 @@ void q3ComputeIncidentFace( const q3Transform& itx, const q3Vec3& e, q3Vec3 n, q
 			out[ 2 ].v.Set( -e.x, -e.y, -e.z );
 			out[ 3 ].v.Set(  e.x, -e.y, -e.z );
 
-			out[ 0 ].f.inI = 7;
-			out[ 0 ].f.outI = 4;
-			out[ 1 ].f.inI = 4;
-			out[ 1 ].f.outI = 5;
-			out[ 2 ].f.inI = 5;
-			out[ 2 ].f.outI = 6;
-			out[ 3 ].f.inI = 5;
-			out[ 3 ].f.outI = 6;
+			// out[ 0 ].f.inI = 7;
+			// out[ 0 ].f.outI = 4;
+			// out[ 1 ].f.inI = 4;
+			// out[ 1 ].f.outI = 5;
+			// out[ 2 ].f.inI = 5;
+			// out[ 2 ].f.outI = 6;
+			// out[ 3 ].f.inI = 5;
+			// out[ 3 ].f.outI = 6;
 		}
 	}
 
@@ -250,14 +250,14 @@ void q3ComputeIncidentFace( const q3Transform& itx, const q3Vec3& e, q3Vec3 n, q
 			out[ 2 ].v.Set(  e.x, -e.y,  e.z );
 			out[ 3 ].v.Set(  e.x,  e.y,  e.z );
 
-			out[ 0 ].f.inI = 0;
-			out[ 0 ].f.outI = 11;
-			out[ 1 ].f.inI = 11;
-			out[ 1 ].f.outI = 4;
-			out[ 2 ].f.inI = 4;
-			out[ 2 ].f.outI = 8;
-			out[ 3 ].f.inI = 8;
-			out[ 3 ].f.outI = 0;
+			// out[ 0 ].f.inI = 0;
+			// out[ 0 ].f.outI = 11;
+			// out[ 1 ].f.inI = 11;
+			// out[ 1 ].f.outI = 4;
+			// out[ 2 ].f.inI = 4;
+			// out[ 2 ].f.outI = 8;
+			// out[ 3 ].f.inI = 8;
+			// out[ 3 ].f.outI = 0;
 		}
 
 		else
@@ -267,14 +267,14 @@ void q3ComputeIncidentFace( const q3Transform& itx, const q3Vec3& e, q3Vec3 n, q
 			out[ 2 ].v.Set( -e.x,  e.y, -e.z );
 			out[ 3 ].v.Set(  e.x,  e.y, -e.z );
 
-			out[ 0 ].f.inI = 9;
-			out[ 0 ].f.outI = 6;
-			out[ 1 ].f.inI = 6;
-			out[ 1 ].f.outI = 10;
-			out[ 2 ].f.inI = 10;
-			out[ 2 ].f.outI = 2;
-			out[ 3 ].f.inI = 2;
-			out[ 3 ].f.outI = 9;
+			// out[ 0 ].f.inI = 9;
+			// out[ 0 ].f.outI = 6;
+			// out[ 1 ].f.inI = 6;
+			// out[ 1 ].f.outI = 10;
+			// out[ 2 ].f.inI = 10;
+			// out[ 2 ].f.outI = 2;
+			// out[ 3 ].f.inI = 2;
+			// out[ 3 ].f.outI = 9;
 		}
 	}
 
@@ -316,10 +316,10 @@ i32 q3Orthographic( r32 sign, r32 e, i32 axis, i32 clipEdge, q3ClipVertex* in, i
 		// I
 		else if ( InFront( da ) && Behind( db ) )
 		{
-			cv.f = b.f;
+			// cv.f = b.f;
 			cv.v = a.v + (b.v - a.v) * (da / (da - db));
-			cv.f.outR = clipEdge;
-			cv.f.outI = 0;
+			// cv.f.outR = clipEdge;
+			// cv.f.outI = 0;
 			assert( outCount < 8 );
 			out[ outCount++ ] = cv;
 		}
@@ -327,10 +327,10 @@ i32 q3Orthographic( r32 sign, r32 e, i32 axis, i32 clipEdge, q3ClipVertex* in, i
 		// I, B
 		else if ( Behind( da ) && InFront( db ) )
 		{
-			cv.f = a.f;
+			// cv.f = a.f;
 			cv.v = a.v + (b.v - a.v) * (da / (da - db));
-			cv.f.inR = clipEdge;
-			cv.f.inI = 0;
+			// cv.f.inR = clipEdge;
+			// cv.f.inI = 0;
 			assert( outCount < 8 );
 			out[ outCount++ ] = cv;
 
@@ -383,7 +383,7 @@ i32 q3Clip( const q3Vec3& rPos, const q3Vec3& e, u8* clipEdges, const q3Mat3& ba
 		if ( d <= r32( 0.0 ) )
 		{
 			outVerts[ outCount ].v = q3Mul( basis, in[ i ].v ) + rPos;
-			outVerts[ outCount ].f = in[ i ].f;
+			// outVerts[ outCount ].f = in[ i ].f;
 			outDepths[ outCount++ ] = d;
 		}
 	}
@@ -710,17 +710,18 @@ void q3BoxtoBox( q3Manifold* m, q3Box* a, q3Box* b )
 			{
 				q3Contact* c = m->contacts + i;
 
-				q3FeaturePair pair = out[ i ].f;
+				//q3FeaturePair pair = out[ i ].f;
 
 				if ( flip )
 				{
-					std::swap( pair.inI, pair.inR );
-					std::swap( pair.outI, pair.outR );
+					// std::swap( pair.inI, pair.inR );
+					// std::swap( pair.outI, pair.outR );
 				}
 
 				// c->fp = out[ i ].f;
 				c->position = out[ i ].v;
 				c->penetration = depths[ i ];
+				std::cout << c->penetration << std::endl;
 			}
 		}
 	}

@@ -31,6 +31,7 @@
 #include "q3Body.h"
 #include "../common/q3Geometry.h"
 #include "../common/q3Settings.h"
+#include <iostream>
 
 //--------------------------------------------------------------------------------------------------
 // q3ContactSolver
@@ -203,5 +204,6 @@ void q3ContactSolver::Solve( )
 		m_velocities[ cs->indexA ].w = wA;
 		m_velocities[ cs->indexB ].v = vB;
 		m_velocities[ cs->indexB ].w = wB;
+		std::cout << "Velocity: (" << vA.x << ", "<< vA.y << ", "<< vA.z << ")" << std::endl;
 	}
 }

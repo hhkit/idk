@@ -27,8 +27,38 @@
 
 struct BoxStack : public Demo
 {
+	q3Body* b;
 	virtual void Init( )
 	{
+		{
+			q3BoxDef boxDef;
+			boxDef.SetRestitution(0);
+			// Create the floor
+			q3BodyDef bodyDef;
+			//bodyDef.axis.Set( q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f ) );
+			//bodyDef.angle = q3PI * q3RandomFloat( -1.0f, 1.0f );
+			q3Body* body = scene.CreateBody(bodyDef);
+			bodyDef.bodyType = eDynamicBody;
+			q3Transform tx;
+			q3Identity(tx);
+			boxDef.Set(tx, q3Vec3(1, 1.0f, 1));
+			boxDef.SetRestitution(0);
+			// for ( i32 i = 0; i < 1; ++i )
+			{
+				// for ( i32 j = 0; j < 1; ++j )
+				{
+					// for ( i32 k = 0; k < 1; ++k )
+					{
+						bodyDef.position.Set(.25, 2, 0);
+						bodyDef.linearDamping = 1.0f;
+						body = scene.CreateBody(bodyDef);
+						body->AddBox(boxDef);
+					}
+				}
+			}
+			b = body;
+		}
+		
 		// Create the floor
 		q3BodyDef bodyDef;
 		//bodyDef.axis.Set( q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f ) );
@@ -39,8 +69,15 @@ struct BoxStack : public Demo
 		boxDef.SetRestitution( 0 );
 		q3Transform tx;
 		q3Identity( tx );
-		boxDef.Set( tx, q3Vec3( 50.0f, 1.0f, 50.0f ) );
+		boxDef.Set( tx, q3Vec3( 1, 1.0f, 1) );
+		bodyDef.position.Set(.5, 0, 0);
 		body->AddBox( boxDef );
+
+		body = scene.CreateBody(bodyDef);
+		q3Identity(tx);
+		boxDef.Set(tx, q3Vec3(1, 1.0f, 1));
+		bodyDef.position.Set(-.5, 0, 0);
+		body->AddBox(boxDef);
 
 		// Create boxes
 		//for ( i32 i = 0; i < 10; ++i )
@@ -56,21 +93,37 @@ struct BoxStack : public Demo
 		//	body->AddBox( boxDef );
 		//}
 
-		bodyDef.bodyType = eDynamicBody;
-		boxDef.Set( tx, q3Vec3( 1, 1.0f, 1 ) );
+		//bodyDef.bodyType = eDynamicBody;
+		//boxDef.Set( tx, q3Vec3( 1, 1.0f, 1 ) );
+		//boxDef.SetRestitution(0);
+		//// for ( i32 i = 0; i < 1; ++i )
+		//{
+		//	// for ( i32 j = 0; j < 1; ++j )
+		//	{
+		//		// for ( i32 k = 0; k < 1; ++k )
+		//		{
+		//			bodyDef.position.Set( 0, 5, 0 );
+		//			body = scene.CreateBody( bodyDef );
+		//			body->AddBox( boxDef );
+		//		}
+		//	}
+		//}
 
-		// for ( i32 i = 0; i < 1; ++i )
+		
+	}
+
+
+	virtual void Update()
+	{
+		static float f = 0.0f;
+		static float x = 0.1f;
+		if (f > 3.0f)
 		{
-			// for ( i32 j = 0; j < 1; ++j )
-			{
-				// for ( i32 k = 0; k < 1; ++k )
-				{
-					bodyDef.position.Set( 0, 5, 0 );
-					body = scene.CreateBody( bodyDef );
-					body->AddBox( boxDef );
-				}
-			}
+			b->ApplyLinearForce(q3Vec3{ x , 1000, 0.0f });
+			x *= -1.0f;
+			f = 0.0f;
 		}
+		f += dt;
 	}
 
 	virtual void Shutdown( )

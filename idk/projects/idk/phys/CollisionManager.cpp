@@ -29,9 +29,9 @@
 
 namespace idk
 {
-	constexpr float baumgarte = 0.2f;
+	constexpr float baumgarte = 0.3f;
 	constexpr float restitution_slop = 0.2f;
-	constexpr float penetration_slop = 0.05f;
+	constexpr float penetration_slop = 0.07f;
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
@@ -198,48 +198,41 @@ namespace idk
 			{
 				const auto col_val = collision.value();
 				ContactConstraintState ccs;
-				const auto r = quat_cast<mat3>(i->rb->_rotate_cache);
-				// broadphase center and world center are the same
-				ccs.centerA = col_val.centerA;	
-				ccs.centerB = col_val.centerB;
-				ccs.rbA = i->rb;
-				ccs.rbB = j->rb;
-				ccs.mA = i->rb->inv_mass;
-				ccs.mB = j->rb ? j->rb->inv_mass : 0.0f;
-				ccs.iA = r * mat3{ scale(vec3{0.4f * 0.5f * 0.5f}) } * r.transpose();
-				ccs.iB = j->rb ? mat3{} : mat3{ scale(vec3{0.0f}) };
-				// ccs.iA = [&]()
-				// {
-				// 	const float ex2 = float(4.0);
-				// 	const float ey2 = float(4.0);
-				// 	const float ez2 = float(4.0);
-				// 	// const float mass = float(8.0) * e.x * e.y * e.z * density;
-				// 	const float x = float(1.0 / 12.0) * 1 * (ey2 + ez2);
-				// 	const float y = float(1.0 / 12.0) * 1 * (ex2 + ez2);
-				// 	const float z = float(1.0 / 12.0) * 1 * (ex2 + ey2);
-				// 	mat3 I = mat3{ scale(vec3{x, y, z}) };
-				// 	return I;
-				// }();
-				// ccs.iB = mat3{ scale(vec3{ 0.4f }) };
-				ccs.restitution = max(i->collider->bounciness, j->collider->bounciness);
-				ccs.friction = std::sqrt(i->collider->static_friction * j->collider->static_friction);
-				
-				ccs.tangentVectors[0] = col_val.tangentVectors[0];
-				ccs.tangentVectors[1] = col_val.tangentVectors[1];
-				ccs.normal = col_val.normal;
-
-				ccs.contactCount = col_val.contactCount;
-				for (int k = 0; k < ccs.contactCount; ++k)
+				// Both must not be triggers.
+				ccs.solve = !i->collider->is_trigger && !j->collider->is_trigger;
+				if (ccs.solve)
 				{
-					ContactState* s = ccs.contacts + k;
-					const phys::ContactPoint* cp = col_val.contacts + k;
+					const auto r = quat_cast<mat3>(i->rb->_rotate_cache);
+					// broadphase center and world center are the same
+					ccs.centerA = col_val.centerA;
+					ccs.centerB = col_val.centerB;
+					ccs.rbA = i->rb;
+					ccs.rbB = j->rb;
+					ccs.mA = i->rb->inv_mass;
+					ccs.mB = j->rb ? j->rb->inv_mass : 0.0f;
+					ccs.iA = r * mat3{ scale(vec3{0.0f}) }// mat3{ scale(vec3{1.0f/ (0.4f * 0.5f * 0.5f)}) } 
+					*r.transpose();
+					ccs.iB = j->rb ? mat3{} : mat3{ scale(vec3{0.0f}) };
+					ccs.restitution = max(i->collider->bounciness, j->collider->bounciness);
+					ccs.friction = std::sqrt(i->collider->static_friction * j->collider->static_friction);
 
-					s->ra = cp->position - ccs.centerA;
-					s->rb = cp->position - ccs.centerB;
-					s->penetration = cp->penetration;
+					ccs.tangentVectors[0] = col_val.tangentVectors[0];
+					ccs.tangentVectors[1] = col_val.tangentVectors[1];
+					ccs.normal = col_val.normal;
+
+					ccs.contactCount = col_val.contactCount;
+					for (int k = 0; k < ccs.contactCount; ++k)
+					{
+						ContactState* s = ccs.contacts + k;
+						const phys::ContactPoint* cp = col_val.contacts + k;
+
+						s->ra = cp->position - ccs.centerA;
+						s->rb = cp->position - ccs.centerB;
+						s->penetration = cp->penetration;
+					}
+
+					constraint_states.emplace_back(ccs);
 				}
-
-				constraint_states.emplace_back(ccs);
 				_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, col_val);
 			}
 		}
@@ -283,8 +276,10 @@ namespace idk
 				}
 
 				// Precalculate bias factor
-				c->bias = -baumgarte * (1.0f / dt) * min(0.0f, c->penetration + penetration_slop);
-
+				const float tmp = c->penetration + penetration_slop;
+				const float tmp2 = min(0.0f, tmp);
+				c->bias = -baumgarte * (1.0f / dt) * tmp2;
+				LOG_TO(LogPool::PHYS, "Penetration: %f,		bias: %f", c->penetration, c->bias);
 				// Warm start contact
 				vec3 P = cs.normal * c->normalImpulse;
 
@@ -303,7 +298,7 @@ namespace idk
 				// Add in restitution bias
 				float dv = (vB + wB.cross(c->rb) - vA - wA.cross(c->ra)).dot(cs.normal);
 
-				if (dv < 1.0f)
+				if (dv < -1.0f)
 					c->bias += -(cs.restitution) * dv;
 			}
 
@@ -402,6 +397,7 @@ namespace idk
 				cs->rbB->linear_velocity = vB;
 				cs->rbB->angular_velocity = wB;
 			}
+			LOG_TO(LogPool::PHYS, "Angular: (%f, %f, %f)", vA.x, vA.y, vA.z);
 		}
 	}
 
@@ -415,10 +411,10 @@ namespace idk
 			{
 				// Translate
 				const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
-				LOG_TO(LogPool::PHYS, "Angular: (%f, %f, %f)", rigidbody.angular_velocity.x, rigidbody.angular_velocity.y, rigidbody.angular_velocity.z);
 				// Only do if there is angular velocity
 				if (rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > 0.0001f)
 				{
+					rigidbody.angular_velocity = vec3{ 0.0f };
 					// Scale
 					const vec3 s = [](const mat4& mat)
 					{
@@ -440,6 +436,11 @@ namespace idk
 
 				rigidbody._global_cache[3].xyz = t;
 				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._global_cache);
+			}
+			else
+			{
+				rigidbody.linear_velocity = vec3{ 0.0f };
+				rigidbody.angular_velocity = vec3{ 0.0f };
 			}
 			    
 			rigidbody.sleep_next_frame = false;
@@ -504,9 +505,9 @@ namespace idk
 			{
 				const auto& c = col.second.contacts[i];
 				dbg.Draw(c.position, color{ 0,1,0,1 }, seconds{ 0.5f });
-				dbg.Draw(ray{ c.position, col.second.normal }, color{ 0,1,0,1 }, seconds{ 0.5 });
-				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] }, color{ 0,0,1,1 }, seconds{ 0.5 });
-				dbg.Draw(ray{ c.position, col.second.tangentVectors[1] }, color{ 0,0,1,1 }, seconds{ 0.5 });
+				dbg.Draw(ray{ c.position, col.second.normal * 0.4f }, color{ 0,1,0,1 }, seconds{ 0.5 });
+				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
+				dbg.Draw(ray{ c.position, col.second.tangentVectors[1] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
 			}
 			LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.contactCount);
 		}

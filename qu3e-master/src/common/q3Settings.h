@@ -39,6 +39,6 @@
 
 #define Q3_BAUMGARTE r32( 0.2 )
 
-#define Q3_PENETRATION_SLOP r32( 0.05 )
+#define Q3_PENETRATION_SLOP r32( 0.005 )
 
 #endif // Q3SETTINGS_H

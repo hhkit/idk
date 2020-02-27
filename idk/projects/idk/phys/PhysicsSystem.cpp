@@ -76,7 +76,7 @@ namespace idk
 					if (!rigidbody.is_kinematic)
 					{
 						rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
-						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
+						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * 0.0f);// rigidbody.linear_damping);
 						// rigidbody._pred_translation = rigidbody.linear_velocity * dt;
 
 						// Compute the angular stuff here too. 
@@ -104,12 +104,18 @@ namespace idk
 		PredictTransform();
 		_col_manager.UpdatePairs(rbs, colliders);
 		_col_manager.TestCollisions();
-		_col_manager.DebugDrawContactPoints(dt);
+		if (debug_draw_colliders)
+			_col_manager.DebugDrawContactPoints(dt);
 		_col_manager.PreSolve();
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < 20; ++i)
 			_col_manager.Solve();
 
 		_col_manager.Finalize();
+
+		if (!debug_draw_colliders)
+			return;
+		_col_manager.DebugDrawColliders(colliders, dt);
+
 		const auto CollideObjects = [&]()
 		{
 			// LOG_TO(LogPool::PHYS, "Num Tests: %d/%d    |    %d/%d", static_tree.num_tests(), notree_num_tests, tree_num_cols, notree_num_cols);
@@ -274,9 +280,7 @@ namespace idk
 		// 
 		// FinalizePositions();
 		
-        if (!debug_draw_colliders)
-            return;
-		_col_manager.DebugDrawColliders(colliders, dt);
+       
 	}
 
 	void PhysicsSystem::FirePhysicsEvents()

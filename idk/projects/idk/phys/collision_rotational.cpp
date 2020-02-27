@@ -195,7 +195,7 @@ namespace idk::phys
 				out[3] = 5;
 
 				*e = vec3{ eR.z, eR.y, eR.x };
-				(*basis)[0] = rtx.rotation[2], (*basis)[1] = rtx.rotation[1], (*basis)[2] = rtx.rotation[0];
+				(*basis)[0] = rtx.rotation[2], (*basis)[1] = rtx.rotation[1], (*basis)[2] = -rtx.rotation[0];
 				// e->Set(eR.z, eR.y, eR.x);
 				// basis->SetRows(rtx.rotation.ez, rtx.rotation.ey, -rtx.rotation.ex);
 			}

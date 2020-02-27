@@ -50,7 +50,7 @@ void q3Island::Solve( )
 
 			// Calculate world space intertia tensor
 			q3Mat3 r = body->m_tx.rotation;
-			body->m_invInertiaWorld = r * body->m_invInertiaModel * q3Transpose( r );
+			body->m_invInertiaWorld = r * q3Diagonal(r32(0.0)) * q3Transpose( r );
 
 			// Integrate velocity
 			body->m_linearVelocity += (body->m_force * body->m_invMass) * m_dt;

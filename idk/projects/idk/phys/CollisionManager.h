@@ -31,6 +31,8 @@ namespace idk
 		float friction{ 0.0f };
 		RigidBody* rbA{nullptr};
 		RigidBody* rbB{ nullptr };
+
+		bool solve = true;
 	};
 
 	class CollisionManager
