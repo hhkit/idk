@@ -50,7 +50,7 @@ namespace idk
 				if (rb.sleeping())
 					continue;
 				if (rb.use_gravity && !rb.is_kinematic)
-					rb.AddForce(vec3{ 0, -9.81, 0 });
+					rb.AddForce(vec3{ 0, -40.81, 0 });
 			}
 		};
 
@@ -76,7 +76,7 @@ namespace idk
 					if (!rigidbody.is_kinematic)
 					{
 						rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
-						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * 0.0f);// rigidbody.linear_damping);
+						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
 						// rigidbody._pred_translation = rigidbody.linear_velocity * dt;
 
 						// Compute the angular stuff here too. 
@@ -91,6 +91,10 @@ namespace idk
 						//rigidbody._accum_accel = vec3{};
 						//rigidbody._prev_pos = curr_pos;
 						//rigidbody._pred_tfm[3].xyz = new_pos;
+
+						LOG_TO(LogPool::PHYS, "Force: (%f, %f, %f) ||  Velocity: (%f, %f, %f)", rigidbody.force.x, rigidbody.force.y, rigidbody.force.z,
+																								rigidbody.linear_velocity.x, rigidbody.linear_velocity.y, rigidbody.linear_velocity.z
+						);
 					}
 				}
 
@@ -107,7 +111,7 @@ namespace idk
 		if (debug_draw_colliders)
 			_col_manager.DebugDrawContactPoints(dt);
 		_col_manager.PreSolve();
-		for (int i = 0; i < 20; ++i)
+		for (int i = 0; i < 10; ++i)
 			_col_manager.Solve();
 
 		_col_manager.Finalize();

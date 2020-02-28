@@ -161,6 +161,8 @@ namespace idk
 
 				if (lrb_sleeping && rrigidbody.sleeping())
 					continue;
+				if (lrigidbody.GetHandle() == rrigidbody.GetHandle())
+					continue;
 				if (!phys.AreLayersCollidable(i->layer, j->layer))
 					continue;
 				if (!i->broad_phase.overlaps(j->broad_phase))
@@ -210,9 +212,10 @@ namespace idk
 					ccs.rbB = j->rb;
 					ccs.mA = i->rb->inv_mass;
 					ccs.mB = j->rb ? j->rb->inv_mass : 0.0f;
-					ccs.iA = r * mat3{ scale(vec3{0.0f}) }// mat3{ scale(vec3{1.0f/ (0.4f * 0.5f * 0.5f)}) } 
+					ccs.iA = r * mat3{ scale(vec3{6.0f}) }// mat3{ scale(vec3{1.0f/ (0.4f * 0.5f * 0.5f)}) } 
 					*r.transpose();
-					ccs.iB = j->rb ? mat3{} : mat3{ scale(vec3{0.0f}) };
+					ccs.iB = r * mat3{ scale(vec3{0.0f}) }// mat3{ scale(vec3{1.0f/ (0.4f * 0.5f * 0.5f)}) } 
+					*r.transpose();
 					ccs.restitution = max(i->collider->bounciness, j->collider->bounciness);
 					ccs.friction = std::sqrt(i->collider->static_friction * j->collider->static_friction);
 
@@ -397,7 +400,7 @@ namespace idk
 				cs->rbB->linear_velocity = vB;
 				cs->rbB->angular_velocity = wB;
 			}
-			LOG_TO(LogPool::PHYS, "Angular: (%f, %f, %f)", vA.x, vA.y, vA.z);
+			LOG_TO(LogPool::PHYS, "Solve Velocity: (%f, %f, %f)", vA.x, vA.y, vA.z);
 		}
 	}
 
