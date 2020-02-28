@@ -42,75 +42,14 @@ namespace idk
 			_rebuild_tree = false;
 		}
 
-		// phases
-		const auto ApplyGravity = [&]()
-		{
-			for (auto& rb : rbs)
-			{
-				if (rb.sleeping())
-					continue;
-				if (rb.use_gravity && !rb.is_kinematic)
-					rb.AddForce(vec3{ 0, -9.81f * rb.gravity_scale, 0 });
-			}
-		};
-
-		const auto PredictTransform = [&]()
-		{
-			const auto dt = Core::GetDT().count();
-			const auto half_dt = dt / 2;
-
-			for (auto& rigidbody : rbs)
-			{
-				const auto tfm = rigidbody.GetGameObject()->Transform();
-				rigidbody._global_cache = tfm->GlobalMatrix();
-				rigidbody._rotate_cache = tfm->GlobalRotation();
-
-				if (rigidbody.sleeping())
-				{
-					rigidbody.linear_velocity = rigidbody.initial_velocity * dt;
-					// rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
-					rigidbody.initial_velocity = vec3{};
-				}
-				else
-				{
-					if (!rigidbody.is_kinematic)
-					{
-						rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
-						rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
-						// rigidbody._pred_translation = rigidbody.linear_velocity * dt;
-
-						// Compute the angular stuff here too. 
-						// Compute inertia world tensor
-						// body->m_invInertiaWorld = r * body->m_invInertiaModel * q3Transpose(r);
-						// body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * m_dt;
-						rigidbody.angular_velocity *= 1.0f / (1.0f + dt * rigidbody.angular_damping);
-
-						//// verlet integrate towards new position
-						////auto new_pos = curr_pos + (curr_pos - rigidbody._prev_pos)*(damping) + rigidbody._accum_accel * dt * dt;
-						//auto new_pos = 2.f * curr_pos - rigidbody._prev_pos + rigidbody._accum_accel * dt * dt;
-						//rigidbody._accum_accel = vec3{};
-						//rigidbody._prev_pos = curr_pos;
-						//rigidbody._pred_tfm[3].xyz = new_pos;
-
-						LOG_TO(LogPool::PHYS, "Force: (%f, %f, %f) ||  Velocity: (%f, %f, %f)", rigidbody.force.x, rigidbody.force.y, rigidbody.force.z,
-																								rigidbody.linear_velocity.x, rigidbody.linear_velocity.y, rigidbody.linear_velocity.z
-						);
-					}
-				}
-
-				// Clear all forces
-				rigidbody.force = vec3{};
-				rigidbody.torque = vec3{};
-			}
-		};
-
-		ApplyGravity();
-		PredictTransform();
-
 		// New frame will insert new static objects into the tree and also initialize the dynamic info
-		_col_manager.NewFrame(rbs, colliders);
+		_col_manager.InitializeNewFrame(rbs, colliders);
+		_col_manager.ApplyGravityAndForces();
+		
 		for (int i = 0; i < 3; ++i)
 		{
+			// Cache global tfm and global rotations as well as update broadphase shapes.
+			// Will also compute intertia tensors here.
 			_col_manager.UpdateDynamics();
 			_col_manager.TestCollisions();
 			if (debug_draw_colliders)

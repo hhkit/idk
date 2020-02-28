@@ -36,7 +36,7 @@ namespace idk
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
 
-	void CollisionManager::NewFrame(span<class RigidBody> rbs, span<class Collider> colliders)
+	void CollisionManager::InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders)
 	{
 		const auto dt = Core::GetDT().count();
 		_dynamic_info.clear();
@@ -120,27 +120,58 @@ namespace idk
 			}
 			else
 			{
-				// ColliderInfo d_info{ .collider = &elem, .rb = &*elem._rigidbody, .layer = elem.GetGameObject()->Layer() };
-				// auto pred_tfm = d_info.rb->_global_cache;
-				// pred_tfm[3].xyz = vec3{ 0.0f };
-				// pred_tfm = quat_cast<mat4>(d_info.rb->_pred_rotate) * pred_tfm;
-				// pred_tfm[3].xyz = d_info.rb->_pred_translation;
-				// 
-				// d_info.predicted_shape = std::visit([&](const auto& shape)->CollidableShapes { return shape * pred_tfm; }, d_info.collider->shape);
-				// d_info.broad_phase = std::visit([&](const auto& shape) { return (shape * pred_tfm).bounds(); }, d_info.collider->shape);
-				// auto vel = d_info.collider->_rigidbody->velocity() * dt;
-				// d_info.broad_phase.grow(vel);
-				// d_info.broad_phase.grow(-vel);
-
 				// Shape and broadphase are computed at UpdateDynamics
 				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {
 					
 					return ColliderInfo{ .collider = &elem,.rb = &*elem._rigidbody, .layer = elem.GetGameObject()->Layer() };
 					}, elem.shape);
-				// Compute the world inertia tensor
 
 				_dynamic_info.emplace_back(collider_info);
 			}
+		}
+	}
+
+	void CollisionManager::ApplyGravityAndForces()
+	{
+		const auto dt = Core::GetDT().count();
+
+		for (auto& dyn_info : _dynamic_info)
+		{
+			auto& rigidbody = *dyn_info.rb;
+	
+			if (rigidbody.sleeping())
+			{
+				rigidbody.linear_velocity = rigidbody.initial_velocity * dt;
+				rigidbody.initial_velocity = vec3{};
+				continue;
+			}
+
+			// Apply gravity
+			if (rigidbody.use_gravity && !rigidbody.is_kinematic)
+				rigidbody.AddForce(vec3{ 0, -9.81f * rigidbody.gravity_scale, 0 });
+
+			const auto tfm = rigidbody.GetGameObject()->Transform();
+			rigidbody._global_cache = tfm->GlobalMatrix();
+			rigidbody._rotate_cache = tfm->GlobalRotation();
+
+			// Apply forces
+			if (!rigidbody.is_kinematic)
+			{
+				rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
+				rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
+
+				// Compute the angular stuff here too. 
+				// body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * m_dt;
+				if (!rigidbody.freeze_rotation)
+					rigidbody.angular_velocity *= 1.0f / (1.0f + dt * rigidbody.angular_damping);
+
+				// LOG_TO(LogPool::PHYS, "Force: (%f, %f, %f) ||  Velocity: (%f, %f, %f)", 
+				//		  rigidbody.force.x, rigidbody.force.y, rigidbody.force.z, rigidbody.linear_velocity.x, rigidbody.linear_velocity.y, rigidbody.linear_velocity.z);
+			}
+
+			// Clear all forces
+			rigidbody.force = vec3{};
+			rigidbody.torque = vec3{};
 		}
 	}
 
@@ -154,7 +185,31 @@ namespace idk
 				auto pred_shape = shape * elem.rb->_global_cache;
 				elem.broad_phase = pred_shape.bounds();
 				elem.predicted_shape = pred_shape;
-				}, elem.collider->shape);
+
+				// Compute the inverse world inertia tensor
+				using Shape = decltype(pred_shape);
+
+				auto& rb = *elem.rb;
+				const mat3 curr_rot = quat_cast<mat3>(rb._rotate_cache);
+				const mat3 curr_rot_inv = curr_rot.transpose();
+				rb._global_inertia_tensor = mat3{ scale(vec3{ 0.0f }) };
+				if constexpr (std::is_same_v<Shape, box>)
+				{
+					
+				}
+				else if constexpr (std::is_same_v<Shape, sphere>)
+				{
+					const mat3 local_tensor = mat3{ scale(vec3{0.4f * pred_shape.radius * pred_shape.radius}) };
+					rb._global_inertia_tensor = curr_rot * local_tensor * curr_rot_inv;
+				}
+				else // Only sphere and box has rotational
+				{
+					rb.freeze_rotation = true;
+				}
+
+			}, elem.collider->shape);
+
+			
 		}
 	}
 
@@ -189,18 +244,10 @@ namespace idk
 
 			if (lrigidbody.sleeping())
 				continue;
+
+			// Static vs Dynamic Broadphase
 			_static_broadphase.query_collisions(*i, _info);
 		}
-
-		// Static vs Dynamic Broadphase
-		// for (const auto& i : _dynamic_info)
-		// {
-		// 	const auto& lrigidbody = *i.rb;
-		// 
-		// 	if (lrigidbody.sleeping())
-		// 		continue;
-		// 	_static_broadphase.query_collisions(i, _info);
-		// }
 
 		// Narrow phase.
 		_collisions.clear();
@@ -228,10 +275,8 @@ namespace idk
 					ccs.rbB = j->rb;
 					ccs.mA = i->rb->inv_mass;
 					ccs.mB = j->rb ? j->rb->inv_mass : 0.0f;
-					ccs.iA = r * mat3{ scale(vec3{6.0f}) }// mat3{ scale(vec3{1.0f/ (0.4f * 0.5f * 0.5f)}) } 
-					*r.transpose();
-					ccs.iB = r * mat3{ scale(vec3{0.0f}) }// mat3{ scale(vec3{1.0f/ (0.4f * 0.5f * 0.5f)}) } 
-					*r.transpose();
+					ccs.iA = ccs.rbA->_global_inertia_tensor;
+					ccs.iB = ccs.rbB ? ccs.rbB->_global_inertia_tensor : mat3{ vec3{0.0f}, vec3{0.0f}, vec3{0.0f} };
 					ccs.restitution = max(i->collider->bounciness, j->collider->bounciness);
 					ccs.friction = std::sqrt(i->collider->static_friction * j->collider->static_friction);
 
@@ -439,10 +484,11 @@ namespace idk
 			{
 				// Translate
 				const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
-				// Only do if there is angular velocity
-				if (rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > 0.0001f)
+
+				// Only do if there is angular velocity and rotational is not frozen
+				if (!rigidbody.freeze_rotation && rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > 0.0001f)
 				{
-					rigidbody.angular_velocity = vec3{ 0.0f };
+					// rigidbody.angular_velocity = vec3{ 0.0f };
 					// Scale
 					const vec3 s = [](const mat4& mat)
 					{

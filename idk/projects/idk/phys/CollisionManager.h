@@ -41,7 +41,8 @@ namespace idk
 		void Init();
 
 		// Will also cache all dynamic bodies for TestCollisions.
-		void NewFrame(span<class RigidBody> rbs, span<class Collider> colliders);
+		void InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders);
+		void ApplyGravityAndForces();
 		void UpdateDynamics();
 		void TestCollisions();
 		void PreSolve();

@@ -52,6 +52,8 @@ namespace idk
 		bool _sleeping = false;
         mat4 _global_cache{};
 		quat _rotate_cache{ };
+		mat3 _global_inertia_tensor{};
+		
 
 		friend class PhysicsSystem;
 		friend class CollisionManager;
