@@ -148,6 +148,9 @@ namespace idk {
 		ImGui::SetCursorPosY(ImGui::GetWindowContentRegionMin().y);
 		ImGui::BeginChild("##scenetex", {}, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
+		if (ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+			ide.DeleteSelectedGameObjects();
+
 		auto imageSize = vec2{ GetScreenSize() };
 		auto meta = ide.GetEditorRenderTarget();
         auto screen_tex = meta->GetColorBuffer();
