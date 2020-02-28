@@ -120,7 +120,7 @@ namespace idk::vkn
 			std::make_pair(vtx::Attrib::Normal, 1),
 			std::make_pair(vtx::Attrib::UV, 2) }
 	};
-	FsqDrawSet::FsqDrawSet(MeshType mesh_type):_mesh_type{mesh_type}
+	FsqDrawSet::FsqDrawSet(MeshType mesh_type, bool draw_till_skip):_mesh_type{mesh_type}, _draw_till_skip{ draw_till_skip }
 	{
 		_fsq_ro.mesh = Mesh::defaults[_mesh_type];
 		_fsq_ro.renderer_req = &_req;
@@ -140,11 +140,12 @@ namespace idk::vkn
 			bindings.Bind(the_interface, fsq_ro);
 			DrawMeshBuffers(the_interface, fsq_ro);
 		};
-		return rendering;
+		return rendering && _draw_till_skip;
 	}
 	PerLightDrawSet::PerLightDrawSet()
 	{
 	}
+#pragma optimize("",off)
 	void PerLightDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)
 	{
 		bindings.Bind(the_interface);

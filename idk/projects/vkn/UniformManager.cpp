@@ -375,6 +375,7 @@ namespace idk::vkn
 		
 		if (!_dbg.Validate(_bindings))
 		{
+			LOG_ERROR_TO(LogPool::GFX, "Invalid Bindings");
 			return{};
 		}
 

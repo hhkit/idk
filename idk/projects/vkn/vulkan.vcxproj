@@ -455,6 +455,7 @@
     <ClCompile Include="CanvasVertexBindings.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
     <ClCompile Include="FencePool.cpp" />
+    <ClCompile Include="LightBinding.cpp" />
     <ClCompile Include="PipelineDescHelper.cpp" />
     <ClCompile Include="RenderPassPool.cpp" />
     <ClCompile Include="SimpleLock.cpp" />

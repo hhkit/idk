@@ -328,15 +328,17 @@ namespace idk::vkn
 		}
 	}
 
+
+#pragma optimize("",off)
 	void FrameGraph::ProcessBatches(RenderBundle& bundle)
 	{
+		size_t i = 0;
 		for (auto& rt : _contexts)
 		{
 			rt.ProcessBatches(bundle);
+			++i;
 		}
 	}
-
-#pragma optimize("",off)
 
 
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)

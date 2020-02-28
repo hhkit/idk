@@ -693,13 +693,16 @@ namespace idk::vkn::renderpasses
 	}
 	using DeferredPbrInstDrawSet = GenericDrawSet<bindings::DeferredPbrRoBind, InstMeshDrawSet>;
 	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
-	using AccumDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
+	using AccumLightDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
+	using AccumAmbientDrawSet = GenericDrawSet<bindings::AmbientBind, FsqDrawSet>;
 
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
-//#pragma optimize("",off)
+	using AccumDrawSet = CombinedMeshDrawSet<AccumLightDrawSet, AccumAmbientDrawSet>;
+	//#pragma optimize("",off)
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
+		using AccumPassSetPair = PassSetPair<AccumPass, AccumDrawSet>;
 		PassUtil::FullRenderData rd{ &gfx_state,&rs };
 		auto [clr_col, clr_dep,ignore_clear] = ExtractClearInfo(gfx_state.camera);
 		//TODO: 
@@ -735,20 +738,23 @@ namespace idk::vkn::renderpasses
 		};
 		auto gbuffer_set =make_gbuffer_set(info);
 		auto& gbuffer_pass_def = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassDeferred", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
+		bindings::AmbientBind ambient_bindings;
 		bindings::LightBind light_bindings;
 		auto& vp_bindings = light_bindings.Get<bindings::CameraViewportBindings>();
 		auto& ls_bindings = light_bindings.Get<bindings::LightShadowBinding>();
 		auto& accum_fsq_bindings = light_bindings.Get<bindings::DeferredLightFsq>();
 		vp_bindings.viewport = gfx_state.camera.viewport;
 		ls_bindings.SetState(bindings::LightShadowBinding::State{ gfx_state.active_lights,*gfx_state.lights,gfx_state.shadow_maps_2d,gfx_state.camera.view_matrix,gfx_state.camera.projection_matrix });
+		ambient_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
+		accum_fsq_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
-		auto& accum_pass_def = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Default", AccumDrawSet{ light_bindings }, gbuffer_pass_def).RenderPass();
+		auto& accum_pass_def = graph.addRenderPass<AccumPassSetPair>("Accum pass Default", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_def).RenderPass();
 
 		auto spec_info = info;
 		spec_info.model = ShadingModel::Specular;
 		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", make_gbuffer_set(spec_info), cube_clear.rt_size, cube_clear.depth).RenderPass();
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(spec_info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
-		auto& accum_pass_spec = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass Specular", AccumDrawSet{ light_bindings }, gbuffer_pass_spec).RenderPass();
+		auto& accum_pass_spec = graph.addRenderPass<AccumPassSetPair>("Accum pass Specular", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_spec).RenderPass();
 
 
 		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, cube_clear.render_target,cube_clear.depth);

@@ -658,6 +658,7 @@
     <ClCompile Include="PipelineDescHelper.cpp" />
     <ClCompile Include="VertexBindingTracker.cpp" />
     <ClCompile Include="RenderPassPool.cpp" />
+    <ClCompile Include="LightBinding.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
