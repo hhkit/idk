@@ -423,7 +423,7 @@ namespace idk
 			if (constraint_states.size() > 0)
 			{
 				const auto vel = constraint_states[0].rbA->linear_velocity;
-				LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
+				// LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
 			}
 			
 		}
