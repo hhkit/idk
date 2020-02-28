@@ -3,7 +3,7 @@
 #include <vkn/GfxConverters.h>
 namespace idk::vkn
 {
-#pragma optimize("",off)
+//#pragma optimize("",off)
 void VertexBindingTracker::Update(RscHandle<ShaderProgram> vtx_shader)
 {
 	_config.buffer_descriptions.clear();

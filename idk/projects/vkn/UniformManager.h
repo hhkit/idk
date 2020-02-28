@@ -134,8 +134,8 @@ namespace idk::vkn
 		void RemoveBinding(binding_manager::set_t set);
 
 		bool BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
-		bool BindAttachment(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
+		bool BindSampler(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+		bool BindAttachment(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
 		bool BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound = false);
 		bool BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
@@ -143,7 +143,7 @@ namespace idk::vkn
 
 		//set, bindings
 		using set_binding_t = std::pair<uint32_t, vector_span<BindingInfo>>;
-		vector_span<set_binding_t> FinalizeCurrent(vector<set_binding_t>& all_sets);
+		std::optional<vector_span<set_binding_t>> FinalizeCurrent(vector<set_binding_t>& all_sets);
 		void GenerateDescriptorSets(span<const set_binding_t> bindings,DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_managers);
 	private:
 		hash_table<string, UniInfo> _uniform_names;

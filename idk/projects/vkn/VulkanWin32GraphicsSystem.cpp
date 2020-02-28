@@ -407,6 +407,7 @@ namespace idk::vkn
 			auto str = dbg::DumpFrameBufferAllocs();
 		}
 #endif
+		std::reverse(curr_states.begin(), curr_states.end());
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 #if 0
 		{

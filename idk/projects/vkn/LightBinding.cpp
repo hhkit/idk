@@ -5,7 +5,7 @@
 #include <ds/result.inl>
 namespace idk::vkn::bindings
 {
-#pragma optimize ("",off)
+//#pragma optimize ("",off)
 	bool DeferredAmbientLight::Skip(RenderInterface& context, const RenderObject&)
 	{
 		return !fragment_shader.as<ShaderModule>().HasCurrent();
@@ -30,7 +30,7 @@ namespace idk::vkn::bindings
 		FakeMat4 inverse_view = camera.view_matrix.inverse();
 		context.BindUniform("PBRBlock", 0, hlp::to_data(inverse_view));
 	}
-	DeferredAmbientLight::DeferredAmbientLight() : fragment_shader{*Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_post_ambient.frag",false)}
+	DeferredAmbientLight::DeferredAmbientLight() : fragment_shader{Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FDeferredPostAmbient]}
 	{
 		auto& derp = *fragment_shader;
 	}

@@ -329,7 +329,7 @@ namespace idk::vkn
 	}
 
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void FrameGraph::ProcessBatches(RenderBundle& bundle)
 	{
 		size_t i = 0;

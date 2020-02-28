@@ -201,7 +201,7 @@ namespace idk::vkn
 			//vk::Framebuffer frame_buffer;
 			Shaders shaders;
 			vector<DrawCall> draw_calls;
-			std::optional<std::string> label;
+			std::optional<string> label;
 		};
 
 		PipelineManager* ppm;

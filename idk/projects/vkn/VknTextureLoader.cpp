@@ -181,7 +181,7 @@ namespace idk::vkn
 			std::optional<Guid> guid;
 		};
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	static void DoNothing() {}
 	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{

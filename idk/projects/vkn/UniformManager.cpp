@@ -232,10 +232,8 @@ namespace idk::vkn
 	{
 		monadic::result< vector_span<BindingInfo>, string> result{};
 		builder.start();
-		string err_msg;
 		auto& set_bindings = builder;
 		uint32_t type_count[DescriptorTypeI::size()] = {};
-		bool failed = false;
 		if (dirty)
 		{
 			size_t max_size = 0;
@@ -254,9 +252,7 @@ namespace idk::vkn
 					}
 				}
 			}
-			if (failed)
-				result = std::move(err_msg);
-			else
+
 			{
 				auto& cl = collated_layouts[layout];
 				cl.first++;
@@ -329,7 +325,7 @@ namespace idk::vkn
 		}
 		return bound;
 	}
-	bool UniformManager::BindSampler(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
+	bool UniformManager::BindSampler(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
 		auto itr = _uniform_names.find(uniform_name);
 		bool bound = false;
@@ -342,7 +338,7 @@ namespace idk::vkn
 		}
 		return bound;
 	}
-	bool UniformManager::BindAttachment(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
+	bool UniformManager::BindAttachment(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
 		auto itr = _uniform_names.find(uniform_name);
 		bool bound = false;
@@ -368,7 +364,7 @@ namespace idk::vkn
 	{
 		return _bindings.BindAttachment(info, array_index, texture, skip_if_bound, layout);
 	}
-	vector_span<UniformManager::set_binding_t>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
+	std::optional<vector_span<UniformManager::set_binding_t>>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
 	{
 		vector_span_builder builder{ all_sets };
 		builder.start();

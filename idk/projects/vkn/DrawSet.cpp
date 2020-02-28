@@ -145,7 +145,7 @@ namespace idk::vkn
 	PerLightDrawSet::PerLightDrawSet()
 	{
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void PerLightDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)
 	{
 		bindings.Bind(the_interface);

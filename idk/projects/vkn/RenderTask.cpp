@@ -27,6 +27,7 @@ namespace idk::vkn
 
 	RenderTask::RenderTask() //:ppm{std::make_unique<PipelineManager>()}
 	{
+		batches.reserve(256);
 	}
 	void RenderTask::DebugLabel(LabelLevel type, string label)
 	{
@@ -143,7 +144,8 @@ namespace idk::vkn
 		di.num_vertices = num_vertices;
 		di.first_vertex = first_vertex;
 		auto uniforms = _uniform_manager.FinalizeCurrent(_uniform_sets);
-		AddToBatch(_dc_builder.end(di,uniforms));
+		if (uniforms)
+			AddToBatch(_dc_builder.end(di, *uniforms));
 	}
 	void RenderTask::DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_index, uint32_t first_instance)
 	{
@@ -154,7 +156,8 @@ namespace idk::vkn
 		di.first_index = first_index;
 		di.first_vertex = first_vertex;
 		auto uniforms = _uniform_manager.FinalizeCurrent(_uniform_sets);
-		AddToBatch(_dc_builder.end(di, uniforms));
+		if(uniforms)
+			AddToBatch(_dc_builder.end(di, *uniforms));
 	}
 	void RenderTask::Copy(CopyCommand&& copy)
 	{
@@ -205,10 +208,24 @@ namespace idk::vkn
 			_clear_depth_stencil = {};
 		}
 	}
+	rect ViewportScissors(rect r, uvec2 fb_size)
+	{
+		r.Scale(fb_size);
+		r.position = max(r.position, vec2{ 0.0f,0.0f });
+		r.size = min(r.size, vec2{ fb_size } -r.position);
+
+		if (r.position.x + r.size.x > fb_size.x
+			||
+			r.position.y + r.size.y > fb_size.y)
+		{
+			DoNothing();
+		}
+		return r;
+	}
 	void RenderTask::SetScissors(rect r)
 	{
 		StartNewBatch();
-		r.Scale(fb_size);
+		r = ViewportScissors(r, fb_size);
 		_rect_builder.start();
 		_rect_builder.emplace_back(r);
 		_current_batch.scissor = _rect_builder.end();
@@ -216,8 +233,7 @@ namespace idk::vkn
 	void RenderTask::SetViewport(rect r)
 	{
 		StartNewBatch();
-		r.Scale(fb_size);
-
+		r = ViewportScissors(r, fb_size);
 		_rect_builder.start();
 		_rect_builder.emplace_back(r);
 		_current_batch.viewport = _rect_builder.end();

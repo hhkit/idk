@@ -332,9 +332,8 @@ namespace idk::vkn::renderpasses
 		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 		if (hdr_shader.guid == Guid{})
 		{
-			auto frag_opt = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
-			if (frag_opt)
-				hdr_shader = *frag_opt;
+			hdr_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FDeferredHDR];//Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
+			
 		}
 
 		context.BindShader(ShaderStage::Fragment, hdr_shader);

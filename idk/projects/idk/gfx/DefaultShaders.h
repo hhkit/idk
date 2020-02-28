@@ -29,6 +29,7 @@ namespace idk
 		FDeferredPost,
 		FDeferredPostSpecular,
 		FDeferredPostAmbient,
+		FDeferredHDR,
 		FMax
 	};
 	enum GeometryShaders
