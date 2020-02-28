@@ -29,14 +29,14 @@
 
 namespace idk
 {
-	constexpr float baumgarte = 0.3f;
+	constexpr float baumgarte = .1f;
 	constexpr float restitution_slop = 0.2f;
 	constexpr float penetration_slop = 0.07f;
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
 
-	void CollisionManager::UpdatePairs(span<class RigidBody> rbs, span<class Collider> colliders)
+	void CollisionManager::NewFrame(span<class RigidBody> rbs, span<class Collider> colliders)
 	{
 		const auto dt = Core::GetDT().count();
 		_dynamic_info.clear();
@@ -109,15 +109,14 @@ namespace idk
 					auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
 					return ColliderInfo{ .collider = &elem, .broad_phase = pred_shape.bounds(), .predicted_shape = pred_shape, .layer = elem.GetGameObject()->Layer() };
 					}, elem.shape);
-				// static_info.emplace_back(collider_info);
 				if (to_insert)
 				{
-					// inserted_within_tick.emplace(elem.GetHandle());
-					// LOG_TO(LogPool::PHYS, "INSERTED from TICK: %u, %u, %u", elem.GetHandle().index, elem.GetHandle().gen, elem.GetHandle().scene);
 					_static_broadphase.insert(elem, collider_info, margin);
 				}
 				else
+				{
 					_static_broadphase.update(elem, collider_info, margin);
+				}
 			}
 			else
 			{
@@ -132,17 +131,34 @@ namespace idk
 				// auto vel = d_info.collider->_rigidbody->velocity() * dt;
 				// d_info.broad_phase.grow(vel);
 				// d_info.broad_phase.grow(-vel);
+
+				// Shape and broadphase are computed at UpdateDynamics
 				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {
-					auto pred_shape = shape * elem.GetGameObject()->Transform()->GlobalMatrix();
-					return ColliderInfo{ .collider = &elem,.rb = &*elem._rigidbody, .broad_phase = pred_shape.bounds(), .predicted_shape = pred_shape, .layer = elem.GetGameObject()->Layer() };
+					
+					return ColliderInfo{ .collider = &elem,.rb = &*elem._rigidbody, .layer = elem.GetGameObject()->Layer() };
 					}, elem.shape);
 				// Compute the world inertia tensor
-				
+
 				_dynamic_info.emplace_back(collider_info);
 			}
 		}
 	}
-#pragma optimize("", off)
+
+	void CollisionManager::UpdateDynamics()
+	{
+		const auto dt = Core::GetDT().count();
+		// Only need to update dynamic objects
+		for (auto& elem : _dynamic_info)
+		{
+			std::visit([&elem](const auto& shape) {
+				auto pred_shape = shape * elem.rb->_global_cache;
+				elem.broad_phase = pred_shape.bounds();
+				elem.predicted_shape = pred_shape;
+				}, elem.collider->shape);
+		}
+	}
+
+	// #pragma optimize("", off)
 	void CollisionManager::TestCollisions()
 	{
 		auto& phys = Core::GetSystem<PhysicsSystem>();
@@ -254,7 +270,7 @@ namespace idk
 			vec3 wA = cs.rbA->angular_velocity;
 			vec3 vB = cs.rbB ? cs.rbB->linear_velocity : vec3{ 0.0f };
 			vec3 wB = cs.rbB ? cs.rbB->angular_velocity : vec3{ 0.0f };
-
+			// LOG_TO(LogPool::PHYS, "===================== COLLIDE =======================");
 			for (int j = 0; j < cs.contactCount; ++j)
 			{
 				ContactState* c = cs.contacts+ j;
@@ -282,7 +298,8 @@ namespace idk
 				const float tmp = c->penetration + penetration_slop;
 				const float tmp2 = min(0.0f, tmp);
 				c->bias = -baumgarte * (1.0f / dt) * tmp2;
-				LOG_TO(LogPool::PHYS, "Penetration: %f,		bias: %f", c->penetration, c->bias);
+				// LOG_TO(LogPool::PHYS, "Penetration: %f,		bias: %f", c->penetration, c->bias);
+				// LOG_TO(LogPool::PHYS, "Normal: (%f, %f, %f)", cs.normal.x, cs.normal.y, cs.normal.z);
 				// Warm start contact
 				vec3 P = cs.normal * c->normalImpulse;
 
@@ -317,49 +334,76 @@ namespace idk
 
 	void CollisionManager::Solve()
 	{
-		for (int i = 0; i < constraint_states.size(); ++i)
+		for (int iter = 0; iter < 10; ++iter)
 		{
-			ContactConstraintState* cs = constraint_states.data() + i;
-
-			vec3 vA = cs->rbA->linear_velocity;
-			vec3 wA = cs->rbA->angular_velocity;
-			vec3 vB = cs->rbB ? cs->rbB->linear_velocity : vec3{ 0.0f };
-			vec3 wB = cs->rbB ? cs->rbB->angular_velocity : vec3{ 0.0f };
-
-			for (int j = 0; j < cs->contactCount; ++j)
+			for (int i = 0; i < constraint_states.size(); ++i)
 			{
-				ContactState* c = cs->contacts + j;
+				ContactConstraintState* cs = constraint_states.data() + i;
 
-				// relative velocity at contact
-				vec3 dv = vB + wB.cross(c->rb) - vA - wA.cross(c->ra);
+				vec3 vA = cs->rbA->linear_velocity;
+				vec3 wA = cs->rbA->angular_velocity;
+				vec3 vB = cs->rbB ? cs->rbB->linear_velocity : vec3{ 0.0f };
+				vec3 wB = cs->rbB ? cs->rbB->angular_velocity : vec3{ 0.0f };
 
-				// Friction
-				// if (m_enableFriction)
+				for (int j = 0; j < cs->contactCount; ++j)
 				{
-					for (int k = 0; k < 2; ++k)
+					ContactState* c = cs->contacts + j;
+
+					// relative velocity at contact
+					vec3 dv = vB + wB.cross(c->rb) - vA - wA.cross(c->ra);
+
+					// Friction
+					// if (m_enableFriction)
 					{
-						float lambda = -dv.dot(cs->tangentVectors[k]) * c->tangentMass[k];
-
-						// Calculate frictional impulse
-						float maxLambda = cs->friction * c->normalImpulse;
-
-						// Clamp frictional impulse
-						float oldPT = c->tangentImpulse[k];
-						c->tangentImpulse[k] = [&](float min, float max, float a) -> float 
+						for (int k = 0; k < 2; ++k)
 						{
-							if (a < min)
-								return min;
+							float lambda = -dv.dot(cs->tangentVectors[k]) * c->tangentMass[k];
 
-							if (a > max)
-								return max;
+							// Calculate frictional impulse
+							float maxLambda = cs->friction * c->normalImpulse;
 
-							return a;
-						}(-maxLambda, maxLambda, oldPT + lambda);
+							// Clamp frictional impulse
+							float oldPT = c->tangentImpulse[k];
+							c->tangentImpulse[k] = [&](float min, float max, float a) -> float
+							{
+								if (a < min)
+									return min;
 
-						lambda = c->tangentImpulse[k] - oldPT;
+								if (a > max)
+									return max;
 
-						// Apply friction impulse
-						vec3 impulse = cs->tangentVectors[k] * lambda;
+								return a;
+							}(-maxLambda, maxLambda, oldPT + lambda);
+
+							lambda = c->tangentImpulse[k] - oldPT;
+
+							// Apply friction impulse
+							vec3 impulse = cs->tangentVectors[k] * lambda;
+							vA -= impulse * cs->mA;
+							wA -= cs->iA * c->ra.cross(impulse);
+
+							vB += impulse * cs->mB;
+							wB += cs->iB * c->rb.cross(impulse);
+						}
+					}
+
+					// Normal
+					{
+						dv = vB + wB.cross(c->rb) - vA - wA.cross(c->ra);
+
+						// Normal impulse
+						float vn = dv.dot(cs->normal);
+
+						// Factor in positional bias to calculate impulse scalar j
+						float lambda = c->normalMass * (-vn + c->bias);
+
+						// Clamp impulse
+						float tempPN = c->normalImpulse;
+						c->normalImpulse = max(tempPN + lambda, 0.0f);
+						lambda = c->normalImpulse - tempPN;
+
+						// Apply impulse
+						vec3 impulse = cs->normal * lambda;
 						vA -= impulse * cs->mA;
 						wA -= cs->iA * c->ra.cross(impulse);
 
@@ -368,39 +412,20 @@ namespace idk
 					}
 				}
 
-				// Normal
+				cs->rbA->linear_velocity = vA;
+				cs->rbA->angular_velocity = wA;
+				if (cs->rbB)
 				{
-					dv = vB + wB.cross(c->rb) - vA - wA.cross(c->ra);
-
-					// Normal impulse
-					float vn = dv.dot(cs->normal);
-
-					// Factor in positional bias to calculate impulse scalar j
-					float lambda = c->normalMass * (-vn + c->bias);
-
-					// Clamp impulse
-					float tempPN = c->normalImpulse;
-					c->normalImpulse = max(tempPN + lambda, 0.0f);
-					lambda = c->normalImpulse - tempPN;
-
-					// Apply impulse
-					vec3 impulse = cs->normal * lambda;
-					vA -= impulse * cs->mA;
-					wA -= cs->iA * c->ra.cross(impulse);
-
-					vB += impulse * cs->mB;
-					wB += cs->iB * c->rb.cross(impulse);
+					cs->rbB->linear_velocity = vB;
+					cs->rbB->angular_velocity = wB;
 				}
 			}
-
-			cs->rbA->linear_velocity = vA;
-			cs->rbA->angular_velocity = wA;
-			if (cs->rbB)
+			if (constraint_states.size() > 0)
 			{
-				cs->rbB->linear_velocity = vB;
-				cs->rbB->angular_velocity = wB;
+				const auto vel = constraint_states[0].rbA->linear_velocity;
+				LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
 			}
-			LOG_TO(LogPool::PHYS, "Solve Velocity: (%f, %f, %f)", vA.x, vA.y, vA.z);
+			
 		}
 	}
 
@@ -502,17 +527,18 @@ namespace idk
 	void CollisionManager::DebugDrawContactPoints(float dt)
 	{
 		auto& dbg = Core::GetSystem<DebugRenderer>();
-		for (auto col : _collisions)
+		for (auto col : constraint_states)
 		{
-			for (int i = 0; i < col.second.contactCount; ++i)
+			for (int i = 0; i < col.contactCount; ++i)
 			{
-				const auto& c = col.second.contacts[i];
-				dbg.Draw(c.position, color{ 0,1,0,1 }, seconds{ 0.5f });
-				dbg.Draw(ray{ c.position, col.second.normal * 0.4f }, color{ 0,1,0,1 }, seconds{ 0.5 });
-				dbg.Draw(ray{ c.position, col.second.tangentVectors[0] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
-				dbg.Draw(ray{ c.position, col.second.tangentVectors[1] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
+				const auto& c = col.contacts[i];
+				const auto position = col.centerA + c.ra;
+				dbg.Draw(position, color{ 0,1,0,1 }, seconds{ 0.5f });
+				dbg.Draw(ray{ position, col.normal * 0.4f }, color{ 0,1,0,1 }, seconds{ 0.5 });
+				dbg.Draw(ray{ position, col.tangentVectors[0] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
+				dbg.Draw(ray{ position, col.tangentVectors[1] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
 			}
-			LOG_TO(LogPool::PHYS, "Contact Count: %d", col.second.contactCount);
+			LOG_TO(LogPool::PHYS, "Contact Count: %d", col.contactCount);
 		}
 	}
 

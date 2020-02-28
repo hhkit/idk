@@ -5,7 +5,7 @@
 #include <phys/collision_rotational.h>
 namespace idk::phys
 {
-#pragma optimize("", off)
+// #pragma optimize("", off)
 	col_result generate_contacts(const box& lhs, const box& rhs)
 	{
 		// Manifold m;

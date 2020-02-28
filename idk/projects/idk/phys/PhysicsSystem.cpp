@@ -32,7 +32,7 @@
 
 namespace idk
 {
-#pragma optimize("", off)
+// #pragma optimize("", off)
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
 		const auto dt = Core::GetDT().count();
@@ -50,7 +50,7 @@ namespace idk
 				if (rb.sleeping())
 					continue;
 				if (rb.use_gravity && !rb.is_kinematic)
-					rb.AddForce(vec3{ 0, -40.81, 0 });
+					rb.AddForce(vec3{ 0, -9.81f * rb.gravity_scale, 0 });
 			}
 		};
 
@@ -106,14 +106,18 @@ namespace idk
 
 		ApplyGravity();
 		PredictTransform();
-		_col_manager.UpdatePairs(rbs, colliders);
-		_col_manager.TestCollisions();
-		if (debug_draw_colliders)
-			_col_manager.DebugDrawContactPoints(dt);
-		_col_manager.PreSolve();
-		for (int i = 0; i < 10; ++i)
-			_col_manager.Solve();
 
+		// New frame will insert new static objects into the tree and also initialize the dynamic info
+		_col_manager.NewFrame(rbs, colliders);
+		for (int i = 0; i < 3; ++i)
+		{
+			_col_manager.UpdateDynamics();
+			_col_manager.TestCollisions();
+			if (debug_draw_colliders)
+				_col_manager.DebugDrawContactPoints(dt);
+			_col_manager.PreSolve();
+			_col_manager.Solve();
+		}
 		_col_manager.Finalize();
 
 		if (!debug_draw_colliders)

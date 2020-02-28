@@ -2,7 +2,7 @@
 
 namespace idk::phys
 {
-#pragma optimize("", off)
+// #pragma optimize("", off)
 #define InFront( a ) \
 	((a) < float( 0.0 ))
 

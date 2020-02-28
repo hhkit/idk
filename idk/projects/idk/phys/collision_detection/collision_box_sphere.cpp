@@ -35,7 +35,7 @@ namespace idk::phys
 		result.contactCount = 1;
 		if (distance < epsilon)
 		{
-			result.contacts[0].penetration = rhs.radius;
+			result.contacts[0].penetration = -rhs.radius;
 			result.contacts[0].position = rhs.center;
 			result.normal = vec3{0, 1, 0};
 		}
@@ -49,7 +49,7 @@ namespace idk::phys
 		}
 		result.max_penetration = result.contacts[0].penetration;
 		compute_basis(result.normal, result.tangentVectors, result.tangentVectors + 1);
-		LOG("Norm: %f, %f, %f", result.normal.x, result.normal.y, result.normal.z);
+		// LOG("Norm: %f, %f, %f", result.normal.x, result.normal.y, result.normal.z);
 		return result;
 	}
 }

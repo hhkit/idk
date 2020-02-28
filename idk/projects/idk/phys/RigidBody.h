@@ -24,8 +24,9 @@ namespace idk
 		float angular_damping{ 0.1f };
 
 		bool use_gravity  { true  };
+		float gravity_scale{ 1.0f };
 		bool is_kinematic { false };
-		bool freeze_rotation{ false };
+		bool freeze_rotation{ true };
 
 		// sleeping
 		real sleep_threshold  { +epsilon };
