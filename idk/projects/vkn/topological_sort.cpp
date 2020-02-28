@@ -28,7 +28,7 @@ std::pair<vector<index_t>, bool> KahnsAlgorithm(IntermediateGraph graph)
 	stack.reserve(in_list.size());
 	sorted_indices.reserve(in_list.size());
 	//Find all nodes with 0 input dependencies
-	for (size_t i = 0; i < in_list.size(); ++i)
+	for (size_t i = in_list.size(); i-- >0 ; ) //Find in reverse so that we maintain ordering as far as possible
 	{
 		if (in_list[i] == 0)
 		{

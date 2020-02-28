@@ -377,6 +377,12 @@
     <ClInclude Include="RenderPassPool.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowPasses.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawSetRenderPass.h">
+      <Filter>render\new_testament</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -659,6 +665,7 @@
     <ClCompile Include="VertexBindingTracker.cpp" />
     <ClCompile Include="RenderPassPool.cpp" />
     <ClCompile Include="LightBinding.cpp" />
+    <ClCompile Include="ShadowPasses.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

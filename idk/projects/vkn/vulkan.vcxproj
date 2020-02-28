@@ -327,9 +327,11 @@
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CanvasVertexBindings.h" />
     <ClInclude Include="ColorPickRenderer.h" />
+    <ClInclude Include="DrawSetRenderPass.h" />
     <ClInclude Include="FencePool.h" />
     <ClInclude Include="PipelineDescHelper.h" />
     <ClInclude Include="RenderPassPool.h" />
+    <ClInclude Include="ShadowPasses.h" />
     <ClInclude Include="SimpleLock.h" />
     <ClInclude Include="SkyboxBinding.h" />
     <ClInclude Include="CubemapRenderer.h" />
@@ -458,6 +460,7 @@
     <ClCompile Include="LightBinding.cpp" />
     <ClCompile Include="PipelineDescHelper.cpp" />
     <ClCompile Include="RenderPassPool.cpp" />
+    <ClCompile Include="ShadowPasses.cpp" />
     <ClCompile Include="SimpleLock.cpp" />
     <ClCompile Include="SkyboxBinding.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />
