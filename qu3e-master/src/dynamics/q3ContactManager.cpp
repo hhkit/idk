@@ -314,6 +314,17 @@ void q3ContactManager::RenderContacts( q3Render* render ) const
 				c->position.y + m->normal.y * 0.5f,
 				c->position.z + m->normal.z * 0.5f
 				);
+
+			render->Line(
+				c->position.x + m->tangentVectors[0].x * 0.5f,
+				c->position.y + m->tangentVectors[0].y * 0.5f,
+				c->position.z + m->tangentVectors[0].z * 0.5f
+			);
+			render->Line(
+				c->position.x + m->tangentVectors[1].x * 0.5f,
+				c->position.y + m->tangentVectors[1].y * 0.5f,
+				c->position.z + m->tangentVectors[1].z * 0.5f
+			);
 		}
 
 		contact = contact->next;

@@ -41,7 +41,7 @@ struct BoxStack : public Demo
 			bodyDef.bodyType = eDynamicBody;
 			q3Transform tx;
 			q3Identity(tx);
-			boxDef.Set(tx, q3Vec3(1, 1.0f, 1));
+			boxDef.Set(tx, q3Vec3(2, 2.0f, 2));
 			boxDef.SetRestitution(0);
 			// for ( i32 i = 0; i < 1; ++i )
 			{

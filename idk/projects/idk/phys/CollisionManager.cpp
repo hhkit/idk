@@ -29,9 +29,9 @@
 
 namespace idk
 {
-	constexpr float baumgarte = .1f;
+	constexpr float baumgarte = .2f;
 	constexpr float restitution_slop = 0.2f;
-	constexpr float penetration_slop = 0.07f;
+	constexpr float penetration_slop = 0.05f;
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
@@ -204,19 +204,27 @@ namespace idk
 				
 				if constexpr (std::is_same_v<Shape, box>)
 				{
-					const vec3 extents = pred_shape.extents;
+					const vec3 extents = pred_shape.half_extents();
 					const vec3 extents_sq = extents * extents;
-					constexpr float scalar = 1 / 12.0f;
-
-					const float e1 = 1.0f / (scalar * extents_sq.y * extents_sq.z);
-					const float e2 = 1.0f / (scalar * extents_sq.x * extents_sq.z);
-					const float e3 = 1.0f / (scalar * extents_sq.x * extents_sq.y);
+					constexpr float scalar = 1.0f / 12.0f;
+					const float mass = rb.mass();
+					float ex2 = 4.0f * extents.x * extents.x;
+					float ey2 = 4.0f * extents.y * extents.y;
+					float ez2 = 4.0f * extents.z * extents.z;
+					float x = scalar * mass * (ey2 + ez2);
+					float y = scalar * mass * (ex2 + ez2);
+					float z = scalar * mass * (ex2 + ey2);
+					
+					// 
+					// const float e1 = 1.0f / (scalar * extents_sq.y * extents_sq.z);
+					// const float e2 = 1.0f / (scalar * extents_sq.x * extents_sq.z);
+					// const float e3 = 1.0f / (scalar * extents_sq.x * extents_sq.y);
 					const mat3 local_tensor{
-						vec3{e1,   0.0f, 0.0f},
-						vec3{0.0f, e2,   0.0f},
-						vec3{0.0f, 0.0f, e3  }
+						vec3{1.0f/ x,   0.0f, 0.0f},
+						vec3{0.0f, 1.0f/ y,   0.0f},
+						vec3{0.0f, 0.0f, 1.0f/z }
 					};
-
+					
 					rb._global_inertia_tensor = curr_rot * (rb.inv_mass * local_tensor) * curr_rot_inv;
 				}
 				else if constexpr (std::is_same_v<Shape, sphere>)
@@ -361,6 +369,7 @@ namespace idk
 					tm[k] += raCt.dot(cs.iA * raCt) + rbCt.dot(cs.iB * rbCt);
 					c->tangentMass[k] = invert(tm[k]);
 				}
+				LOG_TO(LogPool::PHYS, "Tangent Mass: %f, %f", c->tangentMass[0], c->tangentMass[1]);
 
 				// Precalculate bias factor
 				const float tmp = c->penetration + penetration_slop;
@@ -491,7 +500,7 @@ namespace idk
 			if (constraint_states.size() > 0)
 			{
 				const auto vel = constraint_states[0].rbA->linear_velocity;
-				// LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
+				LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
 			}
 			
 		}
@@ -504,13 +513,10 @@ namespace idk
 		{
 			if (!rigidbody.is_kinematic)
 			{
-				// Translate
-				const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
-
+				// Rotational
 				// Only do if there is angular velocity and rotational is not frozen
 				if (!rigidbody.freeze_rotation && rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > 0.0001f)
 				{
-					// rigidbody.angular_velocity = vec3{ 0.0f };
 					// Scale
 					const vec3 s = [](const mat4& mat)
 					{
@@ -530,7 +536,12 @@ namespace idk
 					rigidbody.angular_velocity = vec3{ 0.0f };
 				}
 
-				rigidbody._global_cache[3].xyz = t;
+				// Velocity
+				if (rigidbody.angular_velocity.dot(rigidbody.linear_velocity) > 0.0001f)
+				{
+					const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
+					rigidbody._global_cache[3].xyz = t;
+				}
 				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._global_cache);
 			}
 			else
