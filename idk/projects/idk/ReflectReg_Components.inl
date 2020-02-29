@@ -45,7 +45,7 @@ REFLECT_END()
 
 // PHYSICS
 REFLECT_BEGIN(idk::RigidBody, "RigidBody")
-REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity, gravity_scale, freeze_rotation, linear_damping)
+REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity, gravity_scale, linear_damping, angular_damping, freeze_rotation)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Collider, "Collider")
