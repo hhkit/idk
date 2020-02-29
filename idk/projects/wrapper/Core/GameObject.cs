@@ -40,13 +40,13 @@ namespace idk
         }
 
 
-        public T GetComponent<T>() where T : Component, new()
+        public T GetComponent<T>() where T : Component
         {
             ulong comp_handle = Bindings.GameObjectGetEngineComponent(handle, typeof(T).Name);
 
             if (comp_handle != 0)
             {
-                T component = new T();
+                T component = (T)Activator.CreateInstance(typeof(T));
                 component.handle = comp_handle;
                 return component;
             }
@@ -59,7 +59,7 @@ namespace idk
 
         }
 
-        public T GetComponentInChildren<T>() where T : Component, new()
+        public T GetComponentInChildren<T>() where T : Component
         {
             var children = transform.GetChildren();
             foreach (var child in children)
@@ -79,7 +79,7 @@ namespace idk
             return null;
         }
 
-        public T GetComponentInParent<T>() where T: Component, new()
+        public T GetComponentInParent<T>() where T: Component
         {
             var comp = GetComponent<T>();
             if (comp)
