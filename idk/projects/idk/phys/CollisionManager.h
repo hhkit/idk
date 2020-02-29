@@ -42,12 +42,12 @@ namespace idk
 
 		// Will also cache all dynamic bodies for TestCollisions.
 		void InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders);
-		void ApplyGravityAndForces();
+		void ApplyGravityAndForces(span<class RigidBody> rbs);
 		void UpdateDynamics();
 		void TestCollisions();
 		void PreSolve();
 		void Solve();
-		void Finalize();
+		void Finalize(span<class RigidBody> rbs);
 		void Reset();
 
 		void DebugDrawContactPoints(float dt);

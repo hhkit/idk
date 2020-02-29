@@ -35,7 +35,7 @@ namespace idk
 	constexpr float penetration_max_slop = 0.5f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
-
+// #pragma optimize("", off)
 	void CollisionManager::InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders)
 	{
 		const auto dt = Core::GetDT().count();
@@ -121,57 +121,63 @@ namespace idk
 			else
 			{
 				// Shape and broadphase are computed at UpdateDynamics
-				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {
-					
+				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {	
 					return ColliderInfo{ .collider = &elem,.rb = &*elem._rigidbody, .layer = elem.GetGameObject()->Layer() };
-					}, elem.shape);
+				}, elem.shape);
 
+				// Reset the global inertia tensor
+				collider_info.rb->_global_inertia_tensor = mat3{ scale(vec3{ 0.0f }) };
+				// collider_info.rb->_forces_applied = false;
 				_dynamic_info.emplace_back(collider_info);
 			}
 		}
 	}
 
-	void CollisionManager::ApplyGravityAndForces()
+	void CollisionManager::ApplyGravityAndForces(span<class RigidBody> rbs)
 	{
 		const auto dt = Core::GetDT().count();
 
-		for (auto& dyn_info : _dynamic_info)
+		for (auto& rigidbody: rbs)
 		{
-			auto& rigidbody = *dyn_info.rb;
-	
-			if (rigidbody.sleeping())
-			{
-				rigidbody.linear_velocity = rigidbody.initial_velocity * dt;
-				rigidbody.initial_velocity = vec3{};
-				continue;
-			}
-
-			// Apply gravity
-			if (rigidbody.use_gravity && !rigidbody.is_kinematic)
-				rigidbody.AddForce(vec3{ 0, -9.81f * rigidbody.gravity_scale, 0 });
-
 			const auto tfm = rigidbody.GetGameObject()->Transform();
 			rigidbody._global_cache = tfm->GlobalMatrix();
 			rigidbody._rotate_cache = tfm->GlobalRotation();
 
-			// Apply forces
-			if (!rigidbody.is_kinematic)
+			if (rigidbody.sleeping())
 			{
-				rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
-				rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
-
-				// Compute the angular stuff here too. 
-				// body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * m_dt;
-				if (!rigidbody.freeze_rotation)
-					rigidbody.angular_velocity *= 1.0f / (1.0f + dt * rigidbody.angular_damping);
-
-				// LOG_TO(LogPool::PHYS, "Force: (%f, %f, %f) ||  Velocity: (%f, %f, %f)", 
-				//		  rigidbody.force.x, rigidbody.force.y, rigidbody.force.z, rigidbody.linear_velocity.x, rigidbody.linear_velocity.y, rigidbody.linear_velocity.z);
+				rigidbody.linear_velocity = rigidbody.initial_velocity * dt;
+				rigidbody.initial_velocity = vec3{};
 			}
+			else
+			{
+				// Apply gravity
+				if (rigidbody.use_gravity && !rigidbody.is_kinematic)
+					rigidbody.AddForce(vec3{ 0, -9.81f * rigidbody.gravity_scale, 0 });
 
-			// Clear all forces
-			rigidbody.force = vec3{};
-			rigidbody.torque = vec3{};
+				// Apply forces
+				if (!rigidbody.is_kinematic)
+				{
+					rigidbody.linear_velocity += (rigidbody.force * rigidbody.inv_mass) * dt;
+					rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
+
+					// Compute the angular stuff here too. 
+					// body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * m_dt;
+					if (!rigidbody.freeze_rotation)
+						rigidbody.angular_velocity *= 1.0f / (1.0f + dt * rigidbody.angular_damping);
+
+					// LOG_TO(LogPool::PHYS, "Force: (%f, %f, %f) ||  Velocity: (%f, %f, %f)", 
+					//		  rigidbody.force.x, rigidbody.force.y, rigidbody.force.z, rigidbody.linear_velocity.x, rigidbody.linear_velocity.y, rigidbody.linear_velocity.z);
+				}
+				else
+				{
+					rigidbody.linear_velocity = (rigidbody._global_cache[3].xyz - rigidbody._prev_pos) / dt;
+					rigidbody.angular_velocity = vec3{ 0.0f };
+				}
+
+				// Clear all forces
+				rigidbody.force = vec3{ 0.0f };
+				rigidbody.torque = vec3{ 0.0f };
+			}
 		}
 	}
 
@@ -186,30 +192,47 @@ namespace idk
 				elem.broad_phase = pred_shape.bounds();
 				elem.predicted_shape = pred_shape;
 
+				// No inertia tensor for triggers
+				if (elem.collider->is_trigger)
+					return;
 				// Compute the inverse world inertia tensor
 				using Shape = decltype(pred_shape);
 
 				auto& rb = *elem.rb;
 				const mat3 curr_rot = quat_cast<mat3>(rb._rotate_cache);
 				const mat3 curr_rot_inv = curr_rot.transpose();
-				rb._global_inertia_tensor = mat3{ scale(vec3{ 0.0f }) };
+				
 				if constexpr (std::is_same_v<Shape, box>)
 				{
-					
+					const vec3 extents = pred_shape.extents;
+					const vec3 extents_sq = extents * extents;
+					constexpr float scalar = 1 / 12.0f;
+
+					const float e1 = 1.0f / (scalar * extents_sq.y * extents_sq.z);
+					const float e2 = 1.0f / (scalar * extents_sq.x * extents_sq.z);
+					const float e3 = 1.0f / (scalar * extents_sq.x * extents_sq.y);
+					const mat3 local_tensor{
+						vec3{e1,   0.0f, 0.0f},
+						vec3{0.0f, e2,   0.0f},
+						vec3{0.0f, 0.0f, e3  }
+					};
+
+					rb._global_inertia_tensor = curr_rot * (rb.inv_mass * local_tensor) * curr_rot_inv;
 				}
 				else if constexpr (std::is_same_v<Shape, sphere>)
 				{
-					const mat3 local_tensor = mat3{ scale(vec3{0.4f * pred_shape.radius * pred_shape.radius}) };
-					rb._global_inertia_tensor = curr_rot * local_tensor * curr_rot_inv;
+					// 1/mass * (0.4 * r^2) = 1 / (mass * 0.4 * r^2)
+					const float diag_val = (1.0f / (0.4f * pred_shape.radius * pred_shape.radius));
+					const mat3 local_tensor = mat3{ scale(vec3{diag_val}) };
+					rb._global_inertia_tensor = curr_rot * (rb.inv_mass * local_tensor) * curr_rot_inv;
 				}
 				else // Only sphere and box has rotational
 				{
 					rb.freeze_rotation = true;
+					// rb._global_inertia_tensor = mat3{ scale(vec3{ 0.0f }) };
 				}
 
 			}, elem.collider->shape);
-
-			
 		}
 	}
 
@@ -242,8 +265,8 @@ namespace idk
 				_info.emplace_back(ColliderInfoPair{ &*i, &*j });
 			}
 
-			if (lrigidbody.sleeping())
-				continue;
+			// if (lrigidbody.sleeping())
+			// 	continue;
 
 			// Static vs Dynamic Broadphase
 			_static_broadphase.query_collisions(*i, _info);
@@ -474,12 +497,11 @@ namespace idk
 		}
 	}
 
-	void CollisionManager::Finalize()
+	void CollisionManager::Finalize(span<class RigidBody> rbs)
 	{
 		const float dt = Core::GetDT().count();
-		for (auto& elem : _dynamic_info)
+		for (auto& rigidbody : rbs)
 		{
-			auto& rigidbody = *elem.collider->_rigidbody;
 			if (!rigidbody.is_kinematic)
 			{
 				// Translate
@@ -513,11 +535,13 @@ namespace idk
 			}
 			else
 			{
-				rigidbody.linear_velocity = vec3{ 0.0f };
+				rigidbody._prev_pos = rigidbody._global_cache[3].xyz;
+				rigidbody.linear_velocity = (rigidbody._global_cache[3].xyz - rigidbody._prev_pos) / dt;
 				rigidbody.angular_velocity = vec3{ 0.0f };
 			}
 			    
 			rigidbody.sleep_next_frame = false;
+			// rigidbody._done_this_frame = true;
 		}
 	}
 

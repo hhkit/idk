@@ -44,9 +44,9 @@ namespace idk
 
 		// New frame will insert new static objects into the tree and also initialize the dynamic info
 		_col_manager.InitializeNewFrame(rbs, colliders);
-		_col_manager.ApplyGravityAndForces();
+		_col_manager.ApplyGravityAndForces(rbs);
 		
-		for (int i = 0; i < 3; ++i)
+		// for (int i = 0; i < 3; ++i)
 		{
 			// Cache global tfm and global rotations as well as update broadphase shapes.
 			// Will also compute intertia tensors here.
@@ -57,7 +57,7 @@ namespace idk
 			_col_manager.PreSolve();
 			_col_manager.Solve();
 		}
-		_col_manager.Finalize();
+		_col_manager.Finalize(rbs);
 
 		if (!debug_draw_colliders)
 			return;

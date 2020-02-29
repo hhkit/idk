@@ -48,8 +48,10 @@ namespace idk
 
 	private:
 		// vec3 _accum_accel{};
-		// vec3 _prev_pos;
+		vec3 _prev_pos;
 		bool _sleeping = false;
+		bool _forces_applied = false;
+		bool _done_this_frame = false;
         mat4 _global_cache{};
 		quat _rotate_cache{ };
 		mat3 _global_inertia_tensor{};

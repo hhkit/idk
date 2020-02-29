@@ -73,11 +73,11 @@ struct BoxStack : public Demo
 		bodyDef.position.Set(.5, 0, 0);
 		body->AddBox( boxDef );
 
-		body = scene.CreateBody(bodyDef);
-		q3Identity(tx);
-		boxDef.Set(tx, q3Vec3(1, 1.0f, 1));
-		bodyDef.position.Set(-.5, 0, 0);
-		body->AddBox(boxDef);
+		// body = scene.CreateBody(bodyDef);
+		// q3Identity(tx);
+		// boxDef.Set(tx, q3Vec3(1, 1.0f, 1));
+		// bodyDef.position.Set(-.5, 0, 0);
+		// body->AddBox(boxDef);
 
 		// Create boxes
 		//for ( i32 i = 0; i < 10; ++i )
