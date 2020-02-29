@@ -192,13 +192,13 @@ namespace idk
 				elem.broad_phase = pred_shape.bounds();
 				elem.predicted_shape = pred_shape;
 
+				auto& rb = *elem.rb;
 				// No inertia tensor for triggers
-				if (elem.collider->is_trigger)
+				if (elem.collider->is_trigger || rb.freeze_rotation)
 					return;
 				// Compute the inverse world inertia tensor
 				using Shape = decltype(pred_shape);
-
-				auto& rb = *elem.rb;
+				
 				const mat3 curr_rot = quat_cast<mat3>(rb._rotate_cache);
 				const mat3 curr_rot_inv = curr_rot.transpose();
 				
@@ -273,8 +273,8 @@ namespace idk
 				_info.emplace_back(ColliderInfoPair{ &*i, &*j });
 			}
 
-			// if (lrigidbody.sleeping())
-			// 	continue;
+			if (lrigidbody.sleeping())
+				continue;
 
 			// Static vs Dynamic Broadphase
 			_static_broadphase.query_collisions(*i, _info);
@@ -537,10 +537,14 @@ namespace idk
 				}
 
 				// Velocity
-				if (rigidbody.angular_velocity.dot(rigidbody.linear_velocity) > 0.0001f)
+				if (rigidbody.linear_velocity.dot(rigidbody.linear_velocity) > 0.0001f)
 				{
 					const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
 					rigidbody._global_cache[3].xyz = t;
+				}
+				else
+				{
+					rigidbody.linear_velocity = vec3{ 0.0f };
 				}
 				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._global_cache);
 			}
