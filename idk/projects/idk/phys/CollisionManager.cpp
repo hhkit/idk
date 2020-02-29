@@ -513,6 +513,16 @@ namespace idk
 		{
 			if (!rigidbody.is_kinematic)
 			{
+				// Velocity
+				vec3 translate = rigidbody._global_cache[3].xyz;
+				if (rigidbody.linear_velocity.dot(rigidbody.linear_velocity) > 0.0001f)
+				{
+					translate = translate + rigidbody.linear_velocity * dt;
+				}
+				else
+				{
+					rigidbody.linear_velocity = vec3{ 0.0f };
+				}
 				// Rotational
 				// Only do if there is angular velocity and rotational is not frozen
 				if (!rigidbody.freeze_rotation && rigidbody.angular_velocity.dot(rigidbody.angular_velocity) > 0.0001f)
@@ -536,16 +546,7 @@ namespace idk
 					rigidbody.angular_velocity = vec3{ 0.0f };
 				}
 
-				// Velocity
-				if (rigidbody.linear_velocity.dot(rigidbody.linear_velocity) > 0.0001f)
-				{
-					const vec3 t = rigidbody._global_cache[3].xyz + rigidbody.linear_velocity * dt;
-					rigidbody._global_cache[3].xyz = t;
-				}
-				else
-				{
-					rigidbody.linear_velocity = vec3{ 0.0f };
-				}
+				rigidbody._global_cache[3].xyz = translate;
 				rigidbody.GetGameObject()->Transform()->GlobalMatrix(rigidbody._global_cache);
 			}
 			else
