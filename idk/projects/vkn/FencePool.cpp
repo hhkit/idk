@@ -102,9 +102,12 @@ namespace idk::vkn
 		}
 	}
 
-	vk::CommandBuffer idk::vkn::CmdBufferPool::Get(size_t id) const
+	vk::CommandBuffer CmdBufferPool::Get(size_t id) const
 	{
-		return *_cmd_buffer[id];
+		_acquire_lock.Lock();
+		auto result = *_cmd_buffer[id];
+		_acquire_lock.Unlock();
+		return result;
 	}
 
 	size_t CmdBufferPool::growth_amount() const

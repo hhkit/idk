@@ -56,6 +56,7 @@
 #include <vkn/RenderBundle.h>
 
 #include <vkn/renderpasses/DeferredPasses.h>
+#include <vkn/renderpasses/ShadowPasses.h>
 
 namespace idk::vkn
 {
@@ -463,6 +464,7 @@ namespace idk::vkn
 //
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
+		_pimpl->graph.Reset();
 
 		auto& lights = (*state.shadow_ranges);
 		const size_t num_conv_states = 1;
@@ -754,6 +756,9 @@ namespace idk::vkn
 //#pragma optimize("", off)
 	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
+
+		renderpasses::AddShadowPass(_pimpl->graph, shadow_range, state);
+		return;
 		const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 		auto& rs = r[curr_state];
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
@@ -931,7 +936,6 @@ namespace idk::vkn
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_pimpl->gfx_state_index = 0;
-		_pimpl->graph.Reset();
 		_current_frame_index = frame_index;
 		//Update all the resources that need to be updated.
 		auto& curr_frame = *this;

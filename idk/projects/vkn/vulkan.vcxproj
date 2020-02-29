@@ -331,7 +331,7 @@
     <ClInclude Include="FencePool.h" />
     <ClInclude Include="PipelineDescHelper.h" />
     <ClInclude Include="RenderPassPool.h" />
-    <ClInclude Include="ShadowPasses.h" />
+    <ClInclude Include="renderpasses\ShadowPasses.h" />
     <ClInclude Include="SimpleLock.h" />
     <ClInclude Include="SkyboxBinding.h" />
     <ClInclude Include="CubemapRenderer.h" />
@@ -453,6 +453,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseRenderPass.cpp" />
+    <ClCompile Include="CameraViewportBindings.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CanvasVertexBindings.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
@@ -460,7 +461,7 @@
     <ClCompile Include="LightBinding.cpp" />
     <ClCompile Include="PipelineDescHelper.cpp" />
     <ClCompile Include="RenderPassPool.cpp" />
-    <ClCompile Include="ShadowPasses.cpp" />
+    <ClCompile Include="renderpasses\ShadowPasses.cpp" />
     <ClCompile Include="SimpleLock.cpp" />
     <ClCompile Include="SkyboxBinding.cpp" />
     <ClCompile Include="CubemapRenderer.cpp" />

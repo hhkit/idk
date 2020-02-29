@@ -145,7 +145,7 @@ namespace idk::vkn
 
 		[[maybe_unused]] string_view lhs_name = l_desc.name, rhs_name= r_desc.name;
 
-		return l_desc.format == r_desc.format && l_desc.type == r_desc.type && l_desc.layer_count == r_desc.layer_count && l_desc.aspect == r_desc.aspect;
+		return l_desc.usage==r_desc.usage&&l_desc.format == r_desc.format && l_desc.type == r_desc.type && l_desc.layer_count == r_desc.layer_count && l_desc.aspect == r_desc.aspect;
 	}
 
 	FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(fgr_id rsc)

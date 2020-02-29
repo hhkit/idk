@@ -43,7 +43,7 @@ namespace idk::vkn
 	{
 		return resource_alias;
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void ResourceLifetimeManager::DebugArrange(const FrameGraphResourceManager& rsc_manager) const
 	{
 		bool dbg_enabled = false;

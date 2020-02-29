@@ -18,14 +18,17 @@ namespace idk::vkn {
 		VulkanRsc<vk::Image>			image_{ nullptr };
 		vk::Format				format{};
 		vk::ImageUsageFlags     usage{};
-		vk::ImageAspectFlags    img_aspect;
+		vk::ImageAspectFlagBits    img_aspect;
 		vk::UniqueDeviceMemory  mem{ nullptr };
 		hlp::UniqueAlloc        mem_alloc{};
 		VulkanRsc<vk::ImageView>     imageView{ nullptr };
 		VulkanRsc<vk::Sampler>       sampler{ nullptr };
 		opt<vk::DescriptorSet>	descriptorSet{};
 		vk::ImageSubresourceRange range;
+		uint32_t mipmap_level=1;
 		string dbg_name;
+
+		vk::ImageType image_type = vk::ImageType::e2D;
 
 		VknTexture() = default;
 		~VknTexture();

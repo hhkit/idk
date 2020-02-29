@@ -13,8 +13,8 @@ namespace idk::vkn::hlp
 		SimpleLock& operator=(const SimpleLock&) = delete;
 		std::mutex& Mutex() { _data->mutex; }
 		std::condition_variable& Cv() { _data->cv; }
-		void Lock();
-		void Unlock();
+		void Lock()const;
+		void Unlock()const;
 		~SimpleLock() = default;
 	private:
 		struct Data

@@ -372,6 +372,7 @@ namespace idk::vkn
 		if (!_dbg.Validate(_bindings))
 		{
 			LOG_ERROR_TO(LogPool::GFX, "Invalid Bindings");
+			_dbg.Validate(_bindings);
 			return{};
 		}
 
@@ -474,6 +475,7 @@ namespace idk::vkn
 		}
 		return bound;
 	}
+#pragma optimize("",off)
 	bool UniformUtils::binding_manager::is_bound(set_t set, uint32_t binding_index, uint32_t array_index) const noexcept
 	{
 		const auto s_itr = curr_bindings.find(set);
@@ -522,8 +524,12 @@ namespace idk::vkn
 						auto required = set.bindings[binding_index];
 						if (required)
 						{
-							LOG_ERROR_TO(LogPool::GFX, "Required Binding %u in Set #%u not bound", binding_index, set_index);
-							return false;
+							auto itr = curr_set_bindings.bindings.find(binding_index);
+							if (itr == curr_set_bindings.bindings.end())
+							{
+								LOG_ERROR_TO(LogPool::GFX, "Required Binding %u in Set #%u not bound", binding_index, set_index);
+								return false;
+							}
 						}
 					}
 			}

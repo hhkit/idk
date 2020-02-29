@@ -31,7 +31,7 @@ namespace idk::vkn
 	{
 		vk::UniqueImage first;
 		hlp::UniqueAlloc second;
-		vk::ImageAspectFlags aspect;
+		vk::ImageAspectFlagBits aspect;
 		size_t size_on_device = 0;
 		string name;
 	};
@@ -110,6 +110,7 @@ namespace idk::vkn
 		auto ptr = &texture;
 		auto&& [image, alloc, aspect, sz,name] = vkn::LoadTexture(sub,allocator,  load_info, in_info, guid);
 		ptr->Size(uvec2{ load_info.width,load_info.height });
+		ptr->mipmap_level = load_info.mipmap_level;
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->usage = load_info.image_usage;

@@ -19,14 +19,15 @@ namespace idk::vkn::hlp
 	};
 	*/
 
-	void SimpleLock::Lock() {
+	void SimpleLock::Lock()const
+	{
 		std::unique_lock lock{ _data->mutex };
 		while (_data->locked)
 			_data->cv.wait(lock);
 		_data->locked = true;
 	}
 
-	void SimpleLock::Unlock()
+	void SimpleLock::Unlock()const
 	{
 		_data->locked = false;
 		_data->cv.notify_one();
