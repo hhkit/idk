@@ -128,6 +128,7 @@ namespace idk
 
 			vector<RscHandle<Texture>> shadow_maps;
 			vector <RscHandle<Texture>> shadow_maps_directional;
+			vector<RscHandle<Texture>> shadow_maps_point;
 			//vector<mat4> directional_vp;
 
 			string                     pbr_cube_map_names[PbrCubeMapVarsInfo::size()];

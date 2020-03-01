@@ -147,26 +147,39 @@ namespace idk::vkn
 			auto active_index = vstate.active_lights[i];
 			auto& light = all_lights[active_index];
 			lights.emplace_back(light);
-			if (light.index != 1)
+
+			switch (light.index)
 			{
+			case 0:
+				if (!light.light_maps.empty())
+					shadow_maps.emplace_back(RscHandle<VknTexture>());
+				
 				for (auto& elem : light.light_maps)
 				{
 					auto& fb = elem.light_map.as<VknFrameBuffer>();
 					auto& db = fb.DepthAttachment();
 					shadow_maps.emplace_back(db.buffer);
 				}
-			}
-			else if (light.index == 1)
-			{
-				if(!light.light_maps.empty())
+				break;
+			case 1:
+				if (!light.light_maps.empty())
 					shadow_maps.emplace_back(RscHandle<VknTexture>());
 
 				for (auto& elem : light.light_maps)//state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 				{
 					shadow_maps_directional.emplace_back(elem.light_map.as<VknFrameBuffer>().DepthAttachment().buffer);
-					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat *elem.cascade_projection * light.v});
+					directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat * elem.cascade_projection * light.v });
 				}
-			}
+			break;
+			case 2:
+				for (auto& elem : light.light_maps)
+				{
+					auto& fb = elem.light_map.as<VknFrameBuffer>();
+					auto& db = fb.DepthAttachment();
+					shadow_maps.emplace_back(db.buffer);
+				}
+				break;
+			};
 		}
 
 		while (shadow_maps_directional.size() < 8 && shadow_maps_directional.size())
