@@ -25,14 +25,13 @@
 
 #include <gfx/DebugRenderer.h>
 
+#include <scene/SceneManager.h>
 #include <scene/Scene.h>
 
 namespace idk
 {
 	constexpr float baumgarte = .2f;
-	constexpr float restitution_slop = 0.2f;
 	constexpr float penetration_slop = 0.05f;
-	constexpr float penetration_max_slop = 0.5f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
 // #pragma optimize("", off)
@@ -121,9 +120,9 @@ namespace idk
 			else
 			{
 				// Shape and broadphase are computed at UpdateDynamics
-				const auto collider_info = std::visit([&elem](const auto& shape) -> ColliderInfo {	
+				const auto collider_info = std::visit([&elem]() -> ColliderInfo {	
 					return ColliderInfo{ .collider = &elem,.rb = &*elem._rigidbody, .layer = elem.GetGameObject()->Layer() };
-				}, elem.shape);
+				});
 
 				// Reset the global inertia tensor
 				collider_info.rb->_global_inertia_tensor = mat3{ scale(vec3{ 0.0f }) };
@@ -204,21 +203,19 @@ namespace idk
 				
 				if constexpr (std::is_same_v<Shape, box>)
 				{
+					constexpr float scalar = 1.0f / 12.0f;
+
 					const vec3 extents = pred_shape.half_extents();
 					const vec3 extents_sq = extents * extents;
-					constexpr float scalar = 1.0f / 12.0f;
-					const float mass = rb.mass();
-					float ex2 = 4.0f * extents.x * extents.x;
-					float ey2 = 4.0f * extents.y * extents.y;
-					float ez2 = 4.0f * extents.z * extents.z;
-					float x = scalar * mass * (ey2 + ez2);
-					float y = scalar * mass * (ex2 + ez2);
-					float z = scalar * mass * (ex2 + ey2);
 					
-					// 
-					// const float e1 = 1.0f / (scalar * extents_sq.y * extents_sq.z);
-					// const float e2 = 1.0f / (scalar * extents_sq.x * extents_sq.z);
-					// const float e3 = 1.0f / (scalar * extents_sq.x * extents_sq.y);
+					const float mass = rb.mass();
+					const float ex2 = 4.0f * extents.x * extents.x;
+					const float ey2 = 4.0f * extents.y * extents.y;
+					const float ez2 = 4.0f * extents.z * extents.z;
+					const float x = scalar * mass * (ey2 + ez2);
+					const float y = scalar * mass * (ex2 + ez2);
+					const float z = scalar * mass * (ex2 + ey2);
+					
 					const mat3 local_tensor{
 						vec3{1.0f/ x,   0.0f, 0.0f},
 						vec3{0.0f, 1.0f/ y,   0.0f},
@@ -237,7 +234,6 @@ namespace idk
 				else // Only sphere and box has rotational
 				{
 					rb.freeze_rotation = true;
-					// rb._global_inertia_tensor = mat3{ scale(vec3{ 0.0f }) };
 				}
 
 			}, elem.collider->shape);
@@ -298,7 +294,6 @@ namespace idk
 				ccs.solve = !i->collider->is_trigger && !j->collider->is_trigger;
 				if (ccs.solve)
 				{
-					const auto r = quat_cast<mat3>(i->rb->_rotate_cache);
 					// broadphase center and world center are the same
 					ccs.centerA = col_val.centerA;
 					ccs.centerB = col_val.centerB;
@@ -369,7 +364,7 @@ namespace idk
 					tm[k] += raCt.dot(cs.iA * raCt) + rbCt.dot(cs.iB * rbCt);
 					c->tangentMass[k] = invert(tm[k]);
 				}
-				LOG_TO(LogPool::PHYS, "Tangent Mass: %f, %f", c->tangentMass[0], c->tangentMass[1]);
+				// LOG_TO(LogPool::PHYS, "Tangent Mass: %f, %f", c->tangentMass[0], c->tangentMass[1]);
 
 				// Precalculate bias factor
 				const float tmp = c->penetration + penetration_slop;
@@ -500,7 +495,7 @@ namespace idk
 			if (constraint_states.size() > 0)
 			{
 				const auto vel = constraint_states[0].rbA->linear_velocity;
-				LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
+				//LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
 			}
 			
 		}
@@ -564,7 +559,7 @@ namespace idk
 	void CollisionManager::Init()
 	{
 		_static_broadphase.preallocate_nodes(2500); // Avg ~1030 static objects -> means (2 * 1030 - 1) total nodes in b-tree
-
+		
 		GameState::GetGameState().OnObjectCreate<Collider>() += [&](Handle<Collider> collider)
 		{
 			if (!collider)
@@ -619,12 +614,12 @@ namespace idk
 			{
 				const auto& c = col.contacts[i];
 				const auto position = col.centerA + c.ra;
-				dbg.Draw(position, color{ 0,1,0,1 }, seconds{ 0.5f });
-				dbg.Draw(ray{ position, col.normal * 0.4f }, color{ 0,1,0,1 }, seconds{ 0.5 });
-				dbg.Draw(ray{ position, col.tangentVectors[0] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
-				dbg.Draw(ray{ position, col.tangentVectors[1] * 0.4f }, color{ 0,0,1,1 }, seconds{ 0.5 });
+				dbg.Draw(position, color{ 0,1,0,1 }, seconds{ dt });
+				dbg.Draw(ray{ position, col.normal * 0.4f }, color{ 0,1,0,1 }, seconds{ dt });
+				dbg.Draw(ray{ position, col.tangentVectors[0] * 0.4f }, color{ 0,0,1,1 }, seconds{ dt });
+				dbg.Draw(ray{ position, col.tangentVectors[1] * 0.4f }, color{ 0,0,1,1 }, seconds{ dt });
 			}
-			LOG_TO(LogPool::PHYS, "Contact Count: %d", col.contactCount);
+			// LOG_TO(LogPool::PHYS, "Contact Count: %d", col.contactCount);
 		}
 	}
 
@@ -640,7 +635,7 @@ namespace idk
 
 		_static_broadphase.debug_draw();
 		for (const auto& elem : _dynamic_info)
-			debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 }, seconds{ 0.5f });
+			debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
 		for (auto& elem : colliders)
 		{
 			if (!elem._active_cache)

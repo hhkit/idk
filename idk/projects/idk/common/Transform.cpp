@@ -92,7 +92,7 @@ namespace idk
 	quat Transform::GlobalRotation() const
 	{
 		if (parent)
-			return parent->Transform()->rotation * rotation;
+			return decompose(GlobalMatrix()).rotation;
 		else
 			return rotation;
 	}

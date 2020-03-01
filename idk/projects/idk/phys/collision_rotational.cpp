@@ -14,7 +14,7 @@ namespace idk::phys
 
 	bool track_face_axis(int* axis, int n, float s, float* sMax, const vec3& normal, vec3* axisNormal)
 	{
-		if (s > float(0.0))
+		if (s >= 0.0f)
 			return true;
 
 		if (s > * sMax)
@@ -50,44 +50,7 @@ namespace idk::phys
 		n = -(itx.rotation.transpose() * n);
 		vec3 absN = abs(n);
 
-		if (absN.x > absN.y&& absN.x > absN.z)
-		{
-			if (n.x > 0.0f)
-			{
-				out[0] = vec3(e.x, e.y, -e.z);
-				out[1] = vec3(e.x, e.y, e.z);
-				out[2] = vec3(e.x, -e.y, e.z);
-				out[3] = vec3(e.x, -e.y, -e.z);
-
-				// out[0].f.inI = 9;
-				// out[0].f.outI = 1;
-				// out[1].f.inI = 1;
-				// out[1].f.outI = 8;
-				// out[2].f.inI = 8;
-				// out[2].f.outI = 7;
-				// out[3].f.inI = 7;
-				// out[3].f.outI = 9;
-			}
-
-			else
-			{
-				out[0] = vec3(-e.x, -e.y, e.z);
-				out[1] = vec3(-e.x, e.y, e.z);
-				out[2] = vec3(-e.x, e.y, -e.z);
-				out[3] = vec3(-e.x, -e.y, -e.z);
-
-				// out[0].f.inI = 5;
-				// out[0].f.outI = 11;
-				// out[1].f.inI = 11;
-				// out[1].f.outI = 3;
-				// out[2].f.inI = 3;
-				// out[2].f.outI = 10;
-				// out[3].f.inI = 10;
-				// out[3].f.outI = 5;
-			}
-		}
-
-		else if (absN.y > absN.x&& absN.y > absN.z)
+		if (absN.y > absN.x&& absN.y > absN.z)
 		{
 			if (n.y > 0.0f)
 			{
@@ -121,6 +84,44 @@ namespace idk::phys
 				// out[2].f.outI = 6;
 				// out[3].f.inI = 5;
 				// out[3].f.outI = 6;
+			}
+		}
+		
+
+		else if (absN.x > absN.y&& absN.x > absN.z)
+		{
+			if (n.x > 0.0f)
+			{
+				out[0] = vec3(e.x, e.y, -e.z);
+				out[1] = vec3(e.x, e.y, e.z);
+				out[2] = vec3(e.x, -e.y, e.z);
+				out[3] = vec3(e.x, -e.y, -e.z);
+
+				// out[0].f.inI = 9;
+				// out[0].f.outI = 1;
+				// out[1].f.inI = 1;
+				// out[1].f.outI = 8;
+				// out[2].f.inI = 8;
+				// out[2].f.outI = 7;
+				// out[3].f.inI = 7;
+				// out[3].f.outI = 9;
+			}
+
+			else
+			{
+				out[0] = vec3(-e.x, -e.y, e.z);
+				out[1] = vec3(-e.x, e.y, e.z);
+				out[2] = vec3(-e.x, e.y, -e.z);
+				out[3] = vec3(-e.x, -e.y, -e.z);
+
+				// out[0].f.inI = 5;
+				// out[0].f.outI = 11;
+				// out[1].f.inI = 11;
+				// out[1].f.outI = 3;
+				// out[2].f.inI = 3;
+				// out[2].f.outI = 10;
+				// out[3].f.inI = 10;
+				// out[3].f.outI = 5;
 			}
 		}
 
