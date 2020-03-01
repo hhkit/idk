@@ -11,6 +11,8 @@ namespace idk::vkn
 		this->resource_alias.clear();
 		this->map.clear();
 		this->resource_lifetimes.clear();
+		this->collapsed.clear();
+		this->mappings.clear();
 	}
 	void ResourceLifetimeManager::EndLifetime(fgr_id rsc_id, const fg_id& node_id)
 	{
@@ -44,6 +46,21 @@ namespace idk::vkn
 		return resource_alias;
 	}
 #pragma optimize("",off)
+	void DoNothing();
+	void ResourceLifetimeManager::DebugCollapsed(const FrameGraphResourceManager& rsc_manager) const
+	{
+		bool dbg_enabled = false;
+
+		if (dbg_enabled)
+		{
+			vector<std::pair<string, ResourceLifetime>> derp;
+			for (auto& [id, lifetimes] : collapsed)
+			{
+				derp.emplace_back(rsc_manager.GetResourceDescription(id)->name, lifetimes);
+			}
+			DoNothing();
+		}
+	}
 	void ResourceLifetimeManager::DebugArrange(const FrameGraphResourceManager& rsc_manager) const
 	{
 		bool dbg_enabled = false;

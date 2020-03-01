@@ -126,7 +126,7 @@ namespace idk::vkn::bindings
 					}
 				}
 			}
-
+			Bind(context);
 			auto light_data = PrepareLightBlock(_view_matrix, lights);
 			auto dlight_data = PrepareDirectionalBlock(directional_vp);
 			context.BindUniform("LightBlock", 0, light_data);

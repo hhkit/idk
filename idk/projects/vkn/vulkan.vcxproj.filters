@@ -666,7 +666,9 @@
     <ClCompile Include="RenderPassPool.cpp" />
     <ClCompile Include="LightBinding.cpp" />
     <ClCompile Include="CameraViewportBindings.cpp" />
-    <ClCompile Include="renderpasses\ShadowPasses.cpp" />
+    <ClCompile Include="renderpasses\ShadowPasses.cpp">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

@@ -119,7 +119,6 @@ void main()
 				//	//shadow_factor *= shadow_factor;
 				//	//cascade_c = vec4(0,0,0.1,0);
 				//}
-				shadow_factor = vec3(1.0f);
 				result *= shadow_factor;
 				j = 0;
 				

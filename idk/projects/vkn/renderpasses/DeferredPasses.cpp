@@ -76,7 +76,7 @@ namespace idk::vkn::renderpasses
 		gbuffer_rscs[2] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat        ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm              ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eB10G11R11UfloatPack32    ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		depth_rsc = builder.copy(depth, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,
 			{
 				vk::ImageCopy
@@ -743,7 +743,7 @@ namespace idk::vkn::renderpasses
 		auto& ls_bindings = light_bindings.Get<bindings::LightShadowBinding>();
 		auto& accum_fsq_bindings = light_bindings.Get<bindings::DeferredLightFsq>();
 		vp_bindings.viewport = gfx_state.camera.viewport;
-		ls_bindings.SetState(bindings::LightShadowBinding::State{ gfx_state.active_lights,*gfx_state.lights,gfx_state.shadow_maps_2d,gfx_state.camera.view_matrix,gfx_state.camera.projection_matrix });
+		ls_bindings.SetState(bindings::LightShadowBinding::State{ gfx_state.active_lights,*gfx_state.lights,gfx_state.shadow_maps_2d,gfx_state.camera.view_matrix,gfx_state.camera.view_matrix.inverse() });
 		ambient_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
 		accum_fsq_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];

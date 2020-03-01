@@ -80,6 +80,7 @@ namespace idk::vkn
 
 
 		manager.CollapseLifetimes(original_id);
+		manager.DebugCollapsed(rsc_manager);
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
 		
 		

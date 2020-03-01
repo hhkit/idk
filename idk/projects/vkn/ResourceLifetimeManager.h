@@ -95,6 +95,7 @@ namespace idk::vkn
 		span<const actual_resource_t> GetActualResources()const;
 		const hash_table<fgr_id, actual_resource_id> Aliases()const;
 
+		void DebugCollapsed(const FrameGraphResourceManager& rsc_manager)const;
 		void DebugArrange(const FrameGraphResourceManager& rsc_manager)const;
 		void DebugArrange(gfxdbg::FgRscLifetimes& dbg, const FrameGraphResourceManager& rsc_manager)const;
 

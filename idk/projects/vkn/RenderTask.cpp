@@ -96,6 +96,8 @@ namespace idk::vkn
 			return;
 		UnbindShader(stage);
 		auto& shader = shader_handle.as<ShaderModule>();
+		if (!shader.HasCurrent())
+			return;
 		//DebugBreak();
 		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
 		{
