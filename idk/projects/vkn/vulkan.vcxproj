@@ -329,6 +329,7 @@
     <ClInclude Include="ColorPickRenderer.h" />
     <ClInclude Include="DrawSetRenderPass.h" />
     <ClInclude Include="FencePool.h" />
+    <ClInclude Include="renderpasses\MaskedPass.h" />
     <ClInclude Include="PipelineDescHelper.h" />
     <ClInclude Include="RenderPassPool.h" />
     <ClInclude Include="renderpasses\ShadowPasses.h" />
@@ -460,6 +461,7 @@
     <ClCompile Include="FencePool.cpp" />
     <ClCompile Include="LightBinding.cpp" />
     <ClCompile Include="PipelineDescHelper.cpp" />
+    <ClCompile Include="renderpasses\MaskedPass.cpp" />
     <ClCompile Include="RenderPassPool.cpp" />
     <ClCompile Include="renderpasses\ShadowPasses.cpp" />
     <ClCompile Include="SimpleLock.cpp" />

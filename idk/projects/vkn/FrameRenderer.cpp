@@ -57,6 +57,7 @@
 
 #include <vkn/renderpasses/DeferredPasses.h>
 #include <vkn/renderpasses/ShadowPasses.h>
+#include <vkn/renderpasses/MaskedPass.h>
 
 namespace idk::vkn
 {
@@ -1429,8 +1430,19 @@ namespace idk::vkn
 	void FrameRenderer::RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs)
 	{
 		//TODO, account for forward.
-		_pimpl->graph.MarkRegion(std::to_string(_pimpl->gfx_state_index++));
-		renderpasses::DeferredRendering::MakePass(_pimpl->graph, RscHandle<VknRenderTarget>{ state.camera.render_target }, state, rs);
+		auto& graph = _pimpl->graph;
+		graph.MarkRegion(std::to_string(_pimpl->gfx_state_index++));
+		FrameGraphResource color, depth;
+		{
+			auto [col, dep] = renderpasses::DeferredRendering::MakePass(graph, RscHandle<VknRenderTarget>{ state.camera.render_target }, state, rs);
+			color = col;
+			depth = dep;
+		}
+		{
+			auto [col, dep] = renderpasses::AddTransparentPass(graph, color, depth, state);
+			color = col;
+			depth = dep;
+		}
 //
 //		bool is_deferred = Core::GetSystem<GraphicsSystem>().is_deferred();
 //

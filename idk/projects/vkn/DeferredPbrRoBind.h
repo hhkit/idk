@@ -52,7 +52,7 @@ namespace idk::vkn::bindings
 	namespace detail
 	{
 
-		DeferredPbrRoBind make_deferred_pbr_bind(DeferredPbrInfo info)
+		inline DeferredPbrRoBind make_deferred_pbr_bind(DeferredPbrInfo info)
 		{
 			DeferredPbrRoBind result{};
 			result.Get<CameraViewportBindings>().viewport = info.viewport;
@@ -65,14 +65,14 @@ namespace idk::vkn::bindings
 		}
 	}
 
-	DeferredPbrRoBind make_deferred_pbr_ro_bind(DeferredPbrInfo info)
+	inline DeferredPbrRoBind make_deferred_pbr_ro_bind(DeferredPbrInfo info)
 	{
 		DeferredPbrRoBind result = detail::make_deferred_pbr_bind(info);
 		auto& shader = result.Get<VertexShaderBinding>();
 		shader.vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VNormalMesh];
 		return result;
 	}
-	DeferredPbrAniBind make_deferred_pbr_ani_bind(DeferredPbrInfo info)
+	inline DeferredPbrAniBind make_deferred_pbr_ani_bind(DeferredPbrInfo info)
 	{
 		DeferredPbrAniBind result = detail::make_deferred_pbr_bind(info);
 		auto& shader = result.Get<VertexShaderBinding>();
