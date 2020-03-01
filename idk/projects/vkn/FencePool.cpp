@@ -7,7 +7,14 @@ namespace idk::vkn
 	FenceObj::~FenceObj()
 	{
 		if (_src)
-			_src->Free(std::move(*this));
+		{
+			auto ctrl = _ctrl.lock();
+			if (ctrl)
+			{
+				auto guard = (*ctrl).lock();
+				_src->Free(std::move(*this));
+			}
+		}
 	}
 
 	FenceObj FencePool::AcquireFence()
@@ -19,7 +26,7 @@ namespace idk::vkn
 
 		auto index = _handles.back();
 		_handles.pop_back();
-		return FenceObj{ *_fences[index],index,this };
+		return FenceObj{ *_fences[index],index,this,_ctrl_block };
 	}
 
 	void FencePool::Free(FenceObj&& obj)
@@ -33,6 +40,8 @@ namespace idk::vkn
 		{
 			LOG_ERROR_TO(LogPool::GFX, "Fence pool getting destroyed before FenceObjs are destroyed.");
 		}
+		_ctrl_block->_destroy_lock=true;
+		while (_ctrl_block->_lock > 0);//Wait for everyone who's decrementing to stop.
 	}
 
 	size_t FencePool::growth_amount() const
