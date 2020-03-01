@@ -150,7 +150,14 @@ namespace idk::vkn
 
 	FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(fgr_id rsc)
 	{
-		return concrete_resources[resource_map.find(rsc)->second];
+		auto itr = resource_map.find(rsc);
+		while (itr == resource_map.end())
+		{
+			auto renamed_itr = renamed_resources.find(rsc);
+			if (renamed_itr != renamed_resources.end())
+				itr = resource_map.find(renamed_itr->second);
+		}
+		return concrete_resources[itr->second];
 	}
 
 	fgr_id FrameGraphResourceManager::NextID()
@@ -168,15 +175,15 @@ namespace idk::vkn
 	std::optional<fgr_id> FrameGraphResourceManager::GetPrevious(fgr_id curr) const
 	{
 		std::optional<fgr_id> result = curr;
-		auto wr = BeforeWriteRenamed(FrameGraphResource{ curr });
-		if (wr)
-		{
-			curr = *wr;
-		}
+		//auto wr = BeforeWriteRenamed(FrameGraphResource{ curr }); //If this was written to
+		//if (wr)
+		//{
+		//	curr = *wr;
+		//}
 		{
 			result = {};
-			auto itr = renamed_original.find(curr);
-			if (itr != renamed_original.end() && itr->second != curr)
+			auto itr = renamed_resources.find(curr);
+			if (itr != renamed_resources.end() && itr->second != curr)
 				result = itr->second;
 		}
 		return result;

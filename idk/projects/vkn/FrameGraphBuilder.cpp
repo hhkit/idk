@@ -38,6 +38,7 @@ namespace idk::vkn
 		ResetIDs();
 		consumed_resources.Reset();
 		origin_nodes.clear();
+		input_origin_nodes.clear();
 		_region_name.clear();
 	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
@@ -50,9 +51,9 @@ namespace idk::vkn
 
 	FrameGraphResourceReadOnly FrameGraphBuilder::read(FrameGraphResource in_rsc,[[maybe_unused]] bool may_shader_sample)
 	{
-		//auto rsc = rsc_manager.Rename(in_rsc);
+		auto rsc = rsc_manager.Rename(in_rsc);
 		curr_rsc.input_resources.emplace_back(in_rsc);
-		return in_rsc; //rsc;
+		return rsc;
 	}
 
 	FrameGraphResourceMutable FrameGraphBuilder::write(FrameGraphResource target_rsc, WriteOptions opt)
@@ -137,6 +138,10 @@ namespace idk::vkn
 		for (auto& rsc : curr_rsc.output_resources)
 		{
 			origin_nodes.emplace(rsc.id, id);
+		}
+		for (auto& rsc : curr_rsc.input_resources) //Will be transitioned by the resources
+		{
+			input_origin_nodes.emplace(rsc.id, id);
 		}
 		auto input_span    = consumed_resources.StoreResources(curr_rsc.input_resources);
 		auto read_span     = consumed_resources.StoreResources(curr_rsc.read_resources);

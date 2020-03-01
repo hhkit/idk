@@ -52,6 +52,7 @@ namespace idk::vkn
 		std::optional<fg_id> GetSourceNode(fgr_id rsc)const;
 
 		hash_table<fgr_id, fg_id> origin_nodes;
+		hash_table<fgr_id, fg_id> input_origin_nodes;
 
 		
 		NodeBuffer consumed_resources;

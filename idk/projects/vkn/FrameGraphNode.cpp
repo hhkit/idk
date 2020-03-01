@@ -3,7 +3,7 @@
 #include "FrameGraphCopyResource.h"
 namespace idk::vkn
 {
-	span<const FrameGraphCopyResource> FrameGraphNode::GetCopySpan() const { return copied_resources.to_span(*copy_buffer); }
+	span<const FrameGraphCopyResource> FrameGraphNode::GetCopySpan() const { return (copy_buffer) ? copied_resources.to_span(*copy_buffer) : span<const FrameGraphCopyResource>{nullptr,nullptr}; }
 	bool FrameGraphNode::resource_present(index_span span, FrameGraphResource rsc) const
 	{
 		auto begin = buffer->begin() + span._begin;

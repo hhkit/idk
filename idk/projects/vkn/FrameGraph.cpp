@@ -341,7 +341,7 @@ namespace idk::vkn
 		}
 	}
 
-
+#pragma optimize("",off)
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
 		RenderPassCreateInfoBundle bundle{};
@@ -355,7 +355,8 @@ namespace idk::vkn
 		auto& nodes_buffer = nodes;
 		attachments.reserve(total_att);
 		auto& src_nodes = graph_builder.origin_nodes;
-		auto process_attachment = [&src_nodes, &nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref,vk::ImageLayout actual_layout)
+		auto& input_src_nodes = graph_builder.input_origin_nodes;
+		auto process_attachment = [&src_nodes, &input_src_nodes, &nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref,vk::ImageLayout actual_layout)
 		{
 			auto find_input_layout = [](const FrameGraphNode& node, fgr_id id)
 			{
@@ -376,19 +377,30 @@ namespace idk::vkn
 				auto& [rsc_id, att_opt] = *attachment_info;
 				attachment_ref.attachment = static_cast<uint32_t>(attachments.size());
 				attachment_ref.layout = actual_layout;
-				auto prev_id = rsc_manager.GetPrevious(rsc_id);
 				
+				auto prev_id = rsc_manager.GetPrevious(rsc_id);
+				if (rsc_manager.BeforeWriteRenamed(FrameGraphResource{ rsc_id }))
+				{
+					auto prev = rsc_manager.GetPrevious(*prev_id);
+					if (!prev)
+						prev_id = {}; //If we created it in the same node, Create (id1) -> Write (id1 ->id2), there was no previous
+				}
 				vk::ImageLayout prev_layout = att_opt.layout;
 				if (prev_id)
 				{
 					auto src_itr = src_nodes.find(*prev_id);
-					auto node_to_index = nodes_lookup.find(src_itr->second);
-					auto node_index = node_to_index->second;
-					auto& node = nodes_buffer[node_index];
-					auto copy_span = node.GetCopySpan();
-					auto outp_span = node.GetOutputSpan();
-					auto inpu_span = node.GetInputSpan();
-					prev_layout = find_input_layout(node, *prev_id);
+					auto node_id = (src_itr != src_nodes.end()) ? src_itr->second : input_src_nodes.find(*prev_id)->second;
+					auto node_to_index = nodes_lookup.find(node_id);
+					if (prev_id)
+					{
+						
+						auto node_index = node_to_index->second;
+						auto& node = nodes_buffer[node_index];
+						auto copy_span = node.GetCopySpan();
+						auto outp_span = node.GetOutputSpan();
+						auto inpu_span = node.GetInputSpan();
+						prev_layout = find_input_layout(node, *prev_id);
+					}
 				}
 				attachments.emplace_back(vk::AttachmentDescription
 					{
