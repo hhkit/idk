@@ -383,6 +383,7 @@
     <ClCompile Include="debug\Log.cpp" />
     <ClCompile Include="debug\LogSingleton.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />
+    <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
@@ -466,7 +467,6 @@
     <ClCompile Include="proj\ProjectManager.cpp" />
     <ClCompile Include="res\ResourceMeta.cpp" />
     <ClCompile Include="scene\SceneGraph.cpp" />
-    <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTarget.cpp" />
     <ClCompile Include="gfx\GfxDbgTest.cpp" />
     <ClCompile Include="gfx\buffer_desc.cpp" />

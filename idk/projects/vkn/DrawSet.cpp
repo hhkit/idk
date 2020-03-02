@@ -49,7 +49,7 @@ namespace idk::vkn
 		auto& mesh = ro.mesh.as<VulkanMesh>();
 		bool result = false;
 		if(result |= BindMeshBuffers(the_interface, ro))
-			the_interface.DrawIndexed(mesh.IndexCount(), ro.num_instances, 0, 0, ro.instanced_index);
+			the_interface.DrawIndexed(mesh.IndexCount(), static_cast<uint32_t>(ro.num_instances), 0, 0, static_cast<uint32_t>(ro.instanced_index));
 		return result;
 	}
 	void InstMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)
@@ -79,7 +79,6 @@ namespace idk::vkn
 					if (mat_inst.material && !binders.Skip(the_interface, dc))
 					{
 						binders.Bind(the_interface, dc);
-						auto& mesh = dc.mesh.as<VulkanMesh>();
 						auto& req = *dc.renderer_req;
 						the_interface.BindVertexBuffer(req.instanced_requirements.at(vtx::InstAttrib::ModelTransform), _inst_mesh_render_buffer, 0);
 						//BindMeshBuffers(the_interface, mesh, *dc.renderer_req);
@@ -105,7 +104,7 @@ namespace idk::vkn
 		for (auto& ptr_dc : _draw_calls)
 		{
 			auto& dc = *ptr_dc;
-			auto& mat_inst = *dc.material_instance;
+			[[maybe_unused]] auto& mat_inst = *dc.material_instance; //Debug only
 			if (!binders.Skip(the_interface, dc))
 			{
 				binders.Bind(the_interface, dc);

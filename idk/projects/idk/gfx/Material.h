@@ -5,22 +5,23 @@
 #include <res/SaveableResource.h>
 #include <gfx/UniformInstance.h>
 #include <map>
+#include <gfx/ShaderTemplate.h>
 namespace idk
 {
 	class ShaderTemplate;
 
 	ENUM(MaterialDomain, char,
 		Surface,
-		PostProcess)
+		PostProcess);
 
 	ENUM(BlendMode, char,
 		Opaque,
-		Masked)
+		Masked);
 
 	ENUM(ShadingModel, char,
 		Unlit,
 		DefaultLit,
-		Specular)
+		Specular);
 
 
 	class Material
@@ -40,6 +41,6 @@ namespace idk
 		RscHandle<ShaderTemplate> GetTemplate() const;
 		virtual ~Material();
 
-		EXTENSION(".mat");
+		EXTENSION(".mat")
 	};
 }

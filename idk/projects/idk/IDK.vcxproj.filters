@@ -1315,9 +1315,6 @@
     <ClCompile Include="gfx\ShaderTemplate.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\Material.cpp">
-      <Filter>gfx\object</Filter>
-    </ClCompile>
     <ClCompile Include="common\Name.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -1709,6 +1706,7 @@
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp">
       <Filter>network\substream managers</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
