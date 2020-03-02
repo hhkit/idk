@@ -58,6 +58,7 @@
 #include <vkn/renderpasses/DeferredPasses.h>
 #include <vkn/renderpasses/ShadowPasses.h>
 #include <vkn/renderpasses/MaskedPass.h>
+#include <vkn/renderpasses/DebugDrawPass.h>
 
 namespace idk::vkn
 {
@@ -1273,8 +1274,9 @@ namespace idk::vkn
 	}
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
 	//and command buffer hasn't ended
-	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs,ivec2 vp_pos, uvec2 vp_size)
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs, rect vp)
 	{
+#if 0 
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 		//TODO: figure out inheritance pipeline inheritance and inherit from dbg_pipeline for various viewport sizes
@@ -1286,6 +1288,8 @@ namespace idk::vkn
 		//auto alloced_dsets = rs.dpools.Allocate(layout_count);
 		rs.FlagRendered();
 		const VulkanPipeline* prev = nullptr;
+		RenderInterface* pContext;
+		RenderInterface& context = *pContext;
 		for (auto& p_dc : state.dbg_render)
 		{
 			if (prev!=p_dc->pipeline)
@@ -1323,6 +1327,15 @@ namespace idk::vkn
 
 			}
 			auto& dc = *p_dc;
+			if (context.SetPipeline(*dc.pipeline))
+			{
+				context.SetViewport(vp);
+				FakeMat4 view_mat = state.camera.view_matrix;
+				FakeMat4 proj_mat = mat4{ 1,0,0,0,   0,1,0,0,   0,0,0.5f,0.5f, 0,0,0,1 }*state.camera.projection_matrix;
+
+				context.BindUniform("CameraBlock"    , 0, hlp::to_data(proj_mat                      ));
+				context.BindUniform("ObjectMat4Block", 0, hlp::to_data(std::pair{ view_mat,proj_mat }));
+			}
 			dc.Bind(cmd_buffer);
 			//cmd_buffer.bindVertexBuffers(0,
 			//	{
@@ -1338,7 +1351,7 @@ namespace idk::vkn
 			dc.Draw(cmd_buffer);
 			
 		}
-		
+#endif
 	}
 	vk::RenderPass FrameRenderer::GetRenderPass(const GraphicsState& state, VulkanView&)
 	{
@@ -1440,6 +1453,11 @@ namespace idk::vkn
 		}
 		{
 			auto [col, dep] = renderpasses::AddTransparentPass(graph, color, depth, state);
+			color = col;
+			depth = dep;
+		}
+		{
+			auto [col, dep] = renderpasses::AddDebugDrawPass(graph, state.camera.viewport, state,color, depth);
 			color = col;
 			depth = dep;
 		}

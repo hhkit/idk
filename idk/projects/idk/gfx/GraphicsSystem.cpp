@@ -1192,7 +1192,7 @@ namespace idk
 		//	Core::GetResourceManager().Load<ShaderSnippet>(glsl, false);
 		//}
 		///////////////////////Load vertex shaders
-		//renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/debug.vert");
+		renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/dbgvertex.vert");
 		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
 		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
@@ -1205,7 +1205,7 @@ namespace idk
 		renderer_vertex_shaders[VUi] = LoadShader("/engine_data/shaders/ui.vert");
 
 
-		renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/debug.frag");
+		renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/dbgfragment.frag");
 		renderer_fragment_shaders[FSkyBox] = LoadShader("/engine_data/shaders/skybox.frag");
 		renderer_fragment_shaders[FShadow] = LoadShader("/engine_data/shaders/shadow.frag");
 		renderer_fragment_shaders[FPicking] = LoadShader("/engine_data/shaders/picking.frag");

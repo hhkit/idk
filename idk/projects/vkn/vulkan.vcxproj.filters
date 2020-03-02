@@ -386,6 +386,9 @@
     <ClInclude Include="DrawSetRenderPass.h">
       <Filter>render\new_testament\Renderpasses</Filter>
     </ClInclude>
+    <ClInclude Include="renderpasses\DebugDrawPass.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -675,6 +678,7 @@
     <ClCompile Include="renderpasses\MaskedPass.cpp">
       <Filter>render\new_testament\Renderpasses</Filter>
     </ClCompile>
+    <ClCompile Include="renderpasses\DebugDrawPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

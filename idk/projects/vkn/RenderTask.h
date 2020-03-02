@@ -84,10 +84,12 @@ namespace idk::vkn
 
 
 		void BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset)override;
+		void BindVertexBufferByBinding(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)override;
 		void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)override;
 
 #pragma region Uniforms
-		void BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound=false)override;
+		void BindUniform(string_view name, uint32_t index, string_view data, bool skip_if_bound = false)override;
+		//void BindUniform(vk::DescriptorSet ds, std::optional<string_view> data = {})override;
 		void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false,vk::ImageLayout layout= vk::ImageLayout::eGeneral)override;
 #pragma endregion
 
@@ -106,8 +108,10 @@ namespace idk::vkn
 
 #pragma region PipelineConfigurations
 		//void Inherit(const pipeline_config& config);
-		void SetPipelineConfig(const pipeline_config& config)
+		bool SetPipeline(const VulkanPipeline& pipeline) override;
+		void SetPipelineConfig(const pipeline_config& config) override
 		{
+			StartNewBatch();
 			_current_batch.pipeline = config;
 		}
 		void SetBufferDescriptions(span<buffer_desc>)override;
@@ -196,6 +200,7 @@ namespace idk::vkn
 		struct RenderBatch
 		{
 			pipeline_config pipeline;
+			const VulkanPipeline* pipeline_override=nullptr;
 			vector_span<rect> scissor, viewport;
 			//RenderPassObj render_pass;
 			//vk::Framebuffer frame_buffer;

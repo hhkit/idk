@@ -74,6 +74,10 @@ namespace idk::vkn
 			DoNothing();
 		}
 	}
+	void RenderTask::BindVertexBufferByBinding(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)
+	{
+		_dc_builder.AddVertexBuffer(VertexBindingData{ vertex_buffer,binding,byte_offset });
+	}
 	void RenderTask::BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)
 	{
 		_dc_builder.SetIndexBuffer(IndexBindingData{ buffer,offset,indexType});
@@ -82,6 +86,10 @@ namespace idk::vkn
 	{
 		_uniform_manager.BindUniformBuffer(name, index, data,skip_if_bound);
 	}
+	//void RenderTask::BindUniform(vk::DescriptorSet ds, std::optional<string_view> data)
+	//{
+	//	_uniform_manager.BindUniformBuffer(ds,data);
+	//}
 //#pragma optimize("",off)
 	static void DoNothing() {}
 	void RenderTask::BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
@@ -164,6 +172,16 @@ namespace idk::vkn
 	void RenderTask::Copy(CopyCommand&& copy)
 	{
 		_copy_commands.emplace_back(std::move(copy));
+	}
+	bool RenderTask::SetPipeline(const VulkanPipeline& pipeline)
+	{
+		bool can_set = &pipeline != _current_batch.pipeline_override;
+		if (can_set)
+		{
+			StartNewBatch();
+			_current_batch.pipeline_override = &pipeline;
+		}
+		return can_set;
 	}
 	void RenderTask::Copy(const CopyCommand& copy)
 	{
@@ -385,7 +403,7 @@ namespace idk::vkn
 						condensed_shaders.emplace_back(*oshader);
 					}
 				}
-				auto& pipeline =ppm->GetPipeline(batch.pipeline, condensed_shaders, 0, rp);
+				auto& pipeline =(batch.pipeline_override)?*batch.pipeline_override:ppm->GetPipeline(batch.pipeline, condensed_shaders, 0, rp);
 				pipeline.Bind(render_bundle._cmd_buffer, View());
 				viewports.resize(batch.viewport.size());
 				auto bviewports = batch.viewport.to_span();

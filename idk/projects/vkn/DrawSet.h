@@ -3,6 +3,7 @@
 #include <gfx/Mesh.h>
 namespace idk::vkn
 {
+	class VulkanMesh;
 	template<typename T>
 	using binding_only = std::enable_if_t<std::is_base_of_v<bindings::RenderBindings, T>>;
 	class BaseDrawSet
@@ -129,4 +130,12 @@ namespace idk::vkn
 		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
 	private:
 	};
+
+
+	bool BindMeshBuffers(RenderInterface& the_interface, const VulkanMesh& mesh, const renderer_attributes& attribs);
+	bool BindMeshBuffers(RenderInterface& the_interface, const RenderObject& ro);
+	bool DrawMeshBuffers(RenderInterface& the_interface, const RenderObject& ro);
+	bool DrawMeshBuffers(RenderInterface& the_interface, const InstRenderObjects& ro);
+
+
 }

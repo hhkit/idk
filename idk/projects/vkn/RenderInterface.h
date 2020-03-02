@@ -11,6 +11,7 @@ namespace idk::vkn
 {
 	using VertexBuffer = vk::Buffer;
 	using VknRenderPass = RenderPassObj;
+	struct VulkanPipeline;
 
 	//enum class IndexType { e16, e32 };
 	using IndexType = vk::IndexType;
@@ -50,8 +51,10 @@ namespace idk::vkn
 #pragma region Uniforms
 		virtual void BindUniform(string_view name, uint32_t index, string_view data, bool skip_if_bound = false                                                                 )=0;
 		virtual void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral)=0;
+		//virtual void BindUniform(vk::DescriptorSet ds, std::optional<string_view> data                                                                                          )=0;
 #pragma endregion
 
+		virtual void BindVertexBufferByBinding(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset) = 0;
 		virtual void BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset) = 0;
 		virtual void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType) = 0;
 
@@ -63,6 +66,8 @@ namespace idk::vkn
 #pragma region PipelineConfigurations
 		
 		//If col is nullopt, we clear all the colors from attachment_index onwards.
+		virtual bool SetPipeline          (const VulkanPipeline& pipeline                                    ) = 0;
+		virtual void SetPipelineConfig    (const pipeline_config& config                                     ) = 0;
 		virtual void SetClearColor        (uint32_t attachment_index, std::optional<color> col               ) = 0;//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
 		virtual void SetBufferDescriptions(span<buffer_desc>                                                 ) = 0;
 		virtual void SetBlend             (uint32_t attachment_index, AttachmentBlendConfig blend_config = {}) = 0;
