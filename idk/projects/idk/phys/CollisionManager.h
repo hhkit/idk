@@ -11,7 +11,6 @@ namespace idk
 		float penetration{0.0f};			// Depth of penetration from collision
 		float normalImpulse{ 0.0f };		// Accumulated normal impulse
 		float tangentImpulse[2]{ 0.0f };	// Accumulated friction impulse
-		float tangentStaticImpulse[2]{ 0.0f };	// Accumulated static friction impulse
 		float bias{ 0.0f };					// Restitution + baumgarte
 		float normalMass{ 0.0f };			// Normal constraint mass
 		float tangentMass[2]{ 0.0f };		// Tangent constraint mass

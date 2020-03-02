@@ -437,12 +437,12 @@ namespace idk
 							float maxLambda = cs->static_friction * c->normalImpulse; 
 							if (abs(lambda) < maxLambda)
 							{
-								LOG_TO(LogPool::PHYS, "STATIC CHOSEN");
+								// LOG_TO(LogPool::PHYS, "STATIC CHOSEN");
 							}
 							else
 							{
 								maxLambda = cs->friction * c->normalImpulse;
-								LOG_TO(LogPool::PHYS, "DYNAMIC CHOSEN");
+								// LOG_TO(LogPool::PHYS, "DYNAMIC CHOSEN");
 							} 
 
 							// Clamp frictional impulse
