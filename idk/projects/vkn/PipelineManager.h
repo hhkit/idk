@@ -6,21 +6,9 @@
 #include <vkn/ShaderModule.h>
 #include <vkn/VulkanPipeline.h>
 #include <parallel/multithread_control.h>
+#include <vkn/PipelineDescHelper.h>
 namespace idk::vkn
 {
-	struct PipelineDescHelper
-	{
-
-		vector<buffer_desc> buffer_desc_overrides;
-		hash_table<uint32_t, size_t> override_attr_mapping;
-
-		//Store first
-		void StoreBufferDescOverrides(const pipeline_config& config);
-		//Does not help you store your overrides.
-		void UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config);
-	private:
-		void ApplyBufferDescOverrides(pipeline_config& config);
-	};
 	class PipelineManager
 	{
 		struct PipelineObject;

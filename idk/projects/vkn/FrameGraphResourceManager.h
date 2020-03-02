@@ -17,11 +17,12 @@ namespace idk::vkn
 
 
 
-	struct FrameGraphResourceManager
+	class FrameGraphResourceManager
 	{
+	public:
 		using rsc_index_t = size_t;
 		using actual_rsc_index_t = size_t;
-		using actual_resource_t = variant<VknTextureView>;
+		using actual_resource_t = variant<VknTextureView,std::future<VknTextureView>>;
 
 		FrameGraphResourceManager();
 		FrameGraphResourceManager(const FrameGraphResourceManager&) = delete;
@@ -32,7 +33,7 @@ namespace idk::vkn
 
 
 		//Instantiates an actual resource using base's configuration and associate it with unique_id
-		void Instantiate(fgr_id unique_id, fgr_id base);
+		void Instantiate(size_t unique_id, fgr_id base);
 
 		//Associate fgr_id with unique_id
 		void Alias(fgr_id unique_id, fgr_id id);
@@ -45,6 +46,7 @@ namespace idk::vkn
 		FrameGraphResource Rename(FrameGraphResource rsc);
 		FrameGraphResource WriteRename(FrameGraphResource rsc);
 		FrameGraphResource WriteRenamed(FrameGraphResource rsc)const;
+		std::optional<fgr_id> BeforeWriteRenamed(FrameGraphResource rsc)const;
 		bool IsWriteRenamed(FrameGraphResource rsc)const;
 		string_view Name(FrameGraphResource fg)const;
 
@@ -64,10 +66,11 @@ namespace idk::vkn
 		std::optional<fgr_id> GetPrevious(fgr_id curr)const;
 		fgr_id GetOriginal(fgr_id curr)const;
 
-		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
 		std::optional<TextureDescription> GetResourceDescription(fgr_id rsc_id)const;
+		bool UpdateResourceDescription(fgr_id rsc_id, TextureDescription desc);
 
 		actual_resource_t InstantiateConcrete(TextureDescription desc, bool is_shader_sampled);
+		void FinishInstantiation();
 		void Reset();
 
 		vector<TextureDescription> resources;
@@ -83,6 +86,8 @@ namespace idk::vkn
 		hash_table<fgr_id, fgr_id> renamed_original;
 		hlp::IdGenerator<fgr_id> _fgr_generator;
 		TexturePool pool;
+	private:
+		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
 	};
 
 }

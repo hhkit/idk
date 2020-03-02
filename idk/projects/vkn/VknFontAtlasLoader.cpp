@@ -20,7 +20,7 @@ namespace idk::vkn
 	{
 		vk::UniqueImage first;
 		hlp::UniqueAlloc second;
-		vk::ImageAspectFlags aspect;
+		vk::ImageAspectFlagBits aspect;
 	};
 	FontAtlasResult LoadFontAtlas(hlp::MemoryAllocator& allocator, vk::Fence fence, const void* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);
 	FontAtlasResult LoadFontAtlas(hlp::MemoryAllocator& allocator, vk::Fence fence, const FACreateInfo& load_info, std::optional<InputFAInfo> in_info);

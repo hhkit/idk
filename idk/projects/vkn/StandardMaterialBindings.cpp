@@ -3,6 +3,7 @@
 
 #include <vkn/GraphicsState.h>
 #include <vkn/BufferHelpers.inl>
+#include <res/ResourceHandle.inl>
 
 namespace idk::vkn::bindings
 {

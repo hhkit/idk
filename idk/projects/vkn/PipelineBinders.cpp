@@ -260,7 +260,9 @@ namespace idk::vkn
 
 
 	void PbrFwdBindings::Bind(PipelineThingy& the_interface, const RenderObject& )
-	{
+{
+		//Bind the shadow maps for directional lights
+		the_interface.BindUniformBuffer("DirectionalBlock", 0, dlight_block, !rebind_light);
 		the_interface.BindUniformBuffer("LightBlock", 0, light_block,!rebind_light);//skip if pbr is already bound(not per instance)
 		the_interface.BindUniformBuffer("PBRBlock", 0, pbr_trf, true);//skip if pbr is already bound(not per instance)
 
@@ -293,8 +295,6 @@ namespace idk::vkn
 			}
 			else
 			{
-				//Bind the shadow maps for directional lights
-				the_interface.BindUniformBuffer("DirectionalBlock", 0, dlight_block, true);
 				for (auto& shadow_map : shadow_maps_directional)
 				{
 					auto& sm_uni = shadow_map;

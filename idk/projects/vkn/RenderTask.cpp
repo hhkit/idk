@@ -10,11 +10,24 @@
 
 #include <vkn/DebugUtil.h>
 
+//#pragma optimize("",off)
+static void DoNothing()
+{
+
+}
+
+void dbg_chk(vk::Image img)
+{
+	return;
+}
+//#pragma optimize("",on)
+
 namespace idk::vkn
 {
 
-	RenderTask::RenderTask() :ppm{std::make_unique<PipelineManager>()}
+	RenderTask::RenderTask() //:ppm{std::make_unique<PipelineManager>()}
 	{
+		batches.reserve(256);
 	}
 	void RenderTask::DebugLabel(LabelLevel type, string label)
 	{
@@ -37,9 +50,29 @@ namespace idk::vkn
 	{
 		_uniform_manager.SetUboManager(ubo_manager);
 	}
-	void RenderTask::BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)
+
+	void RenderTask::SetPipelineManager(PipelineManager& pipeline_manager)
 	{
-		_dc_builder.AddVertexBuffer(VertexBindingData{vertex_buffer,binding,byte_offset});
+		ppm = &pipeline_manager;
+	}
+
+
+//#pragma optimize("",off)
+
+	void RenderTask::BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset)
+	{
+		auto binding = _vtx_binding_tracker.GetBinding(location);
+		if (binding)
+		{
+			if (!vertex_buffer)
+				DoNothing();
+			_dc_builder.AddVertexBuffer(VertexBindingData{ vertex_buffer,*binding,byte_offset });
+		}
+		else
+		{
+
+			DoNothing();
+		}
 	}
 	void RenderTask::BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)
 	{
@@ -49,17 +82,22 @@ namespace idk::vkn
 	{
 		_uniform_manager.BindUniformBuffer(name, index, data,skip_if_bound);
 	}
+//#pragma optimize("",off)
+	static void DoNothing() {}
 	void RenderTask::BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
+		dbg_chk(texture.Image());
 		_uniform_manager.BindSampler(name, index, texture, skip_if_bound,layout);
 	}
 	void RenderTask::BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader_handle)
 	{
 		auto& bound_shader = _current_batch.shaders.shaders[static_cast<size_t>(stage)];
-		if (bound_shader == shader_handle)
+		if (bound_shader == shader_handle || shader_handle.guid == Guid{})
 			return;
 		UnbindShader(stage);
 		auto& shader = shader_handle.as<ShaderModule>();
+		if (!shader.HasCurrent())
+			return;
 		//DebugBreak();
 		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
 		{
@@ -71,8 +109,10 @@ namespace idk::vkn
 			_uniform_manager.RegisterUniforms(name, info.set, info.binding, info.size);
 		}
 		bound_shader = shader_handle;
-		if(stage==ShaderStage::Fragment)
+		if (stage == ShaderStage::Fragment)
 			BindInputAttachmentToCurrent();
+		else if (stage == ShaderStage::Vertex)
+			_vtx_binding_tracker.Update(_current_batch.pipeline,shader_handle);
 	}
 	void RenderTask::UnbindShader(ShaderStage stage)
 	{
@@ -89,7 +129,7 @@ namespace idk::vkn
 			oshader.reset();
 		}
 	}
-	void RenderTask::SetRenderPass(RenderPassObj render_pass)
+	void RenderTask::SetRenderPass(VknRenderPass render_pass)
 	{
 		curr_rp = render_pass;
 	}
@@ -106,7 +146,8 @@ namespace idk::vkn
 		di.num_vertices = num_vertices;
 		di.first_vertex = first_vertex;
 		auto uniforms = _uniform_manager.FinalizeCurrent(_uniform_sets);
-		AddToBatch(_dc_builder.end(di,uniforms));
+		if (uniforms)
+			AddToBatch(_dc_builder.end(di, *uniforms));
 	}
 	void RenderTask::DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_index, uint32_t first_instance)
 	{
@@ -117,7 +158,8 @@ namespace idk::vkn
 		di.first_index = first_index;
 		di.first_vertex = first_vertex;
 		auto uniforms = _uniform_manager.FinalizeCurrent(_uniform_sets);
-		AddToBatch(_dc_builder.end(di, uniforms));
+		if(uniforms)
+			AddToBatch(_dc_builder.end(di, *uniforms));
 	}
 	void RenderTask::Copy(CopyCommand&& copy)
 	{
@@ -131,6 +173,9 @@ namespace idk::vkn
 	{
 		StartNewBatch();
 		_current_batch.pipeline.buffer_descriptions = {descriptions.begin(),descriptions.end()};
+		auto& vtx_shader = _current_batch.shaders.shaders[static_cast<int>(ShaderStage::Vertex)];
+		if(vtx_shader)
+			_vtx_binding_tracker.Update(_current_batch.pipeline,*vtx_shader);
 	}
 	void RenderTask::SetBlend(uint32_t attachment_index, AttachmentBlendConfig blend_config)
 	{
@@ -154,11 +199,35 @@ namespace idk::vkn
 	{
 		clear_depths = depth;
 		clear_stencil = stencil;
+		auto depth_value = (depth) ? *depth : 1.0f;
+		auto stencil_value =(stencil) ? *stencil : 0ui8;
+		if (clear_depths || clear_stencil)
+		{
+			_clear_depth_stencil = vk::ClearDepthStencilValue{ depth_value,stencil_value};
+		}
+		else
+		{
+			_clear_depth_stencil = {};
+		}
+	}
+	rect ViewportScissors(rect r, uvec2 fb_size)
+	{
+		r.Scale(fb_size);
+		r.position = max(r.position, vec2{ 0.0f,0.0f });
+		r.size = min(r.size, vec2{ fb_size } -r.position);
+
+		if (r.position.x + r.size.x > fb_size.x
+			||
+			r.position.y + r.size.y > fb_size.y)
+		{
+			DoNothing();
+		}
+		return r;
 	}
 	void RenderTask::SetScissors(rect r)
 	{
 		StartNewBatch();
-		r.Scale(fb_size);
+		r = ViewportScissors(r, fb_size);
 		_rect_builder.start();
 		_rect_builder.emplace_back(r);
 		_current_batch.scissor = _rect_builder.end();
@@ -166,11 +235,15 @@ namespace idk::vkn
 	void RenderTask::SetViewport(rect r)
 	{
 		StartNewBatch();
-		r.Scale(fb_size);
-
+		r = ViewportScissors(r, fb_size);
 		_rect_builder.start();
 		_rect_builder.emplace_back(r);
 		_current_batch.viewport = _rect_builder.end();
+	}
+	void RenderTask::SetScissorsViewport(rect r)
+	{
+		SetScissors(r);
+		SetViewport(r);
 	}
 	void RenderTask::SetFillType(FillType type)
 	{
@@ -220,12 +293,17 @@ namespace idk::vkn
 		_num_output_attachments = size;
 	}
 
-	uint32_t compute_clear_info(size_t num_output_attachments,span<const color> clear_colors, std::optional<float> clear_depth, std::optional<uint8_t> clear_stencil,
+	void RenderTask::SetClearDepthStencil(std::optional<vk::ClearValue> clear_value)
+	{
+		_clear_depth_stencil = clear_value;
+	}
+
+	uint32_t compute_clear_info(size_t num_output_attachments,span<const color> clear_colors, std::optional<vk::ClearValue> clear_depth_stencil,
 		vector<vk::ClearValue>& clear
 		)
 	{
 		clear.clear();
-		clear.reserve(num_output_attachments + ((clear_depth|| clear_stencil) ? 1 : 0));
+		clear.reserve(num_output_attachments + ((clear_depth_stencil) ? 1 : 0));
 		for (auto color : clear_colors)
 		{
 			clear.emplace_back(std::array<float, 4> { color.r,color.g,color.b,color.a });
@@ -234,29 +312,25 @@ namespace idk::vkn
 		{
 			clear.emplace_back(std::array<float, 4> { 0, 0, 0, 0 });
 		}
-		bool clear_other = false;
-		float depth{};
-		uint8_t stencil{};
-		if (clear_depth)
-		{
-			clear_other = true;
-			depth = *clear_depth;
-		}
-		if (clear_stencil)
-		{
-			clear_other = true;
-			stencil = *clear_stencil;
-		}
-		if(clear_other)
-			clear.emplace_back(vk::ClearDepthStencilValue{depth,stencil});
+		if(clear_depth_stencil)
+			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
+//#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
+		_start_new_batch = false;
 		StartNewBatch();//flush the current batch
-		ProcessCopies(render_bundle);
 		auto cmd_buffer = render_bundle._cmd_buffer;
+		if (_label)
+		{
+			dbg::BeginLabel(cmd_buffer, _label->c_str());
+			dbg::BeginLabel(cmd_buffer, "BeginCopyStage");
+		}
+		ProcessCopies(render_bundle);
+		if (_label)
+			dbg::EndLabel(cmd_buffer);
 		auto& d_manager = render_bundle._d_manager;
 		vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
 
@@ -266,14 +340,8 @@ namespace idk::vkn
 		vector<vk::Viewport> viewports;
 		std::optional<RenderPassObj> prev_rp;
 		vector<vk::ClearValue> clear_values;
-		compute_clear_info(_num_output_attachments, clear_colors, clear_depths, clear_stencil,clear_values);
+		compute_clear_info(_num_output_attachments, clear_colors, _clear_depth_stencil,clear_values);
 		vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
-		if (_label)
-		{
-			dbg::BeginLabel(cmd_buffer, _label->c_str());
-		}
-		if (batches.size())
-		{
 
 		auto rp = curr_rp;
 		auto fb = curr_frame_buffer;
@@ -283,22 +351,24 @@ namespace idk::vkn
 		{
 			for (auto& sc : batch.scissor.to_span())
 			{
-				auto vmin= sc.position;
-				auto vmax= vmin + sc.size;
+				auto vmin = sc.position;
+				auto vmax = vmin + sc.size;
 				ra_max = max(ra_max, vmax);
 				ra_min = min(ra_min, vmin);
 			}
 		}
-		render_area = {ra_min,ra_max-ra_min};
+		render_area = { ra_min,ra_max - ra_min };
 
 		vk::RenderPassBeginInfo rpbi
 		{
-			*rp,fb,
+			rp,fb,
 			hlp::ToRect2D(render_area),
 			static_cast<uint32_t>(clear_values.size()),
 			std::data(clear_values),
 		};
 		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+		if (batches.size())
+		{
 		for (auto& batch : this->batches)
 		{
 			if (batch.label)
@@ -339,10 +409,12 @@ namespace idk::vkn
 
 					for (auto& vb : p_ro.vertex_buffers)
 					{
-						auto opt_binding = pipeline.GetBinding(vb.binding);
-						if (opt_binding)
+						//auto opt_binding = pipeline.GetBinding(vb.binding);
+						//if (opt_binding)
 						{
-							cmd_buffer.bindVertexBuffers(*opt_binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
+							if (!vb.buffer) //Don't bind null buffers.
+								continue;
+							cmd_buffer.bindVertexBuffers(vb.binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
 						}
 					}
 					
@@ -360,9 +432,9 @@ namespace idk::vkn
 				dbg::EndLabel(cmd_buffer);
 			}
 		}
-		cmd_buffer.endRenderPass();
-
 		}
+
+		cmd_buffer.endRenderPass();
 		if (_label)
 		{
 			dbg::EndLabel(cmd_buffer);
@@ -382,7 +454,10 @@ namespace idk::vkn
 			auto input_att_index = info.input_attachment_index + attachment_offset;
 			if (info.type == uniform_layout_t::UniformType::eAttachment && input_att_index <input_attachments.size())
 			{
-				_uniform_manager.BindAttachment(UniformManager::UniInfo{ info.set,info.binding,info.size,info.layout }, 0, input_attachments[input_att_index]);
+				auto texture = input_attachments[input_att_index];
+				if (texture.Image().operator VkImage() == (VkImage)0x3684)
+					DoNothing();
+				_uniform_manager.BindAttachment(UniformManager::UniInfo{ info.set,info.binding,info.size,info.layout }, 0, texture);
 			}
 			++itr;
 		}
@@ -398,6 +473,7 @@ namespace idk::vkn
 		if (!_start_new_batch && start)
 		{
 			//Retire the current batch
+			_current_batch.pipeline.buffer_descriptions = _vtx_binding_tracker.GetDescriptors();
 			batches.emplace_back(_current_batch);
 			_current_batch.draw_calls.clear();
 			_current_batch.label.reset();
@@ -411,28 +487,43 @@ namespace idk::vkn
 		{
 			auto src_img = copy_cmd.src.Image();
 			auto dst_img = copy_cmd.dst.Image();
+			dbg_chk(src_img);
+			dbg_chk(dst_img);
 			//Transition from their original layouts to eGeneral
-			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			auto target_src_format = vk::ImageLayout::eTransferSrcOptimal;
+			auto target_dst_format = vk::ImageLayout::eTransferDstOptimal;
+			if (copy_cmd.src_layout != target_src_format)
+			{
+				auto range = copy_cmd.src_range;
+				if (!range)
+					range = copy_cmd.src.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, target_src_format, hlp::TransitionOptions{ {},{},range});
+			}
+			if (copy_cmd.dst_layout != target_dst_format)
 			{
 				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), copy_cmd.src_layout, vk::ImageLayout::eGeneral);
+				auto range = copy_cmd.dst_range;
+				if (!range)
+					range = copy_cmd.dst.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eUndefined, target_dst_format , hlp::TransitionOptions{ {},{},range });
 			}
-			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
-			{
-				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), copy_cmd.dst_layout, vk::ImageLayout::eGeneral);
-			}
-			cmd_buffer.copyImage(copy_cmd.src.Image(), vk::ImageLayout::eGeneral, copy_cmd.dst.Image(), vk::ImageLayout::eGeneral, copy_cmd.regions);
+			cmd_buffer.copyImage(copy_cmd.src.Image(), target_src_format, copy_cmd.dst.Image(), target_dst_format, copy_cmd.regions);
 			//Transition from their eGeneral to original layouts 
-			if (copy_cmd.src_layout != vk::ImageLayout::eGeneral)
+			if (copy_cmd.src_layout != target_src_format && copy_cmd.src_layout != vk::ImageLayout::eUndefined)
 			{
 				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), vk::ImageLayout::eGeneral, copy_cmd.src_layout);
+				auto range = copy_cmd.src_range;
+				if (!range)
+					range = copy_cmd.src.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), target_src_format, copy_cmd.src_layout, hlp::TransitionOptions{ {},{},range });
 			}
-			if (copy_cmd.dst_layout != vk::ImageLayout::eGeneral)
+			if (copy_cmd.dst_layout != target_src_format)
 			{
 				//cmd_buffer.pipelineBarrier();
-				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eGeneral, copy_cmd.dst_layout);
+				auto range = copy_cmd.dst_range;
+				if (!range)
+					range = copy_cmd.dst.FullRange();
+				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eTransferDstOptimal, copy_cmd.dst_layout, hlp::TransitionOptions{ {},{},range});
 			}
 		}
 

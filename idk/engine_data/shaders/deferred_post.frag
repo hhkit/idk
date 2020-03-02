@@ -119,7 +119,6 @@ void main()
 				//	//shadow_factor *= shadow_factor;
 				//	//cascade_c = vec4(0,0,0.1,0);
 				//}
-				
 				result *= shadow_factor;
 				j = 0;
 				
@@ -132,7 +131,7 @@ void main()
 				result *= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
 		}
 		
-		light_accum += result + cascade_c.xyz;
+		light_accum += result;// + cascade_c.xyz;
 	}
 	vec3 F = mix(vec3(0.04), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);

@@ -7,11 +7,8 @@ namespace idk::vkn::bindings
 	{
 	public:
 		rect viewport;
-		void Bind(RenderInterface& the_interface) override
-		{
-			the_interface.SetViewport(viewport);
-			the_interface.SetScissors(viewport);
-		}
+		void Bind(RenderInterface& the_interface) override;
+		void SetState(const CameraData& cam) noexcept;
 	};
 	namespace defaults
 	{

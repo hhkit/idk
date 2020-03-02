@@ -69,6 +69,7 @@ namespace idk::vkn
 		virtual void SetClearDepthStencil (std::optional<float> depth, std::optional<uint8_t> stencil = {}   ) = 0;
 		virtual void SetScissors          (rect r                                                            ) = 0;
 		virtual void SetViewport          (rect r                                                            ) = 0;
+		virtual void SetScissorsViewport  (rect r                                                            ) = 0;
 		virtual void SetFillType          (FillType type                                                     ) = 0;
 		virtual void SetCullFace          (CullFaceFlags cf                                                  ) = 0;
 		virtual void SetPrimitiveTopology (PrimitiveTopology pt                                              ) = 0;

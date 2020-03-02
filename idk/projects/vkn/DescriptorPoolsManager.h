@@ -97,14 +97,14 @@ struct DescriptorPoolsManager
 
 
 	template<typename Policy = FirstFit>
-	vk::DescriptorPool Get(uint32_t pool,vk::DescriptorType type=vk::DescriptorType::eUniformBuffer);
+	vk::DescriptorPool Get(uint32_t num_ds,vk::DescriptorType type=vk::DescriptorType::eUniformBuffer);
 	template<typename Policy = FirstFit>
-	std::optional<vk::DescriptorPool> TryGet(uint32_t pool, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);
+	std::optional<vk::DescriptorPool> TryGet(uint32_t num_ds, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);
 	template<typename Policy = FirstFit>
 	std::optional<vk::DescriptorPool> TryGet(const std::array<uint32_t,DescriptorTypeI::size()>& required);
 
 	template<typename Policy = FirstFit>
-	bool CanGet(uint32_t pool, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);
+	bool CanGet(uint32_t num_ds, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer);
 	void ResetManager(Manager& manager);
 	void ResetManager(Manager2& manager);
 	void Reset(vk::DescriptorPool& pool);

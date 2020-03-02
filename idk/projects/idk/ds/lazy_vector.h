@@ -10,7 +10,7 @@ namespace idk
 	public:
 		using base_t::base_t;
 		using base_t::operator=;
-		T& operator[](size_t i)
+		auto& operator[](size_t i)
 		{
 			if (i >= this->size())
 			{
@@ -18,9 +18,9 @@ namespace idk
 			}
 			return this->at(i);
 		}
-		const T& operator[](size_t i)const noexcept
+		decltype(auto) operator[](size_t i)const 
 		{
-			return static_cast<const base_t&>(*this)[i];
+			return this->at(i);
 		}
 	};
 }

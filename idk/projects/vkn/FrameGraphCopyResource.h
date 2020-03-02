@@ -9,6 +9,8 @@ namespace idk::vkn
 	{
 		vk::ImageLayout dest_layout;
 		vector<vk::ImageCopy> regions;
+		std::optional<vk::ImageSubresourceRange> src_range;
+		std::optional<vk::ImageSubresourceRange> dst_range;
 	};
 
 	struct FrameGraphCopyResource

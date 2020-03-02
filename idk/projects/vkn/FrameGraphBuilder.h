@@ -15,6 +15,7 @@ namespace idk::vkn
 
 		vector<FrameGraphCopyResource> copies;
 		index_span StoreCopies(vector<FrameGraphCopyResource>& rsc);
+		void Reset();
 	};
 
 	struct WriteOptions
@@ -42,6 +43,7 @@ namespace idk::vkn
 		void set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc);
 		void set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, AttachmentDescription attachment_desc);
 
+		void MarkNodeRegion(string name);
 		void BeginNode(string name);
 		FrameGraphNode EndNode();
 
@@ -50,6 +52,7 @@ namespace idk::vkn
 		std::optional<fg_id> GetSourceNode(fgr_id rsc)const;
 
 		hash_table<fgr_id, fg_id> origin_nodes;
+		hash_table<fgr_id, fg_id> input_origin_nodes;
 
 		
 		NodeBuffer consumed_resources;
@@ -71,6 +74,7 @@ namespace idk::vkn
 		};
 
 		//Consumed resources
+		string _region_name;
 		PreObject curr_rsc;
 		hlp::IdGenerator<fg_id> _fgid_generator;
 	};

@@ -44,6 +44,14 @@ namespace idk::vkn {
 	{
 		return _layers;
 	}
+	vk::ImageSubresourceRange VknTexture::FullRange() const
+	{
+		return range;
+	}
+	void VknTexture::FullRange(vk::ImageSubresourceRange range_)
+	{
+		range = range_;
+	}
 	VknTexture::~VknTexture()
 	{
 		//vknData.reset();

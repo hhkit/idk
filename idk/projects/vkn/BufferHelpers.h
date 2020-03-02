@@ -81,7 +81,14 @@ namespace idk::vkn::hlp
 		vk::CommandBufferInheritanceInfo* info = nullptr;
 	};
 
-	void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<BeginInfo> begin = {}, std::optional<SubmissionInfo> queue_sub_config = {});
+	struct TransitionOptions
+	{
+		std::optional<BeginInfo> begin = {};
+		std::optional<SubmissionInfo> queue_sub_config = {};
+		std::optional<vk::ImageSubresourceRange> range = {};
+	};
+
+	void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format format, vk::ImageLayout oLayout, vk::ImageLayout nLayout, TransitionOptions = {});
 
 	template<typename T>
 	vk::ArrayProxy<const T> make_array_proxy(uint32_t sz, T* arr);

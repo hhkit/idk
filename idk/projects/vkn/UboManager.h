@@ -29,6 +29,7 @@ namespace idk::vkn
 			vk::UniqueBuffer buffer{};
 			std::basic_string<char,std::char_traits<char>,tallocator<char>> data{};
 			size_t offset{};
+			size_t block_size;
 			uint32_t alignment{};
 			uint32_t sz_alignment{};
 			//DataPair() = default;

@@ -26,7 +26,7 @@ namespace idk
 				switch (model)
 				{
 				case ShadingModel::DefaultLit: return LOAD("/engine_data/shaders/pbr_forward.tmpt");
-				case ShadingModel::Unlit:      return LOAD("/engine_data/shaders/pbr_forward.tmpt");
+				case ShadingModel::Unlit:      return LOAD(Core::GetSystem<GraphicsSystem>().is_deferred() ? "/engine_data/shaders/unlit.tmpt" : "/engine_data/shaders/pbr_forward.tmpt");
 				case ShadingModel::Specular:   return LOAD("/engine_data/shaders/pbr_specular.tmpt");
 				}
 			}

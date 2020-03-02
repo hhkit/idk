@@ -78,7 +78,7 @@ namespace idk::vkn::bindings
 		return result;
 	}
 
-
+#pragma optimize("",off)
 	void PbrFwdBindings::Bind(RenderInterface& the_interface, const RenderObject&)
 	{
 		the_interface.BindUniform("LightBlock", 0, hlp::to_data(light_block), !rebind_light);//skip if pbr is already bound(not per instance)

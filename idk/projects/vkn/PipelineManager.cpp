@@ -97,9 +97,10 @@ namespace idk::vkn
 	}
 	void PipelineManager::RemovePipeline(VulkanPipeline* pipeline)
 	{
-		size_t index = 0;
-		for (auto& po : pipelines)
+		for (auto po_itr = pipelines.begin(),end = pipelines.end();po_itr!=end;++po_itr )
 		{
+			auto& po = *po_itr;
+			auto obj_handle = po_itr.handle();
 			if (&po.pipeline == pipeline)
 			{
 				for (auto& shader : po.shader_handles)
@@ -109,7 +110,7 @@ namespace idk::vkn
 				vector<const string*> keys;
 				for (auto& [str, handle] : prog_to_pipe2)
 				{
-					if (handle == index)
+					if (handle == obj_handle)
 					{
 						keys.emplace_back(&str);
 					}
@@ -118,12 +119,12 @@ namespace idk::vkn
 				{
 					prog_to_pipe2.erase(*key);
 				}
-				pipelines.free(index);
+				pipelines.free(obj_handle);
 				for (auto& queue : update_queue)
 				{
 					for (auto itr = queue.begin(); queue.end() != itr; ++itr)
 					{
-						if (*itr == index)
+						if (*itr == obj_handle)
 						{
 							queue.erase(itr);
 							break;
@@ -132,7 +133,6 @@ namespace idk::vkn
 				}
 				break;
 			}
-			++index;
 		}
 
 	}
@@ -224,93 +224,6 @@ namespace idk::vkn
 	//PipelineObject() = default;
 	//PipelineObject(PipelineObject&&) noexcept= default;
 	//~PipelineObject() = default;
-
-	void PipelineDescHelper::StoreBufferDescOverrides(const pipeline_config& config)
-	{
-		buffer_desc_overrides = config.buffer_descriptions;
-		size_t i = 0;
-		for (auto& desc : buffer_desc_overrides)
-		{
-			for (auto& attr : desc.attributes)
-			{
-				override_attr_mapping[attr.location] = i;
-			}
-			++i;
-		}
-	}
-
-	//Does not help you store your overrides.
-	void PipelineDescHelper::UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config)
-	{
-		config.buffer_descriptions.clear();
-		hash_set<uint32_t> layouts;
-		for (auto& module : shader_handles)
-		{
-			auto& mod = module.as<ShaderModule>();
-			if (!mod.HasCurrent())
-				continue;
-			//if (mod.NeedUpdate()) //Excluded. leave it to pipeline manager's check for update.
-			//	mod.UpdateCurrent(fo_index);
-			auto& desc = mod.AttribDescriptions();
-			for (auto& desc_set : desc)
-			{
-				bool skip = false;
-				for (auto attrib : desc_set.attributes)
-				{
-					if (attrib.fixed_location)
-					{
-						if (layouts.find(attrib.location) != layouts.end())
-						{
-							skip = true;
-							break;
-						}
-						layouts.emplace(attrib.location);
-					}
-				}
-				if(!skip)
-					config.buffer_descriptions.emplace_back(desc_set);
-			}
-			//shaders.emplace_back(mod.Stage(), mod.Module());
-			if (mod.Stage() == vk::ShaderStageFlagBits::eFragment)
-				config.frag_shader = module;
-
-			if (mod.Stage() == vk::ShaderStageFlagBits::eVertex)
-				config.vert_shader = module;
-			ApplyBufferDescOverrides(config);
-		}
-	}
-
-	void PipelineDescHelper::ApplyBufferDescOverrides(pipeline_config& config)
-	{
-		vector<size_t> binding_removal_indices;
-		auto& config_bdesc = config.buffer_descriptions;
-		size_t i = 0;
-		for (auto& cbd : config_bdesc)
-		{
-			for (auto& attr : cbd.attributes)
-			{
-				auto itr = override_attr_mapping.find(attr.location);
-				if (itr != override_attr_mapping.end())
-				{
-					binding_removal_indices.emplace_back(i);
-				}
-			}
-			++i;
-		}
-		std::sort(binding_removal_indices.begin(), binding_removal_indices.end());
-		{
-			auto end_itr = std::unique(binding_removal_indices.begin(), binding_removal_indices.end());
-			binding_removal_indices.resize(end_itr - binding_removal_indices.begin());
-		}
-		//erase from behind to avoid invalidating indices
-		for (auto itr = binding_removal_indices.rbegin(); itr < binding_removal_indices.rend(); ++itr)
-		{
-			auto index = *itr;
-			config_bdesc.erase(config_bdesc.begin()+index);
-		}
-		config_bdesc.insert(config_bdesc.end(), buffer_desc_overrides.begin(), buffer_desc_overrides.end());
-
-	}
 
 	void PipelineManager::PipelineObject::StoreBufferDescOverrides()
 	{

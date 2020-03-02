@@ -14,7 +14,7 @@ namespace idk::vkn
 }
 namespace idk::vkn::dbg
 {
-
+	static bool enable_named_object = false;;
 	auto CreateLabel(const char* label, const color& col)
 	{
 		return vk::DebugUtilsLabelEXT
@@ -43,50 +43,91 @@ namespace idk::vkn::dbg
 			cmd_buffer.endDebugUtilsLabelEXT(View().DynDispatcher());
 	}
 
-
-
-
-	void NameObject(vk::Image img, const string& name)
+	void BeginLabel(vk::Queue queue, const char* label, const color& col)
 	{
-		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
-		// if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
-		// {
-		// 	vk::DebugUtilsObjectNameInfoEXT tmp
-		// 	{
-		// 		vk::ObjectType::eImage,reinterpret_cast<uint64_t>(img.operator VkImage()),name.c_str()
-		// 	};
-		// 	auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
-		// 
-		// 	View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
-		// }
+		auto dbg_label = CreateLabel(label, col);
+		if (View().DynDispatcher().vkQueueBeginDebugUtilsLabelEXT)
+			queue.beginDebugUtilsLabelEXT(dbg_label, View().DynDispatcher());
 	}
-	void NameObject(vk::Buffer img, const string& name)
+
+	void EndLabel(vk::Queue queue)
 	{
-		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
-		// if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
-		// {
-		// 	vk::DebugUtilsObjectNameInfoEXT tmp
-		// 	{
-		// 		vk::ObjectType::eBuffer,reinterpret_cast<uint64_t>(img.operator VkBuffer()),name.c_str()
-		// 	};
-		// 	auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
-		// 
-		// 	View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
-		// }
+		if (View().DynDispatcher().vkQueueEndDebugUtilsLabelEXT)
+			queue.endDebugUtilsLabelEXT(View().DynDispatcher());
 	}
-	void NameObject(uint64_t unk, const string& name)
+
+
+
+
+	void NameObject(vk::Image img, string_view name)
 	{
-		return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
-		// if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT && unk)//id must be valid if type is unknown
-		// {
-		// 	vk::DebugUtilsObjectNameInfoEXT tmp
-		// 	{
-		// 		vk::ObjectType::eUnknown,unk,name.c_str()
-		// 	};
-		// 	auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
-		// 
-		// 	View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
-		// }
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		if (enable_named_object&&View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eImage,reinterpret_cast<uint64_t>(img.operator VkImage()),name.data()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
+	}
+	void NameObject(vk::Buffer img, string_view name)
+	{
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		if (enable_named_object && View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eBuffer,reinterpret_cast<uint64_t>(img.operator VkBuffer()),name.data()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
+	}
+	void NameObject(vk::RenderPass rp, string_view name)
+	{
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		if (enable_named_object && View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eRenderPass,reinterpret_cast<uint64_t>(rp.operator VkRenderPass()),name.data()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
+	}
+	void NameObject(vk::Framebuffer fb, string_view name)
+	{
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		if (enable_named_object && View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eFramebuffer,reinterpret_cast<uint64_t>(fb.operator VkFramebuffer()),name.data()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
+	}
+	void NameObject(uint64_t unk, string_view name)
+	{
+		//return; //There's a bug in vulkan sdk up to version 1.1.121 or something where they don't copy the string.
+		if (enable_named_object && View().DynDispatcher().vkSetDebugUtilsObjectNameEXT && unk)//id must be valid if type is unknown
+		{
+			vk::DebugUtilsObjectNameInfoEXT tmp
+			{
+				vk::ObjectType::eUnknown,unk,name.data()
+			};
+			auto tmp_ = tmp.operator VkDebugUtilsObjectNameInfoEXT & ();
+
+			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
+		}
 	}
 	string DumpFrameBufferAllocs()
 	{

@@ -52,6 +52,8 @@
     <ClInclude Include="gfx\AttachmentViewType.h" />
     <ClInclude Include="network\EventDestroyObjectMessage.h" />
     <ClInclude Include="gfx\DefaultShaders.h" />
+    <ClInclude Include="gfx\FakeMat4.h" />
+    <ClInclude Include="gfx\GfxDebugData.h" />
     <ClInclude Include="gfx\ShadowMapPool.h" />
     <ClInclude Include="network\ElectronMessageInfo.h" />
     <ClInclude Include="network\ElectronRigidbodyView.h" />

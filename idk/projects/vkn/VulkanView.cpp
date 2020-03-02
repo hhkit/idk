@@ -5,6 +5,7 @@
 #include <vkn/vector_buffer.h>
 #include <vkn/RenderState.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/VulkanState.h>
 namespace idk::vkn
 {
 		struct VulkanView::pimpl

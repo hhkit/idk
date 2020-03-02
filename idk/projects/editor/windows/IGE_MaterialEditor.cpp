@@ -953,7 +953,7 @@ namespace idk
 				switch (meta.model)
 				{
 				case ShadingModel::DefaultLit: new_master_node_name = "master\\PBR";          break;
-				case ShadingModel::Unlit:      new_master_node_name = "master\\Unlit";        break;
+				case ShadingModel::Unlit:      new_master_node_name = (meta.blend==BlendMode::Masked)?"master\\UnlitMasked" : "master\\Unlit";        break;
 				case ShadingModel::Specular:   new_master_node_name = "master\\PBR Specular"; break;
 				}
                 if (master_node.name != new_master_node_name)

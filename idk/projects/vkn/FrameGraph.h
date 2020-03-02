@@ -9,6 +9,10 @@
 #include <vkn/utils/GraphTraverser.h>
 #include <vkn/topological_sort.h>
 #include <vkn/RenderPassCreateInfoBundle.h>
+
+
+#include <vkn/RenderPassPool.h>
+
 //MARK_NON_COPY_CTORABLE(idk::vkn::FrameGraphDetail::Context);
 namespace idk::vkn
 {
@@ -16,7 +20,6 @@ namespace idk::vkn
 	struct TempGraph
 	{
 		hash_table<fgr_id, fg_id> src_node;
-		hash_table<fgr_id, fg_id> end_node;
 		using fgr_span = index_span;
 		hash_table<fg_id, fgr_span> in_nodes;
 		const NodeBuffer* buffer;
@@ -24,7 +27,6 @@ namespace idk::vkn
 	struct ActualGraph
 	{
 		hash_table<fgr_id, fg_id>  src_node;
-		hash_table<fgr_id, fg_id>  end_node;
 		hash_table<fg_id, span<const FrameGraphResource>> in_rsc_nodes;
 		hash_table<fg_id, index_span> in_nodes;
 
@@ -140,6 +142,8 @@ namespace idk::vkn
 			}
 		};
 
+		void MarkRegion(string region_name);
+
 		template<typename T, typename ... T_CtorArgs>
 		T& addCallBackPass(string_view name,
 			const std::function<void(FrameGraphBuilder & builder, T&)>& init,
@@ -155,6 +159,7 @@ namespace idk::vkn
 		{
 			graph_builder.BeginNode(name);
 			auto render_pass = std::make_unique<T>(T{ graph_builder, std::forward <CtorArgs>(args)... });
+			render_pass->name = name;
 			auto& node = StoreNode(graph_builder.EndNode());
 			T& obj = *render_pass;
 			render_passes.emplace(node.id, std::move(render_pass));
@@ -169,6 +174,9 @@ namespace idk::vkn
 
 		void CreateConcreteResources(ResourceLifetimeManager& rlm, FrameGraphResourceManager& rm);
 
+		const ResourceLifetimeManager& GetLifetimeManager()const;
+		const FrameGraphResourceManager& GetResourceManager()const;
+
 		void Reset();
 
 		//Process nodes and cull away unnecessary nodes.
@@ -182,6 +190,7 @@ namespace idk::vkn
 		void BuildRenderPasses();
 
 		void SetDefaultUboManager(UboManager& ubo_manager);
+		void SetPipelineManager(PipelineManager& pipeline_manager);
 
 		//Execute the renderpasses.
 		//Use the dependency graph to split the appropriate jobs into separate threads and sync those.
@@ -195,26 +204,29 @@ namespace idk::vkn
 		vk::ImageLayout GetSourceLayout(fgr_id)const;
 		//Check if there's an existing renderpass that is compatible, reuse if compatible.
 		RenderPassCreateInfoBundle  CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
-		VknRenderPass  CreateRenderPass(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
+		VknRenderPass  CreateRenderPass(string_view name,span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs,std::optional<FrameGraphAttachmentInfo> depth);
 		std::pair<Framebuffer,uvec2> CreateFrameBuffer(VknRenderPass rp, span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth);
 
 
 		FrameGraphResourceManager& GetResourceManager();
-		const FrameGraphResourceManager& GetResourceManager()const ;
 
 		FrameGraphBuilder graph_builder;
 		vector<FrameGraphNode> nodes;
 		//fg id to index in nodes;
 		hash_table<fg_id, size_t> node_lookup;
 		vector<size_t> execution_order;
+		vector<std::tuple<string_view,BaseRenderPass*, FrameGraphNode*>> _dbg_execution_order;
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
 
 		UboManager* _default_ubo_manager = {};
+		PipelineManager* _default_pipeline_manager= {};
 
 		TempGraph tmp_graph;
 		ResourceLifetimeManager rsc_lifetime_mgr;
 
 		vector<std::remove_reference_t<Context_t>> _contexts;
+		RenderPassPool _rp_pool;
+		FramebufferPool _fb_pool;
 	};
 
 }
