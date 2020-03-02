@@ -387,6 +387,7 @@ namespace idk::phys
 		if (res)
 		{
 			auto& v = res.value();
+			
 			compute_basis(v.normal, v.tangentVectors, v.tangentVectors + 1);
 		}
 

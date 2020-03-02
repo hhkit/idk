@@ -34,7 +34,7 @@ namespace idk
 	constexpr float penetration_slop = 0.05f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
-// #pragma optimize("", off)
+#pragma optimize("", off)
 	void CollisionManager::InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders)
 	{
 		const auto dt = Core::GetDT().count();
@@ -151,7 +151,7 @@ namespace idk
 			{
 				// Apply gravity
 				if (rigidbody.use_gravity && !rigidbody.is_kinematic)
-					rigidbody.AddForce(vec3{ 0, -9.81f * rigidbody.gravity_scale, 0 });
+					rigidbody.AddForce(vec3{ 0, -9.81f * rigidbody.gravity_scale * rigidbody.mass(), 0 });
 
 				// Apply forces
 				if (!rigidbody.is_kinematic)
@@ -303,8 +303,9 @@ namespace idk
 					ccs.mB = j->rb ? j->rb->inv_mass : 0.0f;
 					ccs.iA = ccs.rbA->_global_inertia_tensor;
 					ccs.iB = ccs.rbB ? ccs.rbB->_global_inertia_tensor : mat3{ vec3{0.0f}, vec3{0.0f}, vec3{0.0f} };
-					ccs.restitution = max(i->collider->bounciness, j->collider->bounciness);
-					ccs.friction = std::sqrt(i->collider->static_friction * j->collider->static_friction);
+					ccs.restitution = min(i->collider->bounciness, j->collider->bounciness);
+					ccs.static_friction = std::sqrt(i->collider->static_friction * j->collider->static_friction);
+					ccs.friction = std::sqrt(i->collider->dynamic_friction * j->collider->dynamic_friction);
 
 					ccs.tangentVectors[0] = col_val.tangentVectors[0];
 					ccs.tangentVectors[1] = col_val.tangentVectors[1];
@@ -429,10 +430,34 @@ namespace idk
 					{
 						for (int k = 0; k < 2; ++k)
 						{
+							// jt
 							float lambda = -dv.dot(cs->tangentVectors[k]) * c->tangentMass[k];
 
 							// Calculate frictional impulse
-							float maxLambda = cs->friction * c->normalImpulse;
+							float maxLambda = cs->static_friction * c->normalImpulse; 
+							if (abs(lambda) < maxLambda)
+							{
+								LOG_TO(LogPool::PHYS, "STATIC CHOSEN");
+							}
+							else
+							{
+								maxLambda = cs->friction * c->normalImpulse;
+								LOG_TO(LogPool::PHYS, "DYNAMIC CHOSEN");
+							} 
+
+							// Clamp frictional impulse
+							// float oldStatic = c->tangentStaticImpulse[k];
+							// c->tangentStaticImpulse[k] = [&](float min, float max, float a) -> float
+							// {
+							// 	if (a < min)
+							// 		return min;
+							// 
+							// 	if (a > max)
+							// 		return max;
+							// 
+							// 	return a;
+							// }(-maxStatic, maxStatic, oldStatic + lambda);
+							// float newStatic = c->tangentStaticImpulse[k] - oldStatic;
 
 							// Clamp frictional impulse
 							float oldPT = c->tangentImpulse[k];
@@ -448,6 +473,7 @@ namespace idk
 							}(-maxLambda, maxLambda, oldPT + lambda);
 
 							lambda = c->tangentImpulse[k] - oldPT;
+							// lambda = abs(lambda) < newStatic ? newStatic : lambda;
 
 							// Apply friction impulse
 							vec3 impulse = cs->tangentVectors[k] * lambda;

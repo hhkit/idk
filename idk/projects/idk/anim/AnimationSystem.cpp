@@ -190,22 +190,22 @@ namespace idk
 
 				// Pass this child through all the layers to get the final transformation of the bone
 				// Find the last fully weighted bone layer
-				size_t start_layer = 0;
-				for (size_t k = 1; k < animator.layers.size(); ++k)
-				{
-					auto& layer = animator.layers[k];
-					auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
-					if (!valid_clip(anim_state))
-						continue;
-					if (layer.IsPlaying() && layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
-						start_layer = k;
-				}
+				// size_t start_layer = 0;
+				// for (size_t k = 1; k < animator.layers.size(); ++k)
+				// {
+				// 	auto& layer = animator.layers[k];
+				// 	auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
+				// 	if (!valid_clip(anim_state))
+				// 		continue;
+				// 	if (layer.IsPlaying() && layer.bone_mask[child_index] && abs(1.0f - layer.weight) < constants::epsilon<float>())
+				// 		start_layer = k;
+				// }
 
 				// Initialize the final bone pose to the current layer
-				BonePose final_bone_pose = AnimationPass(animator, animator.layers[start_layer], child_index);
+				BonePose final_bone_pose = AnimationPass(animator, animator.layers[0], child_index);
 
 				// From the start layer up, do the animation pass for each layer and blend
-				for (size_t layer_index = start_layer + 1; layer_index < animator.layers.size(); ++layer_index)
+				for (size_t layer_index = 1; layer_index < animator.layers.size(); ++layer_index)
 				{
 					// Blend all animations from this layer to the next based on the layer weight
 					auto& curr_layer = animator.layers[layer_index];
@@ -376,15 +376,15 @@ namespace idk
 		const auto curr_index = layer.curr_state.index;
 		const auto blend_index = layer.blend_state.index;
 		
-		BonePose result = animator._bind_pose[bone_index];
-		result.rotation = quat{};
+		BonePose result = layer.prev_poses[bone_index];
+		// result.rotation = quat{};
 		if (!layer.bone_mask[bone_index])
 		{
 			layer.prev_poses[bone_index] = result;
 			return result;
 		}
 
-		if (layer.curr_state.is_playing && !layer.blend_interrupt)
+		if (!layer.blend_interrupt)
 		{
 			result = ComputePose(animator, layer, layer.curr_state, bone_index);
 			// If after ComputePose curr_state is now not playing, we know that something went wrong.
@@ -434,7 +434,6 @@ namespace idk
 	void AnimationSystem::EvaluateTransitions(Animator& animator, AnimationLayer& layer)
 	{
 		auto& curr_state = layer.curr_state;
-		// Only evaluate curr state if it is playing
 		
 		if (curr_state.is_playing)
 		{
@@ -531,15 +530,15 @@ namespace idk
 		size_t num_playing = 0;
 		for (auto& layer : animator.layers)
 		{
-			if (!layer.IsPlaying())
-				continue;
+			// if (!layer.IsPlaying())
+			// 	continue;
 
 
 			// Evaluate transitions before anything happens
 			EvaluateTransitions(animator, layer);
 
 			// Check both the blend state and the curr state
-			if (layer.curr_state.normalized_time >= 1.0f)
+			if (layer.curr_state.normalized_time >= 1.0f && layer.curr_state.is_playing)
 			{
 				auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
 				if (!anim_state.valid)
@@ -560,7 +559,7 @@ namespace idk
 			if (layer.blend_state.is_playing)
 			{
 				// Note: Blend states always loop
-				if (layer.blend_state.normalized_time >= 1.0f)
+				if (layer.blend_state.normalized_time >= 1.0f && layer.blend_state.is_playing)
 				{
 					auto& anim_state = layer.GetAnimationState(layer.blend_state.index);
 					if (!anim_state.valid)
@@ -884,6 +883,8 @@ namespace idk
 				for (auto& layer : animator->layers)
 				{
 					layer.prev_poses.resize(animator->skeleton->data().size());
+					layer.prev_poses = animator->_bind_pose;
+					
 					layer.blend_source.resize(animator->skeleton->data().size());
 					if (layer.bone_mask.size() != animator->skeleton->data().size())
 					{

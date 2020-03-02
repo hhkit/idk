@@ -47,6 +47,7 @@ namespace idk::phys
 			result.normal = (rhs.center - result.contacts[0].position).get_normalized();
 			// result.contacts[0].position = rhs.center - result.normal * rhs.radius;
 		}
+		result.contact_centroid = result.contacts[0].position;
 		result.max_penetration = result.contacts[0].penetration;
 		compute_basis(result.normal, result.tangentVectors, result.tangentVectors + 1);
 		// LOG("Norm: %f, %f, %f", result.normal.x, result.normal.y, result.normal.z);

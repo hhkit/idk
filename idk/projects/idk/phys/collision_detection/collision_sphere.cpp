@@ -15,6 +15,7 @@ namespace idk::phys
 			const float normal_len = succ.normal.length();
 			succ.normal /= normal_len;
 			succ.contacts[0].position = rhs.center - succ.normal * rhs.radius;
+			succ.contact_centroid = succ.contacts[0].position;
 			succ.contacts[0].penetration = (normal_len - (rhs.radius + lhs.radius)) * 0.5f;
 			// LOG("%f", succ.contacts[0].penetration);
 			succ.contactCount = 1;
