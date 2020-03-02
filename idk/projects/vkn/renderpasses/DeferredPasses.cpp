@@ -538,7 +538,7 @@ namespace idk::vkn::renderpasses
 
 	AccumPass::AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers) : gbuffer_pass{ gbuffers }, rt_size{gbuffers.rt_size}
 	{
-		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat);
+		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {},rt_size);
 		uint32_t index = 0;
 		builder.set_output_attachment(accum_rsc, 0, AttachmentDescription
 			{
