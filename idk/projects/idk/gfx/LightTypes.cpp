@@ -61,7 +61,7 @@ namespace idk
 			//elem.SetCascade(camData, cascadeiter[i++], cascadeiter[i]);
 
 			//if (elem.NeedLightMap())
-			elem.InitShadowMap(1,AttachmentViewType::e2D);
+			elem.InitShadowMap(1,AttachmentViewType::eCube);
 		}
 		return light_map;
 	}

@@ -286,6 +286,7 @@ namespace idk::vkn
 		LayerMask mask = ~(LayerMask{});
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+		array<RscHandle<ShaderProgram>, GeometryShaders::GMax>   renderer_geometry_shaders;
 		const vector<const RenderObject*>*         mesh_render;
 		const vector<const AnimatedRenderObject*>* skinned_mesh_render;
 		const vector<InstRenderObjects>* inst_ro;

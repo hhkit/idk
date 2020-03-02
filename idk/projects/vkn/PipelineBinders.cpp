@@ -158,7 +158,7 @@ namespace idk::vkn
 				{
 					auto& fb = elem.light_map.as<VknFrameBuffer>();
 					auto& db = fb.DepthAttachment();
-					shadow_maps.emplace_back(db.buffer);
+					shadow_maps_point.emplace_back(db.buffer);
 				}
 				break;
 			case 1:
@@ -298,11 +298,30 @@ namespace idk::vkn
 				}
 			}
 			i = 0;
+			if (shadow_maps_point.size() == 0)
+			{
+				//Make sure that it's there.
+				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
+				the_interface.BindSampler("shadow_map_point", 0, tex, true);
+			}
+			else
+			{
+				//Bind the shadow maps
+				for (auto& shadow_map : shadow_maps_point)
+				{
+					//auto& sm_uni = shadow_map;
+					{
+						auto& depth_tex = shadow_map.as<VknTexture>();
+						the_interface.BindSampler("shadow_map_point", i++, depth_tex, true);
+					}
+				}
+			}
+			i = 0;
 			if (shadow_maps_directional.size() == 0)
 			{
 				//Make sure that it's there.
 				auto& tex = RscHandle<Texture>{}.as<VknTexture>();
-				the_interface.BindSampler("shadow_maps_directional", 0, tex, true);
+				the_interface.BindSampler("shadow_map_directional", 0, tex, true);
 			}
 			else
 			{
