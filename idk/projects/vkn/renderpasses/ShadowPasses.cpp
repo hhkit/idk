@@ -28,7 +28,6 @@ namespace idk::vkn
 
 namespace idk::vkn::renderpasses
 {
-#pragma optimize("",off)
 	namespace DirectionalShadow
 	{
 		using Bindings = bindings::ShadowBinding;
@@ -162,8 +161,6 @@ namespace idk::vkn::renderpasses
 	using cull_t = detail::Cull<N, tuple>;
 
 
-#pragma optimize("",off)
-
 	void AAAAAA()
 	{
 
@@ -178,7 +175,6 @@ namespace idk::vkn::renderpasses
 	}
 
 
-#pragma optimize("",off)
 	template<typename Binder, typename ...Args>
 	void SetStateTestFunc(Binder&& binder, Args&&... args)
 	{
@@ -197,7 +193,6 @@ namespace idk::vkn::renderpasses
 		
 	};
 
-#pragma optimize("",off)
 
 	template<typename Binder, typename ...Args>
 	void SetStateTest2Func(Binder&& binder, Args&&... args)
@@ -236,7 +231,7 @@ namespace idk::vkn::renderpasses
 	};
 
 	static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
-#pragma optimize("",off)
+
 	void AddDirectionalShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];

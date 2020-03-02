@@ -34,6 +34,12 @@ namespace idk::vkn
 		_handles.emplace_back(obj.Id());
 	}
 
+	FencePool::FencePool()
+	{
+		_handles.reserve(1000);
+		_fences.reserve(1000);
+	}
+
 	FencePool::~FencePool()
 	{
 		if (_handles.size() != _fences.size())

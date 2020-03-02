@@ -184,7 +184,6 @@ namespace idk::vkn
 		Core::GetResourceManager().Release(fb);
 		_pimpl->rendered_brdf = true;
 	}
-#pragma optimize("",off)
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
 		GraphicsSystem::LateInit();

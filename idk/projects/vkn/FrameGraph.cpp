@@ -341,7 +341,6 @@ namespace idk::vkn
 		}
 	}
 
-#pragma optimize("",off)
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)
 	{
 		RenderPassCreateInfoBundle bundle{};
