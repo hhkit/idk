@@ -18,17 +18,17 @@
             get => gameObject.tag;
         }
 
-        public T GetComponent<T>() where T : Component, new()
+        public T GetComponent<T>() where T : Component
         {
             return gameObject.GetComponent<T>();
         }
 
-        public T GetComponentInChildren<T>() where T : Component, new()
+        public T GetComponentInChildren<T>() where T : Component
         {
             return gameObject.GetComponentInChildren<T>();
         }
 
-        public T GetComponentInParent<T>() where T : Component, new()
+        public T GetComponentInParent<T>() where T : Component
         {
             return gameObject.GetComponentInParent<T>();
         }
