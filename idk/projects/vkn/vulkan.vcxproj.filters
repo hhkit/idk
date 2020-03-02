@@ -51,12 +51,6 @@
     <ClInclude Include="VulkanTypeDescriptors.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="ValHandler.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryAllocator.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="PipelineManager.h">
       <Filter>system</Filter>
     </ClInclude>
@@ -99,16 +93,7 @@
     <ClInclude Include="TmpTest.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="utils\PresentationSignals.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\TriBuffer.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="utils\SwapchainInfo.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\FrameObjects.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="RegisterVulkanFactories.h">
@@ -235,9 +220,6 @@
     <ClInclude Include="RenderPassInfo.h">
       <Filter>render\objects</Filter>
     </ClInclude>
-    <ClInclude Include="DebugUtil.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="topological_sort.h">
       <Filter>render</Filter>
     </ClInclude>
@@ -295,12 +277,6 @@
     </ClInclude>
     <ClInclude Include="RenderBundle.h">
       <Filter>render\graph\util_objects</Filter>
-    </ClInclude>
-    <ClInclude Include="vector_span.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="vector_span_builder.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="UniformManager.h">
       <Filter>render\graph\util_objects</Filter>
@@ -362,6 +338,57 @@
     <ClInclude Include="SkyboxBinding.h">
       <Filter>render\new_testament\Bindings</Filter>
     </ClInclude>
+    <ClInclude Include="DebugUtil.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="ValHandler.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="FencePool.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleLock.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\PresentationSignals.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\TriBuffer.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_span.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_span_builder.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\FrameObjects.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineDescHelper.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBindingTracker.h">
+      <Filter>render\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassPool.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="renderpasses\ShadowPasses.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
+    <ClInclude Include="renderpasses\MaskedPass.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawSetRenderPass.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
+    <ClInclude Include="renderpasses\DebugDrawPass.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -421,9 +448,6 @@
     <ClCompile Include="VknTexture.cpp">
       <Filter>resource</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryAllocator.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="VknImageData.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -431,9 +455,6 @@
       <Filter>render</Filter>
     </ClCompile>
     <ClCompile Include="TmpTest.cpp" />
-    <ClCompile Include="ValHandler.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanResourceManager.cpp">
       <Filter>resource</Filter>
     </ClCompile>
@@ -441,12 +462,6 @@
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="utils\GlslToSpirv.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\PresentationSignals.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\TriBuffer.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="utils\SwapchainInfo.cpp" />
@@ -625,15 +640,45 @@
     <ClCompile Include="StandardVertexBindings.cpp">
       <Filter>render\new_testament\Bindings\Standard</Filter>
     </ClCompile>
-    <ClCompile Include="DebugUtil.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="SkyboxBinding.cpp">
       <Filter>render\new_testament\Bindings</Filter>
     </ClCompile>
     <ClCompile Include="DrawSet.cpp">
       <Filter>render\new_testament</Filter>
     </ClCompile>
+    <ClCompile Include="DebugUtil.cpp">
+      <Filter>utils\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="ValHandler.cpp">
+      <Filter>utils\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="FencePool.cpp">
+      <Filter>utils\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleLock.cpp">
+      <Filter>utils\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\PresentationSignals.cpp">
+      <Filter>utils\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryAllocator.cpp">
+      <Filter>utils\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\TriBuffer.cpp">
+      <Filter>utils\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineDescHelper.cpp" />
+    <ClCompile Include="VertexBindingTracker.cpp" />
+    <ClCompile Include="RenderPassPool.cpp" />
+    <ClCompile Include="LightBinding.cpp" />
+    <ClCompile Include="CameraViewportBindings.cpp" />
+    <ClCompile Include="renderpasses\ShadowPasses.cpp">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
+    <ClCompile Include="renderpasses\MaskedPass.cpp">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
+    <ClCompile Include="renderpasses\DebugDrawPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -698,6 +743,12 @@
     </Filter>
     <Filter Include="render\new_testament\Bindings\Standard">
       <UniqueIdentifier>{4a6c78a0-a8b5-47cd-b918-a9e326886fb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\Debug">
+      <UniqueIdentifier>{7604bcde-49a7-49fc-aff5-56fcda6ada1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\Objects">
+      <UniqueIdentifier>{9d275880-a222-4440-b265-138a872904b2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

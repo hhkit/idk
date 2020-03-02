@@ -508,7 +508,7 @@ namespace idk::vkn
 		m_swapchain->present_mode = presentMode;
 
 	}
-
+#pragma optimize("",off)
 	void VulkanState::createFrameObjects()
 	{
 		for ([[maybe_unused]]auto& image : m_swapchain->m_swapchainGraphics.images)
@@ -1119,7 +1119,7 @@ namespace idk::vkn
 		auto blaargh = //CreateVkSemaphore(*View().Device());/* 
 		blaargh_span[cf];//*/
 		m_device->resetFences(1, &fence, dispatcher);
-		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::ePresentSrcKHR, hlp::BeginInfo{}, hlp::SubmissionInfo{ wait, vk::PipelineStageFlagBits::eBottomOfPipe, blaargh,fence});
+		hlp::TransitionImageLayout(command_buffer, m_graphics_queue, m_swapchain->m_swapchainGraphics.images[rv], vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eGeneral, vk::ImageLayout::ePresentSrcKHR, hlp::TransitionOptions{ hlp::BeginInfo{}, hlp::SubmissionInfo{ wait, vk::PipelineStageFlagBits::eBottomOfPipe, blaargh,fence} });
 
 		vk::SwapchainKHR swapchains[] = { *m_swapchain->swap_chain };
 

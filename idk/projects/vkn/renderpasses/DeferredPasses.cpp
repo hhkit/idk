@@ -18,7 +18,7 @@ namespace idk::vkn::renderpasses
 	using Context_t = PassUtil::Context_t;
 
 	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size={});
-	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size = {});
+	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size = {}, std::optional<WriteOptions> write_opt = {});
 	void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh);
 
 	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2> size)
@@ -40,9 +40,12 @@ namespace idk::vkn::renderpasses
 
 	}
 
-	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2>  size)
+	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2>  size, std::optional<WriteOptions> write_opt)
 	{
-		return builder.write(builder.CreateTexture(CreateTextureInfo(builder, name, format, usage, flag, target,size)));
+		WriteOptions opt = {};
+		if (write_opt)
+			opt = *write_opt;
+		return builder.write(builder.CreateTexture(CreateTextureInfo(builder, name, format, usage, flag, target,size)),opt);
 
 	}
 
@@ -73,8 +76,27 @@ namespace idk::vkn::renderpasses
 		gbuffer_rscs[2] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat        ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm              ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eR8G8B8A8Srgb             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		depth_rsc = builder.write(depth);
+		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eB10G11R11UfloatPack32    ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		depth_rsc = builder.copy(depth, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,
+			{
+				vk::ImageCopy
+				{
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eDepth,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eDepth,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::Extent3D{size.x,size.y,1},
+				}
+			} });
+		depth_rsc = builder.write(depth_rsc, WriteOptions{ false });
 		uint32_t index = 0;
 		for (auto& gbuffer_rsc : gbuffer_rscs)
 		{
@@ -197,10 +219,10 @@ namespace idk::vkn::renderpasses
 
 
 
-	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_, rect viewport, FrameGraphResource color_tex) : accum{ accum_ }, _viewport{viewport}
+	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex) : accum_def{ accum_def_ }, accum_spec{ accum_spec_ }, _viewport{viewport}
 	{
-		hdr_rsc = builder.write(color_tex);
-		depth_att = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_.rt_size);
+		hdr_rsc = builder.write(color_tex, WriteOptions{ false });
+		hdr_depth_rsc = builder.write(depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		builder.set_output_attachment(hdr_rsc, 0, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -218,11 +240,11 @@ namespace idk::vkn::renderpasses
 				//vk::ComponentMapping mapping{};
 			}
 		);
-		auto derp1 = builder.read(accum.accum_rsc);
-		auto derp2 = builder.read(accum.depth_rsc);
-		auto derp3 = builder.read(accum.accum_rsc);
-		auto derp4 = builder.read(accum.depth_rsc);
-		builder.set_input_attachment(accum_att = derp1, 0, AttachmentDescription
+		auto derp1 = builder.read(accum_def.accum_rsc);
+		auto derp2 = builder.read(accum_def.depth_rsc);
+		auto derp3 = builder.read(accum_spec.accum_rsc);
+		auto derp4 = builder.read(accum_spec.depth_rsc);
+		builder.set_input_attachment(accum_att_def = derp1, 1, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -238,7 +260,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_input_attachment(derp2, 1, AttachmentDescription
+		builder.set_input_attachment(depth_att_def = derp2, 2, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -255,7 +277,7 @@ namespace idk::vkn::renderpasses
 				//vk::ComponentMapping mapping{};
 			});
 
-		builder.set_input_attachment(derp3, 2, AttachmentDescription
+		builder.set_input_attachment(accum_att_spec = derp3, 3, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -271,7 +293,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_input_attachment(derp4, 3, AttachmentDescription
+		builder.set_input_attachment(depth_att_spec = derp4, 4, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -287,7 +309,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_depth_stencil_attachment(depth_att, AttachmentDescription
+		builder.set_depth_stencil_attachment(hdr_depth_rsc, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
@@ -308,11 +330,10 @@ namespace idk::vkn::renderpasses
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: HDR Pass");
 		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
-		if (!hdr_shader)
+		if (hdr_shader.guid == Guid{})
 		{
-			auto frag_opt = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
-			if (frag_opt)
-				hdr_shader = *frag_opt;
+			hdr_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FDeferredHDR];//Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
+			
 		}
 
 		context.BindShader(ShaderStage::Fragment, hdr_shader);
@@ -348,12 +369,18 @@ namespace idk::vkn::renderpasses
 
 
 
-	CubeClearPass::CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt, std::optional<color>clear_col, std::optional<float> clear_dep) : rt_size{rt->Size()}
+	CubeClearPass::CubeClearPass(FrameGraphBuilder& builder, RscHandle<RenderTarget> rt, bool col_dont_care, std::optional<color>clear_col, std::optional<float> clear_dep) : rt_size{rt->Size()}
 	{
 		auto color_buffer = RscHandle<VknTexture>{rt->GetColorBuffer()};
 		auto depth_buffer = RscHandle<VknTexture>{rt->GetDepthBuffer()};
-		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer);
-		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer);
+		std::optional<WriteOptions> col_opt{};
+		std::optional<WriteOptions> dep_opt{};
+		if (!clear_col&&!col_dont_care)
+			col_opt = WriteOptions{ false };
+		if (!clear_dep)
+			dep_opt = WriteOptions{ false };
+		auto color_att = CreateGBuffer(builder, "ClearColor", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment       , vk::ImageAspectFlagBits::eColor,color_buffer,rt_size, col_opt);
+		auto depth_att = CreateGBuffer(builder, "ClearDepth", vk::Format::eD32Sfloat   , vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,depth_buffer,rt_size, dep_opt);
 		render_target = color_att;
 		depth = depth_att;
 		std::array<float, 4> clear_color{};
@@ -364,7 +391,7 @@ namespace idk::vkn::renderpasses
 		builder.set_output_attachment(color_att, 0,
 			AttachmentDescription
 			{
-					(clear_col) ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+					(clear_col) ? vk::AttachmentLoadOp::eClear : col_dont_care? vk::AttachmentLoadOp::eDontCare: vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 					vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp store_op;
 					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -481,6 +508,7 @@ namespace idk::vkn::renderpasses
 	{
 		std::optional<color> clear_color={};
 		std::optional<float> clear_depth={};
+		bool ignore_color = false;
 	};
 
 	struct ClearInfoVisitor
@@ -491,7 +519,7 @@ namespace idk::vkn::renderpasses
 		}
 		clear_info operator()(RscHandle<CubeMap> cube)const
 		{
-			return clear_info{ {},1.0f };
+			return clear_info{ {},1.0f,true };
 		}
 		clear_info operator()(DepthOnly )const
 		{
@@ -508,53 +536,9 @@ namespace idk::vkn::renderpasses
 		return std::visit(ClearInfoVisitor{},camera.clear_data);
 	}
 
-	using DeferredPbrInstDrawSet = GenericDrawSet<bindings::DeferredPbrRoBind, InstMeshDrawSet>;
-	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
-	using AccumDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
-
-	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
-	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrInstDrawSet, DeferredPbrAniDrawSet>;
-
-	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
-	{
-		PassUtil::FullRenderData rd{ &gfx_state,&rs };
-		auto [clr_col, clr_dep] = ExtractClearInfo(gfx_state.camera);
-		//TODO: 
-		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{},gfx_state.camera.render_target,clr_col, clr_dep).RenderPass();
-		bindings::StandardVertexBindings::StateInfo state;
-		state.SetState(gfx_state);
-		bindings::DeferredPbrInfo info{
-			.viewport = gfx_state.camera.viewport,
-			.blend = BlendMode::Opaque,
-			.model = ShadingModel::Specular,
-			.material_instances = gfx_state.material_instances,
-			.vertex_state_info = state,
-		};
-		auto& gbuffer_pass = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPass", DeferredPbrSet{ 
-				{
-					DeferredPbrInstDrawSet{bindings::make_deferred_pbr_ro_bind(info),
-										   InstMeshDrawSet{
-												span{
-												  gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_begin,gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_end},
-												  gfx_state.shared_gfx_state->inst_mesh_render_buffer.buffer()
-											}
-						},
-					DeferredPbrAniDrawSet{
-							bindings::make_deferred_pbr_ani_bind(info),
-							SkinnedMeshDrawSet{span{gfx_state.skinned_mesh_render}}
-					}
-				}
-			}, cube_clear.rt_size, cube_clear.depth).RenderPass();
-		auto& accum_pass = graph.addRenderPass<PassSetPair<AccumPass, AccumDrawSet>>("Accum pass", AccumDrawSet{},gbuffer_pass).RenderPass();
-		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass, gfx_state.camera.viewport,cube_clear.render_target);
-
-		return { hdr_pass.hdr_rsc,hdr_pass.depth_att };
-	}
-
-
 	AccumPass::AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers) : gbuffer_pass{ gbuffers }, rt_size{gbuffers.rt_size}
 	{
-		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat);
+		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {},rt_size);
 		uint32_t index = 0;
 		builder.set_output_attachment(accum_rsc, 0, AttachmentDescription
 			{
@@ -642,4 +626,143 @@ namespace idk::vkn::renderpasses
 
 		draw_set.Render(context);
 	}
+	UnlitPass::UnlitPass(FrameGraphBuilder& builder, FrameGraphResource color_tex, FrameGraphResource depth_tex)
+	{
+		color_rsc = builder.write(color_tex,WriteOptions{false});
+		depth_rsc = builder.write(depth_tex,WriteOptions{false});
+
+		builder.set_output_attachment(color_rsc, 0, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+		builder.set_depth_stencil_attachment(depth_rsc, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eDepth,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+	}
+
+	void UnlitPass::Execute(Context_t context, BaseDrawSet& draw_set)
+	{
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, name);
+		{
+			size_t i = 0;
+
+			AttachmentBlendConfig blend{};
+			blend.blend_enable = false;
+			blend.dst_color_blend_factor = BlendFactor::eOne;
+			blend.src_color_blend_factor = BlendFactor::eOne;
+			blend.color_blend_op = BlendOp::eAdd;
+			blend.alpha_blend_op = BlendOp::eMax;
+			blend.dst_alpha_blend_factor = BlendFactor::eOne;
+			blend.src_alpha_blend_factor = BlendFactor::eOne;
+			context.SetBlend(i, blend);
+			//context.SetDepthTest(false);
+			++i;
+		}
+		draw_set.Render(context);
+	}
+
+	void DrawSetRenderPass::Execute(Context_t& context)
+	{
+		LOG_ERROR_TO(LogPool::GFX, "DrawSetRenderPass::Execute(Context_t) should not be executed.");
+	}
+	using DeferredPbrInstDrawSet = GenericDrawSet<bindings::DeferredPbrRoBind, InstMeshDrawSet>;
+	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
+	using AccumLightDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
+	using AccumAmbientDrawSet = GenericDrawSet<bindings::AmbientBind, FsqDrawSet>;
+
+	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
+	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
+	using AccumDrawSet = CombinedMeshDrawSet<AccumLightDrawSet, AccumAmbientDrawSet>;
+	//#pragma optimize("",off)
+	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
+	{
+		using AccumPassSetPair = PassSetPair<AccumPass, AccumDrawSet>;
+		PassUtil::FullRenderData rd{ &gfx_state,&rs };
+		auto [clr_col, clr_dep,ignore_clear] = ExtractClearInfo(gfx_state.camera);
+		//TODO: 
+		bindings::SkyboxBindings skybox_binding{};
+		skybox_binding.SetCamera(gfx_state.camera);
+		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding,FsqDrawSet{MeshType::Box} }, gfx_state.camera.render_target, ignore_clear,clr_col, clr_dep).RenderPass();
+		bindings::StandardVertexBindings::StateInfo state;
+		state.SetState(gfx_state);
+		bindings::DeferredPbrInfo info{
+			.viewport = gfx_state.camera.viewport,
+			.blend = BlendMode::Opaque,
+			.model = ShadingModel::DefaultLit,
+			.material_instances = gfx_state.material_instances,
+			.vertex_state_info = state,
+		};
+		auto make_gbuffer_set = [&](const bindings::DeferredPbrInfo& info)
+		{ 
+			return DeferredPbrSet{
+				{
+					DeferredPbrAniDrawSet{
+							bindings::make_deferred_pbr_ani_bind(info),
+							SkinnedMeshDrawSet{span{gfx_state.skinned_mesh_render}}
+					},
+					DeferredPbrInstDrawSet{bindings::make_deferred_pbr_ro_bind(info),
+										   InstMeshDrawSet{
+												span{
+												  gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_begin,gfx_state.shared_gfx_state->instanced_ros->data() + gfx_state.range.inst_mesh_render_end},
+												  gfx_state.shared_gfx_state->inst_mesh_render_buffer.buffer()
+											}
+						},
+				}
+			};
+		};
+		auto gbuffer_set =make_gbuffer_set(info);
+		auto& gbuffer_pass_def = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassDeferred", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
+		bindings::AmbientBind ambient_bindings;
+		bindings::LightBind light_bindings;
+		auto& vp_bindings = light_bindings.Get<bindings::CameraViewportBindings>();
+		auto& ls_bindings = light_bindings.Get<bindings::LightShadowBinding>();
+		auto& accum_fsq_bindings = light_bindings.Get<bindings::DeferredLightFsq>();
+		vp_bindings.viewport = gfx_state.camera.viewport;
+		ls_bindings.SetState(bindings::LightShadowBinding::State{ gfx_state.active_lights,*gfx_state.lights,gfx_state.shadow_maps_2d,gfx_state.camera.view_matrix,gfx_state.camera.view_matrix.inverse() });
+		ambient_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
+		accum_fsq_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
+		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
+		auto& accum_pass_def = graph.addRenderPass<AccumPassSetPair>("Accum pass Default", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_def).RenderPass();
+
+		auto spec_info = info;
+		spec_info.model = ShadingModel::Specular;
+		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", make_gbuffer_set(spec_info), cube_clear.rt_size, cube_clear.depth).RenderPass();
+		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(spec_info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
+		auto& accum_pass_spec = graph.addRenderPass<AccumPassSetPair>("Accum pass Specular", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_spec).RenderPass();
+
+
+		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, cube_clear.render_target,cube_clear.depth);
+		spec_info.model = ShadingModel::Unlit;
+		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),hdr_pass.hdr_rsc,hdr_pass.depth_att_def).RenderPass();
+
+		return { unlit_pass.color_rsc,unlit_pass.depth_rsc};
+	}
+
+
+
 }

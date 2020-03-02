@@ -166,8 +166,11 @@ void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer
 // 
 
 
-void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format , vk::ImageLayout oLayout, vk::ImageLayout nLayout, std::optional<BeginInfo> begin, std::optional<SubmissionInfo> queue_sub_config)
+void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Image img, vk::Format , vk::ImageLayout oLayout, vk::ImageLayout nLayout, TransitionOptions options)
 {
+	std::optional<BeginInfo> begin = options.begin;
+	std::optional<SubmissionInfo> queue_sub_config = options.queue_sub_config;
+
 	SubmissionInfo sub_info{};
 	if (queue_sub_config)
 		sub_info = *queue_sub_config;
@@ -254,6 +257,8 @@ void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Im
 		//throw std::invalid_argument("unsupported layout transition!");
 	}
 
+	if (options.range)
+		vBarrier.subresourceRange = *options.range;
 	//Pipeline barrier is impt so we need to go in-depth with this
 	cmd_buffer.pipelineBarrier(
 		sourceStage,

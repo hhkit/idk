@@ -8,6 +8,7 @@
 namespace idk::vkn
 {
 //
+//#pragma optimize("",off)
 	void BaseRenderPass::PreExecute(const FrameGraphNode& node, Context_t context)
 	{
 		BeginRenderPass(context);
@@ -21,6 +22,8 @@ namespace idk::vkn
 		}
 		context.SetInputAttachments(_input_attachments);
 		context.SetOutputAttachmentSize(output_atts.size());
+		if(node.depth_stencil)
+			context.SetClearDepthStencil(node.depth_stencil->second.clear_value);
 	}
 
 	void BaseRenderPass::PostExecute(const FrameGraphNode& , Context_t context)

@@ -20,7 +20,7 @@ namespace idk::vkn {
 	{
 		vk::UniqueImage first;
 		hlp::UniqueAlloc second;
-		vk::ImageAspectFlags aspect;
+		vk::ImageAspectFlagBits aspect;
 	};
 	vk::UniqueImageView CreateImageView2D(vk::Device device, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
 	CubemapResult LoadCubemap(hlp::MemoryAllocator& allocator, vk::Fence fence, const char* data, uint32_t width, uint32_t height, size_t len, vk::Format format, bool isRenderTarget = false);

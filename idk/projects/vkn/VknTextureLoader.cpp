@@ -10,6 +10,9 @@
 
 #include <vkn/DebugUtil.h>
 #include <vkn/TextureTracker.h>
+
+#include <parallel/ThreadPool.h>
+
 namespace std
 {
 
@@ -20,6 +23,7 @@ namespace std
 	};
 }
 
+void dbg_chk(vk::Image img);
 namespace idk::vkn
 {
 
@@ -27,11 +31,13 @@ namespace idk::vkn
 	{
 		vk::UniqueImage first;
 		hlp::UniqueAlloc second;
-		vk::ImageAspectFlags aspect;
+		vk::ImageAspectFlagBits aspect;
 		size_t size_on_device = 0;
+		string name;
 	};
+	TextureResult LoadTexture(TextureLoader::SubmissionObjs sub, hlp::MemoryAllocator& allocator, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid);
 	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid);
-	
+
 
 
 	enum class UvAxis
@@ -41,7 +47,7 @@ namespace idk::vkn
 		eW,
 	};
 
-	vk::SamplerAddressMode GetRepeatMode(TextureOptions options, [[maybe_unused]]UvAxis axis)
+	vk::SamplerAddressMode GetRepeatMode(TextureOptions options, [[maybe_unused]] UvAxis axis)
 	{
 		auto repeat_mode = options.uv_mode;
 		vk::SamplerAddressMode mode = vk::SamplerAddressMode::eClampToEdge;
@@ -80,10 +86,12 @@ namespace idk::vkn
 		return mode;
 	}
 
-	
-	void TextureLoader::LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence,std::optional<TextureOptions> ooptions, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+
+	void TextureLoader::LoadTexture(SubmissionObjs sub, VknTexture& texture, hlp::MemoryAllocator& allocator, std::optional<TextureOptions> ooptions, const TexCreateInfo& _load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
+		auto load_fence = sub.load_fence;
 		TextureOptions options{};
+		auto load_info = _load_info;
 		auto format = load_info.internal_format;
 		//auto nformat = NearestBlittableFormat(format, BlitCompatUsageMasks::eDst);
 		//if (nformat)
@@ -92,14 +100,17 @@ namespace idk::vkn
 		if (ooptions)
 		{
 			options = *ooptions;
-		//	format = MapFormat(options.internal_format);
+			//	format = MapFormat(options.internal_format);
 		}
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 		//2x2 image Checkered
+		load_info.layers = std::max(load_info.layers, 1ui32);
+
 
 		auto ptr = &texture;
-		auto&& [image, alloc, aspect,sz] = vkn::LoadTexture(allocator, load_fence, load_info,in_info,guid);
-		ptr->Size(uvec2{load_info.width,load_info.height});
+		auto&& [image, alloc, aspect, sz,name] = vkn::LoadTexture(sub,allocator,  load_info, in_info, guid);
+		ptr->Size(uvec2{ load_info.width,load_info.height });
+		ptr->mipmap_level = load_info.mipmap_level;
 		ptr->format = load_info.internal_format;
 		ptr->img_aspect = aspect;
 		ptr->usage = load_info.image_usage;
@@ -107,10 +118,19 @@ namespace idk::vkn
 		ptr->image_ = std::move(image);
 		ptr->mem_alloc = std::move(alloc);
 		ptr->sizeOnDevice = sz;
+		ptr->dbg_name = std::move(name);
+		ptr->range = vk::ImageSubresourceRange
+		{
+			aspect,
+			0,
+			load_info.mipmap_level,
+			0,
+			load_info.layers,
+		};
 		//TODO set up Samplers and Image Views
 
 		auto device = *view.Device();
-		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect, 
+		ptr->imageView = CreateImageView2D(device, ptr->Image(), format, ptr->img_aspect,
 			ImageViewInfo
 			{
 				0,
@@ -127,7 +147,7 @@ namespace idk::vkn
 			GetFilterMode(options,FilterType::eMin),
 			GetFilterMode(options,FilterType::eMag),
 			//vk::SamplerMipmapMode::eNearest,//
-			(options.filter_mode==FilterMode::Nearest) ? vk::SamplerMipmapMode::eNearest :vk::SamplerMipmapMode::eLinear,
+			(options.filter_mode == FilterMode::Nearest) ? vk::SamplerMipmapMode::eNearest : vk::SamplerMipmapMode::eLinear,
 			GetRepeatMode(options,UvAxis::eU),
 			GetRepeatMode(options,UvAxis::eV),
 			GetRepeatMode(options,UvAxis::eW),
@@ -136,13 +156,67 @@ namespace idk::vkn
 			options.anisoptrophy,
 			s_cast<bool>(options.compare_op),//Used for percentage close filtering
 			(options.compare_op) ? MapCompareOp(*options.compare_op) : vk::CompareOp::eNever,
-			0.0f,0.0f+load_info.mipmap_level,
+			0.0f,0.0f + load_info.mipmap_level,
 			vk::BorderColor::eFloatOpaqueBlack,
 			VK_FALSE
 
 		};
 		ptr->sampler = device.createSamplerUnique(sampler_info);
 
+	}
+	void TextureLoader::LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	{
+		LoadTexture(SubmissionObjs{ {},load_fence }, texture, allocator, ooptional, load_info, in_info, guid);
+	}
+	namespace Nope
+	{
+		struct Derp
+		{
+			VknTexture& texture;
+			hlp::MemoryAllocator& allocator;
+			FenceObj load_fence;
+			CmdBufferObj cmd_buffer;
+			std::optional<TextureOptions> ooptional;
+			TexCreateInfo load_info;
+			std::optional<InputTexInfo> in_info;
+			std::optional<Guid> guid;
+		};
+	}
+//#pragma optimize("",off)
+	static void DoNothing() {}
+	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	{
+		auto fence = load_fence.AcquireFence();
+		auto cmd_buffer = cmd_buffers.AcquireCmdBuffer();
+		abc++;
+		if (!*cmd_buffer)
+			__debugbreak();
+		return Core::GetThreadPool().Post(
+			[loader  = this](const shared_ptr<Nope::Derp>& _derp) ->void
+			{
+				auto& derp = *_derp;
+				auto& lock = loader->lock;
+				lock.Lock();
+				auto cmd_buffer = (*derp.cmd_buffer);
+				cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+				lock.Unlock();
+				loader->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, derp.texture, derp.allocator,  derp.ooptional, derp.load_info, derp.in_info, derp.guid);
+				auto device = *View().Device();
+				auto fence = *derp.load_fence;
+				derp.texture.dbg_name = derp.texture.Name();
+				dbg::NameObject(derp.texture.Image(), derp.texture.dbg_name);
+				device.resetFences(fence);
+				lock.Lock();
+				hlp::EndSingleTimeCbufferCmd(cmd_buffer, View().GraphicsQueue(), false, fence);
+				lock.Unlock();
+				dbg_chk(derp.texture.Image());
+				uint64_t wait_for_milli_seconds = 1;
+				[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
+				//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
+				while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout) std::this_thread::yield();
+				return (void)0;
+			},
+			std::make_shared<Nope::Derp>(Nope::Derp{ texture, allocator, std::move(fence), std::move(cmd_buffer), ooptional, load_info, in_info, guid }));
 	}
 	hash_table<TextureFormat, vk::Format> FormatMap();
 
@@ -321,15 +395,28 @@ namespace idk::vkn
 		);
 	}
 	void DoNothing();
-	TextureResult LoadTexture(hlp::MemoryAllocator& allocator, vk::Fence fence, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	TextureResult LoadTexture(TextureLoader::SubmissionObjs sub,hlp::MemoryAllocator& allocator,  const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
+		vk::CommandBuffer cmd_buffer;
+		vk::UniqueCommandBuffer ucmd_buffer;
+		if (!sub.cmd_buffer)
+		{
+			VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+			vk::PhysicalDevice pd = view.PDevice();
+			vk::Device device = *view.Device();
+			ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
+			cmd_buffer = *ucmd_buffer;
+		}
+		else
+		{
+			cmd_buffer = *sub.cmd_buffer;;
+		}
+		vk::Fence fence = sub.load_fence;
 		auto format = load_info.internal_format, internal_format = load_info.internal_format;
 		TextureResult result;
-		VulkanView& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
+		VulkanView& view = View();
 		vk::PhysicalDevice pd = view.PDevice();
 		vk::Device device = *view.Device();
-		auto ucmd_buffer = hlp::BeginSingleTimeCBufferCmd(device, *view.Commandpool());
-		auto cmd_buffer = *ucmd_buffer;
 		//auto format = load_info.internal_format;
 		//bool is_render_target = isRenderTarget;
 		size_t len;
@@ -351,13 +438,16 @@ namespace idk::vkn
 
 		std::optional<vk::ImageSubresourceRange> range{};
 
+		if (load_info.layers == 0)
+			throw;
+
 		vk::ImageCreateInfo imageInfo{};
 		imageInfo.imageType = vk::ImageType::e2D;
 		imageInfo.extent.width = static_cast<uint32_t>(width);
 		imageInfo.extent.height = static_cast<uint32_t>(height);
 		imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
 		imageInfo.mipLevels = load_info.mipmap_level; //Currently no mipmapping
-		imageInfo.arrayLayers = load_info.layers;
+		imageInfo.arrayLayers =  load_info.layers;
 		imageInfo.format = internal_format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
@@ -472,16 +562,16 @@ namespace idk::vkn
 				}
 				//vector<vk::BufferImageCopy>
 
-				if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
-				{
-					auto name = string{ *guid };
-					if (name == "21707462-3865-4559-b88b-f816025d22a2")
-					{
-						DoNothing();
-					}
-					name += " Staging Dest";
-					dbg::NameObject(copy_dest, name);
-				}
+				//if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
+				//{
+				//	auto name = string{ *guid };
+				//	if (name == "21707462-3865-4559-b88b-f816025d22a2")
+				//	{
+				//		DoNothing();
+				//	}
+				//	name += " Staging Dest";
+				//	dbg::NameObject(copy_dest, name);
+				//}
 				cmd_buffer.copyBufferToImage(*stagingBuffer, copy_dest, vk::ImageLayout::eTransferDstOptimal, copy_regions, vk::DispatchLoaderDefault{});
 
 				staging_buffer = std::move(stagingBuffer);
@@ -510,23 +600,31 @@ namespace idk::vkn
 		//{
 		//	TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, {}, vk::PipelineStageFlagBits::eAllCommands, vk::ImageLayout::eUndefined, load_info.layout, * image, img_aspect);
 		//}
-		device.resetFences(fence);
-		hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
-		uint64_t wait_for_milli_seconds = 1;
-		[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
-		//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
-		while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
-		ucmd_buffer.reset();
-		device.resetCommandPool(*View().Commandpool(), {});
+		if (sub.end_and_submit)
+		{
+			device.resetFences(fence);
+			hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
+			uint64_t wait_for_milli_seconds = 1;
+			[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
+			//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
+			while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout);
+		}
+		if (!sub.cmd_buffer)
+		{
+			ucmd_buffer.reset();
+			device.resetCommandPool(*View().Commandpool(), {});
+		}
 		if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
 		{
-			auto name = string{ *guid };
+			auto& name = result.name =  string{ *guid };
+			result.name.reserve(32);
 			if (name == "d7e578ab-3254-4564-bee0-1555837861f7")
 			{
 				DoNothing();
 			}
 			dbg::NameObject(*image, name);
 		}
+
 		result.first = std::move(image);
 		result.second = std::move(alloc);
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };

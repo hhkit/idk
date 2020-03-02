@@ -1184,6 +1184,8 @@
     <ClInclude Include="network\EventDestroyObjectMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="gfx\FakeMat4.h" />
+    <ClInclude Include="gfx\GfxDebugData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1311,9 +1313,6 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShaderTemplate.cpp">
-      <Filter>gfx\object</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\Material.cpp">
       <Filter>gfx\object</Filter>
     </ClCompile>
     <ClCompile Include="common\Name.cpp">
@@ -1707,6 +1706,7 @@
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp">
       <Filter>network\substream managers</Filter>
     </ClCompile>
+    <ClCompile Include="gfx\Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

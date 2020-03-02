@@ -2,6 +2,7 @@
 #include <vkn/VknTextureView.h>
 #include <vkn/AttachmentDescription.h>
 #include <forward_list>
+#include <future>
 namespace idk::vkn
 {
 
@@ -15,9 +16,12 @@ namespace idk::vkn
 		TexturePool& operator=(TexturePool&&);
 		~TexturePool();
 		VknTextureView allocate(const TextureDescription& description);
+		std::future<VknTextureView> allocate_async(const TextureDescription& description);
+		void collate_async();
 		void reset_allocations();
 	private:
 		VknTextureView create(const TextureDescription& description);
+		std::future<VknTextureView> create_async(const TextureDescription& description);
 		//search for a free texture that matches the description
 		std::optional<VknTextureView> free_match(const TextureDescription& desc);
 

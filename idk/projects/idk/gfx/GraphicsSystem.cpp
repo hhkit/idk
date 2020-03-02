@@ -436,7 +436,7 @@ namespace idk
 		range.light_end = active_light_buffer.size();
 		range.dir_light_end = directional_light_buffer.size();
 	}
-//
+//#pragma optimize("",off)
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -983,7 +983,7 @@ namespace idk
 			//Disable the shadows of the non-cascaded directional lights
 			for (auto& light : result.lights)
 			{
-				if (light.index)
+				if (light.index == 1)
 					light.cast_shadow = false;
 			}
 			//append the added lights at the back of the light range
@@ -1192,7 +1192,7 @@ namespace idk
 		//	Core::GetResourceManager().Load<ShaderSnippet>(glsl, false);
 		//}
 		///////////////////////Load vertex shaders
-		//renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/debug.vert");
+		renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/dbgvertex.vert");
 		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
 		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
@@ -1205,7 +1205,7 @@ namespace idk
 		renderer_vertex_shaders[VUi] = LoadShader("/engine_data/shaders/ui.vert");
 
 
-		renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/debug.frag");
+		renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/dbgfragment.frag");
 		renderer_fragment_shaders[FSkyBox] = LoadShader("/engine_data/shaders/skybox.frag");
 		renderer_fragment_shaders[FShadow] = LoadShader("/engine_data/shaders/shadow.frag");
 		renderer_fragment_shaders[FPicking] = LoadShader("/engine_data/shaders/picking.frag");
@@ -1218,6 +1218,7 @@ namespace idk
 		renderer_fragment_shaders[FDeferredPost] = LoadShader("/engine_data/shaders/deferred_post.frag");
 		renderer_fragment_shaders[FDeferredPostSpecular] = LoadShader("/engine_data/shaders/deferred_post_specular.frag");
 		renderer_fragment_shaders[FDeferredPostAmbient] = LoadShader("/engine_data/shaders/deferred_post_ambient.frag");
+		renderer_fragment_shaders[FDeferredHDR] = LoadShader("/engine_data/shaders/deferred_hdr.frag");
 
 		////////////////////Load geometry Shaders
 		renderer_geometry_shaders[GSinglePassCube] = LoadShader("/engine_data/shaders/single_pass_cube.geom");

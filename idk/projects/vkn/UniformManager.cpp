@@ -169,6 +169,8 @@ namespace idk::vkn
 		layout{ layout_ },
 		type_index{ desc_type_idx<vk::DescriptorType::eUniformBuffer> }
 	{
+		if (buffer_offset_ + size_ > 65536)
+			throw;
 	}
 	UniformUtils::BindingInfo::BindingInfo(
 		uint32_t binding_,
@@ -230,10 +232,8 @@ namespace idk::vkn
 	{
 		monadic::result< vector_span<BindingInfo>, string> result{};
 		builder.start();
-		string err_msg;
 		auto& set_bindings = builder;
 		uint32_t type_count[DescriptorTypeI::size()] = {};
-		bool failed = false;
 		if (dirty)
 		{
 			size_t max_size = 0;
@@ -252,9 +252,7 @@ namespace idk::vkn
 					}
 				}
 			}
-			if (failed)
-				result = std::move(err_msg);
-			else
+
 			{
 				auto& cl = collated_layouts[layout];
 				cl.first++;
@@ -286,7 +284,10 @@ namespace idk::vkn
 		auto set_info = bindings.find(set);
 		bool can_set = set_info != bindings.end();
 		if (can_set)
+		{
 			_uniform_names[std::move(name)] = UniInfo{ set,binding,size,set_info->second.layout };
+			_dbg.RegisterRequiredBinding(set, binding);
+		}
 		return can_set;
 	}
 	void UniformManager::RemoveBinding(binding_manager::set_t set)
@@ -300,6 +301,7 @@ namespace idk::vkn
 			else
 				itr++;
 		}
+		_dbg.RemoveRequiredSet(set);
 	}
 	namespace detail
 	{
@@ -318,10 +320,12 @@ namespace idk::vkn
 		{
 			auto& info = itr->second;
 			bound = BindUniformBuffer(info, array_index, data, skip_if_bound);
+			if (bound)
+				_dbg.MarkBinding(info.set, info.binding);
 		}
 		return bound;
 	}
-	bool UniformManager::BindSampler(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
+	bool UniformManager::BindSampler(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
 		auto itr = _uniform_names.find(uniform_name);
 		bool bound = false;
@@ -329,10 +333,12 @@ namespace idk::vkn
 		{
 			auto& info = itr->second;
 			bound = BindSampler(info, array_index, texture, skip_if_bound, layout);
+			if (bound)
+				_dbg.MarkBinding(info.set, info.binding);
 		}
 		return bound;
 	}
-	bool UniformManager::BindAttachment(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
+	bool UniformManager::BindAttachment(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
 		auto itr = _uniform_names.find(uniform_name);
 		bool bound = false;
@@ -340,13 +346,15 @@ namespace idk::vkn
 		{
 			auto& info = itr->second;
 			bound = BindAttachment(info, array_index, texture, skip_if_bound, layout);
+			if (bound)
+				_dbg.MarkBinding(info.set,info.binding);
 		}
 		return bound;
 	}
 	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
 		auto [buffer, offset] = _ubo_manager->Add(data);
-		return _bindings.BindUniformBuffer(info, array_index, buffer, offset, skip_if_bound);
+		return _bindings.BindUniformBuffer(info, array_index, buffer, offset,data.size(), skip_if_bound);
 	}
 	bool UniformManager::BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
@@ -356,10 +364,18 @@ namespace idk::vkn
 	{
 		return _bindings.BindAttachment(info, array_index, texture, skip_if_bound, layout);
 	}
-	vector_span<UniformManager::set_binding_t>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
+	std::optional<vector_span<UniformManager::set_binding_t>>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
 	{
 		vector_span_builder builder{ all_sets };
 		builder.start();
+		
+		if (!_dbg.Validate(_bindings))
+		{
+			LOG_ERROR_TO(LogPool::GFX, "Invalid Bindings");
+			_dbg.Validate(_bindings);
+			return{};
+		}
+
 		for (auto& [index, set] : _bindings.curr_bindings)
 		{
 			auto bindings = set.FinalizeDC(_collated_layouts,_buffer_builder);
@@ -424,7 +440,7 @@ namespace idk::vkn
 		for (auto& [set, bindings] : curr_bindings)
 			bindings.dirty = true;
 	}
-	bool UniformUtils::binding_manager::BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset, bool skip_if_bound)
+	bool UniformUtils::binding_manager::BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset,size_t size, bool skip_if_bound)
 	{
 		bool bound = false;
 
@@ -432,7 +448,7 @@ namespace idk::vkn
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
 
-			curr_bindings[info.set].Bind(BindingInfo{ info.binding,buffer,offset, array_index, info.size,info.layout });
+			curr_bindings[info.set].Bind(BindingInfo{ info.binding,buffer,offset, array_index, size,info.layout });
 			bound = true;
 		}
 		return bound;
@@ -459,6 +475,7 @@ namespace idk::vkn
 		}
 		return bound;
 	}
+#pragma optimize("",off)
 	bool UniformUtils::binding_manager::is_bound(set_t set, uint32_t binding_index, uint32_t array_index) const noexcept
 	{
 		const auto s_itr = curr_bindings.find(set);
@@ -469,5 +486,55 @@ namespace idk::vkn
 		auto& bindings = existing_bindings.bindings;
 		auto itr = bindings.find(binding_index);
 		return  itr != bindings.end() && itr->second.size() > array_index && itr->second[array_index];
+	}
+	void UniformManager::DebugInfo::RegisterRequiredBinding(uint32_t set_idx, uint32_t binding_idx)
+	{
+		auto& set = sets[set_idx];
+		auto& binding = set.bindings[binding_idx];
+		if(!binding)
+			set.bound++;
+		binding = true;
+	}
+	void UniformManager::DebugInfo::RemoveRequiredSet(uint32_t set)
+	{
+		sets[set].bindings.clear();
+		sets[set].bound =0;
+	}
+	void UniformManager::DebugInfo::MarkBinding(uint32_t set, uint32_t binding)
+	{
+		sets[set].bindings[binding] = false;
+	}
+	bool UniformManager::DebugInfo::Validate(const binding_manager& _bindings) const
+	{
+		uint32_t set_index = 0;
+		for (auto& set : sets)
+		{
+			if (set.bindings.size())
+			{
+				auto itr = _bindings.curr_bindings.find(set_index);
+				if (itr == _bindings.curr_bindings.end())
+				{
+					LOG_ERROR_TO(LogPool::GFX, "Required Set #%u not bound", set_index);
+					return false;
+				}
+				auto& curr_set_bindings = itr->second;
+				if (set.bound != curr_set_bindings.bindings.size())
+					for (uint32_t binding_index = 0; binding_index < set.bindings.size(); ++binding_index)
+					{
+						auto required = set.bindings[binding_index];
+						if (required)
+						{
+							auto itr = curr_set_bindings.bindings.find(binding_index);
+							if (itr == curr_set_bindings.bindings.end())
+							{
+								LOG_ERROR_TO(LogPool::GFX, "Required Binding %u in Set #%u not bound", binding_index, set_index);
+								return false;
+							}
+						}
+					}
+			}
+			++set_index;
+		}
+		return true;
 	}
 }

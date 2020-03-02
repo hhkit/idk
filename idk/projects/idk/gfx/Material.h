@@ -5,22 +5,23 @@
 #include <res/SaveableResource.h>
 #include <gfx/UniformInstance.h>
 #include <map>
+#include <gfx/ShaderTemplate.h>
 namespace idk
 {
 	class ShaderTemplate;
 
 	ENUM(MaterialDomain, char,
 		Surface,
-		PostProcess)
+		PostProcess);
 
 	ENUM(BlendMode, char,
 		Opaque,
-		Masked)
+		Masked);
 
 	ENUM(ShadingModel, char,
 		Unlit,
 		DefaultLit,
-		Specular)
+		Specular);
 
 
 	class Material
@@ -28,7 +29,7 @@ namespace idk
 		, public Saveable<Material, false_type>
 	{
 	public:
-		RscHandle<ShaderProgram>            _shader_program  ;
+		RscHandle<ShaderProgram>            _shader_program = Guid::Make()  ;
 		RscHandle<MaterialInstance>         _default_instance;
         std::map<string, UniformInstance> uniforms         ;
         vector<UniformInstance>             hidden_uniforms  ;
@@ -40,6 +41,6 @@ namespace idk
 		RscHandle<ShaderTemplate> GetTemplate() const;
 		virtual ~Material();
 
-		EXTENSION(".mat");
+		EXTENSION(".mat")
 	};
 }

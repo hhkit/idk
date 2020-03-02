@@ -780,8 +780,19 @@ namespace idk::vkn::gt
 
 	struct GraphTest::PImpl
 	{
-		FrameGraph fg;	
+		unique_ptr<FrameGraph> p_fg;
+		FrameGraph& fg;
+		PImpl() : p_fg{ std::make_unique<FrameGraph>() }, fg{ *p_fg }
+		{
+		}
+		PImpl(FrameGraph& f) :  fg{ f }
+		{
+		}
 	};
+
+	GraphTest::GraphTest(FrameGraph& fg ) :_pimpl{ std::make_unique<PImpl>(fg) }
+	{
+	}
 
 	GraphTest::GraphTest() :_pimpl{std::make_unique<PImpl>()}
 	{

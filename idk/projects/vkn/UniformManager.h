@@ -9,6 +9,9 @@
 #include <vkn/vector_span_builder.h>
 #include <vkn/DescriptorsManager.h>
 #include <vkn/DescriptorUpdateData.h>
+
+#include <ds/lazy_vector.h>
+
 namespace idk::vkn
 {
 
@@ -110,7 +113,7 @@ namespace idk::vkn
 			void RemoveBinding(set_t set);
 			void MarkDirty();
 
-			bool BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset, bool skip_if_bound = false);
+			bool BindUniformBuffer(UniInfo info, uint32_t array_index, vk::Buffer buffer,size_t offset, size_t size, bool skip_if_bound = false);
 			bool BindSampler(UniInfo info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 			bool BindAttachment(UniInfo info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
@@ -131,8 +134,8 @@ namespace idk::vkn
 		void RemoveBinding(binding_manager::set_t set);
 
 		bool BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound = false);
-		bool BindSampler(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
-		bool BindAttachment(const string& uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
+		bool BindSampler(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
+		bool BindAttachment(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
 		bool BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound = false);
 		bool BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
@@ -140,7 +143,7 @@ namespace idk::vkn
 
 		//set, bindings
 		using set_binding_t = std::pair<uint32_t, vector_span<BindingInfo>>;
-		vector_span<set_binding_t> FinalizeCurrent(vector<set_binding_t>& all_sets);
+		std::optional<vector_span<set_binding_t>> FinalizeCurrent(vector<set_binding_t>& all_sets);
 		void GenerateDescriptorSets(span<const set_binding_t> bindings,DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_managers);
 	private:
 		hash_table<string, UniInfo> _uniform_names;
@@ -150,5 +153,20 @@ namespace idk::vkn
 		vector<BindingInfo> _buffer;
 		vector_span_builder<BindingInfo> _buffer_builder{ _buffer };
 		DescriptorUpdateData _dud;
+		struct DebugInfo
+		{
+			struct Set
+			{
+				lazy_vector<uint32_t> bindings;
+				size_t bound = 0;
+			};
+			lazy_vector<Set> sets;
+			void RegisterRequiredBinding(uint32_t set, uint32_t binding);
+			void RemoveRequiredSet(uint32_t set);
+			void MarkBinding(uint32_t set, uint32_t binding);
+
+			bool Validate(const binding_manager& _bindings)const;
+		};
+		DebugInfo _dbg;
 	};
 }
