@@ -436,7 +436,7 @@ namespace idk
 		range.light_end = active_light_buffer.size();
 		range.dir_light_end = directional_light_buffer.size();
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
