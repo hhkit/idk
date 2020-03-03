@@ -12,4 +12,8 @@ namespace idk::vkn::bindings
 	{
 		filter = cam.culling_flags;
 	}
+	void GeometryShaderBinding::Bind(RenderInterface& the_interface)
+	{
+		the_interface.BindShader(ShaderStage::Geometry, geometry_shader);
+	}
 }

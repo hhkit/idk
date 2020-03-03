@@ -240,6 +240,40 @@ namespace idk
 		return result;
 	}
 
+	std::pair<size_t, size_t> BatchRenderObjects(const CameraData& camera, const vector<RenderObject>& ro, const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data, vector<GenericHandle>* handle_buffer = nullptr)
+	{
+
+		//const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
+		//Keep track of the batches culled by this frustum
+		std::pair<size_t, size_t> result{ inst.size() ,inst.size() };
+		std::optional<decltype(ro.begin())> oprev{};
+		InstRenderObjects* inst_itr{};
+		auto bv_itr = bounding_vols.begin();
+		for (auto itr = ro.begin(); itr < ro.end(); ++itr, ++bv_itr)
+		{
+			const auto bv = *bv_itr;
+			if ((itr->layer_mask & camera.culling_flags) )
+			{
+				if (!oprev || ![](auto& itr, auto& prev) {
+					return (itr->mesh == prev->mesh) & (itr->material_instance == prev->material_instance);
+				}(itr, *oprev))
+				{
+					inst_itr = &inst.emplace_back(CreateIROInfo(*itr));
+					inst_itr->instanced_index = instanced_data.size();
+					oprev = itr;
+				}
+					if (handle_buffer)
+						handle_buffer->emplace_back(itr->obj_id);
+					//Keep track of the number of instances to be render for this frustum
+					auto tfm = camera.view_matrix * itr->transform;
+					instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
+					inst_itr->num_instances++;
+			}
+		}
+		result.second = inst.size();
+		return result;
+	}
+
 	/* disabled until we're ready to instance animated render objects too.
 	std::pair<size_t, size_t>  CullAndBatchAnimatedRenderObjects(const frustum& frust, const vector<AnimatedRenderObject>& ro, vector<InstAnimatedRenderObjects>& inst)
 	{
@@ -593,32 +627,32 @@ namespace idk
 				{
 					auto res = elem.GenerateLightData();
 					
-					if (res.index == 1)
-					{
-						//Dtor now frees the shadow maps.
-						//Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
-						//
-						//	//auto& e = std::get<DirectionalLight>(elem.light);							
-						//	for (auto& elem : d_lightmaps)
-						//	{
-						//		for (auto& e : elem.second.cam_lightmaps)
-						//		{
-						//			e.light_map->attachments.clear();
-						//			e.light_map->depth_attachment.reset();
-						//			e.light_map->stencil_attachment.reset();
-						//		}
-						//		elem.second.cam_lightmaps.clear();
-						//	}
-						//	d_lightmaps.clear();
-						//};
+					//if (res.index == 1)
+					//{
+					//	//Dtor now frees the shadow maps.
+					//	//Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
+					//	//
+					//	//	//auto& e = std::get<DirectionalLight>(elem.light);							
+					//	//	for (auto& elem : d_lightmaps)
+					//	//	{
+					//	//		for (auto& e : elem.second.cam_lightmaps)
+					//	//		{
+					//	//			e.light_map->attachments.clear();
+					//	//			e.light_map->depth_attachment.reset();
+					//	//			e.light_map->stencil_attachment.reset();
+					//	//		}
+					//	//		elem.second.cam_lightmaps.clear();
+					//	//	}
+					//	//	d_lightmaps.clear();
+					//	//};
 
-						//auto& e = std::get<DirectionalLight>(elem.light);
-						//
-						//for (auto& c : result.camera)
-						//{
-						//	result.d_lightmaps[c.obj_id].cam_lightmaps = result.d_lightpool.GetShadowMaps(elem);
-						//}
-					}
+					//	//auto& e = std::get<DirectionalLight>(elem.light);
+					//	//
+					//	//for (auto& c : result.camera)
+					//	//{
+					//	//	result.d_lightmaps[c.obj_id].cam_lightmaps = result.d_lightpool.GetShadowMaps(elem);
+					//	//}
+					//}
 					result.lights.emplace_back(res);
 				}
 			}
@@ -951,7 +985,7 @@ namespace idk
         for (auto& elem : futures)
             elem.get();
 
-		result.active_light_buffer.reserve(result.camera.size()+ result.lights.size());
+		result.active_light_buffer.reserve(result.camera.size() + result.lights.size());
 		result.directional_light_buffer.reserve(result.camera.size());
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
@@ -983,7 +1017,7 @@ namespace idk
 			//Disable the shadows of the non-cascaded directional lights
 			for (auto& light : result.lights)
 			{
-				if (light.index == 1)
+				if (light.index!=1)
 					light.cast_shadow = false;
 			}
 			//append the added lights at the back of the light range
@@ -1070,7 +1104,7 @@ namespace idk
 						{
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
 							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-							draw_frustum(frust, color{ ((float)++derp) / result.camera.size(),0,(lm_i + 1.0f) / light.light_maps.size(),1 }, {});
+							//draw_frustum(frust, color{ ((float)++derp) / result.camera.size(),0,(lm_i + 1.0f) / light.light_maps.size(),1 }, {});
 
 							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 							range.inst_mesh_render_begin = start_index;

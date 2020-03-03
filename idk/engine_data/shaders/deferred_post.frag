@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_LIGHTS 8
+#define MAX_LIGHTS 20
 #define MAX_MAP  8
 
 import /engine_data/shaders/deferred_utils.glsl
@@ -33,11 +33,11 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
-S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_LIGHTS];
+S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_MAP];
 
 S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
 {
-	DLight directional_vp[MAX_LIGHTS];
+	DLight directional_vp[MAX_MAP];
 }DirectionalBlk;
 
 vec3 Normal()
