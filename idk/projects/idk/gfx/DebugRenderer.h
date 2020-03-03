@@ -6,6 +6,7 @@
 
 namespace idk
 {
+	struct frustum;
 class DebugRenderer 
 	: public ISystem
 {
@@ -31,7 +32,7 @@ public:
 	void Draw(const ray&      ray                          , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 	void Draw(const vec3&	  start, const vec3& end	   , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true); //Same as ray, but without the tetrahedron(Arrow pointer)
 	void Draw(const sphere&   sphere                       , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
-
+	void Draw(const frustum& frustum                       , const color& c = default_color, seconds duration = seconds{ 0 }, bool depth_test = true);
 	void GraphicsTick();
 	span<const DebugInfo> GetWorldDebugInfo() const;
 private:
