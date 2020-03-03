@@ -50,6 +50,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\AttachmentViewType.h" />
+    <ClInclude Include="network\ElectronAnimatorView.h" />
     <ClInclude Include="network\EventDestroyObjectMessage.h" />
     <ClInclude Include="gfx\DefaultShaders.h" />
     <ClInclude Include="gfx\FakeMat4.h" />
@@ -390,6 +391,7 @@
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
+    <ClCompile Include="network\ElectronAnimatorView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\Lightmap.cpp" />
