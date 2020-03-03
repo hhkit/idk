@@ -228,7 +228,8 @@ namespace idk
 				{
 					// 1/mass * (0.4 * r^2) = 1 / (mass * 0.4 * r^2)
 					const float diag_val = (1.0f / (0.4f * pred_shape.radius * pred_shape.radius));
-					const mat3 local_tensor = mat3{ scale(vec3{diag_val}) };
+					auto gg = vec3{ diag_val };
+					const mat3 local_tensor = mat3{ scale(gg) };
 					rb._global_inertia_tensor = curr_rot * (rb.inv_mass * local_tensor) * curr_rot_inv;
 				}
 				else // Only sphere and box has rotational
