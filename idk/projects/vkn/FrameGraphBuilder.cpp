@@ -2,6 +2,29 @@
 #include "FrameGraphBuilder.h"
 namespace idk::vkn
 {
+
+	namespace validate
+	{
+		bool OutputAttachment(fgr_id att_id,std::optional<fgr_id> before_write, AttachmentDescription att, span<const FrameGraphResource> input_resources)
+		{
+			bool result = true;
+			if (att.load_op == vk::AttachmentLoadOp::eLoad && before_write)
+			{
+				att_id = *before_write;
+				result = false;
+				for (auto rsc : input_resources)
+				{
+					if (rsc.id == att_id)
+					{
+						result = true;
+						break;
+					}
+				}
+			}
+			return result;
+		}
+	}
+
 	fg_id FrameGraphBuilder::NextID()
 	{
 		return _fgid_generator.gen_next();
@@ -13,19 +36,24 @@ namespace idk::vkn
 	void FrameGraphBuilder::Reset()
 	{
 		ResetIDs();
-		consumed_resources.resources.clear();
+		consumed_resources.Reset();
 		origin_nodes.clear();
+		input_origin_nodes.clear();
+		_region_name.clear();
 	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
-		return rsc_manager.CreateTexture(desc);
+		desc.name = curr_rsc.name +":"+ desc.name;
+		auto rsc = rsc_manager.CreateTexture(desc);
+		curr_rsc.output_resources.emplace_back(rsc);
+		return rsc;
 	}
 
 	FrameGraphResourceReadOnly FrameGraphBuilder::read(FrameGraphResource in_rsc,[[maybe_unused]] bool may_shader_sample)
 	{
-		//auto rsc = rsc_manager.Rename(in_rsc);
+		auto rsc = rsc_manager.Rename(in_rsc);
 		curr_rsc.input_resources.emplace_back(in_rsc);
-		return in_rsc; //rsc;
+		return rsc;
 	}
 
 	FrameGraphResourceMutable FrameGraphBuilder::write(FrameGraphResource target_rsc, WriteOptions opt)
@@ -39,23 +67,31 @@ namespace idk::vkn
 		auto rsc = rsc_manager.WriteRename(target_rsc);
 		if (!opt.clear)
 			curr_rsc.input_resources.emplace_back(target_rsc);
-		else
-			curr_rsc.modified_resources.emplace_back(target_rsc);
+		
+		curr_rsc.modified_resources.emplace_back(target_rsc); 
 		curr_rsc.output_resources.emplace_back(rsc);
 		return rsc;
 	}
 
 	FrameGraphResource FrameGraphBuilder::copy(FrameGraphResource target_rsc, CopyOptions opt)
 	{
-		auto copy_desc = rsc_manager.GetResourceDescription(target_rsc.id);
+		auto src_id = target_rsc.id;
+		auto copy_desc = rsc_manager.GetResourceDescription(src_id);
 		FrameGraphResource result = target_rsc;
 		if (copy_desc)
 		{
+			auto usage = copy_desc->usage;
+			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferSrc;
+			rsc_manager.UpdateResourceDescription(src_id, *copy_desc);
+			if (copy_desc->actual_rsc)
+				copy_desc->actual_rsc = {};
+			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferDst;
 			result= CreateTexture(*copy_desc);
-			result = write(result, WriteOptions{ .clear = false });
-			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result});
+			//result = write(result, WriteOptions{ .clear = false }); //Create already puts it into output resources
+			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result,opt});
+			read(target_rsc,false);
 		}
-		return target_rsc;
+		return result;
 	}
 
 	void FrameGraphBuilder::set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
@@ -65,9 +101,15 @@ namespace idk::vkn
 		curr_rsc.input_attachments[attachment_index] = { in_rsc.id,attachment_desc };
 		rsc_manager.MarkUsage(in_rsc.id, vk::ImageUsageFlagBits::eInputAttachment);
 	}
+//#pragma optimize("",off)
 
 	void FrameGraphBuilder::set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{
+		auto read = rsc_manager.BeforeWriteRenamed(out_rsc);
+		if (!validate::OutputAttachment(out_rsc.id,read, attachment_desc, curr_rsc.input_resources))
+		{
+			LOG_ERROR_TO(LogPool::GFX, "Attachment is loading from a resource without calling read on it. \nYou probably forgot to specify clear = false when calling write.");
+		}
 		auto size = std::max(curr_rsc.output_attachments.size(), static_cast<size_t>(attachment_index + 1));
 		curr_rsc.output_attachments.resize(size);
 		curr_rsc.output_attachments[attachment_index] = { out_rsc.id,attachment_desc };
@@ -79,10 +121,15 @@ namespace idk::vkn
 		rsc_manager.MarkUsage(out_rsc.id, vk::ImageUsageFlagBits::eDepthStencilAttachment);
 	}
 
+	void FrameGraphBuilder::MarkNodeRegion(string name)
+	{
+		_region_name = std::move(name);
+	}
+
 	void FrameGraphBuilder::BeginNode(string name)
 	{
 		curr_rsc.reset();
-		curr_rsc.name = std::move(name);
+		curr_rsc.name = std::move(_region_name+":"+name);
 	}
 
 	FrameGraphNode FrameGraphBuilder::EndNode()
@@ -91,6 +138,10 @@ namespace idk::vkn
 		for (auto& rsc : curr_rsc.output_resources)
 		{
 			origin_nodes.emplace(rsc.id, id);
+		}
+		for (auto& rsc : curr_rsc.input_resources) //Will be transitioned by the resources
+		{
+			input_origin_nodes.emplace(rsc.id, id);
 		}
 		auto input_span    = consumed_resources.StoreResources(curr_rsc.input_resources);
 		auto read_span     = consumed_resources.StoreResources(curr_rsc.read_resources);
@@ -145,6 +196,12 @@ namespace idk::vkn
 	{
 		auto& buffer = copies;
 		return StoreResourceInBuffer(buffer, rsc);
+	}
+
+	void NodeBuffer::Reset()
+	{
+		resources.clear();
+		copies.clear();
 	}
 
 }

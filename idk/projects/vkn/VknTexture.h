@@ -18,12 +18,17 @@ namespace idk::vkn {
 		VulkanRsc<vk::Image>			image_{ nullptr };
 		vk::Format				format{};
 		vk::ImageUsageFlags     usage{};
-		vk::ImageAspectFlags    img_aspect;
+		vk::ImageAspectFlagBits    img_aspect;
 		vk::UniqueDeviceMemory  mem{ nullptr };
 		hlp::UniqueAlloc        mem_alloc{};
 		VulkanRsc<vk::ImageView>     imageView{ nullptr };
 		VulkanRsc<vk::Sampler>       sampler{ nullptr };
 		opt<vk::DescriptorSet>	descriptorSet{};
+		vk::ImageSubresourceRange range;
+		uint32_t mipmap_level=1;
+		string dbg_name;
+
+		vk::ImageType image_type = vk::ImageType::e2D;
 
 		VknTexture() = default;
 		~VknTexture();
@@ -32,6 +37,7 @@ namespace idk::vkn {
 		//VknTexture(const VknTexture& rhs);
 		VknTexture(const CompiledTexture&);
 
+
 		VknTexture& operator=(VknTexture&&) noexcept;
 		vk::Sampler Sampler()const { return *sampler; }
 		vk::Image Image()const { return *image_; }
@@ -39,6 +45,10 @@ namespace idk::vkn {
 		vk::ImageAspectFlags ImageAspects()const;
 		uint32_t& Layers(uint32_t layers)noexcept;
 		uint32_t Layers()const noexcept;
+
+		vk::ImageSubresourceRange FullRange()const;
+		void FullRange(vk::ImageSubresourceRange range);
+
 		using Texture::Size;
 		uvec2 Size(uvec2 new_size) override;
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)

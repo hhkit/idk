@@ -20,11 +20,14 @@
 
 #include <vkn/RenderInterface.h>
 
+#include <vkn/VertexBindingTracker.h>
+
 namespace idk::vkn
 {
 	
 
 	struct UboManager;
+	class PipelineManager;
 
 	struct RenderBundle;// holds the stuff required to actually draw/submit
 
@@ -45,8 +48,11 @@ namespace idk::vkn
 	{
 		VknTextureView src;
 		vk::ImageLayout src_layout;
+		std::optional<vk::ImageSubresourceRange> src_range;
 		VknTextureView dst;
 		vk::ImageLayout dst_layout;
+		std::optional<vk::ImageSubresourceRange> dst_range;
+		
 		vector<vk::ImageCopy> regions;
 	};
 
@@ -74,19 +80,22 @@ namespace idk::vkn
 		//void Associate(size_t subpass_index);
 
 		void SetUboManager(UboManager& ubo_manager);
+		void SetPipelineManager(PipelineManager& pipeline_manager);
 
 
-		void BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)override;
+		void BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset)override;
+		void BindVertexBufferByBinding(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset)override;
 		void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)override;
 
 #pragma region Uniforms
-		void BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound=false)override;
+		void BindUniform(string_view name, uint32_t index, string_view data, bool skip_if_bound = false)override;
+		//void BindUniform(vk::DescriptorSet ds, std::optional<string_view> data = {})override;
 		void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false,vk::ImageLayout layout= vk::ImageLayout::eGeneral)override;
 #pragma endregion
 
 		void BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader)override;
 		void UnbindShader(ShaderStage shader_stage)override;
-		void SetRenderPass(RenderPassObj render_pass);
+		void SetRenderPass(VknRenderPass render_pass);
 		void SetFrameBuffer(const Framebuffer& fb,uvec2 size);
 
 #pragma region Draw
@@ -99,8 +108,10 @@ namespace idk::vkn
 
 #pragma region PipelineConfigurations
 		//void Inherit(const pipeline_config& config);
-		void SetPipelineConfig(const pipeline_config& config)
+		bool SetPipeline(const VulkanPipeline& pipeline) override;
+		void SetPipelineConfig(const pipeline_config& config) override
 		{
+			StartNewBatch();
 			_current_batch.pipeline = config;
 		}
 		void SetBufferDescriptions(span<buffer_desc>)override;
@@ -111,6 +122,7 @@ namespace idk::vkn
 		void SetClearDepthStencil(std::optional<float> depth, std::optional<uint8_t> stencil = {})override;
 		void SetScissors(rect r)override;
 		void SetViewport(rect r)override;
+		void SetScissorsViewport(rect r)override;
 		void SetFillType(FillType type)override;
 		void SetCullFace(CullFaceFlags cf)override;
 		void SetPrimitiveTopology(PrimitiveTopology pt)override;
@@ -124,6 +136,7 @@ namespace idk::vkn
 		
 		void SetInputAttachments(span<VknTextureView> input_attachments) noexcept;
 		void SetOutputAttachmentSize(size_t size);
+		void SetClearDepthStencil(std::optional<vk::ClearValue> clear_value = {});
 
 		void ProcessBatches(RenderBundle& render_bundle);
 
@@ -187,20 +200,22 @@ namespace idk::vkn
 		struct RenderBatch
 		{
 			pipeline_config pipeline;
+			const VulkanPipeline* pipeline_override=nullptr;
 			vector_span<rect> scissor, viewport;
 			//RenderPassObj render_pass;
 			//vk::Framebuffer frame_buffer;
 			Shaders shaders;
 			vector<DrawCall> draw_calls;
-			std::optional<std::string> label;
+			std::optional<string> label;
 		};
 
-		unique_ptr<PipelineManager> ppm;
+		PipelineManager* ppm;
 
 #pragma region Clear Info
 		lazy_vector<color> clear_colors;
 		std::optional<float> clear_depths;
 		std::optional<uint8_t> clear_stencil;
+		std::optional<vk::ClearValue> _clear_depth_stencil = {};
 #pragma endregion Clear Info
 
 #pragma region Pipeline State
@@ -212,7 +227,7 @@ namespace idk::vkn
 		rect render_area;
 #pragma endregion
 
-		RenderPassObj curr_rp;
+		VknRenderPass curr_rp;
 		vk::Framebuffer curr_frame_buffer;
 		uvec2 fb_size;
 
@@ -230,6 +245,7 @@ namespace idk::vkn
 		vector<RenderBatch> batches;
 
 		vector<CopyCommand> _copy_commands;
+		VertexBindingTracker _vtx_binding_tracker;
 	};
 
 

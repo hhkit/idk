@@ -1052,6 +1052,20 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		//AudioListener
+		//----------------------------------------------------------------------------------------------------
+		BIND_START("idk.Bindings::AudioListenerGetEnabledState", bool, Handle<AudioListener> audiolistener)
+		{
+			return audiolistener->is_active;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioListenerSetEnabledState", void, Handle<AudioListener> audiolistener, bool val)
+		{
+			audiolistener->is_active = val;
+		}
+		BIND_END();
+
 		//AudioSource
 		//----------------------------------------------------------------------------------------------------
 		BIND_START("idk.Bindings::AudioSourcePlay", void, Handle<AudioSource> audiosource, int index)

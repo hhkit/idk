@@ -213,6 +213,10 @@ namespace idk::vkn
 		string DumpAllocators();
 		std::pair<size_t, size_t> DumpAllocator(std::ostream& out, const MemoryAllocator& alloc);
 	}
+	void ReloadDeferredShaders()
+	{
+		Core::GetSystem<GraphicsSystem>().LoadShaders();
+	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
 		try
@@ -222,6 +226,16 @@ namespace idk::vkn
 		instance_->AcquireFrame(*curr_signal.image_available);
 		auto curr_index = instance_->View().CurrFrame();
 		instance_->ResourceManager().ProcessQueue(curr_index);
+		{
+			auto& var = extra_vars;
+			auto name = "Reload Deferred";
+			var.SetIfUnset(name, false);
+			if (*var.Get<bool>(name))
+			{
+				ReloadDeferredShaders();
+				var.Set(name, false);
+			}
+		}
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
@@ -392,6 +406,7 @@ namespace idk::vkn
 			auto str = dbg::DumpFrameBufferAllocs();
 		}
 #endif
+		//std::reverse(curr_states.begin(), curr_states.end());
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
 #if 0
 		{
@@ -440,11 +455,11 @@ namespace idk::vkn
 	void VulkanWin32GraphicsSystem::Shutdown()
 	{
 		instance_->View().Device()->waitIdle();
-		_pimpl.reset();
+		_frame_renderers.clear();
 		_debug_renderer->Shutdown();
 
 		this->_pm.reset();
-		_frame_renderers.clear();
+		_pimpl.reset();
 		instance_.reset();
 		ShFinalize();
 	}

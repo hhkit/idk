@@ -5,7 +5,7 @@ namespace idk
 {
 	struct ExtraVars
 	{
-		using variant_t = std::variant<bool, float, string, int>;
+		using variant_t = std::variant<bool, float, string, int,void*>;
 		std::unordered_map < string, variant_t> extra_vars;
 		bool SetIfUnset(string name, variant_t v)
 		{

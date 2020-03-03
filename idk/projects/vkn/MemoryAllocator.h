@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <vulkan/vulkan.hpp>
+#include <vkn/SimpleLock.h>
 size_t Track(size_t s);
 namespace idk::vkn::hlp
 {
@@ -105,6 +106,7 @@ namespace idk::vkn::hlp
 		vk::Device device;
 		vk::PhysicalDevice pdevice;
 		hash_table<decltype(vk::MemoryRequirements::memoryTypeBits), Memories> memories;
+		SimpleLock lock;
 	};
 	using UniqueAlloc =MemoryAllocator::UniqueAlloc;
 }

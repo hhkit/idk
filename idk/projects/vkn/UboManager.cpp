@@ -62,7 +62,7 @@ namespace idk::vkn
 			auto&& [buffer, offset] = MakeBuffer();
 			decltype(DataPair::data) buf{};
 			buf.reserve(_chunk_size);
-			auto& tmp = _buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset });
+			auto& tmp = _buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset,_chunk_size });
 			tmp.alignment = OffsetAlignment();
 			tmp.sz_alignment = SizeAlignment();
 			_allocation_table.emplace(_buffers.size() - 1,_memory_blocks.size() - 1);
@@ -119,7 +119,9 @@ namespace idk::vkn
 	}
 	bool UboManager::DataPair::CanAdd(size_t len) const
 	{
-		return data.capacity() >= 
+		if (data.size() > 65536)
+			throw;
+		return block_size >= 
 			data.size() + AlignmentOffset() +
 			SizeAlignmentOffset(len,sz_alignment);
 	}
@@ -132,9 +134,12 @@ namespace idk::vkn
 
 	void UboManager::DataPair::Align()
 	{
-		data.append(AlignmentOffset(), 0);
+		auto padding = std::min(block_size-data.size(),AlignmentOffset());
+		
+		data.append(padding, 0);
 	}
 	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) {
+		//auto capacity = data.capacity();
 		Align();
 		uint32_t result = s_cast<uint32_t>(data.size()) - InitialOffset(data.data(),alignment);
 		auto aligned_len = SizeAlignmentOffset(len, sz_alignment);
@@ -142,12 +147,11 @@ namespace idk::vkn
 		//get the destination start
 		auto dst = data.data()+ data.size();
 		//make sure we can accomodate
-		auto capacity = data.capacity();
 		data.resize(data.size() + aligned_len);
-		if(capacity != data.capacity())
-			throw std::runtime_error{ "resizing our fixed size buffer." };
 		//copy to buffer.
 		memcpy_s(dst, aligned_len, data_, len);
+		if (result + len > block_size)
+			throw;
 		//data.append(r_cast<const char*>(data_), len );
 		return result;
 	}

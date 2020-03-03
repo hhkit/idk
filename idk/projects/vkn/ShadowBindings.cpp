@@ -8,7 +8,7 @@ namespace idk::vkn::bindings
 		return !(dc.layer_mask & filter);
 	}
 
-	void ShadowFilter::SetState(const CameraData& cam, const vector<SkeletonTransforms>&)
+	void ShadowFilter::SetState(const CameraData& cam)
 	{
 		filter = cam.culling_flags;
 	}

@@ -20,12 +20,14 @@ namespace idk::vkn::bindings
 		ShadingModel model;
 		bool Skip([[maybe_unused]] RenderInterface& the_interface, const  RenderObject& dc)  override
 		{
+			
 			if (dc.material_instance)
 			{
 				auto& mat_inst = *dc.material_instance;
 				if (mat_inst.material)
 				{
 					auto& mat = *mat_inst.material;
+					//if (mat.model == ShadingModel::Unlit) return true;
 					return mat.model != model || mat.blend != blend;
 				}
 			}
@@ -34,6 +36,9 @@ namespace idk::vkn::bindings
 	};
 	using DeferredPbrRoBind  = CombinedBindings<TypeCheck, CameraViewportBindings,VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 	using DeferredPbrAniBind = CombinedBindings<TypeCheck, CameraViewportBindings,VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+
+	using DeferredUnlitRoBind = CombinedBindings<TypeCheck, CameraViewportBindings, VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
+	using DeferredUnlitAniBind = CombinedBindings<TypeCheck, CameraViewportBindings, VertexShaderBinding, StandardVertexBindings, StandardMaterialFragBindings, StandardMaterialBindings>;
 
 	struct DeferredPbrInfo
 	{
@@ -47,7 +52,7 @@ namespace idk::vkn::bindings
 	namespace detail
 	{
 
-		DeferredPbrRoBind make_deferred_pbr_bind(DeferredPbrInfo info)
+		inline DeferredPbrRoBind make_deferred_pbr_bind(DeferredPbrInfo info)
 		{
 			DeferredPbrRoBind result{};
 			result.Get<CameraViewportBindings>().viewport = info.viewport;
@@ -60,14 +65,14 @@ namespace idk::vkn::bindings
 		}
 	}
 
-	DeferredPbrRoBind make_deferred_pbr_ro_bind(DeferredPbrInfo info)
+	inline DeferredPbrRoBind make_deferred_pbr_ro_bind(DeferredPbrInfo info)
 	{
 		DeferredPbrRoBind result = detail::make_deferred_pbr_bind(info);
 		auto& shader = result.Get<VertexShaderBinding>();
 		shader.vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VNormalMesh];
 		return result;
 	}
-	DeferredPbrAniBind make_deferred_pbr_ani_bind(DeferredPbrInfo info)
+	inline DeferredPbrAniBind make_deferred_pbr_ani_bind(DeferredPbrInfo info)
 	{
 		DeferredPbrAniBind result = detail::make_deferred_pbr_bind(info);
 		auto& shader = result.Get<VertexShaderBinding>();

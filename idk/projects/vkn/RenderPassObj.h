@@ -14,6 +14,11 @@ namespace idk::vkn
 			ctrl_blk->my_rp = std::move(rp);
 			return *this;
 		}
+		RenderPassObj& operator=(const RenderPassObj& rp)
+		{
+			ctrl_blk = rp.ctrl_blk;
+			return *this;
+		}
 		operator bool()const noexcept
 		{
 			return (ctrl_blk && ctrl_blk->my_rp);
@@ -21,6 +26,10 @@ namespace idk::vkn
 		vk::UniqueRenderPass& operator->()
 		{
 			return ctrl_blk->my_rp;
+		}
+		operator vk::RenderPass()
+		{
+			return *ctrl_blk->my_rp;
 		}
 		vk::RenderPass& operator*()
 		{

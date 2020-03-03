@@ -14,6 +14,8 @@ namespace idk::vkn
 		Framebuffer frame_buffer;
 		uvec2       fb_size;
 
+		string name;
+
 		//Run to Begin the rendering context (renderpass/framebuffer)
 		void PreExecute(const FrameGraphNode& node, Context_t context);
 		virtual void Execute(FrameGraphDetail::Context_t context) = 0;

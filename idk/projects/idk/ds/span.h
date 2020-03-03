@@ -42,6 +42,7 @@ namespace idk
 			&& std::is_convertible_v<decltype(std::data(std::declval<Container&>())), T*>
 				&& !std::is_same_v<std::decay_t<Container>, span>>>
 		constexpr span(Container&& c) noexcept;
+		constexpr span(const span&) noexcept = default;
 
 		// element access
 		constexpr T& operator[](size_t index) const noexcept;

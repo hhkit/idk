@@ -23,12 +23,6 @@ layout(location=2) in VS_OUT
 // temporary light
 import /engine_data/shaders/light.glsl
 
-U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
-{
-	int   light_count;
-	Light lights[MAX_LIGHTS];
-} LightBlk;
-
 
 // lighting functions 
 
