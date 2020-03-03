@@ -14,7 +14,7 @@ namespace idk
 		bool enabled        = true;
 		bool is_trigger     = false;
 
-		real bounciness       { 0.2f };
+		real bounciness       { .0f };
 		real static_friction  { .6f };
 		real dynamic_friction { .6f };
 

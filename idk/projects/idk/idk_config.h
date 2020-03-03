@@ -48,6 +48,7 @@ namespace idk
 		,	class ElectronView
 		,	class ElectronTransformView
 		,	class ElectronRigidbodyView
+		,	class ElectronAnimatorView
 
 		/// SCRIPTING
 		,	class mono::Behavior

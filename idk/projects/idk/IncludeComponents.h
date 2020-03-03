@@ -17,6 +17,7 @@
 #include <network/ElectronView.h>
 #include <network/ElectronTransformView.h>
 #include <network/ElectronRigidbodyView.h>
+#include <network/ElectronAnimatorView.h>
 
 #include <ui/Canvas.h>
 #include <ui/RectTransform.h>

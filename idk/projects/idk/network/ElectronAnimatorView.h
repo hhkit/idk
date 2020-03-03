@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <core/Component.h>
 #include <network/network.h>
 namespace idk
@@ -8,6 +7,11 @@ namespace idk
 		: public Component<ElectronAnimatorView>
 	{
 	public:
+		vector<string> int_params;
+		vector<string> float_params;
+		vector<string> bool_params;
+		vector<string> trigger_params;
+
 		NetworkID GetNetworkID() const;
 		Handle<ElectronView> GetView() const;
 		void Start();

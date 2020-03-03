@@ -87,4 +87,8 @@ REFLECT_END()
 REFLECT_BEGIN(idk::ElectronRigidbodyView, "ElectronRigidbodyView")
 REFLECT_VARS(sync_velocity)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::ElectronAnimatorView, "ElectronAnimatorView")
+REFLECT_VARS(int_params, float_params, bool_params, trigger_params)
+REFLECT_END()
 #pragma endregion
