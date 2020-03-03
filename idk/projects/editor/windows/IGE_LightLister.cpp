@@ -14,7 +14,7 @@
 namespace idk
 {
 	IGE_LightLister::IGE_LightLister()
-		:IGE_IWindow{ "Light Lister##IGE_LightLister",false,ImVec2{ 600,300 },ImVec2{ 450,150 } }
+		:IGE_IWindow{ "Light Lister##IGE_LightLister",false,ImVec2{ 1000,300 },ImVec2{ 450,150 } }
 	{
 	}
 	void IGE_LightLister::BeginWindow()
@@ -57,6 +57,14 @@ namespace idk
 				elem.enabled = false;
 		}
 
+		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+				elem.enabled = true;
+		}
+
 		struct ColumnHeader
 		{
 			const char* label;
@@ -65,12 +73,13 @@ namespace idk
 		ColumnHeader headers[]=
 		{
 			{"On", -1},
-			{"Name", 125},
+			{"Type", 80},
+			{"Name", 100},
 			{"Col", -1},
 			{"Intensity", -1},
 			{"Atten", -1},
-			{"Position", 250},
-			{"Rotation", 250},
+			{"Position", 210},
+			{"Rotation", 210},
 			{"Shadows", -1},
 			{"Isolate", -1},
 			{"Focus", -1}
@@ -109,6 +118,20 @@ namespace idk
 			auto tfm = go->Transform();
 
 			ImGui::Checkbox("##en", &light.enabled);
+			ImGui::NextColumn();
+
+			switch (light.light.index())
+			{
+			case 0:
+				ImGui::Text("Point");
+				break;
+			case 1:
+				ImGui::Text("Directional");
+				break;
+			case 2:
+				ImGui::Text("Spotlight");
+				break;
+			};
 			ImGui::NextColumn();
 
 			if (ImGui::Selectable(name.data()))
