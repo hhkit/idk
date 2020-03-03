@@ -333,7 +333,7 @@ namespace idk::vkn::renderpasses
 	}
 	void AddPointShadowPass      (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
-		/*auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
+		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 		auto& elem = light.light_maps[shadow_range.light_map_index];
 		auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
 		index_span inst_span{ shadow_range.inst_mesh_render_begin, shadow_range.inst_mesh_render_end };
@@ -351,7 +351,7 @@ namespace idk::vkn::renderpasses
 				DirectionalShadow::SkinnedInstDrawSetBinding{skinned_bindings,SkinnedMeshDrawSet{state.skinned_mesh_render}}
 			}
 		};
-		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("spot light", std::move(derp), elem.light_map);*/
+		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);
 
 	}
 

@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_LIGHTS 20
+#define MAX_LIGHTS 8
 #define MAX_MAP  8
 import /engine_data/shaders/deferred_utils.glsl
 
