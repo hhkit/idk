@@ -93,7 +93,7 @@ namespace idk
 	}
 	aabb camera_vp_to_bounding_box(const mat4& view_projection_matrix)
 	{
-
+		/*
 		//Recalculate Frustum planes based on current view matrix
 		std::array<vec4, FrustumSide::count> planes;
 		planes[FrustumSide::Left].x = -(view_projection_matrix[0][3] + view_projection_matrix[0][0]);
@@ -147,5 +147,43 @@ namespace idk
 
 		//Return tight-fitted bounding box
 		return boundingBox;
+		*/
+		auto points = frustum_points(camera_vp_to_frustum(view_projection_matrix));
+		vec3 mini = points[0], maxi = points[0];
+		for (auto& point : points)
+		{
+			mini = min(mini, point);
+			maxi = max(maxi, point);
+		}
+		return aabb{mini,maxi};
+	}
+
+	/*vec3{-1, 1,-1},//*/
+	/*vec3{ 1, 1,-1},//*/
+	/*vec3{ 1,-1,-1},//*/
+	/*vec3{-1,-1,-1},//*/
+	/*vec3{-1, 1, 1},//*/
+	/*vec3{ 1, 1, 1},//*/
+	/*vec3{ 1,-1, 1},//*/
+	/*vec3{-1,-1, 1},//*/
+	array<vec3, 8> frustum_points(const frustum& frust)
+	{
+		auto intersection_point = [](halfspace a, halfspace b, halfspace c)
+		{
+			mat3 mat = mat3{ a.normal,b.normal,c.normal };
+			return mat.transpose().inverse() * vec3 { -a.dist, -b.dist, -c.dist };
+		};
+		std::array<vec3, 8> points =
+		{
+			intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up],frust.sides[FrustumSide::Left]),
+			intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up],frust.sides[FrustumSide::Right]),
+			intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+			intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left]),
+			intersection_point(frust.sides[FrustumSide::Far],frust.sides[FrustumSide::Up],frust.sides[FrustumSide::Left]),
+			intersection_point(frust.sides[FrustumSide::Far],frust.sides[FrustumSide::Up],frust.sides[FrustumSide::Right]),
+			intersection_point(frust.sides[FrustumSide::Far],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
+			intersection_point(frust.sides[FrustumSide::Far],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left]),
+		};
+		return points;
 	}
 }
