@@ -26,6 +26,7 @@ namespace idk
 		T          dot(const quaternion&) const;
 		quaternion inverse() const;
 		quaternion get_normalized() const;
+		quaternion integrate(const tvec<T, 3>& dv) const;
 
 		// modifiers
 		quaternion& normalize();

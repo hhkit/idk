@@ -86,9 +86,6 @@
     <Filter Include="math\shapes">
       <UniqueIdentifier>{904683d7-e103-49da-b891-54115b8bd059}</UniqueIdentifier>
     </Filter>
-    <Filter Include="phys\collision">
-      <UniqueIdentifier>{a443cd4d-0b4b-4ed3-97e1-29444c85c072}</UniqueIdentifier>
-    </Filter>
     <Filter Include="script">
       <UniqueIdentifier>{0ea81c08-6894-4f4d-92fb-1d23678faa9f}</UniqueIdentifier>
     </Filter>
@@ -158,14 +155,14 @@
     <Filter Include="network\substream managers">
       <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
     </Filter>
-    <Filter Include="phys\aabb tree">
+    <Filter Include="phys\broadphase">
       <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="phys\aabb tree">
-      <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
+    <Filter Include="phys\collision detection">
+      <UniqueIdentifier>{a443cd4d-0b4b-4ed3-97e1-29444c85c072}</UniqueIdentifier>
     </Filter>
-    <Filter Include="phys\rotational">
-      <UniqueIdentifier>{84056225-9a38-47b7-8a53-ab3d256bbdcb}</UniqueIdentifier>
+    <Filter Include="phys\collision resolution">
+      <UniqueIdentifier>{12373321-248d-452c-a141-26075769729c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -597,22 +594,22 @@
       <Filter>gfx\object</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_detection\collision_box.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_detection\collision_box_sphere.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="phys\raycasts\collision_raycast.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_result.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_detection\collision_sphere.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="ds\result.h">
       <Filter>ds</Filter>
@@ -857,7 +854,7 @@
       <Filter>math\shapes</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_detection\ManagedCollision.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="gfx\CameraClear.h">
       <Filter>gfx\camera</Filter>
@@ -881,7 +878,7 @@
       <Filter>gfx\object</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_detection\collision_capsule.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="gfx\TextureRenderMeta.h">
       <Filter>gfx</Filter>
@@ -893,10 +890,10 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_detection\collision_capsule_box.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="phys\collision_detection\collision_capsule_sphere.h">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClInclude>
     <ClInclude Include="ui\Image.h">
       <Filter>ui</Filter>
@@ -1101,10 +1098,10 @@
       <Filter>network\substream managers</Filter>
     </ClInclude>
     <ClInclude Include="phys\AAbbTree.h">
-      <Filter>phys\aabb tree</Filter>
+      <Filter>phys\broadphase</Filter>
     </ClInclude>
     <ClInclude Include="phys\AabbTree_utils.h">
-      <Filter>phys\aabb tree</Filter>
+      <Filter>phys\broadphase</Filter>
     </ClInclude>
     <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
@@ -1186,6 +1183,21 @@
     </ClInclude>
     <ClInclude Include="gfx\FakeMat4.h" />
     <ClInclude Include="gfx\GfxDebugData.h" />
+    <ClInclude Include="phys\CollisionManager.h">
+      <Filter>phys</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\Collision_utils.h">
+      <Filter>phys\collision resolution</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_contact.h">
+      <Filter>phys\collision resolution</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_rotation_utils.h">
+      <Filter>phys\collision resolution</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_rotational.h">
+      <Filter>phys\collision resolution</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1397,22 +1409,22 @@
       <Filter>res</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_detection\collision_box.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="phys\raycasts\collision_raycast.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_result.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_detection\collision_sphere.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="math\shapes\frustum.cpp">
       <Filter>math\shapes</Filter>
@@ -1568,7 +1580,7 @@
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="anim\AnimationUtils.cpp">
       <Filter>anim\utils</Filter>
@@ -1577,10 +1589,10 @@
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_detection\collision_capsule_box.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="phys\collision_detection\collision_capsule_sphere.cpp">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </ClCompile>
     <ClCompile Include="ui\UISystem.cpp">
       <Filter>ui</Filter>
@@ -1671,7 +1683,7 @@
       <Filter>gfx\light</Filter>
     </ClCompile>
     <ClCompile Include="phys\AabbTree.cpp">
-      <Filter>phys\aabb tree</Filter>
+      <Filter>phys\broadphase</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ColorPickRequest.cpp">
       <Filter>gfx</Filter>
@@ -1707,6 +1719,16 @@
       <Filter>network\substream managers</Filter>
     </ClCompile>
     <ClCompile Include="gfx\Material.cpp" />
+    <ClCompile Include="gfx\ShadowMapPool.cpp" />
+    <ClCompile Include="phys\CollisionManager.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\Collision_utils.cpp">
+      <Filter>phys\collision resolution</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\collision_rotational.cpp">
+      <Filter>phys\collision resolution</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -1863,7 +1885,7 @@
       <Filter>res</Filter>
     </None>
     <None Include="phys\raycasts\collision_raycast.inl">
-      <Filter>phys\collision</Filter>
+      <Filter>phys\collision detection</Filter>
     </None>
     <None Include="ds\result.inl">
       <Filter>ds</Filter>

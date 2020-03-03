@@ -41,27 +41,26 @@ namespace idk
 	tmat<T, 4, 4> rotate(const tvec<T, 3> & axis, trad<T> angle)
 	{
 		using ret_t = tmat<T, 4, 4>;
+		using ret_3t = tmat<T, 3, 3>;
 		const auto n = axis.get_normalized();
 		const auto c = cos(angle);
 		const auto s = sin(angle);
 
-		const auto crosspdt = ret_t{
-			 0.f, -n.z,  n.y, 0.f,
-			 n.z,  0.f, -n.x, 0.f,
-			-n.y,  n.x,  0.f, 0.f,
-			 0.f,  0.f,  0.f, 1.f
+		const auto crosspdt = ret_3t{
+			 0.f, -n.z,  n.y,
+			 n.z,  0.f, -n.x,
+			-n.y,  n.x,  0.f,
 		};
 		
-		const auto skew_symmetric = ret_t{
-			n.x * n.x,  n.x * n.y, n.x * n.z, 0.f,
-			n.y * n.x,  n.y * n.y, n.y * n.z, 0.f,
-			n.z * n.x,  n.z * n.y, n.z * n.z, 0.f,
-			0.f      ,  0.f      , 0.f      , 1.f
+		const auto skew_symmetric = ret_3t{
+			n.x * n.x,  n.x * n.y, n.x * n.z,
+			n.y * n.x,  n.y * n.y, n.y * n.z,
+			n.z * n.x,  n.z * n.y, n.z * n.z,    
 		};
 
-		return c * ret_t{}
+		return ret_t{ c * ret_3t{}
 		+s * crosspdt
-		+ (1 - c) * skew_symmetric;
+		+ (1 - c) * skew_symmetric };
 	}
 
 	template<typename T, unsigned D>
@@ -143,7 +142,7 @@ namespace idk
 	tmat<T, 4, 4> orient(const tvec<T, 3> & z_prime)
 	{
 		const auto axis = tvec<T, 3>{0, 0, 1}.cross(z_prime);
-		const auto angle = asin(axis.length());
+		const auto angle = acos(z_prime.z);
 		return tmat<T, 4, 4>{rotate(axis, angle)};
 	}
 

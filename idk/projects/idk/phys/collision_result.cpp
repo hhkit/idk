@@ -19,7 +19,8 @@ namespace idk::phys
 	col_success col_success::operator-() const
 	{
 		auto copy = *this;
-		copy.normal_of_collision = -copy.normal_of_collision;
+		copy.normal = -copy.normal;
+		std::swap(copy.centerA, copy.centerB);
 		return copy;
 	}
 }
