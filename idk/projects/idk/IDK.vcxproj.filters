@@ -155,12 +155,6 @@
     <Filter Include="network\substream managers">
       <UniqueIdentifier>{cc1764d9-5675-43dc-bc2c-81e956c3d907}</UniqueIdentifier>
     </Filter>
-    <Filter Include="phys\aabb tree">
-      <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="phys\rotational">
-      <UniqueIdentifier>{84056225-9a38-47b7-8a53-ab3d256bbdcb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="phys\broadphase">
       <UniqueIdentifier>{6f80e421-0638-477d-9911-81b44c0fceaf}</UniqueIdentifier>
     </Filter>
@@ -1187,22 +1181,19 @@
     <ClInclude Include="network\EventDestroyObjectMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision_rotational.h">
-      <Filter>phys\rotational</Filter>
-    </ClInclude>
-    <ClInclude Include="phys\collision_rotation_utils.h">
-      <Filter>phys\rotational</Filter>
-    </ClInclude>
     <ClInclude Include="phys\CollisionManager.h">
       <Filter>phys</Filter>
     </ClInclude>
-    <ClInclude Include="phys\collision_contact.h">
-      <Filter>phys\rotational</Filter>
-    </ClInclude>
-    <ClInclude Include="phys\ContactSolver.h">
+    <ClInclude Include="phys\Collision_utils.h">
       <Filter>phys\collision resolution</Filter>
     </ClInclude>
-    <ClInclude Include="phys\Collision_utils.h">
+    <ClInclude Include="phys\collision_contact.h">
+      <Filter>phys\collision resolution</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_rotation_utils.h">
+      <Filter>phys\collision resolution</Filter>
+    </ClInclude>
+    <ClInclude Include="phys\collision_rotational.h">
       <Filter>phys\collision resolution</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1729,16 +1720,13 @@
       <Filter>network\substream managers</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
-    <ClCompile Include="phys\collision_rotational.cpp">
-      <Filter>phys\rotational</Filter>
-    </ClCompile>
     <ClCompile Include="phys\CollisionManager.cpp">
       <Filter>phys</Filter>
     </ClCompile>
-    <ClCompile Include="phys\ContactSolver.cpp">
+    <ClCompile Include="phys\Collision_utils.cpp">
       <Filter>phys\collision resolution</Filter>
     </ClCompile>
-    <ClCompile Include="phys\Collision_utils.cpp">
+    <ClCompile Include="phys\collision_rotational.cpp">
       <Filter>phys\collision resolution</Filter>
     </ClCompile>
   </ItemGroup>

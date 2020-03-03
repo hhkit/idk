@@ -54,7 +54,7 @@ namespace idk
 			_col_manager.UpdateDynamics();
 			_col_manager.TestCollisions();
 			if (debug_draw_colliders)
-				_col_manager.DebugDrawContactPoints(dt + 0.02f);
+				_col_manager.DebugDrawContactPoints(dt);
 			_col_manager.PreSolve();
 			_col_manager.Solve();
 		}
@@ -62,7 +62,7 @@ namespace idk
 
 		if (!debug_draw_colliders)
 			return;
-		_col_manager.DebugDrawColliders(colliders, dt + 0.02f);
+		_col_manager.DebugDrawColliders(colliders, dt);
 	}
 
 	void PhysicsSystem::FirePhysicsEvents()

@@ -40,7 +40,7 @@ namespace idk
 
         bool AreLayersCollidable(LayerManager::layer_t a, LayerManager::layer_t b) const;
 
-        bool debug_draw_colliders = true;
+        bool debug_draw_colliders = false;
 	private:
 		CollisionList _prev_collisions;
 		CollisionManager _col_manager;

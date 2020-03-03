@@ -34,7 +34,7 @@ namespace idk
 	constexpr float penetration_slop = 0.05f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
-#pragma optimize("", off)
+// #pragma optimize("", off)
 	void CollisionManager::InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders)
 	{
 		const auto dt = Core::GetDT().count();
@@ -651,7 +651,7 @@ namespace idk
 
 	void CollisionManager::DebugDrawColliders(span<class Collider> colliders, float dt)
 	{
-		constexpr auto debug_draw = [&](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT() + seconds{ 0.02f })
+		constexpr auto debug_draw = [&](const CollidableShapes& pred_shape, const color& c = color{ 1,0,0 }, const seconds& dur = Core::GetDT())
 		{
 			std::visit([&](const auto& shape)
 				{
@@ -661,14 +661,14 @@ namespace idk
 
 		_static_broadphase.debug_draw();
 		for (const auto& elem : _dynamic_info)
-			debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 });
+			debug_draw(elem.predicted_shape, elem.collider->is_trigger ? color{ 0, 1, 1 } : color{ 1, 0, 0 }, seconds{ dt });
 		for (auto& elem : colliders)
 		{
 			if (!elem._active_cache)
 			{
 				std::visit([&](const auto& shape)
 					{
-						debug_draw(calc_shape(shape, elem), color{ 0.5 });
+						debug_draw(calc_shape(shape, elem), color{ 0.5 }, seconds{ dt });
 					}, elem.shape);
 			}
 		}
