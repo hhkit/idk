@@ -691,9 +691,9 @@ namespace idk::vkn::renderpasses
 		LOG_ERROR_TO(LogPool::GFX, "DrawSetRenderPass::Execute(Context_t) should not be executed.");
 	}
 	using DeferredPbrInstDrawSet = GenericDrawSet<bindings::DeferredPbrRoBind, InstMeshDrawSet>;
-	using DeferredPbrAniDrawSet = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
-	using AccumLightDrawSet = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
-	using AccumAmbientDrawSet = GenericDrawSet<bindings::AmbientBind, FsqDrawSet>;
+	using DeferredPbrAniDrawSet  = GenericDrawSet<bindings::DeferredPbrAniBind, SkinnedMeshDrawSet>;
+	using AccumLightDrawSet      = GenericDrawSet<bindings::LightBind, PerLightDrawSet>;
+	using AccumAmbientDrawSet    = GenericDrawSet<bindings::AmbientBind, FsqDrawSet>;
 
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
