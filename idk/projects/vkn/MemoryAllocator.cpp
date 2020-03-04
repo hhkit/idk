@@ -18,6 +18,7 @@ namespace idk::vkn::hlp
 		{
 			size_t chunk_alloced = 0;
 			size_t chunk_free = 0;
+			out << "\t\tMemory Type[" << mems.first << "]\n";
 			for (auto& mem : mems.second.memories)
 			{
 				size_t free = 0;
@@ -59,6 +60,7 @@ namespace idk::vkn::hlp
 	}
 	using detail::Memories;
 
+#pragma optimize("",off)
 	MemoryAllocator::MemoryAllocator(vk::Device d, vk::PhysicalDevice pd) :device{ d }, pdevice{ pd }{_allocators.emplace(this); }
 	MemoryAllocator::MemoryAllocator() : device{ *View().Device() }, pdevice{ View().PDevice() }{_allocators.emplace(this); }
 	MemoryAllocator::UniqueAlloc MemoryAllocator::Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req)
