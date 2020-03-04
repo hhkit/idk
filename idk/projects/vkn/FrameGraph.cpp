@@ -58,16 +58,25 @@ namespace idk::vkn
 			max_order = std::max(order, max_order);
 		}
 
+		hash_table<fgr_id, size_t> ordering;
 		for (auto index : exec_order)
 		{
 			auto& curr_node = graph_nodes[index];
 			for (auto& input_rsc : curr_node.GetInputSpan())
 			{
-				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
+				auto rsc_id = input_rsc.id;
+				auto order = fat_order[curr_node.id];
+				manager.ExtendLifetime(rsc_id, order);
+				ordering.emplace(rsc_id, order);
+				ordering[rsc_id] = std::min(ordering[rsc_id],order);
 			}
-			for (auto& input_rsc : curr_node.GetOutputSpan())
+			for (auto& output_rsc : curr_node.GetOutputSpan())
 			{
-				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
+				auto rsc_id = output_rsc.id;
+				auto order = fat_order[curr_node.id];
+				manager.ExtendLifetime(rsc_id, order);
+				ordering.emplace(rsc_id, order);
+				ordering[rsc_id] = std::min(ordering[rsc_id], order);
 			}
 		}
 		vector<std::pair<string, ResourceLifetime>> lifetimes;
@@ -79,7 +88,7 @@ namespace idk::vkn
 		}
 
 
-		manager.CollapseLifetimes(original_id);
+		manager.CollapseLifetimes(original_id,ordering);
 		manager.DebugCollapsed(rsc_manager);
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
 		

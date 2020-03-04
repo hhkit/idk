@@ -16,6 +16,15 @@ namespace idk::vkn
 		uint32_t num_dependencies;
 	};
 
+	RenderPassObj RenderPassPool::GetRenderPass(const rp_info_t& rpci)
+	{
+		RenderPassObj result = {};
+		auto type = ComputeType(rpci);
+		auto itr = _subpools.find(type);
+
+		result = (itr == _subpools.end()) ? CreateRenderPass(type, rpci) : itr->second;
+		return result;
+	}
 
 	RenderPassPool::rp_type_t RenderPassPool::ComputeType(const rp_info_t& rpci) const
 	{
@@ -70,6 +79,16 @@ namespace idk::vkn
 		auto rp = *urp;
 		return _subpools.emplace(type, std::move(urp)).first->second;
 		;
+	}
+
+	vk::Framebuffer FramebufferPool::GetFramebuffer(const fb_info_t& fbci)
+	{
+		vk::Framebuffer result = {};
+		auto type = ComputeType(fbci);
+		auto itr = _subpools.find(type);
+
+		result = (itr == _subpools.end()) ? CreateFramebuffer(type, fbci) : *itr->second;
+		return result;
 	}
 
 	FramebufferPool::fb_type_t FramebufferPool::ComputeType(const fb_info_t& fbci) const

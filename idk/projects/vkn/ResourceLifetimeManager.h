@@ -1,4 +1,5 @@
 #pragma once
+#include <idk.h>
 #include "FrameGraphNode.h"
 #include "FrameGraphResource.h"
 
@@ -43,26 +44,41 @@ namespace idk::vkn
 
 		void ExtendLifetime(fgr_id rsc_id, order_t order);
 		template< typename Dealias>
-		void CollapseLifetimes(Dealias&& get_original_id)
+		void CollapseLifetimes(Dealias&& get_original_id,hash_table<fgr_id,size_t> ordering)
 		{
 			mappings.clear();
 			collapsed.clear();
 			mappings.reserve(map.size());
+			hash_table<fgr_id, size_t> collapsed_ordering{};
+			auto add_to_ordering = [&collapsed_ordering](size_t order, fgr_id id) {
+
+				auto itr = collapsed_ordering.find(id);
+				if (itr == collapsed_ordering.end())
+					collapsed_ordering[id] = order;
+				collapsed_ordering.at(id) = std::min(collapsed_ordering.at(id), order);
+			};
 			for (auto& [id, index] : map)
 			{
 				auto& lifetime = resource_lifetimes[index];
 				auto original_id = get_original_id(id);
 				mappings.emplace_back(Mapping{ id, original_id });
 				auto& collapsed_lifetime = collapsed[original_id];
+				auto order = ordering.at(id);
+				add_to_ordering(order, original_id);
 				collapsed_lifetime.start = std::min(collapsed_lifetime.start, lifetime.start);
 				collapsed_lifetime.end   = std::max(collapsed_lifetime.end, lifetime.end);
 			}
+			sorted_order.resize(collapsed_ordering.size());
+			std::transform(collapsed_ordering.begin(), collapsed_ordering.end(), sorted_order.begin(), [](auto& pair) {return std::pair{ pair.second,pair.first }; });
+			std::sort(sorted_order.begin(), sorted_order.end(), [](auto& lhs, auto& rhs) {return lhs.first < rhs.first; });
 		}
 		template<typename Func>
 		void CombineAllLifetimes(Func&& compatibility_checker)
 		{
-			for (auto& [id, lifetime] : collapsed)
+				
+			for (auto& [order, id] : sorted_order)
 			{
+				auto& lifetime = collapsed.at(id);
 				CombineLifetimes(id, lifetime.start, lifetime.end, compatibility_checker);
 			}
 			for (auto& [rsc, original] : mappings)
@@ -130,7 +146,7 @@ namespace idk::vkn
 		{
 			for (auto& concrete_resource : concrete_resources)
 			{
-				if (!overlap_lifetime(concrete_resource, start, end) && is_compatible(id, concrete_resource.base_rsc))
+				if (!overlap_lifetime(concrete_resource, start, end) && is_compatible(concrete_resource.base_rsc, id))
 				{
 					Alias(id, start, end, concrete_resource);
 					return;
@@ -147,6 +163,7 @@ namespace idk::vkn
 		vector<actual_resource_t> concrete_resources;
 		hash_table<fgr_id, actual_resource_id> resource_alias;
 		hash_table<fgr_id, ResourceLifetime> collapsed{};
+		vector<std::pair<size_t, fgr_id>> sorted_order;
 		struct Mapping
 		{
 			fgr_id rsc;

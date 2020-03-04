@@ -23,19 +23,11 @@ namespace idk::vkn
 		//TODO
 		void Reset();//To reset the allocation tracker and free up the unused renderpasses
 
-		RenderPassObj GetRenderPass(const rp_info_t& rpci)
-		{
-			RenderPassObj result = {};
-			auto type = ComputeType(rpci);
-			auto itr = _subpools.find(type);
-
-			result = (itr == _subpools.end()) ? CreateRenderPass(type, rpci) : itr->second;
-			return result;
-		}
+		RenderPassObj GetRenderPass(const rp_info_t& rpci);
 
 	private:
 
-		hash_table<rp_type_t, RenderPassObj> _subpools;
+		hash_table<rp_type_t, RenderPassObj> _subpools{};
 
 		//rp_hash_t ComputeHash(const rp_info_t& rpci)const;
 		rp_type_t ComputeType(const rp_info_t& rpci)const;
@@ -54,15 +46,7 @@ namespace idk::vkn
 		//TODO
 		void Reset();//To reset the allocation tracker and free up the unused Framebufferes
 
-		vk::Framebuffer GetFramebuffer(const fb_info_t& fbci)
-		{
-			vk::Framebuffer result = {};
-			auto type = ComputeType(fbci);
-			auto itr = _subpools.find(type);
-
-			result = (itr == _subpools.end()) ? CreateFramebuffer(type, fbci) : *itr->second;
-			return result;
-		}
+		vk::Framebuffer GetFramebuffer(const fb_info_t& fbci);
 
 	private:
 

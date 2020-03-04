@@ -50,7 +50,7 @@ namespace idk::vkn
 		bool IsWriteRenamed(FrameGraphResource rsc)const;
 		string_view Name(FrameGraphResource fg)const;
 
-		bool IsCompatible(fgr_id lhs, fgr_id rhs)const;
+		bool IsCompatible(fgr_id original, fgr_id new_)const;
 
 		template<typename ActualResource>
 		ActualResource& Get(fgr_id rsc)
