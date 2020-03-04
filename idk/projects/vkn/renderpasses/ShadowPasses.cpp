@@ -330,7 +330,7 @@ namespace idk::vkn::renderpasses
 	}
 	void AddPointShadowPass      (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
-		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
+		/*auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 		auto& elem = light.light_maps[shadow_range.light_map_index];
 		
 		static array<vec3, 6> cubeMat = {
@@ -367,7 +367,7 @@ namespace idk::vkn::renderpasses
 				DirectionalShadow::SkinnedInstDrawSetBinding{skinned_bindings,SkinnedMeshDrawSet{state.skinned_mesh_render}}
 			}
 		};
-		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);
+		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);*/
 
 	}
 
