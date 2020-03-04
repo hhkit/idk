@@ -48,6 +48,11 @@ of the editor.
 
 namespace idk {
 
+	ivec2 GetMouseScroll()
+	{
+		return ivec2{ static_cast<int>(ImGui::GetIO().MouseWheelH * 5),static_cast<int>(ImGui::GetIO().MouseWheel * 5) };
+	}
+
 	IGE_SceneView::IGE_SceneView()
 		:IGE_IWindow{ "SceneView",true,ImVec2{ 800,600 },ImVec2{ 0,50 } } {		//Delegate Constructor to set window size
 			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
@@ -534,8 +539,8 @@ namespace idk {
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 		auto& app_sys = Core::GetSystem<Application>();
-
-		const auto scroll = app_sys.GetMouseScroll().y;
+		
+		const auto scroll = static_cast<int>(GetMouseScroll().y);
 		if (scroll > 0)
 			cam_vel += cam_vel_additive * scroll;
 		else if (scroll < 0)
@@ -597,7 +602,7 @@ namespace idk {
 
 	void IGE_SceneView::UpdateScrollMouseControl()
 	{
-		const auto scroll = Core::GetSystem<Application>().GetMouseScroll().y;
+		const auto scroll = GetMouseScroll().y;
 		auto tfm = Core::GetSystem<IDE>().GetEditorCamera()->GetGameObject()->Transform();
 
 		if (ImGui::IsWindowHovered() && scroll)

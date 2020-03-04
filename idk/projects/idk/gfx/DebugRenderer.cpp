@@ -107,6 +107,24 @@ namespace idk
 		const mat4 tfm = translate(sphere.center) * mat4 { scale(vec3{ sphere.radius * 2 }) };
 		Draw(Mesh::defaults[MeshType::Sphere], tfm, c, duration, depth_test);
 	}
+	void DebugRenderer::Draw(const frustum& frust, const color& c , seconds duration , bool depth_test )
+	{
+		auto points = frustum_points(frust);
+		//Yes I'm too scrub to write some smart code to do this for me.
+		Draw(points[0], points[4], c, duration, depth_test);
+		Draw(points[1], points[5], c, duration, depth_test);
+		Draw(points[2], points[6], c, duration, depth_test);
+		Draw(points[3], points[7], c, duration, depth_test);
+		Draw(points[0], points[1], c, duration, depth_test);
+		Draw(points[1], points[2], c, duration, depth_test);
+		Draw(points[2], points[3], c, duration, depth_test);
+		Draw(points[3], points[0], c, duration, depth_test);
+		Draw(points[4 + 0], points[4 + 1], c, duration, depth_test);
+		Draw(points[4 + 1], points[4 + 2], c, duration, depth_test);
+		Draw(points[4 + 2], points[4 + 3], c, duration, depth_test);
+		Draw(points[4 + 3], points[4 + 0], c, duration, depth_test);
+
+	}
 
 	void DebugRenderer::GraphicsTick()
 	{

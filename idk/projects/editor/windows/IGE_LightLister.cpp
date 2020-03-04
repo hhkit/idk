@@ -14,7 +14,7 @@
 namespace idk
 {
 	IGE_LightLister::IGE_LightLister()
-		:IGE_IWindow{ "Light Lister##IGE_LightLister",false,ImVec2{ 600,300 },ImVec2{ 450,150 } }
+		:IGE_IWindow{ "Light Lister##IGE_LightLister",false,ImVec2{ 1000,300 },ImVec2{ 450,150 } }
 	{
 	}
 	void IGE_LightLister::BeginWindow()
@@ -23,7 +23,7 @@ namespace idk
 	void IGE_LightLister::Update()
 	{
 		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
-		ImGui::Text("Create:"); 
+		ImGui::Text("Create:");
 		ImGui::SameLine();
 
 		if (ImGui::Button("Point"))
@@ -57,20 +57,29 @@ namespace idk
 				elem.enabled = false;
 		}
 
+		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+				elem.enabled = true;
+		}
+
 		struct ColumnHeader
 		{
 			const char* label;
 			float sz;
 		};
-		ColumnHeader headers[]=
+		ColumnHeader headers[] =
 		{
 			{"On", -1},
-			{"Name", 125},
+			{"Type", 80},
+			{"Name", 100},
 			{"Col", -1},
 			{"Intensity", -1},
 			{"Atten", -1},
-			{"Position", 250},
-			{"Rotation", 250},
+			{"Position", 210},
+			{"Rotation", 210},
 			{"Shadows", -1},
 			{"Isolate", -1},
 			{"Focus", -1}
@@ -111,6 +120,20 @@ namespace idk
 			ImGui::Checkbox("##en", &light.enabled);
 			ImGui::NextColumn();
 
+			switch (light.light.index())
+			{
+			case 0:
+				ImGui::Text("Point");
+				break;
+			case 1:
+				ImGui::Text("Directional");
+				break;
+			case 2:
+				ImGui::Text("Spotlight");
+				break;
+			};
+			ImGui::NextColumn();
+
 			if (ImGui::Selectable(name.data()))
 			{
 				editor.SelectGameObject(go);
@@ -129,15 +152,15 @@ namespace idk
 					light.SetLightIntensity(intens);
 				ImGui::NextColumn();
 			}
-			std::visit([](auto& light) 
+			std::visit([](auto& light)
+			{
+				if constexpr (!std::is_same_v<std::decay_t<decltype(light)>, DirectionalLight>)
 				{
-					if constexpr (!std::is_same_v<std::decay_t<decltype(light)>, DirectionalLight>)
-					{
-						ImGui::DragFloat("##atten", &light.attenuation_radius, 0.1f, 0.f, 1500.f, "%.3f", 1.1f);
-					}
-					ImGui::NextColumn();
-				}, light.light);
-			
+					ImGui::DragFloat("##atten", &light.attenuation_radius, 0.1f, 0.f, 1500.f, "%.3f", 1.1f);
+				}
+				ImGui::NextColumn();
+			}, light.light);
+
 
 			auto pos = tfm->GlobalPosition();
 			if (ImGuidk::DragVec3("##tfm", &pos))

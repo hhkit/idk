@@ -35,4 +35,15 @@ namespace idk
 	frustum camera_vp_to_frustum(const mat4& view_projection_matrix);
 	aabb	camera_vp_to_bounding_box(const mat4& view_projection_matrix);
 	cascadingFrustum camera_vp_to_tight_bound(const mat4& view_projection_matrix);
+
+	/*vec3{-1, 1,-1},//*/
+	/*vec3{ 1, 1,-1},//*/
+	/*vec3{ 1,-1,-1},//*/
+	/*vec3{-1,-1,-1},//*/
+	/*vec3{-1, 1, 1},//*/
+	/*vec3{ 1, 1, 1},//*/
+	/*vec3{ 1,-1, 1},//*/
+	/*vec3{-1,-1, 1},//*/
+	array<vec3, 8> frustum_points(const frustum& frust);
+
 }
