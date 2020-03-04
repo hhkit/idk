@@ -940,10 +940,10 @@ namespace idk
             return changed;
         };
 
-        const auto display_params = [&](auto& param_names, auto type, const string& label, const string& prop_path)
+        const auto display_params = [&](auto& param_names, auto type, const string& label) -> bool
         {
             using ParamType = std::decay_t<decltype(type)>;
-
+            bool changed = false;
             display.GroupBegin();
             
             // const auto title_pos = ImGui::GetCursorPos();
@@ -986,8 +986,7 @@ namespace idk
                         else
                             param_names.erase(found_itr);
 
-                        if(prefab_inst)
-                            PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, prop_path);
+                        changed = true;
                     }
                     ImGui::PopID();
                 }
@@ -997,30 +996,37 @@ namespace idk
             display.GroupEnd();
             ImGui::Unindent();
             ImGui::EndGroup();
+
+            return changed;
         };
         
+        bool changed = false;
         _curr_property_stack.emplace_back("int_params");
-        if (validate_params(a_view.int_params, anim::IntParam{}))
+        changed = validate_params(a_view.int_params, anim::IntParam{});
+        changed |= display_params(a_view.int_params, anim::IntParam{}, "Synced Int Params");
+        if (changed && prefab_inst)
             PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "int_params");
-        display_params(a_view.int_params, anim::IntParam{}, "Synced Int Params", "int_params");
         _curr_property_stack.pop_back();
 
         _curr_property_stack.emplace_back("float_params");
-        if(validate_params(a_view.float_params, anim::FloatParam{}))
+        changed = validate_params(a_view.float_params, anim::FloatParam{});
+        changed |= display_params(a_view.float_params, anim::FloatParam{}, "Synced Float Params");
+        if (changed && prefab_inst)
             PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "float_params");
-        display_params(a_view.float_params, anim::FloatParam{}, "Synced Float Params", "float_params");
         _curr_property_stack.pop_back();
 
         _curr_property_stack.emplace_back("bool_params");
-        if(validate_params(a_view.bool_params, anim::BoolParam{}))
+        changed = validate_params(a_view.bool_params, anim::BoolParam{});
+        changed |= display_params(a_view.bool_params, anim::BoolParam{}, "Synced Bool Params");
+        if (changed && prefab_inst)
             PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "bool_params");
-        display_params(a_view.bool_params, anim::BoolParam{}, "Synced Bool Params", "bool_params");
         _curr_property_stack.pop_back();
 
         _curr_property_stack.emplace_back("trigger_params");
-        if(validate_params(a_view.trigger_params, anim::TriggerParam{}))
+        changed = validate_params(a_view.trigger_params, anim::TriggerParam{});
+        changed |= display_params(a_view.trigger_params, anim::TriggerParam{}, "Synced Trigger Params");
+        if (changed && prefab_inst)
             PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "trigger_params");
-        display_params(a_view.trigger_params, anim::TriggerParam{}, "Synced Trigger Params", "trigger_params");
         _curr_property_stack.pop_back();
 
     }
