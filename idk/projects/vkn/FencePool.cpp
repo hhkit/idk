@@ -117,11 +117,11 @@ namespace idk::vkn
 		}
 	}
 
-	vk::CommandBuffer CmdBufferPool::Get(size_t id) const
+	vk::CommandBuffer CmdBufferPool::Get(size_t id) 
 	{
-		_acquire_lock.Lock();
+		hlp::SimpleLockGuard guard{ _acquire_lock };
 		auto result = *_cmd_buffer[id];
-		_acquire_lock.Unlock();
+		//_acquire_lock.Unlock();
 		return result;
 	}
 
