@@ -68,9 +68,10 @@ namespace idk::vkn
 	class FencePool
 	{
 	public:
+		FencePool();
+		~FencePool();
 		FenceObj AcquireFence();
 		void Free(FenceObj&& obj);
-		~FencePool();
 	private:
 		size_t growth_amount()const;
 		vk::UniqueFence MakeFence();

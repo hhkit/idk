@@ -197,6 +197,30 @@
             return t * t * t * (t * (t * 6 - 15) + 10);
         }
 
+        private static float Grad(int hash, float x, float y)
+        {
+            switch (hash & 0xF)
+            {
+                case 0x0: return x + y;
+                case 0x1: return -x + y;
+                case 0x2: return x - y;
+                case 0x3: return -x - y;
+                case 0x4: return x;
+                case 0x5: return -x;
+                case 0x6: return x;
+                case 0x7: return -x;
+                case 0x8: return y;
+                case 0x9: return -y;
+                case 0xA: return y;
+                case 0xB: return -y;
+                case 0xC: return y + x;
+                case 0xD: return -y;
+                case 0xE: return y - x;
+                case 0xF: return -y;
+                default: return 0; // never happens
+            }
+        }
+
         /// <summary>
         /// Samples Perlin Noise at (x,y), returns [0, 1] (0.5 at integer points).
         /// </summary>
@@ -209,19 +233,13 @@
             // Wrap the integer cells at 255 (smaller integer period can be introduced here)
             X &= 255; Y &= 255;
 
-            // Calculate noise contributions from each of the four corners
-            var n00 = Vector2.Dot(grads[X + perm[Y]], new Vector2(x, y));
-            var n01 = Vector2.Dot(grads[X + perm[Y + 1]], new Vector2(x, y - 1));
-            var n10 = Vector2.Dot(grads[X + 1 + perm[Y]], new Vector2(x - 1, y));
-            var n11 = Vector2.Dot(grads[X + 1 + perm[Y + 1]], new Vector2(x - 1, y - 1));
-
             // Compute the fade curve value for x
             var u = Fade(x);
 
             // Interpolate the four results
             return Mathf.LerpUnclamped(
-                Mathf.LerpUnclamped(n00, n10, u),
-                Mathf.LerpUnclamped(n01, n11, u),
+                Mathf.LerpUnclamped(Grad(X + perm[Y]    , x, y    ), Grad(X + 1 + perm[Y]    , x - 1, y    ), u),
+                Mathf.LerpUnclamped(Grad(X + perm[Y + 1], x, y - 1), Grad(X + 1 + perm[Y + 1], x - 1, y - 1), u),
                 Fade(y)) + 0.5f;
         }
 

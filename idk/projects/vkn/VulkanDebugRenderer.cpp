@@ -152,6 +152,8 @@ namespace idk::vkn
 				}
 			});
 		config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
+		config.depth_test = false;
+		config.depth_write = false;
 		auto line_copy = config;
 		line_copy.prim_top = idk::PrimitiveTopology::eLineList;
 		Init(config,line_copy);

@@ -73,7 +73,6 @@ namespace idk::vkn
 				(*o_prsc)->usage |= usage;
 		}
 	}
-#pragma optimize ("",off)
 	FrameGraphResource FrameGraphResourceManager::CreateTexture(TextureDescription dsc)
 	{
 		auto rsc_index = resources.size();

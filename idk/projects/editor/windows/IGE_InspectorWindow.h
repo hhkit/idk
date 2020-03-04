@@ -90,6 +90,7 @@ namespace idk {
 		void DisplayComponentInner(Handle<Text> c_text);	
         void DisplayComponentInner(Handle<ParticleSystem> c_ps);
         void DisplayComponentInner(Handle<ElectronView> c_ev);
+        void DisplayComponentInner(Handle<ElectronAnimatorView> c_ev);
 
 		void MenuItem_RemoveComponent(GenericHandle i);
 		void MenuItem_CopyComponent(GenericHandle i);

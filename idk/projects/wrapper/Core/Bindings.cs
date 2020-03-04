@@ -339,6 +339,17 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorSetWeight(ulong id, float weight, string name = "");
 
+
+        /*
+         * AudioListener
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioListenerGetEnabledState(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioListenerSetEnabledState(ulong id, bool c);
+
+
         /*
          * AudioSource
          */

@@ -910,5 +910,118 @@ namespace idk
                 ImGui::DragFloat3(name.data(), v.data());
             }
         }
+
+    }
+
+    // joseph you scrub you put it in the function scope
+    void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronAnimatorView> c_av)
+    {
+        // Make sure all current synced params exists
+        auto& a_view = *c_av;
+        auto& animator = *a_view.GetGameObject()->GetComponent<Animator>();
+        auto prefab_inst = animator.GetGameObject()->GetComponent<PrefabInstance>();
+        DisplayStack display{ *this };
+
+        const auto validate_params = [&](auto& param_names, auto type) -> bool
+        {
+            using ParamType = std::decay_t<decltype(type)>;
+            bool changed = false;
+            for (auto itr = param_names.begin(); itr != param_names.end();)
+            {
+                if (!animator.GetParam<ParamType>(*itr).valid)
+                {
+                    itr = param_names.erase(itr);
+                    changed = true;
+                }
+                else
+                    ++itr;
+            }
+
+            return changed;
+        };
+
+        const auto display_params = [&](auto& param_names, auto type, const string& label, const string& prop_path)
+        {
+            using ParamType = std::decay_t<decltype(type)>;
+
+            display.GroupBegin();
+            
+            // const auto title_pos = ImGui::GetCursorPos();
+            bool tree_open = ImGui::CollapsingHeader(("##" + label).c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
+            
+            ImGui::SameLine();
+            display.Label(label.data());
+            ImGui::NewLine();
+            ImGui::Indent();
+            ImGui::BeginGroup();
+            if (tree_open)
+            {
+                ImGui::PushID(label.data());
+                auto& p_table = animator.GetParamTable<ParamType>();
+
+                const float checkbox_x = ImGui::GetContentRegionAvailWidth() * 0.7f;
+
+                for (auto& p : p_table)
+                {
+                    bool synced = false;
+                    // Check if this parameter is synced
+                    auto found_itr = param_names.begin();
+                    for (; found_itr != param_names.end(); ++found_itr)
+                    {
+                        if (*found_itr == p.first)
+                        {
+                            synced = true;
+                            break;
+                        }
+                    }
+
+                    ImGui::PushID(&p);
+                    ImGui::Text(p.first.data());
+                    ImGui::SameLine(checkbox_x);
+
+                    if (ImGui::Checkbox("Sync", &synced))
+                    {
+                        if (synced)
+                            param_names.push_back(p.first);
+                        else
+                            param_names.erase(found_itr);
+
+                        if(prefab_inst)
+                            PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, prop_path);
+                    }
+                    ImGui::PopID();
+                }
+                ImGui::PopID();
+            }
+
+            display.GroupEnd();
+            ImGui::Unindent();
+            ImGui::EndGroup();
+        };
+        
+        _curr_property_stack.emplace_back("int_params");
+        if (validate_params(a_view.int_params, anim::IntParam{}))
+            PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "int_params");
+        display_params(a_view.int_params, anim::IntParam{}, "Synced Int Params", "int_params");
+        _curr_property_stack.pop_back();
+
+        _curr_property_stack.emplace_back("float_params");
+        if(validate_params(a_view.float_params, anim::FloatParam{}))
+            PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "float_params");
+        display_params(a_view.float_params, anim::FloatParam{}, "Synced Float Params", "float_params");
+        _curr_property_stack.pop_back();
+
+        _curr_property_stack.emplace_back("bool_params");
+        if(validate_params(a_view.bool_params, anim::BoolParam{}))
+            PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "bool_params");
+        display_params(a_view.bool_params, anim::BoolParam{}, "Synced Bool Params", "bool_params");
+        _curr_property_stack.pop_back();
+
+        _curr_property_stack.emplace_back("trigger_params");
+        if(validate_params(a_view.trigger_params, anim::TriggerParam{}))
+            PrefabUtility::RecordPrefabInstanceChange(prefab_inst->GetGameObject(), c_av, "trigger_params");
+        display_params(a_view.trigger_params, anim::TriggerParam{}, "Synced Trigger Params", "trigger_params");
+        _curr_property_stack.pop_back();
+
     }
 }

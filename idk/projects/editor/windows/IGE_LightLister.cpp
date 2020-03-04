@@ -23,7 +23,7 @@ namespace idk
 	void IGE_LightLister::Update()
 	{
 		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
-		ImGui::Text("Create:"); 
+		ImGui::Text("Create:");
 		ImGui::SameLine();
 
 		if (ImGui::Button("Point"))
@@ -70,7 +70,7 @@ namespace idk
 			const char* label;
 			float sz;
 		};
-		ColumnHeader headers[]=
+		ColumnHeader headers[] =
 		{
 			{"On", -1},
 			{"Type", 80},
@@ -152,15 +152,15 @@ namespace idk
 					light.SetLightIntensity(intens);
 				ImGui::NextColumn();
 			}
-			std::visit([](auto& light) 
+			std::visit([](auto& light)
+			{
+				if constexpr (!std::is_same_v<std::decay_t<decltype(light)>, DirectionalLight>)
 				{
-					if constexpr (!std::is_same_v<std::decay_t<decltype(light)>, DirectionalLight>)
-					{
-						ImGui::DragFloat("##atten", &light.attenuation_radius, 0.1f, 0.f, 1500.f, "%.3f", 1.1f);
-					}
-					ImGui::NextColumn();
-				}, light.light);
-			
+					ImGui::DragFloat("##atten", &light.attenuation_radius, 0.1f, 0.f, 1500.f, "%.3f", 1.1f);
+				}
+				ImGui::NextColumn();
+			}, light.light);
+
 
 			auto pos = tfm->GlobalPosition();
 			if (ImGuidk::DragVec3("##tfm", &pos))

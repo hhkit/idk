@@ -3,6 +3,7 @@
 #include <gfx/Mesh.h>
 namespace idk::vkn
 {
+	class VulkanMesh;
 	template<typename T>
 	using binding_only = std::enable_if_t<std::is_base_of_v<bindings::RenderBindings, T>>;
 	class BaseDrawSet
@@ -112,21 +113,30 @@ namespace idk::vkn
 	class FsqDrawSet : public BaseDrawLogic
 	{
 	public:
-		FsqDrawSet(MeshType mesh_type = MeshType::FSQ,bool draw_till_skip = false);
+		FsqDrawSet(bool draw_till_skip = false);
+		FsqDrawSet(MeshType::_enum mesh_type , bool draw_till_skip = false);
 		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
 	protected:
 		bool BindRo(RenderInterface& the_interface, bindings::RenderBindings& bindings);
 		RenderObject _fsq_ro;
 		static renderer_attributes _req;
-		MeshType _mesh_type;
-		bool _draw_till_skip;
+		MeshType _mesh_type = MeshType::FSQ;
+		bool _draw_till_skip = false;
 	};
 
 	class PerLightDrawSet : public FsqDrawSet
 	{
 	public:
-		PerLightDrawSet();
+		PerLightDrawSet(bool draw_till_skip = true);
 		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
 	private:
 	};
+
+
+	bool BindMeshBuffers(RenderInterface& the_interface, const VulkanMesh& mesh, const renderer_attributes& attribs);
+	bool BindMeshBuffers(RenderInterface& the_interface, const RenderObject& ro);
+	bool DrawMeshBuffers(RenderInterface& the_interface, const RenderObject& ro);
+	bool DrawMeshBuffers(RenderInterface& the_interface, const InstRenderObjects& ro);
+
+
 }

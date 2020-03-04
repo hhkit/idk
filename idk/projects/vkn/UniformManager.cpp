@@ -475,7 +475,6 @@ namespace idk::vkn
 		}
 		return bound;
 	}
-#pragma optimize("",off)
 	bool UniformUtils::binding_manager::is_bound(set_t set, uint32_t binding_index, uint32_t array_index) const noexcept
 	{
 		const auto s_itr = curr_bindings.find(set);

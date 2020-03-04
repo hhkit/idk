@@ -49,7 +49,7 @@ namespace idk::vkn
 		auto& mesh = ro.mesh.as<VulkanMesh>();
 		bool result = false;
 		if(result |= BindMeshBuffers(the_interface, ro))
-			the_interface.DrawIndexed(mesh.IndexCount(), ro.num_instances, 0, 0, ro.instanced_index);
+			the_interface.DrawIndexed(mesh.IndexCount(), static_cast<uint32_t>(ro.num_instances), 0, 0, static_cast<uint32_t>(ro.instanced_index));
 		return result;
 	}
 	void InstMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)
@@ -79,7 +79,6 @@ namespace idk::vkn
 					if (mat_inst.material && !binders.Skip(the_interface, dc))
 					{
 						binders.Bind(the_interface, dc);
-						auto& mesh = dc.mesh.as<VulkanMesh>();
 						auto& req = *dc.renderer_req;
 						the_interface.BindVertexBuffer(req.instanced_requirements.at(vtx::InstAttrib::ModelTransform), _inst_mesh_render_buffer, 0);
 						//BindMeshBuffers(the_interface, mesh, *dc.renderer_req);
@@ -105,7 +104,7 @@ namespace idk::vkn
 		for (auto& ptr_dc : _draw_calls)
 		{
 			auto& dc = *ptr_dc;
-			auto& mat_inst = *dc.material_instance;
+			[[maybe_unused]] auto& mat_inst = *dc.material_instance; //Debug only
 			if (!binders.Skip(the_interface, dc))
 			{
 				binders.Bind(the_interface, dc);
@@ -120,7 +119,12 @@ namespace idk::vkn
 			std::make_pair(vtx::Attrib::Normal, 1),
 			std::make_pair(vtx::Attrib::UV, 2) }
 	};
-	FsqDrawSet::FsqDrawSet(MeshType mesh_type, bool draw_till_skip):_mesh_type{mesh_type}, _draw_till_skip{ draw_till_skip }
+	FsqDrawSet::FsqDrawSet(MeshType::_enum mesh_type, bool draw_till_skip) :FsqDrawSet{ draw_till_skip }
+	{
+		_mesh_type = mesh_type;
+		_fsq_ro.mesh = Mesh::defaults[_mesh_type];
+	}
+	FsqDrawSet::FsqDrawSet(bool draw_till_skip) : _draw_till_skip{draw_till_skip}
 	{
 		_fsq_ro.mesh = Mesh::defaults[_mesh_type];
 		_fsq_ro.renderer_req = &_req;
@@ -142,7 +146,7 @@ namespace idk::vkn
 		};
 		return rendering && _draw_till_skip;
 	}
-	PerLightDrawSet::PerLightDrawSet()
+	PerLightDrawSet::PerLightDrawSet(bool draw_till_skip ) : FsqDrawSet{draw_till_skip}
 	{
 	}
 //#pragma optimize("",off)

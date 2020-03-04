@@ -45,7 +45,7 @@ REFLECT_END()
 
 // PHYSICS
 REFLECT_BEGIN(idk::RigidBody, "RigidBody")
-REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity)
+REFLECT_VARS(initial_velocity, inv_mass, is_kinematic, use_gravity, gravity_scale, linear_damping, angular_damping, freeze_rotation)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Collider, "Collider")
@@ -86,5 +86,9 @@ REFLECT_END()
 
 REFLECT_BEGIN(idk::ElectronRigidbodyView, "ElectronRigidbodyView")
 REFLECT_VARS(sync_velocity)
+REFLECT_END()
+
+REFLECT_BEGIN(idk::ElectronAnimatorView, "ElectronAnimatorView")
+REFLECT_VARS(int_params, float_params, bool_params, trigger_params)
 REFLECT_END()
 #pragma endregion

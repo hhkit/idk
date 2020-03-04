@@ -390,11 +390,26 @@ namespace idk
 		float d = 0;
 		for (auto axis_aligned_len : e)
 		{
-			d = std::max(0.0f, axis_aligned_len);
+			d = std::max(d, axis_aligned_len);
 		}
 		sphere result{ box.center(),d / 2 };
 		return result;
 	}
+
+	struct LightVolDbg
+	{
+		static void RenderNext() { render_next = true; }
+		template<typename Shape>
+		static void DbgLight  ([[maybe_unused]]Shape light_volume, [[maybe_unused]] color col)
+		{
+			//if (render_next)
+			//	Core::GetSystem<DebugRenderer>().Draw(light_volume, col);
+		}
+
+		static void EndCurrent() { render_next = false;}
+		static bool render_next ;
+	};
+	bool LightVolDbg::render_next = false;
 
 	void CullLights(const CameraData& camera,ShadowMapPool& sm_pool,vector<LightData>& lights,vector<LightData>& new_lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, GraphicsSystem::RenderRange& range)
 	{
@@ -421,22 +436,32 @@ namespace idk
 			case index_in_variant_v<PointLight, LightVariant>:
 				{
 					sphere sphere{ invert_rotation(light.v)[3],light.falloff };
-					if(frustum.contains(sphere))
+					color col = color{ 0.3,0.6,0.2,1.0f };
+					if (frustum.contains(sphere))
+					{
 						active_light_buffer.emplace_back(i);
+						col = color{ 0.5,0.0,0.4,1.0f };
+					}
+					LightVolDbg::DbgLight(sphere,col);
 
 					light.camDataRef = camera;
 				}
 				break;
 			case index_in_variant_v<SpotLight, LightVariant>:
 			{
+				//auto light_frustum = camera_vp_to_frustum(light.vp);
 				auto bounding_box = camera_vp_to_bounding_box(light.vp);
 				auto sphere = bounding_box_to_loose_sphere(bounding_box);
+
+				color col = color{ 0.3,0.2,0.6,1.0f };
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
-
 					light.camDataRef = camera;
+					col = color{ 0.5,0.4,0.0,1.0f };
 				}
+				LightVolDbg::DbgLight(bounding_box, col);
+				//LightVolDbg::DbgLight(light_frustum, col);
 			}
 				break;
 			case index_in_variant_v<DirectionalLight, LightVariant>:
@@ -469,6 +494,7 @@ namespace idk
 		}
 		range.light_end = active_light_buffer.size();
 		range.dir_light_end = directional_light_buffer.size();
+		LightVolDbg::EndCurrent();
 	}
 //#pragma optimize("",off)
 	void GraphicsSystem::BufferGraphicsState(
@@ -990,6 +1016,10 @@ namespace idk
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
 		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
+
+		constexpr auto kDbgLightVol = "DebugLights";
+		extra_vars.SetIfUnset(kDbgLightVol,-1);
+		auto debug_light_vol = *extra_vars.Get<int>(kDbgLightVol);
 		{
 			vector<LightData> new_lights;
 			new_lights.reserve(result.camera.size() * 2);
@@ -1003,7 +1033,8 @@ namespace idk
 					range.inst_mesh_render_end = end_index;
 					ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range, range);
 					ProcessFonts(result.font_render_data, result.font_buffer, result.font_range, range);
-
+					if (debug_light_vol-- == 0)
+						LightVolDbg::RenderNext();
 					CullLights(camera, result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range);
 
 				}
@@ -1037,50 +1068,6 @@ namespace idk
 		size_t i = 0;
 		
 
-		auto draw_frustum = [this](const frustum& frust, color col,seconds duration,bool depth_test=true)
-		{
-
-			auto dbg_cascade_name = "debug_cascade";
-			auto active_opt = this->extra_vars.Get<bool>(dbg_cascade_name);
-
-			if (!active_opt)
-			{
-				extra_vars.Set(dbg_cascade_name,false);
-				active_opt = false;
-			}
-			if (!*active_opt) return;
-
-			auto intersection_point = [](halfspace a, halfspace b, halfspace c)
-			{
-				mat3 mat = mat3{ a.normal,b.normal,c.normal };
-				return mat.transpose().inverse() * vec3 { -a.dist, -b.dist, -c.dist };
-			};
-			vec3 points[8] =
-			{
-				/*vec3{-1, 1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
-				/*vec3{ 1, 1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
-				/*vec3{ 1,-1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
-				/*vec3{-1,-1,-1},//*/intersection_point(frust.sides[FrustumSide::Near],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
-				/*vec3{-1, 1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Left ]),
-				/*vec3{ 1, 1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Up  ],frust.sides[FrustumSide::Right]),
-				/*vec3{ 1,-1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Right]),
-				/*vec3{-1,-1, 1},//*/intersection_point(frust.sides[FrustumSide::Far ],frust.sides[FrustumSide::Down],frust.sides[FrustumSide::Left ]),
-			};
-			//Yes I'm too scrub to write some smart code to do this for me.
-			Core::GetSystem<DebugRenderer>().Draw(points[0    ], points[4    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[1    ], points[5    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[2    ], points[6    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[3    ], points[7    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[0    ], points[1    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[1    ], points[2    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[2    ], points[3    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[3    ], points[0    ], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[4 + 0], points[4 + 1], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[4 + 1], points[4 + 2], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[4 + 2], points[4 + 3], col, duration, depth_test);
-			Core::GetSystem<DebugRenderer>().Draw(points[4 + 3], points[4 + 0], col, duration, depth_test);
-
-		};
 		size_t derp = 0;
 		for (auto& light : result.lights)
 		{
@@ -1226,7 +1213,7 @@ namespace idk
 		//	Core::GetResourceManager().Load<ShaderSnippet>(glsl, false);
 		//}
 		///////////////////////Load vertex shaders
-		//renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/debug.vert");
+		renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/dbgvertex.vert");
 		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
 		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
@@ -1239,7 +1226,7 @@ namespace idk
 		renderer_vertex_shaders[VUi] = LoadShader("/engine_data/shaders/ui.vert");
 
 
-		renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/debug.frag");
+		renderer_fragment_shaders[FDebug] = LoadShader("/engine_data/shaders/dbgfragment.frag");
 		renderer_fragment_shaders[FSkyBox] = LoadShader("/engine_data/shaders/skybox.frag");
 		renderer_fragment_shaders[FShadow] = LoadShader("/engine_data/shaders/shadow.frag");
 		renderer_fragment_shaders[FPicking] = LoadShader("/engine_data/shaders/picking.frag");
