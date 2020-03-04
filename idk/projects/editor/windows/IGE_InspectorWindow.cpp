@@ -62,6 +62,9 @@ of the editor.
 #include <ds/span.inl>
 #include <ds/result.inl>
 
+
+#include <res/ResourceMeta.inl>
+
 namespace idk {
 
 	IGE_InspectorWindow::IGE_InspectorWindow()
@@ -550,6 +553,22 @@ namespace idk {
         if (execute_counter > 1)
             editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
     }
+#pragma optimize("",off)
+
+    template<typename T>
+    struct has_meta
+    {
+        template<typename U, typename = decltype(std::declval<U>().GetMeta())>
+        static char check(U&&);
+        template<typename ...Args>
+        static int check(Args&&...);
+
+        inline static constexpr bool value = sizeof(check(std::declval<T>()))==1;
+    };
+
+    template<typename T>
+    inline constexpr bool has_meta_v = has_meta<T>::value;
+
     void IGE_InspectorWindow::StoreOriginalValues(string_view property_path)
     {
         const auto& sel = Core::GetSystem<IDE>().GetSelectedObjects();
@@ -573,10 +592,36 @@ namespace idk {
                     _original_values.emplace_back();
             }
         }
-        else // showing prefab directly
+        else if (sel.assets.size())
+        {
+            for (auto obj : sel.assets)
+            {
+                obj.visit(
+                    [&](auto& handle) 
+                    {
+                        if constexpr (has_meta_v<std::decay_t<decltype(*handle)>>)
+                            _original_values.push_back(resolve_property_path(handle->GetMeta(), property_path).copy()); 
+                    }
+                );
+                
+                //auto components = obj;
+                //auto nth = _curr_component_nth;
+                //for (auto c : components)
+                //{
+                //    if (c.type == _curr_component.type && nth-- == 0)
+                //    {
+                //        break;
+                //    }
+                //}
+                //if (nth >= 0) // component not found
+                //    _original_values.emplace_back();
+            }
+        }
+        else// if (_curr_component)// showing prefab directly
         {
             _original_values.push_back(resolve_property_path(*_curr_component, property_path).copy());
         }
+
     }
 
     void IGE_InspectorWindow::ExecuteModify(string_view property_path, reflect::dynamic new_value)
