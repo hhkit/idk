@@ -690,6 +690,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::RigidBodyGetGravityScale", float, Handle < RigidBody> rb)
+		{
+			return rb->gravity_scale;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RigidBodySetGravityScale", void, Handle < RigidBody> rb, float gs)
+		{
+			rb->gravity_scale = gs;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::RigidBodyGetIsKinematic", bool, Handle < RigidBody> rb)
 		{
 			return rb->is_kinematic;

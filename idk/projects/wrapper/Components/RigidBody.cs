@@ -37,6 +37,11 @@
             get => Bindings.RigidBodyGetUseGravity(handle);
             set => Bindings.RigidBodySetUseGravity(handle, value);
         }
+        public float gravityScale
+        {
+            get => Bindings.RigidBodyGetGravityScale(handle);
+            set => Bindings.RigidBodySetGravityScale(handle, value);
+        }
 
         public void Sleep()
             => Bindings.RigidBodySleep(handle);
