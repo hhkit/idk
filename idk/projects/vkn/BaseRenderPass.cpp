@@ -24,6 +24,7 @@ namespace idk::vkn
 		context.SetOutputAttachmentSize(output_atts.size());
 		if(node.depth_stencil)
 			context.SetClearDepthStencil(node.depth_stencil->second.clear_value);
+		context.SkipRenderPass(node.skip_render_pass);
 	}
 
 	void BaseRenderPass::PostExecute(const FrameGraphNode& , Context_t context)

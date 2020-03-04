@@ -10,6 +10,7 @@ namespace idk::vkn
 	{
 		//BaseRenderPass(FrameGraphBuilder&,...); //<-- First parameter required, will be forwarded from add command.
 		using Context_t = FrameGraphDetail::Context_t;
+		bool skip_render_pass = false;
 		VknRenderPass  render_pass;
 		Framebuffer frame_buffer;
 		uvec2       fb_size;

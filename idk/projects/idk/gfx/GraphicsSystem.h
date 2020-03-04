@@ -116,7 +116,7 @@ namespace idk
 	protected:
 
 		std::forward_list<ColorPickRequest> request_stack;
-		vector<ColorPickRequest> request_buffer;
+		vector<ColorPickRequest> request_buffer{};
 
 
 		struct SpecialRenderBuffer

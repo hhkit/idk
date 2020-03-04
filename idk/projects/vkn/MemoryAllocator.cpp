@@ -26,6 +26,7 @@ namespace idk::vkn::hlp
 				{
 					free += freed.end - freed.start;
 				}
+				out << "\t\tFree Chunks[" << mem.free_list.size()<< "]\n";
 				out << "\t\tSlice Allocated[" << (mem.sz - free) << "/" << mem.sz << "]\n";
 				chunk_alloced += mem.sz;
 				chunk_free += free;

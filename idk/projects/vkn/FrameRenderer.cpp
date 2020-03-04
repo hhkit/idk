@@ -1024,11 +1024,12 @@ namespace idk::vkn
 			const auto& graph = _pimpl->graph;
 
 			const auto kNameShowDbgLifetimes = "Show Dbg Lifetimes";
-			Core::GetSystem<GraphicsSystem>().extra_vars.SetIfUnset(kNameShowDbgLifetimes, false);
-			if(*Core::GetSystem<GraphicsSystem>().extra_vars.Get<bool>(kNameShowDbgLifetimes))
+			auto& gfx_sys = Core::GetSystem<GraphicsSystem>();
+			gfx_sys.extra_vars.SetIfUnset(kNameShowDbgLifetimes, false);
+			if(*gfx_sys.extra_vars.Get<bool>(kNameShowDbgLifetimes))
 				_pimpl->graph.GetLifetimeManager().DebugArrange(_pimpl->_dbg_lifetimes, graph.GetResourceManager());
 
-			Core::GetSystem<GraphicsSystem>().extra_vars.Set(gfxdbg::kLifetimeName, static_cast<void*>(&_pimpl->_dbg_lifetimes));
+			gfx_sys.extra_vars.Set(gfxdbg::kLifetimeName, static_cast<void*>(&_pimpl->_dbg_lifetimes));
 			auto& state = _states.back();
 			_pimpl->graph.SetDefaultUboManager(state.ubo_manager);
 			_pimpl->graph.AllocateResources();

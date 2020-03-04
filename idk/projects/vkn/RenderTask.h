@@ -134,6 +134,7 @@ namespace idk::vkn
 		const pipeline_config& GetCurrentConfig()const noexcept;
 
 		
+		void SkipRenderPass(bool skip);
 		void SetInputAttachments(span<VknTextureView> input_attachments) noexcept;
 		void SetOutputAttachmentSize(size_t size);
 		void SetClearDepthStencil(std::optional<vk::ClearValue> clear_value = {});
@@ -227,6 +228,7 @@ namespace idk::vkn
 		rect render_area;
 #pragma endregion
 
+		bool _skip_render_pass=false;
 		VknRenderPass curr_rp;
 		vk::Framebuffer curr_frame_buffer;
 		uvec2 fb_size;

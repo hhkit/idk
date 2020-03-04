@@ -1205,6 +1205,7 @@ namespace idk
 		renderer_fragment_shaders[FDeferredPost] = LoadShader("/engine_data/shaders/deferred_post.frag");
 		renderer_fragment_shaders[FDeferredPostSpecular] = LoadShader("/engine_data/shaders/deferred_post_specular.frag");
 		renderer_fragment_shaders[FDeferredPostAmbient] = LoadShader("/engine_data/shaders/deferred_post_ambient.frag");
+		renderer_fragment_shaders[FDeferredCombine] = LoadShader("/engine_data/shaders/deferred_combine.frag");
 		renderer_fragment_shaders[FDeferredHDR] = LoadShader("/engine_data/shaders/deferred_hdr.frag");
 
 		////////////////////Load geometry Shaders

@@ -27,6 +27,8 @@ namespace idk::vkn
 		vector<std::optional<FrameGraphAttachmentInfo>> output_attachments;
 		std::optional<FrameGraphAttachmentInfo> depth_stencil;
 
+		bool skip_render_pass = false;
+		
 		auto GetReadSpan()const { return read_resources.to_span(*buffer); }
 		auto GetInputSpan()const { return input_resources.to_span(*buffer); }
 		auto GetOutputSpan()const { return output_resources.to_span(*buffer); }
