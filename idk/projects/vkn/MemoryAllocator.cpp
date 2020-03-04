@@ -66,7 +66,8 @@ namespace idk::vkn::hlp
 	MemoryAllocator::MemoryAllocator() : device{ *View().Device() }, pdevice{ View().PDevice() }{_allocators.emplace(this); }
 	MemoryAllocator::UniqueAlloc MemoryAllocator::Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req)
 	{
-		lock.Lock();
+		//lock.Lock();
+		SimpleLockGuard guard{ lock };
 		auto itr = memories.find(mem_type);
 		if (itr == memories.end())
 		{
@@ -74,7 +75,7 @@ namespace idk::vkn::hlp
 		}
 		auto& mem = itr->second;
 		auto&& [mem_idx, offsets] = mem.Allocate(mem_req.size,mem_req.alignment);
-		lock.Unlock();
+		//lock.Unlock();
 		auto& [u_offset, offset] = offsets;
 		return std::make_unique<Alloc>(mem, mem_idx, u_offset,offset, mem_req.size);
 	}
