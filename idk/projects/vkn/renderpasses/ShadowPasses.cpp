@@ -16,6 +16,8 @@
 
 #include <meta/meta.inl>
 
+#include <math/matrix_transforms.inl>
+
 
 namespace idk::vkn
 {
@@ -335,9 +337,28 @@ namespace idk::vkn::renderpasses
 	{
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 		auto& elem = light.light_maps[shadow_range.light_map_index];
+		
+		static array<vec3, 6> cubeMat = {
+			vec3{1,0,0},
+			vec3{-1,0,0},
+			vec3{0,1,0},
+			vec3{0,-1,0},
+			vec3{0,0,1},
+			vec3{0,0,-1}
+		};
+
+		vector<mat4> shadow_vp{};
+
+		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[0], cubeMat[3]));
+		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[1], cubeMat[3]));
+		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[2], cubeMat[4]));
+		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[3], cubeMat[5]));
+		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[4], cubeMat[3]));
+		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[5], cubeMat[3]));
+
 		auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
 		index_span inst_span{ shadow_range.inst_mesh_render_begin, shadow_range.inst_mesh_render_end };
-		DirectionalShadow::Bindings bindings;
+		PointShadow::Bindings bindings;
 		bindings::ShadowFilter sf;
 		bindings.for_each_binder<>(
 			SetStateTest2{},
