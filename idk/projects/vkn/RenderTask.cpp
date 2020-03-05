@@ -338,7 +338,7 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
@@ -365,6 +365,7 @@ namespace idk::vkn
 			_uniform_manager.GenerateDescriptorSets(span{ _uniform_sets }, d_manager, uniform_sets);
 
 			vector<vk::Viewport> viewports;
+			vector<vk::Rect2D> scissors;
 			std::optional<RenderPassObj> prev_rp;
 			vector<vk::ClearValue> clear_values;
 			compute_clear_info(_num_output_attachments, clear_colors, _clear_depth_stencil, clear_values);
@@ -394,6 +395,9 @@ namespace idk::vkn
 				std::data(clear_values),
 			};
 			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+
+			VulkanPipeline::Options opt{};
+			opt.dynamic_states.emplace_back(vk::DynamicState::eScissor);
 			if (batches.size())
 			{
 				for (auto& batch : this->batches)
@@ -412,12 +416,17 @@ namespace idk::vkn
 								condensed_shaders.emplace_back(*oshader);
 							}
 						}
-						auto& pipeline = (batch.pipeline_override) ? *batch.pipeline_override : ppm->GetPipeline(batch.pipeline, condensed_shaders, 0, rp);
+						auto& pipeline = (batch.pipeline_override) ? *batch.pipeline_override : ppm->GetPipeline(batch.pipeline, condensed_shaders, 0, rp,false, opt);
 						pipeline.Bind(render_bundle._cmd_buffer, View());
 						viewports.resize(batch.viewport.size());
+						scissors.resize(batch.scissor.size());
 						auto bviewports = batch.viewport.to_span();
+						auto bscissors = batch.scissor.to_span();
+						
 						std::transform(bviewports.begin(), bviewports.end(), viewports.begin(), [](rect r) {return vk::Viewport{ r.position.x,r.position.y, r.size.x,r.size.y,0,1 }; });
+						std::transform(bscissors.begin(), bscissors.end(), scissors.begin(), [](rect r) {return hlp::ToRect2D(r); });
 						cmd_buffer.setViewport(0, viewports);
+						cmd_buffer.setScissor(0, scissors);
 						for (auto& p_ro : batch.draw_calls)
 						{
 
