@@ -242,10 +242,11 @@ namespace idk
         vec2 sz = ImGui::GetContentRegionAvail();
 
         float aspect = texture->AspectRatio();
-        if (aspect > 1.0f)
+        float window_aspect = sz.x / sz.y;
+        if (aspect > window_aspect)
             sz.y = sz.x / aspect;
-        else if (aspect < 1.0f)
-            sz.x = sz.y / aspect;
+        else if (aspect < window_aspect)
+            sz.x = sz.y * aspect;
         else
             sz = vec2{ ImMin(sz.x, sz.y), ImMin(sz.x, sz.y) };
 
@@ -260,10 +261,11 @@ namespace idk
 		vec2 sz = ImGui::GetContentRegionAvail();
 
 		float aspect = texture->AspectRatio();
-		if (aspect > 1.0f)
-			sz.y = sz.x / aspect;
-		else if (aspect < 1.0f)
-			sz.x = sz.y / aspect;
+        float window_aspect = sz.x / sz.y;
+        if (aspect > window_aspect)
+            sz.y = sz.x / aspect;
+        else if (aspect < window_aspect)
+            sz.x = sz.y * aspect;
 		else
 			sz = vec2{ ImMin(sz.x, sz.y), ImMin(sz.x, sz.y) };
 
