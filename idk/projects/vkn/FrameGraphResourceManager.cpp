@@ -88,7 +88,7 @@ namespace idk::vkn
 		auto next_id = NextID();
 		auto itr = resource_handles.find(rsc.id);
 		auto oitr = renamed_original.find(rsc.id);
-		if (itr == resource_handles.end() || oitr ==resource_handles.end())
+		if (itr == resource_handles.end() || oitr == renamed_original.end())
 			throw;
 		resource_handles.emplace(next_id, itr->second);
 		renamed_resources.emplace(next_id, rsc.id);

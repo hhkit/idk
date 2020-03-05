@@ -35,7 +35,8 @@ namespace idk
 
 		for (auto& elem : parameters)
 		{
-			elem->latest_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+			elem->GetGhost()->value_index = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+			elem->GetMaster()->last_packed = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		}
 	}
 
@@ -53,10 +54,9 @@ namespace idk
 		{
 			auto& param = parameters[i];
 			IDK_ASSERT(param);
-			param->CacheCurrValue();
 		}
 	}
-	void ElectronView::UpdateMaster()
+	void ElectronView::UpdateStateFlags()
 	{
 		if (auto* master = std::get_if<Master>(&ghost_state))
 		{
@@ -65,7 +65,7 @@ namespace idk
 			{
 				auto& param = parameters[i];
 				IDK_ASSERT(param);
-				if (param->ValueChanged())
+				if (param->GetMaster()->ValueChanged())
 					state_mask = 1 << i;
 			}
 		}
@@ -79,100 +79,62 @@ namespace idk
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
 				if (state_mask & (1 << i))
-					parameters[i]->ApplyLerp(advance);
+					parameters[i]->GetGhost()->Update(advance);
 			}
 		}
 	}
 
 	vector<string> ElectronView::PackMoveData()
 	{
-		auto pack = vector<string>{};
-		if (auto* master = std::get_if<ClientObject>(&move_state))
-		{
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				IDK_ASSERT(param);
-				if (state_mask & (1 << i))
-				{
-					auto packed = param->PackMoveData();
-					if (packed.size())
-						pack.emplace_back(std::move(packed));
-					param->CacheCurrValue();
-				}
-			}
-			return pack;
-		}
-		return pack;
+		return {};
 	}
 
-	vector<string> ElectronView::PackGhostData()
+	GhostPack ElectronView::MasterPackData(int incoming_state_mask)
 	{
-		auto pack = vector<string>{};
-		if (auto* master = std::get_if<Master>(&ghost_state))
+		auto transmit_state_mask = incoming_state_mask | state_mask;
+		IDK_ASSERT(std::get_if<Master>(&ghost_state));
+		auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+		GhostPack retval;
+		retval.network_id = network_id;
+		retval.state_mask = transmit_state_mask;
+		retval.data_packs.reserve(parameters.size());
+		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
-			for (unsigned i = 0; i < parameters.size(); ++i)
+			auto& param = parameters[i];
+			IDK_ASSERT(param);
+			if (transmit_state_mask & (1 << i))
 			{
-				auto& param = parameters[i];
-				IDK_ASSERT(param);
-				if (state_mask & (1 << i))
-				{
-					auto packed = param->PackGhostData();
-					if (packed.size())
-						pack.emplace_back(std::move(packed));
-					param->CacheCurrValue();
-				}
+				auto packed = param->GetMaster()->PackData(seq);
+				if (packed.size())
+					retval.data_packs.emplace_back(std::move(packed));
 			}
-			return pack;
 		}
-		return pack;
+		return retval;
 	}
 
-	void ElectronView::UnpackGhostData(SeqNo sequence_number, span<string> data_pack)
+	void ElectronView::UnpackGhostData(SeqNo sequence_number, const GhostPack& ghost_pack)
 	{
-		if (auto* ghost = std::get_if<Ghost>(&ghost_state))
+		state_mask = ghost_pack.state_mask;
+		unsigned pack_index{};
+
+		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
-			unsigned count = 0;
-			for (unsigned i = 0; i < parameters.size(); ++i)
+			if (state_mask & (1 << i))
 			{
-				auto& param = parameters[i];
-				IDK_ASSERT(param);
-				if (state_mask & (1 << i))
-				{
-					auto& pack = data_pack[count++];
-					if (seqno_greater_than(sequence_number, param->latest_seq))
-					{
-						param->latest_seq = sequence_number;
-						param->UnpackGhost(pack);
-					}
-				}
+				auto& pack = ghost_pack.data_packs[pack_index++];
+				parameters[i]->GetGhost()->UnpackData(sequence_number, pack);
 			}
 		}
 	}
 
 	void ElectronView::UnpackMoveData(SeqNo sequence_number, span<string> data_pack)
 	{
-		if (auto* master = std::get_if<ControlObject>(&move_state))
-		{
-			unsigned count = 0;
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				IDK_ASSERT(param);
-				if (state_mask & (1 << i))
-				{
-					param->UnpackMove(sequence_number, data_pack[count++]);
-				}
-			}
-		}
 	}
 
 	hash_table<string, reflect::dynamic> ElectronView::GetParameters() const
 	{
 		auto retval = hash_table<string, reflect::dynamic>();
 		retval.reserve(parameters.size());
-		for (auto& elem : parameters)
-			retval.emplace(elem->param_name, elem->GetParam());
 		return retval;
 	}
 
@@ -180,14 +142,6 @@ namespace idk
 	{
 		if (auto* master = std::get_if<ClientObject>(&move_state))
 		{
-			state_mask = 0;
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				IDK_ASSERT(param);
-				if (param->ValueChanged())
-					state_mask = 1 << i;
-			}
 		}
 	}
 }

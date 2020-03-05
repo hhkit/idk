@@ -49,9 +49,12 @@ namespace idk::vkn
 			auto dep_rscs = curr_node.GetInputSpan();
 			for (auto& dep_rsc : dep_rscs)
 			{
-				
-				auto dep_node = ag.src_node.find(dep_rsc.id)->second;
-				order = std::max(fat_order[dep_node], order);
+				auto itr = ag.src_node.find(dep_rsc.id);
+				if (itr != ag.src_node.end())
+				{
+					auto dep_node = itr->second;
+					order = std::max(fat_order[dep_node], order);
+				}
 			}
 			order = order + 1;
 			fat_order[curr_node.id] = serial_order++; //Change back to order to revert to fat ordering.

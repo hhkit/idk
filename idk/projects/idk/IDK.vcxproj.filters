@@ -1201,6 +1201,9 @@
     <ClInclude Include="network\ElectronAnimatorView.h">
       <Filter>network\views</Filter>
     </ClInclude>
+    <ClInclude Include="network\GhostPack.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

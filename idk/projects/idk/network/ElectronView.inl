@@ -13,89 +13,93 @@ namespace idk
 	struct ElectronView::DerivedParameter
 		: ElectronView::BaseParameter
 	{
-		T cached_value;
-		T start_value;
-		T end_value;
-
-		ParameterImpl<T> param;
-
-		DerivedParameter(ParameterImpl<T> param_impl)
-			: param{param_impl}
+		struct DerivedMasterData
+			: MasterData
 		{
-		}
-
-		void CacheCurrValue() override
-		{
-			cached_value = param.getter();
-		}
-
-		bool ValueChanged() const
-		{
-			return param.send_condition(cached_value, param.getter());
-		}
-
-		void UnpackGhost(string_view data) override
-		{
-			// if we already have the latest information, ignore the incoming info
-			if (auto deser = parse_binary<T>(data))
+			ParameterImpl<T>& param;
+			T cached_value;
+			DerivedMasterData(ParameterImpl<T>& impl)
+				: param{ impl } 
 			{
-				if (interp_over != 0)
+				cached_value = param.getter();
+			}
+
+			bool ValueChanged() const override
+			{
+				return !param.equater(param.getter(), cached_value);
+			}
+
+			string PackData(SeqNo pack_date) override
+			{
+				last_packed = pack_date;
+				cached_value = param.getter();
+				return serialize_binary(cached_value);
+			}
+		};
+
+		struct DerivedGhostData
+			: GhostData
+		{
+			ParameterImpl<T>& param;
+			T start_value;
+			T end_value;
+
+			DerivedGhostData(ParameterImpl<T>& p)
+				: param{ p }
+			{}
+
+			void UnpackData(SeqNo index, string_view data) override
+			{
+				// newer data has arrived
+				if (seqno_greater_than(index, value_index))
 				{
-					t = 0;
-					start_value = param.getter();
-					end_value = *deser;
+					if (auto val = parse_binary<T>(data))
+					{
+						value_index = index;
+						t = 0;
+						start_value = param.getter();
+						end_value = *val;
+					}
 				}
-				else
+			}
+
+			void Update(real dt) override
+			{
+				// if interpolation function is defined
+				if (param.interpolator)
+				{
+					auto new_t = std::min(t + dt, 1.f);
+					if (t != new_t)
+					{
+						t = new_t;
+						param.setter(param.interpolator(start_value, end_value, t));
+					}
+				}
+				else // else snap to value
 				{
 					t = 1;
-					end_value = *deser;
+					param.setter(end_value);
 				}
 			}
+
+		};
+
+		ParameterImpl<T> param;
+		DerivedMasterData master_data;
+		DerivedGhostData  ghost_data;
+
+		DerivedParameter(ParameterImpl<T> param_impl)
+			: param{ param_impl }, ghost_data{ param }, master_data{param}
+		{
+			master_data.cached_value = param.getter();
 		}
 
-		void UnpackMove(SeqNo seq_number, string_view data) override
-		{
-			if (auto deser = parse_binary<T>(data))
-				param.setter(param.getter() + *deser);
-		}
-
-		void ApplyLerp(real delta_t) override
-		{
-			if (interp_over != 0 && param.interpolator)
-			{
-				delta_t /= interp_over;
-				t = std::min(t + delta_t, real{ 1 });
-				param.setter(param.interpolator(start_value, end_value, t));
-			}
-			else
-				param.setter(end_value);
-		}
-
-		string PackMoveData() override
-		{
-			auto del = param.getter() - cached_value;
-			if (!param.equater(del, T{}))
-				return serialize_binary(del);
-			return {};
-		}
-
-		string PackGhostData() override
-		{
-			auto curr = param.getter();
-			if (ValueChanged())
-				return serialize_binary(curr);
-			else
-				return { };
-		}
-
-		reflect::dynamic GetParam() override
-		{
-			return param.getter();
-		}
+		DerivedMasterData* GetMaster() override { return &master_data; }
+		DerivedGhostData*  GetGhost()  override { return &ghost_data; }
 	};
 
 	template<typename T>
-	inline ParameterImpl<T>& ElectronView::RegisterMember(string_view name, ParameterImpl<T> param, float interp)
+	ParameterImpl<T>& ElectronView::RegisterMember(string_view name, ParameterImpl<T> param, float interp)
 	{
 		auto ptr = std::make_unique<DerivedParameter<T>>(param);
 		ptr->param_name = string{ name };

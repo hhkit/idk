@@ -13,6 +13,7 @@
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
 #include <network/EventDataBlockFrameNumber.h>
+#include <network/GhostManager.h>
 #include <core/GameState.h>
 
 namespace idk
@@ -71,6 +72,17 @@ namespace idk
 	void NetworkSystem::Disconnect()
 	{
 		ResetNetwork();
+	}
+
+	array<ConnectionManager*, 5> NetworkSystem::GetConnectionManagers()
+	{
+		return array<ConnectionManager*, 5>{
+			client_connection_manager.get(),
+				server_connection_manager[0].get(),
+				server_connection_manager[1].get(),
+				server_connection_manager[2].get(),
+				server_connection_manager[3].get(),
+		};
 	}
 
 	bool NetworkSystem::IsHost()
@@ -140,30 +152,34 @@ namespace idk
 
 	void NetworkSystem::RespondToPackets()
 	{
-		// call static
-		for (auto& elem : frame_start_callbacks)
-			elem.callback();
-		
-		// per client
-		if (client_connection_manager)
-			client_connection_manager->FrameStartManagers();
-		for (auto& elem : server_connection_manager)
-			if (elem)
-				elem->FrameStartManagers();
+		for (auto& elem : GetConnectionManagers())
+		{
+			if (!elem)
+				continue;
+
+			auto& connection_manager = *elem;
+			
+		}
 	}
 
 	void NetworkSystem::PreparePackets()
 	{
-		// call static
-		for (auto& elem : frame_end_callbacks)
-			elem.callback();
+		auto electron_views = Core::GetGameState().GetObjectsOfType<ElectronView>();
+		for (auto& ev : electron_views)
+		{
+			if (std::get_if<ElectronView::Master>(&ev.ghost_state))
+				ev.UpdateStateFlags();
+		}
 
-		// per client
-		if (client_connection_manager)
-			client_connection_manager->FrameEndManagers();
-		for (auto& elem : server_connection_manager)
-			if (elem)
-				elem->FrameEndManagers();
+		for (auto& elem : GetConnectionManagers())
+		{
+			if (!elem)
+				continue;
+
+			auto& connection_manager = *elem;
+			auto gm = connection_manager.GetManager<GhostManager>();
+			gm->SendGhosts(electron_views);
+		}
 	}
 
 	void NetworkSystem::AddCallbackTarget(Handle<mono::Behavior> behavior)

@@ -107,6 +107,7 @@
     <ClInclude Include="memory\ArenaAllocator.h" />
     <ClInclude Include="meta\comparator.h" />
     <ClInclude Include="meta\stl_hack.h" />
+    <ClInclude Include="network\GhostPack.h" />
     <ClInclude Include="network\NetworkTuple.inl" />
     <ClInclude Include="network\RPCTarget.h" />
     <ClInclude Include="parallel\multithread_control.h" />

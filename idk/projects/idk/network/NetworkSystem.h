@@ -30,6 +30,7 @@ namespace idk
 
 		Client& GetClient() { return *client; }
 		Server& GetServer() { return *lobby; }
+		array<ConnectionManager*, 5> GetConnectionManagers();
 
 		bool IsHost();
 		Host GetMe();
