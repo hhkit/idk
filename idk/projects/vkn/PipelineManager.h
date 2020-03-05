@@ -16,7 +16,7 @@ namespace idk::vkn
 	public:
 		using handle_t = container_t::handle_t;
 		//Assumes that shader programs are the only differing thing.
-		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass = {},bool has_depth_stencil=false);
+		VulkanPipeline& GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass = {}, bool has_depth_stencil = false, VulkanPipeline::Options opt = {});
 		void CheckForUpdates(uint32_t frame_index);
 		void RemovePipeline(VulkanPipeline* pipeline);
 	private:
@@ -26,6 +26,7 @@ namespace idk::vkn
 			std::optional<RenderPassObj> rp{};
 			bool has_depth_stencil = false;
 			vector<RscHandle<ShaderProgram>> shader_handles;
+			vector<vk::ShaderModule> shader_concrete;
 			VulkanPipeline pipeline;
 			VulkanPipeline back_pipeline;
 
@@ -38,7 +39,7 @@ namespace idk::vkn
 			//PipelineObject() = default;
 			//PipelineObject(PipelineObject&&) noexcept= default;
 			//~PipelineObject() = default;
-			void Create(VulkanView& view, [[maybe_unused]] size_t fo_index);
+			void Create(VulkanView& view, [[maybe_unused]] size_t fo_index, VulkanPipeline::Options opt);
 			void Swap();
 		};
 		//std::atomic_bool creating = false;
