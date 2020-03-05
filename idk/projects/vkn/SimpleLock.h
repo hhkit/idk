@@ -3,6 +3,15 @@
 #include <mutex>
 namespace idk::vkn::hlp
 {
+	struct SimpleLock;
+	struct SimpleLockGuard
+	{
+		SimpleLockGuard(SimpleLock& lock);
+		SimpleLockGuard(SimpleLockGuard&& lock);
+		~SimpleLockGuard();
+
+		SimpleLock* _lock;
+	};
 	struct SimpleLock
 	{
 	public:

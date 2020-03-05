@@ -34,4 +34,21 @@ namespace idk::vkn::hlp
 	}
 
 
+	SimpleLockGuard::SimpleLockGuard(SimpleLock& lock):_lock{&lock}
+	{
+		lock.Lock();
+	}
+
+	SimpleLockGuard::SimpleLockGuard(SimpleLockGuard&& other):_lock{other._lock}
+	{
+		other._lock = nullptr;
+	}
+
+	SimpleLockGuard::~SimpleLockGuard()
+	{
+		if(_lock)
+			_lock->Unlock();
+		_lock = nullptr;
+	}
+
 }

@@ -102,7 +102,7 @@ namespace idk::vkn
 		void Free(CmdBufferObj&& obj);
 		CmdBufferPool();
 		~CmdBufferPool();
-		vk::CommandBuffer Get(size_t id)const;
+		vk::CommandBuffer Get(size_t id);
 	private:
 		size_t growth_amount()const;
 		void GrowCmdBuffers();

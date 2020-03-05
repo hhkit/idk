@@ -144,6 +144,7 @@ namespace idk
 
 			if (rigidbody.sleeping())
 			{
+				rigidbody._prev_pos = rigidbody._global_cache[3].xyz;
 				rigidbody.linear_velocity = rigidbody.initial_velocity * dt;
 				rigidbody.initial_velocity = vec3{};
 			}
@@ -573,8 +574,8 @@ namespace idk
 			}
 			else
 			{
-				rigidbody._prev_pos = rigidbody._global_cache[3].xyz;
 				rigidbody.linear_velocity = (rigidbody._global_cache[3].xyz - rigidbody._prev_pos) / dt;
+				rigidbody._prev_pos = rigidbody._global_cache[3].xyz;
 				rigidbody.angular_velocity = vec3{ 0.0f };
 			}
 			    

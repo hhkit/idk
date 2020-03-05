@@ -192,6 +192,12 @@ namespace idk
         public extern static void RigidBodySetUseGravity(ulong id, bool val);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float RigidBodyGetGravityScale(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void RigidBodySetGravityScale(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RigidBodySleep(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
