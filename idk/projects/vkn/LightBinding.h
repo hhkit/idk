@@ -97,6 +97,7 @@ namespace idk::vkn::bindings
 			vector<LightData> lights;
 			vector<VknTextureView> shadow_maps;
 			vector<VknTextureView> shadow_maps_directional;
+			vector<VknTextureView> shadow_maps_point;
 			vector<DLightData> directional_vp{};
 			mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 			lights.clear();
@@ -104,20 +105,24 @@ namespace idk::vkn::bindings
 			{
 				auto& light = all_lights[light_indices[i + j]];
 				lights.emplace_back(light);
-				if (light.index != 1)
+				
+				if (light.index == 0)
 				{
+					if (!light.light_maps.empty())
+						shadow_maps.emplace_back(VknTexture{});
+
 					for (auto& elem : light.light_maps)
 					{
 						auto& fb = elem.light_map.as<VknFrameBuffer>();
 						auto& db = fb.DepthAttachment();
-						auto v = db.buffer;
-						shadow_maps.emplace_back(v.as<VknTexture>());
+						auto& v = db.buffer;
+						shadow_maps_point.emplace_back(v.as<VknTexture>());
 					}
 				}
 				else if (light.index == 1)
 				{
 					if (!light.light_maps.empty())
-						shadow_maps.emplace_back(light.light_maps[0].light_map.as<VknFrameBuffer>().DepthAttachment().buffer.as<VknTexture>());
+						shadow_maps.emplace_back(VknTexture{});
 
 					for (auto& elem : light.light_maps)//state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 					{
@@ -125,14 +130,28 @@ namespace idk::vkn::bindings
 						directional_vp.emplace_back(DLightData{ elem.cam_max.z,clip_mat * elem.cascade_projection * light.v });
 					}
 				}
+				else if (light.index == 2)
+				{
+					for (auto& elem : light.light_maps)
+					{
+						auto& fb = elem.light_map.as<VknFrameBuffer>();
+						auto& db = fb.DepthAttachment();
+						auto& v = db.buffer;
+						shadow_maps.emplace_back(v.as<VknTexture>());
+					}
+				}
 			}
 			Bind(context);
+
 			auto light_data = PrepareLightBlock(_view_matrix, lights);
 			auto dlight_data = PrepareDirectionalBlock(directional_vp);
 			context.BindUniform("LightBlock", 0, light_data);
 			context.BindUniform("DirectionalBlock", 0, dlight_data);
+
 			BindShadows(context, "shadow_map_directional", shadow_maps_directional);
+			BindShadows(context, "shadow_map_point", shadow_maps_point);
 			BindShadows(context, "shadow_maps", shadow_maps);
+
 			i += stride;
 		}
 		struct State

@@ -35,6 +35,7 @@ namespace idk
 	enum GeometryShaders
 	{
 		GSinglePassCube,
+		GPointShadow,
 		GMax
 	};
 }

@@ -16,4 +16,12 @@ namespace idk::vkn::bindings
 	{
 		the_interface.BindShader(ShaderStage::Geometry, geometry_shader);
 	}
+	bool PointShadowFilter::Skip(RenderInterface&, const RenderObject& dc)
+	{
+		return !(dc.layer_mask & filter);
+	}
+	void PointShadowFilter::SetState(const PointCameraData& cam)
+	{
+		filter = cam.culling_flags;
+	}
 }

@@ -81,7 +81,7 @@ namespace idk::vkn::renderpasses
 	}
 	namespace PointShadow
 	{
-		using Bindings = bindings::ShadowBinding;
+		using Bindings = bindings::PointShadowBinding;
 		using InstDrawSetBinding = GenericDrawSet<Bindings, InstMeshDrawSet>;
 		using SkinnedInstDrawSetBinding = GenericDrawSet<Bindings, SkinnedMeshDrawSet>;
 
@@ -330,7 +330,7 @@ namespace idk::vkn::renderpasses
 	}
 	void AddPointShadowPass      (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
-		/*auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
+		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 		auto& elem = light.light_maps[shadow_range.light_map_index];
 		
 		static array<vec3, 6> cubeMat = {
@@ -351,23 +351,25 @@ namespace idk::vkn::renderpasses
 		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[4], cubeMat[3]));
 		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[5], cubeMat[3]));
 
-		auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
+		auto cam = PointCameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, shadow_vp };
 		index_span inst_span{ shadow_range.inst_mesh_render_begin, shadow_range.inst_mesh_render_end };
 		PointShadow::Bindings bindings;
-		bindings::ShadowFilter sf;
+		bindings::PointShadowFilter sf;
 		bindings.for_each_binder<>(
 			SetStateTest2{},
 			cam, *state.skeleton_transforms);
 		bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
+		bindings.Get<bindings::GeometryShaderBinding>().geometry_shader = Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GPointShadow];
 		auto skinned_bindings = bindings;
 		skinned_bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkinnedMesh];
-		DirectionalShadow::DrawSetBinding derp{
+		skinned_bindings.Get<bindings::GeometryShaderBinding>().geometry_shader = Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GPointShadow];
+		PointShadow::DrawSetBinding derp{
 			{
-				DirectionalShadow::InstDrawSetBinding{bindings,InstMeshDrawSet{inst_span.to_span(*state.shared_gfx_state->instanced_ros),state.shared_gfx_state->inst_mesh_render_buffer.buffer()}},
-				DirectionalShadow::SkinnedInstDrawSetBinding{skinned_bindings,SkinnedMeshDrawSet{state.skinned_mesh_render}}
+				PointShadow::InstDrawSetBinding{bindings,InstMeshDrawSet{inst_span.to_span(*state.shared_gfx_state->instanced_ros),state.shared_gfx_state->inst_mesh_render_buffer.buffer()}},
+				PointShadow::SkinnedInstDrawSetBinding{skinned_bindings,SkinnedMeshDrawSet{state.skinned_mesh_render}}
 			}
 		};
-		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);*/
+		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);
 
 	}
 
