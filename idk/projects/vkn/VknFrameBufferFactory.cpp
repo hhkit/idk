@@ -315,7 +315,9 @@ namespace idk::vkn
 		constexpr static tex_create_ptr_t cr8_funcs[]
 		{
 			&ColorBufferTexInfo,
-			&DepthBufferTexInfo
+			&DepthBufferTexInfo,
+			&StencilBufferTexInfo,
+			&Depth3DBufferTexInfo,
 		};
 		auto& allocator = _pimpl->allocator;
 		auto fence = *_pimpl->fence;
