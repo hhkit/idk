@@ -4,8 +4,8 @@ const int eUvMetallicRoughness = 2       ;
 const int eViewPos             = 3       ;
 const int eNormal              = 4       ;
 const int eTangent             = 5       ;
-const int eEmissive            = 6       ;
-const int eDepth               = 7       ;
+const int eEmissive            = 5       ;
+const int eDepth               = 6       ;
 const int eGBufferSize         = eDepth+1;
 
 layout(input_attachment_index = eAlbedoAmbOcc       ,set=2, binding=0) uniform subpassInput gAlbAmbOcc;
@@ -29,7 +29,7 @@ if(Load(gDepth).r==1)                                                           
 	discard;                                                                                    \
 vec4  view_pos_  = Load(gViewPos);                                                           \
 vec4  normal_    = Load(gNormal);                                                            \
-vec4  tangent_   = Load(gTangent);                                                           \
+/*vec4  tangent_   = Load(gTangent);*/                                                           \
 vec4 uv_met_rou_ = Load(gUvMetRough);                                                            \
 vec4 alb_amb_occ_= Load(gAlbAmbOcc );                                                           \
 vec4 e_emissive    = Load(gEmissive );                                                            \
@@ -37,7 +37,7 @@ vec4 deep_depth  = Load(gDepth );                                               
 																								\
 vec3 view_pos   = view_pos_.rgb;                                                                \
 vec3 normal   = normal_.rgb   *2 - 1;                                                                    \
-vec3 tangent   = tangent_.rgb *2 - 1;                                                                  \
+/*vec3 tangent   = tangent_.rgb *2 - 1;*/                                                                  \
 float metallic   = uv_met_rou_.z;                                                                \
 float roughness  = uv_met_rou_.w;                                                                \
 vec3  albedo     = alb_amb_occ_.rgb;                                                             \

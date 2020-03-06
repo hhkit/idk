@@ -23,9 +23,15 @@ namespace idk::vkn
 		{
 			GrowFences();
 		}
+		auto get_handle = [this]() {
+			auto guard = _ctrl_block->lock();
 
-		auto index = _handles.back();
-		_handles.pop_back();
+			auto index = _handles.back();
+			_handles.pop_back();
+			return index;
+		};
+		auto index = get_handle();
+
 		return FenceObj{ *_fences[index],index,this,_ctrl_block };
 	}
 

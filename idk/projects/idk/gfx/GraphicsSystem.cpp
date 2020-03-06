@@ -368,8 +368,8 @@ namespace idk
 		template<typename Shape>
 		static void DbgLight  ([[maybe_unused]]Shape light_volume, [[maybe_unused]] color col)
 		{
-			//if (render_next)
-			//	Core::GetSystem<DebugRenderer>().Draw(light_volume, col);
+			if (render_next && Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgLightVolume",false))
+				Core::GetSystem<DebugRenderer>().Draw(light_volume, col);
 		}
 
 		static void EndCurrent() { render_next = false;}
@@ -387,11 +387,16 @@ namespace idk
 		//Perform camera light loop to populate the data
 		float n_plane = camera.near_plane, f_plane = camera.far_plane;
 
+		//float diff = f_plane - n_plane;
+		//float first_end = n_plane + 0.2f * diff;
+		//float second_end = n_plane + 0.45f * diff;
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.2f * diff;
-		float second_end = n_plane + 0.45f * diff;
+		float first_end = n_plane + 0.55f * diff;
+		float second_start= n_plane + 0.45f * diff;
+		float second_end = f_plane;
 
-		float cascadeiter[4] = { n_plane,first_end,second_end,f_plane };
+		float cascade_start[2] = { n_plane  ,second_start};
+		float cascade_end  [2] = { first_end,second_end  };
 		//float cascadeiter[3] = { n_plane,first_end,second_end };
 
 		for (size_t i = 0; i < lights.size(); ++i)
@@ -433,17 +438,19 @@ namespace idk
 			case index_in_variant_v<DirectionalLight, LightVariant>:
 			{
 				///////////////////////////////////////>>>>>>>>>>>>>>>>>>>>>>>
-				unsigned k = 0, j = 1;
+				unsigned k = 0;// , j = 1;
 				light.camDataRef = camera;
 
 				auto copy_light = light;
 
 				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index,copy_light.light_maps);
 				
+				color col = color{ 0.3,0.2,0.6,1.0f };
 				for (auto& elem : copy_light.light_maps)
 				{
-					elem.SetCascade(camera, copy_light, cascadeiter[k], cascadeiter[j]);
-					++k; ++j;
+					elem.SetCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
+					LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection* light.v), col*(k+1));
+					++k;
 				}
 				auto new_index = new_lights.size();
 				new_lights.emplace_back(copy_light);

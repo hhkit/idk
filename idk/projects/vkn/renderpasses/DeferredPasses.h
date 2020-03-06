@@ -51,7 +51,7 @@ namespace idk::vkn::renderpasses
 	};
 	struct GBufferPass : DrawSetRenderPass
 	{
-		FrameGraphResourceMutable gbuffer_rscs[6];
+		FrameGraphResourceMutable gbuffer_rscs[5];
 		FrameGraphResourceMutable depth_rsc;
 
 		uvec2 rt_size;

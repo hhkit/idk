@@ -16,8 +16,8 @@ layout(location = 0) out vec4 out_albedo_amb_o;
 layout(location = 1) out vec4 out_uv_metallic_roughness;
 layout(location = 2) out vec4 out_view_pos;
 layout(location = 3) out vec4 out_normal;
-layout(location = 4) out vec4 out_tangent;
-layout(location = 5) out vec4 out_emissive;
+//layout(location = 4) out vec4 out_tangent;
+layout(location = 4) out vec4 out_emissive;
 
 vec3 Normal()
 {
@@ -52,12 +52,12 @@ void main()
 
 	//__MATERIAL_CODE__;
 	normal  = normal  *0.5 + 0.5;
-	tangent = tangent *0.5 + 0.5;
+	//tangent = tangent *0.5 + 0.5;
 	out_albedo_amb_o = vec4(albedo,ambient_o);
 	out_uv_metallic_roughness = vec4(fs_in.uv,metallic,roughness);
 	out_view_pos = vec4(fs_in.position,0.0f);
 	out_normal = vec4(normal,0.0f);
-	out_tangent = vec4(tangent,0.0f);
+	//out_tangent = vec4(tangent,0.0f);
 	out_emissive = vec4(emissive,0.0f);
 	
 }
