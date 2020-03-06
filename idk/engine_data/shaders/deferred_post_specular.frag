@@ -34,6 +34,8 @@ S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
 S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_MAP];
 
+S_LAYOUT(13, 1) uniform samplerCube shadow_map_point[MAX_LIGHTS];
+
 S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
 {
 	DLight directional_vp[MAX_MAP];

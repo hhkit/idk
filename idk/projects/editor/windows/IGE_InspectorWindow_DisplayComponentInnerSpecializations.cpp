@@ -339,12 +339,20 @@ namespace idk
         else if (ImGui::IsItemDeactivatedAfterEdit())
             ExecuteModify("anchor_max", std::move(c_rt->anchor_max));
 
+		_curr_property_stack.push_back("anchor_pos"); display.GroupBegin(); display.Label("Anchor Pos"); display.ItemBegin(true);
+		ImGuidk::DragVec2("##anchor_pos", &c_rt->anchor_pos);
+		display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
+		if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+			StoreOriginalValues("anchor_pos");
+		else if (ImGui::IsItemDeactivatedAfterEdit())
+			ExecuteModify("anchor_pos", std::move(c_rt->anchor_pos));
+
 
         _curr_property_stack.push_back("pivot"); display.GroupBegin(); display.Label("Pivot"); display.ItemBegin(true);
         ImGuidk::DragVec2("##pivot", &c_rt->pivot, 0.01f, 0, 1.0f);
         display.ItemEnd(); display.GroupEnd(); _curr_property_stack.pop_back();
         if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
-            StoreOriginalValues("pivot");
+            StoreOriginalValues("pivot"); 
         else if (ImGui::IsItemDeactivatedAfterEdit())
             ExecuteModify("pivot", std::move(c_rt->pivot));
 

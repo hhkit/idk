@@ -1750,6 +1750,18 @@ namespace idk::mono
         }
         BIND_END();
 
+		BIND_START("idk.Bindings::RectTransformGetAnchorPos", vec2, Handle<RectTransform> h)
+		{
+			return h->anchor_pos;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RectTransformSetAnchorPos", void, Handle<RectTransform> h, vec2 v)
+		{
+			h->anchor_pos = v;
+		}
+		BIND_END();
+
         BIND_START("idk.Bindings::RectTransformGetPivot", vec2, Handle<RectTransform> h)
         {
             return h->pivot;

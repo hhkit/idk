@@ -109,7 +109,7 @@ REFLECT_END()
 // UI
 #pragma region UI
 REFLECT_BEGIN(idk::RectTransform, "RectTransform")
-REFLECT_VARS(anchor_min, anchor_max, offset_min, offset_max, pivot)
+REFLECT_VARS(anchor_min, anchor_max, anchor_pos, offset_min, offset_max, pivot)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Canvas, "Canvas")

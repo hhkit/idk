@@ -94,7 +94,7 @@ namespace idk {
 				DepthBufferMode::Depth16,
 				true,
 				FilterMode::_enum::Linear,
-				false,
+				_config.isCubeMap,
 				std::nullopt,
 				_config.layer_count,
 				_config.view_type
@@ -112,9 +112,9 @@ namespace idk {
 		return shadow_map;
 	}
 
-	RscHandle<FrameBuffer> Lightmap::InitShadowMap(const size_t& layers, AttachmentViewType type)
+	RscHandle<FrameBuffer> Lightmap::InitShadowMap(const size_t& layers, AttachmentViewType type, const bool& isCubeMap)
 	{
-		return InitShadowMap(LightmapConfig{ layers,type });
+		return InitShadowMap(LightmapConfig{ layers,type, isCubeMap });
 	}
 	RscHandle<FrameBuffer> Lightmap::GetShadowMap()
 	{

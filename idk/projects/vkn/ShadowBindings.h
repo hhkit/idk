@@ -9,6 +9,11 @@ namespace idk::vkn::bindings
 		RscHandle<ShaderProgram> geometry_shader;
 		void Bind(RenderInterface& the_interface)override;
 	};
+	struct FragmentShaderBinding : RenderBindings
+	{
+		RscHandle<ShaderProgram> fragment_shader;
+		void Bind(RenderInterface& the_interface)override;
+	};
 	struct ShadowFilter :RenderBindings
 	{
 		LayerMask filter;
@@ -22,5 +27,5 @@ namespace idk::vkn::bindings
 		void SetState(const PointCameraData& cam);
 	};
 	using ShadowBinding = CombinedBindings<ShadowFilter, CameraViewportBindings,VertexShaderBinding,StandardVertexBindings>;
-	using PointShadowBinding = CombinedBindings<PointShadowFilter, CameraViewportBindings, VertexShaderBinding, GeometryShaderBinding, StandardVertexBindings>;
+	using PointShadowBinding = CombinedBindings<PointShadowFilter, CameraViewportBindings, VertexShaderBinding, GeometryShaderBinding, FragmentShaderBinding, StandardVertexBindings>;
 }

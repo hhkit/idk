@@ -14,6 +14,7 @@ namespace idk {
 	{
 		size_t layer_count = 1;
 		AttachmentViewType view_type = AttachmentViewType::e2D;
+		bool isCubeMap = false;
 	};
 	class Lightmap {
 
@@ -23,7 +24,7 @@ namespace idk {
 		void SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far);
 		void UpdateResolution(const unsigned& res);
 		RscHandle<FrameBuffer> InitShadowMap(LightmapConfig config = {});
-		RscHandle<FrameBuffer> InitShadowMap(const size_t& layers, AttachmentViewType type);
+		RscHandle<FrameBuffer> InitShadowMap(const size_t& layers, AttachmentViewType type, const bool& isCubeMap);
 		RscHandle<FrameBuffer> GetShadowMap();
 		LightmapConfig GetConfig()const;
 		bool NeedLightMap();

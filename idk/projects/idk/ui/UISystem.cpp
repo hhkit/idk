@@ -130,7 +130,7 @@ namespace idk
 
             vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
             vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-            rt._local_rect.position = min - parent_pivot;
+            rt._local_rect.position = rt.anchor_pos + (min - parent_pivot);
             rt._local_rect.size = max - min;
 
             return true;
@@ -189,7 +189,7 @@ namespace idk
 
             vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
             vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-            rt._local_rect.position = min - parent_pivot;
+            rt._local_rect.position = rt.anchor_pos + (min - parent_pivot);
             rt._local_rect.size = max - min;
 
             vec2 pivot_pt = rt._local_rect.position + rt.pivot * rt._local_rect.size;

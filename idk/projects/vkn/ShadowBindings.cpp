@@ -24,4 +24,8 @@ namespace idk::vkn::bindings
 	{
 		filter = cam.culling_flags;
 	}
+	void FragmentShaderBinding::Bind(RenderInterface& the_interface)
+	{
+		the_interface.BindShader(ShaderStage::Fragment, fragment_shader);
+	}
 }

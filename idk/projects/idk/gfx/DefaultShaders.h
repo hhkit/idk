@@ -6,8 +6,10 @@ namespace idk
 	{
 		VDebug,
 		VNormalMesh,
+		VNormalMeshShadow,
 		VNormalMeshPicker,
 		VSkinnedMesh,
+		VSkinnedMeshShadow,
 		VSkinnedMeshPicker,
 		VParticle,
 		VSkyBox,
@@ -30,6 +32,7 @@ namespace idk
 		FDeferredPostSpecular,
 		FDeferredPostAmbient,
 		FDeferredHDR,
+		FPointShadow,
 		FMax
 	};
 	enum GeometryShaders

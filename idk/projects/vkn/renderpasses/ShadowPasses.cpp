@@ -358,18 +358,20 @@ namespace idk::vkn::renderpasses
 		bindings.for_each_binder<>(
 			SetStateTest2{},
 			cam, *state.skeleton_transforms);
-		bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
+		bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMeshShadow];
 		bindings.Get<bindings::GeometryShaderBinding>().geometry_shader = Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GPointShadow];
+		bindings.Get<bindings::FragmentShaderBinding>().fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPointShadow];
 		auto skinned_bindings = bindings;
-		skinned_bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkinnedMesh];
+		skinned_bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkinnedMeshShadow];
 		skinned_bindings.Get<bindings::GeometryShaderBinding>().geometry_shader = Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GPointShadow];
+		skinned_bindings.Get<bindings::FragmentShaderBinding>().fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FPointShadow];
 		PointShadow::DrawSetBinding derp{
 			{
 				PointShadow::InstDrawSetBinding{bindings,InstMeshDrawSet{inst_span.to_span(*state.shared_gfx_state->instanced_ros),state.shared_gfx_state->inst_mesh_render_buffer.buffer()}},
 				PointShadow::SkinnedInstDrawSetBinding{skinned_bindings,SkinnedMeshDrawSet{state.skinned_mesh_render}}
 			}
 		};
-		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);
+		frame_graph.addRenderPass<PassSetPair<PointShadow::RenderPass, PointShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);
 
 	}
 
