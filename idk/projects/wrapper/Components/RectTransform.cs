@@ -23,6 +23,12 @@
             get => Bindings.RectTransformGetAnchorMax(handle);
             set => Bindings.RectTransformSetAnchorMax(handle, value);
         }
+        public Vector2 anchorPos
+        {
+            get => Bindings.RectTransformGetAnchorPos(handle);
+            set => Bindings.RectTransformSetAnchorPos(handle, value);
+        }
+
         public Vector2 pivot
         {
             get => Bindings.RectTransformGetPivot(handle);
