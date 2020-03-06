@@ -63,6 +63,9 @@ of the editor.
 #include <ds/span.inl>
 #include <ds/result.inl>
 
+
+#include <res/ResourceMeta.inl>
+
 namespace idk {
 
 	IGE_InspectorWindow::IGE_InspectorWindow()
@@ -553,6 +556,22 @@ namespace idk {
         if (execute_counter > 1)
             editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
     }
+#pragma optimize("",off)
+
+    template<typename T>
+    struct has_meta
+    {
+        template<typename U, typename = decltype(std::declval<U>().GetMeta())>
+        static char check(U&&);
+        template<typename ...Args>
+        static int check(Args&&...);
+
+        inline static constexpr bool value = sizeof(check(std::declval<T>()))==1;
+    };
+
+    template<typename T>
+    inline constexpr bool has_meta_v = has_meta<T>::value;
+
     void IGE_InspectorWindow::StoreOriginalValues(string_view property_path)
     {
         const auto& sel = Core::GetSystem<IDE>().GetSelectedObjects();

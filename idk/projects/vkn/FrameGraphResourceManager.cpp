@@ -88,7 +88,7 @@ namespace idk::vkn
 		auto next_id = NextID();
 		auto itr = resource_handles.find(rsc.id);
 		auto oitr = renamed_original.find(rsc.id);
-		if (itr == resource_handles.end() || oitr ==resource_handles.end())
+		if (itr == resource_handles.end() || oitr == renamed_original.end())
 			throw;
 		resource_handles.emplace(next_id, itr->second);
 		renamed_resources.emplace(next_id, rsc.id);
@@ -131,10 +131,10 @@ namespace idk::vkn
 		return resources.at(itr->second).name;
 	}
 
-	bool FrameGraphResourceManager::IsCompatible(fgr_id lhs, fgr_id rhs) const
+	bool FrameGraphResourceManager::IsCompatible(fgr_id original, fgr_id new_) const
 	{
-		auto l_itr = resource_handles.find(lhs);
-		auto r_itr = resource_handles.find(rhs);
+		auto l_itr = resource_handles.find(original);
+		auto r_itr = resource_handles.find(new_);
 		if (l_itr == r_itr)
 			return true;
 		auto& l_desc = resources[l_itr->second], &r_desc = resources[r_itr->second];
@@ -142,9 +142,9 @@ namespace idk::vkn
 		if (l_desc.actual_rsc || r_desc.actual_rsc)
 			return false;
 
-		[[maybe_unused]] string_view lhs_name = l_desc.name, rhs_name= r_desc.name;
+		[[maybe_unused]] string_view original_name = l_desc.name, new__name= r_desc.name;
 
-		return l_desc.usage==r_desc.usage&&l_desc.format == r_desc.format && l_desc.type == r_desc.type && l_desc.layer_count == r_desc.layer_count && l_desc.aspect == r_desc.aspect;
+		return (l_desc.usage&r_desc.usage) == r_desc.usage &&l_desc.format == r_desc.format && l_desc.type == r_desc.type && l_desc.layer_count == r_desc.layer_count && l_desc.aspect == r_desc.aspect;
 	}
 
 	FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(fgr_id rsc)

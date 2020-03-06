@@ -18,4 +18,5 @@ namespace idk::vkn::dbg
 
 	string DumpFrameBufferAllocs();
 	string DumpRenderTargetAllocs();
+	string DumpMemoryAllocs();
 }

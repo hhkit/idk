@@ -11,6 +11,10 @@
 namespace idk::vkn
 {
 	VulkanView& View();
+	namespace hlp
+	{
+		string DumpAllocators();
+	}
 }
 namespace idk::vkn::dbg
 {
@@ -203,5 +207,10 @@ namespace idk::vkn::dbg
 		out << "All size: " << total_size << "\n";
 		string derp = out.str();
 		return derp;
+	}
+#pragma optimize("",off)
+	string DumpMemoryAllocs()
+	{
+		return hlp::DumpAllocators();
 	}
 }

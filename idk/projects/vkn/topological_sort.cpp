@@ -14,6 +14,70 @@ return o << " }";
 }
 */
 //Conducts a topological sort on the graph so that all nodes that lead into any particular node have an index larger than the particular node.
+
+namespace idk
+{
+	template<typename T>
+	struct reverse_span
+	{
+		T* rstart, *rend;
+		reverse_span(span<T> sp) :rstart{(sp.end()!=nullptr)?sp.end()-1: nullptr },rend((sp.begin()!=nullptr)?sp.begin()-1:nullptr)
+		{
+
+		}
+		struct reverse_itr
+		{
+			T* ptr;
+
+			T* operator->() { return ptr; }
+			T& operator*() { return *ptr; }
+
+			reverse_itr operator++()
+			{
+				return reverse_itr{ --ptr };
+			}
+			reverse_itr operator++(int)
+			{
+				return reverse_itr{ ptr-- };
+			}
+			reverse_itr operator+(ptrdiff_t diff)
+			{
+				return reverse_itr{ ptr - diff };
+			}
+			reverse_itr operator-(ptrdiff_t diff)
+			{
+				return reverse_itr{ ptr + diff };
+			}
+			reverse_itr& operator+=(ptrdiff_t diff)
+			{
+				return (*this) = reverse_itr{ ptr - diff };
+			}
+			reverse_itr& operator-=(ptrdiff_t diff)
+			{
+				return (*this)= reverse_itr{ ptr + diff };
+			}
+			bool operator==(reverse_itr rhs)
+			{
+				return ptr == rhs.ptr;
+			}
+			bool operator!=(reverse_itr rhs)
+			{
+				return ptr != rhs.ptr;
+			}
+		};
+
+		reverse_itr begin()const
+		{
+			return { rstart };
+		}
+		reverse_itr end()const
+		{
+			return { rend };
+		}
+	};
+
+}
+
 namespace idk::graph_theory
 {
 
@@ -46,7 +110,7 @@ std::pair<vector<index_t>, bool> KahnsAlgorithm(IntermediateGraph graph)
 		sorted_indices.emplace_back(node_index);
 
 		//remove all outgoing edges(subtracting incoming count for related nodes)
-		for (auto& adj_index : graph.AdjacencyList(node_index))
+		for (auto& adj_index : reverse_span{ graph.AdjacencyList(node_index) })
 		{
 			//If there are no nodes leading in anymore, add to stack of nodes with 0 dependencies
 			if (--in_list[adj_index] == 0)

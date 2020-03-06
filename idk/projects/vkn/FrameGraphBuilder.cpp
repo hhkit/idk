@@ -94,6 +94,11 @@ namespace idk::vkn
 		return result;
 	}
 
+	void FrameGraphBuilder::NoRenderPass(bool no_render_pass)
+	{
+		curr_rsc.no_rp = no_render_pass;
+	}
+
 	void FrameGraphBuilder::set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{
 		auto size = std::max(curr_rsc.input_attachments.size(), static_cast<size_t>(attachment_index + 1));
@@ -149,7 +154,7 @@ namespace idk::vkn
 		auto modified_span = consumed_resources.StoreResources(curr_rsc.modified_resources);
 		auto copied_span   = consumed_resources.StoreCopies(curr_rsc.copies);
 
-		return FrameGraphNode{ id,std::move(curr_rsc.name),&consumed_resources.resources,&consumed_resources.copies,input_span,read_span,output_span,modified_span,copied_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment };
+		return FrameGraphNode{ id,std::move(curr_rsc.name),&consumed_resources.resources,&consumed_resources.copies,input_span,read_span,output_span,modified_span,copied_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment,curr_rsc.no_rp };
 	}
 
 	std::optional<fg_id> FrameGraphBuilder::GetSourceNode(fgr_id aliased_rsc) const
@@ -164,6 +169,7 @@ namespace idk::vkn
 
 	void FrameGraphBuilder::PreObject::reset()
 	{
+		no_rp = false;
 		input_resources.clear();
 		read_resources.clear();
 		output_resources.clear();

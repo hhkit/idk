@@ -301,6 +301,10 @@ namespace idk::vkn
 	{
 		return _current_batch.pipeline;
 	}
+	void RenderTask::SkipRenderPass(bool skip)
+	{
+		_skip_render_pass = skip;
+	}
 	void RenderTask::SetInputAttachments(span<VknTextureView> input_attachments) noexcept
 	{
 		_input_attachments = input_attachments;
@@ -334,7 +338,7 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
@@ -349,110 +353,125 @@ namespace idk::vkn
 		ProcessCopies(render_bundle);
 		if (_label)
 			dbg::EndLabel(cmd_buffer);
-		auto& d_manager = render_bundle._d_manager;
-		vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
-
 		
-		_uniform_manager.GenerateDescriptorSets(span{ _uniform_sets }, d_manager, uniform_sets);
+		if (!_skip_render_pass)
+		{
 
-		vector<vk::Viewport> viewports;
-		std::optional<RenderPassObj> prev_rp;
-		vector<vk::ClearValue> clear_values;
-		compute_clear_info(_num_output_attachments, clear_colors, _clear_depth_stencil,clear_values);
-		vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
 
-		auto rp = curr_rp;
-		auto fb = curr_frame_buffer;
-		auto ra_max = vec2{ std::numeric_limits<float>::min() };
-		auto ra_min = vec2{ std::numeric_limits<float>::max() };
-		for (auto& batch : batches)
-		{
-			for (auto& sc : batch.scissor.to_span())
-			{
-				auto vmin = sc.position;
-				auto vmax = vmin + sc.size;
-				ra_max = max(ra_max, vmax);
-				ra_min = min(ra_min, vmin);
-			}
-		}
-		render_area = { ra_min,ra_max - ra_min };
+			auto& d_manager = render_bundle._d_manager;
+			vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
 
-		vk::RenderPassBeginInfo rpbi
-		{
-			rp,fb,
-			hlp::ToRect2D(render_area),
-			static_cast<uint32_t>(clear_values.size()),
-			std::data(clear_values),
-		};
-		cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		if (batches.size())
-		{
-		for (auto& batch : this->batches)
-		{
-			if (batch.label)
+
+			_uniform_manager.GenerateDescriptorSets(span{ _uniform_sets }, d_manager, uniform_sets);
+
+			vector<vk::Viewport> viewports;
+			vector<vk::Rect2D> scissors;
+			std::optional<RenderPassObj> prev_rp;
+			vector<vk::ClearValue> clear_values;
+			compute_clear_info(_num_output_attachments, clear_colors, _clear_depth_stencil, clear_values);
+			vector<RscHandle<ShaderProgram>> condensed_shaders(std::size(batches.front().shaders.shaders));
+
+			auto rp = curr_rp;
+			auto fb = curr_frame_buffer;
+			auto ra_max = vec2{ std::numeric_limits<float>::min() };
+			auto ra_min = vec2{ std::numeric_limits<float>::max() };
+			for (auto& batch : batches)
 			{
-				dbg::BeginLabel(cmd_buffer, batch.label->c_str());
-			}
-			if (batch.draw_calls.size() > 0)
-			{
-				condensed_shaders.clear();
-				for (auto& oshader : batch.shaders.shaders)
+				for (auto& sc : batch.scissor.to_span())
 				{
-					if (oshader)
-					{
-						condensed_shaders.emplace_back(*oshader);
-					}
+					auto vmin = sc.position;
+					auto vmax = vmin + sc.size;
+					ra_max = max(ra_max, vmax);
+					ra_min = min(ra_min, vmin);
 				}
-				auto& pipeline =(batch.pipeline_override)?*batch.pipeline_override:ppm->GetPipeline(batch.pipeline, condensed_shaders, 0, rp);
-				pipeline.Bind(render_bundle._cmd_buffer, View());
-				viewports.resize(batch.viewport.size());
-				auto bviewports = batch.viewport.to_span();
-				std::transform(bviewports.begin(), bviewports.end(), viewports.begin(), [](rect r) {return vk::Viewport{r.position.x,r.position.y, r.size.x,r.size.y,0,1 }; });
-				cmd_buffer.setViewport(0,viewports);
-				for (auto& p_ro : batch.draw_calls)
-				{
+			}
+			render_area = { ra_min,ra_max - ra_min };
 
-					if (p_ro.label.first == LabelType::eInsert)
+			vk::RenderPassBeginInfo rpbi
+			{
+				rp,fb,
+				hlp::ToRect2D(render_area),
+				static_cast<uint32_t>(clear_values.size()),
+				std::data(clear_values),
+			};
+			cmd_buffer.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+
+			VulkanPipeline::Options opt{};
+			opt.dynamic_states.emplace_back(vk::DynamicState::eScissor);
+			if (batches.size())
+			{
+				for (auto& batch : this->batches)
+				{
+					if (batch.label)
 					{
 						dbg::BeginLabel(cmd_buffer, batch.label->c_str());
 					}
-					auto set_bindings = p_ro.uniforms.to_span();
-					auto dses = p_ro.uniforms.to_span(uniform_sets);
-					for (size_t i=0;i<set_bindings.size();++i)
+					if (batch.draw_calls.size() > 0)
 					{
-						auto ds = dses[i];
-						auto [set, bindings] = set_bindings[i];
-						cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.PipelineLayout(), set, ds, {});
-					}
-
-					for (auto& vb : p_ro.vertex_buffers)
-					{
-						//auto opt_binding = pipeline.GetBinding(vb.binding);
-						//if (opt_binding)
+						condensed_shaders.clear();
+						for (auto& oshader : batch.shaders.shaders)
 						{
-							if (!vb.buffer) //Don't bind null buffers.
-								continue;
-							cmd_buffer.bindVertexBuffers(vb.binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
+							if (oshader)
+							{
+								condensed_shaders.emplace_back(*oshader);
+							}
 						}
-					}
-					
-					std::visit(DrawFunc{}, p_ro.draw_info, std::variant<vk::CommandBuffer>{cmd_buffer}, std::variant<IndexBindingData>{ p_ro.index_buffer});
+						auto& pipeline = (batch.pipeline_override) ? *batch.pipeline_override : ppm->GetPipeline(batch.pipeline, condensed_shaders, 0, rp,false, opt);
+						pipeline.Bind(render_bundle._cmd_buffer, View());
+						viewports.resize(batch.viewport.size());
+						scissors.resize(batch.scissor.size());
+						auto bviewports = batch.viewport.to_span();
+						auto bscissors = batch.scissor.to_span();
+						
+						std::transform(bviewports.begin(), bviewports.end(), viewports.begin(), [](rect r) {return vk::Viewport{ r.position.x,r.position.y, r.size.x,r.size.y,0,1 }; });
+						std::transform(bscissors.begin(), bscissors.end(), scissors.begin(), [](rect r) {return hlp::ToRect2D(r); });
+						cmd_buffer.setViewport(0, viewports);
+						cmd_buffer.setScissor(0, scissors);
+						for (auto& p_ro : batch.draw_calls)
+						{
 
-					if (p_ro.label.first == LabelType::eInsert)
+							if (p_ro.label.first == LabelType::eInsert)
+							{
+								dbg::BeginLabel(cmd_buffer, batch.label->c_str());
+							}
+							auto set_bindings = p_ro.uniforms.to_span();
+							auto dses = p_ro.uniforms.to_span(uniform_sets);
+							for (size_t i = 0; i < set_bindings.size(); ++i)
+							{
+								auto ds = dses[i];
+								auto [set, bindings] = set_bindings[i];
+								cmd_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.PipelineLayout(), set, ds, {});
+							}
+
+							for (auto& vb : p_ro.vertex_buffers)
+							{
+								//auto opt_binding = pipeline.GetBinding(vb.binding);
+								//if (opt_binding)
+								{
+									if (!vb.buffer) //Don't bind null buffers.
+										continue;
+									cmd_buffer.bindVertexBuffers(vb.binding, vb.buffer, vk::DeviceSize{ vb.offset }, vk::DispatchLoaderDefault{});
+								}
+							}
+
+							std::visit(DrawFunc{}, p_ro.draw_info, std::variant<vk::CommandBuffer>{cmd_buffer}, std::variant<IndexBindingData>{ p_ro.index_buffer});
+
+							if (p_ro.label.first == LabelType::eInsert)
+							{
+								dbg::EndLabel(cmd_buffer);
+							}
+						}
+
+					}
+					if (batch.label)
 					{
 						dbg::EndLabel(cmd_buffer);
 					}
 				}
-
 			}
-			if (batch.label)
-			{
-				dbg::EndLabel(cmd_buffer);
-			}
-		}
-		}
 
-		cmd_buffer.endRenderPass();
+			cmd_buffer.endRenderPass();
+		}
 		if (_label)
 		{
 			dbg::EndLabel(cmd_buffer);

@@ -13,6 +13,7 @@ namespace idk
             //Outgoing edges
             vector<index_span> adjacency_list;
             vector<index_t> adjacency_buffer;
+            span<string_view> names;
             IntermediateGraph(size_t num_nodes) :in_list(num_nodes), adjacency_list(num_nodes) {}
             void ClearAdjacencyList()
             {

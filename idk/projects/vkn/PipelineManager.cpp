@@ -21,7 +21,7 @@ namespace idk::vkn
 			   //LessChain(lhs.guid.Data1,rhs.guid.Data1,lhs.guid.Data2 , rhs.guid.Data2)|| && lhs.guid.Data3 < rhs.guid.Data3 && reinterpret_cast<uint64_t>(lhs.guid.Data4) < reinterpret_cast<uint64_t>(rhs.guid.Data4);
 	}
 //// 
-	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass, bool has_depth_stencil)
+	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass, bool has_depth_stencil, VulkanPipeline::Options opt)
 	{
 		std::optional<handle_t> prev{};
 		bool is_diff = prog_to_pipe2.empty();
@@ -61,6 +61,16 @@ namespace idk::vkn
 		for (auto& desc : config.buffer_descriptions)
 			combi += desc.GenString();
 
+		decltype(opt.derive_from->base) derived = {};
+		derived = (opt.derive_from) ? opt.derive_from->base:derived;
+		char a = opt.is_base_pipeline?1:0;
+
+		combi += a;
+		combi += string_view{ r_cast<const char*>(&derived), sizeof(derived) };
+
+		for (auto dyn_state : opt.dynamic_states)
+			combi += string_view{ r_cast<const char*>(&dyn_state), sizeof(dyn_state) };
+
 		auto completed_combi = string{ combi.data(),combi.size() };
 		_lock.begin_read();
 		auto itr = prog_to_pipe2.find(completed_combi);
@@ -76,9 +86,16 @@ namespace idk::vkn
 
 		if (is_diff)
 		{
-			PipelineObject obj{ config,render_pass,has_depth_stencil,modules };
+			vector<vk::ShaderModule> cached_modules;
+			cached_modules.reserve(modules.size());
+			for (auto& module : modules)
+			{
+				cached_modules.emplace_back(module.as<ShaderModule>().Module());
+			}
+
+			PipelineObject obj{ config,render_pass,has_depth_stencil,modules,cached_modules };
 			obj.StoreBufferDescOverrides();
-			obj.Create(View(),frame_index);
+			obj.Create(View(),frame_index,opt);
 
 			//TODO threadsafe lock here
 			//while (!creating.compare_exchange_strong(curr_expected_val, true));
@@ -137,12 +154,14 @@ namespace idk::vkn
 
 	}
 
-	bool HasInvalidHandles(const vector<RscHandle<ShaderProgram>>& shaders)
+	bool HasInvalidHandles(const vector<RscHandle<ShaderProgram>>& shaders, const vector<vk::ShaderModule>& shaders_concrete)
 	{
 		bool invalid = false;
-		for (auto& shader : shaders)
+		for (size_t i=0;i< shaders.size();++i)
 		{
-			invalid |= (!shader || (!shader.as<ShaderModule>().operator bool() && !shader.as<ShaderModule>().HasUpdate()));
+			auto& shader = shaders[i];
+			auto concrete = shaders_concrete[i];
+			invalid |= !shader || !shader.as<ShaderModule>().HasCurrent()|| shader.as<ShaderModule>().Module()!=concrete;
 		}
 		return invalid;
 	}
@@ -150,7 +169,7 @@ namespace idk::vkn
 //// 
 	void PipelineManager::CheckForUpdates(uint32_t frame_index)
 	{
-		vector<decltype(pipelines)::iterator> pipelines_to_update;
+		vector<size_t> pipelines_to_update;//handles
 		hash_set<VulkanPipeline*> pipelines_to_destroy;
 		pipelines_to_update.reserve(pipelines.size() * 2);
 		pipelines_to_destroy.reserve(pipelines.size());
@@ -168,16 +187,12 @@ namespace idk::vkn
 		//Remove invalid pipelines.
 		for (auto itr = pipelines.begin(); itr != pipelines.end(); ++itr)
 		{
-			if (itr->rp && (!*itr->rp || HasInvalidHandles(itr->shader_handles)))
+			if (itr->rp && (!*itr->rp || HasInvalidHandles(itr->shader_handles,itr->shader_concrete)))
 			{
 				pipelines_to_destroy.emplace(&itr->pipeline);
 			}
 		}
-
-		for (auto& itr : pipelines_to_destroy)
-		{
-			RemovePipeline(itr);
-		}
+		/*
 		//Update pipelines that need to be updated.
 		for (auto itr = pipelines.begin(); itr != pipelines.end(); ++itr)
 		{
@@ -195,29 +210,18 @@ namespace idk::vkn
 			}
 			if (need_update)
 			{
-				pipelines_to_update.emplace_back(itr);
+				pipelines_to_update.emplace_back(itr.handle());
 			}
 		}
-		for (auto itr : pipelines_to_update)
+		*/
+		for (auto& itr : pipelines_to_destroy)
 		{
-			auto& po = *itr;
-			auto handle = itr.handle();
-			for (auto& shader : po.shader_handles)
-			{
-				auto& module = shader.as<ShaderModule>();
-				if (module.NeedUpdate())
-				{
-					module.UpdateCurrent(frame_index);
-				}
-
-				module.NewlyLoaded(false);
-			}
-			{
-				//Recreate pipeline in back_pipeline
-				pipelines[handle].Swap();
-				pipelines[handle].Create(View(), frame_index);
-			}
-		}
+			RemovePipeline(itr);
+		}/*
+		for (auto handle : pipelines_to_update)
+		{
+			pipelines.free(handle);
+		}*/
 		pipelines.reserve(100 + pipelines.size() * 2);
 	}
 
@@ -230,7 +234,7 @@ namespace idk::vkn
 		desc_helper.StoreBufferDescOverrides(config);
 	}
 
-	void PipelineManager::PipelineObject::Create(VulkanView& view,[[maybe_unused]] size_t fo_index)
+	void PipelineManager::PipelineObject::Create(VulkanView& view,[[maybe_unused]] size_t fo_index, VulkanPipeline::Options opt)
 	{
 		//TODO: set the pipeline's modules
 		desc_helper.UseShaderAttribs(shader_handles, config);
@@ -238,7 +242,7 @@ namespace idk::vkn
 			pipeline.SetRenderPass(**rp, has_depth_stencil);
 		else
 			pipeline.ClearRenderPass();
-		pipeline.Create(config, shader_handles, view);
+		pipeline.Create(config, shader_handles, view,opt);
 	}
 	void PipelineManager::PipelineObject::Swap()
 	{

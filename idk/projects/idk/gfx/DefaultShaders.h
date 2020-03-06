@@ -31,6 +31,7 @@ namespace idk
 		FDeferredPost,
 		FDeferredPostSpecular,
 		FDeferredPostAmbient,
+		FDeferredCombine,
 		FDeferredHDR,
 		FPointShadow,
 		FMax

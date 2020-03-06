@@ -8,7 +8,7 @@
 #include <vkn/DebugUtil.h>
 namespace idk::vkn
 {
-	bool frame_graph_debug = false;
+	bool frame_graph_debug = true;
 	//Process nodes and cull away unnecessary nodes.
 	//Figure out dependencies and synchronization points
 	//Insert new nodes to help transit concrete resources to their corresponding virtual resources
@@ -49,25 +49,37 @@ namespace idk::vkn
 			auto dep_rscs = curr_node.GetInputSpan();
 			for (auto& dep_rsc : dep_rscs)
 			{
-				
-				auto dep_node = ag.src_node.find(dep_rsc.id)->second;
-				order = std::max(fat_order[dep_node], order);
+				auto src_itr = ag.src_node.find(dep_rsc.id);
+				if (src_itr != ag.src_node.end())
+				{
+					auto dep_node = src_itr->second;
+					order = std::max(fat_order[dep_node], order);
+				}
 			}
 			order = order + 1;
 			fat_order[curr_node.id] = serial_order++; //Change back to order to revert to fat ordering.
 			max_order = std::max(order, max_order);
 		}
 
+		hash_table<fgr_id, size_t> ordering;
 		for (auto index : exec_order)
 		{
 			auto& curr_node = graph_nodes[index];
 			for (auto& input_rsc : curr_node.GetInputSpan())
 			{
-				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
+				auto rsc_id = input_rsc.id;
+				auto order = fat_order[curr_node.id];
+				manager.ExtendLifetime(rsc_id, order);
+				ordering.emplace(rsc_id, order);
+				ordering[rsc_id] = std::min(ordering[rsc_id],order);
 			}
-			for (auto& input_rsc : curr_node.GetOutputSpan())
+			for (auto& output_rsc : curr_node.GetOutputSpan())
 			{
-				manager.ExtendLifetime(input_rsc.id, fat_order[curr_node.id]);
+				auto rsc_id = output_rsc.id;
+				auto order = fat_order[curr_node.id];
+				manager.ExtendLifetime(rsc_id, order);
+				ordering.emplace(rsc_id, order);
+				ordering[rsc_id] = std::min(ordering[rsc_id], order);
 			}
 		}
 		vector<std::pair<string, ResourceLifetime>> lifetimes;
@@ -79,7 +91,7 @@ namespace idk::vkn
 		}
 
 
-		manager.CollapseLifetimes(original_id);
+		manager.CollapseLifetimes(original_id,ordering);
 		manager.DebugCollapsed(rsc_manager);
 		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
 		
@@ -133,6 +145,8 @@ namespace idk::vkn
 			{
 				vector<NodeDependencies> nodes;
 
+				vector<std::pair<string, vector<string>>> named_dependencies;
+
 				template<typename FgConvFunc, typename FgrConvFunc>
 				DependencyDebugger(const ActualGraph& graph, FgConvFunc&& fgid_name, FgrConvFunc&& fgrid_name)
 				{
@@ -147,11 +161,35 @@ namespace idk::vkn
 						}
 
 				}
+				void Debug(const graph_theory::IntermediateGraph& igraph, span<const FrameGraphNode>nodes)
+				{
+					hash_table<size_t, vector<size_t>> dependencies;
+					std::set<size_t> indices;
+					for (size_t i = 0; i < igraph.adjacency_list.size(); ++i)
+					{
+						for (auto adj_node : igraph.AdjacencyList(i))
+						{
+							dependencies[adj_node].emplace_back(i);
+							indices.emplace(adj_node);
+						}
+					}
+					for (auto index : indices)
+					{
+						auto& list = dependencies.at(index);
+						auto& [name, deps] = named_dependencies.emplace_back();
+						name = nodes[index].name;
+						for (auto& dep_index : list)
+						{
+							deps.emplace_back(nodes[dep_index].name);
+						}
+					}
+
+				}
 			};
 		}
 
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
 		tmp_graph.buffer = &graph_builder.consumed_resources;
@@ -166,7 +204,7 @@ namespace idk::vkn
 		auto& nodes_ = nodes;
 		auto& rsc_manager = GetResourceManager();
 		auto fg_id_to_name = [&id_to_indices, &nodes_](fg_id id) ->string { return nodes_.at(id_to_indices.at(id)).name; };
-		auto fgr_id_to_name = [&rsc_manager](fgr_id id) ->string { return rsc_manager.GetResourceDescription(id)->name; };
+		auto fgr_id_to_name = [&rsc_manager,&nodes_](fgr_id id) ->string { return rsc_manager.GetResourceDescription(id)->name; };
 
 		{
 			vector<size_t> index_buffer;
@@ -190,10 +228,15 @@ namespace idk::vkn
 			if(frame_graph_debug)
 				for (auto [node_id, dep_nodes] : dependant_nodes)
 				{
-					dbg_dependant_nodes[node_id].first = get_name(node_id);
-						for (auto dep_node_id : dep_nodes)
+					if (node_id)
 					{
-							dbg_dependant_nodes[node_id].second.emplace_back(get_name(dep_node_id));
+						dbg_dependant_nodes[node_id].first = get_name(node_id);
+							for (auto dep_node_id : dep_nodes)
+						{
+
+								if (dep_node_id)
+									dbg_dependant_nodes[node_id].second.emplace_back(get_name(dep_node_id));
+						}
 					}
 				}
 
@@ -208,10 +251,17 @@ namespace idk::vkn
 				std::transform(id_adj_buffer.begin(), id_adj_buffer.end(), index_buffer.begin(), [&id_to_indices](fg_id id) {return id_to_indices.find(id)->second; });
 				dependency_graph.SetAdjacentNodes(src_index, index_buffer.begin(), index_buffer.end());
 			}
+			vector<string_view> names(nodes.size());
+			for (size_t i = 0; i < nodes.size(); ++i)
+			{
+				names[i] = nodes_[i].name;
+			}
 			if (frame_graph_debug)
 			{
 				dbg::fg::DependencyDebugger dep_dbg{ graph,fg_id_to_name,fgr_id_to_name };
+				dep_dbg.Debug(dependency_graph, nodes_);
 			}
+			dependency_graph.names = names;
 			auto [sorted_order, success] = graph_theory::KahnsAlgorithm(dependency_graph);
 			IDK_ASSERT_MSG(success, "Cyclic dependency detected.");
 			//Maybe use copy_if to filter out useless nodes.
@@ -530,10 +580,14 @@ namespace idk::vkn
 			auto& rp = *itr->second;
 			auto input_attachments = span{ node.input_attachments };
 			auto output_attachments = span{ node.output_attachments };
-			rp.render_pass = CreateRenderPass(node.name,input_attachments, output_attachments,node.depth_stencil);
-			auto [fb,size]= CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments, node.depth_stencil);
-			rp.frame_buffer = fb;
-			rp.fb_size = size;
+			rp.skip_render_pass = node.skip_render_pass;
+			if (!rp.skip_render_pass)
+			{
+				rp.render_pass = CreateRenderPass(node.name, input_attachments, output_attachments, node.depth_stencil);
+				auto [fb, size] = CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments, node.depth_stencil);
+				rp.frame_buffer = fb;
+				rp.fb_size = size;
+			}
 		}
 	}
 

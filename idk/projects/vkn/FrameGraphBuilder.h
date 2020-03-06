@@ -39,6 +39,8 @@ namespace idk::vkn
 		//call read first
 		FrameGraphResource        copy (FrameGraphResourceReadOnly target_rsc, CopyOptions opt);
 
+		void NoRenderPass(bool no_render_pass = true);
+
 		void set_input_attachment(FrameGraphResourceReadOnly in_rsc, uint32_t attachment_index , AttachmentDescription attachment_desc);
 		void set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc);
 		void set_depth_stencil_attachment(FrameGraphResourceMutable out_rsc, AttachmentDescription attachment_desc);
@@ -60,6 +62,7 @@ namespace idk::vkn
 		struct PreObject
 		{
 			string name;
+			bool no_rp=false;
 			vector<FrameGraphResource> input_resources;
 			vector<FrameGraphResource> read_resources;
 			vector<FrameGraphResource> output_resources;

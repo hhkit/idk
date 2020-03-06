@@ -11,6 +11,11 @@ namespace idk
 		{
 			return extra_vars.emplace(std::move(name), std::move(v)).second;
 		}
+		template<typename T>
+		T& GetOptional(string name, variant_t v)
+		{
+			return std::get<T>(extra_vars.emplace(std::move(name), std::move(v)).first->second);
+		}
 
 		bool Unset(const string& name)
 		{
