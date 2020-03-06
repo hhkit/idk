@@ -9,7 +9,7 @@ REFLECT_VARS(enabled, mesh, material_instance, cast_shadows, receive_shadows)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Light, "Light")
-REFLECT_VARS(light, shadow_bias, casts_shadows,update_shadow,shadow_layers)
+REFLECT_VARS(light, shadow_bias, casts_shadows, update_shadow, shadow_layers)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PointLight, "PointLight")
@@ -48,7 +48,7 @@ REFLECT_VARS(mask)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target,gamma)
+REFLECT_VARS(enabled, layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target, gamma)
 REFLECT_END()
 #pragma endregion
 
@@ -58,7 +58,7 @@ REFLECT_BEGIN(idk::MainModule, "MainModule")
 REFLECT_VARS(duration, looping, prewarm, max_particles,
 	start_delay, start_lifetime, start_speed, start_size, start_rotation, start_color,
 	gravity_modifier, in_world_space, play_on_awake, destroy_on_finish)
-REFLECT_END();
+	REFLECT_END();
 
 REFLECT_BEGIN(idk::EmissionModule::Burst, "EmissionBurst")
 REFLECT_VARS(time, count, cycles, interval, probability)
