@@ -3,6 +3,10 @@
 #include <gfx/Mesh.h>
 namespace idk::vkn
 {
+	namespace hlp
+	{
+		class vector_buffer;
+	}
 	class VulkanMesh;
 	template<typename T>
 	using binding_only = std::enable_if_t<std::is_base_of_v<bindings::RenderBindings, T>>;
@@ -89,6 +93,16 @@ namespace idk::vkn
 	DrawSet<Binding,V>::DrawSet(Binding&& binding): _binding{std::move(binding)}
 	{
 	}
+
+	class ParticleDrawSet : public BaseDrawLogic
+	{
+	public:
+		ParticleDrawSet(span<const ParticleRange> particles, const hlp::vector_buffer& buffer);
+		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
+	private:
+		span<const ParticleRange> _particles;
+		const hlp::vector_buffer& _particle_buffer;
+	};
 
 
 	class InstMeshDrawSet : public BaseDrawLogic

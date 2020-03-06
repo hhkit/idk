@@ -69,6 +69,14 @@ namespace idk::vkn::meta
 
 	template<template<typename... >typename SFINAE, typename ...Tz>
 	struct SfinaeBool;
+
+
+
+
+	template<typename ...Args>
+	struct Applier; 	
+
+
 }
 namespace std
 {

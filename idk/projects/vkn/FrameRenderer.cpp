@@ -59,6 +59,7 @@
 #include <vkn/renderpasses/ShadowPasses.h>
 #include <vkn/renderpasses/MaskedPass.h>
 #include <vkn/renderpasses/DebugDrawPass.h>
+#include <vkn/renderpasses/PostDeferredPasses.h>
 
 namespace idk::vkn
 {
@@ -71,6 +72,8 @@ namespace idk::vkn
 		ColorPickRenderer color_picker;
 		FrameGraph graph{};
 		gt::GraphTest test{ graph };
+
+		renderpasses::ParticleRenderer particle_renderer;
 
 		gfxdbg::FgRscLifetimes _dbg_lifetimes;
 
@@ -1454,6 +1457,11 @@ namespace idk::vkn
 		}
 		{
 			auto [col, dep] = renderpasses::AddTransparentPass(graph, color, depth, state);
+			color = col;
+			depth = dep;
+		}
+		{
+			auto [col, dep] = _pimpl->particle_renderer.AddPass(graph, state, color, depth);
 			color = col;
 			depth = dep;
 		}

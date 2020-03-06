@@ -187,7 +187,7 @@ namespace idk::vkn
 	{
 		_copy_commands.emplace_back(copy);
 	}
-	void RenderTask::SetBufferDescriptions(span<buffer_desc> descriptions)
+	void RenderTask::SetBufferDescriptions(span<const buffer_desc> descriptions)
 	{
 		StartNewBatch();
 		_current_batch.pipeline.buffer_descriptions = {descriptions.begin(),descriptions.end()};

@@ -276,4 +276,96 @@ namespace idk::vkn::meta
 
 		template<typename V, typename T>
 		static inline constexpr auto IndexOf_v = IndexOf<V, T>::value;
+
+
+
+
+		namespace detail
+		{
+			template<typename IndexSeq>
+			struct reverse_seq;
+			template< size_t ... Nums>
+			struct reverse_seq<std::index_sequence<Nums...>>
+			{
+				static constexpr size_t N = sizeof...(Nums);
+				using type = std::index_sequence<(N - Nums)...>;
+			};
+
+			template<typename index_seq, typename tuple>
+			struct shuffle;
+			template<size_t ...indices, typename tuple>
+			struct shuffle<std::index_sequence<indices...>, tuple>
+			{
+				using type = std::tuple<std::tuple_element_t<indices, tuple>...>;
+			};
+
+			template<typename T>
+			struct Reverse;
+			template<typename ...Args, template<typename...> typename tuple>
+			struct Reverse<tuple<Args...>>
+			{
+				using seq_t = std::make_index_sequence<sizeof...(Args)>;
+				using rev_seq_t = detail::reverse_seq<seq_t>;
+				using type = typename detail::shuffle<rev_seq_t, tuple<Args...>>::type;
+			};
+
+
+			template<size_t max_items, typename T>
+			struct Cull;
+
+			template<size_t N, typename ...Args, template<typename...> typename tuple>
+			struct Cull<N, tuple<Args...>>
+			{
+				using seq_t = std::make_index_sequence<std::min(N, sizeof...(Args))>;
+				using type = typename detail::shuffle<seq_t, tuple<Args...>>::type;
+			};
+
+			template<typename func, typename tuple, typename = void>
+			struct ApplierHelper2 : std::false_type {};
+			template<typename Func, template<typename...>typename tuple, typename ...Args>
+			struct ApplierHelper2<Func, tuple<Args...>, decltype(std::declval<Func>()(std::declval<Args&&>()...))> :std::true_type
+			{
+				template<typename Func, typename ...OtherArgs>
+				static void apply(Func&& func, Args&&... args, OtherArgs&&...)
+				{
+					func(std::forward<Args>(args)...);
+				}
+			};
+			template<size_t N, typename ...Args>
+			struct ApplierHelper
+			{
+				template<typename Func>
+				static void apply(Func&& func, Args&&... args)
+				{
+					using culled = typename Cull<N, std::tuple<Args...>>::type;
+					using Check = ApplierHelper2<Func, culled>;
+					if constexpr (Check::value)
+					{
+						Check::apply(std::forward<Func>(func), std::forward<Args>(args)...);
+					}
+					else if constexpr (N > 1)
+					{
+						ApplierHelper<N - 1, Args...>::apply(std::forward<Func>(func), std::forward<Args>(args)...);
+					}
+
+				}
+				template<typename Func>
+				void operator()(Func&& func, Args&&... args)
+				{
+					apply(std::forward<Func>(func), std::forward<Args>(args)...);
+				}
+			};
+		}
+
+		template<size_t N, typename tuple>
+		using cull_t = detail::Cull<N, tuple>;
+
+
+		template<typename ...Args>
+		struct Applier : detail::ApplierHelper<sizeof...(Args), Args...>
+		{
+			using base = detail::ApplierHelper<sizeof...(Args), Args...>;
+			using base::operator(); //use all the other valid functors
+		};
+
 }
