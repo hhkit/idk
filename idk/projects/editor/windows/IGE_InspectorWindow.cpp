@@ -40,6 +40,7 @@ of the editor.
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <res/ResourceUtils.inl>
+#include <res/ResourceMeta.inl>
 #include <scene/SceneManager.h>
 #include <math/euler_angles.h>
 #include <meta/variant.h>
@@ -131,6 +132,8 @@ namespace idk {
             return;
         if (selection.game_objects.size() && selection.assets.size())
             return;
+
+        _curr_component = {};
 
         if (selection.game_objects.size())
         {
@@ -592,36 +595,20 @@ namespace idk {
                     _original_values.emplace_back();
             }
         }
-        else if (sel.assets.size())
-        {
-            for (auto obj : sel.assets)
-            {
-                obj.visit(
-                    [&](auto& handle) 
-                    {
-                        if constexpr (has_meta_v<std::decay_t<decltype(*handle)>>)
-                            _original_values.push_back(resolve_property_path(handle->GetMeta(), property_path).copy()); 
-                    }
-                );
-                
-                //auto components = obj;
-                //auto nth = _curr_component_nth;
-                //for (auto c : components)
-                //{
-                //    if (c.type == _curr_component.type && nth-- == 0)
-                //    {
-                //        break;
-                //    }
-                //}
-                //if (nth >= 0) // component not found
-                //    _original_values.emplace_back();
-            }
-        }
-        else// if (_curr_component)// showing prefab directly
+        else if (_curr_component) // showing prefab directly
         {
             _original_values.push_back(resolve_property_path(*_curr_component, property_path).copy());
         }
-
+        else // modifying asset meta
+        {
+            std::visit([&](auto h)
+            {
+                if constexpr (has_tag_v<decltype(h)::Resource, MetaResource>)
+                    _original_values.push_back(resolve_property_path(h->GetMeta(), property_path).copy());
+                else
+                    _original_values.emplace_back();
+            }, sel.assets[0]);
+        }
     }
 
     void IGE_InspectorWindow::ExecuteModify(string_view property_path, reflect::dynamic new_value)
@@ -629,7 +616,9 @@ namespace idk {
         if (_original_values.empty()) // no change
             return;
 
-        if (Core::GetSystem<IDE>().GetSelectedObjects().game_objects.size())
+        const auto& sel = Core::GetSystem<IDE>().GetSelectedObjects();
+
+        if (sel.game_objects.size())
         {
             int execute_counter = 0;
             const auto& sel_obj = Core::GetSystem<IDE>().GetSelectedObjects().game_objects;
@@ -659,9 +648,20 @@ namespace idk {
             if (execute_counter > 1)
                 Core::GetSystem<IDE>().ExecuteCommand<CMD_CollateCommands>(execute_counter);
         }
-        else // displaying prefab game object
+        else if (_curr_component) // displaying prefab game object
         {
             Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(_curr_component, property_path, _original_values[0], new_value);
+        }
+        else // modifying asset meta
+        {
+            std::visit([&](auto h)
+            {
+                if constexpr (has_tag_v<decltype(h)::Resource, MetaResource>)
+                {
+                    auto dyn = resolve_property_path(h->GetMeta(), property_path);
+                    Core::GetSystem<IDE>().ExecuteCommand<CMD_ModifyProperty>(dyn, _original_values[0]);
+                }
+            }, sel.assets[0]);
         }
 
         _original_values.clear();
