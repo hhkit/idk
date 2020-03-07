@@ -147,7 +147,7 @@ namespace idk
 			: ControlObjectData
 		{
 			static constexpr auto RememberedMoves = 64;
-			struct SeqAndObj { SeqNo seq; T obj; };
+			struct SeqAndObj { SeqNo seq; T obj; bool verified = false; };
 
 			ParameterImpl<T>& param;
 			T prev_value;
@@ -179,9 +179,9 @@ namespace idk
 				{
 				case PredictionFunction::Linear:
 				{
-					auto change = itr->obj - real_move;
-					param.setter(param.getter() - change);
-					prev_value -= change;
+					auto change = real_move - itr->obj;
+					param.setter(param.getter() + change);
+					prev_value += change;
 					// and snap
 					itr->obj = real_move;
 					break;
@@ -193,10 +193,12 @@ namespace idk
 
 					while (itr != move_buffer.end())
 					{
+						if (itr->verified)
+							break;
+
 						itr->obj += diff;
 						param.setter(param.getter() + diff);
 						prev_value += diff;
-
 						++itr;
 					}
 					break;
@@ -225,6 +227,7 @@ namespace idk
 								{
 									// calculate correction
 									ApplyCorrection(itr, real_move);
+									itr->verified = true;
 								}
 								break;
 							}

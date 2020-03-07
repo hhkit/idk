@@ -27,7 +27,7 @@ namespace idk
 		bool operator!=(const ResourceBundle&) const;
 		bool operator==(const ResourceBundle&) const;
 	private:
-		struct sub_array { char index = 0, count = 0; };
+		struct sub_array { short index = 0, count = 0; };
 
 		vector<GenericResourceHandle> handles; // always sorted so that we can simply span
 		array<sub_array, ResourceCount> subarrays;

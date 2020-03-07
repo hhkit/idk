@@ -96,6 +96,7 @@ namespace idk
                 vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
                 rt._local_rect.position = min - parent_pivot;
                 rt._local_rect.size = max - min;
+                return true;
             });
         }
     }

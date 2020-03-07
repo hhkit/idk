@@ -12,7 +12,7 @@ namespace idk
 	{
 		char buf[BUFSIZ];
 		memset(buf, 0, BUFSIZ);
-		WideCharToMultiByte(CP_ACP, 0, aa->FriendlyName, wcslen(aa->FriendlyName), buf, BUFSIZ, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, aa->FriendlyName, (int) wcslen(aa->FriendlyName), buf, BUFSIZ, NULL, NULL);
 		return buf;
 	}
 
@@ -20,7 +20,7 @@ namespace idk
 	{
 		char buf[BUFSIZ];
 		memset(buf, 0, BUFSIZ);
-		WideCharToMultiByte(CP_ACP, 0, aa->Description, wcslen(aa->Description), buf, BUFSIZ, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, aa->Description, (int) wcslen(aa->Description), buf, BUFSIZ, NULL, NULL);
 		return buf;
 	}
 
@@ -56,10 +56,6 @@ namespace idk
 		PIP_ADAPTER_INFO pAdapter = NULL;
 		DWORD dwRetVal = 0;
 		UINT i;
-
-		struct tm newtime;
-		char buffer[32];
-		errno_t error;
 
 		ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
 		pAdapterInfo = (IP_ADAPTER_INFO*)malloc(sizeof(IP_ADAPTER_INFO));
