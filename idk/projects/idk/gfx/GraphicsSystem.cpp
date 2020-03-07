@@ -503,7 +503,7 @@ namespace idk
 		range.dir_light_end = directional_light_buffer.size();
 		LightVolDbg::EndCurrent();
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
@@ -1055,7 +1055,7 @@ namespace idk
 			//Disable the shadows of the non-cascaded directional lights
 			for (auto& light : result.lights)
 			{
-				if (light.index!=1)
+				if (light.index==1)
 					light.cast_shadow = false;
 			}
 			//append the added lights at the back of the light range

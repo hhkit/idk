@@ -58,7 +58,7 @@ namespace idk::vkn::bindings
 		vec3 light_pos{0.f};
 		FakeMat4<float> p[6];
 	};
-
+#pragma optimize("", off)
 	void PointStandardVertexBindings::Bind(RenderInterface& the_interface)
 	{
 		mat4 projection_trf = mat4{ 1,0,0,0,

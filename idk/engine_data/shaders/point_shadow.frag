@@ -18,7 +18,7 @@ layout(location = 1) in VS_OUT
   vec3 position;
 };
 
-U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
+U_LAYOUT(11,0) uniform BLOCK(CameraBlock)
 {
 	float far_plane;
 	vec3 light_pos;
