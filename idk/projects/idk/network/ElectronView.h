@@ -3,6 +3,8 @@
 #include <core/Component.h>
 #include <network/network.h>
 #include <network/GhostPack.h>
+#include <network/MovePack.h>
+
 namespace idk
 {
 	template<typename T>
@@ -44,21 +46,22 @@ namespace idk
 
 		Host owner = Host::SERVER;
 
-		variant<std::monostate, Master, Ghost> ghost_state;
-		variant<std::monostate, ClientObject, ControlObject> move_state;
+		variant<monostate, Master, Ghost> ghost_state;
+		variant<monostate, ClientObject, ControlObject> move_state;
 
 		bool IsMine() const;
 
 		void Setup();
 		void SetAsClientObject();
+		void SetAsControlObject();
 
-		void UpdateClient();
-		void UpdateStateFlags();
-		void UpdateGhost();
-		vector<string> PackMoveData();
+		void CacheSentData();
+		void PrepareDataForSending();
+		void MoveGhost();
+		MovePack PackMoveData();
 		GhostPack MasterPackData(int incoming_state_mask);
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
-		void UnpackMoveData(SeqNo sequence_number, span <string> data_pack);
+		void UnpackMoveData(const MovePack& data_pack);
 
 		hash_table<string, reflect::dynamic> GetParameters() const;
 
@@ -78,7 +81,8 @@ namespace idk
 		{
 			SeqNo last_packed;
 			virtual bool ValueChanged() const = 0;
-			virtual string PackData(SeqNo pack_date) = 0;
+			virtual void CacheValue(SeqNo pack_date)  = 0;
+			virtual string PackData() = 0;
 			virtual ~MasterData() = default;
 		};
 
@@ -92,12 +96,27 @@ namespace idk
 		};
 
 		// move data
-		// struct ClientObjectData;
-		// struct ControlObjectData;
+		struct ClientObjectData
+		{
+			virtual void Init() = 0;
+			virtual void CalculateMoves(SeqNo curr_seq) = 0;
+			virtual small_vector<SeqAndPack> PackData() = 0;
+			virtual ~ClientObjectData() = default;
+		};
+
+		struct ControlObjectData
+		{
+			virtual void Init() = 0;
+			virtual void RecordPrediction(SeqNo curr_seq) = 0;
+			virtual void UnpackMove(span<const SeqAndPack>) = 0;
+			virtual ~ControlObjectData() = default;
+		};
 
 		string param_name;
 		real   interp_over = 0.2f;
 
+		virtual ClientObjectData* GetClientObject() = 0;
+		virtual ControlObjectData* GetControlObject() = 0;
 		virtual MasterData* GetMaster() = 0;
 		virtual GhostData* GetGhost() = 0;
 		virtual ~BaseParameter() = default;

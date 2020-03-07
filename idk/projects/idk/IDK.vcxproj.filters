@@ -1204,6 +1204,9 @@
     <ClInclude Include="network\GhostPack.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="network\MovePack.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

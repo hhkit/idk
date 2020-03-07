@@ -173,6 +173,7 @@ namespace idk
 					Core::GetResourceManager().Unload(path);
 
 
+			Core::GetSystem<IDE>().ClearScene();
 			Core::GetSystem<mono::ScriptSystem>().RefreshGameScripts();
 			prefab_scene->LoadFromResourcePath();
 			for (auto& path : Core::GetSystem<FileSystem>().GetEntries("/assets", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS, ".idp"))

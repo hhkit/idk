@@ -118,8 +118,8 @@ namespace idk
 	template<typename T>
 	using Ref = std::reference_wrapper<T>;
 
-	template<typename ... Ts>
-	using variant = std::variant<Ts...>;
+	using std::variant;
+	using std::monostate;
 
 	template<bool val>
 	using sfinae = std::enable_if_t<val>;

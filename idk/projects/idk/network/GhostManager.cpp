@@ -15,28 +15,11 @@ namespace idk
 	void GhostManager::SubscribeEvents(ClientConnectionManager& client)
 	{
 		client.Subscribe<GhostMessage>([this](GhostMessage& msg) { OnGhostReceived(msg); });
-		
-		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&GhostManager::UpdateGhosts);
 	}
 
 	void GhostManager::SubscribeEvents(ServerConnectionManager& server)
 	{
 		// TODO: acknowledgment
-
-		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&GhostManager::UpdateMasters); // note: will break on multiple connections
-		OnFrameEnd(&GhostManager::SendGhosts);
-	}
-
-	void GhostManager::UpdateGhosts(span<ElectronView> ghosts)
-	{
-		for (auto& ghost : ghosts)
-			ghost.UpdateGhost();
-	}
-
-	void GhostManager::UpdateMasters(span<ElectronView> ghosts)
-	{
-		for (auto& ghost : ghosts)
-			ghost.UpdateStateFlags();
 	}
 
 	void GhostManager::SendGhosts(span<ElectronView> views)

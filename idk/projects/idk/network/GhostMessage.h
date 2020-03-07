@@ -25,15 +25,22 @@ namespace idk
 			{
 				serialize_int(stream, elem.network_id, 0, 4096);
 				serialize_int(stream, elem.state_mask, 0, std::numeric_limits<int>::max());
-				auto packs = elem.data_packs.size();
-				serialize_int(stream, packs, 0, 32);
+
+				auto sm = elem.state_mask;
+				auto packs = 0;
+				while (sm)
+				{
+					++packs;
+					sm >>= 1;
+				}
+
 				elem.data_packs.resize(packs);
 				for (auto& ghost_pack : elem.data_packs)
 				{
-					auto string_sz = ghost_pack.size();
-					serialize_int(stream, string_sz, 0, 512);
+					auto string_sz = static_cast<int>(ghost_pack.size());
+					serialize_int(stream, string_sz, 0, 511);
 					ghost_pack.resize(string_sz);
-					serialize_string(stream, ghost_pack.data(), string_sz);
+					serialize_bytes(stream, (uint8_t*) ghost_pack.data(), string_sz);
 				}
 			}
 

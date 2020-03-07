@@ -9,6 +9,7 @@
 #include <network/Client.h>
 #include <network/ServerConnectionManager.h>
 #include <network/ClientConnectionManager.h>
+#include <network/ClientMoveManager.h>
 #include <network/ConnectionManager.inl>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
@@ -56,7 +57,8 @@ namespace idk
 					frame_counter = event.frame_count;
 					my_id = event.player_id;
 
-					auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
+					auto frames_late = 0;
+					//auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
 					frame_counter += frames_late;
 				});
 		};
@@ -150,36 +152,35 @@ namespace idk
 			client->SendPackets();
 	}
 
-	void NetworkSystem::RespondToPackets()
+	void NetworkSystem::RespondToPackets(span<ElectronView> electron_views)
 	{
-		for (auto& elem : GetConnectionManagers())
+		for (auto& ev : electron_views)
 		{
-			if (!elem)
-				continue;
-
-			auto& connection_manager = *elem;
-			
+			if (std::get_if<ElectronView::Ghost>(&ev.ghost_state))
+				ev.MoveGhost();
 		}
 	}
 
-	void NetworkSystem::PreparePackets()
+	void NetworkSystem::PreparePackets(span<ElectronView> electron_views)
 	{
-		auto electron_views = Core::GetGameState().GetObjectsOfType<ElectronView>();
 		for (auto& ev : electron_views)
-		{
-			if (std::get_if<ElectronView::Master>(&ev.ghost_state))
-				ev.UpdateStateFlags();
-		}
+			ev.PrepareDataForSending();
 
-		for (auto& elem : GetConnectionManagers())
+		// if server
+		for (const auto& elem : server_connection_manager)
 		{
 			if (!elem)
 				continue;
 
-			auto& connection_manager = *elem;
-			auto gm = connection_manager.GetManager<GhostManager>();
-			gm->SendGhosts(electron_views);
+			elem->GetManager<GhostManager>()->SendGhosts(electron_views);
 		}
+
+		// if client
+		if (client_connection_manager)
+			client_connection_manager->GetManager<ClientMoveManager>()->SendMoves(electron_views);
+
+		for (auto& ev : electron_views)
+			ev.CacheSentData();
 	}
 
 	void NetworkSystem::AddCallbackTarget(Handle<mono::Behavior> behavior)

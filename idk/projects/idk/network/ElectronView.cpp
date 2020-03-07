@@ -44,56 +44,98 @@ namespace idk
 	{
 		ghost_state = std::monostate{};
 		move_state = ElectronView::ClientObject{};
-		if (auto e_rb = GetGameObject()->GetComponent<ElectronRigidbodyView>())
-		{
-			if (e_rb->sync_velocity)
-				if (const auto rb = GetGameObject()->GetComponent<RigidBody>())
-					rb->is_kinematic = false;
-		}
+
 		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
 			auto& param = parameters[i];
 			IDK_ASSERT(param);
+			param->GetClientObject()->Init();
 		}
 	}
-	void ElectronView::UpdateStateFlags()
+	void ElectronView::CacheSentData()
 	{
-		if (auto* master = std::get_if<Master>(&ghost_state))
+		if (std::get_if<Master>(&ghost_state))
 		{
-			state_mask = 0;
+
+			const auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+			for (auto& elem : parameters)
+				elem->GetMaster()->CacheValue(curr_seq);
+		}
+	}
+	void ElectronView::PrepareDataForSending()
+	{
+		state_mask = 0;
+		const auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+
+		if (std::get_if<ClientObject>(&move_state))
+		{
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				param->GetClientObject()->CalculateMoves(curr_seq);
+			}
+		}
+
+		if (std::get_if<ControlObject>(&move_state))
+		{
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				param->GetControlObject()->RecordPrediction(curr_seq);
+			}
+		}
+
+		if (std::get_if<Master>(&ghost_state))
+		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
 				auto& param = parameters[i];
 				IDK_ASSERT(param);
-				if (param->GetMaster()->ValueChanged())
-					state_mask = 1 << i;
+				if (auto master = param->GetMaster(); master && master->ValueChanged())
+					state_mask |= 1 << i;
 			}
 		}
 	}
-	void ElectronView::UpdateGhost()
+
+	void ElectronView::MoveGhost()
 	{
-		if (auto ghost_ = std::get_if<Ghost>(&ghost_state))
+		if (std::get_if<Ghost>(&ghost_state))
 		{
 			auto advance = Core::GetDT().count();
 
 			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				if (state_mask & (1 << i))
-					parameters[i]->GetGhost()->Update(advance);
-			}
+				parameters[i]->GetGhost()->Update(advance);
 		}
 	}
 
-	vector<string> ElectronView::PackMoveData()
+	MovePack ElectronView::PackMoveData()
 	{
-		return {};
+		MovePack move_pack;
+		if (std::get_if<ClientObject>(&move_state))
+		{
+			move_pack.network_id = network_id;
+
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				auto val = param->GetClientObject()->PackData();
+				if (val.size())
+				{
+					move_pack.state_mask |= 1 << i;
+					move_pack.packs.emplace_back(std::move(val));
+				}
+			}
+			if (move_pack.state_mask)
+				LOG_TO(LogPool::NETWORK, "packing move for object %d with state mask %04x", network_id, move_pack.state_mask);
+		}
+		return move_pack;
 	}
 
 	GhostPack ElectronView::MasterPackData(int incoming_state_mask)
 	{
-		auto transmit_state_mask = incoming_state_mask | state_mask;
+		const auto transmit_state_mask = incoming_state_mask | state_mask;
 		IDK_ASSERT(std::get_if<Master>(&ghost_state));
-		auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+		const auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		GhostPack retval;
 		retval.network_id = network_id;
 		retval.state_mask = transmit_state_mask;
@@ -104,7 +146,7 @@ namespace idk
 			IDK_ASSERT(param);
 			if (transmit_state_mask & (1 << i))
 			{
-				auto packed = param->GetMaster()->PackData(seq);
+				auto packed = param->GetMaster()->PackData();
 				if (packed.size())
 					retval.data_packs.emplace_back(std::move(packed));
 			}
@@ -127,8 +169,19 @@ namespace idk
 		}
 	}
 
-	void ElectronView::UnpackMoveData(SeqNo sequence_number, span<string> data_pack)
+	void ElectronView::UnpackMoveData(const MovePack& data_pack)
 	{
+		const auto sm = data_pack.state_mask;
+		auto pack_ptr = 0;
+
+		for (unsigned i = 0; i < parameters.size(); ++i)
+		{
+			if (sm & (1 << i))
+			{
+				auto& move_pack = data_pack.packs[pack_ptr++];
+				parameters[i]->GetControlObject()->UnpackMove(move_pack);
+			}
+		}
 	}
 
 	hash_table<string, reflect::dynamic> ElectronView::GetParameters() const
@@ -136,12 +189,5 @@ namespace idk
 		auto retval = hash_table<string, reflect::dynamic>();
 		retval.reserve(parameters.size());
 		return retval;
-	}
-
-	void ElectronView::UpdateClient()
-	{
-		if (auto* master = std::get_if<ClientObject>(&move_state))
-		{
-		}
 	}
 }
