@@ -560,6 +560,8 @@ namespace idk::mono
 				auto old_parent = h->parent;
 				h->SetParent(parent_gameobject, preserve_global);
 				Core::GetSystem<SceneManager>().ReparentObject(h->GetGameObject(), old_parent);
+				if (const auto rt = h->GetGameObject()->GetComponent<RectTransform>())
+					Core::GetSystem<UISystem>().RecalculateRects(rt);
 			}
 		BIND_END();
 
@@ -1711,6 +1713,7 @@ namespace idk::mono
         BIND_START("idk.Bindings::RectTransformSetOffsetMin", void, Handle<RectTransform> h, vec2 v)
         {
             h->offset_min = v;
+			Core::GetSystem<UISystem>().RecalculateRects(h);
         }
         BIND_END();
 
@@ -1723,6 +1726,7 @@ namespace idk::mono
         BIND_START("idk.Bindings::RectTransformSetOffsetMax", void, Handle<RectTransform> h, vec2 v)
         {
             h->offset_max = v;
+			Core::GetSystem<UISystem>().RecalculateRects(h);
         }
         BIND_END();
 
@@ -1735,6 +1739,7 @@ namespace idk::mono
         BIND_START("idk.Bindings::RectTransformSetAnchorMin", void, Handle<RectTransform> h, vec2 v)
         {
             h->anchor_min = v;
+			Core::GetSystem<UISystem>().RecalculateRects(h);
         }
         BIND_END();
 
@@ -1747,6 +1752,7 @@ namespace idk::mono
         BIND_START("idk.Bindings::RectTransformSetAnchorMax", void, Handle<RectTransform> h, vec2 v)
         {
             h->anchor_max = v;
+			Core::GetSystem<UISystem>().RecalculateRects(h);
         }
         BIND_END();
 
@@ -1759,8 +1765,15 @@ namespace idk::mono
         BIND_START("idk.Bindings::RectTransformSetPivot", void, Handle<RectTransform> h, vec2 v)
         {
             h->pivot = v;
+			Core::GetSystem<UISystem>().RecalculateRects(h);
         }
         BIND_END();
+
+		BIND_START("idk.Bindings::RectTransformGetRect", rect, Handle<RectTransform> h)
+		{
+			return h->_local_rect;
+		}
+		BIND_END();
 
 
         // Image
