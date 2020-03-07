@@ -30,6 +30,7 @@ namespace idk
 
 		Client& GetClient() { return *client; }
 		Server& GetServer() { return *lobby; }
+		array<ConnectionManager*, 5> GetConnectionManagers();
 
 		bool IsHost();
 		Host GetMe();
@@ -42,8 +43,8 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
-		void RespondToPackets();
-		void PreparePackets();
+		void RespondToPackets(span<ElectronView>);
+		void PreparePackets(span<ElectronView>);
 
 		void AddCallbackTarget(Handle<mono::Behavior> behavior);
 		void RemoveCallbackTarget(Handle<mono::Behavior> behavior);

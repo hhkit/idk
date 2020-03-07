@@ -100,7 +100,7 @@ namespace idk::mono
 			MonoObject* exc = nullptr;
 			if (rpc_method.has_message_info_arg)
 			{
-				const auto param_length = mono_array_length(params);
+				const auto param_length = static_cast<int>(mono_array_length(params));
 				auto arr = mono_array_new(mono_domain_get(), mono_get_object_class(), param_length + 1);
 				
 				mono_array_memcpy_refs(arr, 0, params, 0, param_length);

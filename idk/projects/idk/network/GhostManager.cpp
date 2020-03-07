@@ -15,71 +15,57 @@ namespace idk
 	void GhostManager::SubscribeEvents(ClientConnectionManager& client)
 	{
 		client.Subscribe<GhostMessage>([this](GhostMessage& msg) { OnGhostReceived(msg); });
-		
-		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&GhostManager::UpdateGhosts);
 	}
 
 	void GhostManager::SubscribeEvents(ServerConnectionManager& server)
 	{
 		// TODO: acknowledgment
-
-		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&GhostManager::UpdateMasters); // note: will break on multiple connections
-		OnFrameEnd(&GhostManager::SendGhosts);
 	}
 
-	void GhostManager::UpdateGhosts(span<ElectronView> ghosts)
+	void GhostManager::SendGhosts(Host target, span<ElectronView> views)
 	{
-		for (auto& ghost : ghosts)
-			ghost.UpdateGhost();
-	}
+		vector<GhostPack> ghost_packs;
 
-	void GhostManager::UpdateMasters(span<ElectronView> ghosts)
-	{
-		for (auto& ghost : ghosts)
-			ghost.UpdateMaster();
-	}
-
-	void GhostManager::SendGhosts(span<ElectronView> views)
-	{
 		for (auto& view : views)
 		{
-			if (view.owner != Host::SERVER)
+			if (view.owner == target)
 				continue;
 
-			if (auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
+			if (const auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
 			{
-				if (view.state_mask)
-				{
-					//LOG_TO(LogPool::NETWORK, "Sending Ghost Message for %d", view.network_id);
-					connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::UNRELIABLE, [&](GhostMessage& ghost_msg)
-						{
-							ghost_msg.network_id = view.network_id;
-							ghost_msg.sequence_number = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
-							ghost_msg.state_mask = view.state_mask;
-							ghost_msg.pack = view.PackGhostData();
-						});
-				}
+				auto retransmit_state_mask = 0;
+				auto pack = view.MasterPackData(retransmit_state_mask);
+				if (pack.data_packs.size())
+					ghost_packs.emplace_back(std::move(pack));
 			}
 		}
+
+		if (ghost_packs.size())
+			connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::UNRELIABLE, [&](GhostMessage& msg)
+				{
+					msg.sequence_number = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+					msg.ghost_packs = std::move(ghost_packs);
+				});
 	}
 
 	void GhostManager::OnGhostReceived(GhostMessage& msg)
 	{
-		const auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
-		const auto view = id_man.GetViewFromId(msg.network_id);
-		if (view)
+		auto seq = msg.sequence_number;
+
+		for (auto& pack : msg.ghost_packs)
 		{
-			// push the ghost data into the view
-			// LOG_TO(LogPool::NETWORK, "Received Ghost Message for %d", view->network_id);
-			if (msg.state_mask)
+			const auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+			
+			if (const auto view = id_man.GetViewFromId(pack.network_id))
 			{
+				// push the ghost data into the view
 				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))
 					return;
+
 				if (std::get_if<ElectronView::ClientObject>(&view->move_state))
 					return;
 
-				view->state_mask = msg.state_mask;
-				view->UnpackGhostData(msg.sequence_number, msg.pack);
+				view->UnpackGhostData(seq, pack);
 			}
 		}
 	}

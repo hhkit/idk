@@ -24,8 +24,6 @@ namespace idk
 	void ClientMoveManager::SubscribeEvents(ClientConnectionManager&)
 	{
 		//OnFrameStart(&ClientMoveManager::CachePreviousPositions);
-		Core::GetSystem<NetworkSystem>().SubscribePacketResponse(&ClientMoveManager::CachePreviousPositions);
-		OnFrameEnd(&ClientMoveManager::SendMoves);
 	}
 
 	void ClientMoveManager::SubscribeEvents(ServerConnectionManager&)
@@ -33,31 +31,22 @@ namespace idk
 		IDK_ASSERT_MSG(false, "Do not attack clientmovemanager to server!");
 	}
 
-	void ClientMoveManager::CachePreviousPositions(span<ElectronView> views)
-	{
-		for (auto& elem : views)
-			elem.UpdateClient();
-	}
-
 	void ClientMoveManager::SendMoves(span<ElectronView> views)
 	{
+		vector<MovePack> move_packs;
 		for (auto& elem : views)
 		{
-			if (auto* move_data = std::get_if<ElectronView::ClientObject>(&elem.move_state))
-			{
-				
-				if (elem.state_mask)
+			auto move_data = elem.PackMoveData();
+			if (move_data.packs.size())
+				move_packs.emplace_back(std::move(move_data));
+		}
+		if (move_packs.size())
+		{
+			connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::UNRELIABLE, [&](MoveClientMessage& msg)
 				{
-					//LOG_TO(LogPool::NETWORK, "Sending client move message for %d", elem.network_id);
-					connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::FASTEST_GUARANTEED, [&](MoveClientMessage& msg)
-						{
-							msg.sequence_number = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
-							msg.state_mask = elem.state_mask;
-							msg.network_id = elem.network_id;
-							msg.pack = elem.PackMoveData();
-						});
+					msg.move_packs = std::move(move_packs);
 				}
-			}
+			);
 		}
 	}
 }

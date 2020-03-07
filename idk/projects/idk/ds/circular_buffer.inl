@@ -238,7 +238,7 @@ namespace idk
 	template <typename T, size_t SZ>
 	constexpr typename circular_buffer<T, SZ>::size_t circular_buffer<T, SZ>::size() const noexcept
 	{
-		return _end > _start ? _end - _start : SZ - (_end - _start + 1);
+		return empty() ? 0 : (_end > _start ? _end - _start : SZ - (_end - _start + 1));
 	}
 
 	template <typename T, size_t SZ>
