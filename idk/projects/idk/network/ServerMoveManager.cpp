@@ -29,19 +29,6 @@ namespace idk
 		{
 			if (auto view = id_man.GetViewFromId(move_pack.network_id))
 			{
-				struct temp
-				{
-					SeqNo seq;
-					vec3 val;
-				};
-				vector<temp> unpacked;
-
-				for (auto& elem : move_pack.packs[0])
-				{
-					auto val = parse_binary<vec3>(elem.pack);
-					unpacked.emplace_back(temp{ elem.seq, *val });
-				}
-				LOG_TO(LogPool::NETWORK, "unpacking data seq %d (%f,%f,%f)", unpacked[0].seq, unpacked[0].val.x, unpacked[0].val.y, unpacked[0].val.z);
 				view->UnpackMoveData(move_pack);
 			}
 		}

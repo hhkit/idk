@@ -125,8 +125,6 @@ namespace idk
 					pushme.pack = serialize_binary(move);
 					pushme.move = move;
 					buffer.emplace_back(std::move(pushme));
-					if constexpr (std::is_same_v<T, vec3>)
-						LOG_TO(LogPool::NETWORK, "Detected move at seq %d: (%f,%f,%f)", curr_seq, move.x, move.y, move.z);
 				}
 
 				// discard ancient moves
@@ -172,9 +170,6 @@ namespace idk
 				auto new_move = curr_value - prev_value;
 				prev_value = curr_value;
 
-				if constexpr (std::is_same_v<T, vec3>)
-					LOG_TO(LogPool::NETWORK, "Recording predicted value at seq %d: (%f,%f,%f)", curr_seq, new_move.x, new_move.y, new_move.z);
-
 				move_buffer.emplace_back(SeqAndObj{ curr_seq, new_move });
 			}
 
@@ -193,15 +188,8 @@ namespace idk
 							if (prediction.seq == elem.seq)
 							{
 								// if prediction was wrong
-								if constexpr (std::is_same_v<T, vec3>)
-									LOG_TO(LogPool::NETWORK, "Move %d in bounds, old value (%f, %f, %f), new value (%f, %f, %f)"
-										, elem.seq
-										, prediction.obj.x, prediction.obj.y, prediction.obj.z
-										, real_move.x, real_move.y, real_move.z);
-
 								if (!param.equater(prediction.obj, real_move))
 								{
-									LOG_TO(LogPool::NETWORK, "not equal, updating predict");
 									// calculate correction
 									auto change = prediction.obj - real_move;
 									param.setter(param.getter() - change);
@@ -212,15 +200,6 @@ namespace idk
 								}
 								break;
 							}
-						}
-						if (set)
-						{
-							std::stringstream s;
-							s << "Move %d out of bounds [";
-							for (auto& val : move_buffer)
-								s << val.seq << ", ";
-							s << "]";
-							LOG_TO(LogPool::NETWORK, s.str().data(), elem.seq);
 						}
 					}
 				}
