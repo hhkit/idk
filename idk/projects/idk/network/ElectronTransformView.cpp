@@ -28,7 +28,7 @@ namespace idk
 		if (sync_position)
 		{
 			ParameterImpl<vec3> param( tfm, &Transform::position);
-			param.predict_func = PredictionFunction::Quadratic;
+			//param.predict_func = PredictionFunction::Quadratic;
 			param.send_condition = 
 				[dist = this->send_threshold * this->send_threshold](const vec3& lhs, const vec3& rhs) ->bool
 			{
