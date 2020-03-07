@@ -235,6 +235,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::SceneGetActiveScene", Guid)
+		{
+			return Core::GetSystem<SceneManager>().GetActiveScene().guid;
+		}
+		BIND_END();
+
 		// game object
 		
 		BIND_START("idk.Bindings::GameObjectNew", uint64_t)
