@@ -8,7 +8,7 @@
 #include <vkn/DebugUtil.h>
 namespace idk::vkn
 {
-	bool frame_graph_debug = true;
+	bool frame_graph_debug = false;
 	//Process nodes and cull away unnecessary nodes.
 	//Figure out dependencies and synchronization points
 	//Insert new nodes to help transit concrete resources to their corresponding virtual resources
@@ -189,7 +189,6 @@ namespace idk::vkn
 		}
 
 	}
-#pragma optimize("",off)
 	void FrameGraph::Compile()
 	{
 		tmp_graph.buffer = &graph_builder.consumed_resources;
