@@ -163,8 +163,10 @@ namespace idk::vkn
 	{
 		auto& system = *vulkan_;
 		impl = std::make_unique<pimpl>(system.View());
-		impl->pipelines[(int)DbgPipelineType::eTri].Create(tri_config, impl->detail);
-		impl->pipelines[(int)DbgPipelineType::eLine].Create(line_config, impl->detail);
+		VulkanPipeline::Options opt{};
+		opt.dynamic_states.emplace_back(vk::DynamicState::eScissor);
+		impl->pipelines[(int)DbgPipelineType::eTri].Create(tri_config, impl->detail,  opt);
+		impl->pipelines[(int)DbgPipelineType::eLine].Create(line_config, impl->detail,opt);
 
 		impl->buffer_ready = system.View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{ vk::SemaphoreCreateFlags{} });
 

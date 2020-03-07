@@ -5,6 +5,8 @@
 #include <res/ResourceHandle.inl>
 #include <ds/span.inl>
 #include <vkn/RenderUtil.h>
+
+#include <vkn/vector_buffer.h>
 namespace idk::vkn
 {
 //#pragma optimize("",off)
@@ -154,5 +156,61 @@ namespace idk::vkn
 	{
 		bindings.Bind(the_interface);
 		while (BindRo(the_interface, bindings));
+	}
+	ParticleDrawSet::ParticleDrawSet(span<const ParticleRange> particles, const hlp::vector_buffer& buffer) : _particles{ particles }, _particle_buffer{buffer}
+	{
+	}
+	void ParticleDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)
+	{
+		static const renderer_attributes particle_vertex_req = renderer_attributes{ {
+								{ vtx::Attrib::Position, 0 },
+								{ vtx::Attrib::UV, 1 },
+							}
+		};;
+
+		static const vector<buffer_desc> particle_buffer_desc
+		{ buffer_desc
+		{
+					   buffer_desc::binding_info{ {},sizeof(ParticleObj),VertexRate::eInstance },
+							   {
+								   buffer_desc::attribute_info
+				   {
+					   AttribFormat::eSVec3,2,offsetof(ParticleObj,ParticleObj::position),true
+				   },
+				   buffer_desc::attribute_info
+				   {
+					   AttribFormat::eSVec1,3,offsetof(ParticleObj,ParticleObj::rotation),true
+				   },
+				   buffer_desc::attribute_info
+				   {
+					   AttribFormat::eSVec1,4,offsetof(ParticleObj,ParticleObj::size),true
+				   },
+				   buffer_desc::attribute_info
+				   {
+					   AttribFormat::eSVec4,5,offsetof(ParticleObj,ParticleObj::color),true
+				   },
+							   }
+		}
+		};
+		bindings.Bind(the_interface);
+		for (auto& elem : _particles)
+		{
+			InstRenderObjects part_ro;
+
+			const auto material = elem.material_instance->material;
+			part_ro.material_instance = elem.material_instance;
+			part_ro.mesh = Mesh::defaults[MeshType::FSQ];
+			part_ro.renderer_req = &particle_vertex_req;
+			the_interface.SetBufferDescriptions(particle_buffer_desc);
+			//TODO bind materials
+			if (!bindings.Skip(the_interface, part_ro))
+			{
+				bindings.Bind(the_interface, part_ro);
+				part_ro.num_instances = elem.num_elems;
+				part_ro.instanced_index = elem.elem_offset;
+				the_interface.BindVertexBuffer(2, _particle_buffer.buffer(), 0);
+				DrawMeshBuffers(the_interface, part_ro);
+			}
+		}
 	}
 }

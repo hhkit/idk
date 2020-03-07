@@ -114,7 +114,7 @@ namespace idk::vkn
 			StartNewBatch();
 			_current_batch.pipeline = config;
 		}
-		void SetBufferDescriptions(span<buffer_desc>)override;
+		void SetBufferDescriptions(span<const buffer_desc>)override;
 		void SetBlend(uint32_t attachment_index, AttachmentBlendConfig blend_config = {})override;
 		//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
 		//If col is nullopt, we clear all the colors from attachment_index onwards.

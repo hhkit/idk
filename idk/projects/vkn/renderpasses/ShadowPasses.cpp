@@ -17,6 +17,7 @@
 #include <meta/meta.inl>
 
 #include <math/matrix_transforms.inl>
+#include <vkn/binding_util.h>
 
 
 namespace idk::vkn
@@ -128,159 +129,12 @@ namespace idk::vkn::renderpasses
 		};
 
 	}
-	namespace meta
-	{
-
-	namespace detail
-	{
-		template<typename IndexSeq>
-		struct reverse_seq;
-		template< size_t ... Nums>
-		struct reverse_seq<std::index_sequence<Nums...>>
-		{
-			static constexpr size_t N = sizeof...(Nums);
-			using type = std::index_sequence<(N - Nums)...>;
-		};
-
-		template<typename index_seq, typename tuple>
-		struct shuffle;
-		template<size_t ...indices,typename tuple>
-		struct shuffle<std::index_sequence<indices...>,tuple>
-		{
-			using type = std::tuple<std::tuple_element_t<indices, tuple>...>;
-		};
-
-		template<typename T>
-		struct Reverse;
-		template<typename ...Args, template<typename...> typename tuple>
-		struct Reverse<tuple<Args...>>
-		{
-			using seq_t = std::make_index_sequence<sizeof...(Args)>;
-			using rev_seq_t = detail::reverse_seq<seq_t>;
-			using type =typename detail::shuffle<rev_seq_t, tuple<Args...>>::type;
-		};
 
 
-		template<size_t max_items, typename T>
-		struct Cull;
-
-		template<size_t N, typename ...Args, template<typename...> typename tuple>
-		struct Cull<N, tuple<Args...>>
-		{
-			using seq_t = std::make_index_sequence<std::min(N, sizeof...(Args))>;
-			using type = typename detail::shuffle<seq_t, tuple<Args...>>::type;
-		};
-
-		template<typename func, typename tuple, typename = void>
-		struct ApplierHelper2 : std::false_type {};
-		template<typename Func, template<typename...>typename tuple, typename ...Args>
-		struct ApplierHelper2<Func, tuple<Args...>, decltype(std::declval<Func>()(std::declval<Args&&>()...))> :std::true_type
-		{
-			template<typename Func, typename ...OtherArgs>
-			static void apply(Func&& func, Args&&... args, OtherArgs&&...)
-			{
-				func(std::forward<Args>(args)...);
-			}
-		};
-		template<size_t N, typename ...Args>
-		struct ApplierHelper 
-		{
-			template<typename Func>
-			static void apply(Func&& func, Args&&... args)
-			{
-				using culled = typename Cull<N, std::tuple<Args...>>::type;
-				using Check = ApplierHelper2<Func, culled>;
-				if constexpr (Check::value)
-				{
-					Check::apply(std::forward<Func>(func),std::forward<Args>(args)...);
-				}
-				else if constexpr (N > 1)
-				{
-					ApplierHelper<N - 1, Args...>::apply(std::forward<Func>(func), std::forward<Args>(args)...);
-				}
-
-			}
-			template<typename Func>
-			void operator()(Func&& func, Args&&... args)
-			{
-				apply(std::forward<Func>(func), std::forward<Args>(args)...);
-			}
-		};
-	}
-
-	template<size_t N, typename tuple>
-	using cull_t = detail::Cull<N, tuple>;
-
-
-	void AAAAAA()
-	{
-
-	}
-	template<typename ...Args>
-	struct Applier : detail::ApplierHelper<sizeof...(Args),Args...>
-	{
-		using base = detail::ApplierHelper<sizeof...(Args), Args...>;
-		using base::operator(); //use all the other valid functors
-	};
-
-	}
-
-
-	template<typename Binder, typename ...Args>
-	void SetStateTestFunc(Binder&& binder, Args&&... args)
-	{
-		volatile int a = 0;
-		a += 0;
-		binder.SetState(std::forward<Args>(args)...);
-	}
-
-	struct SetStateTest
-	{
-		template<typename Binder, typename ...Args, typename = decltype(std::declval<Binder>().SetState(std::declval<Args&&>()...)) >
-		void operator()(Binder&& binder, Args&&... args)
-		{
-			SetStateTestFunc(std::forward<Binder>(binder), std::forward<Args>(args)...);
-		}
-		
-	};
-
-
-	template<typename Binder, typename ...Args>
-	void SetStateTest2Func(Binder&& binder, Args&&... args)
-	{
-		SetStateTest hmm{};
-		meta::Applier<Binder, Args...> applier;
-		volatile int a = 0;
-		a += 0;
-		applier(hmm, std::forward<Binder>(binder), std::forward<Args>(args)...);
-	}
-	struct SetStateTest2
-	{
-		template<typename Binder, typename ...Args>
-		void operator()(Binder&& binder, Args&&... args)
-		{
-			SetStateTest2Func(std::forward<Binder>(binder), std::forward<Args>(args)...);
-		}
-
-	};
 
 	
 
-
-
-	struct Test
-	{
-		template<typename Binder, typename ...Args, typename = decltype(std::declval<Binder>().SetState(std::declval<Args&&>()...)) >
-		void operator()(Binder&& binder, Args&&... args)
-		{
-			binder.SetState(std::forward<Args>(args)...);
-		}
-
-		template<typename ...Args>
-		void operator()(Args&&... args){}
-
-	};
-
+	
 	static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 
 	void AddDirectionalShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
@@ -292,7 +146,7 @@ namespace idk::vkn::renderpasses
 		DirectionalShadow::Bindings bindings;
 		bindings::ShadowFilter sf;
 		bindings.for_each_binder<>(
-			SetStateTest2{},
+		bindings::BinderForward<bindings::SetStateTest>{},
 			cam, * state.skeleton_transforms);
 		bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 		auto skinned_bindings = bindings;
@@ -315,7 +169,7 @@ namespace idk::vkn::renderpasses
 		DirectionalShadow::Bindings bindings;
 		bindings::ShadowFilter sf;
 		bindings.for_each_binder<>(
-			SetStateTest2{},
+			bindings::BinderForward<bindings::SetStateTest>{},
 			cam, *state.skeleton_transforms);
 		bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMesh];
 		auto skinned_bindings = bindings;
