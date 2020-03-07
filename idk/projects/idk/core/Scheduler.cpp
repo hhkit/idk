@@ -44,10 +44,10 @@ namespace idk
 
 		while (_accumulated_real_dt > _game_update)
 		{
-
 			_accumulated_real_dt -= _game_update;
 			_accumulated_network_dt += _game_update;
-			auto execute_network = _accumulated_network_dt > _network_update;
+
+			const auto execute_network = _accumulated_network_dt > _network_update;
 			if (execute_network)
 				execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
 

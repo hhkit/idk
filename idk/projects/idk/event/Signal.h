@@ -31,8 +31,14 @@ namespace idk
 	class Signal : public SignalBase
 	{
 	public:
+		static constexpr int unlimited_fire = -1;
 		// The function signature, which is: void Fn(Args...)
 		using Fn = function<void(Params...)>;
+		struct Callback
+		{
+			function<void(Params...)> func;
+			int callback_count;
+		};
 
 
 		size_t ListenerCount() const { return _slots.size(); }
@@ -40,7 +46,7 @@ namespace idk
 		// Listens for this signal. Pass in a function of signature: void fn(Ts...)
 		// Returns a SlotId, unique only for this signal. Use it to unlisten.
 		template<typename Func>
-		SlotId Listen(Func&& f);
+		SlotId Listen(Func&& f, int call_count = unlimited_fire);
 
 		// Unlistens the slot with the given id.
 		void Unlisten(SlotId id);
@@ -53,7 +59,7 @@ namespace idk
 		SlotId operator+=(Func&& f) { return Listen(std::forward<Func>(f)); }
 		void   operator-=(SlotId id) { Unlisten(id); }
 	private:
-		hash_table<SlotId, Fn> _slots;
+		hash_table<SlotId, Callback> _slots;
 		vector<SlotId> _removeus;
 		SlotId _next_id = 0;
 	};

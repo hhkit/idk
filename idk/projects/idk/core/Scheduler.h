@@ -49,6 +49,7 @@ namespace idk
 		seconds GetDeltaTime()noexcept;
 		seconds GetUnscaledDeltaTime() noexcept;
 		seconds GetRemainingTime() noexcept;
+		seconds GetNetworkTick() const noexcept { return _network_update; }
 		time_point GetProgramStart() noexcept;
 
 		span<Pass> GetPasses(UpdatePhase) noexcept;
