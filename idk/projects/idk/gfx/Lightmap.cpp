@@ -79,7 +79,7 @@ namespace idk {
 		}
 		//clip_plane_z = vClip.z;
 	}
-
+#pragma optimize("",off)
 	RscHandle<FrameBuffer> Lightmap::InitShadowMap(LightmapConfig config)
 	{
 		_config = config;
