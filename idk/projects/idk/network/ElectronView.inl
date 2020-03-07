@@ -128,7 +128,7 @@ namespace idk
 				}
 
 				// discard ancient moves
-				auto discard_age = curr_seq < move_limit ? std::numeric_limits<SeqNo>::max() - (move_limit - 1 - curr_seq) : curr_seq - 3;
+				auto discard_age = static_cast<SeqNo>(curr_seq < move_limit ? std::numeric_limits<SeqNo>::max() - (move_limit - 1 - curr_seq) : curr_seq - 3);
 				while (buffer.size() && seqno_greater_than(discard_age, buffer.front().seq))
 					buffer.pop_front();
 			}
@@ -180,7 +180,7 @@ namespace idk
 					if (auto unpacked_move = parse_binary<T>(elem.pack))
 					{
 						auto& real_move = *unpacked_move;
-						bool set = false;
+
 						// compare with move
 						// if necessary, displace existing data
 						for (auto& prediction : move_buffer)
@@ -196,7 +196,6 @@ namespace idk
 									prev_value -= change;
 									// and snap
 									prediction.obj = real_move;
-									set = true;
 								}
 								break;
 							}

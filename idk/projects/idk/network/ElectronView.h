@@ -7,6 +7,13 @@
 
 namespace idk
 {
+	enum class PredictionFunction
+	{
+		None,
+		Linear,
+		Quadratic,
+	};
+
 	template<typename T>
 	struct ParameterImpl
 	{
@@ -80,6 +87,7 @@ namespace idk
 		struct MasterData
 		{
 			SeqNo last_packed;
+
 			virtual bool ValueChanged() const = 0;
 			virtual void CacheValue(SeqNo pack_date)  = 0;
 			virtual string PackData() = 0;
@@ -90,6 +98,7 @@ namespace idk
 		{
 			SeqNo value_index;
 			real t = 1;
+
 			virtual void UnpackData(SeqNo index, string_view) = 0;
 			virtual void Update(real dt) = 0;
 			virtual ~GhostData() = default;
@@ -106,6 +115,8 @@ namespace idk
 
 		struct ControlObjectData
 		{
+			PredictionFunction predict_func = PredictionFunction::Linear;
+
 			virtual void Init() = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual void UnpackMove(span<const SeqAndPack>) = 0;

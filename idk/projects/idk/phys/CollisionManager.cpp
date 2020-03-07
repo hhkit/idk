@@ -34,8 +34,8 @@ namespace idk
 	constexpr float penetration_slop = 0.05f;
 	constexpr float margin = 0.2f;
 	constexpr int	collision_threshold = 64;
-// #pragma optimize("", off)
-	void CollisionManager::InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders)
+
+	void CollisionManager::InitializeNewFrame(span<class RigidBody>, span<class Collider> colliders)
 	{
 		const auto dt = Core::GetDT().count();
 		_dynamic_info.clear();

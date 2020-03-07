@@ -139,9 +139,9 @@ namespace idk
 
 	void EventManager::BroadcastLoadLevel(RscHandle<Scene> scene)
 	{
-		static auto scene_change_slot = 0;
 		Core::GetSystem<SceneManager>().SetNextScene(scene);
-		scene_change_slot = Core::GetSystem<SceneManager>().OnSceneChange += 
+
+		Core::GetSystem<SceneManager>().OnSceneChange.Listen(
 			[&id_manager = Core::GetSystem<NetworkSystem>().GetIDManager()]
 		(RscHandle<Scene> scene)
 		{
@@ -153,17 +153,15 @@ namespace idk
 				elem.state_mask = 0;
 			}
 
-			Core::GetSystem<NetworkSystem>().BroadcastMessage<EventLoadLevelMessage>(GameChannel::RELIABLE, 
+			Core::GetSystem<NetworkSystem>().BroadcastMessage<EventLoadLevelMessage>(GameChannel::RELIABLE,
 				[scene](EventLoadLevelMessage& msg)
 				{
 					msg.SetScene(scene);
 					for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
 						msg.AddView(elem.GetHandle());
 				});
-			
-
-			Core::GetSystem<SceneManager>().OnSceneChange -= scene_change_slot;
-		};
+		}
+		, 1); // fire once
 	}
 
 	void EventManager::BroadcastDestroyView(Handle<ElectronView> view)
@@ -195,7 +193,6 @@ namespace idk
 		ev->ghost_state = ElectronView::Ghost{};
 
 		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message.id, ev));
-		ev->Setup();
 
 		auto& tfm = *obj->Transform();
 		if (message.use_position)
@@ -203,6 +200,8 @@ namespace idk
 		if (message.use_rotation)
 			for (unsigned i = 0; i < 4; ++i)
 				tfm.rotation[i] = message.rotation[i];
+
+		ev->Setup();
 	}
 
 	void EventManager::OnTransferOwnershipEvent(EventTransferOwnershipMessage& message)
@@ -223,10 +222,10 @@ namespace idk
 
 	void EventManager::OnLoadLevelMessage(EventLoadLevelMessage& msg)
 	{
-		static auto scene_change_slot = 0;
 		Core::GetSystem<SceneManager>().SetNextScene(msg.GetScene());
 		vector<EventLoadLevelMessage::ViewMapping> views( msg.GetObjects().begin(), msg.GetObjects().end() );
-		scene_change_slot = Core::GetSystem<SceneManager>().OnSceneChange +=
+
+		Core::GetSystem<SceneManager>().OnSceneChange.Listen(
 			[&id_manager = Core::GetSystem<NetworkSystem>().GetIDManager(),
 			views = std::move(views)]
 		(RscHandle<Scene>)
@@ -236,7 +235,6 @@ namespace idk
 				id_manager.EmplaceID(view.id, eview.GetHandle());
 				eview.Setup();
 			}
-			Core::GetSystem<SceneManager>().OnSceneChange -= scene_change_slot;
-		};
+		}, 1);
 	}
 }
