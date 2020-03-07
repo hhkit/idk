@@ -11,15 +11,26 @@
 namespace idk::vkn::renderpasses
 {
 
-	
+
 	class ParticleRenderer
 	{
 	public:
 		void Init();
 
-		std::pair<FrameGraphResource, FrameGraphResource> AddPass(FrameGraph& grpah, const GraphicsState& state,FrameGraphResource color, FrameGraphResource depth);
+		std::pair<FrameGraphResource, FrameGraphResource> AddPass(FrameGraph& graph, const GraphicsState& state, FrameGraphResource color, FrameGraphResource depth);
 
 	private:
-		
+
+	};
+
+	class TextMeshRenderer
+	{
+	public:
+		void Init();
+
+		std::pair<FrameGraphResource, FrameGraphResource> AddPass(FrameGraph& graph, const GraphicsState& state, FrameGraphResource color, FrameGraphResource depth);
+
+	private:
+
 	};
 }

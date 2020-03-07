@@ -34,6 +34,7 @@ void VertexBindingTracker::UpdateLoc()
 {
 	auto [vtx_info, attr_desc] = hlp::ConvertVtxDesc(_config.buffer_descriptions);
 	loc2bind.clear();
+	loc2bind.reserve(attr_desc.size());
 	for (auto& attr : attr_desc)
 	{
 		loc2bind.emplace(attr.location, attr.binding);

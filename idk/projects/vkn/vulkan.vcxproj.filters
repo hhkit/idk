@@ -398,6 +398,12 @@
     <ClInclude Include="binding_util.h">
       <Filter>render\new_testament</Filter>
     </ClInclude>
+    <ClInclude Include="TransparentBlendBindings.h">
+      <Filter>render\new_testament\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardFragmentBinding.h">
+      <Filter>render\new_testament\Bindings\Standard</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -690,6 +696,8 @@
     <ClCompile Include="renderpasses\DebugDrawPass.cpp" />
     <ClCompile Include="renderpasses\SimpleRenderTargetPass.cpp" />
     <ClCompile Include="renderpasses\PostDeferredPasses.cpp" />
+    <ClCompile Include="TransparentBlendBindings.cpp" />
+    <ClCompile Include="StandardFragmentBinding.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

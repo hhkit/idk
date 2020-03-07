@@ -173,6 +173,38 @@ namespace idk
 				move_buffer.emplace_back(SeqAndObj{ curr_seq, new_move });
 			}
 
+			void ApplyCorrection(typename circular_buffer<SeqAndObj, RememberedMoves>::iterator itr, const T& real_move)
+			{
+				switch (param.predict_func)
+				{
+				case PredictionFunction::Linear:
+				{
+					auto change = itr->obj - real_move;
+					param.setter(param.getter() - change);
+					prev_value -= change;
+					// and snap
+					itr->obj = real_move;
+					break;
+				}
+				case PredictionFunction::Quadratic:
+				if (itr != move_buffer.end())
+				{
+					auto diff = real_move - itr->obj;
+
+					while (itr != move_buffer.end())
+					{
+						itr->obj += diff;
+						param.setter(param.getter() + diff);
+						prev_value += diff;
+
+						++itr;
+					}
+					break;
+				}
+				};
+
+			}
+
 			__declspec(noinline) void UnpackMove(span<const SeqAndPack> packs)
 			{
 				for (auto& elem : packs)
@@ -183,19 +215,16 @@ namespace idk
 
 						// compare with move
 						// if necessary, displace existing data
-						for (auto& prediction : move_buffer)
+						for (auto itr = move_buffer.begin(); itr != move_buffer.end(); ++itr)
 						{
+							auto& prediction = *itr;
 							if (prediction.seq == elem.seq)
 							{
 								// if prediction was wrong
 								if (!param.equater(prediction.obj, real_move))
 								{
 									// calculate correction
-									auto change = prediction.obj - real_move;
-									param.setter(param.getter() - change);
-									prev_value -= change;
-									// and snap
-									prediction.obj = real_move;
+									ApplyCorrection(itr, real_move);
 								}
 								break;
 							}
