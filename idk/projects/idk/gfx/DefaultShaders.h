@@ -29,6 +29,7 @@ namespace idk
 		FDeferredPost,
 		FDeferredPostSpecular,
 		FDeferredPostAmbient,
+		FDeferredCombine,
 		FDeferredHDR,
 		FMax
 	};

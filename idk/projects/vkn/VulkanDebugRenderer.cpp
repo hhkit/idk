@@ -152,7 +152,7 @@ namespace idk::vkn
 				}
 			});
 		config.render_pass_type = BasicRenderPasses::eRgbaColorDepth;
-		config.depth_test = false;
+		config.depth_test = Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("Debug Depth Test",false);
 		config.depth_write = false;
 		auto line_copy = config;
 		line_copy.prim_top = idk::PrimitiveTopology::eLineList;
@@ -163,8 +163,10 @@ namespace idk::vkn
 	{
 		auto& system = *vulkan_;
 		impl = std::make_unique<pimpl>(system.View());
-		impl->pipelines[(int)DbgPipelineType::eTri].Create(tri_config, impl->detail);
-		impl->pipelines[(int)DbgPipelineType::eLine].Create(line_config, impl->detail);
+		VulkanPipeline::Options opt{};
+		opt.dynamic_states.emplace_back(vk::DynamicState::eScissor);
+		impl->pipelines[(int)DbgPipelineType::eTri].Create(tri_config, impl->detail,  opt);
+		impl->pipelines[(int)DbgPipelineType::eLine].Create(line_config, impl->detail,opt);
 
 		impl->buffer_ready = system.View().Device()->createSemaphoreUnique(vk::SemaphoreCreateInfo{ vk::SemaphoreCreateFlags{} });
 
@@ -243,6 +245,13 @@ namespace idk::vkn
 
 	void VulkanDebugRenderer::GrabDebugBuffer()
 	{
+		auto& refresh = Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("RefreshDebug", false);
+		if (refresh)
+		{
+			refresh = false;
+			Init();
+		}
+
 		impl->curr_frame = (impl->curr_frame +1)% 2;
 		info->render_info.clear();
 		info->render_info2.clear();

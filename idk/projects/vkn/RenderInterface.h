@@ -69,7 +69,7 @@ namespace idk::vkn
 		virtual bool SetPipeline          (const VulkanPipeline& pipeline                                    ) = 0;
 		virtual void SetPipelineConfig    (const pipeline_config& config                                     ) = 0;
 		virtual void SetClearColor        (uint32_t attachment_index, std::optional<color> col               ) = 0;//Here we only support color, should you wish to do a skybox, please set the color to nullopt and render the skybox yourself.
-		virtual void SetBufferDescriptions(span<buffer_desc>                                                 ) = 0;
+		virtual void SetBufferDescriptions(span<const buffer_desc>                                                 ) = 0;
 		virtual void SetBlend             (uint32_t attachment_index, AttachmentBlendConfig blend_config = {}) = 0;
 		virtual void SetClearDepthStencil (std::optional<float> depth, std::optional<uint8_t> stencil = {}   ) = 0;
 		virtual void SetScissors          (rect r                                                            ) = 0;

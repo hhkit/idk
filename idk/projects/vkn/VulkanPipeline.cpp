@@ -338,10 +338,10 @@ namespace idk::vkn
 		}		
 		Create(config, stageCreateInfo, vulkan,options);
 	}
-	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan)
+	void VulkanPipeline::Create(config_t const& config, Vulkan_t& vulkan, const Options& options)
 	{
 		auto [stageCreateInfo, stage_rsc] = GetShaderStageInfo(config, vulkan);
-		Create(config, stageCreateInfo, vulkan);
+		Create(config, stageCreateInfo, vulkan,options);
 	}
 	void VulkanPipeline::Reset()
 	{

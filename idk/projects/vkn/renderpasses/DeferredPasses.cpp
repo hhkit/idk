@@ -75,28 +75,10 @@ namespace idk::vkn::renderpasses
 		gbuffer_rscs[1] = CreateGBuffer(builder, "eUvMetallicRoughness", vk::Format::eR8G8B8A8Unorm,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[2] = CreateGBuffer(builder, "ViewPos", vk::Format::eR16G16B16A16Sfloat        ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
 		gbuffer_rscs[3] = CreateGBuffer(builder, "Normal", vk::Format::eR8G8B8A8Unorm              ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		gbuffer_rscs[5] = CreateGBuffer(builder, "Emissive", vk::Format::eB10G11R11UfloatPack32    ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
-		depth_rsc = builder.copy(depth, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,
-			{
-				vk::ImageCopy
-				{
-					vk::ImageSubresourceLayers
-					{
-					vk::ImageAspectFlagBits::eDepth,
-					0,0,1
-					},
-					vk::Offset3D{0,0,0},
-					vk::ImageSubresourceLayers
-					{
-					vk::ImageAspectFlagBits::eDepth,
-					0,0,1
-					},
-					vk::Offset3D{0,0,0},
-					vk::Extent3D{size.x,size.y,1},
-				}
-			} });
-		depth_rsc = builder.write(depth_rsc, WriteOptions{ false });
+		//gbuffer_rscs[4] = CreateGBuffer(builder, "Tangent", vk::Format::eR8G8B8A8Unorm             ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		gbuffer_rscs[4] = CreateGBuffer(builder, "Emissive", vk::Format::eB10G11R11UfloatPack32    ,vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor,{},rt_size);
+		
+		depth_rsc = builder.write(depth, WriteOptions{ false });
 		uint32_t index = 0;
 		for (auto& gbuffer_rsc : gbuffer_rscs)
 		{
@@ -217,7 +199,197 @@ namespace idk::vkn::renderpasses
 		}*/
 	}
 
+	AccumPass::AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers) : gbuffer_pass{ gbuffers }, rt_size{ gbuffers.rt_size }
+	{
+		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eB10G11R11UfloatPack32, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, rt_size);
+		uint32_t index = 0;
+		builder.set_output_attachment(accum_rsc, 0, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				vk::ClearColorValue{},//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			}
+		);
+		for (auto& gbuffer : gbuffers.gbuffer_rscs)
+		{
+			builder.set_input_attachment(builder.read(gbuffer), index++, AttachmentDescription
+				{
+					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+					vk::ImageSubresourceRange
+					{
+						vk::ImageAspectFlagBits::eColor,0,1,0,1
+					},//vk::ImageSubresourceRange sub_resource_range{};
+					//std::optional<vk::ClearValue> clear_value;
+					//std::optional<vk::Format> format{};
+					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+					//vk::ComponentMapping mapping{};
+				}
+			);
+		}
+		builder.set_input_attachment(depth_rsc = builder.read(gbuffers.depth_rsc), index++, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eDepth,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			}
+		);
+	}
+	void AccumPass::Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set)
+	{
+		context.attachment_offset = -1;
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Accum Pass");
+		//context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+		//context.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[deferred_post]);
+		//context.BindUniform("irradiance_probe", 0, *RscHandle<VknCubemap>{});
+		//context.BindUniform("environment_probe", 0, *RscHandle<VknCubemap>{});
+		//context.BindUniform("brdfLUT", 0, *RscHandle<VknTexture>{});
+		//for (auto& buffer : gbuffer_rscs)
+		{
+			size_t i = 0;
 
+			AttachmentBlendConfig blend{};
+			blend.blend_enable = true;
+			blend.dst_color_blend_factor = BlendFactor::eOne;
+			blend.src_color_blend_factor = BlendFactor::eOne;
+			blend.color_blend_op = BlendOp::eAdd;
+			blend.alpha_blend_op = BlendOp::eMax;
+			blend.dst_alpha_blend_factor = BlendFactor::eOne;
+			blend.src_alpha_blend_factor = BlendFactor::eOne;
+			context.SetBlend(i, blend);
+			context.SetClearColor(i, idk::color{ 0,0,0,0 });
+			context.SetClearDepthStencil(1.0f);
+			++i;
+		}
+		//context.SetViewport(gfx_state.camera.viewport);
+		//context.SetScissors(gfx_state.camera.viewport);
+
+		draw_set.Render(context);
+	}
+
+	CombinePass::CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex)
+	{
+		auto out_color_rsc= builder.write(out_color_tex, WriteOptions{ false });
+		auto out_depth_rsc= builder.write(out_depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
+		out_color = out_color_rsc;
+		out_depth = out_depth_rsc;
+
+		builder.set_output_attachment(out_color_rsc, 0, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				vk::ClearColorValue{},//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			}
+		);;
+		auto in_color = builder.read(in_color_tex);
+		auto in_depth = builder.read(in_depth_tex);
+
+		builder.set_input_attachment(in_color, 1, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+		builder.set_input_attachment(in_depth_tex, 2, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eDepth,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+		builder.set_depth_stencil_attachment(out_depth_rsc, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eDepth,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+	}
+
+	void CombinePass::Execute(FrameGraphDetail::Context_t context)
+	{
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, name);
+		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+		if (combine_shader.guid == Guid{})
+		{
+			combine_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FDeferredCombine];//Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
+
+		}
+
+		context.BindShader(ShaderStage::Fragment, combine_shader);
+		context.SetViewport(_viewport);
+		context.SetScissors(_viewport);
+
+		context.SetCullFace({});
+		context.SetDepthTest(true);
+
+		auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+		BindMesh(context, fsq_requirements, mesh);
+
+		//DrawFSQ
+		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
+	}
 
 	HdrPass::HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex) : accum_def{ accum_def_ }, accum_spec{ accum_spec_ }, _viewport{viewport}
 	{
@@ -536,96 +708,6 @@ namespace idk::vkn::renderpasses
 		return std::visit(ClearInfoVisitor{},camera.clear_data);
 	}
 
-	AccumPass::AccumPass(FrameGraphBuilder& builder, GBufferPass& gbuffers) : gbuffer_pass{ gbuffers }, rt_size{gbuffers.rt_size}
-	{
-		accum_rsc = CreateGBuffer(builder, "Accum", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {},rt_size);
-		uint32_t index = 0;
-		builder.set_output_attachment(accum_rsc, 0, AttachmentDescription
-			{
-				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
-				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
-				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-				vk::ImageSubresourceRange
-				{
-					vk::ImageAspectFlagBits::eColor,0,1,0,1
-				},//vk::ImageSubresourceRange sub_resource_range{};
-				vk::ClearColorValue{},//std::optional<vk::ClearValue> clear_value;
-				//std::optional<vk::Format> format{};
-				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-				//vk::ComponentMapping mapping{};
-			}
-		);
-		for (auto& gbuffer : gbuffers.gbuffer_rscs)
-		{
-			builder.set_input_attachment(builder.read(gbuffer), index++, AttachmentDescription
-				{
-					vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-					vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-					vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-					vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-					vk::ImageSubresourceRange
-					{
-						vk::ImageAspectFlagBits::eColor,0,1,0,1
-					},//vk::ImageSubresourceRange sub_resource_range{};
-					//std::optional<vk::ClearValue> clear_value;
-					//std::optional<vk::Format> format{};
-					//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-					//vk::ComponentMapping mapping{};
-				}
-			);
-		}
-		builder.set_input_attachment(depth_rsc = builder.read(gbuffers.depth_rsc), index++, AttachmentDescription
-			{
-				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-				vk::ImageSubresourceRange
-				{
-					vk::ImageAspectFlagBits::eDepth,0,1,0,1
-				},//vk::ImageSubresourceRange sub_resource_range{};
-				//std::optional<vk::ClearValue> clear_value;
-				//std::optional<vk::Format> format{};
-				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-				//vk::ComponentMapping mapping{};
-			}
-		);
-	}
-	void AccumPass::Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set)
-	{
-		context.attachment_offset = -1;
-		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Accum Pass");
-		//context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
-		//context.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[deferred_post]);
-		//context.BindUniform("irradiance_probe", 0, *RscHandle<VknCubemap>{});
-		//context.BindUniform("environment_probe", 0, *RscHandle<VknCubemap>{});
-		//context.BindUniform("brdfLUT", 0, *RscHandle<VknTexture>{});
-		//for (auto& buffer : gbuffer_rscs)
-		{
-			size_t i = 0;
-
-			AttachmentBlendConfig blend{};
-			blend.blend_enable = true;
-			blend.dst_color_blend_factor = BlendFactor::eOne;
-			blend.src_color_blend_factor = BlendFactor::eOne;
-			blend.color_blend_op = BlendOp::eAdd;
-			blend.alpha_blend_op = BlendOp::eMax;
-			blend.dst_alpha_blend_factor = BlendFactor::eOne;
-			blend.src_alpha_blend_factor = BlendFactor::eOne;
-			context.SetBlend(i, blend);
-			context.SetClearColor(i, idk::color{ 0,0,0,0 });
-			context.SetClearDepthStencil(1.0f);
-			++i;
-		}
-		//context.SetViewport(gfx_state.camera.viewport);
-		//context.SetScissors(gfx_state.camera.viewport);
-
-		draw_set.Render(context);
-	}
 	UnlitPass::UnlitPass(FrameGraphBuilder& builder, FrameGraphResource color_tex, FrameGraphResource depth_tex)
 	{
 		color_rsc = builder.write(color_tex,WriteOptions{false});
@@ -708,6 +790,10 @@ namespace idk::vkn::renderpasses
 		bindings::SkyboxBindings skybox_binding{};
 		skybox_binding.SetCamera(gfx_state.camera);
 		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding,FsqDrawSet{MeshType::Box} }, gfx_state.camera.render_target, ignore_clear,clr_col, clr_dep).RenderPass();
+
+		auto& def_depth_copy = graph.addRenderPass <CopyDepthPass>("Copy Default Lit depth", cube_clear.rt_size, cube_clear.depth);
+		auto& spec_depth_copy = graph.addRenderPass <CopyDepthPass>("Copy Specular depth", cube_clear.rt_size, cube_clear.depth);
+
 		bindings::StandardVertexBindings::StateInfo state;
 		state.SetState(gfx_state);
 		bindings::DeferredPbrInfo info{
@@ -736,7 +822,7 @@ namespace idk::vkn::renderpasses
 			};
 		};
 		auto gbuffer_set =make_gbuffer_set(info);
-		auto& gbuffer_pass_def = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassDeferred", gbuffer_set, cube_clear.rt_size, cube_clear.depth).RenderPass();
+		auto& gbuffer_pass_def = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassDeferred", gbuffer_set, cube_clear.rt_size, def_depth_copy.copied_depth).RenderPass();
 		bindings::AmbientBind ambient_bindings;
 		bindings::LightBind light_bindings;
 		auto& vp_bindings = light_bindings.Get<bindings::CameraViewportBindings>();
@@ -748,21 +834,58 @@ namespace idk::vkn::renderpasses
 		accum_fsq_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_def = graph.addRenderPass<AccumPassSetPair>("Accum pass Default", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_def).RenderPass();
+		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, cube_clear.depth);
 
 		auto spec_info = info;
 		spec_info.model = ShadingModel::Specular;
-		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", make_gbuffer_set(spec_info), cube_clear.rt_size, cube_clear.depth).RenderPass();
+		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", make_gbuffer_set(spec_info), cube_clear.rt_size, spec_depth_copy.copied_depth).RenderPass();
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(spec_info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_spec = graph.addRenderPass<AccumPassSetPair>("Accum pass Specular", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_spec).RenderPass();
 
 
-		auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, cube_clear.render_target,cube_clear.depth);
+		auto& combine_spec_pass = graph.addRenderPass<CombinePass>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, combine_def_pass.out_color, combine_def_pass.out_depth);
+
+		//auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, combine_spec_pass.out_color, combine_spec_pass.out_depth);
 		spec_info.model = ShadingModel::Unlit;
-		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),hdr_pass.hdr_rsc,hdr_pass.depth_att_def).RenderPass();
+		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),
+			//hdr_pass.hdr_rsc       ,
+			//hdr_pass.depth_att_def
+			combine_spec_pass.out_color,
+			combine_spec_pass.out_depth
+			).RenderPass();
 
 		return { unlit_pass.color_rsc,unlit_pass.depth_rsc};
 	}
 
 
+	
+
+	CopyDepthPass::CopyDepthPass(FrameGraphBuilder& builder, uvec2 depth_size, FrameGraphResource depth):size{depth_size}
+	{
+		copied_depth = builder.copy(depth, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,
+			{
+				vk::ImageCopy
+				{
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eDepth,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eDepth,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::Extent3D{size.x,size.y,1},
+				}
+			} });
+		builder.NoRenderPass();
+	}
+
+	void CopyDepthPass::Execute(FrameGraphDetail::Context_t )
+	{
+	}
 
 }

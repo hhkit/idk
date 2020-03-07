@@ -45,7 +45,7 @@ namespace idk::vkn
 		void Create(config_t const& config, vector<RscHandle<ShaderProgram>> shaders,Vulkan_t& vulkan, const Options& options = Options{});
 		void Create(config_t const& config, vector<vk::PipelineShaderStageCreateInfo> info,hash_table<uint32_t,vk::DescriptorSetLayout> slayout,Vulkan_t& vulkan, const Options& options = Options{});
 	   void Create(config_t const& config, vector<std::pair<vk::ShaderStageFlagBits,vk::ShaderModule>> shader_modules, Vulkan_t& vulkan, const Options& options = Options{});
-	   void Create(config_t const& config, Vulkan_t& vulkan);
+	   void Create(config_t const& config, Vulkan_t& vulkan, const Options& options = Options{});
 		void Reset();
 		void Bind(const vk::CommandBuffer& cmd_buffer, Vulkan_t& vulkan)const;
 		//Unused for now. If we don't switch to this by Milestone 1, we probably won't need it.

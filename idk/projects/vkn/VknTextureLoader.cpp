@@ -349,6 +349,28 @@ namespace idk::vkn
 		info.sampled(true);
 		return info;
 	}
+	TexCreateInfo StencilBufferTexInfo(uint32_t width, uint32_t height)
+	{
+		TexCreateInfo info{};
+		info.width = width;
+		info.height = height;
+		info.internal_format = vk::Format::eD32SfloatS8Uint;
+		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
+		info.aspect = vk::ImageAspectFlagBits::eDepth;
+		info.sampled(true);
+		return info;
+	}
+	TexCreateInfo Depth3DBufferTexInfo(uint32_t width, uint32_t height)
+	{
+		TexCreateInfo info{};
+		info.width = width;
+		info.height = height;
+		info.internal_format = vk::Format::eD16Unorm;
+		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
+		info.aspect = vk::ImageAspectFlagBits::eDepth;
+		info.sampled(true);
+		return info;
+	}
 	std::pair<vk::UniqueImage, hlp::UniqueAlloc> CreateBlitImage(hlp::MemoryAllocator& allocator,uint32_t mipmap_level, uint32_t width, uint32_t height, vk::Format format)
 	{
 

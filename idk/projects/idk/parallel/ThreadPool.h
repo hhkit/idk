@@ -58,6 +58,9 @@ namespace idk::mt
 			, promise
 		]() -> void
 		{
+			try
+			{
+
 			if constexpr (std::is_same_v<Retval, void>)
 			{
 				std::apply(fn, tuple);
@@ -65,6 +68,11 @@ namespace idk::mt
 			}
 			else
 				promise->set_value(std::apply(fn, tuple));
+			}
+			catch (...)
+			{
+				promise->set_exception(std::current_exception());
+			}
 		};
 		
 		while (!jobs.emplace_back(job))
@@ -78,6 +86,12 @@ namespace idk::mt
 	T ThreadPool::Future<T>::get()
 	{
 		IDK_ASSERT(pool);
+		//auto future_is_ready = [](auto& future)
+		//{
+		//	auto status = future.wait_for(std::chrono::nanoseconds{ 5 });
+		//	return status == std::future_status::ready;
+		//};
+		//while (!future_is_ready(future))
 		while (future.wait_for(std::chrono::nanoseconds{5}) != std::future_status::ready)
 			pool->ExecuteJob(thread_id(), thread_id() != 0);
 		return future.get();

@@ -42,9 +42,16 @@ namespace idk::vkn::renderpasses
 		PassUtil(FullRenderData rd) :render_data{ rd } {}
 	};
 
+	struct CopyDepthPass : BaseRenderPass
+	{
+		FrameGraphResource copied_depth;
+		uvec2 size;
+		CopyDepthPass(FrameGraphBuilder& builder, uvec2 depth_size, FrameGraphResource depth);
+		void Execute(FrameGraphDetail::Context_t context) override;
+	};
 	struct GBufferPass : DrawSetRenderPass
 	{
-		FrameGraphResourceMutable gbuffer_rscs[6];
+		FrameGraphResourceMutable gbuffer_rscs[5];
 		FrameGraphResourceMutable depth_rsc;
 
 		uvec2 rt_size;
@@ -78,6 +85,17 @@ namespace idk::vkn::renderpasses
 		void Execute(FrameGraphDetail::Context_t context, BaseDrawSet& draw_set) override;
 	};
 
+	struct CombinePass : BaseRenderPass, FsqUtil
+	{
+		FrameGraphResourceMutable out_color;
+		FrameGraphResourceMutable out_depth;
+
+		RscHandle<ShaderProgram> combine_shader;
+
+		CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex,FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex);
+		void Execute(FrameGraphDetail::Context_t context) override;
+		rect _viewport;
+	};
 	struct HdrPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable hdr_rsc;

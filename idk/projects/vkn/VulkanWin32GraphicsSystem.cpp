@@ -189,7 +189,7 @@ namespace idk::vkn
 		GraphicsSystem::LateInit();
 		_debug_renderer = std::make_unique<VulkanDebugRenderer>();
 		_debug_renderer->Init();
-		_frame_renderers.resize(instance_->View().Swapchain().frame_objects.size());
+		_frame_renderers.resize(instance_->MaxFramesInFlight());//instance_->View().Swapchain().frame_objects.size());
 		for (auto& frame : _frame_renderers)
 		{
 			frame.Init(&instance_->View(), *instance_->View().Commandpool());
@@ -434,8 +434,11 @@ namespace idk::vkn
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
 			auto fb_dump = dbg::DumpFrameBufferAllocs();
 			auto rt_dump = dbg::DumpRenderTargetAllocs();
+			auto alloc_dump = dbg::DumpMemoryAllocs();
+
 			LOG_CRASH_TO(LogPool::GFX, "Framebuffer Dump %s", fb_dump.c_str());
 			LOG_CRASH_TO(LogPool::GFX, "RenderTarget Dump %s", rt_dump.c_str());
+			LOG_CRASH_TO(LogPool::GFX, "MemoryAllocator Dump %s", alloc_dump.c_str());
 			throw;
 		}
 	}
