@@ -200,10 +200,11 @@ namespace idk
             ImGui::Text("Y");
             ImGui::SetCursorPosX(region_width * 0.35f);
             const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
-            float pos_y = pivot_y;
+            const float anchor_ref_y = c_rt->_local_rect.position.y - c_rt->offset_min.y;
+            float pos_y = pivot_y - anchor_ref_y; // pivot - anchor ref point = anchored pos
             if (ImGui::DragFloat("##pos_y", &pos_y))
             {
-                float dy = pos_y - pivot_y;
+                float dy = pos_y - (pivot_y - anchor_ref_y);
                 c_rt->offset_min.y += dy;
                 c_rt->offset_max.y += dy;
             }
@@ -228,10 +229,11 @@ namespace idk
             ImGui::SameLine();
 
             const float pivot_x = c_rt->_local_rect.position.x + c_rt->pivot.x * c_rt->_local_rect.size.x;
-            float pos_x = pivot_x;
+            const float anchor_ref_x = c_rt->_local_rect.position.x - c_rt->offset_min.x;
+            float pos_x = pivot_x - anchor_ref_x; // pivot - anchor ref point = anchored pos
             if (ImGui::DragFloat("##pos_x", &pos_x))
             {
-                float dx = pos_x - pivot_x;
+                float dx = pos_x - (pivot_x - anchor_ref_x);
                 c_rt->offset_min.x += dx;
                 c_rt->offset_max.x += dx;
             }

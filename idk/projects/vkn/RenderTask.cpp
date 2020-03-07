@@ -338,7 +338,6 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
-#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
@@ -583,6 +582,7 @@ namespace idk::vkn
 	RenderTask::DrawCall RenderTask::DrawCallBuilder::end(draw_info di, vector_span<UniformManager::set_binding_t> uniforms)
 	{
 		current_draw_call.draw_info = std::move(di);
+		_vb_builder.grow_reserve(_vertex_bindings.size());
 		_vb_builder.start();
 		for (auto& binding : _vertex_bindings)
 		{
@@ -591,7 +591,8 @@ namespace idk::vkn
 		current_draw_call.vertex_buffers = _vb_builder.end();
 		current_draw_call.uniforms = uniforms;
 		RenderTask::DrawCall result = current_draw_call;
-		current_draw_call.label = {};
+		current_draw_call.label.first = {};
+		current_draw_call.label.second.clear();
 		return result;
 	}
 	void RenderTask::DrawFunc::operator()(indexed_draw_info di, vk::CommandBuffer cmd_buffer ,IndexBindingData idx)

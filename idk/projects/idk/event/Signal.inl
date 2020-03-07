@@ -5,9 +5,9 @@ namespace idk
 {
 	template<typename ... Params>
 	template<typename Func>
-	typename Signal<Params...>::SlotId Signal<Params...>::Listen(Func&& f)
+	typename Signal<Params...>::SlotId Signal<Params...>::Listen(Func&& f, int fire_count)
 	{
-		_slots.emplace(_next_id, std::forward<Func>(f));
+		_slots.emplace(_next_id, Callback{ std::forward<Func>(f), fire_count });
 		return _next_id++;
 	}
 	template<typename ...Params>
@@ -23,7 +23,15 @@ namespace idk
 		for (auto& elem : _removeus)
 			_slots.erase(elem);
 		_removeus.clear();
-		for (auto& f : _slots)
-			f.second(std::forward<Args>(args)...);
+
+		for (auto& [slot, callback] : _slots)
+		{
+			callback.func(std::forward<Args>(args)...);
+			if (callback.callback_count > 0)
+			{
+				if (--callback.callback_count == 0)
+					_removeus.emplace_back(slot);
+			}
+		}
 	}
 }

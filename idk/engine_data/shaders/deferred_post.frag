@@ -91,6 +91,7 @@ void main()
 		vec4(view_pos,1);
 	int j=0;
 	float view_z_abs = abs(view_pos.z);
+	
 	for (int i = 0; i < LightBlk.light_count; ++i)
 	{
 		Light curr_light = LightBlk.lights[i];
@@ -104,20 +105,16 @@ void main()
 				if(view_z_abs <= DirectionalBlk.directional_vp[j].far_plane)
 				{
 					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-					//shadow_factor *= shadow_factor;
-					//cascade_c = vec4(0.1,0,0,0);
+		
 				}
 				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				{
 					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-					//shadow_factor *= shadow_factor;
-					//cascade_c = vec4(0,0.1,0,0);
+					
 				}
 				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				//{
 				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-				//	//shadow_factor *= shadow_factor;
-				//	//cascade_c = vec4(0,0,0.1,0);
 				//}
 				result *= shadow_factor;
 				j = 0;
@@ -128,8 +125,10 @@ void main()
 		else if (curr_light.type == 2)
 		{
 			if(curr_light.cast_shadow!=0)
+			{
 				result *= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
-		}
+			}
+		} 
 		
 		light_accum += result;// + cascade_c.xyz;
 	}

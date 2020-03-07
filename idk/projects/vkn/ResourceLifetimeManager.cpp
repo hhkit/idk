@@ -45,7 +45,6 @@ namespace idk::vkn
 	{
 		return resource_alias;
 	}
-#pragma optimize("",off)
 	void DoNothing();
 	void ResourceLifetimeManager::DebugCollapsed(const FrameGraphResourceManager& rsc_manager) const
 	{

@@ -73,6 +73,13 @@ namespace idk::vkn
 		void Bind(RenderInterface& the_interface, const RenderObject& dc) override;
 		void BindAni(RenderInterface& the_interface, const  AnimatedRenderObject& dc) override;
 
+		//Stuff that needs to be bound only for font renderobject
+		void BindFont(RenderInterface& the_interface, const FontRenderData& dc) override;
+
+		//Stuff that needs to be bound only for canvas renderobject
+		void BindCanvas(RenderInterface& the_interface, const TextData& dc, const UIRenderObject& dc_one) override;
+		void BindCanvas(RenderInterface& the_interface, const ImageData& dc, const UIRenderObject& dc_one) override;
+
 		template<typename Binding, typename Result = decltype(std::get<Binding>(std::declval<CombinedBindings>().binders))>
 		Result& Get();
 	};

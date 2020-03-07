@@ -104,6 +104,16 @@ namespace idk::vkn
 		const hlp::vector_buffer& _particle_buffer;
 	};
 
+	class TextMeshDrawSet : public BaseDrawLogic
+	{
+	public:
+		TextMeshDrawSet(span<const FontRenderData> texts, span<const hlp::vector_buffer> buffers);
+		void Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)override;
+	private:
+		span<const FontRenderData> _texts;
+		span<const hlp::vector_buffer> _text_buffers;
+	};
+
 
 	class InstMeshDrawSet : public BaseDrawLogic
 	{

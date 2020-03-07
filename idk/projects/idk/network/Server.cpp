@@ -4,6 +4,7 @@
 #include <script/ScriptSystem.h>
 #include <network/NetworkSystem.h>
 #include <core/Handle.inl>
+#include <core/Scheduler.h>
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl>
 
@@ -54,7 +55,7 @@ namespace idk
 	}
 	void Server::ReceivePackets()
 	{
-		server.AdvanceTime(server.GetTime() + Core::GetRealDT().count());
+		server.AdvanceTime(server.GetTime() + Core::GetScheduler().GetNetworkTick().count());
 		server.ReceivePackets();
 		ProcessMessages();
 	}

@@ -150,6 +150,25 @@ namespace idk::vkn
 	}
 	PerLightDrawSet::PerLightDrawSet(bool draw_till_skip ) : FsqDrawSet{draw_till_skip}
 	{
+}
+	TextMeshDrawSet::TextMeshDrawSet(span<const FontRenderData> fonts, span<const hlp::vector_buffer> buffers):_texts{fonts}, _text_buffers{buffers}
+	{
+	}
+	void TextMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)
+	{
+		size_t i = 0;
+		bindings.Bind(the_interface);
+		for (auto& text : _texts)
+		{
+			bindings.BindFont(the_interface,text);
+			//Bind Attribute
+			the_interface.BindVertexBuffer(0, _text_buffers[i].buffer(), 0);
+
+			//Finalize draw call
+			the_interface.Draw(s_cast<uint32_t>(text.coords.size()), 1,0,0 );
+			//the_interface.FinalizeDrawCall(font_ro_inst.emplace_back(std::move(RenderObject{ font_ro })));
+			++i;
+		}
 	}
 //#pragma optimize("",off)
 	void PerLightDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)

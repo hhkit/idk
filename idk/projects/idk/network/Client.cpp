@@ -50,7 +50,7 @@ namespace idk
 
 	void Client::ReceivePackets()
 	{
-		client.AdvanceTime(client.GetTime() + Core::GetRealDT().count());
+		client.AdvanceTime(client.GetTime() + Core::GetScheduler().GetNetworkTick().count() );
 		client.ReceivePackets();
 
 		// get rtt

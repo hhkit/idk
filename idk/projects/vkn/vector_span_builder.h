@@ -8,6 +8,13 @@ namespace idk
 	{
 		vector_span_builder(vector<T>& vec) : _buffer{ vec }{}
 
+		void grow_reserve(size_t additional_size)
+		{
+			auto new_size = additional_size + _buffer.size();
+			if(new_size > _buffer.capacity())
+				_buffer.reserve(std::max(new_size,_buffer.capacity()*2));
+		}
+
 		void start()
 		{
 			_span.set_buffer(_buffer);
