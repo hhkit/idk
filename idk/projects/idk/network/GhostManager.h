@@ -10,10 +10,7 @@ namespace idk
 		void SubscribeEvents(ClientConnectionManager& client) override;
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
-		static void UpdateGhosts(span<ElectronView>);
-		static void UpdateMasters(span<ElectronView>);
-
-		void SendGhosts(span<ElectronView> views);
+		void SendGhosts(Host target, span<ElectronView> views);
 	private:
 		void OnGhostReceived(class GhostMessage& msg);
 	};

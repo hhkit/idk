@@ -21,6 +21,6 @@ namespace idk
 	template<typename Manager>
 	inline Manager* ConnectionManager::GetManager()
 	{
-		return static_cast<Manager*>(GetManager(index_in_tuple_v<Manager, SubstreamTypes>));
+		return static_cast<Manager*>(GetManager(Manager::type));
 	}
 }

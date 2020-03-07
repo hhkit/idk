@@ -9,10 +9,12 @@
 #include <network/Client.h>
 #include <network/ServerConnectionManager.h>
 #include <network/ClientConnectionManager.h>
+#include <network/ClientMoveManager.h>
 #include <network/ConnectionManager.inl>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
 #include <network/EventDataBlockFrameNumber.h>
+#include <network/GhostManager.h>
 #include <core/GameState.h>
 
 namespace idk
@@ -55,7 +57,8 @@ namespace idk
 					frame_counter = event.frame_count;
 					my_id = event.player_id;
 
-					auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
+					auto frames_late = 0;
+					//auto frames_late = static_cast<int>(std::chrono::duration<float, std::milli>(client->GetRTT()) / Core::GetRealDT()) / 2; // attempt to synchronize frame time with the server using half rtt
 					frame_counter += frames_late;
 				});
 		};
@@ -71,6 +74,17 @@ namespace idk
 	void NetworkSystem::Disconnect()
 	{
 		ResetNetwork();
+	}
+
+	array<ConnectionManager*, 5> NetworkSystem::GetConnectionManagers()
+	{
+		return array<ConnectionManager*, 5>{
+			client_connection_manager.get(),
+				server_connection_manager[0].get(),
+				server_connection_manager[1].get(),
+				server_connection_manager[2].get(),
+				server_connection_manager[3].get(),
+		};
 	}
 
 	bool NetworkSystem::IsHost()
@@ -138,32 +152,35 @@ namespace idk
 			client->SendPackets();
 	}
 
-	void NetworkSystem::RespondToPackets()
+	void NetworkSystem::RespondToPackets(span<ElectronView> electron_views)
 	{
-		// call static
-		for (auto& elem : frame_start_callbacks)
-			elem.callback();
-		
-		// per client
-		if (client_connection_manager)
-			client_connection_manager->FrameStartManagers();
-		for (auto& elem : server_connection_manager)
-			if (elem)
-				elem->FrameStartManagers();
+		for (auto& ev : electron_views)
+		{
+			if (std::get_if<ElectronView::Ghost>(&ev.ghost_state))
+				ev.MoveGhost();
+		}
 	}
 
-	void NetworkSystem::PreparePackets()
+	void NetworkSystem::PreparePackets(span<ElectronView> electron_views)
 	{
-		// call static
-		for (auto& elem : frame_end_callbacks)
-			elem.callback();
+		for (auto& ev : electron_views)
+			ev.PrepareDataForSending();
 
-		// per client
+		// if server
+		for (const auto& elem : server_connection_manager)
+		{
+			if (!elem)
+				continue;
+
+			elem->GetManager<GhostManager>()->SendGhosts(elem->GetConnectedHost(), electron_views);
+		}
+
+		// if client
 		if (client_connection_manager)
-			client_connection_manager->FrameEndManagers();
-		for (auto& elem : server_connection_manager)
-			if (elem)
-				elem->FrameEndManagers();
+			client_connection_manager->GetManager<ClientMoveManager>()->SendMoves(electron_views);
+
+		for (auto& ev : electron_views)
+			ev.CacheSentData();
 	}
 
 	void NetworkSystem::AddCallbackTarget(Handle<mono::Behavior> behavior)

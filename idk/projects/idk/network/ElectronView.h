@@ -2,6 +2,9 @@
 #include <idk.h>
 #include <core/Component.h>
 #include <network/network.h>
+#include <network/GhostPack.h>
+#include <network/MovePack.h>
+
 namespace idk
 {
 	template<typename T>
@@ -25,7 +28,8 @@ namespace idk
 	public:
 		// state machines
 		struct Master {};        // master object for the server. server owns this regardless of object ownership
-		struct Ghost {};         // ghost object for clients
+		struct Ghost  {};         // ghost object for clients
+
 		struct ClientObject {};  // when the client owns the object, the move_state is placed into clientobject
 		struct ControlObject {}; // the server holds the controlobject
 
@@ -42,21 +46,22 @@ namespace idk
 
 		Host owner = Host::SERVER;
 
-		variant<std::monostate, Master, Ghost> ghost_state;
-		variant<std::monostate, ClientObject, ControlObject> move_state;
+		variant<monostate, Master, Ghost> ghost_state;
+		variant<monostate, ClientObject, ControlObject> move_state;
 
 		bool IsMine() const;
 
 		void Setup();
 		void SetAsClientObject();
+		void SetAsControlObject();
 
-		void UpdateClient();
-		void UpdateMaster();
-		void UpdateGhost();
-		vector<string> PackMoveData();
-		vector<string> PackGhostData();
-		void UnpackGhostData(SeqNo sequence_number, span <string> data_pack);
-		void UnpackMoveData(SeqNo sequence_number, span <string> data_pack);
+		void CacheSentData();
+		void PrepareDataForSending();
+		void MoveGhost();
+		MovePack PackMoveData();
+		GhostPack MasterPackData(int incoming_state_mask);
+		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
+		void UnpackMoveData(const MovePack& data_pack);
 
 		hash_table<string, reflect::dynamic> GetParameters() const;
 
@@ -72,28 +77,59 @@ namespace idk
 
 	struct ElectronView::BaseParameter
 	{
-		string param_name;
-		real t = 1;
-		real interp_over = 1;
-		SeqNo latest_seq;
+		struct MasterData
+		{
+			SeqNo last_packed;
+			virtual bool ValueChanged() const = 0;
+			virtual void CacheValue(SeqNo pack_date)  = 0;
+			virtual string PackData() = 0;
+			virtual ~MasterData() = default;
+		};
 
-		virtual void CacheCurrValue() = 0;
-		virtual bool ValueChanged() const = 0;
-		virtual void ApplyLerp(real delta_t) = 0;
-		virtual void UnpackGhost(string_view) = 0;
-		virtual void UnpackMove(SeqNo, string_view) = 0;
-		virtual string PackGhostData() = 0;
-		virtual string PackMoveData() = 0;
-		virtual reflect::dynamic GetParam() = 0;
+		struct GhostData
+		{
+			SeqNo value_index;
+			real t = 1;
+			virtual void UnpackData(SeqNo index, string_view) = 0;
+			virtual void Update(real dt) = 0;
+			virtual ~GhostData() = default;
+		};
+
+		// move data
+		struct ClientObjectData
+		{
+			virtual void Init() = 0;
+			virtual void CalculateMoves(SeqNo curr_seq) = 0;
+			virtual small_vector<SeqAndPack> PackData() = 0;
+			virtual ~ClientObjectData() = default;
+		};
+
+		struct ControlObjectData
+		{
+			virtual void Init() = 0;
+			virtual void RecordPrediction(SeqNo curr_seq) = 0;
+			virtual void UnpackMove(span<const SeqAndPack>) = 0;
+			virtual ~ControlObjectData() = default;
+		};
+
+		string param_name;
+		real   interp_over = 0.2f;
+
+		virtual ClientObjectData* GetClientObject() = 0;
+		virtual ControlObjectData* GetControlObject() = 0;
+		virtual MasterData* GetMaster() = 0;
+		virtual GhostData* GetGhost() = 0;
 		virtual ~BaseParameter() = default;
 	};
+
+
+
 	template<typename T>
 	template<typename Hnd, typename Mem>
 	inline ParameterImpl<T>::ParameterImpl(Handle<Hnd> obj, T(Mem::* ptr))
 	{
 		getter = [obj, ptr]()->T { return std::invoke(ptr, *obj); };
 		setter = [obj, ptr](const T& val) { std::invoke(ptr, *obj) = val; };
-
 	}
 
 	template<typename T>

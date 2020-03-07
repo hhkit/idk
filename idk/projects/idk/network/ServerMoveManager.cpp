@@ -8,6 +8,8 @@
 #include <network/NetworkSystem.h>
 #include <network/ElectronView.h>
 #include <network/ElectronTransformView.h>
+#include <serialize/binary.inl>
+
 namespace idk
 {
 	void ServerMoveManager::SubscribeEvents(ClientConnectionManager&)
@@ -22,12 +24,13 @@ namespace idk
 
 	void ServerMoveManager::OnMoveReceived(MoveClientMessage& move)
 	{
-		//LOG_TO(LogPool::NETWORK, "Received move event");
-		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(move.network_id);
-		if (view)
+		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+		for (auto& move_pack : move.move_packs)
 		{
-			view->state_mask = move.state_mask;
-			view->UnpackMoveData(move.sequence_number, move.pack);
+			if (auto view = id_man.GetViewFromId(move_pack.network_id))
+			{
+				view->UnpackMoveData(move_pack);
+			}
 		}
 	}
 }

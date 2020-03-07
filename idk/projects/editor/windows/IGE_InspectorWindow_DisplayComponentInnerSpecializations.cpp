@@ -891,6 +891,7 @@ namespace idk
 
         ImGui::Text(owner_str.data());
         ImGui::Text("Network ID: %d", c_ev->network_id);
+        ImGui::Text("Network Frame: %d", Core::GetSystem<NetworkSystem>().GetSequenceNumber());
 
         for (auto [name, param] : c_ev->GetParameters())
         {
