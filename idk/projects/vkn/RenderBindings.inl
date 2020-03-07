@@ -60,4 +60,26 @@ namespace idk::vkn::bindings
 			binder.BindAni(the_interface, dc);
 			}, the_interface, dc);
 	}
+	template<typename ...Args>
+	void CombinedBindings<Args...>::BindFont(RenderInterface& the_interface, const FontRenderData& dc)
+	{
+		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface, auto& dc) {
+			binder.BindFont(the_interface, dc);
+			}, the_interface, dc);
+
+	}
+	template<typename ...Args>
+	void CombinedBindings<Args...>::BindCanvas(RenderInterface& the_interface, const TextData& dc, const UIRenderObject& dc_one)
+	{
+		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface, auto& dc, auto& dc_one) {
+			binder.BindCanvas(the_interface, dc,dc_one);
+			}, the_interface, dc,dc_one);
+	}
+	template<typename ...Args>
+	void CombinedBindings<Args...>::BindCanvas(RenderInterface& the_interface, const ImageData& dc, const UIRenderObject& dc_one)
+	{
+		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface, auto& dc, auto& dc_one) {
+			binder.BindCanvas(the_interface, dc, dc_one);
+			}, the_interface, dc, dc_one);
+	}
 }

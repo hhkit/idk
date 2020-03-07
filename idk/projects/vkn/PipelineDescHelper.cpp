@@ -28,6 +28,7 @@ namespace idk::vkn
 	{
 		config.buffer_descriptions.clear();
 		hash_set<uint32_t> layouts;
+		layouts.reserve(32);
 		for (auto& module : shader_handles)
 		{
 			auto& mod = module.as<ShaderModule>();

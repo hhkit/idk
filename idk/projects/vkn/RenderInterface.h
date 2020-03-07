@@ -55,7 +55,7 @@ namespace idk::vkn
 #pragma endregion
 
 		virtual void BindVertexBufferByBinding(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset) = 0;
-		virtual void BindVertexBuffer(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset) = 0;
+		virtual void BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset) = 0;
 		virtual void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType) = 0;
 
 #pragma region Draw
