@@ -17,11 +17,13 @@ namespace idk
 	template<typename T>
 	struct ParameterImpl
 	{
+
 		function<T()>                          getter;
 		function<void(const T&)>               setter;
 		function <T(const T&, const T&, real)> interpolator;
 		function<bool(const T&, const T&)>     equater = std::equal_to<T>{};
 		function<bool(const T&, const T&)>     send_condition = std::not_equal_to<T>{};
+		PredictionFunction                     predict_func = PredictionFunction::Linear;
 
 		ParameterImpl();
 
@@ -115,8 +117,6 @@ namespace idk
 
 		struct ControlObjectData
 		{
-			PredictionFunction predict_func = PredictionFunction::Linear;
-
 			virtual void Init() = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual void UnpackMove(span<const SeqAndPack>) = 0;

@@ -173,9 +173,9 @@ namespace idk
 				move_buffer.emplace_back(SeqAndObj{ curr_seq, new_move });
 			}
 
-			void ApplyCorrection(circular_buffer<SeqAndObj, RememberedMoves>::iterator itr, const T& real_move)
+			void ApplyCorrection(typename circular_buffer<SeqAndObj, RememberedMoves>::iterator itr, const T& real_move)
 			{
-				switch (predict_func)
+				switch (param.predict_func)
 				{
 				case PredictionFunction::Linear:
 				{
@@ -189,17 +189,17 @@ namespace idk
 				case PredictionFunction::Quadratic:
 				if (itr != move_buffer.end())
 				{
-					auto next = itr; ++next;
-					// recalculate the move based on the diffs in the moves
-					while (next != move_buffer.end())
+					auto diff = real_move - itr->obj;
+
+					while (itr != move_buffer.end())
 					{
-						auto diff = next->obj - itr->obj;
-						itr->obj = real_move;
-						next->obj = itr->obj + diff;
+						itr->obj += diff;
+						param.setter(param.getter() + diff);
+						prev_value += diff;
 
 						++itr;
-						++next;
 					}
+					break;
 				}
 				};
 
