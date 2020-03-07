@@ -78,8 +78,8 @@ namespace idk::vkn::bindings
 
 		static string PrepareDirectionalBlock(const vector<DLightData>& vp)
 		{
-			vector<ShaderDirectionalData> tmp_dlight(vp.size());
-			for (size_t i = 0; i < tmp_dlight.size(); ++i)
+			vector<ShaderDirectionalData> tmp_dlight(std::max(1ui64,vp.size()));
+			for (size_t i = 0; i < vp.size(); ++i)
 			{
 				tmp_dlight[i] = vp[i];
 			}
