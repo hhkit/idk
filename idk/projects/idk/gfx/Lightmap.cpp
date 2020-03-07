@@ -58,6 +58,7 @@ namespace idk {
 
 			for (auto& elem : frustumEdges)
 			{
+				//elem.z *= 0.5f;
 				elem = m * elem;
 
 				min_c = { min(min_c.x,elem.x),min(min_c.y,elem.y) ,min(min_c.z, elem.z) };
@@ -79,7 +80,7 @@ namespace idk {
 		}
 		//clip_plane_z = vClip.z;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	RscHandle<FrameBuffer> Lightmap::InitShadowMap(LightmapConfig config)
 	{
 		_config = config;

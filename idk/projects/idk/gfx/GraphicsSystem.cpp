@@ -503,7 +503,7 @@ namespace idk
 		range.dir_light_end = directional_light_buffer.size();
 		LightVolDbg::EndCurrent();
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void GraphicsSystem::BufferGraphicsState(
 		span<MeshRenderer> mesh_renderers,
 		span<Animator> animators,
