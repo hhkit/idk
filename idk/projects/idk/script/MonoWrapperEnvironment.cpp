@@ -1425,7 +1425,13 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::GraphicsSetGammaCorrection", void, float gamma_correction)
 		{
-			Core::GetSystem<GraphicsSystem>().extra_vars.Set("gamma_correction",gamma_correction);
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set("gamma_correction", gamma_correction);
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsGetGammaCorrection", float)
+		{
+			auto gamma_correction = Core::GetSystem<GraphicsSystem>().extra_vars.Get<float>("gamma_correction");
+			return gamma_correction ? *gamma_correction : 1.0f;
 		}
 		BIND_END();
 		BIND_START("idk.Bindings::GraphicsDisableGammaCorrection", void)

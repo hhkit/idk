@@ -11,6 +11,7 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ObjectValidate(ulong handle);
 
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ObjectDestroy(ulong handle);
 
@@ -448,6 +449,10 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool GraphicsDisableGammaCorrection();
+        
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float GraphicsGetGammaCorrection();
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void GraphicsSetGammaCorrection(float gamma_correction);
 
