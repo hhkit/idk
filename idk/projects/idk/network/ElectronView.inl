@@ -52,7 +52,10 @@ namespace idk
 
 			DerivedGhostData(ParameterImpl<T>& p)
 				: param{ p }
-			{}
+			{
+				start_value = param.getter();
+				end_value = param.getter();
+			}
 
 			void UnpackData(SeqNo index, string_view data) override
 			{

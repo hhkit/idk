@@ -186,6 +186,12 @@ namespace idk
 			return;
 		}
 
+		LOG_TO(LogPool::NETWORK, "  instantiating %s", message.prefab->Name().data());
+		if (message.use_position)
+		LOG_TO(LogPool::NETWORK, "    at (%f, %f, %f)", message.position.x, message.position.y, message.position.z);
+		else
+		LOG_TO(LogPool::NETWORK, "    with no position data.");
+
 		auto obj = message.prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
 
@@ -197,6 +203,7 @@ namespace idk
 		auto& tfm = *obj->Transform();
 		if (message.use_position)
 			tfm.position = message.position;
+
 		if (message.use_rotation)
 			for (unsigned i = 0; i < 4; ++i)
 				tfm.rotation[i] = message.rotation[i];
