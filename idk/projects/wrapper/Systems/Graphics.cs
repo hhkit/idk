@@ -2,15 +2,15 @@
 {
     public static class Graphics
     {
-        public static bool useGammaCorrection
+        public static float gammaCorrection
         {
             get
             {
-                return Bindings.GraphicsGetSRGB();
+                return Bindings.GraphicsGetGammaCorrection();
             }
             set
             {
-                Bindings.GraphicsSetSRGB(value);
+                Bindings.GraphicsSetGammaCorrection(value);
             }
         }
         public static void SetGammaCorrection(float gamma_value)
