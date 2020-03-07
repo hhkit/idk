@@ -26,7 +26,7 @@
         /// </summary>
         public Vector2 anchorMin
         {
-            get { Debug.Log(handle); return Bindings.RectTransformGetAnchorMin(handle); }
+            get => Bindings.RectTransformGetAnchorMin(handle);
             set => Bindings.RectTransformSetAnchorMin(handle, value);
         }
 
