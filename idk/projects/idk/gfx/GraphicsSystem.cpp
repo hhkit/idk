@@ -441,11 +441,11 @@ namespace idk
 			case index_in_variant_v<PointLight, LightVariant>:
 				{
 					sphere sphere{ invert_rotation(light.v)[3],light.falloff };
-					color col = color{ 0.3,0.6,0.2,1.0f };
+					color col = color{ 0.3f,0.6f,0.2f,1.0f };
 					if (frustum.contains(sphere))
 					{
 						active_light_buffer.emplace_back(i);
-						col = color{ 0.5,0.0,0.4,1.0f };
+						col = color{ 0.5f,0.0f,0.4f,1.0f };
 					}
 					LightVolDbg::DbgLight(sphere,col);
 
@@ -458,12 +458,12 @@ namespace idk
 				auto bounding_box = camera_vp_to_bounding_box(light.vp);
 				auto sphere = bounding_box_to_loose_sphere(bounding_box);
 
-				color col = color{ 0.3,0.2,0.6,1.0f };
+				color col = color{ 0.3f,0.2f,0.6f,1.0f };
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
 					light.camDataRef = camera;
-					col = color{ 0.5,0.4,0.0,1.0f };
+					col = color{ 0.5f,0.4f,0.0f,1.0f };
 				}
 				LightVolDbg::DbgLight(bounding_box, col);
 				//LightVolDbg::DbgLight(light_frustum, col);
@@ -1074,8 +1074,6 @@ namespace idk
 		}
 		size_t i = 0;
 		
-
-		size_t derp = 0;
 		for (auto& light : result.lights)
 		{
 			CameraData light_cam_info{};

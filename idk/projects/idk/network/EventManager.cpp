@@ -130,13 +130,6 @@ namespace idk
 
 		const auto go = transfer->GetGameObject();
 
-		if (const auto e_rb = go->GetComponent<ElectronRigidbodyView>())
-		{
-			if (e_rb->sync_velocity)
-				if (const auto rb = go->GetComponent<RigidBody>())
-					rb->is_kinematic = true;
-		}
-
 		conn_man->CreateAndSendMessage<EventTransferOwnershipMessage>(GameChannel::RELIABLE, 
 			[&](EventTransferOwnershipMessage& msg)
 			{

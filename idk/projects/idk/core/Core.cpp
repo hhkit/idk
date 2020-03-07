@@ -98,8 +98,8 @@ namespace idk
 		// setup loop
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::ReceivePackets,        "Receive Packets");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::RespondToPackets,      "Respond to Packets");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets,        "Receive Packets");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::RespondToPackets,      "Respond to Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
@@ -122,8 +122,8 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&NetworkSystem::PreparePackets,        "Prepare to Packets");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&NetworkSystem::SendPackets,           "Send Packets");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::PreparePackets,        "Prepare to Packets");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::SendPackets,           "Send Packets");
 
 		if (editor)
 		{

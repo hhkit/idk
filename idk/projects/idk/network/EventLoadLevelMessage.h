@@ -26,12 +26,12 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_bytes(stream, (uint8_t*)&scene, sizeof(scene));
-			serialize_uint32(stream, obj_count);
+			serialize_int(stream, obj_count, 0, 4096);
 			obj_list.resize(obj_count);
 			for (auto& elem : obj_list)
 			{
 				serialize_uint64(stream, elem.view.id);
-				serialize_uint32(stream, elem.id);
+				serialize_int(stream, elem.id, 0, 4096);
 			}
 			return true;
 		}

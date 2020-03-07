@@ -10,9 +10,6 @@ namespace idk
 	public:
 		void SubscribeEvents(ClientConnectionManager& client) override;
 		void SubscribeEvents(ServerConnectionManager& server) override;
-
-	private:
-		static void CachePreviousPositions(span<ElectronView> views);
 		void SendMoves(span<ElectronView> views);
 	};
 }

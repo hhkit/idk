@@ -20,201 +20,219 @@
 
 namespace idk
 {
-	void UISystem::LateInit()
-	{
-		auto res = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.frag", false);
-		if (!res)
-			return;
+    void UISystem::LateInit()
+    {
+        auto res = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.frag", false);
+        if (!res)
+            return;
 
-		auto frag = *res;
-		auto mat = Core::GetResourceManager().LoaderCreateResource<Material>(Guid{ 0x90da4f5c, 0x0453, 0x4e77, 0xbb3fb506c067d085 });
-		if (mat)
-		{
-			mat->_shader_program = frag;
-			mat->Name("Default UI");
-		}
-		auto inst = Core::GetResourceManager().LoaderCreateResource<MaterialInstance>(UISystem::default_material_inst);
-		if (inst)
-		{
-			inst->material = mat;
-			inst->Name("Default UI");
-			mat->_default_instance = inst;
-		}
-	}
+        auto frag = *res;
+        auto mat = Core::GetResourceManager().LoaderCreateResource<Material>(Guid{ 0x90da4f5c, 0x0453, 0x4e77, 0xbb3fb506c067d085 });
+        if (mat)
+        {
+            mat->_shader_program = frag;
+            mat->Name("Default UI");
+        }
+        auto inst = Core::GetResourceManager().LoaderCreateResource<MaterialInstance>(UISystem::default_material_inst);
+        if (inst)
+        {
+            inst->material = mat;
+            inst->Name("Default UI");
+            mat->_default_instance = inst;
+        }
+    }
 
-	void UISystem::Update(span<class Canvas> canvases)
-	{
-		for (auto& c : canvases)
-			ComputeCanvasHierarchyRects(c.GetHandle());
-	}
+    void UISystem::Update(span<class Canvas> canvases)
+    {
+        for (auto& c : canvases)
+            ComputeCanvasHierarchyRects(c.GetHandle());
+    }
 
-	void UISystem::FinalizeMatrices(span<class Canvas> canvases)
-	{
-		for (auto& c : canvases)
-			FinalizeMatrices(c.GetHandle());
-	}
+    void UISystem::FinalizeMatrices(span<class Canvas> canvases)
+    {
+        for (auto& c : canvases)
+            FinalizeMatrices(c.GetHandle());
+    }
 
-	void UISystem::RecalculateRects([[maybe_unused]] Handle<RectTransform> rt)
-	{
-		//if (!rt)
-		//    return;
-		//auto go = rt->GetGameObject();
-		//if (go->HasComponent<Canvas>())
-		//    ComputeCanvasHierarchyRects(rt->GetGameObject()->GetComponent<Canvas>());
-		//else
-		//{
-		//    if (!go->Parent())
-		//        return;
+    void UISystem::RecalculateRects(Handle<RectTransform> rt)
+    {
+        if (!rt)
+            return;
+        auto go = rt->GetGameObject();
+        if (go->HasComponent<Canvas>())
+            ComputeCanvasHierarchyRects(rt->GetGameObject()->GetComponent<Canvas>());
+        else
+        {
+            if (!go->Parent())
+                return;
 
-		//    // will def have parent, this visit starts from Canvas, which will reach the branch above.
-		//    const auto parent = go->Parent();
+            auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(go);
 
-		//    const auto& parent_rt = *parent->GetComponent<RectTransform>();
-		//    const rect& parent_rect = parent_rt._local_rect;
-		//    vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
+            tree.Visit([](Handle<GameObject> child, int)
+            {
+                if (child->HasComponent<Canvas>())
+                {
+                    LOG_WARNING_TO(LogPool::GAME, "Canvas cannot contain another Canvas.");
+                    return false;
+                }
 
-		//    auto& rt = *rt_handle;
+                const auto rt_handle = child->GetComponent<RectTransform>();
+                if (!rt_handle)
+                {
+                    LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
+                    return false;
+                }
 
-		//    vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
-		//    vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-		//    rt._local_rect.position = min - parent_pivot;
-		//    rt._local_rect.size = max - min;
-		//}
-	}
+                // will def have parent, this visit starts from Canvas, which will reach the branch above.
+                const auto parent = child->Parent();
 
-	void UISystem::ComputeCanvasHierarchyRects(Handle<Canvas> canvas)
-	{
-		// assuming screen space
-		auto screen_size = canvas->render_target->Size();
+                const auto& parent_rt = *parent->GetComponent<RectTransform>();
+                const rect& parent_rect = parent_rt._local_rect;
+                vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
 
-		auto canvas_go = canvas->GetGameObject();
+                auto& rt = *rt_handle;
 
-		// 1424 * 826
-		if (!canvas_go->HasComponent<RectTransform>())
-		{
-			LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
-			return;
-		}
+                vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
+                vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
+                rt._local_rect.position = min - parent_pivot;
+                rt._local_rect.size = max - min;
+            });
+        }
+    }
 
-		canvas_go->GetComponent<RectTransform>()->_local_rect = rect{ vec2{0,0}, vec2{screen_size} };
-		auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
+    void UISystem::ComputeCanvasHierarchyRects(Handle<Canvas> canvas)
+    {
+        // assuming screen space
+        auto screen_size = canvas->render_target->Size();
 
-		tree.Visit([canvas](Handle<GameObject> child, int)
-		{
-			if (child->HasComponent<Canvas>())
-			{
-				if (child->GetComponent<Canvas>() == canvas)
-					return true;
-				else
-				{
-					LOG_WARNING_TO(LogPool::GAME, "Canvas cannot contain another Canvas.");
-					return false;
-				}
-			}
+        auto canvas_go = canvas->GetGameObject();
 
-			const auto rt_handle = child->GetComponent<RectTransform>();
-			if (!rt_handle)
-			{
-				LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
-				return false;
-			}
+        // 1424 * 826
+        if (!canvas_go->HasComponent<RectTransform>())
+        {
+            LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
+            return;
+        }
 
-			// will def have parent, this visit starts from Canvas, which will reach the branch above.
-			const auto parent = child->Parent();
+        canvas_go->GetComponent<RectTransform>()->_local_rect = rect{ vec2{0,0}, vec2{screen_size} };
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
 
-			const auto& parent_rt = *parent->GetComponent<RectTransform>();
-			const rect& parent_rect = parent_rt._local_rect;
-			vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
+        tree.Visit([canvas](Handle<GameObject> child, int)
+        {
+            if (child->HasComponent<Canvas>())
+            {
+                if (child->GetComponent<Canvas>() == canvas)
+                    return true;
+                else
+                {
+                    LOG_WARNING_TO(LogPool::GAME, "Canvas cannot contain another Canvas.");
+                    return false;
+                }
+            }
 
-			auto& rt = *rt_handle;
+            const auto rt_handle = child->GetComponent<RectTransform>();
+            if (!rt_handle)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
+                return false;
+            }
 
-			vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
-			vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-			rt._local_rect.position = rt.anchor_pos + (min - parent_pivot);
-			rt._local_rect.size = max - min;
+            // will def have parent, this visit starts from Canvas, which will reach the branch above.
+            const auto parent = child->Parent();
 
-			return true;
-		});
-	}
+            const auto& parent_rt = *parent->GetComponent<RectTransform>();
+            const rect& parent_rect = parent_rt._local_rect;
+            vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
 
-	void UISystem::FinalizeMatrices(Handle<Canvas> canvas)
-	{
-		// assuming screen space
-		auto screen_size = canvas->render_target->Size();
+            auto& rt = *rt_handle;
 
-		auto canvas_go = canvas->GetGameObject();
+            vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
+            vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
+            rt._local_rect.position = min - parent_pivot;
+            rt._local_rect.size = max - min;
 
-		// 1424 * 826
-		if (!canvas_go->HasComponent<RectTransform>())
-		{
-			LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
-			return;
-		}
+            return true;
+        });
+    }
 
-		auto& canvas_rt = *canvas_go->GetComponent<RectTransform>();
-		canvas_rt._local_rect = rect{ vec2{0,0}, vec2{screen_size} };
-		canvas_rt._matrix = mat4{ scale(vec3(2.0f / screen_size.x, 2.0f / screen_size.y, 1.0f)) };
+    void UISystem::FinalizeMatrices(Handle<Canvas> canvas)
+    {
+        // assuming screen space
+        auto screen_size = canvas->render_target->Size();
 
-		auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
+        auto canvas_go = canvas->GetGameObject();
 
-		tree.Visit([canvas](Handle<GameObject> child, int)
-		{
-			if (child->HasComponent<Canvas>())
-			{
-				if (child->GetComponent<Canvas>() == canvas)
-					return true;
-				else
-				{
-					LOG_WARNING_TO(LogPool::GAME, "Canvas cannot contain another Canvas.");
-					return false;
-				}
-			}
+        // 1424 * 826
+        if (!canvas_go->HasComponent<RectTransform>())
+        {
+            LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
+            return;
+        }
 
-			const auto rt_handle = child->GetComponent<RectTransform>();
-			if (!rt_handle)
-			{
-				LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
-				return false;
-			}
+        auto& canvas_rt = *canvas_go->GetComponent<RectTransform>();
+        canvas_rt._local_rect = rect{ vec2{0,0}, vec2{screen_size} };
+        canvas_rt._matrix = mat4{ scale(vec3(2.0f / screen_size.x, 2.0f / screen_size.y, 1.0f)) };
 
-			auto& rt = *rt_handle;
-			const auto& t = *child->Transform();
+        auto tree = Core::GetSystem<SceneManager>().FetchSceneGraphFor(canvas_go);
+        
+        tree.Visit([canvas](Handle<GameObject> child, int)
+        {
+            if (child->HasComponent<Canvas>())
+            {
+                if (child->GetComponent<Canvas>() == canvas)
+                    return true;
+                else
+                {
+                    LOG_WARNING_TO(LogPool::GAME, "Canvas cannot contain another Canvas.");
+                    return false;
+                }
+            }
 
-			// will def have parent, this visit starts from Canvas, which will reach the branch above.
-			const auto parent = child->Parent();
+            const auto rt_handle = child->GetComponent<RectTransform>();
+            if (!rt_handle)
+            {
+                LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
+                return false;
+            }
 
-			const auto& parent_rt = *parent->GetComponent<RectTransform>();
-			const rect& parent_rect = parent_rt._local_rect;
-			vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
+            auto& rt = *rt_handle;
+            const auto& t = *child->Transform();
 
-			vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
-			vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-			rt._local_rect.position = rt.anchor_pos + (min - parent_pivot);
-			rt._local_rect.size = max - min;
+            // will def have parent, this visit starts from Canvas, which will reach the branch above.
+            const auto parent = child->Parent();
 
-			vec2 pivot_pt = rt._local_rect.position + rt.pivot * rt._local_rect.size;
-			rt._matrix = parent_rt._matrix *
-				translate(vec3(pivot_pt, t.position.z)) *
-				quat_cast<mat4>(t.rotation) *
-				scale(t.scale) *
-				translate(vec3(rt._local_rect.position + vec2(0.5f) * rt._local_rect.size - pivot_pt, 0));
+            const auto& parent_rt = *parent->GetComponent<RectTransform>();
+            const rect& parent_rect = parent_rt._local_rect;
+            vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
 
-			return true;
-		});
-	}
+            vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
+            vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
+            rt._local_rect.position = min - parent_pivot;
+            rt._local_rect.size = max - min;
+
+            vec2 pivot_pt = rt._local_rect.position + rt.pivot * rt._local_rect.size;
+            rt._matrix = parent_rt._matrix *
+                translate(vec3(pivot_pt, t.position.z)) *
+                quat_cast<mat4>(t.rotation) *
+                scale(t.scale) *
+                translate(vec3(rt._local_rect.position + vec2(0.5f) * rt._local_rect.size - pivot_pt, 0));
+
+            return true;
+        });
+    }
 
 
 
-	Handle<class Canvas> UISystem::FindCanvas(Handle<GameObject> go) const
-	{
-		auto parent = go->Parent();
-		while (parent)
-		{
-			if (const auto canvas = parent->GetComponent<Canvas>())
-				return canvas;
-			parent = parent->Parent();
-		}
-		return {};
-	}
+    Handle<class Canvas> UISystem::FindCanvas(Handle<GameObject> go) const
+    {
+        auto parent = go->Parent();
+        while (parent)
+        {
+            if (const auto canvas = parent->GetComponent<Canvas>())
+                return canvas;
+            parent = parent->Parent();
+        }
+        return {};
+    }
 
 }

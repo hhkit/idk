@@ -14,7 +14,7 @@ namespace idk
 	{
 
 		_last_frame = _this_frame = Clock::now();
-		_accumulated_fixed_dt = _accumulated_real_dt = seconds{};
+		_accumulated_network_dt = _accumulated_fixed_dt = _accumulated_real_dt = seconds{};
 	}
 	void Scheduler::SequentialUpdate()
 	{
@@ -40,9 +40,17 @@ namespace idk
 				elem.previous_frames.push_back(Pass::Call{ duration_cast<seconds>(end - pt), paused });
 			}
 		};
+
+
 		while (_accumulated_real_dt > _game_update)
 		{
+
 			_accumulated_real_dt -= _game_update;
+			_accumulated_network_dt += _game_update;
+			auto execute_network = _accumulated_network_dt > _network_update;
+			if (execute_network)
+				execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
+
 			execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
 
 			while (_accumulated_fixed_dt > _fixed_dt)
@@ -52,6 +60,12 @@ namespace idk
 			}
 
 			execute_pass(_passes[s_cast<size_t>(UpdatePhase::MainUpdate)]);
+
+			if (execute_network)
+			{
+				execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickEnd)]);
+				_accumulated_network_dt -= _network_update;
+			}
 		};
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::PreRender)]);
