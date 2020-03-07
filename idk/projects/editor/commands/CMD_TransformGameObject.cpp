@@ -10,6 +10,7 @@
 #include <editor/commands/CMD_TransformGameObject.h>
 #include <common/Transform.h>
 #include <prefab/PrefabUtility.h>
+#include <math/matrix_decomposition.inl>
 
 namespace idk {
 
@@ -26,7 +27,7 @@ namespace idk {
 
 		auto trans = game_object_handle->Transform();
 
-		auto old_t = *trans;
+		auto old_t = decompose(original_values);
 		trans->GlobalMatrix(new_values);
 		if (const auto prefab_inst = game_object_handle->GetComponent<PrefabInstance>())
 		{
