@@ -553,23 +553,25 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformGetOffsetMin(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 RectTransformSetOffsetMin(ulong id, Vector2 value);
+        public extern static void RectTransformSetOffsetMin(ulong id, Vector2 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformGetOffsetMax(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 RectTransformSetOffsetMax(ulong id, Vector2 value);
+        public extern static void RectTransformSetOffsetMax(ulong id, Vector2 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformGetAnchorMin(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 RectTransformSetAnchorMin(ulong id, Vector2 value);
+        public extern static void RectTransformSetAnchorMin(ulong id, Vector2 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformGetAnchorMax(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 RectTransformSetAnchorMax(ulong id, Vector2 value);
+        public extern static void RectTransformSetAnchorMax(ulong id, Vector2 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformGetPivot(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 RectTransformSetPivot(ulong id, Vector2 value);
+        public extern static void RectTransformSetPivot(ulong id, Vector2 value);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Rect RectTransformGetRect(ulong id);
 
         /*
          * Image
