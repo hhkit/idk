@@ -567,10 +567,6 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformSetAnchorMax(ulong id, Vector2 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 RectTransformGetAnchorPos(ulong id);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Vector2 RectTransformSetAnchorPos(ulong id, Vector2 value);
-        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformGetPivot(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformSetPivot(ulong id, Vector2 value);
