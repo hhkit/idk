@@ -205,12 +205,12 @@ namespace idk::vkn::renderpasses
 		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[4], cubeMat[3]));
 		shadow_vp.emplace_back(light.p * look_at(light.v_pos, light.v_pos + cubeMat[5], cubeMat[3]));
 
-		auto cam = PointCameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, shadow_vp };
+		auto cam = PointCameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, shadow_vp,light.falloff,light.v_pos };
 		index_span inst_span{ shadow_range.inst_mesh_render_begin, shadow_range.inst_mesh_render_end };
 		PointShadow::Bindings bindings;
 		bindings::PointShadowFilter sf;
 		bindings.for_each_binder<>(
-			SetStateTest2{},
+			bindings::BinderForward<bindings::SetStateTest>{},
 			cam, *state.skeleton_transforms);
 		bindings.Get<bindings::VertexShaderBinding>().vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VNormalMeshShadow];
 		bindings.Get<bindings::GeometryShaderBinding>().geometry_shader = Core::GetSystem<GraphicsSystem>().renderer_geometry_shaders[GPointShadow];
@@ -226,7 +226,6 @@ namespace idk::vkn::renderpasses
 			}
 		};
 		frame_graph.addRenderPass<PassSetPair<PointShadow::RenderPass, PointShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);
-
 	}
 
 	void AddShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)

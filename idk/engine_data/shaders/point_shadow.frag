@@ -11,6 +11,7 @@ Author: Ho Han Kit Ivan, 230001418, ivan.ho
 Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 #version 450
+#define SHADOW_TRANSFORMS 6
 
 layout(location = 1) in VS_OUT
 {
@@ -21,24 +22,15 @@ U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
 {
 	float far_plane;
 	vec3 light_pos;
+	mat4 perspective_transform[SHADOW_TRANSFORMS];
 } PerCamera;
 
-layout (location = 0) out gl_PerVertex
-{
-  vec4 gl_FragDepth;
-};
-
-layout(location=0)in gl_PerVertex
-{
-	vec4 gl_Position;
-};
 
 void main()
 {
-	//FragColor = vec4(gl_FragCoord.z);
-	float dist = length(gl_Position.xyz - light_pos);
+	float dist = length(gl_FragCoord.xyz - PerCamera.light_pos);
 	
-	dist = dist / far_plane;
+	dist = dist / PerCamera.far_plane;
 	
 	gl_FragDepth = dist;
 } 

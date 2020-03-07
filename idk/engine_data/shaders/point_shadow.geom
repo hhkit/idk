@@ -7,6 +7,8 @@ layout(triangle_strip, max_vertices = 18) out;
 
 U_LAYOUT(10,0) uniform BLOCK(CameraBlock)
 {
+	float far_plane;
+	vec3 light_pos;
 	mat4 perspective_transform[SHADOW_TRANSFORMS];
 } PerCamera;
 

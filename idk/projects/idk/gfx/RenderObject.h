@@ -168,6 +168,8 @@ namespace idk
 		LayerMask culling_flags{ 0xFFFFFFFF };
 		mat4 view_matrix{};
 		vector<mat4> projection_matrix{};
+		real far_plane;
+		vec3 pos;
 		RscHandle<RenderTarget> render_target{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
@@ -175,12 +177,10 @@ namespace idk
 		CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
 		rect viewport;
-		real near_plane;
-		real far_plane;
+		real near_plane;	
 		//real b_sphere_radius;
 		//vec3 far_corner;
-		vec3 look;
-		vec3 pos;
+		vec3 look;	
 		vec2 tan_halfFOV;
 		rad fov{};
 		real ap;

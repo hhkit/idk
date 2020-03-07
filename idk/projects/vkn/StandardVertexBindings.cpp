@@ -3,6 +3,7 @@
 
 #include <vkn/GraphicsState.h>
 #include <vkn/BufferHelpers.inl>
+#include "ShadowBindings.h"
 
 namespace idk::vkn::bindings
 {

@@ -109,7 +109,7 @@ namespace idk::vkn::bindings
 				if (light.index == 0)
 				{
 					if (!light.light_maps.empty())
-						shadow_maps.emplace_back(VknTexture{});
+						shadow_maps.emplace_back(*RscHandle<VknTexture>{});
 
 					for (auto& elem : light.light_maps)
 					{
@@ -122,7 +122,7 @@ namespace idk::vkn::bindings
 				else if (light.index == 1)
 				{
 					if (!light.light_maps.empty())
-						shadow_maps.emplace_back(VknTexture{});
+						shadow_maps.emplace_back(*RscHandle<VknTexture>{});
 
 					for (auto& elem : light.light_maps)//state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 					{

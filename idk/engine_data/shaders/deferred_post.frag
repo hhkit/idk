@@ -100,8 +100,6 @@ void main()
 		{
 			if(curr_light.cast_shadow!=0)
 			{
-				//result *= vec3(1.f - ShadowCalculation(curr_light,shadow_maps[i],(curr_light.v_dir) ,normal ,curr_light.vp * world_pos));			
-				
 				vec3 shadow_factor = vec3(1.f,1.f,1.f);
 				if(view_z_abs <= DirectionalBlk.directional_vp[j].far_plane)
 				{
