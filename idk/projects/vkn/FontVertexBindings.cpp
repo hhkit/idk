@@ -6,6 +6,7 @@
 #include <vkn/BufferHelpers.inl>
 namespace idk::vkn::bindings
 {
+#pragma optimize("",off)
 	void FontVertexBindings::SetState(const GraphicsState& vstate)
 	{
 		auto& cam = vstate.camera;

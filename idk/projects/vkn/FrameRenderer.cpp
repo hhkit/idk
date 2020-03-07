@@ -74,6 +74,7 @@ namespace idk::vkn
 		gt::GraphTest test{ graph };
 
 		renderpasses::ParticleRenderer particle_renderer;
+		renderpasses::TextMeshRenderer text_mesh_renderer;
 
 		gfxdbg::FgRscLifetimes _dbg_lifetimes;
 
@@ -1457,6 +1458,11 @@ namespace idk::vkn
 		}
 		{
 			auto [col, dep] = renderpasses::AddTransparentPass(graph, color, depth, state);
+			color = col;
+			depth = dep;
+		}
+		{
+			auto [col, dep] = _pimpl->text_mesh_renderer.AddPass(graph, state, color, depth);
 			color = col;
 			depth = dep;
 		}

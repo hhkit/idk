@@ -15,8 +15,8 @@ namespace idk {
 		color color = {1.f,1.f,1.f,1.f};
 		unsigned font_size = 48;
 		RscHandle<FontAtlas> font = FontAtlas::defaults[FontDefault::SourceSansPro];
-		TextAnchor anchor = TextAnchor::UpperLeft;
-		TextAlignment alignment = TextAlignment::Left;
+		TextAnchor anchor = TextAnchor::MiddleCenter;
+		TextAlignment alignment = TextAlignment::Center;
 
 		string text;
 

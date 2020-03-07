@@ -6,8 +6,8 @@ namespace idk::vkn::renderpasses
 	BasicRenderTargetPass::BasicRenderTargetPass(FrameGraphBuilder& builder, std::optional<color> clear_color, std::optional<float> clear_depth, FrameGraphResource color, FrameGraphResource depth)
 	{
 		FrameGraphResourceMutable 
-		color_orsc = builder.write(color),
-		depth_orsc = builder.write(depth);
+		color_orsc = builder.write(color,WriteOptions{clear_color.operator bool()}),
+		depth_orsc = builder.write(depth,WriteOptions{clear_depth.operator bool() });
 		color_rsc = color_orsc;
 		depth_rsc = depth_orsc;
 		vk::ClearDepthStencilValue dep = {};
@@ -54,6 +54,7 @@ namespace idk::vkn::renderpasses
 
 	void BasicRenderTargetPass::Execute(Context_t context, BaseDrawSet& draw_set)
 	{
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, name);
 		draw_set.Render(context);
 	}
 
