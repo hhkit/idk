@@ -22,13 +22,13 @@ namespace idk
 		// TODO: acknowledgment
 	}
 
-	void GhostManager::SendGhosts(span<ElectronView> views)
+	void GhostManager::SendGhosts(Host target, span<ElectronView> views)
 	{
 		vector<GhostPack> ghost_packs;
 
 		for (auto& view : views)
 		{
-			if (view.owner != Host::SERVER)
+			if (view.owner == target)
 				continue;
 
 			if (const auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))

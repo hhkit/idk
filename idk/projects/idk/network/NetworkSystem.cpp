@@ -172,7 +172,7 @@ namespace idk
 			if (!elem)
 				continue;
 
-			elem->GetManager<GhostManager>()->SendGhosts(electron_views);
+			elem->GetManager<GhostManager>()->SendGhosts(elem->GetConnectedHost(), electron_views);
 		}
 
 		// if client
