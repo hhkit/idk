@@ -3,6 +3,12 @@
 #include <editor/IDE.h>
 #include <res/ResourceHandle.inl>
 #include <gfx/RenderTarget.h>
+#include <ui/RectTransform.h>
+#include <ui/UISystem.h>
+#include <ui/Canvas.h>
+#include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
+#include <math/matrix_transforms.inl>
 
 namespace idk
 {
@@ -21,6 +27,21 @@ namespace idk
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	}
+
+	static rect get_global_rect(Handle<RectTransform> rt)
+	{
+		if (!rt)
+			return {};
+		const auto parent = rt->GetGameObject()->Parent();
+		if (!parent)
+			return rt->_local_rect;
+		const auto parent_rt = parent->GetComponent<RectTransform>();
+		const rect parent_rect = parent->GetComponent<Canvas>() ? parent_rt->_local_rect : get_global_rect(parent_rt);
+		return rect{
+			parent_rect.position + parent_rect.size * parent_rt->pivot + rt->_local_rect.position,
+			rt->_local_rect.size
+		};
 	}
 
 	void IGE_GameView::Update()
@@ -56,12 +77,65 @@ namespace idk
 		_draw_rect_offset = (GetScreenSize() - imageSize) * 0.5f;
 		ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + _draw_rect_offset);
 
+		const auto image_top_left = ImGui::GetCursorScreenPos();
+
 		//imageSize.y = (imageSize.x * (9 / 16));
 		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
 		ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0, 1), ImVec2(1, 0));
+
+		const auto& sel = Core::GetSystem<IDE>().GetSelectedObjects();
+		if (sel.game_objects.size() && sel.game_objects[0]->HasComponent<RectTransform>())
+		{
+			const auto canvas = Core::GetSystem<UISystem>().FindCanvas(sel.game_objects[0]);
+			if (!canvas)
+				return;
+
+			const auto canvas_size = canvas->GetGameObject()->GetComponent<RectTransform>()->_local_rect.size;
+			const auto canvas_scl = imageSize / canvas_size;
+
+			const auto rt = sel.game_objects[0]->GetComponent<RectTransform>();
+
+			rect global_rect = get_global_rect(rt);
+			rect parent_global_rect = get_global_rect(rt->GetGameObject()->Parent()->GetComponent<RectTransform>());
+
+			{ // draw anchor reference rect
+				vec2 a = parent_global_rect.position + parent_global_rect.size * rt->anchor_min;
+				vec2 b = parent_global_rect.position + parent_global_rect.size * rt->anchor_max;
+				a.y = canvas_size.y - a.y; // imgui draws from top to bottom
+				b.y = canvas_size.y - b.y;
+				a = a * canvas_scl + image_top_left;
+				b = b * canvas_scl + image_top_left;
+				ImGui::GetWindowDrawList()->AddRect(a, b, 0xFFFFFFFF);
+
+				// draw anchors
+				const float x = 8.0f, y = 4.0f;
+				const float u = idk::min(a.y, b.y);
+				const float d = idk::max(a.y, b.y);
+				const float l = idk::min(a.x, b.x);
+				const float r = idk::max(a.x, b.x);
+				const vec2 ul{ l, u }, ur{ r, u }, dl{ l, d }, dr{ r, d };
+				ImGui::GetWindowDrawList()->AddTriangle(ul, ul + vec2{ -x, -y }, ul + vec2{ -y, -x }, 0xFFFFFFFF);
+				ImGui::GetWindowDrawList()->AddTriangle(ur, ur + vec2{  x, -y }, ur + vec2{  y, -x }, 0xFFFFFFFF);
+				ImGui::GetWindowDrawList()->AddTriangle(dl, dl + vec2{ -x,  y }, dl + vec2{ -y,  x }, 0xFFFFFFFF);
+				ImGui::GetWindowDrawList()->AddTriangle(dr, dr + vec2{  x,  y }, dr + vec2{  y,  x }, 0xFFFFFFFF);
+			}
+			{ // draw actual rect
+				vec2 a = global_rect.position;
+				vec2 b = global_rect.position + global_rect.size;
+				a.y = canvas_size.y - a.y; // imgui draws from top to bottom
+				b.y = canvas_size.y - b.y;
+				a = a * canvas_scl + image_top_left;
+				b = b * canvas_scl + image_top_left;
+				ImGui::GetWindowDrawList()->AddRect(a, b, 0xFFFF9999);
+			}
+		}
 	}
+
 	vec2 IGE_GameView::GetScreenSize()
 	{
 		return vec2{ ImGui::GetWindowContentRegionMax() } - vec2{ ImGui::GetWindowContentRegionMin() };
 	}
+
+
+
 }
