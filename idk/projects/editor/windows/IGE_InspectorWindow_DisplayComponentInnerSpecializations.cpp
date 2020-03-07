@@ -264,8 +264,10 @@ namespace idk
             if (ImGui::DragFloat("##height", &height))
             {
                 const float pivot_y = c_rt->_local_rect.position.y + c_rt->pivot.y * c_rt->_local_rect.size.y;
-                c_rt->offset_min.y = pivot_y - c_rt->pivot.y * height;
-                c_rt->offset_max.y = pivot_y + (1.0f - c_rt->pivot.y) * height;
+                const float anchor_ref_y = c_rt->_local_rect.position.y - c_rt->offset_min.y;
+                float pos_y = pivot_y - anchor_ref_y; // pivot - anchor ref point = anchored pos
+                c_rt->offset_min.y = pos_y - c_rt->pivot.y * height;
+                c_rt->offset_max.y = pos_y + (1.0f - c_rt->pivot.y) * height;
             }
             ImGui::SetCursorPosX(region_width * 0.5f - ImGui::CalcTextSize("B").x * 0.5f);
             ImGui::Text("H");
