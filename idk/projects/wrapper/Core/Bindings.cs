@@ -460,34 +460,34 @@ namespace idk
         * Camera
         */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Rad CameraGetFOV(ulong id);
+        public extern static float CameraGetFOV(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void CameraSetFOV(ulong id, Rad c);
+        public extern static void CameraSetFOV(ulong id, float value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float CameraGetNearPlane(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void CameraSetNearPlane(ulong id, float c);
+        public extern static void CameraSetNearPlane(ulong id, float value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float CameraGetFarPlane(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void CameraSetFarPlane(ulong id, float c);
+        public extern static void CameraSetFarPlane(ulong id, float value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Rect CameraGetViewport(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void CameraSetViewport(ulong id, Rect c);
+        public extern static void CameraSetViewport(ulong id, Rect value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool CameraGetEnabledState(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void CameraSetEnabledState(ulong id, bool c);
+        public extern static void CameraSetEnabledState(ulong id, bool value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int CameraGetCullingMask(ulong id);
@@ -523,12 +523,6 @@ namespace idk
         public extern static void LightSetShadowBias(ulong id, float i);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Rad LightGetFOV(ulong id);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void LightSetFOV(ulong id, Rad i);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float LightGetAttenuationRadius(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -539,6 +533,18 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void LightSetIsInverseSqAtt(ulong id, bool i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float LightGetInnerSpotAngle(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetInnerSpotAngle(ulong id, float i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float LightGetOuterSpotAngle(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetOuterSpotAngle(ulong id, float i);
 
         /*
          * Renderer

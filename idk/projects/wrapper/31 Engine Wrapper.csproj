@@ -115,10 +115,8 @@
     <Compile Include="Systems\LayerMask.cs" />
     <Compile Include="Math\Box.cs" />
     <Compile Include="Math\Color.cs" />
-    <Compile Include="Math\Deg.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Behavior\MonoBehavior.cs" />
-    <Compile Include="Math\Rad.cs" />
     <Compile Include="Math\Random.cs" />
     <Compile Include="Math\Shape.cs" />
     <Compile Include="Math\Sphere.cs" />

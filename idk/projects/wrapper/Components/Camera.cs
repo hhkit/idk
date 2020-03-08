@@ -3,7 +3,10 @@
     public class Camera
         : Component
     {
-        public Rad fieldOfView
+        /// <summary>
+        /// The field of view of the camera in degrees.
+        /// </summary>
+        public float fieldOfView
         {
             get => Bindings.CameraGetFOV(handle);
             set => Bindings.CameraSetFOV(handle, value);
