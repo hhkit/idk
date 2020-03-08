@@ -55,7 +55,7 @@ namespace idk
 		PIP_ADAPTER_INFO pAdapterInfo;
 		PIP_ADAPTER_INFO pAdapter = NULL;
 		DWORD dwRetVal = 0;
-		UINT i;
+		[[maybe_unused]] UINT i;
 
 		ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
 		pAdapterInfo = (IP_ADAPTER_INFO*)malloc(sizeof(IP_ADAPTER_INFO));

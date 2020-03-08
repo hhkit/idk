@@ -21,7 +21,7 @@ namespace idk::vkn::renderpasses
 	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size = {}, std::optional<WriteOptions> write_opt = {});
 	void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh);
 
-	TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2> size)
+	TextureDescription CreateTextureInfo([[maybe_unused]] FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlagBits flag, std::optional<RscHandle<VknTexture>> target, std::optional<uvec2> size)
 	{
 		if (!size)
 			size = uvec2{ 1920,1080 };
@@ -269,7 +269,7 @@ namespace idk::vkn::renderpasses
 		//context.BindUniform("brdfLUT", 0, *RscHandle<VknTexture>{});
 		//for (auto& buffer : gbuffer_rscs)
 		{
-			size_t i = 0;
+			uint32_t i = 0;
 
 			AttachmentBlendConfig blend{};
 			blend.blend_enable = true;
@@ -290,7 +290,7 @@ namespace idk::vkn::renderpasses
 		draw_set.Render(context);
 	}
 
-	CombinePass::CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex)
+	CombinePass::CombinePass(FrameGraphBuilder& builder, [[maybe_unused]] rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex)
 	{
 		auto out_color_rsc= builder.write(out_color_tex, WriteOptions{ false });
 		auto out_depth_rsc= builder.write(out_depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
@@ -689,7 +689,7 @@ namespace idk::vkn::renderpasses
 		{
 			return clear_info{ col,1.0f };
 		}
-		clear_info operator()(RscHandle<CubeMap> cube)const
+		clear_info operator()([[maybe_unused]] RscHandle<CubeMap> cube)const
 		{
 			return clear_info{ {},1.0f,true };
 		}
@@ -751,7 +751,7 @@ namespace idk::vkn::renderpasses
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, name);
 		{
-			size_t i = 0;
+			uint32_t i = 0;
 
 			AttachmentBlendConfig blend{};
 			blend.blend_enable = false;
@@ -768,7 +768,7 @@ namespace idk::vkn::renderpasses
 		draw_set.Render(context);
 	}
 
-	void DrawSetRenderPass::Execute(Context_t& context)
+	void DrawSetRenderPass::Execute([[maybe_unused]] Context_t& context)
 	{
 		LOG_ERROR_TO(LogPool::GFX, "DrawSetRenderPass::Execute(Context_t) should not be executed.");
 	}
@@ -781,7 +781,7 @@ namespace idk::vkn::renderpasses
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
 	using AccumDrawSet = CombinedMeshDrawSet<AccumLightDrawSet, AccumAmbientDrawSet>;
 	//#pragma optimize("",off)
-	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
+	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, [[maybe_unused]] RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		using AccumPassSetPair = PassSetPair<AccumPass, AccumDrawSet>;
 		PassUtil::FullRenderData rd{ &gfx_state,&rs };
