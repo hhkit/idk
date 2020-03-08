@@ -7,6 +7,7 @@ namespace idk
 	using NetworkMessageTuple = std::tuple<
 		class TestMessage
 	,	class EventDataBlockFrameNumber
+	,	class EventDataBlockBufferedEvents
 	,	class EventInstantiatePrefabMessage
 	,	class EventLoadLevelMessage
 	,	class EventTransferOwnershipMessage
