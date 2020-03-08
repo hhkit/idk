@@ -125,8 +125,6 @@ namespace idk
 					move_pack.packs.emplace_back(std::move(val));
 				}
 			}
-			if (move_pack.state_mask)
-				LOG_TO(LogPool::NETWORK, "packing move for object %d with state mask %04x", network_id, move_pack.state_mask);
 		}
 		return move_pack;
 	}

@@ -21,6 +21,8 @@ namespace idk
 		function<T()>                          getter;
 		function<void(const T&)>               setter;
 		function <T(const T&, const T&, real)> interpolator;
+		function <T(const T&, const T&)>       differ = [](const T& lhs, const T& rhs) -> T { return lhs - rhs; };
+		function <T(const T&, const T&)>       adder  = [](const T& lhs, const T& rhs) -> T { return lhs + rhs; };
 		function<bool(const T&, const T&)>     equater = std::equal_to<T>{};
 		function<bool(const T&, const T&)>     send_condition = std::not_equal_to<T>{};
 		PredictionFunction                     predict_func = PredictionFunction::Linear;
@@ -153,6 +155,10 @@ namespace idk
 			interpolator = &lerp<vec3, real>;
 
 		if constexpr (std::is_same_v<T, quat>)
+		{
+			differ = [](const quat& lhs, const quat& rhs) -> quat { return lhs * rhs.inverse(); };
+			adder = [](const quat& lhs, const quat& rhs) -> quat { return lhs * rhs; };
 			interpolator = static_cast<quat(*)(const quat&, const quat&, real)>(&slerp<quat, real>);
+		}
 	}
 }
