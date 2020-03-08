@@ -1153,7 +1153,36 @@ namespace idk {
             {
                 if (const auto iter = inject_draw_table->find(display.curr_prop_path); iter != inject_draw_table->end())
                 {
-                    changed |= iter->second(val);
+
+                    if constexpr (is_template_v<T, RscHandle> ||
+                                  std::is_same_v<T, Handle<GameObject>> ||
+                                  is_macro_enum_v<T>)
+                    {
+                        auto copy = val;
+                        changed |= iter->second(copy);
+                        if (changed)
+                        {
+                            StoreOriginalValues(display.curr_prop_path);
+                            val = copy;
+                            changed_and_deactivated = true;
+                        }
+                    }
+                    else if constexpr (std::is_same_v<T, reflect::dynamic>)
+                    {
+                        reflect::dynamic copy = val.copy();
+                        if (copy.type.is_enum_type() || copy.type.is_template<idk::RscHandle>() || copy.type.is<Handle<GameObject>>())
+                        {
+                            changed |= iter->second(copy);
+                            if (changed)
+                            {
+                                StoreOriginalValues(display.curr_prop_path);
+                                val = copy;
+                                changed_and_deactivated = true;
+                            }
+                        }
+                    }
+                    else
+                        changed |= iter->second(val);
                     draw_injected = true;
                 }
             }
@@ -1227,21 +1256,23 @@ namespace idk {
                 }
                 else if constexpr (is_template_v<T, RscHandle>)
                 {
-                    auto ori = val;
-                    changed |= ImGuidk::InputResource("", &val);
+                    auto copy = val;
+                    changed |= ImGuidk::InputResource("", &copy);
                     if (changed)
                     {
                         StoreOriginalValues(display.curr_prop_path);
+                        val = copy;
                         changed_and_deactivated = true;
                     }
                 }
                 else if constexpr (std::is_same_v<T, Handle<GameObject>>)
                 {
-                    auto ori = val;
-                    changed |= ImGuidk::InputGameObject("", &val);
+                    auto copy = val;
+                    changed |= ImGuidk::InputGameObject("", &copy);
                     if (changed)
                     {
                         StoreOriginalValues(display.curr_prop_path);
+                        val = copy;
                         changed_and_deactivated = true;
                     }
                 }
@@ -1251,7 +1282,14 @@ namespace idk {
                 }
                 else if constexpr (is_macro_enum_v<T>)
                 {
-                    changed |= ImGuidk::EnumCombo("", &val);
+                    auto copy = val;
+                    changed |= ImGuidk::EnumCombo("", &copy);
+                    if (changed)
+                    {
+                        StoreOriginalValues(display.curr_prop_path);
+                        val = copy;
+                        changed_and_deactivated = true;
+                    }
                 }
                 else if constexpr (is_template_v<T, std::variant>)
                 {

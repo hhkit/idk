@@ -461,8 +461,15 @@ namespace idk
                 gens.resize(index + 1);
             }
             gens[index] = o.GetHandle().gen;
-            if (o.Parent())
+            if (const auto parent = o.Parent())
+            {
+                if (parent.index >= nodes.size())
+                {
+                    nodes.resize(parent.index + 1);
+                    gens.resize(parent.index + 1);
+                }
                 nodes[o.Parent().index] += static_cast<GenericHandle::index_t>(index);
+            }
         }
 
         // tree walk
