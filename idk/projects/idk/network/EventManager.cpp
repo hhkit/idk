@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include <algorithm>
+
 #include "EventManager.h"
 
 #include <prefab/Prefab.h>
@@ -42,6 +44,7 @@ namespace idk
 
 	void EventManager::Init()
 	{
+		buffered_events = std::make_unique<EventManager::BufferedEvents>();
 	}
 
 	void EventManager::ResetEventBuffer()
@@ -239,6 +242,17 @@ namespace idk
 			{
 				msg.id = id;
 			});
+
+		if (buffered_events)
+		{
+			buffered_events->loaded_prefabs.erase(
+				std::remove_if(buffered_events->loaded_prefabs.begin(), buffered_events->loaded_prefabs.end(), [&](auto& elem) -> bool
+					{
+						return elem.obj == view;
+					}),
+				buffered_events->loaded_prefabs.end()
+			);
+		}
 
 		Core::GetGameState().DestroyObject(view->GetGameObject());
 	}
