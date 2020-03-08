@@ -414,8 +414,8 @@ namespace idk
 		//float first_end = n_plane + 0.2f * diff;
 		//float second_end = n_plane + 0.45f * diff;
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.55f * diff;
-		float second_start= n_plane + 0.45f * diff;
+		float first_end = n_plane + 0.45f * diff;
+		float second_start= n_plane + 0.35f * diff;
 		float second_end = f_plane;
 
 		float cascade_start[2] = { n_plane  ,second_start};

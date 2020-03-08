@@ -643,7 +643,7 @@ namespace idk
 			Handle<Camera> camHandle = camera->AddComponent<Camera>();
 			camera->GetComponent<Name>()->name = "Editor Camera";
 			camera->Transform()->position = vec3{ 0, 0, 5 };
-			camHandle->far_plane = 400.f;
+			camHandle->far_plane = 80.f;
 			camHandle->render_target = _editor_view;
 			camHandle->clear = color{ 0.05f, 0.05f, 0.1f, 1.f };
 			//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
