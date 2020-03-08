@@ -42,7 +42,7 @@ namespace idk::vkn::gt
 		FullRenderData render_data;
 
 		PassUtil(FullRenderData rd) :render_data{rd} {}
-		static TextureDescription CreateTextureInfo(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, uvec2 size = uvec2{1920,1080})
+		static TextureDescription CreateTextureInfo([[maybe_unused]] FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, uvec2 size = uvec2{1920,1080})
 		{
 			return TextureDescription
 			{
@@ -196,11 +196,11 @@ namespace idk::vkn::gt
 						else if (mat_info.IsImageBlock(itr))
 						{
 							auto img_block = mat_info.GetImageBlock(itr);
-							auto name = string_view{ itr->first };
-							name = name.substr(0, name.find_first_of('['));
+							auto name_ = string_view{ itr->first };
+							name_ = name_.substr(0, name_.find_first_of('['));
 							for (size_t img_index = 0; img_index < img_block.size(); ++img_index)
 							{
-								context.BindUniform(name, img_index,img_block[img_index].as<VknTexture>() );
+								context.BindUniform(name_, s_cast<uint32_t>(img_index), img_block[img_index].as<VknTexture>() );
 							}
 						}
 						++itr;
@@ -210,11 +210,11 @@ namespace idk::vkn::gt
 				if (idx_buffer)
 				{
 					context.BindIndexBuffer(*idx_buffer->buffer(), idx_buffer->offset, mesh.IndexType());
-					context.DrawIndexed(mesh.IndexCount(), ro.num_instances, 0, 0, ro.instanced_index);
+					context.DrawIndexed(mesh.IndexCount(), s_cast<uint32_t>(ro.num_instances), 0, 0, s_cast<uint32_t>(ro.instanced_index));
 				}
 				else
 				{
-					context.Draw(mesh.IndexCount(), ro.num_instances, 0, ro.instanced_index);
+					context.Draw(mesh.IndexCount(), s_cast<uint32_t>(ro.num_instances), 0, s_cast<uint32_t>(ro.instanced_index));
 
 				}
 			}
@@ -312,7 +312,7 @@ namespace idk::vkn::gt
 			context.BindUniform("brdfLUT"          , 0, *RscHandle<VknTexture>{});
 			//for (auto& buffer : gbuffer_rscs)
 			{
-				size_t i = 0;
+				uint32_t i = 0;
 				
 				AttachmentBlendConfig blend{};
 				blend.blend_enable           = true;
@@ -347,7 +347,7 @@ namespace idk::vkn::gt
 				for (size_t j = 0; j + i < light_indices.size() && j < stride; ++j)
 				{
 					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[i+j]]);
-					context.BindUniform("shadow_maps",j,gfx_state.shadow_maps_2d[i+j].as<VknTexture>());
+					context.BindUniform("shadow_maps", s_cast<uint32_t>(j), gfx_state.shadow_maps_2d[i+j].as<VknTexture>());
 				}
 				
 				auto light_data = PrepareLightBlock(gfx_state.camera, lights);
@@ -563,7 +563,7 @@ namespace idk::vkn::gt
 			context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 
 			{
-				size_t i = 0;
+				uint32_t i = 0;
 				auto& cam_clear = gfx_state.camera.clear_data;
 				auto color_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, color>::value;
 				//auto cube_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, RscHandle<CubeMap>>::value;

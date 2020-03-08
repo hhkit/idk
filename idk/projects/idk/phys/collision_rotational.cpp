@@ -337,7 +337,7 @@ namespace idk::phys
 		*CB = PB + DB * TB;
 	}
 
-	int orthographic(float sign, float e, int axis, int clipEdge, vec3* in, int inCount, vec3* out)
+	int orthographic(float sign, float e, int axis, int , vec3* in, int inCount, vec3* out)
 	{
 		int outCount = 0;
 		vec3 a = in[inCount - 1];

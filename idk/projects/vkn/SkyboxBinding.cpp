@@ -47,7 +47,7 @@ namespace idk::vkn::bindings
 	{
 		RenderInterface& the_interface;
 		template<typename T>
-		void operator()(T&& t) {} //Catchall
+		void operator()([[maybe_unused]] T&& t) {} //Catchall
 
 		void operator()(color col)
 		{
