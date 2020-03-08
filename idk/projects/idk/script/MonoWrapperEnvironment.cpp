@@ -28,6 +28,7 @@
 #include <core/GameObject.inl>
 #include <util/ioutils.h>
 #include <ds/span.inl>
+#include <math/arith.inl>
 
 #include <res/ResourceHandle.inl>
 
@@ -1837,6 +1838,22 @@ namespace idk::mono
 		BIND_START("idk.Bindings::RectTransformGetRect", rect, Handle<RectTransform> h)
 		{
 			return h->_local_rect;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RectTransformGetAnchoredPosition", vec2ret, Handle<RectTransform> h)
+		{
+			vec2 anchored_pos = lerp(h->offset_min, h->offset_max, h->pivot);
+			return vec2ret{ anchored_pos.x, anchored_pos.y };
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RectTransformSetAnchoredPosition", void, Handle<RectTransform> h, vec2 v)
+		{
+			vec2 d = v - lerp(h->offset_min, h->offset_max, h->pivot);
+			h->offset_min += d;
+			h->offset_max += d;
+			Core::GetSystem<UISystem>().RecalculateRects(h);
 		}
 		BIND_END();
 

@@ -586,6 +586,10 @@ namespace idk
         public extern static void RectTransformSetPivot(ulong id, Vector2 value);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Rect RectTransformGetRect(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 RectTransformGetAnchoredPosition(ulong id);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void RectTransformSetAnchoredPosition(ulong id, Vector2 value);
 
         /*
          * Image

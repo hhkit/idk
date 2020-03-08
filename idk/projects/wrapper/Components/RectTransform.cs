@@ -56,32 +56,13 @@
         /// <summary>
         /// The position of the pivot of this RectTransform relative to the anchor reference point.
         /// The anchor reference point is the position of the anchors.
-        /// If the anchors are not together, the four anchor positions are estimated using the pivot placement as a reference.
+        /// If the anchors are not together, the anchor reference point is estimated using the pivot placement with respect to the four anchor points.
         /// Setting this property modifies offsetMin and offsetMax.
         /// </summary>
         public Vector2 anchoredPosition
         {
-            get
-            {
-                Vector2 amin = anchorMin;
-                Vector2 amax = anchorMax;
-                Vector2 p = pivot;
-                Rect r = rect;
-
-                Vector2 pos = r.min + new Vector2(r.width * p.x, r.height * p.y);
-                if (amin.x != amax.x)
-                    pos.x -= (amax.x - amin.x) * p.x; // anchor reference pt
-                if (amin.y != amax.y)
-                    pos.y -= (amax.y - amin.y) * p.y; // anchor reference pt
-
-                return pos;
-            }
-            set
-            {
-                Vector2 move = value - anchoredPosition;
-                offsetMin += move;
-                offsetMax += move;
-            }
+            get => Bindings.RectTransformGetAnchoredPosition(handle);
+            set => Bindings.RectTransformSetAnchoredPosition(handle, value);
         }
     }
 }
