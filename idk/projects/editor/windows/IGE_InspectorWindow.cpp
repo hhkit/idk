@@ -1169,9 +1169,9 @@ namespace idk {
                     }
                     else if constexpr (std::is_same_v<T, reflect::dynamic>)
                     {
-                        reflect::dynamic copy = val.copy();
-                        if (copy.type.is_enum_type() || copy.type.is_template<idk::RscHandle>() || copy.type.is<Handle<GameObject>>())
+                        if (val.type.is_enum_type() || val.type.is_template<idk::RscHandle>() || val.type.is<Handle<GameObject>>())
                         {
+                            reflect::dynamic copy = val.copy();
                             changed |= iter->second(copy);
                             if (changed)
                             {
@@ -1180,6 +1180,8 @@ namespace idk {
                                 changed_and_deactivated = true;
                             }
                         }
+                        else
+                            changed |= iter->second(val);
                     }
                     else
                         changed |= iter->second(val);
