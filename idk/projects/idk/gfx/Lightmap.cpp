@@ -93,6 +93,56 @@ namespace idk {
 	{
 		return color{ (rand() % 101) / 100.0f,(rand() % 101) / 100.0f,(rand() % 101) / 100.0f,1.0f };
 	}
+
+	struct CascadeDebug
+	{
+		static void DebugDraw(span<const vec4> frustum_vertices,vec3 min_c,vec3 max_c,const mat4& invView,const mat4& lightView)
+		{
+			vec3 frust_points[8];
+			for (size_t i = 0; i < frustum_vertices.size(); i++)
+			{
+				auto& elem = frustum_vertices[i];
+				frust_points[i] = invView * elem;
+			}
+
+			static color dbg_colors[] = { rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() };
+			auto col = dbg_colors[DbgIndex() % std::size(dbg_colors)];
+			{
+
+				auto& pts = frust_points;
+				auto top_left_near = pts[static_cast<size_t>(frustum_vert::eTopLeftNear)];
+				auto top_right_near = pts[static_cast<size_t>(frustum_vert::eTopRightNear)];
+				auto bot_right_near = pts[static_cast<size_t>(frustum_vert::eBotRightNear)];
+				auto bot_left_near = pts[static_cast<size_t>(frustum_vert::eBotLeftNear)];
+				auto top_left_far = pts[static_cast<size_t>(frustum_vert::eTopLeftFar)];
+				auto top_right_far = pts[static_cast<size_t>(frustum_vert::eTopRightFar)];
+				auto bot_right_far = pts[static_cast<size_t>(frustum_vert::eBotRightFar)];
+				auto bot_left_far = pts[static_cast<size_t>(frustum_vert::eBotLeftFar)];
+
+
+				Core::GetSystem<DebugRenderer>().Draw(top_left_near, top_left_far, col);
+				Core::GetSystem<DebugRenderer>().Draw(top_right_near, top_right_far, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_left_near, bot_left_far, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_right_near, bot_right_far, col);
+
+				Core::GetSystem<DebugRenderer>().Draw(top_left_near, top_right_near, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_left_near, bot_right_near, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_left_near, top_left_near, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_right_near, top_right_near, col);
+
+				Core::GetSystem<DebugRenderer>().Draw(top_left_far, top_right_far, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_left_far, bot_right_far, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_left_far, top_left_far, col);
+				Core::GetSystem<DebugRenderer>().Draw(bot_right_far, top_right_far, col);
+
+				//Core::GetSystem<DebugRenderer>().Draw(camera_vp_to_frustum(camData.projection_matrix * camData.view_matrix));
+				Core::GetSystem<DebugRenderer>().Draw(aabb{ lightView.inverse() * vec4 { min_c,1 },lightView.inverse() * vec4 { max_c,1 } }, col);
+
+			}
+		}
+	};
+
+
 	//#pragma optimize("",off)
 	void Lightmap::SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far)
 	{
@@ -109,11 +159,7 @@ namespace idk {
 
 			vec2 near_face = near_plane * camData.tan_halfFOV;
 			vec2 far_face = far_plane * camData.tan_halfFOV;
-
-			//auto frustum_planes = camera_vp_to_frustum(camData.projection_matrix * camData.view_matrix);
-			//auto frustum_pts = frustum_points(frustum_planes);
-
-
+			
 			vec4 frustumEdges[8] =
 			{
 				// near face
@@ -145,44 +191,10 @@ namespace idk {
 
 			for (auto& elem : frustumEdges)
 			{
-				(*ptr) = invView *elem;
 				elem = m * elem;
 				min_c = { min(min_c.x,elem.x),min(min_c.y,elem.y) ,min(min_c.z, elem.z) };
 				max_c = { max(max_c.x,elem.x),max(max_c.y,elem.y) ,max(max_c.z,elem.z) };
 				ptr++;
-			}
-			static color dbg_colors[] = { rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() ,rand_color() };
-			auto col = dbg_colors[DbgIndex() % std::size(dbg_colors)];
-			{
-
-				auto& pts = frust_points;
-				auto top_left_near = pts[static_cast<size_t>(frustum_vert::eTopLeftNear)];
-				auto top_right_near = pts[static_cast<size_t>(frustum_vert::eTopRightNear)];
-				auto bot_right_near = pts[static_cast<size_t>(frustum_vert::eBotRightNear)];
-				auto bot_left_near = pts[static_cast<size_t>(frustum_vert::eBotLeftNear)];
-				auto top_left_far = pts[static_cast<size_t>(frustum_vert::eTopLeftFar)];
-				auto top_right_far = pts[static_cast<size_t>(frustum_vert::eTopRightFar)];
-				auto bot_right_far = pts[static_cast<size_t>(frustum_vert::eBotRightFar)];
-				auto bot_left_far = pts[static_cast<size_t>(frustum_vert::eBotLeftFar)];
-
-
-				Core::GetSystem<DebugRenderer>().Draw(top_left_near, top_left_far,col);
-				Core::GetSystem<DebugRenderer>().Draw(top_right_near, top_right_far,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_left_near, bot_left_far,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_right_near, bot_right_far,col);
-
-				Core::GetSystem<DebugRenderer>().Draw(top_left_near, top_right_near,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_left_near, bot_right_near,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_left_near, top_left_near,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_right_near, top_right_near,col);
-
-				Core::GetSystem<DebugRenderer>().Draw(top_left_far , top_right_far,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_left_far , bot_right_far,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_left_far , top_left_far,col);
-				Core::GetSystem<DebugRenderer>().Draw(bot_right_far, top_right_far,col);
-
-				//Core::GetSystem<DebugRenderer>().Draw(camera_vp_to_frustum(camData.projection_matrix * camData.view_matrix));
-
 			}
 
 			
@@ -194,7 +206,6 @@ namespace idk {
 			texel_size = static_cast<unsigned int>(floor((float)cascade_resolution / (2.f * max_rad)));
 
 			
-			Core::GetSystem<DebugRenderer>().Draw(aabb{ lightView.inverse() * vec4 { min_c,1 },lightView.inverse() * vec4 { max_c,1 } }, col);
 
 
 			//cascade_projection = ortho(-max_rad, max_rad, -max_rad, max_rad, -max_rad, max_rad);

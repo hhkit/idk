@@ -208,8 +208,21 @@ namespace idk
 	struct CullBatchOpt
 	{
 		FrustumFaceFlags in_mask= ~FrustumFaceFlags{};
-		float near, far;
+		float near=std::numeric_limits<float>::max(), far = std::numeric_limits<float>::min();
 	};
+
+
+	//This is probably code bloat but...
+	
+	void TrackNearFar(const frustum& frust, const sphere& bv, float& near, float& far)
+	{
+		auto frust_test = [](auto& side, vec3 point)
+		{
+			return side.normal.dot(point) - side.dist;
+		};
+		near = std::min(frust_test(frust.sides[FrustumSide::Near], bv.center) - bv.radius, near);
+		far = std::max(frust_test(frust.sides[FrustumSide::Far], bv.center) + bv.radius, far);
+	}
 	//returns indices to the start and one past the end
 	std::pair<size_t, size_t> CullAndBatchRenderObjects(const CameraData& camera, const vector<RenderObject>& ro, const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data, vector<GenericHandle>* handle_buffer = nullptr, CullBatchOpt opt = {})
 	{
@@ -221,20 +234,7 @@ namespace idk
 		InstRenderObjects* inst_itr{};
 		auto bv_itr = bounding_vols.begin();
 
-		//This is probably code bloat but...
-		auto in_mask = opt.in_mask;
-		auto& near = opt.near = std::numeric_limits<float>::max();
-		auto& far =opt.far  = std::numeric_limits<float>::min();
-		auto update_near_far = [&near,&far,&frust](const sphere& bv) 
-		{
-			auto frust_test = [](auto& side, vec3 point)
-			{
-				return side.normal.dot(point) - side.dist;
-			};
-			near = std::min(frust_test(frust.sides[FrustumSide::Near], bv.center)-bv.radius, near);
-			far = std::max(frust_test(frust.sides[FrustumSide::Near], bv.center)+bv.radius,far);
-		};
-
+		const auto in_mask = opt.in_mask;
 		for (auto itr = ro.begin(); itr < ro.end(); ++itr,++bv_itr)
 		{
 			const auto bv = *bv_itr;
@@ -252,7 +252,7 @@ namespace idk
 				if (handle_buffer)
 					handle_buffer->emplace_back(itr->obj_id);
 				//Keep track of the number of instances to be render for this frustum
-				auto tfm = camera.view_matrix * itr->transform;
+				const auto tfm = camera.view_matrix * itr->transform;
 				instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
 				inst_itr->num_instances++;
 			}
@@ -1096,14 +1096,9 @@ namespace idk
 							CullBatchOpt opt{};
 							if (light.index == 1)
 								opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
-							//draw_frustum(frust, color{ ((float)++derp) / result.camera.size(),0,(lm_i + 1.0f) / light.light_maps.size(),1 }, {});
-
+							
 							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
-							if (light.index == 1)
-							{
-								//Update lightmap.cascade_projection matrix using near far.
-
-							}
+							
 							range.inst_mesh_render_begin = start_index;
 							range.inst_mesh_render_end = end_index;
 						}
