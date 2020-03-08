@@ -2,6 +2,8 @@
 #include <cstdint>
 namespace idk
 {
+	template<typename T>
+	struct FlagTraits;
 	//Copied from vulkan.hpp
 	template <typename BitType, typename MaskType = uint32_t>
 	class Flags
