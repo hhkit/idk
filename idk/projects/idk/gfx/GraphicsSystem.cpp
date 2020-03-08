@@ -445,7 +445,7 @@ namespace idk
 
 				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index,copy_light.light_maps);
 				
-				color col = color{ 0.3,0.2,0.6,1.0f };
+				color col = color{ 0.3f,0.2f,0.6f,1.0f };
 				for (auto& elem : copy_light.light_maps)
 				{
 					elem.SetCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
@@ -1075,7 +1075,7 @@ namespace idk
 			}
 			else
 			{
-				for (auto& lightmap : light.light_maps)
+				for ([[maybe_unused]] auto& lightmap : light.light_maps)
 				{
 					range.light_map_index = lm_i;
 					{
