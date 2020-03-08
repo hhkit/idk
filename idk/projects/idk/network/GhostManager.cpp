@@ -4,6 +4,7 @@
 #include <common/Transform.h>
 #include <res/ResourceHandle.inl>
 #include <network/GhostMessage.h>
+#include <network/GhostAcknowledgementMessage.h>
 #include <network/NetworkSystem.inl>
 #include <network/IDManager.h>
 #include <network/ElectronTransformView.h>
@@ -19,11 +20,59 @@ namespace idk
 
 	void GhostManager::SubscribeEvents(ServerConnectionManager& server)
 	{
-		// TODO: acknowledgment
+		server.Subscribe<GhostAcknowledgementMessage>([this](GhostAcknowledgementMessage& msg) { OnGhostACKReceived(msg); });
 	}
 
 	void GhostManager::SendGhosts(Host target, span<ElectronView> views)
 	{
+		const auto now = Clock::now();
+		const auto rtt = connection_manager->GetRTT();
+		const auto timeout = rtt;
+		// timeout packets
+		hash_table<Handle<ElectronView>, int> view_to_state_masks;
+
+		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+		
+		while (transmission_record.size())
+		{
+			if (transmission_record.front().acked)
+			{
+				transmission_record.pop_front();
+				continue;
+			}
+
+			if (now - transmission_record.front().send_time < timeout) // not timed out
+				break;
+
+			// now we must have timed out
+
+			for (auto& elem : transmission_record.front().entries)
+			{
+				auto view = elem.id;
+				if (view)
+				{
+					const auto itr = view_to_state_masks.find(view);
+					if (itr != view_to_state_masks.end())
+						itr->second |= elem.state_mask;
+					else
+						view_to_state_masks[view] = elem.state_mask;
+				}
+			}
+
+			transmission_record.pop_front();
+		}
+
+		// now we have the list of dropped, check to see if the mask was retransmitted recently
+		for (auto& record : transmission_record)
+		{
+			for (auto& entry : record.entries)
+			{
+				auto find = view_to_state_masks.find(entry.id);
+				if (find != view_to_state_masks.end())
+					find->second &= ~entry.state_mask;
+			}
+		}
+
 		vector<GhostPack> ghost_packs;
 
 		for (auto& view : views)
@@ -34,6 +83,9 @@ namespace idk
 			if (const auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
 			{
 				auto retransmit_state_mask = 0;
+				if (auto itr = view_to_state_masks.find(view.GetHandle()); itr != view_to_state_masks.end())
+					retransmit_state_mask = itr->second;
+
 				auto pack = view.MasterPackData(retransmit_state_mask);
 				if (pack.data_packs.size())
 					ghost_packs.emplace_back(std::move(pack));
@@ -41,11 +93,25 @@ namespace idk
 		}
 
 		if (ghost_packs.size())
+		{
+			{
+				auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+				auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+				GhostPacketInfo transmission_rec;
+				transmission_rec.sequence_number = seq;
+				transmission_rec.send_time = now;
+				for (auto& elem : ghost_packs)
+					transmission_rec.entries.emplace_back(GhostEntry{ id_man.GetViewFromId(elem.network_id) , elem.state_mask});
+
+				transmission_record.emplace_back(std::move(transmission_rec));
+			}
+
 			connection_manager->CreateAndSendMessage<GhostMessage>(GameChannel::UNRELIABLE, [&](GhostMessage& msg)
 				{
 					msg.sequence_number = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 					msg.ghost_packs = std::move(ghost_packs);
 				});
+		}
 	}
 
 	void GhostManager::OnGhostReceived(GhostMessage& msg)
@@ -67,6 +133,37 @@ namespace idk
 
 				view->UnpackGhostData(seq, pack);
 			}
+		}
+
+		 connection_manager->CreateAndSendMessage<GhostAcknowledgementMessage>(GameChannel::UNRELIABLE, [&](GhostAcknowledgementMessage& msg)
+		 	{
+		 		msg.base_ack = seq;
+		 		msg.ack_field = 0; // fill later
+		 	});
+	}
+
+	void GhostManager::OnGhostACKReceived(GhostAcknowledgementMessage& msg)
+	{
+		auto ack = msg.base_ack;
+		auto ackfield = msg.ack_field;
+
+		hash_set<SeqNo> acked{ack};
+
+		while (ackfield)
+		{
+			if (ack == 0)
+				ack = seq_max;
+			else
+				--ack;
+			
+			if (ackfield & 1)
+				acked.emplace(ack);
+		}
+
+		for (auto& elem : transmission_record)
+		{
+			if (acked.find(elem.sequence_number) != acked.end())
+				elem.acked = true;
 		}
 	}
 

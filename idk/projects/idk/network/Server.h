@@ -30,6 +30,7 @@ namespace idk
 
 		void ReceivePackets();
 		void SendPackets();
+		float GetRTT(int clientIndex) const;
 
 		yojimbo::Message* CreateMessage(int client, int type_id) { return server.CreateMessage(client, type_id); }
 		void SendMessage(int clientIndex, yojimbo::Message* message, GameChannel delivery_mode);

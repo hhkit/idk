@@ -63,7 +63,14 @@ namespace idk
 	void Server::SendPackets()
 	{
 		server.SendPackets();
-	} 
+	}
+	float Server::GetRTT(int clientIndex) const
+	{
+		yojimbo::NetworkInfo info;
+		server.GetNetworkInfo(clientIndex, info);
+		return info.RTT;
+	}
+
 
 	void Server::SendMessage(int clientIndex, yojimbo::Message* message, GameChannel delivery_mode)
 	{

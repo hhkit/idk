@@ -17,6 +17,7 @@ namespace idk
 	ADD_MESSAGE(EventInvokeRPCMessage);
 	ADD_MESSAGE(EventDestroyObjectMessage);
 	ADD_MESSAGE(GhostMessage);
+	ADD_MESSAGE(GhostAcknowledgementMessage);
 	ADD_MESSAGE(MoveClientMessage);
 	YOJIMBO_MESSAGE_FACTORY_FINISH();
 

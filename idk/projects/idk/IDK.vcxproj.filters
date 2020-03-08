@@ -1209,6 +1209,9 @@
     </ClInclude>
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
     <ClInclude Include="network\yojimbo_helpers.h" />
+    <ClInclude Include="network\GhostAcknowledgementMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

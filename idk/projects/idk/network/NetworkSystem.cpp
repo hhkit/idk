@@ -44,6 +44,7 @@ namespace idk
 			server_connection_manager[clientid].reset();
 		};
 		id_manager = std::make_unique<IDManager>();
+		EventManager::Init();
 	}
 
 	void NetworkSystem::ConnectToServer(const Address& d)

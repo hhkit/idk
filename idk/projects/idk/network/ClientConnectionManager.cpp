@@ -41,6 +41,11 @@ namespace idk
 			client.OnMessageReceived[(int) type].Unlisten(slot);
 	}
 
+	seconds ClientConnectionManager::GetRTT() const
+	{
+		return duration_cast<seconds>(std::chrono::duration<float, std::milli>(client.GetRTT()));
+	}
+
 	void ClientConnectionManager::FrameStartManagers()
 	{
 		for (auto& elem : substream_managers)
@@ -62,7 +67,7 @@ namespace idk
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
 		
-		// LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
+		LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
 		return client.CreateMessage(static_cast<int>(id));
 	}
 

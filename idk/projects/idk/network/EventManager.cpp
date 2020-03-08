@@ -328,33 +328,8 @@ namespace idk
 
 	void EventManager::OnBufferedEventMessage(EventDataBlockBufferedEvents& msg)
 	{
-		Core::GetSystem<SceneManager>().SetNextScene(msg.load_scene);
-		
-		Core::GetSystem<SceneManager>().OnSceneChange.Listen(
-			[ this,
-			  &id_manager = Core::GetSystem<NetworkSystem>().GetIDManager(),
-			  objects = msg.loaded_objects,
-			  prefabs = msg.loaded_prefabs
-			](RscHandle<Scene>)
+		auto create_prefabs = [this, prefabs = msg.loaded_prefabs]()
 		{
-			for (auto& obj : objects)
-			{
-				if (obj.destroyed)
-				{
-					Core::GetGameState().DestroyObject(obj.handle);
-				}
-				else
-				{
-					LOG_TO(LogPool::NETWORK, "moving obj %ld to (%f,%f,%f)", obj.handle.id, obj.position.x, obj.position.y, obj.position.z);
-					obj.handle->Transform()->position = obj.position;
-					obj.handle->Transform()->rotation = obj.rotation;
-					auto eview = obj.handle->GetComponent<ElectronView>();
-					id_manager.EmplaceID(obj.id, eview);
-					eview->ghost_state = ElectronView::Ghost{};
-					eview->Setup();
-				}
-			}
-
 			for (auto& prefab : prefabs)
 			{
 				EventInstantiatePrefabMessage prefab_msg;
@@ -368,7 +343,43 @@ namespace idk
 
 				OnInstantiatePrefabEvent(prefab_msg);
 			}
+		};
+
+		if (msg.load_scene)
+		{
+			Core::GetSystem<SceneManager>().SetNextScene(msg.load_scene);
+
+			Core::GetSystem<SceneManager>().OnSceneChange.Listen(
+				[this,
+				&id_manager = Core::GetSystem<NetworkSystem>().GetIDManager(),
+				objects = msg.loaded_objects,
+				prefabs = msg.loaded_prefabs,
+				create_prefabs
+				](RscHandle<Scene>)
+			{
+				for (auto& obj : objects)
+				{
+					if (obj.destroyed)
+					{
+						Core::GetGameState().DestroyObject(obj.handle);
+					}
+					else
+					{
+						LOG_TO(LogPool::NETWORK, "moving obj %ld to (%f,%f,%f)", obj.handle.id, obj.position.x, obj.position.y, obj.position.z);
+						obj.handle->Transform()->position = obj.position;
+						obj.handle->Transform()->rotation = obj.rotation;
+						auto eview = obj.handle->GetComponent<ElectronView>();
+						id_manager.EmplaceID(obj.id, eview);
+						eview->ghost_state = ElectronView::Ghost{};
+						eview->Setup();
+					}
+				}
+
+				create_prefabs();
+			}
+			, 1);
 		}
-		, 1);
+		else
+			create_prefabs();
 	}
 }

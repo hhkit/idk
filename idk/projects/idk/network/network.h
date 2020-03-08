@@ -18,6 +18,7 @@ namespace idk
 		ANY = CLIENT_MAX,
 	};
 
+	static constexpr SeqNo seq_max = 0xFFFF;
 	static constexpr auto sliding_window_buf = 30;
 
 	bool seqno_greater_than(SeqNo lhs, SeqNo rhs);
