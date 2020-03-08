@@ -1272,6 +1272,7 @@ namespace idk::mono
 				VALIDATE_RESOURCE(Material);
 				VALIDATE_RESOURCE(MaterialInstance);
 				VALIDATE_RESOURCE(Prefab);
+				VALIDATE_RESOURCE(Scene);
             default: return false;
             }
         }
@@ -1291,6 +1292,7 @@ namespace idk::mono
 				NAME_OF_RESOURCE(Material);
 				NAME_OF_RESOURCE(MaterialInstance);
 				NAME_OF_RESOURCE(Prefab);
+				NAME_OF_RESOURCE(Scene);
                 default: return mono_string_empty(mono_domain_get());
             }
         }
