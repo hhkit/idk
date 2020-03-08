@@ -74,7 +74,6 @@ namespace idk::vkn
 	TexCreateInfo DepthBufferTexInfo(uint32_t width, uint32_t height);
 	TexCreateInfo StencilBufferTexInfo(uint32_t width, uint32_t height);
 	TexCreateInfo Depth3DBufferTexInfo(uint32_t width, uint32_t height);
-
 	class TextureLoader
 	{
 	public:

@@ -1043,7 +1043,7 @@ namespace idk::vkn
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-			dbg::BeginLabel(rb._cmd_buffer, "Framegraph in RenderGraphicsStates starting.", color{ 0.3,0.4,0 });
+			dbg::BeginLabel(rb._cmd_buffer, "Framegraph in RenderGraphicsStates starting.", color{ 0.3f, 0.4f, 0.f });
 			_pimpl->graph.ProcessBatches(rb);
 			state.ubo_manager.UpdateAllBuffers();
 			dbg::EndLabel(rb._cmd_buffer);

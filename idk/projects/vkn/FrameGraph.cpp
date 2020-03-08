@@ -161,7 +161,7 @@ namespace idk::vkn
 						}
 
 				}
-				void Debug(const graph_theory::IntermediateGraph& igraph, span<const FrameGraphNode>nodes)
+				void Debug(const graph_theory::IntermediateGraph& igraph, span<const FrameGraphNode> nodes_)
 				{
 					hash_table<size_t, vector<size_t>> dependencies;
 					std::set<size_t> indices;
@@ -177,10 +177,10 @@ namespace idk::vkn
 					{
 						auto& list = dependencies.at(index);
 						auto& [name, deps] = named_dependencies.emplace_back();
-						name = nodes[index].name;
+						name = nodes_[index].name;
 						for (auto& dep_index : list)
 						{
-							deps.emplace_back(nodes[dep_index].name);
+							deps.emplace_back(nodes_[dep_index].name);
 						}
 					}
 
@@ -620,7 +620,7 @@ namespace idk::vkn
 			if (node.depth_stencil && src_id == node.depth_stencil->first|| id == node.depth_stencil->first)
 				result = node.depth_stencil->second.layout;
 			else
-			if (output_ptr < output_nodes.end()&& output_index < node.output_attachments.size())
+			if (output_ptr < output_nodes.end() && output_index < s_cast<long long>(node.output_attachments.size()))
 			{
 				auto& att_info = node.output_attachments[output_index];
 				result = att_info->second.layout;

@@ -131,7 +131,7 @@ namespace idk::vkn::renderpasses
 		};
 		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("spot light", std::move(derp), elem.light_map);
 	}
-	void AddPointShadowPass      (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state){}
+	void AddPointShadowPass      ([[maybe_unused]] FrameGraph& frame_graph, [[maybe_unused]] GraphicsSystem::LightRenderRange shadow_range, [[maybe_unused]] const PreRenderData& state){}
 
 	void AddShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{

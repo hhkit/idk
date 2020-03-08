@@ -11,7 +11,7 @@ namespace idk::vkn::bindings
 	public:
 		void Bind(RenderInterface& context)override
 		{
-			size_t i = 0;
+			uint32_t i = 0;
 
 			AttachmentBlendConfig blend{};
 			blend.blend_enable = true;
@@ -46,7 +46,7 @@ namespace idk::vkn::bindings
 			auto pbr_trf = _state._pbr_trf;
 			context.BindUniform("PBRBlock", 0, string_view{ hlp::buffer_data<const char*>(pbr_trf),hlp::buffer_size(pbr_trf) });
 		}
-		bool Skip(RenderInterface& context, const RenderObject& ro) override
+		bool Skip([[maybe_unused]] RenderInterface& context, [[maybe_unused]] const RenderObject& ro) override
 		{
 			return i  >= _state._light_indices.size();
 		}
@@ -78,8 +78,8 @@ namespace idk::vkn::bindings
 
 		static string PrepareDirectionalBlock(const vector<DLightData>& vp)
 		{
-			vector<ShaderDirectionalData> tmp_dlight(vp.size());
-			for (size_t i = 0; i < tmp_dlight.size(); ++i)
+			vector<ShaderDirectionalData> tmp_dlight(std::max(1ui64,vp.size()));
+			for (size_t i = 0; i < vp.size(); ++i)
 			{
 				tmp_dlight[i] = vp[i];
 			}
