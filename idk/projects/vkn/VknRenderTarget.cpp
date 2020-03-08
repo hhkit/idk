@@ -31,8 +31,10 @@ namespace idk::vkn
 		for (auto& elem : Textures())
 		{
 			if (elem != RscHandle<Texture>{})
-				elem = RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<VknTexture>()};
-			Core::GetResourceManager().Release(elem);
+			{
+				elem = RscHandle<Texture>{Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(elem.guid)};
+				Core::GetResourceManager().Release(elem);
+			}
 		}
 		if (_frame_buffer)
 		{
@@ -48,6 +50,7 @@ namespace idk::vkn
 			(Srgb()) ? TextureInternalFormat::SBGRA_8 : TextureInternalFormat::BGRA_8,
 			FilterMode::Nearest,
 			false,
+			(color_tex.guid != Guid{}) ? AttachmentInfo::buffer_opt_t{color_tex.guid} : std::nullopt
 		};
 		auto dep_info = AttachmentInfo
 		{
@@ -56,6 +59,7 @@ namespace idk::vkn
 			TextureInternalFormat::DEPTH_32,
 			FilterMode::Nearest,
 			false,
+			(depth_tex.guid != Guid{}) ? AttachmentInfo::buffer_opt_t{depth_tex.guid} : std::nullopt
 		};
 		fbf.AddAttachment(col_info);
 		fbf.SetDepthAttachment(dep_info);
@@ -91,6 +95,7 @@ namespace idk::vkn
 			}
 
 		}
+		Saveable_t::Dirty();
 		////TODO get these from somewhere persistent.
 		//auto& factory = Core::GetResourceManager().GetFactory<VknRenderTargetFactory>();
 		//hlp::MemoryAllocator& alloc = factory.GetAllocator();
