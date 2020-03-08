@@ -39,7 +39,7 @@ namespace idk {
             IGE_InspectorWindow& self;
             float item_width_ratio;
             string curr_prop_path;
-            bool has_override;
+            bool has_override = false;
 
             DisplayStack(IGE_InspectorWindow& self, float item_width_ratio = default_item_width_ratio)
                 : self{ self }, item_width_ratio{ item_width_ratio }
