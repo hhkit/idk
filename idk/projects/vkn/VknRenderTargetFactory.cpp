@@ -12,6 +12,9 @@
 
 namespace idk::vkn
 {
+	
+	static const Guid default_rt_color_id = Guid{ "5B26B74B-65C5-4840-A3B5-C08DFDC11F0A" };
+	static const Guid default_rt_depth_id = Guid{ "E0290658-AE4F-427F-BF21-8F52D1367B94" };
 
 	VknRenderTargetFactory::VknRenderTargetFactory():allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().GetVulkanHandle().View().PDevice() }
 	{
@@ -23,8 +26,8 @@ namespace idk::vkn
 		auto& rsc_manager = Core::GetResourceManager();
 
 		//Todo make these default guids
-		auto ptr = rsc_manager.LoaderEmplaceResource<VknTexture>();
-		auto depth_ptr = rsc_manager.LoaderEmplaceResource<VknTexture>();
+		auto ptr = rsc_manager.LoaderEmplaceResource<VknTexture>(default_rt_color_id);
+		auto depth_ptr = rsc_manager.LoaderEmplaceResource<VknTexture>(default_rt_depth_id);
 
 		auto fb = std::make_unique<VknRenderTarget>();
 		auto &m = *fb;

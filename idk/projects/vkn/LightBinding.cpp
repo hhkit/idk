@@ -6,7 +6,7 @@
 namespace idk::vkn::bindings
 {
 //#pragma optimize ("",off)
-	bool DeferredAmbientLight::Skip(RenderInterface& context, const RenderObject&)
+	bool DeferredAmbientLight::Skip([[maybe_unused]] RenderInterface& context, const RenderObject&)
 	{
 		return !fragment_shader.as<ShaderModule>().HasCurrent();
 	}
@@ -32,7 +32,7 @@ namespace idk::vkn::bindings
 	}
 	DeferredAmbientLight::DeferredAmbientLight() : fragment_shader{Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FDeferredPostAmbient]}
 	{
-		auto& derp = *fragment_shader;
+		[[maybe_unused]] auto& derp = *fragment_shader;
 	}
 
 	void DeferredLightFsq::Bind(RenderInterface& context)

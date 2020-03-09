@@ -10,6 +10,7 @@ namespace idk
 	YOJIMBO_MESSAGE_FACTORY_START(GameMessageFactory, MessageCount);
 	ADD_MESSAGE(TestMessage);
 	ADD_MESSAGE(EventDataBlockFrameNumber);
+	ADD_MESSAGE(EventDataBlockBufferedEvents);
 	ADD_MESSAGE(EventInstantiatePrefabMessage);
 	ADD_MESSAGE(EventLoadLevelMessage);
 	ADD_MESSAGE(EventTransferOwnershipMessage);

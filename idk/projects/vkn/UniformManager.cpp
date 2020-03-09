@@ -110,6 +110,7 @@ namespace idk::vkn
 		}
 	};
 	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw);
+#pragma optimize("",off)
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
 		span<UniformUtils::BindingInfo> bindings,
@@ -169,7 +170,7 @@ namespace idk::vkn
 		layout{ layout_ },
 		type_index{ desc_type_idx<vk::DescriptorType::eUniformBuffer> }
 	{
-		if (buffer_offset_ + size_ > 65536)
+		if (buffer_offset_ + size_ > 65536 || size_==0)
 			throw;
 	}
 	UniformUtils::BindingInfo::BindingInfo(
@@ -387,6 +388,7 @@ namespace idk::vkn
 		}
 		return builder.end();
 	}
+#pragma optimize("",off)
 	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
 	{
 		_dud.Reset();

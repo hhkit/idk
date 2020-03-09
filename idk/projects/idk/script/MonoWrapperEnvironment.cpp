@@ -28,6 +28,7 @@
 #include <core/GameObject.inl>
 #include <util/ioutils.h>
 #include <ds/span.inl>
+#include <math/arith.inl>
 
 #include <res/ResourceHandle.inl>
 
@@ -146,6 +147,11 @@ namespace idk::mono
 		}
 	};
 
+	struct vec2ret 
+	{
+		float val[2];
+	};
+
 	template<typename Ret>
 	struct Retval { using T = Ret; };
 
@@ -232,6 +238,12 @@ namespace idk::mono
 		BIND_START("idk.Bindings::SceneChangeScene", void, Guid scene)
 		{
 			Core::GetSystem<SceneManager>().SetNextScene(RscHandle<Scene>{scene});
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::SceneGetActiveScene", Guid)
+		{
+			return Core::GetSystem<SceneManager>().GetActiveScene().guid;
 		}
 		BIND_END();
 
@@ -1260,6 +1272,7 @@ namespace idk::mono
 				VALIDATE_RESOURCE(Material);
 				VALIDATE_RESOURCE(MaterialInstance);
 				VALIDATE_RESOURCE(Prefab);
+				VALIDATE_RESOURCE(Scene);
             default: return false;
             }
         }
@@ -1279,6 +1292,7 @@ namespace idk::mono
 				NAME_OF_RESOURCE(Material);
 				NAME_OF_RESOURCE(MaterialInstance);
 				NAME_OF_RESOURCE(Prefab);
+				NAME_OF_RESOURCE(Scene);
                 default: return mono_string_empty(mono_domain_get());
             }
         }
@@ -1309,7 +1323,7 @@ namespace idk::mono
 			auto s = unbox(name);
 			if (!handle) { return vec2{}; }
 			auto res = handle->GetUniform(s.get());
-            return res ? std::get<vec2>(*res) : vec2(0, 0);
+			return res ? std::get<idk::vec2>(*res) : idk::vec2(0, 0);
         }
 		BIND_END();
         BIND_START("idk.Bindings::MaterialInstanceGetVector3",  vec3, RscHandle<MaterialInstance> handle, MonoString* name)
@@ -1419,7 +1433,13 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::GraphicsSetGammaCorrection", void, float gamma_correction)
 		{
-			Core::GetSystem<GraphicsSystem>().extra_vars.Set("gamma_correction",gamma_correction);
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set("gamma_correction", gamma_correction);
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsGetGammaCorrection", float)
+		{
+			auto gamma_correction = Core::GetSystem<GraphicsSystem>().extra_vars.Get<float>("gamma_correction");
+			return gamma_correction ? *gamma_correction : 1.0f;
 		}
 		BIND_END();
 		BIND_START("idk.Bindings::GraphicsDisableGammaCorrection", void)
@@ -1429,15 +1449,15 @@ namespace idk::mono
 		BIND_END();
 
 		// //////Camera///////////////
-		BIND_START("idk.Bindings::CameraGetFOV", rad, Handle<Camera> h)
+		BIND_START("idk.Bindings::CameraGetFOV", real, Handle<Camera> h)
 		{
-			return h->field_of_view;
+			return deg(h->field_of_view).value;
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::CameraSetFOV", void, Handle<Camera> h, rad r)
+		BIND_START("idk.Bindings::CameraSetFOV", void, Handle<Camera> h, float r)
 		{
-			h->field_of_view = r;
+			h->field_of_view = deg(r);
 		}
 		BIND_END();
 
@@ -1613,6 +1633,54 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::LightGetInnerSpotAngle", real, Handle<Light> h)
+		{
+			return std::visit([&](auto& light_variant)-> const real
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, SpotLight>)
+					return light_variant.inner_angle.value;
+				else
+					return 0.f;
+			}, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetInnerSpotAngle", void, Handle<Light> h, real i)
+		{
+			std::visit([&, val = i](auto& light_variant)
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, SpotLight>)
+					light_variant.inner_angle.value = val;
+			}, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightGetOuterSpotAngle", real, Handle<Light> h)
+		{
+			return std::visit([&](auto& light_variant)-> const real
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, SpotLight>)
+					return light_variant.outer_angle.value;
+				else
+					return 0.f;
+			}, h->light);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetOuterSpotAngle", void, Handle<Light> h, real i)
+		{
+			std::visit([&, val = i](auto& light_variant)
+			{
+				using T = std::decay_t<decltype(light_variant)>;
+				if constexpr (std::is_same_v<T, SpotLight>)
+					light_variant.outer_angle.value = val;
+			}, h->light);
+		}
+		BIND_END();
+
 
 		// Input
 
@@ -1704,9 +1772,9 @@ namespace idk::mono
 
         // RectTransform
 
-        BIND_START("idk.Bindings::RectTransformGetOffsetMin", vec2, Handle<RectTransform> h)
+        BIND_START("idk.Bindings::RectTransformGetOffsetMin", vec2ret, Handle<RectTransform> h)
         {
-            return h->offset_min;
+			return vec2ret{ h->offset_min.x, h->offset_min.y };
         }
         BIND_END();
 
@@ -1717,9 +1785,9 @@ namespace idk::mono
         }
         BIND_END();
 
-        BIND_START("idk.Bindings::RectTransformGetOffsetMax", vec2, Handle<RectTransform> h)
+        BIND_START("idk.Bindings::RectTransformGetOffsetMax", vec2ret, Handle<RectTransform> h)
         {
-            return h->offset_max;
+			return vec2ret{ h->offset_max.x, h->offset_max.y };
         }
         BIND_END();
 
@@ -1730,9 +1798,9 @@ namespace idk::mono
         }
         BIND_END();
 
-        BIND_START("idk.Bindings::RectTransformGetAnchorMin", vec2, Handle<RectTransform> h)
+        BIND_START("idk.Bindings::RectTransformGetAnchorMin", vec2ret, Handle<RectTransform> h)
         {
-            return h->anchor_min;
+			return vec2ret{ h->anchor_min.x, h->anchor_min.y };
         }
         BIND_END();
 
@@ -1743,9 +1811,9 @@ namespace idk::mono
         }
         BIND_END();
 
-        BIND_START("idk.Bindings::RectTransformGetAnchorMax", vec2, Handle<RectTransform> h)
+        BIND_START("idk.Bindings::RectTransformGetAnchorMax", vec2ret, Handle<RectTransform> h)
         {
-            return h->anchor_max;
+			return vec2ret{ h->anchor_max.x, h->anchor_max.y };
         }
         BIND_END();
 
@@ -1756,9 +1824,9 @@ namespace idk::mono
         }
         BIND_END();
 
-        BIND_START("idk.Bindings::RectTransformGetPivot", vec2, Handle<RectTransform> h)
+        BIND_START("idk.Bindings::RectTransformGetPivot", vec2ret, Handle<RectTransform> h)
         {
-            return h->pivot;
+			return vec2ret{ h->pivot.x, h->pivot.y };
         }
         BIND_END();
 
@@ -1772,6 +1840,22 @@ namespace idk::mono
 		BIND_START("idk.Bindings::RectTransformGetRect", rect, Handle<RectTransform> h)
 		{
 			return h->_local_rect;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RectTransformGetAnchoredPosition", vec2ret, Handle<RectTransform> h)
+		{
+			vec2 anchored_pos = lerp(h->offset_min, h->offset_max, h->pivot);
+			return vec2ret{ anchored_pos.x, anchored_pos.y };
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::RectTransformSetAnchoredPosition", void, Handle<RectTransform> h, vec2 v)
+		{
+			vec2 d = v - lerp(h->offset_min, h->offset_max, h->pivot);
+			h->offset_min += d;
+			h->offset_max += d;
+			Core::GetSystem<UISystem>().RecalculateRects(h);
 		}
 		BIND_END();
 

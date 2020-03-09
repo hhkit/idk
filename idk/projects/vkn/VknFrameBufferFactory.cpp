@@ -308,6 +308,29 @@ namespace idk::vkn
 		//TODO actually create a default framebuffer and use it here
 		return fb;
 	}
+#pragma optimize("",off)
+
+	RscHandle<VknTexture> derp(RscHandle<Texture> tex)
+	{
+		return RscHandle<VknTexture>{tex};
+	}
+	RscHandle<VknTexture> derp(Guid guid)
+	{
+		return Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(guid);
+	}
+	struct BufferGetter
+	{
+		bool is_guid = false;
+		RscHandle<VknTexture> operator()(RscHandle<Texture> tex)
+		{
+			return derp(tex);
+		}
+		RscHandle<VknTexture> operator()(Guid guid)
+		{
+			is_guid = true;
+			return derp(guid);
+		}
+	};
 
 	void VknFrameBufferFactory::CreateAttachment(AttachmentType type, const AttachmentInfo& info, uvec2 size, unique_ptr<Attachment>& out)
 	{
@@ -325,8 +348,12 @@ namespace idk::vkn
 		out->load_op = info.load_op;
 		out->store_op = info.store_op;
 		
+		auto GetBuffer = BufferGetter{};
+		
+
 		auto preset = static_cast<bool>(info.buffer);
-		RscHandle<VknTexture> tex = (preset) ? RscHandle<VknTexture>{*info.buffer} : Core::GetResourceManager().Create<VknTexture>();
+		RscHandle<VknTexture> tex = (preset) ? std::visit(GetBuffer, *info.buffer) : Core::GetResourceManager().Create<VknTexture>();
+		preset &= !GetBuffer.is_guid;
 		auto& vout = static_cast<VknAttachment&>(*out);
 		vout.override_as_depth = info.override_as_depth;
 		vout.is_input_att = info.is_input_att;

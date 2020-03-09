@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include <algorithm>
+
 #include "EventManager.h"
 
 #include <prefab/Prefab.h>
@@ -18,12 +20,38 @@
 #include <network/ElectronTransformView.h>
 #include <network/EventLoadLevelMessage.h>
 #include <network/EventDestroyObjectMessage.h>
+#include <network/EventDataBlockBufferedEvents.h>
 #include <network/EventInstantiatePrefabMessage.h>
 #include <network/EventTransferOwnershipMessage.h>
 #include <network/EventInvokeRPCMessage.h>
 
 namespace idk
 {
+	struct EventManager::BufferedEvents
+	{
+		struct InstantiatedPrefab
+		{
+			RscHandle<Prefab> prefab;
+			Handle<ElectronView> obj;
+		};
+
+		RscHandle<Scene> loaded_scene;
+		vector<Handle<GameObject>> loaded_views;
+		vector<InstantiatedPrefab> loaded_prefabs;
+	};
+
+	unique_ptr<EventManager::BufferedEvents> buffered_events;
+
+	void EventManager::Init()
+	{
+		buffered_events = std::make_unique<EventManager::BufferedEvents>();
+	}
+
+	void EventManager::ResetEventBuffer()
+	{
+		buffered_events.reset();
+	}
+
 	void EventManager::SubscribeEvents(ClientConnectionManager& client)
 	{
 		client.Subscribe<TestMessage>([](TestMessage& message) { LOG_TO(LogPool::NETWORK, "Received message %d", message.i); });
@@ -32,6 +60,7 @@ namespace idk
 		client.Subscribe<EventLoadLevelMessage>([this](EventLoadLevelMessage& msg) { OnLoadLevelMessage(msg); });
 		client.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage& msg) { OnInvokeRPCMessage(msg); });
 		client.Subscribe<EventDestroyObjectMessage>([this](EventDestroyObjectMessage& msg) {OnDestroyObjectMessage(msg); });
+		client.Subscribe<EventDataBlockBufferedEvents>([this](EventDataBlockBufferedEvents& msg) {OnBufferedEventMessage(msg); });
 	}
 
 	void EventManager::SubscribeEvents(ServerConnectionManager& server)
@@ -45,10 +74,8 @@ namespace idk
 				});
 			});
 		server.Subscribe<EventInvokeRPCMessage>([this](EventInvokeRPCMessage& msg) { OnInvokeRPCMessage(msg); });
-
-		// the server should never be told to instantiate prefabs
-		//server.Subscribe<EventInstantiatePrefabMessage>([this](EventInstantiatePrefabMessage* msg) { OnInstantiatePrefabEvent(msg); });
 	}
+
 	void EventManager::SendTestMessage(int i)
 	{
 		LOG_TO(LogPool::NETWORK, "Sending test message w payload %d", i);
@@ -58,6 +85,42 @@ namespace idk
 			});
 	}
 
+	void EventManager::SendBufferedEvents()
+	{
+		if (buffered_events)
+		{
+			connection_manager->CreateAndSendMessage<EventDataBlockBufferedEvents>(GameChannel::RELIABLE, [](EventDataBlockBufferedEvents& msg)
+				{
+					msg.load_scene = buffered_events->loaded_scene;
+					for (auto& elem : buffered_events->loaded_views)
+					{
+						if (!elem)
+						{
+							auto& obj = msg.loaded_objects.emplace_back();
+							obj.handle = elem;
+							obj.destroyed = true;
+						}
+						else
+						{
+							auto& obj = msg.loaded_objects.emplace_back();
+							obj.handle = elem;
+							obj.id = elem->GetComponent<ElectronView>()->network_id;
+							obj.position = elem->Transform()->position;
+							obj.rotation = elem->Transform()->rotation;
+						}
+					}
+
+					for (auto& elem : buffered_events->loaded_prefabs)
+					{
+						auto& obj_and_pfb = msg.loaded_prefabs.emplace_back();
+						obj_and_pfb.prefab = elem.prefab;
+						obj_and_pfb.id = elem.obj->network_id;
+						obj_and_pfb.position = elem.obj->GetGameObject()->Transform()->position;
+						obj_and_pfb.rotation = elem.obj->GetGameObject()->Transform()->rotation;
+					}
+				});
+		}
+	}
 
 	Handle<GameObject> EventManager::BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> rotation)
 	{
@@ -84,6 +147,8 @@ namespace idk
 			tfm.rotation = *rotation;
 
 		ev->ghost_state = ElectronView::Master{};
+		
+		buffered_events->loaded_prefabs.emplace_back(EventManager::BufferedEvents::InstantiatedPrefab{ prefab, ev });
 
 		Core::GetSystem<NetworkSystem>().BroadcastMessage<EventInstantiatePrefabMessage>(GameChannel::RELIABLE,
 			[&](EventInstantiatePrefabMessage& msg)
@@ -153,6 +218,11 @@ namespace idk
 				elem.state_mask = 0;
 			}
 
+			buffered_events = std::make_unique<EventManager::BufferedEvents>();
+			buffered_events->loaded_scene = scene;
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
+				buffered_events->loaded_views.emplace_back(elem.GetGameObject());
+
 			Core::GetSystem<NetworkSystem>().BroadcastMessage<EventLoadLevelMessage>(GameChannel::RELIABLE,
 				[scene](EventLoadLevelMessage& msg)
 				{
@@ -173,6 +243,17 @@ namespace idk
 				msg.id = id;
 			});
 
+		if (buffered_events)
+		{
+			buffered_events->loaded_prefabs.erase(
+				std::remove_if(buffered_events->loaded_prefabs.begin(), buffered_events->loaded_prefabs.end(), [&](auto& elem) -> bool
+					{
+						return elem.obj == view;
+					}),
+				buffered_events->loaded_prefabs.end()
+			);
+		}
+
 		Core::GetGameState().DestroyObject(view->GetGameObject());
 	}
 
@@ -186,6 +267,12 @@ namespace idk
 			return;
 		}
 
+		LOG_TO(LogPool::NETWORK, "  instantiating %s", message.prefab->Name().data());
+		if (message.use_position)
+		LOG_TO(LogPool::NETWORK, "    at (%f, %f, %f)", message.position.x, message.position.y, message.position.z);
+		else
+		LOG_TO(LogPool::NETWORK, "    with no position data.");
+
 		auto obj = message.prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
 		auto ev = obj->GetComponent<ElectronView>();
 
@@ -197,6 +284,7 @@ namespace idk
 		auto& tfm = *obj->Transform();
 		if (message.use_position)
 			tfm.position = message.position;
+
 		if (message.use_rotation)
 			for (unsigned i = 0; i < 4; ++i)
 				tfm.rotation[i] = message.rotation[i];
@@ -236,5 +324,51 @@ namespace idk
 				eview.Setup();
 			}
 		}, 1);
+	}
+
+	void EventManager::OnBufferedEventMessage(EventDataBlockBufferedEvents& msg)
+	{
+		Core::GetSystem<SceneManager>().SetNextScene(msg.load_scene);
+		
+		Core::GetSystem<SceneManager>().OnSceneChange.Listen(
+			[ this,
+			  &id_manager = Core::GetSystem<NetworkSystem>().GetIDManager(),
+			  objects = msg.loaded_objects,
+			  prefabs = msg.loaded_prefabs
+			](RscHandle<Scene>)
+		{
+			for (auto& obj : objects)
+			{
+				if (obj.destroyed)
+				{
+					Core::GetGameState().DestroyObject(obj.handle);
+				}
+				else
+				{
+					LOG_TO(LogPool::NETWORK, "moving obj %ld to (%f,%f,%f)", obj.handle.id, obj.position.x, obj.position.y, obj.position.z);
+					obj.handle->Transform()->position = obj.position;
+					obj.handle->Transform()->rotation = obj.rotation;
+					auto eview = obj.handle->GetComponent<ElectronView>();
+					id_manager.EmplaceID(obj.id, eview);
+					eview->ghost_state = ElectronView::Ghost{};
+					eview->Setup();
+				}
+			}
+
+			for (auto& prefab : prefabs)
+			{
+				EventInstantiatePrefabMessage prefab_msg;
+				prefab_msg.prefab = prefab.prefab;
+				prefab_msg.id = prefab.id;
+				prefab_msg.use_position = true;
+				prefab_msg.position = prefab.position;
+				prefab_msg.use_rotation = true;
+				for (auto i = 0; i < 4; ++i)
+					prefab_msg.rotation[i] = prefab.rotation[i];
+
+				OnInstantiatePrefabEvent(prefab_msg);
+			}
+		}
+		, 1);
 	}
 }

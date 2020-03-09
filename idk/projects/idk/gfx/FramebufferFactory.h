@@ -11,27 +11,31 @@ namespace idk
 	//using AttachmentInfo = int;
 	struct AttachmentInfo
 	{
+
+		using buffer_t = std::variant<RscHandle<Texture>, Guid>;
+		using buffer_opt_t = std::optional<buffer_t>;
+
 		LoadOp  load_op = LoadOp::eClear;
 		StoreOp store_op = StoreOp::eStore;
 
 		TextureInternalFormat internal_format = TextureInternalFormat::RGBA_32_F;
 		FilterMode  filter_mode = FilterMode::Linear;
 		std::optional<size_t> layer_count;
-		std::optional<RscHandle<Texture>> buffer;
+		buffer_opt_t buffer;
 		bool isCubeMap = false;
 		bool override_as_depth = false;
 		bool is_input_att = false;
 		AttachmentViewType view_type = AttachmentViewType::e2D;
 
 		AttachmentInfo() = default;
-
+		
 		AttachmentInfo(
 			LoadOp  load_op_,
 			StoreOp store_op_,
 			TextureInternalFormat int_format,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
-			std::optional<RscHandle<Texture>> buffer_ = std::nullopt,
+			buffer_opt_t buffer_ = std::nullopt,
 			std::optional<size_t> layer_count_ = 1,
 			AttachmentViewType view_type_ = AttachmentViewType::e2D
 		) :
@@ -51,7 +55,7 @@ namespace idk
 			ColorFormat color_format,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
-			std::optional<RscHandle<Texture>> buffer_= std::nullopt,
+			buffer_opt_t buffer_= std::nullopt,
 			std::optional<size_t> layer_count_ = 1,
 			AttachmentViewType view_type_ = AttachmentViewType::e2D
 		) :
@@ -72,7 +76,7 @@ namespace idk
 			bool enable_stencil,
 			FilterMode  filter_mode_,
 			bool isCubeMap_ = false,
-			std::optional<RscHandle<Texture>> buffer_ = std::nullopt,
+			buffer_opt_t buffer_ = std::nullopt,
 			std::optional<size_t> layer_count_ = 1,
 			AttachmentViewType view_type_ = AttachmentViewType::e2D
 		) :

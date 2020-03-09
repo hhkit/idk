@@ -205,8 +205,26 @@ namespace idk
 			ro.config,
 		};
 	}
+	struct CullBatchOpt
+	{
+		FrustumFaceFlags in_mask= ~FrustumFaceFlags{};
+		float near=std::numeric_limits<float>::max(), far = std::numeric_limits<float>::min();
+	};
+
+
+	//This is probably code bloat but...
+	
+	void TrackNearFar(const frustum& frust, const sphere& bv, float& near, float& far)
+	{
+		auto frust_test = [](auto& side, vec3 point)
+		{
+			return side.normal.dot(point) - side.dist;
+		};
+		near = std::min(frust_test(frust.sides[FrustumSide::Near], bv.center) - bv.radius, near);
+		far = std::max(frust_test(frust.sides[FrustumSide::Far], bv.center) + bv.radius, far);
+	}
 	//returns indices to the start and one past the end
-	std::pair<size_t,size_t> CullAndBatchRenderObjects(const CameraData& camera,const vector<RenderObject>& ro,const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data,vector<GenericHandle>* handle_buffer=nullptr)
+	std::pair<size_t, size_t> CullAndBatchRenderObjects(const CameraData& camera, const vector<RenderObject>& ro, const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data, vector<GenericHandle>* handle_buffer = nullptr, CullBatchOpt opt = {})
 	{
 
 		const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
@@ -215,10 +233,13 @@ namespace idk
 		std::optional<decltype(ro.begin())> oprev{};
 		InstRenderObjects* inst_itr{};
 		auto bv_itr = bounding_vols.begin();
+
+		const auto in_mask = opt.in_mask;
 		for (auto itr = ro.begin(); itr < ro.end(); ++itr,++bv_itr)
 		{
 			const auto bv = *bv_itr;
-			if ((itr->layer_mask&camera.culling_flags) &&frust.contains(bv))
+
+			if ((itr->layer_mask & camera.culling_flags) && ((frust.containment_test(bv) & in_mask) == in_mask))
 			{
 				if (!oprev || ![](auto& itr, auto& prev) {
 					return (itr->mesh == prev->mesh) & (itr->material_instance == prev->material_instance);
@@ -231,7 +252,7 @@ namespace idk
 				if (handle_buffer)
 					handle_buffer->emplace_back(itr->obj_id);
 				//Keep track of the number of instances to be render for this frustum
-				auto tfm = camera.view_matrix * itr->transform;
+				const auto tfm = camera.view_matrix * itr->transform;
 				instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
 				inst_itr->num_instances++;
 			}
@@ -411,6 +432,8 @@ namespace idk
 	};
 	bool LightVolDbg::render_next = false;
 
+	int& DbgIndex();
+
 	void CullLights(const CameraData& camera,ShadowMapPool& sm_pool,vector<LightData>& lights,vector<LightData>& new_lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, GraphicsSystem::RenderRange& range)
 	{
 
@@ -425,13 +448,14 @@ namespace idk
 		//float first_end = n_plane + 0.2f * diff;
 		//float second_end = n_plane + 0.45f * diff;
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.55f * diff;
-		float second_start= n_plane + 0.45f * diff;
+		float first_end = n_plane + 0.45f * diff;
+		float second_start= n_plane + 0.35f * diff;
 		float second_end = f_plane;
 
 		float cascade_start[2] = { n_plane  ,second_start};
 		float cascade_end  [2] = { first_end,second_end  };
 		//float cascadeiter[3] = { n_plane,first_end,second_end };
+
 
 		for (size_t i = 0; i < lights.size(); ++i)
 		{
@@ -447,7 +471,8 @@ namespace idk
 						active_light_buffer.emplace_back(i);
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
 					}
-					LightVolDbg::DbgLight(sphere,col);
+					if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgPointLight", true))
+						LightVolDbg::DbgLight(sphere,col);
 
 					light.camDataRef = camera;
 				}
@@ -465,7 +490,8 @@ namespace idk
 					light.camDataRef = camera;
 					col = color{ 0.5f,0.4f,0.0f,1.0f };
 				}
-				LightVolDbg::DbgLight(bounding_box, col);
+				if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgSpotLight", true))
+					LightVolDbg::DbgLight(sphere, col);
 				//LightVolDbg::DbgLight(light_frustum, col);
 			}
 				break;
@@ -479,11 +505,12 @@ namespace idk
 
 				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index,copy_light.light_maps);
 				
-				color col = color{ 0.3,0.2,0.6,1.0f };
+				color col = color{ 0.3f, 0.2f, 0.6f, 1.0f };
 				for (auto& elem : copy_light.light_maps)
 				{
 					elem.SetCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
-					LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection* light.v), col*(k+1));
+					if(Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgDirectionalLight", true))
+						LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection* light.v), col*(k+1));
 					++k;
 				}
 				auto new_index = new_lights.size();
@@ -1030,6 +1057,7 @@ namespace idk
 		{
 			vector<LightData> new_lights;
 			new_lights.reserve(result.camera.size() * 2);
+			size_t i = 0;
 			for (auto& cam : result.camera)
 			{
 				auto& camera = cam;
@@ -1042,6 +1070,7 @@ namespace idk
 					ProcessFonts(result.font_render_data, result.font_buffer, result.font_range, range);
 					if (debug_light_vol-- == 0)
 						LightVolDbg::RenderNext();
+					DbgIndex() = i++;
 					CullLights(camera, result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range);
 
 				}
@@ -1095,10 +1124,13 @@ namespace idk
 						else
 						{
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
-							//const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-							//draw_frustum(frust, color{ ((float)++derp) / result.camera.size(),0,(lm_i + 1.0f) / light.light_maps.size(),1 }, {});
-
-							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
+							CullBatchOpt opt{};
+							if (light.index == 1)
+								opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
+							
+							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
+							
 							range.inst_mesh_render_begin = start_index;
 							range.inst_mesh_render_end = end_index;
 						}
@@ -1109,7 +1141,7 @@ namespace idk
 			}
 			else
 			{
-				for (auto& lightmap : light.light_maps)
+				for ([[maybe_unused]] auto& lightmap : light.light_maps)
 				{
 					range.light_map_index = lm_i;
 					{

@@ -45,6 +45,48 @@ namespace idk
         public static Rect LerpUnclamped(Rect a, Rect b, float t)
             => new Rect(Vector2.LerpUnclamped(a.position, b.position, t), Vector2.LerpUnclamped(a.size, b.size, t));
 
+        public bool Contains(Vector2 point)
+        {
+            Vector2 lmin = min, lmax = max;
+            return point.x >= lmin.x && point.x < lmax.x
+                && point.y >= lmin.y && point.y < lmax.y;
+        }
+
+        public bool Overlaps(Rect other)
+        {
+            Vector2 lmin = min, rmin = other.min, lmax = max, rmax = other.max;
+            return rmax.x > lmin.x &&
+                rmin.x < lmax.x &&
+                rmax.y > lmin.y &&
+                rmin.y < lmax.y;
+        }
+
+        public bool Equals(Rect rhs)
+        {
+            return position == rhs.position && size == rhs.size;
+        }
+        public static bool operator ==(Rect lhs, Rect rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+        public static bool operator !=(Rect lhs, Rect rhs)
+        {
+            // Returns true in the presence of NaN values.
+            return !(lhs == rhs);
+        }
+        public override bool Equals(object obj)
+        {
+            return this == (Rect)obj;
+        }
+        public override int GetHashCode()
+        {
+            return position.GetHashCode() ^ size.GetHashCode() << 2;
+        }
+        public override string ToString()
+        {
+            return string.Format("(X:{0}, Y:{1}, W:{2}, H:{3})", x, y, width, height);
+        }
+
         public static Rect zero { get => new Rect(0, 0, 0, 0); }
     }
 }

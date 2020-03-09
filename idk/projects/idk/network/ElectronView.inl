@@ -52,7 +52,10 @@ namespace idk
 
 			DerivedGhostData(ParameterImpl<T>& p)
 				: param{ p }
-			{}
+			{
+				start_value = param.getter();
+				end_value = param.getter();
+			}
 
 			void UnpackData(SeqNo index, string_view data) override
 			{
@@ -118,7 +121,7 @@ namespace idk
 				auto curr_value = param.getter();
 				if (!param.equater(prev_value, curr_value))
 				{
-					auto move = curr_value - prev_value;
+					auto move = param.differ(curr_value, prev_value);
 					prev_value = curr_value;
 					SeqAndMove pushme;
 					pushme.seq = curr_seq;
@@ -147,7 +150,7 @@ namespace idk
 			: ControlObjectData
 		{
 			static constexpr auto RememberedMoves = 64;
-			struct SeqAndObj { SeqNo seq; T obj; };
+			struct SeqAndObj { SeqNo seq; T obj; bool verified = false; };
 
 			ParameterImpl<T>& param;
 			T prev_value;
@@ -167,10 +170,44 @@ namespace idk
 			__declspec(noinline) void RecordPrediction(SeqNo curr_seq) override
 			{
 				auto curr_value = param.getter();
-				auto new_move = curr_value - prev_value;
+				auto new_move = param.differ(curr_value, prev_value);
 				prev_value = curr_value;
 
 				move_buffer.emplace_back(SeqAndObj{ curr_seq, new_move });
+			}
+
+			void ApplyCorrection(typename circular_buffer<SeqAndObj, RememberedMoves>::iterator itr, const T& real_move)
+			{
+				switch (param.predict_func)
+				{
+				case PredictionFunction::Linear:
+				{
+					auto change = param.differ(real_move, itr->obj);
+					param.setter(param.adder(param.getter(), change));
+					prev_value = param.adder(prev_value, change);
+					// and snap
+					itr->obj = real_move;
+					break;
+				}
+				case PredictionFunction::Quadratic:
+				if (itr != move_buffer.end())
+				{
+					auto diff = param.differ(real_move, itr->obj);
+
+					while (itr != move_buffer.end())
+					{
+						if (itr->verified)
+							break;
+
+						itr->obj = param.adder(itr->obj, diff);
+						param.setter(param.adder(param.getter(), diff));
+						prev_value = param.adder(prev_value, diff);
+						++itr;
+					}
+					break;
+				}
+				};
+
 			}
 
 			__declspec(noinline) void UnpackMove(span<const SeqAndPack> packs)
@@ -183,19 +220,17 @@ namespace idk
 
 						// compare with move
 						// if necessary, displace existing data
-						for (auto& prediction : move_buffer)
+						for (auto itr = move_buffer.begin(); itr != move_buffer.end(); ++itr)
 						{
+							auto& prediction = *itr;
 							if (prediction.seq == elem.seq)
 							{
 								// if prediction was wrong
 								if (!param.equater(prediction.obj, real_move))
 								{
 									// calculate correction
-									auto change = prediction.obj - real_move;
-									param.setter(param.getter() - change);
-									prev_value -= change;
-									// and snap
-									prediction.obj = real_move;
+									ApplyCorrection(itr, real_move);
+									itr->verified = true;
 								}
 								break;
 							}

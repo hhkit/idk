@@ -7,5 +7,10 @@
             if ((object) s != null)
                 Bindings.SceneChangeScene(s.guid);
         }
+
+        public static Scene GetActiveScene()
+        {
+            return new Scene() { guid = Bindings.SceneGetActiveScene() };
+        }
     }
 }

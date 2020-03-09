@@ -4,46 +4,61 @@ namespace idk
     public class Light
        : Component
     {
-        public Color Color
+        public Color color
         {
             get => Bindings.LightGetColor(handle);
             set => Bindings.LightSetColor(handle, value);
         }
 
-        public float Intensity
+        public float intensity
         {
             get => Bindings.LightGetIntensity(handle);
             set => Bindings.LightSetIntensity(handle, value);
         }
 
-        public bool IsCastShadow
+        public bool castsShadows
         {
             get => Bindings.LightGetCastShadow(handle);
             set => Bindings.LightSetCastShadow(handle, value);
         }
 
-        public float ShadowBias
+        public float shadowBias
         {
             get => Bindings.LightGetShadowBias(handle);
             set => Bindings.LightSetShadowBias(handle, value);
         }
 
-        public Rad FOV
-        {
-            get => Bindings.LightGetFOV(handle);
-            set => Bindings.LightSetFOV(handle, value);
-        }
-
-        public float AttenuationRadius
+        /// <summary>
+        /// Gets the attenuation radius, ie. range of the spotlight / pointlight. 
+        /// For directional light, returns 0.
+        /// </summary>
+        public float attenuationRadius
         {
             get => Bindings.LightGetAttenuationRadius(handle);
             set => Bindings.LightSetAttenuationRadius(handle, value);
         }
 
-        public bool IsInverseSquareAttenuation
+        /// <summary>
+        /// Whether light falls off using the inverse square law (intensity = 1 / distance^2)
+        /// ie. light gets dimmer quickly as it moves away from the source.
+        /// Only for spotlight and pointlight, returns false for directional light.
+        /// </summary>
+        public bool useInverseSquareAttenuation
         {
             get => Bindings.LightGetIsInverseSqAtt(handle);
             set => Bindings.LightSetIsInverseSqAtt(handle, value);
+        }
+
+        public float innerSpotAngle
+        {
+            get => Bindings.LightGetInnerSpotAngle(handle);
+            set => Bindings.LightSetInnerSpotAngle(handle, value);
+        }
+
+        public float outerSpotAngle
+        {
+            get => Bindings.LightGetOuterSpotAngle(handle);
+            set => Bindings.LightSetOuterSpotAngle(handle, value);
         }
     }
 }

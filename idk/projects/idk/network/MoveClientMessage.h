@@ -3,14 +3,8 @@
 #include <idk.h>
 #include <network/network.h>
 #include <network/MovePack.h>
+#include <network/yojimbo_helpers.h>
 #include "GhostFlags.h"
-
-#define serialize_vector_count(stream, vec, max_size) \
-{                                                     \
-	auto count = vec.size();                          \
-	serialize_int(stream, count, 0, max_size);        \
-	vec.resize(count);                                \
-}
 
 namespace idk
 {

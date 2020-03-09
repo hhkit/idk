@@ -2,6 +2,7 @@
 #include "RenderPassInfo.h"
 #include <vkn/BufferHelpers.h>
 #include <vkn/VknTextureRenderMeta.h>
+#include <meta/variant.inl>
 namespace idk::vkn
 {
 	vk::AttachmentLoadOp MapLoadOp(LoadOp load_op);
@@ -172,9 +173,14 @@ void RenderPassInfo::AddAttachment(AttachmentInfo attachment, vector<vk::Attachm
 	auto& col_attachment = attachment;
 	auto& vk_att = col_attachment;
 
+	
 	attachment_desc.emplace_back(vk::AttachmentDescription{
 		vk::AttachmentDescriptionFlags{}
-		, (attachment.buffer)? attachment.buffer->as<VknTexture>().format : MapFormat(vk_att.internal_format)
+		, (attachment.buffer && (
+			index_in_variant_v<
+				RscHandle<Texture>,
+				AttachmentInfo::buffer_t
+			> == attachment.buffer->index()))? std::get<RscHandle<Texture>>(*attachment.buffer).as<VknTexture>().format : MapFormat(vk_att.internal_format)
 		, vk::SampleCountFlagBits::e1
 		, MapLoadOp(vk_att.load_op)
 		, MapStoreOp(vk_att.store_op)

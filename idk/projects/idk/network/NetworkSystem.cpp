@@ -14,6 +14,7 @@
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
 #include <network/EventDataBlockFrameNumber.h>
+#include <network/EventManager.h>
 #include <network/GhostManager.h>
 #include <core/GameState.h>
 
@@ -36,6 +37,7 @@ namespace idk
 					msg.frame_count = frame_counter;
 					msg.player_id = static_cast<Host>(clientid);
 				});
+			server_connection_manager[clientid]->GetManager<EventManager>()->SendBufferedEvents();
 		};
 		lobby->OnClientDisconnect += [this](int clientid)
 		{

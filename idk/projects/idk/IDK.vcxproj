@@ -50,6 +50,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\AttachmentViewType.h" />
+    <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
     <ClInclude Include="network\MovePack.h" />
     <ClInclude Include="network\ElectronAnimatorView.h" />
     <ClInclude Include="network\EventDestroyObjectMessage.h" />
@@ -111,6 +112,7 @@
     <ClInclude Include="network\GhostPack.h" />
     <ClInclude Include="network\NetworkTuple.inl" />
     <ClInclude Include="network\RPCTarget.h" />
+    <ClInclude Include="network\yojimbo_helpers.h" />
     <ClInclude Include="parallel\multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Address.h" />
