@@ -8,4 +8,5 @@
 #include <network/EventDestroyObjectMessage.h>
 #include <network/EventInvokeRPCMessage.h>
 #include <network/GhostMessage.h>
+#include <network/GhostAcknowledgementMessage.h>
 #include <network/MoveClientMessage.h>

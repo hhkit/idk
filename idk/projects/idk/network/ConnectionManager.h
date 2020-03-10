@@ -12,6 +12,7 @@ namespace idk
 	class ConnectionManager
 	{
 	public:
+		virtual seconds GetRTT() const = 0;
 		virtual Host GetConnectedHost() const = 0;
 		virtual ~ConnectionManager() = default;
 

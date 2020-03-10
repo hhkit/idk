@@ -25,7 +25,7 @@ namespace idk
 		{
 			Subscribe2<MessageType>(std::forward<Func>(func)); //Forward hack cause MSVC bug? in 16.2.3
 		}
-
+		seconds GetRTT() const override;
 		void FrameStartManagers() override;
 		void FrameEndManagers() override;
 	private:

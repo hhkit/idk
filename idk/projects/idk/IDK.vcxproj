@@ -51,6 +51,7 @@
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\AttachmentViewType.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
+    <ClInclude Include="network\GhostAcknowledgementMessage.h" />
     <ClInclude Include="network\MovePack.h" />
     <ClInclude Include="network\ElectronAnimatorView.h" />
     <ClInclude Include="network\EventDestroyObjectMessage.h" />

@@ -21,6 +21,7 @@ namespace idk
 		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType&>>>
 		void Subscribe(Func&& func) { Subscribe2<MessageType>(std::forward<Func>(func)); }
 
+		seconds GetRTT() const override;
 		Host GetConnectedHost() const override;
 		void FrameStartManagers() override;
 		void FrameEndManagers() override;

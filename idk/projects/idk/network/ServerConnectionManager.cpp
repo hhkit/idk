@@ -51,6 +51,11 @@ namespace idk
 			elem->NetworkFrameEnd();
 	}
 
+	seconds ServerConnectionManager::GetRTT() const
+	{
+		return duration_cast<seconds>(std::chrono::duration<float, std::milli>(server.GetRTT(clientID)));
+	}
+
 	Host ServerConnectionManager::GetConnectedHost() const
 	{
 		return (Host) clientID;
@@ -60,7 +65,7 @@ namespace idk
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
 
-		// LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), clientID);
+		LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), clientID);
 		return server.CreateMessage(clientID, static_cast<int>(id));
 	}
 

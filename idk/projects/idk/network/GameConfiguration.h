@@ -14,6 +14,7 @@ namespace idk
 	,	class EventInvokeRPCMessage
 	,	class EventDestroyObjectMessage
 	,	class GhostMessage
+	,	class GhostAcknowledgementMessage
 	,	class MoveClientMessage
 	,	class MoveReturnMessage
 	>;
