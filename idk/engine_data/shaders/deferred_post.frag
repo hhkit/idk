@@ -89,7 +89,7 @@ void main()
 	vec4 world_pos = 
 		PerCamera.inverse_view_transform *
 		vec4(view_pos,1);
-	int j=0;
+	int j=0, k = 0;
 	float view_z_abs = abs(view_pos.z);
 	
 	for (int i = 0; i < LightBlk.light_count; ++i)
@@ -97,7 +97,18 @@ void main()
 		Light curr_light = LightBlk.lights[i];
 		vec3 result = pbr_metallic(curr_light, view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		vec4 cascade_c = vec4(0,0,0,0);
-		if (curr_light.type == 1)
+		if(curr_light.type == 0)
+		{
+			if(curr_light.cast_shadow!=0)
+			{
+				if(curr_light.cast_shadow!=0)
+				{
+					result *= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
+				}
+			}
+			++k;
+		}
+		else if (curr_light.type == 1)
 		{
 			if(curr_light.cast_shadow!=0)
 			{
@@ -116,9 +127,12 @@ void main()
 				//{
 				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
 				//}
-				result *= shadow_factor;
-				j = 0;
-				
+				result *= shadow_factor;	
+				++j;
+			}
+			else
+			{
+				j+=2;
 			}
 			//vvvp = curr_light.vp;
 		}

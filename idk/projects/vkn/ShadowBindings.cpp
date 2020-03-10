@@ -55,7 +55,7 @@ namespace idk::vkn::bindings
 	
 	struct PointShadowData {
 		float far_plane{};
-		vec3 light_pos{0.f};
+		alignas(16) vec3 light_pos{0.f};
 		FakeMat4<float> p[6];
 	};
 //#pragma optimize("", off)
@@ -77,6 +77,7 @@ namespace idk::vkn::bindings
 			++i;
 		}
 		the_interface.BindUniform("CameraBlock", 0, hlp::to_data(pdata));
+		the_interface.BindUniform("CameraBlock1", 0, hlp::to_data(pdata));
 	}
 	void PointStandardVertexBindings::Bind(RenderInterface& the_interface, const RenderObject& dc)
 	{

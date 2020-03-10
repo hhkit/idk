@@ -13,10 +13,10 @@ End Header --------------------------------------------------------*/
 #version 450
 #define SHADOW_TRANSFORMS 6
 
-layout(location = 1) in VS_OUT
+layout(location = 5) in VS_OUT
 {
-  vec3 position;
-};
+  vec3 fragPos;
+} fp_in;
 
 U_LAYOUT(11,0) uniform BLOCK(CameraBlock)
 {
@@ -28,7 +28,7 @@ U_LAYOUT(11,0) uniform BLOCK(CameraBlock)
 
 void main()
 {
-	float dist = length(gl_FragCoord.xyz - PerCamera.light_pos);
+	float dist = length(fp_in.fragPos.xyz - PerCamera.light_pos);
 	
 	dist = dist / PerCamera.far_plane;
 	

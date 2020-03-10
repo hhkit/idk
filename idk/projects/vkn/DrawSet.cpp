@@ -54,6 +54,7 @@ namespace idk::vkn
 			the_interface.DrawIndexed(mesh.IndexCount(), static_cast<uint32_t>(ro.num_instances), 0, 0, static_cast<uint32_t>(ro.instanced_index));
 		return result;
 	}
+//#pragma optimize("", off)
 	void InstMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)
 	{
 		
