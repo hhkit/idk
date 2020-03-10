@@ -51,18 +51,52 @@ namespace idk
 
 		ImGui::SameLine();
 
+		if (ImGui::Button("Enable All Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+				elem.enabled = true;
+		}
+
+		ImGui::SameLine();
+
 		if (ImGui::Button("Disable All Lights"))
 		{
 			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
 				elem.enabled = false;
 		}
 
+
 		ImGui::SameLine();
 
-		if (ImGui::Button("Enable All Lights"))
+		if (ImGui::Button("Disable All Point Lights"))
 		{
 			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
-				elem.enabled = true;
+			{
+				if(elem.light.index() == 0)
+					elem.enabled = false;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disable All Spot Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 2)
+					elem.enabled = false;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disable All Directional Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 1)
+					elem.enabled = false;
+			}
 		}
 
 		struct ColumnHeader
