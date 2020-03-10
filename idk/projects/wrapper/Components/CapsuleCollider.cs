@@ -3,22 +3,22 @@
     public class CapsuleCollider
         : Collider
     {
-        Vector3 center
+        public Vector3 center
         {
             get => Bindings.ColliderCapsuleGetCenter(handle);
             set => Bindings.ColliderCapsuleSetCenter(handle, value);
         }
-        Vector3 direction
+        public Vector3 direction
         {
             get => Bindings.ColliderCapsuleGetDirection(handle);
             set => Bindings.ColliderCapsuleSetDirection(handle, value);
         }
-        float height
+        public float height
         {
             get => Bindings.ColliderCapsuleGetHeight(handle);
             set => Bindings.ColliderCapsuleSetHeight(handle, value);
         }
-        float radius
+        public float radius
         {
             get => Bindings.ColliderCapsuleGetRadius(handle);
             set => Bindings.ColliderCapsuleSetRadius(handle, value);
