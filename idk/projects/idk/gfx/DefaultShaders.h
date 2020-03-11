@@ -33,6 +33,7 @@ namespace idk
 		FDeferredPostAmbient,
 		FDeferredCombine,
 		FDeferredHDR,
+		FDeferredBloom,
 		FPointShadow,
 		FMax
 	};

@@ -170,7 +170,6 @@ vec3 ShadowCoords(vec4 fPosInLS)
 	 // perform perspective divide
 	 fPosInLS.xyz=fPosInLS.xyz/fPosInLS.w;
     vec3 projCoords = fPosInLS.xyz *0.5f + 0.5f;
-	//projCoords =  ;
 	
 	return projCoords.xyz ;
 }
@@ -178,14 +177,11 @@ float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3
 {
 	vec3 projCoords = ShadowCoords(fPosInLS);
 	
-	if(projCoords.x>0.f && projCoords.y > 0.f)
+	//Oversampling check
+	if(projCoords.x > 0.f && projCoords.y > 0.f && projCoords.z <= 1.f)
 	{					
 		{//Other
-		
-			//Oversampling check
-			if(projCoords.z > 1.0f)
-				return 0.f;
-				
+						
 			float curDepth = projCoords.z;
 				
 			//Bias calculation
@@ -223,7 +219,7 @@ float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3
 float ShadowCalculation(Light light, samplerCube shadow_tex , vec3 lightDir , vec3 normal,vec4 fPosInLS, float far_plane, vec3 light_pos)
 {
 
-	vec3 projCoords = ShadowCoords(fPosInLS);
+	vec3 projCoords = fPosInLS.xyz;
 	
 	vec3 fragToLight = projCoords - light_pos; 
     float closestDepth = texture(shadow_tex, fragToLight).r;
@@ -236,7 +232,7 @@ float ShadowCalculation(Light light, samplerCube shadow_tex , vec3 lightDir , ve
 		if(closestDepth > 1.0f)
 			return 0.f;
 			
-		float curDepth = closestDepth;
+		float curDepth = length(fragToLight);
 			
 		//Bias calculation
 		//float bias = max(0.005 * (1.0 - dot(normal,lightDir)),0.009);

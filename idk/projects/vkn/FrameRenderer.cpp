@@ -762,129 +762,127 @@ namespace idk::vkn
 //#pragma optimize("", off)
 	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
 	{
-
 		renderpasses::AddShadowPass(_pimpl->graph, shadow_range, state);
 		return;
-		const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
-		auto& rs = r[curr_state];
-		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-		if (!light.update_shadow)
-			return;
-		if (light.index == 1)
-		{
-			//auto& camData = *state.cameras->begin();
-			{
-				
-				
-				//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
-				static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
-				//for (auto& e : *state.d_lightmaps)
-				{
-					//for (auto& elem : light.light_maps)
-					auto& elem = light.light_maps[shadow_range.light_map_index];
-					{
-						auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
-						ShadowBinding shadow_binding;
-						shadow_binding.for_each_binder<has_setstate>(
-							[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
-						{
-							binder.SetState(cam, skel);
-						},
-							cam,
-							*state.skeleton_transforms);
-						GraphicsStateInterface gsi = { state };
-						gsi.range = shadow_range;
-						auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-						the_interface.GenerateDS(rs.dpools,false);
+		//const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
+		//auto& rs = r[curr_state];
+		//vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+		//
+		//if (light.index == 1)
+		//{
+		//	//auto& camData = *state.cameras->begin();
+		//	{
+		//		
+		//		
+		//		//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
+		//		static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
+		//		//for (auto& e : *state.d_lightmaps)
+		//		{
+		//			//for (auto& elem : light.light_maps)
+		//			auto& elem = light.light_maps[shadow_range.light_map_index];
+		//			{
+		//				auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
+		//				ShadowBinding shadow_binding;
+		//				shadow_binding.for_each_binder<has_setstate>(
+		//					[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+		//				{
+		//					binder.SetState(cam, skel);
+		//				},
+		//					cam,
+		//					*state.skeleton_transforms);
+		//				GraphicsStateInterface gsi = { state };
+		//				gsi.range = shadow_range;
+		//				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+		//				the_interface.GenerateDS(rs.dpools,false);
 
-						//auto& swapchain = view.Swapchain();
-
-
-						//auto lm = elem.light_map->DepthAttachment().buffer;
-						auto sz = elem.light_map->DepthAttachment().buffer->Size();
-
-						vk::Rect2D render_area
-						{
-							vk::Offset2D{},
-							vk::Extent2D{sz.x,sz.y}
-						};
-						auto& rt = elem.light_map.as<VknFrameBuffer>();
-						vk::Framebuffer fb = rt.GetFramebuffer();
-						auto  rp = rt.GetRenderPass();
-						rt.PrepareDraw(cmd_buffer);
-						vector<vec4> clear_colors
-						{
-							vec4{1}
-						};
-						//if (the_interface.DrawCalls().size())
-							rs.FlagRendered();
-						dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
-						RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
-						dbg::EndLabel(cmd_buffer);
-						cmd_buffer.endRenderPass();
-					}
-					//cmd_buffer.end();
-					//rs.ubo_manager.UpdateAllBuffers();
-				}
-			}
-		}
-		else
-		{
-
-			auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
-			ShadowBinding shadow_binding;
-			shadow_binding.for_each_binder<has_setstate>(
-				[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
-			{
-				binder.SetState(cam, skel);
-			},
-				cam,
-				*state.skeleton_transforms);
-
-			GraphicsStateInterface gsi = { state };
-			gsi.range = shadow_range;
-
-			//for (auto& elem : light.light_maps)
-			auto& elem = light.light_maps[shadow_range.light_map_index];
-			{
-				//auto& rs = r[curr_state];
-				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-				the_interface.GenerateDS(rs.dpools,false);
+		//				//auto& swapchain = view.Swapchain();
 
 
-				//auto& swapchain = view.Swapchain();
-				//auto dispatcher = vk::DispatchLoaderDefault{};
-				//vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-				//vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-				//
-				//
-				//cmd_buffer.begin(begin_info, dispatcher);
-				auto sz = elem.light_map->DepthAttachment().buffer->Size();
-				vk::Rect2D render_area
-				{
-					vk::Offset2D{},
-					vk::Extent2D{sz.x,sz.y}
-				};
-				auto& rt = elem.light_map.as<VknFrameBuffer>();
-				vk::Framebuffer fb = rt.GetFramebuffer();
-				auto  rp = rt.GetRenderPass();
-				dbg::BeginLabel(cmd_buffer, "other shadow", color{ 0,0.2f,0.4f,1 });
-				rt.PrepareDraw(cmd_buffer);
-				vector<vec4> clear_colors
-				{
-					vec4{1}
-				};
-				if (the_interface.DrawCalls().size())
-					rs.FlagRendered();
-				RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+		//				//auto lm = elem.light_map->DepthAttachment().buffer;
+		//				auto sz = elem.light_map->DepthAttachment().buffer->Size();
 
-				cmd_buffer.endRenderPass();
-				dbg::EndLabel(cmd_buffer);
+		//				vk::Rect2D render_area
+		//				{
+		//					vk::Offset2D{},
+		//					vk::Extent2D{sz.x,sz.y}
+		//				};
+		//				auto& rt = elem.light_map.as<VknFrameBuffer>();
+		//				vk::Framebuffer fb = rt.GetFramebuffer();
+		//				auto  rp = rt.GetRenderPass();
+		//				rt.PrepareDraw(cmd_buffer);
+		//				vector<vec4> clear_colors
+		//				{
+		//					vec4{1}
+		//				};
+		//				//if (the_interface.DrawCalls().size())
+		//					rs.FlagRendered();
+		//				dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
+		//				RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+		//				dbg::EndLabel(cmd_buffer);
+		//				cmd_buffer.endRenderPass();
+		//			}
+		//			//cmd_buffer.end();
+		//			//rs.ubo_manager.UpdateAllBuffers();
+		//		}
+		//	}
+		//}
+		//else
+		//{
 
-				//cmd_buffer.end();
+		//	auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
+		//	ShadowBinding shadow_binding;
+		//	shadow_binding.for_each_binder<has_setstate>(
+		//		[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
+		//	{
+		//		binder.SetState(cam, skel);
+		//	},
+		//		cam,
+		//		*state.skeleton_transforms);
 
-			}
-		}
+		//	GraphicsStateInterface gsi = { state };
+		//	gsi.range = shadow_range;
+
+		//	//for (auto& elem : light.light_maps)
+		//	auto& elem = light.light_maps[shadow_range.light_map_index];
+		//	{
+		//		//auto& rs = r[curr_state];
+		//		auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
+		//		the_interface.GenerateDS(rs.dpools,false);
+
+
+		//		//auto& swapchain = view.Swapchain();
+		//		//auto dispatcher = vk::DispatchLoaderDefault{};
+		//		//vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
+		//		//vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
+		//		//
+		//		//
+		//		//cmd_buffer.begin(begin_info, dispatcher);
+		//		auto sz = elem.light_map->DepthAttachment().buffer->Size();
+		//		vk::Rect2D render_area
+		//		{
+		//			vk::Offset2D{},
+		//			vk::Extent2D{sz.x,sz.y}
+		//		};
+		//		auto& rt = elem.light_map.as<VknFrameBuffer>();
+		//		vk::Framebuffer fb = rt.GetFramebuffer();
+		//		auto  rp = rt.GetRenderPass();
+		//		dbg::BeginLabel(cmd_buffer, "other shadow", color{ 0,0.2f,0.4f,1 });
+		//		rt.PrepareDraw(cmd_buffer);
+		//		vector<vec4> clear_colors
+		//		{
+		//			vec4{1}
+		//		};
+		//		if (the_interface.DrawCalls().size())
+		//			rs.FlagRendered();
+		//		RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
+
+		//		cmd_buffer.endRenderPass();
+		//		dbg::EndLabel(cmd_buffer);
+
+		//		//cmd_buffer.end();
+
+		//	}
+		//}
 
 	}
 

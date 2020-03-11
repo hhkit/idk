@@ -470,6 +470,8 @@ namespace idk
 					{
 						active_light_buffer.emplace_back(i);
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
+						for (auto& elem : light.light_maps)
+							elem.UpdatePointMat(light);					
 					}
 					if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgPointLight", true))
 						LightVolDbg::DbgLight(sphere,col);
@@ -498,26 +500,33 @@ namespace idk
 			case index_in_variant_v<DirectionalLight, LightVariant>:
 			{
 				///////////////////////////////////////>>>>>>>>>>>>>>>>>>>>>>>
-				unsigned k = 0;// , j = 1;
 				light.camDataRef = camera;
 
-				auto copy_light = light;
-
-				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index,copy_light.light_maps);
-				
-				color col = color{ 0.3f, 0.2f, 0.6f, 1.0f };
-				for (auto& elem : copy_light.light_maps)
+				if (camera.is_shadow)
 				{
-					elem.SetCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
-					if(Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgDirectionalLight", true))
-						LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection* light.v), col*(k+1));
-					++k;
-				}
-				auto new_index = new_lights.size();
-				new_lights.emplace_back(copy_light);
-				active_light_buffer.emplace_back(lights.size() + new_index); //new_lights is gonna be appended at the back of the set
-				directional_light_buffer.emplace_back(lights.size() + new_index);
+					unsigned k = 0;// , j = 1;
+					light.update_shadow = true;
+					auto copy_light = light;
 
+					copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index, copy_light.light_maps);
+
+					color col = color{ 0.3f, 0.2f, 0.6f, 1.0f };
+					for (auto& elem : copy_light.light_maps)
+					{
+						elem.UpdateCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
+						if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgDirectionalLight", true))
+							LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection * light.v), col * (k + 1));
+						++k;
+					}
+					auto new_index = new_lights.size();
+					new_lights.emplace_back(copy_light);
+					active_light_buffer.emplace_back(lights.size() + new_index); //new_lights is gonna be appended at the back of the set
+					directional_light_buffer.emplace_back(lights.size() + new_index);
+				}
+				else
+				{
+					light.update_shadow = false;
+				}
 				//active_light_buffer.emplace_back(i);
 
 				
@@ -1280,6 +1289,7 @@ namespace idk
 		renderer_fragment_shaders[FDeferredPostAmbient] = LoadShader("/engine_data/shaders/deferred_post_ambient.frag");
 		renderer_fragment_shaders[FDeferredCombine] = LoadShader("/engine_data/shaders/deferred_combine.frag");
 		renderer_fragment_shaders[FDeferredHDR] = LoadShader("/engine_data/shaders/deferred_hdr.frag");
+		renderer_fragment_shaders[FDeferredBloom] = LoadShader("/engine_data/shaders/deferred_bloom.frag");
 		renderer_fragment_shaders[FPointShadow] = LoadShader("/engine_data/shaders/point_shadow.frag");
 
 		////////////////////Load geometry Shaders

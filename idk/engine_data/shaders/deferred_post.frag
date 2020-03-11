@@ -97,18 +97,18 @@ void main()
 		Light curr_light = LightBlk.lights[i];
 		vec3 result = pbr_metallic(curr_light, view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		vec4 cascade_c = vec4(0,0,0,0);
-		if(curr_light.type == 0)
-		{
-			if(curr_light.cast_shadow!=0)
-			{
-				if(curr_light.cast_shadow!=0)
-				{
-					result *= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
-				}
-			}
-			++k;
-		}
-		else if (curr_light.type == 1)
+		//if(curr_light.type == 0)
+		//{
+		//	
+		//	if(curr_light.cast_shadow!=0)
+		//	{
+		//		result *= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
+		//		//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
+		//	}
+		//	
+		//	++k;
+		//}
+		if (curr_light.type == 1)
 		{
 			if(curr_light.cast_shadow!=0)
 			{
@@ -127,7 +127,8 @@ void main()
 				//{
 				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
 				//}
-				result *= shadow_factor;	
+				result *= shadow_factor;
+				//shadow_accum -= shadow_factor;				
 				++j;
 			}
 			else
@@ -141,11 +142,14 @@ void main()
 			if(curr_light.cast_shadow!=0)
 			{
 				result *= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+				//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+			
 			}
 		} 
 		
 		light_accum += result;// + cascade_c.xyz;
 	}
+	
 	vec3 F = mix(vec3(0.04), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
 	vec3 kD = 1.0 - kS;
