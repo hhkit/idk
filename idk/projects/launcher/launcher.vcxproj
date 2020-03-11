@@ -144,7 +144,6 @@ if not exist "$(OutDir)editor_data" mklink /J "$(OutDir)editor_data" "$(Solution
 if not exist "$(OutDir)engine_data" mklink /J "$(OutDir)engine_data" "$(SolutionDir)engine_data" 
 if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
-if not exist "$(OutDir)scripts" mklink /J "$(OutDir)scripts" "$(SolutionDir)scripts"
 if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <Outputs>x</Outputs>
     </CustomBuildStep>
@@ -176,7 +175,6 @@ if not exist "$(OutDir)editor_data" mklink /J "$(OutDir)editor_data" "$(Solution
 if not exist "$(OutDir)engine_data" mklink /J "$(OutDir)engine_data" "$(SolutionDir)engine_data" 
 if not exist "$(OutDir)mono" mklink /J "$(OutDir)mono" "$(SolutionDir)dep\deploy\mono"
 if not exist "$(OutDir)tools" mklink /J "$(OutDir)tools" "$(SolutionDir)tools"
-if not exist "$(OutDir)scripts" mklink /J "$(OutDir)scripts" "$(SolutionDir)scripts"
 if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
       <Outputs>x</Outputs>
     </CustomBuildStep>

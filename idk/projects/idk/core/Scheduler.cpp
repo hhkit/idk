@@ -73,6 +73,11 @@ namespace idk
 
 		_last_frame = _this_frame;
 	}
+	void Scheduler::ResetTimings()
+	{
+		_accumulated_fixed_dt = _fixed_dt;
+		_accumulated_real_dt = _game_update;
+	}
 	seconds Scheduler::GetFixedDeltaTime()noexcept
 	{
 		return _fixed_dt;

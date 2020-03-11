@@ -43,7 +43,7 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
-		void RespondToPackets(span<ElectronView>);
+		void UpdatePredictions(span<ElectronView>);
 		void PreparePackets(span<ElectronView>);
 
 		void AddCallbackTarget(Handle<mono::Behavior> behavior);

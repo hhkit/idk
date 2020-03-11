@@ -13,6 +13,9 @@
 
 #include <core/Core.h>
 #include <process.h>
+#include <io.h>
+#include <fcntl.h>
+#include <processthreadsapi.h>
 
 #include "InputManager.h"
 #include "WindowsApplication.h"
@@ -67,23 +70,122 @@ namespace idk::win
 
 	}
 
-	void Windows::Exec(string_view path, span<const char*> argv, bool wait)
+	string Windows::Exec(string_view path, span<const char*> argv, bool wait)
 	{
 		vector<const char*> args{ path.data() };
 		for (auto& elem : argv)
 			args.emplace_back(elem);
 		args.emplace_back(nullptr);
 
-		auto ret = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+		intptr_t ret{};
+
 		if (wait)
-			LOG_TO(LogPool::SYS, "Executed %s with retcode %d", path.data(), ret);
-		else
-			LOG_TO(LogPool::SYS, "Executing %s with child %p", path.data(), ret);
-		if (!wait)
 		{
+			SECURITY_ATTRIBUTES saAttr;
+
+			printf("\n->Start of parent execution.\n");
+
+			// Set the bInheritHandle flag so pipe handles are inherited. 
+
+			saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+			saAttr.bInheritHandle = TRUE;
+			saAttr.lpSecurityDescriptor = NULL;
+
+			HANDLE g_hChildStd_OUT_Rd = NULL;
+			HANDLE g_hChildStd_OUT_Wr = NULL;
+
+			PROCESS_INFORMATION info;
+			ZeroMemory(&info, sizeof(info));
+			STARTUPINFOA startup;
+			ZeroMemory(&startup, sizeof(startup));
+
+			auto command = string{};
+			for (auto& elem : argv)
+				command += string{ elem } +" ";
+
+
+
+			//*/
+			// create a pipe for the output
+
+			if (!CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0))
+				return "failed to create output pipe";
+
+			// Ensure the read handle to the pipe for STDOUT is not inherited.
+			if (!SetHandleInformation(g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0))
+				return "I have no idea";
+
+
+			startup.dwFlags |= STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+			startup.wShowWindow = SW_HIDE;
+			startup.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+			startup.hStdError = g_hChildStd_OUT_Wr;
+			startup.hStdOutput = g_hChildStd_OUT_Wr;
+
+			if (CreateProcessA(path.data(), command.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &startup, &info))
+			{
+				string retval; 
+
+				CloseHandle(g_hChildStd_OUT_Wr);
+				CloseHandle(info.hProcess);
+				CloseHandle(info.hThread);
+				for (;;)
+				{
+					DWORD dwRead;
+					char readbuf[256];
+					auto bSuccess = ReadFile(g_hChildStd_OUT_Rd, readbuf, 256, &dwRead, nullptr);
+					if (!bSuccess || dwRead == 0)
+						break;
+					retval += string_view(readbuf, dwRead);
+				}
+
+				return retval;
+			}
+			else
+			{
+				char error_buffer[256];
+				auto dw = GetLastError();
+				FormatMessageA(
+					FORMAT_MESSAGE_FROM_SYSTEM |
+					FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					dw,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+					error_buffer,
+					0, NULL);
+				LOG_TO(LogPool::SYS, "%s", error_buffer);
+
+				return "fail";
+			}
+			/*/
+			auto pfile = _popen((string{ path } + " " + command).data(), "rt");
+			if (!pfile)
+				return {};
+
+			string retval;
+			char printbuff[256];
+			while (fgets(printbuff, 256, pfile))
+				retval += printbuff;
+
+			if (feof(pfile))
+				LOG_TO(LogPool::SYS, "Process returned %d", _pclose(pfile));
+			else
+				LOG_TO(LogPool::SYS, "Error: failed to read file to the end");
+				
+			return retval;
+			*/
+		}
+		else
+		{
+			ret = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+			LOG_TO(LogPool::SYS, "Executing %s with child %p", path.data(), ret);
+
 			if (children.size() >= std::thread::hardware_concurrency())
 				WaitForChildren();
 			children.emplace_back(ret);
+
+			// no output
+			return {};
 		}
 	}
 	void Windows::WaitForChildren()

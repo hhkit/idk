@@ -30,7 +30,7 @@ namespace idk
 	//	Signal<>      OnWindowed;
 		// app
 		virtual void PollEvents() = 0;
-		virtual void Exec(string_view path, span<const char*> argv, bool wait) = 0;
+		virtual string Exec(string_view path, span<const char*> argv, bool wait) = 0;
 		virtual void WaitForChildren() {};
 
 		// movement

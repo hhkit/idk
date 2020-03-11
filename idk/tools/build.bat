@@ -6,7 +6,7 @@ set VsWhere=%4
 setlocal enabledelayedexpansion
 
 for /f "usebackq tokens=*" %%i in (`%4 -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe`) do (
-  "%%i" %SolnName% -target:%ProjName% /p:Configuration=%Config%
+  "%%i" %SolnName% -target:%ProjName% /p:Configuration=%Config% /verbosity:m /nologo
   exit /b !errorlevel!
 )
 cd %dir%
