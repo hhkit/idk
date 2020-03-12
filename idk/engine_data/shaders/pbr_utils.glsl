@@ -1,7 +1,7 @@
 import /engine_data/shaders/pbr_utils.glsl
 
 #define POISSON_BIAS 1.f/ 700.f
-#define DIVISIBLE_FACTOR 1.f/14.f
+#define DIVISIBLE_FACTOR 1.f/15.f
 
 vec3 fresnel(float cos_theta, vec3 f0)
 {
@@ -197,7 +197,7 @@ float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3
 			vec2 pc = projCoords.xy;
 			
 			
-			for(int x = -1; x <= 1; ++x)
+			for(int x = -2; x <= 2; ++x)
 			{		
 				avgDepth += computePCF(shadow_tex,pc, texelSize,tc_z,bias,curDepth,x);
 				avgDepth -= computeStratifiedPoisson(shadow_tex,pc,texelSize, tc_z, bias,x);

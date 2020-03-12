@@ -29,7 +29,7 @@ namespace idk::vkn
 			shadow_maps_2d.resize(active_lights.size(), def_2d);
 			active_dir_lights.insert(active_dir_lights.end(), active_directional_light.begin() + data.dir_light_begin, active_directional_light.begin() + data.dir_light_end);
 			//shadow_maps_directional.resize(active_directional_light.size(), def_2d);
-			shadow_maps_cube.resize(active_lights.size(), def_cube);
+			//shadow_maps_cube.resize(active_lights.size(), def_cube);
 			for (auto& light_idx : active_lights)
 			{
 				auto& light = lights_data[light_idx];

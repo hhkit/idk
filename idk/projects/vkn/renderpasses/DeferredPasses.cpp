@@ -290,10 +290,10 @@ namespace idk::vkn::renderpasses
 		draw_set.Render(context);
 	}
 
-	CombinePass::CombinePass(FrameGraphBuilder& builder, [[maybe_unused]] rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_hdr_tex, FrameGraphResource out_depth_tex)
+	CombinePass::CombinePass(FrameGraphBuilder& builder, [[maybe_unused]] rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex)
 	{
 		auto out_color_rsc= builder.write(out_color_tex, WriteOptions{ false });
-		auto out_hdr_rsc = builder.write(out_hdr_tex, WriteOptions{ false });
+		auto out_hdr_rsc = CreateGBuffer(builder, "brightness layer", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ viewport.size });
 		auto out_depth_rsc= builder.write(out_depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		out_color = out_color_rsc;
 		out_hdr = out_hdr_rsc;
@@ -318,7 +318,7 @@ namespace idk::vkn::renderpasses
 		);;
 		builder.set_output_attachment(out_hdr_rsc, 3, AttachmentDescription
 			{
-				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -402,6 +402,14 @@ namespace idk::vkn::renderpasses
 
 		context.SetCullFace({});
 		context.SetDepthTest(true);
+
+		//uint32_t i = 0;
+		
+		context.SetBlend(3);
+		context.SetClearColor(3, idk::color{ 0,0,0,0 });
+		//context.SetClearColor(i, idk::color{ 0,0,0,0 });
+	
+		
 
 		auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
 		BindMesh(context, fsq_requirements, mesh);
@@ -976,7 +984,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		auto& accum_pass_spec = graph.addRenderPass<AccumPassSetPair>("Accum pass Specular", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_spec).RenderPass();
 
 
-		auto& combine_spec_pass = graph.addRenderPass<CombinePass>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, combine_def_pass.out_color,combine_def_pass.out_hdr , combine_def_pass.out_depth);
+		auto& combine_spec_pass = graph.addRenderPass<CombinePass>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, combine_def_pass.out_color, combine_def_pass.out_depth);
 
 		//auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, combine_spec_pass.out_color, combine_spec_pass.out_depth);
 		
@@ -986,9 +994,9 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 			combine_spec_pass.out_depth
 			).RenderPass();
 
-		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", gfx_state.camera.viewport, unlit_pass.color_rsc, unlit_pass.depth_rsc);
+		//auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", gfx_state.camera.viewport, unlit_pass.color_rsc, unlit_pass.depth_rsc);
 
-		return { bloom_pass.bloom_rsc,bloom_pass.bloom_depth_rsc};
+		return { unlit_pass.color_rsc,unlit_pass.depth_rsc};
 	}
 
 

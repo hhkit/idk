@@ -529,7 +529,7 @@ struct BloomPass : PassUtil, FsqUtil
 	BloomPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget>, FullRenderData& rd) :PassUtil{ rd }
 	{
 		bloom_rsc = CreateGBuffer(builder, "Bloom", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
-		bloom_depth_rsc = CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth);
+		bloom_depth_rsc = CreateGBuffer(builder, "Bloom Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth);
 		builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;

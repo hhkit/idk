@@ -470,6 +470,7 @@ namespace idk::vkn
 //
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
+		UNREFERENCED_PARAMETER(frame_index);
 		_pimpl->graph.Reset();
 
 		auto& lights = (*state.shadow_ranges);
@@ -579,7 +580,7 @@ namespace idk::vkn
 			cmd_buffer.begin(begin_info, dispatcher);
 			for (auto range : lights)
 			{
-				PreRenderShadow(range, state, _pre_states, curr_state, frame_index);
+				PreRenderShadow(range, state);
 			}
 			cmd_buffer.end();
 			rs.ubo_manager.UpdateAllBuffers();
@@ -760,7 +761,7 @@ namespace idk::vkn
 		}
 	}
 //#pragma optimize("", off)
-	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state, vector<RenderStateV2>& r, size_t& curr_state, uint32_t frame_index)
+	void FrameRenderer::PreRenderShadow(GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
 		renderpasses::AddShadowPass(_pimpl->graph, shadow_range, state);
 		return;
@@ -1279,6 +1280,9 @@ namespace idk::vkn
 	//and command buffer hasn't ended
 	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs, rect vp)
 	{
+		UNREFERENCED_PARAMETER(vp);
+		UNREFERENCED_PARAMETER(rs);
+		UNREFERENCED_PARAMETER(state);
 #if 0 
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();

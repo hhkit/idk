@@ -99,6 +99,39 @@ namespace idk
 			}
 		}
 
+		ImGui::SameLine();
+
+		if (ImGui::Button("Toggle All Point Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 0)
+					elem.casts_shadows = !elem.casts_shadows;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Toggle All Directional Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 1)
+					elem.casts_shadows = !elem.casts_shadows;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Toggle All Spot Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 2)
+					elem.casts_shadows = !elem.casts_shadows;
+			}
+		}
+
 		struct ColumnHeader
 		{
 			const char* label;
