@@ -155,6 +155,7 @@ namespace idk
 		ADD_WINDOW(IGE_AnimatorWindow);
 		ADD_WINDOW(IGE_ProfilerWindow);
 		ADD_WINDOW(IGE_ProjectSettings);	
+		ADD_WINDOW(IGE_NetworkSettings);
 		ADD_WINDOW(IGE_HelpWindow);	
 #undef ADD_WINDOW
 

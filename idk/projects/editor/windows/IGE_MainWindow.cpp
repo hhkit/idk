@@ -508,7 +508,8 @@ namespace idk {
 			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_LightLister>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_ProjectWindow>()->window_name, bottom_left);
             ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_HierarchyWindow>()->window_name, left);
-            ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_InspectorWindow>()->window_name, right);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_InspectorWindow>()->window_name, right);
+			ImGui::DockBuilderDockWindow(ide.FindWindow<IGE_NetworkSettings>()->window_name, right);
             ImGui::DockBuilderFinish(dockspace_id);
         }
 

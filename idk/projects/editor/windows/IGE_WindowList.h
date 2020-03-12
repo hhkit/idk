@@ -29,3 +29,4 @@ Include all windows here
 #include <editor/windows/IGE_AnimatorWindow.h>
 #include <editor/windows/IGE_HelpWindow.h>
 #include <editor/windows/IGE_LightLister.h>
+#include <editor/windows/IGE_NetworkSettings.h>

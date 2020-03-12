@@ -122,6 +122,24 @@ namespace idk
 		return nullptr; // no connection found
 	}
 
+	void NetworkSystem::SetPacketLoss(float percent)
+	{
+		if (lobby)
+			lobby->SetPacketLoss(percent);
+
+		if (client)
+			client->SetPacketLoss(percent);
+	}
+
+	void NetworkSystem::SetLatency(seconds time)
+	{
+		if (lobby)
+			lobby->SetLatency(time);
+
+		if (client)
+			client->SetLatency(time);
+	}
+
 	void NetworkSystem::ReceivePackets()
 	{
 		if (lobby || client)

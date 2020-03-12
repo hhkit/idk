@@ -40,6 +40,9 @@ namespace idk
 		void BroadcastMessage(GameChannel channel, InstantiationFunc&& func);
 		IDManager& GetIDManager() { return *id_manager; }
 
+		void SetPacketLoss(float percent);
+		void SetLatency(seconds time);
+
 		void ReceivePackets();
 		void SendPackets();
 
