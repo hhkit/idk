@@ -215,6 +215,14 @@ namespace idk::vkn
 		}
 		layout = new_layout;
 	}
+	bool UniformUtils::binding_manager::set_bindings::SetOverride(vk::DescriptorSet ds, vk::DescriptorSetLayout layout_)
+	{
+		const bool valid = layout_ == layout ;
+		if (valid)
+			ds_override= ds;
+		return valid;
+	}
+	
 	void UniformUtils::binding_manager::set_bindings::Bind(BindingInfo info)
 	{
 		//if (bindings.size() <= info.binding)
@@ -229,40 +237,49 @@ namespace idk::vkn
 	{
 		bindings.erase(binding);
 	}
-	monadic::result<vector_span<UniformUtils::BindingInfo>, string> UniformUtils::binding_manager::set_bindings::FinalizeDC(CollatedLayouts_t& collated_layouts, vector_span_builder<BindingInfo>& builder)
+	monadic::result<UniformUtils::binding_manager::binding_span, string> UniformUtils::binding_manager::set_bindings::FinalizeDC(CollatedLayouts_t& collated_layouts, vector_span_builder<BindingInfo>& builder)
 	{
-		monadic::result< vector_span<BindingInfo>, string> result{};
+		monadic::result< UniformUtils::binding_manager::binding_span, string> result{};
 		builder.start();
 		auto& set_bindings = builder;
 		uint32_t type_count[DescriptorTypeI::size()] = {};
 		if (dirty)
 		{
-			size_t max_size = 0;
-			for (auto& binding : bindings)
+			if (ds_override)
 			{
-				max_size += binding.second.size();
+				result = *ds_override;
 			}
-			for (auto& [binding_index, binding] : bindings)
+			else
 			{
-				for (auto& elem : binding)
+
+				size_t max_size = 0;
+				for (auto& binding : bindings)
 				{
-					if (elem)
+					max_size += binding.second.size();
+				}
+				for (auto& [binding_index, binding] : bindings)
+				{
+					for (auto& elem : binding)
 					{
-						auto& binding_elem = set_bindings.emplace_back(*elem);
-						type_count[binding_elem.type_index]++;
+						if (elem)
+						{
+							auto& binding_elem = set_bindings.emplace_back(*elem);
+							type_count[binding_elem.type_index]++;
+						}
 					}
 				}
-			}
 
-			{
-				auto& cl = collated_layouts[layout];
-				cl.first++;
-				for (size_t i = 0; i < std::size(total_desc); ++i)
 				{
-					cl.second[i] = total_desc[i];
+					auto& cl = collated_layouts[layout];
+					cl.first++;
+					for (size_t i = 0; i < std::size(total_desc); ++i)
+					{
+						cl.second[i] = total_desc[i];
+					}
+					result = set_bindings.end();
+					dirty = false;
 				}
-				result = set_bindings.end();
-				dirty = false;
+
 			}
 		}
 
@@ -312,6 +329,10 @@ namespace idk::vkn
 			auto itr = bindings.find(binding_index);
 			return  itr != bindings.end() && itr->second.size() > array_index && itr->second[array_index];
 		}
+	}
+	bool UniformManager::BindDescriptorSet(uint32_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl)
+	{
+		return _bindings.SetOverride(set, ds,dsl);
 	}
 	bool UniformManager::BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
@@ -365,6 +386,28 @@ namespace idk::vkn
 	{
 		return _bindings.BindAttachment(info, array_index, texture, skip_if_bound, layout);
 	}
+
+	namespace visitors
+	{
+		template<typename T>
+		struct FinalizeChecker
+		{
+			vector_span_builder<T> builder;
+			uint32_t index;
+			FinalizeChecker(vector_span_builder<T> builder_, uint32_t index_):builder{builder_},index{index_}{}
+			void operator()(vk::DescriptorSet ds)
+			{
+				builder.emplace_back(index, ds);
+			}
+			template<typename vspan>
+			void operator()(vspan bindings)
+			{
+				if (bindings.size())
+					builder.emplace_back(index, bindings);
+			}
+		};
+	}
+
 	std::optional<vector_span<UniformManager::set_binding_t>>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
 	{
 		vector_span_builder builder{ all_sets };
@@ -382,8 +425,7 @@ namespace idk::vkn
 			auto bindings = set.FinalizeDC(_collated_layouts,_buffer_builder);
 			if (bindings)
 			{
-				if(bindings->size())
-					builder.emplace_back(index, *bindings);
+				std::visit(visitors::FinalizeChecker{ builder,index }, *bindings);
 			}
 		}
 		return builder.end();
@@ -394,32 +436,61 @@ namespace idk::vkn
 		_dud.Reset();
 		auto dsl = dm.Allocate(_collated_layouts);
 		size_t i = 0;
-		for (auto& [set, binding] : bindings)
+		for (auto& [set, bindingv] : bindings)
 		{
-			auto layout = [](auto& bindings)
+			vk::DescriptorSet result = {};
+			if (bindingv.index() == index_in_variant_v<vk::DescriptorSet, std::decay_t<decltype(bindingv)>>)
 			{
-				vk::DescriptorSetLayout layout{};
-				for (auto& binding : bindings)
-				{
-					if (binding.layout)
-					{
-						layout = binding.layout;
-						break;
-					}
-				}
-				return layout;
-			}(binding);
-			auto itr = dsl.find(layout);
-			if (itr != dsl.end())
-			{
-				auto ds = itr->second.GetNext();
-				//TODO update ds
-				UpdateUniformDS(ds, binding.to_span(), _dud);
-				descriptor_sets[i] = ds;
+				result = std::get<vk::DescriptorSet>(bindingv);
 			}
+			else
+			{
+				auto& binding = std::get<vector_span<BindingInfo>>(bindingv);
+				auto layout = [](auto& bindings)
+				{
+					vk::DescriptorSetLayout layout{};
+					for (auto& binding : bindings)
+					{
+						if (binding.layout)
+						{
+							layout = binding.layout;
+							break;
+						}
+					}
+					return layout;
+				}(binding);
+				auto itr = dsl.find(layout);
+				if (itr != dsl.end())
+				{
+					auto ds = itr->second.GetNext();
+					//TODO update ds
+					UpdateUniformDS(ds, binding.to_span(), _dud);
+					result = ds;
+				}
+
+			}
+			descriptor_sets[i] = result;
 			++i;
 		}
 		_dud.SendUpdates();
+	}
+	std::optional<vk::DescriptorSetLayout> UniformUtils::binding_manager::GetLayout(set_t set)
+	{
+		std::optional<vk::DescriptorSetLayout> result{};
+		auto itr = curr_bindings.find(set);
+		if (itr != curr_bindings.end())
+			result = itr->second.layout;
+		return result;
+	}
+	bool UniformUtils::binding_manager::SetOverride(set_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl)
+	{
+		bool bound = false;
+		auto itr = curr_bindings.find(set);
+		if (itr != curr_bindings.end() )
+		{
+			bound=itr->second.SetOverride(ds,dsl);
+		}
+		return bound;
 	}
 	void UniformUtils::binding_manager::AddBinding(set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts)
 	{

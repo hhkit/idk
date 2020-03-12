@@ -88,7 +88,7 @@ namespace idk::vkn
 		void BindIndexBuffer(IndexBuffer buffer, size_t offset, IndexType indexType)override;
 
 #pragma region Uniforms
-		void BindDescriptorSet(uint32_t set, vk::DescriptorSet ds) override;
+		void BindDescriptorSet(uint32_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl) override;
 		void BindUniform(string_view name, uint32_t index, string_view data, bool skip_if_bound = false)override;
 		//void BindUniform(vk::DescriptorSet ds, std::optional<string_view> data = {})override;
 		void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false,vk::ImageLayout layout= vk::ImageLayout::eGeneral)override;
