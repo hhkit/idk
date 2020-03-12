@@ -42,6 +42,7 @@ namespace idk
 
 		void Setup();
 		void SequentialUpdate();
+		void ResetTimings();
 		void ParallelizedUpdate();
 		template<typename ... Ts>
 		void SetPauseState(PausedSystemConfig<Ts...>);

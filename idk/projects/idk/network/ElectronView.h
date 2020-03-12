@@ -68,7 +68,7 @@ namespace idk
 
 		void CacheSentData();
 		void PrepareDataForSending();
-		void MoveGhost();
+		void MoveGhost(seconds delta);
 		MovePack PackMoveData();
 		GhostPack MasterPackData(int incoming_state_mask);
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);

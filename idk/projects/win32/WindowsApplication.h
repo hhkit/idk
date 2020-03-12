@@ -24,7 +24,7 @@ namespace idk::win
 		Windows(HINSTANCE hInstance, int nCmdShow);
 		~Windows();
 		void PollEvents() override;
-		void Exec(string_view path, span<const char*> argv, bool wait) override;
+		string Exec(string_view path, span<const char*> argv, bool wait) override;
 		void WaitForChildren() override;
 
 		int GetReturnVal();
