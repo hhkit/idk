@@ -97,14 +97,18 @@ namespace idk
 		}
 	}
 
-	void ElectronView::MoveGhost()
+	void ElectronView::MoveGhost(seconds delta)
 	{
 		if (std::get_if<Ghost>(&ghost_state))
 		{
-			auto advance = Core::GetDT().count();
-
 			for (unsigned i = 0; i < parameters.size(); ++i)
-				parameters[i]->GetGhost()->Update(advance);
+			{
+				auto& param = parameters[i];
+				if (param->interp_over > 0.0001f)
+					param->GetGhost()->Update(delta.count() / param->interp_over);
+				else
+					param->GetGhost()->Update(1.f);
+			}
 		}
 	}
 
