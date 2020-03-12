@@ -40,10 +40,13 @@ namespace idk
 		void BroadcastMessage(GameChannel channel, InstantiationFunc&& func);
 		IDManager& GetIDManager() { return *id_manager; }
 
+		void SetPacketLoss(float percent);
+		void SetLatency(seconds time);
+
 		void ReceivePackets();
 		void SendPackets();
 
-		void RespondToPackets(span<ElectronView>);
+		void UpdatePredictions(span<ElectronView>);
 		void PreparePackets(span<ElectronView>);
 
 		void AddCallbackTarget(Handle<mono::Behavior> behavior);

@@ -11,6 +11,7 @@
 #include <util/ioutils.h>
 #include <file/FileSystem.h>
 #include <core/GameState.inl>
+#include <core/Scheduler.h>
 
 #include <res/Guid.inl>
 #include <iostream>
@@ -87,6 +88,7 @@ namespace idk
 
 	void SceneManager::SetNextScene(RscHandle<Scene> s)
 	{
+		Core::GetScheduler().ResetTimings();
 		changing = true;
 		_next_scene = s;
 	}

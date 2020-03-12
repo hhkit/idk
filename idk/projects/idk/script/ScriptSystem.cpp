@@ -23,6 +23,7 @@
 
 #include <process.h>
 #include <ds/span.inl>
+#include <sstream>
 
 namespace idk::mono
 {
@@ -183,22 +184,52 @@ namespace idk::mono
 		auto proj_man = Core::GetSystem<ProjectManager>();
 		auto path_to_sln = string{ proj_man.GetProjectDir() } +'/' + string{ proj_man.GetProjectName() } +".sln";
 
+		auto wrap_string = [](string_view str) -> string
+		{
+			return "\"" + string{ str } +"\"";
+		};
+
 		vector<string> vals{ 
 			"/C",
-			string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/tools/" + "build.bat",
-			path_to_sln,
-			string{proj_man.GetProjectName()},
-			"Release",
-			string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/tools/" + "vswhere"
+			wrap_string(
+				wrap_string(string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/tools/" + "build.bat") + " " +
+				wrap_string(path_to_sln) + " " +
+				string{proj_man.GetProjectName()} + " " +
+				"Release" + " " +
+				wrap_string(string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/tools/" + "vswhere")
+			)
 		};
 		vector<const char*> nani;
 		for (auto& elem : vals)
 			nani.emplace_back(elem.data());
 
-		Core::GetSystem<Application>().Exec(
-			"cmd.exe",
+		auto logged_string = Core::GetSystem<Application>().Exec(
+			"c:/windows/system32/cmd.exe",
 			nani,
 			true
 		);
+
+		auto search = size_t{};
+
+		vector<string> tokens;
+
+		std::stringstream stream{ logged_string };
+		std::string token;
+		while (std::getline(stream, token))
+			tokens.emplace_back(token.data());
+
+		tokens.erase(std::remove_if(tokens.begin(), tokens.end(), [](const string& str)
+			{
+				if (str.size() < 2)
+					return true;
+
+				auto sv = string_view{ str };
+				sv.remove_prefix(1);
+				return sv.starts_with(":\\");
+			}), tokens.end());
+
+		LOG_TO(LogPool::GAME, "Compiling game project...");
+		for (auto& elem : tokens)
+			LOG_TO(LogPool::GAME, elem.c_str());
 	}
 }

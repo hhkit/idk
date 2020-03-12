@@ -64,6 +64,17 @@ namespace idk
 	{
 		server.SendPackets();
 	}
+
+	void Server::SetPacketLoss(float percent_loss)
+	{
+		server.SetPacketLoss(percent_loss);
+	}
+
+	void Server::SetLatency(seconds dur)
+	{
+		server.SetLatency(duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
+	}
+
 	float Server::GetRTT(int clientIndex) const
 	{
 		yojimbo::NetworkInfo info;
