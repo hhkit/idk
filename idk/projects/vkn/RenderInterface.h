@@ -49,6 +49,7 @@ namespace idk::vkn
 		//virtual void SetFrameBuffer(const Framebuffer& fb, uvec2 size);
 
 #pragma region Uniforms
+		virtual void BindDescriptorSet(uint32_t set,vk::DescriptorSet ds) = 0;
 		virtual void BindUniform(string_view name, uint32_t index, string_view data, bool skip_if_bound = false                                                                 )=0;
 		virtual void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral)=0;
 		//virtual void BindUniform(vk::DescriptorSet ds, std::optional<string_view> data                                                                                          )=0;

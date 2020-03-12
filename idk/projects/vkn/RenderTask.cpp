@@ -82,6 +82,10 @@ namespace idk::vkn
 	{
 		_dc_builder.SetIndexBuffer(IndexBindingData{ buffer,offset,indexType});
 	}
+	void RenderTask::BindDescriptorSet(uint32_t set, vk::DescriptorSet ds)
+	{
+		_uniform_manager.BindDescriptorSet(set,ds);
+	}
 	void RenderTask::BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound)
 	{
 		_uniform_manager.BindUniformBuffer(name, index, data,skip_if_bound);
