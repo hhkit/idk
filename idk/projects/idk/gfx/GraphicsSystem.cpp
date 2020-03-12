@@ -474,10 +474,18 @@ namespace idk
 	void CullLights(const CameraData& camera,ShadowMapPool& sm_pool,vector<LightData>& lights,vector<LightData>& new_lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, GraphicsSystem::RenderRange& range)
 	{
 
-		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		range.light_begin = active_light_buffer.size();
 		range.dir_light_begin = directional_light_buffer.size();
+
+		if (!camera.enabled)
+		{
+			range.light_end = active_light_buffer.size();
+			range.dir_light_end = directional_light_buffer.size();
+			LightVolDbg::EndCurrent();
+			return;
+		}
 		
+		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		//Perform camera light loop to populate the data
 		float n_plane = camera.near_plane, f_plane = camera.far_plane;
 
@@ -503,14 +511,20 @@ namespace idk
 				{
 					sphere sphere{ invert_rotation(light.v)[3],light.falloff };
 					color col = color{ 0.3f,0.6f,0.2f,1.0f };
+					light.update_shadow = false;
 					if (frustum.contains(sphere))
 					{
 						active_light_buffer.emplace_back(i);
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
 						if (light.cast_shadow)
+						{
 							for (auto& elem : light.light_maps)
-								elem.UpdatePointMat(light);					
+								elem.UpdatePointMat(light);
+							light.update_shadow = true;
+						}
 					}
+					
+
 					if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgPointLight", true))
 						LightVolDbg::DbgLight(sphere,col);
 
@@ -524,12 +538,15 @@ namespace idk
 				auto sphere = bounding_box_to_loose_sphere(bounding_box);
 
 				color col = color{ 0.3f,0.2f,0.6f,1.0f };
+				light.update_shadow = false;
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
 					light.camDataRef = camera;
 					col = color{ 0.5f,0.4f,0.0f,1.0f };
+					light.update_shadow = true;
 				}
+
 				if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgSpotLight", true))
 					LightVolDbg::DbgLight(sphere, col);
 				//LightVolDbg::DbgLight(light_frustum, col);
@@ -540,35 +557,33 @@ namespace idk
 				///////////////////////////////////////>>>>>>>>>>>>>>>>>>>>>>>
 				light.camDataRef = camera;
 
-				if (camera.is_shadow)
+				auto copy_light = light;
+
+				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index, copy_light.light_maps);
+
+				light.update_shadow = false;
+				if (light.cast_shadow)
 				{
 					unsigned k = 0;// , j = 1;
 					light.update_shadow = true;
-					auto copy_light = light;
-
-					copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index, copy_light.light_maps);
 
 					color col = color{ 0.3f, 0.2f, 0.6f, 1.0f };
-					if (light.cast_shadow)
-						for (auto& elem : copy_light.light_maps)
-						{
-								elem.UpdateCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
-							if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgDirectionalLight", true))
-								LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection * light.v), col * static_cast<float>(k + 1));
-							++k;
-						}
-					auto new_index = new_lights.size();
-					new_lights.emplace_back(copy_light);
-					active_light_buffer.emplace_back(lights.size() + new_index); //new_lights is gonna be appended at the back of the set
-					directional_light_buffer.emplace_back(lights.size() + new_index);
-				}
-				else
-				{
-					light.update_shadow = false;
-				}
-				//active_light_buffer.emplace_back(i);
 
-				
+					for (auto& elem : copy_light.light_maps)
+					{
+							elem.UpdateCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
+						if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgDirectionalLight", true))
+							LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection * light.v), col * static_cast<float>(k + 1));
+						++k;
+					}
+				}		
+
+				auto new_index = new_lights.size();
+				new_lights.emplace_back(copy_light);
+				active_light_buffer.emplace_back(lights.size() + new_index); //new_lights is gonna be appended at the back of the set
+				directional_light_buffer.emplace_back(lights.size() + new_index);
+				//active_light_buffer.emplace_back(i);
+	
 			}
 				break;
 			}
@@ -1118,7 +1133,7 @@ namespace idk
 					ProcessFonts(result.font_render_data, result.font_buffer, result.font_range, range);
 					if (debug_light_vol-- == 0)
 						LightVolDbg::RenderNext();
-					DbgIndex() = i++;
+					DbgIndex() = s_cast<int>(i++);
 					CullLights(camera, result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range);
 
 				}
@@ -1263,9 +1278,6 @@ namespace idk
 			}
 		}
 
-		for( auto& range: result.culled_render_range)
-		if (range.light_end - range.light_begin < 0)
-			throw("Im sad");
 		//SubmitBuffers(std::move(result));
 		SwapWritingBuffer();
 	}

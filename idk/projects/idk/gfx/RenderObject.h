@@ -146,7 +146,7 @@ namespace idk
 		RscHandle<RenderTarget> render_target{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
-		bool is_shadow = false;
+		bool enabled = true;
         CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
 		rect viewport;
