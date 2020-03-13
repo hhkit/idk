@@ -3,6 +3,8 @@
 #include <vkn/BufferHelpers.h>
 #include <vkn/VulkanView.h>
 #include <sstream>
+
+#include <ds/index_span.inl>
 namespace idk::vkn
 {
 	VulkanView& View();
@@ -22,13 +24,13 @@ namespace idk::vkn::hlp
 			for (auto& mem : mems.second.memories)
 			{
 				size_t free = 0;
-				for (auto& freed : mem.free_list)
+				for (auto& freed : mem.collator.free_list)
 				{
-					free += freed.end - freed.start;
+					free += freed.size();
 				}
-				out << "\t\tFree Chunks[" << mem.free_list.size()<< "]\n";
-				out << "\t\tSlice Allocated[" << (mem.sz - free) << "/" << mem.sz << "]\n";
-				chunk_alloced += mem.sz;
+				out << "\t\tFree Chunks[" << mem.collator.free_list.size()<< "]\n";
+				out << "\t\tSlice Allocated[" << (mem.sz() - free) << "/" << mem.sz() << "]\n";
+				chunk_alloced += mem.sz();
 				chunk_free += free;
 			}
 			out << "\tChunk Allocated[" << (chunk_alloced - chunk_free) << "/" << chunk_alloced << "]\n";
@@ -60,6 +62,9 @@ namespace idk::vkn::hlp
 		return out.str();
 	}
 	using detail::Memories;
+
+
+//#pragma optimize("",off)
 
 	MemoryAllocator::MemoryAllocator(vk::Device d, vk::PhysicalDevice pd) :device{ d }, pdevice{ pd }{_allocators.emplace(this); }
 	MemoryAllocator::MemoryAllocator() : device{ *View().Device() }, pdevice{ View().PDevice() }{_allocators.emplace(this); }
@@ -123,66 +128,19 @@ namespace idk::vkn::hlp
 //// 
 	void Memories::Memory::Free(size_t offset, size_t size)
 	{
-		MemoryRange range{ MemoryRange{offset, offset + size} };
-		//TODO use some kind of find closest (maybe upper bound)?
-		for (auto& freed : free_list)
-		{
-			if (freed.overlaps(range))
-			{
-				auto new_range = freed;
-				free_list.erase(freed);
-				new_range.absorb(range);
-				auto itr = free_list.lower_bound(new_range);
-				if (itr!=free_list.end()&&itr->overlaps(new_range))
-				{
-					new_range.absorb(*itr);
-					free_list.erase(itr);
-				}
-				range = new_range;
-				break;
-			}
-		}
-		if (range.end == this->curr_offset)
-			curr_offset = range.start;
-		else
-			free_list.emplace(range);
+		collator.mark_freed(index_span{ offset,offset + size });
 	}
 
-	size_t Aligned(size_t offset, size_t alignment)
-	{
-		size_t mod = (offset) % alignment;
-		return offset + ((mod)?(alignment - mod):0);
-	}
 
 	//Returns unaligned and aligned offset if it is allocated
-	std::optional<std::pair<size_t,size_t>> Memories::Memory::Allocate(size_t size,size_t alignment)
+	std::optional<std::pair<detail::unaligned_t, detail::aligned_t>> Memories::Memory::Allocate(size_t size,size_t alignment)
 	{
-		std::optional<std::pair<size_t, size_t>> result{};
-		for (auto& range : free_list)
-		{
-			if (range.can_split(size, alignment))
-			{
-				auto new_range = range;
-				auto result_range = new_range.split(size, alignment);
-				free_list.erase(range);
-				if (new_range)
-					free_list.emplace(new_range);
-				result = { result_range->start,Aligned(result_range->start,alignment) };
-				break;
-			}
-		}
-		if (!result)
-		{
-			auto unaligned_offset = curr_offset;
-			auto aligned_offset = Aligned(curr_offset, alignment);
-			if (sz >= aligned_offset + size)
-			{
-				result = { unaligned_offset,aligned_offset };
-				curr_offset = aligned_offset+size;
-			}
+		return collator.allocate(size,alignment);
+	}
 
-		}
-		return result;
+	size_t detail::Memories::Memory::sz() const noexcept
+	{
+		return collator.full_range.size();
 	}
 
 	Memories::Memories(
@@ -205,9 +163,9 @@ namespace idk::vkn::hlp
 		return memories.back();
 	}
 
-	std::pair<uint32_t, std::pair<size_t, size_t>> detail::Memories::Allocate(size_t size, size_t alignment)
+	std::pair<uint32_t, std::pair<detail::unaligned_t, detail::aligned_t>> detail::Memories::Allocate(size_t size, size_t alignment)
 	{
-		std::optional<std::pair<size_t,size_t>> alloc_offset;
+		std::optional<std::pair<unaligned_t, aligned_t>> alloc_offset;
 		uint32_t index{};
 		for (auto& mem : memories)
 		{
@@ -228,40 +186,5 @@ namespace idk::vkn::hlp
 
 
 	//returns true if absorbed (overlapping)
-
-	bool detail::Memories::Memory::MemoryRange::overlaps(const MemoryRange& range) const noexcept
-	{
-		return !(start > range.end || end < range.start);
-	}
-
-	bool detail::Memories::Memory::MemoryRange::absorb(const MemoryRange& range) noexcept
-	{
-		bool should_absorb = overlaps(range);
-		start = (should_absorb) ? std::min(range.start, start) : start;
-		end = (should_absorb) ? std::max(range.end, end) : end;
-		return should_absorb;
-	}
-
-	bool detail::Memories::Memory::MemoryRange::can_split(size_t sz, size_t align) const noexcept
-	{
-		auto aligned_start = Aligned(start, align);
-		auto new_start = aligned_start + sz;
-		return (end >= new_start);
-	}
-
-	std::optional<detail::Memories::Memory::MemoryRange> detail::Memories::Memory::MemoryRange::split(size_t sz, size_t align) noexcept
-	{
-		std::optional<detail::Memories::Memory::MemoryRange> result{ };
-		auto aligned_start = Aligned(start, align);
-		auto new_start = aligned_start + sz;
-		if (end >= new_start)
-			result = MemoryRange{ start, new_start - start };
-		start = aligned_start + sz;
-		return result;
-	}
-	detail::Memories::Memory::MemoryRange::operator bool()const noexcept
-	{
-		return start > end;
-	}
 
 }

@@ -91,6 +91,12 @@ namespace idk::vkn
 		return result;
 	}
 
+	void DescriptorsManager::Free(vk::DescriptorSetLayout layout, vk::DescriptorSet ds)
+	{
+		auto itr = free_dses.find(layout);
+		itr->second.FreeDS(ds);
+	}
+
 
 	void DescriptorsManager::Grow(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations)
 	{
@@ -311,7 +317,7 @@ namespace idk::vkn
 		return size()-curr_index;
 	}
 
-	vk::DescriptorSet& DescriptorSets::GetNext()
+	vk::DescriptorSet DescriptorSets::GetNext()
 	{
 		return sets[curr_index++];
 	}
@@ -339,5 +345,18 @@ namespace idk::vkn
 	{
 		curr_index = 0;
 		return sets = rhs;
+	}
+	void DescriptorSets::FreeDS(vk::DescriptorSet ds)
+	{
+		for (size_t i = 0; i < sets.size(); i++)
+		{
+			if (ds == sets[i])
+			{
+				if(curr_index>0)
+					std::swap(sets[curr_index - 1], sets[i]);
+				curr_index--;
+				break;
+			}
+		}
 	}
 }

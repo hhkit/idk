@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vkn/VulkanView.h>
 #include <meta/stl_hack.h>
+#include <vkn/MemoryCollator.h>
 namespace idk::vkn
 {
 	template<typename T>
@@ -13,13 +14,16 @@ namespace idk::vkn
 		using buffer_idx_t = size_t;
 
 
-		UboManager(VulkanView& view);
+		UboManager(VulkanView& view = View());
 
 		uint32_t OffsetAlignment()const;
 		uint32_t SizeAlignment()  const;
 
 		template<typename T>
 		std::pair<vk::Buffer, uint32_t> Add(const T& data);
+		void Update(vk::Buffer buffer, index_span range, string_view data);
+		void Free(vk::Buffer buffer, uint32_t offset,uint32_t size);
+
 		void UpdateAllBuffers();
 		void Clear();
 
@@ -28,10 +32,13 @@ namespace idk::vkn
 		{
 			vk::UniqueBuffer buffer{};
 			std::basic_string<char,std::char_traits<char>,tallocator<char>> data{};
-			size_t offset{};
+			size_t initial_offset{};
 			size_t block_size;
+			MemoryCollator collator;
 			uint32_t alignment{};
 			uint32_t sz_alignment{};
+
+
 			//DataPair() = default;
 			//DataPair(DataPair&&) noexcept = default;
 			//DataPair(const DataPair&) = delete;
@@ -39,9 +46,10 @@ namespace idk::vkn
 			size_t AlignmentOffset()const;
 			void Align();
 			uint32_t Add(size_t len, const void* data_);
+			void Free(uint32_t offset, size_t len);
 			vk::Buffer& Buffer() { return *buffer; }
 
-			void Reset() { data.resize(0); }
+			void Reset();
 		};
 		struct Memory
 		{

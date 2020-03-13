@@ -404,6 +404,12 @@
     <ClInclude Include="StandardFragmentBinding.h">
       <Filter>render\new_testament\Bindings\Standard</Filter>
     </ClInclude>
+    <ClInclude Include="MemoryCollator.h">
+      <Filter>utils\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialInstanceCache.h">
+      <Filter>render\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -698,6 +704,8 @@
     <ClCompile Include="renderpasses\PostDeferredPasses.cpp" />
     <ClCompile Include="TransparentBlendBindings.cpp" />
     <ClCompile Include="StandardFragmentBinding.cpp" />
+    <ClCompile Include="MemoryCollator.cpp" />
+    <ClCompile Include="MaterialInstanceCache.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

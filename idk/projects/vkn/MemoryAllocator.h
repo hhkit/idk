@@ -2,41 +2,28 @@
 #include <idk.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/SimpleLock.h>
+#include <vkn/MemoryCollator.h>
 size_t Track(size_t s);
 namespace idk::vkn::hlp
 {
 	namespace detail
 	{
-
+		using unaligned_t = size_t;
+		using aligned_t = size_t;
 	struct Memories
 	{
 		struct Memory
 		{
-			Memory(vk::UniqueDeviceMemory&& mem, size_t size) :memory{ std::move(mem) }, sz{ size }{}
+			Memory(vk::UniqueDeviceMemory&& mem, size_t size) :memory{ std::move(mem) }, collator{ {0,size} }{}
 
 			void Free(size_t offset, size_t size);
 			//Returns offset if it is allocated
-			std::optional<std::pair<size_t, size_t>> Allocate(size_t size,size_t alignment);
+			std::optional<std::pair<unaligned_t,aligned_t>> Allocate(size_t size,size_t alignment);
 
 			vk::UniqueDeviceMemory memory;
-			size_t sz{};
-			size_t curr_offset{};
+			size_t sz()const noexcept;
+			MemoryCollator collator;
 
-			struct MemoryRange
-			{
-				bool operator<(const MemoryRange& range)const noexcept {
-					return end < range.start;
-				}
-				bool overlaps(const MemoryRange& range)const noexcept;
-				//returns true if absorbed (overlapping)
-				bool absorb(const MemoryRange& range)noexcept;
-				bool can_split(size_t sz,size_t align)const noexcept;
-				operator bool()const noexcept;
-				std::optional<MemoryRange> split(size_t sz, size_t align)noexcept;
-				size_t start={}, end={};
-			};
-
-			std::set<MemoryRange> free_list;
 
 		};
 		vk::Device device;
@@ -50,7 +37,8 @@ namespace idk::vkn::hlp
 			size_t chunkSize = default_chunk_size 
 		);
 		Memory& Add(size_t min_size);
-		std::pair<uint32_t, std::pair<size_t, size_t>> Allocate(size_t size, size_t alignment);
+
+		std::pair<uint32_t, std::pair<unaligned_t, aligned_t>> Allocate(size_t size, size_t alignment);
 	};
 
 	}
@@ -64,7 +52,7 @@ namespace idk::vkn::hlp
 			vk::DeviceMemory Memory()const { return control.Memory(); }
 			size_t           Offset()const { return control.offset; }
 			size_t           Size()const { return control.size; }
-			size_t           BlockSize()const { return control.IntMemory().sz; }
+			size_t           BlockSize()const { return control.IntMemory().sz(); }
 			Alloc(Memories& mem, uint32_t index,size_t u_offset, size_t offset, size_t size) :control{ &mem,index,u_offset,offset,size } {}
 			Alloc(const Alloc&) = delete;
 			Alloc(Alloc&&) = default;

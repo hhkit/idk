@@ -14,7 +14,7 @@
 
 namespace idk::vkn
 {
-
+	class ShaderModule;
 	struct UboData {};
 	struct TexData {};
 
@@ -137,6 +137,11 @@ namespace idk::vkn
 
 		void SetUboManager(UboManager& ubo_manager) noexcept;
 
+		//Helper function to call the relevant registration functions
+		void AddShader(const ShaderModule& module);
+		//Helper function to call the relevant deregistration functions
+		void RemoveShader(const ShaderModule& module);
+
 		//Do this first
 		void AddBinding(binding_manager::set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts);
 		//Before this
@@ -175,6 +180,7 @@ namespace idk::vkn
 			void RegisterRequiredBinding(uint32_t set, uint32_t binding);
 			void RemoveRequiredSet(uint32_t set);
 			void MarkBinding(uint32_t set, uint32_t binding);
+			void MarkSet(uint32_t set);
 
 			bool Validate(const binding_manager& _bindings)const;
 		};

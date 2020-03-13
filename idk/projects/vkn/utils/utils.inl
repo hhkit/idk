@@ -335,7 +335,7 @@ namespace idk::vkn::meta
 			struct ApplierHelper
 			{
 				template<typename Func>
-				static void apply(Func&& func, Args&&... args)
+				static void apply([[maybe_unused]] Func&& func, [[maybe_unused]]Args&&... args)
 				{
 					using culled = typename Cull<N, std::tuple<Args...>>::type;
 					using Check = ApplierHelper2<Func, culled>;

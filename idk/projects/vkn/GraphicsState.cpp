@@ -55,7 +55,12 @@ namespace idk::vkn
 		CullAndAdd(render_objects, skinned_render_objects);
 	}
 
-	void CoreGraphicsState::ProcessMaterialInstances()
+	const hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& CoreGraphicsState::material_instances()const
+	{
+		return shared_gfx_state->material_instances;
+	}
+
+	void CoreGraphicsState::ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& material_instances,MaterialInstanceCache& mat_inst_cache)
 	{
 		auto AddMatInst = [](auto& material_instances, const RenderObject* p_ro)
 		{
@@ -82,6 +87,11 @@ namespace idk::vkn
 		{
 			material_instances[part_range.material_instance] = ProcessedMaterial{ part_range.material_instance };
 		}
+		for (auto& p_mat_inst : material_instances)
+		{
+			mat_inst_cache.CacheMaterialInstance(p_mat_inst.second);
+		}
+		mat_inst_cache.ProcessCreation();
 	}
 
 void GraphicsState::CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects)
@@ -142,13 +152,14 @@ void PreRenderData::Init(const vector<RenderObject>& render_objects, const vecto
 	{
 		skinned_mesh_render.emplace_back(&ro);
 	}
-	skeleton_transforms = &s_transforms;
+	this->skeleton_transforms = &s_transforms;
 
 	inst_mesh_buffer = &inst_mesh_render_buffer;
 }
 
 ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 {
+	inst_guid = inst.guid;
 	{
 		auto& mat_inst = *inst;
 		[[maybe_unused]] auto& mat = *mat_inst.material;

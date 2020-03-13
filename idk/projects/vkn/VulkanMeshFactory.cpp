@@ -367,8 +367,8 @@ namespace idk::vkn
 			pos.emplace_back(start);
 			pos.emplace_back(perp);
 
-			indices.emplace_back(pos.size() - 2);
-			indices.emplace_back(pos.size() - 1);
+			indices.emplace_back(static_cast<uint16_t>(pos.size() - 2));
+			indices.emplace_back(static_cast<uint16_t>(pos.size() - 1));
 			start = end;
 		}
 	}
@@ -563,8 +563,8 @@ namespace idk::vkn
 		auto start = perp;
 		pos.emplace_back(normal);
 		pos.emplace_back(vec3{0,0,0});
-		indices.emplace_back(0);
-		indices.emplace_back(1); // base to tip
+		indices.emplace_back(0ui16);
+		indices.emplace_back(0ui16); // base to tip
 		for (int i = 0; i < 6; ++i)
 		{
 			perp = mat * vec4{ perp, 0 };
@@ -573,14 +573,14 @@ namespace idk::vkn
 			pos.emplace_back(start);
 			pos.emplace_back(perp);
 
-			indices.emplace_back(pos.size() - 2);
-			indices.emplace_back(pos.size() - 1);
+			indices.emplace_back(static_cast<uint16_t>(pos.size() - 2));
+			indices.emplace_back(static_cast<uint16_t>(pos.size() - 1));
 
 			// For each point on the circle add a line segment to the point of the arrow and to origin
 			pos.emplace_back(start);
 
 			indices.emplace_back(start_index);
-			indices.emplace_back(0); // tip of the arrow
+			indices.emplace_back(0ui16); // tip of the arrow
 
 			start = end;
 		}

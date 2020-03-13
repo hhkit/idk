@@ -61,6 +61,8 @@
 #include <vkn/renderpasses/DebugDrawPass.h>
 #include <vkn/renderpasses/PostDeferredPasses.h>
 
+#include <vkn/MaterialInstanceCache.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<NonThreadedRender>()
@@ -72,6 +74,8 @@ namespace idk::vkn
 		ColorPickRenderer color_picker;
 		FrameGraph graph{};
 		gt::GraphTest test{ graph };
+
+		MaterialInstanceCache mat_inst_cache;
 
 		renderpasses::ParticleRenderer particle_renderer;
 		renderpasses::TextMeshRenderer text_mesh_renderer;
@@ -470,6 +474,7 @@ namespace idk::vkn
 //
 	void FrameRenderer::PreRenderGraphicsStates(const PreRenderData& state, uint32_t frame_index)
 	{
+		_pimpl->mat_inst_cache.UpdateUniformBuffers();
 		_pimpl->graph.Reset();
 
 		auto& lights = (*state.shadow_ranges);
@@ -1279,7 +1284,7 @@ namespace idk::vkn
 	}
 	//Assumes that you're in the middle of rendering other stuff, i.e. command buffer's renderpass has been set
 	//and command buffer hasn't ended
-	void FrameRenderer::RenderDebugStuff(const GraphicsState& state, RenderStateV2& rs, rect vp)
+	void FrameRenderer::RenderDebugStuff(const GraphicsState& , RenderStateV2& , rect )
 	{
 #if 0 
 		auto dispatcher = vk::DispatchLoaderDefault{};
@@ -1760,6 +1765,11 @@ namespace idk::vkn
 //		rs.ubo_manager.UpdateAllBuffers();
 //		cmd_buffer.end();
 //		Track(0);
+	}
+
+	MaterialInstanceCache& FrameRenderer::GetMatInstCache()
+	{
+		return _pimpl->mat_inst_cache;
 	}
 
 	FrameRenderer::FrameRenderer(FrameRenderer&&)= default;

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "UniformManager.h"
+#include <vkn/ShaderModule.h>
 namespace idk::vkn
 {
 
@@ -110,7 +111,7 @@ namespace idk::vkn
 		}
 	};
 	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw);
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
 		span<UniformUtils::BindingInfo> bindings,
@@ -220,6 +221,7 @@ namespace idk::vkn
 		const bool valid = layout_ == layout ;
 		if (valid)
 			ds_override= ds;
+		dirty = true;
 		return valid;
 	}
 	
@@ -289,6 +291,25 @@ namespace idk::vkn
 	{
 		_ubo_manager = &ubo_manager;
 	}
+	void UniformManager::AddShader(const ShaderModule& shader)
+	{
+		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
+		{
+			AddBinding(itr->first, *itr->second.layout, itr->second.entry_counts);
+		}
+		for (auto itr = shader.InfoBegin(), end = shader.InfoEnd(); itr != end; ++itr)
+		{
+			auto [name, info] = *itr;
+			RegisterUniforms(name, info.set, info.binding, info.size);
+		}
+	}
+	void UniformManager::RemoveShader(const ShaderModule& shader)
+	{
+		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
+		{
+			RemoveBinding(itr->first);
+		}
+	}
 	void UniformManager::AddBinding(binding_manager::set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts)
 	{
 		_bindings.AddBinding(set, layout, counts);
@@ -332,6 +353,7 @@ namespace idk::vkn
 	}
 	bool UniformManager::BindDescriptorSet(uint32_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl)
 	{
+		_dbg.MarkSet(set);
 		return _bindings.SetOverride(set, ds,dsl);
 	}
 	bool UniformManager::BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound)
@@ -430,7 +452,7 @@ namespace idk::vkn
 		}
 		return builder.end();
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
 	{
 		_dud.Reset();
@@ -576,6 +598,13 @@ namespace idk::vkn
 	{
 		sets[set].bindings[binding] = false;
 	}
+	void UniformManager::DebugInfo::MarkSet(uint32_t set)
+	{
+		for (auto& binding : sets[set].bindings)
+		{
+			binding = false;
+		}
+	}
 	bool UniformManager::DebugInfo::Validate(const binding_manager& _bindings) const
 	{
 		uint32_t set_index = 0;
@@ -596,8 +625,8 @@ namespace idk::vkn
 						auto required = set.bindings[binding_index];
 						if (required)
 						{
-							auto itr = curr_set_bindings.bindings.find(binding_index);
-							if (itr == curr_set_bindings.bindings.end())
+							auto itr2 = curr_set_bindings.bindings.find(binding_index);
+							if (itr2 == curr_set_bindings.bindings.end())
 							{
 								LOG_ERROR_TO(LogPool::GFX, "Required Binding %u in Set #%u not bound", binding_index, set_index);
 								return false;

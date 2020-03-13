@@ -103,7 +103,8 @@ namespace idk::vkn::renderpasses
 		auto& vtx_shader_bind = bindings.Get<bindings::VertexShaderBinding>();
 		vtx_shader_bind.vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VParticle];
 		auto& mat_shader_bind = bindings.Get<bindings::StandardMaterialBindings>();
-		mat_shader_bind.p_material_instances = &graphics_state.material_instances;
+		mat_shader_bind.p_material_instances = &graphics_state.material_instances();
+		mat_shader_bind.p_cached_mat_insts= graphics_state.shared_gfx_state->mat_inst_cache;
 
 		index_span particle_idx{ graphics_state.range.inst_particle_begin,graphics_state.range.inst_particle_end};
 
