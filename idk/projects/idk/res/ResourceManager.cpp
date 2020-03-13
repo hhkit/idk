@@ -446,11 +446,28 @@ namespace idk
 		{
 			fcb.is_new = true;
 			for (auto& elem : resource_bundle.GetAll())
-				std::visit([](auto& handle) {
-				if constexpr (has_tag_v<std::decay_t<decltype(handle)>, MetaResource>)
-					handle->DirtyMeta(); },
+				std::visit([&](auto& handle) {
+				using T = std::decay_t<decltype(*handle)>;
+				if constexpr (has_tag_v<T, MetaResource>)
+				{
+					handle->DirtyMeta();
+				}},
 					elem);
 		}
+
+		for (auto& elem : resource_bundle.GetAll())
+			std::visit([&](auto& handle) {
+			using T = std::decay_t<decltype(*handle)>;
+			if constexpr (has_tag_v<T, MetaResource>)
+			{
+				auto m = meta_bundle.FetchMeta<T>();
+				if (m)
+				{
+					auto meta = m->GetMeta<T>();
+					GetControlBlock<T>(handle)->userdata = std::make_shared<typename T::Metadata>(*meta);
+				}
+			}},
+				elem);
 
 		fcb.bundle = resource_bundle;
 

@@ -209,8 +209,6 @@ namespace idk::mono
 			true
 		);
 
-		auto search = size_t{};
-
 		vector<string> tokens;
 
 		std::stringstream stream{ logged_string };

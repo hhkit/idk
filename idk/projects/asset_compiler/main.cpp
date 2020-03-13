@@ -33,7 +33,6 @@ int WINAPI wWinMain(
 )
 {
 	int argc{};
-	AllocConsole();
 	LPWSTR* wargv = CommandLineToArgvW(lpCmdLine, &argc);;
 	std::vector<idk::string> strargv;
 	std::vector<const char*> argv;

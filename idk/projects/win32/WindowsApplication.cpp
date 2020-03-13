@@ -124,7 +124,7 @@ namespace idk::win
 
 			if (CreateProcessA(path.data(), command.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &startup, &info))
 			{
-				string retval; 
+				string output_value; 
 
 				CloseHandle(g_hChildStd_OUT_Wr);
 				CloseHandle(info.hProcess);
@@ -136,10 +136,10 @@ namespace idk::win
 					auto bSuccess = ReadFile(g_hChildStd_OUT_Rd, readbuf, 256, &dwRead, nullptr);
 					if (!bSuccess || dwRead == 0)
 						break;
-					retval += string_view(readbuf, dwRead);
+					output_value += string_view(readbuf, dwRead);
 				}
 
-				return retval;
+				return output_value;
 			}
 			else
 			{
