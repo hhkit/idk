@@ -66,7 +66,36 @@ namespace idk
 		}
 
 
+		if (ImGui::Button("Enable All Point Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 0)
+					elem.enabled = true;
+			}
+		}
+
 		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Spot Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 2)
+					elem.enabled = true;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Directional Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 1)
+					elem.enabled = true;
+			}
+		}
 
 		if (ImGui::Button("Disable All Point Lights"))
 		{
