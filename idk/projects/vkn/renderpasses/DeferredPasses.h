@@ -123,7 +123,7 @@ namespace idk::vkn::renderpasses
 		rect _viewport;
 	};
 
-	/*struct BloomPass : BaseRenderPass, FsqUtil
+	struct BloomPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable bloom_rsc;
 		FrameGraphResourceMutable bloom_depth_rsc;
@@ -134,7 +134,7 @@ namespace idk::vkn::renderpasses
 		BloomPass(FrameGraphBuilder& builder, UnlitPass& unlit_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
-	};*/
+	};
 
 	struct CubeClearPass : DrawSetRenderPass, FsqUtil
 	{
