@@ -14,7 +14,7 @@ namespace idk
 	{
 
 		_last_frame = _this_frame = Clock::now();
-		_accumulated_network_dt = _accumulated_fixed_dt = _accumulated_real_dt = seconds{};
+		_accumulated_network_dt = _accumulated_fixed_dt = seconds{};
 	}
 	void Scheduler::SequentialUpdate()
 	{
@@ -22,7 +22,7 @@ namespace idk
 
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
-		_accumulated_real_dt += std::min(_real_dt, dt_limit);
+		_accumulated_network_dt += _real_dt;
 		_accumulated_fixed_dt += std::min(_real_dt, dt_limit) * time_scale;
 
 		constexpr auto execute_pass = [](auto& pass_vector)
@@ -41,32 +41,25 @@ namespace idk
 			}
 		};
 
+		const auto execute_network = _accumulated_network_dt > _network_update;
+		if (execute_network)
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
 
-		while (_accumulated_real_dt > _game_update)
+		execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
+
+		while (_accumulated_fixed_dt > _fixed_dt)
 		{
-			_accumulated_real_dt -= _game_update;
-			_accumulated_network_dt += _game_update;
+			_accumulated_fixed_dt -= _fixed_dt;
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::Fixed)]);
+		}
 
-			const auto execute_network = _accumulated_network_dt > _network_update;
-			if (execute_network)
-				execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
+		execute_pass(_passes[s_cast<size_t>(UpdatePhase::MainUpdate)]);
 
-			execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
-
-			while (_accumulated_fixed_dt > _fixed_dt)
-			{
-				_accumulated_fixed_dt -= _fixed_dt;
-				execute_pass(_passes[s_cast<size_t>(UpdatePhase::Fixed)]);
-			}
-
-			execute_pass(_passes[s_cast<size_t>(UpdatePhase::MainUpdate)]);
-
-			if (execute_network)
-			{
-				execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickEnd)]);
-				_accumulated_network_dt -= _network_update;
-			}
-		};
+		if (execute_network)
+		{
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickEnd)]);
+			_accumulated_network_dt -= _network_update;
+		}
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::PreRender)]);
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::Render)]);
@@ -76,7 +69,7 @@ namespace idk
 	void Scheduler::ResetTimings()
 	{
 		_accumulated_fixed_dt = _fixed_dt;
-		_accumulated_real_dt = _game_update;
+		// _accumulated_real_dt = _game_update;
 	}
 	seconds Scheduler::GetFixedDeltaTime()noexcept
 	{
@@ -84,15 +77,11 @@ namespace idk
 	}
 	seconds Scheduler::GetDeltaTime()noexcept
 	{
-		return _game_update * time_scale;
+		return _real_dt * time_scale;
 	}
 	seconds Scheduler::GetUnscaledDeltaTime() noexcept
 	{
-		return _game_update;
-	}
-	seconds Scheduler::GetRemainingTime() noexcept
-	{
-		return _accumulated_real_dt;
+		return _real_dt;
 	}
 	time_point Scheduler::GetProgramStart() noexcept
 	{

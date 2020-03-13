@@ -62,11 +62,9 @@ namespace idk
 		time_point _last_frame;
 		time_point _this_frame;
 		seconds    _real_dt;
-		seconds    _accumulated_real_dt;
 		seconds    _accumulated_fixed_dt;
 		seconds    _accumulated_network_dt;
-		seconds    _network_update = seconds{ 1.0 / 30 };
-		seconds    _game_update    = seconds{ 1.0 / 60 };
+		seconds    _network_update = seconds{ 1.0 / 5 };
 		seconds    _fixed_dt       = seconds{ 1.0 / 60 };
 
 		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];
