@@ -520,8 +520,8 @@ namespace idk
 						{
 							light.update_shadow = true;							
 						}
-						for (auto& elem : light.light_maps)
-							elem.UpdatePointMat(light);
+						//for (auto& elem : light.light_maps)
+							//elem.UpdatePointMat(light);
 
 					}
 					
