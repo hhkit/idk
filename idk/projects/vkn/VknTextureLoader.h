@@ -27,6 +27,8 @@ namespace idk::vkn
 		TextureInternalFormat internal_format = TextureInternalFormat::RGBA_8;
 		float anisoptrophy = 1.0f;
 
+		bool input_is_srgb = false;
+
 		TextureOptions() = default;
 		TextureOptions(const TextureMeta& meta) 
 		{

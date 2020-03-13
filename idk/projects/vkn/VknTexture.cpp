@@ -29,6 +29,7 @@ namespace idk::vkn {
 		//	string test2 = ss.str();
 		//	DoNothing();
 		//}
+
 		loader.LoadTexture(*this,data,compiled_tex);
 		texture_bytes += this->sizeOnDevice;
 	}

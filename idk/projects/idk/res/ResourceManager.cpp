@@ -289,13 +289,27 @@ namespace idk
 			}
 			auto test = serialize_text(m);
 			{
-				auto stream = Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE);
-				stream << test;
-				stream.close();
-				stream.clear();
+				{
+					auto stream = Core::GetSystem<FileSystem>().Open(path + ".meta", FS_PERMISSIONS::WRITE);
+					stream << test;
+				}
+				// auto tmp_path = Core::GetSystem<FileSystem>().GetFullPath(path + ".meta.tmp");
+				// auto meta_path = Core::GetSystem<FileSystem>().GetFullPath(path + ".meta");
+				// std::filesystem::remove(std::filesystem::path{ meta_path.sv() });
+				// if (std::rename(tmp_path.data(), meta_path.data()))
+				// 	LOG_TO(LogPool::SYS, "failed to create new meta");
 			}
 			resource.is_new = false;
 			Load(path, true);
+
+			for (auto& elem : _loaded_files[path].bundle.GetAll())
+			{
+				std::visit([&](const auto& handle)
+					{
+						if constexpr (has_tag_v<std::decay_t<decltype(handle)>::Resource, MetaResource>)
+							GetControlBlock(handle)->dirty_meta = false;
+					}, elem);
+			}
 		}
 
 		dirty_files.clear();
@@ -488,8 +502,10 @@ namespace idk
 			auto infile = wrap(path.GetFullPath());
 			auto outdir = wrap(PathHandle{ "/build" }.GetFullPath());
 			auto mountdir = wrap(string(PathHandle("/build").GetFullPath()) + string{ path.GetMountPath() });
-			const char* exec[] = { infile.data(), outdir.data(), mountdir.data() };
-			Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, wait);
+			const char* exec[] = { "hack", infile.data(), outdir.data(), mountdir.data() };
+			auto printout = Core::GetSystem<Application>().Exec(Core::GetSystem<Application>().GetExecutableDir() + "\\tools\\compiler\\idc.exe", exec, wait);
+			
+			LOG_TO(LogPool::SYS, printout.data());
 		}
 	}
 

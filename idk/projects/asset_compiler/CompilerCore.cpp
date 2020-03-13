@@ -16,6 +16,8 @@
 #include "CompilerCore.h"
 #include "IAssetLoader.h"
 
+#include <iostream>
+
 namespace fs = std::filesystem;
 
 template<typename T, typename U>
@@ -40,6 +42,8 @@ namespace idk
 	}
 	void CompilerCore::Compile(string_view full_path)
 	{
+		std::cout << "compiling";
+
 		auto tmp = string{ fs::temp_directory_path().string() };
 		auto pathify = fs::path{ full_path };
 		auto find_loader = _loaders.find(pathify.extension().generic_string());
@@ -57,7 +61,12 @@ namespace idk
 			{
 				std::ifstream str{ meta_path };
 				if (str)
+				{
+					std::cout << " successfully opened meta";
 					parse_text(stringify(str), bundle);
+				}
+				else
+					std::cout << "failed to open meta";
 			}
 
 			// try to load the asset
@@ -147,5 +156,7 @@ namespace idk
 				}
 			}
 		}
+		else
+			std::cout << "could not find loader for extension " << pathify.extension().generic_string();
 	}
 }
