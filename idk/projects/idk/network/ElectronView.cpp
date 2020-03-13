@@ -72,7 +72,7 @@ namespace idk
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
 				auto& param = parameters[i];
-				param->GetClientObject()->CalculateMoves(curr_seq);
+				param->GetClientObject()->CalculateMove(curr_seq);
 			}
 		}
 
@@ -114,6 +114,7 @@ namespace idk
 
 	MovePack ElectronView::PackMoveData()
 	{
+		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		MovePack move_pack;
 		if (std::get_if<ClientObject>(&move_state))
 		{
@@ -122,7 +123,7 @@ namespace idk
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
 				auto& param = parameters[i];
-				auto val = param->GetClientObject()->PackData();
+				auto val = param->GetClientObject()->PackData(curr_seq);
 				if (val.size())
 				{
 					move_pack.state_mask |= 1 << i;
@@ -165,8 +166,13 @@ namespace idk
 		{
 			if (state_mask & (1 << i))
 			{
+				auto& param = parameters[i];
 				auto& pack = ghost_pack.data_packs[pack_index++];
-				parameters[i]->GetGhost()->UnpackData(sequence_number, pack);
+				if (std::get_if<Ghost>(&ghost_state))
+					param->GetGhost()->UnpackData(sequence_number, pack);
+				if (std::get_if<ClientObject>(&move_state))
+					param->GetClientObject()->UnpackGhost(sequence_number, pack);
+
 			}
 		}
 	}

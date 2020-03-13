@@ -116,7 +116,7 @@ namespace idk
 				prev_value = param.getter();
 			}
 
-			void CalculateMoves(SeqNo curr_seq) override
+			void CalculateMove(SeqNo curr_seq) override
 			{
 				auto curr_value = param.getter();
 				if (!param.equater(prev_value, curr_value))
@@ -130,27 +130,50 @@ namespace idk
 					buffer.emplace_back(std::move(pushme));
 				}
 
-				// discard ancient moves
-				auto discard_age = static_cast<SeqNo>(curr_seq < move_limit ? std::numeric_limits<SeqNo>::max() - (move_limit - 1 - curr_seq) : curr_seq - 3);
-				while (buffer.size() && seqno_greater_than(discard_age, buffer.front().seq))
-					buffer.pop_front();
 			}
 
-			small_vector<SeqAndPack> PackData() override
+			small_vector<SeqAndPack> PackData(SeqNo curr_seq) override
 			{
+				// discard ancient moves
+				auto discard_age = curr_seq - 3;
+
 				small_vector<SeqAndPack> retval;
 				for (auto& elem : buffer)
-					retval.emplace_back(elem);
+				{
+					if (elem.seq > discard_age)
+						retval.emplace_back(elem);
+				}
 				if (retval.size() > move_limit)
 					throw;
 				return retval;
+			}
+
+			void UnpackGhost(SeqNo index, string_view data) override
+			{
+				// newer data has arrived
+				while (buffer.size() && seqno_greater_than(index, buffer.front().seq))
+					buffer.pop_front();
+
+				if (auto val = parse_binary<T>(data))
+				{
+					T move{};
+					for (auto& elem : buffer)
+						move = param.adder(move, elem.move);
+
+					param.setter(*val + move);
+				}
 			}
 		};
 		struct DerivedControlObjectData
 			: ControlObjectData
 		{
 			static constexpr auto RememberedMoves = 64;
-			struct SeqAndObj { SeqNo seq; T obj; bool verified = false; };
+			struct SeqAndObj 
+			{ 
+				SeqNo seq; 
+				T obj; 
+				bool verified = false; 
+			};
 
 			ParameterImpl<T>& param;
 			T prev_value;
@@ -165,6 +188,25 @@ namespace idk
 			void Init() override
 			{
 				prev_value = param.getter();
+			}
+
+			MoveAck AcknowledgeMoves(SeqNo curr_seq) override
+			{
+				MoveAck ack;
+				ack.sequence_number = curr_seq;
+
+				for (auto& elem : move_buffer)
+				{
+					if (elem.verified)
+					{
+						auto seq = elem.seq;
+						auto diff = curr_seq - seq;
+						if (diff < 32)
+							ack.acked_moves = 1 << diff;
+					}
+				}
+
+				return ack;
 			}
 
 			__declspec(noinline) void RecordPrediction(SeqNo curr_seq) override
@@ -227,11 +269,9 @@ namespace idk
 							{
 								// if prediction was wrong
 								if (!param.equater(prediction.obj, real_move))
-								{
-									// calculate correction
 									ApplyCorrection(itr, real_move);
-									itr->verified = true;
-								}
+
+								itr->verified = true;
 								break;
 							}
 						}

@@ -113,6 +113,7 @@
     <ClInclude Include="network\GhostPack.h" />
     <ClInclude Include="network\NetworkTuple.inl" />
     <ClInclude Include="network\RPCTarget.h" />
+    <ClInclude Include="network\SeqNo.h" />
     <ClInclude Include="network\yojimbo_helpers.h" />
     <ClInclude Include="parallel\multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
@@ -447,6 +448,7 @@
     <ClCompile Include="network\MoveClientMessage.cpp" />
     <ClCompile Include="network\network.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
+    <ClCompile Include="network\SeqNo.cpp" />
     <ClCompile Include="network\Server.cpp" />
     <ClCompile Include="network\ServerConnectionManager.cpp" />
     <ClCompile Include="network\ServerMoveManager.cpp" />

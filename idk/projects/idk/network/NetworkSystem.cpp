@@ -26,7 +26,7 @@ namespace idk
 	void NetworkSystem::InstantiateServer(const Address& d)
 	{
 		ResetNetwork();
-		frame_counter = 0;
+		frame_counter = SeqNo{};
 		my_id = Host::SERVER;
 		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
 		lobby->OnClientConnect += [this](int clientid)
@@ -50,7 +50,7 @@ namespace idk
 	void NetworkSystem::ConnectToServer(const Address& d)
 	{
 		ResetNetwork();
-		frame_counter = 0;
+		frame_counter = SeqNo{};
 		client = std::make_unique<Client>(Address{ d.a,d.b,d.c,d.d, server_listen_port });
 		client->OnConnectionToServer += [this]()
 		{
@@ -144,10 +144,7 @@ namespace idk
 	{
 		if (lobby || client)
 		{
-			if (frame_counter != 0xFFFF)
-				++frame_counter;
-			else
-				frame_counter = 0;
+			++frame_counter;
 		}
 
 		if (lobby)

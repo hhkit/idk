@@ -112,14 +112,16 @@ namespace idk
 		struct ClientObjectData
 		{
 			virtual void Init() = 0;
-			virtual void CalculateMoves(SeqNo curr_seq) = 0;
-			virtual small_vector<SeqAndPack> PackData() = 0;
+			virtual void CalculateMove(SeqNo curr_seq) = 0;
+			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
+			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
 			virtual ~ClientObjectData() = default;
 		};
 
 		struct ControlObjectData
 		{
 			virtual void Init() = 0;
+			virtual MoveAck AcknowledgeMoves(SeqNo curr_seq) = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual void UnpackMove(span<const SeqAndPack>) = 0;
 			virtual ~ControlObjectData() = default;
@@ -128,10 +130,10 @@ namespace idk
 		string param_name;
 		real   interp_over = 0.2f;
 
-		virtual ClientObjectData* GetClientObject() = 0;
+		virtual MasterData*        GetMaster() = 0;
+		virtual GhostData*         GetGhost() = 0;
+		virtual ClientObjectData*  GetClientObject() = 0;
 		virtual ControlObjectData* GetControlObject() = 0;
-		virtual MasterData* GetMaster() = 0;
-		virtual GhostData* GetGhost() = 0;
 		virtual ~BaseParameter() = default;
 	};
 

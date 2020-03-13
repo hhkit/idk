@@ -19,4 +19,10 @@ namespace idk
 		int state_mask{};
 		vector<MoveList> packs;
 	};
+
+	struct MoveAck
+	{
+		SeqNo sequence_number {};
+		int   acked_moves     {};
+	};
 }
