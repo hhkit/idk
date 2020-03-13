@@ -518,95 +518,95 @@ namespace idk::vkn::gt
 			context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 		}
 	};
-struct BloomPass : PassUtil, FsqUtil
-{
-	FrameGraphResourceMutable bloom_rsc, bloom_depth_rsc;
-		
-	FrameGraphResourceMutable color_att, depth_att;
-
-	RscHandle<ShaderProgram> bloom_shader;
-
-	BloomPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget>, FullRenderData& rd) :PassUtil{ rd }
-	{
-		bloom_rsc = CreateGBuffer(builder, "Bloom", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
-		bloom_depth_rsc = CreateGBuffer(builder, "Bloom Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth);
-		builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
-			{
-				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
-				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
-				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-				vk::ImageSubresourceRange
-				{
-					vk::ImageAspectFlagBits::eColor,0,1,0,1
-				},//vk::ImageSubresourceRange sub_resource_range{};
-				vk::ClearColorValue{},//std::optional<vk::ClearValue> clear_value;
-				//std::optional<vk::Format> format{};
-				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-				//vk::ComponentMapping mapping{};
-			}
-		);
-		builder.set_depth_stencil_attachment(bloom_depth_rsc, AttachmentDescription
-			{
-				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
-				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
-				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-				vk::ImageSubresourceRange
-				{
-					vk::ImageAspectFlagBits::eDepth,0,1,0,1
-				},//vk::ImageSubresourceRange sub_resource_range{};
-				vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
-				//std::optional<vk::Format> format{};
-				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-				//vk::ComponentMapping mapping{};
-			});
-	}
-	void Execute(FrameGraphDetail::Context_t context) override
-	{
-		context.SetUboManager(this->render_data.rs_state->ubo_manager);
-		auto& gfx_state = this->render_data.GetGfxState();
-		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
-		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
-		if (!bloom_shader)
-		{
-			auto frag_opt = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_bloom.frag", false);
-			if (frag_opt)
-				bloom_shader = *frag_opt;
-		}
-
-		context.BindShader(ShaderStage::Fragment, bloom_shader);
-		{
-			uint32_t i = 0;
-
-			AttachmentBlendConfig blend{};
-			blend.blend_enable = true;
-			blend.dst_color_blend_factor = BlendFactor::eOne;
-			blend.src_color_blend_factor = BlendFactor::eOne;
-			blend.color_blend_op = BlendOp::eAdd;
-			blend.alpha_blend_op = BlendOp::eMax;
-			blend.dst_alpha_blend_factor = BlendFactor::eOne;
-			blend.src_alpha_blend_factor = BlendFactor::eOne;
-			context.SetBlend(i);
-			context.SetClearColor(i, idk::color{ 0,0,0,0 });
-			context.SetClearDepthStencil(1.0f);
-			++i;
-		}
-		context.SetViewport(gfx_state.camera.viewport);
-		context.SetScissors(gfx_state.camera.viewport);
-
-		context.SetCullFace({});
-		//context.SetDepthTest(false);
-
-		auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
-		BindMesh(context, fsq_requirements, mesh);
-
-		//DrawFSQ
-		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
-	}
-};
+//struct BloomPass : PassUtil, FsqUtil
+//{
+//	FrameGraphResourceMutable bloom_rsc, bloom_depth_rsc;
+//		
+//	FrameGraphResourceMutable color_att, depth_att;
+//
+//	RscHandle<ShaderProgram> bloom_shader;
+//
+//	BloomPass(FrameGraphBuilder& builder, RscHandle<VknRenderTarget>, FullRenderData& rd) :PassUtil{ rd }
+//	{
+//		bloom_rsc = CreateGBuffer(builder, "Bloom", vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor);
+//		bloom_depth_rsc = CreateGBuffer(builder, "Bloom Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth);
+//		builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
+//			{
+//				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+//				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+//				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+//				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+//				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+//				vk::ImageSubresourceRange
+//				{
+//					vk::ImageAspectFlagBits::eColor,0,1,0,1
+//				},//vk::ImageSubresourceRange sub_resource_range{};
+//				vk::ClearColorValue{},//std::optional<vk::ClearValue> clear_value;
+//				//std::optional<vk::Format> format{};
+//				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+//				//vk::ComponentMapping mapping{};
+//			}
+//		);
+//		builder.set_depth_stencil_attachment(bloom_depth_rsc, AttachmentDescription
+//			{
+//				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+//				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+//				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+//				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+//				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+//				vk::ImageSubresourceRange
+//				{
+//					vk::ImageAspectFlagBits::eDepth,0,1,0,1
+//				},//vk::ImageSubresourceRange sub_resource_range{};
+//				vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
+//				//std::optional<vk::Format> format{};
+//				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+//				//vk::ComponentMapping mapping{};
+//			});
+//	}
+//	void Execute(FrameGraphDetail::Context_t context) override
+//	{
+//		context.SetUboManager(this->render_data.rs_state->ubo_manager);
+//		auto& gfx_state = this->render_data.GetGfxState();
+//		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
+//		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+//		if (!bloom_shader)
+//		{
+//			auto frag_opt = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_bloom.frag", false);
+//			if (frag_opt)
+//				bloom_shader = *frag_opt;
+//		}
+//
+//		context.BindShader(ShaderStage::Fragment, bloom_shader);
+//		{
+//			uint32_t i = 0;
+//
+//			AttachmentBlendConfig blend{};
+//			blend.blend_enable = true;
+//			blend.dst_color_blend_factor = BlendFactor::eOne;
+//			blend.src_color_blend_factor = BlendFactor::eOne;
+//			blend.color_blend_op = BlendOp::eAdd;
+//			blend.alpha_blend_op = BlendOp::eMax;
+//			blend.dst_alpha_blend_factor = BlendFactor::eOne;
+//			blend.src_alpha_blend_factor = BlendFactor::eOne;
+//			context.SetBlend(i);
+//			context.SetClearColor(i, idk::color{ 0,0,0,0 });
+//			context.SetClearDepthStencil(1.0f);
+//			++i;
+//		}
+//		context.SetViewport(gfx_state.camera.viewport);
+//		context.SetScissors(gfx_state.camera.viewport);
+//
+//		context.SetCullFace({});
+//		//context.SetDepthTest(false);
+//
+//		auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+//		BindMesh(context, fsq_requirements, mesh);
+//
+//		//DrawFSQ
+//		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
+//	}
+//};
 	struct CubeClearPass : PassUtil, FsqUtil
 	{
 

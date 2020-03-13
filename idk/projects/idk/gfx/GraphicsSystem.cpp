@@ -477,13 +477,13 @@ namespace idk
 		range.light_begin = active_light_buffer.size();
 		range.dir_light_begin = directional_light_buffer.size();
 
-		if (!camera.enabled)
+		/*if (!camera.enabled)
 		{
 			range.light_end = active_light_buffer.size();
 			range.dir_light_end = directional_light_buffer.size();
 			LightVolDbg::EndCurrent();
 			return;
-		}
+		}*/
 		
 		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		//Perform camera light loop to populate the data
@@ -520,8 +520,8 @@ namespace idk
 						{
 							light.update_shadow = true;							
 						}
-						for (auto& elem : light.light_maps)
-							elem.UpdatePointMat(light);
+						//for (auto& elem : light.light_maps)
+							//elem.UpdatePointMat(light);
 
 					}
 					
@@ -577,7 +577,9 @@ namespace idk
 							LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection * light.v), col * static_cast<float>(k + 1));
 						++k;
 					}
-				}		
+				}	
+
+				//light.cast_shadow = false;
 
 				auto new_index = new_lights.size();
 				new_lights.emplace_back(copy_light);
@@ -1145,11 +1147,11 @@ namespace idk
 			//}
 			}
 			//Disable the shadows of the non-cascaded directional lights
-			for (auto& light : result.lights)
+			/*for (auto& light : result.lights)
 			{
 				if (light.index==1)
 					light.cast_shadow = false;
-			}
+			}*/
 			//append the added lights at the back of the light range
 			result.lights.insert(result.lights.end(), new_lights.begin(), new_lights.end());
 		}
