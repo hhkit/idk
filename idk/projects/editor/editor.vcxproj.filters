@@ -165,6 +165,7 @@
     <ClInclude Include="windows\IGE_GfxDebugWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="windows\IGE_NetworkSettings.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -312,6 +313,7 @@
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayComponentInnerSpecializations.cpp">
       <Filter>windows</Filter>
     </ClCompile>
+    <ClCompile Include="windows\IGE_NetworkSettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">

@@ -24,6 +24,10 @@ namespace idk
 		void ProcessMessages();
 		void ReceivePackets();
 		void SendPackets();
+
+		void SetPacketLoss(float percent_loss);
+		void SetLatency(seconds dur);
+
 		float GetRTT();
 
 		yojimbo::Message* CreateMessage(int id);

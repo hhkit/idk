@@ -30,6 +30,9 @@ namespace idk
 
 		void ReceivePackets();
 		void SendPackets();
+
+		void SetPacketLoss(float percent_loss);
+		void SetLatency(seconds dur);
 		float GetRTT(int clientIndex) const;
 
 		yojimbo::Message* CreateMessage(int client, int type_id) { return server.CreateMessage(client, type_id); }

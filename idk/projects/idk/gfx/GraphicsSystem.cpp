@@ -1064,14 +1064,14 @@ namespace idk
 				//result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 			}
 
-			// sort ui render by depth then z pos
+			// sort ui render by z pos then depth
 			for (auto& [canvas, vec] : result.ui_render_per_canvas)
 			{
 				std::stable_sort(vec.begin(), vec.end(),
 					[](const UIRenderObject& a, const UIRenderObject& b) {
-						return a.depth == b.depth ?
-							a.transform[3].z < b.transform[3].z :
-							a.depth < b.depth;
+						return a.transform[3].z == b.transform[3].z ?
+							a.depth < b.depth :
+							a.transform[3].z < b.transform[3].z;
 					}
 				);
 			}
