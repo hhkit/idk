@@ -1,7 +1,7 @@
 import /engine_data/shaders/pbr_utils.glsl
 
 #define POISSON_BIAS 1.f/ 700.f
-#define DIVISIBLE_FACTOR 1.f/15.f
+#define DIVISIBLE_FACTOR 1.f/14.f
 
 vec3 fresnel(float cos_theta, vec3 f0)
 {
