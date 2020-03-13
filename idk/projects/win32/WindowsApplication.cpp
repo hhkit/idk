@@ -177,7 +177,7 @@ namespace idk::win
 		}
 		else
 		{
-			ret = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data());
+			ret = _spawnvp(wait ? P_WAIT : P_NOWAIT, path.data(), args.data() + 1);
 			LOG_TO(LogPool::SYS, "Executing %s with child %p", path.data(), ret);
 
 			if (children.size() >= std::thread::hardware_concurrency())
