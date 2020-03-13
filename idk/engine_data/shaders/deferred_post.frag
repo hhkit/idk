@@ -83,7 +83,7 @@ void main()
 
 	vec3 light_accum = vec3(0);
 	normal = normalize(normal);
-	
+	vec3 currShadow = vec3(1);
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
 	vec4 world_pos = 
@@ -127,7 +127,8 @@ void main()
 				//{
 				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
 				//}
-				result *= shadow_factor;
+				//result *= shadow_factor;
+				currShadow = max(currShadow,shadow_factor);
 				//shadow_accum -= shadow_factor;				
 				++j;
 			}
@@ -141,11 +142,13 @@ void main()
 		{
 			if(curr_light.cast_shadow!=0)
 			{
-				result *= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+				vec3 shadow_factor = (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+				currShadow = max(currShadow,shadow_factor);
 				//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
 			
 			}
 		} 
+		result *= currShadow;
 		
 		light_accum += result;// + cascade_c.xyz;
 	}
