@@ -62,6 +62,7 @@ namespace idk::vkn
 		vk::ImageLayout layout = vk::ImageLayout::eGeneral;
 		vk::ImageViewType view_type = vk::ImageViewType::e2D;
 		vk::ComponentMapping component_mapping{};
+		vk::ImageCreateFlags image_create_bits{};
 		bool read_after = false;//True if you intend to copy the memory back out for reading.
 		uint32_t layers = 1;
 		//True if you intend to sample with a shader

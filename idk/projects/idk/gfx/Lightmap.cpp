@@ -144,7 +144,7 @@ namespace idk {
 
 
 	//#pragma optimize("",off)
-	void Lightmap::SetCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far)
+	void Lightmap::UpdateCascade(const CameraData& camData,LightData& light, float cas_near, float cas_far)
 	{
 		if (oldCamView != camData.view_matrix)
 		{
@@ -191,6 +191,7 @@ namespace idk {
 
 			for (auto& elem : frustumEdges)
 			{
+				//elem.z *= 0.5f;
 				elem = m * elem;
 				min_c = { min(min_c.x,elem.x),min(min_c.y,elem.y) ,min(min_c.z, elem.z) };
 				max_c = { max(max_c.x,elem.x),max(max_c.y,elem.y) ,max(max_c.z,elem.z) };
@@ -217,7 +218,35 @@ namespace idk {
 		}
 		//clip_plane_z = vClip.z;
 	}
-
+	static array<vec3, 6> cubeMat = {
+			vec3{1,0,0},
+			vec3{-1,0,0},
+			vec3{0,1,0},
+			vec3{0,-1,0},
+			vec3{0,0,1},
+			vec3{0,0,-1}
+	};
+	static array<int, 6> upDirectionsSpec = {
+		3,
+		3,
+		4,
+		5,
+		3,
+		3
+	};
+	void Lightmap::UpdatePointMat(const LightData& light)
+	{
+		if (old_light_pos != light.v_pos)
+		{
+			old_light_pos = light.v_pos;
+			if (shadow_vp.empty())
+				shadow_vp.resize(6);
+			
+			for (int i = 0; i < upDirectionsSpec.size(); ++i)
+				shadow_vp[i] = light.p * look_at(light.v_pos, light.v_pos + cubeMat[i], cubeMat[upDirectionsSpec[i]]);
+		}
+	}
+//#pragma optimize("",off)
 	RscHandle<FrameBuffer> Lightmap::InitShadowMap(LightmapConfig config)
 	{
 		_config = config;
@@ -231,7 +260,7 @@ namespace idk {
 				DepthBufferMode::Depth16,
 				true,
 				FilterMode::_enum::Linear,
-				false,
+				_config.isCubeMap,
 				std::nullopt,
 				_config.layer_count,
 				_config.view_type
@@ -249,9 +278,9 @@ namespace idk {
 		return shadow_map;
 	}
 
-	RscHandle<FrameBuffer> Lightmap::InitShadowMap(const size_t& layers, AttachmentViewType type)
+	RscHandle<FrameBuffer> Lightmap::InitShadowMap(const size_t& layers, AttachmentViewType type, const bool& isCubeMap)
 	{
-		return InitShadowMap(LightmapConfig{ layers,type });
+		return InitShadowMap(LightmapConfig{ layers,type, isCubeMap });
 	}
 	RscHandle<FrameBuffer> Lightmap::GetShadowMap()
 	{

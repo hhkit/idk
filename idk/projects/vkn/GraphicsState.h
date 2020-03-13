@@ -129,7 +129,6 @@ namespace idk::vkn
 		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
 		vector<RscHandle<Texture>> shadow_maps_2d  ;
-		vector<RscHandle<CubeMap>> shadow_maps_cube;
 
 		bool clear_render_target = false;
 

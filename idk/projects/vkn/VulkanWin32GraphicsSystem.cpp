@@ -324,7 +324,7 @@ namespace idk::vkn
 		//		}, camera.clear_data);*/
 		//}
 		bool will_draw_debug = true;
-		for (size_t i = 0; i < curr_states.size(); ++i)
+		for (size_t i = 0; i < curr_states.size()&&i<curr_buffer.culled_render_range.size(); ++i)
 		{
 			auto& curr_state = curr_states[i];		
 			auto& curr_range = curr_buffer.culled_render_range[i];
@@ -353,7 +353,6 @@ namespace idk::vkn
 					}
 				}
 			}, curr_cam.clear_data);
-
 			//Init render datas (range for instanced data, followed by render datas for other passes)
 			curr_state.Init(curr_range,curr_buffer.active_light_buffer,curr_buffer.directional_light_buffer, curr_buffer.lights,curr_buffer.d_lightmaps, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);

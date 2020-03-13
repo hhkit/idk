@@ -146,7 +146,7 @@ namespace idk
 		RscHandle<RenderTarget> render_target{};
 		// variant<> clear_data; // -> support no clear, clear_color, skybox 
 		//vec4 clear_color{ 0,0,0,1 };
-		bool is_shadow = false;
+		bool enabled = true;
         CameraClear clear_data;
 		opt<RscHandle<Mesh>> CubeMapMesh{};
 		rect viewport;
@@ -160,6 +160,31 @@ namespace idk
 		rad fov{};
 		real ap;
 		real gamma=1.f;
+	};
+
+	struct PointCameraData
+	{
+		Handle<GameObject> obj_id{};
+		LayerMask culling_flags{ 0xFFFFFFFF };
+		mat4 view_matrix{};
+		vector<mat4> projection_matrix{};
+		real far_plane;
+		vec3 pos;
+		RscHandle<RenderTarget> render_target{};
+		// variant<> clear_data; // -> support no clear, clear_color, skybox 
+		//vec4 clear_color{ 0,0,0,1 };
+		bool is_shadow = false;
+		CameraClear clear_data;
+		opt<RscHandle<Mesh>> CubeMapMesh{};
+		rect viewport;
+		real near_plane;	
+		//real b_sphere_radius;
+		//vec3 far_corner;
+		vec3 look;	
+		vec2 tan_halfFOV;
+		rad fov{};
+		real ap;
+		real gamma = 1.f;
 	};
 	// static_assert(std::is_trivially_destructible_v<RenderObject>, "destroying render object must be super efficient");
 

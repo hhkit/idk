@@ -368,7 +368,10 @@ namespace idk::vkn
 		info.internal_format = vk::Format::eD16Unorm;
 		info.image_usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 		info.aspect = vk::ImageAspectFlagBits::eDepth;
+		info.view_type = vk::ImageViewType::eCube;
+		info.image_create_bits = vk::ImageCreateFlagBits::eCubeCompatible;
 		info.sampled(true);
+		info.layers = 6;
 		return info;
 	}
 	std::pair<vk::UniqueImage, hlp::UniqueAlloc> CreateBlitImage(hlp::MemoryAllocator& allocator,uint32_t mipmap_level, uint32_t width, uint32_t height, vk::Format format)
@@ -446,7 +449,11 @@ namespace idk::vkn
 
 		vk::ImageUsageFlags image_usage = load_info.image_usage;//(format == vk::Format::eD16Unorm) ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment;
 		//vk::ImageLayout     attachment_layout = vk::ImageLayout::eGeneral;//(format == vk::Format::eD16Unorm) ? vk::ImageLayout::eDepthStencilAttachmentOptimal :vk::ImageLayout::eColorAttachmentOptimal;
+
 		size_t single_level_size = ComputeTextureLength(width, height, format);
+		if (load_info.view_type == vk::ImageViewType::eCube)
+			single_level_size *= 6;
+		
 		if (!in_info) { //If data isn't given.
 			len = single_level_size;
 		}
@@ -464,6 +471,7 @@ namespace idk::vkn
 			throw;
 
 		vk::ImageCreateInfo imageInfo{};
+		imageInfo.flags = load_info.image_create_bits;
 		imageInfo.imageType = vk::ImageType::e2D;
 		imageInfo.extent.width = static_cast<uint32_t>(width);
 		imageInfo.extent.height = static_cast<uint32_t>(height);
@@ -500,7 +508,7 @@ namespace idk::vkn
 			sub_range.baseMipLevel = 0;
 			sub_range.levelCount = load_info.mipmap_level;
 			sub_range.baseArrayLayer = 0;
-			sub_range.layerCount = 1;
+			sub_range.layerCount = load_info.layers;
 
 			//TODO update this part so that we check the usage flags and set access flags accordingly.
 			vk::AccessFlags src_flags = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eShaderRead;
@@ -550,7 +558,7 @@ namespace idk::vkn
 					region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 					region.imageSubresource.mipLevel = 0;// std::max(load_info.mipmap_level, 1u) - 1;
 					region.imageSubresource.baseArrayLayer = 0;
-					region.imageSubresource.layerCount = 1;
+					region.imageSubresource.layerCount = load_info.layers;
 
 					region.imageOffset = { 0, 0, 0 };
 					region.imageExtent = {
@@ -571,7 +579,7 @@ namespace idk::vkn
 				region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 				region.imageSubresource.mipLevel = i;// std::max(load_info.mipmap_level, 1u) - 1;
 				region.imageSubresource.baseArrayLayer = 0;
-				region.imageSubresource.layerCount = 1;
+				region.imageSubresource.layerCount = load_info.layers;
 
 				region.imageOffset = { 0, 0, 0 };
 				region.imageExtent = {
@@ -580,7 +588,10 @@ namespace idk::vkn
 					1
 				};
 				copy_regions[i]=(region);
-				offset += ComputeTextureLength(region.imageExtent.width,region.imageExtent.height,format);//single_level_size >> (2 * i);
+				auto lenggth = ComputeTextureLength(region.imageExtent.width, region.imageExtent.height, format);
+				if (load_info.view_type == vk::ImageViewType::eCube)
+					lenggth *= 6;
+				offset += lenggth;//single_level_size >> (2 * i);
 				}
 				//vector<vk::BufferImageCopy>
 

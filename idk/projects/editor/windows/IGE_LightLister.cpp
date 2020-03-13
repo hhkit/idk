@@ -51,18 +51,144 @@ namespace idk
 
 		ImGui::SameLine();
 
+		if (ImGui::Button("Enable All Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+				elem.enabled = true;
+		}
+
+		ImGui::SameLine();
+
 		if (ImGui::Button("Disable All Lights"))
 		{
 			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
 				elem.enabled = false;
 		}
 
-		ImGui::SameLine();
 
-		if (ImGui::Button("Enable All Lights"))
+		if (ImGui::Button("Enable All Point Lights"))
 		{
 			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
-				elem.enabled = true;
+			{
+				if (elem.light.index() == 0)
+					elem.enabled = true;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Spot Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 2)
+					elem.enabled = true;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Directional Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 1)
+					elem.enabled = true;
+			}
+		}
+
+		if (ImGui::Button("Disable All Point Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if(elem.light.index() == 0)
+					elem.enabled = false;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disable All Spot Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 2)
+					elem.enabled = false;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disable All Directional Lights"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 1)
+					elem.enabled = false;
+			}
+		}
+
+		if (ImGui::Button("Enable All Point Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 0)
+					elem.casts_shadows = true;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Directional Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 1)
+					elem.casts_shadows = true;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Enable All Spot Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 2)
+					elem.casts_shadows = true;
+			}
+		}
+
+
+		if (ImGui::Button("Disable All Point Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 0)
+					elem.casts_shadows = false;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disable All Directional Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 1)
+					elem.casts_shadows = false;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disable All Spot Light Shadows"))
+		{
+			for (auto& elem : Core::GetGameState().GetObjectsOfType<Light>())
+			{
+				if (elem.light.index() == 2)
+					elem.casts_shadows = false;
+			}
 		}
 
 		struct ColumnHeader

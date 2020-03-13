@@ -110,7 +110,7 @@ namespace idk::vkn
 		}
 	};
 	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw);
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
 		span<UniformUtils::BindingInfo> bindings,
@@ -388,7 +388,7 @@ namespace idk::vkn
 		}
 		return builder.end();
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
 	{
 		_dud.Reset();
@@ -461,6 +461,8 @@ namespace idk::vkn
 		auto itr2 = curr_bindings.find(info.set);
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
+			if (texture.ImageView() == vk::ImageView())
+				throw;
 			curr_bindings[info.set].Bind(BindingInfo{ info.binding,ImageBinding{texture.ImageView(),texture.Sampler(),layout}, array_index, info.size, info.layout });
 			bound = true;
 		}
@@ -472,6 +474,8 @@ namespace idk::vkn
 		auto itr2 = curr_bindings.find(info.set);
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
+			if (texture.ImageView() == vk::ImageView())
+				throw;
 			curr_bindings[info.set].Bind(BindingInfo{ info.binding,AttachmentBinding{texture.ImageView(),layout}, array_index, info.size, info.layout });
 			bound = true;
 		}

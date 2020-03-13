@@ -84,7 +84,7 @@ namespace idk
 		ImGui::Image(screen_tex->ID(), imageSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		const auto& sel = Core::GetSystem<IDE>().GetSelectedObjects();
-		if (sel.game_objects.size() && sel.game_objects[0]->HasComponent<RectTransform>())
+		if (sel.game_objects.size() && sel.game_objects[0] && sel.game_objects[0]->HasComponent<RectTransform>())
 		{
 			const auto canvas = Core::GetSystem<UISystem>().FindCanvas(sel.game_objects[0]);
 			if (!canvas)

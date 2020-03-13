@@ -5,7 +5,6 @@ layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput depth_i
 
 
 layout(location=0) out vec4 out_color;
-layout(location=3) out vec4 out_hdr;
 out float gl_FragDepth;
 
 //(Relative luminance, obtained from wiki)
@@ -39,14 +38,11 @@ void main()
 	float depth = subpassLoad(depth_input).r;
 	vec3  light = subpassLoad(color_input).rgb;
 	
-	out_color = vec4(ReinhardOperator(light),1);
-	
-	float brightness = dot(out_color.rgb, vec3(0.45,0.7,0.7));
-	 if(brightness > 1.0)
-        out_hdr = vec4(out_color.rgb, 1.0);
-    else
-        out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
-		
-	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
-	
+	float depth =min(metallic_depth,specular_depth);
+	vec3 light =(metallic_depth<specular_depth)?metallic_light:specular_light;
+	if(depth==1)
+		discard;
+	vec3 color = ReinhardOperator(light); 
+	out_color = vec4(color,1);
+	gl_FragDepth = depth;
 }

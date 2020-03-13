@@ -54,7 +54,7 @@ namespace idk
 			ViewMatrix(),
 			ProjectionMatrix(),
 			render_target,
-			false,
+			enabled,
 			clear,
 			Mesh::defaults[MeshType::Box],
 			viewport,
