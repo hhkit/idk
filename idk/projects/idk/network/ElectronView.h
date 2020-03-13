@@ -140,6 +140,7 @@ namespace idk
 	template<typename T>
 	template<typename Hnd, typename Mem>
 	inline ParameterImpl<T>::ParameterImpl(Handle<Hnd> obj, T(Mem::* ptr))
+		: ParameterImpl{}
 	{
 		getter = [obj, ptr]()->T { return std::invoke(ptr, *obj); };
 		setter = [obj, ptr](const T& val) { std::invoke(ptr, *obj) = val; };

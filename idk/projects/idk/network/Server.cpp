@@ -7,11 +7,17 @@
 #include <core/Scheduler.h>
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl>
+#include <network/NetworkTuple.inl>
 
 #undef SendMessage
 
 namespace idk
 {
+	namespace detail
+	{
+		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
+	}
+
 	Server::Server(const Address& address)
 		: adapter{ this }, server{ yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY, yojimbo::Address{address.a, address.b, address.c, address.d, address.port}, config, adapter, 0.0 }
 	{
@@ -33,6 +39,8 @@ namespace idk
 	}
 	void Server::ProcessMessage(int clientIndex, yojimbo::Message* message)
 	{
+		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+		LOG_TO(LogPool::NETWORK, "Received %s message from client %d", message_name_array[message->GetType()].data(), clientIndex);
 		OnMessageReceived[clientIndex][message->GetType()].Fire(message);
 	}
 

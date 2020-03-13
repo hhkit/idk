@@ -9,10 +9,16 @@
 #include <core/Scheduler.h>
 #include <script/ScriptSystem.h>
 #include <script/MonoBehavior.h>
+#include <network/NetworkTuple.inl>
 #undef SendMessage
 
 namespace idk
 {
+	namespace detail
+	{
+		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
+	}
+
 	Client::Client(const Address& server_addr)
 		: client(yojimbo::GetDefaultAllocator(), yojimbo::Address("0.0.0.0"), config, adapter, 0.0)
 	{
@@ -107,6 +113,8 @@ namespace idk
 
 	void Client::ProcessMessage(yojimbo::Message* message)
 	{
+		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+		LOG_TO(LogPool::NETWORK, "Received %s message", message_name_array[message->GetType()].data());
 		OnMessageReceived[message->GetType()].Fire(message);
 	}
 }
