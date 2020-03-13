@@ -261,10 +261,10 @@ namespace idk
 		return result;
 	}
 
-	std::pair<size_t, size_t> CullAndBatchRenderObjectsForShadow(const CameraData& camera, const vector<RenderObject>& ro, const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data, vector<GenericHandle>* handle_buffer = nullptr, CullBatchOpt opt = {})
+	std::pair<size_t, size_t> CullAndBatchRenderObjectsForShadow(const CameraData& camera, const frustum& frust,  const vector<RenderObject>& ro, const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data, vector<GenericHandle>* handle_buffer = nullptr, CullBatchOpt opt = {})
 	{
 
-		const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
+		//const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		//Keep track of the batches culled by this frustum
 		std::pair<size_t, size_t> result{ inst.size() ,inst.size() };
 		std::optional<decltype(ro.begin())> oprev{};
@@ -276,7 +276,7 @@ namespace idk
 		{
 			const auto bv = *bv_itr;
 
-			if ((itr->layer_mask & camera.culling_flags) && ((frust.containment_test(bv) & in_mask) == in_mask) && itr->cast_shadows)
+			if ((itr->layer_mask & camera.culling_flags) && itr->cast_shadows && ((frust.containment_test(bv) & in_mask) == in_mask))
 			{
 				if (!oprev || ![](auto& itr, auto& prev) {
 					return (itr->mesh == prev->mesh) & (itr->material_instance == prev->material_instance);
@@ -493,8 +493,8 @@ namespace idk
 		//float first_end = n_plane + 0.2f * diff;
 		//float second_end = n_plane + 0.45f * diff;
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.45f * diff;
-		float second_start= n_plane + 0.35f * diff;
+		float first_end = n_plane + 0.4f * diff;
+		float second_start= n_plane + 0.38f * diff;
 		float second_end = f_plane;
 
 		float cascade_start[2] = { n_plane  ,second_start};
@@ -518,10 +518,11 @@ namespace idk
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
 						if (light.cast_shadow)
 						{
-							for (auto& elem : light.light_maps)
-								elem.UpdatePointMat(light);
-							light.update_shadow = true;
+							light.update_shadow = true;							
 						}
+						for (auto& elem : light.light_maps)
+							elem.UpdatePointMat(light);
+
 					}
 					
 
@@ -538,13 +539,13 @@ namespace idk
 				auto sphere = bounding_box_to_loose_sphere(bounding_box);
 
 				color col = color{ 0.3f,0.2f,0.6f,1.0f };
-				light.update_shadow = false;
+				//light.update_shadow = false;
+				light.update_shadow = true;
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
 					light.camDataRef = camera;
-					col = color{ 0.5f,0.4f,0.0f,1.0f };
-					light.update_shadow = true;
+					col = color{ 0.5f,0.4f,0.0f,1.0f };			
 				}
 
 				if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgSpotLight", true))
@@ -1135,7 +1136,6 @@ namespace idk
 						LightVolDbg::RenderNext();
 					DbgIndex() = s_cast<int>(i++);
 					CullLights(camera, result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range);
-
 				}
 				result.culled_render_range.emplace_back(range);
 				//{
@@ -1156,12 +1156,17 @@ namespace idk
 		for (auto& request : this->request_buffer)
 		{
 			auto& cam = request.data.camera;
-			auto& out_instanced_mesh_render = result.instanced_mesh_render;
-			auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
-			{
+			
+			if(cam.enabled){
+				auto& out_instanced_mesh_render = result.instanced_mesh_render;
+				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
 				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
 				request.data.inst_mesh_render_begin = start_index;
 				request.data.inst_mesh_render_end = end_index;
+			}
+			else
+			{
+				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
 			}
 		}
 		size_t i = 0;
@@ -1180,7 +1185,7 @@ namespace idk
 				{
 					range.light_map_index = lm_i;
 					{
-						if (!light.cast_shadow)
+						if (!light.update_shadow || !light.cast_shadow)
 						{
 							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 						}
@@ -1192,7 +1197,7 @@ namespace idk
 							if (light.index == 1)
 								opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
 							
-							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
+							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
 							
 							range.inst_mesh_render_begin = start_index;
 							range.inst_mesh_render_end = end_index;
@@ -1204,17 +1209,18 @@ namespace idk
 			}
 			else
 			{
+				const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
 				for ([[maybe_unused]] auto& lightmap : light.light_maps)
 				{
 					range.light_map_index = lm_i;
 					{
-						if (!light.cast_shadow)
+						if (!light.update_shadow || !light.cast_shadow)
 						{
 							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 						}
 						else
 						{
-							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 							range.inst_mesh_render_begin = start_index;
 							range.inst_mesh_render_end = end_index;
 						}
