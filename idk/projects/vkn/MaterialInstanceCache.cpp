@@ -129,7 +129,6 @@ namespace idk::vkn
 		auto& creation_buffer = update_info.create_buffer;
 		auto& ubo_manager = update_info.ubo_manager;
 		auto& ds_updater = update_info.ds_updater;
-		auto& scratch = update_info.scratch;
 		vector_span_builder tbuilder{ update_info.scratch };
 		auto shader = mat_inst.shader;
 		if (!shader || !shader.as<ShaderModule>().HasCurrent())
