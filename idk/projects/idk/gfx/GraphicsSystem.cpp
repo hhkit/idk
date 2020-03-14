@@ -477,13 +477,13 @@ namespace idk
 		range.light_begin = active_light_buffer.size();
 		range.dir_light_begin = directional_light_buffer.size();
 
-		/*if (!camera.enabled)
+		if (!camera.enabled)
 		{
 			range.light_end = active_light_buffer.size();
 			range.dir_light_end = directional_light_buffer.size();
 			LightVolDbg::EndCurrent();
 			return;
-		}*/
+		}
 		
 		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		//Perform camera light loop to populate the data
@@ -518,10 +518,10 @@ namespace idk
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
 						if (light.cast_shadow)
 						{
-							light.update_shadow = true;							
-						}
-						//for (auto& elem : light.light_maps)
+							light.update_shadow = true;				
+							//for (auto& elem : light.light_maps)
 							//elem.UpdatePointMat(light);
+						}
 
 					}
 					

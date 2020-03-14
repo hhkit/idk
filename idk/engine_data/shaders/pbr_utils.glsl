@@ -1,7 +1,7 @@
 import /engine_data/shaders/pbr_utils.glsl
 
 #define POISSON_BIAS 1.f/ 700.f
-#define DIVISIBLE_FACTOR 1.f/15.f
+#define DIVISIBLE_FACTOR 1.f/14.f
 
 vec3 fresnel(float cos_theta, vec3 f0)
 {
@@ -186,7 +186,7 @@ float ShadowCalculation(Light light, sampler2D shadow_tex , vec3 lightDir , vec3
 				
 			//Bias calculation
 			//float bias = max(0.005 * (1.0 - dot(normal,lightDir)),0.009);
-			float bias = light.shadow_bias + 0.00005;
+			float bias = light.shadow_bias;
 			
 			//PCF
 			float avgDepth = 0.f;
@@ -236,7 +236,7 @@ float ShadowCalculation(Light light, samplerCube shadow_tex , vec3 lightDir , ve
 			
 		//Bias calculation
 		//float bias = max(0.005 * (1.0 - dot(normal,lightDir)),0.009);
-		float bias = light.shadow_bias + 0.00005;
+		float bias = light.shadow_bias;
 		
 		//PCF
 		float avgDepth = 0.f;
