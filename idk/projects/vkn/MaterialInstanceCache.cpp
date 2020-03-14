@@ -224,7 +224,8 @@ namespace idk::vkn
 			hash_table<set_t, SetCollation> collated_data;
 			ShaderModule& mod = mat_inst.shader.as<ShaderModule>();
 			auto [buffer, offset] = um.Add(mat_inst.data_block);
-			
+			info.buffer = buffer;
+			info.buffer_range = {offset,offset+mat_inst.data_block.size()};
 			for (auto [name, ub] : mat_inst.ubo_table)
 			{
 				auto& uni_info = mod.GetLayout(name);
