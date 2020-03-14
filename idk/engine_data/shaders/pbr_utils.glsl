@@ -236,7 +236,7 @@ float ShadowCalculation(Light light, samplerCube shadow_tex , vec3 lightDir , ve
 			
 		//Bias calculation
 		//float bias = max(0.005 * (1.0 - dot(normal,lightDir)),0.009);
-		float bias = light.shadow_bias + 0.00005;
+		float bias = light.shadow_bias;
 		
 		//PCF
 		float avgDepth = 0.f;
