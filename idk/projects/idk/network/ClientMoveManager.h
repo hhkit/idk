@@ -4,6 +4,8 @@
 
 namespace idk
 {
+	class GhostMessage;
+
 	class ClientMoveManager
 		: public SubstreamManager<MoveManager>
 	{
@@ -11,5 +13,7 @@ namespace idk
 		void SubscribeEvents(ClientConnectionManager& client) override;
 		void SubscribeEvents(ServerConnectionManager& server) override;
 		void SendMoves(span<ElectronView> views);
+	private:
+		void OnGhostReceived(GhostMessage& ghost_msg);
 	};
 }

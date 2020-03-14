@@ -1212,6 +1212,7 @@
     <ClInclude Include="network\GhostAcknowledgementMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="network\SeqNo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1746,6 +1747,7 @@
     <ClCompile Include="network\ElectronRigidbodyView.cpp">
       <Filter>network\views</Filter>
     </ClCompile>
+    <ClCompile Include="network\SeqNo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

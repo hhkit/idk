@@ -51,7 +51,7 @@ namespace idk
 		}
 		RenderExtraVars(Core::GetSystem<GraphicsSystem>().extra_vars);
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void RenderLifetimeStuff(std::string& dump,const gfxdbg::FgRscLifetimes& lifetimes)
 	{
 		size_t max_len = 0;

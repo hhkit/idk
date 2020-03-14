@@ -261,6 +261,77 @@ namespace idk
 		return result;
 	}
 
+	std::pair<size_t, size_t> CullAndBatchRenderObjectsForShadow(const CameraData& camera, const frustum& frust,  const vector<RenderObject>& ro, const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data, vector<GenericHandle>* handle_buffer = nullptr, CullBatchOpt opt = {})
+	{
+
+		//const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
+		//Keep track of the batches culled by this frustum
+		std::pair<size_t, size_t> result{ inst.size() ,inst.size() };
+		std::optional<decltype(ro.begin())> oprev{};
+		InstRenderObjects* inst_itr{};
+		auto bv_itr = bounding_vols.begin();
+
+		const auto in_mask = opt.in_mask;
+		for (auto itr = ro.begin(); itr < ro.end(); ++itr, ++bv_itr)
+		{
+			const auto bv = *bv_itr;
+
+			if ((itr->layer_mask & camera.culling_flags) && itr->cast_shadows && ((frust.containment_test(bv) & in_mask) == in_mask))
+			{
+				if (!oprev || ![](auto& itr, auto& prev) {
+					return (itr->mesh == prev->mesh) & (itr->material_instance == prev->material_instance);
+				}(itr, *oprev))
+				{
+					inst_itr = &inst.emplace_back(CreateIROInfo(*itr));
+					inst_itr->instanced_index = instanced_data.size();
+					oprev = itr;
+				}
+					if (handle_buffer)
+						handle_buffer->emplace_back(itr->obj_id);
+					//Keep track of the number of instances to be render for this frustum
+					const auto tfm = camera.view_matrix * itr->transform;
+					instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
+					inst_itr->num_instances++;
+			}
+		}
+		result.second = inst.size();
+		return result;
+	}
+
+	std::pair<size_t, size_t> BatchRenderObjects(const CameraData& camera, const vector<RenderObject>& ro, const vector<sphere>& bounding_vols, vector<InstRenderObjects>& inst, vector<InstancedData>& instanced_data, vector<GenericHandle>* handle_buffer = nullptr)
+	{
+
+		//const auto frust = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
+		//Keep track of the batches culled by this frustum
+		std::pair<size_t, size_t> result{ inst.size() ,inst.size() };
+		std::optional<decltype(ro.begin())> oprev{};
+		InstRenderObjects* inst_itr{};
+		auto bv_itr = bounding_vols.begin();
+		for (auto itr = ro.begin(); itr < ro.end(); ++itr, ++bv_itr)
+		{
+			const auto bv = *bv_itr;
+			if ((itr->layer_mask & camera.culling_flags) )
+			{
+				if (!oprev || ![](auto& itr, auto& prev) {
+					return (itr->mesh == prev->mesh) & (itr->material_instance == prev->material_instance);
+				}(itr, *oprev))
+				{
+					inst_itr = &inst.emplace_back(CreateIROInfo(*itr));
+					inst_itr->instanced_index = instanced_data.size();
+					oprev = itr;
+				}
+					if (handle_buffer)
+						handle_buffer->emplace_back(itr->obj_id);
+					//Keep track of the number of instances to be render for this frustum
+					auto tfm = camera.view_matrix * itr->transform;
+					instanced_data.emplace_back(InstancedData{ tfm,tfm.inverse().transpose() });
+					inst_itr->num_instances++;
+			}
+		}
+		result.second = inst.size();
+		return result;
+	}
+
 	/* disabled until we're ready to instance animated render objects too.
 	std::pair<size_t, size_t>  CullAndBatchAnimatedRenderObjects(const frustum& frust, const vector<AnimatedRenderObject>& ro, vector<InstAnimatedRenderObjects>& inst)
 	{
@@ -403,10 +474,18 @@ namespace idk
 	void CullLights(const CameraData& camera,ShadowMapPool& sm_pool,vector<LightData>& lights,vector<LightData>& new_lights, vector<size_t>& active_light_buffer, vector<size_t>& directional_light_buffer, GraphicsSystem::RenderRange& range)
 	{
 
-		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		range.light_begin = active_light_buffer.size();
 		range.dir_light_begin = directional_light_buffer.size();
+
+		/*if (!camera.enabled)
+		{
+			range.light_end = active_light_buffer.size();
+			range.dir_light_end = directional_light_buffer.size();
+			LightVolDbg::EndCurrent();
+			return;
+		}*/
 		
+		auto frustum = camera_vp_to_frustum(camera.projection_matrix * camera.view_matrix);
 		//Perform camera light loop to populate the data
 		float n_plane = camera.near_plane, f_plane = camera.far_plane;
 
@@ -414,8 +493,8 @@ namespace idk
 		//float first_end = n_plane + 0.2f * diff;
 		//float second_end = n_plane + 0.45f * diff;
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.45f * diff;
-		float second_start= n_plane + 0.35f * diff;
+		float first_end = n_plane + 0.4f * diff;
+		float second_start= n_plane + 0.38f * diff;
 		float second_end = f_plane;
 
 		float cascade_start[2] = { n_plane  ,second_start};
@@ -432,11 +511,21 @@ namespace idk
 				{
 					sphere sphere{ invert_rotation(light.v)[3],light.falloff };
 					color col = color{ 0.3f,0.6f,0.2f,1.0f };
+					light.update_shadow = false;
 					if (frustum.contains(sphere))
 					{
 						active_light_buffer.emplace_back(i);
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
+						if (light.cast_shadow)
+						{
+							light.update_shadow = true;							
+						}
+						//for (auto& elem : light.light_maps)
+							//elem.UpdatePointMat(light);
+
 					}
+					
+
 					if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgPointLight", true))
 						LightVolDbg::DbgLight(sphere,col);
 
@@ -450,12 +539,15 @@ namespace idk
 				auto sphere = bounding_box_to_loose_sphere(bounding_box);
 
 				color col = color{ 0.3f,0.2f,0.6f,1.0f };
+				//light.update_shadow = false;
+				light.update_shadow = true;
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
 					light.camDataRef = camera;
-					col = color{ 0.5f,0.4f,0.0f,1.0f };
+					col = color{ 0.5f,0.4f,0.0f,1.0f };			
 				}
+
 				if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgSpotLight", true))
 					LightVolDbg::DbgLight(sphere, col);
 				//LightVolDbg::DbgLight(light_frustum, col);
@@ -464,29 +556,37 @@ namespace idk
 			case index_in_variant_v<DirectionalLight, LightVariant>:
 			{
 				///////////////////////////////////////>>>>>>>>>>>>>>>>>>>>>>>
-				unsigned k = 0;// , j = 1;
 				light.camDataRef = camera;
 
 				auto copy_light = light;
 
-				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index,copy_light.light_maps);
-				
-				color col = color{ 0.3f, 0.2f, 0.6f, 1.0f };
-				for (auto& elem : copy_light.light_maps)
+				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index, copy_light.light_maps);
+
+				light.update_shadow = false;
+				if (light.cast_shadow)
 				{
-					elem.SetCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
-					if(Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgDirectionalLight", true))
-						LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection* light.v), col*(k+1));
-					++k;
-				}
+					unsigned k = 0;// , j = 1;
+					light.update_shadow = true;
+
+					color col = color{ 0.3f, 0.2f, 0.6f, 1.0f };
+
+					for (auto& elem : copy_light.light_maps)
+					{
+							elem.UpdateCascade(camera, copy_light, cascade_start[k], cascade_end[k]);
+						if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgDirectionalLight", true))
+							LightVolDbg::DbgLight(camera_vp_to_frustum(elem.cascade_projection * light.v), col * static_cast<float>(k + 1));
+						++k;
+					}
+				}	
+
+				//light.cast_shadow = false;
+
 				auto new_index = new_lights.size();
 				new_lights.emplace_back(copy_light);
 				active_light_buffer.emplace_back(lights.size() + new_index); //new_lights is gonna be appended at the back of the set
 				directional_light_buffer.emplace_back(lights.size() + new_index);
-
 				//active_light_buffer.emplace_back(i);
-
-				
+	
 			}
 				break;
 			}
@@ -653,32 +753,32 @@ namespace idk
 				{
 					auto res = elem.GenerateLightData();
 					
-					if (res.index == 1)
-					{
-						//Dtor now frees the shadow maps.
-						//Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
-						//
-						//	//auto& e = std::get<DirectionalLight>(elem.light);							
-						//	for (auto& elem : d_lightmaps)
-						//	{
-						//		for (auto& e : elem.second.cam_lightmaps)
-						//		{
-						//			e.light_map->attachments.clear();
-						//			e.light_map->depth_attachment.reset();
-						//			e.light_map->stencil_attachment.reset();
-						//		}
-						//		elem.second.cam_lightmaps.clear();
-						//	}
-						//	d_lightmaps.clear();
-						//};
+					//if (res.index == 1)
+					//{
+					//	//Dtor now frees the shadow maps.
+					//	//Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
+					//	//
+					//	//	//auto& e = std::get<DirectionalLight>(elem.light);							
+					//	//	for (auto& elem : d_lightmaps)
+					//	//	{
+					//	//		for (auto& e : elem.second.cam_lightmaps)
+					//	//		{
+					//	//			e.light_map->attachments.clear();
+					//	//			e.light_map->depth_attachment.reset();
+					//	//			e.light_map->stencil_attachment.reset();
+					//	//		}
+					//	//		elem.second.cam_lightmaps.clear();
+					//	//	}
+					//	//	d_lightmaps.clear();
+					//	//};
 
-						//auto& e = std::get<DirectionalLight>(elem.light);
-						//
-						//for (auto& c : result.camera)
-						//{
-						//	result.d_lightmaps[c.obj_id].cam_lightmaps = result.d_lightpool.GetShadowMaps(elem);
-						//}
-					}
+					//	//auto& e = std::get<DirectionalLight>(elem.light);
+					//	//
+					//	//for (auto& c : result.camera)
+					//	//{
+					//	//	result.d_lightmaps[c.obj_id].cam_lightmaps = result.d_lightpool.GetShadowMaps(elem);
+					//	//}
+					//}
 					result.lights.emplace_back(res);
 				}
 			}
@@ -966,14 +1066,14 @@ namespace idk
 				//result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 			}
 
-			// sort ui render by depth then z pos
+			// sort ui render by z pos then depth
 			for (auto& [canvas, vec] : result.ui_render_per_canvas)
 			{
 				std::stable_sort(vec.begin(), vec.end(),
 					[](const UIRenderObject& a, const UIRenderObject& b) {
-						return a.depth == b.depth ?
-							a.transform[3].z < b.transform[3].z :
-							a.depth < b.depth;
+						return a.transform[3].z == b.transform[3].z ?
+							a.depth < b.depth :
+							a.transform[3].z < b.transform[3].z;
 					}
 				);
 			}
@@ -1011,7 +1111,7 @@ namespace idk
         for (auto& elem : futures)
             elem.get();
 
-		result.active_light_buffer.reserve(result.camera.size()+ result.lights.size());
+		result.active_light_buffer.reserve(result.camera.size() + result.lights.size());
 		result.directional_light_buffer.reserve(result.camera.size());
 		vector<sphere> bounding_vols;
 		bounding_vols.resize(result.mesh_render.size());
@@ -1036,9 +1136,8 @@ namespace idk
 					ProcessFonts(result.font_render_data, result.font_buffer, result.font_range, range);
 					if (debug_light_vol-- == 0)
 						LightVolDbg::RenderNext();
-					DbgIndex() = i++;
+					DbgIndex() = s_cast<int>(i++);
 					CullLights(camera, result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range);
-
 				}
 				result.culled_render_range.emplace_back(range);
 				//{
@@ -1048,23 +1147,28 @@ namespace idk
 			//}
 			}
 			//Disable the shadows of the non-cascaded directional lights
-			for (auto& light : result.lights)
+			/*for (auto& light : result.lights)
 			{
-				if (light.index == 1)
+				if (light.index==1)
 					light.cast_shadow = false;
-			}
+			}*/
 			//append the added lights at the back of the light range
 			result.lights.insert(result.lights.end(), new_lights.begin(), new_lights.end());
 		}
 		for (auto& request : this->request_buffer)
 		{
 			auto& cam = request.data.camera;
-			auto& out_instanced_mesh_render = result.instanced_mesh_render;
-			auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
-			{
+			
+			if(cam.enabled){
+				auto& out_instanced_mesh_render = result.instanced_mesh_render;
+				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
 				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
 				request.data.inst_mesh_render_begin = start_index;
 				request.data.inst_mesh_render_end = end_index;
+			}
+			else
+			{
+				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
 			}
 		}
 		size_t i = 0;
@@ -1083,7 +1187,7 @@ namespace idk
 				{
 					range.light_map_index = lm_i;
 					{
-						if (!light.cast_shadow)
+						if (!light.update_shadow || !light.cast_shadow)
 						{
 							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 						}
@@ -1095,7 +1199,7 @@ namespace idk
 							if (light.index == 1)
 								opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
 							
-							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
+							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
 							
 							range.inst_mesh_render_begin = start_index;
 							range.inst_mesh_render_end = end_index;
@@ -1107,17 +1211,18 @@ namespace idk
 			}
 			else
 			{
+				const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
 				for ([[maybe_unused]] auto& lightmap : light.light_maps)
 				{
 					range.light_map_index = lm_i;
 					{
-						if (!light.cast_shadow)
+						if (!light.update_shadow || !light.cast_shadow)
 						{
 							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 						}
 						else
 						{
-							const auto [start_index, end_index] = CullAndBatchRenderObjects(light_cam_info, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 							range.inst_mesh_render_begin = start_index;
 							range.inst_mesh_render_end = end_index;
 						}
@@ -1180,6 +1285,7 @@ namespace idk
 				request.data.ani_handles = pani_handles;
 			}
 		}
+
 		//SubmitBuffers(std::move(result));
 		SwapWritingBuffer();
 	}
@@ -1218,9 +1324,11 @@ namespace idk
 		///////////////////////Load vertex shaders
 		renderer_vertex_shaders[VDebug] = LoadShader("/engine_data/shaders/dbgvertex.vert");
 		renderer_vertex_shaders[VNormalMesh] = LoadShader("/engine_data/shaders/mesh.vert");
+		renderer_vertex_shaders[VNormalMeshShadow] = LoadShader("/engine_data/shaders/shadow_mesh.vert");
 		renderer_vertex_shaders[VNormalMeshPicker] = LoadShader("/engine_data/shaders/mesh_picking.vert");
 		renderer_vertex_shaders[VParticle] = LoadShader("/engine_data/shaders/particle.vert");
 		renderer_vertex_shaders[VSkinnedMesh] = LoadShader("/engine_data/shaders/skinned_mesh.vert");
+		renderer_vertex_shaders[VSkinnedMeshShadow] = LoadShader("/engine_data/shaders/shadow_skinned_mesh.vert");
 		renderer_vertex_shaders[VSkinnedMeshPicker] = LoadShader("/engine_data/shaders/skinned_mesh_picking.vert");
 		renderer_vertex_shaders[VSkyBox] = LoadShader("/engine_data/shaders/skybox.vert");
 		renderer_vertex_shaders[VPBRConvolute] = LoadShader("/engine_data/shaders/pbr_convolute.vert");
@@ -1244,9 +1352,12 @@ namespace idk
 		renderer_fragment_shaders[FDeferredPostAmbient] = LoadShader("/engine_data/shaders/deferred_post_ambient.frag");
 		renderer_fragment_shaders[FDeferredCombine] = LoadShader("/engine_data/shaders/deferred_combine.frag");
 		renderer_fragment_shaders[FDeferredHDR] = LoadShader("/engine_data/shaders/deferred_hdr.frag");
+		renderer_fragment_shaders[FDeferredBloom] = LoadShader("/engine_data/shaders/deferred_bloom.frag");
+		renderer_fragment_shaders[FPointShadow] = LoadShader("/engine_data/shaders/point_shadow.frag");
 
 		////////////////////Load geometry Shaders
 		renderer_geometry_shaders[GSinglePassCube] = LoadShader("/engine_data/shaders/single_pass_cube.geom");
+		renderer_geometry_shaders[GPointShadow] = LoadShader("/engine_data/shaders/point_shadow.geom");
 
 
 	}

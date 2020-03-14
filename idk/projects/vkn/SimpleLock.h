@@ -30,7 +30,7 @@ namespace idk::vkn::hlp
 		{
 			std::mutex mutex;
 			std::condition_variable cv;
-			bool locked = false;
+			atomic<bool> locked = false;
 		};
 		unique_ptr<Data> _data;
 	};

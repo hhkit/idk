@@ -54,6 +54,9 @@ namespace idk::vkn
 		iti.data = dds.Data().data();
 		iti.len = dds.size();
 		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
+		iti.format = UnSrgb(iti.format);
+		if (to.input_is_srgb)
+			iti.format = ToSrgb(iti.format);
 		TexCreateInfo tci;
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
 		tci.width = dds.Dimensions().x;

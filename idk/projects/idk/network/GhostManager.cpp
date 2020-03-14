@@ -77,9 +77,6 @@ namespace idk
 
 		for (auto& view : views)
 		{
-			if (view.owner == target)
-				continue;
-
 			if (const auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
 			{
 				auto retransmit_state_mask = 0;
@@ -95,7 +92,6 @@ namespace idk
 		if (ghost_packs.size())
 		{
 			{
-				auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
 				auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 				GhostPacketInfo transmission_rec;
 				transmission_rec.sequence_number = seq;
@@ -151,10 +147,7 @@ namespace idk
 
 		while (ackfield)
 		{
-			if (ack == 0)
-				ack = seq_max;
-			else
-				--ack;
+			--ack;
 			
 			if (ackfield & 1)
 				acked.emplace(ack);

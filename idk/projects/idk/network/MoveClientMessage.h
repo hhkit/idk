@@ -31,7 +31,7 @@ namespace idk
 					serialize_vector_count(stream, pack, 3);
 					for (auto& seq_and_pack : pack)
 					{
-						serialize_int(stream, seq_and_pack.seq, 0, std::numeric_limits<unsigned short>::max());
+						serialize_int(stream, seq_and_pack.seq.value, 0, SeqNo::max_value);
 						serialize_vector_count(stream, seq_and_pack.pack, 256);
 						serialize_bytes(stream, (uint8_t*) seq_and_pack.pack.data(), static_cast<int>(seq_and_pack.pack.size()));
 					}

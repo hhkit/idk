@@ -554,6 +554,8 @@ namespace idk::vkn
 		auto itr2 = curr_bindings.find(info.set);
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
+			if (texture.ImageView() == vk::ImageView())
+				throw;
 			curr_bindings[info.set].Bind(BindingInfo{ info.binding,ImageBinding{texture.ImageView(),texture.Sampler(),layout}, array_index, info.size, info.layout });
 			bound = true;
 		}
@@ -565,6 +567,8 @@ namespace idk::vkn
 		auto itr2 = curr_bindings.find(info.set);
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
+			if (texture.ImageView() == vk::ImageView())
+				throw;
 			curr_bindings[info.set].Bind(BindingInfo{ info.binding,AttachmentBinding{texture.ImageView(),layout}, array_index, info.size, info.layout });
 			bound = true;
 		}

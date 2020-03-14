@@ -15,7 +15,7 @@ public:
 
     // app
     void PollEvents() override { ++i; }
-    void Exec(std::string_view path, idk::span<const char*> argv, bool wait) override { };
+    string Exec(std::string_view path, idk::span<const char*> argv, bool wait) override { };
 
     // movement
     idk::vec2 GetMouseScreenPos() override { return idk::vec2{}; };

@@ -33,11 +33,13 @@ U_LAYOUT(5, 0) uniform BLOCK(LightBlock)
 
 S_LAYOUT(7, 4) uniform sampler2D shadow_maps[MAX_LIGHTS];
 
-S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_LIGHTS];
+S_LAYOUT(9, 1) uniform sampler2D shadow_map_directional[MAX_MAP];
+
+S_LAYOUT(13, 1) uniform samplerCube shadow_map_point[MAX_LIGHTS];
 
 S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
 {
-	DLight directional_vp[MAX_LIGHTS];
+	DLight directional_vp[MAX_MAP];
 }DirectionalBlk;
 
 vec3 Normal()
@@ -87,7 +89,7 @@ void main()
 	vec4 world_pos = 
 		PerCamera.inverse_view_transform *
 		vec4(view_pos,1);
-	int j=0;
+	int j=0, k = 0;
 	float view_z_abs = abs(view_pos.z);
 	
 	for (int i = 0; i < LightBlk.light_count; ++i)
@@ -95,6 +97,17 @@ void main()
 		Light curr_light = LightBlk.lights[i];
 		vec3 result = pbr_metallic(curr_light, view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		vec4 cascade_c = vec4(0,0,0,0);
+		//if(curr_light.type == 0)
+		//{
+		//	
+		//	if(curr_light.cast_shadow!=0)
+		//	{
+		//		result *= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
+		//		//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
+		//	}
+		//	
+		//	++k;
+		//}
 		if (curr_light.type == 1)
 		{
 			if(curr_light.cast_shadow!=0)
@@ -115,8 +128,12 @@ void main()
 				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
 				//}
 				result *= shadow_factor;
-				j = 0;
-				
+				//shadow_accum -= shadow_factor;				
+				++j;
+			}
+			else
+			{
+				j+=2;
 			}
 			//vvvp = curr_light.vp;
 		}
@@ -125,11 +142,14 @@ void main()
 			if(curr_light.cast_shadow!=0)
 			{
 				result *= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+				//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+			
 			}
 		} 
 		
 		light_accum += result;// + cascade_c.xyz;
 	}
+	
 	vec3 F = mix(vec3(0.04), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
 	vec3 kD = 1.0 - kS;

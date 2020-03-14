@@ -88,11 +88,12 @@ namespace idk::vkn::renderpasses
 	struct CombinePass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable out_color;
+		FrameGraphResourceMutable out_hdr;
 		FrameGraphResourceMutable out_depth;
 
 		RscHandle<ShaderProgram> combine_shader;
 
-		CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex,FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex);
+		CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex,FrameGraphResource out_color_tex,  FrameGraphResource out_depth_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
@@ -101,12 +102,12 @@ namespace idk::vkn::renderpasses
 		FrameGraphResourceMutable hdr_rsc;
 		FrameGraphResourceMutable hdr_depth_rsc;
 		AccumPass& accum_def, & accum_spec;
-
+	
 		FrameGraphResourceMutable accum_att_def, depth_att_def;
 		FrameGraphResourceMutable accum_att_spec, depth_att_spec;
-
+	
 		RscHandle<ShaderProgram> hdr_shader;
-
+	
 		HdrPass(FrameGraphBuilder& builder, AccumPass& accum_def_, AccumPass& accum_spec_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
@@ -121,6 +122,20 @@ namespace idk::vkn::renderpasses
 		void Execute(Context_t context, BaseDrawSet& draw_set) override;
 		rect _viewport;
 	};
+
+	/*struct BloomPass : BaseRenderPass, FsqUtil
+	{
+		FrameGraphResourceMutable bloom_rsc;
+		FrameGraphResourceMutable bloom_depth_rsc;
+		UnlitPass& unlit_rsc;
+
+		RscHandle<ShaderProgram> bloom_shader;
+
+		BloomPass(FrameGraphBuilder& builder, UnlitPass& unlit_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex);
+		void Execute(FrameGraphDetail::Context_t context) override;
+		rect _viewport;
+	};*/
+
 	struct CubeClearPass : DrawSetRenderPass, FsqUtil
 	{
 

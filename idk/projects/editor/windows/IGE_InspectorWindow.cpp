@@ -556,7 +556,7 @@ namespace idk {
         if (execute_counter > 1)
             editor.ExecuteCommand<CMD_CollateCommands>(execute_counter);
     }
-#pragma optimize("",off)
+//#pragma optimize("",off)
 
     template<typename T>
     struct has_meta

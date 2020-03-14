@@ -15,7 +15,7 @@ namespace idk
 		template <typename Stream>
 		bool Serialize(Stream& stream)
 		{
-			serialize_int(stream, base_ack, 0, 0xFFFF);
+			serialize_int(stream, base_ack.value, 0, SeqNo::max_value);
 			serialize_int(stream, ack_field, 0, std::numeric_limits<unsigned>::max());
 			return true;
 		}

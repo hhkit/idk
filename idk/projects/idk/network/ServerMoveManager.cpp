@@ -24,7 +24,7 @@ namespace idk
 
 	void ServerMoveManager::OnMoveReceived(MoveClientMessage& move)
 	{
-		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+		const auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
 		for (auto& move_pack : move.move_packs)
 		{
 			if (auto view = id_man.GetViewFromId(move_pack.network_id))
