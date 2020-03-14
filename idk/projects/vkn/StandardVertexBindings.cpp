@@ -43,7 +43,6 @@ namespace idk::vkn::bindings
 		BindAni(the_interface, dc);
 	}
 
-#pragma optimize("",off)
 	void StandardVertexBindings::BindAni(RenderInterface& the_interface, const AnimatedRenderObject& dc)
 	{
 		//auto& state = State();

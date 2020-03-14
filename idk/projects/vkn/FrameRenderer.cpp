@@ -1285,9 +1285,6 @@ namespace idk::vkn
 	//and command buffer hasn't ended
 	void FrameRenderer::RenderDebugStuff(const GraphicsState& , RenderStateV2& , rect )
 	{
-		UNREFERENCED_PARAMETER(vp);
-		UNREFERENCED_PARAMETER(rs);
-		UNREFERENCED_PARAMETER(state);
 #if 0 
 		auto dispatcher = vk::DispatchLoaderDefault{};
 		vk::CommandBuffer cmd_buffer = rs.CommandBuffer();

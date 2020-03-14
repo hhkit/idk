@@ -281,8 +281,7 @@ namespace idk::vkn
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		if (&curr_buffer.skeleton_transforms != pre_render_data.skeleton_transforms)
 			throw;
-		if (pre_render_data.skeleton_transforms->size())
-			DebugBreak();
+
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
 
 		shared_graphics_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
