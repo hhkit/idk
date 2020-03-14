@@ -569,7 +569,7 @@ namespace idk::vkn
 		{
 			perp = mat * vec4{ perp, 0 };
 			const auto end = perp;
-			const auto start_index = pos.size();
+			const auto start_index = static_cast<uint16_t>(pos.size());
 			pos.emplace_back(start);
 			pos.emplace_back(perp);
 

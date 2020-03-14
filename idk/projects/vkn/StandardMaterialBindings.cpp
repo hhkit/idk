@@ -20,7 +20,7 @@ namespace idk::vkn::bindings
 	void StandardMaterialBindings::Bind(RenderInterface& the_interface, const RenderObject& dc)
 	{
 		//Bind the material uniforms
-		auto& material_instances = *p_material_instances;
+		//auto& material_instances = *p_material_instances;
 		{
 			if (dc.material_instance != prev_material_inst)
 			{

@@ -3,8 +3,10 @@
 
 #include <vkn/GraphicsState.h>
 
-#include <vkn/MaterialInstanceCache.h>
-
+namespace idk::vkn
+{
+	class MaterialInstanceCache;
+}
 namespace idk::vkn::bindings
 {
 	struct StandardMaterialFragBindings : RenderBindings

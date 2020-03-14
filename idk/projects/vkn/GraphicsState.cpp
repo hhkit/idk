@@ -3,6 +3,7 @@
 #include <gfx/RenderTarget.h>
 #include <gfx/Framebuffer.h>
 #include <ds/span.inl>
+#include <vkn/MaterialInstanceCache.h>
 #include <res/ResourceHandle.inl>
 namespace idk::vkn
 {
@@ -59,37 +60,36 @@ namespace idk::vkn
 	{
 		return shared_gfx_state->material_instances;
 	}
-
+#pragma optimize("",off)
 	void CoreGraphicsState::ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& material_instances,MaterialInstanceCache& mat_inst_cache)
 	{
-		auto AddMatInst = [](auto& material_instances, const RenderObject* p_ro)
+		
+		auto AddMatInst = [](auto& material_instances,auto& cache, const RenderObject* p_ro)
 		{
 			auto mat_inst = p_ro->material_instance;
 			if (material_instances.find(mat_inst) == material_instances.end())
 			{
-				material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
+				auto [itr,success]=material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
+				
+				cache.CacheMaterialInstance(itr->second);
 			}
 		};
 		for (auto& p_ro : mesh_render)
 		{
-			AddMatInst(material_instances, p_ro);
+			AddMatInst(material_instances, mat_inst_cache,p_ro);
 		}
 		for (auto& p_ro : skinned_mesh_render)
 		{
-			AddMatInst(material_instances, p_ro);
+			AddMatInst(material_instances, mat_inst_cache,p_ro);
 		}
 		for (auto& p_ro : *shared_gfx_state->instanced_ros)
 		{
-			AddMatInst(material_instances, &p_ro);
+			AddMatInst(material_instances, mat_inst_cache,&p_ro);
 		}
 		if(shared_gfx_state->particle_range)
 		for (auto& part_range : *shared_gfx_state->particle_range)
 		{
 			material_instances[part_range.material_instance] = ProcessedMaterial{ part_range.material_instance };
-		}
-		for (auto& p_mat_inst : material_instances)
-		{
-			mat_inst_cache.CacheMaterialInstance(p_mat_inst.second);
 		}
 		mat_inst_cache.ProcessCreation();
 	}
@@ -119,6 +119,7 @@ void SharedGraphicsState::Reset()
 {
 	lights=nullptr;
 	instanced_ros = nullptr;
+	material_instances.clear();
 	update_instructions.resize(0);
 }
 

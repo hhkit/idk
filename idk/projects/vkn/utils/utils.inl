@@ -334,6 +334,7 @@ namespace idk::vkn::meta
 			template<size_t N, typename ...Args>
 			struct ApplierHelper
 			{
+				static void Unused(Args&& ...) {}
 				template<typename Func>
 				static void apply([[maybe_unused]] Func&& func, [[maybe_unused]]Args&&... args)
 				{
@@ -346,6 +347,10 @@ namespace idk::vkn::meta
 					else if constexpr (N > 1)
 					{
 						ApplierHelper<N - 1, Args...>::apply(std::forward<Func>(func), std::forward<Args>(args)...);
+					}
+					else
+					{
+						Unused(args...);
 					}
 
 				}

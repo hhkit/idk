@@ -13,7 +13,6 @@ namespace idk::vkn
 	struct MaterialInstanceCache::PImpl
 	{
 		DescriptorsManager _dm;
-		UniformManager ds_builder;
 
 		creation_buffer_t _creation_buffer;
 		UboManager _ubo_manager;
@@ -22,21 +21,41 @@ namespace idk::vkn
 		DsUpdater updater;
 	};
 
+	struct SetCollation {
+		vk::DescriptorSetLayout layout;
+		lazy_vector<std::optional<BindingData>> bindings;
+	};
+
+
+	struct MaterialInstanceCache::UpdateInfo
+	{
+		creation_buffer_t& create_buffer;
+		UboManager& ubo_manager;
+		DsUpdater& ds_updater;
+		vector <vk::DescriptorImageInfo>& scratch;
+	};
 	struct DescriptorSetDispenser
 	{
 		CollatedLayouts_t layouts;
 	};
 	void MaterialInstanceCache::CacheMaterialInstance(const ProcessedMaterial& inst)
 	{
-		if (inst.shader && inst.shader.as<ShaderModule>().HasCurrent())
+		if (inst.shader)
 		{
-			auto& cache = cached_info[inst.inst_guid];
-			cache.Update(inst, _pimpl->_creation_buffer, _pimpl->_ubo_manager);
+			auto& mod = inst.shader.as<ShaderModule>();
+			if (mod.HasCurrent())
+			{
+				auto& cache = cached_info[inst.inst_guid];
+				UpdateInfo ui{
+					_pimpl->_creation_buffer,
+					_pimpl->_ubo_manager,
+					_pimpl->updater,
+					_pimpl->scratch};
+				cache.Update(inst,ui );
+				return;
+			}
 		}
-		else
-		{
-			cached_info.erase(inst.inst_guid);
-		}
+		cached_info.erase(inst.inst_guid);
 	}
 	span<const MaterialInstanceCache::descriptors_t> MaterialInstanceCache::GetDescriptorSets(RscHandle<MaterialInstance> inst)const
 	{
@@ -103,32 +122,36 @@ namespace idk::vkn
 		}
 	};
 
-	struct SetCollation {
-		vk::DescriptorSetLayout layout;
-		lazy_vector<std::optional<BindingData>> bindings;
-	};
 
-
-
-
-	void MaterialInstanceCache::InstCachedInfo::Update(const ProcessedMaterial& mat_inst, creation_buffer_t& creation_buffer,UboManager& ubo_manager)
+	void MaterialInstanceCache::InstCachedInfo::Update(const ProcessedMaterial& mat_inst, UpdateInfo& update_info)
 	{
+		
+		auto& creation_buffer = update_info.create_buffer;
+		auto& ubo_manager = update_info.ubo_manager;
+		auto& ds_updater = update_info.ds_updater;
+		auto& scratch = update_info.scratch;
+		vector_span_builder tbuilder{ update_info.scratch };
 		auto shader = mat_inst.shader;
 		if (!shader || !shader.as<ShaderModule>().HasCurrent())
 			return;
 		auto& mod = shader.as<ShaderModule>();
 		auto compute_pair = [](const ProcessedMaterial& mat_inst)
 		{
+			/*
 			size_t data_block_hash = 0;
-			hash_combine(data_block_hash, mat_inst.data_block);
+			std::hash<string> hasher;
+			//hash_combine(data_block_hash, mat_inst.data_block);
+			data_block_hash = hasher(mat_inst.data_block);
 			size_t texture_block_hash = 0;
-			hash_combine(texture_block_hash, hlp::to_data(mat_inst.texture_block));
-			return std::make_pair(data_block_hash, texture_block_hash);
+			texture_block_hash = hasher(hlp::to_data(mat_inst.texture_block));
+			return std::make_pair(data_block_hash, texture_block_hash);*/
+
+			return std::make_pair(mat_inst.data_block, string{ hlp::to_data(mat_inst.texture_block) });
 		};
 		auto is_exact_same= [this,compute_pair](const ProcessedMaterial& mat_inst)->bool 
 		{
 			auto [db_hash, tb_hash] = compute_pair(mat_inst);
-			return data_hash == db_hash && tb_hash == texture_hash;
+			return data_cache == db_hash && tb_hash == texture_cache;
 		};
 		auto shader_is_same = [this](const ProcessedMaterial& mat_inst)->bool
 		{
@@ -137,9 +160,10 @@ namespace idk::vkn
 		};
 		const bool exact_same = is_exact_same(mat_inst);
 		const bool same_shader = shader_is_same(mat_inst);
-		auto [db_hash, tb_hash] = compute_pair(mat_inst);
-		data_hash = db_hash;
-		texture_hash = tb_hash;
+		//Update the hashes
+		auto [db_cache, tb_cache] = compute_pair(mat_inst);
+		data_cache = db_cache;
+		texture_cache = tb_cache;
 		frag_shader=mod.Module();
 		if (same_shader)
 		{
@@ -150,10 +174,17 @@ namespace idk::vkn
 				if (buffer_range.size())
 					ubo_manager.Update(buffer, buffer_range,mat_inst.data_block);
 			};
+			for (auto& [name,textures] : mat_inst.tex_table)
+			{
+				auto info =mod.GetLayout(name);
+				BindingData bd{vk::DescriptorType::eCombinedImageSampler,info.binding};
+				bd.SetTex(textures,tbuilder);
+				auto& [set,dsl,ds] = descriptors.at(descriptor_indices.at(info.set));
+				ds_updater.associate(ds,bd);
+			}
 
 			return UpdateDataBuffer(mat_inst,ubo_manager);
 		}
-		//Update the hashes
 
 
 		creation_buffer.emplace_back(*this, mat_inst);
@@ -213,7 +244,9 @@ namespace idk::vkn
 			for (auto& [set, set_data] : collated_data)
 			{
 				auto ds = allocator.at(set_data.layout).GetNext();
+				auto index = info.descriptors.size();
 				info.descriptors.emplace_back(set,set_data.layout, ds);
+				info.descriptor_indices.emplace(set, index);
 				for (auto binding : set_data.bindings)
 				{
 					if (binding)
@@ -243,6 +276,7 @@ namespace idk::vkn
 			dm.Free(layout, ds);
 		}
 		descriptors.clear();
+		descriptor_indices.clear();
 		sets.clear();
 	}
 

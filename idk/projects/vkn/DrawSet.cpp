@@ -42,7 +42,8 @@ namespace idk::vkn
 	{
 		auto& mesh = ro.mesh.as<VulkanMesh>();
 		bool result = false;
-		if(result|=BindMeshBuffers(the_interface, mesh, *ro.renderer_req))
+		result |= BindMeshBuffers(the_interface, mesh, *ro.renderer_req);
+		if(result)
 			the_interface.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 		return result;
 	}
@@ -50,7 +51,8 @@ namespace idk::vkn
 	{
 		auto& mesh = ro.mesh.as<VulkanMesh>();
 		bool result = false;
-		if(result |= BindMeshBuffers(the_interface, ro))
+		result |= BindMeshBuffers(the_interface, ro);
+		if(result)
 			the_interface.DrawIndexed(mesh.IndexCount(), static_cast<uint32_t>(ro.num_instances), 0, 0, static_cast<uint32_t>(ro.instanced_index));
 		return result;
 	}
