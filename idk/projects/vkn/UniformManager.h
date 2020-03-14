@@ -14,7 +14,7 @@
 
 namespace idk::vkn
 {
-
+	class ShaderModule;
 	struct UboData {};
 	struct TexData {};
 
@@ -93,21 +93,31 @@ namespace idk::vkn
 		{
 			using set_t = uint32_t;
 			using binding_t = uint32_t;
+
+			using binding_span = std::variant< vector_span<BindingInfo>, vk::DescriptorSet>;
+
 			struct set_bindings
 			{
 				vk::DescriptorSetLayout layout;
 				hash_table<uint32_t, vector<std::optional<BindingInfo>>>  bindings;
+				std::optional<vk::DescriptorSet> ds_override{};
 				DsCountArray total_desc;
 				bool dirty = false;
 
 				vector<BindingInfo> scratch_out;
 
 				void SetLayout(vk::DescriptorSetLayout new_layout, const DsCountArray& total_descriptors, bool clear_bindings = false);
+				bool SetOverride(vk::DescriptorSet ds,vk::DescriptorSetLayout layout);
 				void Bind(BindingInfo info);
 				void Unbind(uint32_t binding);
-				monadic::result< vector_span<BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts, vector_span_builder<BindingInfo>& builder);
+				monadic::result< binding_span, string> FinalizeDC(CollatedLayouts_t& collated_layouts, vector_span_builder<BindingInfo>& builder);
 			};
+			using binding_span = binding_manager::binding_span;
 			hash_table<set_t, set_bindings> curr_bindings;
+
+			std::optional<vk::DescriptorSetLayout> GetLayout(set_t);
+
+			bool SetOverride(set_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl);
 
 			void AddBinding(set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts);
 			void RemoveBinding(set_t set);
@@ -127,12 +137,18 @@ namespace idk::vkn
 
 		void SetUboManager(UboManager& ubo_manager) noexcept;
 
+		//Helper function to call the relevant registration functions
+		void AddShader(const ShaderModule& module);
+		//Helper function to call the relevant deregistration functions
+		void RemoveShader(const ShaderModule& module);
+
 		//Do this first
 		void AddBinding(binding_manager::set_t set, vk::DescriptorSetLayout layout, const DsCountArray& counts);
 		//Before this
 		bool RegisterUniforms(string name, binding_manager::set_t set, uint32_t binding, uint32_t size);
 		void RemoveBinding(binding_manager::set_t set);
 
+		bool BindDescriptorSet(uint32_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl);
 		bool BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound = false);
 		bool BindSampler(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 		bool BindAttachment(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
@@ -142,7 +158,7 @@ namespace idk::vkn
 		bool BindAttachment(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
 		//set, bindings
-		using set_binding_t = std::pair<uint32_t, vector_span<BindingInfo>>;
+		using set_binding_t = std::pair<uint32_t, binding_manager::binding_span>;
 		std::optional<vector_span<set_binding_t>> FinalizeCurrent(vector<set_binding_t>& all_sets);
 		void GenerateDescriptorSets(span<const set_binding_t> bindings,DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_managers);
 	private:
@@ -164,6 +180,7 @@ namespace idk::vkn
 			void RegisterRequiredBinding(uint32_t set, uint32_t binding);
 			void RemoveRequiredSet(uint32_t set);
 			void MarkBinding(uint32_t set, uint32_t binding);
+			void MarkSet(uint32_t set);
 
 			bool Validate(const binding_manager& _bindings)const;
 		};

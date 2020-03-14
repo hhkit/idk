@@ -5,6 +5,9 @@
 
 namespace idk::vkn
 {
+
+
+
 	UboManager::Memory::Memory(VulkanView& view, vk::Buffer& buffer, size_t capacity_) :capacity{ capacity_ }
 	{
 		auto req = view.Device()->getBufferMemoryRequirements(buffer, view.Dispatcher());
@@ -53,7 +56,7 @@ namespace idk::vkn
 
 	UboManager::DataPair& UboManager::FindPair(size_t size)
 	{
-		if (_buffers.size() > _curr_buffer_idx && !_buffers[_curr_buffer_idx].CanAdd(size))
+		while (_buffers.size() > _curr_buffer_idx && !_buffers[_curr_buffer_idx].CanAdd(size))
 		{
 			++_curr_buffer_idx;
 		}
@@ -61,8 +64,8 @@ namespace idk::vkn
 		{
 			auto&& [buffer, offset] = MakeBuffer();
 			decltype(DataPair::data) buf{};
-			buf.reserve(_chunk_size);
-			auto& tmp = _buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset,_chunk_size });
+			buf.reserve(_chunk_size+_alignment);
+			auto& tmp = _buffers.emplace_back(DataPair{ std::move(buffer),std::move(buf),offset,_chunk_size,MemoryCollator{index_span{0,_chunk_size}} });
 			tmp.alignment = OffsetAlignment();
 			tmp.sz_alignment = SizeAlignment();
 			_allocation_table.emplace(_buffers.size() - 1,_memory_blocks.size() - 1);
@@ -85,6 +88,30 @@ namespace idk::vkn
 		uint32_t mod = s_cast<uint32_t>((r_cast<intptr_t>(ptr) % alignment));
 		return (mod) ? alignment - mod : 0;
 	}
+	void UboManager::Update(vk::Buffer buffer, index_span range, string_view data)
+	{
+		for (auto& dp : this->_buffers)
+		{
+			if (dp.Buffer() == buffer)
+			{
+				memcpy_s(dp.data.data()+range._begin, dp.data.size()-range._begin, data.data(),data.size());
+				return;
+			}
+		}
+	}
+	void UboManager::Free(vk::Buffer buffer, uint32_t offset, uint32_t size)
+	{
+		//Find the datapair with the buffer
+		for (auto& dp: this->_buffers)
+		{
+			if (dp.Buffer() == buffer)
+			{
+				dp.Free(offset, size);
+				return;
+			}
+		}
+		//free it.
+	}
 	void UboManager::UpdateAllBuffers()
 	{
 		for (auto& [buffer_idx,memory_idx] : _allocation_table)
@@ -92,15 +119,15 @@ namespace idk::vkn
 			auto& block = _memory_blocks[memory_idx];
 			auto& memory = block.memory;
 			auto& buffer = _buffers[buffer_idx];
-			auto initial_offset = InitialOffset(buffer.data.data(), _alignment);
+			auto initial_offset = buffer.initial_offset;//InitialOffset(buffer.data.data(), _alignment);
 
 
 			if (buffer.data.size())
 			{
-				auto dst_size = block.size - buffer.offset;
+				auto dst_size = block.size ;
 				auto src_size = buffer.data.size() - initial_offset;
 				IDK_ASSERT(src_size <= dst_size);
-				hlp::MapMemory(*view.Device(), *memory, buffer.offset, std::data(buffer.data) + initial_offset, dst_size, view.Dispatcher());
+				hlp::MapMemory(*view.Device(), *memory, /*buffer.initial_offset*/0, std::data(buffer.data) + initial_offset, dst_size, view.Dispatcher());
 			}
 		}
 	}
@@ -109,7 +136,7 @@ namespace idk::vkn
 	{
 		for (auto& data_pair : _buffers)
 		{
-			data_pair.data.resize(0);
+			data_pair.Reset();
 		}
 		_curr_buffer_idx = 0;
 	}
@@ -117,10 +144,14 @@ namespace idk::vkn
 	{
 		return s_cast<uint32_t>(sz + ((sz % alignment) ? alignment - (sz % alignment) : 0));
 	}
+//#pragma optimize("",off)
+	uint32_t aaaa2 = 0;
 	bool UboManager::DataPair::CanAdd(size_t len) const
 	{
+		aaaa2++;
 		if (data.size() > 65536)
 			throw;
+		return collator.can_allocate(Aligned(len, sz_alignment), alignment);
 		return block_size >= 
 			data.size() + AlignmentOffset() +
 			SizeAlignmentOffset(len,sz_alignment);
@@ -135,25 +166,45 @@ namespace idk::vkn
 	void UboManager::DataPair::Align()
 	{
 		auto padding = std::min(block_size-data.size(),AlignmentOffset());
-		
 		data.append(padding, 0);
 	}
-	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) {
-		//auto capacity = data.capacity();
-		Align();
-		uint32_t result = s_cast<uint32_t>(data.size()) - InitialOffset(data.data(),alignment);
-		auto aligned_len = SizeAlignmentOffset(len, sz_alignment);
-		//manually add to back.
-		//get the destination start
-		auto dst = data.data()+ data.size();
-		//make sure we can accomodate
-		data.resize(data.size() + aligned_len);
-		//copy to buffer.
-		memcpy_s(dst, aligned_len, data_, len);
-		if (result + len > block_size)
+	uint32_t aaaa = 0;
+	bool operator==(index_span lhs, index_span rhs)
+	{
+		return lhs._begin == rhs._begin && lhs._end == rhs._end;
+	}
+	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) 
+	{
+		if (collator.free_range == collator.full_range)
+		{
+			initial_offset = 0;// InitialOffset(data.data(), alignment);
+		}
+
+		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
+		aaaa++;
+		if (!opt)
 			throw;
-		//data.append(r_cast<const char*>(data_), len );
-		return result;
+		auto [unaligned_offset,aligned_offset] = *opt;
+		//free the alignment stuff so that we just need to free the allocated block later
+		if(aligned_offset - unaligned_offset!=0)
+			collator.mark_freed({ unaligned_offset,aligned_offset });
+
+		data.resize(block_size);
+		if (len+ aligned_offset > 65536)
+			throw;
+		memcpy_s(data.data() +initial_offset+ aligned_offset, data.size()-(initial_offset + aligned_offset), data_, len);
+		return static_cast<uint32_t>(aligned_offset);
+	}
+
+	void UboManager::DataPair::Free(uint32_t offset, size_t len)
+	{
+		collator.mark_freed(index_span{ offset,offset + len });
+	}
+
+	void UboManager::DataPair::Reset() 
+	{
+		data.resize(0); 
+		collator.reset();
 	}
 
 }

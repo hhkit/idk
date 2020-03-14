@@ -17,7 +17,7 @@ namespace idk::vkn::bindings
 	{
 		state.SetState(cam, skel);
 	}
-
+//#pragma optimize("",off)
 	void StandardVertexBindings::Bind(RenderInterface& the_interface)
 	{
 		//map back into z: (0,1)
@@ -46,7 +46,8 @@ namespace idk::vkn::bindings
 	void StandardVertexBindings::BindAni(RenderInterface& the_interface, const AnimatedRenderObject& dc)
 	{
 		//auto& state = State();
-		the_interface.BindUniform("BoneMat4Block", 0, hlp::to_data((*state.skeletons)[dc.skeleton_index].bones_transforms));
+		auto& skels = (*state.skeletons);
+		the_interface.BindUniform("BoneMat4Block", 0, hlp::to_data(skels.at(dc.skeleton_index).bones_transforms));
 	}
 	void VertexShaderBinding::Bind(RenderInterface& the_interface)
 	{

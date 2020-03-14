@@ -247,6 +247,7 @@ namespace idk::vkn
 		SharedGraphicsState& shared_graphics_state=curr_frame.shared_graphics_state;
 		shared_graphics_state.Reset();
 		auto& lights = curr_buffer.lights;
+		shared_graphics_state.mat_inst_cache = &curr_frame.GetMatInstCache();
 		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);
 		shared_graphics_state.BrdfLookupTable = _pimpl->BrdfLookupTable;
 		shared_graphics_state.particle_data = &curr_buffer.particle_buffer;
@@ -278,6 +279,9 @@ namespace idk::vkn
 			pre_render_data.active_dir_lights.emplace_back(elem);
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
+		if (&curr_buffer.skeleton_transforms != pre_render_data.skeleton_transforms)
+			throw;
+
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
 
 		shared_graphics_state.renderer_vertex_shaders = curr_buffer.renderer_vertex_shaders;
@@ -366,7 +370,7 @@ namespace idk::vkn
 			//curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
-			curr_state.ProcessMaterialInstances();
+			curr_state.ProcessMaterialInstances(shared_graphics_state.material_instances, curr_frame.GetMatInstCache());
 			if (curr_cam.render_target->RenderDebug())
 			{
 				will_draw_debug = true;
@@ -398,6 +402,10 @@ namespace idk::vkn
 			RscHandle<VknRenderTarget>{}->Finalize();
 		// */
 		//string test = hlp::DumpAllocators();
+
+		
+
+
 		curr_frame.ColorPick(std::move(request_buffer));
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
 #if 0

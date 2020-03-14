@@ -12,7 +12,7 @@ struct DescriptorPoolsManager
 		const vk::DescriptorType type = vk::DescriptorType::eUniformBuffer;
 		vk::UniqueDescriptorPool pool;
 		uint32_t size, capacity;
-		Manager(uint32_t capacity_, vk::Device device, vk::DescriptorType type_ = vk::DescriptorType::eUniformBuffer);
+		Manager(uint32_t capacity_, vk::Device device, vk::DescriptorType type_ = vk::DescriptorType::eUniformBuffer, vk::DescriptorPoolCreateFlagBits flags = {});
 	};
 	struct Manager2
 	{

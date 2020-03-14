@@ -15,7 +15,7 @@ namespace idk::vkn::bindings
 		//const GraphicsState& State();
 		struct StateInfo
 		{
-			const vector<SkeletonTransforms>* skeletons;
+			const vector<SkeletonTransforms>* skeletons=nullptr;
 			mat4 view_trf, proj_trf;
 			void SetState(const GraphicsState& vstate);
 			void SetState(const CameraData& camera, const vector<SkeletonTransforms>& skel);

@@ -6,7 +6,9 @@
 #include <network/ConnectionManager.inl>
 #include <network/MoveClientMessage.h>
 #include <network/NetworkSystem.inl>
+#include <network/GhostMessage.h>
 #include <network/GhostFlags.h>
+#include <network/IDManager.h>
 #include <network/ElectronView.h>
 
 namespace idk
@@ -21,9 +23,9 @@ namespace idk
 		return true;
 	}
 
-	void ClientMoveManager::SubscribeEvents(ClientConnectionManager&)
+	void ClientMoveManager::SubscribeEvents(ClientConnectionManager& client)
 	{
-		//OnFrameStart(&ClientMoveManager::CachePreviousPositions);
+		client.Subscribe<GhostMessage>([this](GhostMessage& msg) {OnGhostReceived(msg); });
 	}
 
 	void ClientMoveManager::SubscribeEvents(ServerConnectionManager&)
@@ -47,6 +49,18 @@ namespace idk
 					msg.move_packs = std::move(move_packs);
 				}
 			);
+		}
+	}
+
+	void ClientMoveManager::OnGhostReceived(GhostMessage& ghost_msg)
+	{
+		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+		for (auto& elem : ghost_msg.ghost_packs)
+		{
+			auto net_id = elem.network_id;
+			auto elec_view = id_man.GetViewFromId(net_id);
+			if (elec_view)
+				elec_view->UnpackGhostData(ghost_msg.sequence_number, elem);
 		}
 	}
 }

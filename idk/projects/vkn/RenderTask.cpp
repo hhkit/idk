@@ -16,7 +16,7 @@ static void DoNothing()
 
 }
 
-void dbg_chk(vk::Image img)
+void dbg_chk([[maybe_unused]]vk::Image img)
 {
 	return;
 }
@@ -82,6 +82,10 @@ namespace idk::vkn
 	{
 		_dc_builder.SetIndexBuffer(IndexBindingData{ buffer,offset,indexType});
 	}
+	void RenderTask::BindDescriptorSet(uint32_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl)
+	{
+		_uniform_manager.BindDescriptorSet(set,ds,dsl);
+	}
 	void RenderTask::BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound)
 	{
 		_uniform_manager.BindUniformBuffer(name, index, data,skip_if_bound);
@@ -107,15 +111,8 @@ namespace idk::vkn
 		if (!shader.HasCurrent())
 			return;
 		//DebugBreak();
-		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
-		{
-			_uniform_manager.AddBinding(itr->first,*itr->second.layout,itr->second.entry_counts);
-		}
-		for (auto itr = shader.InfoBegin(), end = shader.InfoEnd(); itr != end; ++itr)
-		{
-			auto [name, info] = *itr;
-			_uniform_manager.RegisterUniforms(name, info.set, info.binding, info.size);
-		}
+		_uniform_manager.AddShader(shader);
+
 		bound_shader = shader_handle;
 		if (stage == ShaderStage::Fragment)
 			BindInputAttachmentToCurrent();
@@ -129,11 +126,7 @@ namespace idk::vkn
 		if (oshader)
 		{
 			auto& shader = oshader->as<ShaderModule>();
-
-			for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
-			{
-				_uniform_manager.RemoveBinding(itr->first);
-			}
+			_uniform_manager.RemoveShader(shader);
 			oshader.reset();
 		}
 	}
@@ -338,6 +331,7 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
+//#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);

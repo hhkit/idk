@@ -754,7 +754,7 @@ namespace idk::vkn
 		for (auto& rs : rss)
 			rs.RenderPass() = *m_crenderpass;
 	}
-
+//#pragma optimize("",off)
 	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format fmt, vk::ImageTiling tiling, vk::ImageUsageFlags usage, [[maybe_unused]] vk::MemoryPropertyFlags ppts, vk::Image& image, hlp::MemoryAllocator& allocator, hlp::UniqueAlloc& alloc)
 	{
 		if (!imageFence)
@@ -1178,7 +1178,7 @@ namespace idk::vkn
 	void VulkanState::PresentFrame2()
 	{
 		auto cf = current_frame;
-		auto& current_sc_signal = m_swapchain->m_swapchainGraphics.pSignals[cf];
+		[[maybe_unused]]auto& current_sc_signal = m_swapchain->m_swapchainGraphics.pSignals[cf];
 
 		//Already done by acquire frame
 		//m_device->waitForFences(1, &*current_sc_signal.inflight_fence, VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher); 

@@ -31,6 +31,7 @@ namespace idk::vkn
 	struct GraphicsState;
 	class PipelineManager;
 	using PipelineHandle_t =uint32_t;
+	class MaterialInstanceCache;
 	class FrameRenderer
 	{
 	public:
@@ -46,6 +47,8 @@ namespace idk::vkn
 		SharedGraphicsState shared_graphics_state;
 		void ColorPick(vector<ColorPickRequest>&& pick_buffer);
 		void RenderGraphicsState(const GraphicsState& state, RenderStateV2& rs);
+
+		MaterialInstanceCache& GetMatInstCache();
 		
 		FrameRenderer() = default;
 		FrameRenderer(const FrameRenderer&)= delete;

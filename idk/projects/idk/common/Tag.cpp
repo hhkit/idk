@@ -6,6 +6,11 @@
 namespace idk
 {
 
+    Tag::Tag(string str)
+    {
+        index = Core::GetSystem<TagManager>().GetIndexFromTag(str);
+    }
+
     Tag::Tag(string_view str)
     {
         index = Core::GetSystem<TagManager>().GetIndexFromTag(str);

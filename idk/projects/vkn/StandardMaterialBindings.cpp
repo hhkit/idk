@@ -5,6 +5,8 @@
 #include <vkn/BufferHelpers.inl>
 #include <res/ResourceHandle.inl>
 
+#include <vkn/MaterialInstanceCache.h>
+
 namespace idk::vkn::bindings
 {
 	void StandardMaterialFragBindings::Bind(RenderInterface& the_interface, const RenderObject& dc)
@@ -23,6 +25,12 @@ namespace idk::vkn::bindings
 			if (dc.material_instance != prev_material_inst)
 			{
 				prev_material_inst = dc.material_instance;
+				auto descriptors =p_cached_mat_insts->GetDescriptorSets(dc.material_instance);
+				for (auto& [set,dsl, ds] : descriptors)
+				{
+					the_interface.BindDescriptorSet(set, ds, dsl);
+				}
+				/*
 				auto mat = material_instances.find(dc.material_instance);
 				auto& mat_inst = mat->second;
 				//[[maybe_unused]]auto& mat = *mat_inst.material;
@@ -38,7 +46,7 @@ namespace idk::vkn::bindings
 						the_interface.BindUniform(name, i++, img.as<VknTexture>());
 					}
 				}
-
+				*/
 			}
 		}
 	}

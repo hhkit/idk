@@ -4,7 +4,7 @@
 #include <vkn/VulkanView.h>
 namespace idk::vkn
 {
-	DescriptorPoolsManager::Manager::Manager(uint32_t capacity_, vk::Device device, vk::DescriptorType type_) :type{ type_ },capacity{capacity_}
+	DescriptorPoolsManager::Manager::Manager(uint32_t capacity_, vk::Device device, vk::DescriptorType type_, vk::DescriptorPoolCreateFlagBits flags) :type{ type_ }, capacity{ capacity_ }
 	{
 		vk::DescriptorPoolSize pool_size[]
 		{
@@ -15,7 +15,7 @@ namespace idk::vkn
 		};
 		vk::DescriptorPoolCreateInfo create_info
 		{
-			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
+			 flags //Flag if we'll be deleting or updating the descriptor sets afterwards
 			,capacity
 			,hlp::arr_count(pool_size)
 			,std::data(pool_size)

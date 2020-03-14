@@ -9,7 +9,7 @@
 #include <serialize/text.inl>
 #include <util/ioutils.h>
 #include <reflect/reflect.inl>
-
+#include <iostream>
 #include "DDSCompiler.h"
 
 namespace idk
@@ -35,8 +35,10 @@ namespace idk
 
 		
 		// compile the texture
+		std::cout << " TEST";
 
 		CompiledTexture t;
+		t.guid = t_guid;
 		t.filter_mode = t_meta.filter_mode;
 		t.internal_format = t_meta.internal_format;
 		t.is_srgb = t_meta.is_srgb;

@@ -3,6 +3,9 @@
 #include <gfx/Light.h>
 #include <vkn/VulkanPipeline.h>
 #include <vkn/vector_buffer.h>
+
+#include <vkn/MaterialInstanceCache.h>
+
 namespace idk::vkn
 {
 	struct buffer_info
@@ -79,6 +82,10 @@ namespace idk::vkn
 		size_t total_num_of_text{ 0 };
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;
 		array<RscHandle<ShaderProgram>, FragmentShaders::FMax>   renderer_fragment_shaders;
+
+		hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> material_instances;
+		MaterialInstanceCache* mat_inst_cache;
+
 		//vector<FontPoint>* ui_text_data;
 
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);
@@ -102,6 +109,7 @@ namespace idk::vkn
 		data_block_t data_block;
 		vector<RscHandle<Texture>> texture_block;
 		RscHandle<ShaderProgram> shader;
+		Guid inst_guid;
 
 		ProcessedMaterial() = default;
 		ProcessedMaterial(RscHandle<MaterialInstance> inst);
@@ -116,11 +124,12 @@ namespace idk::vkn
 		const std::map<Handle<GameObject>, CamLightData>* d_lightmaps;
 		vector<const RenderObject*> mesh_render;
 		vector<const AnimatedRenderObject*> skinned_mesh_render;
-		hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> material_instances;
+		const hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& material_instances()const;
+		;
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
 
-		void ProcessMaterialInstances();
+		void ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> &material_instances,MaterialInstanceCache& mat_inst_cache);
 	};
 
 	struct GraphicsState : CoreGraphicsState

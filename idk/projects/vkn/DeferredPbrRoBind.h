@@ -46,6 +46,7 @@ namespace idk::vkn::bindings
 		BlendMode blend; 
 		ShadingModel model; 
 		const StandardMaterialBindings::mat_inst_lookup_t& material_instances;
+		const MaterialInstanceCache& mat_inst_cache;
 		StandardVertexBindings::StateInfo vertex_state_info;
 	};
 
@@ -60,6 +61,7 @@ namespace idk::vkn::bindings
 			type_filter.blend = info.blend;
 			type_filter.model = info.model;
 			result.Get<StandardMaterialBindings>().p_material_instances = &info.material_instances;
+			result.Get<StandardMaterialBindings>().p_cached_mat_insts = &info.mat_inst_cache;
 			result.Get<StandardVertexBindings>().state = info.vertex_state_info;
 			return result;
 		}

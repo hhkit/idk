@@ -941,7 +941,8 @@ namespace idk::vkn::renderpasses
 			.viewport = gfx_state.camera.viewport,
 			.blend = BlendMode::Opaque,
 			.model = ShadingModel::DefaultLit,
-			.material_instances = gfx_state.material_instances,
+			.material_instances = gfx_state.material_instances(),
+			.mat_inst_cache = *gfx_state.shared_gfx_state->mat_inst_cache,
 			.vertex_state_info = state,
 		};
 		auto make_gbuffer_set = [&](const bindings::DeferredPbrInfo& info)
