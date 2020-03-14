@@ -18,18 +18,24 @@ namespace idk::vkn::hlp
 		}
 	};
 	*/
-
 	void SimpleLock::Lock()const
 	{
-		std::unique_lock lock{ _data->mutex };
-		while (_data->locked)
-			_data->cv.wait(lock);
-		_data->locked = true;
+		std::unique_lock lock{ _data->mutex};
+		// bool expected = false;
+		while (!_data->locked)// _data->locked.compare_exchange_strong(expected, true))
+		{
+			//expected = false;
+			_data->cv.wait(lock, [this]() { return !_data->locked; });
+		}
 	}
 
 	void SimpleLock::Unlock()const
 	{
-		_data->locked = false;
+		{
+			std::unique_lock unlock_guard{ _data->mutex };
+
+			_data->locked = false;
+		}
 		_data->cv.notify_one();
 	}
 
