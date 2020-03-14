@@ -18,6 +18,8 @@
 #include <network/GhostManager.h>
 #include <core/GameState.h>
 
+#include <thread>
+
 namespace idk
 {
 	NetworkSystem::NetworkSystem() = default;

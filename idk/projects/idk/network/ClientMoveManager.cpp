@@ -40,7 +40,10 @@ namespace idk
 		{
 			auto move_data = elem.PackMoveData();
 			if (move_data.packs.size())
+			{
+				LOG_TO(LogPool::NETWORK, "packing move for object %d", elem.network_id);
 				move_packs.emplace_back(std::move(move_data));
+			}
 		}
 		if (move_packs.size())
 		{

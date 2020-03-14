@@ -253,8 +253,9 @@ namespace idk
 
 			}
 
-			__declspec(noinline) void UnpackMove(span<const SeqAndPack> packs)
+			__declspec(noinline) int UnpackMove(span<const SeqAndPack> packs)
 			{
+				int unpacked_moves = 0;
 				for (auto& elem : packs)
 				{
 					if (auto unpacked_move = parse_binary<T>(elem.pack))
@@ -273,11 +274,13 @@ namespace idk
 									ApplyCorrection(itr, real_move);
 
 								itr->verified = true;
+								++unpacked_moves;
 								break;
 							}
 						}
 					}
 				}
+				return unpacked_moves;
 			}
 		};
 

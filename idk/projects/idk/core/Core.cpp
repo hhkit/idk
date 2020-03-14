@@ -96,9 +96,9 @@ namespace idk
 		auto* editor = &GetSystem<IEditor>();
 
 		// setup loop
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets,  "Receive Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets,  "Receive Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::UpdatePredictions,     "Network prediction");
 

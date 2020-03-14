@@ -123,7 +123,7 @@ namespace idk
 			virtual void Init() = 0;
 			virtual MoveAck AcknowledgeMoves(SeqNo curr_seq) = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
-			virtual void UnpackMove(span<const SeqAndPack>) = 0;
+			virtual int UnpackMove(span<const SeqAndPack>) = 0;
 			virtual ~ControlObjectData() = default;
 		};
 
