@@ -150,6 +150,7 @@ namespace idk
 
 			void UnpackGhost(SeqNo index, string_view data) override
 			{
+				return;
 				// newer data has arrived
 				while (buffer.size() && seqno_greater_than(index, buffer.front().seq))
 					buffer.pop_front();

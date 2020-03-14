@@ -170,7 +170,6 @@ namespace idk
 			});
 
 		return obj;
-#pragma message("Store the event for future connections")
 	}
 
 	// static

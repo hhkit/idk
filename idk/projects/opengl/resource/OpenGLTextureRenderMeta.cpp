@@ -79,8 +79,6 @@ namespace idk::ogl::detail {
 		case TextureInternalFormat::SRGBA_8 : return GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
 
 		// compressed srgb
-		#pragma message("please remember to update glad to have the ARB_texture_view extension ")
-
 
 		case TextureInternalFormat::SRGB_DXT1:  return GL_COMPRESSED_RGB;
 		case TextureInternalFormat::SRGBA_DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;

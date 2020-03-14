@@ -53,7 +53,7 @@ namespace idk::vkn
 	{
 		resource_map[id] = unique_id;
 	}
-	TransitionInfo FrameGraphResourceManager::TransitionInfo(const FrameGraphResource& rsc)
+	TransitionInfo FrameGraphResourceManager::TransitionInfo([[maybe_unused]] const FrameGraphResource& rsc)
 	{
 		//TODO
 		return vkn::TransitionInfo{};
