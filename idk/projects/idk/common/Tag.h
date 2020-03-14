@@ -10,6 +10,7 @@ namespace idk
         uint8_t index;
 
         Tag() = default;
+        Tag(string str); 
         explicit Tag(string_view str);
         explicit operator string() const;
     };
