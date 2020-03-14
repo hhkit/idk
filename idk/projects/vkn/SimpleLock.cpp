@@ -22,11 +22,12 @@ namespace idk::vkn::hlp
 	{
 		std::unique_lock lock{ _data->mutex};
 		// bool expected = false;
-		while (!_data->locked)// _data->locked.compare_exchange_strong(expected, true))
+		while (_data->locked)// _data->locked.compare_exchange_strong(expected, true))
 		{
 			//expected = false;
 			_data->cv.wait(lock, [this]() { return !_data->locked; });
 		}
+		_data->locked = true;
 	}
 
 	void SimpleLock::Unlock()const
