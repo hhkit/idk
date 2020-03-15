@@ -61,7 +61,7 @@ namespace idk
 
 		d = T{ 1.0 } / T{ std::sqrt(d) };
 
-		if (d > T{ 1.0e-8 })
+		if (d > static_cast<T>(1.0e-8 ))
 		{
 			res.x *= d;
 			res.y *= d;
