@@ -7,6 +7,8 @@
 
 #include <vkn/vulkan_enum_info.h>
 
+#include <vkn/BufferedObj.inl>
+
 namespace idk::vkn
 {
 	namespace spx = spirv_cross;
@@ -398,18 +400,22 @@ std::optional<UboInfo> ShaderModule::TryGetLayout(const string& uniform_name) co
 		result = itr->second;
 	return result;
 }
-void DoNothing();
-ShaderModule::~ShaderModule()
-{
-	DoNothing();
-}
-
 std::optional<uint32_t> ShaderModule::Data::GetBinding(uint32_t location) const
 {
 	std::optional<uint32_t> result{};
 	auto itr = loc_to_bind.find(location);
 	result = (itr != loc_to_bind.end()) ? itr->second : result;
 	return result;
+}
+
+void DoNothing();
+ShaderModule::ShaderModule()
+{
+	DoNothing();
+}
+ShaderModule::~ShaderModule()
+{
+	DoNothing();
 }
 
 }
