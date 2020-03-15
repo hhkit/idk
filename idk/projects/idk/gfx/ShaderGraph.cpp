@@ -321,7 +321,10 @@ namespace idk::shadergraph
 		auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
         if (_shader_program.guid == Guid{})
             _shader_program = Core::GetResourceManager().Create<ShaderProgram>();
-
+		else if (!_shader_program)
+		{
+			_shader_program = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(_shader_program.guid);
+		}
         auto& program = *_shader_program;
 		program.Name(string{ this->Name() }+"_" + string{ GetTemplate()->Name() });
 		
