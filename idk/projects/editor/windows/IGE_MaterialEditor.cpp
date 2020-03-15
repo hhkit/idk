@@ -407,7 +407,7 @@ namespace idk
                                     size_t new_pos = inner.find('|', pos + 1);
                                     string label = inner.substr(pos + 1, new_pos - pos - 1);
                                     if (ImGui::Selectable(label.c_str(), label == next_value))
-                                        next_value = label;
+                                        final_control_values += label + '|';
                                     pos = new_pos;
                                 }
                                 ImGui::EndCombo();
