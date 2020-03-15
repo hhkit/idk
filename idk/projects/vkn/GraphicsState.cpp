@@ -60,7 +60,6 @@ namespace idk::vkn
 	{
 		return shared_gfx_state->material_instances;
 	}
-#pragma optimize("",off)
 	void CoreGraphicsState::ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& material_instances,MaterialInstanceCache& mat_inst_cache)
 	{
 		

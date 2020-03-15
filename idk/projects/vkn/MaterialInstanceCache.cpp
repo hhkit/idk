@@ -136,21 +136,19 @@ namespace idk::vkn
 		auto& mod = shader.as<ShaderModule>();
 		auto compute_pair = [](const ProcessedMaterial& mat_inst)
 		{
-			/*
+			
 			size_t data_block_hash = 0;
 			std::hash<string> hasher;
 			//hash_combine(data_block_hash, mat_inst.data_block);
 			data_block_hash = hasher(mat_inst.data_block);
 			size_t texture_block_hash = 0;
 			texture_block_hash = hasher(hlp::to_data(mat_inst.texture_block));
-			return std::make_pair(data_block_hash, texture_block_hash);*/
-
-			return std::make_pair(mat_inst.data_block, string{ hlp::to_data(mat_inst.texture_block) });
+			return std::make_pair(data_block_hash, texture_block_hash);
 		};
 		auto is_exact_same= [this,compute_pair](const ProcessedMaterial& mat_inst)->bool 
 		{
 			auto [db_hash, tb_hash] = compute_pair(mat_inst);
-			return data_cache == db_hash && tb_hash == texture_cache;
+			return data_hash == db_hash && tb_hash == texture_hash;
 		};
 		auto shader_is_same = [this](const ProcessedMaterial& mat_inst)->bool
 		{
@@ -160,9 +158,9 @@ namespace idk::vkn
 		const bool exact_same = is_exact_same(mat_inst);
 		const bool same_shader = shader_is_same(mat_inst);
 		//Update the hashes
-		auto [db_cache, tb_cache] = compute_pair(mat_inst);
-		data_cache = db_cache;
-		texture_cache = tb_cache;
+		auto [db_hash, tb_hash] = compute_pair(mat_inst);
+		data_hash = db_hash;
+		texture_hash = tb_hash;
 		frag_shader=mod.Module();
 		if (same_shader)
 		{
