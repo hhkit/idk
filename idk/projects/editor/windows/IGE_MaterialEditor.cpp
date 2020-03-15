@@ -377,6 +377,42 @@ namespace idk
                                 ImGui::EndPopup();
                             }
                         }
+                        else if (slot_name[1] == '[' && slot_name.back() == ']')
+                        {
+                            auto w = ImGui::GetStyle().ItemSpacing.x * 4 * _canvas.zoom + ImGui::GetStateStorage()->GetFloat(ImGui::GetID("output-max-title-width"));
+                            string inner = slot_name.substr(2, slot_name.size() - 3);
+
+                            size_t pos = inner.find(':');
+                            if (pos != string::npos)
+                            {
+                                auto txt = inner.substr(0, pos);
+                                w -= ImGui::CalcTextSize(txt.c_str()).x;
+                                ImGui::Text(txt.c_str());
+                                ImGui::SameLine();
+                                inner = inner.substr(pos);
+                            }
+
+                            // inner = :aaaaaaa|bbbbbbb|ccccccc...
+                            pos = inner.find('|');
+
+                            if (next_value.empty())
+                                final_control_values += (next_value = inner.substr(1, pos - 1));
+
+                            ImGui::SetNextItemWidth(w);
+                            if (ImGui::BeginCombo(("##" + std::to_string(i)).c_str(), next_value.c_str()))
+                            {
+                                pos = 0;
+                                while (pos != string::npos)
+                                {
+                                    size_t new_pos = inner.find('|', pos + 1);
+                                    string label = inner.substr(pos + 1, new_pos - pos - 1);
+                                    if (ImGui::Selectable(label.c_str(), label == next_value))
+                                        next_value = label;
+                                    pos = new_pos;
+                                }
+                                ImGui::EndCombo();
+                            }
+                        }
                     }
 
                     ++i;

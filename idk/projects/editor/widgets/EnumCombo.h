@@ -14,7 +14,7 @@ namespace idk::ImGuidk
         {
             for (auto name : EnumT::names)
             {
-                if (ImGui::MenuItem(string(name).c_str()))
+                if (ImGui::Selectable(string(name).c_str(), name == e->to_string()))
                 {
                     *e = EnumT::from_string(name);
                     ret = true;

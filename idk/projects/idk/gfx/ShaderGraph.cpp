@@ -71,7 +71,7 @@ namespace idk::shadergraph
 
     static void resolve_conditionals(string& code, const Node& node)
     {
-        std::regex regex{ "\\?(\\d+):(float|vec2|vec3|vec4|mat2|mat3|mat4|sampler2D)\\{(.*)\\}" };
+        std::regex regex{ "\\?(\\d+):(\\w+)\\{(.*)\\}" };
         std::smatch sm;
 
         std::string _code = code;
@@ -88,9 +88,24 @@ namespace idk::shadergraph
                 else
                     _code.replace(sm.position(), sm.length(), "");
             }
-            else
+            else if(index < node.input_slots.size() + node.output_slots.size())
             {
                 if (node.output_slots[index - node.input_slots.size()].type == ValueType::from_string(make_uppercase(type)))
+                    _code.replace(sm.position(), sm.length(), inner.str());
+                else
+                    _code.replace(sm.position(), sm.length(), "");
+            }
+            else // conditional
+            {
+                auto control_index = index - node.input_slots.size() - node.output_slots.size();
+                size_t pos = 0, start = 0;
+                while (control_index && pos != string::npos)
+                {
+                    start = pos + 1;
+                    pos = node.control_values.find('|', start);
+                    --control_index;
+                }
+                if (control_index == 0 && node.control_values.substr(start, pos - start) == type)
                     _code.replace(sm.position(), sm.length(), inner.str());
                 else
                     _code.replace(sm.position(), sm.length(), "");
@@ -123,7 +138,7 @@ namespace idk::shadergraph
 
             // add the code, then replace the output variable names
             code += tpl.code;
-            resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
+            resolve_conditionals(code, node); // resolve conditionals based on types or dropdown (?<index>:<type>{...})
             for (int i = 0; i < node.output_slots.size(); ++i)
             {
                 replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
