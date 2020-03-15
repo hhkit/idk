@@ -16,26 +16,127 @@
 #include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>
 #include <res/ResourceUtils.inl>
-#include <regex>
 #include <res/Guid.inl>
+
+#include <regex>
 namespace fs = std::filesystem;
 
 namespace idk
 {
     using namespace idk::shadergraph;
 
-    static array<unsigned, ValueType::count + 1> type_colors
-    { // from DB32 palette
+    static array<ImColor, ValueType::count + 1> type_colors
+    {
         0,
-        0xff826030,
-        0xffe16e5b,
-        0xffff9b63,
-        0xffe4fc5f,
-        0xff6e9437,
-        0xff30be6a,
-        0xff50e599,
-        0xffba7bd7
+        0xffEBC05B,
+        0xff3DC59B,
+        0xff4CE7FD,
+        0xff2179FA,
+        0xff0631CE
     };
+
+    enum class TypeMatch
+    {
+        // Upcast = lower dimension to higher dimension
+        None = 0, Downcast, Upcast, Match
+    };
+    // vecs can upcast to any dimension higher, but can only downcast to 1d
+    static TypeMatch type_match(int t1, int t2)
+    {
+        if (t1 == t2) return TypeMatch::Match;
+        if (t1 == ValueType::SAMPLER2D || t2 == ValueType::SAMPLER2D) return TypeMatch::None;
+        if (t2 < t1) return TypeMatch::Downcast;
+        if (t1 == ValueType::FLOAT) return TypeMatch::Upcast;
+        return TypeMatch::None;
+    }
+
+    // similar to c++ function matching,
+    // we match each param for each signature to determine the best matching function
+#pragma optimize("", off)
+    static const NodeSignature* match_node_sig(const Node& node)
+    {
+        auto& tpl = NodeTemplate::GetTable().at(node.name);
+        const size_t in_sz = node.input_slots.size();
+
+        const NodeSignature* best_matched_sig = nullptr;
+        vector<TypeMatch> best_match_values(in_sz, TypeMatch::None);
+        for (auto& sig : tpl.signatures)
+        {
+            vector<TypeMatch> curr_match_values(in_sz, TypeMatch::Match);
+            for (int i = 0; i < in_sz; ++i)
+            {
+                if (!node.input_slots[i].value.empty()) // disconnected
+                {
+                    curr_match_values[i] = TypeMatch::Match; // can freely change type
+                    continue;
+                }
+                auto match = type_match(node.input_slots[i].type, sig.ins[i]);
+                if (match < curr_match_values[i])
+                    curr_match_values[i] = match;
+            }
+
+            bool is_better_match = true;
+            for (int i = 0; i < in_sz; ++i)
+            {
+                if (curr_match_values[i] == TypeMatch::None || curr_match_values[i] < best_match_values[i])
+                {
+                    is_better_match = false;
+                    break;
+                }
+            }
+
+            if (is_better_match)
+            {
+                std::swap(best_match_values, curr_match_values);
+                best_matched_sig = &sig;
+            }
+        }
+
+        return best_matched_sig;
+    }
+
+    // force input slot to be kind_in
+    static ValueType match_node_sig_for_slot(const Node& node, int slot, ValueType kind_in)
+    {
+        auto& tpl = NodeTemplate::GetTable().at(node.name);
+        const size_t in_sz = node.input_slots.size();
+
+        const NodeSignature* best_matched_sig = nullptr;
+        vector<TypeMatch> best_match_values(in_sz, TypeMatch::None);
+        for (auto& sig : tpl.signatures)
+        {
+            vector<TypeMatch> curr_match_values(in_sz, TypeMatch::Match);
+            for (int i = 0; i < in_sz; ++i)
+            {
+                if (slot != i && !node.input_slots[i].value.empty()) // disconnected
+                {
+                    curr_match_values[i] = TypeMatch::Match; // can freely change type
+                    continue;
+                }
+                auto match = type_match(slot == i ? kind_in : node.input_slots[i].type, sig.ins[i]);
+                if (match < curr_match_values[i])
+                    curr_match_values[i] = match;
+            }
+
+            bool is_better_match = true;
+            for (int i = 0; i < in_sz; ++i)
+            {
+                if (curr_match_values[i] == TypeMatch::None || curr_match_values[i] < best_match_values[i])
+                {
+                    is_better_match = false;
+                    break;
+                }
+            }
+
+            if (is_better_match)
+            {
+                std::swap(best_match_values, curr_match_values);
+                best_matched_sig = &sig;
+            }
+        }
+
+        return best_matched_sig ? best_matched_sig->ins[slot] : kind_in;
+    }
 
 
 
@@ -52,7 +153,7 @@ namespace idk
         }
     }
 
-    bool draw_slot(const char* title, int kind)
+    bool draw_slot(const char* title, int kind, ValueType converted_slot_type = 0)
     {
         auto* canvas = ImNodes::GetCurrentCanvas();
 
@@ -83,13 +184,14 @@ namespace idk
             bool is_active = ImNodes::IsSlotCurveHovered() ||
                 (ImNodes::IsConnectingCompatibleSlot() /*&& !IsAlreadyConnectedWithPendingConnection(title, kind)*/);
 
-            ImColor kindColor = type_colors[std::abs(kind)];
+            ImColor kindColor = converted_slot_type ? type_colors[converted_slot_type] : type_colors[std::abs(kind)];
             ImColor text_color = ImGui::GetColorU32(ImGuiCol_Text);//is_active ? kindColor : canvas->colors[ImNodes::ColConnection];
             if (!is_active) text_color.Value.w = 0.7f;
-            ImColor color = is_active ? canvas->colors[ImNodes::ColConnectionActive] : canvas->colors[ImNodes::ColConnection];
+            ImColor color = !is_active ? canvas->colors[ImNodes::ColConnection] :
+                (converted_slot_type ? type_colors[converted_slot_type] : type_colors[std::abs(kind)]);
 
             string label = title;
-            label += slot_suffix(static_cast<ValueType>(abs(kind)));
+            label += slot_suffix(converted_slot_type ? converted_slot_type : static_cast<ValueType>(abs(kind)));
 
             ImGui::PushStyleColor(ImGuiCol_Text, text_color.Value);
 
@@ -317,22 +419,23 @@ namespace idk
 
                         kind = -node.input_slots[i].type;
 
-                        if (ImNodes::GetPendingConnection(reinterpret_cast<void**>(&node_out), &title_out, &kind_out))
+                        if (ImNodes::GetPendingConnection(reinterpret_cast<void**>(&node_out), &title_out, &kind_out)
+                            && kind_out > 0 && node_out != &node)
                         {
-                            for (auto& sig : tpl.signatures)
-                            {
-                                if (sig.ins[i] == kind_out)
-                                {
-                                    kind = -kind_out;
-                                    break;
-                                }
-                            }
-                        }
+                            ValueType converted_slot_type = match_node_sig_for_slot(node, i, kind_out);
 
-                        auto cursorpos = ImGui::GetCursorPos();
-                        drawValue(node, i); // draw value control when disconnected
-                        ImGui::SetCursorPos(cursorpos);
-                        draw_slot(slot_name.c_str(), kind);
+                            auto cursorpos = ImGui::GetCursorPos();
+                            drawValue(node, i); // draw value control when disconnected
+                            ImGui::SetCursorPos(cursorpos);
+                            draw_slot(slot_name.c_str(), -kind_out, converted_slot_type);
+                        }
+                        else
+                        {
+                            auto cursorpos = ImGui::GetCursorPos();
+                            drawValue(node, i); // draw value control when disconnected
+                            ImGui::SetCursorPos(cursorpos);
+                            draw_slot(slot_name.c_str(), kind);
+                        }
                     }
                     else if (i < num_slots)
                     {
@@ -887,24 +990,15 @@ namespace idk
             // set new type
             node_in->input_slots[slot_in].type = node_out->output_slots[slot_out - node_out->input_slots.size()].type;
 
-            // resolve new node_in output type
+            // resolve new node_in signature
             if (!out_is_param)
             {
-                auto& tpl = NodeTemplate::GetTable().at(node_in->name);
-                for (auto& sig : tpl.signatures)
+                if (const auto* sig = match_node_sig(*node_in))
                 {
-                    bool match = true;
                     for (size_t i = 0; i < node_in->input_slots.size(); ++i)
-                    {
-                        if (node_in->input_slots[i].type != sig.ins[i])
-                            match = false;
-                    }
-                    if (match)
-                    {
-                        for (size_t i = 0; i < node_in->output_slots.size(); ++i)
-                            node_in->output_slots[i].type = sig.outs[i];
-                        break;
-                    }
+                        node_in->input_slots[i].type = sig->ins[i];
+                    for (size_t i = 0; i < node_in->output_slots.size(); ++i)
+                        node_in->output_slots[i].type = sig->outs[i];
                 }
             }
 
@@ -924,7 +1018,9 @@ namespace idk
             auto& node_out = g.nodes[link.node_out];
             auto& node_in = g.nodes[link.node_in];
             auto col = _canvas.colors[ImNodes::ColConnection];
+            auto col2 = _canvas.colors[ImNodes::ColConnection2];
             _canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
+            _canvas.colors[ImNodes::ColConnection2] = type_colors[std::abs(node_out.output_slots[link.slot_out - node_out.input_slots.size()].type)];
 
             const auto& slot_out = node_out.name[0] == '$' ?
                 g.parameters[std::stoi(node_out.name.data() + 1)].name :
@@ -936,6 +1032,7 @@ namespace idk
                 link_to_delete = iter;
             }
             _canvas.colors[ImNodes::ColConnection] = col;
+            _canvas.colors[ImNodes::ColConnection2] = col2;
         }
         if (link_to_delete != g.links.end())
         {

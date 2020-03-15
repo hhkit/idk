@@ -8,14 +8,5 @@ float,vec4->vec4
 vec2,vec2->vec2
 vec3,vec3->vec3
 vec4,vec4->vec4
-mat2,mat2->mat2
-mat3,mat3->mat3
-mat4,mat4->mat4
-mat2,float->mat2
-mat3,float->mat3
-mat4,float->mat4
-float,mat2->mat2
-float,mat3->mat3
-float,mat4->mat4
 A,B,Out
 {2} = {0} + {1};

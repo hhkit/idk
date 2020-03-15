@@ -461,7 +461,7 @@ namespace idk
 
                 ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 3 }, nullptr);
                 ImGui::PopID();
-                ImGui::Separator(false);
+                ImGui::Separator();
             }
             ImGui::Unindent();
         }
@@ -518,7 +518,7 @@ namespace idk
             else
                 throw("???");
 
-            ImGui::Separator(false);
+            ImGui::Separator();
 
             ImGui::EndGroup();
             ImGui::Unindent();

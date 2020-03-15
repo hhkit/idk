@@ -61,10 +61,42 @@ namespace idk::shadergraph
         return "_v" + std::to_string(counter);
     }
 
+    static string wrap_vec_ctor(const Node& node, int slot_index, const string& args)
+    {
+        if (slot_index < node.input_slots.size())
+        {
+            auto t = node.input_slots[slot_index].type;
+            if (t != ValueType::SAMPLER2D)
+            {
+                string wrapped = t.to_string();
+                make_lowercase(wrapped);
+                wrapped += '(';
+                wrapped += args;
+                wrapped += ')';
+                return wrapped;
+            }
+        }
+        else if (slot_index < node.input_slots.size() + node.output_slots.size())
+        {
+            auto t = node.output_slots[slot_index - node.input_slots.size()].type;
+            if (t != ValueType::SAMPLER2D)
+            {
+                string wrapped = t.to_string();
+                make_lowercase(wrapped);
+                wrapped += '(';
+                wrapped += args;
+                wrapped += ')';
+                return wrapped;
+            }
+        }
+        return args;
+    }
+
     static void replace_variables(string& code, int slot_index, const string& replacement)
     {
         string to_find = '{' + serialize_text(slot_index) + '}';
         size_t offset = 0;
+
         while ((offset = code.find(to_find, offset)) != string::npos)
             code = code.replace(offset, to_find.size(), replacement);
     }
@@ -208,7 +240,7 @@ namespace idk::shadergraph
                     replacement = node.input_slots[i].type.to_string();
                     make_lowercase(replacement);
                     replacement += '(' + value + ')';
-                    replace_variables(code, i, replacement);
+                    replace_variables(code, i, wrap_vec_ctor(node, i, replacement));
                 }
 
                 continue;
@@ -221,7 +253,7 @@ namespace idk::shadergraph
             auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
             if (resolved_iter != state.resolved_outputs.end())
             {
-                replace_variables(code, i, resolved_iter->second);
+                replace_variables(code, i, wrap_vec_ctor(node, i, resolved_iter->second));
             }
             else
             {
@@ -229,7 +261,7 @@ namespace idk::shadergraph
                 code_from_input += '\n';
                 resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
                 assert(resolved_iter != state.resolved_outputs.end());
-                replace_variables(code, i, resolved_iter->second);
+                replace_variables(code, i, wrap_vec_ctor(node, i, resolved_iter->second));
             }
         }
 
