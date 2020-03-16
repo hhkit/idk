@@ -116,11 +116,12 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts")
 			                                              .IfPausedThen(&ScriptSystem::ScriptPausedUpdate);
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
 												          .IfPausedThen(&AnimationSystem::UpdatePaused);
         _pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects, "Destroy Objects");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::PreparePackets,        "Prepare to Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::SendPackets,           "Send Packets");
