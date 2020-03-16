@@ -50,8 +50,10 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\AttachmentViewType.h" />
+    <ClInclude Include="network\ack_utils.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
     <ClInclude Include="network\GhostAcknowledgementMessage.h" />
+    <ClInclude Include="network\MoveAcknowledgementMessage.h" />
     <ClInclude Include="network\MovePack.h" />
     <ClInclude Include="network\ElectronAnimatorView.h" />
     <ClInclude Include="network\EventDestroyObjectMessage.h" />
@@ -397,6 +399,7 @@
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
+    <ClCompile Include="network\ack_utils.cpp" />
     <ClCompile Include="network\ElectronAnimatorView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />

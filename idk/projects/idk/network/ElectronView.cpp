@@ -157,6 +157,38 @@ namespace idk
 		return retval;
 	}
 
+	MoveAck ElectronView::PrepareMoveAcknowledgements(SeqNo curr_seq) const
+	{
+		MoveAck retval;
+		retval.sequence_number = curr_seq;
+
+		for (unsigned i = 0; i < parameters.size(); ++i)
+		{
+			const auto sm = state_mask & (1 << i);
+			if (sm)
+			{
+				auto& param = parameters[i];
+				if (std::get_if<ControlObject>(&move_state))
+					retval.ackfield |= param->GetControlObject()->AcknowledgeMoves(curr_seq);
+			}
+		}
+		return retval;
+	}
+
+	void ElectronView::ReceiveMoveAcknowledgements(int sequence_state_mask, span<SeqNo> sequences)
+	{
+		for (unsigned i = 0; i < parameters.size(); ++i)
+		{
+			if (sequence_state_mask & (1 << i))
+			{
+				auto& param = parameters[i];
+				if (std::get_if<ClientObject>(&move_state))
+					param->GetClientObject()->ReceiveAcks(sequences);
+			}
+		}
+
+	}
+
 	void ElectronView::UnpackGhostData(SeqNo sequence_number, const GhostPack& ghost_pack)
 	{
 		state_mask = ghost_pack.state_mask;

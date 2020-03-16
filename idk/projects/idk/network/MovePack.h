@@ -22,7 +22,7 @@ namespace idk
 
 	struct MoveAck
 	{
-		SeqNo sequence_number {};
-		int   acked_moves     {};
+		SeqNo sequence_number { };
+		unsigned ackfield      { };
 	};
 }

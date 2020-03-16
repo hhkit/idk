@@ -15,6 +15,8 @@ namespace idk
 	struct ElectronView::DerivedParameter
 		: ElectronView::BaseParameter
 	{
+		static constexpr auto RememberedMoves = 32;
+
 		struct DerivedMasterData
 			: MasterData
 		{
@@ -101,15 +103,18 @@ namespace idk
 				: SeqAndPack
 			{
 				T move;
+				int send_count    = 3;
+				bool acknowledged = false;
 			};
 
 			ParameterImpl<T>& param;
-			circular_buffer<SeqAndMove, move_limit> buffer;
+			circular_buffer<SeqAndMove, RememberedMoves> buffer;
 			T prev_value;
 
 			DerivedClientObjectData(ParameterImpl<T>& impl)
 				: param{ impl }
-			{}
+			{
+			}
 
 			void Init() override
 			{
@@ -123,44 +128,82 @@ namespace idk
 				{
 					auto move = param.differ(curr_value, prev_value);
 					prev_value = curr_value;
-					SeqAndMove pushme;
-					pushme.seq = curr_seq;
-					pushme.pack = serialize_binary(move);
-					pushme.move = move;
-					buffer.emplace_back(std::move(pushme));
+
+					// if the buffer is full, drop the first move
+					if (buffer.capacity() == buffer.size())
+					{
+						if (buffer.front().acknowledged == false)
+							param.setter(param.adder(param.getter(), param.differ(T{}, buffer.front().move)));
+
+						buffer.pop_front();
+					}
+
+					// pack the move
+					{
+						SeqAndMove pushme;
+						pushme.seq = curr_seq;
+						pushme.pack = serialize_binary(move);
+						pushme.move = move;
+						buffer.emplace_back(std::move(pushme));
+					}
 				}
 
 			}
 
 			small_vector<SeqAndPack> PackData(SeqNo curr_seq) override
 			{
-				// discard ancient moves
-				auto discard_age = curr_seq - 3;
-
 				small_vector<SeqAndPack> retval;
 				for (auto& elem : buffer)
 				{
-					if (elem.seq > discard_age)
+					if (elem.send_count > 0)
+					{
 						retval.emplace_back(elem);
+						--elem.send_count;
+					}
 				}
-				if (retval.size() > move_limit)
-					throw;
 				return retval;
+			}
+
+			void ReceiveAcks(span<SeqNo> acknowleged_sequences) override
+			{
+				// newer data has arrived
+				auto buffer_itr = buffer.begin();
+				auto ack_itr = acknowleged_sequences.begin();
+
+				// assume the move buffer is in ascending sequence order
+				// assume the acknowledged sequences are in ascending sequence order
+				while (buffer_itr != buffer.end() && ack_itr != acknowleged_sequences.end())
+				{
+					// if butter is behind
+					while (buffer_itr != buffer.end() && buffer_itr->seq < *ack_itr)
+						buffer_itr++;
+
+					while (ack_itr != acknowleged_sequences.end() && buffer_itr->seq > * ack_itr)
+						ack_itr++;
+
+					if (buffer_itr == buffer.end() || ack_itr == acknowleged_sequences.end())
+						break;
+
+					if (buffer_itr->seq == *ack_itr)
+						buffer_itr->acknowledged = true;
+
+					if (buffer_itr->seq < *ack_itr)
+						buffer_itr++;
+					else
+						ack_itr++;
+				}
 			}
 
 			void UnpackGhost(SeqNo index, string_view data) override
 			{
-				return;
-				// newer data has arrived
-				while (buffer.size() && seqno_greater_than(index, buffer.front().seq))
-					buffer.pop_front();
-
 				if (auto val = parse_binary<T>(data))
 				{
 					T move{};
 					for (auto& elem : buffer)
-						move = param.adder(move, elem.move);
-
+					{
+						if (elem.acknowledged == false)
+							move = param.adder(move, elem.move);
+					}
 					param.setter(*val + move);
 				}
 			}
@@ -168,11 +211,10 @@ namespace idk
 		struct DerivedControlObjectData
 			: ControlObjectData
 		{
-			static constexpr auto RememberedMoves = 64;
 			struct SeqAndObj 
 			{ 
 				SeqNo seq; 
-				T obj; 
+				T move;
 				bool verified = false; 
 			};
 
@@ -191,10 +233,9 @@ namespace idk
 				prev_value = param.getter();
 			}
 
-			MoveAck AcknowledgeMoves(SeqNo curr_seq) override
+			int AcknowledgeMoves(SeqNo curr_seq) override
 			{
-				MoveAck ack;
-				ack.sequence_number = curr_seq;
+				int mask{};
 
 				for (auto& elem : move_buffer)
 				{
@@ -203,11 +244,11 @@ namespace idk
 						auto seq = elem.seq;
 						auto diff = curr_seq - seq;
 						if (diff < 32)
-							ack.acked_moves = 1 << diff;
+							mask |= 1 << diff;
 					}
 				}
 
-				return ack;
+				return mask;
 			}
 
 			__declspec(noinline) void RecordPrediction(SeqNo curr_seq) override
@@ -225,24 +266,24 @@ namespace idk
 				{
 				case PredictionFunction::Linear:
 				{
-					auto change = param.differ(real_move, itr->obj);
+					auto change = param.differ(real_move, itr->move);
 					param.setter(param.adder(param.getter(), change));
 					prev_value = param.adder(prev_value, change);
 					// and snap
-					itr->obj = real_move;
+					itr->move = real_move;
 					break;
 				}
 				case PredictionFunction::Quadratic:
 				if (itr != move_buffer.end())
 				{
-					auto diff = param.differ(real_move, itr->obj);
+					auto diff = param.differ(real_move, itr->move);
 
 					while (itr != move_buffer.end())
 					{
 						if (itr->verified)
 							break;
 
-						itr->obj = param.adder(itr->obj, diff);
+						itr->move = param.adder(itr->move, diff);
 						param.setter(param.adder(param.getter(), diff));
 						prev_value = param.adder(prev_value, diff);
 						++itr;
@@ -270,7 +311,7 @@ namespace idk
 							if (prediction.seq == elem.seq)
 							{
 								// if prediction was wrong
-								if (!param.equater(prediction.obj, real_move))
+								if (!param.equater(prediction.move, real_move))
 									ApplyCorrection(itr, real_move);
 
 								itr->verified = true;

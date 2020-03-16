@@ -71,6 +71,9 @@ namespace idk
 		void MoveGhost(seconds delta);
 		MovePack PackMoveData();
 		GhostPack MasterPackData(int incoming_state_mask);
+
+		MoveAck PrepareMoveAcknowledgements(SeqNo curr_seq) const;
+		void ReceiveMoveAcknowledgements(int statemask, span<SeqNo> sequences);
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
 		void UnpackMoveData(const MovePack& data_pack);
 
@@ -114,6 +117,7 @@ namespace idk
 			virtual void Init() = 0;
 			virtual void CalculateMove(SeqNo curr_seq) = 0;
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
+			virtual void ReceiveAcks(span<SeqNo>) = 0;
 			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
 			virtual ~ClientObjectData() = default;
 		};
@@ -121,7 +125,7 @@ namespace idk
 		struct ControlObjectData
 		{
 			virtual void Init() = 0;
-			virtual MoveAck AcknowledgeMoves(SeqNo curr_seq) = 0;
+			virtual int AcknowledgeMoves(SeqNo curr_seq) = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual int UnpackMove(span<const SeqAndPack>) = 0;
 			virtual ~ControlObjectData() = default;
@@ -159,8 +163,8 @@ namespace idk
 
 		if constexpr (std::is_same_v<T, quat>)
 		{
-			differ = [](const quat& lhs, const quat& rhs) -> quat { return lhs * rhs.inverse(); };
-			adder = [](const quat& lhs, const quat& rhs) -> quat { return lhs * rhs; };
+			differ = [](const quat& lhs, const quat& rhs) -> quat { return rhs.inverse() * lhs; };
+			adder = [](const quat& lhs, const quat& rhs) -> quat { return rhs * lhs; };
 			interpolator = static_cast<quat(*)(const quat&, const quat&, real)>(&slerp<quat, real>);
 		}
 	}

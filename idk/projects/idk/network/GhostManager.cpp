@@ -10,6 +10,7 @@
 #include <network/ElectronTransformView.h>
 #include <network/ConnectionManager.inl>
 #include <network/SubstreamManager.inl>
+#include <network/MoveAcknowledgementMessage.h>
 
 namespace idk
 {
@@ -23,11 +24,12 @@ namespace idk
 		server.Subscribe<GhostAcknowledgementMessage>([this](GhostAcknowledgementMessage& msg) { OnGhostACKReceived(msg); });
 	}
 
-	void GhostManager::SendGhosts([[maybe_unused]] Host target, span<ElectronView> views)
+	void GhostManager::SendGhosts(span<ElectronView> views)
 	{
 		const auto now = Clock::now();
 		const auto rtt = connection_manager->GetRTT();
 		const auto timeout = rtt;
+		const auto target_host = connection_manager->GetConnectedHost();
 		// timeout packets
 		hash_table<Handle<ElectronView>, int> view_to_state_masks;
 
@@ -77,6 +79,12 @@ namespace idk
 
 		for (auto& view : views)
 		{
+			if (view.network_id == 0)
+				continue;
+
+			if (view.owner == target_host)
+				continue;
+
 			if (const auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
 			{
 				auto retransmit_state_mask = 0;
@@ -110,6 +118,36 @@ namespace idk
 		}
 	}
 
+	void GhostManager::SendServerCorrections(span<ElectronView> views)
+	{
+		const auto target_host = connection_manager->GetConnectedHost();
+
+		auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+
+		vector<GhostWithMoveAck> ghost_moves_and_acks;
+
+		for (auto& view : views)
+		{
+			if (view.network_id == 0)
+				continue;
+
+			if (view.owner != target_host)
+				continue;
+
+			GhostWithMoveAck obj{ std::move(view.MasterPackData(0)) };
+			obj.ack = view.PrepareMoveAcknowledgements(seq);
+
+			ghost_moves_and_acks.emplace_back(std::move(obj));
+		}
+
+		connection_manager->CreateAndSendMessage<MoveAcknowledgementMessage>
+			(GameChannel::UNRELIABLE, [&](MoveAcknowledgementMessage& msg)
+			{
+				msg.objects = std::move(ghost_moves_and_acks);
+			});
+	}
+
+
 	void GhostManager::OnGhostReceived(GhostMessage& msg)
 	{
 		auto seq = msg.sequence_number;
@@ -122,10 +160,10 @@ namespace idk
 			{
 				// push the ghost data into the view
 				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))
-					return;
+					continue;
 
 				if (std::get_if<ElectronView::ClientObject>(&view->move_state))
-					return;
+					continue;
 
 				view->UnpackGhostData(seq, pack);
 			}

@@ -10,6 +10,7 @@
 #include <network/GhostFlags.h>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
+#include <network/ack_utils.h>
 
 namespace idk
 {
@@ -25,7 +26,8 @@ namespace idk
 
 	void ClientMoveManager::SubscribeEvents(ClientConnectionManager& client)
 	{
-		client.Subscribe<GhostMessage>([this](GhostMessage& msg) {OnGhostReceived(msg); });
+		client.Subscribe<GhostMessage>([this](GhostMessage& msg) { OnGhostReceived(msg); });
+		client.Subscribe<MoveAcknowledgementMessage>([this](MoveAcknowledgementMessage& msg) { OnMoveAcknowledgementReceived(msg); });
 	}
 
 	void ClientMoveManager::SubscribeEvents(ServerConnectionManager&)
@@ -64,6 +66,18 @@ namespace idk
 			auto elec_view = id_man.GetViewFromId(net_id);
 			if (elec_view)
 				elec_view->UnpackGhostData(ghost_msg.sequence_number, elem);
+		}
+	}
+
+	void ClientMoveManager::OnMoveAcknowledgementReceived(MoveAcknowledgementMessage& move_msg)
+	{
+		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
+		for (auto& elem : move_msg.objects)
+		{
+			vector<SeqNo> acks = ackfield_to_acks(elem.ack.sequence_number, elem.ack.ackfield);
+			auto eview = id_man.GetViewFromId(elem.network_id);
+			if (eview)
+				eview->ReceiveMoveAcknowledgements(elem.state_mask, acks);
 		}
 	}
 }

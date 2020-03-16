@@ -19,6 +19,7 @@ namespace idk
 	ADD_MESSAGE(GhostMessage);
 	ADD_MESSAGE(GhostAcknowledgementMessage);
 	ADD_MESSAGE(MoveClientMessage);
+	ADD_MESSAGE(MoveAcknowledgementMessage);
 	YOJIMBO_MESSAGE_FACTORY_FINISH();
 
 	yojimbo::MessageFactory* Adapter::CreateMessageFactory(yojimbo::Allocator& allocator)
