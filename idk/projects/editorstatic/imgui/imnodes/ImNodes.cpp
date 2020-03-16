@@ -207,7 +207,7 @@ bool RenderConnection(const ImVec2& input_pos, const ImVec2& output_pos, float t
         for (int i = 0; i < n; ++i)
         {
             float t = ImClamp(static_cast<float>(i - n / 4) / (n / 2), 0.0f, 1.0f);
-            ImColor col = ImLerp((ImVec4)canvas->colors[ColConnection], (ImVec4)canvas->colors[ColConnection2], t);
+            ImColor col = ImLerp((ImVec4)canvas->colors[ColConnection2], (ImVec4)canvas->colors[ColConnection], t);
             draw_list->AddPolyline(draw_list->_Path.Data + i, 2, col, false, thickness);
         }
         draw_list->_Path.Size = 0;
