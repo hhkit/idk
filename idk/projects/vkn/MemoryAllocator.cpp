@@ -66,6 +66,8 @@ namespace idk::vkn::hlp
 
 //#pragma optimize("",off)
 
+	static size_t dbg_threshold = 100000000;
+
 	MemoryAllocator::MemoryAllocator(vk::Device d, vk::PhysicalDevice pd) :device{ d }, pdevice{ pd }{_allocators.emplace(this); }
 	MemoryAllocator::MemoryAllocator() : device{ *View().Device() }, pdevice{ View().PDevice() }{_allocators.emplace(this); }
 	MemoryAllocator::UniqueAlloc MemoryAllocator::Allocate(vk::Device d, uint32_t mem_type, vk::MemoryRequirements mem_req)
@@ -79,6 +81,8 @@ namespace idk::vkn::hlp
 		}
 		auto& mem = itr->second;
 		auto&& [mem_idx, offsets] = mem.Allocate(mem_req.size,mem_req.alignment);
+		//if (mem_req.size > dbg_threshold)
+		//	DebugBreak();
 		//lock.Unlock();
 		auto& [u_offset, offset] = offsets;
 		return std::make_unique<Alloc>(mem, mem_idx, u_offset,offset, mem_req.size);

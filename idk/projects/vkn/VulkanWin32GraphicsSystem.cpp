@@ -219,6 +219,17 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		auto dump = []() {
+
+			auto fb_dump = dbg::DumpFrameBufferAllocs();
+			auto rt_dump = dbg::DumpRenderTargetAllocs();
+			auto alloc_dump = dbg::DumpMemoryAllocs();
+
+			LOG_CRASH_TO(LogPool::GFX, "Framebuffer Dump %s", fb_dump.c_str());
+			LOG_CRASH_TO(LogPool::GFX, "RenderTarget Dump %s", rt_dump.c_str());
+			LOG_CRASH_TO(LogPool::GFX, "MemoryAllocator Dump %s", alloc_dump.c_str());
+		};
+
 		try
 		{
 
@@ -435,17 +446,17 @@ namespace idk::vkn
 		vector<RscHandle<RenderTarget>> targets{render_targets.begin(),render_targets.end()};
 		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(), *curr_signal.render_finished, targets);
 
+		if (extra_vars.GetOptional<bool>("Dump", false))
+		{
+			extra_vars.Set("Dump", false);
+			dump();
+		}
+
 		}
 		catch (vk::SystemError& err)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
-			auto fb_dump = dbg::DumpFrameBufferAllocs();
-			auto rt_dump = dbg::DumpRenderTargetAllocs();
-			auto alloc_dump = dbg::DumpMemoryAllocs();
-
-			LOG_CRASH_TO(LogPool::GFX, "Framebuffer Dump %s", fb_dump.c_str());
-			LOG_CRASH_TO(LogPool::GFX, "RenderTarget Dump %s", rt_dump.c_str());
-			LOG_CRASH_TO(LogPool::GFX, "MemoryAllocator Dump %s", alloc_dump.c_str());
+			dump();
 			throw;
 		}
 	}
