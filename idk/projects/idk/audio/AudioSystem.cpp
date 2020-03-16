@@ -298,22 +298,23 @@ namespace idk
 	void AudioSystem::SetSystemPaused(bool is_system_paused)
 	{
 		_system_paused = is_system_paused;
+		_channelGroup_MASTER->setPaused(_system_paused);
 
-		int numOfChannelsPlaying = 0; //A gate to reduce calls
-		ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numOfChannelsPlaying));
-
-		for (int i = 0; i < _max_channels && numOfChannelsPlaying; ++i) {
-			FMOD::Channel* channelPtr = nullptr;
-			_result = _Core_System->getChannel(i, &channelPtr); //getChannel does not point to a nullptr, rather an allocated empty space in FMOD
-
-			bool isPlaying = false;
-			_result = channelPtr->isPlaying(&isPlaying); //This channel pointer can never be null after calling getChannel! It can be invalid, so calling isPlaying can result in invalid handle, but its ok
-
-			if (_result == FMOD_OK && isPlaying) {
-				ParseFMOD_RESULT(channelPtr->setPaused(_system_paused));
-				--numOfChannelsPlaying;
-			}
-		}
+		//int numOfChannelsPlaying = 0; //A gate to reduce calls
+		//ParseFMOD_RESULT(_Core_System->getChannelsPlaying(&numOfChannelsPlaying));
+		//
+		//for (int i = 0; i < _max_channels && numOfChannelsPlaying; ++i) {
+		//	FMOD::Channel* channelPtr = nullptr;
+		//	_result = _Core_System->getChannel(i, &channelPtr); //getChannel does not point to a nullptr, rather an allocated empty space in FMOD
+		//
+		//	bool isPlaying = false;
+		//	_result = channelPtr->isPlaying(&isPlaying); //This channel pointer can never be null after calling getChannel! It can be invalid, so calling isPlaying can result in invalid handle, but its ok
+		//
+		//	if (_result == FMOD_OK && isPlaying) {
+		//		ParseFMOD_RESULT(channelPtr->setPaused(_system_paused));
+		//		--numOfChannelsPlaying;
+		//	}
+		//}
 
 
 	}

@@ -46,7 +46,6 @@ namespace idk
         }
 
 
-
         public static void StopAll()
             => Bindings.AudioSystemStopAll();
 
