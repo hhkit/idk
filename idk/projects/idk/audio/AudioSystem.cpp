@@ -435,6 +435,82 @@ namespace idk
 		return returnVal;
 	}
 
+	void AudioSystem::SetChannel_MASTER_Pause(bool newState)
+	{
+		_channelGroup_MASTER->setPaused(newState);
+
+	}
+
+	bool AudioSystem::GetChannel_MASTER_Pause()
+	{
+		bool retVal = false;
+		_channelGroup_MASTER->getPaused(&retVal);
+		return retVal;
+	}
+
+	void AudioSystem::SetChannel_SFX_Pause(bool newState)
+	{
+		_channelGroup_SFX->setPaused(newState);
+	}
+
+	bool AudioSystem::GetChannel_SFX_Pause()
+	{
+		bool retVal = false;
+		_channelGroup_SFX->getPaused(&retVal);
+		return retVal;
+	}
+
+	void AudioSystem::SetChannel_MUSIC_Pause(bool newState)
+	{
+		_channelGroup_MUSIC->setPaused(newState);
+	}
+
+	bool AudioSystem::GetChannel_MUSIC_Pause()
+	{
+		bool retVal = false;
+		_channelGroup_MUSIC->getPaused(&retVal);
+		return retVal;
+	}
+
+	void AudioSystem::SetChannel_AMBIENT_Pause(bool newState)
+	{
+		_channelGroup_AMBIENT->setPaused(newState);
+	}
+
+	bool AudioSystem::GetChannel_AMBIENT_Pause()
+	{
+		bool retVal = false;
+		_channelGroup_AMBIENT->getPaused(&retVal);
+		return retVal;
+	}
+
+	void AudioSystem::SetChannel_DIALOGUE_Pause(bool newState)
+	{
+		_channelGroup_DIALOGUE->setPaused(newState);
+	}
+
+	bool AudioSystem::GetChannel_DIALOGUE_Pause()
+	{
+		bool retVal = false;
+		_channelGroup_DIALOGUE->getPaused(&retVal);
+		return retVal;
+	}
+
+	void AudioSystem::ResetChannels()
+	{
+		SetChannel_MASTER_Pause(false);
+		SetChannel_SFX_Pause(false);
+		SetChannel_MUSIC_Pause(false);
+		SetChannel_AMBIENT_Pause(false);
+		SetChannel_DIALOGUE_Pause(false);
+
+		SetChannel_MASTER_Volume(1);
+		SetChannel_SFX_Volume(1);
+		SetChannel_MUSIC_Volume(1);
+		SetChannel_AMBIENT_Volume(1);
+		SetChannel_DIALOGUE_Volume(1);
+	}
+
 	void AudioSystem::SetCurrentSoundDriver(int index)
 	{
 		try {

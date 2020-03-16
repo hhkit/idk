@@ -446,6 +446,43 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float AudioSystemGetDIALOGUEVolume();
 
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetMASTERPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetMASTERPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetSFXPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetSFXPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetMUSICPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetMUSICPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetAMBIENTPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetAMBIENTPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetDIALOGUEPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetDIALOGUEPause();
+
+
+
+
+
+
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSystemStopAll();
 
