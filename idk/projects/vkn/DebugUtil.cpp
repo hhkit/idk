@@ -133,6 +133,29 @@ namespace idk::vkn::dbg
 			View().DynDispatcher().vkSetDebugUtilsObjectNameEXT(*View().Device(), &tmp_);
 		}
 	}
+	string num_bytes_to_str(size_t num_bytes)
+	{
+		const std::pair<float, string> post_fix[] =
+		{
+			{1000000000," GB"},
+			{1000000," MB"},
+			{1000," KB"},
+			//{1,"B"},
+		};
+
+		string result = std::to_string(num_bytes);
+		string runit = " B";
+		for (auto& [denominator, unit] : post_fix)
+		{
+			if (denominator < num_bytes)
+			{
+				result = std::to_string(num_bytes / denominator);
+				runit = unit;
+				break;
+			}
+		}
+		return result + runit;
+	}
 	string DumpFrameBufferAllocs()
 	{
 		std::stringstream out;
@@ -148,7 +171,7 @@ namespace idk::vkn::dbg
 				auto tex = fb.GetAttachment(i).buffer;
 
 				auto sz = tex.as<VknTexture>().sizeOnDevice;
-				out << "\t\t Attachment[" << i << "] size: " << sz;
+				out << "\t\t Attachment[" << i << "] size: " << num_bytes_to_str(sz);
 				if (!tracked_texture.emplace(tex).second)
 					out << "[Duplicate]";
 				else
@@ -157,10 +180,10 @@ namespace idk::vkn::dbg
 				}
 				out << "\n";
 			}
-			out << "\t Framebuffer <" << fb.Name() << "> size: " << fb_size << "\n";
+			out << "\t Framebuffer <" << fb.Name() << "> size: " << num_bytes_to_str(fb_size) << "\n";
 			total_size += fb_size;
 		}
-		out << "All size: " << total_size << "\n";
+		out << "All size: " << num_bytes_to_str(total_size) << "\n";
 		string derp = out.str();
 		return derp;
 	}
@@ -179,7 +202,7 @@ namespace idk::vkn::dbg
 				auto tex = fb.GetColorBuffer();
 
 				auto sz = tex.as<VknTexture>().sizeOnDevice;
-				out << "\t\t Color Attachment size: " << sz;
+				out << "\t\t Color Attachment size: " << num_bytes_to_str(sz);
 				if (!tracked_texture.emplace(tex).second)
 					out << "[Duplicate]";
 				else
@@ -192,7 +215,7 @@ namespace idk::vkn::dbg
 				auto tex = fb.GetDepthBuffer();
 
 				auto sz = tex.as<VknTexture>().sizeOnDevice;
-				out << "\t\t Depth Attachment size: " << sz;
+				out << "\t\t Depth Attachment size: " << num_bytes_to_str(sz);
 				if (!tracked_texture.emplace(tex).second)
 					out << "[Duplicate]";
 				else
@@ -201,10 +224,10 @@ namespace idk::vkn::dbg
 				}
 				out << "\n";
 			}
-			out << "\t RenderTarget <" << fb.Name() << "> size: " << fb_size << "\n";
+			out << "\t RenderTarget <" << fb.Name() << "> size: " << num_bytes_to_str(fb_size) << "\n";
 			total_size += fb_size;
 		}
-		out << "All size: " << total_size << "\n";
+		out << "All size: " << num_bytes_to_str(total_size) << "\n";
 		string derp = out.str();
 		return derp;
 	}
