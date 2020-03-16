@@ -495,11 +495,7 @@ namespace idk
 		float diff = f_plane - n_plane;
 		float first_end = n_plane + 0.4f * diff;
 		float second_start= n_plane + 0.38f * diff;
-<<<<<<< Updated upstream
-		float second_end = f_plane;
-=======
 		float second_end = n_plane + 0.7f * diff;
->>>>>>> Stashed changes
 
 		float cascade_start[2] = { n_plane  ,second_start};
 		float cascade_end  [2] = { first_end,second_end  };
