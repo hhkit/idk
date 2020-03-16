@@ -130,7 +130,7 @@ namespace idk::shadergraph
             else // conditional
             {
                 auto control_index = index - node.input_slots.size() - node.output_slots.size();
-                size_t pos = 0, start = 0;
+                size_t pos = node.control_values.find('|', 0), start = 0;
                 while (control_index && pos != string::npos)
                 {
                     start = pos + 1;

@@ -401,6 +401,7 @@ namespace idk
 
                 i = 0;
                 float cursor_y = ImGui::GetCursorPosY();
+                float max_slots_cursor_y = cursor_y;
                 string control_values = node.control_values;
                 string final_control_values;
 
@@ -436,15 +437,22 @@ namespace idk
                             ImGui::SetCursorPos(cursorpos);
                             draw_slot(slot_name.c_str(), kind);
                         }
+
+                        max_slots_cursor_y = ImMax(max_slots_cursor_y, ImGui::GetCursorPosY());
                     }
                     else if (i < num_slots)
                     {
                         kind = node.output_slots[i - node.input_slots.size()].type;
                         draw_slot(slot_name.c_str(), kind);
+
+                        max_slots_cursor_y = ImMax(max_slots_cursor_y, ImGui::GetCursorPosY());
                     }
                     else // custom controls
                     {
                         assert(slot_name[0] == '$'); // did we fuck up the names in the .node?
+
+                        if (i == num_slots)
+                            ImGui::SetCursorPosY(max_slots_cursor_y);
 
                         string next_value = "";
                         if (control_values.size())
