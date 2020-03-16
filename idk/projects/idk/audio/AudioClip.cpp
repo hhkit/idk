@@ -32,38 +32,6 @@ namespace idk
 		_soundHandle = nullptr;
 	}
 
-	void AudioClip::ReassignSoundGroup(SubSoundGroup newSndGrp)
-	{
-		auto& audioSystem = Core::GetSystem<AudioSystem>();
-
-		switch (newSndGrp) {
-		default:
-		case SubSoundGroup::SubSoundGroup_SFX:
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setSoundGroup(audioSystem._soundGroup_SFX));
-			priority = 128;
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setDefaults(frequency, priority));
-			break;
-
-		case SubSoundGroup::SubSoundGroup_MUSIC:
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setSoundGroup(audioSystem._soundGroup_MUSIC));
-			priority = 32; //SFX has the lowest priority
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setDefaults(frequency, priority));
-			break;
-
-		case SubSoundGroup::SubSoundGroup_AMBIENT:
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setSoundGroup(audioSystem._soundGroup_AMBIENT));
-			priority = 32; //SFX has the lowest priority
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setDefaults(frequency, priority));
-			break;
-
-		case SubSoundGroup::SubSoundGroup_DIALOGUE:
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setSoundGroup(audioSystem._soundGroup_DIALOGUE));
-			priority = 64; //SFX has the lowest priority
-			audioSystem.ParseFMOD_RESULT(_soundHandle->setDefaults(frequency, priority));
-			break;
-		}
-	}
-
 	AudioClipInfo AudioClip::GetAudioClipInfo()
 	{
 		return soundInfo;

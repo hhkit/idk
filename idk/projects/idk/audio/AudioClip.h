@@ -41,8 +41,6 @@ namespace idk
 		AudioClip();
 		~AudioClip();
 
-		void			ReassignSoundGroup(SubSoundGroup newSndGrp); //Reassigns sound to a new soundgroup.
-
 		AudioClipInfo	GetAudioClipInfo();	//Returns a readonly information of the sound.
 		string			GetName();
 

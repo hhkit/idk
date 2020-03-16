@@ -162,12 +162,17 @@ namespace idk
 		ParseFMOD_RESULT(_Core_System->init(_max_channels, FMOD_INIT_NORMAL, 0)); //1024 = number of channels that can be played on
 		
 		//Channel Group Setup
-		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_MUSIC",		&_soundGroup_MUSIC		));
-		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_SFX",		&_soundGroup_SFX		));
-		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_AMBIENT",	&_soundGroup_AMBIENT	));
-		ParseFMOD_RESULT(_Core_System->createSoundGroup("soundGroup_DIALOGUE",	&_soundGroup_DIALOGUE	));
+		ParseFMOD_RESULT(_Core_System->createChannelGroup("soundGroup_SFX",			&_channelGroup_SFX		));
+		ParseFMOD_RESULT(_Core_System->createChannelGroup("soundGroup_MUSIC",		&_channelGroup_MUSIC	));
+		ParseFMOD_RESULT(_Core_System->createChannelGroup("soundGroup_AMBIENT",		&_channelGroup_AMBIENT	));
+		ParseFMOD_RESULT(_Core_System->createChannelGroup("soundGroup_DIALOGUE",	&_channelGroup_DIALOGUE	));
 		ParseFMOD_RESULT(_Core_System->getMasterChannelGroup(&_channelGroup_MASTER));
 
+		_channelGroup_MASTER		->setVolumeRamp(false);
+		_channelGroup_SFX			->setVolumeRamp(false);
+		_channelGroup_MUSIC			->setVolumeRamp(false);
+		_channelGroup_AMBIENT		->setVolumeRamp(false);
+		_channelGroup_DIALOGUE		->setVolumeRamp(false);
 		//Get Number of Drivers available
 		ParseFMOD_RESULT(_Core_System->getNumDrivers(&_number_of_drivers));
 
@@ -231,10 +236,7 @@ namespace idk
 		//Update all the audio source here too!
 		for (auto& elem : audio_sources)
 		{
-			
 			elem.UpdateAudioClips();
-			
-
 		}
 
 		//Check which listeners are active. At best there will always be at most, 4 listeners in the game. And it is not going to be constantly toggable.
@@ -335,15 +337,15 @@ namespace idk
 		StopAllAudio();
 			
 		//Closes sound groups. Dont really have to do this, but this is for cleanliness.
-		ParseFMOD_RESULT(_soundGroup_MUSIC	  ->release()); 
-		ParseFMOD_RESULT(_soundGroup_SFX	  ->release()); 
-		ParseFMOD_RESULT(_soundGroup_AMBIENT  ->release()); 
-		ParseFMOD_RESULT(_soundGroup_DIALOGUE ->release());
-		_soundGroup_MUSIC	 = nullptr;
-		_soundGroup_SFX		 = nullptr;
-		_soundGroup_AMBIENT  = nullptr;
-		_soundGroup_DIALOGUE = nullptr;
-		_channelGroup_MASTER = nullptr;
+		ParseFMOD_RESULT(_channelGroup_MUSIC	->release()); 
+		ParseFMOD_RESULT(_channelGroup_SFX		->release()); 
+		ParseFMOD_RESULT(_channelGroup_AMBIENT  ->release()); 
+		ParseFMOD_RESULT(_channelGroup_DIALOGUE ->release());
+		_channelGroup_MUSIC		= nullptr;
+		_channelGroup_SFX		= nullptr;
+		_channelGroup_AMBIENT	= nullptr;
+		_channelGroup_DIALOGUE	= nullptr;
+		_channelGroup_MASTER	= nullptr;
 
 		//System close
 		ParseFMOD_RESULT(_Core_System->release());
@@ -379,22 +381,22 @@ namespace idk
 
 	void AudioSystem::SetChannel_SFX_Volume(const float& newVolume)
 	{
-		ParseFMOD_RESULT(_soundGroup_SFX->setVolume(newVolume));
+		ParseFMOD_RESULT(_channelGroup_SFX->setVolume(newVolume));
 	}
 
 	void AudioSystem::SetChannel_MUSIC_Volume(const float& newVolume)
 	{
-		ParseFMOD_RESULT(_soundGroup_MUSIC->setVolume(newVolume));
+		ParseFMOD_RESULT(_channelGroup_MUSIC->setVolume(newVolume));
 	}
 
 	void AudioSystem::SetChannel_AMBIENT_Volume(const float& newVolume)
 	{
-		ParseFMOD_RESULT(_soundGroup_AMBIENT->setVolume(newVolume));
+		ParseFMOD_RESULT(_channelGroup_AMBIENT->setVolume(newVolume));
 	}
 
 	void AudioSystem::SetChannel_DIALOGUE_Volume(const float& newVolume)
 	{
-		ParseFMOD_RESULT(_soundGroup_DIALOGUE->setVolume(newVolume));
+		ParseFMOD_RESULT(_channelGroup_DIALOGUE->setVolume(newVolume));
 	}
 
 	void AudioSystem::SetCurrentSoundDriver(int index)
