@@ -187,7 +187,8 @@ namespace idk
 			if (sm & (1 << i))
 			{
 				auto& move_pack = data_pack.packs[pack_ptr++];
-				parameters[i]->GetControlObject()->UnpackMove(move_pack);
+				auto unpacked = parameters[i]->GetControlObject()->UnpackMove(move_pack);
+				LOG_TO(LogPool::NETWORK, "unpacking %d moves", unpacked);
 			}
 		}
 	}

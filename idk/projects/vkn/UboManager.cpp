@@ -94,7 +94,7 @@ namespace idk::vkn
 		{
 			if (dp.Buffer() == buffer)
 			{
-				memcpy_s(dp.data.data()+range._begin, dp.data.size()-range._begin, data.data(),data.size());
+				memcpy_s(dp.data.data()+dp.initial_offset+range._begin, dp.data.size()-range._begin, data.data(),data.size());
 				return;
 			}
 		}
@@ -177,7 +177,7 @@ namespace idk::vkn
 	{
 		if (collator.free_range == collator.full_range)
 		{
-			initial_offset = 0;// InitialOffset(data.data(), alignment);
+			initial_offset = InitialOffset(data.data(), alignment);
 		}
 
 		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
@@ -192,7 +192,7 @@ namespace idk::vkn
 		data.resize(block_size);
 		if (len+ aligned_offset > 65536)
 			throw;
-		memcpy_s(data.data() +initial_offset+ aligned_offset, data.size()-(initial_offset + aligned_offset), data_, len);
+		memcpy_s(data.data() +initial_offset+ aligned_offset, data.capacity()-(initial_offset + aligned_offset), data_, len);
 		return static_cast<uint32_t>(aligned_offset);
 	}
 

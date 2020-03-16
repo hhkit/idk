@@ -38,7 +38,6 @@
 
 #include <gfx/RenderTarget.h>
 
-
 struct guid_64
 {
 	uint64_t mem1;
@@ -89,7 +88,8 @@ namespace idk
 	{
 		for (auto& animator : animators)
 		{
-			PrepareSkeletonTransform(*animator, buffer_out, index_table_out);
+			// if(animator->GetGameObject()->ActiveInHierarchy())
+				PrepareSkeletonTransform(*animator, buffer_out, index_table_out);
 		}
 	}
 

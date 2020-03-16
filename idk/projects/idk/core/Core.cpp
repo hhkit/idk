@@ -96,9 +96,9 @@ namespace idk
 		auto* editor = &GetSystem<IEditor>();
 
 		// setup loop
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets,  "Receive Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets,  "Receive Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::UpdatePredictions,     "Network prediction");
 
@@ -116,11 +116,12 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdate,           "Update Scripts")
 			                                              .IfPausedThen(&ScriptSystem::ScriptPausedUpdate);
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptUpdateCoroutines, "Update Coroutines");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&AnimationSystem::Update,              "Animate animators")
 												          .IfPausedThen(&AnimationSystem::UpdatePaused);
         _pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects, "Destroy Objects");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::PreparePackets,        "Prepare to Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::SendPackets,           "Send Packets");

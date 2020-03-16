@@ -61,17 +61,49 @@ namespace idk::shadergraph
         return "_v" + std::to_string(counter);
     }
 
+    static string wrap_vec_ctor(const Node& node, int slot_index, const string& args)
+    {
+        if (slot_index < node.input_slots.size())
+        {
+            auto t = node.input_slots[slot_index].type;
+            if (t != ValueType::SAMPLER2D)
+            {
+                string wrapped = t.to_string();
+                make_lowercase(wrapped);
+                wrapped += '(';
+                wrapped += args;
+                wrapped += ')';
+                return wrapped;
+            }
+        }
+        else if (slot_index < node.input_slots.size() + node.output_slots.size())
+        {
+            auto t = node.output_slots[slot_index - node.input_slots.size()].type;
+            if (t != ValueType::SAMPLER2D)
+            {
+                string wrapped = t.to_string();
+                make_lowercase(wrapped);
+                wrapped += '(';
+                wrapped += args;
+                wrapped += ')';
+                return wrapped;
+            }
+        }
+        return args;
+    }
+
     static void replace_variables(string& code, int slot_index, const string& replacement)
     {
         string to_find = '{' + serialize_text(slot_index) + '}';
         size_t offset = 0;
+
         while ((offset = code.find(to_find, offset)) != string::npos)
             code = code.replace(offset, to_find.size(), replacement);
     }
 
     static void resolve_conditionals(string& code, const Node& node)
     {
-        std::regex regex{ "\\?(\\d+):(float|vec2|vec3|vec4|mat2|mat3|mat4|sampler2D)\\{(.*)\\}" };
+        std::regex regex{ "\\?(\\d+):(\\w+)\\{(.*)\\}" };
         std::smatch sm;
 
         std::string _code = code;
@@ -88,9 +120,24 @@ namespace idk::shadergraph
                 else
                     _code.replace(sm.position(), sm.length(), "");
             }
-            else
+            else if(index < node.input_slots.size() + node.output_slots.size())
             {
                 if (node.output_slots[index - node.input_slots.size()].type == ValueType::from_string(make_uppercase(type)))
+                    _code.replace(sm.position(), sm.length(), inner.str());
+                else
+                    _code.replace(sm.position(), sm.length(), "");
+            }
+            else // conditional
+            {
+                auto control_index = index - node.input_slots.size() - node.output_slots.size();
+                size_t pos = 0, start = 0;
+                while (control_index && pos != string::npos)
+                {
+                    start = pos + 1;
+                    pos = node.control_values.find('|', start);
+                    --control_index;
+                }
+                if (control_index == 0 && node.control_values.substr(start, pos - start) == type)
                     _code.replace(sm.position(), sm.length(), inner.str());
                 else
                     _code.replace(sm.position(), sm.length(), "");
@@ -123,7 +170,7 @@ namespace idk::shadergraph
 
             // add the code, then replace the output variable names
             code += tpl.code;
-            resolve_conditionals(code, node); // resolve conditionals based on types (?<index>:<type>{...})
+            resolve_conditionals(code, node); // resolve conditionals based on types or dropdown (?<index>:<type>{...})
             for (int i = 0; i < node.output_slots.size(); ++i)
             {
                 replace_variables(code, static_cast<int>(node.input_slots.size() + i), var_name(state.slot_counter));
@@ -193,7 +240,7 @@ namespace idk::shadergraph
                     replacement = node.input_slots[i].type.to_string();
                     make_lowercase(replacement);
                     replacement += '(' + value + ')';
-                    replace_variables(code, i, replacement);
+                    replace_variables(code, i, wrap_vec_ctor(node, i, replacement));
                 }
 
                 continue;
@@ -206,7 +253,7 @@ namespace idk::shadergraph
             auto resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
             if (resolved_iter != state.resolved_outputs.end())
             {
-                replace_variables(code, i, resolved_iter->second);
+                replace_variables(code, i, wrap_vec_ctor(node, i, resolved_iter->second));
             }
             else
             {
@@ -214,7 +261,7 @@ namespace idk::shadergraph
                 code_from_input += '\n';
                 resolved_iter = state.resolved_outputs.find({ node_out.guid, link->slot_out - s_cast<int>(node_out.input_slots.size()) });
                 assert(resolved_iter != state.resolved_outputs.end());
-                replace_variables(code, i, resolved_iter->second);
+                replace_variables(code, i, wrap_vec_ctor(node, i, resolved_iter->second));
             }
         }
 
@@ -321,7 +368,10 @@ namespace idk::shadergraph
 		auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
         if (_shader_program.guid == Guid{})
             _shader_program = Core::GetResourceManager().Create<ShaderProgram>();
-
+		else if (!_shader_program)
+		{
+			_shader_program = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(_shader_program.guid);
+		}
         auto& program = *_shader_program;
 		program.Name(string{ this->Name() }+"_" + string{ GetTemplate()->Name() });
 		

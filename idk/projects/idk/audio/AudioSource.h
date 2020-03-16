@@ -18,6 +18,8 @@
 
 namespace idk
 {
+	ENUM(SoundGroup, char, Null = 0, Sfx, Music, Ambient, Dialogue)
+
 	class AudioSource :public Component<AudioSource>{
 	public:
 
@@ -36,6 +38,7 @@ namespace idk
 		int  FindAudio(string_view name);
 
 		void UpdateAudioClips();
+		void RefreshSoundGroups();
 
 		vector<RscHandle<AudioClip>> audio_clip_list;
 		vector<float>				 audio_clip_volume;	//This is tightly updated with the list, like a pair
@@ -50,14 +53,13 @@ namespace idk
 		bool			is3Dsound	{ true };	//Does this sound follow the the gameobject position?
 		bool			isUnique	{ true };	//When I call play, does it duplicate? Or replay the sound again?
 		bool			isLoop		{ false };	//Does this audio loop?
-		//ADD PRIORITY HERE?
-		SubSoundGroup	soundGroup	{ SubSoundGroup::SubSoundGroup_SFX };
+		int				priority	{ 128 };
+		SoundGroup		soundGroup	{ 0 }; //0 = NULL, 1 = SFX, 2 = MUSIC, 3 = AMBIENT, 4 = DIALOGUE
 
 
 		void ResizeAudioClipListData();
 	private:
 		FMOD_MODE ConvertSettingToFMOD_MODE(); //For FMOD::System.setMode. Collates the current setting given.
-
 
 		void FMOD_RES(FMOD_RESULT e); //Throws string on fail
 	};

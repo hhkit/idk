@@ -23,7 +23,7 @@ namespace idk
 		server.Subscribe<GhostAcknowledgementMessage>([this](GhostAcknowledgementMessage& msg) { OnGhostACKReceived(msg); });
 	}
 
-	void GhostManager::SendGhosts(Host target, span<ElectronView> views)
+	void GhostManager::SendGhosts([[maybe_unused]] Host target, span<ElectronView> views)
 	{
 		const auto now = Clock::now();
 		const auto rtt = connection_manager->GetRTT();

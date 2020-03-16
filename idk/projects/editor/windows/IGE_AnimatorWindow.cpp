@@ -199,7 +199,7 @@ namespace idk
 						selectLayer(i);
 					}
 					ImGui::PopStyleColor(3);
-					ImGui::Separator(false);
+					ImGui::Separator();
 
 					// Save the current position so we can set the position back after we finish drawing the widgets
 					auto new_cursor_pos = ImGui::GetCursorPos();
@@ -260,9 +260,9 @@ namespace idk
 					ImGui::NewLine();
 					const ImVec2 prog_size = ImVec2(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().FramePadding.x, 3);
 					if (layer.IsPlaying())
-						ImGui::ProgressBar(layer.weight, ImVec4{ 0.5, 0.5, 0.5, 1.0 }, prog_size, nullptr);
+						ImGui::ProgressBar(layer.weight, prog_size, nullptr);
 					else
-						ImGui::ProgressBar(layer.default_weight, ImVec4{ 0.5, 0.5, 0.5, 1.0 }, ImVec2(-1, 3), nullptr);
+						ImGui::ProgressBar(layer.default_weight, ImVec2(-1, 3), nullptr);
 
 					ImGui::Unindent(ImGui::GetStyle().FramePadding.x);
 
@@ -529,7 +529,7 @@ namespace idk
 					else
 						throw("???");
 
-					ImGui::Separator(false);
+					ImGui::Separator();
 					ImGui::SetCursorPos(next_pos);
 
 					ImGui::EndGroup();
@@ -630,7 +630,7 @@ namespace idk
 						rename_param_type = anim::AnimDataType::NONE;
 					}
 				}
-				ImGui::Separator(false);
+				ImGui::Separator();
 			}
 			
 			ImGui::EndTabItem();
@@ -713,7 +713,10 @@ namespace idk
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_bg_col);
 					else
 						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, _selectable_hovered_col);
-					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | s_cast<ImGuiSelectableFlags_>(ImGuiSelectableFlags_PressedOnClick), selectable_size))
+
+#pragma warning(disable:5054) // enum between different types
+					if (ImGui::Selectable("##transition_drop_down", selected, ImGuiSelectableFlags_AllowItemOverlap | ImGuiSelectableFlags_SelectOnClick, selectable_size))
+#pragma warning(default:5054)
 					{
 						selectTransition(_selected_layer, state_index, transition_index);
 						_show_transition = true;
@@ -734,7 +737,7 @@ namespace idk
 
 
 					ImGui::PopStyleColor(3);
-					ImGui::Separator(false);
+					ImGui::Separator();
 					const auto new_cursor_pos = ImGui::GetCursorPos();
 					ImGui::SetCursorPos(prev_cursor_pos + selectable_offset);
 					
@@ -756,7 +759,9 @@ namespace idk
 					if (style_and_bar)
 						ImGui::PopStyleColor(1);
 					
-					ImGui::ProgressBar(weight, _blend_prog_col, ImVec2(-1, 3), nullptr);
+					ImGui::PushStyleColor(ImGuiCol_PlotHistogram, _blend_prog_col);
+					ImGui::ProgressBar(weight, ImVec2(-1, 3), nullptr);
+					ImGui::PopStyleColor();
 
 					ImGui::EndGroup();
 					ImGui::Unindent();
@@ -793,7 +798,7 @@ namespace idk
 				if (!can_remove)
 					ImGuidk::PopDisabled();
 
-				ImGui::Separator(false);
+				ImGui::Separator();
 
 				for (int i = 1; i < curr_layer.anim_states.size(); ++i)
 				{
@@ -821,7 +826,7 @@ namespace idk
 					}
 					_layers_changed |= drawStatesContextMenu();
 
-					ImGui::Separator(false);
+					ImGui::Separator();
 					
 					const auto new_cursor_pos = ImGui::GetCursorPos();
 
@@ -1045,7 +1050,7 @@ namespace idk
 
 		curr_state.IsBlendTree() ? inspectBlendTree(layer_index, state_index) : inspectBasicState(layer_index, state_index);
 		ImGui::NewLine();
-		ImGui::Separator(false);
+		ImGui::Separator();
 
 		ImGui::Text("Transitions");
 		ImGui::PushItemWidth(-1);
@@ -1136,7 +1141,7 @@ namespace idk
 			ImGuidk::PopDisabled();
 
 		ImGui::NewLine();
-		ImGui::Separator(false);
+		ImGui::Separator();
 		ImGui::PopID();
 
 		if (_show_transition)
@@ -1375,7 +1380,7 @@ namespace idk
 		}
 		else
 			ImGui::Text(transition_to_state.name.data());
-		ImGui::Separator(false);
+		ImGui::Separator();
 
 		const float width_avail = (ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize("Transition Duration").x);
 		const float item_width = width_avail * 0.8f;
@@ -1450,7 +1455,7 @@ namespace idk
 			ImGuidk::PopDisabled();
 
 		ImGui::NewLine();
-		ImGui::Separator(false);
+		ImGui::Separator();
 		ImGui::PopID();
 
 		displayConditions(layer_index, state_index, transition_index);

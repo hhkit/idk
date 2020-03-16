@@ -295,7 +295,7 @@ namespace idk::vkn
 		_default_pipeline_manager = &pipeline_manager;
 	}
 
-	void TransitionResource(FrameGraph::Context_t context, TransitionInfo info)
+	void TransitionResource([[maybe_unused]] FrameGraph::Context_t context, [[maybe_unused]] TransitionInfo info)
 	{
 		//TODO: Actually transition
 	}

@@ -4,10 +4,10 @@
 #include <vkn/VulkanPipeline.h>
 #include <vkn/vector_buffer.h>
 
-#include <vkn/MaterialInstanceCache.h>
 
 namespace idk::vkn
 {
+	class MaterialInstanceCache;
 	struct buffer_info
 	{
 		vk::Buffer buffer{};
@@ -52,6 +52,23 @@ namespace idk::vkn
 	};
 
 	using shadow_map_t = std::variant<RscHandle<Texture>, RscHandle<CubeMap>>;
+
+	struct ProcessedMaterial
+	{
+		using data_block_t = string;
+		using offset_t = size_t;
+		using texture_table_t =hash_table<string, span<RscHandle<Texture>>>;
+		using uniform_table_t =hash_table<string, string_view>;
+		texture_table_t tex_table;
+		uniform_table_t ubo_table;
+		data_block_t data_block;
+		vector<RscHandle<Texture>> texture_block;
+		RscHandle<ShaderProgram> shader;
+		Guid inst_guid;
+
+		ProcessedMaterial() = default;
+		ProcessedMaterial(RscHandle<MaterialInstance> inst);
+	};
 
 	struct SharedGraphicsState
 	{
@@ -98,22 +115,6 @@ namespace idk::vkn
 	};
 
 	
-	struct ProcessedMaterial
-	{
-		using data_block_t = string;
-		using offset_t = size_t;
-		using texture_table_t =hash_table<string, span<RscHandle<Texture>>>;
-		using uniform_table_t =hash_table<string, string_view>;
-		texture_table_t tex_table;
-		uniform_table_t ubo_table;
-		data_block_t data_block;
-		vector<RscHandle<Texture>> texture_block;
-		RscHandle<ShaderProgram> shader;
-		Guid inst_guid;
-
-		ProcessedMaterial() = default;
-		ProcessedMaterial(RscHandle<MaterialInstance> inst);
-	};
 
 	struct CoreGraphicsState
 	{

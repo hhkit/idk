@@ -39,9 +39,12 @@ namespace idk::vkn
 		{
 			size_t index = 0;
 			vector<RscHandle<Texture>> tex;
-
+			using binding_t = uint32_t;
 			bool dirty = true;
 		};
+
+		struct UpdateInfo;
+
 		struct InstCachedInfo
 		{
 			hash_table<set_t, SetCachedInfo> sets;
@@ -52,14 +55,21 @@ namespace idk::vkn
 
 			size_t data_hash = 0;
 			size_t texture_hash = 0;
+
+			string data_cache;
+			string texture_cache;
+
 			vector< descriptors_t> descriptors;
-			void Update(const ProcessedMaterial& mat_inst, creation_buffer_t&,UboManager&);
+			//indexes into descriptors
+			hash_table<set_t, size_t> descriptor_indices;
+			void Update(const ProcessedMaterial& mat_inst, UpdateInfo& update_info);
 			void ReleaseDescriptorSets(DescriptorsManager& dm);
 		};
 
 		void Start();
 		void CacheMaterialInstance(const ProcessedMaterial& inst);
 		//Does not check if inst is invalid
+		bool IsCached(RscHandle<MaterialInstance> mat_inst)const;
 		span<const descriptors_t> GetDescriptorSets(RscHandle<MaterialInstance> inst)const;
 		void UpdateUniformBuffers();
 		void End();

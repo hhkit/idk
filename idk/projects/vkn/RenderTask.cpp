@@ -106,10 +106,10 @@ namespace idk::vkn
 		auto& bound_shader = _current_batch.shaders.shaders[static_cast<size_t>(stage)];
 		if (bound_shader == shader_handle || shader_handle.guid == Guid{})
 			return;
-		UnbindShader(stage);
 		auto& shader = shader_handle.as<ShaderModule>();
 		if (!shader.HasCurrent())
 			return;
+		UnbindShader(stage);
 		//DebugBreak();
 		_uniform_manager.AddShader(shader);
 

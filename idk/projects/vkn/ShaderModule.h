@@ -83,7 +83,7 @@ namespace idk::vkn
 		bool NewlyLoaded()const { return _newly_loaded_flag; }
 		void NewlyLoaded(bool val){ _newly_loaded_flag = val; }
 
-		ShaderModule() = default;
+		ShaderModule();
 		ShaderModule(const ShaderModule&) = default;
 		ShaderModule(ShaderModule&&) = default;
 		ShaderModule& operator=(ShaderModule&&) = default;

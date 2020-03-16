@@ -461,7 +461,7 @@ namespace idk
 
                 ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 3 }, nullptr);
                 ImGui::PopID();
-                ImGui::Separator(false);
+                ImGui::Separator();
             }
             ImGui::Unindent();
         }
@@ -518,7 +518,7 @@ namespace idk
             else
                 throw("???");
 
-            ImGui::Separator(false);
+            ImGui::Separator();
 
             ImGui::EndGroup();
             ImGui::Unindent();
@@ -737,11 +737,21 @@ namespace idk
             return changed;
         };
 
+        constexpr auto draw_soundGroup = [](const reflect::dynamic& dyn) -> bool
+        {
+            bool changed = ImGuidk::EnumCombo("", &dyn.get<SoundGroup>());
+            if (changed)
+                static_audiosource->RefreshSoundGroups();
+            return changed;
+        };
+
+
 
 
         InjectDrawTable table{
             { "audio_clip_list", draw_audio_list },
-            { "audio_clip_volume", draw_audio_volume }
+            { "audio_clip_volume", draw_audio_volume },
+            { "soundGroup", draw_soundGroup }
         };
 
         DisplayVal(*c_audiosource, &table);

@@ -48,9 +48,11 @@ namespace idk
 			};
 		};
 
+		display_plots("Network Start", UpdatePhase::NetworkTickStart);
 		display_plots("Frame Start", UpdatePhase::FrameStart);
 		display_plots("Fixed Update", UpdatePhase::Fixed);
 		display_plots("Always Update", UpdatePhase::MainUpdate);
+		display_plots("Network End", UpdatePhase::NetworkTickEnd);
 		display_plots("Prerender", UpdatePhase::PreRender);
 		display_plots("Render", UpdatePhase::Render);
 	}

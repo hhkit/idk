@@ -569,7 +569,7 @@ namespace idk::vkn
 		{
 			perp = mat * vec4{ perp, 0 };
 			const auto end = perp;
-			const auto start_index = pos.size();
+			const auto start_index = static_cast<uint16_t>(pos.size());
 			pos.emplace_back(start);
 			pos.emplace_back(perp);
 
@@ -579,7 +579,7 @@ namespace idk::vkn
 			// For each point on the circle add a line segment to the point of the arrow and to origin
 			pos.emplace_back(start);
 
-			indices.emplace_back(start_index);
+			indices.emplace_back(static_cast<uint16_t>(start_index));
 			indices.emplace_back(0ui16); // tip of the arrow
 
 			start = end;

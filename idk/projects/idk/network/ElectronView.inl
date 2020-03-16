@@ -150,6 +150,7 @@ namespace idk
 
 			void UnpackGhost(SeqNo index, string_view data) override
 			{
+				return;
 				// newer data has arrived
 				while (buffer.size() && seqno_greater_than(index, buffer.front().seq))
 					buffer.pop_front();
@@ -252,8 +253,9 @@ namespace idk
 
 			}
 
-			__declspec(noinline) void UnpackMove(span<const SeqAndPack> packs)
+			__declspec(noinline) int UnpackMove(span<const SeqAndPack> packs)
 			{
+				int unpacked_moves = 0;
 				for (auto& elem : packs)
 				{
 					if (auto unpacked_move = parse_binary<T>(elem.pack))
@@ -272,11 +274,13 @@ namespace idk
 									ApplyCorrection(itr, real_move);
 
 								itr->verified = true;
+								++unpacked_moves;
 								break;
 							}
 						}
 					}
 				}
+				return unpacked_moves;
 			}
 		};
 

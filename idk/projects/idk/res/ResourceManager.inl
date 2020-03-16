@@ -279,22 +279,23 @@ namespace idk
 			return {};
 
 		auto& table = GetTable<Res>();
-		const auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
-		if (!success)
-			return {};
-
-		auto& control_block = itr->second;
+		//const auto [itr, success] = table.emplace(guid, ResourceControlBlock<Res>{});
+		//if (!success)
+		//	return {};
+		auto& control_block = table[guid];
+		auto& tguid = guid;
+		//auto& control_block = itr->second;
 		// attempt to put on another thread
 		{
 			if constexpr (has_tag_v<Res, MetaResource>)
 				if (!control_block.userdata)
 					control_block.userdata = std::make_shared<typename Res::Metadata>();
 			control_block.resource = factory.Create();
-			control_block.resource->_handle = RscHandle<Res>{ itr->first };
-			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{itr->first});
+			control_block.resource->_handle = RscHandle<Res>{ tguid };
+			GetNewVector<Res>().emplace_back(RscHandle<typename Res::BaseResource>{tguid});
 		}
 
-		return RscHandle<Res>(itr->first);
+		return RscHandle<Res>(tguid);
 	}
 
 	template<typename Res, typename ...Args>

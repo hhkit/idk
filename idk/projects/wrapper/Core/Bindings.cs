@@ -417,7 +417,34 @@ namespace idk
          * AudioSystem
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AudioSystemSetVolume(float newVolume);
+        public extern static void AudioSystemSetMASTERVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetMASTERVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetSFXVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetSFXVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetMUSICVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetMUSICVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetAMBIENTVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetAMBIENTVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetDIALOGUEVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetDIALOGUEVolume();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSystemStopAll();
