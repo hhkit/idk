@@ -63,9 +63,8 @@ namespace idk::vkn
 	void CoreGraphicsState::ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& material_instances,MaterialInstanceCache& mat_inst_cache)
 	{
 		
-		auto AddMatInst = [](auto& material_instances,auto& cache, const RenderObject* p_ro)
+		auto AddMatInst = [](auto& material_instances,auto& cache, RscHandle<MaterialInstance> mat_inst)
 		{
-			auto mat_inst = p_ro->material_instance;
 			if (material_instances.find(mat_inst) == material_instances.end())
 			{
 				auto [itr,success]=material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
@@ -75,20 +74,20 @@ namespace idk::vkn
 		};
 		for (auto& p_ro : mesh_render)
 		{
-			AddMatInst(material_instances, mat_inst_cache,p_ro);
+			AddMatInst(material_instances, mat_inst_cache,p_ro->material_instance);
 		}
 		for (auto& p_ro : skinned_mesh_render)
 		{
-			AddMatInst(material_instances, mat_inst_cache,p_ro);
+			AddMatInst(material_instances, mat_inst_cache,p_ro->material_instance);
 		}
 		for (auto& p_ro : *shared_gfx_state->instanced_ros)
 		{
-			AddMatInst(material_instances, mat_inst_cache,&p_ro);
+			AddMatInst(material_instances, mat_inst_cache,p_ro.material_instance);
 		}
 		if(shared_gfx_state->particle_range)
 		for (auto& part_range : *shared_gfx_state->particle_range)
 		{
-			material_instances[part_range.material_instance] = ProcessedMaterial{ part_range.material_instance };
+			AddMatInst(material_instances, mat_inst_cache, part_range.material_instance);
 		}
 		mat_inst_cache.ProcessCreation();
 	}

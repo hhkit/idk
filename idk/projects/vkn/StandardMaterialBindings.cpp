@@ -17,7 +17,7 @@ namespace idk::vkn::bindings
 	}
 	bool StandardMaterialBindings::Skip(RenderInterface& , const RenderObject& dc)
 	{
-		return !dc.material_instance || !dc.material_instance->material || !dc.material_instance->material->_shader_program || !dc.material_instance->material->_shader_program.as<ShaderModule>().HasCurrent();
+		return !p_cached_mat_insts->IsCached(dc.material_instance)||!dc.material_instance->material || !dc.material_instance->material->_shader_program || !dc.material_instance->material->_shader_program.as<ShaderModule>().HasCurrent();
 	}
 	//// 
 		//Assumes that the material is valid.

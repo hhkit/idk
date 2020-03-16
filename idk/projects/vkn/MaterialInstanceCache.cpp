@@ -57,6 +57,10 @@ namespace idk::vkn
 		}
 		cached_info.erase(inst.inst_guid);
 	}
+	bool MaterialInstanceCache::IsCached(RscHandle<MaterialInstance> mat_inst) const
+	{
+		return cached_info.find(mat_inst)!=cached_info.end();
+	}
 	span<const MaterialInstanceCache::descriptors_t> MaterialInstanceCache::GetDescriptorSets(RscHandle<MaterialInstance> inst)const
 	{
 		span<descriptors_t> result{};

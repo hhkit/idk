@@ -69,6 +69,7 @@ namespace idk::vkn
 		void Start();
 		void CacheMaterialInstance(const ProcessedMaterial& inst);
 		//Does not check if inst is invalid
+		bool IsCached(RscHandle<MaterialInstance> mat_inst)const;
 		span<const descriptors_t> GetDescriptorSets(RscHandle<MaterialInstance> inst)const;
 		void UpdateUniformBuffers();
 		void End();
