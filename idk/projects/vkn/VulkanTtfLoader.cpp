@@ -194,8 +194,17 @@ namespace idk::vkn
 
 	ResourceBundle idk::vkn::TtfLoader::LoadFile(PathHandle handle, const MetaBundle& meta)
 	{
-		auto tex = meta.CreateResource<VknFontAtlas>();
-		return LoadFile(handle, RscHandle<FontAtlas>{tex});
+		auto m = meta.FetchMeta<FontAtlas>();
+		auto tex = m ? Core::GetResourceManager().LoaderEmplaceResource<VknFontAtlas>(m->guid)
+			: Core::GetResourceManager().LoaderEmplaceResource<VknFontAtlas>();
+		//auto tex = meta.CreateResource<VknFontAtlas>();
+		if (m)
+		{
+			auto met = m->GetMeta<FontAtlas>();
+			auto meta_ptr = (met) ? &(*met) : nullptr;
+			return LoadFile(handle, RscHandle<FontAtlas>{tex}, meta_ptr);;
+		}
+		return LoadFile(handle, RscHandle<FontAtlas>{tex},nullptr);
 	}
 
 }

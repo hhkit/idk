@@ -38,8 +38,8 @@ void main()
 	float depth = subpassLoad(depth_input).r;
 	vec3  light = subpassLoad(color_input).rgb;
 	
-	float depth =min(metallic_depth,specular_depth);
-	vec3 light =(metallic_depth<specular_depth)?metallic_light:specular_light;
+	//float depth =min(metallic_depth,specular_depth);
+	//vec3 light =(metallic_depth<specular_depth)?metallic_light:specular_light;
 	if(depth==1)
 		discard;
 	vec3 color = ReinhardOperator(light); 
