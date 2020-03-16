@@ -1200,10 +1200,68 @@ namespace idk::mono
 		BIND_END();
 		//----------------------------------------------------------------------------------------------------
 		//AudioSystem
-		BIND_START("idk.Bindings::AudioSystemSetVolume", void, float newVolume)
+		BIND_START("idk.Bindings::AudioSystemSetMASTERVolume", void, float newVolume)
 		{
 			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
 			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMASTERVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MASTER_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetSFXVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_SFX_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetSFXVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_SFX_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetMUSICVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_MUSIC_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMUSICVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MUSIC_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetAMBIENTVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_AMBIENT_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetAMBIENTVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_AMBIENT_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetDIALOGUEVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_DIALOGUE_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetDIALOGUEVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_DIALOGUE_Volume();
 		}
 		BIND_END();
 

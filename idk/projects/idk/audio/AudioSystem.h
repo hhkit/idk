@@ -77,11 +77,16 @@ namespace idk
 
 		//Channel Controls
 		///////////////////////////////////////////////
-		void SetChannel_MASTER_Volume(const float& newVolume);
-		void SetChannel_SFX_Volume(const float& newVolume);
-		void SetChannel_MUSIC_Volume(const float& newVolume);
-		void SetChannel_AMBIENT_Volume(const float& newVolume);
-		void SetChannel_DIALOGUE_Volume(const float& newVolume);
+		void  SetChannel_MASTER_Volume(const float& newVolume);
+		float GetChannel_MASTER_Volume();
+		void  SetChannel_SFX_Volume(const float& newVolume);
+		float GetChannel_SFX_Volume();
+		void  SetChannel_MUSIC_Volume(const float& newVolume);
+		float GetChannel_MUSIC_Volume();
+		void  SetChannel_AMBIENT_Volume(const float& newVolume);
+		float GetChannel_AMBIENT_Volume();
+		void  SetChannel_DIALOGUE_Volume(const float& newVolume);
+		float GetChannel_DIALOGUE_Volume();
 		///////////////////////////////////////////////
 
 		//Sound Driver Control

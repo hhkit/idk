@@ -19,8 +19,33 @@ namespace idk
         /// <summary>
         /// Clamps to 0...1
         /// </summary>
-        public static void SetMasterVolume(float newVolume)
-            => Bindings.AudioSystemSetVolume(newVolume);
+        public static float masterVolume
+        {
+            get => Bindings.AudioSystemGetMASTERVolume();
+            set => Bindings.AudioSystemSetMASTERVolume(value);
+        }
+        public static float sfxVolume
+        {
+            get => Bindings.AudioSystemGetSFXVolume();
+            set => Bindings.AudioSystemSetSFXVolume(value);
+        }
+        public static float musicVolume
+        {
+            get => Bindings.AudioSystemGetMUSICVolume();
+            set => Bindings.AudioSystemSetMUSICVolume(value);
+        }
+        public static float ambientVolume
+        {
+            get => Bindings.AudioSystemGetAMBIENTVolume();
+            set => Bindings.AudioSystemSetAMBIENTVolume(value);
+        }
+        public static float dialogueVolume
+        {
+            get => Bindings.AudioSystemGetDIALOGUEVolume();
+            set => Bindings.AudioSystemSetDIALOGUEVolume(value);
+        }
+
+
 
         public static void StopAll()
             => Bindings.AudioSystemStopAll();

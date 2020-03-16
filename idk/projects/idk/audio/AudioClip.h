@@ -25,13 +25,6 @@ namespace FMOD {
 namespace idk
 {
 
-	ENUM (SubSoundGroup, int,
-		SubSoundGroup_MUSIC,
-		SubSoundGroup_SFX,
-		SubSoundGroup_AMBIENT,
-		SubSoundGroup_DIALOGUE
-	)
-
 	class AudioClip
 		: public Resource<AudioClip>
 	{ //A class that contains the data holding FMOD sounds. This interacts with the AudioSystem directly. Not to be confused with AudioSource

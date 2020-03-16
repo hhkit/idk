@@ -379,9 +379,23 @@ namespace idk
 		ParseFMOD_RESULT(_channelGroup_MASTER->setVolume(newVolume));
 	}
 
+	float AudioSystem::GetChannel_MASTER_Volume()
+	{
+		float returnVal = 0;
+		ParseFMOD_RESULT(_channelGroup_MASTER->getVolume(&returnVal));
+		return returnVal;
+	}
+
 	void AudioSystem::SetChannel_SFX_Volume(const float& newVolume)
 	{
 		ParseFMOD_RESULT(_channelGroup_SFX->setVolume(newVolume));
+	}
+
+	float AudioSystem::GetChannel_SFX_Volume()
+	{
+		float returnVal = 0;
+		ParseFMOD_RESULT(_channelGroup_SFX->getVolume(&returnVal));
+		return returnVal;
 	}
 
 	void AudioSystem::SetChannel_MUSIC_Volume(const float& newVolume)
@@ -389,14 +403,35 @@ namespace idk
 		ParseFMOD_RESULT(_channelGroup_MUSIC->setVolume(newVolume));
 	}
 
+	float AudioSystem::GetChannel_MUSIC_Volume()
+	{
+		float returnVal = 0;
+		ParseFMOD_RESULT(_channelGroup_MUSIC->getVolume(&returnVal));
+		return returnVal;
+	}
+
 	void AudioSystem::SetChannel_AMBIENT_Volume(const float& newVolume)
 	{
 		ParseFMOD_RESULT(_channelGroup_AMBIENT->setVolume(newVolume));
 	}
 
+	float AudioSystem::GetChannel_AMBIENT_Volume()
+	{
+		float returnVal = 0;
+		ParseFMOD_RESULT(_channelGroup_AMBIENT->getVolume(&returnVal));
+		return returnVal;
+	}
+
 	void AudioSystem::SetChannel_DIALOGUE_Volume(const float& newVolume)
 	{
 		ParseFMOD_RESULT(_channelGroup_DIALOGUE->setVolume(newVolume));
+	}
+
+	float AudioSystem::GetChannel_DIALOGUE_Volume()
+	{
+		float returnVal = 0;
+		ParseFMOD_RESULT(_channelGroup_DIALOGUE->getVolume(&returnVal));
+		return returnVal;
 	}
 
 	void AudioSystem::SetCurrentSoundDriver(int index)
