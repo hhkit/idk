@@ -15,7 +15,7 @@ namespace idk
 	struct ElectronView::DerivedParameter
 		: ElectronView::BaseParameter
 	{
-		static constexpr auto RememberedMoves = 32;
+		static constexpr auto RememberedMoves = 8;
 
 		struct DerivedMasterData
 			: MasterData
@@ -196,15 +196,35 @@ namespace idk
 
 			void UnpackGhost(SeqNo index, string_view data) override
 			{
-				if (auto val = parse_binary<T>(data))
+				if (index > last_received)
 				{
-					T move{};
-					for (auto& elem : buffer)
+					if (auto val = parse_binary<T>(data))
 					{
-						if (elem.acknowledged == false)
-							move = param.adder(move, elem.move);
+						T move{};
+						for (auto& elem : buffer)
+						{
+							if (elem.acknowledged == false)
+								move = param.adder(move, elem.move);
+						}
+						auto curr_val = *val + move;
+						prev_value = curr_val;
+						param.setter(curr_val);
+						last_received = index;
 					}
-					param.setter(*val + move);
+				}
+			}
+
+			void LogMoves(SeqNo curr_seq) override
+			{
+				if constexpr(std::is_same_v<T, vec3>)
+				{
+					std::stringstream s;
+					s << "CURR: " << curr_seq.value << "\n";
+					
+					for (auto& elem : buffer)
+						s << elem.seq.value << ": ACK " << std::boolalpha << elem.acknowledged << " (" << elem.move.x << ", " << elem.move.y << ", " << elem.move.z << ")\n";
+
+					LOG_TO(LogPool::NETWORK, s.str().data());
 				}
 			}
 		};
@@ -266,9 +286,18 @@ namespace idk
 				{
 				case PredictionFunction::Linear:
 				{
+					auto old_val = param.getter();
 					auto change = param.differ(real_move, itr->move);
 					param.setter(param.adder(param.getter(), change));
 					prev_value = param.adder(prev_value, change);
+					auto new_val = param.getter();
+
+					if constexpr (std::is_same_v<vec3, T>)
+						LOG_TO(LogPool::NETWORK, "MOVE: (%f, %f, %f)    OLD: (%f, %f, %f)    NEW: (%f, %f, %f)    CHANGE: (%f, %f, %f)",
+							real_move.x, real_move.y, real_move.z,
+							old_val.x, old_val.y, old_val.z,
+							new_val.x, new_val.y, new_val.z,
+							change.x, change.y, change.z);
 					// and snap
 					itr->move = real_move;
 					break;
@@ -308,6 +337,9 @@ namespace idk
 						for (auto itr = move_buffer.begin(); itr != move_buffer.end(); ++itr)
 						{
 							auto& prediction = *itr;
+							if (prediction.verified)
+								continue;
+
 							if (prediction.seq == elem.seq)
 							{
 								// if prediction was wrong
@@ -322,6 +354,20 @@ namespace idk
 					}
 				}
 				return unpacked_moves;
+			}
+
+			void LogMoves(SeqNo curr_seq) override
+			{
+				if constexpr (std::is_same_v<T, vec3>)
+				{
+					std::stringstream s;
+					s << "CURR: " << curr_seq.value << " - ";
+
+					for (auto& elem : move_buffer)
+						s << elem.seq.value << ": ACK " << std::boolalpha << elem.verified << " (" << elem.move.x << ", " << elem.move.y << ", " << elem.move.z << ")\n";
+
+					LOG_TO(LogPool::NETWORK, s.str().data());
+				}
 			}
 		};
 

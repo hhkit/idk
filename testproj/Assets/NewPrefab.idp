@@ -59,8 +59,8 @@ data:
     script_data: !PlayerController 
       air_move_control: 0.25
       air_turn_control: 0.02
-      jump_force: 25
-      move_speed: 50
+      jump_force: 500
+      move_speed: 10
       rot_speed: 90
   parent_index: -1
 - components: 

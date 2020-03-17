@@ -137,14 +137,18 @@ namespace idk
 			GhostWithMoveAck obj{ std::move(view.MasterPackData(0)) };
 			obj.ack = view.PrepareMoveAcknowledgements(seq);
 
-			ghost_moves_and_acks.emplace_back(std::move(obj));
+			if (obj.ack.ackfield) // if we have naything to acknowledge
+				ghost_moves_and_acks.emplace_back(std::move(obj)); // acknowledge
 		}
 
-		connection_manager->CreateAndSendMessage<MoveAcknowledgementMessage>
-			(GameChannel::UNRELIABLE, [&](MoveAcknowledgementMessage& msg)
-			{
-				msg.objects = std::move(ghost_moves_and_acks);
-			});
+		if (ghost_moves_and_acks.size())
+		{
+			connection_manager->CreateAndSendMessage<MoveAcknowledgementMessage>
+				(GameChannel::UNRELIABLE, [&](MoveAcknowledgementMessage& msg)
+					{
+						msg.objects = std::move(ghost_moves_and_acks);
+					});
+		}
 	}
 
 

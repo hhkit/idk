@@ -50,6 +50,7 @@ namespace idk
 			auto& param = parameters[i];
 			IDK_ASSERT(param);
 			param->GetClientObject()->Init();
+			param->GetClientObject()->last_received = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		}
 	}
 	void ElectronView::CacheSentData()
@@ -223,6 +224,16 @@ namespace idk
 				LOG_TO(LogPool::NETWORK, "unpacking %d moves", unpacked);
 			}
 		}
+	}
+
+	void ElectronView::DumpToLog()
+	{
+		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+		for (auto& elem : parameters)
+			if (std::get_if<ClientObject>(&move_state))
+				elem->GetClientObject()->LogMoves(curr_seq);
+			else
+				elem->GetControlObject()->LogMoves(curr_seq);
 	}
 
 	hash_table<string, reflect::dynamic> ElectronView::GetParameters() const

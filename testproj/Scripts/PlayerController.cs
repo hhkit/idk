@@ -91,7 +91,7 @@ namespace TestAndSeek
                         transform.rotation = Quaternion.AngleAxis(-rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
 
                     if (Input.GetKey(KeyCode.W))
-                        rb.AddForce(transform.forward * move_speed);
+                        rb.velocity = transform.forward * move_speed;
 
                     if (jump_count > 0)
                     {
@@ -112,7 +112,7 @@ namespace TestAndSeek
                         transform.rotation = Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.deltaTime, Vector3.up) * transform.rotation;
 
                     if (Input.GetKey(KeyCode.W))
-                        rb.AddForce(transform.forward * move_speed * air_move_control);
+                        rb.velocity = transform.forward * move_speed * air_move_control;
                 }
             }
         }

@@ -77,6 +77,7 @@ namespace idk
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
 		void UnpackMoveData(const MovePack& data_pack);
 
+		void DumpToLog();
 		hash_table<string, reflect::dynamic> GetParameters() const;
 
 		template<typename T>
@@ -114,11 +115,15 @@ namespace idk
 		// move data
 		struct ClientObjectData
 		{
+			SeqNo last_received;
+
 			virtual void Init() = 0;
 			virtual void CalculateMove(SeqNo curr_seq) = 0;
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
 			virtual void ReceiveAcks(span<SeqNo>) = 0;
 			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
+
+			virtual void LogMoves(SeqNo curr_seq) = 0;
 			virtual ~ClientObjectData() = default;
 		};
 
@@ -128,6 +133,8 @@ namespace idk
 			virtual int AcknowledgeMoves(SeqNo curr_seq) = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual int UnpackMove(span<const SeqAndPack>) = 0;
+
+			virtual void LogMoves(SeqNo curr_seq) = 0;
 			virtual ~ControlObjectData() = default;
 		};
 
@@ -163,8 +170,8 @@ namespace idk
 
 		if constexpr (std::is_same_v<T, quat>)
 		{
-			differ = [](const quat& lhs, const quat& rhs) -> quat { return rhs.inverse() * lhs; };
-			adder = [](const quat& lhs, const quat& rhs) -> quat { return rhs * lhs; };
+			differ = [](const quat& lhs, const quat& rhs) -> quat { return (rhs.inverse() * lhs).normalize(); };
+			adder = [](const quat& lhs, const quat& rhs) -> quat { return (rhs * lhs).normalize(); };
 			interpolator = static_cast<quat(*)(const quat&, const quat&, real)>(&slerp<quat, real>);
 		}
 	}

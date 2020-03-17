@@ -67,6 +67,7 @@ namespace idk
 			if (elec_view)
 				elec_view->UnpackGhostData(ghost_msg.sequence_number, elem);
 		}
+
 	}
 
 	void ClientMoveManager::OnMoveAcknowledgementReceived(MoveAcknowledgementMessage& move_msg)
