@@ -6,6 +6,7 @@
 #include <editor/widgets/InputResource.h>
 #include <editor/widgets/EnumCombo.h>
 #include <editor/DragDropTypes.h>
+#include <app/Keys.h>
 #include <gfx/ShaderGraph.h>
 #include <gfx/ShaderGraph_helpers.h>
 #include <gfx/MaterialInstance.h>
@@ -135,7 +136,7 @@ namespace idk
             }
         }
 
-        return best_matched_sig ? best_matched_sig->ins[slot] : kind_in;
+        return best_matched_sig ? best_matched_sig->ins[slot] : static_cast<ValueType>(ValueType::INVALID);
     }
 
 
@@ -428,7 +429,10 @@ namespace idk
                             auto cursorpos = ImGui::GetCursorPos();
                             drawValue(node, i); // draw value control when disconnected
                             ImGui::SetCursorPos(cursorpos);
-                            draw_slot(slot_name.c_str(), -kind_out, converted_slot_type);
+                            if (converted_slot_type != ValueType::INVALID)
+                                draw_slot(slot_name.c_str(), -kind_out, converted_slot_type);
+                            else
+                                draw_slot(slot_name.c_str(), kind);
                         }
                         else
                         {
@@ -548,22 +552,9 @@ namespace idk
         {
             if (ImGui::MenuItem("Disconnect"))
                 disconnectNode(node);
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", NULL, false, !is_master_node))
-            {
-
-            }
-            if (ImGui::MenuItem("Copy", NULL, false, !is_master_node))
-            {
-
-            }
             if (ImGui::MenuItem("Delete", NULL, false, !is_master_node))
             {
                 removeNode(node);
-            }
-            if (ImGui::MenuItem("Duplicate", NULL, false, !is_master_node))
-            {
-
             }
             ImGui::EndPopup();
         }
@@ -769,7 +760,10 @@ namespace idk
 
         static ImGuiTextFilter filter;
         if (ImGui::IsWindowAppearing())
+        {
             filter.Clear();
+            ImGui::SetKeyboardFocusHere();
+        }
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetFrameHeight() * 0.5f);
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_Border));
         filter.Draw("", ImGui::GetWindowContentRegionWidth());
@@ -852,6 +846,14 @@ namespace idk
 
         auto g = _graph;
 
+        if(ImGui::IsKeyDown(static_cast<int>(Key::Delete)))
+        {
+            for (const auto& [guid, node] : g->nodes)
+            {
+                if (node.selected && guid != g->master_node)
+                    removeNode(node);
+            }
+        }
 
         if (ImGui::BeginMenuBar())
         {
@@ -878,7 +880,8 @@ namespace idk
         auto window_pos = ImGui::GetWindowPos();
 
         ImGui::SetWindowFontScale(1.0f);
-        if (!ImGui::IsMouseDragPastThreshold(1) && ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered())
+        if (_released_link_for_pending_new_node.node_in || _released_link_for_pending_new_node.node_out ||
+            (ImGui::IsMouseReleased(1) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered()))
         {
             ImGui::OpenPopup("nodes_context_menu");
         }
@@ -891,11 +894,61 @@ namespace idk
             {
                 ImGui::CloseCurrentPopup();
                 auto pos = (ImGui::GetWindowPos() - window_pos - _canvas.offset) / _canvas.zoom;
-                addNode(str, pos);
+                auto& node = addNode(str, pos);
                 // pos = windowpos + nodepos * zoom + offset
                 // nodepos = (screenpos - offset - windowpos) / zoom
+
+                if (_released_link_for_pending_new_node.node_out)
+                {
+                    const auto& slot_out = g->nodes[_released_link_for_pending_new_node.node_out].output_slots[_released_link_for_pending_new_node.slot_out];
+                    for (int i = 0; i < node.input_slots.size(); ++i)
+                    {
+                        auto converted = match_node_sig_for_slot(node, i, slot_out.type);
+                        if (converted != ValueType::INVALID)
+                        {
+                            _released_link_for_pending_new_node.node_in = node.guid;
+                            _released_link_for_pending_new_node.slot_in = i;
+                            g->links.push_back(_released_link_for_pending_new_node);
+
+                            node.input_slots[i].type = converted;
+                            node.input_slots[i].value.clear();
+                            if (const auto* sig = match_node_sig(node))
+                            {
+                                for (size_t j = 0; j < node.input_slots.size(); ++j)
+                                    node.input_slots[j].type = sig->ins[j];
+                                for (size_t j = 0; j < node.output_slots.size(); ++j)
+                                    node.output_slots[j].type = sig->outs[j];
+                            }
+                            break;
+                        }
+                    }
+                }
+                else if (_released_link_for_pending_new_node.node_in) // want to connect to an output slot
+                {
+                    const auto& slot_in = g->nodes[_released_link_for_pending_new_node.node_in].input_slots[_released_link_for_pending_new_node.slot_in];
+                    for (int i = 0; i < node.output_slots.size(); ++i)
+                    {
+                        const auto match = type_match(node.output_slots[i].type, slot_in.type);
+                        if (match > TypeMatch::None)
+                        {
+                            _released_link_for_pending_new_node.node_out = node.guid;
+                            _released_link_for_pending_new_node.slot_out = i;
+                            g->links.push_back(_released_link_for_pending_new_node);
+                            break;
+                        }
+                    }
+                }
+
+                _released_link_for_pending_new_node.node_in = {};
+                _released_link_for_pending_new_node.node_out = {};
             }
             ImGui::EndPopup();
+
+            if (ImGui::IsMouseClicked(0))
+            {
+                _released_link_for_pending_new_node.node_in = {};
+                _released_link_for_pending_new_node.node_out = {};
+            }
         }
 
         for (auto& guid : _nodes_to_delete)
@@ -944,6 +997,28 @@ namespace idk
             if (ImNodes::GetPendingConnection(r_cast<void**>(&node), &title, &kind))
             {
                 _canvas.colors[ImNodes::ColConnectionActive] = type_colors[std::abs(kind)];
+                if (!ImGui::IsMouseDown(0))
+                {
+                    if (kind < 0)
+                    {
+                        _released_link_for_pending_new_node.node_in = node->guid;
+                        _released_link_for_pending_new_node.node_out = {};
+                        _released_link_for_pending_new_node.slot_in = (int)NodeTemplate::GetTable().at(node->name).GetSlotIndex(title);
+                        _released_link_for_pending_new_node.slot_out = -1;
+                    }
+                    else
+                    {
+                        _released_link_for_pending_new_node.node_out = node->guid;
+                        _released_link_for_pending_new_node.node_in = {};
+                        const bool out_is_param = node->name[0] == '$';
+                        _released_link_for_pending_new_node.slot_out = out_is_param ? 0 : (int)NodeTemplate::GetTable().at(node->name).GetSlotIndex(title);
+                        _released_link_for_pending_new_node.slot_in = -1;
+                    }
+
+
+
+                }
+                    ImGui::OpenPopup("nodes_context_menu");
             }
         }
 
@@ -1010,6 +1085,9 @@ namespace idk
                 }
             }
 
+            _released_link_for_pending_new_node.node_in = {};
+            _released_link_for_pending_new_node.node_out = {};
+
             g.Compile();
         }
     }
@@ -1027,8 +1105,8 @@ namespace idk
             auto& node_in = g.nodes[link.node_in];
             auto col = _canvas.colors[ImNodes::ColConnection];
             auto col2 = _canvas.colors[ImNodes::ColConnection2];
-            _canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
-            _canvas.colors[ImNodes::ColConnection2] = type_colors[std::abs(node_out.output_slots[link.slot_out - node_out.input_slots.size()].type)];
+            _canvas.colors[ImNodes::ColConnection] = type_colors[std::abs(node_out.output_slots[link.slot_out - node_out.input_slots.size()].type)];
+            _canvas.colors[ImNodes::ColConnection2] = type_colors[std::abs(node_in.input_slots[link.slot_in].type)];
 
             const auto& slot_out = node_out.name[0] == '$' ?
                 g.parameters[std::stoi(node_out.name.data() + 1)].name :
