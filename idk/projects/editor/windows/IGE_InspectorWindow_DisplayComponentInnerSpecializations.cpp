@@ -882,7 +882,7 @@ namespace idk
     
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronView> c_ev)
     {
-        bool is_me = Core::GetSystem<NetworkSystem>().GetMe() == c_ev->owner;
+        const bool is_me = Core::GetSystem<NetworkSystem>().GetMe() == c_ev->owner;
         std::string owner_str = "Owner: ";
         switch (auto val = c_ev->owner)
         {
@@ -914,6 +914,9 @@ namespace idk
                     }
 
                     if (is_client_obj)
+                    {
+                        ImGui::Text("Move Producer");
+
                         elem->GetClientObject()->VisitMoveBuffer([](auto move, SeqNo seq, bool ack)
                             {
                                 using T = std::decay_t<decltype(move)>;
@@ -927,10 +930,12 @@ namespace idk
                                     ImGui::SameLine();
                                 }
 
-                                ImGui::Checkbox("##asdasad", &ack);
+                                ImGui::Checkbox("", &ack);
                             });
-
+                    }
                     if (is_control_obj)
+                    {
+                        ImGui::Text("Control Object");
                         elem->GetControlObject()->VisitMoveBuffer([](auto move, SeqNo seq, bool ack)
                             {
                                 using T = std::decay_t<decltype(move)>;
@@ -945,6 +950,7 @@ namespace idk
                                 }
                                 ImGui::Checkbox("##asdasad", &ack);
                             });
+                    }
                 }
                 ImGuidk::PopDisabled();
             }
