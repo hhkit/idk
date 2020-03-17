@@ -4,6 +4,7 @@
 #include <network/network.h>
 #include <network/GhostPack.h>
 #include <network/MovePack.h>
+#include <meta/erased_visitor.h>
 
 namespace idk
 {
@@ -37,6 +38,8 @@ namespace idk
 		: public Component<ElectronView>
 	{
 	public:
+		struct BaseParameter;
+
 		// state machines
 		struct Master {};        // master object for the server. server owns this regardless of object ownership
 		struct Ghost  {};         // ghost object for clients
@@ -78,15 +81,13 @@ namespace idk
 		void UnpackMoveData(const MovePack& data_pack);
 
 		void DumpToLog();
-		hash_table<string, reflect::dynamic> GetParameters() const;
+		span<const unique_ptr<BaseParameter>> GetParameters() const;
 
 		template<typename T>
 		ParameterImpl<T>& RegisterMember(string_view name, ParameterImpl<T> param, float interp = 1.f);
 	private:
-		struct BaseParameter;
 		template<typename T>
 		struct DerivedParameter;
-
 		vector<unique_ptr<BaseParameter>> parameters;
 	};
 
@@ -115,6 +116,9 @@ namespace idk
 		// move data
 		struct ClientObjectData
 		{
+			// SequenceNumber, acknowledgement state, move
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool)>;
+
 			SeqNo last_received;
 
 			virtual void Init() = 0;
@@ -122,19 +126,20 @@ namespace idk
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
 			virtual void ReceiveAcks(span<SeqNo>) = 0;
 			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
-
-			virtual void LogMoves(SeqNo curr_seq) = 0;
+			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
 			virtual ~ClientObjectData() = default;
 		};
 
 		struct ControlObjectData
 		{
+			// SequenceNumber, guess verification state, guess
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool)>;
+
 			virtual void Init() = 0;
 			virtual int AcknowledgeMoves(SeqNo curr_seq) = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual int UnpackMove(span<const SeqAndPack>) = 0;
-
-			virtual void LogMoves(SeqNo curr_seq) = 0;
+			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
 			virtual ~ControlObjectData() = default;
 		};
 

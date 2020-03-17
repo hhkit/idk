@@ -226,20 +226,45 @@ namespace idk
 		}
 	}
 
+	struct MoveBuffLogger
+	{
+		std::stringstream logger{};
+
+		MoveBuffLogger() = default;
+		MoveBuffLogger(MoveBuffLogger&&) = default;
+		MoveBuffLogger& operator=(MoveBuffLogger&&) = default;
+
+		~MoveBuffLogger()
+		{
+			LOG_TO(LogPool::NETWORK, logger.str().data());
+		}
+		void operator()(const vec3& v, SeqNo seq, bool acknowledged)
+		{
+			logger << "[" << seq.value <<"]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x <<"," << v.y <<"," << v.z <<")" << "\n";
+		}
+
+		void operator()(const quat& v, SeqNo seq, bool acknowledged)
+		{
+			logger << "[" << seq.value << "]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" << "\n";
+		}
+	};
+
 	void ElectronView::DumpToLog()
 	{
+		erased_visitor<void(int)> hey{ [](int a) {} };
+
 		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		for (auto& elem : parameters)
+		{
 			if (std::get_if<ClientObject>(&move_state))
-				elem->GetClientObject()->LogMoves(curr_seq);
-			else
-				elem->GetControlObject()->LogMoves(curr_seq);
+				elem->GetClientObject()->VisitMoveBuffer(MoveBuffLogger{});
+			if (std::get_if<ControlObject>(&move_state))
+				elem->GetControlObject()->VisitMoveBuffer(MoveBuffLogger{});
+		}
 	}
 
-	hash_table<string, reflect::dynamic> ElectronView::GetParameters() const
+	span<const unique_ptr<ElectronView::BaseParameter>> ElectronView::GetParameters() const
 	{
-		auto retval = hash_table<string, reflect::dynamic>();
-		retval.reserve(parameters.size());
-		return retval;
+		return parameters;
 	}
 }

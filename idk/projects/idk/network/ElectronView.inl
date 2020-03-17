@@ -213,19 +213,10 @@ namespace idk
 					}
 				}
 			}
-
-			void LogMoves(SeqNo curr_seq) override
+			void VisitMoveBuffer(const BufferVisitor& visit) override
 			{
-				if constexpr(std::is_same_v<T, vec3>)
-				{
-					std::stringstream s;
-					s << "CURR: " << curr_seq.value << "\n";
-					
-					for (auto& elem : buffer)
-						s << elem.seq.value << ": ACK " << std::boolalpha << elem.acknowledged << " (" << elem.move.x << ", " << elem.move.y << ", " << elem.move.z << ")\n";
-
-					LOG_TO(LogPool::NETWORK, s.str().data());
-				}
+				for (auto& elem : buffer)
+					visit(elem.move, elem.seq, elem.acknowledged);
 			}
 		};
 		struct DerivedControlObjectData
@@ -356,18 +347,10 @@ namespace idk
 				return unpacked_moves;
 			}
 
-			void LogMoves(SeqNo curr_seq) override
+			void VisitMoveBuffer(const BufferVisitor& visit) override
 			{
-				if constexpr (std::is_same_v<T, vec3>)
-				{
-					std::stringstream s;
-					s << "CURR: " << curr_seq.value << " - ";
-
-					for (auto& elem : move_buffer)
-						s << elem.seq.value << ": ACK " << std::boolalpha << elem.verified << " (" << elem.move.x << ", " << elem.move.y << ", " << elem.move.z << ")\n";
-
-					LOG_TO(LogPool::NETWORK, s.str().data());
-				}
+				for (auto& elem : move_buffer)
+					visit(elem.move, elem.seq, elem.verified);
 			}
 		};
 
