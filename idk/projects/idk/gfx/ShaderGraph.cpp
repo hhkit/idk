@@ -295,87 +295,87 @@ namespace idk::shadergraph
         string uniforms_str = "";
         uniforms.clear();
 
-        if (state.uniforms.size())
+        array<string, ValueType::count + 1> uniform_blocks;
+
+        // add block for time
+        uniform_blocks[0] = "U_LAYOUT(1, 0) uniform BLOCK(_UB0) { float time;";
+
+        for (const auto& [uniform_name, uniform_type] : state.uniforms)
         {
-            array<string, ValueType::count + 1> uniform_blocks;
+            if (uniform_name.empty() || uniform_type == ValueType::SAMPLER2D)
+                continue;
 
-            for (const auto& [uniform_name, uniform_type] : state.uniforms)
+            auto& block = uniform_blocks[uniform_type];
+
+            if (uniform_type == ValueType::SAMPLER2D)
+                continue;
+
+            string str{ uniform_type.to_string() };
+            string typestr = make_lowercase(str);
+
+            if (block.empty())
             {
-                if(uniform_name.empty() || uniform_type == ValueType::SAMPLER2D)
-                    continue;
-
-                auto& block = uniform_blocks[uniform_type];
-
-                if (uniform_type == ValueType::SAMPLER2D)
-                    continue;
-
-                string str{ uniform_type.to_string() };
-                string typestr = make_lowercase(str);
-
-                if (block.empty())
-                {
-                    block += "U_LAYOUT(1, ";
-                    block += serialize_text<char>(uniform_type);
-                    block += ") uniform BLOCK(_UB";
-                    block += serialize_text<char>(uniform_type);
-                    block += ")\n{\n";
-                }
-                block += "  ";
-                block += typestr;
-                block += ' ';
-                block += uniform_name;
-                block += ";\n";
+                block += "U_LAYOUT(1, ";
+                block += serialize_text<char>(uniform_type);
+                block += ") uniform BLOCK(_UB";
+                block += serialize_text<char>(uniform_type);
+                block += ")\n{\n";
             }
-
-            for (const auto& [uniform_name, guid_str] : state.non_param_textures)
-            {
-                hidden_uniforms.emplace_back(UniformInstance{ uniform_name, RscHandle<Texture>(Guid(guid_str)) });
-            }
-
-            for (size_t i = 0; i < uniform_blocks.size(); ++i)
-            {
-                if (uniform_blocks[i].empty() || i == ValueType::SAMPLER2D)
-                    continue;
-
-                uniforms_str += uniform_blocks[i];
-                uniforms_str += "} _ub";
-                uniforms_str += serialize_text(i);
-                uniforms_str += ";\n";
-            }
-
-            if (state.tex_counter > 0) // U_LAYOUT(3, 8) uniform sampler2D _uTex[count];
-                uniform_blocks[ValueType::SAMPLER2D] = "S_LAYOUT(2, " + std::to_string(ValueType::SAMPLER2D) +
-                                                       ") uniform sampler2D _uTex[" + std::to_string(state.tex_counter) + "];\n";
-            uniforms_str += uniform_blocks[ValueType::SAMPLER2D];
-
-            int param_index = -1;
-			for (const auto& [uniform_name, uniform_type] : state.uniforms)
-			{
-                ++param_index;
-                if (uniform_name.empty())
-                    continue;
-
-                if (uniform_type == ValueType::SAMPLER2D)
-                    uniforms.emplace(parameters[param_index].name,
-                                     UniformInstance{ uniform_name, to_uniform_instance_value(parameters[param_index]) });
-                else
-				    uniforms.emplace(parameters[param_index].name,
-                                     UniformInstance{ "_ub" + serialize_text<char>(uniform_type) + '.' + uniform_name,
-                                                      to_uniform_instance_value(parameters[param_index]) });
-			}
+            block += "  ";
+            block += typestr;
+            block += ' ';
+            block += uniform_name;
+            block += ";\n";
         }
 
-		auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
+        for (const auto& [uniform_name, guid_str] : state.non_param_textures)
+        {
+            hidden_uniforms.emplace_back(UniformInstance{ uniform_name, RscHandle<Texture>(Guid(guid_str)) });
+        }
+
+        for (size_t i = 0; i < uniform_blocks.size(); ++i)
+        {
+            if (uniform_blocks[i].empty() || i == ValueType::SAMPLER2D)
+                continue;
+
+            uniforms_str += uniform_blocks[i];
+            uniforms_str += "} _ub";
+            uniforms_str += serialize_text(i);
+            uniforms_str += ";\n";
+        }
+
+        if (state.tex_counter > 0) // U_LAYOUT(3, 8) uniform sampler2D _uTex[count];
+            uniform_blocks[ValueType::SAMPLER2D] = "S_LAYOUT(2, " + std::to_string(ValueType::SAMPLER2D) +
+            ") uniform sampler2D _uTex[" + std::to_string(state.tex_counter) + "];\n";
+        uniforms_str += uniform_blocks[ValueType::SAMPLER2D];
+
+        int param_index = -1;
+        for (const auto& [uniform_name, uniform_type] : state.uniforms)
+        {
+            ++param_index;
+            if (uniform_name.empty())
+                continue;
+
+            if (uniform_type == ValueType::SAMPLER2D)
+                uniforms.emplace(parameters[param_index].name,
+                    UniformInstance{ uniform_name, to_uniform_instance_value(parameters[param_index]) });
+            else
+                uniforms.emplace(parameters[param_index].name,
+                    UniformInstance{ "_ub" + serialize_text<char>(uniform_type) + '.' + uniform_name,
+                                     to_uniform_instance_value(parameters[param_index]) });
+        }
+
+        auto shader_template = GetTemplate()->Instantiate(uniforms_str, code);
         if (_shader_program.guid == Guid{})
             _shader_program = Core::GetResourceManager().Create<ShaderProgram>();
-		else if (!_shader_program)
-		{
-			_shader_program = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(_shader_program.guid);
-		}
+        else if (!_shader_program)
+        {
+            _shader_program = Core::GetResourceManager().LoaderCreateResource<ShaderProgram>(_shader_program.guid);
+        }
         auto& program = *_shader_program;
-		program.Name(string{ this->Name() }+"_" + string{ GetTemplate()->Name() });
-		
-		program.BuildShader(ShaderStage::Fragment, shader_template);
+        program.Name(string{ this->Name() }+"_" + string{ GetTemplate()->Name() });
+
+        program.BuildShader(ShaderStage::Fragment, shader_template);
     }
 
 }

@@ -52,6 +52,7 @@ namespace idk
 		seconds GetRemainingTime() noexcept;
 		seconds GetNetworkTick() const noexcept { return _network_update; }
 		time_point GetProgramStart() noexcept;
+		seconds GetTimeSinceStart() noexcept;
 
 		span<Pass> GetPasses(UpdatePhase) noexcept;
 	private:
