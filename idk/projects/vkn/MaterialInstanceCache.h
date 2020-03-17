@@ -50,8 +50,14 @@ namespace idk::vkn
 			hash_table<set_t, SetCachedInfo> sets;
 			vk::ShaderModule frag_shader = {};
 
-			vk::Buffer buffer;
-			index_span buffer_range;
+			struct BufferInfo
+			{
+				vk::Buffer buffer;
+				index_span buffer_range;
+				index_span data_range;
+			};
+			
+			vector<BufferInfo> buffers;
 
 			size_t data_hash = 0;
 			size_t texture_hash = 0;
