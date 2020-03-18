@@ -14,7 +14,6 @@ namespace idk
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
 		void SendGhosts(span<ElectronView> views);
-		void SendServerCorrections(span<ElectronView> views);
 	private:
 		struct GhostEntry
 		{

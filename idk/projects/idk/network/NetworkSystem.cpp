@@ -193,7 +193,6 @@ namespace idk
 				continue;
 
 			elem->GetManager<GhostManager>()->SendGhosts(electron_views);
-			elem->GetManager<GhostManager>()->SendServerCorrections(electron_views);
 		}
 
 		// if client

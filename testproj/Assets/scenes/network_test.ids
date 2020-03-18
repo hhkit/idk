@@ -124,3 +124,11 @@
     material_instance: {guid: 00000000-0000-0000-0000-000000000000}
     mesh: {guid: 00000000-0000-0000-0000-000000000000}
     receive_shadows: 1
+  - !TestComponent 
+    a: 0
+    b: 0
+    c: 0
+    d: 0
+    makeme: {guid: 00000000-0000-0000-0000-000000000000}
+    send_pos: 0
+    send_rot: 0

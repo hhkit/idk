@@ -30,6 +30,7 @@ namespace idk
 		const auto rtt = connection_manager->GetRTT();
 		const auto timeout = rtt;
 		const auto target_host = connection_manager->GetConnectedHost();
+		const auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		// timeout packets
 		hash_table<Handle<ElectronView>, int> view_to_state_masks;
 
@@ -75,6 +76,7 @@ namespace idk
 			}
 		}
 
+		vector<GhostWithMoveAck> ghost_moves_and_acks;
 		vector<GhostPack> ghost_packs;
 
 		for (auto& view : views)
@@ -82,25 +84,38 @@ namespace idk
 			if (view.network_id == 0)
 				continue;
 
-			if (view.owner == target_host)
-				continue;
+			const bool is_ghost = std::get_if<ElectronView::Master>(&view.ghost_state);
+			const bool is_move_creator = std::get_if<ElectronView::ClientObject>(&view.move_state);
 
-			if (const auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
+			if (is_ghost || is_move_creator)
 			{
 				auto retransmit_state_mask = 0;
 				if (auto itr = view_to_state_masks.find(view.GetHandle()); itr != view_to_state_masks.end())
 					retransmit_state_mask = itr->second;
 
 				auto pack = view.MasterPackData(retransmit_state_mask);
-				if (pack.data_packs.size())
-					ghost_packs.emplace_back(std::move(pack));
+				if (is_move_creator)
+				{
+					GhostWithMoveAck obj{ std::move(pack) };
+					obj.ack = view.PrepareMoveAcknowledgements(seq);
+
+					if (obj.ack.ackfield) // if we have naything to acknowledge
+						ghost_moves_and_acks.emplace_back(std::move(obj)); // acknowledge
+				}
+				else
+				{
+					if (is_ghost)
+					{
+						if (pack.data_packs.size())
+							ghost_packs.emplace_back(std::move(pack));
+					}
+				}
 			}
 		}
 
 		if (ghost_packs.size())
 		{
 			{
-				auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 				GhostPacketInfo transmission_rec;
 				transmission_rec.sequence_number = seq;
 				transmission_rec.send_time = now;
@@ -116,33 +131,19 @@ namespace idk
 					msg.ghost_packs = std::move(ghost_packs);
 				});
 		}
-	}
-
-	void GhostManager::SendServerCorrections(span<ElectronView> views)
-	{
-		const auto target_host = connection_manager->GetConnectedHost();
-
-		auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
-
-		vector<GhostWithMoveAck> ghost_moves_and_acks;
-
-		for (auto& view : views)
-		{
-			if (view.network_id == 0)
-				continue;
-
-			if (view.owner != target_host)
-				continue;
-
-			GhostWithMoveAck obj{ std::move(view.MasterPackData(0)) };
-			obj.ack = view.PrepareMoveAcknowledgements(seq);
-
-			if (obj.ack.ackfield) // if we have naything to acknowledge
-				ghost_moves_and_acks.emplace_back(std::move(obj)); // acknowledge
-		}
 
 		if (ghost_moves_and_acks.size())
 		{
+			{
+				GhostPacketInfo transmission_rec;
+				transmission_rec.sequence_number = seq;
+				transmission_rec.send_time = now;
+				for (auto& elem : ghost_moves_and_acks)
+					transmission_rec.entries.emplace_back(GhostEntry{ id_man.GetViewFromId(elem.network_id) , elem.state_mask });
+
+				transmission_record.emplace_back(std::move(transmission_rec));
+			}
+
 			connection_manager->CreateAndSendMessage<MoveAcknowledgementMessage>
 				(GameChannel::UNRELIABLE, [&](MoveAcknowledgementMessage& msg)
 					{

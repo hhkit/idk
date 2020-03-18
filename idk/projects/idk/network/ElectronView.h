@@ -38,6 +38,8 @@ namespace idk
 		: public Component<ElectronView>
 	{
 	public:
+		friend class TestComponent;
+
 		struct BaseParameter;
 
 		// state machines
@@ -117,7 +119,7 @@ namespace idk
 		struct ClientObjectData
 		{
 			// SequenceNumber, acknowledgement state, move
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool)>;
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool), void(int, SeqNo, bool)>;
 
 			SeqNo last_received;
 
@@ -133,10 +135,10 @@ namespace idk
 		struct ControlObjectData
 		{
 			// SequenceNumber, guess verification state, guess
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool)>;
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool), void(int, SeqNo, bool)>;
 
 			virtual void Init() = 0;
-			virtual int AcknowledgeMoves(SeqNo curr_seq) = 0;
+			virtual unsigned AcknowledgeMoves(SeqNo curr_seq) = 0;
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual int UnpackMove(span<const SeqAndPack>) = 0;
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;

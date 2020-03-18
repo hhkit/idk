@@ -238,6 +238,10 @@ namespace idk
 		{
 			LOG_TO(LogPool::NETWORK, logger.str().data());
 		}
+
+		template<typename T>
+		void operator()(const T&, SeqNo, bool) {}
+
 		void operator()(const vec3& v, SeqNo seq, bool acknowledged)
 		{
 			logger << "[" << seq.value <<"]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x <<"," << v.y <<"," << v.z <<")" << "\n";
