@@ -570,6 +570,7 @@ namespace idk
 		Core::GetScheduler().SetPauseState(UnpauseAll);
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
 		Core::GetSystem<PhysicsSystem>().Reset();
+		Core::GetSystem<AudioSystem>().ResetChannels();
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
 		ImGui::SetWindowFocus(FindWindow<IGE_GameView>()->window_name);
 		_game_running = true;
@@ -599,6 +600,7 @@ namespace idk
 		RestoreFromTemporaryScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 		Core::GetScheduler().SetPauseState(EditorPause);
+		Core::GetSystem<AudioSystem>().ResetChannels();
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
 		Core::GetSystem<AudioSystem>().StopAllAudio();
 		Core::GetSystem<PhysicsSystem>().Reset();

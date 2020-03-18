@@ -1,5 +1,6 @@
 #version 450
 
+U_LAYOUT(1, 0) uniform BLOCK(_UB0) { float time; } _ub0;
 S_LAYOUT(2, 5) uniform sampler2D _uTex[1];
 
 layout(location = 2) in VS_OUT

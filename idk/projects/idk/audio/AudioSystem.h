@@ -87,6 +87,19 @@ namespace idk
 		float GetChannel_AMBIENT_Volume();
 		void  SetChannel_DIALOGUE_Volume(const float& newVolume);
 		float GetChannel_DIALOGUE_Volume();
+
+		void  SetChannel_MASTER_Pause(bool newState);
+		bool  GetChannel_MASTER_Pause();
+		void  SetChannel_SFX_Pause(bool newState);
+		bool  GetChannel_SFX_Pause();
+		void  SetChannel_MUSIC_Pause(bool newState);
+		bool  GetChannel_MUSIC_Pause();
+		void  SetChannel_AMBIENT_Pause(bool newState);
+		bool  GetChannel_AMBIENT_Pause();
+		void  SetChannel_DIALOGUE_Pause(bool newState);
+		bool  GetChannel_DIALOGUE_Pause();
+
+		void  ResetChannels();
 		///////////////////////////////////////////////
 
 		//Sound Driver Control
