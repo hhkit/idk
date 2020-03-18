@@ -1200,6 +1200,7 @@ namespace idk::mono
 		BIND_END();
 		//----------------------------------------------------------------------------------------------------
 		//AudioSystem
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
 		BIND_START("idk.Bindings::AudioSystemSetMASTERVolume", void, float newVolume)
 		{
 			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
@@ -1264,6 +1265,70 @@ namespace idk::mono
 			return Core::GetSystem<AudioSystem>().GetChannel_DIALOGUE_Volume();
 		}
 		BIND_END();
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		BIND_START("idk.Bindings::AudioSystemSetMASTERPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMASTERPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MASTER_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetSFXPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_SFX_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetSFXPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_SFX_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetMUSICPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_MUSIC_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMUSICPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MUSIC_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetAMBIENTPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_AMBIENT_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetAMBIENTPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_AMBIENT_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetDIALOGUEPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_DIALOGUE_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetDIALOGUEPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_DIALOGUE_Pause();
+		}
+		BIND_END();
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 		BIND_START("idk.Bindings::AudioSystemStopAll", void)
 		{

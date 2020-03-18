@@ -45,6 +45,31 @@ namespace idk
             set => Bindings.AudioSystemSetDIALOGUEVolume(value);
         }
 
+        public static bool pausedState_Master
+        {
+            get => Bindings.AudioSystemGetMASTERPause();
+            set => Bindings.AudioSystemSetMASTERPause(value);
+        }
+        public static bool pausedState_Sfx
+        {
+            get => Bindings.AudioSystemGetSFXPause();
+            set => Bindings.AudioSystemSetSFXPause(value);
+        }
+        public static bool pausedState_Music
+        {
+            get => Bindings.AudioSystemGetMUSICPause();
+            set => Bindings.AudioSystemSetMUSICPause(value);
+        }
+        public static bool pausedState_Ambient
+        {
+            get => Bindings.AudioSystemGetAMBIENTPause();
+            set => Bindings.AudioSystemSetAMBIENTPause(value);
+        }
+        public static bool pausedState_Dialogue
+        {
+            get => Bindings.AudioSystemGetDIALOGUEPause();
+            set => Bindings.AudioSystemSetDIALOGUEPause(value);
+        }
 
         public static void StopAll()
             => Bindings.AudioSystemStopAll();

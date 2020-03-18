@@ -4,6 +4,7 @@
 #include <meta/variant.h>
 #include <serialize/text.inl>
 #include <res/ResourceHandle.inl>
+#include <core/Scheduler.h>
 
 namespace idk
 {
@@ -89,15 +90,23 @@ namespace idk
 
 		switch (type)
 		{
+		case shadergraph::ValueType::INVALID: // special value (time)
+			{
+				const float time = Core::GetScheduler().GetTimeSinceStart().count();
+				data.resize(sizeof(float));
+				memcpy_s(data.data(), sizeof(float), &time, sizeof(float));
+				return data;
+			}
+
 		case shadergraph::ValueType::FLOAT: // align contiguous (N)
 			for (const auto& pair : uniforms)
 			{
 				const auto& val = func(pair.second);
-				if (val.index() == index_in_variant_v<float, UniformInstanceValue>)
+				if (std::holds_alternative<float>(val))
 				{
 					auto sz = data.size();
 					data.resize(sz + sizeof(float));
-					memcpy_s(data.data() + sz, sizeof(float), &std::get<index_in_variant_v<float, UniformInstanceValue>>(val), sizeof(float));
+					memcpy_s(data.data() + sz, sizeof(float), &std::get<float>(val), sizeof(float));
 				}
 			}
 			return data;
@@ -106,11 +115,11 @@ namespace idk
 			for (const auto& pair : uniforms)
 			{
 				const auto& val = func(pair.second);
-				if (val.index() == index_in_variant_v<vec2, UniformInstanceValue>)
+				if (std::holds_alternative<vec2>(val))
 				{
 					auto sz = data.size();
 					data.resize(sz + sizeof(vec2));
-					memcpy_s(data.data() + sz, sizeof(vec2), &std::get<index_in_variant_v<vec2, UniformInstanceValue>>(val), sizeof(vec2));
+					memcpy_s(data.data() + sz, sizeof(vec2), &std::get<vec2>(val), sizeof(vec2));
 				}
 			}
 			return data;
@@ -119,11 +128,11 @@ namespace idk
 			for (const auto& pair : uniforms)
 			{
 				const auto& val = func(pair.second);
-				if (val.index() == index_in_variant_v<vec4, UniformInstanceValue>)
+				if (std::holds_alternative<vec4>(val))
 				{
 					auto sz = data.size();
 					data.resize(sz + sizeof(vec4));
-					memcpy_s(data.data() + sz, sizeof(vec4), &std::get<index_in_variant_v<vec4, UniformInstanceValue>>(val), sizeof(vec4));
+					memcpy_s(data.data() + sz, sizeof(vec4), &std::get<vec4>(val), sizeof(vec4));
 				}
 			}
 			return data;
@@ -132,11 +141,11 @@ namespace idk
 			for (const auto& pair : uniforms)
 			{
 				const auto& val = func(pair.second);
-				if (val.index() == index_in_variant_v<vec3, UniformInstanceValue>)
+				if (std::holds_alternative<vec3>(val))
 				{
 					auto sz = data.size();
 					data.resize(sz + sizeof(vec4));
-					memcpy_s(data.data() + sz, sizeof(vec3), &std::get<index_in_variant_v<vec3, UniformInstanceValue>>(val), sizeof(vec3));
+					memcpy_s(data.data() + sz, sizeof(vec3), &std::get<vec3>(val), sizeof(vec3));
 				}
 			}
 			return data;
@@ -223,6 +232,8 @@ namespace idk
 					store.uniforms[name] = uni;
 				}
 			}
+
+			store.uniforms["_UB0"];
 		}
 		return store;
 	}

@@ -172,8 +172,13 @@ namespace idk::vkn
 				return;
 			auto UpdateDataBuffer = [this](const ProcessedMaterial& mat_inst, UboManager& ubo_manager)->void
 			{
-				if (buffer_range.size())
-					ubo_manager.Update(buffer, buffer_range,mat_inst.data_block);
+				for(auto& binfo : buffers)
+				{
+					if (binfo.buffer_range.size())
+					{
+						ubo_manager.Update(binfo.buffer, binfo.buffer_range, mat_inst.data_block.substr(binfo.data_range._begin,binfo.data_range._end));;
+					}
+				}
 			};
 			for (auto& [name,textures] : mat_inst.tex_table)
 			{
@@ -193,9 +198,6 @@ namespace idk::vkn
 	}
 
 	
-
-
-
 	void MaterialInstanceCache::ProcessCreation()
 	{
 		auto& create_buffer = _pimpl->_creation_buffer;
@@ -224,16 +226,20 @@ namespace idk::vkn
 			info.ReleaseDescriptorSets(dm);
 			hash_table<set_t, SetCollation> collated_data;
 			ShaderModule& mod = mat_inst.shader.as<ShaderModule>();
-			auto [buffer, offset] = um.Add(mat_inst.data_block);
-			info.buffer = buffer;
-			info.buffer_range = {offset,offset+mat_inst.data_block.size()};
 			for (auto [name, ub] : mat_inst.ubo_table)
 			{
 				auto& uni_info = mod.GetLayout(name);
 				collated_data[uni_info.set].layout = uni_info.layout;
-				auto block_offset = ub.data() - mat_inst.data_block.data();
+				
+				size_t block_offset = ub.data() - mat_inst.data_block.data();
+
+				auto [buffer, offset] = um.Add(mat_inst.data_block.substr(block_offset,ub.size()));
+				;
+				info.buffers.emplace_back(InstCachedInfo::BufferInfo{ buffer,index_span{offset,offset + ub.size()},index_span{block_offset,block_offset + ub.size()} });
+				//info.buffer_range = { offset,offset + mat_inst.data_block.size() };
+
 				collated_data[uni_info.set].bindings[uni_info.binding] = BindingData{vk::DescriptorType::eUniformBuffer,uni_info.binding };
-				collated_data[uni_info.set].bindings[uni_info.binding]->SetData(buffer,offset+block_offset,ub.size(),bbuilder);
+				collated_data[uni_info.set].bindings[uni_info.binding]->SetData(buffer,offset,ub.size(),bbuilder);
 			}
 			for (auto [name, textures] : mat_inst.tex_table)
 			{
@@ -262,6 +268,8 @@ namespace idk::vkn
 		}
 		_pimpl->updater.UpdateDescriptorSets();
 		_pimpl->_creation_buffer.clear();
+		_pimpl->scratch.clear();
+		_pimpl->buffer_scratch.clear();
 	}
 
 	MaterialInstanceCache::MaterialInstanceCache():_pimpl{std::make_unique<PImpl>()}
