@@ -1,0 +1,8 @@
+vec2,vec2,float->vec2
+UV,Center,Rotation,Out,$[Mode:Radians|Degrees]
+{
+float angle = {2};
+?4:Degrees{angle *= 3.1415926 / 180.0;}
+{3}.x =  cos(angle) * ({0}.x - {1}.x) + sin(angle) * ({0}.y - {1}.y) + {1}.x;
+{3}.y = -sin(angle) * ({0}.x - {1}.x) + cos(angle) * ({0}.y - {1}.y) + {1}.y;
+}

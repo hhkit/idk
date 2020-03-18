@@ -98,12 +98,13 @@ namespace idk {
 
         void DisplayAsset(GenericResourceHandle handle);
 
-        template<typename Res> void DisplayAsset(RscHandle<Res>) {}
-        template<> void DisplayAsset(RscHandle<Prefab> prefab);
-        template<> void DisplayAsset(RscHandle<MaterialInstance> material);
-        template<> void DisplayAsset(RscHandle<Material> material);
-        template<> void DisplayAsset(RscHandle<Texture> texture);
-		template<> void DisplayAsset(RscHandle<FontAtlas> fontAtlas);
+        template<typename Res> bool DisplayAsset(RscHandle<Res>) { return false; }
+        template<> bool DisplayAsset(RscHandle<Prefab> prefab);
+        template<> bool DisplayAsset(RscHandle<MaterialInstance> material);
+        template<> bool DisplayAsset(RscHandle<Material> material);
+        template<> bool DisplayAsset(RscHandle<Texture> texture);
+        template<> bool DisplayAsset(RscHandle<FontAtlas> fontAtlas);
+        //template<> bool DisplayAsset(RscHandle<RenderTarget> render_target);
 
         // when curr property is key, draws using CustomDrawFn
         using CustomDrawFn = bool(*)(const reflect::dynamic& dyn);

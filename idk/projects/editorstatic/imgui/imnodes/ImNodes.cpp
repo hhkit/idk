@@ -333,9 +333,6 @@ void EndCanvas()
         {
             if (ImGui::IsWindowHovered())
             {
-                if (!ImGui::IsWindowFocused())
-                    ImGui::FocusWindow(ImGui::GetCurrentWindow());
-
                 if (!ImGui::IsAnyItemActive())
                 {
                     ImGui::SetActiveID(canvas_id, ImGui::GetCurrentWindow());

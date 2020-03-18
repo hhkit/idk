@@ -1,0 +1,9 @@
+vec2,vec2,float,vec2->vec2
+UV,Center,Strength,Offset,Out
+{
+vec2 delta = {0} - {1};
+float angle = {2} * length(delta);
+float x = cos(angle) * delta.x - sin(angle) * delta.y;
+float y = sin(angle) * delta.x + cos(angle) * delta.y;
+{4} = vec2(x, y) + {1} + {3};
+}

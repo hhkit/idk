@@ -1,0 +1,10 @@
+vec2,float,float,float->vec2
+UV,Width,Height,Tile,Out,$Bool:Invert Y=1
+{
+float tile = mod({3}, {1} * {2});
+vec2 tileSize = 1.0 / vec2({1}, {2});
+float tileY = floor(tile * tileSize.x);
+float tileX = tile - {1} * tileY;
+?5:1{tileY = {2} - tileY - 1;}
+{4} = ({0} + vec2(tileX, tileY)) * tileSize;
+}

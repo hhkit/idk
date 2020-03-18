@@ -24,8 +24,17 @@ namespace idk
 			vsprintf_s(buf, message.data(), args);
 			va_end(args);
 			LogSingleton::Get().LogMessage(level, pool, preface, buf);
-		}else
-			LogSingleton::Get().LogMessage(level, pool, preface, "log message exceeded 256 characters");
+		}
+		else
+		{
+			std::string long_message;
+			long_message.resize(printed_size + 1);
+			va_list args;
+			va_start(args, message);
+			vsprintf_s(long_message.data(), long_message.size(), message.data(), args);
+			va_end(args);
+			LogSingleton::Get().LogMessage(level, pool, preface, long_message);
+		}
 
 	}
 }
