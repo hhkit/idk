@@ -20,6 +20,8 @@ namespace idk
 		EXTENSION(".rtis");
 
 		// actually renderer-related stuff
+		RscHandle<Texture> ColorGradingLut;
+
 		uvec2              size              { 1024, 1024 };
 		AntiAliasing       anti_aliasing     { AntiAliasing::None };
 		RscHandle<Texture> color_tex         { };
