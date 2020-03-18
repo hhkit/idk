@@ -137,9 +137,9 @@ namespace idk::vkn::dbg
 	{
 		const std::pair<float, string> post_fix[] =
 		{
-			{1000000000," GB"},
-			{1000000," MB"},
-			{1000," KB"},
+			{1000000000.0f," GB"},
+			{1000000.0f," MB"},
+			{1000.0f," KB"},
 			//{1,"B"},
 		};
 
