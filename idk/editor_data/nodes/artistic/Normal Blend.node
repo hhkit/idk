@@ -1,7 +1,7 @@
 vec3,vec3->vec3
 Base,Detail,Out,$[Mode:Default|Reoriented]
-?3:Default{{2} = normalize(vec3({0}.rg + {1}.rg, {0}.b * {1}.b));}
 {
+?3:Default{{2} = normalize(vec3({0}.rg + {1}.rg, {0}.b * {1}.b));}
 ?3:Reoriented{vec3 t = {0}.xyz + vec3(0, 0, 1.0);}
 ?3:Reoriented{vec3 u = {1}.xyz * vec3(-1.0, -1.0, 1.0);}
 ?3:Reoriented{{2} = (t / t.z) * dot(t, u) - u;}
