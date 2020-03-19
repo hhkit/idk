@@ -565,10 +565,12 @@ namespace idk::vkn::renderpasses
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 	}
 
-BloomPass::BloomPass(FrameGraphBuilder& builder, UnlitPass& unlit_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex) : unlit_rsc{ unlit_ },  _viewport{ viewport }
+BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport) : combine_rsc{ combine_ },  _viewport{ viewport }
 {
-	bloom_rsc = builder.write(color_tex, WriteOptions{ false });
-	bloom_depth_rsc = builder.write(depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
+	//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
+	//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
+	bloom_rsc = CreateGBuffer(builder, "Brightness", vk::Format::eB10G11R11UfloatPack32, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ viewport.size });
+
 	builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
 		{
 			vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -586,8 +588,8 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, UnlitPass& unlit_, rect viewpor
 			//vk::ComponentMapping mapping{};
 		}
 	);
-	auto derp1 = builder.read(unlit_.color_rsc);
-	auto derp2 = builder.read(unlit_.depth_rsc);
+	auto derp1 = builder.read(combine_.out_color);
+	auto derp2 = builder.read(combine_.out_hdr);
 
 	builder.set_input_attachment(derp1, 1, AttachmentDescription
 		{
@@ -614,26 +616,9 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, UnlitPass& unlit_, rect viewpor
 			vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
 			vk::ImageSubresourceRange
 			{
-				vk::ImageAspectFlagBits::eDepth,0,1,0,1
+				vk::ImageAspectFlagBits::eColor,0,1,0,1
 			},//vk::ImageSubresourceRange sub_resource_range{};
 			//std::optional<vk::ClearValue> clear_value;
-			//std::optional<vk::Format> format{};
-			//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-			//vk::ComponentMapping mapping{};
-		});
-
-	builder.set_depth_stencil_attachment(bloom_depth_rsc, AttachmentDescription
-		{
-			vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
-			vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
-			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-			vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-			vk::ImageSubresourceRange
-			{
-				vk::ImageAspectFlagBits::eDepth,0,1,0,1
-			},//vk::ImageSubresourceRange sub_resource_range{};
-			vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
 			//std::optional<vk::Format> format{};
 			//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 			//vk::ComponentMapping mapping{};
@@ -663,14 +648,14 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		blend.src_alpha_blend_factor = BlendFactor::eOne;
 		context.SetBlend(i);
 		context.SetClearColor(i, idk::color{ 0,0,0,0 });
-		context.SetClearDepthStencil(1.0f);
+		//context.SetClearDepthStencil(1.0f);
 		++i;
 	}
 	context.SetViewport(_viewport);
 	context.SetScissors(_viewport);
 
 	context.SetCullFace({});
-	//context.SetDepthTest(false);
+	context.SetDepthTest(false);
 
 	auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
 	BindMesh(context, fsq_requirements, mesh);
@@ -744,76 +729,6 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 
 		draw_set.Render(context);
 		//TODO: Move into a draw_set/draw_logic
-		/*
-		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
-		{
-			size_t i = 0;
-			auto& cam_clear = gfx_state.camera.clear_data;
-			auto color_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, color>::value;
-			//auto cube_index = meta::IndexOf<std::remove_cvref_t<decltype(cam_clear)>, RscHandle<CubeMap>>::value;
-			color col = {};
-			if (color_index == cam_clear.index())
-			{
-				col = std::get<color>(cam_clear);
-			}
-
-			AttachmentBlendConfig blend{};
-			blend.blend_enable = true;
-			blend.dst_color_blend_factor = BlendFactor::eOne;
-			blend.src_color_blend_factor = BlendFactor::eOne;
-			blend.color_blend_op = BlendOp::eAdd;
-			blend.alpha_blend_op = BlendOp::eMax;
-			blend.dst_alpha_blend_factor = BlendFactor::eOne;
-			blend.src_alpha_blend_factor = BlendFactor::eOne;
-			context.SetBlend(i);
-			context.SetClearColor(i, col);
-			context.SetClearDepthStencil(1.0f);
-			++i;
-		}
-		context.SetViewport(gfx_state.camera.viewport);
-		context.SetScissors(gfx_state.camera.viewport);
-
-		//auto& light_indices = gfx_state.active_lights;
-		//vector<LightData> lights;
-		//vector<VknTextureView> shadow_maps;
-		//lights.reserve(8);
-		//shadow_maps.reserve(8);
-		//FakeMat4 pbr_trf = gfx_state.camera.view_matrix.inverse();
-		//auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
-		//BindMesh(context, fsq_requirements, mesh);
-
-
-		pipeline_config skybox_render_config;
-		skybox_render_config.fill_type = FillType::eFill;
-		skybox_render_config.prim_top = PrimitiveTopology::eTriangleList;
-		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VSkyBox]);
-		context.BindShader(ShaderStage::Fragment, Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FSkyBox]);
-		context.SetCullFace({});
-		context.SetDepthTest(false);
-		context.SetDepthWrite(false);
-
-		//No idea if this is expensive....if really so I will try shift up to init
-
-
-		auto camera = gfx_state.camera;
-
-		auto sb_cm = std::get<RscHandle<CubeMap>>(camera.clear_data);
-
-		auto& mesh = camera.CubeMapMesh->as<VulkanMesh>();
-
-		auto mat4block = camera.projection_matrix * mat4{ mat3{ camera.view_matrix } };
-		//rs.skyboxRenderer.QueueSkyBox(rs.ubo_manager, {}, *sb_cm, camera.projection_matrix * mat4{ mat3{camera.view_matrix} });
-
-		context.BindUniform("CameraBlock", 0, string_view{ hlp::buffer_data<const char*>(mat4block),hlp::buffer_size(mat4block) });
-
-		context.BindUniform("sb", 0, sb_cm.as<VknCubemap>());
-		BindMesh(context, req, mesh);
-		//rs.skyboxRenderer.ProcessQueueWithoutRP(cmd_buffer, offset, size);
-
-
-		//DrawFSQ
-		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
-		*/
 	}
 
 
@@ -921,7 +836,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
 	using AccumDrawSet = CombinedMeshDrawSet<AccumLightDrawSet, AccumAmbientDrawSet>;
-	//#pragma optimize("",off)
+	#pragma optimize("",off)
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, [[maybe_unused]] RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		using AccumPassSetPair = PassSetPair<AccumPass, AccumDrawSet>;
@@ -995,8 +910,9 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 			combine_spec_pass.out_depth
 			).RenderPass();
 
-		//auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass",unlit_pass, gfx_state.camera.viewport, unlit_pass.color_rsc, unlit_pass.depth_rsc);
-
+		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass",combine_spec_pass, gfx_state.camera.viewport);
+		//bloom_pass.bloom_rsc;
+		//bloom_pass.bloom_depth_rsc;
 		return { unlit_pass.color_rsc,unlit_pass.depth_rsc};
 	}
 

@@ -126,12 +126,12 @@ namespace idk::vkn::renderpasses
 	struct BloomPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable bloom_rsc;
-		FrameGraphResourceMutable bloom_depth_rsc;
-		UnlitPass& unlit_rsc;
+		//FrameGraphResourceMutable bloom_depth_rsc;
+		CombinePass& combine_rsc;
 
 		RscHandle<ShaderProgram> bloom_shader;
 
-		BloomPass(FrameGraphBuilder& builder, UnlitPass& unlit_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex);
+		BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
