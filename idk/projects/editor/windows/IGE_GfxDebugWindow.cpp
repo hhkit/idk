@@ -11,6 +11,8 @@
 
 #include <gfx/GfxDebugData.h>
 
+#include "IDE.h"
+
 namespace idk
 {
 	struct IGE_GfxDebugWindow::Pimpl
@@ -48,6 +50,10 @@ namespace idk
 		if (ImGui::Checkbox("Default Render Target SRGB", &srgb))
 		{
 			RscHandle<RenderTarget>{}->Srgb(srgb);
+		}
+		if (ImGui::Button("Select Default Render Target"))
+		{
+			Core::GetSystem<IDE>().SelectAsset(RscHandle<RenderTarget>{},false,true);
 		}
 		RenderExtraVars(Core::GetSystem<GraphicsSystem>().extra_vars);
 	}
