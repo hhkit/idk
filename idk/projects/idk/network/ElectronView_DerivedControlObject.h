@@ -101,6 +101,17 @@ namespace idk
 			}
 			return unpacked_moves;
 		}
+		string AccumulateUnverifiedPredictions() override
+		{
+			T accum{};
+			for (auto& elem : move_buffer)
+			{
+				if (elem.verified)
+					continue;
+				accum = param.adder(accum, elem.move);
+			}
+			return serialize_binary(accum);
+		}
 
 		void VisitMoveBuffer(const BufferVisitor& visit) override
 		{

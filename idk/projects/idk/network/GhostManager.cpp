@@ -97,7 +97,7 @@ namespace idk
 				if (is_move_creator)
 				{
 					GhostWithMoveAck obj{ std::move(pack) };
-					obj.ack = view.PrepareMoveAcknowledgements(seq);
+					obj.ack = view.PrepareMoveAcknowledgementsAndGuess(seq);
 
 					if (obj.ack.ackfield) // if we have naything to acknowledge
 						ghost_moves_and_acks.emplace_back(std::move(obj)); // acknowledge

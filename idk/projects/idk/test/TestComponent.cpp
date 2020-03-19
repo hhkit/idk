@@ -88,7 +88,7 @@ namespace idk
 				client_to_server_pack.reset();
 
 				client_to_server_pack = client_ev.PackMoveData(SeqNo{ frame });
-				auto server_frame = server_ev.PrepareMoveAcknowledgements(SeqNo{ frame });
+				auto server_frame = server_ev.PrepareMoveAcknowledgementsAndGuess(SeqNo{ frame });
 				auto server_packs = server_ev.MasterPackData(1);
 				
 				server_to_client_pack = GhostWithMoveAck

@@ -58,7 +58,7 @@ namespace idk
 
 		NetworkID network_id{};
 		vector<GenericHandle> observed_components;
-		int state_mask{};
+		unsigned state_mask{};
 
 		Host owner = Host::SERVER;
 
@@ -77,7 +77,7 @@ namespace idk
 		MovePack PackMoveData(SeqNo curr_seq);
 		GhostPack MasterPackData(int incoming_state_mask);
 
-		MoveAck PrepareMoveAcknowledgements(SeqNo curr_seq) const;
+		MoveAck PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const;
 		void ReceiveMoveAcknowledgements(int statemask, span<SeqNo> sequences);
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
 		void UnpackMoveData(const MovePack& data_pack);
@@ -142,6 +142,7 @@ namespace idk
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual int UnpackMove(span<const SeqAndPack>) = 0;
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
+			virtual string AccumulateUnverifiedPredictions() = 0;
 			virtual ~ControlObjectData() = default;
 		};
 

@@ -16,13 +16,16 @@ namespace idk
 		using MoveList = small_vector<SeqAndPack>;
 
 		NetworkID network_id{};
-		int state_mask{};
+		unsigned state_mask{};
 		vector<MoveList> packs;
 	};
 
 	struct MoveAck
 	{
 		SeqNo sequence_number { };
-		unsigned ackfield      { };
+		unsigned ackfield     { };
+
+		unsigned state_mask { };
+		vector<string> accumulated_guesses;
 	};
 }

@@ -156,7 +156,7 @@ namespace idk
 		return retval;
 	}
 
-	MoveAck ElectronView::PrepareMoveAcknowledgements(SeqNo curr_seq) const
+	MoveAck ElectronView::PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const
 	{
 		MoveAck retval;
 		retval.sequence_number = curr_seq;
@@ -168,9 +168,14 @@ namespace idk
 			{
 				auto& param = parameters[i];
 				if (std::get_if<ControlObject>(&move_state))
+				{
 					retval.ackfield |= param->GetControlObject()->AcknowledgeMoves(curr_seq);
+					retval.accumulated_guesses.emplace_back(param->GetControlObject()->AccumulateUnverifiedPredictions());
+					retval.state_mask |= sm;
+				}
 			}
 		}
+
 		return retval;
 	}
 

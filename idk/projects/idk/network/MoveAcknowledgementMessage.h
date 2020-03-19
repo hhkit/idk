@@ -32,6 +32,14 @@ namespace idk
 				serialize_int(stream, elem.ack.sequence_number.value, 0, SeqNo::max_value);
 				serialize_int(stream, elem.ack.ackfield, 0, std::numeric_limits<unsigned>::max());
 
+				serialize_int(stream, elem.ack.state_mask, 0, std::numeric_limits<unsigned>::max());
+				serialize_vector_count(stream, elem.ack.accumulated_guesses, 32);
+				for (auto& guess : elem.ack.accumulated_guesses)
+				{
+					serialize_vector_count(stream, guess, 2048);
+					serialize_bytes(stream, (uint8_t*) guess.data(), guess.size());
+				}
+
 				serialize_vector_count(stream, elem.data_packs, 64);
 				for (auto& pack : elem.data_packs)
 				{
