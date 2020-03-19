@@ -50,6 +50,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\AttachmentViewType.h" />
+    <ClInclude Include="gfx\ColorGrade.h" />
     <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
     <ClInclude Include="network\GhostAcknowledgementMessage.h" />
@@ -386,6 +387,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="gfx\ColorGrade.cpp" />
     <ClCompile Include="gfx\ColorPickRequest.cpp" />
     <ClCompile Include="common\Layer.cpp" />
     <ClCompile Include="common\LayerManager.cpp" />

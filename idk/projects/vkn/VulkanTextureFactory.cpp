@@ -10,6 +10,12 @@
 #include <fstream>
 #include <sstream>
 #include <vkn/DDSLoader.h>
+
+#include <gfx/ColorGrade.h>
+
+#include <res/ResourceHandle.inl>
+#include <res/ResourceManager.inl>
+
 namespace idk::vkn
 {
 
@@ -28,6 +34,38 @@ namespace idk::vkn
 	}
 
 	VulkanTextureFactory::~VulkanTextureFactory() = default; //Here for the DdsLoader's dtor
+
+	void VulkanTextureFactory::Init()
+	{
+		constexpr Guid color_grade_id = {0xFADAu,0xFADAu,0xFADAu ,0xFADAu };
+		auto color_grade_data = GenerateRgbaDefaultColorGradeTexData();
+
+		auto ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(color_grade_id);
+
+		TextureLoader loader;
+
+		TexCreateInfo tci =
+		{
+			color_grade_data.dimensions.x,color_grade_data.dimensions.y,
+			MapFormat(TextureFormat::eRGBA32),
+			vk::ImageUsageFlagBits::eSampled,
+			1,
+			vk::ImageAspectFlagBits::eColor,
+		};
+
+		InputTexInfo input_info
+		{
+			color_grade_data.data.data(),
+			hlp::buffer_size(color_grade_data.data),
+			MapFormat(TextureFormat::eRGBA32)
+		};
+		ptr->Name(" Default Color Grade LUT");
+		TextureOptions to{};
+		to.input_is_srgb = false;
+		to.uv_mode = UVMode::Clamp;
+		loader.LoadTexture(*ptr, _allocator, *_fence, to, tci, input_info);
+		
+	}
 
 	unique_ptr<Texture> VulkanTextureFactory::GenerateDefaultResource()
 	{
