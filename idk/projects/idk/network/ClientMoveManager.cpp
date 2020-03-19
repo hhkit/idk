@@ -37,10 +37,11 @@ namespace idk
 
 	void ClientMoveManager::SendMoves(span<ElectronView> views)
 	{
+		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		vector<MovePack> move_packs;
 		for (auto& elem : views)
 		{
-			auto move_data = elem.PackMoveData();
+			auto move_data = elem.PackMoveData(curr_seq);
 			if (move_data.packs.size())
 			{
 				LOG_TO(LogPool::NETWORK, "packing move for object %d", elem.network_id);

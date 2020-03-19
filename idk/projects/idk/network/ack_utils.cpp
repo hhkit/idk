@@ -19,7 +19,7 @@ namespace idk
 
 	unsigned acks_to_ackfield(SeqNo base, span<SeqNo> sequence_numbers)
 	{
-		unsigned mask;
+		unsigned mask{};
 
 		for (auto& elem : sequence_numbers)
 		{

@@ -22,6 +22,7 @@ namespace idk
 		DerivedClientObjectData(ParameterImpl<T>& impl)
 			: param{ impl }
 		{
+			prev_value = param.getter();
 		}
 
 		void Init() override
@@ -53,8 +54,11 @@ namespace idk
 				{
 					SeqAndMove pushme;
 					pushme.seq = curr_seq;
-					pushme.pack = serialize_binary(move);
 					pushme.move = move;
+					pushme.pack = serialize_binary(move);
+					auto parse = parse_binary<T>(pushme.pack);
+					if (*parse != move)
+						throw;
 					buffer.emplace_back(std::move(pushme));
 				}
 			}

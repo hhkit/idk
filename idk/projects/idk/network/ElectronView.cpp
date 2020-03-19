@@ -63,10 +63,9 @@ namespace idk
 				elem->GetMaster()->CacheValue(curr_seq);
 		}
 	}
-	void ElectronView::PrepareDataForSending()
+	void ElectronView::PrepareDataForSending(SeqNo curr_seq)
 	{
 		state_mask = 0;
-		const auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 
 		if (std::get_if<ClientObject>(&move_state))
 		{
@@ -113,9 +112,8 @@ namespace idk
 		}
 	}
 
-	MovePack ElectronView::PackMoveData()
+	MovePack ElectronView::PackMoveData(SeqNo curr_seq)
 	{
-		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		MovePack move_pack;
 		if (std::get_if<ClientObject>(&move_state))
 		{
@@ -139,7 +137,7 @@ namespace idk
 	{
 		const auto transmit_state_mask = incoming_state_mask | state_mask;
 		IDK_ASSERT(std::get_if<Master>(&ghost_state));
-		const auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+
 		GhostPack retval;
 		retval.network_id = network_id;
 		retval.state_mask = transmit_state_mask;

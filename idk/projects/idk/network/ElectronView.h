@@ -72,9 +72,9 @@ namespace idk
 		void SetAsControlObject();
 
 		void CacheSentData();
-		void PrepareDataForSending();
+		void PrepareDataForSending(SeqNo curr_seq);
 		void MoveGhost(seconds delta);
-		MovePack PackMoveData();
+		MovePack PackMoveData(SeqNo curr_seq);
 		GhostPack MasterPackData(int incoming_state_mask);
 
 		MoveAck PrepareMoveAcknowledgements(SeqNo curr_seq) const;

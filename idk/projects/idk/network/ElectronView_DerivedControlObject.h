@@ -1,5 +1,6 @@
 #pragma once
-
+#include <network/ack_utils.h>
+#pragma optimize("", off)
 namespace idk
 {
 	template<typename T>
@@ -30,20 +31,15 @@ namespace idk
 
 		unsigned AcknowledgeMoves(SeqNo curr_seq) override
 		{
-			unsigned ackfield{};
+			vector<SeqNo> ack_us;
 
 			for (auto& elem : move_buffer)
 			{
 				if (elem.verified)
-				{
-					auto seq = elem.seq;
-					auto diff = curr_seq - seq;
-					if (diff < 32)
-						ackfield |= 1 << diff;
-				}
+					ack_us.emplace_back(elem.seq);
 			}
 
-			return ackfield;
+			return acks_to_ackfield(curr_seq, ack_us);
 		}
 
 		__declspec(noinline) void RecordPrediction(SeqNo curr_seq) override
@@ -113,3 +109,4 @@ namespace idk
 		}
 	};
 }
+#pragma optimize("", on)

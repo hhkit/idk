@@ -184,7 +184,7 @@ namespace idk
 
 		for (auto& ev : electron_views)
 		{
-			ev.PrepareDataForSending();
+			ev.PrepareDataForSending(frame_counter);
 		}
 		// if server
 		for (const auto& elem : server_connection_manager)

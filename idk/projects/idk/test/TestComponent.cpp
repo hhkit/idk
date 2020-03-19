@@ -64,26 +64,30 @@ namespace idk
 				// receive packets
 				if (server_to_client_pack)
 				{
+					// drop half the packets
 					auto acks = ackfield_to_acks(server_to_client_pack->ack.sequence_number, server_to_client_pack->ack.ackfield);
 					client_ev.ReceiveMoveAcknowledgements(1, acks);
-					client_ev.UnpackGhostData(SeqNo{ frame }, *server_to_client_pack);
-					server_to_client_pack.reset();
+					client_ev.UnpackGhostData(SeqNo{ frame - 1 }, *server_to_client_pack);
 				}
 				if (client_to_server_pack)
 				{
-					server_ev.UnpackMoveData(*client_to_server_pack);
-					client_to_server_pack.reset();
+					if (frame % 2)
+						server_ev.UnpackMoveData(*client_to_server_pack);
 				}
 
 				// frame update
 				++client_value;
+				++server_value; // server prediction
 
 				// send client packets
-				client_ev.PrepareDataForSending();
-				server_ev.PrepareDataForSending();
+				client_ev.PrepareDataForSending(SeqNo{frame});
+				server_ev.PrepareDataForSending(SeqNo{frame});
 
 
-				client_to_server_pack = client_ev.PackMoveData();
+				server_to_client_pack.reset();
+				client_to_server_pack.reset();
+
+				client_to_server_pack = client_ev.PackMoveData(SeqNo{ frame });
 				auto server_frame = server_ev.PrepareMoveAcknowledgements(SeqNo{ frame });
 				auto server_packs = server_ev.MasterPackData(1);
 				
