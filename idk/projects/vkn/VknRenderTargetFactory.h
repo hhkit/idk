@@ -4,11 +4,12 @@
 #include <vkn/MemoryAllocator.h>
 #include <vulkan/vulkan.hpp>
 #include <res/SaveableResourceLoader.h>
+#include <gfx/RenderTargetFactory.h>
 namespace idk::vkn
 {
 
 	class VknRenderTargetFactory
-		: public ResourceFactory<RenderTarget>
+		: public RenderTargetFactory
 	{
 	public:
 		VknRenderTargetFactory();
