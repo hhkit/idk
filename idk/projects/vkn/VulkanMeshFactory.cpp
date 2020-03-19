@@ -618,30 +618,30 @@ namespace idk::vkn
 			const auto box_mesh = Mesh::defaults[MeshType::Box];
 			const auto mesh_handle = Core::GetResourceManager().LoaderEmplaceResource<VulkanMesh>(box_mesh.guid);
 			std::vector<Vertex> vertices{
-				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{  sz, -sz,  sz}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{-sz, -sz,  sz}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{-sz,  sz,  sz}, vec3{0,0, 1} },  // front
-				Vertex{ vec3{  sz,  sz, -sz}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{  sz, -sz, -sz}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{-sz, -sz, -sz}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{-sz,  sz, -sz}, vec3{0,0,-1} },  // back
-				Vertex{ vec3{-sz,  sz,  sz}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{-sz,  sz, -sz}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{-sz, -sz, -sz}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{-sz, -sz,  sz}, vec3{-1,0,0} },  // left
-				Vertex{ vec3{  sz,  sz,  sz}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{  sz,  sz, -sz}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{  sz, -sz, -sz}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{  sz, -sz,  sz}, vec3{ 1,0,0} },  // right
-				Vertex{ vec3{  sz,  sz,  sz}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{  sz,  sz, -sz}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{ -sz,  sz, -sz}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{ -sz,  sz,  sz}, vec3{0, 1,0} },  // top
-				Vertex{ vec3{  sz, -sz,  sz}, vec3{0,-1,0} },  // bottom
-				Vertex{ vec3{  sz, -sz, -sz}, vec3{0,-1,0} },  // bottom
-				Vertex{ vec3{ -sz, -sz, -sz}, vec3{0,-1,0} },  // bottom
-				Vertex{ vec3{ -sz, -sz,  sz}, vec3{0,-1,0} },  // bottom
+				Vertex{ vec3{  sz,  sz,  sz}, vec3{0,0, 1} , vec2{1,1}},  // front
+				Vertex{ vec3{  sz, -sz,  sz}, vec3{0,0, 1} , vec2{1,0}},  // front
+				Vertex{ vec3{-sz, -sz,  sz}, vec3{0,0, 1}  , vec2{0,0}},  // front
+				Vertex{ vec3{-sz,  sz,  sz}, vec3{0,0, 1}  , vec2{0,1}},  // front
+				Vertex{ vec3{  sz,  sz, -sz}, vec3{0,0,-1} , vec2{1,1}},  // back
+				Vertex{ vec3{  sz, -sz, -sz}, vec3{0,0,-1} , vec2{1,0}},  // back
+				Vertex{ vec3{-sz, -sz, -sz}, vec3{0,0,-1}  , vec2{0,0}},  // back
+				Vertex{ vec3{-sz,  sz, -sz}, vec3{0,0,-1}  , vec2{0,1}},  // back
+				Vertex{ vec3{-sz,  sz,  sz}, vec3{-1,0,0}  , vec2{1,1}},  // left
+				Vertex{ vec3{-sz,  sz, -sz}, vec3{-1,0,0}  , vec2{1,0}},  // left
+				Vertex{ vec3{-sz, -sz, -sz}, vec3{-1,0,0}  , vec2{0,0}},  // left
+				Vertex{ vec3{-sz, -sz,  sz}, vec3{-1,0,0}  , vec2{0,1}},  // left
+				Vertex{ vec3{  sz,  sz,  sz}, vec3{ 1,0,0} , vec2{1,1}},  // right
+				Vertex{ vec3{  sz,  sz, -sz}, vec3{ 1,0,0} , vec2{1,0}},  // right
+				Vertex{ vec3{  sz, -sz, -sz}, vec3{ 1,0,0} , vec2{0,0}},  // right
+				Vertex{ vec3{  sz, -sz,  sz}, vec3{ 1,0,0} , vec2{0,1}},  // right
+				Vertex{ vec3{  sz,  sz,  sz}, vec3{0, 1,0} , vec2{1,1}},  // top
+				Vertex{ vec3{  sz,  sz, -sz}, vec3{0, 1,0} , vec2{1,0}},  // top
+				Vertex{ vec3{ -sz,  sz, -sz}, vec3{0, 1,0} , vec2{0,0}},  // top
+				Vertex{ vec3{ -sz,  sz,  sz}, vec3{0, 1,0} , vec2{0,1}},  // top
+				Vertex{ vec3{  sz, -sz,  sz}, vec3{0,-1,0} , vec2{1,1}},  // bottom
+				Vertex{ vec3{  sz, -sz, -sz}, vec3{0,-1,0} , vec2{1,0}},  // bottom
+				Vertex{ vec3{ -sz, -sz, -sz}, vec3{0,-1,0} , vec2{0,0}},  // bottom
+				Vertex{ vec3{ -sz, -sz,  sz}, vec3{0,-1,0} , vec2{0,1}},  // bottom
 			};
 
 			std::vector<uint16_t> indices{
