@@ -573,7 +573,7 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect vie
 
 	builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
 		{
-			vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+			vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 			vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -648,7 +648,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		blend.src_alpha_blend_factor = BlendFactor::eOne;
 		context.SetBlend(i);
 		context.SetClearColor(i, idk::color{ 0,0,0,0 });
-		//context.SetClearDepthStencil(1.0f);
+		context.SetClearDepthStencil(1.0f);
 		++i;
 	}
 	context.SetViewport(_viewport);
@@ -904,13 +904,14 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 
 		//auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, combine_spec_pass.out_color, combine_spec_pass.out_depth);
 		
+		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", combine_spec_pass, gfx_state.camera.viewport);
+
 		spec_info.model = ShadingModel::Unlit;
 		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),
-			combine_spec_pass.out_color,
+			bloom_pass.bloom_rsc,
 			combine_spec_pass.out_depth
 			).RenderPass();
 
-		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass",combine_spec_pass, gfx_state.camera.viewport);
 		//bloom_pass.bloom_rsc;
 		//bloom_pass.bloom_depth_rsc;
 		return { unlit_pass.color_rsc,unlit_pass.depth_rsc};

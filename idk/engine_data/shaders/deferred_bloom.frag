@@ -24,7 +24,7 @@ void main()
 	
 	
 	
-	
+	frag_color += brightness;
 	vec3 color = ReinhardOperator(frag_color); 
 	out_color = vec4(color,1);
 }
