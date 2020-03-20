@@ -108,13 +108,11 @@ namespace idk
 			}
 		}
 
-		void UnpackGhost(SeqNo index, string_view data, string_view server_guess_data) override
+		void UnpackGhost(SeqNo index, string_view data) override
 		{
 			if (index > last_received)
 			{
-				auto server_guess = parse_binary<T>(server_guess_data);
-				if (server_guess)
-				if (auto val = parse_binary<T>(data))
+				if (auto valid_data = parse_binary<T>(data))
 				{
 					auto retain_move = param.differ(param.getter(), prev_value);
 
@@ -125,13 +123,14 @@ namespace idk
 							accumulated_moves = param.adder(accumulated_moves, elem.move);
 					}
 
-					auto corrected_current_value = param.adder(param.adder(param.differ(*val, *server_guess), accumulated_moves), retain_move);
+					auto current_value_with_unacknowledged_moves = param.adder(*valid_data, accumulated_moves);
+					auto corrected_current_value = param.adder(current_value_with_unacknowledged_moves, retain_move);
 
 					// correct current value
 					param.setter(corrected_current_value);
 
 					// shift the prev value to account for the corrected value
-					prev_value = param.differ(corrected_current_value, retain_move);
+					prev_value = current_value_with_unacknowledged_moves;
 
 					// cleanup
 					last_received = index;

@@ -11,8 +11,8 @@
           <Item Name="[{counter}]">*($T1*)itr</Item>
           <Exec>++itr</Exec>
           <Exec>++counter</Exec>
-          <If Condition="itr == _buf + byte_size">
-            <Exec>itr = _buf</Exec>
+          <If Condition="itr == ($T1*)(_buf + byte_size)">
+            <Exec>itr = ($T1*)_buf</Exec>
           </If>
         </Loop>
       </CustomListItems>

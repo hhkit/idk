@@ -15,7 +15,7 @@ namespace idk
 	struct ElectronView::DerivedParameter
 		: ElectronView::BaseParameter
 	{
-		static constexpr auto RememberedMoves = 8;
+		static constexpr auto RememberedMoves = 64;
 
 		struct DerivedMasterData
 			: MasterData

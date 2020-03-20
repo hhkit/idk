@@ -75,12 +75,12 @@ namespace idk
 		void PrepareDataForSending(SeqNo curr_seq);
 		void MoveGhost(seconds delta);
 		MovePack PackMoveData(SeqNo curr_seq);
-		GhostPack MasterPackData(int incoming_state_mask);
+		GhostPack PackGhostData(int incoming_state_mask);
+		ControlGhost PackServerGuess(int incoming_state_mask, SeqNo curr_seq) const;
 
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
 		void UnpackMoveData(const MovePack& data_pack);
 
-		ControlGhost PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const;
 		void UnpackServerGuess(const ControlGhost&);
 
 		void DumpToLog();
@@ -128,7 +128,7 @@ namespace idk
 			virtual void CalculateMove(SeqNo curr_seq) = 0;
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
 			virtual void ReceiveAcks(span<SeqNo>) = 0;
-			virtual void UnpackGhost(SeqNo index, string_view data, string_view server_guess_data) = 0;
+			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
 			virtual ~ClientObjectData() = default;
 		};

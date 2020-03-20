@@ -64,7 +64,7 @@ namespace idk
 		seconds    _real_dt;
 		seconds    _accumulated_fixed_dt;
 		seconds    _accumulated_network_dt;
-		seconds    _network_update = seconds{ 1.0 / 10 };
+		seconds    _network_update = seconds{ 1.0 / 30 };
 		seconds    _fixed_dt       = seconds{ 1.0 / 60 };
 
 		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];

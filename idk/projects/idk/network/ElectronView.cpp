@@ -133,7 +133,7 @@ namespace idk
 		return move_pack;
 	}
 
-	GhostPack ElectronView::MasterPackData(int incoming_state_mask)
+	GhostPack ElectronView::PackGhostData(int incoming_state_mask)
 	{
 		const auto transmit_state_mask = incoming_state_mask | state_mask;
 		IDK_ASSERT(std::get_if<Master>(&ghost_state));
@@ -156,14 +156,16 @@ namespace idk
 		return retval;
 	}
 
-	ControlGhost ElectronView::PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const
+	ControlGhost ElectronView::PackServerGuess(int incoming_state_mask, SeqNo curr_seq) const
 	{
+		const auto transmit_state_mask = incoming_state_mask | state_mask;
 		ControlGhost retval;
+		retval.network_id = network_id;
 		retval.sequence_number = curr_seq;
 
 		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
-			const auto sm = state_mask & (1 << i);
+			const auto sm = transmit_state_mask & (1 << i);
 			if (sm)
 			{
 				auto& param = parameters[i];
@@ -183,13 +185,18 @@ namespace idk
 	{
 		auto acks = ackfield_to_acks(control_ghost.sequence_number, control_ghost.ackfield);
 
+		auto value_index = 0;
 		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
 			if (control_ghost.state_mask & (1 << i))
 			{
 				auto& param = parameters[i];
+				auto& val = control_ghost.verified_ghost_value[value_index++];
 				if (std::get_if<ClientObject>(&move_state))
+				{
 					param->GetClientObject()->ReceiveAcks(acks);
+					param->GetClientObject()->UnpackGhost(control_ghost.sequence_number, val);
+				}
 			}
 		}
 

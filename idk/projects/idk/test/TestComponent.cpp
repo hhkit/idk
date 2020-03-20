@@ -62,6 +62,7 @@ namespace idk
 			SeqNo clientframe{};
 			SeqNo serverframe{1};
 
+			server_ev.PrepareDataForSending(SeqNo{ 0 });
 			for (unsigned frame = 0; frame < 60; ++frame)
 			{
 				// receive packets
@@ -77,8 +78,8 @@ namespace idk
 				}
 
 				// frame update
-				++client_value;
-				//++server_value; // server prediction
+				//++client_value;
+				++server_value; // server prediction
 
 				// send client packets
 				client_ev.PrepareDataForSending(SeqNo{clientframe});
@@ -89,7 +90,7 @@ namespace idk
 				client_to_server_pack.reset();
 
 				client_to_server_pack = client_ev.PackMoveData(SeqNo{ clientframe });
-				server_to_client_pack = server_ev.PrepareMoveAcknowledgementsAndGuess(SeqNo{ serverframe });
+				server_to_client_pack = server_ev.PackServerGuess(1, SeqNo{ serverframe });
 
 				++clientframe;
 				++serverframe;

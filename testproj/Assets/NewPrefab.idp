@@ -19,7 +19,7 @@ data:
     inv_mass: 1
     is_kinematic: 0
     linear_damping: 1
-    use_gravity: 0
+    use_gravity: 1
   - !Collider 
     bounciness: 0
     dynamic_friction: 0.6
@@ -53,7 +53,7 @@ data:
     sync_rotation: 1
     sync_scale: 0
   - !ElectronRigidbodyView 
-    sync_velocity: 0
+    sync_velocity: 1
   - !MonoBehavior 
     enabled: 1
     script_data: !PlayerController 

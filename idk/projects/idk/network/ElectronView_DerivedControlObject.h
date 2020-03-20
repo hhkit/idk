@@ -61,6 +61,7 @@ namespace idk
 				auto old_val = param.getter();
 				auto move_change = param.differ(real_move, itr->move);
 
+				itr->move = real_move;
 				prev_value = param.adder(prev_value, move_change);
 				param.setter(param.adder(param.getter(), move_change));
 				break;

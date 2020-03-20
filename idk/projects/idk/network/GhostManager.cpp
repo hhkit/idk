@@ -85,7 +85,7 @@ namespace idk
 				continue;
 
 			const bool is_ghost = std::get_if<ElectronView::Master>(&view.ghost_state);
-			const bool is_move_creator = std::get_if<ElectronView::ClientObject>(&view.move_state);
+			const bool is_move_creator = std::get_if<ElectronView::ControlObject>(&view.move_state);
 
 			if (is_ghost || is_move_creator)
 			{
@@ -93,16 +93,16 @@ namespace idk
 				if (auto itr = view_to_state_masks.find(view.GetHandle()); itr != view_to_state_masks.end())
 					retransmit_state_mask = itr->second;
 
-				auto pack = view.MasterPackData(retransmit_state_mask);
 				if (is_move_creator)
 				{
-					auto control_ghost = view.PrepareMoveAcknowledgementsAndGuess(seq);
+					auto control_ghost = view.PackServerGuess(retransmit_state_mask, seq);
 					ghost_moves_and_acks.emplace_back(control_ghost); // acknowledge
 				}
 				else
 				{
 					if (is_ghost)
 					{
+						auto pack = view.PackGhostData(retransmit_state_mask);
 						if (pack.data_packs.size())
 							ghost_packs.emplace_back(std::move(pack));
 					}
