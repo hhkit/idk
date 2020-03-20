@@ -55,7 +55,14 @@ namespace idk
 					[](ResourceManager* resource_man)
 					{
 						if (auto loader = &resource_man->GetFactoryRes<Rs>())
-							resource_man->_default_resources[ResourceID<Rs>] = loader->GenerateDefaultResource();
+						{
+							auto result = loader->GenerateDefaultResource();
+							//Ensure the creation of the slot
+							auto& slot = resource_man->_default_resources[ResourceID<Rs>];
+							//Only set if GenerateDefaultResource returns a valid resource (in case GenerateDefaultResource is gonna load something)
+							if(result)
+								slot = std::move(result);
+						}
 					}...
 				};
 			}

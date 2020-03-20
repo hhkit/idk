@@ -23,20 +23,24 @@ namespace idk::vkn
 	}
 	unique_ptr<RenderTarget> VknRenderTargetFactory::GenerateDefaultResource()
 	{
-		auto& rsc_manager = Core::GetResourceManager();
+		//auto& rsc_manager = Core::GetResourceManager();
+		//
+		////Todo make these default guids
+		//auto ptr = rsc_manager.LoaderEmplaceResource<VknTexture>(default_rt_color_id);
+		//auto depth_ptr = rsc_manager.LoaderEmplaceResource<VknTexture>(default_rt_depth_id);
+		//
+		//auto fb = std::make_unique<VknRenderTarget>();
+		//auto &m = *fb;
 
-		//Todo make these default guids
-		auto ptr = rsc_manager.LoaderEmplaceResource<VknTexture>(default_rt_color_id);
-		auto depth_ptr = rsc_manager.LoaderEmplaceResource<VknTexture>(default_rt_depth_id);
+		auto result = RenderTargetFactory::GenerateDefaultResource();
 
-		auto fb = std::make_unique<VknRenderTarget>();
-		auto &m = *fb;
+		auto& m = *RscHandle<VknRenderTarget>{};
+
 		m.size = uvec2{ Core::GetSystem<Application>().GetScreenSize() };
-		
-		m.SetColorBuffer(RscHandle<Texture>{ptr      });
-		m.SetDepthBuffer(RscHandle<Texture>{depth_ptr});
 
-		return fb;
+		m.Name("Default RenderTarget");
+
+		return result;
 	}
 	unique_ptr<RenderTarget> VknRenderTargetFactory::Create()
 	{

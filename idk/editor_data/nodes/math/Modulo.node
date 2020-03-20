@@ -1,0 +1,6 @@
+float,float->float
+vec2,vec2->vec2
+vec3,vec3->vec3
+vec4,vec4->vec4
+A,B,Out
+{2} = mod({0}, {1});
