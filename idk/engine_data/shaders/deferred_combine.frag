@@ -41,9 +41,9 @@ void main()
 	
 	out_color = vec4(ReinhardOperator(light),1);
 	
-	float brightness = dot(out_color.rgb, vec3(0.45,0.7,0.7));
+	float brightness = dot(light, vec3(0.45,0.68,0.68));
 	 if(brightness > 1.0)
-        out_hdr = vec4(out_color.rgb, 1.0);
+        out_hdr = vec4(light, 1.0);
     else
         out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
 		

@@ -126,6 +126,7 @@ namespace idk::vkn::renderpasses
 	struct BloomPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable bloom_rsc;
+		FrameGraphResourceReadOnly brightness_read_only;
 		//FrameGraphResourceMutable bloom_depth_rsc;
 		CombinePass& combine_rsc;
 

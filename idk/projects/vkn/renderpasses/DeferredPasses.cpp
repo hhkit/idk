@@ -13,6 +13,7 @@
 #include <vkn/LightBinding.h>
 #include <vkn/SkyboxBinding.h>
 
+
 namespace idk::vkn::renderpasses
 {
 	using Context_t = PassUtil::Context_t;
@@ -589,7 +590,7 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect vie
 		}
 	);
 	auto derp1 = builder.read(combine_.out_color);
-	auto derp2 = builder.read(combine_.out_hdr);
+	brightness_read_only = builder.read(combine_.out_hdr);
 
 	builder.set_input_attachment(derp1, 1, AttachmentDescription
 		{
@@ -607,7 +608,7 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect vie
 			//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 			//vk::ComponentMapping mapping{};
 		});
-	builder.set_input_attachment(derp2, 2, AttachmentDescription
+	builder.set_input_attachment(brightness_read_only, 2, AttachmentDescription
 		{
 			vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -624,6 +625,7 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect vie
 			//vk::ComponentMapping mapping{};
 		});
 }
+#pragma optimize("",off)
 void BloomPass::Execute(FrameGraphDetail::Context_t context)
 {
 	context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
@@ -651,6 +653,10 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		context.SetClearDepthStencil(1.0f);
 		++i;
 	}
+	auto hi = context.Resources().Get<VknTextureView>(brightness_read_only.id);
+	
+	context.BindUniform("brightness_input", 0, hi);
+
 	context.SetViewport(_viewport);
 	context.SetScissors(_viewport);
 
