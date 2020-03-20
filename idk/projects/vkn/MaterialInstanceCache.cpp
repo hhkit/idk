@@ -6,7 +6,6 @@
 #include <res/ResourceHandle.inl>
 
 #include <vkn/GraphicsState.h>
-#pragma optimize("",off)
 
 namespace idk::vkn
 {
@@ -121,13 +120,6 @@ namespace idk::vkn
 				(data) ? data->to_span().data() : nullptr,
 				nullptr
 			};
-			for (auto& t : tex->to_span())
-			{
-				if (t.imageView.operator VkImageView() > (VkImageView)0x10000 )
-					DebugBreak();
-			}
-			if (r.descriptorType == vk::DescriptorType::eCombinedImageSampler && r.pImageInfo == nullptr)
-				DebugBreak();
 			return r;
 		}
 	};
