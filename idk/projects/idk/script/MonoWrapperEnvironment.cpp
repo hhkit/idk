@@ -1646,6 +1646,18 @@ namespace idk::mono
 		BIND_END();
 
 		// //////lights////////////////
+		BIND_START("idk.Bindings::LightGetEnabled", bool, Handle<Light> h)
+		{
+			return h->enabled;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetEnabled", void, Handle<Light> h, bool value)
+		{
+			h->enabled = value;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
 		{
 			return h->GetColor();

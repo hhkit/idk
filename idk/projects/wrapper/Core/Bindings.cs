@@ -563,6 +563,12 @@ namespace idk
         * Light
         */
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool LightGetEnabled(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetEnabled(ulong id, bool value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Color LightGetColor(ulong id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
