@@ -655,7 +655,18 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	}
 	auto hi = context.Resources().Get<VknTextureView>(brightness_read_only.id);
 	
-	context.BindUniform("brightness_input", 0, hi);
+	context.BindUniform("brightness_input", 0, hi,false,vk::ImageLayout::eShaderReadOnlyOptimal);
+
+	struct bb {
+		int i = 1;
+	};
+
+	bb ii;
+	string d_block;
+	vector<bb> crap;
+	crap.emplace_back(ii);
+	d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
+	context.BindUniform("blurBlock",0,d_block);
 
 	context.SetViewport(_viewport);
 	context.SetScissors(_viewport);

@@ -5,6 +5,11 @@ layout (input_attachment_index=1, set=2, binding=0) uniform subpassInput color_i
 
 S_LAYOUT(3,1) uniform sampler2D brightness_input;
 
+S_LAYOUT(2,1) uniform BLOCK(blurBlock)
+{
+	int blurdirection;
+} bBlock;
+
 
 layout(location=0) out vec4 out_color;
 
