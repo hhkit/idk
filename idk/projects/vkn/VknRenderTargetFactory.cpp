@@ -10,6 +10,8 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 
+#include <gfx/ColorGrade.h>
+
 namespace idk::vkn
 {
 	
@@ -37,7 +39,7 @@ namespace idk::vkn
 		auto& m = *RscHandle<VknRenderTarget>{};
 
 		m.size = uvec2{ Core::GetSystem<Application>().GetScreenSize() };
-
+		m.ColorGradingLut = RscHandle<Texture>{GetDefaultColorGradeGuid()};
 		m.Name("Default RenderTarget");
 
 		return result;
@@ -55,6 +57,7 @@ namespace idk::vkn
 		m.Size(uvec2{ Core::GetSystem<Application>().GetScreenSize() });
 		m.SetColorBuffer(RscHandle<Texture>{ptr      });
 		m.SetDepthBuffer(RscHandle<Texture>{depth_ptr});
+		m.ColorGradingLut = RscHandle<Texture>{GetDefaultColorGradeGuid()};
 	
 		return fb;
 	}

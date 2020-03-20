@@ -34,6 +34,11 @@ namespace idk
 		return tex_data;
 	}
 
+	Guid GetDefaultColorGradeGuid()
+	{
+		return Guid{ 0xFADAu,0xFADAu,0xFADAu ,0xFADAu };
+	}
+
 	SimpleTexData GenerateRgbDefaultColorGradeTexData(byte default_fill)
 	{
 		return GenerateDefaultColorGradeTexData<3>(default_fill);

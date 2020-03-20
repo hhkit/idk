@@ -8,6 +8,8 @@ layout(location=0) out vec4 out_color;
 layout(location=3) out vec4 out_hdr;
 out float gl_FragDepth;
 
+S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
+
 //(Relative luminance, obtained from wiki)
 float Luminance(vec3 color)
 {
@@ -47,6 +49,24 @@ void main()
     else
         out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
 		
+	//out_color = clamp(out_color,0,1);
+	//	
+	//float tmp_x = out_color.x * 15 ;
+	//float tmp_z1 = floor(out_color.z * 15) ;
+	//float tmp_z2 = ceil(out_color.z * 15)  ;
+	//float tmp_zt  = out_color.z*15-tmp_z1;
+	//float u1 =  (out_color.x/16+tmp_z1/16);
+	//float u2 =  (out_color.x/16+tmp_z2/16);
+	//
+	//int u = int(out_color.x*15) + int(out_color.z*15)*16;
+	//
+	//vec3 c0 = texelFetch(ColCorrectLut[0],ivec2(u,out_color.y*15),0).rgb;//texture(ColCorrectLut[0],vec2(u1,out_color.y)).bbb;
+	//vec3 c1 = texture(ColCorrectLut[0],vec2(u1,out_color.y)).rgb;
+	
+	//out_color = vec4(floor(out_color.rgb*15)/15,1);//abs(ceil(abs(out_color.bbb-c0)*16)-1),1);//mix(c0,c1,tmp_zt),1);
+	//out_color = vec4(c1,1);;
+	//out_color.b -= 1/16.0f;
+	
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 	
 }
