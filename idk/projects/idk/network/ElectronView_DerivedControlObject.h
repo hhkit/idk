@@ -101,7 +101,7 @@ namespace idk
 			}
 			return unpacked_moves;
 		}
-		string AccumulateUnverifiedPredictions() override
+		string GetGhostValue() override
 		{
 			T accum{};
 			for (auto& elem : move_buffer)
@@ -110,7 +110,7 @@ namespace idk
 					continue;
 				accum = param.adder(accum, elem.move);
 			}
-			return serialize_binary(accum);
+			return serialize_binary(param.differ(param.getter(), accum));
 		}
 
 		void VisitMoveBuffer(const BufferVisitor& visit) override

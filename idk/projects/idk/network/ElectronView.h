@@ -77,10 +77,11 @@ namespace idk
 		MovePack PackMoveData(SeqNo curr_seq);
 		GhostPack MasterPackData(int incoming_state_mask);
 
-		MoveAck PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const;
-		void ReceiveMoveAcknowledgements(int statemask, span<SeqNo> sequences);
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
 		void UnpackMoveData(const MovePack& data_pack);
+
+		ControlGhost PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const;
+		void UnpackServerGuess(const ControlGhost&);
 
 		void DumpToLog();
 		span<const unique_ptr<BaseParameter>> GetParameters() const;
@@ -127,7 +128,7 @@ namespace idk
 			virtual void CalculateMove(SeqNo curr_seq) = 0;
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
 			virtual void ReceiveAcks(span<SeqNo>) = 0;
-			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
+			virtual void UnpackGhost(SeqNo index, string_view data, string_view server_guess_data) = 0;
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
 			virtual ~ClientObjectData() = default;
 		};
@@ -142,7 +143,7 @@ namespace idk
 			virtual void RecordPrediction(SeqNo curr_seq) = 0;
 			virtual int UnpackMove(span<const SeqAndPack>) = 0;
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
-			virtual string AccumulateUnverifiedPredictions() = 0;
+			virtual string GetGhostValue() = 0;
 			virtual ~ControlObjectData() = default;
 		};
 

@@ -20,12 +20,13 @@ namespace idk
 		vector<MoveList> packs;
 	};
 
-	struct MoveAck
+	struct ControlGhost
 	{
+		NetworkID network_id;
 		SeqNo sequence_number { };
 		unsigned ackfield     { };
 
 		unsigned state_mask { };
-		vector<string> accumulated_guesses;
+		vector<string> verified_ghost_value;
 	};
 }

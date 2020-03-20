@@ -156,9 +156,9 @@ namespace idk
 		return retval;
 	}
 
-	MoveAck ElectronView::PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const
+	ControlGhost ElectronView::PrepareMoveAcknowledgementsAndGuess(SeqNo curr_seq) const
 	{
-		MoveAck retval;
+		ControlGhost retval;
 		retval.sequence_number = curr_seq;
 
 		for (unsigned i = 0; i < parameters.size(); ++i)
@@ -170,7 +170,7 @@ namespace idk
 				if (std::get_if<ControlObject>(&move_state))
 				{
 					retval.ackfield |= param->GetControlObject()->AcknowledgeMoves(curr_seq);
-					retval.accumulated_guesses.emplace_back(param->GetControlObject()->AccumulateUnverifiedPredictions());
+					retval.verified_ghost_value.emplace_back(param->GetControlObject()->GetGhostValue());
 					retval.state_mask |= sm;
 				}
 			}
@@ -179,15 +179,17 @@ namespace idk
 		return retval;
 	}
 
-	void ElectronView::ReceiveMoveAcknowledgements(int sequence_state_mask, span<SeqNo> sequences)
+	void ElectronView::UnpackServerGuess(const ControlGhost& control_ghost)
 	{
+		auto acks = ackfield_to_acks(control_ghost.sequence_number, control_ghost.ackfield);
+
 		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
-			if (sequence_state_mask & (1 << i))
+			if (control_ghost.state_mask & (1 << i))
 			{
 				auto& param = parameters[i];
 				if (std::get_if<ClientObject>(&move_state))
-					param->GetClientObject()->ReceiveAcks(sequences);
+					param->GetClientObject()->ReceiveAcks(acks);
 			}
 		}
 
@@ -206,8 +208,6 @@ namespace idk
 				auto& pack = ghost_pack.data_packs[pack_index++];
 				if (std::get_if<Ghost>(&ghost_state))
 					param->GetGhost()->UnpackData(sequence_number, pack);
-				if (std::get_if<ClientObject>(&move_state))
-					param->GetClientObject()->UnpackGhost(sequence_number, pack);
 
 			}
 		}
@@ -247,12 +247,12 @@ namespace idk
 
 		void operator()(const vec3& v, SeqNo seq, bool acknowledged)
 		{
-			logger << "[" << seq.value <<"]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x <<"," << v.y <<"," << v.z <<")" << "\n";
+		//	logger << "[" << seq.value <<"]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x <<"," << v.y <<"," << v.z <<")" << "\n";
 		}
 
 		void operator()(const quat& v, SeqNo seq, bool acknowledged)
 		{
-			logger << "[" << seq.value << "]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" << "\n";
+		//	logger << "[" << seq.value << "]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" << "\n";
 		}
 	};
 

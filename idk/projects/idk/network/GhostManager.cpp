@@ -76,7 +76,7 @@ namespace idk
 			}
 		}
 
-		vector<GhostWithMoveAck> ghost_moves_and_acks;
+		vector<ControlGhost> ghost_moves_and_acks;
 		vector<GhostPack> ghost_packs;
 
 		for (auto& view : views)
@@ -96,11 +96,8 @@ namespace idk
 				auto pack = view.MasterPackData(retransmit_state_mask);
 				if (is_move_creator)
 				{
-					GhostWithMoveAck obj{ std::move(pack) };
-					obj.ack = view.PrepareMoveAcknowledgementsAndGuess(seq);
-
-					if (obj.ack.ackfield) // if we have naything to acknowledge
-						ghost_moves_and_acks.emplace_back(std::move(obj)); // acknowledge
+					auto control_ghost = view.PrepareMoveAcknowledgementsAndGuess(seq);
+					ghost_moves_and_acks.emplace_back(control_ghost); // acknowledge
 				}
 				else
 				{

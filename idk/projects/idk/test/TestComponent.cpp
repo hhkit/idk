@@ -43,7 +43,7 @@ namespace idk
 			}
 
 			std::optional<MovePack> client_to_server_pack;
-			std::optional<GhostWithMoveAck> server_to_client_pack;
+			std::optional<ControlGhost> server_to_client_pack;
 
 			// init
 
@@ -59,15 +59,16 @@ namespace idk
 				elem->GetMaster()->last_packed = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 			}
 
+			SeqNo clientframe{};
+			SeqNo serverframe{1};
+
 			for (unsigned frame = 0; frame < 60; ++frame)
 			{
 				// receive packets
 				if (server_to_client_pack)
 				{
 					// drop half the packets
-					auto acks = ackfield_to_acks(server_to_client_pack->ack.sequence_number, server_to_client_pack->ack.ackfield);
-					client_ev.ReceiveMoveAcknowledgements(1, acks);
-					client_ev.UnpackGhostData(SeqNo{ frame - 1 }, *server_to_client_pack);
+					client_ev.UnpackServerGuess(*server_to_client_pack);
 				}
 				if (client_to_server_pack)
 				{
@@ -77,25 +78,21 @@ namespace idk
 
 				// frame update
 				++client_value;
-				++server_value; // server prediction
+				//++server_value; // server prediction
 
 				// send client packets
-				client_ev.PrepareDataForSending(SeqNo{frame});
-				server_ev.PrepareDataForSending(SeqNo{frame});
+				client_ev.PrepareDataForSending(SeqNo{clientframe});
+				server_ev.PrepareDataForSending(SeqNo{serverframe});
 
 
 				server_to_client_pack.reset();
 				client_to_server_pack.reset();
 
-				client_to_server_pack = client_ev.PackMoveData(SeqNo{ frame });
-				auto server_frame = server_ev.PrepareMoveAcknowledgementsAndGuess(SeqNo{ frame });
-				auto server_packs = server_ev.MasterPackData(1);
-				
-				server_to_client_pack = GhostWithMoveAck
-				{
-					server_packs,
-					server_frame
-				};
+				client_to_server_pack = client_ev.PackMoveData(SeqNo{ clientframe });
+				server_to_client_pack = server_ev.PrepareMoveAcknowledgementsAndGuess(SeqNo{ serverframe });
+
+				++clientframe;
+				++serverframe;
 			}
 		}
 

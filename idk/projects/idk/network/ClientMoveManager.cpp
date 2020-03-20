@@ -63,9 +63,7 @@ namespace idk
 		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
 		for (auto& elem : ghost_msg.ghost_packs)
 		{
-			auto net_id = elem.network_id;
-			auto elec_view = id_man.GetViewFromId(net_id);
-			if (elec_view)
+			if (auto elec_view = id_man.GetViewFromId(elem.network_id))
 				elec_view->UnpackGhostData(ghost_msg.sequence_number, elem);
 		}
 
@@ -76,10 +74,8 @@ namespace idk
 		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
 		for (auto& elem : move_msg.objects)
 		{
-			vector<SeqNo> acks = ackfield_to_acks(elem.ack.sequence_number, elem.ack.ackfield);
-			auto eview = id_man.GetViewFromId(elem.network_id);
-			if (eview)
-				eview->ReceiveMoveAcknowledgements(elem.state_mask, acks);
+			if (auto eview = id_man.GetViewFromId(elem.network_id))
+				eview->UnpackServerGuess(elem);
 		}
 	}
 }
