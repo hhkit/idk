@@ -26,6 +26,9 @@ namespace idk::vkn
 		void UpdateDescriptorSets();
 
 		vector<vk::WriteDescriptorSet> write_buffer;
+		vector<vk::DescriptorBufferInfo> b_scratch;
+		vector<vk::DescriptorImageInfo>  i_scratch;
+
 	};
 
 	class MaterialInstanceCache
