@@ -1402,7 +1402,9 @@ namespace idk::mono
 		BIND_END();
 #undef VALIDATE_RESOURCE
 
-#define NAME_OF_RESOURCE(RES) case string_hash(#RES): return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<RES>(guid).Name().data());
+#define NAME_OF_RESOURCE(RES) case string_hash(#RES): { \
+	auto path = Core::GetResourceManager().GetPath(RscHandle<RES>(guid)); auto name = Core::GetResourceManager().Get<RES>(guid).Name(); \
+	return mono_string_new(mono_domain_get(), name.size() ? name.data() : PathHandle{ *path }.GetStem().data()); }
         BIND_START("idk.Bindings::ResourceGetName",  MonoString*, Guid guid, MonoString* type)
         {
             // TODO: make get jumptable...
