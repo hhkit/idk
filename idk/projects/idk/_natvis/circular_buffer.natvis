@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="idk::circular_buffer&lt;*, *&gt;">
+    <DisplayString>[size={_start ==_end ? 0 : (_end > _start ? _end - _start : $T2 - (_end - _start + 1))}]</DisplayString>
+    <Expand>
+      <CustomListItems MaxItemsPerView="32">
+        <Variable Name="counter" InitialValue="0"/>
+        <Variable Name="itr" InitialValue="_start"/>
+        <Loop>
+          <Break Condition="itr == _end"/>
+          <Item Name="[{counter}]">*($T1*)itr</Item>
+          <Exec>++itr</Exec>
+          <Exec>++counter</Exec>
+          <If Condition="itr == _buf + byte_size">
+            <Exec>itr = _buf</Exec>
+          </If>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>
