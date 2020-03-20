@@ -2013,5 +2013,6 @@
     <Natvis Include="_natvis\filesystem.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
+    <Natvis Include="_natvis\circular_buffer.natvis" />
   </ItemGroup>
 </Project>
