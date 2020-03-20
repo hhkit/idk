@@ -6,6 +6,7 @@
 #include <res/ResourceHandle.inl>
 
 #include <vkn/GraphicsState.h>
+#pragma optimize("",off)
 
 namespace idk::vkn
 {
@@ -77,7 +78,7 @@ namespace idk::vkn
 		vk::DescriptorType type;
 		uint32_t binding;
 		std::optional<vector_span<vk::DescriptorBufferInfo>> data;
-		std::optional<vector_span<vk::DescriptorImageInfo>> tex;
+		std::optional<vector_span<vk::DescriptorImageInfo> > tex;
 
 
 		void SetData(vk::Buffer buffer, size_t offset, size_t size, vector_span_builder< vk::DescriptorBufferInfo> builder)
@@ -120,6 +121,11 @@ namespace idk::vkn
 				(data) ? data->to_span().data() : nullptr,
 				nullptr
 			};
+			for (auto& t : tex->to_span())
+			{
+				if (t.imageView.operator VkImageView() > (VkImageView)0x10000 )
+					DebugBreak();
+			}
 			if (r.descriptorType == vk::DescriptorType::eCombinedImageSampler && r.pImageInfo == nullptr)
 				DebugBreak();
 			return r;
@@ -293,12 +299,48 @@ namespace idk::vkn
 	void DsUpdater::associate(vk::DescriptorSet ds, const BindingData& binding)
 	{
 		write_buffer.emplace_back(binding.GetWriteInfo(ds));
-	}
 
+		auto& write_info = write_buffer.back();
+		if (write_info.pBufferInfo)
+		{
+			auto offset = b_scratch.size();
+			std::copy(write_info.pBufferInfo, write_info.pBufferInfo + write_info.descriptorCount, std::back_inserter(b_scratch));
+			write_info.pBufferInfo = (vk::DescriptorBufferInfo*) offset;
+		}
+
+		if (write_info.pImageInfo)
+		{
+			auto offset = i_scratch.size();
+			std::copy(write_info.pImageInfo, write_info.pImageInfo + write_info.descriptorCount, std::back_inserter(i_scratch));
+			write_info.pImageInfo = (vk::DescriptorImageInfo*) offset;
+		}
+
+	}
 	void DsUpdater::UpdateDescriptorSets()
 	{
+		for (auto& write_info : write_buffer)
+		{
+			if (write_info.descriptorType == vk::DescriptorType::eUniformBuffer
+				||
+				write_info.descriptorType == vk::DescriptorType::eStorageBuffer
+				||
+				write_info.descriptorType == vk::DescriptorType::eUniformBufferDynamic
+				|| 
+				write_info.descriptorType == vk::DescriptorType::eStorageBufferDynamic)
+			{
+				write_info.pBufferInfo = b_scratch.data() +  (size_t)write_info.pBufferInfo;
+			}
+
+			if (write_info.descriptorType == vk::DescriptorType::eCombinedImageSampler)
+			{
+				write_info.pImageInfo = i_scratch.data() + (size_t)write_info.pImageInfo;
+			}
+			
+		}
 		View().Device()->updateDescriptorSets(write_buffer, {});
 		write_buffer.clear();
+		b_scratch.clear();
+		i_scratch.clear();
 	}
 
 }
