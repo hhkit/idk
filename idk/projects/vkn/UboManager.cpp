@@ -149,7 +149,7 @@ namespace idk::vkn
 	bool UboManager::DataPair::CanAdd(size_t len) const
 	{
 		aaaa2++;
-		if (data.size() > 65536)
+		if (data.size() > block_size+initial_offset)
 			throw;
 		return collator.can_allocate(Aligned(len, sz_alignment), alignment);
 		return block_size >= 
@@ -168,7 +168,6 @@ namespace idk::vkn
 		auto padding = std::min(block_size-data.size(),AlignmentOffset());
 		data.append(padding, 0);
 	}
-	uint32_t aaaa = 0;
 	bool operator==(index_span lhs, index_span rhs)
 	{
 		return lhs._begin == rhs._begin && lhs._end == rhs._end;
@@ -177,11 +176,12 @@ namespace idk::vkn
 	{
 		if (collator.free_range == collator.full_range)
 		{
+			//Initial offset to ensure that the memory we are dealing with is aligned
 			initial_offset = InitialOffset(data.data(), alignment);
+			data.resize(block_size+initial_offset);
 		}
 
 		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
-		aaaa++;
 		if (!opt)
 			throw;
 		auto [unaligned_offset,aligned_offset] = *opt;
@@ -189,10 +189,10 @@ namespace idk::vkn
 		if(aligned_offset - unaligned_offset!=0)
 			collator.mark_freed({ unaligned_offset,aligned_offset });
 
-		data.resize(block_size);
+		auto actual_offset = initial_offset + aligned_offset;
 		if (len+ aligned_offset > 65536)
 			throw;
-		memcpy_s(data.data() +initial_offset+ aligned_offset, data.capacity()-(initial_offset + aligned_offset), data_, len);
+		memcpy_s(data.data() +actual_offset, data.size()-actual_offset, data_, len);
 		return static_cast<uint32_t>(aligned_offset);
 	}
 
