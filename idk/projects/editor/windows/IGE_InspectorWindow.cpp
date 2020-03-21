@@ -1321,6 +1321,7 @@ namespace idk {
                     {
                         val = variant_construct<T>(new_ind);
                         changed = true;
+                        changed_and_deactivated = true;
                     }
 
                     recurse = true;
