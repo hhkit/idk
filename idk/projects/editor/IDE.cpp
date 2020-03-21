@@ -633,7 +633,7 @@ namespace idk
 	void IDE::SetupEditorScene()
 	{
 		// create editor view
-		_editor_view = Core::GetResourceManager().Create<RenderTarget>();
+		_editor_view = *Core::GetResourceManager().Load<RenderTarget>("/editor_data/graphics/editor_camera.rtis");
 		auto sz = _editor_view->Size();
 		_editor_view->Size(uvec2{ Core::GetSystem<Application>().GetScreenSize() });
 		//this->FindWindow<IGE_Console>()->PushMessage(std::to_string(sz.x) + "," + std::to_string(sz.y));

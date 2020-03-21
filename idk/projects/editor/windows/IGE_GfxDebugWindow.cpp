@@ -108,21 +108,29 @@ namespace idk
 		{
 			RscHandle<RenderTarget>{}->Srgb(srgb);
 		}
+		auto& ide = Core::GetSystem<IDE>();
 		if (ImGui::Button("Select Default Render Target"))
 		{
-			Core::GetSystem<IDE>().SelectAsset(RscHandle<RenderTarget>{}, false, true);
+			ide.SelectAsset(RscHandle<RenderTarget>{}, false, true);
 		}
-		ImGui::InputText("LUT Save path: ", &_pimpl->lut_path);
-		if (ImGui::Button("Save Default Color Grade LUT"))
+		if (ImGui::Button("Select Editor Render Target"))
 		{
-			auto cg_lut = GenerateRgbDefaultColorGradeTexData();
-			auto data = TGAWriter::SaveTGA(cg_lut);
-			std::ofstream file{ _pimpl->lut_path,std::ios::binary | std::ios::out | std::ios::trunc };
-			if(file)
-				file<<std::string{ reinterpret_cast<const char*>(data.data()), std::size(data) }<<std::flush;
-			file.close();
+			ide.SelectAsset(ide.GetEditorCamera()->render_target, false, true);
 		}
-		RenderExtraVars(Core::GetSystem<GraphicsSystem>().extra_vars);
+		if (ImGui::CollapsingHeader("More Gfx Debug Stuff"))
+		{
+			ImGui::InputText("LUT Save path: ", &_pimpl->lut_path);
+			if (ImGui::Button("Save Default Color Grade LUT"))
+			{
+				auto cg_lut = GenerateRgbDefaultColorGradeTexData();
+				auto data = TGAWriter::SaveTGA(cg_lut);
+				std::ofstream file{ _pimpl->lut_path,std::ios::binary | std::ios::out | std::ios::trunc };
+				if(file)
+					file<<std::string{ reinterpret_cast<const char*>(data.data()), std::size(data) }<<std::flush;
+				file.close();
+			}
+			RenderExtraVars(Core::GetSystem<GraphicsSystem>().extra_vars);
+		}
 	}
 //#pragma optimize("",off)
 	void RenderLifetimeStuff(std::string& dump,const gfxdbg::FgRscLifetimes& lifetimes)
@@ -268,12 +276,14 @@ namespace idk
 
 	void IGE_GfxDebugWindow::RenderExtraVars(ExtraVars& extra_vars)
 	{
+		if (!ImGui::CollapsingHeader("ExtraVars"))
+			return;
 		ImGui::Checkbox("Show Hidden: ", &_pimpl->show_hidden);
 		for (auto& [name, value] : extra_vars)
 		{
 			ExtraVars::variant_t& v = value;
 			std::variant<string_view> str = name;
-			if (!_pimpl->show_hidden &&(!name.empty() || name[0] == '_')) //Skip if name starts with underscore (hidden)
+			if (!_pimpl->show_hidden &&(name.empty() || name[0] == '_')) //Skip if name starts with underscore (hidden)
 			{
 				continue;
 			}
