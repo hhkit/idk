@@ -47,7 +47,7 @@ namespace idk::vkn
 		TexCreateInfo tci =
 		{
 			color_grade_data.dimensions.x,color_grade_data.dimensions.y,
-			ToSrgb(MapFormat(TextureFormat::eRGBA32)),
+			MapFormat(TextureFormat::eRGBA32),
 			vk::ImageUsageFlagBits::eSampled,
 			1,
 			vk::ImageAspectFlagBits::eColor,
@@ -57,13 +57,13 @@ namespace idk::vkn
 		{
 			color_grade_data.data.data(),
 			hlp::buffer_size(color_grade_data.data),
-			ToSrgb(MapFormat(TextureFormat::eRGBA32))
+			MapFormat(TextureFormat::eRGBA32)
 		};
 		ptr->Name(" Default Color Grade LUT");
 		TextureOptions to{};
-		//to.input_is_srgb = true;
-		//to.uv_mode = UVMode::Clamp;
-		//to.filter_mode = FilterMode::Nearest;
+		to.input_is_srgb = false;
+		to.uv_mode = UVMode::Clamp;
+		to.filter_mode = FilterMode::Nearest;
 		loader.LoadTexture(*ptr, _allocator, *_fence, to, tci, input_info);
 		
 	}
