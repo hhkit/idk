@@ -101,10 +101,13 @@ namespace idk
 
                 for (auto handle_i : all_handles)
                 {
-                    auto name = handle_i->Name();
-                    auto path = Core::GetResourceManager().GetPath(handle_i);
-                    auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
-                    table.emplace(str, handle_i);
+					if (handle_i && &*handle_i) //Ignore invalid handles
+					{
+						auto name = handle_i->Name();
+						auto path = Core::GetResourceManager().GetPath(handle_i);
+						auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
+						table.emplace(str, handle_i);
+					}
                 }
 
                 const T& default_res = *RscHandle<T>();
