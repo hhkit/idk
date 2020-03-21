@@ -39,7 +39,8 @@ namespace idk::vkn
 		auto& m = *RscHandle<VknRenderTarget>{};
 
 		m.size = uvec2{ Core::GetSystem<Application>().GetScreenSize() };
-		m.ColorGradingLut = RscHandle<Texture>{GetDefaultColorGradeGuid()};
+		if (m.ColorGradingLut == RscHandle<Texture>{})
+			m.ColorGradingLut = RscHandle<Texture>{GetDefaultColorGradeGuid()};
 		m.Name("Default RenderTarget");
 
 		return result;
