@@ -35,6 +35,44 @@ vec3 ReinhardOperator(vec3 color)
 	float L = Luminance(color.rgb); 
 	return color/(L+1);
 }
+vec3 sizeSpace(vec3 coords)
+{
+	return coords*15;
+}
+
+vec3 directSample(ivec3 sizeSpace)
+{
+	ivec2 uv = ivec2(sizeSpace.x + sizeSpace.z*16,sizeSpace.y);
+	vec3 result = texelFetch(ColCorrectLut[0],uv,0).rgb;
+	return result;//pow(result,vec3(1/1.01));
+}
+vec3 interp(vec3 c0, vec3 c1, float t)
+{
+	//t = smoothstep(0,1,t);
+	return (1-t)*c0+t*c1;
+}
+vec3 linearSample(ivec3 p0, ivec3 p1, float t)
+{
+	vec3 c0 =directSample(p0);
+	vec3 c1 = directSample(p1);
+	return interp(c0,c1,t);
+}
+vec3 bilinearSample(ivec3 p, ivec3 d0, ivec3 d1, vec2 uv)
+{
+	vec3 c0=linearSample(p,p+d0,uv.x);
+	vec3 c1=linearSample(p+d1,p+d1+d0,uv.x);
+	return interp(c0,c1,uv.y);
+}
+vec3 trilinearSample(ivec3 p, ivec3 d0, ivec3 d1, ivec3 d2, vec3 uvw)
+{
+	vec3 c0=bilinearSample(p,d0,d2,uvw.xz);
+	vec3 c1=bilinearSample(p+d1,d0,d2,uvw.xz);
+	return interp(c0,c1,uvw.y);
+}
+
+
+
+
 
 void main()
 {
@@ -49,24 +87,25 @@ void main()
     else
         out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
 		
-	//out_color = clamp(out_color,0,1);
-	//	
-	//float tmp_x = out_color.x * 15 ;
-	//float tmp_z1 = floor(out_color.z * 15) ;
-	//float tmp_z2 = ceil(out_color.z * 15)  ;
-	//float tmp_zt  = out_color.z*15-tmp_z1;
-	//float u1 =  (out_color.x/16+tmp_z1/16);
-	//float u2 =  (out_color.x/16+tmp_z2/16);
-	//
-	//int u = int(out_color.x*15) + int(out_color.z*15)*16;
-	//
-	//vec3 c0 = texelFetch(ColCorrectLut[0],ivec2(u,out_color.y*15),0).rgb;//texture(ColCorrectLut[0],vec2(u1,out_color.y)).bbb;
-	//vec3 c1 = texture(ColCorrectLut[0],vec2(u1,out_color.y)).rgb;
+	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
-	//out_color = vec4(floor(out_color.rgb*15)/15,1);//abs(ceil(abs(out_color.bbb-c0)*16)-1),1);//mix(c0,c1,tmp_zt),1);
-	//out_color = vec4(c1,1);;
-	//out_color.b -= 1/16.0f;
+	vec3 og = out_color.rgb;
+	vec3 p = sizeSpace(og);
+	vec3 p0 =floor(p);
+	vec3 p1 =ceil(p);
+	ivec3 ip0 = ivec3(p0);
+	ivec3 ip1 = ivec3(p1);
 	
+	vec3 t = (p - p0);// /(p1-p0);
+	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
+	//out_color.rgb = abs(out_color.rgb-og);
+	//float err = 0.000000059604645;
+	//if(out_color.r<=err)
+	//	out_color.r=1;
+	//if(out_color.g<=err)
+	//	out_color.g=1;
+	//if(out_color.b<=err)
+	//	out_color.b=1;
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 	
 }
