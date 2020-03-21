@@ -49,7 +49,12 @@ namespace idk::vkn
 	void DdsLoader::LoadTexture(VknTexture& tex, string_view entire_file, const TextureOptions& to)
 	{
 		DdsFile dds{ entire_file };
-
+		if (dds.File().magic[0] != 'D' ||
+			dds.File().magic[1] != 'D' ||
+			dds.File().magic[2] != 'S' ||
+			dds.File().magic[3] != ' '
+			)
+			throw std::runtime_error("Invalid DDS");
 		InputTexInfo iti;
 		iti.data = dds.Data().data();
 		iti.len = dds.size();

@@ -45,7 +45,7 @@ namespace idk::vkn
 	};
 	struct DdsFileInternal
 	{
-		uint32_t magic;
+		char magic[4];
 		DdsHeader header;
 		char  data[1]; //To represent the start of the data.
 		BlockType GetBlockType()const;
