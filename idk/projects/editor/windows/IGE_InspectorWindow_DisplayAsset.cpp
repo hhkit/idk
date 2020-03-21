@@ -77,7 +77,14 @@ namespace idk
 
                     if (!asset_displayed && h && DisplayVal(*h))
                         h->Dirty();
-
+					if constexpr (!ResT::autosave)
+					{
+						if(ImGui::Button("Save", ImVec2{60,20}))
+						{
+							h->Dirty();
+							Core::GetResourceManager().Save(h);
+						}
+					}
                 }
                 catch (...)
                 {
