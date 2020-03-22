@@ -3,6 +3,7 @@
 #include <core/Component.h>
 #include <ds/sliding_window.inl>
 #include <network/network.h>
+#include <network/ElectronView.h>
 
 namespace idk
 {
@@ -21,5 +22,7 @@ namespace idk
 		Handle<ElectronView> GetView() const;
 
 		void Start();
+	private:
+		
 	};
 }

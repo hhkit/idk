@@ -11,7 +11,6 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ObjectValidate(ulong handle);
 
-
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ObjectDestroy(ulong handle);
 
@@ -794,5 +793,13 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ViewDestroy(ulong handle);
 
+        /*
+         * ElectronRigidBody
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ElectronRigidBodySetVelocity(ulong handle, Vector3 value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ElectronRigidBodyAddForce(ulong handle, Vector3 value);
     }
 }

@@ -915,7 +915,7 @@ namespace idk
 
                     if (is_client_obj)
                     {
-                        ImGui::Text("Move Producer");
+                        ImGui::Text("Move Object");
 
                         elem->GetClientObject()->VisitMoveBuffer([](auto move, SeqNo seq)
                             {
@@ -927,7 +927,6 @@ namespace idk
                                 if constexpr (std::is_same_v<T, vec3>)
                                 {
                                     ImGui::DragFloat3("", move.data());
-                                    ImGui::SameLine();
                                 }
                             });
                     }
@@ -944,7 +943,6 @@ namespace idk
                                 if constexpr (std::is_same_v<T, vec3>)
                                 {
                                     ImGui::DragFloat3("", move.data());
-                                    ImGui::SameLine();
                                 }
                             });
                     }

@@ -78,6 +78,15 @@ namespace idk
 
 	void ElectronView::MoveGhost(seconds delta)
 	{
+		if (std::get_if<ControlObject>(&move_state))
+		{
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				param->GetControlObject()->ApplyMove();
+			}
+		}
+
 		if (std::get_if<Ghost>(&ghost_state))
 		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
@@ -190,7 +199,7 @@ namespace idk
 
 		~MoveBuffLogger()
 		{
-			LOG_TO(LogPool::NETWORK, logger.str().data());
+		//	LOG_TO(LogPool::NETWORK, logger.str().data());
 		}
 
 		template<typename T>

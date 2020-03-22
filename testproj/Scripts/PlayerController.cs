@@ -19,6 +19,7 @@ namespace TestAndSeek
 
         RigidBody rb;
         ElectronView ev;
+        ElectronRigidbodyView erbv;
 
         internal bool transfer = false;
         internal Client p = null;
@@ -50,6 +51,7 @@ namespace TestAndSeek
         {
             rb = GetComponent<RigidBody>();
             ev = GetComponent<ElectronView>();
+            erbv = GetComponent<ElectronRigidbodyView>();
         }
 
         void OnTriggerEnter(Collider other)
@@ -91,7 +93,7 @@ namespace TestAndSeek
                         transform.rotation = Quaternion.AngleAxis(-rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
 
                     if (Input.GetKey(KeyCode.W))
-                        rb.velocity = transform.forward * move_speed;
+                        erbv.velocity = transform.forward * move_speed;
 
                     if (jump_count > 0)
                     {
@@ -99,7 +101,7 @@ namespace TestAndSeek
                         {
                             --jump_count;
                             StartCoroutine(JumpCooldown());
-                            rb.AddForce(Vector3.up * jump_force);
+                            erbv.AddForce(Vector3.up * jump_force);
                         }
                     }
                 }
@@ -112,7 +114,7 @@ namespace TestAndSeek
                         transform.rotation = Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.deltaTime, Vector3.up) * transform.rotation;
 
                     if (Input.GetKey(KeyCode.W))
-                        rb.velocity = transform.forward * move_speed * air_move_control;
+                        erbv.velocity = transform.forward * move_speed * air_move_control;
                 }
             }
         }

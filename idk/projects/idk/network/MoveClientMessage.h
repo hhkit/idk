@@ -28,7 +28,9 @@ namespace idk
 				serialize_vector_count(stream, elem.packs, 32);
 				for (auto& pack : elem.packs)
 				{
-					serialize_vector_count(stream, pack, 3);
+					if (pack.size() > 3)
+						throw;
+					serialize_vector_count(stream, pack, 4);
 					for (auto& seq_and_pack : pack)
 					{
 						serialize_int(stream, seq_and_pack.seq.value, 0, SeqNo::max_value);

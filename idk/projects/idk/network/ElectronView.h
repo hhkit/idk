@@ -78,7 +78,7 @@ namespace idk
 		span<const unique_ptr<BaseParameter>> GetParameters() const;
 
 		template<typename T>
-		ParameterImpl<T>& RegisterMember(string_view name, ParameterImpl<T> param, float interp = 1.f);
+		BaseParameter* RegisterMember(string_view name, ParameterImpl<T> param, float interp = 1.f);
 	private:
 		template<typename T>
 		struct DerivedParameter;
@@ -120,7 +120,7 @@ namespace idk
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
 
 			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
-			virtual void Update(real ghost_bias = 0.3f) = 0;
+			virtual void Update(real ghost_bias = 0.03f) = 0;
 
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
 			virtual ~MoveObjectData() = default;

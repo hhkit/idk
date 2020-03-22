@@ -2176,5 +2176,17 @@ namespace idk::mono
 			event_manager->SendRPC(ev, unbox(method_name).get(), param_vec);
 		}
 		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronRigidBodySetVelocity", void, Handle<ElectronRigidbodyView> e_rb, vec3 val)
+		{
+			e_rb->SetVelocity(val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronRigidBodyAddForce", void, Handle<ElectronRigidbodyView> e_rb, vec3 force)
+		{
+			e_rb->AddForce(force);
+		}
+		BIND_END();
 	}
 }

@@ -44,6 +44,8 @@ namespace idk
 						move_buffer.emplace_back(new_entry);
 
 						latest_move = elem.seq;
+
+						++unpacked_moves;
 					}
 				}
 			}
