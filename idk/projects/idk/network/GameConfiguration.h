@@ -16,7 +16,6 @@ namespace idk
 	,	class GhostMessage
 	,	class GhostAcknowledgementMessage
 	,	class MoveClientMessage
-	,	class MoveAcknowledgementMessage
 	>;
 
 	static constexpr auto MessageCount = std::tuple_size_v<NetworkMessageTuple>;

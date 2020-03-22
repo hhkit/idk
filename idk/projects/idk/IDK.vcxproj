@@ -56,7 +56,6 @@
     <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
     <ClInclude Include="network\GhostAcknowledgementMessage.h" />
-    <ClInclude Include="network\MoveAcknowledgementMessage.h" />
     <ClInclude Include="network\MovePack.h" />
     <ClInclude Include="network\ElectronAnimatorView.h" />
     <ClInclude Include="network\EventDestroyObjectMessage.h" />

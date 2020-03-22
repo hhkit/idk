@@ -25,14 +25,4 @@ namespace idk
 		unsigned state_mask{};
 		vector<MoveList> packs;
 	};
-
-	struct ControlGhost
-	{
-		NetworkID network_id;
-		SeqNo sequence_number { };
-		unsigned ackfield     { };
-
-		unsigned state_mask { };
-		vector<string> verified_ghost_value;
-	};
 }

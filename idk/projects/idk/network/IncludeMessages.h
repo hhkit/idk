@@ -10,4 +10,3 @@
 #include <network/GhostMessage.h>
 #include <network/GhostAcknowledgementMessage.h>
 #include <network/MoveClientMessage.h>
-#include <network/MoveAcknowledgementMessage.h>

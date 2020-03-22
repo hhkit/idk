@@ -917,7 +917,7 @@ namespace idk
                     {
                         ImGui::Text("Move Producer");
 
-                        elem->GetClientObject()->VisitMoveBuffer([](auto move, SeqNo seq, bool ack)
+                        elem->GetClientObject()->VisitMoveBuffer([](auto move, SeqNo seq)
                             {
                                 using T = std::decay_t<decltype(move)>;
 
@@ -929,14 +929,12 @@ namespace idk
                                     ImGui::DragFloat3("", move.data());
                                     ImGui::SameLine();
                                 }
-
-                                ImGui::Checkbox("", &ack);
                             });
                     }
                     if (is_control_obj)
                     {
                         ImGui::Text("Control Object");
-                        elem->GetControlObject()->VisitMoveBuffer([](auto move, SeqNo seq, bool ack)
+                        elem->GetControlObject()->VisitMoveBuffer([](auto move, SeqNo seq)
                             {
                                 using T = std::decay_t<decltype(move)>;
 
@@ -948,7 +946,6 @@ namespace idk
                                     ImGui::DragFloat3("", move.data());
                                     ImGui::SameLine();
                                 }
-                                ImGui::Checkbox("##asdasad", &ack);
                             });
                     }
                 }

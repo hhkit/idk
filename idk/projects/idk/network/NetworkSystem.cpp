@@ -172,8 +172,7 @@ namespace idk
 	{
 		for (auto& ev : electron_views)
 		{
-			if (std::get_if<ElectronView::Ghost>(&ev.ghost_state))
-				ev.MoveGhost(Core::GetRealDT());
+			ev.MoveGhost(Core::GetRealDT());
 		}
 	}
 

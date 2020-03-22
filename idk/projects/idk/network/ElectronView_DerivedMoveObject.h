@@ -51,11 +51,13 @@ namespace idk
 					break;
 
 				case SeqAndPack::delta_move: 
+				{
 					auto& back = buffer.back();
 					back.move = param.adder(back.move, val);
 					param.setter(back.move);
 					// if the previous move was a set move, we compound the delta but remain a set move
 					break;
+				}
 				default:
 					break;
 				}
@@ -101,10 +103,10 @@ namespace idk
 			param.setter(param.interpolator(param.getter(), ghost_value, ghost_bias));
 		}
 
-		void VisitMoveBuffer(const BufferVisitor& visit) override
+		void VisitMoveBuffer(const BufferVisitor& visit) 
 		{
 			for (auto& elem : buffer)
-				visit(elem.move, elem.seq, elem.acknowledged);
+				visit(elem.move, elem.seq);
 		}
 	};
 }

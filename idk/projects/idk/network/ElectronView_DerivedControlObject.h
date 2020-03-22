@@ -74,7 +74,7 @@ namespace idk
 		void VisitMoveBuffer(const BufferVisitor& visit) override
 		{
 			for (auto& elem : move_buffer)
-				visit(elem.move, elem.seq, elem.verified);
+				visit(elem.move, elem.seq);
 		}
 	};
 }

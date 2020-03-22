@@ -1213,7 +1213,6 @@
       <Filter>network\messages</Filter>
     </ClInclude>
     <ClInclude Include="network\SeqNo.h" />
-    <ClInclude Include="network\MoveAcknowledgementMessage.h" />
     <ClInclude Include="network\ack_utils.h" />
     <ClInclude Include="meta\erased_visitor.h" />
     <ClInclude Include="network\ElectronView_DerivedControlObject.h" />

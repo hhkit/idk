@@ -89,6 +89,16 @@ namespace idk
 					param->GetGhost()->Update(1.f);
 			}
 		}
+
+		if (std::get_if<MoveObject>(&move_state))
+		{
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				param->GetClientObject()->Update();
+			}
+
+		}
 	}
 
 	MovePack ElectronView::PackMoveData(SeqNo curr_seq)
