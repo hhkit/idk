@@ -37,7 +37,7 @@ namespace idk::vkn
 
 	void VulkanTextureFactory::Init()
 	{
-		constexpr Guid color_grade_id = {0xFADAu,0xFADAu,0xFADAu ,0xFADAu };
+		const Guid color_grade_id = GetDefaultColorGradeGuid();
 		auto color_grade_data = GenerateRgbaDefaultColorGradeTexData();
 
 		auto ptr = Core::GetResourceManager().LoaderEmplaceResource<VknTexture>(color_grade_id);
@@ -63,6 +63,7 @@ namespace idk::vkn
 		TextureOptions to{};
 		to.input_is_srgb = false;
 		to.uv_mode = UVMode::Clamp;
+		to.filter_mode = FilterMode::Nearest;
 		loader.LoadTexture(*ptr, _allocator, *_fence, to, tci, input_info);
 		
 	}

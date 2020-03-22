@@ -57,7 +57,6 @@ void main()
 	out_uv_metallic_roughness = vec4(fs_in.uv,specular,roughness);
 	out_view_pos = vec4(fs_in.position,0.0f);
 	out_normal = vec4(normal,0.0f);
-	out_tangent = vec4(tangent,0.0f);
 	out_emissive = vec4(emissive,0.0f);
 	
 }
