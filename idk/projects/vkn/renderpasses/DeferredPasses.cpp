@@ -608,22 +608,22 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect vie
 			//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 			//vk::ComponentMapping mapping{};
 		});
-	builder.set_input_attachment(brightness_read_only, 2, AttachmentDescription
-		{
-			vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-			vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-			vk::ImageSubresourceRange
-			{
-				vk::ImageAspectFlagBits::eColor,0,1,0,1
-			},//vk::ImageSubresourceRange sub_resource_range{};
-			//std::optional<vk::ClearValue> clear_value;
-			//std::optional<vk::Format> format{};
-			//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-			//vk::ComponentMapping mapping{};
-		});
+	//builder.set_input_attachment(brightness_read_only, 2, AttachmentDescription
+	//	{
+	//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+	//		vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+	//		vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+	//		vk::ImageSubresourceRange
+	//		{
+	//			vk::ImageAspectFlagBits::eColor,0,1,0,1
+	//		},//vk::ImageSubresourceRange sub_resource_range{};
+	//		//std::optional<vk::ClearValue> clear_value;
+	//		//std::optional<vk::Format> format{};
+	//		//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+	//		//vk::ComponentMapping mapping{};
+	//	});
 }
 #pragma optimize("",off)
 void BloomPass::Execute(FrameGraphDetail::Context_t context)
@@ -651,11 +651,12 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		context.SetBlend(i);
 		context.SetClearColor(i, idk::color{ 0,0,0,0 });
 		context.SetClearDepthStencil(1.0f);
+		context.attachment_offset = -1;
 		++i;
 	}
 	auto hi = context.Resources().Get<VknTextureView>(brightness_read_only.id);
 	
-	context.BindUniform("brightness_input", 0, hi,false,vk::ImageLayout::eShaderReadOnlyOptimal);
+	context.BindUniform("brightness_input", 0, hi);
 
 	struct bb {
 		int i = 1;
