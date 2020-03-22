@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 
 namespace idk
 {
@@ -14,7 +15,7 @@ namespace idk
 		};
 
 		ParameterImpl<T>& param;
-		circular_buffer<SeqAndMove, RememberedMoves> buffer;
+		std::deque<SeqAndMove> buffer;
 		T ghost_value;
 
 		DerivedMoveObjectData(ParameterImpl<T>& impl)
@@ -37,31 +38,37 @@ namespace idk
 			new_move.seq = curr_seq;
 			new_move.move_type = move_type;
 			new_move.move = val;
-
+			
 			if (buffer.empty() || buffer.back().seq < curr_seq)
 				buffer.emplace_back(new_move);
 			else
 			{
-				switch (move_type)
+				if (buffer.back().seq == curr_seq)
 				{
-				case SeqAndPack::set_move:
-					// if the previous move this frame was a delta move, we change it to a set move
-					param.setter(val);
-					buffer.back() = new_move;
-					break;
+					switch (move_type)
+					{
+					case SeqAndPack::set_move:
+						// if the previous move this frame was a delta move, we change it to a set move
+						param.setter(val);
+						buffer.back() = new_move;
+						break;
 
-				case SeqAndPack::delta_move: 
-				{
-					auto& back = buffer.back();
-					back.move = param.adder(back.move, val);
-					param.setter(back.move);
-					// if the previous move was a set move, we compound the delta but remain a set move
-					break;
-				}
-				default:
-					break;
+					case SeqAndPack::delta_move:
+					{
+						auto& back = buffer.back();
+						back.move = param.adder(back.move, val);
+						param.setter(back.move);
+						// if the previous move was a set move, we compound the delta but remain a set move
+						break;
+					}
+					default:
+						break;
+					}
 				}
 			}
+
+			if (buffer.size() > 4)
+				throw;
 		}
 
 		small_vector<SeqAndPack> PackData(SeqNo curr_seq) override

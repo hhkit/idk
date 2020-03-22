@@ -37,9 +37,10 @@ namespace idk
 	{
 		return _instance->_pimpl->_scheduler->GetFixedDeltaTime();
 	}
+
 	seconds Core::GetRealDT()
 	{
-		return _instance->_pimpl->_scheduler->GetDeltaTime();
+		return _instance->_pimpl->_scheduler->GetRealDeltaTime();
 	}
 
 	GameState& Core::GetGameState() { return _instance->_pimpl->_game_state; }
@@ -100,7 +101,7 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::UpdatePredictions,     "Network prediction");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkPredict>(&NetworkSystem::UpdatePredictions,     "Network prediction");
 
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")

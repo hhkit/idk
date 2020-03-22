@@ -71,7 +71,7 @@ namespace idk
 
             gamepad.SetRumble(0, gamepad.GetAxis(0, GamepadAxis::LeftStickY), gamepad.GetAxis(0, GamepadAxis::RightStickY));
 
-			elem.NetworkUpdate();
+		//	elem.NetworkUpdate();
 			//auto rb = elem.GetGameObject()->GetComponent<RigidBody>();
 			//if (rb)
 			//	rb->AddForce(vec3{ 1, 0, 0 } * sin(rad{t / 0.01f}));

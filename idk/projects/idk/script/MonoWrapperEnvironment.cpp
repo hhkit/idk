@@ -1752,7 +1752,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TimeGetDelta",  float)
 			{
-				return Core::GetScheduler().GetDeltaTime().count();
+				return Core::GetScheduler().GetRealDeltaTime().count();
 			}
 		BIND_END();
 

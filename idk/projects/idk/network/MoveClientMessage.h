@@ -28,8 +28,6 @@ namespace idk
 				serialize_vector_count(stream, elem.packs, 32);
 				for (auto& pack : elem.packs)
 				{
-					if (pack.size() > 3)
-						throw;
 					serialize_vector_count(stream, pack, 4);
 					for (auto& seq_and_pack : pack)
 					{

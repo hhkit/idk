@@ -25,6 +25,7 @@ namespace idk
 
 		void Init(SeqNo initial_frame) override
 		{
+			latest_move = initial_frame;
 		}
 
 		__declspec(noinline) int UnpackMove(span<const SeqAndPack> packs)

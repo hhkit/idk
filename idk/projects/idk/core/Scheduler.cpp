@@ -14,7 +14,7 @@ namespace idk
 	{
 
 		_last_frame = _this_frame = Clock::now();
-		_accumulated_network_dt = _accumulated_fixed_dt = seconds{};
+		_accumulated_predict_dt = _accumulated_network_dt = _accumulated_fixed_dt = seconds{};
 	}
 	void Scheduler::SequentialUpdate()
 	{
@@ -23,6 +23,7 @@ namespace idk
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
 		_accumulated_network_dt += _real_dt;
+		_accumulated_predict_dt += _real_dt;
 		_accumulated_fixed_dt += std::min(_real_dt, dt_limit) * time_scale;
 
 		constexpr auto execute_pass = [](auto& pass_vector)
@@ -46,6 +47,12 @@ namespace idk
 			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
+
+		if (_accumulated_predict_dt > _predict_dt)
+		{
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkPredict)]);
+			_accumulated_predict_dt -= _predict_dt;
+		}
 
 		while (_accumulated_fixed_dt > _fixed_dt)
 		{
@@ -75,7 +82,8 @@ namespace idk
 	{
 		return _fixed_dt;
 	}
-	seconds Scheduler::GetDeltaTime()noexcept
+
+	seconds Scheduler::GetRealDeltaTime()noexcept
 	{
 		return _real_dt * time_scale;
 	}

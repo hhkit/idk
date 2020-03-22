@@ -13,6 +13,7 @@ namespace idk
 	enum class UpdatePhase
 	{
 		FrameStart,
+		NetworkPredict,
 		MainUpdate,
 		Fixed,
 		NetworkTickStart,
@@ -47,7 +48,7 @@ namespace idk
 		template<typename ... Ts>
 		void SetPauseState(PausedSystemConfig<Ts...>);
 		seconds GetFixedDeltaTime()noexcept;
-		seconds GetDeltaTime()noexcept;
+		seconds GetRealDeltaTime()noexcept;
 		seconds GetUnscaledDeltaTime() noexcept;
 		seconds GetRemainingTime() noexcept;
 		seconds GetNetworkTick() const noexcept { return _network_update; }
@@ -63,8 +64,11 @@ namespace idk
 		time_point _this_frame;
 		seconds    _real_dt;
 		seconds    _accumulated_fixed_dt;
+		seconds    _accumulated_game_dt;
 		seconds    _accumulated_network_dt;
+		seconds    _accumulated_predict_dt;
 		seconds    _network_update = seconds{ 1.0 / 30 };
+		seconds    _predict_dt     = seconds{ 1.0 / 60 };
 		seconds    _fixed_dt       = seconds{ 1.0 / 60 };
 
 		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];
