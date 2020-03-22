@@ -898,7 +898,7 @@ namespace idk
         ImGui::Text("Network ID: %d", c_ev->network_id);
         ImGui::Text("Network Frame: %d", Core::GetSystem<NetworkSystem>().GetSequenceNumber());
 
-        const bool is_client_obj = std::get_if<ElectronView::ClientObject>(&c_ev->move_state);
+        const bool is_client_obj = std::get_if<ElectronView::MoveObject>(&c_ev->move_state);
         const bool is_control_obj = std::get_if<ElectronView::ControlObject>(&c_ev->move_state);
 
         for (auto& elem : c_ev->GetParameters())

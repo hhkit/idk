@@ -52,7 +52,7 @@
     <ClInclude Include="gfx\AttachmentViewType.h" />
     <ClInclude Include="meta\erased_visitor.h" />
     <ClInclude Include="network\ack_utils.h" />
-    <ClInclude Include="network\ElectronView_DerivedClientObject.h" />
+    <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
     <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
     <ClInclude Include="network\GhostAcknowledgementMessage.h" />

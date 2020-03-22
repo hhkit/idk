@@ -208,6 +208,18 @@ namespace idk
 	}
 
 	template<typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::reference circular_buffer<T, SZ>::back()
+	{
+		return (*this)[size() - 1];
+	}
+
+	template<typename T, size_t SZ>
+	typename circular_buffer<T, SZ>::const_reference circular_buffer<T, SZ>::back() const
+	{
+		return (*this)[size() - 1];
+	}
+
+	template<typename T, size_t SZ>
 	typename circular_buffer<T, SZ>::reference circular_buffer<T, SZ>::operator[](size_t index)
 	{
 		auto buf_end = reinterpret_cast<pointer>(std::end(_buf));

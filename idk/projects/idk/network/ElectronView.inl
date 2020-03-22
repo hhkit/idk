@@ -95,13 +95,13 @@ namespace idk
 
 		};
 
-		struct DerivedClientObjectData;
+		struct DerivedMoveObjectData;
 		struct DerivedControlObjectData;
 
 		ParameterImpl<T> param;
 		DerivedMasterData master_data;
 		DerivedGhostData  ghost_data;
-		DerivedClientObjectData client_object_data;
+		DerivedMoveObjectData client_object_data;
 		DerivedControlObjectData control_object_data;
 
 		DerivedParameter(ParameterImpl<T> param_impl)
@@ -115,7 +115,7 @@ namespace idk
 		}
 
 		DerivedControlObjectData* GetControlObject() override { return &control_object_data; }
-		DerivedClientObjectData* GetClientObject() override { return &client_object_data; };
+		DerivedMoveObjectData* GetClientObject() override { return &client_object_data; };
 		DerivedMasterData* GetMaster() override { return &master_data; }
 		DerivedGhostData*  GetGhost()  override { return &ghost_data; }
 	};
@@ -131,5 +131,5 @@ namespace idk
 	}
 }
 
-#include <network/ElectronView_DerivedClientObject.h>
+#include <network/ElectronView_DerivedMoveObject.h>
 #include <network/ElectronView_DerivedControlObject.h>

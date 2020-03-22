@@ -8,12 +8,7 @@
 
 namespace idk
 {
-	enum class PredictionFunction
-	{
-		None,
-		Linear,
-		Quadratic,
-	};
+	using SyncableValue = variant<int, vec3, quat>;
 
 	template<typename T>
 	struct ParameterImpl
@@ -26,7 +21,6 @@ namespace idk
 		function <T(const T&, const T&)>       adder  = [](const T& lhs, const T& rhs) -> T { return lhs + rhs; };
 		function<bool(const T&, const T&)>     equater = std::equal_to<T>{};
 		function<bool(const T&, const T&)>     send_condition = std::not_equal_to<T>{};
-		PredictionFunction                     predict_func = PredictionFunction::Linear;
 
 		ParameterImpl();
 
@@ -46,7 +40,7 @@ namespace idk
 		struct Master {};        // master object for the server. server owns this regardless of object ownership
 		struct Ghost  {};         // ghost object for clients
 
-		struct ClientObject {};  // when the client owns the object, the move_state is placed into clientobject
+		struct MoveObject {};  // when the client owns the object, the move_state is placed into clientobject
 		struct ControlObject {}; // the server holds the controlobject
 
 		ElectronView() = default;
@@ -63,7 +57,7 @@ namespace idk
 		Host owner = Host::SERVER;
 
 		variant<monostate, Master, Ghost> ghost_state;
-		variant<monostate, ClientObject, ControlObject> move_state;
+		variant<monostate, MoveObject, ControlObject> move_state;
 
 		bool IsMine() const;
 
@@ -76,12 +70,9 @@ namespace idk
 		void MoveGhost(seconds delta);
 		MovePack PackMoveData(SeqNo curr_seq);
 		GhostPack PackGhostData(int incoming_state_mask);
-		ControlGhost PackServerGuess(int incoming_state_mask, SeqNo curr_seq) const;
 
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
 		void UnpackMoveData(const MovePack& data_pack);
-
-		void UnpackServerGuess(const ControlGhost&);
 
 		void DumpToLog();
 		span<const unique_ptr<BaseParameter>> GetParameters() const;
@@ -117,42 +108,42 @@ namespace idk
 		};
 
 		// move data
-		struct ClientObjectData
+		struct MoveObjectData
 		{
 			// SequenceNumber, acknowledgement state, move
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool), void(int, SeqNo, bool)>;
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo)>;
 
 			SeqNo last_received;
 
-			virtual void Init() = 0;
-			virtual void CalculateMove(SeqNo curr_seq) = 0;
+			virtual void Init(SeqNo initial_frame) = 0;
+			virtual void PushMove(SeqNo curr_seq, int move_type, const SyncableValue&) = 0;
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
-			virtual void ReceiveAcks(span<SeqNo>) = 0;
+
 			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
+			virtual void Update(real ghost_bias = 0.3f) = 0;
+
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
-			virtual ~ClientObjectData() = default;
+			virtual ~MoveObjectData() = default;
 		};
 
 		struct ControlObjectData
 		{
 			// SequenceNumber, guess verification state, guess
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo, bool), void(quat, SeqNo, bool), void(int, SeqNo, bool)>;
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo)>;
 
-			virtual void Init() = 0;
-			virtual unsigned AcknowledgeMoves(SeqNo curr_seq) = 0;
-			virtual void RecordPrediction(SeqNo curr_seq) = 0;
-			virtual int UnpackMove(span<const SeqAndPack>) = 0;
+			virtual void Init(SeqNo initial_frame) = 0;
+			virtual int  UnpackMove(span<const SeqAndPack>) = 0;
+			virtual void ApplyMove() = 0;
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
-			virtual string GetGhostValue() = 0;
 			virtual ~ControlObjectData() = default;
 		};
 
 		string param_name;
 		real   interp_over = 0.2f;
 
-		virtual MasterData*        GetMaster() = 0;
 		virtual GhostData*         GetGhost() = 0;
-		virtual ClientObjectData*  GetClientObject() = 0;
+		virtual MasterData*        GetMaster() = 0;
+		virtual MoveObjectData*    GetClientObject() = 0;
 		virtual ControlObjectData* GetControlObject() = 0;
 		virtual ~BaseParameter() = default;
 	};

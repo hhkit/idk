@@ -76,7 +76,6 @@ namespace idk
 			}
 		}
 
-		vector<ControlGhost> ghost_moves_and_acks;
 		vector<GhostPack> ghost_packs;
 
 		for (auto& view : views)
@@ -85,28 +84,17 @@ namespace idk
 				continue;
 
 			const bool is_ghost = std::get_if<ElectronView::Master>(&view.ghost_state);
-			const bool is_move_creator = std::get_if<ElectronView::ControlObject>(&view.move_state);
 
-			if (is_ghost || is_move_creator)
+			// recompose state mask
+			auto retransmit_state_mask = 0;
+			if (auto itr = view_to_state_masks.find(view.GetHandle()); itr != view_to_state_masks.end())
+				retransmit_state_mask = itr->second;
+
+			if (is_ghost)
 			{
-				auto retransmit_state_mask = 0;
-				if (auto itr = view_to_state_masks.find(view.GetHandle()); itr != view_to_state_masks.end())
-					retransmit_state_mask = itr->second;
-
-				if (is_move_creator)
-				{
-					auto control_ghost = view.PackServerGuess(retransmit_state_mask, seq);
-					ghost_moves_and_acks.emplace_back(control_ghost); // acknowledge
-				}
-				else
-				{
-					if (is_ghost)
-					{
-						auto pack = view.PackGhostData(retransmit_state_mask);
-						if (pack.data_packs.size())
-							ghost_packs.emplace_back(std::move(pack));
-					}
-				}
+				auto pack = view.PackGhostData(retransmit_state_mask);
+				if (pack.data_packs.size())
+					ghost_packs.emplace_back(std::move(pack));
 			}
 		}
 
@@ -128,25 +116,6 @@ namespace idk
 					msg.ghost_packs = std::move(ghost_packs);
 				});
 		}
-
-		if (ghost_moves_and_acks.size())
-		{
-			{
-				GhostPacketInfo transmission_rec;
-				transmission_rec.sequence_number = seq;
-				transmission_rec.send_time = now;
-				for (auto& elem : ghost_moves_and_acks)
-					transmission_rec.entries.emplace_back(GhostEntry{ id_man.GetViewFromId(elem.network_id) , elem.state_mask });
-
-				transmission_record.emplace_back(std::move(transmission_rec));
-			}
-
-			connection_manager->CreateAndSendMessage<MoveAcknowledgementMessage>
-				(GameChannel::UNRELIABLE, [&](MoveAcknowledgementMessage& msg)
-					{
-						msg.objects = std::move(ghost_moves_and_acks);
-					});
-		}
 	}
 
 
@@ -161,10 +130,7 @@ namespace idk
 			if (const auto view = id_man.GetViewFromId(pack.network_id))
 			{
 				// push the ghost data into the view
-				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))
-					continue;
-
-				if (std::get_if<ElectronView::ClientObject>(&view->move_state))
+				if (std::get_if<ElectronView::Master>(&view->ghost_state))
 					continue;
 
 				view->UnpackGhostData(seq, pack);

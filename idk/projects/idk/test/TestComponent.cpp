@@ -25,7 +25,7 @@ namespace idk
 			ElectronView client_ev, server_ev;
 			{
 				client_ev.ghost_state = std::monostate{};
-				client_ev.move_state = ElectronView::ClientObject{};
+				client_ev.move_state = ElectronView::MoveObject{};
 
 				ParameterImpl<int> test_param;
 				test_param.setter = [&](int val) { client_value = val; };

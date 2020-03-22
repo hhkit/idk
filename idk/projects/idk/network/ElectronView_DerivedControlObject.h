@@ -11,107 +11,64 @@ namespace idk
 		{
 			SeqNo seq;
 			T move;
-			bool verified = false;
+			int move_type;
 		};
 
 		ParameterImpl<T>& param;
-		T prev_value;
 		circular_buffer<SeqAndObj, RememberedMoves> move_buffer;
+		SeqNo latest_move;
 
 		DerivedControlObjectData(ParameterImpl<T>& impl)
 			: param{ impl }
 		{
-			prev_value = param.getter();
 		}
 
-		void Init() override
+		void Init(SeqNo initial_frame) override
 		{
-			prev_value = param.getter();
-		}
-
-		unsigned AcknowledgeMoves(SeqNo curr_seq) override
-		{
-			vector<SeqNo> ack_us;
-
-			for (auto& elem : move_buffer)
-			{
-				if (elem.verified)
-					ack_us.emplace_back(elem.seq);
-			}
-
-			return acks_to_ackfield(curr_seq, ack_us);
-		}
-
-		__declspec(noinline) void RecordPrediction(SeqNo curr_seq) override
-		{
-			auto curr_value = param.getter();
-			auto new_move = param.differ(curr_value, prev_value);
-			prev_value = curr_value;
-
-			move_buffer.emplace_back(SeqAndObj{ curr_seq, new_move });
-		}
-
-		void ApplyCorrection(typename circular_buffer<SeqAndObj, RememberedMoves>::iterator itr, const T& real_move)
-		{
-			switch (param.predict_func)
-			{
-			case PredictionFunction::Quadratic:
-			case PredictionFunction::Linear:
-			{
-				auto old_val = param.getter();
-				auto move_change = param.differ(real_move, itr->move);
-
-				itr->move = real_move;
-				prev_value = param.adder(prev_value, move_change);
-				param.setter(param.adder(param.getter(), move_change));
-				break;
-			}
-			};
-
 		}
 
 		__declspec(noinline) int UnpackMove(span<const SeqAndPack> packs)
 		{
 			int unpacked_moves = 0;
+			// assume the packs are in order
 			for (auto& elem : packs)
 			{
-				if (auto unpacked_move = parse_binary<T>(elem.pack))
+				if (move_buffer.empty() || latest_move < elem.seq)
 				{
-					auto& real_move = *unpacked_move;
-
-					// compare with move
-					// if necessary, displace existing data
-					for (auto itr = move_buffer.begin(); itr != move_buffer.end(); ++itr)
+					if (auto unpacked_move = parse_binary<T>(elem.pack))
 					{
-						auto& prediction = *itr;
-						if (prediction.verified)
-							continue;
+						SeqAndObj new_entry;
+						new_entry.seq = elem.seq;
+						new_entry.move = *unpacked_move;
+						new_entry.move_type = elem.move_type;
+						move_buffer.emplace_back(new_entry);
 
-						if (prediction.seq == elem.seq)
-						{
-							// if prediction was wrong
-							if (!param.equater(prediction.move, real_move))
-								ApplyCorrection(itr, real_move);
-
-							itr->verified = true;
-							++unpacked_moves;
-							break;
-						}
+						latest_move = elem.seq;
 					}
 				}
 			}
 			return unpacked_moves;
 		}
-		string GetGhostValue() override
+
+		void ApplyMove() override
 		{
-			T accum{};
-			for (auto& elem : move_buffer)
+			if (move_buffer.size())
 			{
-				if (elem.verified)
-					continue;
-				accum = param.adder(accum, elem.move);
+				auto apply_move = move_buffer.front();
+				switch (apply_move.move_type)
+				{
+				case SeqAndPack::set_move:
+					param.setter(apply_move.move);
+					break;
+				case SeqAndPack::delta_move:
+					param.setter(param.adder(param.getter(), apply_move.move));
+					break;
+				default:
+					break;
+				}
+
+				move_buffer.pop_front();
 			}
-			return serialize_binary(param.differ(param.getter(), accum));
 		}
 
 		void VisitMoveBuffer(const BufferVisitor& visit) override

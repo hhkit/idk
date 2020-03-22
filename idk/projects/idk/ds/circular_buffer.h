@@ -48,6 +48,8 @@ namespace idk
 		// accessors
 		reference front();
 		const_reference front() const;
+		reference back();
+		const_reference back() const;
 		reference operator[](size_t index);
 		const_reference operator[](size_t index) const;
 		constexpr bool empty() const noexcept;
