@@ -32,7 +32,7 @@
 	REFLECT_ENUM(idk::AntiAliasing, "AntiAliasing")
 
 	REFLECT_BEGIN(idk::Texture::Metadata, "TextureMeta")
-	REFLECT_VARS(uv_mode, internal_format, filter_mode, is_srgb)
+	REFLECT_VARS(uv_mode, internal_format, filter_mode, is_srgb, force_uncompressed)
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::RenderTarget, "RenderTarget")

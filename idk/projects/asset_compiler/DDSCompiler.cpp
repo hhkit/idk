@@ -44,7 +44,7 @@ namespace idk
 		t.is_srgb = t_meta.is_srgb;
 		t.filter_mode = t_meta.filter_mode;
 		t.pixel_buffer = std::move(binary_data);
-
+		t.force_uncompiled = t_meta.force_uncompressed;
 		return AssetBundle{ updated_meta_bundle, {{ t_guid, std::move(t)} } };
 	}
 }

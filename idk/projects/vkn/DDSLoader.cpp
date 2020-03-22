@@ -46,6 +46,30 @@ namespace idk::vkn
 		while (i > 0 && !((d >> i)>=4))--i; //Decrease mipmap count
 		return i;
 	}
+
+	vk::ComponentSwizzle MaskToSwizzle(uint32_t mask)
+	{
+		vk::ComponentSwizzle result{ vk::ComponentSwizzle::eIdentity };
+		switch (mask)
+		{
+		case 0x000000FF:
+			result =  vk::ComponentSwizzle::eR;
+			break;
+		case 0x0000FF00:
+			result =  vk::ComponentSwizzle::eG;
+			break;
+		case 0x00FF0000:
+			result =  vk::ComponentSwizzle::eB;
+			break;
+		case 0xFF000000:
+			result =  vk::ComponentSwizzle::eA;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
 	void DdsLoader::LoadTexture(VknTexture& tex, string_view entire_file, const TextureOptions& to)
 	{
 		DdsFile dds{ entire_file };
@@ -70,6 +94,7 @@ namespace idk::vkn
 		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width, tci.height);
 		tci.internal_format = iti.format;// MapFormat(to.internal_format);
 		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
+		tci.component_mapping = vk::ComponentMapping{MaskToSwizzle(dds.File().header.pf.rBitMask),MaskToSwizzle(dds.File().header.pf.gBitMask),MaskToSwizzle(dds.File().header.pf.bBitMask),MaskToSwizzle(dds.File().header.pf.aBitMask) };
 
 		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti,to.guid);
 	}
@@ -111,7 +136,8 @@ namespace idk::vkn
 		{ "DXT4",BlockType::eBC3 },
 		{ "DXT5",BlockType::eBC3 },
 		};
-		string format_str = GetFormatString();
+		auto&& fmt_cstr = GetFormatString();
+		string format_str{ fmt_cstr,std::size(fmt_cstr) };
 		auto itr = map.find(format_str);
 		return (itr == map.end()) ? BlockType::eNone : itr->second;
 	}
