@@ -110,8 +110,9 @@ namespace idk
 	{
 		for (auto& elem : objs)
 		{
-			if (elem.HierarchyIsQueuedForDestruction())
-				GameState::GetGameState().DestroyObject(elem.GetHandle());
+			if (elem.IsQueuedForDestruction())
+				_scene_graph.GetHandle(elem.GetHandle()).Visit(
+					[](Handle<GameObject> h, int) { GameState::GetGameState().DestroyObject(h); });
 		}
 		GameState::GetGameState().DestroyQueue();
 		GameState::GetGameState().FlushCreationQueue();

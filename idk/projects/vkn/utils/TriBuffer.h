@@ -10,7 +10,6 @@ namespace idk::vkn
 
 	struct TriBuffer {
 		vector<hlp::UniqueAlloc     > allocs{};
-		vector<vk::Image            > images{};
 		vector<vk::UniqueImageView  > image_views{};
 		vector<PresentationSignals>	  pSignals{};
 		bool						  enabled{true};
@@ -29,6 +28,10 @@ namespace idk::vkn
 		void CreatePresentationSignals(VulkanView&  view);
 
 		void CreateImagePool(VulkanView& view);
+		const vector<vk::Image            >& Images()const;
+		void Images(vector<vk::Image            >&& imgs);
+	private:
+		vector<vk::Image            > images{};
 
 	};
 };

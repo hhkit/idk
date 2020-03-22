@@ -417,7 +417,71 @@ namespace idk
          * AudioSystem
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void AudioSystemSetVolume(float newVolume);
+        public extern static void AudioSystemSetMASTERVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetMASTERVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetSFXVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetSFXVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetMUSICVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetMUSICVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetAMBIENTVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetAMBIENTVolume();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetDIALOGUEVolume(float newVolume);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float AudioSystemGetDIALOGUEVolume();
+
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetMASTERPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetMASTERPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetSFXPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetSFXPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetMUSICPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetMUSICPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetAMBIENTPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetAMBIENTPause();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AudioSystemSetDIALOGUEPause(bool newState);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool AudioSystemGetDIALOGUEPause();
+
+
+
+
+
+
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSystemStopAll();
@@ -498,6 +562,12 @@ namespace idk
         /*
         * Light
         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool LightGetEnabled(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void LightSetEnabled(ulong id, bool value);
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Color LightGetColor(ulong id);
 

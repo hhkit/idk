@@ -4,6 +4,8 @@
 #include <gfx/pipeline_config.h>
 #include <gfx/uniform_info.h>
 
+#include <vkn/ManagedVulkanObjs.h>
+
 namespace idk::vkn
 {
 	class ShaderModule;
@@ -12,8 +14,8 @@ namespace idk::vkn
 		using Vulkan_t     = VulkanView;
 		using config_t     = pipeline_config;
 
-		vk::UniquePipelineLayout pipelinelayout{};
-		vk::UniquePipeline       pipeline{};
+		VulkanRsc<vk::PipelineLayout> pipelinelayout{};
+		VulkanRsc<vk::Pipeline>       pipeline{};
 		vk::Pipeline Pipeline()const;
 		vk::PipelineLayout PipelineLayout()const;
 		

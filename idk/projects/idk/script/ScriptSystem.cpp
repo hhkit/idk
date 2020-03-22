@@ -114,6 +114,7 @@ namespace idk::mono
 
 	void ScriptSystem::ScriptStart(span<Behavior> behaviors)
 	{
+		GameState::GetGameState().FlushCreationQueue();
 		for (auto& elem : behaviors)
 			elem.Awake();
 
@@ -124,6 +125,7 @@ namespace idk::mono
 	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
 	{
 		IDK_ASSERT(run_scripts);
+		GameState::GetGameState().FlushCreationQueue();
 		for (auto& elem : behaviors)
 			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
 				elem.FixedUpdate();
@@ -132,6 +134,7 @@ namespace idk::mono
 	void ScriptSystem::ScriptUpdate(span<Behavior> behaviors)
 	{
 		IDK_ASSERT(run_scripts);
+		GameState::GetGameState().FlushCreationQueue();
 		for (auto& elem : behaviors)
 			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
 				elem.Update();
@@ -139,6 +142,7 @@ namespace idk::mono
 
 	void ScriptSystem::ScriptPausedUpdate(span<Behavior> behaviors)
 	{
+		GameState::GetGameState().FlushCreationQueue();
 		if (run_scripts)
 			for (auto& elem : behaviors)
 				if (elem.enabled && elem.GetHandle().scene != Scene::prefab)

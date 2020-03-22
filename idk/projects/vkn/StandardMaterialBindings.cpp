@@ -4,7 +4,7 @@
 #include <vkn/GraphicsState.h>
 #include <vkn/BufferHelpers.inl>
 #include <res/ResourceHandle.inl>
-
+#include <vkn/ShaderModule.h>
 #include <vkn/MaterialInstanceCache.h>
 
 namespace idk::vkn::bindings
@@ -15,11 +15,16 @@ namespace idk::vkn::bindings
 		auto& mat = *mat_inst.material;
 		the_interface.BindShader(ShaderStage::Fragment, mat._shader_program);
 	}
+	bool StandardMaterialBindings::Skip(RenderInterface& , const RenderObject& dc)
+	{
+		return !p_cached_mat_insts->IsCached(dc.material_instance)||!dc.material_instance->material || !dc.material_instance->material->_shader_program || !dc.material_instance->material->_shader_program.as<ShaderModule>().HasCurrent();
+	}
 	//// 
 		//Assumes that the material is valid.
 	void StandardMaterialBindings::Bind(RenderInterface& the_interface, const RenderObject& dc)
 	{
 		//Bind the material uniforms
+		//auto& material_instances = *p_material_instances;
 		{
 			if (dc.material_instance != prev_material_inst)
 			{

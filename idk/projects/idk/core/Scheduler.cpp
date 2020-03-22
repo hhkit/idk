@@ -90,6 +90,10 @@ namespace idk
 	{
 		return _program_start;
 	}
+	seconds Scheduler::GetTimeSinceStart() noexcept
+	{
+		return _this_frame - _program_start;
+	}
 	span<Scheduler::Pass> Scheduler::GetPasses(UpdatePhase phase)noexcept
 	{
 		return span<Pass>(_passes[s_cast<size_t>(phase)]);

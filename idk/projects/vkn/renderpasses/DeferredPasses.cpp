@@ -413,6 +413,8 @@ namespace idk::vkn::renderpasses
 
 		auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
 		BindMesh(context, fsq_requirements, mesh);
+		
+		context.BindUniform("ColCorrectLut", 0, color_correction_lut);
 
 		//DrawFSQ
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
@@ -977,6 +979,7 @@ namespace idk::vkn::renderpasses
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_def = graph.addRenderPass<AccumPassSetPair>("Accum pass Default", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_def).RenderPass();
 		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, cube_clear.depth);
+		combine_def_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		auto spec_info = info;
 		spec_info.model = ShadingModel::Specular;
@@ -986,6 +989,7 @@ namespace idk::vkn::renderpasses
 
 
 		auto& combine_spec_pass = graph.addRenderPass<CombinePass>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, combine_def_pass.out_color, combine_def_pass.out_depth);
+		combine_spec_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		//auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, combine_spec_pass.out_color, combine_spec_pass.out_depth);
 		

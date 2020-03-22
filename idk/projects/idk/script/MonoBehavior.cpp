@@ -57,7 +57,7 @@ namespace idk::mono
 
 	void Behavior::Start()
 	{
-		if (!_started && script_data)
+		if (enabled && !_started && script_data)
 		{
 			_started = true;
 			if (auto method = script_data.Type()->GetThunk("Start"))
@@ -67,7 +67,7 @@ namespace idk::mono
 
 	void Behavior::FixedUpdate()
 	{
-		if (enabled && script_data)
+		if (enabled && _started && script_data)
 		{
 			if (auto method = script_data.Type()->GetThunk("FixedUpdate"))
 				method->Invoke(script_data.Raw());
@@ -76,7 +76,7 @@ namespace idk::mono
 
 	void Behavior::Update()
 	{
-		if (enabled && script_data)
+		if (enabled && _started && script_data)
 		{
 			if (auto method = script_data.Type()->GetThunk("Update"))
 				method->Invoke(script_data.Raw());

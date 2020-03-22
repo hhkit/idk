@@ -68,18 +68,49 @@ namespace idk
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
             ImGui::Separator();
 
-            DisplayAsset(h);
+            bool asset_displayed = DisplayAsset(h);
 
-            if constexpr (has_tag_v<ResT, MetaResource>)
+            if constexpr (has_tag_v<ResT, Saveable>)
             {
-                if (DisplayVal(h->GetMeta()))
-                    h->DirtyMeta();
+                try
+                {
+
+                    if (!asset_displayed && h && DisplayVal(*h))
+                        h->Dirty();
+					if constexpr (!ResT::autosave)
+					{
+						if(ImGui::Button("Save", ImVec2{60,20}))
+						{
+							h->Dirty();
+							Core::GetResourceManager().Save(h);
+						}
+					}
+                }
+                catch (...)
+                {
+                    LOG_ERROR_TO(LogPool::EDIT, "Error while attempting to display Saveable asset.");
+                }
+            }
+            else
+            {
+                UNREFERENCED_PARAMETER(asset_displayed);
+                if constexpr (has_tag_v<ResT, MetaResource>)
+                {
+                    if (DisplayVal(h->GetMeta()))
+                        h->DirtyMeta();
+                }
             }
         }, handle);
     }
+    //template<> bool IGE_InspectorWindow::DisplayAsset(RscHandle<RenderTarget> render_target)
+    //{
+    //    if (DisplayVal(*render_target))
+    //        render_target->Dirty();
+    //    return true;
+    //}
 
     template<>
-    void IGE_InspectorWindow::DisplayAsset(RscHandle<Prefab> prefab)
+    bool IGE_InspectorWindow::DisplayAsset(RscHandle<Prefab> prefab)
     {
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y + 2.0f);
         auto iter = _prefab_store.find(prefab);
@@ -95,10 +126,11 @@ namespace idk
             iter->second->GetComponent<PrefabInstance>()->removed_components.size() ||
             iter->second->GetComponents().size() > prefab->data[0].components.size() + 1) // + 1 for prefab instance
             PrefabUtility::ApplyPrefabInstance(iter->second);
+        return true;
     }
 
     template<>
-    void IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material_inst)
+    bool IGE_InspectorWindow::DisplayAsset(RscHandle<MaterialInstance> material_inst)
     {
         const float item_width = ImGui::GetWindowContentRegionWidth() * default_item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
@@ -212,17 +244,18 @@ namespace idk
         ImGui::PopItemWidth();
         ImGui::EndChild();
         ImGui::Unindent();
+        return true;
     }
 
     template<>
-    void IGE_InspectorWindow::DisplayAsset(RscHandle<Material> material)
+    bool IGE_InspectorWindow::DisplayAsset(RscHandle<Material> material)
     {
         const float item_width = ImGui::GetWindowContentRegionWidth() * default_item_width_ratio;
         const float pad_y = ImGui::GetStyle().FramePadding.y;
 
         auto graph = RscHandle<shadergraph::Graph>{ material };
         if (!graph)
-            return;
+            return true;
 
         ImGui::Indent(8.0f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
@@ -233,10 +266,11 @@ namespace idk
 
         ImGui::EndChild();
         ImGui::Unindent();
+        return true;
     }
 
     template<>
-    void IGE_InspectorWindow::DisplayAsset(RscHandle<Texture> texture)
+    bool IGE_InspectorWindow::DisplayAsset(RscHandle<Texture> texture)
     {
         void* id = texture->ID();
         vec2 sz = ImGui::GetContentRegionAvail();
@@ -252,10 +286,11 @@ namespace idk
 
         if (id)
             ImGui::Image(id, sz);
+        return true;
     }
 
 	template<>
-	void IGE_InspectorWindow::DisplayAsset(RscHandle<FontAtlas> texture)
+	bool IGE_InspectorWindow::DisplayAsset(RscHandle<FontAtlas> texture)
 	{
 		void* id = texture->ID();
 		vec2 sz = ImGui::GetContentRegionAvail();
@@ -271,6 +306,7 @@ namespace idk
 
 		if (id)
 			ImGui::Image(id, sz);
+        return true;
 	}
 
 }

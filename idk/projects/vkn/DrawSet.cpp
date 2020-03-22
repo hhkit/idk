@@ -41,27 +41,20 @@ namespace idk::vkn
 	bool DrawMeshBuffers(RenderInterface& the_interface, const RenderObject& ro)
 	{
 		auto& mesh = ro.mesh.as<VulkanMesh>();
-		if (BindMeshBuffers(the_interface, mesh, *ro.renderer_req))
-		{
+		bool result = false;
+		result |= BindMeshBuffers(the_interface, mesh, *ro.renderer_req);
+		if(result)
 			the_interface.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return result;
 	}
 	bool DrawMeshBuffers(RenderInterface& the_interface, const InstRenderObjects& ro)
 	{
 		auto& mesh = ro.mesh.as<VulkanMesh>();
-
-		if (BindMeshBuffers(the_interface, ro))
-		{
+		bool result = false;
+		result |= BindMeshBuffers(the_interface, ro);
+		if(result)
 			the_interface.DrawIndexed(mesh.IndexCount(), static_cast<uint32_t>(ro.num_instances), 0, 0, static_cast<uint32_t>(ro.instanced_index));
-			return true;
-		}
-		else
-			return false;
+		return result;
 	}
 //#pragma optimize("", off)
 	void InstMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)

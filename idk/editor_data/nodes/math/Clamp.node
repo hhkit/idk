@@ -2,8 +2,5 @@ float,float,float->float
 vec2,vec2,vec2->vec2
 vec3,vec3,vec3->vec3
 vec4,vec4,vec4->vec4
-vec2,float,float->vec2
-vec3,float,float->vec3
-vec4,float,float->vec4
 In,Min,Max,Out
 {3} = clamp({0},{1},{2});

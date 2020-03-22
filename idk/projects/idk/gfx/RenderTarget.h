@@ -20,6 +20,8 @@ namespace idk
 		EXTENSION(".rtis");
 
 		// actually renderer-related stuff
+		RscHandle<Texture> ColorGradingLut;
+
 		uvec2              size              { 1024, 1024 };
 		AntiAliasing       anti_aliasing     { AntiAliasing::None };
 		RscHandle<Texture> color_tex         { };
@@ -42,15 +44,15 @@ namespace idk
 		float AspectRatio() const noexcept;
 		
 		uvec2 Size() const noexcept                  { return size; }
-		void  Size(uvec2 new_size)            { size = new_size; Dirty(); }
+		void  Size(uvec2 new_size);
 		bool  Srgb() const noexcept                  { return is_srgb; }
-		void  Srgb(bool  srgb)                { is_srgb = srgb; Dirty(); }
+		void  Srgb(bool  srgb);
 
 		bool  IsWorldRenderer() const noexcept       { return is_world_renderer; }
-		void  IsWorldRenderer(bool new_val) noexcept { is_world_renderer = new_val; }
+		void  IsWorldRenderer(bool new_val) noexcept;
 
 		bool  RenderDebug() const noexcept           { return render_debug; }
-		void  RenderDebug(bool new_val) noexcept     { render_debug = new_val; }
+		void  RenderDebug(bool new_val) noexcept;
 
 		RscHandle<Texture> GetColorBuffer();
 		RscHandle<Texture> GetDepthBuffer();

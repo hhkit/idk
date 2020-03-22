@@ -77,11 +77,29 @@ namespace idk
 
 		//Channel Controls
 		///////////////////////////////////////////////
-		void SetChannel_MASTER_Volume(const float& newVolume);
-		void SetChannel_SFX_Volume(const float& newVolume);
-		void SetChannel_MUSIC_Volume(const float& newVolume);
-		void SetChannel_AMBIENT_Volume(const float& newVolume);
-		void SetChannel_DIALOGUE_Volume(const float& newVolume);
+		void  SetChannel_MASTER_Volume(const float& newVolume);
+		float GetChannel_MASTER_Volume();
+		void  SetChannel_SFX_Volume(const float& newVolume);
+		float GetChannel_SFX_Volume();
+		void  SetChannel_MUSIC_Volume(const float& newVolume);
+		float GetChannel_MUSIC_Volume();
+		void  SetChannel_AMBIENT_Volume(const float& newVolume);
+		float GetChannel_AMBIENT_Volume();
+		void  SetChannel_DIALOGUE_Volume(const float& newVolume);
+		float GetChannel_DIALOGUE_Volume();
+
+		void  SetChannel_MASTER_Pause(bool newState);
+		bool  GetChannel_MASTER_Pause();
+		void  SetChannel_SFX_Pause(bool newState);
+		bool  GetChannel_SFX_Pause();
+		void  SetChannel_MUSIC_Pause(bool newState);
+		bool  GetChannel_MUSIC_Pause();
+		void  SetChannel_AMBIENT_Pause(bool newState);
+		bool  GetChannel_AMBIENT_Pause();
+		void  SetChannel_DIALOGUE_Pause(bool newState);
+		bool  GetChannel_DIALOGUE_Pause();
+
+		void  ResetChannels();
 		///////////////////////////////////////////////
 
 		//Sound Driver Control
@@ -116,22 +134,23 @@ namespace idk
 		friend class AudioClipLoader;
 
 
-		FMOD::System*		_Core_System		{ nullptr };		//Is updated on init, destroyed and nulled on shutdown.
-		FMOD_RESULT			_result				{ FMOD_OK };		//Most recent result by the most recent FMOD function call.
-		bool				_system_paused		{ false };			//Sets audiosystem to update or not
+		FMOD::System*		_Core_System				{ nullptr };		//Is updated on init, destroyed and nulled on shutdown.
+		FMOD_RESULT			_result						{ FMOD_OK };		//Most recent result by the most recent FMOD function call.
+		bool				_system_paused				{ false };			//Sets audiosystem to update or not
 		int					_number_of_drivers			{ 0 };		//Updated on init. Describes the number of available sound driver that can play audio.
 		int					_current_driver				{ 0 };		//Updated on init. Describes the current running sound driver.
 		time_point			_time_it_was_initialized	{};			//Updated on Init()
-		unsigned            _destroy_slot{};
+		unsigned            _destroy_slot				{};
 		const int			_max_channels				{ 512 };
-		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details{};			//Describes each driver.
+		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details	{};			//Describes each driver.
+
 
 		//Useable after calling Init().
-		FMOD::ChannelGroup* _channelGroup_MASTER	{ nullptr };	//All sounds are routed to MASTER.
-		FMOD::SoundGroup*	_soundGroup_MUSIC		{ nullptr };	//Music, by default is looped.
-		FMOD::SoundGroup*	_soundGroup_SFX			{ nullptr };	//Sound Effects
-		FMOD::SoundGroup*	_soundGroup_AMBIENT		{ nullptr };	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
-		FMOD::SoundGroup*	_soundGroup_DIALOGUE	{ nullptr };	//Dialogue/Voice Overs. This is OPTIONAL.
+		FMOD::ChannelGroup* _channelGroup_MASTER		{ nullptr };	//All sounds are routed to MASTER.
+		FMOD::ChannelGroup*	_channelGroup_SFX			{ nullptr };	//Sound Effects
+		FMOD::ChannelGroup*	_channelGroup_MUSIC			{ nullptr };	//Music, by default is looped.
+		FMOD::ChannelGroup*	_channelGroup_AMBIENT		{ nullptr };	//Ambient Sounds. This is similar to SFX. It is also OPTIONAL.
+		FMOD::ChannelGroup*	_channelGroup_DIALOGUE		{ nullptr };	//Dialogue/Voice Overs. This is OPTIONAL.
 
 		void ParseFMOD_RESULT(FMOD_RESULT);			//All fmod function returns an FMOD_RESULT. This function parses the result. Throws EXCEPTION_AudioSystem if a function fails.
 		void ParseFMOD_RESULT_2(FMOD_RESULT);		//This does not update _result

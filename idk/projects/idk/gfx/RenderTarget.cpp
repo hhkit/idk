@@ -4,6 +4,8 @@
 #include <res/ResourceHandle.inl>
 #include <res/ResourceHandle.inl>
 
+#include <gfx/ColorGrade.h>
+
 namespace idk
 {
 	float RenderTarget::AspectRatio() const noexcept
@@ -28,6 +30,10 @@ namespace idk
 	}
 	void RenderTarget::Finalize()
 	{
+		if (this->ColorGradingLut == RscHandle<Texture>{})
+		{
+			this->ColorGradingLut = RscHandle<Texture>{GetDefaultColorGradeGuid()};
+		}
 		OnFinalize();
 		_need_finalizing = false;
 		int i = 0;
@@ -39,13 +45,34 @@ namespace idk
 		}
 		for (auto& tex : this->Textures())
 		{
-			tex->Name(string{ Name() } + string{ names[i++] } +" Buffer");
+			tex->Name(' '+string{ Name() } +':'+ string{ names[i++] } +" Buffer");
 		}
 	}
 	RenderTarget::~RenderTarget()
 	{
 		for (auto& tex : Textures())
 			Core::GetResourceManager().Free(tex);
+	}
+	void  RenderTarget::RenderDebug(bool new_val) noexcept 
+	{
+		render_debug = new_val; 
+	}
+	void  RenderTarget::IsWorldRenderer(bool new_val) noexcept { is_world_renderer = new_val; Dirty(); }
+	void  RenderTarget::Srgb(bool  srgb) 
+	{
+		if (is_srgb != srgb) 
+		{
+			is_srgb = srgb; 
+			Dirty(); 
+		} 
+	}
+	void RenderTarget::Size(uvec2 new_size)
+	{
+		if (size != new_size)
+		{
+			size = new_size;
+			Dirty();
+		}
 	}
 	//Override and hide Saveable Dirty
 	void RenderTarget::Dirty() 

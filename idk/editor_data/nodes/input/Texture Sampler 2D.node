@@ -1,6 +1,7 @@
 sampler2d,vec2->vec4,float,float,float,float
-Texture,UV,RGBA,R,G,B,A
+Texture,UV,RGBA,R,G,B,A,$[Type:Default|Normal]
 {2} = texture({0},{1});
+?7:Normal{{2} = vec4(unpack_normal({2}.xyz), {2}.w);}
 {3} = {2}.r;
 {4} = {2}.g;
 {5} = {2}.b;

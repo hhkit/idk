@@ -3,8 +3,10 @@
 
 #include <vkn/GraphicsState.h>
 
-#include <vkn/MaterialInstanceCache.h>
-
+namespace idk::vkn
+{
+	class MaterialInstanceCache;
+}
 namespace idk::vkn::bindings
 {
 	struct StandardMaterialFragBindings : RenderBindings
@@ -20,6 +22,7 @@ namespace idk::vkn::bindings
 		RscHandle<MaterialInstance> prev_material_inst{};
 		const MaterialInstanceCache* p_cached_mat_insts;
 		const mat_inst_lookup_t* p_material_instances;
+		bool Skip(RenderInterface& the_interface, const RenderObject& dc)override;
 		//Assumes that the material is valid.
 		void Bind(RenderInterface& the_interface, const RenderObject& dc) override;
 

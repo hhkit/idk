@@ -11,6 +11,64 @@
 
 #include <gfx/GfxDebugData.h>
 
+#include "IDE.h"
+#include <gfx/ColorGrade.h>
+#pragma optimize("",off)
+namespace idk
+{
+	class TGAWriter
+	{
+	public:
+		static vector<byte> SaveTGA(const SimpleTexData& data);
+	private:
+#pragma pack(push,1)
+		struct ColorMapSpec
+		{
+			uint16_t  first_entry_index{};
+			uint16_t  color_map_length{};
+			uint8_t   color_map_entry_size{};
+		};
+		struct ImageSpec
+		{
+			uint16_t x_origin{};
+			uint16_t y_origin{};
+			uint16_t width{};
+			uint16_t height{};
+			uint8_t  bits_per_pixel{};
+			uint8_t  image_descriptor{};
+		};
+		struct TGAHeader
+		{
+			uint8_t id_length{};
+			uint8_t color_map_type{};
+			uint8_t img_type{};
+			ColorMapSpec cm_spec{};
+			ImageSpec img_spec{};
+		};
+#pragma pack(pop)
+	};
+	void MapRgbToBgr(void* data, size_t len,uint8_t stride = 3)
+	{
+		auto ptr = reinterpret_cast<unsigned char*>(data);
+		for (auto end = ptr+len;ptr+stride<=end;ptr+=stride)
+		{
+			std::swap(*(ptr + 0), *(ptr + 2));
+		}
+	}
+	vector<byte> TGAWriter::SaveTGA(const SimpleTexData& data)
+	{
+		vector<byte> tga_data(data.data.size() + sizeof(TGAHeader));
+		const auto& dim = data.dimensions;
+		constexpr uint8_t kUncompressedRGB = 2;
+
+		auto& header = *new (tga_data.data()) TGAHeader{ 0ui8,0ui8,kUncompressedRGB,ColorMapSpec{0,0,0},ImageSpec{0,0,static_cast<uint16_t>(dim.x),static_cast<uint16_t>(dim.y),24,1<<5} };
+		static_assert(sizeof(TGAHeader) == 18, "TGA header has been padded.");
+		auto ptr = tga_data.data() + sizeof(TGAHeader);
+		std::memcpy(ptr, data.data.data(), data.data.size());
+		MapRgbToBgr(ptr, data.data.size());
+		return tga_data;
+	}
+}
 namespace idk
 {
 	struct IGE_GfxDebugWindow::Pimpl
@@ -20,6 +78,7 @@ namespace idk
 
 		bool show_hidden = false;
 
+		std::string lut_path = "../default_lut.tga";
 		std::string dump;
 	};
 
@@ -49,7 +108,29 @@ namespace idk
 		{
 			RscHandle<RenderTarget>{}->Srgb(srgb);
 		}
-		RenderExtraVars(Core::GetSystem<GraphicsSystem>().extra_vars);
+		auto& ide = Core::GetSystem<IDE>();
+		if (ImGui::Button("Select Default Render Target"))
+		{
+			ide.SelectAsset(RscHandle<RenderTarget>{}, false, true);
+		}
+		if (ImGui::Button("Select Editor Render Target"))
+		{
+			ide.SelectAsset(ide.GetEditorCamera()->render_target, false, true);
+		}
+		if (ImGui::CollapsingHeader("More Gfx Debug Stuff"))
+		{
+			ImGui::InputText("LUT Save path: ", &_pimpl->lut_path);
+			if (ImGui::Button("Save Default Color Grade LUT"))
+			{
+				auto cg_lut = GenerateRgbDefaultColorGradeTexData();
+				auto data = TGAWriter::SaveTGA(cg_lut);
+				std::ofstream file{ _pimpl->lut_path,std::ios::binary | std::ios::out | std::ios::trunc };
+				if(file)
+					file<<std::string{ reinterpret_cast<const char*>(data.data()), std::size(data) }<<std::flush;
+				file.close();
+			}
+			RenderExtraVars(Core::GetSystem<GraphicsSystem>().extra_vars);
+		}
 	}
 //#pragma optimize("",off)
 	void RenderLifetimeStuff(std::string& dump,const gfxdbg::FgRscLifetimes& lifetimes)
@@ -195,12 +276,14 @@ namespace idk
 
 	void IGE_GfxDebugWindow::RenderExtraVars(ExtraVars& extra_vars)
 	{
+		if (!ImGui::CollapsingHeader("ExtraVars"))
+			return;
 		ImGui::Checkbox("Show Hidden: ", &_pimpl->show_hidden);
 		for (auto& [name, value] : extra_vars)
 		{
 			ExtraVars::variant_t& v = value;
 			std::variant<string_view> str = name;
-			if (!_pimpl->show_hidden &&(!name.empty() || name[0] == '_')) //Skip if name starts with underscore (hidden)
+			if (!_pimpl->show_hidden &&(name.empty() || name[0] == '_')) //Skip if name starts with underscore (hidden)
 			{
 				continue;
 			}

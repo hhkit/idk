@@ -462,7 +462,7 @@ namespace idk
 
                 ImGui::ProgressBar(layer.curr_state.normalized_time, ImVec2{ -1, 3 }, nullptr);
                 ImGui::PopID();
-                ImGui::Separator(false);
+                ImGui::Separator();
             }
             ImGui::Unindent();
         }
@@ -519,7 +519,7 @@ namespace idk
             else
                 throw("???");
 
-            ImGui::Separator(false);
+            ImGui::Separator();
 
             ImGui::EndGroup();
             ImGui::Unindent();
@@ -612,21 +612,11 @@ namespace idk
             if (ImGui::InputTextMultiline("", &buf))
             {
                 val.get<string>() = buf;
-                return true;
+                return EditState::Editing;
             }
-            return false;
+            return EditState::None;
         };
-        constexpr CustomDrawFn draw_anchor = [](const reflect::dynamic& val)
-        {
-            auto& anchor = val.get<TextAnchor>();
-            return ImGuidk::EnumCombo("", &anchor);
-        };
-        constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
-        {
-            auto& alignment = val.get<TextAlignment>();
-            return ImGuidk::EnumCombo("", &alignment);
-        };
-        InjectDrawTable table{ { "text", draw_text }, { "anchor", draw_anchor }, { "alignment", draw_alignment } };
+        InjectDrawTable table{ { "text", draw_text } };
         DisplayVal(*c_font, &table);
     }
 
@@ -640,16 +630,11 @@ namespace idk
             if (ImGui::InputTextMultiline("", &buf))
             {
                 val.get<string>() = buf;
-                return true;
+                return EditState::Editing;
             }
-            return false;
+            return EditState::None;
         };
-        constexpr CustomDrawFn draw_alignment = [](const reflect::dynamic& val)
-        {
-            auto& anchor = val.get<TextAnchor>();
-            return ImGuidk::EnumCombo("", &anchor);
-        };
-        InjectDrawTable table{ { "text", draw_text }, { "alignment", draw_alignment } };
+        InjectDrawTable table{ { "text", draw_text } };
         DisplayVal(*c_text, &table);
     }
 
@@ -658,19 +643,24 @@ namespace idk
     {
         static Handle<AudioSource> static_audiosource{};
         static_audiosource = c_audiosource;
-        constexpr auto draw_audio_list = [](const reflect::dynamic& dyn) -> bool
+
+        constexpr auto draw_audio_list = [](const reflect::dynamic& dyn)
         {
             bool changed = false;
             auto& audio_clip_list = dyn.get<vector<RscHandle<AudioClip>>>();
-            if (ImGui::Button("Add AudioClip")) {
+
+            if (ImGui::Button("Add AudioClip"))
+            {
                 audio_clip_list.emplace_back(RscHandle<AudioClip>());
                 static_audiosource->ResizeAudioClipListData();
                 changed = true;
             }
 
-            if (!audio_clip_list.empty()) {
+            if (!audio_clip_list.empty()) 
+            {
                 ImGui::BeginChild("AudioClips", ImVec2(ImGui::GetWindowContentRegionWidth() - 20, 150), true);
-                for (auto i = 0; i < audio_clip_list.size(); ++i) {
+                for (auto i = 0; i < audio_clip_list.size(); ++i)
+                {
                     string txt = "[" + std::to_string(i) + "]";
                     if (ImGuidk::InputResource(txt.c_str(), &audio_clip_list[i])) {
                         //Stop playing before switching sounds!
@@ -703,10 +693,10 @@ namespace idk
                 ImGui::EndChild();
             }
 
-            return changed;
+            return changed ? EditState::CompletedInOneFrame : EditState::None;
         };
 
-        constexpr auto draw_audio_volume = [](const reflect::dynamic& dyn) -> bool
+        constexpr auto draw_audio_volume = [](const reflect::dynamic& dyn)
         {
             bool changed = false;
 
@@ -732,17 +722,26 @@ namespace idk
 
                 ImGui::EndChild();
                 ImGui::Separator();
-
             }
 
-            return changed;
+            return changed ? EditState::Editing : EditState::None;
         };
+
+        constexpr auto draw_soundGroup = [](const reflect::dynamic& dyn)
+        {
+            bool changed = ImGuidk::EnumCombo("", &dyn.get<SoundGroup>());
+            if (changed)
+                static_audiosource->RefreshSoundGroups();
+            return changed ? EditState::CompletedInOneFrame : EditState::None;
+        };
+
 
 
 
         InjectDrawTable table{
             { "audio_clip_list", draw_audio_list },
-            { "audio_clip_volume", draw_audio_volume }
+            { "audio_clip_volume", draw_audio_volume },
+            { "soundGroup", draw_soundGroup }
         };
 
         DisplayVal(*c_audiosource, &table);
@@ -817,14 +816,14 @@ namespace idk
 
         static Handle<ParticleSystem> _static_ps_handle{};
         _static_ps_handle = c_ps;
-        constexpr auto draw_bursts = [](const reflect::dynamic& val) -> bool
+        constexpr auto draw_bursts = [](const reflect::dynamic& val)
         {
-            bool changed = false;
+            EditState ret = EditState::None;
             auto& bursts = val.get<vector<EmissionModule::Burst>>();
             if (ImGui::Button("+"))
             {
                 bursts.emplace_back();
-                changed = true;
+                ret = EditState::CompletedInOneFrame;
             }
             if (bursts.size())
             {
@@ -832,7 +831,7 @@ namespace idk
                 if (ImGui::Button("-"))
                 {
                     bursts.pop_back();
-                    changed = true;
+                    ret = EditState::CompletedInOneFrame;
                 }
             }
 
@@ -849,6 +848,8 @@ namespace idk
             ImGui::SameLine(w * 0.9f - ImGui::CalcTextSize("Probability").x * 0.5f);
             ImGui::Text("Probability");
 
+            bool changed = false;
+
             ImGui::PushItemWidth(w * 0.2f);
             for (int i = 0; i < bursts.size(); ++i)
             {
@@ -864,7 +865,7 @@ namespace idk
             ImGui::PopItemWidth();
             ImGui::PopStyleVar();
 
-            return changed;
+            return changed ? EditState::Editing : EditState::None;
         };
         InjectDrawTable inject{ { "emission/bursts", CustomDrawFn(draw_bursts) } };
 

@@ -16,7 +16,7 @@ namespace idk
 				LOG_TO(LogPool::GFX, "Default mesh %s not created\n", MeshType{ i }.to_string().data());
 			else
 			{
-				elem->Name(string{ "Default" } +string{ MeshType{ i }.to_string() });
+				elem->Name(string{ " Default" } +string{ MeshType{ i }.to_string() });
 			}
 			++i;
 		}

@@ -54,6 +54,8 @@
     <ClInclude Include="network\ack_utils.h" />
     <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
     <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
+    <ClInclude Include="gfx\ColorGrade.h" />
+    <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
     <ClInclude Include="network\GhostAcknowledgementMessage.h" />
     <ClInclude Include="network\MovePack.h" />
@@ -389,6 +391,7 @@
     <ClCompile Include="audio\AudioListener.cpp" />
     <ClCompile Include="audio\AudioSource.cpp" />
     <ClCompile Include="audio\AudioSystem.cpp" />
+    <ClCompile Include="gfx\ColorGrade.cpp" />
     <ClCompile Include="gfx\ColorPickRequest.cpp" />
     <ClCompile Include="common\Layer.cpp" />
     <ClCompile Include="common\LayerManager.cpp" />
@@ -400,6 +403,7 @@
     <ClCompile Include="debug\LogSingleton.cpp" />
     <ClCompile Include="debug\LogSystem.cpp" />
     <ClCompile Include="gfx\Material.cpp" />
+    <ClCompile Include="gfx\RenderTargetFactory.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
     <ClCompile Include="network\ack_utils.cpp" />
     <ClCompile Include="network\ElectronAnimatorView.cpp" />

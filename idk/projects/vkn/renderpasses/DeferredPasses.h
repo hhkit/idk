@@ -93,6 +93,8 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> combine_shader;
 
+		VknTextureView color_correction_lut;
+
 		CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex,FrameGraphResource out_color_tex,  FrameGraphResource out_depth_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;

@@ -44,6 +44,7 @@ enum StyleColor
     ColNodeActiveBg,
     ColNodeBorder,
     ColConnection,
+    ColConnection2,
     ColConnectionActive,
     ColSelectBg,
     ColSelectBorder,

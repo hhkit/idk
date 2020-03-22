@@ -142,6 +142,7 @@ CanvasState::CanvasState() noexcept
     colors[ColNodeActiveBg] = imgui_style.Colors[ImGuiCol_FrameBgActive];
     colors[ColNodeBorder] = imgui_style.Colors[ImGuiCol_Border];
     colors[ColConnection] = imgui_style.Colors[ImGuiCol_PlotLines];
+    colors[ColConnection2] = imgui_style.Colors[ImGuiCol_PlotLines];
     colors[ColConnectionActive] = imgui_style.Colors[ImGuiCol_PlotLinesHovered];
     colors[ColSelectBg] = imgui_style.Colors[ImGuiCol_FrameBgActive];
     colors[ColSelectBg].Value.w = 0.25f;
@@ -192,21 +193,25 @@ bool RenderConnection(const ImVec2& input_pos, const ImVec2& output_pos, float t
     ImVec2 p2 = input_pos - ImVec2{100 * canvas->zoom, 0};
     ImVec2 p3 = output_pos + ImVec2{100 * canvas->zoom, 0};
 
-    // Assemble segments for path
-    draw_list->PathLineTo(input_pos);
-    draw_list->PathBezierCurveTo(p2, p3, output_pos, 0);
-
-    // Check each segment and determine if mouse is hovering curve that is to be drawn
-    float min_square_distance = FLT_MAX;
-    for (int i = 0; i < draw_list->_Path.size() - 1; i++)
-    {
-        min_square_distance = ImMin(min_square_distance,
-            GetDistanceToLineSquared(ImGui::GetMousePos(), draw_list->_Path[i], draw_list->_Path[i + 1]));
-    }
-
-    // Draw curve, change when it is hovered
+    ImVec2 closest_pt = ImBezierClosestPointCasteljau(input_pos, p2, p3, output_pos, ImGui::GetMousePos(), style.CurveTessellationTol);
+    float min_square_distance = ImFabs(ImLengthSqr(ImGui::GetMousePos() - closest_pt));
     bool is_close = min_square_distance <= thickness * thickness && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
-    draw_list->PathStroke(is_close ? canvas->colors[ColConnectionActive] : canvas->colors[ColConnection], false, thickness);
+
+    if (is_close || canvas->colors[ColConnection] == canvas->colors[ColConnection2])
+        draw_list->AddBezierCurve(input_pos, p2, p3, output_pos, is_close ? canvas->colors[ColConnectionActive] : canvas->colors[ColConnection], thickness, 0);
+    else
+    {
+        draw_list->PathLineTo(input_pos);
+        draw_list->PathBezierCurveTo(p2, p3, output_pos, 32);
+        const int n = draw_list->_Path.Size - 1;
+        for (int i = 0; i < n; ++i)
+        {
+            float t = ImClamp(static_cast<float>(i - n / 4) / (n / 2), 0.0f, 1.0f);
+            ImColor col = ImLerp((ImVec4)canvas->colors[ColConnection2], (ImVec4)canvas->colors[ColConnection], t);
+            draw_list->AddPolyline(draw_list->_Path.Data + i, 2, col, false, thickness);
+        }
+        draw_list->_Path.Size = 0;
+    }
     return is_close;
 }
 
@@ -217,29 +222,37 @@ void BeginCanvas(CanvasState* canvas)
     const ImGuiWindow* w = ImGui::GetCurrentWindow();
     ImGui::PushID(canvas);
 
-    ImGui::ItemAdd(w->WorkRect, ImGui::GetID("canvas"));
+    ImGui::ItemAdd(w->ContentRegionRect, ImGui::GetID("canvas"));
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImGuiIO& io = ImGui::GetIO();
 
-	canvas->prev_offset = canvas->offset;
-	canvas->prev_zoom = canvas->zoom;
+    canvas->prev_offset = canvas->offset;
+    canvas->prev_zoom = canvas->zoom;
     if (!ImGui::IsMouseDown(0) && ImGui::IsItemHovered())
     {
-        if (ImGui::IsMouseDragging(1))
+        if (ImGui::IsMouseDragging(2))
             canvas->offset += io.MouseDelta;
 
         if (io.KeyShift && !io.KeyCtrl)
             canvas->offset.x += io.MouseWheel * 16.0f;
 
         if (!io.KeyShift && !io.KeyCtrl)
+        {
             canvas->offset.y += io.MouseWheel * 16.0f;
+            canvas->offset.x += io.MouseWheelH * 16.0f;
+        }
 
         if (!io.KeyShift && io.KeyCtrl)
         {
             if (io.MouseWheel != 0)
+            {
+                ImVec2 mouseRel = ImVec2{ ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetMousePos().y - ImGui::GetWindowPos().y };
+                float prevZoom = canvas->zoom;
                 canvas->zoom = ImClamp(canvas->zoom + io.MouseWheel * canvas->zoom / 16.f, 0.3f, 3.f);
-            canvas->offset += ImGui::GetMouseDragDelta();
+                float zoomFactor = (prevZoom - canvas->zoom) / prevZoom;
+                canvas->offset += (mouseRel - canvas->offset) * zoomFactor;
+            }
         }
     }
 
@@ -316,13 +329,10 @@ void EndCanvas()
     case State_None:
     {
         ImGuiID canvas_id = ImGui::GetID("canvas");
-        if (ImGui::IsMouseDown(0) && ImGui::GetCurrentWindow()->WorkRect.Contains(ImGui::GetMousePos()))
+        if (ImGui::IsMouseDown(0) && ImGui::GetCurrentWindow()->ContentRegionRect.Contains(ImGui::GetMousePos()))
         {
             if (ImGui::IsWindowHovered())
             {
-                if (!ImGui::IsWindowFocused())
-                    ImGui::FocusWindow(ImGui::GetCurrentWindow());
-
                 if (!ImGui::IsAnyItemActive())
                 {
                     ImGui::SetActiveID(canvas_id, ImGui::GetCurrentWindow());
@@ -477,12 +487,12 @@ void EndNode()
             }
             else if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered() && ImGui::IsItemActive())
             {
-                if (!io.KeyCtrl && !node_selected)
+                node_selected ^= true;
+                if (!io.KeyCtrl && node_selected)
                 {
                     impl->single_selected_node = node_id;
                     impl->do_selections_frame = ImGui::GetCurrentContext()->FrameCount + 1;
                 }
-                node_selected = true;
             }
             else if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
             {
@@ -499,7 +509,7 @@ void EndNode()
             {
                 // Upon node creation we would like it to be positioned at the center of mouse cursor. This can be done only
                 // once widget dimensions are known at the end of rendering and thus on the next frame.
-                node_pos = ImGui::GetMousePos() - ImGui::GetCurrentWindow()->Pos - canvas->offset - (node_rect.GetSize() / 2);
+                node_pos = (ImGui::GetMousePos() - ImGui::GetCurrentWindow()->Pos) / canvas->zoom - canvas->offset - (node_rect.GetSize() / 2);
                 impl->auto_position_node_id = nullptr;
             }
         }
@@ -629,9 +639,9 @@ bool Connection(void* input_node, const char* input_slot, void* output_node, con
 
     // Indent connection a bit into slot widget.
     float connection_indent = canvas->style.connection_indent * canvas->zoom;
-	auto win_pos = ImGui::GetWindowPos();
-	input_slot_pos = (input_slot_pos - canvas->prev_win_pos - canvas->prev_offset) / canvas->prev_zoom * canvas->zoom + win_pos + canvas->offset;
-	output_slot_pos = (output_slot_pos - canvas->prev_win_pos - canvas->prev_offset) / canvas->prev_zoom * canvas->zoom + win_pos + canvas->offset;
+    auto win_pos = ImGui::GetWindowPos();
+    input_slot_pos = (input_slot_pos - canvas->prev_win_pos - canvas->prev_offset) / canvas->prev_zoom * canvas->zoom + win_pos + canvas->offset;
+    output_slot_pos = (output_slot_pos - canvas->prev_win_pos - canvas->prev_offset) / canvas->prev_zoom * canvas->zoom + win_pos + canvas->offset;
     input_slot_pos.x += connection_indent;
     output_slot_pos.x -= connection_indent;
 

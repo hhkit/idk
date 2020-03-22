@@ -40,8 +40,12 @@ namespace idk::vkn
 			result_range = *free_range.split(size, alignment);
 			//
 		}
-
-		return result_range ? std::optional<std::pair<size_t, size_t>>{std::pair<size_t, size_t>{ result_range->_begin, Aligned(result_range->_begin, alignment) }} : std::nullopt;
+		std::optional<std::pair<size_t, size_t>> result{};
+		if (result_range)
+		{
+			result = { result_range->_begin, Aligned(result_range->_begin, alignment) };
+		}
+		return result;
 	}
 
 	void MemoryCollator::mark_freed(index_span to_free)

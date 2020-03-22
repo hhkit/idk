@@ -1200,12 +1200,135 @@ namespace idk::mono
 		BIND_END();
 		//----------------------------------------------------------------------------------------------------
 		//AudioSystem
-		BIND_START("idk.Bindings::AudioSystemSetVolume", void, float newVolume)
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		BIND_START("idk.Bindings::AudioSystemSetMASTERVolume", void, float newVolume)
 		{
 			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
 			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Volume(newVolume);
 		}
 		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMASTERVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MASTER_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetSFXVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_SFX_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetSFXVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_SFX_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetMUSICVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_MUSIC_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMUSICVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MUSIC_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetAMBIENTVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_AMBIENT_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetAMBIENTVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_AMBIENT_Volume();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetDIALOGUEVolume", void, float newVolume)
+		{
+			newVolume = newVolume > 1 ? 1 : (newVolume < 0 ? 0 : newVolume); //Clamp
+			Core::GetSystem<AudioSystem>().SetChannel_DIALOGUE_Volume(newVolume);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetDIALOGUEVolume", float)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_DIALOGUE_Volume();
+		}
+		BIND_END();
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		BIND_START("idk.Bindings::AudioSystemSetMASTERPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_MASTER_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMASTERPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MASTER_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetSFXPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_SFX_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetSFXPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_SFX_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetMUSICPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_MUSIC_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetMUSICPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_MUSIC_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetAMBIENTPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_AMBIENT_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetAMBIENTPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_AMBIENT_Pause();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemSetDIALOGUEPause", void, bool newState)
+		{
+			Core::GetSystem<AudioSystem>().SetChannel_DIALOGUE_Pause(newState);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AudioSystemGetDIALOGUEPause", bool)
+		{
+			return Core::GetSystem<AudioSystem>().GetChannel_DIALOGUE_Pause();
+		}
+		BIND_END();
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 		BIND_START("idk.Bindings::AudioSystemStopAll", void)
 		{
@@ -1279,7 +1402,9 @@ namespace idk::mono
 		BIND_END();
 #undef VALIDATE_RESOURCE
 
-#define NAME_OF_RESOURCE(RES) case string_hash(#RES): return mono_string_new(mono_domain_get(), Core::GetResourceManager().Get<RES>(guid).Name().data());
+#define NAME_OF_RESOURCE(RES) case string_hash(#RES): { \
+	auto path = Core::GetResourceManager().GetPath(RscHandle<RES>(guid)); auto name = Core::GetResourceManager().Get<RES>(guid).Name(); \
+	return mono_string_new(mono_domain_get(), name.size() ? name.data() : PathHandle{ *path }.GetStem().data()); }
         BIND_START("idk.Bindings::ResourceGetName",  MonoString*, Guid guid, MonoString* type)
         {
             // TODO: make get jumptable...
@@ -1523,6 +1648,18 @@ namespace idk::mono
 		BIND_END();
 
 		// //////lights////////////////
+		BIND_START("idk.Bindings::LightGetEnabled", bool, Handle<Light> h)
+		{
+			return h->enabled;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::LightSetEnabled", void, Handle<Light> h, bool value)
+		{
+			h->enabled = value;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::LightGetColor", color, Handle<Light> h)
 		{
 			return h->GetColor();

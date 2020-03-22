@@ -1153,38 +1153,25 @@ namespace idk {
             {
                 if (const auto iter = inject_draw_table->find(display.curr_prop_path); iter != inject_draw_table->end())
                 {
+                    auto copy = val;
+                    auto edit_state = iter->second(copy);
+                    if (edit_state == EditState::Editing)
+                    {
+                        changed = true;
+                        val = copy;
+                    }
+                    else if (edit_state == EditState::Completed)
+                    {
+                        changed_and_deactivated = true;
+                        val = copy;
+                    }
+                    else if (edit_state == EditState::CompletedInOneFrame)
+                    {
+                        StoreOriginalValues(display.curr_prop_path);
+                        val = copy;
+                        changed_and_deactivated = true;
+                    }
 
-                    if constexpr (is_template_v<T, RscHandle> ||
-                                  std::is_same_v<T, Handle<GameObject>> ||
-                                  is_macro_enum_v<T>)
-                    {
-                        auto copy = val;
-                        changed |= iter->second(copy);
-                        if (changed)
-                        {
-                            StoreOriginalValues(display.curr_prop_path);
-                            val = copy;
-                            changed_and_deactivated = true;
-                        }
-                    }
-                    else if constexpr (std::is_same_v<T, reflect::dynamic>)
-                    {
-                        if (val.type.is_enum_type() || val.type.is_template<idk::RscHandle>() || val.type.is<Handle<GameObject>>())
-                        {
-                            reflect::dynamic copy = val.copy();
-                            changed |= iter->second(copy);
-                            if (changed)
-                            {
-                                StoreOriginalValues(display.curr_prop_path);
-                                val = copy;
-                                changed_and_deactivated = true;
-                            }
-                        }
-                        else
-                            changed |= iter->second(val);
-                    }
-                    else
-                        changed |= iter->second(val);
                     draw_injected = true;
                 }
             }
@@ -1321,6 +1308,7 @@ namespace idk {
                     {
                         val = variant_construct<T>(new_ind);
                         changed = true;
+                        changed_and_deactivated = true;
                     }
 
                     recurse = true;
@@ -1351,23 +1339,51 @@ namespace idk {
                 }
                 else
                 {
-                    if (keyName.size())
+                    bool dyn_handled = false;
+
+                    if constexpr (std::is_same_v<T, reflect::dynamic>)
                     {
-                        ImGui::NewLine();
-                        indent = true;
+                        if (val.type.is_enum_type())
+                        {
+                            auto enum_val = val.to_enum_value();
+                            if (ImGui::BeginCombo("", enum_val.name().data()))
+                            {
+                                for (auto [k, v] : enum_val.enum_type)
+                                {
+                                    if (ImGui::Selectable(string(k).c_str(), v == enum_val.value()))
+                                    {
+                                        StoreOriginalValues(display.curr_prop_path);
+                                        val = enum_val.try_assign(v).value();
+                                        changed = true;
+                                        changed_and_deactivated = true;
+                                    }
+                                }
+                                ImGui::EndCombo();
+                            }
+                            dyn_handled = true;
+                        }
                     }
-                    else
+
+                    if (!dyn_handled)
                     {
-                        ImGui::SetCursorPosX(0);
-                        ImGui::SetCursorPosY(currentHeight);
-                        ImGui::EndGroup();
-                        ImGui::PopItemWidth();
-                        ImGui::PopID();
-                        indent_stack.push_back(0);
-                        ImGui::SetCursorPosY(currentHeight);
-                        return true;
+                        recurse = true;
+                        if (keyName.size())
+                        {
+                            ImGui::NewLine();
+                            indent = true;
+                        }
+                        else
+                        {
+                            ImGui::SetCursorPosX(0);
+                            ImGui::SetCursorPosY(currentHeight);
+                            ImGui::EndGroup();
+                            ImGui::PopItemWidth();
+                            ImGui::PopID();
+                            indent_stack.push_back(0);
+                            ImGui::SetCursorPosY(currentHeight);
+                            return true;
+                        }
                     }
-                    recurse = true;
                 }
             }
 

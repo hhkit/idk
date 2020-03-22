@@ -4,6 +4,12 @@ namespace idk
     public class Light
        : Component
     {
+        public bool enabled
+        {
+            get => Bindings.LightGetEnabled(handle);
+            set => Bindings.LightSetEnabled(handle, value);
+        }
+
         public Color color
         {
             get => Bindings.LightGetColor(handle);

@@ -9,7 +9,7 @@ REFLECT_VARS(enabled, mesh, material_instance, cast_shadows, receive_shadows)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Light, "Light")
-REFLECT_VARS(light, shadow_bias, casts_shadows,update_shadow,shadow_layers)
+REFLECT_VARS(enabled, light, shadow_bias, casts_shadows, update_shadow, shadow_layers)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PointLight, "PointLight")

@@ -38,19 +38,60 @@ namespace idk
 			if (!audio_clip_list[index])
 				return;
 			AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-
+			const FMOD_MODE currentMode = ConvertSettingToFMOD_MODE();
 			ResizeAudioClipListData();
-			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[index]->_soundHandle, nullptr, false, &audio_clip_channels[index])); //Creates a channel for audio to use. Start as paused to edit stuff first.
+
+			FMOD::ChannelGroup* outputChannel = nullptr;
+			switch (soundGroup) {
+				case 1:
+					outputChannel = audioSystem._channelGroup_SFX;
+					break;
+				case 2:
+					outputChannel = audioSystem._channelGroup_MUSIC;
+					break;
+				case 3:
+					outputChannel = audioSystem._channelGroup_AMBIENT;
+					break;
+				case 4:
+					outputChannel = audioSystem._channelGroup_DIALOGUE;
+					break;
+			}
+
+
+
+			audio_clip_list[index]->_soundHandle->setMode(currentMode);
+			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[index]->_soundHandle, outputChannel, false, &audio_clip_channels[index])); //Creates a channel for audio to use. Start as paused to edit stuff first.
+			audio_clip_channels[index]->setPriority(priority);
+
 		}
 	}
 	void AudioSource::PlayAll()
 	{
 		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
-		FMOD_MODE currentMode = ConvertSettingToFMOD_MODE();
+		const FMOD_MODE currentMode = ConvertSettingToFMOD_MODE();
 		ResizeAudioClipListData();
+
+		FMOD::ChannelGroup* outputChannel = nullptr;
+		switch (soundGroup) {
+		case 1:
+			outputChannel = audioSystem._channelGroup_SFX;
+			break;
+		case 2:
+			outputChannel = audioSystem._channelGroup_MUSIC;
+			break;
+		case 3:
+			outputChannel = audioSystem._channelGroup_AMBIENT;
+			break;
+		case 4:
+			outputChannel = audioSystem._channelGroup_DIALOGUE;
+			break;
+		}
+
+
 		for (int i = 0; i < audio_clip_list.size(); ++i) {
 			audio_clip_list[i]->_soundHandle->setMode(currentMode);
-			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[i]->_soundHandle, nullptr, false, &audio_clip_channels[i])); //Creates a channel for audio to use. Start as paused to edit stuff first.
+			audioSystem.ParseFMOD_RESULT(audioSystem._Core_System->playSound(audio_clip_list[i]->_soundHandle, outputChannel, false, &audio_clip_channels[i])); //Creates a channel for audio to use. Start as paused to edit stuff first.
+			audio_clip_channels[i]->setPriority(priority);
 		}
 	}
 	void AudioSource::Stop(int index)
@@ -179,6 +220,30 @@ namespace idk
 			}
 		}
 	}
+	void AudioSource::RefreshSoundGroups()
+	{
+		AudioSystem& audioSystem = Core::GetSystem<AudioSystem>();
+		FMOD::ChannelGroup* outputChannel = nullptr;
+		switch (soundGroup) {
+		case 1:
+			outputChannel = audioSystem._channelGroup_SFX;
+			break;
+		case 2:
+			outputChannel = audioSystem._channelGroup_MUSIC;
+			break;
+		case 3:
+			outputChannel = audioSystem._channelGroup_AMBIENT;
+			break;
+		case 4:
+			outputChannel = audioSystem._channelGroup_DIALOGUE;
+			break;
+		}
+
+
+		for (int i = 0; i < audio_clip_channels.size(); ++i) {
+			audio_clip_channels[i]->setChannelGroup(outputChannel);
+		}
+	}
 	int AudioSource::FindAudio(string_view name)
 	{
 		for (int i = 0; i < audio_clip_list.size(); ++i) {
@@ -188,6 +253,7 @@ namespace idk
 		}
 		return -1;
 	}
+
 	FMOD_MODE AudioSource::ConvertSettingToFMOD_MODE()
 	{
 		FMOD_MODE output = FMOD_DEFAULT | FMOD_3D_LINEARROLLOFF;

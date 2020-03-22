@@ -570,6 +570,7 @@ namespace idk
 		Core::GetScheduler().SetPauseState(UnpauseAll);
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
 		Core::GetSystem<PhysicsSystem>().Reset();
+		Core::GetSystem<AudioSystem>().ResetChannels();
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
 		ImGui::SetWindowFocus(FindWindow<IGE_GameView>()->window_name);
 		_game_running = true;
@@ -599,6 +600,7 @@ namespace idk
 		RestoreFromTemporaryScene();
 		Core::GetSystem<mono::ScriptSystem>().run_scripts = false;
 		Core::GetScheduler().SetPauseState(EditorPause);
+		Core::GetSystem<AudioSystem>().ResetChannels();
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
 		Core::GetSystem<AudioSystem>().StopAllAudio();
 		Core::GetSystem<PhysicsSystem>().Reset();
@@ -631,7 +633,7 @@ namespace idk
 	void IDE::SetupEditorScene()
 	{
 		// create editor view
-		_editor_view = Core::GetResourceManager().Create<RenderTarget>();
+		_editor_view = *Core::GetResourceManager().Load<RenderTarget>("/editor_data/graphics/editor_camera.rtis");
 		auto sz = _editor_view->Size();
 		_editor_view->Size(uvec2{ Core::GetSystem<Application>().GetScreenSize() });
 		//this->FindWindow<IGE_Console>()->PushMessage(std::to_string(sz.x) + "," + std::to_string(sz.y));

@@ -7,7 +7,7 @@
 namespace idk::shadergraph
 {
 
-    ENUM(ValueType, char, FLOAT = 1, VEC2, VEC3, VEC4, MAT2, MAT3, MAT4, SAMPLER2D)
+    ENUM(ValueType, char, FLOAT = 1, VEC2, VEC3, VEC4, /*MAT2, MAT3, MAT4,*/ SAMPLER2D, INVALID = 0)
 
     struct Slot
     {

@@ -2,13 +2,12 @@
 #include <editor/windows/IGE_IWindow.h>
 #include <imgui/imnodes/ImNodes.h>
 #include <res/ResourceHandle.h>
+#include <gfx/ShaderGraph_data.h>
 
 namespace idk
 {
     namespace shadergraph
     {
-        struct Node;
-        struct Value;
         class Graph;
     }
 
@@ -28,6 +27,7 @@ namespace idk
         RscHandle<shadergraph::Graph> _graph;
         vector<Guid> _nodes_to_delete;
         vector<Guid> _node_order;
+        shadergraph::Link _released_link_for_pending_new_node;
 
         void handleNewLink();
         void drawLinks();
@@ -39,7 +39,7 @@ namespace idk
         void drawNode(shadergraph::Node& node);
         shadergraph::Node& addNode(const string& name, vec2 pos);
         void removeNode(const shadergraph::Node& node);
-        void disconnectNode(const shadergraph::Node& node);
+        void disconnectNode(const shadergraph::Node& node, bool disconnect_inputs = true, bool disconnect_outputs = true);
 
         void addParamNode(int param_index, vec2 pos);
         void removeParam(int param_index);
