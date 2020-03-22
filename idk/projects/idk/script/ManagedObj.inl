@@ -280,7 +280,7 @@ namespace idk::mono
 					}();
 					auto new_val = old_val;
 
-					functor(field_name.data(), new_val, depth);
+					functor(field_name.data(), new_val, -last_children);
 					if (old_val != new_val)
 						mono_field_set_value(Raw(), field, mono_string_new(mono_domain_get(), new_val.data()));
 

@@ -51,6 +51,10 @@ namespace idk {
             void GroupEnd();
         };
 
+        enum class EditState : char
+        {
+            None = 0, Editing, Completed, CompletedInOneFrame
+        };
 
         bool _debug_mode = false;
 
@@ -107,7 +111,7 @@ namespace idk {
         //template<> bool DisplayAsset(RscHandle<RenderTarget> render_target);
 
         // when curr property is key, draws using CustomDrawFn
-        using CustomDrawFn = bool(*)(const reflect::dynamic& dyn);
+        using CustomDrawFn = EditState(*)(const reflect::dynamic& dyn);
         using InjectDrawTable = hash_table<string_view, CustomDrawFn>;
         bool DisplayVal(reflect::dynamic dyn, InjectDrawTable* inject_draw_table = nullptr);
 
