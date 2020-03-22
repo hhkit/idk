@@ -23,6 +23,10 @@ namespace idk::vkn
 		bool clear = true;
 	};
 
+	struct CopyResult
+	{
+		FrameGraphResource copy,original;
+	};
 
 	struct FrameGraphBuilder
 	{
@@ -37,7 +41,7 @@ namespace idk::vkn
 		FrameGraphResourceReadOnly read(FrameGraphResource in_rsc,bool may_shader_sample=true);
 		FrameGraphResourceMutable write(FrameGraphResource target_rsc, WriteOptions opt = {});
 		//call read first
-		FrameGraphResource        copy (FrameGraphResourceReadOnly target_rsc, CopyOptions opt);
+		CopyResult        copy (FrameGraphResourceReadOnly target_rsc, CopyOptions opt);
 
 		void NoRenderPass(bool no_render_pass = true);
 
