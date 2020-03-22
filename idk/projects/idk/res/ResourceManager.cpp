@@ -352,7 +352,6 @@ namespace idk
 	{
 		return _file_loader.find(ext.data()) != _file_loader.end() || _compilable_extensions.find(ext.data()) != _compilable_extensions.end();
 	}
-
 	ResourceManager::GeneralLoadResult ResourceManager::Load(PathHandle path, bool reload_resource)
 	{
 		if (!reload_resource)
@@ -457,7 +456,7 @@ namespace idk
 				using T = std::decay_t<decltype(*handle)>;
 				if constexpr (has_tag_v<T, MetaResource>)
 				{
-					handle->DirtyMeta();
+					GetControlBlock<T>(handle)->dirty_meta = true;
 				}},
 					elem);
 		}

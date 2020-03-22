@@ -20,10 +20,12 @@ namespace idk
 		auto tmp_path = out_path; tmp_path += ".tmp.dds";
 		auto final_path = out_path; final_path += ".dds";
 		
-		auto stringed_meta = bundle.FetchMeta<Texture>();
-		auto meta = stringed_meta->GetMeta<Texture>();
 
-		TextureMeta texture_meta = meta ? *meta : TextureMeta{};
+		TextureMeta texture_meta{};
+
+		if (auto stringed_meta = bundle.FetchMeta<Texture>())
+			if (auto meta = stringed_meta->GetMeta<Texture>())
+				texture_meta = *meta;
 
 		if (texture_meta.is_srgb)
 			std::cout << "exporting gammacompressed texture" << "\n";
@@ -33,12 +35,12 @@ namespace idk
 		auto retval =
 			[&]()
 		{
-			if (texture_meta.is_srgb)
+			if (texture_meta.force_uncompressed)
 			{
 				return _spawnl(P_WAIT, "tools/nvtt/nvcompress.exe",
 					"nvcompress.exe",
 					"-silent",
-					"-bc3",
+					"-rgb",
 					wrap(full_path).data(),
 					wrap(tmp_path.string()).data(),
 					0);

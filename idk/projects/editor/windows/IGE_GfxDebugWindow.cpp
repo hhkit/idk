@@ -61,7 +61,7 @@ namespace idk
 		const auto& dim = data.dimensions;
 		constexpr uint8_t kUncompressedRGB = 2;
 
-		auto& header = *new (tga_data.data()) TGAHeader{ 0ui8,0ui8,kUncompressedRGB,ColorMapSpec{0,0,0},ImageSpec{0,0,static_cast<uint16_t>(dim.x),static_cast<uint16_t>(dim.y),24,1<<5} };
+		[[maybe_unused]]auto& header = *new (tga_data.data()) TGAHeader{ 0ui8,0ui8,kUncompressedRGB,ColorMapSpec{0,0,0},ImageSpec{0,0,static_cast<uint16_t>(dim.x),static_cast<uint16_t>(dim.y),24,1<<5} };
 		static_assert(sizeof(TGAHeader) == 18, "TGA header has been padded.");
 		auto ptr = tga_data.data() + sizeof(TGAHeader);
 		std::memcpy(ptr, data.data.data(), data.data.size());
