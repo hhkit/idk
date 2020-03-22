@@ -907,12 +907,6 @@ namespace idk
             {
                 ImGuidk::PushDisabled();
                 {
-                    if (!(is_client_obj || is_control_obj))
-                    {
-                        // display value
-                        continue;
-                    }
-
                     if (is_client_obj)
                     {
                         ImGui::Text("Move Object");

@@ -32,9 +32,10 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void EngineKill();
+
         /**
-         * Game Object
-         */
+* Game Object
+*/
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool GameObjectGetActiveInHierarchy(ulong gamehandle);
 
@@ -794,6 +795,25 @@ namespace idk
         public extern static void ViewDestroy(ulong handle);
 
         /*
+         * ElectronTransformView
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ElectronTransformSetPosition(ulong handle, Vector3 value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ElectronTransformTranslate(ulong handle, Vector3 translation);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ElectronTransformSetRotation(ulong handle, Quaternion value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ElectronTransformRotate(ulong handle, Quaternion rotation);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ElectronTransformSetScale(ulong handle, Vector3 value);
+
+
+        /*
          * ElectronRigidBody
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -801,5 +821,6 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ElectronRigidBodyAddForce(ulong handle, Vector3 value);
+
     }
 }

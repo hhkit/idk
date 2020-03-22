@@ -17,6 +17,7 @@ namespace idk
 		ParameterImpl<T>& param;
 		std::deque<SeqAndMove> buffer;
 		T ghost_value;
+		bool accept_moves = false;
 
 		DerivedMoveObjectData(ParameterImpl<T>& impl)
 			: param{ impl }
@@ -28,11 +29,28 @@ namespace idk
 		{
 			ghost_value = param.getter();
 			last_received = initial_frame;
+			accept_moves = true;
 		}
 
 		virtual void PushMove(SeqNo curr_seq, int move_type, const SyncableValue& value) override
 		{
 			auto val = std::get<T>(value); // we let c++ variant throw here in case we make any runtime errors
+
+			if (accept_moves == false)
+			{
+				switch (move_type)
+				{
+				case SeqAndPack::set_move:
+					param.setter(val);
+					break;
+				case SeqAndPack::delta_move:
+					param.setter(param.adder(param.getter(), val));
+					break;
+				default:
+					break;
+				}
+				return;
+			}
 
 			SeqAndMove new_move;
 			new_move.seq = curr_seq;
@@ -56,9 +74,19 @@ namespace idk
 					case SeqAndPack::delta_move:
 					{
 						auto& back = buffer.back();
-						back.move = param.adder(back.move, val);
-						param.setter(back.move);
+						
+						if (back.move_type == SeqAndPack::set_move)
 						// if the previous move was a set move, we compound the delta but remain a set move
+						{
+							back.move = param.adder(back.move, val);
+							param.setter(back.move);
+						}
+						else
+						// if the previous move was a delta move ,we compound the delta and the value.
+						{
+							back.move = param.adder(back.move, val);
+							param.setter(param.adder(param.getter(), val));
+						}
 						break;
 					}
 					default:

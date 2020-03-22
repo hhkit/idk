@@ -85,6 +85,7 @@
     <Compile Include="Components\Renderer.cs" />
     <Compile Include="Core\Application.cs" />
     <Compile Include="Electron\ElectronRigidbodyView.cs" />
+    <Compile Include="Electron\ElectronTransformView.cs" />
     <Compile Include="Electron\InvalidNetworkOperationException.cs" />
     <Compile Include="Electron\MonoBehaviorElec.cs" />
     <Compile Include="Electron\ElectronMessageInfo.cs" />

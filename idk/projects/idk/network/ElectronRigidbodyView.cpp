@@ -9,8 +9,6 @@ namespace idk
 {
 	void ElectronRigidbodyView::SetVelocity(const vec3& v)
 	{
-		rb->velocity(v);
-
 		if (velocity_param)
 			velocity_param->GetClientObject()->PushMove(
 				Core::GetSystem<NetworkSystem>().GetSequenceNumber(), 
@@ -22,14 +20,15 @@ namespace idk
 
 	void ElectronRigidbodyView::AddForce(const vec3& force)
 	{
-		rb->AddForce(force);
-
 		if (velocity_param)
+		{
+			LOG_TO(LogPool::GAME, "adding force");
 			velocity_param->GetClientObject()->PushMove(
 				Core::GetSystem<NetworkSystem>().GetSequenceNumber(),
 				SeqAndPack::delta_move,
 				force * rb->inv_mass
 			);
+		}
 	}
 
 	void ElectronRigidbodyView::Start()
