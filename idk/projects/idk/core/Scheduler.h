@@ -49,6 +49,7 @@ namespace idk
 		void SetPauseState(PausedSystemConfig<Ts...>);
 		seconds GetFixedDeltaTime()noexcept;
 		seconds GetRealDeltaTime()noexcept;
+		seconds GetPredictedDeltaTime() noexcept { return _predict_dt; }
 		seconds GetUnscaledDeltaTime() noexcept;
 		seconds GetRemainingTime() noexcept;
 		seconds GetNetworkTick() const noexcept { return _network_update; }
@@ -69,7 +70,7 @@ namespace idk
 		seconds    _accumulated_predict_dt;
 		seconds    _network_update = seconds{ 1.0 / 30 };
 		seconds    _predict_dt     = seconds{ 1.0 / 60 };
-		seconds    _fixed_dt       = seconds{ 1.0 / 60 };
+		seconds    _fixed_dt       = seconds{ 1.0 / 30 };
 
 		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];
 

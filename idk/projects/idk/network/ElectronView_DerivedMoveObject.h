@@ -58,7 +58,20 @@ namespace idk
 			new_move.move = val;
 			
 			if (buffer.empty() || buffer.back().seq < curr_seq)
+			{
+				switch (move_type)
+				{
+				case SeqAndPack::set_move:
+					param.setter(val);
+					break;
+				case SeqAndPack::delta_move:
+					param.setter(param.adder(param.getter(), val));
+					break;
+				default:
+					break;
+				}
 				buffer.emplace_back(new_move);
+			}
 			else
 			{
 				if (buffer.back().seq == curr_seq)
@@ -133,7 +146,7 @@ namespace idk
 			}
 		}
 
-		void Update(real ghost_bias) override
+		void UpdateGhost(real ghost_bias) override
 		{
 			param.setter(param.interpolator(param.getter(), ghost_value, ghost_bias));
 		}

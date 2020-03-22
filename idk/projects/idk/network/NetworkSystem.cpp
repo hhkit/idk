@@ -17,6 +17,7 @@
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
 #include <core/GameState.h>
+#include <core/Scheduler.h>
 
 #include <thread>
 
@@ -172,7 +173,7 @@ namespace idk
 	{
 		for (auto& ev : electron_views)
 		{
-			ev.MoveGhost(Core::GetRealDT());
+			ev.MoveGhost(Core::GetScheduler().GetRealDeltaTime());
 		}
 	}
 

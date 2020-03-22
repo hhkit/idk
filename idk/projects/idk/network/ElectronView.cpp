@@ -104,7 +104,7 @@ namespace idk
 			for (unsigned i = 0; i < parameters.size(); ++i)
 			{
 				auto& param = parameters[i];
-				param->GetClientObject()->Update();
+				param->GetClientObject()->UpdateGhost(interp_bias);
 			}
 
 		}

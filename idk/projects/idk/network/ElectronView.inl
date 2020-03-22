@@ -105,7 +105,7 @@ namespace idk
 		DerivedControlObjectData control_object_data;
 
 		DerivedParameter(ParameterImpl<T> param_impl)
-			: param{ param_impl }
+			: param{ std::move(param_impl) }
 			, ghost_data          { param }
 			, master_data         { param }
 			, client_object_data  { param }

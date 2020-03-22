@@ -54,6 +54,8 @@ namespace idk
 		vector<GenericHandle> observed_components;
 		unsigned state_mask{};
 
+		real interp_bias{ 0.03f };
+
 		Host owner = Host::SERVER;
 
 		variant<monostate, Master, Ghost> ghost_state;
@@ -120,7 +122,7 @@ namespace idk
 			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
 
 			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
-			virtual void Update(real ghost_bias = 0.03f) = 0;
+			virtual void UpdateGhost(real ghost_bias = 0.03f) = 0;
 
 			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
 			virtual ~MoveObjectData() = default;

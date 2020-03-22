@@ -45,7 +45,11 @@ namespace idk
 
 			ParameterImpl<vec3> param;
 			param.getter = [rigidbody]() -> vec3 { return rigidbody->velocity(); };
-			param.setter = [rigidbody](const vec3& v) -> void { rigidbody->velocity(v);  };
+			param.setter = [rigidbody](const vec3& v) -> void 
+			{ 
+				LOG_TO(LogPool::NETWORK, "SET VELOCITY (%f, %f,%f)", v.x, v.y, v.z);
+				rigidbody->velocity(v);  
+			};
 			velocity_param = view->RegisterMember("Velocity", std::move(param), 0);
 		}
 	}

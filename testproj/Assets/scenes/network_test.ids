@@ -98,7 +98,7 @@
       x: 0
       y: 0
       z: 0
-    scale: {x: 29.087101, y: 0.7105797, z: 29.087101}
+    scale: {x: 500, y: 0.7105797, z: 500}
   - !Name 
     name: ""
   - !Tag futanari

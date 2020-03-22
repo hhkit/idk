@@ -47,12 +47,7 @@ namespace idk
 			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
-
-		if (_accumulated_predict_dt > _predict_dt)
-		{
-			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkPredict)]);
-			_accumulated_predict_dt -= _predict_dt;
-		}
+		execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkPredict)]);
 
 		while (_accumulated_fixed_dt > _fixed_dt)
 		{
