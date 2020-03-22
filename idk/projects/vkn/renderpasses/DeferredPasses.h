@@ -49,6 +49,14 @@ namespace idk::vkn::renderpasses
 		CopyDepthPass(FrameGraphBuilder& builder, uvec2 depth_size, FrameGraphResource depth);
 		void Execute(FrameGraphDetail::Context_t context) override;
 	};
+	struct CopyColorPass : BaseRenderPass
+	{
+		FrameGraphResource copied_color;
+		FrameGraphResource original_color;
+		uvec2 size;
+		CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color);
+		void Execute(FrameGraphDetail::Context_t context) override;
+	};
 	struct GBufferPass : DrawSetRenderPass
 	{
 		FrameGraphResourceMutable gbuffer_rscs[5];
@@ -129,14 +137,11 @@ namespace idk::vkn::renderpasses
 	{
 		FrameGraphResourceMutable bloom_rsc;
 		FrameGraphResourceMutable brightness_read_only;
-
-		VknTextureView bright_texture;
 		//FrameGraphResourceMutable bloom_depth_rsc;
-		CombinePass& combine_rsc;
 
 		RscHandle<ShaderProgram> bloom_shader;
 
-		BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport, FrameGraphResource in_tex);
+		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};

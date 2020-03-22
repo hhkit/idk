@@ -44,28 +44,29 @@ void main()
 	weight[4] = 0.016216;
 
 	vec2 tex_offset = 1.0 / textureSize(brightness_input, 0) * blurScale; // gets size of single texel
-	
-	vec3 brightness = texture(brightness_input,vs_out.uv).rgb * weight[0];
+	vec2 uv =vs_out.uv;
+	uv.x = 1-uv.x;
+	vec3 brightness = texture(brightness_input,uv).rgb * weight[0];
 	
 	for(int i = 1; i < 5; ++i)
 	{
 		//if (blurdirection == 1)
 		{
 			// H
-			brightness += texture(brightness_input, vs_out.uv + vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
-			brightness += texture(brightness_input, vs_out.uv - vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
+			brightness += texture(brightness_input, uv + vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
+			brightness += texture(brightness_input, uv - vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
 		}
 		//else
 		//{
 		//	// V
-		//	brightness += texture(brightness_input, vs_out.uv + vec2(0.0, tex_offset.y * i)).rgb * weight[i] * blurStrength;
-		//	brightness += texture(brightness_input, vs_out.uv - vec2(0.0, tex_offset.y * i)).rgb * weight[i] * blurStrength;
+		//	brightness += texture(brightness_input, uv + vec2(0.0, tex_offset.y * i)).rgb * weight[i] * blurStrength;
+		//	brightness += texture(brightness_input, uv - vec2(0.0, tex_offset.y * i)).rgb * weight[i] * blurStrength;
 		//}
 	}
 	
 	
 	
-	//frag_color += brightness;
+	frag_color += brightness;
 	//vec3 color = ReinhardOperator(frag_color); 
-	out_color = vec4(brightness,1);
+	out_color = vec4(frag_color,1);//vec4(brightness,1);
 }

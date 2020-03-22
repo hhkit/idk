@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "FrameGraphBuilder.h"
+
+#include <res/ResourceHandle.inl>
+
 namespace idk::vkn
 {
 
@@ -44,6 +47,13 @@ namespace idk::vkn
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
 		desc.name = curr_rsc.name +":"+ desc.name;
+		if (desc.actual_rsc && *desc.actual_rsc)
+		{
+			auto& rsc = **desc.actual_rsc;
+			desc.format = rsc.format;
+			desc.type = rsc.image_type;
+		}
+
 		auto rsc = rsc_manager.CreateTexture(desc);
 		curr_rsc.output_resources.emplace_back(rsc);
 		return rsc;
@@ -73,11 +83,12 @@ namespace idk::vkn
 		return rsc;
 	}
 
-	FrameGraphResource FrameGraphBuilder::copy(FrameGraphResource target_rsc, CopyOptions opt)
+	CopyResult FrameGraphBuilder::copy(FrameGraphResource target_rsc, CopyOptions opt)
 	{
+		CopyResult result{target_rsc,target_rsc};
 		auto src_id = target_rsc.id;
 		auto copy_desc = rsc_manager.GetResourceDescription(src_id);
-		FrameGraphResource result = target_rsc;
+		FrameGraphResource& copy =result.copy;
 		if (copy_desc)
 		{
 			auto usage = copy_desc->usage;
@@ -86,10 +97,10 @@ namespace idk::vkn
 			if (copy_desc->actual_rsc)
 				copy_desc->actual_rsc = {};
 			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferDst;
-			result= CreateTexture(*copy_desc);
+			copy = CreateTexture(*copy_desc);
 			//result = write(result, WriteOptions{ .clear = false }); //Create already puts it into output resources
-			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,result,opt});
-			read(target_rsc,false);
+			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,copy,opt});
+			result.original = read(target_rsc,false);
 		}
 		return result;
 	}

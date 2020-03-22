@@ -26,6 +26,8 @@ namespace idk::vkn::renderpasses
 	{
 		if (!size)
 			size = uvec2{ 1920,1080 };
+
+
 		return TextureDescription
 		{
 			.name = name,//string_view name);
@@ -568,17 +570,17 @@ namespace idk::vkn::renderpasses
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 	}
 
-BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport, FrameGraphResource in_tex) : combine_rsc{ combine_ },  _viewport{ viewport }
+BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport) :  _viewport{ viewport }
 {
 	//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
 	//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
-	bloom_rsc = builder.write(combine_.out_color, WriteOptions{ false });//CreateGBuffer(builder, "Brightness", vk::Format::eB10G11R11UfloatPack32, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ viewport.size });
+	bloom_rsc = builder.write(out_color, WriteOptions{false});
 
 	//builder.write(combine_.out_color, WriteOptions{false});
 
 	builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
 		{
-			vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
 			vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -593,27 +595,8 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect vie
 			//vk::ComponentMapping mapping{};
 		}
 	);
-	auto derp1 = builder.read(combine_.out_color);
-	//brightness_read_only = builder.read(combine_.out_hdr);
-	std::vector<vk::ImageCopy> hifi;
-	hifi.emplace_back(vk::ImageCopy
-		{
-			vk::ImageSubresourceLayers
-			{
-			vk::ImageAspectFlagBits::eColor,
-			0,0,1
-			},
-			vk::Offset3D{0,0,0},
-			vk::ImageSubresourceLayers
-			{
-			vk::ImageAspectFlagBits::eColor,
-			0,0,1
-			},
-			vk::Offset3D{0,0,0},
-			vk::Extent3D{s_cast<uint32_t>(viewport.size.x),s_cast<uint32_t>(viewport.size.y),1},
-		});
-
-	brightness_read_only = builder.copy(combine_.out_hdr, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,hifi });
+	auto derp1 = builder.read(color);
+	brightness_read_only = builder.read(hdr,true);
 
 	builder.set_input_attachment(derp1, 1, AttachmentDescription
 		{
@@ -680,7 +663,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	//auto hi = context.Resources().Get<VknTextureView>(.id);
 	bright_texture = context.Resources().Get<VknTextureView>(brightness_read_only.id);
 	
-	context.BindUniform("brightness_input", 0, bright_texture);
+	context.BindUniform("brightness_input", 0, hi,false,vk::ImageLayout::eShaderReadOnlyOptimal);
 
 	struct bb {
 		int i = 1;
@@ -699,7 +682,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	context.SetCullFace({});
 	context.SetDepthTest(false);
 
-	auto& mesh = Mesh::defaults[MeshType::FSQ].as<VulkanMesh>();
+	auto& mesh = Mesh::defaults[MeshType::INV_FSQ].as<VulkanMesh>();
 	BindMesh(context, fsq_requirements, mesh);
 
 	//DrawFSQ
@@ -949,6 +932,10 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		combine_spec_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		//auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, combine_spec_pass.out_color, combine_spec_pass.out_depth);
+		
+		auto& copy_color_pass = graph.addRenderPass<CopyColorPass>("Copy Color For Bloom", cube_clear.rt_size, combine_spec_pass.out_color);
+
+		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass.original_color, copy_color_pass.copied_color, combine_spec_pass.out_hdr, gfx_state.camera.viewport);
 
 		spec_info.model = ShadingModel::Unlit;
 		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),
@@ -966,7 +953,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 
 	CopyDepthPass::CopyDepthPass(FrameGraphBuilder& builder, uvec2 depth_size, FrameGraphResource depth):size{depth_size}
 	{
-		copied_depth = builder.copy(depth, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,
+		auto [copy,original] = builder.copy(depth, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,
 			{
 				vk::ImageCopy
 				{
@@ -986,9 +973,42 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 				}
 			} });
 		builder.NoRenderPass();
+
+		copied_depth = copy;
+
 	}
 
 	void CopyDepthPass::Execute(FrameGraphDetail::Context_t )
+	{
+	}
+
+	CopyColorPass::CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color) :size{ color_size }
+	{
+		auto [copy,original]=builder.copy(color, CopyOptions{ vk::ImageLayout::eGeneral,
+			{
+				vk::ImageCopy
+				{
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eColor,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::ImageSubresourceLayers
+					{
+					vk::ImageAspectFlagBits::eColor,
+					0,0,1
+					},
+					vk::Offset3D{0,0,0},
+					vk::Extent3D{size.x,size.y,1},
+				}
+			} });
+		copied_color = copy;
+		original_color = original;
+		builder.NoRenderPass();
+	}
+
+	void CopyColorPass::Execute(FrameGraphDetail::Context_t )
 	{
 	}
 
