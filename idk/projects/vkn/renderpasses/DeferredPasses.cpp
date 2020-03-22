@@ -568,15 +568,17 @@ namespace idk::vkn::renderpasses
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 	}
 
-BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport) : combine_rsc{ combine_ },  _viewport{ viewport }
+BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport, FrameGraphResource in_tex) : combine_rsc{ combine_ },  _viewport{ viewport }
 {
 	//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
 	//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
-	bloom_rsc = CreateGBuffer(builder, "Brightness", vk::Format::eB10G11R11UfloatPack32, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ viewport.size });
+	bloom_rsc = builder.write(combine_.out_color, WriteOptions{ false });//CreateGBuffer(builder, "Brightness", vk::Format::eB10G11R11UfloatPack32, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ viewport.size });
+
+	//builder.write(combine_.out_color, WriteOptions{false});
 
 	builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
 		{
-			vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+			vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 			vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -592,7 +594,26 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect vie
 		}
 	);
 	auto derp1 = builder.read(combine_.out_color);
-	brightness_read_only = builder.read(combine_.out_hdr);
+	//brightness_read_only = builder.read(combine_.out_hdr);
+	std::vector<vk::ImageCopy> hifi;
+	hifi.emplace_back(vk::ImageCopy
+		{
+			vk::ImageSubresourceLayers
+			{
+			vk::ImageAspectFlagBits::eColor,
+			0,0,1
+			},
+			vk::Offset3D{0,0,0},
+			vk::ImageSubresourceLayers
+			{
+			vk::ImageAspectFlagBits::eColor,
+			0,0,1
+			},
+			vk::Offset3D{0,0,0},
+			vk::Extent3D{s_cast<uint32_t>(viewport.size.x),s_cast<uint32_t>(viewport.size.y),1},
+		});
+
+	brightness_read_only = builder.copy(combine_.out_hdr, CopyOptions{ vk::ImageLayout::eShaderReadOnlyOptimal,hifi });
 
 	builder.set_input_attachment(derp1, 1, AttachmentDescription
 		{
@@ -656,9 +677,10 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		context.attachment_offset = -1;
 		++i;
 	}
-	auto hi = context.Resources().Get<VknTextureView>(brightness_read_only.id);
+	//auto hi = context.Resources().Get<VknTextureView>(.id);
+	bright_texture = context.Resources().Get<VknTextureView>(brightness_read_only.id);
 	
-	context.BindUniform("brightness_input", 0, hi);
+	context.BindUniform("brightness_input", 0, bright_texture);
 
 	struct bb {
 		int i = 1;
@@ -914,6 +936,8 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, cube_clear.depth);
 		combine_def_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
+		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", combine_def_pass, gfx_state.camera.viewport, accum_pass_def.accum_rsc);
+
 		auto spec_info = info;
 		spec_info.model = ShadingModel::Specular;
 		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", make_gbuffer_set(spec_info), cube_clear.rt_size, spec_depth_copy.copied_depth).RenderPass();
@@ -925,8 +949,6 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		combine_spec_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		//auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, combine_spec_pass.out_color, combine_spec_pass.out_depth);
-		
-		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", combine_spec_pass, gfx_state.camera.viewport);
 
 		spec_info.model = ShadingModel::Unlit;
 		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),

@@ -129,12 +129,14 @@ namespace idk::vkn::renderpasses
 	{
 		FrameGraphResourceMutable bloom_rsc;
 		FrameGraphResourceMutable brightness_read_only;
+
+		VknTextureView bright_texture;
 		//FrameGraphResourceMutable bloom_depth_rsc;
 		CombinePass& combine_rsc;
 
 		RscHandle<ShaderProgram> bloom_shader;
 
-		BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport);
+		BloomPass(FrameGraphBuilder& builder, CombinePass& combine_, rect viewport, FrameGraphResource in_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
