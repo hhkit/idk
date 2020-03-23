@@ -26,11 +26,15 @@ namespace idk
 
 		return retval.inverse();
 	}
-
+	mat4 ortho_correction(mat4 m)
+	{
+		m[2][2] = -m[2][2];
+		return m;
+	}
 	mat4 Camera::ProjectionMatrix() const
 	{
 		return is_orthographic
-			? ortho(-orthographic_size, +orthographic_size, -orthographic_size * AspectRatio(), +orthographic_size * AspectRatio(), near_plane, far_plane)
+			? ortho_correction(ortho(-orthographic_size * AspectRatio(), +orthographic_size * AspectRatio(), -orthographic_size , +orthographic_size, near_plane, far_plane))
 			: perspective(field_of_view, AspectRatio(), near_plane, far_plane);
 	}
 
