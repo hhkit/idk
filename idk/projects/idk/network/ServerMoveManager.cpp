@@ -31,7 +31,6 @@ namespace idk
 			{
 				LOG_TO(LogPool::NETWORK, "unpacking move for %d", move_pack.network_id);
 				view->UnpackMoveData(move_pack);
-	
 			}
 		}
 	}

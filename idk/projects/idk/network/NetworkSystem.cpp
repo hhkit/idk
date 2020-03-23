@@ -17,6 +17,7 @@
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
 #include <core/GameState.h>
+#include <core/Scheduler.h>
 
 #include <thread>
 
@@ -172,23 +173,26 @@ namespace idk
 	{
 		for (auto& ev : electron_views)
 		{
-			if (std::get_if<ElectronView::Ghost>(&ev.ghost_state))
-				ev.MoveGhost(Core::GetRealDT());
+			ev.MoveGhost(Core::GetScheduler().GetRealDeltaTime());
 		}
 	}
 
 	void NetworkSystem::PreparePackets(span<ElectronView> electron_views)
 	{
 		for (auto& ev : electron_views)
-			ev.PrepareDataForSending();
+			ev.DumpToLog();
 
+		for (auto& ev : electron_views)
+		{
+			ev.PrepareDataForSending(frame_counter);
+		}
 		// if server
 		for (const auto& elem : server_connection_manager)
 		{
 			if (!elem)
 				continue;
 
-			elem->GetManager<GhostManager>()->SendGhosts(elem->GetConnectedHost(), electron_views);
+			elem->GetManager<GhostManager>()->SendGhosts(electron_views);
 		}
 
 		// if client

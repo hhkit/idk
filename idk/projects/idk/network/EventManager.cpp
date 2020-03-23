@@ -203,6 +203,7 @@ namespace idk
 
 	void EventManager::BroadcastLoadLevel(RscHandle<Scene> scene)
 	{
+		scene_changing = true;
 		Core::GetSystem<SceneManager>().SetNextScene(scene);
 
 		Core::GetSystem<SceneManager>().OnSceneChange.Listen(
@@ -229,6 +230,8 @@ namespace idk
 					for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
 						msg.AddView(elem.GetHandle());
 				});
+
+			scene_changing = false;
 		}
 		, 1); // fire once
 	}
@@ -259,56 +262,82 @@ namespace idk
 	// targets
 	void EventManager::OnInstantiatePrefabEvent(EventInstantiatePrefabMessage& message)
 	{
-		LOG_TO(LogPool::NETWORK, "Received instantiate prefab event");
 		if (!message.prefab)
 		{
 			LOG_TO(LogPool::NETWORK, "Prefab %s does not exist", static_cast<string>(message.prefab.guid).c_str());
 			return;
 		}
 
-		LOG_TO(LogPool::NETWORK, "  instantiating %s", message.prefab->Name().data());
-		if (message.use_position)
-		LOG_TO(LogPool::NETWORK, "    at (%f, %f, %f)", message.position.x, message.position.y, message.position.z);
+
+		const auto instantiate_prefab = 
+		[	prefab = message.prefab,
+			id = message.id,
+			use_position = message.use_position, 
+			position = message.position,
+			use_rotation = message.use_rotation, 
+			rotation = quat{ message.rotation[0],message.rotation[1],message.rotation[2],message.rotation[3] }
+		] (RscHandle<Scene>)
+		{
+
+			auto obj = prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
+			auto ev = obj->GetComponent<ElectronView>();
+
+			// set to ghost state
+			ev->ghost_state = ElectronView::Ghost{};
+
+			IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(id, ev));
+
+			auto& tfm = *obj->Transform();
+			if (use_position)
+				tfm.position = position;
+
+			if (use_rotation)
+				for (unsigned i = 0; i < 4; ++i)
+					tfm.rotation[i] = rotation[i];
+
+			ev->Setup();
+		};
+
+		if (scene_changing)
+			Core::GetSystem<SceneManager>().OnSceneChange.Listen(instantiate_prefab, 1);
 		else
-		LOG_TO(LogPool::NETWORK, "    with no position data.");
-
-		auto obj = message.prefab->Instantiate(*Core::GetSystem<SceneManager>().GetActiveScene());
-		auto ev = obj->GetComponent<ElectronView>();
-
-		// set to ghost state
-		ev->ghost_state = ElectronView::Ghost{};
-
-		IDK_ASSERT(Core::GetSystem<NetworkSystem>().GetIDManager().EmplaceID(message.id, ev));
-
-		auto& tfm = *obj->Transform();
-		if (message.use_position)
-			tfm.position = message.position;
-
-		if (message.use_rotation)
-			for (unsigned i = 0; i < 4; ++i)
-				tfm.rotation[i] = message.rotation[i];
-
-		ev->Setup();
+			instantiate_prefab({});
 	}
 
 	void EventManager::OnTransferOwnershipEvent(EventTransferOwnershipMessage& message)
 	{
-		auto id = std::make_shared<SignalBase::SlotId>();
-		LOG_TO(LogPool::NETWORK, "Received transfer ownership event");
-		auto network_id = message.object_to_transfer;
-		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(network_id);
-		ev->owner = Core::GetSystem<NetworkSystem>().GetMe();
-		ev->GetGameObject()->GetComponent<ElectronView>()->SetAsClientObject();
+		const auto transfer_ownership = [network_id = message.object_to_transfer](RscHandle<Scene>)
+		{
+			auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(network_id);
+			ev->owner = Core::GetSystem<NetworkSystem>().GetMe();
+			ev->GetGameObject()->GetComponent<ElectronView>()->SetAsClientObject();
+		};
+
+		if (scene_changing)
+			Core::GetSystem<SceneManager>().OnSceneChange.Listen(transfer_ownership, 1);
+		else
+			transfer_ownership({});
+
 	}
 
 	void EventManager::OnDestroyObjectMessage(EventDestroyObjectMessage& message)
 	{
-		auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(message.id);
-		Core::GetGameState().DestroyObject(view->GetGameObject());
+		const auto destroy_object =
+			[id = message.id](RscHandle<Scene>)
+		{
+			auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(id);
+			Core::GetGameState().DestroyObject(view->GetGameObject());
+		};
+
+		if (scene_changing)
+			Core::GetSystem<SceneManager>().OnSceneChange.Listen(destroy_object, 1);
+		else
+			destroy_object({});
 	}
 
 	void EventManager::OnLoadLevelMessage(EventLoadLevelMessage& msg)
 	{
+		scene_changing = true;
 		Core::GetSystem<SceneManager>().SetNextScene(msg.GetScene());
 		vector<EventLoadLevelMessage::ViewMapping> views( msg.GetObjects().begin(), msg.GetObjects().end() );
 
@@ -322,6 +351,7 @@ namespace idk
 				id_manager.EmplaceID(view.id, eview.GetHandle());
 				eview.Setup();
 			}
+			scene_changing = false;
 		}, 1);
 	}
 

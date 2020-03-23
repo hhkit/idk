@@ -98,7 +98,18 @@ namespace idk
 
 	void EventManager::OnInvokeRPCMessage(EventInvokeRPCMessage& raw_msg)
 	{
-		InvokeRPC(connection_manager->GetConnectedHost(), raw_msg.payload);
+		const auto invoke_rpc = 
+		[	connection_manager = this->connection_manager, 
+			payload = raw_msg.payload]
+		(RscHandle<Scene>)
+		{
+			InvokeRPC(connection_manager->GetConnectedHost(), payload);
+		};
+
+		if (scene_changing)
+			Core::GetSystem<SceneManager>().OnSceneChange.Listen(invoke_rpc, 1);
+		else
+			invoke_rpc({});
 	}
 
 	struct ElectronMessageInfo
