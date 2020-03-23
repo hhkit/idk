@@ -155,18 +155,19 @@ void main()
 	
 	//distance
 	
-	int remain = MAX_LIGHTS - LightBlk.light_count;
-	vec3 accum_for_fog = light_accum;
+	//int remain = MAX_LIGHTS - LightBlk.light_count;
+	//vec3 accum_for_fog = light_accum;
 	
 	
 	float dist = 0;
 	float fogFactor = 0;
 	
 	//range based
-	dist = length(view_pos);
+	dist = view_z_abs;
 	 
 	//Exponential fog
-	fogFactor = 1.0 /exp( (dist * FogDensity)* (dist * FogDensity));
+	float d = dist * FogDensity;
+	fogFactor = 1.0 /exp( d *d );
 	fogFactor = clamp( fogFactor, 0.0, 1.0 );
 	//float be = (10.0 - view_pos.y) * 0.004;//0.004 is just a factor; change it if you want
 	//float bi = (10.0 - view_pos.y) * 0.001;//0.001 is just a factor; change it if you want
@@ -174,7 +175,7 @@ void main()
 	//float ext = exp(-dist * be);
 	//float insc = exp(-dist * bi);
 	
-	light_accum = mix(fogColor,accum_for_fog,fogFactor);
+	light_accum = mix(fogColor,light_accum,fogFactor);
 	
 	//light_accum = light_accum* ext + fogColor * (1.0 - insc);
 	

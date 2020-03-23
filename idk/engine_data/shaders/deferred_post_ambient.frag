@@ -50,6 +50,7 @@ void main()
 	LoadGBuffers(view_pos, normal, tangent, metallic, roughness, albedo,ambient_o, uv, emissive);
 	
 	vec3 view_dir = -normalize(view_pos);
+	float view_z_abs = abs(view_pos.z);
 
 	vec3 light_accum = vec3(0);
 

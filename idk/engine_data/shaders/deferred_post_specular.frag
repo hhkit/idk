@@ -60,6 +60,9 @@ import /engine_data/shaders/pbr_utils.glsl
 // forward shading only cares about color!
 layout(location = 0)out vec4 out_color;
 
+const vec3 fogColor = vec3(0.5, 0.5,0.5);
+const float FogDensity = 0.005;
+
 
 void main()
 {
@@ -125,6 +128,28 @@ void main()
 		
 		light_accum += result;
 	}
+	
+	float dist = 0;
+	float fogFactor = 0;
+	
+	//range based
+	dist = view_z_abs;
+	 
+	//Exponential fog
+	float d = dist * FogDensity;
+	fogFactor = 1.0 /exp( d*d );
+	fogFactor = clamp( fogFactor, 0.0, 1.0 );
+	//float be = (10.0 - view_pos.y) * 0.004;//0.004 is just a factor; change it if you want
+	//float bi = (10.0 - view_pos.y) * 0.001;//0.001 is just a factor; change it if you want
+ 
+	//float ext = exp(-dist * be);
+	//float insc = exp(-dist * bi);
+	
+	light_accum = mix(fogColor,light_accum,fogFactor);
+	
+	//light_accum = light_accum* ext + fogColor * (1.0 - insc);
+	
+	
 	vec3 F = mix(vec3(0.04), albedo, specular);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
 	vec3 kD = 1.0 - kS;
