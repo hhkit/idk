@@ -31,8 +31,8 @@ layout(location = 2) in VS_OUT
 
 void main()
 {
-	float blurStrength = 30.f;
-	float blurScale = 10.f;
+	float blurStrength = 1.f;
+	float blurScale = 1.f;
 	
 	//vec3 frag_color = subpassLoad(color_input).rgb;
 	
@@ -48,15 +48,19 @@ void main()
 	uv.x = 1-uv.x;
 	vec3 brightness = texture(brightness_input,uv).rgb * weight[0];
 	
-	for(int i = 1; i < 5; ++i)
+	
+	if (bBlock.blurdirection == 1)
 	{
-		if (bBlock.blurdirection == 1)
+		for(int i = 1; i < 5; ++i)
 		{
 			// H
 			brightness += texture(brightness_input, uv + vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
 			brightness += texture(brightness_input, uv - vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
 		}
-		else
+	}
+	else
+	{
+		for(int i = 1; i < 5; ++i)
 		{
 			// V
 			brightness += texture(brightness_input, uv + vec2(0.0, tex_offset.y * i)).rgb * weight[i] * blurStrength;
@@ -64,13 +68,5 @@ void main()
 		}
 	}
 
-
-	//out_color = vec4(ReinhardOperator(brightness),1);
-	
-	//float b = dot(brightness, vec3(0.45,0.70,0.70));
-	// if(b > 1.0)
-     //   frag_color += brightness;
-		
-	//vec3 color = ReinhardOperator(brightness); 
 	out_color = vec4(brightness,1);//vec4(brightness,1);
 }

@@ -79,13 +79,13 @@ void main()
 	float depth = subpassLoad(depth_input).r;
 	vec3  light = subpassLoad(color_input).rgb;
 	
-	out_color = vec4(ReinhardOperator(light),1);
-	
-	float brightness = dot(out_color.rgb, vec3(0.45,0.70,0.70));
+	float brightness = dot(light, vec3(0.45,0.70,0.70));
 	 if(brightness > 1.0)
         out_hdr = vec4(light, 1.0);
     else
         out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
+	
+	out_color = vec4(ReinhardOperator(light),1);
 		
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	

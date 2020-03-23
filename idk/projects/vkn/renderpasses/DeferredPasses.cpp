@@ -293,10 +293,10 @@ namespace idk::vkn::renderpasses
 		draw_set.Render(context);
 	}
 
-	CombinePass::CombinePass(FrameGraphBuilder& builder, [[maybe_unused]] rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex)
+	CombinePass::CombinePass(FrameGraphBuilder& builder, [[maybe_unused]] rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex, uvec2 rt_size)
 	{
 		auto out_color_rsc= builder.write(out_color_tex, WriteOptions{ false });
-		auto out_hdr_rsc = CreateGBuffer(builder, "brightness layer", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ viewport.size });
+		auto out_hdr_rsc = CreateGBuffer(builder, "brightness layer", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, { rt_size });
 		auto out_depth_rsc= builder.write(out_depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		out_color = out_color_rsc;
 		out_hdr = out_hdr_rsc;
@@ -634,7 +634,7 @@ namespace idk::vkn::renderpasses
 	//#pragma optimize("",off)
 	void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	{
-		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass Combine");
 		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 		if (bloom_shader.guid == Guid{})
 		{
@@ -664,6 +664,8 @@ namespace idk::vkn::renderpasses
 		bright_texture = context.Resources().Get<VknTextureView>(brightness_read_only.id);
 
 		context.BindUniform("brightness_input", 0, bright_texture, false, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+		context.BindUniform("ColCorrectLut", 0, color_correction_lut);
 
 		struct bb {
 			int i = 1;
@@ -737,7 +739,7 @@ BloomPassH::BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color,
 //#pragma optimize("",off)
 void BloomPassH::Execute(FrameGraphDetail::Context_t context)
 {
-	context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
+	context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom PassH");
 	context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 	if (bloom_shader.guid == Guid{})
 	{
@@ -856,7 +858,7 @@ BloomPassW::BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color,
 //#pragma optimize("",off)
 void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 {
-	context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
+	context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom PassW");
 	context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
 	if (bloom_shader.guid == Guid{})
 	{
@@ -1138,22 +1140,23 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 		accum_fsq_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_def = graph.addRenderPass<AccumPassSetPair>("Accum pass Default", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_def).RenderPass();
-		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, cube_clear.depth);
+		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, cube_clear.depth, cube_clear.rt_size);
 		combine_def_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		//Bloom pass stage start
 
-		///////////Bright color pass - Sample bright colours from light emissive, into a texture, and apply 2-pass gaussian blurring effect on the said texture/////////////////////////
-		///////////Bright colors extracted from Combine default pass//////////
-		//////////Now apply horizontal gaussian pass//////////////
-		//auto& copy_color_pass = graph.addRenderPass<CopyColorPass>("Copy Color For BloomH", cube_clear.rt_size, combine_def_pass.out_hdr);
-		//auto& bloom_passH = graph.addRenderPass<BloomPassH>("Bloom passH", copy_color_pass.original_color, copy_color_pass.copied_color, copy_color_pass.copied_color, gfx_state.camera.viewport);
-		//auto& copy_color_pass_1 = graph.addRenderPass<CopyColorPass>("Copy Color For BloomW", cube_clear.rt_size, bloom_passH.bloom_rsc);
-		///////////Now apply vertical gaussian pass////////////////
-		//auto& bloom_pass = graph.addRenderPass<BloomPassW>("Bloom passW", copy_color_pass_1.original_color, copy_color_pass_1.copied_color, copy_color_pass_1.copied_color, gfx_state.camera.viewport);
-		//auto& copy_color_pass_2 = graph.addRenderPass<CopyColorPass>("Copy Color For Bloom effect", cube_clear.rt_size, combine_def_pass.out_color);
-		//////////Now additive blend the blurred brightness back onto the default pass texture////////
-		//auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, bloom_pass.bloom_rsc, gfx_state.camera.viewport);
+		/////////Bright color pass - Sample bright colours from light emissive, into a texture, and apply 2-pass gaussian blurring effect on the said texture/////////////////////////
+		/////////Bright colors extracted from Combine default pass//////////
+		////////Now apply horizontal gaussian pass//////////////
+		auto& copy_color_pass = graph.addRenderPass<CopyColorPass>("Copy Color For BloomH", cube_clear.rt_size, combine_def_pass.out_hdr, vk::ImageLayout::eShaderReadOnlyOptimal);
+		auto& bloom_passH = graph.addRenderPass<BloomPassH>("Bloom passH", copy_color_pass.original_color, copy_color_pass.copied_color, copy_color_pass.copied_color, gfx_state.camera.viewport);
+		auto& copy_color_pass_1 = graph.addRenderPass<CopyColorPass>("Copy Color For BloomW", cube_clear.rt_size, bloom_passH.bloom_rsc, vk::ImageLayout::eShaderReadOnlyOptimal);
+		/////////Now apply vertical gaussian pass////////////////
+		auto& bloom_pass = graph.addRenderPass<BloomPassW>("Bloom passW", copy_color_pass_1.original_color, copy_color_pass_1.copied_color, copy_color_pass_1.copied_color, gfx_state.camera.viewport);
+		auto& copy_color_pass_2 = graph.addRenderPass<CopyColorPass>("Copy Color For Bloom effect", cube_clear.rt_size, combine_def_pass.out_color);
+		////////Now additive blend the blurred brightness back onto the default pass texture////////
+		auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, bloom_pass.bloom_rsc, gfx_state.camera.viewport);
+		bloom_pass_combine.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		//Bloom pass stage end
 
@@ -1164,7 +1167,7 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 		auto& accum_pass_spec = graph.addRenderPass<AccumPassSetPair>("Accum pass Specular", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_spec).RenderPass();
 
 
-		auto& combine_spec_pass = graph.addRenderPass<CombinePass>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, combine_def_pass.out_color, combine_def_pass.out_depth);
+		auto& combine_spec_pass = graph.addRenderPass<CombinePass>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, bloom_pass_combine.bloom_rsc, combine_def_pass.out_depth, cube_clear.rt_size);
 		combine_spec_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		spec_info.model = ShadingModel::Unlit;
@@ -1213,9 +1216,9 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 	{
 	}
 
-	CopyColorPass::CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color) :size{ color_size }
+	CopyColorPass::CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color, vk::ImageLayout il) :size{ color_size }
 	{
-		auto [copy,original]=builder.copy(color, CopyOptions{ vk::ImageLayout::eGeneral,
+		auto [copy,original]=builder.copy(color, CopyOptions{ il,
 			{
 				vk::ImageCopy
 				{
