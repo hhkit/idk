@@ -13,6 +13,7 @@ written consent of DigiPen Institute of Technology is prohibited.
 /******************************************************************************/
 #pragma once
 #include <idk.h>
+#include <map>
 
 namespace idk
 {
@@ -59,7 +60,7 @@ namespace idk
 		SlotId operator+=(Func&& f) { return Listen(std::forward<Func>(f)); }
 		void   operator-=(SlotId id) { Unlisten(id); }
 	private:
-		hash_table<SlotId, Callback> _slots;
+		std::map<SlotId, Callback> _slots;
 		vector<SlotId> _removeus;
 		SlotId _next_id = 0;
 	};
