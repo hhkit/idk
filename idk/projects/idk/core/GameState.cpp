@@ -193,7 +193,8 @@ namespace idk::detail
 							const auto entity = real_handle->GetGameObject();
 							gs.DestroyObjectNow(real_handle);
 							IDK_ASSERT(entity);
-							entity->DeregisterComponent(real_handle);
+							if (entity)
+								entity->DeregisterComponent(real_handle);
 						}
 					}
 				} ...
