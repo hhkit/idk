@@ -130,7 +130,7 @@ namespace idk::vkn
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
 
-		void ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> &material_instances,MaterialInstanceCache& mat_inst_cache);
+		void ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> &material_instances);
 	};
 
 	struct GraphicsState : CoreGraphicsState
