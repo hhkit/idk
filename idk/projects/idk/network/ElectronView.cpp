@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include "ElectronView.inl"
 #include <core/GameObject.inl>
-
+#include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <phys/RigidBody.h>
 
 #include <network/ElectronTransformView.h>
 #include <network/ElectronRigidbodyView.h>
+#include <network/ElectronAnimatorView.h>
 #include <network/NetworkSystem.h>
 namespace idk
 {
@@ -32,6 +34,19 @@ namespace idk
 			tfm_view->Start();
 		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
 			rb_view->Start();
+		const auto sg_handle = Core::GetSystem<SceneManager>().FetchSceneGraphFor(GetGameObject());
+
+		if (sg_handle)
+			sg_handle.Visit([&](Handle<GameObject> go, int) -> bool
+				{
+					if (auto animator_view = go->GetComponent<ElectronAnimatorView>())
+					{
+						animator_view->Start(GetHandle());
+						return false;
+					}
+					return true;
+				}
+			);
 
 		for (auto& elem : parameters)
 		{

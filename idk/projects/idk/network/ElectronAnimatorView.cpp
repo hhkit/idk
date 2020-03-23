@@ -13,17 +13,18 @@ namespace idk
 	}
 	Handle<ElectronView> ElectronAnimatorView::GetView() const
 	{
-		return GetGameObject()->GetComponent<ElectronView>();
+		return electron_view;
 	}
-	void ElectronAnimatorView::Start()
+	void ElectronAnimatorView::Start(Handle<ElectronView> view)
 	{
-		auto view = GetGameObject()->GetComponent<ElectronView>();
 		if (!view)
 			return;
 
+		electron_view = view;
+
 		// Get all synced params based on type and name. 
 		auto& animator = *GetGameObject()->GetComponent<Animator>();
-		const auto register_params = [&](auto& param_names, auto type)
+		const auto register_params = [&](auto& param_names, auto type) noexcept
 		{
 			using ParamType = decltype(type);
 			for (auto& synced_p : param_names)
@@ -39,7 +40,12 @@ namespace idk
 					view->RegisterMember(param.name, impl);
 				}
 			}
-
 		};
+
+		register_params(int_params    , anim::IntParam{});
+		register_params(bool_params   , anim::BoolParam{});
+		register_params(float_params  , anim::FloatParam{});
+		register_params(trigger_params, anim::TriggerParam{});
+
 	}
 }

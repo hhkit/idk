@@ -342,7 +342,8 @@ namespace idk
 			auto old_c_queue = std::move(_creation_queue);
 
 			for (auto& elem : old_c_queue)
-				created_handles[elem.type](this, elem);
+				if (elem)
+					created_handles[elem.type](this, elem);
 		}
 	}
 	void GameState::DestroyQueue()
@@ -355,9 +356,11 @@ namespace idk
 			auto old_d_queue = std::move(_destruction_queue);
 
 			for (auto& elem : old_d_queue)
-				destroy_handlesignal_jt[elem.type](this, elem);
+				if (elem)
+					destroy_handlesignal_jt[elem.type](this, elem);
 			for (auto& elem : old_d_queue)
-				destroy_handles_jt[elem.type](*this, elem);
+				if (elem)
+					destroy_handles_jt[elem.type](*this, elem);
 		}
 	}
 	Handle<GameObject> GameState::GetGameObject(const GenericHandle& handle)

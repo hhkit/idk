@@ -87,6 +87,7 @@ namespace idk
 
 	void EventManager::SendBufferedEvents()
 	{
+		if(0)
 		if (buffered_events)
 		{
 			connection_manager->CreateAndSendMessage<EventDataBlockBufferedEvents>(GameChannel::RELIABLE, [](EventDataBlockBufferedEvents& msg)

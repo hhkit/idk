@@ -8,7 +8,7 @@
 
 namespace idk
 {
-	using SyncableValue = variant<int, vec3, quat>;
+	using SyncableValue = variant<bool, int, float, vec3, quat>;
 
 	template<typename T>
 	struct ParameterImpl

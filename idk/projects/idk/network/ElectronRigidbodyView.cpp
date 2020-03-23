@@ -26,7 +26,7 @@ namespace idk
 			velocity_param->GetClientObject()->PushMove(
 				Core::GetSystem<NetworkSystem>().GetSequenceNumber(),
 				SeqAndPack::delta_move,
-				force * rb->inv_mass
+				force * rb->inv_mass * Core::GetDT().count()
 			);
 		}
 	}
