@@ -90,10 +90,10 @@ namespace idk::vkn::bindings
 
 		void Bind(RenderInterface& context, const RenderObject&)
 		{
-			auto light_indices = _state._light_indices;
-			auto all_lights = _state.all_lights;
-			auto all_shadows = _state.all_shadows;
-			auto _view_matrix = _state._view_matrix;
+			const auto& light_indices = _state._light_indices;
+			const auto& all_lights = _state.all_lights;
+			//auto all_shadows = _state.all_shadows;
+			const auto& _view_matrix = _state._view_matrix;
 			vector<LightData> lights;
 			vector<VknTextureView> shadow_maps;
 			vector<VknTextureView> shadow_maps_directional;

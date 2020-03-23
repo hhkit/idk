@@ -34,6 +34,7 @@ namespace idk
 		FDeferredCombine,
 		FDeferredHDR,
 		FDeferredBloom,
+		FDeferredBloomCombine,
 		FPointShadow,
 		FMax
 	};

@@ -160,6 +160,7 @@ namespace idk
 		rad fov{};
 		real ap;
 		real gamma=1.f;
+		mat4 view_matrix_inverse{};
 	};
 
 	struct PointCameraData

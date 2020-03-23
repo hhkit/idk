@@ -570,7 +570,126 @@ namespace idk::vkn::renderpasses
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 	}
 
-BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport) :  _viewport{ viewport }
+	BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport) : _viewport{ viewport }
+	{
+		//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
+		//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
+		bloom_rsc = builder.write(out_color, WriteOptions{ false });
+
+		//builder.write(combine_.out_color, WriteOptions{false});
+
+		builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				vk::ClearColorValue{},//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			}
+		);
+		auto derp1 = builder.read(color);
+		brightness_read_only = builder.read(hdr, true);
+
+		builder.set_input_attachment(derp1, 1, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+		//builder.set_input_attachment(brightness_read_only, 2, AttachmentDescription
+		//	{
+		//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+		//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+		//		vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+		//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+		//		vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+		//		vk::ImageSubresourceRange
+		//		{
+		//			vk::ImageAspectFlagBits::eColor,0,1,0,1
+		//		},//vk::ImageSubresourceRange sub_resource_range{};
+		//		//std::optional<vk::ClearValue> clear_value;
+		//		//std::optional<vk::Format> format{};
+		//		//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+		//		//vk::ComponentMapping mapping{};
+		//	});
+	}
+	//#pragma optimize("",off)
+	void BloomPass::Execute(FrameGraphDetail::Context_t context)
+	{
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
+		context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+		if (bloom_shader.guid == Guid{})
+		{
+			bloom_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FDeferredBloomCombine];//Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
+
+		}
+
+		context.BindShader(ShaderStage::Fragment, bloom_shader);
+		{
+			uint32_t i = 0;
+
+			AttachmentBlendConfig blend{};
+			blend.blend_enable = true;
+			blend.dst_color_blend_factor = BlendFactor::eOne;
+			blend.src_color_blend_factor = BlendFactor::eOne;
+			blend.color_blend_op = BlendOp::eAdd;
+			blend.alpha_blend_op = BlendOp::eAdd;
+			blend.dst_alpha_blend_factor = BlendFactor::eDstAlpha;
+			blend.src_alpha_blend_factor = BlendFactor::eSrcAlpha;
+			context.SetBlend(i);
+			context.SetClearColor(i, idk::color{ 0,0,0,0 });
+			context.SetClearDepthStencil(1.0f);
+			context.attachment_offset = -1;
+			++i;
+		}
+		//auto hi = context.Resources().Get<VknTextureView>(.id);
+		bright_texture = context.Resources().Get<VknTextureView>(brightness_read_only.id);
+
+		context.BindUniform("brightness_input", 0, bright_texture, false, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+		struct bb {
+			int i = 1;
+		};
+
+		bb ii;
+		string d_block;
+		vector<bb> crap;
+		crap.emplace_back(ii);
+		d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
+		//context.BindUniform("blurBlock", 0, d_block);
+
+		context.SetViewport(_viewport);
+		context.SetScissors(_viewport);
+
+		context.SetCullFace({});
+		context.SetDepthTest(false);
+
+		auto& mesh = Mesh::defaults[MeshType::INV_FSQ].as<VulkanMesh>();
+		BindMesh(context, fsq_requirements, mesh);
+
+		//DrawFSQ
+		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
+	}
+
+BloomPassH::BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport) :  _viewport{ viewport }
 {
 	//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
 	//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
@@ -595,32 +714,16 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, F
 			//vk::ComponentMapping mapping{};
 		}
 	);
-	auto derp1 = builder.read(color);
+	//auto derp1 = builder.read(color);
 	brightness_read_only = builder.read(hdr,true);
 
-	builder.set_input_attachment(derp1, 1, AttachmentDescription
-		{
-			vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-			vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-			vk::ImageSubresourceRange
-			{
-				vk::ImageAspectFlagBits::eColor,0,1,0,1
-			},//vk::ImageSubresourceRange sub_resource_range{};
-			//std::optional<vk::ClearValue> clear_value;
-			//std::optional<vk::Format> format{};
-			//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-			//vk::ComponentMapping mapping{};
-		});
-	//builder.set_input_attachment(brightness_read_only, 2, AttachmentDescription
+	//builder.set_input_attachment(derp1, 1, AttachmentDescription
 	//	{
 	//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
 	//		vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-	//		vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+	//		vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
 	//		vk::ImageSubresourceRange
 	//		{
 	//			vk::ImageAspectFlagBits::eColor,0,1,0,1
@@ -631,8 +734,8 @@ BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, F
 	//		//vk::ComponentMapping mapping{};
 	//	});
 }
-#pragma optimize("",off)
-void BloomPass::Execute(FrameGraphDetail::Context_t context)
+//#pragma optimize("",off)
+void BloomPassH::Execute(FrameGraphDetail::Context_t context)
 {
 	context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
 	context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
@@ -651,9 +754,9 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		blend.dst_color_blend_factor = BlendFactor::eOne;
 		blend.src_color_blend_factor = BlendFactor::eOne;
 		blend.color_blend_op = BlendOp::eAdd;
-		blend.alpha_blend_op = BlendOp::eMax;
-		blend.dst_alpha_blend_factor = BlendFactor::eOne;
-		blend.src_alpha_blend_factor = BlendFactor::eOne;
+		blend.alpha_blend_op = BlendOp::eAdd;
+		blend.dst_alpha_blend_factor = BlendFactor::eDstAlpha;
+		blend.src_alpha_blend_factor = BlendFactor::eSrcAlpha;
 		context.SetBlend(i);
 		context.SetClearColor(i, idk::color{ 0,0,0,0 });
 		context.SetClearDepthStencil(1.0f);
@@ -663,7 +766,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	//auto hi = context.Resources().Get<VknTextureView>(.id);
 	bright_texture = context.Resources().Get<VknTextureView>(brightness_read_only.id);
 	
-	context.BindUniform("brightness_input", 0, hi,false,vk::ImageLayout::eShaderReadOnlyOptimal);
+	context.BindUniform("brightness_input", 0, bright_texture,false,vk::ImageLayout::eShaderReadOnlyOptimal);
 
 	struct bb {
 		int i = 1;
@@ -675,6 +778,125 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	crap.emplace_back(ii);
 	d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
 	context.BindUniform("blurBlock",0,d_block);
+
+	context.SetViewport(_viewport);
+	context.SetScissors(_viewport);
+
+	context.SetCullFace({});
+	context.SetDepthTest(false);
+
+	auto& mesh = Mesh::defaults[MeshType::INV_FSQ].as<VulkanMesh>();
+	BindMesh(context, fsq_requirements, mesh);
+
+	//DrawFSQ
+	context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
+}
+
+BloomPassW::BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport) : _viewport{ viewport }
+{
+	//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
+	//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
+	bloom_rsc = builder.write(out_color, WriteOptions{ false });
+
+	//builder.write(combine_.out_color, WriteOptions{false});
+
+	builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
+		{
+			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
+			vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
+			vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+			vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+			vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+			vk::ImageSubresourceRange
+			{
+				vk::ImageAspectFlagBits::eColor,0,1,0,1
+			},//vk::ImageSubresourceRange sub_resource_range{};
+			vk::ClearColorValue{},//std::optional<vk::ClearValue> clear_value;
+			//std::optional<vk::Format> format{};
+			//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+			//vk::ComponentMapping mapping{};
+		}
+	);
+	//auto derp1 = builder.read(color);
+	brightness_read_only = builder.read(hdr, true);
+
+	//builder.set_input_attachment(derp1, 1, AttachmentDescription
+	//	{
+	//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+	//		vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+	//		vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+	//		vk::ImageSubresourceRange
+	//		{
+	//			vk::ImageAspectFlagBits::eColor,0,1,0,1
+	//		},//vk::ImageSubresourceRange sub_resource_range{};
+	//		//std::optional<vk::ClearValue> clear_value;
+	//		//std::optional<vk::Format> format{};
+	//		//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+	//		//vk::ComponentMapping mapping{};
+	//	});
+	//builder.set_input_attachment(brightness_read_only, 2, AttachmentDescription
+	//	{
+	//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+	//		vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+	//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+	//		vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+	//		vk::ImageSubresourceRange
+	//		{
+	//			vk::ImageAspectFlagBits::eColor,0,1,0,1
+	//		},//vk::ImageSubresourceRange sub_resource_range{};
+	//		//std::optional<vk::ClearValue> clear_value;
+	//		//std::optional<vk::Format> format{};
+	//		//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+	//		//vk::ComponentMapping mapping{};
+	//	});
+}
+//#pragma optimize("",off)
+void BloomPassW::Execute(FrameGraphDetail::Context_t context)
+{
+	context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass");
+	context.BindShader(ShaderStage::Vertex, Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VFsq]);
+	if (bloom_shader.guid == Guid{})
+	{
+		bloom_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FDeferredBloom];//Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/deferred_hdr.frag", false);
+
+	}
+
+	context.BindShader(ShaderStage::Fragment, bloom_shader);
+	{
+		uint32_t i = 0;
+
+		AttachmentBlendConfig blend{};
+		blend.blend_enable = true;
+		blend.dst_color_blend_factor = BlendFactor::eOne;
+		blend.src_color_blend_factor = BlendFactor::eOne;
+		blend.color_blend_op = BlendOp::eAdd;
+		blend.alpha_blend_op = BlendOp::eAdd;
+		blend.dst_alpha_blend_factor = BlendFactor::eDstAlpha;
+		blend.src_alpha_blend_factor = BlendFactor::eSrcAlpha;
+		context.SetBlend(i);
+		context.SetClearColor(i, idk::color{ 0,0,0,0 });
+		context.SetClearDepthStencil(1.0f);
+		context.attachment_offset = -1;
+		++i;
+	}
+	//auto hi = context.Resources().Get<VknTextureView>(.id);
+	bright_texture = context.Resources().Get<VknTextureView>(brightness_read_only.id);
+
+	context.BindUniform("brightness_input", 0, bright_texture, false, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+	struct bb {
+		int i = 0;
+	};
+
+	bb ii;
+	string d_block;
+	vector<bb> crap;
+	crap.emplace_back(ii);
+	d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
+	context.BindUniform("blurBlock", 0, d_block);
 
 	context.SetViewport(_viewport);
 	context.SetScissors(_viewport);
@@ -861,7 +1083,7 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
 	using AccumDrawSet = CombinedMeshDrawSet<AccumLightDrawSet, AccumAmbientDrawSet>;
-	#pragma optimize("",off)
+	//#pragma optimize("",off)
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, [[maybe_unused]] RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		using AccumPassSetPair = PassSetPair<AccumPass, AccumDrawSet>;
@@ -919,7 +1141,21 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, cube_clear.depth);
 		combine_def_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
-		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", combine_def_pass, gfx_state.camera.viewport, accum_pass_def.accum_rsc);
+		//Bloom pass stage start
+
+		///////////Bright color pass - Sample bright colours from light emissive, into a texture, and apply 2-pass gaussian blurring effect on the said texture/////////////////////////
+		///////////Bright colors extracted from Combine default pass//////////
+		//////////Now apply horizontal gaussian pass//////////////
+		//auto& copy_color_pass = graph.addRenderPass<CopyColorPass>("Copy Color For BloomH", cube_clear.rt_size, combine_def_pass.out_hdr);
+		//auto& bloom_passH = graph.addRenderPass<BloomPassH>("Bloom passH", copy_color_pass.original_color, copy_color_pass.copied_color, copy_color_pass.copied_color, gfx_state.camera.viewport);
+		//auto& copy_color_pass_1 = graph.addRenderPass<CopyColorPass>("Copy Color For BloomW", cube_clear.rt_size, bloom_passH.bloom_rsc);
+		///////////Now apply vertical gaussian pass////////////////
+		//auto& bloom_pass = graph.addRenderPass<BloomPassW>("Bloom passW", copy_color_pass_1.original_color, copy_color_pass_1.copied_color, copy_color_pass_1.copied_color, gfx_state.camera.viewport);
+		//auto& copy_color_pass_2 = graph.addRenderPass<CopyColorPass>("Copy Color For Bloom effect", cube_clear.rt_size, combine_def_pass.out_color);
+		//////////Now additive blend the blurred brightness back onto the default pass texture////////
+		//auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, bloom_pass.bloom_rsc, gfx_state.camera.viewport);
+
+		//Bloom pass stage end
 
 		auto spec_info = info;
 		spec_info.model = ShadingModel::Specular;
@@ -931,15 +1167,10 @@ void BloomPass::Execute(FrameGraphDetail::Context_t context)
 		auto& combine_spec_pass = graph.addRenderPass<CombinePass>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, combine_def_pass.out_color, combine_def_pass.out_depth);
 		combine_spec_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
-		//auto& hdr_pass = graph.addRenderPass<HdrPass>("HDR pass", accum_pass_def, accum_pass_spec, gfx_state.camera.viewport, combine_spec_pass.out_color, combine_spec_pass.out_depth);
-		
-		auto& copy_color_pass = graph.addRenderPass<CopyColorPass>("Copy Color For Bloom", cube_clear.rt_size, combine_spec_pass.out_color);
-
-		auto& bloom_pass = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass.original_color, copy_color_pass.copied_color, combine_spec_pass.out_hdr, gfx_state.camera.viewport);
-
 		spec_info.model = ShadingModel::Unlit;
 		auto& unlit_pass = graph.addRenderPass<PassSetPair<UnlitPass,DeferredPbrSet>>("Unlit Pass", make_gbuffer_set(spec_info),
-			bloom_pass.bloom_rsc,
+			combine_spec_pass.out_color,
+			//combine_spec_pass.out_color,
 			combine_spec_pass.out_depth
 			).RenderPass();
 

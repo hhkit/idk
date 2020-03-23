@@ -1359,6 +1359,7 @@ namespace idk
 		renderer_fragment_shaders[FDeferredCombine] = LoadShader("/engine_data/shaders/deferred_combine.frag");
 		renderer_fragment_shaders[FDeferredHDR] = LoadShader("/engine_data/shaders/deferred_hdr.frag");
 		renderer_fragment_shaders[FDeferredBloom] = LoadShader("/engine_data/shaders/deferred_bloom.frag");
+		renderer_fragment_shaders[FDeferredBloomCombine] = LoadShader("/engine_data/shaders/deferred_bloom_combine.frag");
 		renderer_fragment_shaders[FPointShadow] = LoadShader("/engine_data/shaders/point_shadow.frag");
 
 		////////////////////Load geometry Shaders

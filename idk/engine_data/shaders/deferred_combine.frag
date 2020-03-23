@@ -81,7 +81,7 @@ void main()
 	
 	out_color = vec4(ReinhardOperator(light),1);
 	
-	float brightness = dot(light, vec3(0.45,0.68,0.68));
+	float brightness = dot(out_color.rgb, vec3(0.45,0.70,0.70));
 	 if(brightness > 1.0)
         out_hdr = vec4(light, 1.0);
     else
@@ -98,6 +98,7 @@ void main()
 	
 	vec3 t = (p - p0);// /(p1-p0);
 	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
+	
 	//out_color.rgb = abs(out_color.rgb-og);
 	//float err = 0.000000059604645;
 	//if(out_color.r<=err)
