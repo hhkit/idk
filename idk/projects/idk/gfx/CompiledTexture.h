@@ -14,6 +14,7 @@ namespace idk
 		FilterMode filter_mode;
 		uvec2 size;
 		bool is_srgb{};
+		bool force_uncompiled{};
 		unsigned generate_mipmaps{};
 		string pixel_buffer;
 

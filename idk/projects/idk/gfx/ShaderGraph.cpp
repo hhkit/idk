@@ -39,6 +39,7 @@ namespace idk::shadergraph
         vector<std::pair<string, ValueType>> uniforms{};
         hash_table<string, string> non_param_textures{};
         int tex_counter = 0;
+        int tex_hidden_counter = 0;
         int slot_counter = 0;
     };
 
@@ -230,7 +231,7 @@ namespace idk::shadergraph
                 if (node.input_slots[i].type == ValueType::SAMPLER2D)
                 {
                     // can't connect textures directly, we need to go through uniforms
-                    auto uniform_name = "_uTex[" + std::to_string(state.tex_counter++) + ']';
+                    auto uniform_name = "_uTexHidden[" + serialize_text(state.tex_hidden_counter++) + ']';
                     state.non_param_textures[uniform_name] = node.input_slots[i].value;
                     replacement = uniform_name;
                     replace_variables(code, i, replacement);
@@ -344,10 +345,14 @@ namespace idk::shadergraph
             uniforms_str += ";\n";
         }
 
-        if (state.tex_counter > 0) // U_LAYOUT(3, 8) uniform sampler2D _uTex[count];
+        if (state.tex_counter > 0) // S_LAYOUT(2, 5) uniform sampler2D _uTex[count];
             uniform_blocks[ValueType::SAMPLER2D] = "S_LAYOUT(2, " + std::to_string(ValueType::SAMPLER2D) +
             ") uniform sampler2D _uTex[" + std::to_string(state.tex_counter) + "];\n";
         uniforms_str += uniform_blocks[ValueType::SAMPLER2D];
+
+        if (state.tex_hidden_counter > 0) // S_LAYOUT(2, 6) uniform sampler2D _uTexHidden[count];
+            uniforms_str += string_view{ "S_LAYOUT(2, " + std::to_string(ValueType::SAMPLER2D + 1) +
+            ") uniform sampler2D _uTexHidden[" + std::to_string(state.tex_hidden_counter) + "];\n" };
 
         int param_index = -1;
         for (const auto& [uniform_name, uniform_type] : state.uniforms)

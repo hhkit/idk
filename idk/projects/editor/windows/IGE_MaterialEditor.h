@@ -39,7 +39,7 @@ namespace idk
         void drawNode(shadergraph::Node& node);
         shadergraph::Node& addNode(const string& name, vec2 pos);
         void removeNode(const shadergraph::Node& node);
-        void disconnectNode(const shadergraph::Node& node);
+        void disconnectNode(const shadergraph::Node& node, bool disconnect_inputs = true, bool disconnect_outputs = true);
 
         void addParamNode(int param_index, vec2 pos);
         void removeParam(int param_index);

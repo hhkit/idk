@@ -11,11 +11,12 @@ namespace idk
 
 	struct TextureMeta
 	{
-		ColorFormat internal_format = ColorFormat::Automatic; //Format in GPU
-		UVMode      uv_mode         = UVMode::Repeat;
-		FilterMode  filter_mode     = FilterMode::Linear;
-		bool        is_srgb         = true;
-		unsigned    mipmap_level    = 0;
+		ColorFormat internal_format    = ColorFormat::Automatic; //Format in GPU
+		UVMode      uv_mode            = UVMode::Repeat;
+		FilterMode  filter_mode        = FilterMode::Linear;
+		bool        is_srgb            = true;
+		bool        force_uncompressed = false;
+		unsigned    mipmap_level       = 0;
 	};
 
 	class Texture

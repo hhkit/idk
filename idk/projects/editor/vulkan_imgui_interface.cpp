@@ -468,7 +468,7 @@ namespace idk
 		{
 			EditorFrame* fd = &editorControls.edt_frames[i];
 			att[0] = fd->edt_backbufferView = *editorControls.edt_buffer->image_views[i];
-			fd->edt_backbuffer = editorControls.edt_buffer->images[i];
+			fd->edt_backbuffer = editorControls.edt_buffer->Images()[i];
 			vk::FramebufferCreateInfo fbInfo{
 				vk::FramebufferCreateFlags{},
 				*editorControls.edt_renderPass,

@@ -1213,6 +1213,8 @@
       <Filter>network\messages</Filter>
     </ClInclude>
     <ClInclude Include="network\SeqNo.h" />
+    <ClInclude Include="gfx\RenderTargetFactory.h" />
+    <ClInclude Include="gfx\ColorGrade.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1748,6 +1750,8 @@
       <Filter>network\views</Filter>
     </ClCompile>
     <ClCompile Include="network\SeqNo.cpp" />
+    <ClCompile Include="gfx\RenderTargetFactory.cpp" />
+    <ClCompile Include="gfx\ColorGrade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

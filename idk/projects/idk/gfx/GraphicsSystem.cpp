@@ -493,7 +493,7 @@ namespace idk
 		//float first_end = n_plane + 0.2f * diff;
 		//float second_end = n_plane + 0.45f * diff;
 		float diff = f_plane - n_plane;
-		float first_end = n_plane + 0.45 * diff;
+		float first_end = n_plane + 0.45f * diff;
 		float second_start= n_plane + 0.40f * diff;
 		float second_end = f_plane;
 
@@ -923,19 +923,25 @@ namespace idk
 				const auto& rt = *go->GetComponent<RectTransform>();
 				auto& render_data = result.ui_render_per_canvas[ui.FindCanvas(go)].emplace_back();
 
-				auto sz = rt._local_rect.size * 0.5f;
+				const auto sz = rt._local_rect.size * 0.5f;
 
 				if (im.preserve_aspect)
 				{
+					auto new_sz = sz;
+
 					const float tex_aspect = im.texture->AspectRatio();
 					const float rt_aspect = rt._local_rect.size.x / rt._local_rect.size.y;
 					if (tex_aspect > rt_aspect) // horizontally longer
-						sz.y = sz.x / tex_aspect;
+						new_sz.y = new_sz.x / tex_aspect;
 					else if (tex_aspect < rt_aspect) // vertically longer
-						sz.x = sz.y * tex_aspect;
-				}
+						new_sz.x = new_sz.y * tex_aspect;
 
-				render_data.transform = rt._matrix * mat4{ scale(vec3{sz, 1.0f}) };
+					const vec2 tl{ (rt.pivot - vec2(0.5f, 0.5f)) * (sz - new_sz) };
+					render_data.transform = rt._matrix * translate(vec3{ tl, 0 }) * mat4 { scale(vec3{ new_sz, 1.0f }) };
+				}
+				else
+					render_data.transform = rt._matrix * mat4{ scale(vec3{ sz, 1.0f }) };
+
 				render_data.material = im.material;
 				render_data.color = im.tint;
 				render_data.data = ImageData{ im.texture };

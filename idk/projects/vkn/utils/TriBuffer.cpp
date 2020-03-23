@@ -93,4 +93,12 @@ namespace idk::vkn {
 		}
 		CreateImageViewWithCurrImgs(view);
 	}
+	const vector<vk::Image>& TriBuffer::Images() const
+	{
+		return images;
+	}
+	void TriBuffer::Images(vector<vk::Image>&& imgs)
+	{
+		images = std::move(imgs);
+	}
 };

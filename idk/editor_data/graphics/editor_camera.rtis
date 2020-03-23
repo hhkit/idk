@@ -1,0 +1,7 @@
+ColorGradingLut: {guid: 00000000-0000-0000-0000-000000000000}
+anti_aliasing: None
+color_tex: {guid: 376996df-2bf9-40f5-bd82-f0b53d9843f7}
+depth_tex: {guid: 67ef74e5-7294-4364-b5f6-0124bb210a05}
+is_world_renderer: 0
+render_debug: 1
+size: {x: 1536, y: 841}

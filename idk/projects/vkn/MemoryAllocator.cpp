@@ -8,9 +8,14 @@
 namespace idk::vkn
 {
 	VulkanView& View();
+	namespace dbg
+	{
+		string num_bytes_to_str(size_t num_bytes);
+	}
 }
 namespace idk::vkn::hlp
 {
+	using dbg::num_bytes_to_str;
 	static hash_set<MemoryAllocator*> _allocators;
 	std::pair<size_t,size_t> DumpAllocator(std::ostream& out,const MemoryAllocator& alloc)
 	{
@@ -28,16 +33,16 @@ namespace idk::vkn::hlp
 				{
 					free += freed.size();
 				}
-				out << "\t\tFree Chunks[" << mem.collator.free_list.size()<< "]\n";
-				out << "\t\tSlice Allocated[" << (mem.sz() - free) << "/" << mem.sz() << "]\n";
+				out << "\t\tFree Chunks[" << num_bytes_to_str(mem.collator.free_list.size())<< "]\n";
+				out << "\t\tSlice Allocated[" << num_bytes_to_str(mem.sz() - free) << "/" << num_bytes_to_str(mem.sz()) << "]\n";
 				chunk_alloced += mem.sz();
 				chunk_free += free;
 			}
-			out << "\tChunk Allocated[" << (chunk_alloced - chunk_free) << "/" << chunk_alloced << "]\n";
+			out << "\tChunk Allocated[" << num_bytes_to_str(chunk_alloced - chunk_free) << "/" << num_bytes_to_str(chunk_alloced) << "]\n";
 			alloc_allocced += chunk_alloced;
 			alloc_freed += chunk_free;
 		}
-		out << " Allocator Allocated[" << (alloc_allocced - alloc_freed) << "/" << alloc_allocced << "]\n";
+		out << " Allocator Allocated[" << num_bytes_to_str(alloc_allocced - alloc_freed) << "/" << num_bytes_to_str(alloc_allocced) << "]\n";
 		return { alloc_allocced,alloc_freed };
 	}
 	string DumpAllocators()
@@ -58,13 +63,15 @@ namespace idk::vkn::hlp
 			//}
 			out << "}\n";
 		}
-		out << "Total Allocated[" << (total_alloc- total_free) << "/" << total_alloc<< "]\n";
+		out << "Total Allocated[" << num_bytes_to_str(total_alloc- total_free) << "/" << num_bytes_to_str(total_alloc)<< "]\n";
 		return out.str();
 	}
 	using detail::Memories;
 
 
 //#pragma optimize("",off)
+
+	static size_t dbg_threshold = 100000000;
 
 	MemoryAllocator::MemoryAllocator(vk::Device d, vk::PhysicalDevice pd) :device{ d }, pdevice{ pd }{_allocators.emplace(this); }
 	MemoryAllocator::MemoryAllocator() : device{ *View().Device() }, pdevice{ View().PDevice() }{_allocators.emplace(this); }
@@ -79,6 +86,8 @@ namespace idk::vkn::hlp
 		}
 		auto& mem = itr->second;
 		auto&& [mem_idx, offsets] = mem.Allocate(mem_req.size,mem_req.alignment);
+		//if (mem_req.size > dbg_threshold)
+		//	DebugBreak();
 		//lock.Unlock();
 		auto& [u_offset, offset] = offsets;
 		return std::make_unique<Alloc>(mem, mem_idx, u_offset,offset, mem_req.size);

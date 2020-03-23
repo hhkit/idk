@@ -17,6 +17,7 @@ namespace idk::vkn
 		VulkanTextureFactory& operator=(const VulkanTextureFactory&) = delete;
 		VulkanTextureFactory& operator=(VulkanTextureFactory&&) = default;
 		~VulkanTextureFactory();
+		void Init()override;
 		unique_ptr<Texture> GenerateDefaultResource() override;
 		unique_ptr<Texture> Create() override;
 		hlp::MemoryAllocator& GetAllocator();

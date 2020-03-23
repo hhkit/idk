@@ -1076,7 +1076,7 @@ namespace idk::vkn
 		subResourceRange.baseArrayLayer = 0;
 		subResourceRange.layerCount = 1;
 
-		//if (!rendered)
+		if (!rendered)
 		{
 			vk::ImageMemoryBarrier presentToClearBarrier = {};
 			presentToClearBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
@@ -1085,7 +1085,7 @@ namespace idk::vkn
 			presentToClearBarrier.newLayout = vk::ImageLayout::eGeneral;
 			presentToClearBarrier.srcQueueFamilyIndex = *View().QueueFamily().graphics_family;
 			presentToClearBarrier.dstQueueFamilyIndex = *View().QueueFamily().graphics_family;
-			presentToClearBarrier.image = swapchain.m_graphics.images[swapchain.curr_index];
+			presentToClearBarrier.image = swapchain.m_graphics.Images()[swapchain.curr_index];
 			presentToClearBarrier.subresourceRange = subResourceRange;
 			begin_info.pInheritanceInfo = &iinfo;
 			transition_buffer->begin(begin_info, vk::DispatchLoaderDefault{});
@@ -1131,7 +1131,9 @@ namespace idk::vkn
 		dbg::BeginLabel(queue, "Render GraphicsStates", color{ 0.3f,0.0f,0.3f });
 		queue.submit(submit_info, inflight_fence, vk::DispatchLoaderDefault{});
 		dbg::EndLabel(queue);
-		View().Swapchain().m_graphics.images[View().vulkan().rv] = RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
+		auto copy = View().Swapchain().m_graphics.Images();
+		copy[View().vulkan().rv ]= RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
+		View().Swapchain().m_graphics.Images(std::move(copy));
 	}
 
 	void ConvertToNonSRGB(RenderStateV2& rs,gt::GraphTest& gtest)

@@ -1,0 +1,6 @@
+anti_aliasing: None
+color_tex: {guid: 5B26B74B-65C5-4840-A3B5-C08DFDC11F0A}
+depth_tex: {guid: E0290658-AE4F-427F-BF21-8F52D1367B94}
+is_world_renderer: 0
+render_debug: 0
+size: {x: 1920, y: 1154}
