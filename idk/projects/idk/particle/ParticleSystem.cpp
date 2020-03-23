@@ -132,7 +132,7 @@ namespace idk
 
         while (age > 0)
         {
-            constexpr auto timeslice = 1 / 60.0f;
+            constexpr auto timeslice = 1 / 30.0f;
             float dt = age > timeslice ? timeslice : age;
             data.age[i] += dt;
             velocity_over_lifetime.Update(*this, dt, i);
