@@ -23,11 +23,13 @@ namespace idk
 		server.Subscribe<GhostAcknowledgementMessage>([this](GhostAcknowledgementMessage& msg) { OnGhostACKReceived(msg); });
 	}
 
-	void GhostManager::SendGhosts([[maybe_unused]] Host target, span<ElectronView> views)
+	void GhostManager::SendGhosts(span<ElectronView> views)
 	{
 		const auto now = Clock::now();
 		const auto rtt = connection_manager->GetRTT();
 		const auto timeout = rtt;
+		const auto target_host = connection_manager->GetConnectedHost();
+		const auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		// timeout packets
 		hash_table<Handle<ElectronView>, int> view_to_state_masks;
 
@@ -77,13 +79,19 @@ namespace idk
 
 		for (auto& view : views)
 		{
-			if (const auto ghost_state = std::get_if<ElectronView::Master>(&view.ghost_state))
-			{
-				auto retransmit_state_mask = 0;
-				if (auto itr = view_to_state_masks.find(view.GetHandle()); itr != view_to_state_masks.end())
-					retransmit_state_mask = itr->second;
+			if (view.network_id == 0)
+				continue;
 
-				auto pack = view.MasterPackData(retransmit_state_mask);
+			const bool is_ghost = std::get_if<ElectronView::Master>(&view.ghost_state);
+
+			// recompose state mask
+			auto retransmit_state_mask = 0;
+			if (auto itr = view_to_state_masks.find(view.GetHandle()); itr != view_to_state_masks.end())
+				retransmit_state_mask = itr->second;
+
+			if (is_ghost)
+			{
+				auto pack = view.PackGhostData(retransmit_state_mask);
 				if (pack.data_packs.size())
 					ghost_packs.emplace_back(std::move(pack));
 			}
@@ -92,7 +100,6 @@ namespace idk
 		if (ghost_packs.size())
 		{
 			{
-				auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 				GhostPacketInfo transmission_rec;
 				transmission_rec.sequence_number = seq;
 				transmission_rec.send_time = now;
@@ -110,6 +117,7 @@ namespace idk
 		}
 	}
 
+
 	void GhostManager::OnGhostReceived(GhostMessage& msg)
 	{
 		auto seq = msg.sequence_number;
@@ -121,11 +129,8 @@ namespace idk
 			if (const auto view = id_man.GetViewFromId(pack.network_id))
 			{
 				// push the ghost data into the view
-				if (!std::get_if<ElectronView::Ghost>(&view->ghost_state))
-					return;
-
-				if (std::get_if<ElectronView::ClientObject>(&view->move_state))
-					return;
+				if (std::get_if<ElectronView::Master>(&view->ghost_state))
+					continue;
 
 				view->UnpackGhostData(seq, pack);
 			}

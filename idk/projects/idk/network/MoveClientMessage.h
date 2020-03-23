@@ -28,12 +28,13 @@ namespace idk
 				serialize_vector_count(stream, elem.packs, 32);
 				for (auto& pack : elem.packs)
 				{
-					serialize_vector_count(stream, pack, 3);
+					serialize_vector_count(stream, pack, 4);
 					for (auto& seq_and_pack : pack)
 					{
 						serialize_int(stream, seq_and_pack.seq.value, 0, SeqNo::max_value);
 						serialize_vector_count(stream, seq_and_pack.pack, 256);
 						serialize_bytes(stream, (uint8_t*) seq_and_pack.pack.data(), static_cast<int>(seq_and_pack.pack.size()));
+						serialize_int(stream, seq_and_pack.move_type, 0, 2);
 					}
 				}
 			}

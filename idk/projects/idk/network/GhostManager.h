@@ -13,12 +13,12 @@ namespace idk
 		void SubscribeEvents(ClientConnectionManager& client) override;
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
-		void SendGhosts(Host target, span<ElectronView> views);
+		void SendGhosts(span<ElectronView> views);
 	private:
 		struct GhostEntry
 		{
 			Handle<ElectronView> id;
-			int state_mask{};
+			unsigned state_mask{};
 		};
 
 		struct GhostPacketInfo

@@ -50,6 +50,10 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\AttachmentViewType.h" />
+    <ClInclude Include="meta\erased_visitor.h" />
+    <ClInclude Include="network\ack_utils.h" />
+    <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
+    <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
     <ClInclude Include="gfx\ColorGrade.h" />
     <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
@@ -401,6 +405,7 @@
     <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\RenderTargetFactory.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
+    <ClCompile Include="network\ack_utils.cpp" />
     <ClCompile Include="network\ElectronAnimatorView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
@@ -654,6 +659,7 @@
     <None Include="util\string_hash.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="_natvis\circular_buffer.natvis" />
     <Natvis Include="_natvis\filesystem.natvis" />
     <Natvis Include="_natvis\yaml.natvis" />
     <Natvis Include="_natvis\ds.natvis" />
