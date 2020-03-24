@@ -60,7 +60,7 @@ import /engine_data/shaders/pbr_utils.glsl
 layout(location = 0)out vec4 out_color;
 
 const vec3 fogColor = vec3(0.5, 0.5,0.5);
-const float FogDensity = 0.008;
+const float FogDensity = 0.006;
 
 
 void main()
