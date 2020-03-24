@@ -31,6 +31,9 @@ of the editor.
 #include <iostream>
 #include <res/ResourceHandle.inl>
 #include <scene/SceneGraph.inl>
+#include <script/ScriptSystem.h>
+#include <script/MonoBehavior.h>
+
 
 namespace idk {
 
@@ -120,10 +123,81 @@ namespace idk {
 		}
 		if (ImGui::BeginPopup("OpenAdditionalStuff", ImGuiWindowFlags_NoMove)) {
 			ImGui::Checkbox("Show Editor Objects", &show_editor_objects);
+			ImGui::Checkbox("Component Finder Mode", &component_finder_mode);
 			ImGui::EndPopup();
 		}
+		
+		if (ImGui::BeginPopup("ComponentFinder", ImGuiWindowFlags_None)) {
+			ImGui::Text("Search bar:");
+			ImGui::SameLine();
+			const bool value_changed2 = ImGui::InputTextEx("##hierarchyComp_textFilter", NULL, component_textFilter.InputBuf, IM_ARRAYSIZE(component_textFilter.InputBuf), ImVec2{ 100,0 }, ImGuiInputTextFlags_None);
+			if (value_changed2)
+				component_textFilter.Build();
+			
+			ImGui::Separator();
+			
+			if (ImGui::MenuItem("Cancel Selection"))
+			{
+				component_finder_text = "";
+			}
+			ImGui::Separator();
+			ImGui::TextColored(ImVec4{0,1,0,1},"COMPONENTS");
+			ImGui::Separator();
+			
+			span componentNames = GameState::GetComponentNames();
+			for (const char* name : componentNames)
+			{
+				string displayName = name;
+				if (displayName == "Transform" ||
+					displayName == "Name" ||
+					displayName == "Tag" ||
+					displayName == "Layer" ||
+					displayName == "PrefabInstance" ||
+					displayName == "MonoBehavior")
+					continue;
+			
+				//Comment/Uncomment this to remove text fluff 
+				const string fluffText{ "idk::" };
+			
+				std::size_t found = displayName.find(fluffText);
+				if (found != std::string::npos)
+					displayName.erase(found, fluffText.size());
+			
+				if (!component_textFilter.PassFilter(displayName.c_str())) //skip if filtered
+					continue;
+			
+				if (ImGui::MenuItem(displayName.c_str()))
+				{
+					component_finder_text = name;
+					isComponentAScript = false;
+				}
+			}
 
+			ImGui::Separator();
+			ImGui::TextColored(ImVec4{ 0,1,0,1 }, "SCRIPTS");
+			ImGui::Separator();
+			
+			auto* script_env = &Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment();
+			if (script_env == nullptr)
+				ImGui::Text("Scripts not loaded!");
+			else {
 
+				span scriptNames = script_env->GetBehaviorList();
+				for (const char* name : scriptNames)
+				{
+					if (!component_textFilter.PassFilter(name)) //skip if filtered
+						continue;
+
+					if (ImGui::MenuItem(name))
+					{
+						component_finder_text = name;
+						isComponentAScript = true;
+					}
+				}
+			}
+			ImGui::EndPopup();
+		}
+		
 		ImGui::SameLine();
 		ImVec2 startPos = ImGui::GetCursorPos();
 		ImGui::SetCursorPosX(startPos.x+15);
@@ -131,13 +205,28 @@ namespace idk {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 		const auto search_bar_offset_x = ImGui::GetCursorPosX() + 20;
 		//Can call textFilter.Draw(), but I want to use a custom inputText.
-		bool value_changed = ImGui::InputTextEx("##ToolBarSearchBar", NULL, textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImVec2{ window_size.x - search_bar_offset_x,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None);
-		if (value_changed)
-			textFilter.Build();
+		if (component_finder_mode) {
+			if (component_finder_text.empty()) {
+				if (ImGui::Button("Search Component", ImVec2{ window_size.x * 0.5f,0.0f })) {
+					ImGui::OpenPopup("ComponentFinder");
+				}
+			}
+			else {
+				if (ImGui::Button(component_finder_text.c_str(), ImVec2{ window_size.x * 0.5f,0.0f })) {
+					ImGui::OpenPopup("ComponentFinder");
+				}
+			}
+			
+		}
+		else {
+			const bool value_changed = ImGui::InputTextEx("##ToolBarSearchBar", NULL, textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImVec2{ window_size.x - search_bar_offset_x,ImGui::GetFrameHeight() - 2 }, ImGuiInputTextFlags_None);
+			if (value_changed)
+				textFilter.Build();
 
-		if (!ImGui::IsItemActive())
-			DrawToolTipOnHover("Type here to filter gameobjects.\n" "Add a '-' to exclude gameobjects.");
-		
+			if (!ImGui::IsItemActive())
+				DrawToolTipOnHover("Type here to filter gameobjects.\n" "Add a '-' to exclude gameobjects.");
+		}
+
 		ImGui::PopStyleVar();
 
 		ImGui::EndMenuBar();
@@ -224,7 +313,34 @@ namespace idk {
 
             ImGui::PushStyleColor(ImGuiCol_Text, col.Value);
 			
-			if (!textFilter.PassFilter(goName.c_str())) {
+			if (component_finder_mode) {
+				if (!component_finder_text.empty()) {
+					if (isComponentAScript) {
+						auto monobehaviorHandle = handle->GetComponent("MonoBehavior");
+						if (!monobehaviorHandle) {
+							ImGui::PopStyleColor();
+							return true;
+						}
+						auto mb_handle = handle_cast<mono::Behavior>(monobehaviorHandle);
+						if (!mb_handle) {
+							ImGui::PopStyleColor();
+							return true;
+						}
+						if (mb_handle->TypeName() != component_finder_text) {
+							ImGui::PopStyleColor();
+							return true;
+						}
+					}
+					else {
+						auto componentHandle = handle->GetComponent(component_finder_text);
+						if (!componentHandle) {
+							ImGui::PopStyleColor();
+							return true;
+						}
+					}
+				}
+			}
+			else if (!textFilter.PassFilter(goName.c_str())) {
                 ImGui::PopStyleColor();
 				return true;
 			}
