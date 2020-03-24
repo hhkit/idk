@@ -74,13 +74,20 @@ void main()
 	
 	//out_color += vec4(frag_color,1);
 	
-	frag_color += brightness;
+	//vec3 frag_copy = frag_color;
+	//bvec3 chk = greaterThan(brightness,vec3(0.f));
+	//if(chk.x || chk.y || chk.z)
+	
+	//frag_color = mix(brightness,frag_color,0.1f);
+	
+	//hard set ratio on bloom because of unwanted shading effects when casted on wall
+	frag_color += brightness *0.1f; 
 
 	out_color = vec4(ReinhardOperator(frag_color),1);
 	
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
-	vec3 og = out_color.rgb;
+	vec3 og = pow(out_color.rgb,vec3(1/2.2));
 	vec3 p = sizeSpace(og);
 	vec3 p0 =floor(p);
 	vec3 p1 =ceil(p);
@@ -89,4 +96,6 @@ void main()
 	
 	vec3 t = (p - p0);// /(p1-p0);
 	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
+	
+	out_color.rgb = pow(out_color.rgb,vec3(2.2));
 }

@@ -31,8 +31,8 @@ layout(location = 2) in VS_OUT
 
 void main()
 {
-	float blurStrength = 1.f;
-	float blurScale = 1.f;
+	float blurStrength = 1.5f;
+	float blurScale = 2.f;
 	
 	//vec3 frag_color = subpassLoad(color_input).rgb;
 	
