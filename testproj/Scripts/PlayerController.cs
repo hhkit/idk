@@ -19,6 +19,8 @@ namespace TestAndSeek
 
         RigidBody rb;
         ElectronView ev;
+        ElectronTransformView etransform;
+        ElectronRigidbodyView erbv;
 
         internal bool transfer = false;
         internal Client p = null;
@@ -50,6 +52,8 @@ namespace TestAndSeek
         {
             rb = GetComponent<RigidBody>();
             ev = GetComponent<ElectronView>();
+            etransform = GetComponent<ElectronTransformView>();
+            erbv = GetComponent<ElectronRigidbodyView>();
         }
 
         void OnTriggerEnter(Collider other)
@@ -68,7 +72,7 @@ namespace TestAndSeek
         }
         IEnumerator JumpCooldown()
         {
-            yield return new WaitForSeconds(0.05);
+            yield return new WaitForSeconds(0.5);
             jump_count++;
         }
         void FixedUpdate()
@@ -85,13 +89,13 @@ namespace TestAndSeek
                 if (on_floor)
                 {
                     if (Input.GetKey(KeyCode.A))
-                        transform.rotation = Quaternion.AngleAxis(rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
+                        etransform.Rotate(Quaternion.AngleAxis(rot_speed * Time.deltaTime, Vector3.up));
 
                     if (Input.GetKey(KeyCode.D))
-                        transform.rotation = Quaternion.AngleAxis(-rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
+                        etransform.Rotate(Quaternion.AngleAxis(-rot_speed * Time.deltaTime, Vector3.up));
 
                     if (Input.GetKey(KeyCode.W))
-                        rb.AddForce(transform.forward * move_speed);
+                        erbv.velocity = transform.forward * move_speed;
 
                     if (jump_count > 0)
                     {
@@ -99,20 +103,20 @@ namespace TestAndSeek
                         {
                             --jump_count;
                             StartCoroutine(JumpCooldown());
-                            rb.AddForce(Vector3.up * jump_force);
+                            erbv.AddForce(Vector3.up * jump_force);
                         }
                     }
                 }
                 else
                 {
                     if (Input.GetKey(KeyCode.A))
-                        transform.rotation = Quaternion.AngleAxis(rot_speed * air_turn_control * Time.deltaTime, Vector3.up) * transform.rotation;
+                        etransform.Rotate(Quaternion.AngleAxis(rot_speed * air_turn_control * Time.deltaTime, Vector3.up));
 
                     if (Input.GetKey(KeyCode.D))
-                        transform.rotation = Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.deltaTime, Vector3.up) * transform.rotation;
+                        etransform.Rotate(Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.deltaTime, Vector3.up));
 
                     if (Input.GetKey(KeyCode.W))
-                        rb.AddForce(transform.forward * move_speed * air_move_control);
+                        erbv.velocity = transform.forward * move_speed * air_move_control;
                 }
             }
         }

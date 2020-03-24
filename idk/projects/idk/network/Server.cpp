@@ -8,6 +8,7 @@
 #include <script/MonoBehavior.h>
 #include <script/ManagedObj.inl>
 #include <network/NetworkTuple.inl>
+#include <meta/variant.inl>
 
 #undef SendMessage
 
@@ -40,7 +41,12 @@ namespace idk
 	void Server::ProcessMessage(int clientIndex, yojimbo::Message* message)
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
-		LOG_TO(LogPool::NETWORK, "Received %s message from client %d", message_name_array[message->GetType()].data(), clientIndex);
+		if (  message->GetType() != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+			&& message->GetType() != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+			&& message->GetType() != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+			)
+			LOG_TO(LogPool::NETWORK, "Received %s message from client %d", message_name_array[message->GetType()].data(), clientIndex);
+
 		OnMessageReceived[clientIndex][message->GetType()].Fire(message);
 	}
 

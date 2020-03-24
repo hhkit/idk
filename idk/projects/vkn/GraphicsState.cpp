@@ -60,36 +60,34 @@ namespace idk::vkn
 	{
 		return shared_gfx_state->material_instances;
 	}
-	void CoreGraphicsState::ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& material_instances,MaterialInstanceCache& mat_inst_cache)
+	void CoreGraphicsState::ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>& material_instances)
 	{
 		
-		auto AddMatInst = [](auto& material_instances,auto& cache, RscHandle<MaterialInstance> mat_inst)
+		auto AddMatInst = [](auto& material_instances,RscHandle<MaterialInstance> mat_inst)
 		{
 			if (material_instances.find(mat_inst) == material_instances.end())
 			{
 				auto [itr,success]=material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
-				
-				cache.CacheMaterialInstance(itr->second);
 			}
 		};
 		for (auto& p_ro : mesh_render)
 		{
-			AddMatInst(material_instances, mat_inst_cache,p_ro->material_instance);
+			AddMatInst(material_instances, p_ro->material_instance);
 		}
 		for (auto& p_ro : skinned_mesh_render)
 		{
-			AddMatInst(material_instances, mat_inst_cache,p_ro->material_instance);
+			AddMatInst(material_instances, p_ro->material_instance);
 		}
 		for (auto& p_ro : *shared_gfx_state->instanced_ros)
 		{
-			AddMatInst(material_instances, mat_inst_cache,p_ro.material_instance);
+			AddMatInst(material_instances, p_ro.material_instance);
 		}
 		if(shared_gfx_state->particle_range)
 		for (auto& part_range : *shared_gfx_state->particle_range)
 		{
-			AddMatInst(material_instances, mat_inst_cache, part_range.material_instance);
+			AddMatInst(material_instances, part_range.material_instance);
 		}
-		mat_inst_cache.ProcessCreation();
+		//mat_inst_cache.ProcessCreation();
 	}
 
 void GraphicsState::CullAndAdd(const vector<RenderObject>& render_objects, const vector<AnimatedRenderObject>& skinned_render_objects)

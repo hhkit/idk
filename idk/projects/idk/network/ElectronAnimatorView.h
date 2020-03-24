@@ -14,6 +14,9 @@ namespace idk
 
 		NetworkID GetNetworkID() const;
 		Handle<ElectronView> GetView() const;
-		void Start();
+		void Start(Handle<ElectronView>);
+
+	private:
+		Handle<ElectronView> electron_view;
 	};
 }

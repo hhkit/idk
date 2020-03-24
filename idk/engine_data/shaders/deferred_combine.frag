@@ -89,7 +89,7 @@ void main()
 		
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
-	vec3 og = out_color.rgb;
+	vec3 og = pow(out_color.rgb,vec3(1/2.2));
 	vec3 p = sizeSpace(og);
 	vec3 p0 =floor(p);
 	vec3 p1 =ceil(p);
@@ -107,6 +107,7 @@ void main()
 	//	out_color.g=1;
 	//if(out_color.b<=err)
 	//	out_color.b=1;
+	out_color.rgb = pow(out_color.rgb,vec3(2.2));
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 	
 }

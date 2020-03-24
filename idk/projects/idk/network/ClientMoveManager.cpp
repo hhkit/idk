@@ -10,6 +10,7 @@
 #include <network/GhostFlags.h>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
+#include <network/ack_utils.h>
 
 namespace idk
 {
@@ -23,9 +24,9 @@ namespace idk
 		return true;
 	}
 
-	void ClientMoveManager::SubscribeEvents(ClientConnectionManager& client)
+	void ClientMoveManager::SubscribeEvents([[maybe_unused]] ClientConnectionManager& client)
 	{
-		client.Subscribe<GhostMessage>([this](GhostMessage& msg) {OnGhostReceived(msg); });
+
 	}
 
 	void ClientMoveManager::SubscribeEvents(ServerConnectionManager&)
@@ -35,13 +36,14 @@ namespace idk
 
 	void ClientMoveManager::SendMoves(span<ElectronView> views)
 	{
+		const auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		vector<MovePack> move_packs;
 		for (auto& elem : views)
 		{
-			auto move_data = elem.PackMoveData();
+			auto move_data = elem.PackMoveData(curr_seq);
 			if (move_data.packs.size())
 			{
-				LOG_TO(LogPool::NETWORK, "packing move for object %d", elem.network_id);
+				LOG_TO(LogPool::NETWORK, "packing %d moves for object %d", (int) move_data.packs.size(), elem.network_id);
 				move_packs.emplace_back(std::move(move_data));
 			}
 		}
@@ -52,18 +54,6 @@ namespace idk
 					msg.move_packs = std::move(move_packs);
 				}
 			);
-		}
-	}
-
-	void ClientMoveManager::OnGhostReceived(GhostMessage& ghost_msg)
-	{
-		auto& id_man = Core::GetSystem<NetworkSystem>().GetIDManager();
-		for (auto& elem : ghost_msg.ghost_packs)
-		{
-			auto net_id = elem.network_id;
-			auto elec_view = id_man.GetViewFromId(net_id);
-			if (elec_view)
-				elec_view->UnpackGhostData(ghost_msg.sequence_number, elem);
 		}
 	}
 }

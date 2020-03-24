@@ -1889,7 +1889,7 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::TimeGetDelta",  float)
 			{
-				return Core::GetScheduler().GetDeltaTime().count();
+				return Core::GetScheduler().GetRealDeltaTime().count();
 			}
 		BIND_END();
 
@@ -2311,6 +2311,48 @@ namespace idk::mono
 			}
 
 			event_manager->SendRPC(ev, unbox(method_name).get(), param_vec);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronTransformSetPosition", void, Handle<ElectronTransformView> e_tfm, vec3 new_pos)
+		{
+			e_tfm->SetPosition(new_pos);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronTransformTranslate", void, Handle<ElectronTransformView> e_tfm, vec3 new_pos)
+		{
+			e_tfm->ApplyTranslation(new_pos);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronTransformSetRotation", void, Handle<ElectronTransformView> e_tfm, quat new_rot)
+		{
+			e_tfm->SetRotation(new_rot);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronTransformRotate", void, Handle<ElectronTransformView> e_tfm, quat new_rot)
+		{
+			e_tfm->ApplyRotation(new_rot);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronTransformSetScale", void, Handle<ElectronTransformView> e_tfm, vec3 new_scl)
+		{
+			e_tfm->SetScale(new_scl);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronRigidBodySetVelocity", void, Handle<ElectronRigidbodyView> e_rb, vec3 val)
+		{
+			e_rb->SetVelocity(val);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ElectronRigidBodyAddForce", void, Handle<ElectronRigidbodyView> e_rb, vec3 force)
+		{
+			e_rb->AddForce(force);
 		}
 		BIND_END();
 	}

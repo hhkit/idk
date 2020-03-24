@@ -1213,6 +1213,10 @@
       <Filter>network\messages</Filter>
     </ClInclude>
     <ClInclude Include="network\SeqNo.h" />
+    <ClInclude Include="network\ack_utils.h" />
+    <ClInclude Include="meta\erased_visitor.h" />
+    <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
+    <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
     <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="gfx\ColorGrade.h" />
   </ItemGroup>
@@ -1752,6 +1756,7 @@
     <ClCompile Include="network\SeqNo.cpp" />
     <ClCompile Include="gfx\RenderTargetFactory.cpp" />
     <ClCompile Include="gfx\ColorGrade.cpp" />
+    <ClCompile Include="network\ack_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">
@@ -2011,5 +2016,6 @@
     <Natvis Include="_natvis\filesystem.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
+    <Natvis Include="_natvis\circular_buffer.natvis" />
   </ItemGroup>
 </Project>

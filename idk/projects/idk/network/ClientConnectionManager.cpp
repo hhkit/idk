@@ -7,6 +7,7 @@
 #include <network/EventManager.h>
 #include <network/GhostManager.h>
 #include <network/NetworkTuple.inl>
+#include <meta/variant.inl>
 
 #undef SendMessage
 
@@ -66,7 +67,11 @@ namespace idk
 	yojimbo::Message* ClientConnectionManager::CreateMessage(size_t id)
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
-		
+
+		if (   id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+			&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+			&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+			)
 		LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
 		return client.CreateMessage(static_cast<int>(id));
 	}

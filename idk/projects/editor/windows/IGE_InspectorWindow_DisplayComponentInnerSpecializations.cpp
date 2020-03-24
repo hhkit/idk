@@ -43,6 +43,7 @@
 #include <imgui/imgui_stl.h>
 #include <imgui/imgui_internal.h> //InputTextEx
 #include <iostream>
+#include <sstream>
 
 #include <gfx/GraphicsSystem.h>
 #include <ds/span.inl>
@@ -882,7 +883,7 @@ namespace idk
     
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronView> c_ev)
     {
-        bool is_me = Core::GetSystem<NetworkSystem>().GetMe() == c_ev->owner;
+        const bool is_me = Core::GetSystem<NetworkSystem>().GetMe() == c_ev->owner;
         std::string owner_str = "Owner: ";
         switch (auto val = c_ev->owner)
         {
@@ -897,29 +898,55 @@ namespace idk
         ImGui::Text(owner_str.data());
         ImGui::Text("Network ID: %d", c_ev->network_id);
         ImGui::Text("Network Frame: %d", Core::GetSystem<NetworkSystem>().GetSequenceNumber());
+        ImGui::SliderFloat("Interp Bias", &c_ev->interp_bias, 0, 1);
+        const bool is_client_obj = std::get_if<ElectronView::MoveObject>(&c_ev->move_state);
+        const bool is_control_obj = std::get_if<ElectronView::ControlObject>(&c_ev->move_state);
 
-        for (auto [name, param] : c_ev->GetParameters())
+        for (auto& elem : c_ev->GetParameters())
         {
-            ImGui::Text(name.data());
-            ImGui::SameLine();
-            ImGui::SetCursorPosX(ImGui::GetStyle().IndentSpacing);
-            if (param.is<vec3>())
+            if (ImGui::CollapsingHeader(elem->param_name.data()))
             {
-                auto v = param.get<vec3>();
-                ImGui::DragFloat3(name.data(), v.data());
-            }
+                ImGuidk::PushDisabled();
+                {
+                    if (is_client_obj)
+                    {
+                        ImGui::Text("Move Object");
 
-            if (param.is<quat>())
-            {
-                auto euler = euler_angles{ param.get<quat>() };
-                auto v = vec3{ euler.x.value, euler.y.value, euler.z.value };
-                ImGui::DragFloat3(name.data(), v.data());
+                        elem->GetClientObject()->VisitMoveBuffer([](auto move, SeqNo seq)
+                            {
+                                using T = std::decay_t<decltype(move)>;
+
+                                ImGui::Text("[%d]", seq.value);
+                                ImGui::SameLine();
+
+                                if constexpr (std::is_same_v<T, vec3>)
+                                {
+                                    ImGui::DragFloat3("", move.data());
+                                }
+                            });
+                    }
+                    if (is_control_obj)
+                    {
+                        ImGui::Text("Control Object");
+                        elem->GetControlObject()->VisitMoveBuffer([](auto move, SeqNo seq)
+                            {
+                                using T = std::decay_t<decltype(move)>;
+
+                                ImGui::Text("[%d]", seq.value);
+                                ImGui::SameLine();
+
+                                if constexpr (std::is_same_v<T, vec3>)
+                                {
+                                    ImGui::DragFloat3("", move.data());
+                                }
+                            });
+                    }
+                }
+                ImGuidk::PopDisabled();
             }
         }
-
     }
 
-    // joseph you scrub you put it in the function scope
     void IGE_InspectorWindow::DisplayComponentInner(Handle<ElectronAnimatorView> c_av)
     {
         // Make sure all current synced params exists

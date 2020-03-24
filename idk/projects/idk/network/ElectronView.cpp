@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include "ElectronView.inl"
 #include <core/GameObject.inl>
-
+#include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <phys/RigidBody.h>
 
 #include <network/ElectronTransformView.h>
 #include <network/ElectronRigidbodyView.h>
+#include <network/ElectronAnimatorView.h>
 #include <network/NetworkSystem.h>
 namespace idk
 {
@@ -32,6 +34,19 @@ namespace idk
 			tfm_view->Start();
 		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
 			rb_view->Start();
+		const auto sg_handle = Core::GetSystem<SceneManager>().FetchSceneGraphFor(GetGameObject());
+
+		if (sg_handle)
+			sg_handle.Visit([&](Handle<GameObject> go, int) -> bool
+				{
+					if (auto animator_view = go->GetComponent<ElectronAnimatorView>())
+					{
+						animator_view->Start(GetHandle());
+						return false;
+					}
+					return true;
+				}
+			);
 
 		for (auto& elem : parameters)
 		{
@@ -43,48 +58,27 @@ namespace idk
 	void ElectronView::SetAsClientObject()
 	{
 		ghost_state = std::monostate{};
-		move_state = ElectronView::ClientObject{};
+		move_state = ElectronView::MoveObject{};
 
 		for (unsigned i = 0; i < parameters.size(); ++i)
 		{
 			auto& param = parameters[i];
 			IDK_ASSERT(param);
-			param->GetClientObject()->Init();
+			param->GetClientObject()->Init(Core::GetSystem<NetworkSystem>().GetSequenceNumber());
 		}
 	}
 	void ElectronView::CacheSentData()
 	{
 		if (std::get_if<Master>(&ghost_state))
 		{
-
 			const auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 			for (auto& elem : parameters)
 				elem->GetMaster()->CacheValue(curr_seq);
 		}
 	}
-	void ElectronView::PrepareDataForSending()
+	void ElectronView::PrepareDataForSending(SeqNo curr_seq)
 	{
 		state_mask = 0;
-		const auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
-
-		if (std::get_if<ClientObject>(&move_state))
-		{
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				param->GetClientObject()->CalculateMove(curr_seq);
-			}
-		}
-
-		if (std::get_if<ControlObject>(&move_state))
-		{
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				param->GetControlObject()->RecordPrediction(curr_seq);
-			}
-		}
-
 		if (std::get_if<Master>(&ghost_state))
 		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
@@ -99,6 +93,15 @@ namespace idk
 
 	void ElectronView::MoveGhost(seconds delta)
 	{
+		if (std::get_if<ControlObject>(&move_state))
+		{
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				param->GetControlObject()->ApplyMove();
+			}
+		}
+
 		if (std::get_if<Ghost>(&ghost_state))
 		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
@@ -110,13 +113,22 @@ namespace idk
 					param->GetGhost()->Update(1.f);
 			}
 		}
+
+		if (std::get_if<MoveObject>(&move_state))
+		{
+			for (unsigned i = 0; i < parameters.size(); ++i)
+			{
+				auto& param = parameters[i];
+				param->GetClientObject()->UpdateGhost(interp_bias);
+			}
+
+		}
 	}
 
-	MovePack ElectronView::PackMoveData()
+	MovePack ElectronView::PackMoveData(SeqNo curr_seq)
 	{
-		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		MovePack move_pack;
-		if (std::get_if<ClientObject>(&move_state))
+		if (std::get_if<MoveObject>(&move_state))
 		{
 			move_pack.network_id = network_id;
 
@@ -134,11 +146,11 @@ namespace idk
 		return move_pack;
 	}
 
-	GhostPack ElectronView::MasterPackData(int incoming_state_mask)
+	GhostPack ElectronView::PackGhostData(int incoming_state_mask)
 	{
 		const auto transmit_state_mask = incoming_state_mask | state_mask;
 		IDK_ASSERT(std::get_if<Master>(&ghost_state));
-		const auto seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+
 		GhostPack retval;
 		retval.network_id = network_id;
 		retval.state_mask = transmit_state_mask;
@@ -170,9 +182,8 @@ namespace idk
 				auto& pack = ghost_pack.data_packs[pack_index++];
 				if (std::get_if<Ghost>(&ghost_state))
 					param->GetGhost()->UnpackData(sequence_number, pack);
-				if (std::get_if<ClientObject>(&move_state))
+				if (std::get_if<MoveObject>(&move_state))
 					param->GetClientObject()->UnpackGhost(sequence_number, pack);
-
 			}
 		}
 	}
@@ -193,10 +204,49 @@ namespace idk
 		}
 	}
 
-	hash_table<string, reflect::dynamic> ElectronView::GetParameters() const
+	struct MoveBuffLogger
 	{
-		auto retval = hash_table<string, reflect::dynamic>();
-		retval.reserve(parameters.size());
-		return retval;
+		std::stringstream logger{};
+
+		MoveBuffLogger() = default;
+		MoveBuffLogger(MoveBuffLogger&&) = default;
+		MoveBuffLogger& operator=(MoveBuffLogger&&) = default;
+
+		~MoveBuffLogger()
+		{
+		//	LOG_TO(LogPool::NETWORK, logger.str().data());
+		}
+
+		template<typename T>
+		void operator()(const T&, SeqNo) {}
+
+		void operator()(const vec3& v, SeqNo seq)
+		{
+		//	logger << "[" << seq.value <<"]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x <<"," << v.y <<"," << v.z <<")" << "\n";
+		}
+
+		void operator()(const quat& v, SeqNo seq)
+		{
+		//	logger << "[" << seq.value << "]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" << "\n";
+		}
+	};
+
+	void ElectronView::DumpToLog()
+	{
+		erased_visitor<void(int)> hey{ [](int a) {} };
+
+		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
+		for (auto& elem : parameters)
+		{
+			if (std::get_if<MoveObject>(&move_state))
+				elem->GetClientObject()->VisitMoveBuffer(MoveBuffLogger{});
+			if (std::get_if<ControlObject>(&move_state))
+				elem->GetControlObject()->VisitMoveBuffer(MoveBuffLogger{});
+		}
+	}
+
+	span<const unique_ptr<ElectronView::BaseParameter>> ElectronView::GetParameters() const
+	{
+		return parameters;
 	}
 }

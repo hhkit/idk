@@ -41,5 +41,10 @@ namespace idk
 
 		//Checks if its children is selected or not. This is recursive.
 		bool CheckIfChildrenIsSelected(SceneGraphHandle childrenGraph, Handle<GameObject> comparingGameObject);
+
+		bool component_finder_mode = false;
+		ImGuiTextFilter component_textFilter;
+		bool isComponentAScript = false;
+		string component_finder_text = "";
 	};
 }

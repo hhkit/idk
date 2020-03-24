@@ -15,6 +15,8 @@ namespace idk
 	struct ElectronView::DerivedParameter
 		: ElectronView::BaseParameter
 	{
+		static constexpr auto RememberedMoves = 4;
+
 		struct DerivedMasterData
 			: MasterData
 		{
@@ -93,205 +95,17 @@ namespace idk
 
 		};
 
-		struct DerivedClientObjectData
-			: ClientObjectData
-		{
-			static constexpr auto move_limit = 3;
-			struct SeqAndMove
-				: SeqAndPack
-			{
-				T move;
-			};
-
-			ParameterImpl<T>& param;
-			circular_buffer<SeqAndMove, move_limit> buffer;
-			T prev_value;
-
-			DerivedClientObjectData(ParameterImpl<T>& impl)
-				: param{ impl }
-			{}
-
-			void Init() override
-			{
-				prev_value = param.getter();
-			}
-
-			void CalculateMove(SeqNo curr_seq) override
-			{
-				auto curr_value = param.getter();
-				if (!param.equater(prev_value, curr_value))
-				{
-					auto move = param.differ(curr_value, prev_value);
-					prev_value = curr_value;
-					SeqAndMove pushme;
-					pushme.seq = curr_seq;
-					pushme.pack = serialize_binary(move);
-					pushme.move = move;
-					buffer.emplace_back(std::move(pushme));
-				}
-
-			}
-
-			small_vector<SeqAndPack> PackData(SeqNo curr_seq) override
-			{
-				// discard ancient moves
-				auto discard_age = curr_seq - 3;
-
-				small_vector<SeqAndPack> retval;
-				for (auto& elem : buffer)
-				{
-					if (elem.seq > discard_age)
-						retval.emplace_back(elem);
-				}
-				if (retval.size() > move_limit)
-					throw;
-				return retval;
-			}
-
-			void UnpackGhost(SeqNo index, string_view data) override
-			{
-				return;
-				// newer data has arrived
-				while (buffer.size() && seqno_greater_than(index, buffer.front().seq))
-					buffer.pop_front();
-
-				if (auto val = parse_binary<T>(data))
-				{
-					T move{};
-					for (auto& elem : buffer)
-						move = param.adder(move, elem.move);
-
-					param.setter(*val + move);
-				}
-			}
-		};
-		struct DerivedControlObjectData
-			: ControlObjectData
-		{
-			static constexpr auto RememberedMoves = 64;
-			struct SeqAndObj 
-			{ 
-				SeqNo seq; 
-				T obj; 
-				bool verified = false; 
-			};
-
-			ParameterImpl<T>& param;
-			T prev_value;
-			circular_buffer<SeqAndObj, RememberedMoves> move_buffer;
-
-			DerivedControlObjectData(ParameterImpl<T>& impl)
-				: param{ impl } 
-			{
-				prev_value = param.getter();
-			}
-			
-			void Init() override
-			{
-				prev_value = param.getter();
-			}
-
-			MoveAck AcknowledgeMoves(SeqNo curr_seq) override
-			{
-				MoveAck ack;
-				ack.sequence_number = curr_seq;
-
-				for (auto& elem : move_buffer)
-				{
-					if (elem.verified)
-					{
-						auto seq = elem.seq;
-						auto diff = curr_seq - seq;
-						if (diff < 32)
-							ack.acked_moves = 1 << diff;
-					}
-				}
-
-				return ack;
-			}
-
-			__declspec(noinline) void RecordPrediction(SeqNo curr_seq) override
-			{
-				auto curr_value = param.getter();
-				auto new_move = param.differ(curr_value, prev_value);
-				prev_value = curr_value;
-
-				move_buffer.emplace_back(SeqAndObj{ curr_seq, new_move });
-			}
-
-			void ApplyCorrection(typename circular_buffer<SeqAndObj, RememberedMoves>::iterator itr, const T& real_move)
-			{
-				switch (param.predict_func)
-				{
-				case PredictionFunction::Linear:
-				{
-					auto change = param.differ(real_move, itr->obj);
-					param.setter(param.adder(param.getter(), change));
-					prev_value = param.adder(prev_value, change);
-					// and snap
-					itr->obj = real_move;
-					break;
-				}
-				case PredictionFunction::Quadratic:
-				if (itr != move_buffer.end())
-				{
-					auto diff = param.differ(real_move, itr->obj);
-
-					while (itr != move_buffer.end())
-					{
-						if (itr->verified)
-							break;
-
-						itr->obj = param.adder(itr->obj, diff);
-						param.setter(param.adder(param.getter(), diff));
-						prev_value = param.adder(prev_value, diff);
-						++itr;
-					}
-					break;
-				}
-				};
-
-			}
-
-			__declspec(noinline) int UnpackMove(span<const SeqAndPack> packs)
-			{
-				int unpacked_moves = 0;
-				for (auto& elem : packs)
-				{
-					if (auto unpacked_move = parse_binary<T>(elem.pack))
-					{
-						auto& real_move = *unpacked_move;
-
-						// compare with move
-						// if necessary, displace existing data
-						for (auto itr = move_buffer.begin(); itr != move_buffer.end(); ++itr)
-						{
-							auto& prediction = *itr;
-							if (prediction.seq == elem.seq)
-							{
-								// if prediction was wrong
-								if (!param.equater(prediction.obj, real_move))
-									ApplyCorrection(itr, real_move);
-
-								itr->verified = true;
-								++unpacked_moves;
-								break;
-							}
-						}
-					}
-				}
-				return unpacked_moves;
-			}
-		};
+		struct DerivedMoveObjectData;
+		struct DerivedControlObjectData;
 
 		ParameterImpl<T> param;
 		DerivedMasterData master_data;
 		DerivedGhostData  ghost_data;
-		DerivedClientObjectData client_object_data;
+		DerivedMoveObjectData client_object_data;
 		DerivedControlObjectData control_object_data;
 
 		DerivedParameter(ParameterImpl<T> param_impl)
-			: param{ param_impl }
+			: param{ std::move(param_impl) }
 			, ghost_data          { param }
 			, master_data         { param }
 			, client_object_data  { param }
@@ -301,18 +115,22 @@ namespace idk
 		}
 
 		DerivedControlObjectData* GetControlObject() override { return &control_object_data; }
-		DerivedClientObjectData* GetClientObject() override { return &client_object_data; };
+		DerivedMoveObjectData* GetClientObject() override { return &client_object_data; };
 		DerivedMasterData* GetMaster() override { return &master_data; }
 		DerivedGhostData*  GetGhost()  override { return &ghost_data; }
 	};
 
 	template<typename T>
-	ParameterImpl<T>& ElectronView::RegisterMember(string_view name, ParameterImpl<T> param, float interp)
+	ElectronView::BaseParameter* ElectronView::RegisterMember(string_view name, ParameterImpl<T> param, float interp)
 	{
 		auto ptr = std::make_unique<DerivedParameter<T>>(param);
 		ptr->param_name = string{ name };
 		auto& impl = ptr->param;
-		parameters.emplace_back(std::move(ptr))->interp_over = interp;
-		return impl;
+		auto& emplaced = parameters.emplace_back(std::move(ptr)); 
+		emplaced->interp_over = interp;
+		return emplaced.get();
 	}
 }
+
+#include <network/ElectronView_DerivedMoveObject.h>
+#include <network/ElectronView_DerivedControlObject.h>

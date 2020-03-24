@@ -31,6 +31,8 @@
 
 #include <vkn/DebugUtil.h>
 
+#include <vkn/MaterialInstanceCache.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -381,7 +383,7 @@ namespace idk::vkn
 			//curr_state.skinned_mesh_vtx = curr_buffer.skinned_mesh_vtx;
 			curr_state.dbg_render.resize(0);
 			curr_state.shared_gfx_state = &shared_graphics_state;
-			curr_state.ProcessMaterialInstances(shared_graphics_state.material_instances, curr_frame.GetMatInstCache());
+			curr_state.ProcessMaterialInstances(shared_graphics_state.material_instances);
 			if (curr_cam.render_target->RenderDebug())
 			{
 				will_draw_debug = true;
@@ -408,6 +410,23 @@ namespace idk::vkn
 		{
 			if (prt->NeedsFinalizing())
 				prt->Finalize();
+		}
+		{
+			auto& mat_cache = curr_frame.GetMatInstCache();
+			hash_set<ShaderModule*> shaders;
+			for (auto& [handle, p_mat] : shared_graphics_state.material_instances)
+			{
+				shaders.emplace(&p_mat.shader.as<ShaderModule>());
+			}
+			for (auto& shader : shaders)
+			{
+				shader->UpdateCurrent(curr_index);
+			}
+			for (auto& [handle, p_mat] : shared_graphics_state.material_instances)
+			{
+				mat_cache.CacheMaterialInstance(p_mat);
+			}
+			mat_cache.ProcessCreation();
 		}
 		if (RscHandle<VknRenderTarget>{}->NeedsFinalizing())
 			RscHandle<VknRenderTarget>{}->Finalize();

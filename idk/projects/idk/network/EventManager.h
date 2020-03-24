@@ -34,7 +34,7 @@ namespace idk
 		static void BroadcastDestroyView(Handle<ElectronView> view);
 		static void BroadcastRPC(Handle<ElectronView> ev, RPCTarget target, string_view method_name, span<vector<unsigned char>> buffer);
 	private:
-
+		static inline bool scene_changing = false;
 		void OnInstantiatePrefabEvent(EventInstantiatePrefabMessage& message);
 		void OnTransferOwnershipEvent(EventTransferOwnershipMessage& message);
 		void OnDestroyObjectMessage(EventDestroyObjectMessage& message);
