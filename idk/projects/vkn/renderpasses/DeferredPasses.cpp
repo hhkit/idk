@@ -1244,7 +1244,7 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 	{
 	}
 
-	CopyColorPass::CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color, vk::ImageLayout il) :size{ color_size }
+	CopyColorPass::CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color, vk::ImageLayout il) :size{ color_size }, c_pass_name{ builder.Get_region_name() }
 	{
 		auto [copy,original]=builder.copy(color, CopyOptions{ il,
 			{
@@ -1272,7 +1272,7 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 
 	void CopyColorPass::Execute(FrameGraphDetail::Context_t context)
 	{
-		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Copy Pass - in between bloom");
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Copy Pass" + c_pass_name);
 	}
 
 }
