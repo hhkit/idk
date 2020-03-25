@@ -63,7 +63,7 @@ layout(location = 2) in VS_OUT
 } vs_out;
 
 const vec3 fogColor = vec3(0.5, 0.5,0.5);
-const float FogDensity = 0.001;
+const float FogDensity = 1.8; //magic number verified by YY
 
 void main()
 {
@@ -85,17 +85,20 @@ void main()
 	
 	
 	float dist = 0;
-	float fogFactor = 0;
+	float fogFactor = 0;      
+	float d0 =7, dmax = 55;   //magic numbers verified by YY
+	float fog_cap = 0.028125; //magic number verified by YY
 	
 	//range based
-	dist = length(view_pos);
-	 
-	//Exponential fog
-	float d = dist * FogDensity;
-	fogFactor = 1.0 /exp( d );
-	fogFactor = clamp( fogFactor, 0.0, 1.0 );
+	dist = (abs(view_pos.z)-d0)/(dmax-d0); //magic number verified by YY
+	//Exponential fog                      //magic number verified by YY
+	float d = dist * FogDensity;           //magic number verified by YY
+	d= 1 - 1/exp(d);                       //magic number verified by YY
+	d = pow(d,4);                          //magic number verified by YY
+	fogFactor = d;//1.0 /exp( d );
+	fogFactor = clamp( fogFactor, 0.0, fog_cap );
 	
-	frag_color = mix(fogColor,frag_color,fogFactor);
+	frag_color = mix(frag_color,fogColor,fogFactor);
 
 	out_color = vec4(ReinhardOperator(frag_color),1);
 	
