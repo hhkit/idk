@@ -276,7 +276,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CameraControls.h" />
     <ClInclude Include="commands\CMD_AddBehavior.h" />
     <ClInclude Include="commands\CMD_CollateCommands.h" />
     <ClInclude Include="commands\CMD_DeleteComponent.h" />
@@ -340,7 +339,6 @@
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CameraControls.cpp" />
     <ClCompile Include="commands\CMD_AddBehavior.cpp" />
     <ClCompile Include="commands\CMD_CollateCommands.cpp" />
     <ClCompile Include="commands\CMD_DeleteComponent.cpp" />

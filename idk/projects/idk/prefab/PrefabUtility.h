@@ -26,6 +26,9 @@ namespace idk
         static RscHandle<Prefab> Save(Handle<GameObject> go, string_view save_path);
         static RscHandle<Prefab> SaveAndConnect(Handle<GameObject> go, string_view save_path);
 
+        // breaks prefab instance to normal game object.
+        static void BreakPrefabInstance(Handle<GameObject> root);
+
         // get the root of a prefab instance.
         // if the given game object is not part of a prefab instance, returns a null handle.
         static Handle<GameObject> GetPrefabInstanceRoot(Handle<GameObject> go);

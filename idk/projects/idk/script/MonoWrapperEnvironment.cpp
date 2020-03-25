@@ -771,6 +771,42 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::ColliderSetStaticFriction", void, Handle<Collider> col, float val)
+		{
+			col->static_friction = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetStaticFriction", float, Handle<Collider> col)
+		{
+			return col->static_friction;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSetDynamicFriction", void, Handle<Collider> col, float val)
+		{
+			col->dynamic_friction = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetDynamicFriction", float, Handle<Collider> col)
+		{
+			return col->dynamic_friction;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSetBounciness", void, Handle<Collider> col, float val)
+		{
+			col->bounciness = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetBounciness", float, Handle<Collider> col)
+		{
+			return col->bounciness;
+		}
+		BIND_END();
+
 		// BoxCollider
 
 		BIND_START("idk.Bindings::ColliderBoxSetCenter", void, Handle<Collider> col, vec3 val)
