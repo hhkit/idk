@@ -563,6 +563,18 @@ namespace idk
         return handle;
     }
 
+    void PrefabUtility::BreakPrefabInstance(Handle<GameObject> root)
+    {
+        if (!root)
+            return;
+
+        Core::GetSystem<SceneManager>().FetchSceneGraphFor(root).Visit([](Handle<GameObject> go, int)
+        {
+            if (const auto handle = go->GetComponent<PrefabInstance>())
+                go->RemoveComponent(handle);
+        });
+    }
+
     Handle<GameObject> PrefabUtility::GetPrefabInstanceRoot(Handle<GameObject> go)
     {
         if (!go->HasComponent<PrefabInstance>())

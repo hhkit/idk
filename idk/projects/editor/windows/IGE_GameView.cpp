@@ -77,7 +77,7 @@ namespace idk
 		_draw_rect_offset = (GetScreenSize() - imageSize) * 0.5f;
 		ImGui::SetCursorPos(vec2(ImGui::GetWindowContentRegionMin()) + _draw_rect_offset);
 
-		const auto image_top_left = ImGui::GetCursorScreenPos();
+		const vec2 image_top_left = ImGui::GetCursorScreenPos();
 
 		//imageSize.y = (imageSize.x * (9 / 16));
 		//if (Core::GetSystem<GraphicsSystem>().GetAPI() != GraphicsAPI::Vulkan)
