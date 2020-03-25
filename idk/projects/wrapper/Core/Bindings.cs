@@ -225,6 +225,24 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ColliderGetTrigger(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetStaticFriction(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetStaticFriction(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetDynamicFriction(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetDynamicFriction(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetBounciness(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetBounciness(ulong id);
+
         /*
          * BoxCollider
          */
