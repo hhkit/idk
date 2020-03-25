@@ -273,8 +273,37 @@ namespace idk {
 			Handle<GameObject> closestGameObject{};
 
 			if (closestRenderer)
-				closestGameObject = closestRenderer.visit([](auto handle) { return GetGameObject(handle); });
-
+			{
+				closestGameObject = closestRenderer.visit([](auto handle) { 
+					using T = std::decay_t<decltype(*handle)>;
+					if constexpr (std::is_same_v<T, SkinnedMeshRenderer>)
+					{
+						auto go = GetGameObject(handle);
+						while (go)
+						{
+							if (go->HasComponent<Animator>())
+								return go;
+							go = go->Parent();
+						}
+					}
+					/*
+					if constexpr (std::is_same_v<T, MeshRenderer>)
+					{
+						auto go = GetGameObject(handle);
+						while (go)
+						{
+							if (auto prefab = go->GetComponent<PrefabInstance>())
+								if (prefab->object_index == -1)
+									return go;
+							go = go->Parent();
+						}
+					}
+					*/
+					return GetGameObject(handle); 
+					
+					});
+				
+			}
 			if (closestGameObject)
 			{
 				auto& editor = ide;
