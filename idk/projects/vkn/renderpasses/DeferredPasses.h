@@ -51,6 +51,7 @@ namespace idk::vkn::renderpasses
 	};
 	struct CopyColorPass : BaseRenderPass
 	{
+		string c_pass_name; 
 		FrameGraphResource copied_color;
 		FrameGraphResource original_color;
 		uvec2 size;

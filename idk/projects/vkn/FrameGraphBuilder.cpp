@@ -168,6 +168,12 @@ namespace idk::vkn
 		return FrameGraphNode{ id,std::move(curr_rsc.name),&consumed_resources.resources,&consumed_resources.copies,input_span,read_span,output_span,modified_span,copied_span,curr_rsc.input_attachments,curr_rsc.output_attachments,curr_rsc.depth_attachment,curr_rsc.no_rp };
 	}
 
+	const string& FrameGraphBuilder::Get_region_name()
+	{
+		// TODO: insert return statement here
+		return curr_rsc.name;
+	}
+
 	std::optional<fg_id> FrameGraphBuilder::GetSourceNode(fgr_id aliased_rsc) const
 	{
 		std::optional < fg_id> result{};

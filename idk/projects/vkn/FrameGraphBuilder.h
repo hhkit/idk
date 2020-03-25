@@ -53,6 +53,8 @@ namespace idk::vkn
 		void BeginNode(string name);
 		FrameGraphNode EndNode();
 
+		const string& Get_region_name();
+
 		FrameGraphResourceManager rsc_manager;
 		
 		std::optional<fg_id> GetSourceNode(fgr_id rsc)const;
