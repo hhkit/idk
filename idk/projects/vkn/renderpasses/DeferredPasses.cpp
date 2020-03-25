@@ -294,9 +294,10 @@ namespace idk::vkn::renderpasses
 	}
 
 	CombinePass::CombinePass(FrameGraphBuilder& builder, [[maybe_unused]] rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex, uvec2 rt_size)
+		:_viewport{viewport}
 	{
 		auto out_color_rsc= builder.write(out_color_tex, WriteOptions{ false });
-		auto out_hdr_rsc = CreateGBuffer(builder, "brightness layer", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, { rt_size });
+		auto out_hdr_rsc = CreateGBuffer(builder, "brightness layer", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {},  rt_size );
 		auto out_depth_rsc= builder.write(out_depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		out_color = out_color_rsc;
 		out_hdr = out_hdr_rsc;
@@ -570,12 +571,12 @@ namespace idk::vkn::renderpasses
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 	}
 
-	BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport) : _viewport{ viewport }
+	BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport) : _viewport{ viewport }
 	{
 		//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
 		//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
 		bloom_rsc = builder.write(out_color, WriteOptions{ false });
-
+		//depth_rsc = builder.write(depth);
 		//builder.write(combine_.out_color, WriteOptions{false});
 
 		builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
@@ -596,6 +597,8 @@ namespace idk::vkn::renderpasses
 			}
 		);
 		auto derp1 = builder.read(color);
+		auto derp2 = builder.read(depth);
+		auto derp3 = builder.read(gViewPos);
 		brightness_read_only = builder.read(hdr, true);
 
 		builder.set_input_attachment(derp1, 1, AttachmentDescription
@@ -614,22 +617,57 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		//builder.set_input_attachment(brightness_read_only, 2, AttachmentDescription
+		builder.set_input_attachment(derp2, 2, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eDepth,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			});
+		builder.set_input_attachment(derp3, 3, AttachmentDescription
+			{
+				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+				vk::ImageSubresourceRange
+				{
+					vk::ImageAspectFlagBits::eColor,0,1,0,1
+				},//vk::ImageSubresourceRange sub_resource_range{};
+				//std::optional<vk::ClearValue> clear_value;
+				//std::optional<vk::Format> format{};
+				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+				//vk::ComponentMapping mapping{};
+			}
+		);
+
+		//builder.set_depth_stencil_attachment(depth_rsc, AttachmentDescription
 		//	{
-		//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-		//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+		//		vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
+		//		vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 		//		vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 		//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-		//		vk::ImageLayout::eGeneral,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+		//		vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
 		//		vk::ImageSubresourceRange
 		//		{
-		//			vk::ImageAspectFlagBits::eColor,0,1,0,1
+		//			vk::ImageAspectFlagBits::eDepth,0,1,0,1
 		//		},//vk::ImageSubresourceRange sub_resource_range{};
-		//		//std::optional<vk::ClearValue> clear_value;
+		//		vk::ClearDepthStencilValue{},//std::optional<vk::ClearValue> clear_value;
 		//		//std::optional<vk::Format> format{};
 		//		//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 		//		//vk::ComponentMapping mapping{};
 		//	});
+
 	}
 	//#pragma optimize("",off)
 	void BloomPass::Execute(FrameGraphDetail::Context_t context)
@@ -666,17 +704,6 @@ namespace idk::vkn::renderpasses
 		context.BindUniform("brightness_input", 0, bright_texture, false, vk::ImageLayout::eShaderReadOnlyOptimal);
 
 		context.BindUniform("ColCorrectLut", 0, color_correction_lut);
-
-		struct bb {
-			int i = 1;
-		};
-
-		bb ii;
-		string d_block;
-		vector<bb> crap;
-		crap.emplace_back(ii);
-		d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
-		//context.BindUniform("blurBlock", 0, d_block);
 
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
@@ -1154,8 +1181,9 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 		/////////Now apply vertical gaussian pass////////////////
 		auto& bloom_pass = graph.addRenderPass<BloomPassW>("Bloom passW", copy_color_pass_1.original_color, copy_color_pass_1.copied_color, copy_color_pass_1.copied_color, gfx_state.camera.viewport);
 		auto& copy_color_pass_2 = graph.addRenderPass<CopyColorPass>("Copy Color For Bloom effect", cube_clear.rt_size, combine_def_pass.out_color);
+		auto& copy_view_pass_ = graph.addRenderPass<CopyColorPass>("Copy viewpos For fog effect", cube_clear.rt_size, gbuffer_pass_def.gbuffer_rscs[2]);
 		////////Now additive blend the blurred brightness back onto the default pass texture////////
-		auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, bloom_pass.bloom_rsc, gfx_state.camera.viewport);
+		auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, combine_def_pass.out_depth, bloom_pass.bloom_rsc, copy_view_pass_.copied_color, gfx_state.camera.viewport);
 		bloom_pass_combine.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		//Bloom pass stage end
@@ -1242,8 +1270,9 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 		builder.NoRenderPass();
 	}
 
-	void CopyColorPass::Execute(FrameGraphDetail::Context_t )
+	void CopyColorPass::Execute(FrameGraphDetail::Context_t context)
 	{
+		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Copy Pass - in between bloom");
 	}
 
 }

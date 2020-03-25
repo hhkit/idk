@@ -1,7 +1,8 @@
 #version 460
 
 layout (input_attachment_index=1, set=2, binding=0) uniform subpassInput color_input;
-//layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput brightness_input;
+layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput depth_input;
+layout (input_attachment_index=3, set=2, binding=2) uniform subpassInput gView_pos;
 
 S_LAYOUT(3,1) uniform sampler2D brightness_input;
 
@@ -61,27 +62,40 @@ layout(location = 2) in VS_OUT
   vec2 uv;	
 } vs_out;
 
+const vec3 fogColor = vec3(0.5, 0.5,0.5);
+const float FogDensity = 0.001;
+
 void main()
 {
-
+	float depth = subpassLoad(depth_input).r;
 	vec3 frag_color = subpassLoad(color_input).rgb;
+	
+	//if(depth == 1)
+		//discard;
+	
+	vec4 view_pos = subpassLoad(gView_pos);
 	
 	vec2 uv =vs_out.uv;
 	uv.x = 1-uv.x;
 	vec3 brightness = texture(brightness_input,uv).rgb;
-	
-	//brightness = clamp(brightness,0,1); //Cannot afford to have it go outside of its LUT
-	
-	//out_color += vec4(frag_color,1);
-	
-	//vec3 frag_copy = frag_color;
-	//bvec3 chk = greaterThan(brightness,vec3(0.f));
-	//if(chk.x || chk.y || chk.z)
-	
-	//frag_color = mix(brightness,frag_color,0.1f);
+
 	
 	//hard set ratio on bloom because of unwanted shading effects when casted on wall
-	frag_color += brightness *0.1f; 
+	frag_color += brightness * 0.15f; 
+	
+	
+	float dist = 0;
+	float fogFactor = 0;
+	
+	//range based
+	dist = length(view_pos);
+	 
+	//Exponential fog
+	float d = dist * FogDensity;
+	fogFactor = 1.0 /exp( d );
+	fogFactor = clamp( fogFactor, 0.0, 1.0 );
+	
+	frag_color = mix(fogColor,frag_color,fogFactor);
 
 	out_color = vec4(ReinhardOperator(frag_color),1);
 	
@@ -95,7 +109,8 @@ void main()
 	ivec3 ip1 = ivec3(p1);
 	
 	vec3 t = (p - p0);// /(p1-p0);
-	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
-	
+	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);	
 	out_color.rgb = pow(out_color.rgb,vec3(2.2));
+	
+	//gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 }

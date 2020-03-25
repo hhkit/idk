@@ -59,8 +59,8 @@ import /engine_data/shaders/pbr_utils.glsl
 // forward shading only cares about color!
 layout(location = 0)out vec4 out_color;
 
-const vec3 fogColor = vec3(0.5, 0.5,0.5);
-const float FogDensity = 0.006;
+//const vec3 fogColor = vec3(0.5, 0.5,0.5);
+//const float FogDensity = 0.001;
 
 
 void main()
@@ -86,7 +86,7 @@ void main()
 
 	vec3 light_accum = vec3(0);
 	normal = normalize(normal);
-	vec3 dir_light_accum = vec3(0);
+	//vec3 dir_light_accum = vec3(0);
 	
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
@@ -131,11 +131,11 @@ void main()
 				//{
 				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
 				//}
-				//result *= shadow_factor;
+				result *= shadow_factor;
 				//shadow_accum -= shadow_factor;				
 				++j;
 				
-				dir_light_accum = result * shadow_factor;
+				//dir_light_accum = result * shadow_factor;
 			}
 			else
 			{
@@ -162,23 +162,18 @@ void main()
 	//vec3 accum_for_fog = light_accum;
 	
 	
-	float dist = 0;
-	float fogFactor = 0;
-	
-	//range based
-	dist = view_z_abs;
-	 
-	//Exponential fog
-	float d = dist * FogDensity;
-	fogFactor = 1.0 /exp( d *d );
-	fogFactor = clamp( fogFactor, 0.0, 1.0 );
-	//float be = (10.0 - view_pos.y) * 0.004;//0.004 is just a factor; change it if you want
-	//float bi = (10.0 - view_pos.y) * 0.001;//0.001 is just a factor; change it if you want
- 
-	//float ext = exp(-dist * be);
-	//float insc = exp(-dist * bi);
-	
-	light_accum = mix(fogColor,dir_light_accum,fogFactor) + light_accum;
+	//float dist = 0;
+	//float fogFactor = 0;
+	//
+	////range based
+	//dist = length(view_pos);
+	// 
+	////Exponential fog
+	//float d = dist * FogDensity;
+	//fogFactor = 1.0 /exp( d );
+	//fogFactor = clamp( fogFactor, 0.0, 1.0 );
+	//
+	//light_accum = mix(fogColor,light_accum,fogFactor);
 	
 	//light_accum = light_accum* ext + fogColor * (1.0 - insc);
 	

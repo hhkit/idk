@@ -136,6 +136,7 @@ namespace idk::vkn::renderpasses
 	struct BloomPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable bloom_rsc;
+		FrameGraphResourceMutable depth_rsc;
 		FrameGraphResourceMutable brightness_read_only;
 		//FrameGraphResourceMutable bloom_depth_rsc;
 
@@ -144,7 +145,7 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> bloom_shader;
 
-		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport);
+		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
