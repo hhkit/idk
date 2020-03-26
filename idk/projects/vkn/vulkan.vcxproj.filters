@@ -410,6 +410,9 @@
     <ClInclude Include="MaterialInstanceCache.h">
       <Filter>render\utils</Filter>
     </ClInclude>
+    <ClInclude Include="renderpasses\BloomPass.h">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -706,6 +709,9 @@
     <ClCompile Include="StandardFragmentBinding.cpp" />
     <ClCompile Include="MemoryCollator.cpp" />
     <ClCompile Include="MaterialInstanceCache.cpp" />
+    <ClCompile Include="renderpasses\BloomPass.cpp">
+      <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
