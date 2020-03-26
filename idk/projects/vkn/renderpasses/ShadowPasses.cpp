@@ -218,7 +218,7 @@ namespace idk::vkn::renderpasses
 	{
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 
-		if (!light.update_shadow || !light.cast_shadow)
+		if (!light.update_shadow)
 			return;
 
 		switch (light.index)

@@ -32,6 +32,7 @@ namespace idk
 		FDeferredPostSpecular,
 		FDeferredPostAmbient,
 		FDeferredCombine,
+		FDeferredCombineSpec,
 		FDeferredHDR,
 		FDeferredBloom,
 		FDeferredBloomCombine,

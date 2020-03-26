@@ -108,6 +108,20 @@ namespace idk::vkn::renderpasses
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
+	struct CombinePassSpec : BaseRenderPass, FsqUtil
+	{
+		FrameGraphResourceMutable out_color;
+		FrameGraphResourceMutable out_hdr;
+		FrameGraphResourceMutable out_depth;
+
+		RscHandle<ShaderProgram> combine_shader;
+
+		VknTextureView color_correction_lut;
+
+		CombinePassSpec(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex, uvec2 rt_size);
+		void Execute(FrameGraphDetail::Context_t context) override;
+		rect _viewport;
+	};
 	struct HdrPass : BaseRenderPass, FsqUtil
 	{
 		FrameGraphResourceMutable hdr_rsc;

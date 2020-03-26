@@ -539,12 +539,15 @@ namespace idk
 
 				color col = color{ 0.3f,0.2f,0.6f,1.0f };
 				//light.update_shadow = false;
-				light.update_shadow = true;
+				light.update_shadow = false;
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
 					light.camDataRef = camera;
-					col = color{ 0.5f,0.4f,0.0f,1.0f };			
+					col = color{ 0.5f,0.4f,0.0f,1.0f };	
+
+					if (light.cast_shadow)
+						light.update_shadow = true;
 				}
 
 				if (Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("DbgSpotLight", true))
@@ -750,35 +753,7 @@ namespace idk
 				//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
 				if (elem.is_active_and_enabled())
 				{
-					auto res = elem.GenerateLightData();
-					
-					//if (res.index == 1)
-					//{
-					//	//Dtor now frees the shadow maps.
-					//	//Core::GetSystem<SceneManager>().OnSceneChange += [&](RscHandle<Scene>) { 
-					//	//
-					//	//	//auto& e = std::get<DirectionalLight>(elem.light);							
-					//	//	for (auto& elem : d_lightmaps)
-					//	//	{
-					//	//		for (auto& e : elem.second.cam_lightmaps)
-					//	//		{
-					//	//			e.light_map->attachments.clear();
-					//	//			e.light_map->depth_attachment.reset();
-					//	//			e.light_map->stencil_attachment.reset();
-					//	//		}
-					//	//		elem.second.cam_lightmaps.clear();
-					//	//	}
-					//	//	d_lightmaps.clear();
-					//	//};
-
-					//	//auto& e = std::get<DirectionalLight>(elem.light);
-					//	//
-					//	//for (auto& c : result.camera)
-					//	//{
-					//	//	result.d_lightmaps[c.obj_id].cam_lightmaps = result.d_lightpool.GetShadowMaps(elem);
-					//	//}
-					//}
-					result.lights.emplace_back(res);
+					result.lights.emplace_back(elem.GenerateLightData());
 				}
 			}
 
@@ -1188,21 +1163,21 @@ namespace idk
 			size_t lm_i = 0;
 			if (light.index == 1)
 			{
+				const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
 				for (auto& lightmap : light.light_maps)
 				{
 					range.light_map_index = lm_i;
 					{
-						if (!light.update_shadow || !light.cast_shadow)
+						if (!light.update_shadow)
 						{
 							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 						}
 						else
 						{
 							light_cam_info.projection_matrix = { lightmap.cascade_projection };
-							const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
 							CullBatchOpt opt{};
-							if (light.index == 1)
-								opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
+
+							opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
 							
 							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
 							
@@ -1221,7 +1196,7 @@ namespace idk
 				{
 					range.light_map_index = lm_i;
 					{
-						if (!light.update_shadow || !light.cast_shadow)
+						if (!light.update_shadow)
 						{
 							range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
 						}
@@ -1356,6 +1331,7 @@ namespace idk
 		renderer_fragment_shaders[FDeferredPostSpecular] = LoadShader("/engine_data/shaders/deferred_post_specular.frag");
 		renderer_fragment_shaders[FDeferredPostAmbient] = LoadShader("/engine_data/shaders/deferred_post_ambient.frag");
 		renderer_fragment_shaders[FDeferredCombine] = LoadShader("/engine_data/shaders/deferred_combine.frag");
+		renderer_fragment_shaders[FDeferredCombineSpec] = LoadShader("/engine_data/shaders/deferred_combine_specular.frag");
 		renderer_fragment_shaders[FDeferredHDR] = LoadShader("/engine_data/shaders/deferred_hdr.frag");
 		renderer_fragment_shaders[FDeferredBloom] = LoadShader("/engine_data/shaders/deferred_bloom.frag");
 		renderer_fragment_shaders[FDeferredBloomCombine] = LoadShader("/engine_data/shaders/deferred_bloom_combine.frag");
