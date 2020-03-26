@@ -53,7 +53,7 @@ namespace idk
 
     // similar to c++ function matching,
     // we match each param for each signature to determine the best matching function
-#pragma optimize("", off)
+//#pragma optimize("", off)
     static const NodeSignature* match_node_sig(const Node& node)
     {
         auto& tpl = NodeTemplate::GetTable().at(node.name);

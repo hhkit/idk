@@ -23,6 +23,12 @@ S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 	int useBloom;
 }ppb;
 
+S_LAYOUT(5,0) uniform BLOCK(ViewportBlock)
+{
+	vec2 pos;
+	vec2 extent;
+}vb;
+
 
 layout(location=0) out vec4 out_color;
 
@@ -57,8 +63,8 @@ void main()
 	weight[4] = 0.016216;
 
 	vec2 tex_offset = 1.0 / textureSize(brightness_input, 0) * blurScale; // gets size of single texel
-	vec2 uv =vs_out.uv;
-	uv.x = 1-uv.x;
+	vec2 uv =vb.pos + vs_out.uv*vb.extent;
+	//uv.x = 1-uv.x;
 	vec3 brightness = texture(brightness_input,uv).rgb * weight[0];
 	
 	

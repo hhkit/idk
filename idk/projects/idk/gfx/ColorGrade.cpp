@@ -3,7 +3,7 @@
 
 namespace idk
 {
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	template<size_t stride>
 	SimpleTexData GenerateDefaultColorGradeTexData(byte default_fill)
 	{

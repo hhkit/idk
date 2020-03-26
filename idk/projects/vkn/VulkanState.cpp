@@ -516,7 +516,7 @@ namespace idk::vkn
 			m_swapchain->frame_objects.emplace_back(std::move(fo));
 		}
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void VulkanState::createImageViews()
 	{
 

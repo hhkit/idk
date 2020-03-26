@@ -175,6 +175,14 @@ namespace idk::vkn::renderpasses
 
 		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
 
+		//struct OffsetBlock
+		//{
+		//	vec2 min;
+		//	vec2 extent;
+		//};
+		//OffsetBlock ob{_viewport.position, _viewport.size };
+		//context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
+
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
 
@@ -198,7 +206,7 @@ namespace idk::vkn::renderpasses
 
 		builder.set_output_attachment(bloom_rsc, 0, AttachmentDescription
 			{
-				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp load_op;
+				vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eStore,//vk::AttachmentStoreOp stencil_store_op;
 				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -275,6 +283,8 @@ namespace idk::vkn::renderpasses
 		context.BindUniform("blurBlock", 0, hlp::to_data(ii));
 
 		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
+
+		context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
 
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
@@ -392,6 +402,9 @@ namespace idk::vkn::renderpasses
 		context.BindUniform("blurBlock", 0, hlp::to_data(ii));
 
 		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
+
+		//context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
+		context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
 
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
