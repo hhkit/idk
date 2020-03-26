@@ -370,6 +370,8 @@ namespace idk::vkn
 					}
 				}
 			}, curr_cam.clear_data);
+
+			curr_state.ppEffect = ppEffect;
 			//Init render datas (range for instanced data, followed by render datas for other passes)
 			curr_state.Init(curr_range,curr_buffer.active_light_buffer,curr_buffer.directional_light_buffer, curr_buffer.lights,curr_buffer.d_lightmaps, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);

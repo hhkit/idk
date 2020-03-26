@@ -8,6 +8,19 @@ S_LAYOUT(3,1) uniform sampler2D brightness_input;
 
 S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 
+S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
+{
+	vec3 fogColor;
+	float FogDensity;
+
+	//Bloom
+	float blurStrength;
+	float blurScale;
+	
+	int useFog;
+	int useBloom;
+}ppb;
+
 
 layout(location=0) out vec4 out_color;
 
@@ -62,9 +75,6 @@ layout(location = 2) in VS_OUT
   vec2 uv;	
 } vs_out;
 
-const vec3 fogColor = vec3(0.5, 0.5,0.5);
-const float FogDensity = 0.001;
-
 void main()
 {
 	float depth = subpassLoad(depth_input).r;
@@ -79,23 +89,27 @@ void main()
 	uv.x = 1-uv.x;
 	vec3 brightness = texture(brightness_input,uv).rgb;
 
-	
 	//hard set ratio on bloom because of unwanted shading effects when casted on wall
-	frag_color += brightness * 0.15f; 
+	
+	if(ppb.useBloom == 1)
+		frag_color += brightness * 0.15f; 
 	
 	
-	float dist = 0;
-	float fogFactor = 0;
-	
-	//range based
-	dist = length(view_pos);
-	 
-	//Exponential fog
-	float d = dist * FogDensity;
-	fogFactor = 1.0 /exp( d );
-	fogFactor = clamp( fogFactor, 0.0, 1.0 );
-	
-	frag_color = mix(fogColor,frag_color,fogFactor);
+	if(ppb.useFog == 1)
+	{
+		float dist = 0;
+		float fogFactor = 0;
+		
+		//range based
+		dist = length(view_pos);
+		 
+		//Exponential fog
+		float d = dist * ppb.FogDensity;
+		fogFactor = 1.0 /exp( d );
+		fogFactor = clamp( fogFactor, 0.0, 1.0 );
+		
+		frag_color = mix(ppb.fogColor,frag_color,fogFactor);
+	}
 
 	out_color = vec4(ReinhardOperator(frag_color),1);
 	

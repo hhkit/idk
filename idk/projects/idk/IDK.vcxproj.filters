@@ -1219,6 +1219,9 @@
     <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
     <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="gfx\ColorGrade.h" />
+    <ClInclude Include="gfx\PostProcessEffect.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

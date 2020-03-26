@@ -21,6 +21,8 @@
 
 #include <gfx/DefaultShaders.h>
 
+#include <gfx/PostProcessEffect.h>
+
 namespace idk
 {
 
@@ -58,6 +60,8 @@ namespace idk
 		std::map<Handle<GameObject>, CamLightData> d_lightmaps;
 
 		ExtraVars extra_vars;
+
+		PostProcessEffect ppEffect;
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;

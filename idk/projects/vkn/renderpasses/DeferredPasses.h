@@ -4,6 +4,7 @@
 #include <vkn/DrawSet.h>
 #include <gfx/DefaultShaders.h>
 #include <vkn/DrawSetRenderPass.h>
+#include <gfx/PostProcessEffect.h>
 namespace idk
 {
 	struct renderer_attributes;
@@ -146,6 +147,8 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> bloom_shader;
 
+		PostProcessEffect ppe;
+
 		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
@@ -161,6 +164,8 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> bloom_shader;
 
+		PostProcessEffect ppe;
+
 		BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
@@ -175,6 +180,8 @@ namespace idk::vkn::renderpasses
 		VknTextureView bright_texture;
 
 		RscHandle<ShaderProgram> bloom_shader;
+
+		PostProcessEffect ppe;
 
 		BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource hdr, rect viewport);
 		void Execute(FrameGraphDetail::Context_t context) override;

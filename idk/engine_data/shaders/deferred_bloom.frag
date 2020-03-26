@@ -10,6 +10,19 @@ S_LAYOUT(2,1) uniform BLOCK(blurBlock)
 	int blurdirection;
 } bBlock;
 
+S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
+{
+	vec3 fogColor;
+	float FogDensity;
+
+	//Bloom
+	float blurStrength;
+	float blurScale;
+	
+	int useFog;
+	int useBloom;
+}ppb;
+
 
 layout(location=0) out vec4 out_color;
 
@@ -31,8 +44,8 @@ layout(location = 2) in VS_OUT
 
 void main()
 {
-	float blurStrength = 1.5f;
-	float blurScale = 2.f;
+	float blurStrength = ppb.blurStrength;
+	float blurScale = ppb.blurScale;
 	
 	//vec3 frag_color = subpassLoad(color_input).rgb;
 	

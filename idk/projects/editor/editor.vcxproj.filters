@@ -165,6 +165,9 @@
     <ClInclude Include="widgets\IconCheckbox.h">
       <Filter>widgets</Filter>
     </ClInclude>
+    <ClInclude Include="windows\IGE_PostProcessingWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -313,6 +316,9 @@
     <ClCompile Include="SceneManagement.cpp" />
     <ClCompile Include="widgets\IconCheckbox.cpp">
       <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_PostProcessingWindow.cpp">
+      <Filter>windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

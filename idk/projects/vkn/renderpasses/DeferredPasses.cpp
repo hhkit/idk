@@ -705,6 +705,8 @@ namespace idk::vkn::renderpasses
 
 		context.BindUniform("ColCorrectLut", 0, color_correction_lut);
 
+		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
+
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
 
@@ -797,16 +799,18 @@ void BloomPassH::Execute(FrameGraphDetail::Context_t context)
 	
 	context.BindUniform("brightness_input", 0, bright_texture,false,vk::ImageLayout::eShaderReadOnlyOptimal);
 
+	context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
+
 	struct bb {
 		int i = 1;
 	};
 
 	bb ii;
-	string d_block;
-	vector<bb> crap;
-	crap.emplace_back(ii);
-	d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
-	context.BindUniform("blurBlock",0,d_block);
+	//string d_block;
+	//vector<bb> crap;
+	//crap.emplace_back(ii);
+	//d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
+	context.BindUniform("blurBlock",0,hlp::to_data(ii));
 
 	context.SetViewport(_viewport);
 	context.SetScissors(_viewport);
@@ -916,16 +920,18 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 
 	context.BindUniform("brightness_input", 0, bright_texture, false, vk::ImageLayout::eShaderReadOnlyOptimal);
 
+	context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
+
 	struct bb {
 		int i = 0;
 	};
 
 	bb ii;
-	string d_block;
-	vector<bb> crap;
-	crap.emplace_back(ii);
-	d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
-	context.BindUniform("blurBlock", 0, d_block);
+	//string d_block;
+	//vector<bb> crap;
+	//crap.emplace_back(ii);
+	//d_block += string{ reinterpret_cast<const char*>(crap.data()), hlp::buffer_size(crap) };
+	context.BindUniform("blurBlock", 0, hlp::to_data(ii));
 
 	context.SetViewport(_viewport);
 	context.SetScissors(_viewport);
@@ -1185,6 +1191,9 @@ void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 		////////Now additive blend the blurred brightness back onto the default pass texture////////
 		auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, combine_def_pass.out_depth, bloom_pass.bloom_rsc, copy_view_pass_.copied_color, gfx_state.camera.viewport);
 		bloom_pass_combine.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
+		bloom_pass_combine.ppe = gfx_state.ppEffect;
+		bloom_pass.ppe = gfx_state.ppEffect;
+		bloom_passH.ppe = gfx_state.ppEffect;
 
 		//Bloom pass stage end
 
