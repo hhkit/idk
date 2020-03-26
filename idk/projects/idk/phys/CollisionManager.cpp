@@ -28,6 +28,8 @@
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
 
+#include <ds/result.inl>
+
 namespace idk
 {
 	constexpr float baumgarte = .2f;

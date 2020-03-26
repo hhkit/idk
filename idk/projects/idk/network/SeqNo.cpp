@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "SeqNo.h"
 #include <stdexcept>
 #include <ostream>
