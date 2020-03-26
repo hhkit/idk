@@ -213,7 +213,9 @@ namespace idk::phys
 		{
 			// sphere s{};
 			// Core::GetSystem<DebugRenderer>().Draw(sphere{ quat_cast<mat3>(bb.rotation) * result.value().point_of_collision });
-			result.value().point_of_collision = quat_cast<mat3>(bb.rotation) * result.value().point_of_collision + bb.center;
+			const auto rot = quat_cast<mat3>(bb.rotation);
+			result.value().point_of_collision = rot * result.value().point_of_collision + bb.center;
+			result.value().surface_normal = rot * result.value().surface_normal;
 		}
 		return result;
 	}
@@ -261,7 +263,7 @@ namespace idk::phys
 		//pt collision
 		const vec3 poc = lhs.get_point_after(t);
 
-		return raycast_success{false,poc,lhs.origin.distance(poc) };
+		return raycast_success{false,poc,lhs.origin.distance(poc),(poc-s.center).normalize()};
 	}
 
 
@@ -275,7 +277,7 @@ namespace idk::phys
 			float s_to_sphere = lhs.direction().get_normalized().dot(closest_pt_pair.second - lhs.origin) - c.radius;
 			const auto point_of_collision = lhs.origin + lhs.direction().get_normalized()* s_to_sphere;
 		
-			return raycast_success{ false,point_of_collision,lhs.origin.distance(point_of_collision) };
+			return raycast_success{ false,point_of_collision,lhs.origin.distance(point_of_collision),vec3()};
 		}
 
 		return raycast_failure { lhs.origin };

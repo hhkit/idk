@@ -251,15 +251,15 @@ namespace idk
 						return phys::collide_ray_sphere(
 							r, rShape);
 					else
-						if constexpr (std::is_same_v<RShape, box>)
-							return phys::collide_ray_box(
-								r, rShape);
-						else
-							if constexpr (std::is_same_v<RShape, capsule>)
-								return phys::collide_ray_capsule(
-									r, rShape);
-							else
-								return phys::raycast_failure{};
+					if constexpr (std::is_same_v<RShape, box>)
+						return phys::collide_ray_box(
+							r, rShape);
+					else
+					if constexpr (std::is_same_v<RShape, capsule>)
+						return phys::collide_ray_capsule(
+							r, rShape);
+					else
+						return phys::raycast_failure{};
 				}, c.shape);
 
 			if (result)
