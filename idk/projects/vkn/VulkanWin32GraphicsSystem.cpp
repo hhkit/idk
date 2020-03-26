@@ -259,6 +259,7 @@ namespace idk::vkn
 
 		SharedGraphicsState& shared_graphics_state=curr_frame.shared_graphics_state;
 		shared_graphics_state.Reset();
+		auto& active_lights = curr_buffer.active_light_buffer;
 		auto& lights = curr_buffer.lights;
 		shared_graphics_state.mat_inst_cache = &curr_frame.GetMatInstCache();
 		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);

@@ -119,7 +119,7 @@ namespace idk
 		return tmat<T, 4, 4>(
 			vec_t{_2 / (r-l), _0, _0, _0},
 			vec_t{_0, _2 / (t-b), _0, _0},
-			vec_t{_0, _0, _2 / (f-n), _0},
+			vec_t{_0, _0, -_2 / (f-n), _0},
 			tvec
 		);
 	}

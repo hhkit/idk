@@ -28,7 +28,6 @@ namespace idk
 	}
 	mat4 ortho_correction(mat4 m)
 	{
-		m[2][2] = -m[2][2];
 		return m;
 	}
 	mat4 Camera::ProjectionMatrix() const
