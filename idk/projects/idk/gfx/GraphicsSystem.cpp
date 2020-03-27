@@ -38,6 +38,8 @@
 
 #include <gfx/RenderTarget.h>
 
+#include <memory/ArenaAllocator.inl>
+
 using char_bool = uint8_t;
 struct guid_64
 {
@@ -471,7 +473,7 @@ namespace idk
 	bool LightVolDbg::render_next = false;
 
 	int& DbgIndex();
-
+	using lights_used_t = lazy_vector<char_bool, ArenaAllocator<char_bool>>;
 	struct CullLightsInfo
 	{
 		ShadowMapPool& sm_pool;
@@ -480,7 +482,7 @@ namespace idk
 		vector<size_t>& active_light_buffer; 
 		vector<size_t>& directional_light_buffer;
 		GraphicsSystem::RenderRange& range;
-		lazy_vector<char_bool>& active_lights;
+		lights_used_t& active_lights;
 	};
 
 	void CullLights(const CameraData& camera, CullLightsInfo&& info)
@@ -1148,7 +1150,10 @@ namespace idk
 		constexpr auto kDbgLightVol = "DebugLights";
 		extra_vars.SetIfUnset(kDbgLightVol,-1);
 		auto debug_light_vol = *extra_vars.Get<int>(kDbgLightVol);
-		lazy_vector<char_bool> lights_used(lights.size(),false);
+		unsigned char buff[0x4000];
+		ArenaAllocator<char_bool> alloc;
+		lights_used_t lights_used(alloc);
+		lights_used.resize(lights.size(), false);
 		{
 			vector<LightData> new_lights;
 			new_lights.reserve(result.camera.size() * 2);
