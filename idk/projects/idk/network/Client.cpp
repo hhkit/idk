@@ -73,7 +73,7 @@ namespace idk
 		{
 			OnDisconnectionFromServer.Fire();
 			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-				target->FireMessage("OnDisconnectedFromServer");
+				target->FireMessage("OnDisconnectionFromServer");
 		}
 		if (connected_this_frame)
 			ProcessMessages();

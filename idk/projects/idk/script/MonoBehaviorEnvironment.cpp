@@ -147,7 +147,7 @@ namespace idk::mono
 				find_method(type, "Start");
 				find_method(type, "FixedUpdate");
 				find_method(type, "OnConnectedToServer");
-				find_method(type, "OnDisconnectedFromServer");
+				find_method(type, "OnDisconnectionFromServer");
 				find_method(type, "OnClientConnect", 1);
 				find_method(type, "OnClientDisconnect", 1);
 				find_method(type, "OnDestroy");
