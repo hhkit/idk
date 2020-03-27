@@ -285,7 +285,7 @@ namespace idk::vkn
 		pre_render_data.cameras = &curr_buffer.camera;
 		pre_render_data.d_lightmaps = &curr_buffer.d_lightmaps;
 
-		for (size_t i = 0; i < lights.size(); ++i)
+		for (auto i: active_lights)// size_t i = 0; i < lights.size(); ++i)
 			if(lights[i].cast_shadow && lights[i].index!=0)
 				pre_render_data.active_lights.emplace_back(i);
 
