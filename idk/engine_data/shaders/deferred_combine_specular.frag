@@ -79,8 +79,8 @@ void main()
 	float depth = subpassLoad(depth_input).r;
 	vec3  light = subpassLoad(color_input).rgb;
 	
-	float brightness = dot(light, vec3(0.45,0.70,0.70));
-	 if(brightness > 1.0)
+	float brightness = dot(light, vec3(0.9,0.9,0.9));
+	if(brightness > 1.0)
         out_hdr = vec4(light, 1.0);
     else
         out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
