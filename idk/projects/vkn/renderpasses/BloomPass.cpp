@@ -290,7 +290,7 @@ namespace idk::vkn::renderpasses
 		context.SetScissors(_viewport);
 
 		context.SetCullFace({});
-		context.SetDepthTest(false);
+		//context.SetDepthTest(false);
 
 		auto& mesh = Mesh::defaults[MeshType::INV_FSQ].as<VulkanMesh>();
 		BindMesh(context, fsq_requirements, mesh);
@@ -410,7 +410,7 @@ namespace idk::vkn::renderpasses
 		context.SetScissors(_viewport);
 
 		context.SetCullFace({});
-		context.SetDepthTest(false);
+		//context.SetDepthTest(false);
 
 		auto& mesh = Mesh::defaults[MeshType::INV_FSQ].as<VulkanMesh>();
 		BindMesh(context, fsq_requirements, mesh);
