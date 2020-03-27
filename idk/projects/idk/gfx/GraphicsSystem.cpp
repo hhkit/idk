@@ -1151,7 +1151,7 @@ namespace idk
 		extra_vars.SetIfUnset(kDbgLightVol,-1);
 		auto debug_light_vol = *extra_vars.Get<int>(kDbgLightVol);
 		unsigned char buff[0x4000];
-		ArenaAllocator<char_bool> alloc;
+		ArenaAllocator<char_bool> alloc{ buff };
 		lights_used_t lights_used(alloc);
 		lights_used.resize(lights.size(), false);
 		{
