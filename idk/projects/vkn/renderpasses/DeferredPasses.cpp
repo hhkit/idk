@@ -293,7 +293,8 @@ namespace idk::vkn::renderpasses
 	CombinePass::CombinePass(FrameGraphBuilder& builder, [[maybe_unused]] rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex)
 	{
 		auto out_color_rsc= builder.write(out_color_tex, WriteOptions{ false });
-		auto out_hdr_rsc = CreateGBuffer(builder, "brightness layer", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ viewport.size });
+		auto size = builder.rsc_manager.GetResourceDescription(out_color_tex.id)->actual_rsc->as<VknTexture>().Size();
+		auto out_hdr_rsc = CreateGBuffer(builder, "brightness layer", vk::Format::eR16G16B16A16Sfloat, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, {}, uvec2{ size });
 		auto out_depth_rsc= builder.write(out_depth_tex);//CreateGBuffer(builder, "Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,{},accum_def.rt_size);
 		out_color = out_color_rsc;
 		out_hdr = out_hdr_rsc;
