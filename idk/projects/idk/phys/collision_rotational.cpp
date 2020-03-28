@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "collision_rotational.h"
 
 namespace idk::phys

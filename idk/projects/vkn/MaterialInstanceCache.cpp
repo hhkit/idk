@@ -133,7 +133,6 @@ namespace idk::vkn
 		}
 	};
 
-//#pragma optimize("",off)
 	void MaterialInstanceCache::InstCachedInfo::Update(const ProcessedMaterial& mat_inst, UpdateInfo& update_info)
 	{
 		

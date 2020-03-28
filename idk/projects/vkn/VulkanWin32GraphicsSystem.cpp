@@ -259,6 +259,7 @@ namespace idk::vkn
 
 		SharedGraphicsState& shared_graphics_state=curr_frame.shared_graphics_state;
 		shared_graphics_state.Reset();
+		auto& active_lights = curr_buffer.active_light_buffer;
 		auto& lights = curr_buffer.lights;
 		shared_graphics_state.mat_inst_cache = &curr_frame.GetMatInstCache();
 		shared_graphics_state.Init(lights,curr_buffer.instanced_mesh_render);
@@ -284,7 +285,7 @@ namespace idk::vkn
 		pre_render_data.cameras = &curr_buffer.camera;
 		pre_render_data.d_lightmaps = &curr_buffer.d_lightmaps;
 
-		for (size_t i = 0; i < lights.size(); ++i)
+		for (auto i: active_lights)// size_t i = 0; i < lights.size(); ++i)
 			if(lights[i].cast_shadow && lights[i].index!=0)
 				pre_render_data.active_lights.emplace_back(i);
 

@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "RenderTargetFactory.h"
-
+#include <res/ResourceHandle.inl>
 #include <res/ResourceManager.inl>
+#include <ds/result.inl>
 
 namespace idk
 {

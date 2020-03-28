@@ -143,6 +143,7 @@ namespace idk
 		{
 			alignas(machine::cache_line_sz) vector<CameraData>   camera;
 			alignas(machine::cache_line_sz) vector<LightData>    lights;
+			alignas(machine::cache_line_sz) vector<size_t>       active_light_indices;
 			alignas(machine::cache_line_sz) vector<size_t>       active_light_buffer;
 			alignas(machine::cache_line_sz) vector<size_t>       directional_light_buffer;
 			alignas(machine::cache_line_sz) std::map<Handle<GameObject>, CamLightData> d_lightmaps;

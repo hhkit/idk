@@ -1,9 +1,8 @@
 #include "stdafx.h"
 #include "ColorGrade.h"
-
+#include <res/Guid.inl>
 namespace idk
 {
-//#pragma optimize("",off)
 	template<size_t stride>
 	SimpleTexData GenerateDefaultColorGradeTexData(byte default_fill)
 	{

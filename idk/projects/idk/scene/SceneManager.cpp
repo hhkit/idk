@@ -16,6 +16,7 @@
 #include <res/Guid.inl>
 #include <iostream>
 #include <ds/span.inl>
+#include "scene/SceneGraph.inl"
 
 namespace idk
 {

@@ -530,16 +530,20 @@ namespace idk::vkn
 		vk::Device d = *View().Device();
 		auto& rsc_manager = GetResourceManager();
 		vector<vk::ImageView> targets;
-		uvec2 size{std::numeric_limits<uint32_t>::max()}; //TODO get an actual size
+		uvec2 size{ std::numeric_limits<uint32_t>::max() }; //TODO get an actual size
+		uvec2 virtual_size{std::numeric_limits<uint32_t>::max()}; 
 		uint32_t num_layers = std::numeric_limits<uint32_t>::max();
 		for (auto& output_rsc : output_rscs)
 		{
 			if (output_rsc)
 			{
 				auto tex = rsc_manager.Get<VknTextureView>(output_rsc->first);
+				auto desc = rsc_manager.GetResourceDescription(output_rsc->first);
+				auto dv_size = (desc->actual_rsc) ? desc->actual_rsc->as<VknTexture>().Size() : desc->size;
 				targets.emplace_back(tex.ImageView());
 				//Temp: getting min size
 				size = min(tex.Size(),size);
+				virtual_size = min(dv_size, virtual_size);
 				num_layers = min(tex.Layers(),num_layers);
 			}
 		}
@@ -569,7 +573,7 @@ namespace idk::vkn
 				static_cast<uint32_t>(targets.size()),
 				std::data(targets),
 				size.x,size.y,num_layers
-			}),size };
+			}),virtual_size };
 	}
 	void FrameGraph::CreateRenderPasses()
 	{
