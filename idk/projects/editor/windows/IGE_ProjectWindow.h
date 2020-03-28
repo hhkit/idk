@@ -37,12 +37,16 @@ namespace idk
         PathHandle selected_path;
         bool renaming_selected_asset = false;
         bool just_rename = false;
+        bool is_list_view = false;
         float icon_size = 64.0f;
         ImGuiTextFilter filter;
+        char rename_buf[256];
 
         void displayDir(PathHandle dir);
-        void drawThumbnail(PathHandle path);
+        void drawThumbnail(PathHandle path, float icon_sz);
         void drawContents(vector<PathHandle>& paths, ImVec2 spacing, int icons_per_row);
+        void itemHandler(const PathHandle& path);
+        void itemContextMenu(const PathHandle& path, const string& name);
         void folderDragDropTarget(PathHandle path);
 
         GenericResourceHandle getOrLoadFirstAsset(PathHandle path);

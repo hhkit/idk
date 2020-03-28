@@ -771,6 +771,12 @@ namespace idk
         public extern static float InputGetAxis(sbyte index, int a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetAnyKey();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetAnyKeyDown();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float InputSetRumble(sbyte index, float low_freq, float high_freq);
 
         [MethodImpl(MethodImplOptions.InternalCall)]

@@ -64,6 +64,9 @@
         /// </summary>
         public static float GetAxis(int player, Axis a) => Bindings.InputGetAxis((sbyte)player, (int)a);
 
+        public static bool anyKey => Bindings.InputGetAnyKey();
+        public static bool anyKeyDown => Bindings.InputGetAnyKeyDown();
+
         /// <summary>
         /// Sets the gamepad's rumble.
         /// </summary>
