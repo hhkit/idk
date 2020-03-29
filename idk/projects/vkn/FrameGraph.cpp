@@ -551,6 +551,9 @@ namespace idk::vkn
 		{
 			auto tex = rsc_manager.Get<VknTextureView>(depth->first);
 			targets.emplace_back(tex.ImageView());
+			auto desc = rsc_manager.GetResourceDescription(depth->first);
+			auto dv_size = (desc->actual_rsc) ? desc->actual_rsc->as<VknTexture>().Size() : desc->size;
+			virtual_size = min(dv_size, virtual_size);
 			//Temp: getting min size
 			size = min(tex.Size(), size);
 			num_layers = min(tex.Layers(), num_layers);
