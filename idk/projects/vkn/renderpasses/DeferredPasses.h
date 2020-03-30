@@ -4,6 +4,7 @@
 #include <vkn/DrawSet.h>
 #include <gfx/DefaultShaders.h>
 #include <vkn/DrawSetRenderPass.h>
+#include <gfx/PostProcessEffect.h>
 namespace idk
 {
 	struct renderer_attributes;

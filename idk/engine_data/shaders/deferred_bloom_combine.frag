@@ -97,15 +97,17 @@ void main()
 	
 	vec3 brightness = subpassLoad(bright_input).rgb;
 	
+	//if(brightness == vec3(0))
+	//	discard;
 	
 
 	//hard set ratio on bloom because of unwanted shading effects when casted on wall
 	
-	if(ppb.useBloom == 1)
+	//if(ppb.useBloom == 1)
 		frag_color += brightness * 0.15f; 
 	
 	
-	if(ppb.useFog == 1)
+	//if(ppb.useFog == 1)
 	{
 		float dist = 0;
 		float fogFactor = 0;      

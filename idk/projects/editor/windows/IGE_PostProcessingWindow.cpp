@@ -30,7 +30,7 @@ namespace idk
 		ImGui::Separator();
 		ImGui::Checkbox("Use", &ppe.useBloom);
 		ImGui::NewLine();
-		ImGui::DragFloat("Brightness Threshold", ppe.threshold.data());
+		ImGui::DragFloat3("Brightness Threshold", ppe.threshold.data());
 		ImGui::NewLine();
 		ImGui::DragFloat("Blur Strength", &ppe.blurStrength);
 		ImGui::NewLine();
