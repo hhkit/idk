@@ -14,7 +14,7 @@
             dur = duration;
         }
 
-        internal override YieldInstruction execute()
+        protected internal override YieldInstruction execute()
         {
             dur -= Time.deltaTime;
 

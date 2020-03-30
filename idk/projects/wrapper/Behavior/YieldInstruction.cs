@@ -2,7 +2,7 @@
 {
     public class YieldInstruction
     {
-        internal virtual YieldInstruction execute()
+        internal protected virtual YieldInstruction execute()
         {
             return null;
         }
