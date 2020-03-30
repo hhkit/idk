@@ -18,7 +18,7 @@ namespace idk::vkn::renderpasses
 
 		PostProcessEffect ppe;
 
-		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport);
+		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport, uvec2 rt_size);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
@@ -35,7 +35,7 @@ namespace idk::vkn::renderpasses
 
 		PostProcessEffect ppe;
 
-		BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport);
+		BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport, uvec2 rt_size);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
@@ -52,7 +52,7 @@ namespace idk::vkn::renderpasses
 
 		PostProcessEffect ppe;
 
-		BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport);
+		BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport, uvec2 rt_size);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};

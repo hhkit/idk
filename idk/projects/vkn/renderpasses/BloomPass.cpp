@@ -20,7 +20,7 @@ namespace idk::vkn::renderpasses
 	FrameGraphResourceMutable CreateGBuffer(FrameGraphBuilder& builder, string_view name, vk::Format format, vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits flag = vk::ImageAspectFlagBits::eColor, std::optional<RscHandle<VknTexture>> target = {}, std::optional<uvec2> size = {}, std::optional<WriteOptions> write_opt = {});
 	void BindMesh(Context_t context, const renderer_attributes& req, VulkanMesh& mesh);
 
-	BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport) : _viewport{ viewport }
+	BloomPass::BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport, uvec2 rt_size) : _viewport{ viewport }
 	{
 		//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
 		//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
@@ -119,6 +119,8 @@ namespace idk::vkn::renderpasses
 			}
 		);
 
+		_viewport.size = vec2{ rt_size };
+
 		//builder.set_depth_stencil_attachment(depth_rsc, AttachmentDescription
 		//	{
 		//		vk::AttachmentLoadOp::eClear,//vk::AttachmentLoadOp load_op;
@@ -172,7 +174,6 @@ namespace idk::vkn::renderpasses
 		//context.BindUniform("brightness_input", 0, bright_texture, false, vk::ImageLayout::eShaderReadOnlyOptimal);
 
 		context.BindUniform("ColCorrectLut", 0, color_correction_lut);
-
 		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
 
 		//struct OffsetBlock
@@ -196,7 +197,7 @@ namespace idk::vkn::renderpasses
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 	}
 
-	BloomPassH::BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport) : _viewport{ viewport }
+	BloomPassH::BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport, uvec2 rt_size) : _viewport{ viewport }
 	{
 		//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
 		//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
@@ -224,6 +225,8 @@ namespace idk::vkn::renderpasses
 		//auto derp1 = builder.read(color);
 		brightness_read_only = builder.read(hdr, true);
 
+		//_viewport.size = vec2{ rt_size };
+
 		//builder.set_input_attachment(derp1, 1, AttachmentDescription
 		//	{
 		//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -240,6 +243,7 @@ namespace idk::vkn::renderpasses
 		//		//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 		//		//vk::ComponentMapping mapping{};
 		//	});
+
 	}
 	//#pragma optimize("",off)
 	void BloomPassH::Execute(FrameGraphDetail::Context_t context)
@@ -299,7 +303,7 @@ namespace idk::vkn::renderpasses
 		context.DrawIndexed(mesh.IndexCount(), 1, 0, 0, 0);
 	}
 
-	BloomPassW::BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport) : _viewport{ viewport }
+	BloomPassW::BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport, uvec2 rt_size) : _viewport{ viewport }
 	{
 		//bloom_rsc = builder.write(color_tex, WriteOptions{ false });
 		//bloom_depth_rsc = CreateGBuffer(builder, "Brightness Depth", vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, {}, uvec2{ viewport.size });
@@ -326,6 +330,8 @@ namespace idk::vkn::renderpasses
 		);
 		//auto derp1 = builder.read(color);
 		brightness_read_only = builder.read(hdr, true);
+
+		//_viewport.size = vec2{ rt_size };
 
 		//builder.set_input_attachment(derp1, 1, AttachmentDescription
 		//	{
