@@ -6,7 +6,6 @@
 #include <res/ResourceHandle.inl>
 
 #include <vkn/DebugUtil.h>
-#pragma optimize("",off)
 namespace idk::vkn
 {
 	bool frame_graph_debug = false;
