@@ -26,8 +26,8 @@ void main()
 	
 	FragColor = mix(s * PerUI.color, vec4(1, 1, 1, s.r) * PerUI.color, m);
 	//FragColor = s * PerUI.color;
-	
-	FragColor.a = smoothstep(0.3f - smoothing, 0.3f + smoothing, FragColor.a);
+	if(PerUI.is_font!=0)
+		FragColor.a = smoothstep(0.3f - smoothing, 0.3f + smoothing, FragColor.a);
 	
 	//FragColor.a = alpha * FragColor.a;
 	
