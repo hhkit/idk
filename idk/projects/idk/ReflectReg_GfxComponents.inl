@@ -124,6 +124,10 @@ REFLECT_BEGIN(idk::Image, "Image")
 REFLECT_VARS(texture, tint, material, preserve_aspect)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::AspectRatioFitter, "AspectRatioFitter")
+REFLECT_VARS(aspect_ratio)
+REFLECT_END()
+
 //REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
 
 REFLECT_BEGIN(idk::Text, "Text")

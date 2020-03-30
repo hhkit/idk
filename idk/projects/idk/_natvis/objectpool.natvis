@@ -69,27 +69,32 @@
   <Type Name="idk::GenericHandle">
     <Expand>
       <CustomListItems MaxItemsPerView="16">
-        <Item Name="[GameObject]"          Condition="type == idk::natvis::GameObjectID"         >*((idk::Handle&lt;idk::GameObject&gt;*)(&amp;id))</Item>
-        <Item Name="[Transform]"           Condition="type == idk::natvis::TransformID"          >*((idk::Handle&lt;idk::Transform&gt;*)(&amp;id))</Item>
-        <Item Name="[Name]"                Condition="type == idk::natvis::NameID"               >*((idk::Handle&lt;idk::Name&gt;*)(&amp;id))</Item>
-        <Item Name="[Tag]"                 Condition="type == idk::natvis::TagID"                >*((idk::Handle&lt;idk::Tag&gt;*)(&amp;id))</Item>
-        <Item Name="[Layer]"               Condition="type == idk::natvis::LayerID"              >*((idk::Handle&lt;idk::Layer&gt;*)(&amp;id))</Item>
-        <Item Name="[PrefabInstance]"      Condition="type == idk::natvis::PrefabInstanceID"     >*((idk::Handle&lt;idk::PrefabInstance&gt;*)(&amp;id))</Item>
-        <Item Name="[RigidBody]"           Condition="type == idk::natvis::RigidBodyID"          >*((idk::Handle&lt;idk::RigidBody&gt;*)(&amp;id))</Item>
-        <Item Name="[Collider]"            Condition="type == idk::natvis::ColliderID"           >*((idk::Handle&lt;idk::Collider&gt;*)(&amp;id))</Item>
-        <Item Name="[MeshRenderer]"        Condition="type == idk::natvis::MeshRendererID"       >*((idk::Handle&lt;idk::MeshRenderer&gt;*)(&amp;id))</Item>
-        <Item Name="[Camera]"              Condition="type == idk::natvis::CameraID"             >*((idk::Handle&lt;idk::Camera&gt;*)(&amp;id))</Item>
-        <Item Name="[SkinnedMeshRenderer]" Condition="type == idk::natvis::SkinnedMeshRendererID">*((idk::Handle&lt;idk::SkinnedMeshRenderer&gt;*)(&amp;id))</Item>
-        <Item Name="[Light]"               Condition="type == idk::natvis::LightID"              >*((idk::Handle&lt;idk::Light&gt;*)(&amp;id))</Item>
-        <Item Name="[Animator]"            Condition="type == idk::natvis::AnimatorID"           >*((idk::Handle&lt;idk::Animator&gt;*)(&amp;id))</Item>
-        <Item Name="[mono::Behavior]"      Condition="type == idk::natvis::monoBehaviorID"       >*((idk::Handle&lt;idk::mono::Behavior&gt;*)(&amp;id))</Item>
-        <Item Name="[AudioSource]"         Condition="type == idk::natvis::AudioSourceID"        >*((idk::Handle&lt;idk::AudioSource&gt;*)(&amp;id))</Item>
-        <Item Name="[AudioListener]"       Condition="type == idk::natvis::AudioListenerID"      >*((idk::Handle&lt;idk::AudioListener&gt;*)(&amp;id))</Item>
-        <Item Name="[ParticleSystem]"      Condition="type == idk::natvis::ParticleSystemID"     >*((idk::Handle&lt;idk::ParticleSystem&gt;*)(&amp;id))</Item>
-        <Item Name="[Canvas]"              Condition="type == idk::natvis::CanvasID"             >*((idk::Handle&lt;idk::Canvas&gt;*)(&amp;id))</Item>
-        <Item Name="[RectTransform]"       Condition="type == idk::natvis::RectTransformID"      >*((idk::Handle&lt;idk::RectTransform&gt;*)(&amp;id))</Item>
-        <Item Name="[ElectronView]"        Condition="type == idk::natvis::ElectronViewID"       >*((idk::Handle&lt;idk::ElectronView&gt;*)(&amp;id))</Item>
-        <Item Name="[ElectronTransformView]" Condition="type == idk::natvis::ElectronTransformViewID"      >*((idk::Handle&lt;idk::ElectronTransformView&gt;*)(&amp;id))</Item>
+        <Item Name="[GameObject]"            Condition="type == idk::natvis::GameObjectID"            >*((idk::Handle&lt;idk::GameObject&gt;*)(&amp;id))</Item>
+        <Item Name="[Transform]"             Condition="type == idk::natvis::TransformID"             >*((idk::Handle&lt;idk::Transform&gt;*)(&amp;id))</Item>
+        <Item Name="[Name]"                  Condition="type == idk::natvis::NameID"                  >*((idk::Handle&lt;idk::Name&gt;*)(&amp;id))</Item>
+        <Item Name="[Tag]"                   Condition="type == idk::natvis::TagID"                   >*((idk::Handle&lt;idk::Tag&gt;*)(&amp;id))</Item>
+        <Item Name="[Layer]"                 Condition="type == idk::natvis::LayerID"                 >*((idk::Handle&lt;idk::Layer&gt;*)(&amp;id))</Item>
+        <Item Name="[PrefabInstance]"        Condition="type == idk::natvis::PrefabInstanceID"        >*((idk::Handle&lt;idk::PrefabInstance&gt;*)(&amp;id))</Item>
+        <Item Name="[RigidBody]"             Condition="type == idk::natvis::RigidBodyID"             >*((idk::Handle&lt;idk::RigidBody&gt;*)(&amp;id))</Item>
+        <Item Name="[Collider]"              Condition="type == idk::natvis::ColliderID"              >*((idk::Handle&lt;idk::Collider&gt;*)(&amp;id))</Item>
+        <Item Name="[MeshRenderer]"          Condition="type == idk::natvis::MeshRendererID"          >*((idk::Handle&lt;idk::MeshRenderer&gt;*)(&amp;id))</Item>
+        <Item Name="[Camera]"                Condition="type == idk::natvis::CameraID"                >*((idk::Handle&lt;idk::Camera&gt;*)(&amp;id))</Item>
+        <Item Name="[SkinnedMeshRenderer]"   Condition="type == idk::natvis::SkinnedMeshRendererID"   >*((idk::Handle&lt;idk::SkinnedMeshRenderer&gt;*)(&amp;id))</Item>
+        <Item Name="[Light]"                 Condition="type == idk::natvis::LightID"                 >*((idk::Handle&lt;idk::Light&gt;*)(&amp;id))</Item>
+        <Item Name="[Animator]"              Condition="type == idk::natvis::AnimatorID"              >*((idk::Handle&lt;idk::Animator&gt;*)(&amp;id))</Item>
+        <Item Name="[mono::Behavior]"        Condition="type == idk::natvis::monoBehaviorID"          >*((idk::Handle&lt;idk::mono::Behavior&gt;*)(&amp;id))</Item>
+        <Item Name="[AudioSource]"           Condition="type == idk::natvis::AudioSourceID"           >*((idk::Handle&lt;idk::AudioSource&gt;*)(&amp;id))</Item>
+        <Item Name="[AudioListener]"         Condition="type == idk::natvis::AudioListenerID"         >*((idk::Handle&lt;idk::AudioListener&gt;*)(&amp;id))</Item>
+        <Item Name="[ParticleSystem]"        Condition="type == idk::natvis::ParticleSystemID"        >*((idk::Handle&lt;idk::ParticleSystem&gt;*)(&amp;id))</Item>
+        <Item Name="[Canvas]"                Condition="type == idk::natvis::CanvasID"                >*((idk::Handle&lt;idk::Canvas&gt;*)(&amp;id))</Item>
+        <Item Name="[RectTransform]"         Condition="type == idk::natvis::RectTransformID"         >*((idk::Handle&lt;idk::RectTransform&gt;*)(&amp;id))</Item>
+        <Item Name="[Image]"                 Condition="type == idk::natvis::ImageID"                 >*((idk::Handle&lt;idk::Image&gt;*)(&amp;id))</Item>
+        <Item Name="[Text]"                  Condition="type == idk::natvis::TextID"                  >*((idk::Handle&lt;idk::Text&gt;*)(&amp;id))</Item>
+        <Item Name="[AspectRatioFitter]"     Condition="type == idk::natvis::AspectRatioFitterID"     >*((idk::Handle&lt;idk::AspectRatioFitter&gt;*)(&amp;id))</Item>
+        <Item Name="[TextMesh]"              Condition="type == idk::natvis::TextMeshID"              >*((idk::Handle&lt;idk::TextMesh&gt;*)(&amp;id))</Item>
+        <Item Name="[ElectronView]"          Condition="type == idk::natvis::ElectronViewID"          >*((idk::Handle&lt;idk::ElectronView&gt;*)(&amp;id))</Item>
+        <Item Name="[ElectronTransformView]" Condition="type == idk::natvis::ElectronTransformViewID" >*((idk::Handle&lt;idk::ElectronTransformView&gt;*)(&amp;id))</Item>
+        <Item Name="[ElectronRigidbodyView]" Condition="type == idk::natvis::ElectronRigidbodyViewID" >*((idk::Handle&lt;idk::ElectronRigidbodyView&gt;*)(&amp;id))</Item>
       </CustomListItems>
     </Expand>
   </Type>

@@ -24,6 +24,7 @@
 #include <ui/RectTransform.h>
 #include <ui/Image.h>
 #include <ui/Text.h>
+#include <ui/AspectRatioFitter.h>
 
 #include <particle/ParticleSystem.h>
 

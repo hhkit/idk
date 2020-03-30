@@ -1222,6 +1222,9 @@
     <ClInclude Include="gfx\PostProcessEffect.h">
       <Filter>gfx</Filter>
     </ClInclude>
+    <ClInclude Include="ui\AspectRatioFitter.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

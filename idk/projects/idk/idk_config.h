@@ -43,6 +43,7 @@ namespace idk
         ,   class RectTransform
         ,   class Image
         ,   class Text
+        ,   class AspectRatioFitter
 
 		/// NETWORKING
 		,	class ElectronView
