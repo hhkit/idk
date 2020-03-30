@@ -12,6 +12,7 @@ S_LAYOUT(2,1) uniform BLOCK(blurBlock)
 
 S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
+	vec3 threshold;
 	vec3 fogColor;
 	float FogDensity;
 
@@ -64,7 +65,11 @@ void main()
 
 	vec2 tex_offset = 1.0 / textureSize(brightness_input, 0) * blurScale; // gets size of single texel
 	vec2 uv =vb.pos + vs_out.uv*vb.extent;
-	//uv.x = 1-uv.x;
+	
+	vec2 hac = tex_offset * 4;
+	vec2 end = vb.pos + vb.extent;
+	uv = clamp(uv, vb.pos + hac, end - hac);
+	
 	vec3 brightness = texture(brightness_input,uv).rgb * weight[0];
 	
 	
@@ -73,8 +78,10 @@ void main()
 		for(int i = 1; i < 5; ++i)
 		{
 			// H
-			brightness += texture(brightness_input, uv + vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
-			brightness += texture(brightness_input, uv - vec2(tex_offset.x * i, 0.0)).rgb * weight[i] * blurStrength;
+			vec2 ha = vec2(tex_offset.x * i, 0.0);
+			float wb = weight[i] * blurStrength;
+			brightness += texture(brightness_input, uv + ha).rgb * wb;
+			brightness += texture(brightness_input, uv - ha).rgb * wb;
 		}
 	}
 	else
@@ -82,8 +89,10 @@ void main()
 		for(int i = 1; i < 5; ++i)
 		{
 			// V
-			brightness += texture(brightness_input, uv + vec2(0.0, tex_offset.y * i)).rgb * weight[i] * blurStrength;
-			brightness += texture(brightness_input, uv - vec2(0.0, tex_offset.y * i)).rgb * weight[i] * blurStrength;
+			vec2 ha = vec2(0.0, tex_offset.y * i);
+			float wb = weight[i] * blurStrength;
+			brightness += texture(brightness_input, uv + ha).rgb * wb;
+			brightness += texture(brightness_input, uv - ha).rgb * wb;
 		}
 	}
 

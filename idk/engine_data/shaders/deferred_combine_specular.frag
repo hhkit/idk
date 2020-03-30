@@ -5,7 +5,7 @@ layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput depth_i
 
 
 layout(location=0) out vec4 out_color;
-layout(location=3) out vec4 out_hdr;
+//layout(location=3) out vec4 out_hdr;
 out float gl_FragDepth;
 
 S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
@@ -77,13 +77,17 @@ vec3 trilinearSample(ivec3 p, ivec3 d0, ivec3 d1, ivec3 d2, vec3 uvw)
 void main()
 {
 	float depth = subpassLoad(depth_input).r;
+	
+	if(depth == 1)
+		discard;
+		
 	vec3  light = subpassLoad(color_input).rgb;
 	
 	float brightness = dot(light, vec3(0.9,0.9,0.9));
-	if(brightness > 1.0)
-        out_hdr = vec4(light, 1.0);
-    else
-        out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
+	//if(brightness > 1.0)
+    //    out_hdr = vec4(light, 1.0);
+    //else
+    //    out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
 	
 	out_color = vec4(ReinhardOperator(light),1);
 		

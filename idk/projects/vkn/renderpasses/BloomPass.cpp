@@ -119,7 +119,7 @@ namespace idk::vkn::renderpasses
 			}
 		);
 
-		_viewport.size = vec2{ rt_size };
+		//_viewport.size = vec2{ rt_size };
 
 		//builder.set_depth_stencil_attachment(depth_rsc, AttachmentDescription
 		//	{
@@ -176,6 +176,8 @@ namespace idk::vkn::renderpasses
 		context.BindUniform("ColCorrectLut", 0, color_correction_lut);
 		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
 
+		//context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
+
 		//struct OffsetBlock
 		//{
 		//	vec2 min;
@@ -183,9 +185,10 @@ namespace idk::vkn::renderpasses
 		//};
 		//OffsetBlock ob{_viewport.position, _viewport.size };
 		//context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
-
+		//_viewport.size = min(vec2(1) - _viewport.position, _viewport.size);
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
+
 
 		context.SetCullFace({});
 		context.SetDepthTest(false);
@@ -287,14 +290,14 @@ namespace idk::vkn::renderpasses
 		context.BindUniform("blurBlock", 0, hlp::to_data(ii));
 
 		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
-
+		//_viewport.size = min(vec2(1) - _viewport.position, _viewport.size);
 		context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
 
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
 
 		context.SetCullFace({});
-		//context.SetDepthTest(false);
+		context.SetDepthTest(false);
 
 		auto& mesh = Mesh::defaults[MeshType::INV_FSQ].as<VulkanMesh>();
 		BindMesh(context, fsq_requirements, mesh);
@@ -408,7 +411,6 @@ namespace idk::vkn::renderpasses
 		context.BindUniform("blurBlock", 0, hlp::to_data(ii));
 
 		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
-
 		//context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
 		context.BindUniform("ViewportBlock", 0, hlp::to_data(_viewport));
 
@@ -416,7 +418,7 @@ namespace idk::vkn::renderpasses
 		context.SetScissors(_viewport);
 
 		context.SetCullFace({});
-		//context.SetDepthTest(false);
+		context.SetDepthTest(false);
 
 		auto& mesh = Mesh::defaults[MeshType::INV_FSQ].as<VulkanMesh>();
 		BindMesh(context, fsq_requirements, mesh);

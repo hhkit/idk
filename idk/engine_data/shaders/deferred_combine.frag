@@ -10,6 +10,20 @@ out float gl_FragDepth;
 
 S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 
+S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
+{
+	vec3 threshold;
+	vec3 fogColor;
+	float FogDensity;
+
+	//Bloom
+	float blurStrength;
+	float blurScale;
+	
+	int useFog;
+	int useBloom;
+}ppb;
+
 //(Relative luminance, obtained from wiki)
 float Luminance(vec3 color)
 {
@@ -79,7 +93,7 @@ void main()
 	float depth = subpassLoad(depth_input).r;
 	vec3  light = subpassLoad(color_input).rgb;
 	
-	float brightness = dot(light, vec3(0.9,0.9,0.9));
+	float brightness = dot(light, ppb.threshold);
 	 if(brightness > 1.0)
         out_hdr = vec4(light, 1.0);
     else
@@ -87,7 +101,7 @@ void main()
 	
 	out_color = vec4(ReinhardOperator(light),1);
 		
-	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
+	//out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	//
 	//vec3 og = pow(out_color.rgb,vec3(1/2.2));
 	//vec3 p = sizeSpace(og);

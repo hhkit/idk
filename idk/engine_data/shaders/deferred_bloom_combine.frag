@@ -11,6 +11,7 @@ S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 
 S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
+	vec3 threshold;
 	vec3 fogColor;
 	float FogDensity;
 
@@ -21,6 +22,12 @@ S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 	int useFog;
 	int useBloom;
 }ppb;
+
+//S_LAYOUT(5,0) uniform BLOCK(ViewportBlock)
+//{
+//	vec2 pos;
+//	vec2 extent;
+//}vb;
 
 
 layout(location=0) out vec4 out_color;
@@ -89,14 +96,16 @@ void main()
 	vec4 view_pos = subpassLoad(gView_pos);
 	
 	vec3 brightness = subpassLoad(bright_input).rgb;
+	
+	
 
 	//hard set ratio on bloom because of unwanted shading effects when casted on wall
 	
-	//if(ppb.useBloom == 1)
+	if(ppb.useBloom == 1)
 		frag_color += brightness * 0.15f; 
 	
 	
-	//if(ppb.useFog == 1)
+	if(ppb.useFog == 1)
 	{
 		float dist = 0;
 		float fogFactor = 0;      

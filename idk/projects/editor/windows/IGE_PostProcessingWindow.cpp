@@ -18,7 +18,7 @@ namespace idk
 
 		ImGui::Text("Fog Effect");
 		ImGui::Separator();
-		//ImGui::Checkbox("Use", &ppe.useFog);
+		ImGui::Checkbox("Use", &ppe.useFog);
 		ImGui::NewLine();
 		ImGui::DragFloat3("Color", ppe.fogColor.data());
 		ImGui::NewLine();
@@ -28,7 +28,9 @@ namespace idk
 		ImGui::NewLine();
 		ImGui::Text("Bloom Effect");
 		ImGui::Separator();
-		//ImGui::Checkbox("Use", &ppe.useBloom);
+		ImGui::Checkbox("Use", &ppe.useBloom);
+		ImGui::NewLine();
+		ImGui::DragFloat("Brightness Threshold", ppe.threshold.data());
 		ImGui::NewLine();
 		ImGui::DragFloat("Blur Strength", &ppe.blurStrength);
 		ImGui::NewLine();

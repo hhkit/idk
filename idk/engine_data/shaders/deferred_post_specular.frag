@@ -132,21 +132,6 @@ void main()
 		light_accum += result;
 	}
 	
-	//float dist = 0;
-	//float fogFactor = 0;
-	//
-	////range based
-	//dist = view_z_abs;
-	// 
-	////Exponential fog
-	//float d = dist * FogDensity;
-	//fogFactor = 1.0 /exp( d );
-	//fogFactor = clamp( fogFactor, 0.0, 1.0 );
-	
-	//light_accum = mix(fogColor,dir_light_accum +light_accum,fogFactor);
-	
-	//light_accum = light_accum* ext + fogColor * (1.0 - insc);
-	
 	
 	vec3 F = mix(vec3(0.04), albedo, specular);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
