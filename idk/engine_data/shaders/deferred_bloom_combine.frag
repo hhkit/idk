@@ -98,14 +98,10 @@ void main()
 	vec3 brightness = subpassLoad(bright_input).rgb;
 	
 	//if(brightness == vec3(0))
-	//	discard;
+		//discard;
 	
 
 	//hard set ratio on bloom because of unwanted shading effects when casted on wall
-	
-	if(ppb.useBloom == 1)
-		frag_color += brightness * 0.15f; 
-	
 	
 	if(ppb.useFog == 1)
 	{
@@ -125,6 +121,10 @@ void main()
 	
 		frag_color = mix(frag_color,ppb.fogColor.rgb,fogFactor);
 	}
+	
+	if(ppb.useBloom == 1)
+		frag_color += brightness * 0.15f; 
+	
 
 	out_color = vec4(ReinhardOperator(frag_color),1);
 	

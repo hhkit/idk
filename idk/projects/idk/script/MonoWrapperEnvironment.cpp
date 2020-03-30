@@ -1688,6 +1688,91 @@ namespace idk::mono
 		}
 		BIND_END();
 
+
+		BIND_START("idk.Bindings::CameraGetUseFog", int, Handle<Camera> h)
+		{
+			return h->ppe.useFog;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetUseFog", void, Handle<Camera> h, int r)
+		{
+			h->ppe.useFog = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetUseBloom", int, Handle<Camera> h)
+		{
+			return h->ppe.useFog;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetUseBloom", void, Handle<Camera> h, int r)
+		{
+			h->ppe.useBloom = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetFogColor", color, Handle<Camera> h)
+		{
+			return h->ppe.fogColor;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetFogColor", void, Handle<Camera> h, color r)
+		{
+			h->ppe.fogColor = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetFogDensity", float, Handle<Camera> h)
+		{
+			return h->ppe.FogDensity;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetFogDensity", void, Handle<Camera> h, float r)
+		{
+			h->ppe.FogDensity = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetThreshold", vec3, Handle<Camera> h)
+		{
+			return h->ppe.threshold;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetThreshold", void, Handle<Camera> h, vec3 r)
+		{
+			h->ppe.threshold = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetBlurStrength", float, Handle<Camera> h)
+		{
+			return h->ppe.blurStrength;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetBlurStrength", void, Handle<Camera> h, float r)
+		{
+			h->ppe.blurStrength = r;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraGetBlurScale", float, Handle<Camera> h)
+		{
+			return h->ppe.blurScale;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetBlurScale", void, Handle<Camera> h, float r)
+		{
+			h->ppe.blurScale = r;
+		}
+		BIND_END();
+
 		// //////lights////////////////
 		BIND_START("idk.Bindings::LightGetEnabled", bool, Handle<Light> h)
 		{
