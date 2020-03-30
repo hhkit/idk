@@ -148,11 +148,12 @@ namespace idk::vkn
 		return !((rsc.end<start) | (rsc.start>end));
 	}
 
-	void ResourceLifetimeManager::Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc)
+	void ResourceLifetimeManager::Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc,uvec2 size)
 	{
 		resource_alias[id] = rsc.index;
 		rsc.start = std::min(start, rsc.start);
 		rsc.end = std::max(end, rsc.end);
+		rsc.size = max(rsc.size, size);
 	}
 
 	ResourceLifetimeManager::actual_resource_id ResourceLifetimeManager::NewActualRscId()
@@ -160,10 +161,10 @@ namespace idk::vkn
 		return concrete_resources.size();
 	}
 
-	void ResourceLifetimeManager::CreateResource(fgr_id id, order_t start, order_t end)
+	void ResourceLifetimeManager::CreateResource(fgr_id id, order_t start, order_t end, uvec2 size)
 	{
 		auto& rsc = concrete_resources.emplace_back(actual_resource_t{ NewActualRscId(),id,start,end });
-		Alias(id, start, end, rsc);
+		Alias(id, start, end, rsc,size);
 	}
 
 }

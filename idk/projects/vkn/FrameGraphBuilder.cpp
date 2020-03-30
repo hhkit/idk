@@ -84,7 +84,10 @@ namespace idk::vkn
 			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferSrc;
 			rsc_manager.UpdateResourceDescription(src_id, *copy_desc);
 			if (copy_desc->actual_rsc)
+			{
+				copy_desc->size = copy_desc->actual_rsc->as<VknTexture>().Size();
 				copy_desc->actual_rsc = {};
+			}
 			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferDst;
 			result= CreateTexture(*copy_desc);
 			//result = write(result, WriteOptions{ .clear = false }); //Create already puts it into output resources

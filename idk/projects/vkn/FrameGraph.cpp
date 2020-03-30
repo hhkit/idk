@@ -6,6 +6,7 @@
 #include <res/ResourceHandle.inl>
 
 #include <vkn/DebugUtil.h>
+#pragma optimize("",off)
 namespace idk::vkn
 {
 	bool frame_graph_debug = false;
@@ -93,7 +94,11 @@ namespace idk::vkn
 
 		manager.CollapseLifetimes(original_id,ordering);
 		manager.DebugCollapsed(rsc_manager);
-		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
+		auto get_size = [&rsc_manager](fgr_id rsc_id) ->uvec2
+		{
+			return rsc_manager.GetResourceDescription(rsc_id)->size;
+		};
+		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2),get_size);
 		
 		
 		//auto& rsc_manager = GetResourceManager();
@@ -106,7 +111,10 @@ namespace idk::vkn
 		
 		for (auto& resource_template : resource_templates)
 		{
-			rm.Instantiate(resource_template.index, resource_template.base_rsc);
+			auto desc_copy = *rm.GetResourceDescription(resource_template.base_rsc);
+			desc_copy.size = resource_template.size;
+			auto new_base = rm.CreateTexture(desc_copy);
+			rm.Instantiate(resource_template.index, new_base.id);
 		}
 		rm.FinishInstantiation();
 		auto& aliases = rlm.Aliases();
@@ -544,6 +552,11 @@ namespace idk::vkn
 				virtual_size = min(dv_size, virtual_size);
 				num_layers = min(tex.Layers(),num_layers);
 			}
+		}
+		auto test = min(virtual_size, size);
+		if (virtual_size - test != uvec2{})
+		{
+			DebugBreak();
 		}
 		if (depth)
 		{

@@ -331,7 +331,7 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);
@@ -510,6 +510,7 @@ namespace idk::vkn
 		}
 		_start_new_batch = start;
 	}
+#pragma optimize("",off)
 	void RenderTask::ProcessCopies(RenderBundle& render_bundle)
 	{
 		auto cmd_buffer = render_bundle._cmd_buffer;
@@ -536,6 +537,13 @@ namespace idk::vkn
 				if (!range)
 					range = copy_cmd.dst.FullRange();
 				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eUndefined, target_dst_format , hlp::TransitionOptions{ {},{},range });
+			}
+			for (auto& region : copy_cmd.regions)
+			{
+				auto derp = uvec2{ region.dstOffset.x,region.dstOffset.y } +uvec2{ region.extent.width,region.extent.height };
+				derp = min(derp, copy_cmd.dst.Size());
+				region.extent.width = derp.x - region.dstOffset.x;
+				region.extent.height = derp.y - region.dstOffset.y;
 			}
 			cmd_buffer.copyImage(copy_cmd.src.Image(), target_src_format, copy_cmd.dst.Image(), target_dst_format, copy_cmd.regions);
 			//Transition from their eGeneral to original layouts 
