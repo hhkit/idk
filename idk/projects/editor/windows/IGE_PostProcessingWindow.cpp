@@ -14,27 +14,29 @@ namespace idk
 	}
 	void IGE_PostProcessingWindow::Update()
 	{
-		auto& ppe = Core::GetSystem<GraphicsSystem>().ppEffect;
-
-		ImGui::Text("Fog Effect");
-		ImGui::Separator();
-		ImGui::Checkbox("Use", &ppe.useFog);
-		ImGui::NewLine();
-		ImGui::DragFloat3("Color", ppe.fogColor.data());
-		ImGui::NewLine();
-		ImGui::DragFloat("Density", &ppe.FogDensity);
-		ImGui::NewLine();
-		ImGui::Separator();
-		ImGui::NewLine();
-		ImGui::Text("Bloom Effect");
-		ImGui::Separator();
-		ImGui::Checkbox("Use", &ppe.useBloom);
-		ImGui::NewLine();
-		ImGui::DragFloat3("Brightness Threshold", ppe.threshold.data());
-		ImGui::NewLine();
-		ImGui::DragFloat("Blur Strength", &ppe.blurStrength);
-		ImGui::NewLine();
-		ImGui::DragFloat("Blue Scale", &ppe.blurScale);
-		ImGui::NewLine();
+		//auto& ppe = Core::GetSystem<GraphicsSystem>().ppEffect;
+		//
+		//ImGui::Text("Fog Effect");
+		//ImGui::Separator();
+		////if (ImGui::Checkbox("Use"))
+		////	ppe.useFog = ppe.useFog ? 0 : 1;
+		//
+		//ImGui::NewLine();
+		//ImGui::DragFloat3("Color", ppe.fogColor.data());
+		//ImGui::NewLine();
+		//ImGui::DragFloat("Density", &ppe.FogDensity);
+		//ImGui::NewLine();
+		//ImGui::Separator();
+		//ImGui::NewLine();
+		//ImGui::Text("Bloom Effect");
+		//ImGui::Separator();
+		////ImGui::Checkbox("Use", &ppe.useBloom);
+		//ImGui::NewLine();
+		//ImGui::DragFloat3("Brightness Threshold", ppe.threshold.data());
+		//ImGui::NewLine();
+		//ImGui::DragFloat("Blur Strength", &ppe.blurStrength);
+		//ImGui::NewLine();
+		//ImGui::DragFloat("Blue Scale", &ppe.blurScale);
+		//ImGui::NewLine();
 	}
 }

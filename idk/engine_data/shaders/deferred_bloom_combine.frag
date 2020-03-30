@@ -12,7 +12,7 @@ S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
 	vec3 threshold;
-	vec3 fogColor;
+	vec4 fogColor;
 	float FogDensity;
 
 	//Bloom
@@ -83,8 +83,8 @@ layout(location = 2) in VS_OUT
   vec2 uv;	
 } vs_out;
 
-const vec3 fogColor = vec3(0.5, 0.5,0.5);
-const float FogDensity = 1.8; //magic number verified by YY
+//const vec3 fogColor = vec3(0.5, 0.5,0.5);
+//const float FogDensity = 1.8; //magic number verified by YY
 
 void main()
 {
@@ -103,11 +103,11 @@ void main()
 
 	//hard set ratio on bloom because of unwanted shading effects when casted on wall
 	
-	//if(ppb.useBloom == 1)
+	if(ppb.useBloom == 1)
 		frag_color += brightness * 0.15f; 
 	
 	
-	//if(ppb.useFog == 1)
+	if(ppb.useFog == 1)
 	{
 		float dist = 0;
 		float fogFactor = 0;      
@@ -117,13 +117,13 @@ void main()
 		//range based
 		dist = (abs(view_pos.z)-d0)/(dmax-d0); //magic number verified by YY
 		//Exponential fog                      //magic number verified by YY
-		float d = dist * FogDensity;           //magic number verified by YY
+		float d = dist * ppb.FogDensity;           //magic number verified by YY
 		d= 1 - 1/exp(d);                       //magic number verified by YY
 		d = pow(d,4);                          //magic number verified by YY
 		fogFactor = d;//1.0 /exp( d );
 		fogFactor = clamp( fogFactor, 0.0, fog_cap );
 	
-		frag_color = mix(frag_color,fogColor,fogFactor);
+		frag_color = mix(frag_color,ppb.fogColor.rgb,fogFactor);
 	}
 
 	out_color = vec4(ReinhardOperator(frag_color),1);

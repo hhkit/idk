@@ -13,7 +13,7 @@ S_LAYOUT(2,1) uniform BLOCK(blurBlock)
 S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
 	vec3 threshold;
-	vec3 fogColor;
+	vec4 fogColor;
 	float FogDensity;
 
 	//Bloom

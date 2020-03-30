@@ -955,7 +955,7 @@ namespace idk::vkn::renderpasses
 		auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, combine_def_pass.out_depth, bloom_pass.bloom_rsc, copy_view_pass_.copied_color, gfx_state.camera.viewport, cube_clear.rt_size);
 		bloom_pass_combine.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 		
-		bloom_passH.ppe = bloom_pass.ppe = bloom_pass_combine.ppe = combine_def_pass.ppe = gfx_state.ppEffect;
+		bloom_passH.ppe = bloom_pass.ppe = bloom_pass_combine.ppe = combine_def_pass.ppe = gfx_state.camera.ppe;
 		//Bloom pass stage end
 
 		auto spec_info = info;
