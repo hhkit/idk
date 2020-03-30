@@ -803,6 +803,9 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetUnscaledDelta();
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetTimeSinceStart();
+
         /*
          * Debug
          */

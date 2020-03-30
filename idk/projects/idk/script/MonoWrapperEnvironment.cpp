@@ -2014,6 +2014,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::TimeGetTimeSinceStart", float)
+		{
+			return Core::GetScheduler().GetTimeSinceStart().count();
+		}
+		BIND_END();
+
 
 
         // RectTransform

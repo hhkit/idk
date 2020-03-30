@@ -27,14 +27,12 @@
         public static float unscaledFixedDeltaTime
         { get => Bindings.TimeGetUnscaledFixedDelta(); }
 
-        ///// <summary>
-        /////     Time elapsed since program start in seconds
-        ///// </summary>
-        //public static float elapsedTime
-        //{
-        //    get { return 0; }
-        //}
-        //
+        /// <summary>
+        ///     Time elapsed since program startup in seconds, unaffected by timeScale.
+        /// </summary>
+        public static float realtimeSinceStartup
+        { get => Bindings.TimeGetTimeSinceStart(); }
+
         /// <summary>
         ///     The scale at which the time is passing. This can be used for slow motion effects.
         /// </summary>
