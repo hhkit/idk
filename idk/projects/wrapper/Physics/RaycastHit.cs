@@ -11,6 +11,7 @@ namespace idk
         internal ulong collider_id;
         internal Vector3 pt;
         internal float dist;
+        internal Vector3 norm;
         
         public Collider collider
         {
@@ -42,6 +43,12 @@ namespace idk
         {
             get => dist;
             internal set => dist = value;
+        }
+
+        public Vector3 normal
+        {
+            get => norm;
+            internal set => norm = value;
         }
     }
 }

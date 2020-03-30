@@ -61,6 +61,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
 #include <editor/windows/IGE_GfxDebugWindow.h>
+#include <editor/windows/IGE_PostProcessingWindow.h>
 
 // util
 #include <util/ioutils.h>
@@ -157,6 +158,7 @@ namespace idk
 		ADD_WINDOW(IGE_ProjectSettings);	
 		ADD_WINDOW(IGE_NetworkSettings);
 		ADD_WINDOW(IGE_HelpWindow);	
+		ADD_WINDOW(IGE_PostProcessingWindow);
 #undef ADD_WINDOW
 
 		for (auto& i : _ige_windows)

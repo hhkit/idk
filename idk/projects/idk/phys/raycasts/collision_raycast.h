@@ -10,6 +10,7 @@ namespace idk::phys
 		bool origin_colliding     {};
 		vec3 point_of_collision   {};
 		real distance_to_collision{};
+		vec3 surface_normal       {};
 	};
 
 	struct raycast_failure

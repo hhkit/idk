@@ -33,8 +33,6 @@
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderSnippetLoader.h>
 
-//#include <gfx/CameraControls.h>
-
 #include <test/TestSystem.h>
 
 #include <shellapi.h>//CommandLineToArgv

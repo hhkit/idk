@@ -623,7 +623,7 @@ namespace property
         template< typename T, std::size_t N >
         constexpr table_hash( const T& Storage, const char (&Name)[N] ) noexcept
             : table         { Name, entry_count_v, Storage.m_ActionEntry.data(), m_Map.data(), Storage.m_UserEntry.data() }
-            , m_Map         { InsertEntries( Storage.m_ActionEntry, Storage.m_UserEntry ) }
+            , m_Map         { /*InsertEntries( Storage.m_ActionEntry, Storage.m_UserEntry )*/ }
             {}
 
         const std::array< map_entry, map_size_v > m_Map;

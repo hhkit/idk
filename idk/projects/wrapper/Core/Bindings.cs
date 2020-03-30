@@ -225,6 +225,24 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ColliderGetTrigger(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetStaticFriction(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetStaticFriction(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetDynamicFriction(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetDynamicFriction(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetBounciness(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetBounciness(ulong id);
+
         /*
          * BoxCollider
          */
@@ -753,6 +771,12 @@ namespace idk
         public extern static float InputGetAxis(sbyte index, int a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetAnyKey();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetAnyKeyDown();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float InputSetRumble(sbyte index, float low_freq, float high_freq);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -778,6 +802,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetUnscaledDelta();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetTimeSinceStart();
 
         /*
          * Debug

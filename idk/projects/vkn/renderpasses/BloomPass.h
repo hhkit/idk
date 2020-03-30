@@ -1,5 +1,7 @@
 #pragma once
 #include <vkn/renderpasses/DeferredPasses.h>
+#include <gfx/PostProcessEffect.h>
+
 namespace idk::vkn::renderpasses
 {
 	struct BloomPass : BaseRenderPass, FsqUtil
@@ -14,7 +16,9 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> bloom_shader;
 
-		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport);
+		PostProcessEffect ppe;
+
+		BloomPass(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource color, FrameGraphResource depth, FrameGraphResource hdr, FrameGraphResource gViewPos, rect viewport, uvec2 rt_size);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
@@ -29,7 +33,9 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> bloom_shader;
 
-		BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport);
+		PostProcessEffect ppe;
+
+		BloomPassH(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport, uvec2 rt_size);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
@@ -44,7 +50,9 @@ namespace idk::vkn::renderpasses
 
 		RscHandle<ShaderProgram> bloom_shader;
 
-		BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport);
+		PostProcessEffect ppe;
+
+		BloomPassW(FrameGraphBuilder& builder, FrameGraphResource out_color, FrameGraphResource hdr, rect viewport, uvec2 rt_size);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};

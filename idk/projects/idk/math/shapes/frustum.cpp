@@ -31,8 +31,8 @@ namespace idk
 	{
 		auto in_face = [](auto& side, const sphere& s)
 		{
-			const float dist_to_point = vec4{ side.normal, 0 }.dot(vec4{ s.center, 0 }) + side.dist;
-			return !(dist_to_point > s.radius);
+			const float dist_to_point = side.normal.dot(s.center) + side.dist;
+			return dist_to_point <= s.radius;
 		};
 
 		FrustumFaceFlags in_flags{};
@@ -40,8 +40,8 @@ namespace idk
 		in_flags|= (in_face(sides[FrustumSide::Right], s)) ? FrustumFaceFlags{ FrustumFaceBits::eRight } : FrustumFaceFlags{};
 		in_flags|= (in_face(sides[FrustumSide::Up], s)) ? FrustumFaceFlags{ FrustumFaceBits::eUp } : FrustumFaceFlags{};
 		in_flags|= (in_face(sides[FrustumSide::Down], s)) ? FrustumFaceFlags{ FrustumFaceBits::eDown } : FrustumFaceFlags{};
-		in_flags|= (in_face(sides[FrustumSide::Near], s)) ? FrustumFaceFlags{ FrustumFaceBits::eNear } : FrustumFaceFlags{};
 		in_flags|= (in_face(sides[FrustumSide::Far], s)) ? FrustumFaceFlags{ FrustumFaceBits::eFar } : FrustumFaceFlags{};
+		in_flags|= (in_face(sides[FrustumSide::Near], s)) ? FrustumFaceFlags{ FrustumFaceBits::eNear } : FrustumFaceFlags{};
 
 		return in_flags;
 	}

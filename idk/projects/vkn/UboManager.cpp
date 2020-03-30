@@ -203,7 +203,6 @@ namespace idk::vkn
 
 	void UboManager::DataPair::Reset() 
 	{
-		data.resize(0); 
 		collator.reset();
 	}
 

@@ -13,7 +13,7 @@ namespace idk::vkn
 		bool skip_render_pass = false;
 		VknRenderPass  render_pass;
 		Framebuffer frame_buffer;
-		uvec2       fb_size;
+		uvec2       fb_size{};
 
 		string name;
 

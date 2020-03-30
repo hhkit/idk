@@ -648,7 +648,12 @@ namespace idk::mono
 			{
 				auto& first = res.front();
 				if (first.raycast_succ.distance_to_collision < max_dist)
-					return ManagedRaycast{ .valid = true,.collider_id = first.collider.id,.distance = first.raycast_succ.distance_to_collision,.point_of_collision = first.raycast_succ.point_of_collision };
+					return ManagedRaycast{
+						true,
+						first.collider.id,
+						first.raycast_succ.distance_to_collision,
+						first.raycast_succ.surface_normal,
+						first.raycast_succ.point_of_collision };
 			}
 
 			return ManagedRaycast{ .valid = false };
@@ -768,6 +773,42 @@ namespace idk::mono
 		BIND_START("idk.Bindings::ColliderGetTrigger", bool, Handle<Collider> col)
 		{
 			return col->is_trigger;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSetStaticFriction", void, Handle<Collider> col, float val)
+		{
+			col->static_friction = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetStaticFriction", float, Handle<Collider> col)
+		{
+			return col->static_friction;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSetDynamicFriction", void, Handle<Collider> col, float val)
+		{
+			col->dynamic_friction = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetDynamicFriction", float, Handle<Collider> col)
+		{
+			return col->dynamic_friction;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderSetBounciness", void, Handle<Collider> col, float val)
+		{
+			col->bounciness = val;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::ColliderGetBounciness", float, Handle<Collider> col)
+		{
+			return col->bounciness;
 		}
 		BIND_END();
 
@@ -1848,6 +1889,74 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::InputGetAnyKeyDown", bool)
+		{
+			auto& app = Core::GetSystem<Application>();
+			for (unsigned char key = s_cast<unsigned char>(idk::Key::LButton); key <= s_cast<unsigned char>(idk::Key::AltRight); ++key)
+			{
+				if (app.GetKeyDown(s_cast<idk::Key>(key)))
+					return true;
+			}
+
+			constexpr auto check_gamepad_buttons = [](char player)
+			{
+				const auto& gamepad = Core::GetSystem<GamepadSystem>();
+				for (int bit = 0; bit < 16; ++bit)
+				{
+					if (gamepad.GetButtonDown(player, s_cast<idk::GamepadButton>(1 << bit)))
+						return true;
+				}
+				return false;
+			};
+			const auto connected = Core::GetSystem<GamepadSystem>().GetConnectedPlayers();
+
+			if ((connected & 1) && check_gamepad_buttons(0))
+				return true;
+			if ((connected & 2) && check_gamepad_buttons(1))
+				return true;
+			if ((connected & 4) && check_gamepad_buttons(2))
+				return true;
+			if ((connected & 8) && check_gamepad_buttons(3))
+				return true;
+
+			return false;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::InputGetAnyKey", bool)
+		{
+			auto& app = Core::GetSystem<Application>();
+			for (unsigned char key = s_cast<unsigned char>(idk::Key::LButton); key <= s_cast<unsigned char>(idk::Key::AltRight); ++key)
+			{
+				if (app.GetKey(s_cast<idk::Key>(key)))
+					return true;
+			}
+
+			constexpr auto check_gamepad_buttons = [](char player)
+			{
+				const auto& gamepad = Core::GetSystem<GamepadSystem>();
+				for (int bit = 0; bit < 16; ++bit)
+				{
+					if (gamepad.GetButton(player, s_cast<idk::GamepadButton>(1 << bit)))
+						return true;
+				}
+				return false;
+			};
+			const auto connected = Core::GetSystem<GamepadSystem>().GetConnectedPlayers();
+
+			if ((connected & 1) && check_gamepad_buttons(0))
+				return true;
+			if ((connected & 2) && check_gamepad_buttons(1))
+				return true;
+			if ((connected & 4) && check_gamepad_buttons(2))
+				return true;
+			if ((connected & 8) && check_gamepad_buttons(3))
+				return true;
+
+			return false;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::InputGetAxis",  float, char code, int axis)
 		{
 			return Core::GetSystem<GamepadSystem>().GetAxis(code, s_cast<GamepadAxis>( axis));
@@ -1902,6 +2011,12 @@ namespace idk::mono
 		BIND_START("idk.Bindings::TimeGetUnscaledDelta", float)
 		{
 			return Core::GetScheduler().GetUnscaledDeltaTime().count();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::TimeGetTimeSinceStart", float)
+		{
+			return Core::GetScheduler().GetTimeSinceStart().count();
 		}
 		BIND_END();
 
