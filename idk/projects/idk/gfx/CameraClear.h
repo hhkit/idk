@@ -6,7 +6,7 @@
 
 namespace idk
 {
-	struct DepthOnly {};
-    struct DontClear {};
+    struct DepthOnly { int hack; };
+    struct DontClear { int hack; };
     using CameraClear = std::variant<color, RscHandle<class CubeMap>, DepthOnly, DontClear>;
 }

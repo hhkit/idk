@@ -39,8 +39,10 @@ REFLECT_END()
 // CAMERA
 #pragma region Camera
 REFLECT_BEGIN(idk::DontClear, "Don'tClear")
+REFLECT_VAR(hack)
 REFLECT_END()
 REFLECT_BEGIN(idk::DepthOnly, "DepthOnly")
+REFLECT_VAR(hack)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::LayerMask, "LayerMask")
