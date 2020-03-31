@@ -21,8 +21,6 @@
 
 #include <gfx/DefaultShaders.h>
 
-#include <gfx/PostProcessEffect.h>
-
 namespace idk
 {
 
@@ -61,7 +59,7 @@ namespace idk
 
 		ExtraVars extra_vars;
 
-		PostProcessEffect ppEffect;
+		//PostProcessEffect ppEffect;
 
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
