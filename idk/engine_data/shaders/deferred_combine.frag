@@ -104,17 +104,19 @@ void main()
 		
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
-	//vec3 og = pow(out_color.rgb,vec3(1/2.2));
-	//vec3 p = sizeSpace(og);
-	//vec3 p0 =floor(p);
-	//vec3 p1 =ceil(p);
-	//ivec3 ip0 = ivec3(p0);
-	//ivec3 ip1 = ivec3(p1);
-	//
-	//vec3 t = (p - p0);// /(p1-p0);
-	//out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
-	//
-	//out_color.rgb = pow(out_color.rgb,vec3(2.2));
+	
+	//Only use if deferred bloom is unused
+	vec3 og = pow(out_color.rgb,vec3(1/2.2));
+	vec3 p = sizeSpace(og);
+	vec3 p0 =floor(p);
+	vec3 p1 =ceil(p);
+	ivec3 ip0 = ivec3(p0);
+	ivec3 ip1 = ivec3(p1);
+	
+	vec3 t = (p - p0);// /(p1-p0);
+	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
+	
+	out_color.rgb = pow(out_color.rgb,vec3(2.2));
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 	
 }
