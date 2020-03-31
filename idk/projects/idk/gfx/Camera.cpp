@@ -69,7 +69,9 @@ namespace idk
 			{tan(hfov),tan(vfov) },
 			field_of_view,
 			AspectRatio(),
-			gamma
+			gamma,
+			ViewMatrix().inverse(),
+			ppe
 		};
 	}
 }

@@ -154,7 +154,7 @@ namespace idk {
 			const mat4 lightView = light.v;
 
 			//Using tanfov calculation
-			const mat4 invView = camData.view_matrix.inverse();
+			const mat4 invView = camData.view_matrix_inverse;
 			
 
 			vec2 near_face = near_plane * camData.tan_halfFOV;

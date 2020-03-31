@@ -17,6 +17,8 @@
 
 #include <gfx/FakeMat4.h>
 
+#include <gfx/PostProcessEffect.h>
+
 namespace idk
 {
 	class Mesh;
@@ -160,6 +162,8 @@ namespace idk
 		rad fov{};
 		real ap;
 		real gamma=1.f;
+		mat4 view_matrix_inverse{};
+		PostProcessEffect ppe;
 	};
 
 	struct PointCameraData

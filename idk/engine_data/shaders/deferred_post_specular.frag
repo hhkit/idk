@@ -60,6 +60,9 @@ import /engine_data/shaders/pbr_utils.glsl
 // forward shading only cares about color!
 layout(location = 0)out vec4 out_color;
 
+//const vec3 fogColor = vec3(0.5, 0.5,0.5);
+//const float FogDensity = 0.005;
+
 
 void main()
 {
@@ -71,6 +74,7 @@ void main()
 
 	vec3 light_accum = vec3(0);
 	normal = normalize(normal);
+	//vec3 dir_light_accum = vec3(0);
 	
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
@@ -87,7 +91,7 @@ void main()
 		vec4 cascade_c = vec4(0,0,0,0);
 		if (curr_light.type == 1)
 		{
-			if(curr_light.cast_shadow!=0)
+			if(curr_light.cast_shadow==1)
 			{
 				//result *= vec3(1.f - ShadowCalculation(curr_light,shadow_maps[i],(curr_light.v_dir) ,normal ,curr_light.vp * world_pos));			
 				
@@ -112,6 +116,8 @@ void main()
 				//}
 				
 				result *= shadow_factor;
+				
+				//dir_light_accum = result * shadow_factor;
 				j = 0;
 				
 			}
@@ -125,6 +131,8 @@ void main()
 		
 		light_accum += result;
 	}
+	
+	
 	vec3 F = mix(vec3(0.04), albedo, specular);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
 	vec3 kD = 1.0 - kS;

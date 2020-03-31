@@ -332,6 +332,7 @@
     <ClInclude Include="binding_util.h" />
     <ClInclude Include="MaterialInstanceCache.h" />
     <ClInclude Include="MemoryCollator.h" />
+    <ClInclude Include="renderpasses\BloomPass.h" />
     <ClInclude Include="renderpasses\DebugDrawPass.h" />
     <ClInclude Include="renderpasses\MaskedPass.h" />
     <ClInclude Include="PipelineDescHelper.h" />
@@ -471,6 +472,7 @@
     <ClCompile Include="MaterialInstanceCache.cpp" />
     <ClCompile Include="MemoryCollator.cpp" />
     <ClCompile Include="PipelineDescHelper.cpp" />
+    <ClCompile Include="renderpasses\BloomPass.cpp" />
     <ClCompile Include="renderpasses\DebugDrawPass.cpp" />
     <ClCompile Include="renderpasses\MaskedPass.cpp" />
     <ClCompile Include="renderpasses\PostDeferredPasses.cpp" />

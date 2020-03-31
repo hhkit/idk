@@ -59,6 +59,8 @@ namespace idk
 
 		ExtraVars extra_vars;
 
+		//PostProcessEffect ppEffect;
+
 		//RscHandle<ShaderProgram> brdf;
 		//RscHandle<ShaderProgram> convoluter;
 		bool isolate = false;

@@ -510,7 +510,7 @@ namespace idk::vkn
 		}
 		_start_new_batch = start;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void RenderTask::ProcessCopies(RenderBundle& render_bundle)
 	{
 		auto cmd_buffer = render_bundle._cmd_buffer;
