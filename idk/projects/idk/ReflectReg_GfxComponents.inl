@@ -48,7 +48,7 @@ REFLECT_VARS(mask)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::PostProcessEffect, "PostProcessEffect")
-REFLECT_VARS(useFog, fogColor, FogDensity, useBloom, threshold, blurStrength, blurScale)
+REFLECT_VARS(useFog, fogColor, fogDensity, useBloom, threshold, blurStrength, blurScale)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::Camera, "Camera")

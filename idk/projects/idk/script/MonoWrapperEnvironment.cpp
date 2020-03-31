@@ -1689,25 +1689,25 @@ namespace idk::mono
 		BIND_END();
 
 
-		BIND_START("idk.Bindings::CameraGetUseFog", int, Handle<Camera> h)
+		BIND_START("idk.Bindings::CameraGetUseFog", bool, Handle<Camera> h)
 		{
 			return h->ppe.useFog;
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::CameraSetUseFog", void, Handle<Camera> h, int r)
+		BIND_START("idk.Bindings::CameraSetUseFog", void, Handle<Camera> h, bool r)
 		{
 			h->ppe.useFog = r;
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::CameraGetUseBloom", int, Handle<Camera> h)
+		BIND_START("idk.Bindings::CameraGetUseBloom", bool, Handle<Camera> h)
 		{
 			return h->ppe.useFog;
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::CameraSetUseBloom", void, Handle<Camera> h, int r)
+		BIND_START("idk.Bindings::CameraSetUseBloom", void, Handle<Camera> h, bool r)
 		{
 			h->ppe.useBloom = r;
 		}
@@ -1727,13 +1727,13 @@ namespace idk::mono
 
 		BIND_START("idk.Bindings::CameraGetFogDensity", float, Handle<Camera> h)
 		{
-			return h->ppe.FogDensity;
+			return h->ppe.fogDensity;
 		}
 		BIND_END();
 
 		BIND_START("idk.Bindings::CameraSetFogDensity", void, Handle<Camera> h, float r)
 		{
-			h->ppe.FogDensity = r;
+			h->ppe.fogDensity = r;
 		}
 		BIND_END();
 

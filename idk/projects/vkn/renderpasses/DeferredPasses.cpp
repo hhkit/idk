@@ -405,7 +405,15 @@ namespace idk::vkn::renderpasses
 
 		context.BindShader(ShaderStage::Fragment, combine_shader);
 
-		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(ppe));
+		PostProcessEffectData toData;
+		toData.fogColor = ppe.fogColor;
+		toData.fogDensity = ppe.fogDensity;
+		toData.threshold = ppe.threshold;
+		toData.blurScale = ppe.blurScale;
+		toData.blurStrength = ppe.blurStrength;
+		toData.useBloom = s_cast<int>(ppe.useBloom);
+		toData.useFog = s_cast<int>(ppe.useFog);
+		context.BindUniform("PostProcessingBlock", 0, hlp::to_data(toData));
 
 		context.SetViewport(_viewport);
 		context.SetScissors(_viewport);
@@ -546,8 +554,8 @@ namespace idk::vkn::renderpasses
 
 		//uint32_t i = 0;
 
-		context.SetBlend(3);
-		context.SetClearColor(3, idk::color{ 0,0,0,0 });
+		//context.SetBlend(3);
+		context.SetClearColor(0, idk::color{ 0,0,0,0 });
 		//context.SetClearColor(i, idk::color{ 0,0,0,0 });
 
 
@@ -945,14 +953,14 @@ namespace idk::vkn::renderpasses
 		//////Now apply horizontal gaussian pass//////////////
 		auto& hi = cube_clear.rt_size;
 		auto& copy_color_pass   = graph.addRenderPass<CopyColorPass>("Copy Color For BloomH", hi, combine_def_pass.out_hdr, vk::ImageLayout::eShaderReadOnlyOptimal);
-		auto& bloom_passH       = graph.addRenderPass<BloomPassH   >("Bloom passH"          , copy_color_pass.original_color, copy_color_pass.copied_color, gfx_state.camera.viewport, cube_clear.rt_size);
+		auto& bloom_passH       = graph.addRenderPass<BloomPassH   >("Bloom passH"          , copy_color_pass.original_color, copy_color_pass.copied_color, gfx_state.camera.viewport);
 		auto& copy_color_pass_1 = graph.addRenderPass<CopyColorPass>("Copy Color For BloomW", hi, bloom_passH.bloom_rsc, vk::ImageLayout::eShaderReadOnlyOptimal);
 		/////////Now apply vertical gaussian pass////////////////
-		auto& bloom_pass = graph.addRenderPass<BloomPassW>("Bloom passW", copy_color_pass_1.original_color, copy_color_pass_1.copied_color, gfx_state.camera.viewport, cube_clear.rt_size);
+		auto& bloom_pass = graph.addRenderPass<BloomPassW>("Bloom passW", copy_color_pass_1.original_color, copy_color_pass_1.copied_color, gfx_state.camera.viewport);
 		auto& copy_color_pass_2 = graph.addRenderPass<CopyColorPass>("Copy Color For Bloom effect", hi, combine_def_pass.out_color);
 		auto& copy_view_pass_ = graph.addRenderPass<CopyColorPass>("Copy viewpos For fog effect", hi, gbuffer_pass_def.gbuffer_rscs[2]);
 		////////Now additive blend the blurred brightness back onto the default pass texture////////
-		auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, combine_def_pass.out_depth, bloom_pass.bloom_rsc, copy_view_pass_.copied_color, gfx_state.camera.viewport, cube_clear.rt_size);
+		auto& bloom_pass_combine = graph.addRenderPass<BloomPass>("Bloom pass", copy_color_pass_2.original_color, copy_color_pass_2.copied_color, combine_def_pass.out_depth, bloom_pass.bloom_rsc, copy_view_pass_.copied_color, gfx_state.camera.viewport);
 		bloom_pass_combine.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 		
 		bloom_passH.ppe = bloom_pass.ppe = bloom_pass_combine.ppe = combine_def_pass.ppe = gfx_state.camera.ppe;
@@ -965,7 +973,7 @@ namespace idk::vkn::renderpasses
 		auto& accum_pass_spec = graph.addRenderPass<AccumPassSetPair>("Accum pass Specular", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_spec).RenderPass();
 
 
-		auto& combine_spec_pass = graph.addRenderPass<CombinePassSpec>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, combine_def_pass.out_color, combine_def_pass.out_depth, cube_clear.rt_size);
+		auto& combine_spec_pass = graph.addRenderPass<CombinePassSpec>("Combine Spec pass", gfx_state.camera.viewport, accum_pass_spec.accum_rsc, accum_pass_spec.depth_rsc, bloom_pass_combine.bloom_rsc, combine_def_pass.out_depth, cube_clear.rt_size);
 		combine_spec_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		spec_info.model = ShadingModel::Unlit;

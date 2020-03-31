@@ -13,7 +13,7 @@ S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
 	vec3 threshold;
 	vec4 fogColor;
-	float FogDensity;
+	float fogDensity;
 
 	//Bloom
 	float blurStrength;
@@ -84,7 +84,7 @@ layout(location = 2) in VS_OUT
 } vs_out;
 
 //const vec3 fogColor = vec3(0.5, 0.5,0.5);
-//const float FogDensity = 1.8; //magic number verified by YY
+//const float fogDensity = 1.8; //magic number verified by YY
 
 void main()
 {
@@ -93,18 +93,12 @@ void main()
 		discard;
 	vec3 frag_color = subpassLoad(color_input).rgb;
 	
-	vec4 view_pos = subpassLoad(gView_pos);
-	
-	vec3 brightness = subpassLoad(bright_input).rgb;
-	
-	//if(brightness == vec3(0))
-		//discard;
-	
 
 	//hard set ratio on bloom because of unwanted shading effects when casted on wall
 	
 	if(ppb.useFog == 1)
 	{
+		vec4 view_pos = subpassLoad(gView_pos);
 		float dist = 0;
 		float fogFactor = 0;      
 		float d0 =7, dmax = 55;   //magic numbers verified by YY
@@ -113,7 +107,7 @@ void main()
 		//range based
 		dist = (abs(view_pos.z)-d0)/(dmax-d0); //magic number verified by YY
 		//Exponential fog                      //magic number verified by YY
-		float d = dist * ppb.FogDensity;           //magic number verified by YY
+		float d = dist * ppb.fogDensity;           //magic number verified by YY
 		d= 1 - 1/exp(d);                       //magic number verified by YY
 		d = pow(d,4);                          //magic number verified by YY
 		fogFactor = d;//1.0 /exp( d );
@@ -123,23 +117,28 @@ void main()
 	}
 	
 	if(ppb.useBloom == 1)
+	{
+		vec3 brightness = subpassLoad(bright_input).rgb;
 		frag_color += brightness * 0.15f; 
+	}
 	
 
 	out_color = vec4(ReinhardOperator(frag_color),1);
 	
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
-	//vec3 og = pow(out_color.rgb,vec3(1/2.2));
-	//vec3 p = sizeSpace(og);
-	//vec3 p0 =floor(p);
-	//vec3 p1 =ceil(p);
-	//ivec3 ip0 = ivec3(p0);
-	//ivec3 ip1 = ivec3(p1);
-	//
-	//vec3 t = (p - p0);// /(p1-p0);
-	//out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);	
-	//out_color.rgb = pow(out_color.rgb,vec3(2.2));
 	
-	//gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
+	//LUT colour correction shifted here
+	vec3 og = pow(out_color.rgb,vec3(1/2.2));
+	vec3 p = sizeSpace(og);
+	vec3 p0 =floor(p);
+	vec3 p1 =ceil(p);
+	ivec3 ip0 = ivec3(p0);
+	ivec3 ip1 = ivec3(p1);
+	
+	vec3 t = (p - p0);// /(p1-p0);
+	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);	
+	out_color.rgb = pow(out_color.rgb,vec3(2.2));
+	
+	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 }

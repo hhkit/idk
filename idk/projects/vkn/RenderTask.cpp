@@ -331,7 +331,7 @@ namespace idk::vkn
 			clear.emplace_back(*clear_depth_stencil);
 		return static_cast<uint32_t>(clear.size());
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
 		//AddToBatch(_current_batch);

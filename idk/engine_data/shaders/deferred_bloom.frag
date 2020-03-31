@@ -14,7 +14,7 @@ S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
 	vec3 threshold;
 	vec4 fogColor;
-	float FogDensity;
+	float fogDensity;
 
 	//Bloom
 	float blurStrength;
@@ -49,26 +49,29 @@ layout(location = 2) in VS_OUT
   vec2 uv;	
 } vs_out;
 
+float weight[5] = float[](
+	0.227027f,
+	0.1945946f,
+	0.1216216f,
+	0.054054f,
+	0.016216f
+);
+
 void main()
 {
-	float blurStrength = ppb.blurStrength;
-	float blurScale = ppb.blurScale;
 	
 	//vec3 frag_color = subpassLoad(color_input).rgb;
 	
-	float weight[5];
-	weight[0] = 0.227027;
-	weight[1] = 0.1945946;
-	weight[2] = 0.1216216;
-	weight[3] = 0.054054;
-	weight[4] = 0.016216;
-
+	
+	float blurStrength = ppb.blurStrength;
+	float blurScale = ppb.blurScale;
+	
 	vec2 tex_offset = 1.0 / textureSize(brightness_input, 0) * blurScale; // gets size of single texel
 	vec2 uv =vb.pos + vs_out.uv*vb.extent;
 	
 	vec2 hac = tex_offset * 4;
 	vec2 end = vb.pos + vb.extent;
-	uv = clamp(uv, vb.pos + hac, end - hac);
+	uv = clamp(uv, vb.pos + hac, end - hac);	
 	
 	vec3 brightness = texture(brightness_input,uv).rgb * weight[0];
 	
@@ -96,5 +99,6 @@ void main()
 		}
 	}
 
-	out_color = vec4(brightness,1);//vec4(brightness,1);
+	out_color = vec4(brightness,1);
+	
 }

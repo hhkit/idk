@@ -91,7 +91,7 @@ void main()
 		vec4 cascade_c = vec4(0,0,0,0);
 		if (curr_light.type == 1)
 		{
-			if(curr_light.cast_shadow!=0)
+			if(curr_light.cast_shadow==1)
 			{
 				//result *= vec3(1.f - ShadowCalculation(curr_light,shadow_maps[i],(curr_light.v_dir) ,normal ,curr_light.vp * world_pos));			
 				
