@@ -111,6 +111,8 @@ namespace idk {
 					editor.CreateGameObject(go, "Image", vector<string>{ "RectTransform", "Image" });
 				if (ImGui::MenuItem("Text"))
 					editor.CreateGameObject(go, "Text", vector<string>{ "RectTransform", "Text" });
+				if (ImGui::MenuItem("AspectRatioFitter"))
+					editor.CreateGameObject(go, "AspectRatioFitter", vector<string>{ "RectTransform", "AspectRatioFitter" });
 				
 				ImGui::EndMenu();
             }

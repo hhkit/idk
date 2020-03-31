@@ -16,7 +16,7 @@
 
 #include <editor/imguidk.h>
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
 namespace idk
 {
 	class TGAWriter

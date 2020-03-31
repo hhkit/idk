@@ -271,7 +271,7 @@ namespace idk::vkn
 		shared_graphics_state.fonts_data = &curr_buffer.font_render_data;
 		shared_graphics_state.font_range = &curr_buffer.font_range;
 
-		shared_graphics_state.ui_render_per_canvas = &curr_buffer.ui_render_per_canvas;
+		//shared_graphics_state.ui_render_per_canvas = &curr_buffer.ui_render_per_canvas;
 		shared_graphics_state.ui_canvas = &curr_buffer.ui_canvas;
 		shared_graphics_state.ui_text_data = &curr_buffer.ui_text_buffer;
 		shared_graphics_state.ui_text_range = &curr_buffer.ui_text_range;
@@ -371,6 +371,8 @@ namespace idk::vkn
 					}
 				}
 			}, curr_cam.clear_data);
+
+			//curr_state.ppEffect = ppEffect;
 			//Init render datas (range for instanced data, followed by render datas for other passes)
 			curr_state.Init(curr_range,curr_buffer.active_light_buffer,curr_buffer.directional_light_buffer, curr_buffer.lights,curr_buffer.d_lightmaps, curr_buffer.mesh_render, curr_buffer.skinned_mesh_render,curr_buffer.skeleton_transforms);
 			const auto itr = render_targets.find(curr_cam.render_target);

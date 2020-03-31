@@ -41,6 +41,7 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="ui\AspectRatioFitter.h" />
     <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipLoader.h" />
     <ClInclude Include="audio\AudioClip.h" />
@@ -50,6 +51,7 @@
     <ClInclude Include="anim\SkinnedMeshRenderer.h" />
     <ClInclude Include="ds\sliding_window.h" />
     <ClInclude Include="gfx\AttachmentViewType.h" />
+    <ClInclude Include="gfx\PostProcessEffect.h" />
     <ClInclude Include="meta\erased_visitor.h" />
     <ClInclude Include="network\ack_utils.h" />
     <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />

@@ -59,6 +59,9 @@ import /engine_data/shaders/pbr_utils.glsl
 // forward shading only cares about color!
 layout(location = 0)out vec4 out_color;
 
+//const vec3 fogColor = vec3(0.5, 0.5,0.5);
+//const float FogDensity = 0.001;
+
 
 void main()
 {
@@ -83,6 +86,7 @@ void main()
 
 	vec3 light_accum = vec3(0);
 	normal = normalize(normal);
+	//vec3 dir_light_accum = vec3(0);
 	
 	vec3 reflected = vec3(PerCamera.inverse_view_transform * vec4(reflect(-view_dir, normal),0));
 	
@@ -130,6 +134,8 @@ void main()
 				result *= shadow_factor;
 				//shadow_accum -= shadow_factor;				
 				++j;
+				
+				//dir_light_accum = result * shadow_factor;
 			}
 			else
 			{
@@ -149,6 +155,28 @@ void main()
 		
 		light_accum += result;// + cascade_c.xyz;
 	}
+	
+	//distance
+	
+	//int remain = MAX_LIGHTS - LightBlk.light_count;
+	//vec3 accum_for_fog = light_accum;
+	
+	
+	//float dist = 0;
+	//float fogFactor = 0;
+	//
+	////range based
+	//dist = length(view_pos);
+	// 
+	////Exponential fog
+	//float d = dist * FogDensity;
+	//fogFactor = 1.0 /exp( d );
+	//fogFactor = clamp( fogFactor, 0.0, 1.0 );
+	//
+	//light_accum = mix(fogColor,light_accum,fogFactor);
+	
+	//light_accum = light_accum* ext + fogColor * (1.0 - insc);
+	
 	
 	vec3 F = mix(vec3(0.04), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);

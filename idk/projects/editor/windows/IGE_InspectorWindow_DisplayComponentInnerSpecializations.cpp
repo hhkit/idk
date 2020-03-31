@@ -176,6 +176,11 @@ namespace idk
             ImGui::TextDisabled("Values driven by Canvas.");
             return;
         }
+        if (c_rt->GetGameObject()->HasComponent<AspectRatioFitter>())
+        {
+            ImGui::TextDisabled("Values driven by AspectRatioFitter.");
+            return;
+        }
 
         const float region_width = ImGui::GetWindowContentRegionWidth();
 
@@ -699,6 +704,7 @@ namespace idk
         constexpr auto draw_audio_volume = [](const reflect::dynamic& dyn)
         {
             bool changed = false;
+            bool changed_and_deactivated = false;
 
             auto& audio_clip_volume = dyn.get<vector<float>>();
 
@@ -714,7 +720,8 @@ namespace idk
                     if (ImGui::DragFloat("##audioVol", &(static_audiosource->audio_clip_volume[i]), 0.01f, 0, 1, "%.2f", 1.0f)) {
                         changed = true;
                     }
-                    //ImGui::Text("%.2f", static_audiosource->audio_clip_volume[i]);
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                        changed_and_deactivated = true;
 
                     ImGui::PopID();
 
@@ -724,7 +731,7 @@ namespace idk
                 ImGui::Separator();
             }
 
-            return changed ? EditState::Editing : EditState::None;
+            return changed ? (changed_and_deactivated ? EditState::Completed : EditState::Editing) : EditState::None;
         };
 
         constexpr auto draw_soundGroup = [](const reflect::dynamic& dyn)

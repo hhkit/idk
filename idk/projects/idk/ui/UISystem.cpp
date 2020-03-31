@@ -3,6 +3,7 @@
 #include <app/Application.h>
 #include <ui/Canvas.h>
 #include <ui/RectTransform.h>
+#include <ui/AspectRatioFitter.h>
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <scene/SceneManager.h>
@@ -54,6 +55,38 @@ namespace idk
             FinalizeMatrices(c.GetHandle());
     }
 
+    static void calc_rt(Handle<GameObject>& child, const Handle<RectTransform>& rt_handle)
+    {
+        const auto parent = child->Parent();
+
+        const auto& parent_rt = *parent->GetComponent<RectTransform>();
+        const rect& parent_rect = parent_rt._local_rect;
+        vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
+
+        auto& rt = *rt_handle;
+
+        if (const auto fitter = child->GetComponent<AspectRatioFitter>())
+        {
+            const auto parent_aspect = parent_rect.size.x / parent_rect.size.y;
+            const auto fitter_aspect = fitter->aspect_ratio;
+            vec2 fit_scl{ 1.0f };
+            if (fitter_aspect > parent_aspect)
+                fit_scl.y /= fitter_aspect / parent_aspect;
+            else if (fitter_aspect < parent_aspect)
+                fit_scl.x *= fitter_aspect / parent_aspect;
+
+            rt.anchor_min = -rt.pivot * fit_scl + rt.pivot;
+            rt.anchor_max = (vec2(1.0f) - rt.pivot) * fit_scl + rt.pivot;
+            rt.offset_min = vec2(0.0f);
+            rt.offset_max = vec2(0.0f);
+        }
+
+        vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
+        vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
+        rt._local_rect.position = min - parent_pivot;
+        rt._local_rect.size = max - min;
+    }
+
     void UISystem::RecalculateRects(Handle<RectTransform> rt)
     {
         if (!rt)
@@ -83,19 +116,7 @@ namespace idk
                     return false;
                 }
 
-                // will def have parent, this visit starts from Canvas, which will reach the branch above.
-                const auto parent = child->Parent();
-
-                const auto& parent_rt = *parent->GetComponent<RectTransform>();
-                const rect& parent_rect = parent_rt._local_rect;
-                vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
-
-                auto& rt = *rt_handle;
-
-                vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
-                vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-                rt._local_rect.position = min - parent_pivot;
-                rt._local_rect.size = max - min;
+                calc_rt(child, rt_handle);
                 return true;
             });
         }
@@ -108,7 +129,6 @@ namespace idk
 
         auto canvas_go = canvas->GetGameObject();
 
-        // 1424 * 826
         if (!canvas_go->HasComponent<RectTransform>())
         {
             LOG_WARNING_TO(LogPool::GAME, "Canvas hierarchy must use RectTransform.");
@@ -138,20 +158,7 @@ namespace idk
                 return false;
             }
 
-            // will def have parent, this visit starts from Canvas, which will reach the branch above.
-            const auto parent = child->Parent();
-
-            const auto& parent_rt = *parent->GetComponent<RectTransform>();
-            const rect& parent_rect = parent_rt._local_rect;
-            vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
-
-            auto& rt = *rt_handle;
-
-            vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
-            vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-            rt._local_rect.position = min - parent_pivot;
-            rt._local_rect.size = max - min;
-
+            calc_rt(child, rt_handle);
             return true;
         });
     }
@@ -200,16 +207,8 @@ namespace idk
             const auto& t = *child->Transform();
 
             // will def have parent, this visit starts from Canvas, which will reach the branch above.
-            const auto parent = child->Parent();
-
-            const auto& parent_rt = *parent->GetComponent<RectTransform>();
-            const rect& parent_rect = parent_rt._local_rect;
-            vec2 parent_pivot = parent_rt.pivot * parent_rect.size;
-
-            vec2 min = parent_rect.size * rt.anchor_min + rt.offset_min;
-            vec2 max = parent_rect.size * rt.anchor_max + rt.offset_max;
-            rt._local_rect.position = min - parent_pivot;
-            rt._local_rect.size = max - min;
+            const auto& parent_rt = *child->Parent()->GetComponent<RectTransform>();
+            calc_rt(child, rt_handle);
 
             vec2 pivot_pt = rt._local_rect.position + rt.pivot * rt._local_rect.size;
             rt._matrix = parent_rt._matrix *

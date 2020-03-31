@@ -49,6 +49,17 @@ namespace idk::vkn
 		
 		resource_map[base] = unique_id;
 	}
+	vec2 FrameGraphResourceManager::ConcreteSizeRatio(fgr_id rsc) const
+	{
+		auto concrete = Get<VknTextureView>(rsc);
+		auto desc = this->GetResourceDescription(rsc);
+		vec2 result{};
+		if (desc)
+		{
+			result = vec2{ desc->size } / vec2{ concrete.Size() };
+		}
+		return result;
+	}
 	void FrameGraphResourceManager::Alias(fgr_id id, fgr_id unique_id)
 	{
 		resource_map[id] = unique_id;
@@ -157,6 +168,11 @@ namespace idk::vkn
 				itr = resource_map.find(renamed_itr->second);
 		}
 		return concrete_resources[itr->second];
+	}
+
+	const FrameGraphResourceManager::actual_resource_t& FrameGraphResourceManager::GetVar(fgr_id rsc) const
+	{
+		return const_cast<FrameGraphResourceManager*>(this)->GetVar(rsc);
 	}
 
 	fgr_id FrameGraphResourceManager::NextID()
