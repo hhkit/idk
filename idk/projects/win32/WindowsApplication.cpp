@@ -23,6 +23,8 @@
 #include <ds/span.inl>
 #include <event/Signal.inl>
 
+#include "WinMessageTable.h"
+
 namespace idk::win
 {
 #define _DEBUG
@@ -256,7 +258,12 @@ namespace idk::win
 		return _input_manager->GetChar();
 	}
 
-    bool Windows::SetFullscreen(bool fullscreen)
+	bool Windows::GetFullscreen() const
+	{
+		return _fullscreen;
+	}
+
+	bool Windows::SetFullscreen(bool fullscreen)
     {
         // stolen from chromium
 
