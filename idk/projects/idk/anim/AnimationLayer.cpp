@@ -25,7 +25,10 @@ namespace idk
 		curr_state.is_playing = true;
 		curr_state.index = index;
 		// cap at 1.0f
-		curr_state.normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
+		if (offset > 0.0f)
+			curr_state.normalized_time = std::max(std::min(offset, 1.0f), 0.0f);
+		else
+			curr_state.normalized_time = anim_states[index].speed >= 0.0f ? 0.0f : 1.0f;
 		return true;
 	}
 
@@ -77,7 +80,7 @@ namespace idk
 			return false;
 
 		blend_state.index = index;
-		blend_state.normalized_time = 0.0f;
+		blend_state.normalized_time = anim_states[index].speed < 0.0f ? 1.0f : 0.0f;
 		blend_state.elapsed_time = 0.0f;
 		blend_state.is_playing = true;
 		blend_this_frame = true;
@@ -92,7 +95,7 @@ namespace idk
 		if (found_anim >= anim_states.size())
 		{
 			blend_state.Reset();
-			blend_duration = 0.0f;
+			blend_duration = anim_states[found_anim].speed < 0.0f ? 1.0f : 0.0f;
 			blend_this_frame = false;
 			blend_interrupt = false;
 

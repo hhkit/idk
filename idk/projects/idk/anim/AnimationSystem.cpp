@@ -22,6 +22,7 @@
 
 namespace idk
 {
+#pragma optimize("", off)
 	static bool valid_clip(AnimationState& state)
 	{
 		if (!state.valid)
@@ -281,7 +282,7 @@ namespace idk
 			return result;
 
 		// Interpolate from the found keyframe to the next keyframe and store the result.
-		InterpolateBone(*animated_bone, ticks, result);
+		InterpolateBone(*animated_bone, ticks, result, anim_state.speed < 0.0f);
 
 		return result;
 	}
@@ -346,7 +347,7 @@ namespace idk
 			if (animated_bone != nullptr)
 			{
 				// Interpolate from the found keyframe to the next keyframe and store the result.
-				InterpolateBone(*animated_bone, ticks, curr_pose);
+				InterpolateBone(*animated_bone, ticks, curr_pose, false);
 			}
 
 			// If the a bone pose was applied to result alr, we want to add to the result and not just blend FROM the result
@@ -461,7 +462,7 @@ namespace idk
 				{
 					bool exit_time_reached = false;
 					if (curr_transition.exit_time <= 1.0f)
-						exit_time_reached = curr_state.normalized_time >= curr_transition.exit_time;
+						exit_time_reached = curr_state.elapsed_time >= curr_transition.exit_time;
 					else
 						exit_time_reached = curr_state.elapsed_time >= curr_transition.exit_time;
 
@@ -538,34 +539,47 @@ namespace idk
 			EvaluateTransitions(animator, layer);
 
 			// Check both the blend state and the curr state
-			if (layer.curr_state.normalized_time >= 1.0f && layer.curr_state.is_playing)
+
+			if (layer.curr_state.is_playing)
 			{
+				
 				auto& anim_state = layer.GetAnimationState(layer.curr_state.index);
 				if (!anim_state.valid)
 					continue;
+				bool reset = (anim_state.speed < 0.0f && layer.curr_state.normalized_time <= 0.0f) ||
+							 (anim_state.speed >= 0.0f && layer.curr_state.normalized_time >= 1.0f);
 
-				// Stop here if the animation does not loop
-				// We dont subtract normalized_time because the designers might check
-				// normalized_time >= 1.0f to check if an animation has ended
-				if (!anim_state.loop)
+				if (reset)
 				{
-					layer.curr_state.is_playing = false;
-					layer.curr_state.normalized_time = 1.0f;
+					// Stop here if the animation does not loop
+					// We dont subtract normalized_time because the designers might check
+					// normalized_time >= 1.0f to check if an animation has ended
+					if (!anim_state.loop)
+					{
+						layer.curr_state.is_playing = false;
+						layer.curr_state.normalized_time = anim_state.speed >= 0.0f ? 1.0f : 0.0f;
+					}
+					else
+					{
+						int delta = 1.0f;// s_cast<int>(layer.curr_state.normalized_time);
+						layer.curr_state.normalized_time = anim_state.speed >= 0.0f ? layer.curr_state.normalized_time - delta : layer.curr_state.normalized_time + delta;
+					}
 				}
-				else
-					layer.curr_state.normalized_time -= 1.0f;
 			}
 
 			if (layer.blend_state.is_playing)
 			{
+				auto& anim_state = layer.GetAnimationState(layer.blend_state.index);
+
+				bool reset = (anim_state.speed < 0.0f && layer.blend_state.normalized_time <= 0.0f) ||
+							 (anim_state.speed >= 0.0f && layer.blend_state.normalized_time >= 1.0f);
 				// Note: Blend states always loop
-				if (layer.blend_state.normalized_time >= 1.0f && layer.blend_state.is_playing)
+				if (reset)
 				{
-					auto& anim_state = layer.GetAnimationState(layer.blend_state.index);
 					if (!anim_state.valid)
 						continue;
-
-					layer.blend_state.normalized_time -= 1.0f;
+					int delta = 1.0f;//;s_cast<int>(layer.blend_state.normalized_time);
+					layer.blend_state.normalized_time = anim_state.speed > 0.0f ? layer.blend_state.normalized_time - delta : layer.blend_state.normalized_time + delta;
 				}
 
 				// Check if the blending is over
@@ -619,7 +633,7 @@ namespace idk
 					auto anim_data = anim_state.GetBasicState();
 					const float inc = Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
 					layer.curr_state.normalized_time += inc;
-					layer.curr_state.elapsed_time += inc;
+					layer.curr_state.elapsed_time += abs(inc);
 				}
 				
 			}
@@ -638,7 +652,7 @@ namespace idk
 					auto anim_data = anim_state.GetBasicState();
 					const float inc = Core::GetRealDT().count() / anim_data->motion->GetDuration() * anim_state.speed;
 					layer.blend_state.normalized_time += inc;
-					layer.blend_state.elapsed_time += inc;
+					layer.blend_state.elapsed_time += abs(inc);
 				}
 			}
 
@@ -741,9 +755,9 @@ namespace idk
 		animator.ResetTriggers();
 	}
 
-	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose)
+	void AnimationSystem::InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose, bool reverse)
 	{
-		const auto find_key = [&](const auto& vec, float ticks) -> size_t
+		const auto find_key = [&](const auto& vec, float ticks) -> int
 		{
 			for (unsigned i = 0; i < vec.size(); ++i)
 			{
@@ -751,65 +765,167 @@ namespace idk
 				{
 					return i - 1;
 				}
+				else if (ticks == static_cast<float>(vec[i].time))
+					return i;
 			}
 
 			return vec.size() - 1;
 		};
 
+		const auto find_key_r = [&](const auto& vec, float ticks) -> int
+		{
+			for (unsigned i = 0; i < vec.size(); ++i)
+			{
+				if (ticks <= static_cast<float>(vec[i].time))
+				{
+					return i;
+				}
+			}
+
+			return vec.size() - 1;
+		};
+
+		const auto valid_index = [&](const auto& vec, int index) ->bool
+		{
+			return index >= 0 && index < vec.size();
+		};
+
+		const auto interpolate = [&](const auto& keys, auto& val)
+		{
+			using T = std::decay_t<decltype(val)>;
+			if (keys.size() > 1)
+			{
+				int start = 0, next = 0;
+				if (!reverse)
+				{
+					start = find_key(keys, time_in_ticks);
+					next = (start + 1) % keys.size();
+				}
+				else
+				{
+					start = find_key_r(keys, time_in_ticks);
+					next = start - 1;
+					if (next < 0)
+						next = keys.size() - 1;
+				}
+
+				bool start_valid = valid_index(keys, start), next_valid = valid_index(keys, next);
+				if (start_valid && next_valid)
+				{
+					const float dt = static_cast<float>(keys[next].time - keys[start].time);
+					const float factor = (time_in_ticks - keys[start].time) / dt;
+					IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
+
+					if constexpr (std::is_same_v<T, vec3>)
+						val = lerp(keys[start].val, keys[next].val, factor);
+					else
+					{
+						val = slerp(keys[start].val, keys[next].val, factor);
+						val.normalize();
+					}
+				}
+				else if (start_valid)
+				{
+					val = keys[start].val;
+				}
+				else if (next_valid)
+				{
+					val = keys[next].val;
+				}
+			}
+		};
+
+		interpolate(animated_bone.scale_track, curr_pose.scale);
+		interpolate(animated_bone.translate_track, curr_pose.position);
+		interpolate(animated_bone.rotation_track, curr_pose.rotation);
 		// Scaling
-		if (animated_bone.scale_track.size() > 1)
-		{
-			const size_t start = find_key(animated_bone.scale_track, time_in_ticks);
-			if (start + 1 >= animated_bone.scale_track.size())
-			{
-				curr_pose.scale = animated_bone.scale_track[start].val;
-			}
-			else
-			{
-				const float dt = static_cast<float>(animated_bone.scale_track[start + 1].time - animated_bone.scale_track[start].time);
-				const float factor = (time_in_ticks - animated_bone.scale_track[start].time) / dt;
-				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
+		//if (animated_bone.scale_track.size() > 1)
+		//{
+		//	int start = 0, next = 0;
+		//	if (!reverse)
+		//	{
+		//		start = find_key(animated_bone.scale_track, time_in_ticks);
+		//		next  = (start + 1) % animated_bone.scale_track.size();
+		//	}
+		//	else
+		//	{
+		//		start = find_key_r(animated_bone.scale_track, time_in_ticks);
+		//		next = (start - 1) % animated_bone.scale_track.size();
+		//	}
 
-				curr_pose.scale = lerp(animated_bone.scale_track[start].val, animated_bone.scale_track[start + 1].val, factor);
-			}
-		}
+		//	bool start_valid = valid_index(animated_bone.scale_track, start), next_valid = valid_index(animated_bone.scale_track, next);
+		//	if (start_valid && next_valid)
+		//	{
+		//		const float dt = static_cast<float>(animated_bone.scale_track[next].time - animated_bone.scale_track[start].time);
+		//		const float factor = (time_in_ticks - animated_bone.scale_track[start].time) / dt;
+		//		IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-		// Translate
-		if (animated_bone.translate_track.size() > 1)
-		{
-			const size_t start = find_key(animated_bone.translate_track, time_in_ticks);
-			if (start + 1 >= animated_bone.translate_track.size())
-			{
-				curr_pose.position = animated_bone.translate_track[start].val;
-			}
-			else
-			{
-				const float dt = static_cast<float>(animated_bone.translate_track[start + 1].time - animated_bone.translate_track[start].time);
-				const float factor = (time_in_ticks - animated_bone.translate_track[start].time) / dt;
-				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
+		//		curr_pose.scale = lerp(animated_bone.scale_track[start].val, animated_bone.scale_track[next].val, factor);
+		//	}
+		//	if (start_valid)
+		//	{
+		//		curr_pose.scale = animated_bone.scale_track[start].val;
+		//	}
+		//	else if (next_valid)
+		//	{
+		//		curr_pose.scale = animated_bone.scale_track[next].val;
+		//	}
+		//}
 
-				curr_pose.position = lerp(animated_bone.translate_track[start].val, animated_bone.translate_track[start + 1].val, factor);
-			}
-		}
+		//// Translate
+		//if (animated_bone.translate_track.size() > 1)
+		//{
+		//	const size_t start = find_key(animated_bone.translate_track, time_in_ticks);
+		//	const size_t next = reverse ? start - 1 : start + 1;
+		//	if (next >= animated_bone.translate_track.size() || next < 0)
+		//	{
+		//		curr_pose.position = animated_bone.translate_track[start].val;
+		//	}
+		//	else
+		//	{
+		//		const float dt = static_cast<float>(animated_bone.translate_track[next].time - animated_bone.translate_track[start].time);
+		//		const float factor = (time_in_ticks - animated_bone.translate_track[start].time) / dt;
+		//		IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
 
-		// Rotate
-		if (animated_bone.rotation_track.size() > 1)
-		{
-			const size_t start = find_key(animated_bone.rotation_track, time_in_ticks);
-			if (start + 1 >= animated_bone.rotation_track.size())
-			{
-				curr_pose.rotation = animated_bone.rotation_track[start].val;
-			}
-			else
-			{
-				const float dt = static_cast<float>(animated_bone.rotation_track[start + 1].time - animated_bone.rotation_track[start].time);
-				const float factor = (time_in_ticks - animated_bone.rotation_track[start].time) / dt;
-				IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
+		//		curr_pose.position = lerp(animated_bone.translate_track[start].val, animated_bone.translate_track[next].val, factor);
+		//	}
+		//	if (start_valid)
+		//	{
+		//		curr_pose.scale = animated_bone.scale_track[start].val;
+		//	}
+		//	else if (next_valid)
+		//	{
+		//		curr_pose.scale = animated_bone.scale_track[next].val;
+		//	}
+		//}
 
-				curr_pose.rotation = slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[start + 1].val, factor);
-				curr_pose.rotation.normalize();
-			}
-		}
+		//// Rotate
+		//if (animated_bone.rotation_track.size() > 1)
+		//{
+		//	const size_t start = find_key(animated_bone.rotation_track, time_in_ticks);
+		//	const size_t next = reverse ? start - 1 : start + 1;
+		//	if (next >= animated_bone.rotation_track.size() || next < 0)
+		//	{
+		//		curr_pose.rotation = animated_bone.rotation_track[start].val;
+		//	}
+		//	else
+		//	{
+		//		const float dt = static_cast<float>(animated_bone.rotation_track[next].time - animated_bone.rotation_track[start].time);
+		//		const float factor = (time_in_ticks - animated_bone.rotation_track[start].time) / dt;
+		//		IDK_ASSERT(factor >= 0.0f && factor <= 1.0f);
+
+		//		curr_pose.rotation = slerp(animated_bone.rotation_track[start].val, animated_bone.rotation_track[next].val, factor);
+		//		curr_pose.rotation.normalize();
+		//	}
+		//	if (start_valid)
+		//	{
+		//		curr_pose.scale = animated_bone.scale_track[start].val;
+		//	}
+		//	else if (next_valid)
+		//	{
+		//		curr_pose.scale = animated_bone.scale_track[next].val;
+		//	}
+		//}
 	}
 
 	void AnimationSystem::InitializeAnimators(bool play)
