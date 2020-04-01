@@ -41,7 +41,8 @@ namespace idk::win
 		bool GetKeyUp(Key) override;
 		char GetChar() override;
 		// windows
-        bool SetFullscreen(bool) override;
+		bool GetFullscreen() const override;
+		bool SetFullscreen(bool) override;
 		bool SetScreenSize(ivec2) override { return false; }
 		void SetTitle(string_view new_title) override;
 

@@ -46,6 +46,40 @@ bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 	}
 	return result;
 }
+std::optional<std::wstring_view> GetArgValue(std::wstring_view arg, LPWSTR* args, int num_args)
+{
+	std::optional<std::wstring_view> result;
+	for (int i = 0; (i < num_args) & (!result); ++i)
+	{
+		std::wstring_view incoming = args[i];
+		auto val_start = incoming.find_first_of(':');
+		if(val_start!=incoming.npos && incoming.substr(0,val_start)==arg)
+			result = incoming.substr(val_start+1);
+	}
+	return result;
+}
+LRESULT ProcessAltTab(idk::Windows& win)//, HWND hwnd, UINT msg, WPARAM wParam, [[maybe_unused]] LPARAM lParam)
+{
+	if (win.GetFullscreen())
+	{
+		//bool is_sys_down = msg == WM_SYSKEYDOWN;
+		//bool is_sys_up = msg == WM_SYSKEYUP;
+		//if ((is_sys_down || is_sys_up) && wParam == VK_TAB)
+		//{
+		ShowWindow(win.GetWindowHandle(), SW_MINIMIZE);
+		//}
+	}
+	return LRESULT{};
+}
+
+void MinimizeOnAltTab(idk::Windows& windows)
+{
+	static auto on_alt_tab = [&windows]()->LRESULT//HWND hwnd, UINT msg, WPARAM wParam, [[maybe_unused]] LPARAM lParam) -> LRESULT
+	{
+		return ProcessAltTab(windows);// , hwnd, msg, wParam, lParam);
+	};
+	windows.OnFocusLost.Listen(on_alt_tab);
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -59,6 +93,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 
 	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
+	if (!HasArg(L"--ignoreAltTabMin", command_lines, num_args))
+		MinimizeOnAltTab(win);
 	c->AddSystem<win::XInputSystem>();
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = HasArg(L"--opengl", command_lines, num_args) ? GraphicsAPI::OpenGL : GraphicsAPI::Vulkan;
@@ -93,7 +129,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Core::GetSystem<LogSystem>().SetLogDir(idk_app_data.string());
 
 	c->Init();
-	Core::GetSystem<ProjectManager>().LoadProject(string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/project/hydeandseek.idk");
+
+	auto project_dir = string{ Core::GetSystem<FileSystem>().GetExeDir() } +"/project/hydeandseek.idk";
+	auto data_dir = string{ Core::GetSystem<FileSystem>().GetExeDir() };
+	auto arg_proj = GetArgValue(L"--project", command_lines, num_args);
+	auto arg_data = GetArgValue(L"--engine", command_lines, num_args);
+	if (arg_proj)
+	{
+		auto& proj_path = *arg_proj;
+		string derp;
+		derp.resize(proj_path.length());
+		std::locale{ "" };
+		std::transform(proj_path.begin(), proj_path.end(), derp.begin(), [](auto wch) {return static_cast<char>(wch); });
+		project_dir = derp;
+	}
+	if (arg_data)
+	{
+		auto& data_path = *arg_data;
+		string derp;
+		derp.resize(data_path.length());
+		std::locale{ "" };
+		std::transform(data_path.begin(), data_path.end(), derp.begin(), [](auto wch) {return static_cast<char>(wch); });
+		data_dir = derp;
+	}
+
+	Core::GetSystem<ProjectManager>().LoadProject(project_dir);
 
 	Core::GetResourceManager().RegisterLoader<ShaderSnippetLoader>(".glsl");
 	switch (gfx_api)
@@ -131,7 +191,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Core::GetResourceManager().RegisterFactory<GraphFactory>();
 
 	auto& filesys = Core::GetSystem<FileSystem>();
-	filesys.Mount(string{ filesys.GetExeDir() } +"/editor_data", "/editor_data", false);
+	filesys.Mount(string{ data_dir } +"/editor_data", "/editor_data", false);
 	if (shadergraph::NodeTemplate::GetTable().empty())
 		shadergraph::NodeTemplate::LoadTable("/editor_data/nodes");
 

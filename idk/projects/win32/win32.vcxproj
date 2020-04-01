@@ -255,6 +255,7 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="WindowsApplication.h" />
+    <ClInclude Include="WinMessageTable.h" />
     <ClInclude Include="XInputSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -269,6 +270,7 @@
     </ClCompile>
     <ClCompile Include="WindowsApplication.cpp" />
     <ClCompile Include="WindowsApplication_GetNetworkDevices.cpp" />
+    <ClCompile Include="WinMessageTable.cpp" />
     <ClCompile Include="XInputSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
