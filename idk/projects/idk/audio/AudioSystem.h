@@ -144,6 +144,7 @@ namespace idk
 		const int			_max_channels				{ 512 };
 		vector<AUDIOSYSTEM_DRIVERDATA> _driver_details	{};			//Describes each driver.
 
+		float _master_volume_on_focus;
 
 		//Useable after calling Init().
 		FMOD::ChannelGroup* _channelGroup_MASTER		{ nullptr };	//All sounds are routed to MASTER.

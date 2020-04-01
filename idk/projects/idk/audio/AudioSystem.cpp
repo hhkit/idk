@@ -133,7 +133,7 @@ Variables:
 #include <res/ResourceHandle.inl>
 #include <core/GameState.inl>
 #include <ds/span.inl>
-
+#include <app/Application.h>
 namespace idk
 {
 
@@ -149,6 +149,7 @@ namespace idk
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".wav");
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".ogg");
 		Core::GetResourceManager().RegisterLoader<AudioClipLoader>(".mp3");
+
 
 		_destroy_slot = Core::GetGameState().OnObjectDestroy<AudioSource>() += [&](Handle<AudioSource> dying_source) //Add a call back to stop all its sounds before changing scene
 		{
@@ -224,6 +225,20 @@ namespace idk
 
 		ParseFMOD_RESULT(_Core_System->getDriver(&_current_driver));
 		//std::cout << "Current driver index in use:" << currentDriver << std::endl;
+
+		_master_volume_on_focus = 1;
+		Core::GetSystem<Application>().OnFocusGain += [this]()
+		{
+			_channelGroup_MASTER->setVolume(_master_volume_on_focus);
+
+		};
+
+		Core::GetSystem<Application>().OnFocusLost += [this]()
+		{
+			_channelGroup_MASTER->getVolume(&_master_volume_on_focus);
+			_channelGroup_MASTER->setVolume(0);
+		};
+
 
 		_time_it_was_initialized = time_point::clock::now();
 
