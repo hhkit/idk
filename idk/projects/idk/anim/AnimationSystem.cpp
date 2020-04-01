@@ -22,7 +22,6 @@
 
 namespace idk
 {
-#pragma optimize("", off)
 	static bool valid_clip(AnimationState& state)
 	{
 		if (!state.valid)
