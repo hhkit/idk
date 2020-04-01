@@ -23,7 +23,7 @@ namespace idk
         const unsigned atlas_font_size = font_atlas->GetMeta().font_size;
         const real s = font_size ? (s_cast<real>(font_size) / atlas_font_size) : 1.0f;
 
-        const auto& c = font_atlas->c;
+        const auto& c = font_atlas->char_map;
         const real line_height = (font_atlas->ascender - font_atlas->descender) * line_spacing;
         size_t n = 0;
         size_t line_start_n = 0;

@@ -18,3 +18,4 @@
 #include <test/TestResource.h>
 #include <prefab/Prefab.h>
 #include <gfx/ShaderSnippet.h>
+#include <gfx/TextureRenderMeta.h>

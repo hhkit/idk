@@ -629,4 +629,13 @@ namespace idk::vkn
 		return std::move(result);//std::pair<vk::UniqueImage, hlp::UniqueAlloc>{, };
 
 	}
+	FontAtlasOptions::FontAtlasOptions(const CompiledFontAtlas& meta)
+	{
+		guid = meta.guid;
+		min_filter = mag_filter = filter_mode = meta.filter_mode;
+		uv_mode = meta.mode;
+		internal_format = meta.internal_format;
+		is_srgb = meta.is_srgb;
+		font_size = meta.font_size;
+	}
 }

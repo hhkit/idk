@@ -161,6 +161,19 @@
 	REFLECT_VARS(internal_format, mode, filter_mode, size, is_srgb, generate_mipmaps, pixel_buffer)
 	REFLECT_END()
 
+	REFLECT_BEGIN(idk::CharacterInfo, "CharacterInfo")
+	REFLECT_VARS(advance, glyph_size, bearing, tex_offset)
+	REFLECT_END()
+
+	//using ArrayOfCharInfo = idk::array<idk::CharacterInfo,128>;
+
+	REFLECT_BEGIN(idk::vector<idk::CharacterInfo>, "vector<CharacterInfo>")
+	REFLECT_END()
+
+	REFLECT_BEGIN(idk::CompiledFontAtlas, "CompiledFontAtlas")
+	REFLECT_VARS(internal_format, mode, filter_mode, size, is_srgb, pixel_buffer, font_size, char_map, ascender, descender)
+	REFLECT_END()
+
 	// shader graph
 	REFLECT_ENUM(idk::shadergraph::ValueType, "ShaderGraphValueType")
 

@@ -16,7 +16,7 @@ namespace idk::vkn
 
 
 
-	VulkanFontAtlasFactory::VulkanFontAtlasFactory() : allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
+	VulkanFontAtlasFactory::VulkanFontAtlasFactory() : allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }, _ittf_loader{ std::make_unique<IttfLoader>() }
 	{
 		auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
 
@@ -44,5 +44,10 @@ namespace idk::vkn
 	unique_ptr<FontAtlas> VulkanFontAtlasFactory::Create()
 	{
 		return GenerateDefaultResource();
+	}
+	IttfLoader& VulkanFontAtlasFactory::GetIttfLoader()
+	{
+		// TODO: insert return statement here
+		return *_ittf_loader;
 	}
 }

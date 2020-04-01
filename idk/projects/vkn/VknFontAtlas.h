@@ -5,6 +5,7 @@
 //#include "gfx/Texture.h"
 #include <vkn/MemoryAllocator.h>
 #include <vkn/VknTexture.h>
+#include <gfx/CompiledTexture.h>
 namespace idk::vkn {
 	class VknFontAtlas
 		:public FontAtlas
@@ -24,6 +25,7 @@ namespace idk::vkn {
 		VknFontAtlas() = default;
 		~VknFontAtlas();
 		VknFontAtlas(VknFontAtlas&& rhs) noexcept;
+		VknFontAtlas(const CompiledFontAtlas&);
 
 		VknFontAtlas& operator=(VknFontAtlas&&) noexcept;
 		using FontAtlas::Size;
