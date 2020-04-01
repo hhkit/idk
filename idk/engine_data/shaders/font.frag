@@ -28,7 +28,7 @@ const float smoothing = 1.0 /16.0;
 void main()
 {
 	float dist = texture(tex,vs_out.uv).r;
-	float alpha = smoothstep(0.5f - smoothing, 0.5f + smoothing, dist);
+	float alpha = smoothstep(0.3f, 0.8f, dist);
 	
 	//FragColor = vec4(1, 1, 1, texture(tex, vs_out.uv).r) * vs_out.color;
 		

@@ -96,6 +96,7 @@ int main(int argc, const char* argv[])
 	c.RegisterCompiler<AssimpCompiler>(".fbx");
 	c.RegisterCompiler<AssimpCompiler>(".obj");
 	c.RegisterCompiler<AssimpCompiler>(".ma");
+	c.RegisterCompiler<FontAtlasCompiler>(".ttf");
 
 	c.Compile(src.generic_string());
 	

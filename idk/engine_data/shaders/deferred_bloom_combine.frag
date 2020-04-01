@@ -85,6 +85,9 @@ layout(location = 2) in VS_OUT
 
 //const vec3 fogColor = vec3(0.5, 0.5,0.5);
 //const float fogDensity = 1.8; //magic number verified by YY
+    
+float d0 =7, dmax = 55;   //magic numbers verified by YY
+float fog_cap = 0.028125; //magic number verified by YY
 
 void main()
 {
@@ -100,10 +103,8 @@ void main()
 	{
 		vec4 view_pos = subpassLoad(gView_pos);
 		float dist = 0;
-		float fogFactor = 0;      
-		float d0 =7, dmax = 55;   //magic numbers verified by YY
-		float fog_cap = 0.028125; //magic number verified by YY
-	
+		float fogFactor = 0;
+		
 		//range based
 		dist = (abs(view_pos.z)-d0)/(dmax-d0); //magic number verified by YY
 		//Exponential fog                      //magic number verified by YY

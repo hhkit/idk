@@ -9,6 +9,7 @@
 #include <res/CompiledAssets.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/VknTexture.h>
+#include <vkn/VknFontAtlas.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLTexture.h>
@@ -40,6 +41,7 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 		auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
+		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledFontAtlas, vkn::VknFontAtlas>>();
 		gSys = &sys;
 		if (HasArg(L"--validation", command_lines, num_args))
 			sys.Instance().EnableValidation();
@@ -68,6 +70,7 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	Core::GetResourceManager().RegisterCompilableExtension(".fbx");
 	Core::GetResourceManager().RegisterCompilableExtension(".obj");
 	Core::GetResourceManager().RegisterCompilableExtension(".ma");
+	Core::GetResourceManager().RegisterCompilableExtension(".ttf");
 
 	c->AddSystem<IDE>();
 

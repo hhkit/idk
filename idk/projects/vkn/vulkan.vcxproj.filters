@@ -413,6 +413,9 @@
     <ClInclude Include="renderpasses\BloomPass.h">
       <Filter>render\new_testament\Renderpasses</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanIttfLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -711,6 +714,9 @@
     <ClCompile Include="MaterialInstanceCache.cpp" />
     <ClCompile Include="renderpasses\BloomPass.cpp">
       <Filter>render\new_testament\Renderpasses</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanIttfLoader.cpp">
+      <Filter>resource\Loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

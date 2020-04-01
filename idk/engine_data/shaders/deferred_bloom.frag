@@ -70,8 +70,8 @@ void main()
 	vec2 uv =vb.pos + vs_out.uv*vb.extent;
 	
 	vec2 hac = tex_offset * 4;
-	vec2 end = vb.pos + vb.extent;
-	uv = clamp(uv, vb.pos + hac, end - hac);	
+	vec2 end = vb.pos + vb.extent - hac;
+	uv = clamp(uv, vb.pos + hac, end);	
 	
 	vec3 brightness = texture(brightness_input,uv).rgb * weight[0];
 	

@@ -28,6 +28,7 @@
     <ClCompile Include="AssimpCompiler_helpers.cpp" />
     <ClCompile Include="CompilerCore.cpp" />
     <ClCompile Include="DDSCompiler.cpp" />
+    <ClCompile Include="FontAtlasCompiler.cpp" />
     <ClCompile Include="IAssetLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SceneUpdater.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="CompilerCore.h" />
     <ClInclude Include="CompilerList.h" />
     <ClInclude Include="DDSCompiler.h" />
+    <ClInclude Include="FontAtlasCompiler.h" />
     <ClInclude Include="IAssetLoader.h" />
     <ClInclude Include="SceneUpdater.h" />
     <ClInclude Include="TextureCompiler.h" />

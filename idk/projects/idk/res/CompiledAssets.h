@@ -11,6 +11,7 @@ namespace idk
 	using CompiledVariant = variant<
 		CompiledMesh
 	,	CompiledTexture
+	,   CompiledFontAtlas
 	,	anim::Animation
 	,	anim::Skeleton
 	,	Prefab

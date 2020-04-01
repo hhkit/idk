@@ -434,6 +434,7 @@
     <ClInclude Include="VulkanCubemapFactory.h" />
     <ClInclude Include="VulkanGlslLoader.h" />
     <ClInclude Include="VulkanHashes.h" />
+    <ClInclude Include="VulkanIttfLoader.h" />
     <ClInclude Include="VulkanPngLoader.h" />
     <ClInclude Include="VulkanResourceManager.h" />
     <ClInclude Include="VulkanShaderModuleFactory.h" />
@@ -534,6 +535,7 @@
     <ClCompile Include="VknTextureView.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
+    <ClCompile Include="VulkanIttfLoader.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="utils\GlslToSpirv.cpp" />

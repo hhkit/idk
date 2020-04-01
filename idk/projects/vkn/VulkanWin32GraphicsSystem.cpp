@@ -33,6 +33,8 @@
 
 #include <vkn/MaterialInstanceCache.h>
 
+#include <time.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -221,6 +223,8 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		auto d_start = std::chrono::high_resolution_clock::now();
+
 		auto dump = []() {
 
 			auto fb_dump = dbg::DumpFrameBufferAllocs();
@@ -236,7 +240,13 @@ namespace idk::vkn
 		{
 
 		auto& curr_signal = instance_->View().CurrPresentationSignals();
+
+		auto d_af_start = std::chrono::high_resolution_clock::now();
 		instance_->AcquireFrame(*curr_signal.image_available);
+		auto d_af_end = std::chrono::high_resolution_clock::now();
+		//auto e_time = (d_af_end - d_af_start).count();
+		//LOG_CRASH_TO(LogPool::GFX, "Acquired Frame time: %d", std::chrono::duration_cast<std::chrono::microseconds>((d_af_end - d_af_start)).count());
+
 		auto curr_index = instance_->View().CurrFrame();
 		instance_->ResourceManager().ProcessQueue(curr_index);
 		{
@@ -315,32 +325,7 @@ namespace idk::vkn
 		{
 			return camera.clear_data.index() == meta::IndexOf <std::remove_const_t<decltype(camera.clear_data)>, DontClear>::value;
 		};
-		//for (auto& camera : curr_buffer.camera)
-		//{
-		//	/*auto& pimpl = _pimpl;
-		//	std::visit([&](auto& clear)
-		//		{
-		//			if constexpr (std::is_same_v<std::decay_t<decltype(clear)>, RscHandle<CubeMap>>)
-		//			{
-		//				const RscHandle<CubeMap>& cubemap = clear;
-		//				if (!cubemap)
-		//					return;
-		//				VknCubemap& cm = cubemap.as<VknCubemap>();
-		//				RscHandle<VknCubemap> conv = cm.GetConvoluted();
-		//				if (RscHandle < VknCubemap>{} == conv)
-		//				{
-		//					conv = Core::GetResourceManager().Create<VknCubemap>();
-		//					conv->Size(cubemap->Size());
-		//					CubemapLoader loader;
-		//					CubemapOptions options{cm.GetMeta()};
-		//					CMCreateInfo info = CMColorBufferTexInfo(cubemap->Size().x, cubemap->Size().y);
-		//					info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
-		//					loader.LoadCubemap(conv.as<VknCubemap>(), *pimpl->allocator, *pimpl->fence, options, info, {});
-		//					cm.SetConvoluted(conv);
-		//				}
-		//			}
-		//		}, camera.clear_data);*/
-		//}
+		
 		bool will_draw_debug = true;
 		for (size_t i = 0; i < curr_states.size()&&i<curr_buffer.culled_render_range.size(); ++i)
 		{
@@ -467,7 +452,10 @@ namespace idk::vkn
 		//View().GraphicsQueue().submit(si, {});
 		vector<RscHandle<RenderTarget>> targets{render_targets.begin(),render_targets.end()};
 		instance_->DrawFrame(*curr_frame.GetPostRenderComplete(), *curr_signal.render_finished, targets);
+		auto d_end = std::chrono::high_resolution_clock::now();
 
+		//LOG_CRASH_TO(LogPool::GFX, "renderrender time: %d", std::chrono::duration_cast<std::chrono::microseconds>((d_end - d_start)).count());
+		//LOG_CRASH_TO(LogPool::GFX, "Render End Log: %s", );
 		if (extra_vars.GetOptional<bool>("Dump", false))
 		{
 			extra_vars.Set("Dump", false);

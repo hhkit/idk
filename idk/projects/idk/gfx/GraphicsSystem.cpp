@@ -763,9 +763,12 @@ namespace idk
 					continue;
 				if (!camera.enabled || !camera.GetGameObject()->ActiveInHierarchy())
 					continue;
+				if (camera.viewport.size.x <= 0 || camera.viewport.size.y <= 0)
+					continue;
 
 				if (camera.GetHandle().scene == Scene::editor)
 					result.curr_scene_camera_index = result.camera.size();
+
 				result.camera.emplace_back(camera.GenerateCameraData());
 				auto& vp = result.camera.back();
 				vp.viewport.size = min(vec2(1) - vp.viewport.position, vp.viewport.size);
