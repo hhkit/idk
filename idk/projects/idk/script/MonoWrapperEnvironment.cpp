@@ -923,12 +923,25 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorCrossFade", bool, Handle<Animator> animator, MonoString* name, float time = 0.2f, MonoString* layer = nullptr)
+		BIND_START("idk.Bindings::AnimatorBlendTo", bool, Handle<Animator> animator, MonoString* name, float time = 0.2f, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
 			auto l = unbox(layer);
 			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
 			
+			return animator->BlendTo(s.get(), time, index);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorBlendToSeconds", bool, Handle<Animator> animator, MonoString* name, float timeInSeconds = 0.0f, MonoString* layer = nullptr)
+		{
+			auto s = unbox(name);
+			auto l = unbox(layer);
+			int index = l.get()[0] ? s_cast<int>(animator->FindLayerIndex(l.get())) : 0;
+			auto state = animator->GetState(s.get(), index);
+			float time = 0.0f;
+			if (state.valid)
+				time = timeInSeconds / state.duration;
 			return animator->BlendTo(s.get(), time, index);
 		}
 		BIND_END();
