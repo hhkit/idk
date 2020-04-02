@@ -560,7 +560,7 @@ namespace idk
 					}
 					else
 					{
-						int delta = 1.0f;// s_cast<int>(layer.curr_state.normalized_time);
+						float delta = 1.0f;// s_cast<int>(layer.curr_state.normalized_time);
 						layer.curr_state.normalized_time = anim_state.speed >= 0.0f ? layer.curr_state.normalized_time - delta : layer.curr_state.normalized_time + delta;
 					}
 				}
@@ -577,7 +577,7 @@ namespace idk
 				{
 					if (!anim_state.valid)
 						continue;
-					int delta = 1.0f;//;s_cast<int>(layer.blend_state.normalized_time);
+					float delta = 1.0f;//;s_cast<int>(layer.blend_state.normalized_time);
 					layer.blend_state.normalized_time = anim_state.speed > 0.0f ? layer.blend_state.normalized_time - delta : layer.blend_state.normalized_time + delta;
 				}
 

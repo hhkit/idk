@@ -101,4 +101,6 @@ void main()
 
 	out_color = vec4(brightness,1);
 	
+	//if(out_color.rgb == vec3(0))
+		//discard;
 }

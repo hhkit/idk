@@ -966,7 +966,7 @@ namespace idk::vkn::renderpasses
 		//bloom_passH.ppe = bloom_pass.ppe = bloom_pass_combine.ppe = combine_def_pass.ppe = gfx_state.camera.ppe;
 		//Bloom pass stage end
 
-		auto spec_info = info;
+		auto& spec_info = info;
 		spec_info.model = ShadingModel::Specular;
 		auto& gbuffer_pass_spec = graph.addRenderPass<PassSetPair<GBufferPass, DeferredPbrSet>>("GBufferPassSpecular", make_gbuffer_set(spec_info), cube_clear.rt_size, spec_depth_copy.copied_depth).RenderPass();
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(spec_info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];

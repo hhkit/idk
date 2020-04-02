@@ -31,16 +31,18 @@ namespace idk
         real x = 0;
         real y = -s_cast<real>(font_atlas->ascender) * s;
 
-        for (char ch : text)
+        for (const char& ch : text)
         {
-            real x2 = x + c[ch].bearing.x * s;
-            real y2 = -y - c[ch].bearing.y * s;
-            real w = c[ch].glyph_size.x * s;
-            real h = c[ch].glyph_size.y * s;
+            auto& character = c[ch];
+
+            real x2 = x + character.bearing.x * s;
+            real y2 = -y - character.bearing.y * s;
+            real w = character.glyph_size.x * s;
+            real h = character.glyph_size.y * s;
 
             // Advance the cursor to the start of the next character
-            x += (c[ch].advance.x + tracking) * s;
-            y += c[ch].advance.y * s;
+            x += (character.advance.x + tracking) * s;
+            y += character.advance.y * s;
 
             if (ch == '\n')
             {
@@ -68,12 +70,17 @@ namespace idk
                 continue;
 
             //remember: each glyph occupies a different amount of vertical space
-            data.coords[n++].position = vec4{ x2    , -y2    , c[ch].tex_offset.x                                   , c[ch].tex_offset.y };
-            data.coords[n++].position = vec4{ x2    , -y2 - h, c[ch].tex_offset.x                                   , c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
-            data.coords[n++].position = vec4{ x2 + w, -y2    , c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y };
-            data.coords[n++].position = vec4{ x2 + w, -y2    , c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y };
-            data.coords[n++].position = vec4{ x2    , -y2 - h, c[ch].tex_offset.x                                   , c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
-            data.coords[n++].position = vec4{ x2 + w, -y2 - h, c[ch].tex_offset.x + c[ch].glyph_size.x / atlas_width, c[ch].tex_offset.y + c[ch].glyph_size.y / atlas_height };
+            auto x2_w = x2 + w;
+            auto y2_h = -y2 - h;
+            auto toffset_x = character.tex_offset.x + character.glyph_size.x / atlas_width;
+            auto toffset_y = character.tex_offset.y + character.glyph_size.y / atlas_height;
+
+            data.coords[n++].position = vec4{ x2    , -y2    , character.tex_offset.x , character.tex_offset.y };
+            data.coords[n++].position = vec4{ x2    , y2_h   , character.tex_offset.x , toffset_y };
+            data.coords[n++].position = vec4{ x2_w  , -y2    , toffset_x, character.tex_offset.y };
+            data.coords[n++].position = vec4{ x2_w  , -y2    , toffset_x, character.tex_offset.y };
+            data.coords[n++].position = vec4{ x2    , y2_h   , character.tex_offset.x , toffset_y };
+            data.coords[n++].position = vec4{ x2_w  , y2_h   , toffset_x , toffset_y };
         }
 
         if(text.back() != '\n')

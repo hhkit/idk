@@ -91,12 +91,14 @@ vec3 trilinearSample(ivec3 p, ivec3 d0, ivec3 d1, ivec3 d2, vec3 uvw)
 void main()
 {
 	float depth = subpassLoad(depth_input).r;
+	if(depth == 1)
+		discard;
 	vec3  light = subpassLoad(color_input).rgb;
 	vec3 rh_light = ReinhardOperator(light);
 	
 	float brightness = dot(light, ppb.threshold);
 	 if(brightness > 1.0)
-        out_hdr = vec4(rh_light, 1.0);
+        out_hdr = vec4(light, 1.0);
     else
         out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
 	
