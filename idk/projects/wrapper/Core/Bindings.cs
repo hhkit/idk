@@ -161,6 +161,8 @@ namespace idk
          */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ManagedRaycast PhysicsRaycast(Vector3 origin, Vector3 dir, float max_dist, int mask, bool hit_triggers);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ManagedRaycast[] PhysicsRaycastAll(Vector3 origin, Vector3 dir, float max_dist, int mask, bool hit_triggers);
 
         /*
          * RigidBody

@@ -163,7 +163,7 @@ namespace idk
 	bool AudioSource::IsAnyAudioClipPlaying()
 	{
 		bool returnVal = false;
-		for (int i = 0; i < audio_clip_list.size(); ++i) {
+		for (int i = 0; i < audio_clip_channels.size(); ++i) {
 			audio_clip_channels[i]->isPlaying(&returnVal);
 			if (returnVal)
 				return true;
