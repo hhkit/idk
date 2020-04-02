@@ -1,22 +1,27 @@
 #include "stdafx.h"
 #include "ElectronView.inl"
 #include <core/GameObject.inl>
-
+#include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 #include <phys/RigidBody.h>
 
 #include <network/ElectronTransformView.h>
 #include <network/ElectronRigidbodyView.h>
+#include <network/ElectronAnimatorView.h>
 #include <network/NetworkSystem.h>
 namespace idk
 {
 	ElectronView::ElectronView(const ElectronView&)
 	{
 	}
+
 	ElectronView::ElectronView(ElectronView&&) noexcept = default;
+
 	ElectronView& ElectronView::operator=(const ElectronView&)
 	{
 		throw;
 	}
+
 	ElectronView& ElectronView::operator=(ElectronView&&) noexcept = default;
 
 	ElectronView::~ElectronView() = default;
@@ -28,10 +33,24 @@ namespace idk
 
 	void ElectronView::Setup()
 	{
-		if (auto tfm_view = GetGameObject()->GetComponent<ElectronTransformView>())
+		if (const auto tfm_view = GetGameObject()->GetComponent<ElectronTransformView>())
 			tfm_view->Start();
-		if (auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
+		if (const auto rb_view = GetGameObject()->GetComponent<ElectronRigidbodyView>())
 			rb_view->Start();
+
+		if (const auto sg_handle = Core::GetSystem<SceneManager>().FetchSceneGraphFor(GetGameObject()))
+		{
+			sg_handle.Visit([&](Handle<GameObject> go, int) -> bool
+				{
+					if (auto animator_view = go->GetComponent<ElectronAnimatorView>())
+					{
+						animator_view->Start(GetHandle());
+						return false;
+					}
+					return true;
+				}
+			);
+		}
 
 		for (auto& elem : parameters)
 		{
@@ -183,8 +202,8 @@ namespace idk
 			if (sm & (1 << i))
 			{
 				auto& move_pack = data_pack.packs[pack_ptr++];
-				auto unpacked = parameters[i]->GetControlObject()->UnpackMove(move_pack);
-				LOG_TO(LogPool::NETWORK, "unpacking %d moves", unpacked);
+				parameters[i]->GetControlObject()->UnpackMove(move_pack);
+			//	LOG_TO(LogPool::NETWORK, "unpacking %d moves", unpacked);
 			}
 		}
 	}

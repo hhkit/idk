@@ -55,7 +55,7 @@ void RegisterFactories()
 	Core::GetResourceManager().RegisterLoader<VknRenderTargetLoader>(RenderTarget::ext);
 	//Core::GetResourceManager().RegisterLoader<DdsLoader>(".dds");
 	Core::GetResourceManager().RegisterLoader<CbmLoader>(".cbm");
-	Core::GetResourceManager().RegisterLoader<TtfLoader>(".ttf");
+	//Core::GetResourceManager().RegisterLoader<TtfLoader>(".ttf");
 }
 
 }

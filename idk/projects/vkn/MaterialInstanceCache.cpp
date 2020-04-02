@@ -45,6 +45,8 @@ namespace idk::vkn
 			auto& mod = inst.shader.as<ShaderModule>();
 			if (mod.HasCurrent())
 			{
+				try {
+
 				auto& cache = cached_info[inst.inst_guid];
 				UpdateInfo ui{
 					_pimpl->_creation_buffer,
@@ -53,6 +55,13 @@ namespace idk::vkn
 					_pimpl->scratch};
 				cache.Update(inst,ui );
 				return;
+
+				}
+				catch (...)
+				{
+					auto guid = inst.inst_guid.operator idk::string();
+					LOG_ERROR_TO(LogPool::GFX, "Material %s and shader mismatch!",guid.c_str());
+				}
 			}
 		}
 		cached_info.erase(inst.inst_guid);
@@ -124,7 +133,6 @@ namespace idk::vkn
 		}
 	};
 
-
 	void MaterialInstanceCache::InstCachedInfo::Update(const ProcessedMaterial& mat_inst, UpdateInfo& update_info)
 	{
 		
@@ -180,7 +188,9 @@ namespace idk::vkn
 			};
 			for (auto& [name,textures] : mat_inst.tex_table)
 			{
-				auto info =mod.GetLayout(name);
+				auto& info =mod.GetLayout(name);
+				if (!&info)
+					throw std::runtime_error("Invalid material");
 				BindingData bd{vk::DescriptorType::eCombinedImageSampler,info.binding};
 				bd.SetTex(textures,tbuilder);
 				auto& [set,dsl,ds] = descriptors.at(descriptor_indices.at(info.set));

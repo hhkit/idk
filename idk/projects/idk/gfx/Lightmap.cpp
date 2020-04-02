@@ -154,7 +154,7 @@ namespace idk {
 			const mat4 lightView = light.v;
 
 			//Using tanfov calculation
-			const mat4 invView = camData.view_matrix.inverse();
+			const mat4 invView = camData.view_matrix_inverse;
 			
 
 			vec2 near_face = near_plane * camData.tan_halfFOV;
@@ -178,9 +178,9 @@ namespace idk {
 			//{
 			//	frustumEdges[i] = vec4{ frustum_pts[i],1 };
 			//}
-			constexpr real max_v = std::numeric_limits<float>::max();
+			//constexpr real max_v = ;
 			//real min_v = std::numeric_limits<real>::min();
-			vec3 min_c{ max_v };
+			vec3 min_c{ std::numeric_limits<float>::max() };
 			vec3 max_c = -min_c;
 
 			const mat4 m = lightView * invView;
@@ -195,7 +195,7 @@ namespace idk {
 				elem = m * elem;
 				min_c = { min(min_c.x,elem.x),min(min_c.y,elem.y) ,min(min_c.z, elem.z) };
 				max_c = { max(max_c.x,elem.x),max(max_c.y,elem.y) ,max(max_c.z,elem.z) };
-				ptr++;
+				++ptr;
 			}
 
 			

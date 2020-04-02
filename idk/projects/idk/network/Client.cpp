@@ -10,6 +10,7 @@
 #include <script/ScriptSystem.h>
 #include <script/MonoBehavior.h>
 #include <network/NetworkTuple.inl>
+#include <meta/variant.inl>
 #undef SendMessage
 
 namespace idk
@@ -72,7 +73,7 @@ namespace idk
 		{
 			OnDisconnectionFromServer.Fire();
 			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-				target->FireMessage("OnDisconnectedFromServer");
+				target->FireMessage("OnDisconnectionFromServer");
 		}
 		if (connected_this_frame)
 			ProcessMessages();
@@ -114,6 +115,10 @@ namespace idk
 	void Client::ProcessMessage(yojimbo::Message* message)
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+		if (message->GetType() != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+			&& message->GetType() != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+			&& message->GetType() != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+			)
 		LOG_TO(LogPool::NETWORK, "Received %s message", message_name_array[message->GetType()].data());
 		OnMessageReceived[message->GetType()].Fire(message);
 	}

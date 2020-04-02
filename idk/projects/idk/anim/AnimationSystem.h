@@ -47,7 +47,7 @@ namespace idk
 		void AdvanceBlendTree(AnimationLayerState& layer_state, AnimationState& state) const;
 
 		void FinalPass(Animator& animator);
-		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose);
+		void InterpolateBone(const anim::AnimatedBone& animated_bone, float time_in_ticks, matrix_decomposition<real>& curr_pose, bool reverse);
 
 		void InitializeAnimators(bool play);
 

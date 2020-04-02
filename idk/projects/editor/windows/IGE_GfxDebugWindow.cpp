@@ -13,7 +13,10 @@
 
 #include "IDE.h"
 #include <gfx/ColorGrade.h>
-#pragma optimize("",off)
+
+#include <editor/imguidk.h>
+
+//#pragma optimize("",off)
 namespace idk
 {
 	class TGAWriter
@@ -78,6 +81,8 @@ namespace idk
 
 		bool show_hidden = false;
 
+		RscHandle<Texture> selected_tex = {};
+
 		std::string lut_path = "../default_lut.tga";
 		std::string dump;
 	};
@@ -87,6 +92,13 @@ namespace idk
 	}
 	void IGE_GfxDebugWindow::Update()
 	{
+		{
+			RscHandle<Texture>& tex = _pimpl->selected_tex;
+			ImGuidk::InputResource("Texture Selection:", &tex);
+			if (ImGui::Button("Select Texture"))
+				Core::GetSystem<IDE>().SelectAsset(tex);
+		}
+
 		vector<std::string> names = {"Texture", "Cubemap", "FontAtlas"};
 		auto& trackers = vkn::dbg::TextureTracker::Insts();
 		size_t i = 0;

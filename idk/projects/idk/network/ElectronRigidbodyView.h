@@ -1,6 +1,7 @@
 #pragma once
 #include <core/Component.h>
 #include <network/network.h>
+#include <network/ElectronView.h>
 namespace idk
 {
 	class ElectronRigidbodyView

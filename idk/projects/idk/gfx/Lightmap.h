@@ -1,10 +1,10 @@
 #pragma once
-#include <idk.h>
+//#include <idk.h>
 
 #include <gfx/Framebuffer.h>
 #include <gfx/Camera.h>
 
-#include <math/matrix.h>
+//#include <math/matrix.h>
 
 #include <gfx/AttachmentViewType.h>
 

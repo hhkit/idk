@@ -13,6 +13,7 @@
 #include <anim/SkinnedMeshRenderer.h>
 #include <gfx/Light.h>
 #include <gfx/TextMesh.h>
+#include <gfx/PostProcessEffect.h>
 
 #include <network/ElectronView.h>
 #include <network/ElectronTransformView.h>
@@ -23,6 +24,7 @@
 #include <ui/RectTransform.h>
 #include <ui/Image.h>
 #include <ui/Text.h>
+#include <ui/AspectRatioFitter.h>
 
 #include <particle/ParticleSystem.h>
 

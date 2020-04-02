@@ -23,6 +23,7 @@ namespace idk
 	void IGE_LightLister::Update()
 	{
 		auto scene = Core::GetSystem<SceneManager>().GetActiveScene();
+
 		ImGui::Text("Create:");
 		ImGui::SameLine();
 

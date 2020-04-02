@@ -10,6 +10,20 @@ out float gl_FragDepth;
 
 S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 
+S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
+{
+	vec3 threshold;
+	vec3 fogColor;
+	float fogDensity;
+
+	//Bloom
+	float blurStrength;
+	float blurScale;
+	
+	int useFog;
+	int useBloom;
+}ppb;
+
 //(Relative luminance, obtained from wiki)
 float Luminance(vec3 color)
 {
@@ -77,19 +91,24 @@ vec3 trilinearSample(ivec3 p, ivec3 d0, ivec3 d1, ivec3 d2, vec3 uvw)
 void main()
 {
 	float depth = subpassLoad(depth_input).r;
+	if(depth == 1)
+		discard;
 	vec3  light = subpassLoad(color_input).rgb;
+	vec3 rh_light = ReinhardOperator(light);
 	
-	out_color = vec4(ReinhardOperator(light),1);
-	
-	float brightness = dot(out_color.rgb, vec3(0.45,0.7,0.7));
+	float brightness = dot(light, ppb.threshold);
 	 if(brightness > 1.0)
-        out_hdr = vec4(out_color.rgb, 1.0);
+        out_hdr = vec4(light, 1.0);
     else
         out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
+	
+	out_color = vec4(rh_light,1);
 		
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
-	vec3 og = out_color.rgb;
+	
+	//Only use if deferred bloom is unused
+	vec3 og = pow(out_color.rgb,vec3(1/2.2));
 	vec3 p = sizeSpace(og);
 	vec3 p0 =floor(p);
 	vec3 p1 =ceil(p);
@@ -98,14 +117,8 @@ void main()
 	
 	vec3 t = (p - p0);// /(p1-p0);
 	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
-	//out_color.rgb = abs(out_color.rgb-og);
-	//float err = 0.000000059604645;
-	//if(out_color.r<=err)
-	//	out_color.r=1;
-	//if(out_color.g<=err)
-	//	out_color.g=1;
-	//if(out_color.b<=err)
-	//	out_color.b=1;
+	
+	out_color.rgb = pow(out_color.rgb,vec3(2.2));
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 	
 }

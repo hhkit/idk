@@ -26,13 +26,8 @@ namespace idk {
 			{ Guid{0x382A438E, 0xADC8, 0x4283, 0xA8D0E339F7D34159} }, // SourceSansPro
 		};
 
-		struct character_info
-        {
-			vec2 advance;
-			vec2 glyph_size; // w, h
-			vec2 bearing; // left, top
-			vec2 tex_offset; // x offset of glyph in texture coordinates
-		} c[128];
+		//Characters information
+		vector<CharacterInfo> char_map;
         // max y above baseline
         float ascender;
         // max y below baseline

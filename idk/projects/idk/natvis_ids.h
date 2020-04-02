@@ -27,7 +27,9 @@ namespace idk::natvis
     constexpr auto RectTransformID         = ComponentID<RectTransform        > + 1;
     constexpr auto ImageID                 = ComponentID<Image                > + 1;
     constexpr auto TextID                  = ComponentID<Text                 > + 1;
+    constexpr auto AspectRatioFitterID     = ComponentID<AspectRatioFitter    > + 1;
     constexpr auto TextMeshID              = ComponentID<TextMesh             > + 1;
     constexpr auto ElectronViewID          = ComponentID<ElectronView         > + 1;
     constexpr auto ElectronTransformViewID = ComponentID<ElectronTransformView> + 1;
+    constexpr auto ElectronRigidbodyViewID = ComponentID<ElectronRigidbodyView> + 1;
 }

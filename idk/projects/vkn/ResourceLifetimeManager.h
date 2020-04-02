@@ -40,11 +40,12 @@ namespace idk::vkn
 			actual_resource_id index;
 			fgr_id base_rsc;
 			order_t start, end;
+			uvec2 size;
 		};
 
 		void ExtendLifetime(fgr_id rsc_id, order_t order);
 		template< typename Dealias>
-		void CollapseLifetimes(Dealias&& get_original_id,hash_table<fgr_id,size_t> ordering)
+		void CollapseLifetimes(Dealias&& get_original_id, const hash_table<fgr_id,size_t>& ordering)
 		{
 			mappings.clear();
 			collapsed.clear();
@@ -72,20 +73,20 @@ namespace idk::vkn
 			std::transform(collapsed_ordering.begin(), collapsed_ordering.end(), sorted_order.begin(), [](auto& pair) {return std::pair{ pair.second,pair.first }; });
 			std::sort(sorted_order.begin(), sorted_order.end(), [](auto& lhs, auto& rhs) {return lhs.first < rhs.first; });
 		}
-		template<typename Func>
-		void CombineAllLifetimes(Func&& compatibility_checker)
+		template<typename Func,typename SizeFunc>
+		void CombineAllLifetimes(Func&& compatibility_checker, SizeFunc&& get_rsc_size)
 		{
 				
 			for (auto& [order, id] : sorted_order)
 			{
 				auto& lifetime = collapsed.at(id);
-				CombineLifetimes(id, lifetime.start, lifetime.end, compatibility_checker);
+				CombineLifetimes(id, lifetime.start, lifetime.end, compatibility_checker,get_rsc_size(id));
 			}
 			for (auto& [rsc, original] : mappings)
 			{
 				auto concrete_itr = GetConcrete(original);
 				auto& lifetime = collapsed.at(original);
-				Alias(rsc, lifetime.start, lifetime.end, *concrete_itr);
+				Alias(rsc, lifetime.start, lifetime.end, *concrete_itr,get_rsc_size(rsc));
 			}
 
 
@@ -142,23 +143,23 @@ namespace idk::vkn
 		}
 
 		template<typename Func>
-		void CombineLifetimes(fgr_id id, order_t start, order_t end, Func&& is_compatible)
+		void CombineLifetimes(fgr_id id, order_t start, order_t end, Func&& is_compatible,uvec2 rsc_size)
 		{
 			for (auto& concrete_resource : concrete_resources)
 			{
 				if (!overlap_lifetime(concrete_resource, start, end) && is_compatible(concrete_resource.base_rsc, id))
 				{
-					Alias(id, start, end, concrete_resource);
+					Alias(id, start, end, concrete_resource,rsc_size);
 					return;
 				}
 			}
-			CreateResource(id, start, end);
+			CreateResource(id, start, end,rsc_size);
 		}
 
 		bool overlap_lifetime(const actual_resource_t& rsc, order_t start, order_t end);
-		void Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc);
+		void Alias(fgr_id id, order_t start, order_t end, actual_resource_t& rsc,uvec2 size);
 		actual_resource_id NewActualRscId();
-		void CreateResource(fgr_id id, order_t start, order_t end);
+		void CreateResource(fgr_id id, order_t start, order_t end,uvec2 size);
 
 		vector<actual_resource_t> concrete_resources;
 		hash_table<fgr_id, actual_resource_id> resource_alias;

@@ -46,6 +46,9 @@ namespace idk
 				case SeqAndPack::delta_move:
 					param.setter(param.adder(param.getter(), val));
 					break;
+				case SeqAndPack::custom_move:
+					param.custom_move(val);
+					break;
 				default:
 					break;
 				}
@@ -66,6 +69,9 @@ namespace idk
 					break;
 				case SeqAndPack::delta_move:
 					param.setter(param.adder(param.getter(), val));
+					break;
+				case SeqAndPack::custom_move:
+					param.custom_move(val);
 					break;
 				default:
 					break;
@@ -102,6 +108,10 @@ namespace idk
 						}
 						break;
 					}
+					case SeqAndPack::custom_move:
+						param.custom_move(val);
+						buffer.back() = new_move;
+						break;
 					default:
 						break;
 					}

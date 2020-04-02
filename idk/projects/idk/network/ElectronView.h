@@ -8,7 +8,7 @@
 
 namespace idk
 {
-	using SyncableValue = variant<int, vec3, quat>;
+	using SyncableValue = variant<bool, int, float, vec3, quat>;
 
 	template<typename T>
 	struct ParameterImpl
@@ -16,7 +16,8 @@ namespace idk
 
 		function<T()>                          getter;
 		function<void(const T&)>               setter;
-		function <T(const T&, const T&, real)> interpolator;
+		function<void(const T&)>               custom_move;
+		function <T(const T&, const T&, real)> interpolator = [](const T& lhs, const T& rhs, real) { return rhs; };
 		function <T(const T&, const T&)>       differ = [](const T& lhs, const T& rhs) -> T { return lhs - rhs; };
 		function <T(const T&, const T&)>       adder  = [](const T& lhs, const T& rhs) -> T { return lhs + rhs; };
 		function<bool(const T&, const T&)>     equater = std::equal_to<T>{};

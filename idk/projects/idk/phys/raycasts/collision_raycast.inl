@@ -62,6 +62,7 @@ namespace idk::phys
 				raycast_success succ;
 				succ.point_of_collision    = collision_pt;
 				succ.distance_to_collision = t * l_ray.velocity.length();
+				succ.surface_normal        = is_below ? -nml : nml;
 				return succ;
 			}
 

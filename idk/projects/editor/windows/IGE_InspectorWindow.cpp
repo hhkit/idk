@@ -866,6 +866,11 @@ namespace idk {
         {
             PrefabUtility::RevertPrefabInstance(c_prefab->GetGameObject());
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Break"))
+        {
+            PrefabUtility::BreakPrefabInstance(c_prefab->GetGameObject());
+        }
     }
 
 	void IGE_InspectorWindow::DisplayComponent(GenericHandle component)

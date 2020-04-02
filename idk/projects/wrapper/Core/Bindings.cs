@@ -225,6 +225,24 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ColliderGetTrigger(ulong id);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetStaticFriction(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetStaticFriction(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetDynamicFriction(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetDynamicFriction(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void ColliderSetBounciness(ulong id, float val);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float ColliderGetBounciness(ulong id);
+
         /*
          * BoxCollider
          */
@@ -559,6 +577,49 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void CameraSetCullingMask(ulong id, int value);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int CameraGetUseFog(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetUseFog(ulong id, int value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int CameraGetUseBloom(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetUseBloom(ulong id, int value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Color CameraGetFogColor(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetFogColor(ulong id, Color value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float CameraGetFogDensity(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetFogDensity(ulong id, float value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 CameraGetThreshold(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetThreshold(ulong id, Vector3 value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float CameraGetBlurStrength(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetBlurStrength(ulong id, float value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float CameraGetBlurScale(ulong id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetBlurScale(ulong id, float value);
+
+
         /*
         * Light
         */
@@ -753,6 +814,12 @@ namespace idk
         public extern static float InputGetAxis(sbyte index, int a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetAnyKey();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool InputGetAnyKeyDown();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float InputSetRumble(sbyte index, float low_freq, float high_freq);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -778,6 +845,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetUnscaledDelta();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetTimeSinceStart();
 
         /*
          * Debug

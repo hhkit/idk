@@ -298,8 +298,8 @@ namespace idk::vkn
 			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, 
 			vk::PipelineStageFlagBits::eFragmentShader);
 
-		auto create_info = rp_info.BuildRenderPass();
-		return View().Device()->createRenderPassUnique(create_info);
+		//auto create_info = rp_info.BuildRenderPass();
+		return View().Device()->createRenderPassUnique(rp_info.BuildRenderPass());
 	}
 
 	void DeferredPass::Init(VknRenderTarget& ) 
@@ -726,6 +726,11 @@ namespace idk::vkn
 	void DeferredPass::DrawToGBuffers(vk::CommandBuffer cmd_buffer,const GraphicsState& graphics_state,RenderStateV2& rs)
 	{
 		int i = 0; 
+		std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
+		std::array<float, 4> g_clear{ 0.0f,0.0f ,0.0f ,0.0f };
+		auto& camera = graphics_state.camera;
+		const rect& viewport = graphics_state.camera.viewport;
+
 		for (auto& gbuffer : GBuffers())
 		{
 			//Bind the material uniforms
@@ -738,20 +743,13 @@ namespace idk::vkn
 			auto&& the_interface = ProcessRoUniforms(graphics_state, rs.ubo_manager, binder);
 			the_interface.GenerateDS(rs.dpools,false);
 
+			//std::array<float, 4> a{};
 
-
-			std::array<float, 4> a{};
-
-			auto& camera = graphics_state.camera;
 			auto& g_buffer = *gbuffer.gbuffer;
 			auto frame_buffer = g_buffer.GetFramebuffer();
 
-			auto sz = g_buffer.Size();
-			rect viewport = graphics_state.camera.viewport;
-			auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
-
-			std::array<float, 4> depth_clear{ 1.0f,1.0f ,1.0f ,1.0f };
-			std::array<float, 4> g_clear{ 0.0f,0.0f ,0.0f ,0.0f };
+			//auto sz = ;
+			auto [offset, size] = ComputeVulkanViewport(vec2{ g_buffer.Size() }, viewport);
 
 			vk::ClearValue v[EGBufferBinding::size()+1]{};
 			for(auto& value : v)
@@ -789,11 +787,12 @@ namespace idk::vkn
 	void DeferredPass::DrawToAccum(vk::CommandBuffer cmd_buffer, PipelineThingy(&accum_stuff)[EGBufferType::size()], const CameraData& camera, [[maybe_unused]]RenderStateV2& rs)
 	{
 		int i = 0;
+		auto sz = vec2{ camera.render_target->Size() };
+		auto viewport = rect{};// camera.viewport;
+		
 		for (auto& gbuffer : GBuffers())
 		{
-			auto sz = camera.render_target->Size();
-			auto viewport = rect{};// camera.viewport;
-			auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, viewport);
+			auto [offset, size] = ComputeVulkanViewport(sz, viewport);
 			vk::Rect2D render_area
 			{
 				vk::Offset2D
@@ -835,8 +834,8 @@ namespace idk::vkn
 	void DoNothing();
 	void DeferredPass::DrawToRenderTarget(vk::CommandBuffer cmd_buffer, PipelineThingy& fsq_stuff,const CameraData& camera, [[maybe_unused]]VknRenderTarget& rt, [[maybe_unused]]RenderStateV2& rs)
 	{
-		auto sz = camera.render_target->Size();
-		auto [offset, size] = ComputeVulkanViewport(vec2{ sz }, camera.viewport);
+		auto sz = vec2{ camera.render_target->Size() };
+		auto [offset, size] = ComputeVulkanViewport(sz, camera.viewport);
 		vk::Rect2D render_area
 		{
 			vk::Offset2D

@@ -41,5 +41,45 @@
             set => Bindings.CameraSetCullingMask(handle, value);
         }
 
+        public int useFog
+        {
+            get => Bindings.CameraGetUseFog(handle);
+            set => Bindings.CameraSetUseFog(handle, value);
+        }
+
+        public int useBloom
+        {
+            get => Bindings.CameraGetUseBloom(handle);
+            set => Bindings.CameraSetUseBloom(handle, value);
+        }
+
+        public Color fogColor
+        {
+            get => Bindings.CameraGetFogColor(handle);
+            set => Bindings.CameraSetFogColor(handle, value);
+        }
+        public float fogDensity
+        {
+            get => Bindings.CameraGetFogDensity(handle);
+            set => Bindings.CameraSetFogDensity(handle, value);
+        }
+
+        public Vector3 threshold
+        {
+            get => Bindings.CameraGetThreshold(handle);
+            set => Bindings.CameraSetThreshold(handle, value);
+        }
+
+        public float blurStrength
+        {
+            get => Bindings.CameraGetBlurStrength(handle);
+            set => Bindings.CameraSetBlurStrength(handle, value);
+        }
+
+        public float blurScale
+        {
+            get => Bindings.CameraGetBlurScale(handle);
+            set => Bindings.CameraSetBlurScale(handle, value);
+        }
     }
 }

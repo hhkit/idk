@@ -8,6 +8,7 @@
 #include <vkn/DebugUtil.h>
 namespace idk::vkn
 {
+	void DoNothing();
 	bool frame_graph_debug = false;
 	//Process nodes and cull away unnecessary nodes.
 	//Figure out dependencies and synchronization points
@@ -93,7 +94,11 @@ namespace idk::vkn
 
 		manager.CollapseLifetimes(original_id,ordering);
 		manager.DebugCollapsed(rsc_manager);
-		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2));
+		auto get_size = [&rsc_manager](fgr_id rsc_id) ->uvec2
+		{
+			return rsc_manager.GetResourceDescription(rsc_id)->size;
+		};
+		manager.CombineAllLifetimes(std::bind(&FrameGraphResourceManager::IsCompatible, &GetResourceManager(), std::placeholders::_1, std::placeholders::_2),get_size);
 		
 		
 		//auto& rsc_manager = GetResourceManager();
@@ -106,7 +111,10 @@ namespace idk::vkn
 		
 		for (auto& resource_template : resource_templates)
 		{
-			rm.Instantiate(resource_template.index, resource_template.base_rsc);
+			auto desc_copy = *rm.GetResourceDescription(resource_template.base_rsc);
+			desc_copy.size = resource_template.size;
+			auto new_base = rm.CreateTexture(desc_copy);
+			rm.Instantiate(resource_template.index, new_base.id);
 		}
 		rm.FinishInstantiation();
 		auto& aliases = rlm.Aliases();
@@ -370,6 +378,8 @@ namespace idk::vkn
 					if (!ValidateImageLayout(src_layout))
 						src_layout = src_layout;
 					auto dst_layout = copy_req.options.dest_layout;
+					if (!ValidateImageLayout(dst_layout))
+						dst_layout = dst_layout;
 					context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,copy_req.options.src_range,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.dst_range,copy_req.options.regions});
 				}
 				rp.Execute(context);
@@ -379,7 +389,6 @@ namespace idk::vkn
 	}
 
 
-//#pragma optimize("",off)
 	void FrameGraph::ProcessBatches(RenderBundle& bundle)
 	{
 		size_t i = 0;
@@ -528,23 +537,35 @@ namespace idk::vkn
 		vk::Device d = *View().Device();
 		auto& rsc_manager = GetResourceManager();
 		vector<vk::ImageView> targets;
-		uvec2 size{std::numeric_limits<uint32_t>::max()}; //TODO get an actual size
+		uvec2 size{ std::numeric_limits<uint32_t>::max() }; //TODO get an actual size
+		uvec2 virtual_size{std::numeric_limits<uint32_t>::max()}; 
 		uint32_t num_layers = std::numeric_limits<uint32_t>::max();
 		for (auto& output_rsc : output_rscs)
 		{
 			if (output_rsc)
 			{
 				auto tex = rsc_manager.Get<VknTextureView>(output_rsc->first);
+				auto desc = rsc_manager.GetResourceDescription(output_rsc->first);
+				auto dv_size = (desc->actual_rsc) ? desc->actual_rsc->as<VknTexture>().Size() : desc->size;
 				targets.emplace_back(tex.ImageView());
 				//Temp: getting min size
 				size = min(tex.Size(),size);
+				virtual_size = min(dv_size, virtual_size);
 				num_layers = min(tex.Layers(),num_layers);
 			}
+		}
+		auto test = min(virtual_size, size);
+		if (virtual_size - test != uvec2{})
+		{
+			DebugBreak();
 		}
 		if (depth)
 		{
 			auto tex = rsc_manager.Get<VknTextureView>(depth->first);
 			targets.emplace_back(tex.ImageView());
+			auto desc = rsc_manager.GetResourceDescription(depth->first);
+			auto dv_size = (desc->actual_rsc) ? desc->actual_rsc->as<VknTexture>().Size() : desc->size;
+			virtual_size = min(dv_size, virtual_size);
 			//Temp: getting min size
 			size = min(tex.Size(), size);
 			num_layers = min(tex.Layers(), num_layers);
@@ -567,7 +588,7 @@ namespace idk::vkn
 				static_cast<uint32_t>(targets.size()),
 				std::data(targets),
 				size.x,size.y,num_layers
-			}),size };
+			}),virtual_size };
 	}
 	void FrameGraph::CreateRenderPasses()
 	{
@@ -605,10 +626,20 @@ namespace idk::vkn
 		auto& node = this->nodes[node_itr->second];
 		return &node;
 	}
-
 	vk::ImageLayout FrameGraph::GetSourceLayout(fgr_id id) const
 	{
 		vk::ImageLayout result = {};
+		/*
+		auto tmp = GetResourceManager().GetPrevious(id);
+		if (!tmp)
+		{
+			auto info = GetResourceManager().GetResourceDescription(id);
+			string_view name = "[Descriptionless]";
+			if (info)
+				name = info->name;
+			LOG_ERROR_TO(LogPool::GFX, "Attempting to get source layout for resource [%s] that has not been written to.", name.data());
+			throw std::runtime_error("Attempting to get source layout for a resource that has not been written to.");
+		}*/
 		auto src_id = GetResourceManager().GetOriginal(id);
 		auto node_ptr = GetSourceNode(src_id);
 		if (node_ptr)
@@ -617,13 +648,27 @@ namespace idk::vkn
 			auto output_nodes = node.GetOutputSpan();
 			auto output_ptr = std::find(output_nodes.begin(), output_nodes.end(), FrameGraphResource{ src_id });
 			auto output_index = output_ptr - output_nodes.begin();
-			if (node.depth_stencil && src_id == node.depth_stencil->first|| id == node.depth_stencil->first)
+			if (node.depth_stencil && src_id == node.depth_stencil->first || id == node.depth_stencil->first)
+			{
 				result = node.depth_stencil->second.layout;
+
+				if (!ValidateImageLayout(result))
+					DoNothing();
+			}
 			else
 			if (output_ptr < output_nodes.end() && output_index < s_cast<long long>(node.output_attachments.size()))
 			{
 				auto& att_info = node.output_attachments[output_index];
-				result = att_info->second.layout;
+				if (att_info) //is an output attachment
+				{
+					result = att_info->second.layout;
+					if (!ValidateImageLayout(result))
+						DoNothing();
+				}
+				else //is not an output attachment
+				{
+
+				}
 			}
 		}
 		else

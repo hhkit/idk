@@ -23,10 +23,19 @@ layout(location = 0) out vec4 FragColor;
 
 S_LAYOUT(3,0) uniform sampler2D tex;
 
+const float smoothing = 1.0 /16.0;
+
 void main()
 {
-	FragColor = vec4(1, 1, 1, texture(tex, vs_out.uv).r) * vs_out.color;
+	float dist = texture(tex,vs_out.uv).r;
+	float alpha = smoothstep(0.3f, 0.8f, dist);
+	
+	//FragColor = vec4(1, 1, 1, texture(tex, vs_out.uv).r) * vs_out.color;
+		
+	FragColor = vec4(vs_out.color.rgb,alpha * vs_out.color.a);
 	
 	if(FragColor.a< 0.001176)
 		discard;
+		
+	//FragColor = vec4(vs_out.color.rgb,0.f);
 } 

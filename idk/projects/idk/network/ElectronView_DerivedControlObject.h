@@ -66,6 +66,9 @@ namespace idk
 				case SeqAndPack::delta_move:
 					param.setter(param.adder(param.getter(), apply_move.move));
 					break;
+				case SeqAndPack::custom_move:
+					param.custom_move(apply_move.move);
+					break;
 				default:
 					break;
 				}

@@ -35,6 +35,10 @@ namespace idk::vkn
 		//Instantiates an actual resource using base's configuration and associate it with unique_id
 		void Instantiate(size_t unique_id, fgr_id base);
 
+		//returns the ratio of the virtual resource against its concrete resource size
+		//components should never exceed 1
+		vec2 ConcreteSizeRatio(fgr_id rsc)const;
+
 		//Associate fgr_id with unique_id
 		void Alias(fgr_id unique_id, fgr_id id);
 
@@ -57,8 +61,14 @@ namespace idk::vkn
 		{
 			return std::get<ActualResource>(GetVar(rsc));
 		}
+		template<typename ActualResource>
+		const ActualResource& Get(fgr_id rsc)const
+		{
+			return std::get<ActualResource>(GetVar(rsc));
+		}
 
 		actual_resource_t& GetVar(fgr_id rsc);
+		const actual_resource_t& GetVar(fgr_id rsc)const;
 		//Generate the next id.
 		fgr_id NextID();
 		void ResetIDs();

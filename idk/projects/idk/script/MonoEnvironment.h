@@ -1,6 +1,6 @@
 #pragma once
 #include <idk.h>
-
+#include <map>
 #include <mono/jit/jit.h>
 
 #include <script/ManagedType.h>
@@ -25,7 +25,7 @@ namespace idk::mono
 		MonoDomain*   _domain   {};
 		MonoAssembly* _assembly {};
 
-		hash_table<string, ManagedType> _types;
+		std::map<string, ManagedType> _types;
 
 		MonoEnvironment(MonoEnvironment&&) noexcept = delete;
 		MonoEnvironment(const MonoEnvironment&) = delete;

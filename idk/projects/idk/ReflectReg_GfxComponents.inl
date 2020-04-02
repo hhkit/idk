@@ -39,16 +39,22 @@ REFLECT_END()
 // CAMERA
 #pragma region Camera
 REFLECT_BEGIN(idk::DontClear, "Don'tClear")
+REFLECT_VAR(hack)
 REFLECT_END()
 REFLECT_BEGIN(idk::DepthOnly, "DepthOnly")
+REFLECT_VAR(hack)
 REFLECT_END()
 
 REFLECT_BEGIN(idk::LayerMask, "LayerMask")
 REFLECT_VARS(mask)
 REFLECT_END()
 
+REFLECT_BEGIN(idk::PostProcessEffect, "PostProcessEffect")
+REFLECT_VARS(useFog, fogColor, fogDensity, useBloom, threshold, blurStrength, blurScale)
+REFLECT_END()
+
 REFLECT_BEGIN(idk::Camera, "Camera")
-REFLECT_VARS(enabled, layer_mask, near_plane, far_plane, field_of_view, depth, clear, is_orthographic, viewport, render_target,gamma)
+REFLECT_VARS(enabled, layer_mask, near_plane, far_plane, field_of_view, orthographic_size,depth, clear, is_orthographic, viewport, render_target,gamma, ppe)
 REFLECT_END()
 #pragma endregion
 
@@ -119,6 +125,12 @@ REFLECT_END()
 REFLECT_BEGIN(idk::Image, "Image")
 REFLECT_VARS(texture, tint, material, preserve_aspect)
 REFLECT_END()
+
+REFLECT_BEGIN(idk::AspectRatioFitter, "AspectRatioFitter")
+REFLECT_VARS(aspect_ratio)
+REFLECT_END()
+
+//REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
 
 REFLECT_BEGIN(idk::Text, "Text")
 REFLECT_VARS(text, font, font_size, letter_spacing, line_height, alignment, wrap, best_fit, color, material)

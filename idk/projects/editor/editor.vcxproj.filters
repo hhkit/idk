@@ -93,9 +93,6 @@
     <ClInclude Include="widgets\ConsoleLog.h">
       <Filter>widgets</Filter>
     </ClInclude>
-    <ClInclude Include="SceneManagement.h">
-      <Filter>controls</Filter>
-    </ClInclude>
     <ClInclude Include="windows\IGE_AnimatorWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
@@ -126,16 +123,12 @@
     <ClInclude Include="widgets\LayerMaskCombo.h">
       <Filter>widgets</Filter>
     </ClInclude>
-    <ClInclude Include="ProjectManagement.h">
-      <Filter>controls</Filter>
-    </ClInclude>
     <ClInclude Include="Registry.h" />
     <ClInclude Include="commands\CMD_ModifyProperty.h">
       <Filter>commands</Filter>
     </ClInclude>
     <ClInclude Include="IconsFontAwesome5_c.h" />
     <ClInclude Include="ComponentIcons.h" />
-    <ClInclude Include="widgets\IconCheckbox.h" />
     <ClInclude Include="commands\CMD_CollateCommands.h">
       <Filter>commands</Filter>
     </ClInclude>
@@ -151,7 +144,6 @@
     <ClInclude Include="opengl_imgui_interface.h">
       <Filter>graphicsAPI_interface</Filter>
     </ClInclude>
-    <ClInclude Include="CameraControls.h" />
     <ClInclude Include="vulkan_imgui_interface.h">
       <Filter>graphicsAPI_interface</Filter>
     </ClInclude>
@@ -165,7 +157,17 @@
     <ClInclude Include="windows\IGE_GfxDebugWindow.h">
       <Filter>windows</Filter>
     </ClInclude>
-    <ClInclude Include="windows\IGE_NetworkSettings.h" />
+    <ClInclude Include="windows\IGE_NetworkSettings.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectManagement.h" />
+    <ClInclude Include="SceneManagement.h" />
+    <ClInclude Include="widgets\IconCheckbox.h">
+      <Filter>widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\IGE_PostProcessingWindow.h">
+      <Filter>windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -245,9 +247,6 @@
     <ClCompile Include="widgets\ConsoleLog.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
-    <ClCompile Include="SceneManagement.cpp">
-      <Filter>controls</Filter>
-    </ClCompile>
     <ClCompile Include="windows\IGE_AnimatorWindow.cpp">
       <Filter>windows</Filter>
     </ClCompile>
@@ -280,7 +279,6 @@
     </ClCompile>
     <ClCompile Include="ProjectManagement.cpp" />
     <ClCompile Include="Registry.cpp" />
-    <ClCompile Include="widgets\IconCheckbox.cpp" />
     <ClCompile Include="commands\CMD_CollateCommands.cpp">
       <Filter>commands</Filter>
     </ClCompile>
@@ -293,7 +291,6 @@
     <ClCompile Include="opengl_imgui_interface.cpp">
       <Filter>graphicsAPI_interface</Filter>
     </ClCompile>
-    <ClCompile Include="CameraControls.cpp" />
     <ClCompile Include="vulkan_imgui_interface.cpp">
       <Filter>graphicsAPI_interface</Filter>
     </ClCompile>
@@ -313,14 +310,20 @@
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayComponentInnerSpecializations.cpp">
       <Filter>windows</Filter>
     </ClCompile>
-    <ClCompile Include="windows\IGE_NetworkSettings.cpp" />
+    <ClCompile Include="windows\IGE_NetworkSettings.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManagement.cpp" />
+    <ClCompile Include="widgets\IconCheckbox.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\IGE_PostProcessingWindow.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="loader">
       <UniqueIdentifier>{6736b34e-82f1-486c-a938-0e50208db3da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="controls">
-      <UniqueIdentifier>{39054dc7-3aac-467b-99ab-170c8f7698c4}</UniqueIdentifier>
     </Filter>
     <Filter Include="commands">
       <UniqueIdentifier>{1915fa26-6cba-47a3-95b4-c3891080ff02}</UniqueIdentifier>

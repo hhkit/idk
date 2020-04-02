@@ -4,6 +4,7 @@
 #include <vkn/DrawSet.h>
 #include <gfx/DefaultShaders.h>
 #include <vkn/DrawSetRenderPass.h>
+#include <gfx/PostProcessEffect.h>
 namespace idk
 {
 	struct renderer_attributes;
@@ -47,6 +48,15 @@ namespace idk::vkn::renderpasses
 		FrameGraphResource copied_depth;
 		uvec2 size;
 		CopyDepthPass(FrameGraphBuilder& builder, uvec2 depth_size, FrameGraphResource depth);
+		void Execute(FrameGraphDetail::Context_t context) override;
+	};
+	struct CopyColorPass : BaseRenderPass
+	{
+		string c_pass_name; 
+		FrameGraphResource copied_color;
+		FrameGraphResource original_color;
+		uvec2 size;
+		CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color,vk::ImageLayout imageLayoutToConvert = vk::ImageLayout::eGeneral);
 		void Execute(FrameGraphDetail::Context_t context) override;
 	};
 	struct GBufferPass : DrawSetRenderPass
@@ -95,7 +105,23 @@ namespace idk::vkn::renderpasses
 
 		VknTextureView color_correction_lut;
 
+		PostProcessEffect ppe;
+
 		CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex,FrameGraphResource out_color_tex,  FrameGraphResource out_depth_tex);
+		void Execute(FrameGraphDetail::Context_t context) override;
+		rect _viewport;
+	};
+	struct CombinePassSpec : BaseRenderPass, FsqUtil
+	{
+		FrameGraphResourceMutable out_color;
+		FrameGraphResourceMutable out_hdr;
+		FrameGraphResourceMutable out_depth;
+
+		RscHandle<ShaderProgram> combine_shader;
+
+		VknTextureView color_correction_lut;
+
+		CombinePassSpec(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex, FrameGraphResource out_color_tex, FrameGraphResource out_depth_tex);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};
@@ -125,18 +151,6 @@ namespace idk::vkn::renderpasses
 		rect _viewport;
 	};
 
-	/*struct BloomPass : BaseRenderPass, FsqUtil
-	{
-		FrameGraphResourceMutable bloom_rsc;
-		FrameGraphResourceMutable bloom_depth_rsc;
-		UnlitPass& unlit_rsc;
-
-		RscHandle<ShaderProgram> bloom_shader;
-
-		BloomPass(FrameGraphBuilder& builder, UnlitPass& unlit_, rect viewport, FrameGraphResource color_tex, FrameGraphResource depth_tex);
-		void Execute(FrameGraphDetail::Context_t context) override;
-		rect _viewport;
-	};*/
 
 	struct CubeClearPass : DrawSetRenderPass, FsqUtil
 	{

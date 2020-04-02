@@ -91,7 +91,7 @@ namespace idk::vkn
 		//vector<hlp::vector_buffer>        ui_text_buffer;
 		vector<hlp::vector_buffer>        ui_text_buffer_pos;
 		vector<hlp::vector_buffer>        ui_text_buffer_uv;
-		hash_table<Handle<Canvas>, vector<UIRenderObject>>* ui_render_per_canvas;
+		//hash_table<Handle<Canvas>, vector<UIRenderObject>>* ui_render_per_canvas;
 		vector<UIRenderObjectWithCanvas>* ui_canvas;
 		vector<UITextRange>*   ui_text_range;
 		vector<UIAttriBlock>*      ui_text_data;
@@ -130,7 +130,7 @@ namespace idk::vkn
 		const vector<SkeletonTransforms>* skeleton_transforms;
 
 
-		void ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> &material_instances,MaterialInstanceCache& mat_inst_cache);
+		void ProcessMaterialInstances(hash_table<RscHandle<MaterialInstance>, ProcessedMaterial> &material_instances);
 	};
 
 	struct GraphicsState : CoreGraphicsState
@@ -139,6 +139,7 @@ namespace idk::vkn
 		GraphicsSystem::RenderRange range;
 		const vector<LightData>* lights;
 		vector<RscHandle<Texture>> shadow_maps_2d  ;
+		//PostProcessEffect ppEffect;
 
 		bool clear_render_target = false;
 

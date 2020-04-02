@@ -35,6 +35,7 @@
       <Filter>Shared</Filter>
     </ClCompile>
     <ClCompile Include="SceneUpdater.cpp" />
+    <ClCompile Include="FontAtlasCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssimpCompiler.h" />
@@ -45,5 +46,6 @@
     <ClInclude Include="IAssetLoader.h" />
     <ClInclude Include="TextureCompiler.h" />
     <ClInclude Include="SceneUpdater.h" />
+    <ClInclude Include="FontAtlasCompiler.h" />
   </ItemGroup>
 </Project>

@@ -6,6 +6,7 @@
     <ClInclude Include="WindowsApplication.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="XInputSystem.h" />
+    <ClInclude Include="WinMessageTable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -13,5 +14,6 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="XInputSystem.cpp" />
     <ClCompile Include="WindowsApplication_GetNetworkDevices.cpp" />
+    <ClCompile Include="WinMessageTable.cpp" />
   </ItemGroup>
 </Project>

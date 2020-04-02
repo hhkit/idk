@@ -2,7 +2,7 @@
 #include <idk.h>
 #include <util/enum.h>
 
-namespace idk{
+namespace idk {
 
 	// for import only
 	// if you need a more specific format, call the constructor directly
@@ -33,7 +33,7 @@ namespace idk{
 		, NoDepth
 		, Depth16
 		, Depth2432
-		);
+	);
 
 	ENUM(TextureTarget, int,
 		PosX, NegX,
@@ -54,5 +54,13 @@ namespace idk{
 	ENUM(FontDefault, int,
 		SourceSansPro
 	); // 
+
+	struct CharacterInfo
+	{
+		vec2 advance;
+		vec2 glyph_size; // w, h
+		vec2 bearing; // left, top
+		vec2 tex_offset; // x offset of glyph in texture coordinates
+	};
 
 }

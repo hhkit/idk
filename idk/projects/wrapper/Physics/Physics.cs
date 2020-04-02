@@ -23,6 +23,7 @@ namespace idk
             hitInfo.collider_id = result.collider_id;
             hitInfo.pt = result.point_of_collision;
             hitInfo.dist = result.distance;
+            hitInfo.norm = result.normal;
             return result.valid;
         }
     }

@@ -3,6 +3,7 @@
 #include <ds/span.inl>
 #include <phys/collision_contact.h>
 #include <phys/collision_rotational.h>
+#include <ds/result.inl>
 namespace idk::phys
 {
 // #pragma optimize("", off)

@@ -6,18 +6,28 @@
 
 #include <vkn/VknTextureRenderMeta.h>
 
+namespace idk
+{
+	struct CompiledFontAtlas;
+}
+
 namespace idk::vkn
 {
 	class VknFontAtlas;
 
 	struct FontAtlasOptions : FontAtlasMeta
 	{
+		Guid guid;
 		FilterMode  min_filter{};
 		FilterMode  mag_filter{};
 		std::optional<CompareOp> compare_op{};
 		float anisoptrophy = 1.0f;
 		FontAtlasOptions() = default;
-		FontAtlasOptions(const FontAtlasMeta& meta) :FontAtlasMeta{ meta } {}
+		FontAtlasOptions(const FontAtlasMeta& meta) :FontAtlasMeta{ meta } 
+		{
+			min_filter = mag_filter = filter_mode = meta.filter_mode;
+		}
+		FontAtlasOptions(const CompiledFontAtlas& meta);
 	};
 	struct CharacterCreateInfo {
 		int x{};

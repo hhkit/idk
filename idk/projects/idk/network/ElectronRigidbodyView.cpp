@@ -22,11 +22,10 @@ namespace idk
 	{
 		if (velocity_param)
 		{
-			LOG_TO(LogPool::GAME, "adding force");
 			velocity_param->GetClientObject()->PushMove(
 				Core::GetSystem<NetworkSystem>().GetSequenceNumber(),
-				SeqAndPack::delta_move,
-				force * rb->inv_mass
+				SeqAndPack::custom_move,
+				force
 			);
 		}
 	}
@@ -45,11 +44,8 @@ namespace idk
 
 			ParameterImpl<vec3> param;
 			param.getter = [rigidbody]() -> vec3 { return rigidbody->velocity(); };
-			param.setter = [rigidbody](const vec3& v) -> void 
-			{ 
-				LOG_TO(LogPool::NETWORK, "SET VELOCITY (%f, %f,%f)", v.x, v.y, v.z);
-				rigidbody->velocity(v);  
-			};
+			param.setter = [rigidbody](const vec3& v) -> void { rigidbody->velocity(v); };
+			param.custom_move = [rigidbody](const vec3& v) -> void { LOG_TO(LogPool::NETWORK, "ADD FORCE"); rigidbody->AddForce(v); };
 			velocity_param = view->RegisterMember("Velocity", std::move(param), 0);
 		}
 	}

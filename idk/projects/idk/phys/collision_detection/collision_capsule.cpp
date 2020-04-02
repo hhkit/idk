@@ -15,12 +15,14 @@ Collisions with capsule. Currently has debug renders
 #include "stdafx.h"
 #include "collision_capsule.h"
 #include "collision_sphere.h"
-#include <phys/collision.cpp>
+//#include <phys/collision.cpp>
 #include <gfx/DebugRenderer.h> //Temp
 #include <ds/result.inl>
 
 namespace idk::phys
 {
+	std::pair<vec3, vec3> GJKAlgorithm(const vector<vec3> points);
+	std::pair<vec3, vec3> ClosestPairPointsLineSegmentToLineSegment(const vec3& lineA_1, const vec3& lineA_2, const vec3& lineB_1, const vec3& lineB_2);
 
 
 	col_result collide_capsule_capsule_discrete(const capsule& lhs, const capsule& rhs)
