@@ -137,7 +137,7 @@ namespace idk::vkn::renderpasses
 
 		vtx_shader_bind.vertex_shader = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFont];
 		frg_shader_bind.fragment_shader= Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FFont];
-		index_span particle_idx{ state.range.inst_particle_begin,state.range.inst_particle_end };
+		//index_span particle_idx{ state.range.inst_font_begin,state.range.inst_font_end };
 
 		TextMeshDrawSet  logic{ *state.shared_gfx_state->fonts_data,state.shared_gfx_state->font_buffer};
 		TextMeshBindingLogic binding_and_logic{ bindings,logic };

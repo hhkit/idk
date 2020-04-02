@@ -316,7 +316,6 @@
     <ClInclude Include="windows\IGE_HelpWindow.h" />
     <ClInclude Include="windows\IGE_LightLister.h" />
     <ClInclude Include="windows\IGE_NetworkSettings.h" />
-    <ClInclude Include="windows\IGE_PostProcessingWindow.h" />
     <ClInclude Include="windows\IGE_ProfilerWindow.h" />
     <ClInclude Include="windows\IGE_ProgrammerConsole.h" />
     <ClInclude Include="windows\IGE_ProjectSettings.h" />
@@ -380,7 +379,6 @@
     <ClCompile Include="windows\IGE_InspectorWindow_DisplayAsset.cpp" />
     <ClCompile Include="windows\IGE_LightLister.cpp" />
     <ClCompile Include="windows\IGE_NetworkSettings.cpp" />
-    <ClCompile Include="windows\IGE_PostProcessingWindow.cpp" />
     <ClCompile Include="windows\IGE_ProfilerWindow.cpp" />
     <ClCompile Include="windows\IGE_ProgrammerConsole.cpp" />
     <ClCompile Include="windows\IGE_ProjectSettings.cpp" />

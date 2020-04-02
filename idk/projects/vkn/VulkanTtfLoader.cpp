@@ -1,24 +1,24 @@
 #include "pch.h"
-#include "VulkanTtfLoader.h"
-#include <vkn/VknFontAtlas.h>
-#include <res/MetaBundle.inl>
-#include <vkn/VknFontAtlasLoader.h>
-#include <sstream>
-#include <vkn/VulkanWin32GraphicsSystem.h>
-#include <res/ResourceManager.inl>
-#include <res/ResourceHandle.inl>
-#include <res/ResourceMeta.inl>
-
-//Dep
-//#include <ft2build.h>
-//#include FT_FREETYPE_H 
-
-//Resources
-#include <gfx/FontAtlas.h>
-#include <iostream>
-
-namespace idk::vkn
-{
+//#include "VulkanTtfLoader.h"
+//#include <vkn/VknFontAtlas.h>
+//#include <res/MetaBundle.inl>
+//#include <vkn/VknFontAtlasLoader.h>
+//#include <sstream>
+//#include <vkn/VulkanWin32GraphicsSystem.h>
+//#include <res/ResourceManager.inl>
+//#include <res/ResourceHandle.inl>
+//#include <res/ResourceMeta.inl>
+//
+////Dep
+////#include <ft2build.h>
+////#include FT_FREETYPE_H 
+//
+////Resources
+//#include <gfx/FontAtlas.h>
+//#include <iostream>
+//
+//namespace idk::vkn
+//{
 	//VulkanView& View();
 	//TtfLoader::TtfLoader() : allocator{ *View().Device(),View().PDevice() }
 	//{
@@ -208,4 +208,4 @@ namespace idk::vkn
 	//	return LoadFile(handle, RscHandle<FontAtlas>{tex},nullptr);
 	//}
 
-}
+//}

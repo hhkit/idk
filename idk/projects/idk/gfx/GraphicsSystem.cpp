@@ -763,7 +763,7 @@ namespace idk
 					continue;
 				if (!camera.enabled || !camera.GetGameObject()->ActiveInHierarchy())
 					continue;
-				if (camera.viewport.size.x <= 0 || camera.viewport.size.y <= 0)
+				if (camera.viewport.size.x <= 0.f || camera.viewport.size.y <= 0.f)
 					continue;
 
 				if (camera.GetHandle().scene == Scene::editor)
@@ -775,9 +775,9 @@ namespace idk
 			}
 			for (auto& elem : lights)
 			{
-				if (isolate)
+				if (isolate && !elem.isolate)
 				{
-					if (!elem.isolate)
+					//if (!elem.isolate)
 						continue;
 				}
 				//result.light_camera_data.emplace_back(elem.GenerateCameraData());//Add the camera needed for the shadowmap
@@ -815,9 +815,9 @@ namespace idk
 				auto obj = GetRenderObj(elem);
 				if (obj)
 				{
-					auto& render_obj = *obj;
+					//auto& render_obj = *obj;
 					//Core::GetSystem<DebugRenderer>().Draw(render_obj.mesh->bounding_volume * render_obj.transform, color{ 0,0,1 });
-					result.mesh_render.emplace_back(std::move(render_obj));
+					result.mesh_render.emplace_back(std::move(*obj));
 				}
 			}
 		POST_END();
@@ -1140,10 +1140,9 @@ namespace idk
 			size_t i = 0;
 			for (auto& cam : result.camera)
 			{
-				auto& camera = cam;
-				RenderRange range{ camera };
+				RenderRange range{ cam };
 				{
-					const auto [start_index, end_index] = CullAndBatchRenderObjects(camera, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+					const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
 					range.inst_mesh_render_begin = start_index;
 					range.inst_mesh_render_end = end_index;
 					ProcessParticles(result.particle_render_data, result.particle_buffer, result.particle_range, range);
@@ -1152,7 +1151,7 @@ namespace idk
 						LightVolDbg::RenderNext();
 					DbgIndex() = s_cast<int>(i++);
 					
-					CullLights(camera, CullLightsInfo { result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range,lights_used });
+					CullLights(cam, CullLightsInfo { result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range,lights_used });
 				}
 				result.culled_render_range.emplace_back(range);
 				//{

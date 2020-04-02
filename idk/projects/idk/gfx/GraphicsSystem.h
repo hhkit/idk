@@ -42,18 +42,18 @@ namespace idk
 		struct RenderRange
 		{
 			CameraData camera;
-			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
-			size_t inst_particle_begin{}, inst_particle_end{};
-			size_t inst_font_begin{}, inst_font_end{};
-			size_t light_begin{}, light_end{};
-			size_t dir_light_begin{}, dir_light_end{};
+			size_t inst_mesh_render_begin{0}, inst_mesh_render_end{0};
+			size_t inst_particle_begin{0}, inst_particle_end{0};
+			size_t inst_font_begin{0}, inst_font_end{0};
+			size_t light_begin{0}, light_end{0};
+			size_t dir_light_begin{0}, dir_light_end{0};
 		};
 		struct LightRenderRange
 		{
-			size_t light_index;
-			size_t light_map_index;
-			size_t inst_mesh_render_begin{}, inst_mesh_render_end{};
-			size_t instanced_skinned_mesh_render_begin{}, instanced_skinned_mesh_render_end{};
+			size_t light_index{};
+			size_t light_map_index{};
+			size_t inst_mesh_render_begin{0}, inst_mesh_render_end{0};
+			size_t instanced_skinned_mesh_render_begin{0}, instanced_skinned_mesh_render_end{0};
 		};
 		std::map<Handle<GameObject>, CamLightData> d_lightmaps;
 

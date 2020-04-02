@@ -43,7 +43,7 @@ namespace idk::vkn::bindings
 		static constexpr size_t stride = 8;
 		void Bind(RenderInterface& context)override
 		{
-			auto pbr_trf = _state._pbr_trf;
+			auto& pbr_trf = _state._pbr_trf;
 			context.BindUniform("PBRBlock", 0, string_view{ hlp::buffer_data<const char*>(pbr_trf),hlp::buffer_size(pbr_trf) });
 		}
 		bool Skip([[maybe_unused]] RenderInterface& context, [[maybe_unused]] const RenderObject& ro) override
@@ -68,8 +68,8 @@ namespace idk::vkn::bindings
 				{
 					//auto& sm_uni = shadow_map;
 					{
-						auto& depth_tex = shadow_map;
-						context.BindUniform(name,i++, depth_tex);
+						//auto& depth_tex = shadow_map;
+						context.BindUniform(name,i++, shadow_map);
 					}
 				}
 			}
@@ -143,10 +143,8 @@ namespace idk::vkn::bindings
 			}
 			Bind(context);
 
-			auto light_data = PrepareLightBlock(_view_matrix, lights);
-			auto dlight_data = PrepareDirectionalBlock(directional_vp);
-			context.BindUniform("LightBlock", 0, light_data);
-			context.BindUniform("DirectionalBlock", 0, dlight_data);
+			context.BindUniform("LightBlock", 0, PrepareLightBlock(_view_matrix, lights));
+			context.BindUniform("DirectionalBlock", 0, PrepareDirectionalBlock(directional_vp));
 
 			BindShadows(context, "shadow_map_directional", shadow_maps_directional);
 			BindShadows(context, "shadow_map_point", shadow_maps_point);

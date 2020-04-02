@@ -45,7 +45,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <gfx/GraphFactory.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
-#include <opengl/resource/OpenGLFontAtlasLoader.h>
+//#include <opengl/resource/OpenGLFontAtlasLoader.h>
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderSnippetLoader.h>
 #include <res/ResourceHandle.inl>
@@ -61,7 +61,6 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <editor/windows/IGE_WindowList.h>
 #include <editor/windows/IGE_ShadowMapWindow.h>
 #include <editor/windows/IGE_GfxDebugWindow.h>
-#include <editor/windows/IGE_PostProcessingWindow.h>
 
 // util
 #include <util/ioutils.h>
@@ -101,7 +100,7 @@ namespace idk
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
             Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
-			Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
+			//Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 			break;
 		case GraphicsAPI::Vulkan:
 			_interface = std::make_unique<vulkan_imgui_interface>(&Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().Instance());
@@ -158,7 +157,6 @@ namespace idk
 		ADD_WINDOW(IGE_ProjectSettings);	
 		ADD_WINDOW(IGE_NetworkSettings);
 		ADD_WINDOW(IGE_HelpWindow);	
-		ADD_WINDOW(IGE_PostProcessingWindow);
 #undef ADD_WINDOW
 
 		for (auto& i : _ige_windows)

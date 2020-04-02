@@ -902,7 +902,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;freetype.lib;fmod_vc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>

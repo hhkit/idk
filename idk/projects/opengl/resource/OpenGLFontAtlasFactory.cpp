@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "OpenGLFontAtlasFactory.h"
-#include "OpenGLFontAtlasLoader.h"
+//#include "OpenGLFontAtlasLoader.h"
 
 #include "OpenGLFontAtlas.h"
 #include <core/Core.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H 
+//#include <ft2build.h>
+//#include FT_FREETYPE_H 
 
 #include <iostream>
 
@@ -30,8 +30,8 @@ namespace idk::ogl {
 	{
 		//auto result = *Core::GetResourceManager().Load<OpenGLFontAtlas>("/engine_data/fonts/SourceSansPro-SemiBold.ttf");
 		//RscHandle<OpenGLFontAtlas> default_font = Core::GetResourceManager().LoaderEmplaceResource<OpenGLFontAtlas>();
-		
-		return GenerateFontAtlas(PathHandle{ "/engine_data/fonts/SourceSansPro-SemiBold.ttf" });
+		return {};
+		//return GenerateFontAtlas(PathHandle{ "/engine_data/fonts/SourceSansPro-SemiBold.ttf" });
 	}
 	unique_ptr<FontAtlas> OpenGLFontAtlasFactory::Create()
 	{

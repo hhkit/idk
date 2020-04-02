@@ -29,7 +29,7 @@
 #include <opengl/resource/OpenGLMesh.h>
 #include <opengl/resource/OpenGLCubeMapLoader.h>
 #include <opengl/resource/OpenGLTextureLoader.h>
-#include <opengl/resource/OpenGLFontAtlasLoader.h>
+//#include <opengl/resource/OpenGLFontAtlasLoader.h>
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderSnippetLoader.h>
 
@@ -179,7 +179,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpg");
 		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".jpeg");
 		Core::GetResourceManager().RegisterLoader<OpenGLTextureLoader>(".dds");
-		Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
+		//Core::GetResourceManager().RegisterLoader<OpenGLFontAtlasLoader>(".ttf");
 		break;
 	default:
 		break;
