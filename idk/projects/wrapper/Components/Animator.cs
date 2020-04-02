@@ -8,17 +8,29 @@ namespace idk
         public bool Play(string name, string layer)
              => Bindings.AnimatorPlay(handle, name, layer);
 
-        public bool CrossFade(string name)
-           => Bindings.AnimatorCrossFade(handle, name);
+        public bool BlendTo(string name)
+           => Bindings.AnimatorBlendTo(handle, name);
 
-        public bool CrossFade(string name, float time)
-          => Bindings.AnimatorCrossFade(handle, name, time);
+        public bool BlendTo(string name, float time)
+          => Bindings.AnimatorBlendTo(handle, name, time);
 
-        public bool CrossFade(string name, string layer)
-          => Bindings.AnimatorCrossFade(handle, name, 0.2f, layer);
+        public bool BlendTo(string name, string layer)
+          => Bindings.AnimatorBlendTo(handle, name, 0.2f, layer);
 
-        public bool CrossFade(string name, float time, string layer)
-          => Bindings.AnimatorCrossFade(handle, name, time, layer);
+        public bool BlendTo(string name, float time, string layer)
+          => Bindings.AnimatorBlendTo(handle, name, time, layer);
+
+        public bool BlendToInSeconds(string name)
+           => Bindings.AnimatorBlendToInSeconds(handle, name);
+
+        public bool BlendToInSeconds(string name, float timeInSeconds)
+          => Bindings.AnimatorBlendToInSeconds(handle, name, timeInSeconds);
+
+        public bool BlendToInSeconds(string name, string layer)
+          => Bindings.AnimatorBlendToInSeconds(handle, name, 0.0f, layer);
+
+        public bool BlendToInSeconds(string name, float timeInSeconds, string layer)
+          => Bindings.AnimatorBlendToInSeconds(handle, name, timeInSeconds, layer);
 
         public bool Resume()
              => Bindings.AnimatorResume(handle);

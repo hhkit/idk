@@ -297,7 +297,8 @@ namespace idk
         public extern static bool AnimatorPlay(ulong id, string name, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool AnimatorCrossFade(ulong id, string name, float time = 0.2f, string layer = "");
+        public extern static bool AnimatorBlendTo(ulong id, string name, float time = 0.2f, string layer = "");
+        public extern static bool AnimatorBlendToInSeconds(ulong id, string name, float timeInSeconds = 0.0f, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorPause(ulong id, string layer = "");

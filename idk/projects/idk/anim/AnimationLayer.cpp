@@ -84,7 +84,8 @@ namespace idk
 		blend_state.elapsed_time = 0.0f;
 		blend_state.is_playing = true;
 		blend_this_frame = true;
-		blend_duration = blend_time;
+		// Cap the loop time to 1.0f if this state does not loop
+		blend_duration = anim_states[index].loop ? blend_time : std::max(blend_time, 1.0f);
 		transition_index = 0;
 		return true;
 	}
