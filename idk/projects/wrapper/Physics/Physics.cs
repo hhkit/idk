@@ -26,5 +26,20 @@ namespace idk
             hitInfo.norm = result.normal;
             return result.valid;
         }
+
+        public static RaycastHit[] RaycastAll(Vector3 origin, Vector3 direction, float max_dist = Mathf.Infinity, int mask = DefaultRaycastLayers, bool queriesHitTriggers = false)
+        {
+            var res = Bindings.PhysicsRaycastAll(origin, direction, max_dist, mask, queriesHitTriggers);
+            RaycastHit[] ret = new RaycastHit[res.Length];
+            for (int i = 0; i < ret.Length; i++)
+            {
+                ret[i] = new RaycastHit();
+                ret[i].collider_id = res[i].collider_id;
+                ret[i].pt = res[i].point_of_collision;
+                ret[i].dist = res[i].distance;
+                ret[i].norm = res[i].normal;
+            }
+            return ret;
+        }
     }
 }

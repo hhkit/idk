@@ -641,13 +641,14 @@ namespace idk::mono
 			vec3 normal;
 			vec3 point_of_collision;
 		};
+
 		BIND_START("idk.Bindings::PhysicsRaycast", ManagedRaycast, vec3 origin, vec3 direction, float max_dist, int mask, bool hit_triggers)
 		{
 			auto res = Core::GetSystem<PhysicsSystem>().Raycast(ray{ .origin = origin,.velocity = direction }, LayerMask{ mask }, hit_triggers);
 			if (res.size())
 			{
 				auto& first = res.front();
-				if (first.raycast_succ.distance_to_collision < max_dist)
+				if (first.raycast_succ.distance_to_collision <= max_dist)
 					return ManagedRaycast{
 						true,
 						first.collider.id,
@@ -657,6 +658,29 @@ namespace idk::mono
 			}
 
 			return ManagedRaycast{ .valid = false };
+		}
+		BIND_END()
+
+		BIND_START("idk.Bindings::PhysicsRaycastAll", MonoArray*, vec3 origin, vec3 direction, float max_dist, int mask, bool hit_triggers)
+		{
+			auto res = Core::GetSystem<PhysicsSystem>().Raycast(ray{ .origin = origin,.velocity = direction }, LayerMask{ mask }, hit_triggers);
+			const auto end = std::remove_if(res.begin(), res.end(), [max_dist](const RaycastHit& hit) { return hit.raycast_succ.distance_to_collision > max_dist; });
+			const auto sz = end - res.begin();
+			
+			const auto managed_raycast_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("ManagedRaycast");
+			auto retval = mono_array_new(mono_domain_get(), managed_raycast_type->Raw(), sz);
+			for (int i = 0; i < sz; ++i)
+			{
+				const ManagedRaycast managed_raycast{
+					true,
+					res[i].collider.id,
+					res[i].raycast_succ.distance_to_collision,
+					res[i].raycast_succ.surface_normal,
+					res[i].raycast_succ.point_of_collision };
+				mono_array_set(retval, ManagedRaycast, i, managed_raycast);
+			}
+
+			return retval;
 		}
 		BIND_END()
 
