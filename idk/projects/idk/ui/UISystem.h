@@ -25,5 +25,4 @@ namespace idk
         void ComputeCanvasHierarchyRects(Handle<Canvas> canvas);
         void FinalizeMatrices(Handle<Canvas> canvas);
     };
-    void calc_rt(idk::Handle<idk::GameObject>& child, const idk::Handle<idk::RectTransform>& rt_handle);
 }

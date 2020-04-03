@@ -15,6 +15,6 @@ void main()
 {
 	out_color = fs_in.color * texture(_uTex[0], fs_in.uv);
 	
-	if(FragColor.a < 0.001176)
+	if(out_color.a < 0.001176)
 		discard;
 } 

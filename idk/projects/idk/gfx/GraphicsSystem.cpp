@@ -1003,7 +1003,6 @@ namespace idk
 				float tw = font_data.width;
 				float th = font_data.height;
 
-				render_data.material = text.material;
 				render_data.color = text.color;
 				render_data.data = TextData{ font_data.coords, text.font };
 				render_data.depth = go->Transform()->Depth();

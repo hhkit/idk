@@ -461,7 +461,7 @@ namespace idk::vkn
 		mat4 obj_ivt = obj_trfm.inverse().transpose();
 		mat4 block2[] = { obj_trfm,obj_ivt };
 		the_interface.BindUniformBuffer("ObjectMat4Block", 0, block2);
-		the_interface.BindSampler("_uTex", 0, *dc.atlas.as<VknFontAtlas>().texture);
+		the_interface.BindSampler("tex", 0, *dc.atlas.as<VknFontAtlas>().texture);
 	}
 
 	void CanvasVertexBindings::BindCanvas(PipelineThingy& the_interface, const ImageData& dc, const UIRenderObject& dc_one)

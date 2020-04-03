@@ -96,7 +96,7 @@ namespace idk::vkn
 					}
 					else
 					{
-						the_interface.BindShader(ShaderStage::Fragment, ui_canvas.material->material->_shader_program);
+						the_interface.BindShader(ShaderStage::Fragment, state.shared_gfx_state->renderer_fragment_shaders[FragmentShaders::FFont]);
 
 						canvas_ui_ro.config = canvas_pipeline2;
 						canvas_ui_ro.material_instance = ui_canvas.material;

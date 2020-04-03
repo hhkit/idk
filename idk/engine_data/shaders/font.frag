@@ -12,7 +12,7 @@ Creation date: 5/28/2019
 End Header --------------------------------------------------------*/
 #version 450
 
-layout(location = 2) in VS_OUT
+layout(location = 1) in VS_OUT
 {
   vec3 position;
   vec2 uv;
@@ -21,11 +21,14 @@ layout(location = 2) in VS_OUT
 
 layout(location = 0) out vec4 out_color;
 
-S_LAYOUT(2, 5) uniform sampler2D _uTex[1];
+S_LAYOUT(3,0) uniform sampler2D tex;
+
+const float smoothing = 1.0 /16.0;
 
 void main()
 {
-	float alpha = texture(_uTex[0], vs_out.uv).r;
+	float dist = texture(tex,vs_out.uv).r;
+	float alpha = smoothstep(0.3f, 0.8f, dist);
 		
 	out_color = vec4(vs_out.color.rgb, vs_out.color.a * alpha);
 	
