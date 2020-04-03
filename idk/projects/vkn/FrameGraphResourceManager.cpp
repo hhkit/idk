@@ -6,7 +6,6 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanView.h>
 #include <res/ResourceHandle.inl>
-#pragma optimize("",off)
 namespace idk::vkn
 {
 	bool ValidateUsage(const TextureDescription& desc,vk::ImageUsageFlags usage)
