@@ -469,7 +469,11 @@ namespace idk::vkn
 
 		if (load_info.layers == 0)
 			throw;
-
+		vk::MemoryPropertyFlags mem_property = vk::MemoryPropertyFlagBits::eDeviceLocal;
+		//if (!(vk::ImageUsageFlagBits::eColorAttachment| vk::ImageUsageFlagBits::eDepthStencilAttachment) & load_info.image_usage)
+		//{
+		//	
+		//}
 		vk::ImageCreateInfo imageInfo{};
 		imageInfo.flags = load_info.image_create_bits;
 		imageInfo.imageType = vk::ImageType::e2D;
@@ -485,7 +489,7 @@ namespace idk::vkn
 		imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
 		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
 		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
-		auto alloc = allocator.Allocate(*image, vk::MemoryPropertyFlagBits::eDeviceLocal); //Allocate on device only
+		auto alloc = allocator.Allocate(*image, mem_property); //Allocate on device only
 		result.size_on_device = alloc->Size();
 		device.bindImageMemory(*image, alloc->Memory(), alloc->Offset(), vk::DispatchLoaderDefault{});
 

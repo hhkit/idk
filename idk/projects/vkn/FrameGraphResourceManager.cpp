@@ -6,6 +6,7 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VulkanView.h>
 #include <res/ResourceHandle.inl>
+#pragma optimize("",off)
 namespace idk::vkn
 {
 	bool ValidateUsage(const TextureDescription& desc,vk::ImageUsageFlags usage)
@@ -86,11 +87,31 @@ namespace idk::vkn
 	}
 	FrameGraphResource FrameGraphResourceManager::CreateTexture(TextureDescription dsc)
 	{
-		auto rsc_index = resources.size();
-		resources.emplace_back(dsc);
-		auto id = NextID();
-		resource_handles.emplace(id, rsc_index);
-		renamed_original.emplace(id, id);
+		fgr_id id{};
+		if (dsc.actual_rsc)
+		{
+			Guid guid = dsc.actual_rsc->guid;
+			auto o_id = override_tracker.GetID(*this, guid);
+			
+			if (o_id)
+			{
+				id = *o_id;
+				auto desc = *GetResourceDescriptionPtr(id);
+				desc->usage |= dsc.usage;
+			}
+		}
+		if (!id)
+		{
+			auto rsc_index = resources.size();
+			resources.emplace_back(dsc);
+			id = NextID();
+			if (dsc.actual_rsc)
+			{
+				override_tracker.Register(dsc.actual_rsc->guid, id);
+			}
+			resource_handles.emplace(id, rsc_index);
+			renamed_original.emplace(id, id);
+		}
 		return FrameGraphResource{ id };
 	}
 
@@ -103,6 +124,7 @@ namespace idk::vkn
 			throw;
 		resource_handles.emplace(next_id, itr->second);
 		renamed_resources.emplace(next_id, rsc.id);
+		renamed_rsc_next.emplace(rsc.id, next_id);
 		renamed_original.emplace(next_id, oitr->second);
 		return FrameGraphResource{ next_id };
 	}
@@ -208,6 +230,33 @@ namespace idk::vkn
 	{
 		return renamed_original.find(curr)->second;
 	}
+	fgr_id FrameGraphResourceManager::GetLatest(fgr_id id)
+	{
+		bool is_changed ;
+		do
+		{
+			is_changed = false;
+		{
+			auto itr = renamed_rsc_next.find(id);
+			while (itr != renamed_rsc_next.end())
+			{
+				id = itr->second;
+				itr = renamed_rsc_next.find(id);
+			}
+		}
+		{
+			auto itr = write_renamed.find(id);
+			while (itr != write_renamed.end())
+			{
+				id = itr->second;
+				itr = write_renamed.find(id);
+				is_changed = true;
+			}
+		}
+
+		} while (is_changed);
+		return id;
+	}
 
 	std::optional<TextureDescription*> FrameGraphResourceManager::GetResourceDescriptionPtr(fgr_id rsc_id)
 	{
@@ -282,6 +331,28 @@ namespace idk::vkn
 		renamed_original.clear();
 		write_renamed.clear();
 		renamed_resources.clear();
+		override_tracker.Reset();
+		renamed_rsc_next.clear();
+	}
+	void FrameGraphResourceManager::OverrideTracker::Register(Guid guid, fgr_id id)
+	{
+		override_to_original.emplace(guid, id);
+	}
+	std::optional<fgr_id>FrameGraphResourceManager::OverrideTracker::GetID(FrameGraphResourceManager& rsc_manager, Guid guid)
+	{
+		std::optional<fgr_id> result;
+		auto itr = override_to_original.find(guid);
+		if (itr != override_to_original.end())
+		{
+			result = itr->second;
+			result  = rsc_manager.GetLatest(*result);
+			
+		}
+		return result;
+	}
+	void FrameGraphResourceManager::OverrideTracker::Reset()
+	{
+		override_to_original.clear();
 	}
 }
 

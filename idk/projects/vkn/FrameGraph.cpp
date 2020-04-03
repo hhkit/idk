@@ -6,6 +6,7 @@
 #include <res/ResourceHandle.inl>
 
 #include <vkn/DebugUtil.h>
+#pragma optimize("",off)
 namespace idk::vkn
 {
 	void DoNothing();
@@ -613,7 +614,7 @@ namespace idk::vkn
 
 	const FrameGraphNode* FrameGraph::GetSourceNode(fgr_id id) const
 	{
-		auto src_node_id = this->graph_builder.GetSourceNode(id);
+		auto src_node_id = this->graph_builder.GetOutputNode(id);
 		if (!src_node_id)
 		{
 			return nullptr;
@@ -626,6 +627,7 @@ namespace idk::vkn
 		auto& node = this->nodes[node_itr->second];
 		return &node;
 	}
+	static int dbg_counter = 0;
 	vk::ImageLayout FrameGraph::GetSourceLayout(fgr_id id) const
 	{
 		vk::ImageLayout result = {};
@@ -640,8 +642,25 @@ namespace idk::vkn
 			LOG_ERROR_TO(LogPool::GFX, "Attempting to get source layout for resource [%s] that has not been written to.", name.data());
 			throw std::runtime_error("Attempting to get source layout for a resource that has not been written to.");
 		}*/
-		auto src_id = GetResourceManager().GetOriginal(id);
+		auto& rsc_manager = GetResourceManager();
+		//auto curr_node_ptr = GetSourceNode(id);
+		auto src_id = *GetResourceManager().GetPrevious(id);
+		++dbg_counter;
+		while (!rsc_manager.IsWriteRenamed(FrameGraphResource{ src_id }))
+		{
+			src_id = *GetResourceManager().GetPrevious(id);
+		}
+		
+		auto derp = rsc_manager.WriteRenamed(FrameGraphResource{ src_id });
+		src_id = derp.id;
 		auto node_ptr = GetSourceNode(src_id);
+		//while(curr_node_ptr == node_ptr)
+		//{
+		//	src_id = *GetResourceManager().GetPrevious(src_id);
+		//	node_ptr = GetSourceNode(src_id);
+		//}
+		//if (node_ptr == nullptr)
+		//	node_ptr = curr_node_ptr;
 		if (node_ptr)
 		{
 			auto& node = *node_ptr;
@@ -667,8 +686,12 @@ namespace idk::vkn
 				}
 				else //is not an output attachment
 				{
-
+					DoNothing();
 				}
+			}
+			else
+			{
+				DoNothing();
 			}
 		}
 		else

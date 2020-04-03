@@ -510,7 +510,7 @@ namespace idk::vkn
 		}
 		_start_new_batch = start;
 	}
-//#pragma optimize("",off)
+#pragma optimize("",off)
 	void RenderTask::ProcessCopies(RenderBundle& render_bundle)
 	{
 		auto cmd_buffer = render_bundle._cmd_buffer;
@@ -553,7 +553,9 @@ namespace idk::vkn
 				auto range = copy_cmd.src_range;
 				if (!range)
 					range = copy_cmd.src.FullRange();
+				dbg::BeginLabel(cmd_buffer, "DERP");
 				hlp::TransitionImageLayout(cmd_buffer, {}, src_img, copy_cmd.src.Format(), target_src_format, copy_cmd.src_layout, hlp::TransitionOptions{ {},{},range });
+				dbg::EndLabel(cmd_buffer);
 			}
 			if (copy_cmd.dst_layout != target_src_format)
 			{
@@ -561,7 +563,9 @@ namespace idk::vkn
 				auto range = copy_cmd.dst_range;
 				if (!range)
 					range = copy_cmd.dst.FullRange();
+				dbg::BeginLabel(cmd_buffer, "HERP");
 				hlp::TransitionImageLayout(cmd_buffer, {}, dst_img, copy_cmd.dst.Format(), vk::ImageLayout::eTransferDstOptimal, copy_cmd.dst_layout, hlp::TransitionOptions{ {},{},range});
+				dbg::EndLabel(cmd_buffer);
 			}
 		}
 

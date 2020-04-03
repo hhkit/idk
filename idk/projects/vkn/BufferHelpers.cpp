@@ -219,6 +219,10 @@ void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Im
 	}
 	switch (nLayout)
 	{
+	case vk::ImageLayout::eShaderReadOnlyOptimal:
+		destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+		vBarrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+		break;
 	case vk::ImageLayout::eDepthStencilAttachmentOptimal:
 		destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
 		vBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;

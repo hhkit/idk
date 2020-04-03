@@ -58,6 +58,7 @@ namespace idk::vkn
 		FrameGraphResourceManager rsc_manager;
 		
 		std::optional<fg_id> GetSourceNode(fgr_id rsc)const;
+		std::optional<fg_id> GetOutputNode(fgr_id rsc)const;
 
 		hash_table<fgr_id, fg_id> origin_nodes;
 		hash_table<fgr_id, fg_id> input_origin_nodes;

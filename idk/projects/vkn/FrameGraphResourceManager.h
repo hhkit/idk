@@ -93,10 +93,20 @@ namespace idk::vkn
 		dual_set<fgr_id, fgr_id> write_renamed;
 		//new to old(second)
 		hash_table<fgr_id, fgr_id> renamed_resources;
+		hash_table<fgr_id, fgr_id> renamed_rsc_next;
 		hash_table<fgr_id, fgr_id> renamed_original;
+		struct OverrideTracker
+		{
+			hash_table<Guid, fgr_id> override_to_original;
+			void Register(Guid guid, fgr_id id);
+			std::optional<fgr_id> GetID(FrameGraphResourceManager& rsc_manager, Guid guid);
+			void Reset();
+		};
+		OverrideTracker override_tracker;
 		hlp::IdGenerator<fgr_id> _fgr_generator;
 		TexturePool pool;
 	private:
+		fgr_id GetLatest(fgr_id id);
 		std::optional<TextureDescription*> GetResourceDescriptionPtr(fgr_id rsc_id);
 	};
 

@@ -179,8 +179,13 @@ namespace idk::vkn
 
 	std::optional<fg_id> FrameGraphBuilder::GetSourceNode(fgr_id aliased_rsc) const
 	{
-		std::optional < fg_id> result{};
 		auto rsc = rsc_manager.GetOriginal(aliased_rsc);
+		return GetOutputNode(rsc);
+	}
+
+	std::optional<fg_id> FrameGraphBuilder::GetOutputNode(fgr_id rsc) const
+	{
+		std::optional < fg_id> result{};
 		auto itr = origin_nodes.find(rsc);
 		if (itr != origin_nodes.end())
 			result = itr->second;
