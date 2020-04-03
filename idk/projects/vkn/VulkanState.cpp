@@ -369,8 +369,8 @@ namespace idk::vkn
 		{
 			auto debugInfo = populateDebugMessengerCreateInfo();
 			instInfo.pNext = (enable_validation)?&debugInfo:nullptr;
-			*instance = vk::createInstance(instInfo, nullptr, dispatcher);
-			dyn_dispatcher.init(*instance, vkGetInstanceProcAddr);
+			instance = vk::createInstanceUnique(instInfo, nullptr, dispatcher);
+			dyn_dispatcher.init(*instance,*m_device);
 			if(enable_validation)
 				m_debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debugInfo, nullptr, dyn_dispatcher);
 			//if (result != vk::Result::eSuccess)

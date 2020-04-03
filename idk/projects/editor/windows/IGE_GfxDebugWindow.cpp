@@ -288,6 +288,14 @@ namespace idk
 
 	void IGE_GfxDebugWindow::RenderExtraVars(ExtraVars& extra_vars)
 	{
+		{
+			auto tmp = extra_vars.Get<void*>("445");
+			if (tmp)
+			{
+				ImGui::Image(*tmp, ImVec2{ 100,100 });
+			}
+		}
+
 		if (!ImGui::CollapsingHeader("ExtraVars"))
 			return;
 		ImGui::Checkbox("Show Hidden: ", &_pimpl->show_hidden);

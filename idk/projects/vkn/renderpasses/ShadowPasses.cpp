@@ -208,6 +208,7 @@ namespace idk::vkn::renderpasses
 		{
 			cx.SetScissorsViewport(rect{ vec2{0.5f,0.5f},vec2{0.5f,0.5f} });
 			cx.SetClearColor(0, color{ 0.0f,1.0f,0.0f,1.0f });
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set("445", static_cast<void*>(cx.Resources().Get<VknTextureView>(test.id).ImageView()));
 		}
 	};
 	

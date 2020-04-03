@@ -109,7 +109,7 @@ namespace idk::vkn
 
 
 		auto ptr = &texture;
-		if (load_info.mipmap_level > 1)
+		if (load_info.mipmap_level > 1&& Core::GetSystem<GraphicsSystem>().extra_vars.GetOptional<bool>("HalfMip",true))
 		{
 			load_info.mipmap_level--;
 			auto offset = ComputeTextureLength(load_info.width, load_info.height, in_info->format);
