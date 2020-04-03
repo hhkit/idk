@@ -54,6 +54,7 @@ namespace idk
 	bool NeedShadowMap(const DirectionalLight&light){return NeedShadowMapImpl(light);};
 	vector<Lightmap> PointLight::InitShadowMap()
 	{
+		/*
 		light_map.resize(1);
 		//vector<Lightmap> framebuffers;
 		for (auto& elem : light_map)
@@ -63,6 +64,7 @@ namespace idk
 			//if (elem.NeedLightMap())
 			elem.InitShadowMap(6,AttachmentViewType::eCube, true);
 		}
+		*/
 		return light_map;
 	}
 	void PointLight::DeleteShadowMap() noexcept
