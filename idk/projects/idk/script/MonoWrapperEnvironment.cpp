@@ -933,7 +933,7 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::AnimatorBlendToSeconds", bool, Handle<Animator> animator, MonoString* name, float timeInSeconds = 0.0f, MonoString* layer = nullptr)
+		BIND_START("idk.Bindings::AnimatorBlendToInSeconds", bool, Handle<Animator> animator, MonoString* name, float timeInSeconds = 0.0f, MonoString* layer = nullptr)
 		{
 			auto s = unbox(name);
 			auto l = unbox(layer);

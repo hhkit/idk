@@ -298,6 +298,8 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorBlendTo(ulong id, string name, float time = 0.2f, string layer = "");
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorBlendToInSeconds(ulong id, string name, float timeInSeconds = 0.0f, string layer = "");
 
         [MethodImpl(MethodImplOptions.InternalCall)]
