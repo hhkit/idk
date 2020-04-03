@@ -469,7 +469,7 @@ namespace idk::vkn
 						att_opt.store_op,
 						att_opt.stencil_load_op,
 						att_opt.stencil_store_op,
-						(att_opt.load_op != vk::AttachmentLoadOp::eLoad) ? vk::ImageLayout::eUndefined : prev_layout,
+						(att_opt.pre_layout)? *att_opt.pre_layout: ((att_opt.load_op != vk::AttachmentLoadOp::eLoad) ? vk::ImageLayout::eUndefined : prev_layout),
 						att_opt.layout,
 					});
 			}

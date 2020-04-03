@@ -173,6 +173,8 @@ namespace idk::vkn::renderpasses
 		}
 		void Execute(Context_t& cx ) override
 		{
+			cx.SetScissorsViewport(rect{});
+			cx.SetClearColor(0, color{ 0.5f,0.0f,0.5f,1.0f });
 		}
 	};
 	struct TestRp2 : BaseRenderPass
@@ -196,6 +198,8 @@ namespace idk::vkn::renderpasses
 					vk::ClearValue{ vk::ClearColorValue{col} },
 					{},
 					{},
+					vk::ImageLayout::eGeneral,
+					{},
 					vk::ImageLayout::eGeneral
 				)
 			);
@@ -203,6 +207,7 @@ namespace idk::vkn::renderpasses
 		void Execute(Context_t& cx) override
 		{
 			cx.SetScissorsViewport(rect{ vec2{0.5f,0.5f},vec2{0.5f,0.5f} });
+			cx.SetClearColor(0, color{ 0.0f,1.0f,0.0f,1.0f });
 		}
 	};
 	

@@ -64,16 +64,17 @@ namespace idk::vkn
 	};
 	struct AttachmentDescription
 	{
-		vk::AttachmentLoadOp          load_op            ;
-		vk::AttachmentStoreOp         store_op           ;
-		vk::AttachmentLoadOp          stencil_load_op    ;
-		vk::AttachmentStoreOp         stencil_store_op   ;
-		vk::ImageLayout               layout             {vk::ImageLayout::eGeneral}; //layout after RenderPass
-		vk::ImageSubresourceRange     sub_resource_range {};
-		std::optional<vk::ClearValue> clear_value        ;
-		std::optional<vk::Format>     format             {};
-		vk::ImageViewType             view_type          { vk::ImageViewType::e2D };
-		vk::ComponentMapping          mapping            {};
+		vk::AttachmentLoadOp           load_op            ;
+		vk::AttachmentStoreOp          store_op           ;
+		vk::AttachmentLoadOp           stencil_load_op    ;
+		vk::AttachmentStoreOp          stencil_store_op   ;
+		vk::ImageLayout                layout             {vk::ImageLayout::eGeneral}; //layout after RenderPass
+		vk::ImageSubresourceRange      sub_resource_range {};
+		std::optional<vk::ClearValue>  clear_value        ;
+		std::optional<vk::Format>      format             {};
+		vk::ImageViewType              view_type          { vk::ImageViewType::e2D };
+		vk::ComponentMapping           mapping            {};
+		std::optional<vk::ImageLayout> pre_layout{};
 		static AttachmentDescription make(
 			vk::AttachmentLoadOp              load_op             = {},
 			vk::AttachmentStoreOp             store_op            = {},
@@ -84,7 +85,8 @@ namespace idk::vkn
 			std::optional<vk::Format>         format              = {},
 			vk::ComponentMapping              mapping             = {},
 			std::optional<vk::ImageLayout  >  layout              = {},
-			std::optional<vk::ImageViewType>  view_type           = {}
+			std::optional<vk::ImageViewType>  view_type           = {},
+			std::optional<vk::ImageLayout>    pre_layout          = {}
 		)
 		{
 			AttachmentDescription def{};
@@ -101,6 +103,7 @@ namespace idk::vkn
 				format                                  ,
 				(view_type) ? *view_type : def.view_type,
 				mapping                                 ,
+				pre_layout                              ,
 			};
 		}
 	};
