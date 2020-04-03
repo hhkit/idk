@@ -238,6 +238,7 @@ namespace idk
 	{
 		vector<vec2> pos;
 		vector<vec2> uv;
+		vector<color> color;
 	};
 
 	struct UITextRange

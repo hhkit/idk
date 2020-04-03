@@ -89,12 +89,13 @@ namespace idk::vkn
 		const vector<FontRenderData>*	  fonts_data;
 
 		//vector<hlp::vector_buffer>        ui_text_buffer;
-		vector<hlp::vector_buffer>        ui_text_buffer_pos;
-		vector<hlp::vector_buffer>        ui_text_buffer_uv;
+		vector<hlp::vector_buffer>        ui_buffer_pos;
+		vector<hlp::vector_buffer>        ui_buffer_uv;
+		vector<hlp::vector_buffer>        ui_buffer_color;
 		//hash_table<Handle<Canvas>, vector<UIRenderObject>>* ui_render_per_canvas;
 		vector<UIRenderObjectWithCanvas>* ui_canvas;
 		vector<UITextRange>*   ui_text_range;
-		vector<UIAttriBlock>*      ui_text_data;
+		vector<UIAttriBlock>*      ui_attrib_data;
 		//vector<CanvasRenderRange>* ui_canvas_range;
 		size_t total_num_of_text{ 0 };
 		array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;

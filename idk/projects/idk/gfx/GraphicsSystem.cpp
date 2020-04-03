@@ -412,7 +412,8 @@ namespace idk
 		range.inst_font_end = font_render_data.size();
 	}
 
-	void ProcessCanvas(
+	void ProcessCanvasText(
+		const UIRenderObject& ui_ro,
 		const vector<FontPoint>& unique_canvas_font,
 		vector<UIAttriBlock>& font_buffer,
 		//vector<FontPoint>& font_buffer,
@@ -426,19 +427,20 @@ namespace idk
 		{
 			vector<vec2> posList;
 			vector<vec2> uvList;
+			vector<color> colorList;
 			size_t count = 0;
 			for (auto& elem : unique_canvas_font)
 			{
-				auto res = elem.ConvertToPairs();
-				posList.insert(posList.end(), res.first);
-				uvList.insert(uvList.end(), res.second);
+				const auto res = elem.ConvertToPairs();
+				posList.push_back(res.first);
+				uvList.push_back(res.second);
+				colorList.push_back(ui_ro.color);
 				++count;
 			}
-			auto start = posList.size();
-			font_buffer.insert(font_buffer.end(), UIAttriBlock{ posList,uvList });
+			font_buffer.push_back(UIAttriBlock{ posList,uvList,colorList });
 			++total_num_of_text;
 
-			UITextRange f_range{ start,count };
+			UITextRange f_range{ posList.size(),count };
 			font_render_data.emplace_back(f_range);
 
 		}
@@ -721,7 +723,7 @@ namespace idk
 			
 			ClearSwap(rb.ui_render_per_canvas, tmp.ui_render_per_canvas);
 			ClearSwap(rb.ui_canvas, tmp.ui_canvas);
-			ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
+			ClearSwap(rb.ui_attrib_buffer, tmp.ui_attrib_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
 			//ClearSwap(rb.ui_canvas_range, tmp.ui_canvas_range);
 			ClearSwap(rb.instanced_mesh_render, tmp.instanced_mesh_render);//clear then swap the stuff back into rb
@@ -1070,8 +1072,8 @@ namespace idk
 				const auto size = result.ui_canvas.size() + unique_fonts.size();
 				const auto size_2 = result.ui_render_per_canvas.size() + unique_fonts.size();
 				result.ui_text_range.reserve(result.ui_text_range.size() + size);
-				result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
-				result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+				result.ui_attrib_buffer.reserve(result.ui_attrib_buffer.size() + size * avg_font_count);
+				result.ui_attrib_buffer.reserve(result.ui_attrib_buffer.size() + size * avg_font_count);
 				//result.ui_canvas_range.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 				//result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 			}
@@ -1107,8 +1109,11 @@ namespace idk
 						using T = std::decay_t<decltype(data)>;
 						if constexpr (!std::is_same_v<T, ImageData>)
 						{
-							ProcessCanvas(data.coords, result.ui_text_buffer, result.ui_text_range, result.ui_total_num_of_text);
-							//result.canvas_render_range.emplace_back(range);
+							ProcessCanvasText(elem, data.coords, result.ui_attrib_buffer, result.ui_text_range, result.ui_total_num_of_text);
+						}
+						else
+						{
+							result.ui_attrib_buffer.push_back(UIAttriBlock{ {}, {}, { elem.color, elem.color, elem.color, elem.color } });
 						}
 					}, elem.data);
 				}

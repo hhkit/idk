@@ -90,7 +90,7 @@ namespace idk::vkn
 		void PreRenderShadow(GraphicsSystem::LightRenderRange light_index, const PreRenderData& state);
 		
 		//PostRender
-		void PostRenderCanvas(size_t& canvas_count, RscHandle<RenderTarget> rt, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index);
+		void PostRenderCanvas(size_t& ui_elem_count, size_t& text_count, RscHandle<RenderTarget> rt, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index);
 
 
 		VulkanView& View()const { return *_view; }
