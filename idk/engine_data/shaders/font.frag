@@ -23,14 +23,14 @@ layout(location = 0) out vec4 out_color;
 
 S_LAYOUT(3,0) uniform sampler2D tex;
 
-const float smoothing = 1.0 /16.0;
+//const float smoothing = 1.0 /16.0;
 
 void main()
 {
 	float dist = texture(tex,vs_out.uv).r;
-	float alpha = smoothstep(0.3f, 0.8f, dist);
+	//float alpha = smoothstep(0.3f, 0.8f, dist);
 		
-	out_color = vec4(vs_out.color.rgb, vs_out.color.a * alpha);
+	out_color = vec4(vs_out.color.rgb, vs_out.color.a * dist);
 	
 	if(out_color.a < 0.001176)
 		discard;
