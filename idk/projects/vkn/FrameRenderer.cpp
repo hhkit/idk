@@ -583,6 +583,8 @@ namespace idk::vkn
 			vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
 			vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
 			cmd_buffer.begin(begin_info, dispatcher);
+			renderpasses::Add445_75Test(_pimpl->graph, state);
+
 			for (auto range : lights)
 			{
 				PreRenderShadow(range, state);

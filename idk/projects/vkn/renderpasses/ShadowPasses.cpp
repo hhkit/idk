@@ -132,12 +132,89 @@ namespace idk::vkn::renderpasses
 	}
 
 
-
+	struct TestRp1 : BaseRenderPass
+	{
+		FrameGraphResource test;
+		TestRp1(FrameGraphBuilder& builder)
+		{
+			
+			;
+			test = builder.CreateTexture(TextureDescription::make
+			(
+				name + " z",
+				uvec2{100,100},
+				vk::Format::eR8G8B8A8Snorm,
+				vk::ImageAspectFlagBits::eColor,
+				vk::ImageType::e2D,
+				1,
+				1,
+				{},
+				vk::ImageUsageFlagBits::eColorAttachment
+			));
+			test = builder.write(test);
+			std::array<float,4>col = {0.5f,0,0.5f,1};
+			builder.set_output_attachment(test, 0,
+				AttachmentDescription::make(
+					vk::AttachmentLoadOp::eClear,
+					vk::AttachmentStoreOp::eStore,
+					vk::AttachmentLoadOp::eDontCare,
+					vk::AttachmentStoreOp::eDontCare,
+					vk::ImageSubresourceRange
+					{
+						vk::ImageAspectFlagBits::eColor,
+						0,1,0,1
+					},
+					vk::ClearValue{ vk::ClearColorValue{col} },
+					{},
+					{},
+					vk::ImageLayout::eGeneral
+				)
+			);
+		}
+		void Execute(Context_t& cx ) override
+		{
+		}
+	};
+	struct TestRp2 : BaseRenderPass
+	{
+		FrameGraphResource test;
+		TestRp2(FrameGraphBuilder& builder, FrameGraphResource aa)
+		{
+			test = builder.write(aa);
+			std::array<float, 4>col = { 0.0f,0.5f,0.0f,1 };
+			builder.set_output_attachment(test, 0,
+				AttachmentDescription::make(
+					vk::AttachmentLoadOp::eClear,
+					vk::AttachmentStoreOp::eStore,
+					vk::AttachmentLoadOp::eDontCare,
+					vk::AttachmentStoreOp::eDontCare,
+					vk::ImageSubresourceRange
+					{
+						vk::ImageAspectFlagBits::eColor,
+						0,1,0,1
+					},
+					vk::ClearValue{ vk::ClearColorValue{col} },
+					{},
+					{},
+					vk::ImageLayout::eGeneral
+				)
+			);
+		}
+		void Execute(Context_t& cx) override
+		{
+			cx.SetScissorsViewport(rect{ vec2{0.5f,0.5f},vec2{0.5f,0.5f} });
+		}
+	};
 	
 
 	
 	static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 
+	void Add445_75Test(FrameGraph& frame_graph, const PreRenderData& state)
+	{
+		auto& rp = frame_graph.addRenderPass<TestRp1>("TestRp");
+		frame_graph.addRenderPass<TestRp2>("TestRp",rp.test);
+	}
 	void AddDirectionalShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];

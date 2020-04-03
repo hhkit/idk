@@ -13,4 +13,6 @@ namespace idk::vkn::renderpasses
 	//void AddSpotlightShadowPass  (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state);
 	//void AddPointShadowPass      (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state);
 	void AddShadowPass           (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state);
+	void Add445_75Test(FrameGraph& frame_graph, const PreRenderData& state);
+
 }
