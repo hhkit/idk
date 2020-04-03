@@ -27,6 +27,7 @@ void dbg_chk(vk::Image img);
 namespace idk::vkn
 {
 
+	size_t ComputeTextureLength(size_t width, size_t height, vk::Format format);
 	struct TextureResult
 	{
 		vk::UniqueImage first;
@@ -108,6 +109,16 @@ namespace idk::vkn
 
 
 		auto ptr = &texture;
+		if (load_info.mipmap_level > 1)
+		{
+			load_info.mipmap_level--;
+			auto offset = ComputeTextureLength(load_info.width, load_info.height, in_info->format);
+			in_info->data = reinterpret_cast<const char*>(in_info->data) + offset;
+			in_info->len -= offset;
+			load_info.width /= 2;
+			load_info.height /= 2;
+		}
+
 		auto&& [image, alloc, aspect, sz,name] = vkn::LoadTexture(sub,allocator,  load_info, in_info, guid);
 		ptr->Size(uvec2{ load_info.width,load_info.height });
 		ptr->mipmap_level = load_info.mipmap_level;
@@ -480,7 +491,7 @@ namespace idk::vkn
 		imageInfo.extent.width = static_cast<uint32_t>(width);
 		imageInfo.extent.height = static_cast<uint32_t>(height);
 		imageInfo.extent.depth = 1; //1 texel deep, can't put 0, otherwise it'll be an array of 0 2D textures
-		imageInfo.mipLevels = load_info.mipmap_level; //Currently no mipmapping
+		imageInfo.mipLevels = load_info.mipmap_level; 
 		imageInfo.arrayLayers =  load_info.layers;
 		imageInfo.format = internal_format; //Unsigned normalized so that it can still be interpreted as a float later
 		imageInfo.tiling = vk::ImageTiling::eOptimal; //We don't intend on reading from it afterwards
@@ -488,6 +499,15 @@ namespace idk::vkn
 		imageInfo.usage = image_usage;//vk::ImageUsageFlagBits::eSampled | ((is_render_target) ? attachment_type : vk::ImageUsageFlagBits::eTransferDst) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc; //Image needs to be transfered to and Sampled from
 		imageInfo.sharingMode = vk::SharingMode::eExclusive; //Only graphics queue needs this.
 		imageInfo.samples = vk::SampleCountFlagBits::e1; //Multisampling
+
+		//if (imageInfo.mipLevels > 1)
+		//{
+		//	imageInfo.mipLevels--;
+		//	width = imageInfo.extent.width /= 2;
+		//	height = imageInfo.extent.height /= 2;
+		//}
+
+
 		vk::UniqueImage image = device.createImageUnique(imageInfo, nullptr, vk::DispatchLoaderDefault{});
 		auto alloc = allocator.Allocate(*image, mem_property); //Allocate on device only
 		result.size_on_device = alloc->Size();
@@ -510,7 +530,7 @@ namespace idk::vkn
 			vk::ImageSubresourceRange sub_range;
 			sub_range.aspectMask = img_aspect;
 			sub_range.baseMipLevel = 0;
-			sub_range.levelCount = load_info.mipmap_level;
+			sub_range.levelCount = imageInfo.mipLevels;
 			sub_range.baseArrayLayer = 0;
 			sub_range.layerCount = load_info.layers;
 
@@ -526,7 +546,7 @@ namespace idk::vkn
 			vk::Image copy_dest = *image;
 			if (internal_format != format)
 			{
-				auto&& [img, al] = CreateBlitImage(allocator, load_info.mipmap_level, width, height,format);
+				auto&& [img, al] = CreateBlitImage(allocator, imageInfo.mipLevels, width, height,format);
 
 				blit_src_img = std::move(img);
 				blit_img_alloc = std::move(al);
@@ -552,7 +572,7 @@ namespace idk::vkn
 			{
 
 				//Copy data from buffer to image
-				vector< vk::BufferImageCopy> copy_regions(load_info.mipmap_level);
+				vector< vk::BufferImageCopy> copy_regions(imageInfo.mipLevels);
 				{
 					vk::BufferImageCopy region{};
 					region.bufferOffset = 0;
@@ -573,7 +593,7 @@ namespace idk::vkn
 					copy_regions[0] = (region);
 				}
 				size_t offset = single_level_size;
-				for (uint32_t i = 1; i < load_info.mipmap_level; ++i)
+				for (uint32_t i = 1; i < imageInfo.mipLevels; ++i)
 				{
 				vk::BufferImageCopy region{};
 				region.bufferOffset = offset;
@@ -623,7 +643,7 @@ namespace idk::vkn
 				conditions[1] = true;
 				TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, vk::AccessFlagBits::eTransferRead, vk::PipelineStageFlagBits::eTransfer, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal, copy_dest, img_aspect,sub_range);
 				TransitionImageLayout(cmd_buffer, {}, vk::PipelineStageFlagBits::eAllCommands , vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, * image, img_aspect, sub_range);
-				BlitConvert(cmd_buffer, img_aspect, *blit_src_img, *image, load_info.mipmap_level, width, height);
+				BlitConvert(cmd_buffer, img_aspect, *blit_src_img, *image, imageInfo.mipLevels, width, height);
 			}
 			TransitionImageLayout(cmd_buffer, vk::AccessFlagBits::eTransferWrite, vk::PipelineStageFlagBits::eTransfer, dst_flags, dst_stages, vk::ImageLayout::eTransferDstOptimal, load_info.layout, *image, img_aspect,sub_range);
 
