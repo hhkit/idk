@@ -46,6 +46,7 @@ namespace idk::vkn::renderpasses
 	struct CopyDepthPass : BaseRenderPass
 	{
 		FrameGraphResource copied_depth;
+		FrameGraphResource original_depth;
 		uvec2 size;
 		CopyDepthPass(FrameGraphBuilder& builder, uvec2 depth_size, FrameGraphResource depth);
 		void Execute(FrameGraphDetail::Context_t context) override;

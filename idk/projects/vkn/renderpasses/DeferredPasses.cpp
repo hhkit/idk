@@ -358,7 +358,7 @@ namespace idk::vkn::renderpasses
 				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
 				//vk::ComponentMapping mapping{};
 			});
-		builder.set_input_attachment(in_depth_tex, 2, AttachmentDescription
+		builder.set_input_attachment(in_depth, 2, AttachmentDescription
 			{
 				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
 				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
@@ -900,8 +900,8 @@ namespace idk::vkn::renderpasses
 		auto& cube_clear = graph.addRenderPass<PassSetPair<CubeClearPass, ClearCubeSet>>("Cube Clear", ClearCubeSet{ skybox_binding,FsqDrawSet{MeshType::Box} }, gfx_state.camera.render_target, ignore_clear,clr_col, clr_dep).RenderPass();
 
 		auto& def_depth_copy = graph.addRenderPass <CopyDepthPass>("Copy Default Lit depth", cube_clear.rt_size, cube_clear.depth);
-		auto& spec_depth_copy = graph.addRenderPass <CopyDepthPass>("Copy Specular depth", cube_clear.rt_size, cube_clear.depth);
-
+		auto& spec_depth_copy = graph.addRenderPass <CopyDepthPass>("Copy Specular depth", cube_clear.rt_size, def_depth_copy.original_depth);
+		auto rt_depth = spec_depth_copy.original_depth;
 		bindings::StandardVertexBindings::StateInfo state;
 		state.SetState(gfx_state);
 		bindings::DeferredPbrInfo info{
@@ -943,7 +943,7 @@ namespace idk::vkn::renderpasses
 		accum_fsq_bindings.SetCamera(gfx_state.camera, gfx_state.shared_gfx_state->BrdfLookupTable);
 		accum_fsq_bindings.fragment_shader = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[(info.model == ShadingModel::DefaultLit) ? FDeferredPost : FDeferredPostSpecular];
 		auto& accum_pass_def = graph.addRenderPass<AccumPassSetPair>("Accum pass Default", AccumDrawSet{ {AccumLightDrawSet{light_bindings},AccumAmbientDrawSet{} } }, gbuffer_pass_def).RenderPass();
-		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, cube_clear.depth);
+		auto& combine_def_pass = graph.addRenderPass<CombinePass>("Combine DefaultLit pass", gfx_state.camera.viewport, accum_pass_def.accum_rsc, accum_pass_def.depth_rsc, cube_clear.render_target, rt_depth);
 		combine_def_pass.color_correction_lut = gfx_state.camera.render_target->ColorGradingLut.as<VknTexture>();
 
 		//Bloom pass stage start
@@ -1013,7 +1013,7 @@ namespace idk::vkn::renderpasses
 				}
 			} });
 		builder.NoRenderPass();
-
+		original_depth = original;
 		copied_depth = copy;
 
 	}
