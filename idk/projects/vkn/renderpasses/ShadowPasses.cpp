@@ -216,7 +216,7 @@ namespace idk::vkn::renderpasses
 	
 	static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 
-	void Add445_75Test(FrameGraph& frame_graph, const PreRenderData& state)
+	void Add445_75Test(FrameGraph& frame_graph, const PreRenderData& )
 	{
 		auto& rp = frame_graph.addRenderPass<TestRp1>("TestRp");
 		frame_graph.addRenderPass<TestRp2>("TestRp",rp.test);
