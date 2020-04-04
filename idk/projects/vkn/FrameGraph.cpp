@@ -413,8 +413,10 @@ namespace idk::vkn
 		attachments.reserve(total_att);
 		auto& src_nodes = graph_builder.origin_nodes;
 		auto& input_src_nodes = graph_builder.input_origin_nodes;
-		auto process_attachment = [&src_nodes, &input_src_nodes, &nodes_buffer,&nodes_lookup,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref,vk::ImageLayout actual_layout)
+		auto& copy_src_nodes = graph_builder.copy_origin_nodes;
+		auto process_attachment = [&src_nodes, &input_src_nodes,&copy_src_nodes, &nodes_buffer,&nodes_lookup,this,&rsc_manager, &attachments](auto& attachment_info, auto& attachment_ref,vk::ImageLayout actual_layout)
 		{
+			
 			auto find_input_layout = [](const FrameGraphNode& node, fgr_id id)
 			{
 				for (auto& o_input : node.output_attachments)
@@ -442,11 +444,26 @@ namespace idk::vkn
 					if (!prev)
 						prev_id = {}; //If we created it in the same node, Create (id1) -> Write (id1 ->id2), there was no previous
 				}
+				auto get_alt_src = [&input_src_nodes, &copy_src_nodes ](fgr_id id)
+				{
+					{
+						auto itr = input_src_nodes.find(id);
+						if (itr != input_src_nodes.end())
+							return itr->second;
+					}
+					{
+						auto itr = copy_src_nodes.find(id);
+						if (itr != copy_src_nodes.end())
+							return itr->second;
+					}
+					throw;
+					return fg_id{};
+				};
 				vk::ImageLayout prev_layout = att_opt.layout;
-				if (prev_id)
+				/*if (prev_id)
 				{
 					auto src_itr = src_nodes.find(*prev_id);
-					auto node_id = (src_itr != src_nodes.end()) ? src_itr->second : input_src_nodes.find(*prev_id)->second;
+					auto node_id = (src_itr != src_nodes.end()) ? src_itr->second : get_alt_src(*prev_id);
 					auto node_to_index = nodes_lookup.find(node_id);
 					if (prev_id)
 					{
@@ -458,7 +475,16 @@ namespace idk::vkn
 						auto inpu_span = node.GetInputSpan();
 						prev_layout = find_input_layout(node, *prev_id);
 					}
+				}*/
+				if(prev_id)
+					prev_layout = graph_builder.GetPostLayout(*prev_id);
+				else 
+				{
+					
+					prev_layout = (att_opt.load_op == vk::AttachmentLoadOp::eLoad)?vk::ImageLayout::eGeneral :vk::ImageLayout::eUndefined;
 				}
+				prev_layout = (att_opt.pre_layout) ? *att_opt.pre_layout : (prev_layout);
+				
 				attachments.emplace_back(vk::AttachmentDescription
 					{
 						//vk::AttachmentDescriptionFlagBits::eMayAlias
@@ -469,7 +495,7 @@ namespace idk::vkn
 						att_opt.store_op,
 						att_opt.stencil_load_op,
 						att_opt.stencil_store_op,
-						(att_opt.pre_layout)? *att_opt.pre_layout: ((att_opt.load_op != vk::AttachmentLoadOp::eLoad) ? vk::ImageLayout::eUndefined : prev_layout),
+						prev_layout,
 						att_opt.layout,
 					});
 			}
@@ -483,7 +509,6 @@ namespace idk::vkn
 			auto ref_itr = attachment_refs.begin();
 			for (auto& input_rsc : attachment_infos)
 			{
-
 				process_attachment(input_rsc, *ref_itr, actual_layout);
 				++ref_itr;
 			}
@@ -511,16 +536,36 @@ namespace idk::vkn
 			(depth) ? &depth_ref : nullptr,
 			0,nullptr,
 		};
-		vk::SubpassDependency subpass_dep
+		std::array<vk::SubpassDependency,1> subpass_dep
 		{
+			vk::SubpassDependency
+			{
+				VK_SUBPASS_EXTERNAL,0,
+				vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests,  //TODO: Figure this out
+				vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, //TODO: Figure this out
+				vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,//TODO: Figure this out
+				vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentRead,	//TODO: Figure this out
+				vk::DependencyFlagBits::eByRegion
+			}
+		/*	vk::SubpassDependency{
 			VK_SUBPASS_EXTERNAL,0,
-			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests,  //TODO: Figure this out
+			vk::PipelineStageFlagBits::eAllGraphics | vk::PipelineStageFlagBits::eTransfer, //vk::PipelineStageFlagBits::eTransfer | vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests,  //TODO: Figure this out
 			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, //TODO: Figure this out
-			vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,//TODO: Figure this out
-			vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentRead,	//TODO: Figure this out
+			vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,//TODO: Figure this out
+			vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,	//TODO: Figure this out
 			vk::DependencyFlagBits::eByRegion
-		};
-		bundle.set(subpass_desc, subpass_dep);
+			}
+		,
+			vk::SubpassDependency{
+			0,VK_SUBPASS_EXTERNAL,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests, //TODO: Figure this out
+			vk::PipelineStageFlagBits::eAllGraphics, //vk::PipelineStageFlagBits::eTransfer | vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests,  //TODO: Figure this out
+			vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,	//TODO: Figure this out
+			vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,//TODO: Figure this out
+			vk::DependencyFlagBits::eByRegion
+			}
+		*/};
+		bundle.set(span{ &subpass_desc,&subpass_desc+1 }, span{ subpass_dep });
 		return bundle;
 	}
 
@@ -647,7 +692,7 @@ namespace idk::vkn
 		++dbg_counter;
 		while (!rsc_manager.IsWriteRenamed(FrameGraphResource{ src_id }))
 		{
-			src_id = *GetResourceManager().GetPrevious(id);
+			src_id = *GetResourceManager().GetPrevious(src_id);
 		}
 		
 		auto derp = rsc_manager.WriteRenamed(FrameGraphResource{ src_id });

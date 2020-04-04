@@ -344,7 +344,8 @@ namespace idk::vkn
 		if (itr != override_to_original.end())
 		{
 			result = itr->second;
-			result  = rsc_manager.GetLatest(*result);
+			auto tmp = rsc_manager.GetLatest(*result);
+			result  = tmp;
 			
 		}
 		return result;

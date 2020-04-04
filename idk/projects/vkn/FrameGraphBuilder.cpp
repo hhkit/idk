@@ -42,7 +42,9 @@ namespace idk::vkn
 		consumed_resources.Reset();
 		origin_nodes.clear();
 		input_origin_nodes.clear();
+		copy_origin_nodes.clear();
 		_region_name.clear();
+		resource_layouts.clear();
 	}
 	FrameGraphResource FrameGraphBuilder::CreateTexture(TextureDescription desc)
 	{
@@ -102,8 +104,8 @@ namespace idk::vkn
 			copy_desc->usage = usage | vk::ImageUsageFlagBits::eTransferDst;
 			copy = CreateTexture(*copy_desc);
 			//result = write(result, WriteOptions{ .clear = false }); //Create already puts it into output resources
-			curr_rsc.copies.emplace_back(FrameGraphCopyResource{target_rsc,copy,opt});
-			result.original = read(target_rsc,false);
+			result.original = read(target_rsc, false);
+			curr_rsc.copies.emplace_back(FrameGraphCopyResource{ result.original ,copy=write(copy,WriteOptions{true}),opt });
 		}
 		return result;
 	}
@@ -154,13 +156,62 @@ namespace idk::vkn
 	FrameGraphNode FrameGraphBuilder::EndNode()
 	{
 		auto id = NextID();
+
+		for (auto& opt : curr_rsc.output_attachments)
+		{
+			if (opt)
+			{
+				auto& [att_id, desc] = *opt;
+				resource_layouts[att_id] = desc.layout;
+			}
+		}
+		for (auto& opt : curr_rsc.input_attachments)
+		{
+			if (opt)
+			{
+				auto& [att_id, desc] = *opt;
+				resource_layouts[att_id] = desc.layout;
+			}
+		}
+		for (auto& cpy : curr_rsc.copies)
+		{
+			//if (opt)
+			{
+				resource_layouts[cpy.dest.id] = cpy.options.dest_layout;
+				auto src_id = rsc_manager.GetPrevious(cpy.src.id);
+				//If this is not earliest.
+				if (rsc_manager.GetPrevious(*src_id))
+				{
+					resource_layouts[cpy.src.id] = resource_layouts.at(*src_id);
+				}
+				copy_origin_nodes.emplace(cpy.src.id, id);
+			}
+		}
+		if (curr_rsc.depth_attachment)
+		{
+			auto& [att_id, desc] = *curr_rsc.depth_attachment;
+			resource_layouts[att_id] = desc.layout;
+		}
+
 		for (auto& rsc : curr_rsc.output_resources)
 		{
 			origin_nodes.emplace(rsc.id, id);
+			auto src_id = rsc_manager.GetPrevious(rsc.id);
+			//If this is not earliest.
+			if (rsc_manager.GetPrevious(*src_id))
+			{
+				resource_layouts.emplace(rsc.id,resource_layouts.at(*src_id));
+			}
 		}
 		for (auto& rsc : curr_rsc.input_resources) //Will be transitioned by the resources
 		{
 			input_origin_nodes.emplace(rsc.id, id);
+			auto src_id = rsc_manager.GetPrevious(rsc.id);
+			//If this is not earliest.
+			if (rsc_manager.GetPrevious(*src_id))
+			{
+				resource_layouts.emplace(rsc.id, resource_layouts.at(*src_id));
+			}
 		}
 		auto input_span    = consumed_resources.StoreResources(curr_rsc.input_resources);
 		auto read_span     = consumed_resources.StoreResources(curr_rsc.read_resources);
@@ -190,6 +241,11 @@ namespace idk::vkn
 		if (itr != origin_nodes.end())
 			result = itr->second;
 		return result;
+	}
+
+	vk::ImageLayout FrameGraphBuilder::GetPostLayout(fgr_id id) const
+	{
+		return resource_layouts.at(id);
 	}
 
 	void FrameGraphBuilder::PreObject::reset()
