@@ -9,6 +9,7 @@ layout(location = 1) in VS_OUT
 
 layout(location = 0) out vec4 out_color;
 
+U_LAYOUT(1, 0) uniform BLOCK(_UB0) { float time; } _ub0;
 S_LAYOUT(2, 5) uniform sampler2D _uTex[1];
 
 void main()

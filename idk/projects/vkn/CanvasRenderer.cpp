@@ -50,7 +50,12 @@ namespace idk::vkn
 	{
 		auto& shared_state = *state.shared_gfx_state;
 
+		const auto& test = static_cast<const GraphicsState&>(static_cast<const CoreGraphicsState&>(state));
+
 		CanvasVertexBindings vert_bind;
+		StandardMaterialBindings mat_bind;
+		mat_bind.SetState(test);
+
 		auto renderer_vertex_shaders = state.shared_gfx_state->renderer_vertex_shaders;
 
 		if (canvas_data.size())
@@ -87,10 +92,10 @@ namespace idk::vkn
 						canvas_ui_ro.mesh = Mesh::defaults[MeshType::FSQ];
 						canvas_ui_ro.renderer_req = &canvas_vertex_req;
 
+						mat_bind.Bind(the_interface, canvas_ui_ro);
 						vert_bind.BindCanvas(the_interface, data, ui_canvas);
 						the_interface.BindMeshBuffers(canvas_ui_ro);
 						the_interface.BindAttrib(2, ui_buffer_color[i].buffer(), 0);
-
 
 						the_interface.FinalizeDrawCall(canvas_ro_inst.emplace_back(std::move(canvas_ui_ro)));
 					}
