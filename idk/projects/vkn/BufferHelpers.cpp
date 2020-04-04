@@ -195,7 +195,7 @@ void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Im
 	vk::PipelineStageFlags destinationStage;
 	sourceStage = vk::PipelineStageFlagBits::eAllCommands;
 	destinationStage = vk::PipelineStageFlagBits::eAllCommands;
-	vBarrier.srcAccessMask = vk::AccessFlags::Flags();
+	vBarrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 	vBarrier.dstAccessMask = vk::AccessFlags::Flags();
 	switch (oLayout)
 	{
@@ -220,8 +220,8 @@ void TransitionImageLayout(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Im
 	switch (nLayout)
 	{
 	case vk::ImageLayout::eShaderReadOnlyOptimal:
-		destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
-		vBarrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+		destinationStage = vk::PipelineStageFlagBits::eAllGraphics;
+		vBarrier.dstAccessMask = vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentRead;
 		break;
 	case vk::ImageLayout::eDepthStencilAttachmentOptimal:
 		destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
