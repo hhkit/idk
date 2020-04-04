@@ -997,9 +997,6 @@ namespace idk
 					anchor_to_alignment(text.alignment),
 					text.wrap ? sx : 0);
 
-				if (text.text.empty() || !text.font)
-					continue;
-
 				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
 				++canvas->num_of_text;
 
