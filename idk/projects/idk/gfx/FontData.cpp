@@ -16,6 +16,8 @@ namespace idk
 
         FontData data;
         data.coords.resize(6 * text.size());
+		//data.width = 0;
+		//data.height = 0;
 
         // screen space
         const real atlas_width = s_cast<real>(font_atlas->Size().x);

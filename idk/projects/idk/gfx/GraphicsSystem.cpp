@@ -972,9 +972,6 @@ namespace idk
 
 				const auto& rt = *go->GetComponent<RectTransform>();
 
-				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
-				++canvas->num_of_text;
-
 				constexpr auto anchor_to_alignment = [](TextAnchor anchor)
 				{
 					switch (anchor)
@@ -992,13 +989,19 @@ namespace idk
 				const float sx = rt._local_rect.size.x;
 				const float sy = rt._local_rect.size.y;
 
-				const auto font_data = FontData::Generate(
+				auto font_data = FontData::Generate(
 					text.text, text.font,
 					text.best_fit ? 0 : text.font_size,
 					text.letter_spacing,
 					text.line_height,
 					anchor_to_alignment(text.alignment),
 					text.wrap ? sx : 0);
+
+				if (text.text.empty() || !text.font)
+					continue;
+
+				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
+				++canvas->num_of_text;
 
 				float tw = font_data.width;
 				float th = font_data.height;
