@@ -1217,6 +1217,15 @@ namespace idk::vkn
 
 		//Do post pass here
 		//Canvas pass
+		if (state.shared_gfx_state->ui_canvas)
+			for (auto& ui_canvas : *state.shared_gfx_state->ui_canvas)
+			{
+				for (auto& ui_ro : ui_canvas.ui_ro)
+				{
+					if (std::holds_alternative<ImageData>(ui_ro.data))
+						state.shared_gfx_state->material_instances.emplace(ui_ro.material, ProcessedMaterial{ ui_ro.material });
+				}
+			}
 		size_t i = 0, j = 0;
 		for (auto& elem : canvas)
 		{

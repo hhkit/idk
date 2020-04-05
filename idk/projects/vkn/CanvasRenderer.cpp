@@ -85,12 +85,15 @@ namespace idk::vkn
 					using T = std::decay_t<decltype(data)>;
 					if constexpr (std::is_same_v<T, ImageData>)
 					{
-						the_interface.BindShader(ShaderStage::Fragment, ui_canvas.material->material->_shader_program);
-
 						canvas_ui_ro.config = canvas_pipeline;
 						canvas_ui_ro.material_instance = ui_canvas.material;
 						canvas_ui_ro.mesh = Mesh::defaults[MeshType::FSQ];
 						canvas_ui_ro.renderer_req = &canvas_vertex_req;
+
+						if (!ui_canvas.material) // invalid material!
+							canvas_ui_ro.material_instance = UISystem::default_material_inst;
+
+						the_interface.BindShader(ShaderStage::Fragment, canvas_ui_ro.material_instance->material->_shader_program);
 
 						mat_bind.Bind(the_interface, canvas_ui_ro);
 						vert_bind.BindCanvas(the_interface, data, ui_canvas);
