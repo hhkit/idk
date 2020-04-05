@@ -21,6 +21,8 @@
 #include <script/MonoBehaviorEnvironment.h>
 #include <script/MonoWrapperEnvironment.h>
 
+#include <core/GameObject.inl>
+
 #include <process.h>
 #include <ds/span.inl>
 #include <sstream>
@@ -119,7 +121,7 @@ namespace idk::mono
 			elem.Awake();
 
 		for (auto& elem : behaviors)
-			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
+			if (elem.enabled && elem.GetGameObject()->ActiveInHierarchy() && elem.GetHandle().scene != Scene::prefab)
 				elem.Start();
 	}
 	void ScriptSystem::ScriptFixedUpdate(span<Behavior>behaviors)
@@ -127,7 +129,7 @@ namespace idk::mono
 		IDK_ASSERT(run_scripts);
 		GameState::GetGameState().FlushCreationQueue();
 		for (auto& elem : behaviors)
-			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
+			if (elem.enabled && elem.GetGameObject()->ActiveInHierarchy() && elem.GetHandle().scene != Scene::prefab)
 				elem.FixedUpdate();
 	}
 
@@ -136,7 +138,7 @@ namespace idk::mono
 		IDK_ASSERT(run_scripts);
 		GameState::GetGameState().FlushCreationQueue();
 		for (auto& elem : behaviors)
-			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
+			if (elem.enabled && elem.GetGameObject()->ActiveInHierarchy() && elem.GetHandle().scene != Scene::prefab)
 				elem.Update();
 	}
 
@@ -145,14 +147,14 @@ namespace idk::mono
 		GameState::GetGameState().FlushCreationQueue();
 		if (run_scripts)
 			for (auto& elem : behaviors)
-				if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
+				if (elem.enabled && elem.GetGameObject()->ActiveInHierarchy() && elem.GetHandle().scene != Scene::prefab)
 					elem.FireMessage("PausedUpdate");
 	}
 
 	void ScriptSystem::ScriptUpdateCoroutines(span<Behavior> behaviors)
 	{
 		for (auto& elem : behaviors)
-			if (elem.enabled && elem.GetHandle().scene != Scene::prefab)
+			if (elem.enabled && elem.GetGameObject()->ActiveInHierarchy() && elem.GetHandle().scene != Scene::prefab)
 				elem.UpdateCoroutines();
 	}
 
