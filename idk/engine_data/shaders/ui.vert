@@ -13,6 +13,8 @@ layout(location = 1) out VS_OUT
 {
   vec3 position;
   vec2 uv;
+  vec3 normal;
+  vec3 tangent;
   vec4 color;
 } vs_out;
 
