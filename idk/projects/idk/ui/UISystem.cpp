@@ -23,7 +23,7 @@ namespace idk
 {
     void UISystem::LateInit()
     {
-        auto res = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/ui.frag", false);
+        auto res = Core::GetResourceManager().Load<ShaderProgram>("/engine_data/shaders/default_ui.frag", false);
         if (!res)
             return;
 
@@ -40,6 +40,8 @@ namespace idk
             inst->material = mat;
             inst->Name("Default UI");
             mat->_default_instance = inst;
+
+            mat->uniforms.emplace("Texture", UniformInstance{ "_uTex[0]", RscHandle<Texture>{} });
         }
     }
 

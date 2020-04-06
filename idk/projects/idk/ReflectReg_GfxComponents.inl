@@ -133,6 +133,6 @@ REFLECT_END()
 //REFLECT_ENUM(idk::TextAnchor, "TextAnchor")
 
 REFLECT_BEGIN(idk::Text, "Text")
-REFLECT_VARS(text, font, font_size, letter_spacing, line_height, alignment, wrap, best_fit, color, material)
+REFLECT_VARS(text, font, font_size, letter_spacing, line_height, alignment, wrap, best_fit, color)
 REFLECT_END()
 #pragma endregion

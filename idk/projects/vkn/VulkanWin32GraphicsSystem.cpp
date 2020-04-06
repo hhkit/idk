@@ -283,7 +283,7 @@ namespace idk::vkn
 
 		//shared_graphics_state.ui_render_per_canvas = &curr_buffer.ui_render_per_canvas;
 		shared_graphics_state.ui_canvas = &curr_buffer.ui_canvas;
-		shared_graphics_state.ui_text_data = &curr_buffer.ui_text_buffer;
+		shared_graphics_state.ui_attrib_data = &curr_buffer.ui_attrib_buffer;
 		shared_graphics_state.ui_text_range = &curr_buffer.ui_text_range;
 		shared_graphics_state.total_num_of_text = curr_buffer.ui_total_num_of_text;
 		//shared_graphics_state.ui_canvas_range = &curr_buffer.ui_canvas_range;

@@ -13,7 +13,6 @@ namespace idk
     public:
         string text;
         RscHandle<FontAtlas> font = FontAtlas::defaults[FontDefault::SourceSansPro];
-        RscHandle<MaterialInstance> material{ UISystem::default_material_inst };
 
         unsigned font_size = 48;
         real letter_spacing = 0;

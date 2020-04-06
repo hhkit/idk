@@ -83,10 +83,10 @@ namespace idk::vkn
 			AddMatInst(material_instances, p_ro.material_instance);
 		}
 		if(shared_gfx_state->particle_range)
-		for (auto& part_range : *shared_gfx_state->particle_range)
-		{
-			AddMatInst(material_instances, part_range.material_instance);
-		}
+			for (auto& part_range : *shared_gfx_state->particle_range)
+			{
+				AddMatInst(material_instances, part_range.material_instance);
+			}
 		//mat_inst_cache.ProcessCreation();
 	}
 
@@ -201,7 +201,7 @@ ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 		{
 			auto& [offset, size] = block_range;
 			auto ptr = texture_block.data();
-			tex_table[name] = span<RscHandle<Texture>>{ ptr + offset,ptr + size };
+			tex_table[name] = span<RscHandle<Texture>>{ ptr + offset, ptr + offset + size };
 		}
 		shader = mat._shader_program;
 	}

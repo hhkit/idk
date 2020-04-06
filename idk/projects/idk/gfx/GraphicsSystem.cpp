@@ -412,7 +412,8 @@ namespace idk
 		range.inst_font_end = font_render_data.size();
 	}
 
-	void ProcessCanvas(
+	void ProcessCanvasText(
+		const UIRenderObject& ui_ro,
 		const vector<FontPoint>& unique_canvas_font,
 		vector<UIAttriBlock>& font_buffer,
 		//vector<FontPoint>& font_buffer,
@@ -426,19 +427,20 @@ namespace idk
 		{
 			vector<vec2> posList;
 			vector<vec2> uvList;
+			vector<color> colorList;
 			size_t count = 0;
 			for (auto& elem : unique_canvas_font)
 			{
-				auto res = elem.ConvertToPairs();
-				posList.insert(posList.end(), res.first);
-				uvList.insert(uvList.end(), res.second);
+				const auto res = elem.ConvertToPairs();
+				posList.emplace_back(res.first);
+				uvList.emplace_back(res.second);
+				colorList.emplace_back(ui_ro.color);
 				++count;
 			}
-			auto start = posList.size();
-			font_buffer.insert(font_buffer.end(), UIAttriBlock{ posList,uvList });
+			font_buffer.emplace_back(UIAttriBlock{ posList,uvList,colorList });
 			++total_num_of_text;
 
-			UITextRange f_range{ start,count };
+			UITextRange f_range{ posList.size(),count };
 			font_render_data.emplace_back(f_range);
 
 		}
@@ -721,7 +723,7 @@ namespace idk
 			
 			ClearSwap(rb.ui_render_per_canvas, tmp.ui_render_per_canvas);
 			ClearSwap(rb.ui_canvas, tmp.ui_canvas);
-			ClearSwap(rb.ui_text_buffer, tmp.ui_text_buffer);
+			ClearSwap(rb.ui_attrib_buffer, tmp.ui_attrib_buffer);
 			ClearSwap(rb.ui_text_range, tmp.ui_text_range);
 			//ClearSwap(rb.ui_canvas_range, tmp.ui_canvas_range);
 			ClearSwap(rb.instanced_mesh_render, tmp.instanced_mesh_render);//clear then swap the stuff back into rb
@@ -773,6 +775,9 @@ namespace idk
 				auto& vp = result.camera.back();
 				vp.viewport.size = min(vec2(1) - vp.viewport.position, vp.viewport.size);
 			}
+		POST_END();
+
+		POST()
 			for (auto& elem : lights)
 			{
 				if (isolate && !elem.isolate)
@@ -906,7 +911,9 @@ namespace idk
 				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * translate(vec3{ ox, oy, 0 });
 				render_data.atlas = f.font;
 			}
-
+		POST_END();
+		
+		POST()
 			auto& ui = Core::GetSystem<UISystem>();
 			for (auto& im : images)
 			{
@@ -951,7 +958,7 @@ namespace idk
 				render_data.data = ImageData{ im.texture };
 				render_data.depth = go->Transform()->Depth();
 			}
-
+		
 			for (auto& text : texts)
 			{
 				if (text.text.empty() || !text.font)
@@ -970,9 +977,6 @@ namespace idk
 
 				const auto& rt = *go->GetComponent<RectTransform>();
 
-				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
-				++canvas->num_of_text;
-
 				constexpr auto anchor_to_alignment = [](TextAnchor anchor)
 				{
 					switch (anchor)
@@ -990,7 +994,7 @@ namespace idk
 				const float sx = rt._local_rect.size.x;
 				const float sy = rt._local_rect.size.y;
 
-				const auto font_data = FontData::Generate(
+				auto font_data = FontData::Generate(
 					text.text, text.font,
 					text.best_fit ? 0 : text.font_size,
 					text.letter_spacing,
@@ -998,10 +1002,12 @@ namespace idk
 					anchor_to_alignment(text.alignment),
 					text.wrap ? sx : 0);
 
+				auto& render_data = result.ui_render_per_canvas[canvas].emplace_back();
+				++canvas->num_of_text;
+
 				float tw = font_data.width;
 				float th = font_data.height;
 
-				render_data.material = text.material;
 				render_data.color = text.color;
 				render_data.data = TextData{ font_data.coords, text.font };
 				render_data.depth = go->Transform()->Depth();
@@ -1033,7 +1039,7 @@ namespace idk
 				if (text.best_fit)
 					render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
 			}
-		POST_END()
+		POST_END();
 
 		for (auto& elem : futures)
 			elem.get();
@@ -1055,11 +1061,11 @@ namespace idk
 			result.font_buffer.reserve(result.font_buffer.size() + size * avg_font_count);
 		}
 			std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
-		POST_END()
+		POST_END();
 
 		POST()
 			std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
-		POST_END()
+		POST_END();
 
 		POST()
 #pragma region FOR UI
@@ -1070,13 +1076,14 @@ namespace idk
 				const auto size = result.ui_canvas.size() + unique_fonts.size();
 				const auto size_2 = result.ui_render_per_canvas.size() + unique_fonts.size();
 				result.ui_text_range.reserve(result.ui_text_range.size() + size);
-				result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
-				result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
+				result.ui_attrib_buffer.reserve(result.ui_attrib_buffer.size() + size * avg_font_count);
+				result.ui_attrib_buffer.reserve(result.ui_attrib_buffer.size() + size * avg_font_count);
 				//result.ui_canvas_range.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 				//result.ui_text_buffer.reserve(result.ui_text_buffer.size() + size * avg_font_count);
 			}
 
 			// sort ui render by z pos then depth
+			result.ui_total_num_of_text = 0;
 			for (auto& [canvas, vec] : result.ui_render_per_canvas)
 			{
 				std::stable_sort(vec.begin(), vec.end(),
@@ -1086,14 +1093,6 @@ namespace idk
 							a.transform[3].z < b.transform[3].z;
 					}
 				);
-			}
-
-			//Push it into the char buffer when done
-			result.ui_total_num_of_text = 0;
-			for (auto& [canvas, vec] : result.ui_render_per_canvas)
-			{
-				//No need to cull, this is to find all the coords data and append them to one buffer
-				//CanvasRenderRange range{};
 
 				auto& res = result.ui_canvas.emplace_back();
 
@@ -1107,19 +1106,30 @@ namespace idk
 						using T = std::decay_t<decltype(data)>;
 						if constexpr (!std::is_same_v<T, ImageData>)
 						{
-							ProcessCanvas(data.coords, result.ui_text_buffer, result.ui_text_range, result.ui_total_num_of_text);
-							//result.canvas_render_range.emplace_back(range);
+							ProcessCanvasText(elem, data.coords, result.ui_attrib_buffer, result.ui_text_range, result.ui_total_num_of_text);
+						}
+						else
+						{
+							result.ui_attrib_buffer.emplace_back(UIAttriBlock{ {}, {}, { elem.color, elem.color, elem.color, elem.color } });
 						}
 					}, elem.data);
 				}
-
-
 			}
-#pragma endregion
-        POST_END()
 
-        for (auto& elem : futures)
-            elem.get();
+			//Push it into the char buffer when done
+			//result.ui_total_num_of_text = 0;
+			//for (auto& [canvas, vec] : result.ui_render_per_canvas)
+			//{
+			//	//No need to cull, this is to find all the coords data and append them to one buffer
+			//	//CanvasRenderRange range{};
+			//
+			//}
+#pragma endregion
+		POST_END();
+
+		for (auto& elem : futures)
+			elem.get();
+		futures.clear();
 
 		result.active_light_buffer.reserve(result.camera.size() + result.lights.size());
 		result.directional_light_buffer.reserve(result.camera.size());
@@ -1134,6 +1144,28 @@ namespace idk
 		ArenaAllocator<char_bool> alloc{ buff };
 		lights_used_t lights_used(alloc);
 		lights_used.resize(lights.size(), false);
+
+		
+		//POST()
+		for (auto& request : this->request_buffer)
+		{
+			auto& cam = request.data.camera;
+			
+			if(cam.enabled){
+				auto& out_instanced_mesh_render = result.instanced_mesh_render;
+				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
+				request.data.inst_mesh_render_begin = start_index;
+				request.data.inst_mesh_render_end = end_index;
+			}
+			else
+			{
+				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
+			}
+		}
+		//POST_END();
+
+		//POST()
 		{
 			vector<LightData> new_lights;
 			new_lights.reserve(result.camera.size() * 2);
@@ -1150,8 +1182,8 @@ namespace idk
 					if (debug_light_vol-- == 0)
 						LightVolDbg::RenderNext();
 					DbgIndex() = s_cast<int>(i++);
-					
-					CullLights(cam, CullLightsInfo { result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range,lights_used });
+
+					CullLights(cam, CullLightsInfo{ result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range,lights_used });
 				}
 				result.culled_render_range.emplace_back(range);
 				//{
@@ -1168,22 +1200,6 @@ namespace idk
 			}*/
 			//append the added lights at the back of the light range
 			result.lights.insert(result.lights.end(), new_lights.begin(), new_lights.end());
-		}
-		for (auto& request : this->request_buffer)
-		{
-			auto& cam = request.data.camera;
-			
-			if(cam.enabled){
-				auto& out_instanced_mesh_render = result.instanced_mesh_render;
-				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
-				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
-				request.data.inst_mesh_render_begin = start_index;
-				request.data.inst_mesh_render_end = end_index;
-			}
-			else
-			{
-				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
-			}
 		}
 		result.active_light_indices.reserve(lights_used.size());
 		for (size_t i = 0; i < lights_used.size(); i++)
@@ -1231,7 +1247,7 @@ namespace idk
 			else
 			{
 				//const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-				for ([[maybe_unused]] auto& lightmap : light.light_maps)
+				//for ([[maybe_unused]] auto& lightmap : light.light_maps)
 				{
 					range.light_map_index = lm_i;
 					{
@@ -1252,7 +1268,11 @@ namespace idk
 			}
 			
 		}
+		//POST_END();
 
+		//for (auto& elem : futures)
+		//	elem.get();
+		//futures.clear();
 		//for (auto& light_idx : result.active_light_indices)
 		//{
 		//	auto& light = result.lights[light_idx];

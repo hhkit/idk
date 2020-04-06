@@ -894,7 +894,7 @@ namespace idk::vkn
 
 	}
 
-	void FrameRenderer::PostRenderCanvas(size_t& canvas_count,RscHandle<RenderTarget> rr, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index)
+	void FrameRenderer::PostRenderCanvas(size_t& ui_elem_count, size_t& text_count, RscHandle<RenderTarget> rr, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index)
 	{
 		auto& rt = rr.as<VknRenderTarget>();
 		//auto& swapchain = view.Swapchain();
@@ -907,7 +907,7 @@ namespace idk::vkn
 		PipelineThingy the_interface{};
 		
 		the_interface.SetRef(rs.ubo_manager);
-		_canvas_renderer.DrawCanvas(canvas_count,the_interface, state, rs, canvas_data);
+		_canvas_renderer.DrawCanvas(ui_elem_count, text_count, the_interface, state, rs, canvas_data);
 		the_interface.GenerateDS(rs.dpools);
 
 		cmd_buffer.begin(begin_info, dispatcher);
@@ -1173,35 +1173,30 @@ namespace idk::vkn
 			if (state.shared_gfx_state->ui_canvas && state.shared_gfx_state->ui_canvas->size())
 			{
 				//auto& canvas_data = canvas;
-				auto& pos_buffer = state.shared_gfx_state->ui_text_buffer_pos;
-				auto& uv_buffer = state.shared_gfx_state->ui_text_buffer_uv;
+				auto& pos_buffer = state.shared_gfx_state->ui_buffer_pos;
+				auto& uv_buffer = state.shared_gfx_state->ui_buffer_uv;
+				auto& color_buffer = state.shared_gfx_state->ui_buffer_color;
 				//auto& buffer = state.shared_gfx_state->ui_text_buffer;
-				auto& doto = *state.shared_gfx_state->ui_text_data;
-				auto& t_size = state.shared_gfx_state->total_num_of_text;
+				auto& doto = *state.shared_gfx_state->ui_attrib_data;
 				//auto& canvas_range_data = *state.shared_gfx_state->ui_canvas_range;
 
-				pos_buffer.resize(t_size);
-				uv_buffer.resize(t_size);
+				pos_buffer.resize(doto.size());
+				uv_buffer.resize(doto.size());
+				color_buffer.resize(doto.size());
 
-				unsigned i = 0;
-				//size_t offset_size = 0;
-				//size_t range = 0;
-				for (auto& elem : doto)
+				for (size_t i = 0; i < doto.size(); ++i)
 				{
-					elem;
-					auto& b = pos_buffer[i];
-					b.resize(hlp::buffer_size(doto[i].pos));
-					b.update<const vec2>(0, doto[i].pos, cmd_buffer);
-					auto& b1 = uv_buffer[i];
-					b1.resize(hlp::buffer_size(doto[i].uv));
-					b1.update<const vec2>(0, doto[i].uv, cmd_buffer);
+					if (doto[i].pos.size())
+					{
+						pos_buffer[i].resize(hlp::buffer_size(doto[i].pos));
+						pos_buffer[i].update<const vec2>(0, doto[i].pos, cmd_buffer);
 
-					//range = hlp::buffer_size(doto[i].pos);
+						uv_buffer[i].resize(hlp::buffer_size(doto[i].uv));
+						uv_buffer[i].update<const vec2>(0, doto[i].uv, cmd_buffer);
+					}
 
-					//canvas_range_data.emplace_back(CanvasRenderRange{offset_size,offset_size + range});
-					//offset_size += range;
-
-					++i;
+					color_buffer[i].resize(hlp::buffer_size(doto[i].color));
+					color_buffer[i].update<const color>(0, doto[i].color, cmd_buffer);
 				}
 				
 			}
@@ -1224,12 +1219,22 @@ namespace idk::vkn
 
 		//Do post pass here
 		//Canvas pass
-		size_t i = 0;
+		//if (state.shared_gfx_state->ui_canvas)
+		//	for (auto& ui_canvas : *state.shared_gfx_state->ui_canvas)
+		//	{
+		//		
+		//	}
+		size_t i = 0, j = 0;
 		for (auto& elem : canvas)
 		{
+			//for (auto& ui_ro : elem.ui_ro)
+			//{
+			//	if (std::holds_alternative<ImageData>(ui_ro.data))
+			//		state.shared_gfx_state->material_instances.emplace(ui_ro.material, ProcessedMaterial{ ui_ro.material });
+			//}
 			auto& rs = _post_states[curr_state++];
 			//if(elem.render_target) //Default render target is null. Don't ignore it.
-			PostRenderCanvas(i,elem.render_target, elem.ui_ro, state, rs, frame_index);
+			PostRenderCanvas(i, j, elem.render_target, elem.ui_ro, state, rs, frame_index);
 		}
 
 		if (Core::GetSystem<GraphicsSystem>().extra_vars.Get<float>("gamma_correction"))

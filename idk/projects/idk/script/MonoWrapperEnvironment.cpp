@@ -2287,18 +2287,6 @@ namespace idk::mono
         }
         BIND_END();
 
-        BIND_START("idk.Bindings::TextGetMaterialInstance", Guid, Handle<idk::Text> h)
-        {
-            return h->material.guid;
-        }
-        BIND_END();
-
-        BIND_START("idk.Bindings::TextSetMaterialInstance", void, Handle<idk::Text> h, Guid guid)
-        {
-            h->material = RscHandle<MaterialInstance>{ guid };
-        }
-        BIND_END();
-
         BIND_START("idk.Bindings::TextGetColor", color, Handle<idk::Text> h)
         {
             return h->color;
