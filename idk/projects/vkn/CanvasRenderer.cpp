@@ -85,6 +85,8 @@ namespace idk::vkn
 					using T = std::decay_t<decltype(data)>;
 					if constexpr (std::is_same_v<T, ImageData>)
 					{
+						state.shared_gfx_state->material_instances.emplace(ui_canvas.material, ProcessedMaterial{ ui_canvas.material });
+
 						canvas_ui_ro.config = canvas_pipeline;
 						canvas_ui_ro.material_instance = ui_canvas.material;
 						canvas_ui_ro.mesh = Mesh::defaults[MeshType::FSQ];

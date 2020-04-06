@@ -1217,18 +1217,19 @@ namespace idk::vkn
 
 		//Do post pass here
 		//Canvas pass
-		if (state.shared_gfx_state->ui_canvas)
-			for (auto& ui_canvas : *state.shared_gfx_state->ui_canvas)
-			{
-				for (auto& ui_ro : ui_canvas.ui_ro)
-				{
-					if (std::holds_alternative<ImageData>(ui_ro.data))
-						state.shared_gfx_state->material_instances.emplace(ui_ro.material, ProcessedMaterial{ ui_ro.material });
-				}
-			}
+		//if (state.shared_gfx_state->ui_canvas)
+		//	for (auto& ui_canvas : *state.shared_gfx_state->ui_canvas)
+		//	{
+		//		
+		//	}
 		size_t i = 0, j = 0;
 		for (auto& elem : canvas)
 		{
+			//for (auto& ui_ro : elem.ui_ro)
+			//{
+			//	if (std::holds_alternative<ImageData>(ui_ro.data))
+			//		state.shared_gfx_state->material_instances.emplace(ui_ro.material, ProcessedMaterial{ ui_ro.material });
+			//}
 			auto& rs = _post_states[curr_state++];
 			//if(elem.render_target) //Default render target is null. Don't ignore it.
 			PostRenderCanvas(i, j, elem.render_target, elem.ui_ro, state, rs, frame_index);
