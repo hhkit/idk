@@ -688,14 +688,22 @@ namespace idk::vkn
 		}*/
 		auto& rsc_manager = GetResourceManager();
 		//auto curr_node_ptr = GetSourceNode(id);
+
 		auto src_id = *GetResourceManager().GetPrevious(id);
 		++dbg_counter;
 		while (!rsc_manager.IsWriteRenamed(FrameGraphResource{ src_id }))
 		{
-			src_id = *GetResourceManager().GetPrevious(src_id);
+			auto prv = GetResourceManager().GetPrevious(src_id);
+			if (!prv)
+				break;
+			src_id = *prv;
 		}
+
 		
+		if (rsc_manager.IsWriteRenamed(FrameGraphResource{ src_id }))
+		{
 		auto derp = rsc_manager.WriteRenamed(FrameGraphResource{ src_id });
+
 		src_id = derp.id;
 		auto node_ptr = GetSourceNode(src_id);
 		//while(curr_node_ptr == node_ptr)
@@ -741,6 +749,11 @@ namespace idk::vkn
 		else
 		{
 			__debugbreak();
+		}
+		}
+		else
+		{
+			result = graph_builder.GetPostLayout(id);
 		}
 		return result;
 	}

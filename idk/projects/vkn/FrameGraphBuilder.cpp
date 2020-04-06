@@ -2,7 +2,6 @@
 #include "FrameGraphBuilder.h"
 
 #include <res/ResourceHandle.inl>
-
 namespace idk::vkn
 {
 
@@ -142,6 +141,11 @@ namespace idk::vkn
 		rsc_manager.MarkUsage(out_rsc.id, vk::ImageUsageFlagBits::eDepthStencilAttachment);
 	}
 
+	void FrameGraphBuilder::MarkImageLayout(FrameGraphResource rsc, vk::ImageLayout layout)
+	{
+		resource_layouts.emplace(rsc.id, layout);
+	}
+
 	void FrameGraphBuilder::MarkNodeRegion(string name)
 	{
 		_region_name = std::move(name);
@@ -184,6 +188,10 @@ namespace idk::vkn
 				{
 					resource_layouts[cpy.src.id] = resource_layouts.at(*src_id);
 				}
+				//else
+				//{
+				//	resource_layouts[cpy.src.id] = vk::ImageLayout::eGeneral;
+				//}
 				copy_origin_nodes.emplace(cpy.src.id, id);
 			}
 		}

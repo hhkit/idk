@@ -14,6 +14,9 @@
 
 #include <vkn/utils/utils.inl>
 #include <vkn/utils/VknUtil.h>
+
+#include <vkn/renderpasses/DeferredPasses.h>
+
 namespace idk::vkn
 {
 
@@ -898,18 +901,16 @@ namespace idk::vkn::gt
 	}
 
 
-
 	struct GammaConv : BaseRenderPass, FsqUtil
 	{
 		static RscHandle<ShaderProgram> gamma_shd;
 		float linear_to_gamma=1/2.2f;
 		VknTextureView temp;
 		FrameGraphResource in_rsc;
-		GammaConv(FrameGraphBuilder& builder, RscHandle<VknRenderTarget> rt, float lin_to_gamma) : linear_to_gamma{lin_to_gamma}
+		GammaConv(FrameGraphBuilder& builder, FrameGraphResource orig, FrameGraphResource copy, float lin_to_gamma) : linear_to_gamma{lin_to_gamma}
 		{
-			auto col_tex = RscHandle<VknTexture>{ rt->GetColorBuffer() };
-			auto color_att = PassUtil::CreateGBuffer(builder, "Gamma Out Tex", col_tex->format, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageAspectFlagBits::eColor, col_tex);
-			auto input_tex = builder.read(in_rsc = builder.CreateTexture(PassUtil::CreateTextureInfo(builder, "Gamma In Tex", col_tex->format, vk::ImageUsageFlagBits::eColorAttachment|vk::ImageUsageFlagBits::eTransferDst, vk::ImageAspectFlagBits::eColor, {},col_tex->Size())));
+			auto color_att = builder.write(orig);
+			auto input_tex = builder.read(copy);
 
 			//auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
 			builder.set_output_attachment(color_att, 0,
@@ -926,7 +927,7 @@ namespace idk::vkn::gt
 						}
 				}
 			);
-			builder.set_input_attachment(builder.read(input_tex), 0,
+			builder.set_input_attachment(input_tex, 0,
 				AttachmentDescription
 				{
 						vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
@@ -985,7 +986,8 @@ namespace idk::vkn::gt
 		auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars;
 		string gamma_name = "gamma_correction";
 		vars.SetIfUnset(gamma_name,1 / 2.2f);
-		auto& rp = fg.addRenderPass<GammaConv>("Gamma Conv", RscHandle<VknRenderTarget>{},*vars.Get<float>(gamma_name));
+		auto& crp = fg.addRenderPass<renderpasses::CopyColorPass>("Copy color", RscHandle<VknRenderTarget>{}->Size(), RscHandle<VknTexture>{RscHandle<VknRenderTarget>{}->GetColorBuffer()});
+		auto& rp = fg.addRenderPass<GammaConv>("Gamma Conv", crp.original_color,crp.copied_color,*vars.Get<float>(gamma_name));
 		auto rt_col = RscHandle<VknRenderTarget>{}->GetColorBuffer();
 		//ccr.MakePass(fg, {}, color, depth, gfx_state, rs);
 		fg.Compile();
