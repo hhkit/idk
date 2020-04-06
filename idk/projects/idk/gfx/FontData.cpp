@@ -11,8 +11,8 @@ namespace idk
                                 unsigned font_size, real tracking, real line_spacing,
                                 TextAlignment alignment, [[maybe_unused]]real wrap_width)
     {
-        if (!font_atlas || text.empty())
-            return {};
+        //if (!font_atlas || text.empty())
+           // return {};
 
         FontData data;
         data.coords.resize(6 * text.size());
