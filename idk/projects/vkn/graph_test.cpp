@@ -16,7 +16,7 @@
 #include <vkn/utils/VknUtil.h>
 
 #include <vkn/renderpasses/DeferredPasses.h>
-
+#pragma optimize("",off)
 namespace idk::vkn
 {
 
@@ -910,7 +910,7 @@ namespace idk::vkn::gt
 		GammaConv(FrameGraphBuilder& builder, FrameGraphResource orig, FrameGraphResource copy, float lin_to_gamma) : linear_to_gamma{lin_to_gamma}
 		{
 			auto color_att = builder.write(orig);
-			auto input_tex = builder.read(copy);
+			auto input_tex = in_rsc = builder.read(copy);
 
 			//auto depth_att = CreateGBuffer(builder, "DepthCombine", vk::Format::eD16Unorm,    vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth, RscHandle<VknTexture>{rt->GetDepthBuffer()});
 			builder.set_output_attachment(color_att, 0,
