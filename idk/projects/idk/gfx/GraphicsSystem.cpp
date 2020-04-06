@@ -432,12 +432,12 @@ namespace idk
 			for (auto& elem : unique_canvas_font)
 			{
 				const auto res = elem.ConvertToPairs();
-				posList.push_back(res.first);
-				uvList.push_back(res.second);
-				colorList.push_back(ui_ro.color);
+				posList.emplace_back(res.first);
+				uvList.emplace_back(res.second);
+				colorList.emplace_back(ui_ro.color);
 				++count;
 			}
-			font_buffer.push_back(UIAttriBlock{ posList,uvList,colorList });
+			font_buffer.emplace_back(UIAttriBlock{ posList,uvList,colorList });
 			++total_num_of_text;
 
 			UITextRange f_range{ posList.size(),count };
@@ -540,7 +540,7 @@ namespace idk
 						active_light_buffer.emplace_back(i);
 						info.active_lights[i] = true;
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
-						if (light.cast_shadow)
+						//if (light.cast_shadow)
 						{
 							light.update_shadow = true;				
 							//for (auto& elem : light.light_maps)
@@ -563,8 +563,8 @@ namespace idk
 				auto sphere = bounding_box_to_loose_sphere(bounding_box);
 
 				color col = color{ 0.3f,0.2f,0.6f,1.0f };
-				//light.update_shadow = false;
 				light.update_shadow = false;
+				//light.update_shadow = true;
 				if (frustum.contains(sphere))
 				{
 					active_light_buffer.emplace_back(i);
@@ -775,6 +775,9 @@ namespace idk
 				auto& vp = result.camera.back();
 				vp.viewport.size = min(vec2(1) - vp.viewport.position, vp.viewport.size);
 			}
+		POST_END();
+
+		POST()
 			for (auto& elem : lights)
 			{
 				if (isolate && !elem.isolate)
@@ -908,7 +911,9 @@ namespace idk
 				render_data.transform = f.GetGameObject()->Transform()->GlobalMatrix() * translate(vec3{ ox, oy, 0 });
 				render_data.atlas = f.font;
 			}
-
+		POST_END();
+		
+		POST()
 			auto& ui = Core::GetSystem<UISystem>();
 			for (auto& im : images)
 			{
@@ -953,7 +958,7 @@ namespace idk
 				render_data.data = ImageData{ im.texture };
 				render_data.depth = go->Transform()->Depth();
 			}
-
+		
 			for (auto& text : texts)
 			{
 				if (text.text.empty() || !text.font)
@@ -1016,25 +1021,41 @@ namespace idk
 					s = sw > sh ? sh : sw;
 					tw *= s;
 					th *= s;
-				}
 
-				switch (text.alignment)
-				{
-				case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
-				case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
-				case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
-				case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
-				case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
-				case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
-				case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
-				case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
-				case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
-				}
 
-				if (text.best_fit)
+					switch (text.alignment)
+					{
+					case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
+					case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
+					case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
+					case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
+					case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
+					case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
+					case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
+					case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
+					case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
+					};
+
+
 					render_data.transform = render_data.transform * mat4{ scale(vec3{ s, s, 1.0f }) };
+				}
+				else
+				{
+					switch (text.alignment)
+					{
+					case TextAnchor::UpperLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * sy, 0 }); break;
+					case TextAnchor::MiddleLeft:   render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, 0.5f * th, 0 }); break;
+					case TextAnchor::LowerLeft:    render_data.transform = rt._matrix * translate(vec3{ -0.5f * sx, -0.5f * sy + th, 0 }); break;
+					case TextAnchor::UpperCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * sy, 0 }); break;
+					case TextAnchor::MiddleCenter: render_data.transform = rt._matrix * translate(vec3{ 0, 0.5f * th, 0 }); break;
+					case TextAnchor::LowerCenter:  render_data.transform = rt._matrix * translate(vec3{ 0, -0.5f * sy + th, 0 }); break;
+					case TextAnchor::UpperRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * sy, 0 }); break;
+					case TextAnchor::MiddleRight:  render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, 0.5f * th, 0 }); break;
+					case TextAnchor::LowerRight:   render_data.transform = rt._matrix * translate(vec3{ 0.5f * sx, -0.5f * sy + th, 0 }); break;
+					};
+				}
 			}
-		POST_END()
+		POST_END();
 
 		for (auto& elem : futures)
 			elem.get();
@@ -1055,12 +1076,15 @@ namespace idk
 			result.font_range.reserve(result.font_range.size() + size);
 			result.font_buffer.reserve(result.font_buffer.size() + size * avg_font_count);
 		}
+		POST_END();
+		
+		POST()
 			std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
-		POST_END()
+		POST_END();
 
 		POST()
 			std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
-		POST_END()
+		POST_END();
 
 		POST()
 #pragma region FOR UI
@@ -1078,6 +1102,7 @@ namespace idk
 			}
 
 			// sort ui render by z pos then depth
+			result.ui_total_num_of_text = 0;
 			for (auto& [canvas, vec] : result.ui_render_per_canvas)
 			{
 				std::stable_sort(vec.begin(), vec.end(),
@@ -1087,14 +1112,6 @@ namespace idk
 							a.transform[3].z < b.transform[3].z;
 					}
 				);
-			}
-
-			//Push it into the char buffer when done
-			result.ui_total_num_of_text = 0;
-			for (auto& [canvas, vec] : result.ui_render_per_canvas)
-			{
-				//No need to cull, this is to find all the coords data and append them to one buffer
-				//CanvasRenderRange range{};
 
 				auto& res = result.ui_canvas.emplace_back();
 
@@ -1112,18 +1129,26 @@ namespace idk
 						}
 						else
 						{
-							result.ui_attrib_buffer.push_back(UIAttriBlock{ {}, {}, { elem.color, elem.color, elem.color, elem.color } });
+							result.ui_attrib_buffer.emplace_back(UIAttriBlock{ {}, {}, { elem.color, elem.color, elem.color, elem.color } });
 						}
 					}, elem.data);
 				}
-
-
 			}
-#pragma endregion
-        POST_END()
 
-        for (auto& elem : futures)
-            elem.get();
+			//Push it into the char buffer when done
+			//result.ui_total_num_of_text = 0;
+			//for (auto& [canvas, vec] : result.ui_render_per_canvas)
+			//{
+			//	//No need to cull, this is to find all the coords data and append them to one buffer
+			//	//CanvasRenderRange range{};
+			//
+			//}
+#pragma endregion
+		POST_END();
+
+		for (auto& elem : futures)
+			elem.get();
+		futures.clear();
 
 		result.active_light_buffer.reserve(result.camera.size() + result.lights.size());
 		result.directional_light_buffer.reserve(result.camera.size());
@@ -1138,6 +1163,28 @@ namespace idk
 		ArenaAllocator<char_bool> alloc{ buff };
 		lights_used_t lights_used(alloc);
 		lights_used.resize(lights.size(), false);
+
+		
+		//POST()
+		for (auto& request : this->request_buffer)
+		{
+			auto& cam = request.data.camera;
+			
+			if(cam.enabled){
+				auto& out_instanced_mesh_render = result.instanced_mesh_render;
+				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
+				request.data.inst_mesh_render_begin = start_index;
+				request.data.inst_mesh_render_end = end_index;
+			}
+			else
+			{
+				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
+			}
+		}
+		//POST_END();
+
+		//POST()
 		{
 			vector<LightData> new_lights;
 			new_lights.reserve(result.camera.size() * 2);
@@ -1154,8 +1201,8 @@ namespace idk
 					if (debug_light_vol-- == 0)
 						LightVolDbg::RenderNext();
 					DbgIndex() = s_cast<int>(i++);
-					
-					CullLights(cam, CullLightsInfo { result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range,lights_used });
+
+					CullLights(cam, CullLightsInfo{ result.d_lightpool, result.lights, new_lights, result.active_light_buffer, result.directional_light_buffer, range,lights_used });
 				}
 				result.culled_render_range.emplace_back(range);
 				//{
@@ -1172,22 +1219,6 @@ namespace idk
 			}*/
 			//append the added lights at the back of the light range
 			result.lights.insert(result.lights.end(), new_lights.begin(), new_lights.end());
-		}
-		for (auto& request : this->request_buffer)
-		{
-			auto& cam = request.data.camera;
-			
-			if(cam.enabled){
-				auto& out_instanced_mesh_render = result.instanced_mesh_render;
-				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
-				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
-				request.data.inst_mesh_render_begin = start_index;
-				request.data.inst_mesh_render_end = end_index;
-			}
-			else
-			{
-				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
-			}
 		}
 		result.active_light_indices.reserve(lights_used.size());
 		for (size_t i = 0; i < lights_used.size(); i++)
@@ -1256,7 +1287,11 @@ namespace idk
 			}
 			
 		}
+		//POST_END();
 
+		//for (auto& elem : futures)
+		//	elem.get();
+		//futures.clear();
 		//for (auto& light_idx : result.active_light_indices)
 		//{
 		//	auto& light = result.lights[light_idx];

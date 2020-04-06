@@ -38,7 +38,7 @@ namespace idk
                 if (Mathf.Abs(t2) >= 1.0f) // gimbal
                     v.y = (t2 < 0 ? -Mathf.PI : Mathf.PI) * 0.5f * t2 * Mathf.RadToDeg;
                 else
-                    v.y = Mathf.Asin(t2);
+                    v.y = Mathf.Asin(t2) * Mathf.RadToDeg;
                 v.z = Mathf.Atan2(w * z + x * y, 0.5f - (y * y + z * z)) * Mathf.RadToDeg;
 
                 return v;

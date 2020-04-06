@@ -267,7 +267,7 @@ namespace idk::vkn::renderpasses
 	}
 	void AddPointShadowPass      (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
-		if (0)
+		/*if (0)
 		{
 			auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 			auto& elem = light.light_maps[shadow_range.light_map_index];
@@ -293,22 +293,24 @@ namespace idk::vkn::renderpasses
 				}
 			};
 			frame_graph.addRenderPass<PassSetPair<PointShadow::RenderPass, PointShadow::DrawSetBinding>>("point light", std::move(derp), elem.light_map);
-		}
+		}*/
 	}
 
 	void AddShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 
-		if (!light.update_shadow)
-			return;
 
 		switch (light.index)
 		{
 		case kPointLight:
+			if (!light.update_shadow)
+				return;
 			AddPointShadowPass(frame_graph, shadow_range, state);
 			break;
 		case kDirectionalLight:
+			if (!light.update_shadow)
+				return;
 			AddDirectionalShadowPass(frame_graph, shadow_range, state);
 			break;
 		case kSpotLight:
