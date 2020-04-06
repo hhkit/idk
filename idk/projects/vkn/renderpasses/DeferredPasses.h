@@ -5,6 +5,7 @@
 #include <gfx/DefaultShaders.h>
 #include <vkn/DrawSetRenderPass.h>
 #include <gfx/PostProcessEffect.h>
+#include <WindowsApplication.h>
 namespace idk
 {
 	struct renderer_attributes;
@@ -57,7 +58,9 @@ namespace idk::vkn::renderpasses
 		FrameGraphResource copied_color;
 		FrameGraphResource original_color;
 		uvec2 size;
-		CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color,vk::ImageLayout imageLayoutToConvert = vk::ImageLayout::eGeneral);
+		CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color, vk::ImageLayout imageLayoutToConvert = vk::ImageLayout::eGeneral);
+		CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, RscHandle<VknTexture> color,vk::ImageLayout imageLayoutToConvert = vk::ImageLayout::eGeneral);
+		//void Init(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color, vk::ImageLayout il);
 		void Execute(FrameGraphDetail::Context_t context) override;
 	};
 	struct GBufferPass : DrawSetRenderPass

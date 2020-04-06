@@ -1024,7 +1024,7 @@ namespace idk::vkn::renderpasses
 
 	CopyColorPass::CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, FrameGraphResource color, vk::ImageLayout il) :size{ color_size }, c_pass_name{ builder.Get_region_name() }
 	{
-		auto [copy,original]=builder.copy(color, CopyOptions{ il,
+		auto [copy, original] = builder.copy(color, CopyOptions{ il,
 			{
 				vk::ImageCopy
 				{
@@ -1043,10 +1043,24 @@ namespace idk::vkn::renderpasses
 					vk::Extent3D{size.x,size.y,1},
 				}
 			} });
+
+		if (!builder.rsc_manager.GetPrevious(color.id))
+		{
+			builder.MarkImageLayout(color, il);
+			builder.MarkImageLayout(original, il);
+		}
 		copied_color = copy;
 		original_color = original;
 		builder.NoRenderPass();
 	}
+
+	CopyColorPass::CopyColorPass(FrameGraphBuilder& builder, uvec2 color_size, RscHandle<VknTexture> color, vk::ImageLayout imageLayoutToConvert) : CopyColorPass(builder,color_size, builder.CreateTexture(CreateTextureInfo(builder, "copy src col", color->format, color->usage, vk::ImageAspectFlagBits::eColor, color)), imageLayoutToConvert)
+	{
+		
+	}
+	//void CopyColorPass::Init(FrameGraphBuilder& builder, FrameGraphResource color, vk::ImageLayout il)
+	//{
+	//}
 
 	void CopyColorPass::Execute(FrameGraphDetail::Context_t context)
 	{
