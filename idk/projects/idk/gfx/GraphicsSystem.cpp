@@ -914,7 +914,6 @@ namespace idk
 		POST_END();
 		
 		POST()
-			result.ui_render_per_canvas.clear();
 			auto& ui = Core::GetSystem<UISystem>();
 			for (auto& im : images)
 			{
