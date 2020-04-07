@@ -114,7 +114,7 @@ namespace idk
 		struct MoveObjectData
 		{
 			// SequenceNumber, acknowledgement state, move
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo), void(bool, SeqNo)>;
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo), void(float, SeqNo), void(bool, SeqNo)>;
 
 			SeqNo last_received;
 
@@ -132,7 +132,7 @@ namespace idk
 		struct ControlObjectData
 		{
 			// SequenceNumber, guess verification state, guess
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo)>;
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo), void(float, SeqNo), void(bool, SeqNo)>;
 
 			virtual void Init(SeqNo initial_frame) = 0;
 			virtual int  UnpackMove(span<const SeqAndPack>) = 0;

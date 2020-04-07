@@ -207,7 +207,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		Core::GetResourceManager().LoadCompiledAsset(elem);
 
 
-	auto load_scene = RscHandle<Scene>{ Guid{ "a826bf62-cb6f-4383-b59f-6749950a595d" } };
+	auto load_scene = RscHandle<Scene>{ Guid{ "8574c366-ca08-4da1-ba2e-70e092184dfa" } };
 	Core::GetSystem<SceneManager>().SetActiveScene(load_scene);
 	load_scene->LoadFromResourcePath();
 	Core::GetScheduler().SetPauseState(UnpauseAll);
