@@ -52,7 +52,7 @@ namespace idk::vkn
 	struct DSUpdater
 	{
 		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos;
+		DescriptorUpdateData::vector_a<DescriptorUpdateData::vector_a<vk::DescriptorImageInfo>>& image_infos;
 		const UniformUtils::BindingInfo& binding;
 		const vk::DescriptorSet& dset;
 		vk::WriteDescriptorSet& curr;
@@ -84,7 +84,7 @@ namespace idk::vkn
 		void operator()(UniformUtils::image_t ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
@@ -98,7 +98,7 @@ namespace idk::vkn
 		void operator()(UniformUtils::AttachmentBinding ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 					{}
@@ -110,7 +110,7 @@ namespace idk::vkn
 			curr.descriptorType = vk::DescriptorType::eInputAttachment;
 		}
 	};
-	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw);
+	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw);
 //#pragma optimize("",off)
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
@@ -118,9 +118,9 @@ namespace idk::vkn
 		DescriptorUpdateData& out
 	)
 	{
-		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos = out.scratch_buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos = out.scratch_image_info;
-		vector<vk::WriteDescriptorSet>& descriptorWrite = out.scratch_descriptorWrite;
+		auto& buffer_infos = out.scratch_buffer_infos;
+		auto& image_infos = out.scratch_image_info;
+		auto& descriptorWrite = out.scratch_descriptorWrite;
 		uint32_t max_binding = 0;
 		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
 		vk::DescriptorImageInfo default_img
@@ -453,9 +453,9 @@ namespace idk::vkn
 		return builder.end();
 	}
 //#pragma optimize("",off)
-	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
+	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorUpdateData& dud, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
 	{
-		_dud.Reset();
+		//_dud.Reset();
 		auto dsl = dm.Allocate(_collated_layouts);
 		size_t i = 0;
 		for (auto& [set, bindingv] : bindings)
@@ -486,7 +486,7 @@ namespace idk::vkn
 				{
 					auto ds = itr->second.GetNext();
 					//TODO update ds
-					UpdateUniformDS(ds, binding.to_span(), _dud);
+					UpdateUniformDS(ds, binding.to_span(), dud);
 					result = ds;
 				}
 
@@ -494,7 +494,7 @@ namespace idk::vkn
 			descriptor_sets[i] = result;
 			++i;
 		}
-		_dud.SendUpdates();
+		//_dud.SendUpdates();
 	}
 	std::optional<vk::DescriptorSetLayout> UniformUtils::binding_manager::GetLayout(set_t set)
 	{
@@ -602,6 +602,7 @@ namespace idk::vkn
 	{
 		sets[set].bindings[binding] = false;
 	}
+	//DescriptorUpdateData UniformManager::_dud = {};
 	void UniformManager::DebugInfo::MarkSet(uint32_t set)
 	{
 		for (auto& binding : sets[set].bindings)

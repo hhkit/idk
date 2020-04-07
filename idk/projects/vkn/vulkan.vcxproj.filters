@@ -723,9 +723,6 @@
     <Filter Include="system">
       <UniqueIdentifier>{ae16a2ac-34ab-44fe-88cf-fbbb70a7cb46}</UniqueIdentifier>
     </Filter>
-    <Filter Include="utils">
-      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
-    </Filter>
     <Filter Include="buffer">
       <UniqueIdentifier>{93364066-fc1f-4a19-8df1-752682cc0020}</UniqueIdentifier>
     </Filter>
@@ -782,6 +779,9 @@
     </Filter>
     <Filter Include="render\new_testament\Bindings\Standard">
       <UniqueIdentifier>{4a6c78a0-a8b5-47cd-b918-a9e326886fb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
     </Filter>
     <Filter Include="utils\Debug">
       <UniqueIdentifier>{7604bcde-49a7-49fc-aff5-56fcda6ada1c}</UniqueIdentifier>

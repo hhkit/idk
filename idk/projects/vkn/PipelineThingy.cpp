@@ -20,7 +20,7 @@ namespace idk::vkn
 	struct DSUpdater
 	{
 		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos;
+		DescriptorUpdateData::vector_a<DescriptorUpdateData::vector_a<vk::DescriptorImageInfo>>& image_infos;
 		const ProcessedRO::BindingInfo& binding;
 		const vk::DescriptorSet& dset;
 		vk::WriteDescriptorSet& curr;
@@ -52,7 +52,7 @@ namespace idk::vkn
 		void operator()(ProcessedRO::image_t ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
@@ -66,7 +66,7 @@ namespace idk::vkn
 		void operator()(ProcessedRO::AttachmentBinding ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
@@ -78,7 +78,7 @@ namespace idk::vkn
 			curr.descriptorType = vk::DescriptorType::eInputAttachment;
 		}
 	};
-	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw)
+	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw)
 	{
 		auto insert_itr = dsw.begin();
 		for (auto itr = dsw.begin(); itr != dsw.end(); ++itr)
@@ -144,9 +144,9 @@ namespace idk::vkn
 		DescriptorUpdateData& out
 	)
 	{
-		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos = out.scratch_buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos = out.scratch_image_info;
-		vector<vk::WriteDescriptorSet> &descriptorWrite = out.scratch_descriptorWrite;
+		auto& buffer_infos = out.scratch_buffer_infos;
+		auto& image_infos = out.scratch_image_info;
+		auto  &descriptorWrite = out.scratch_descriptorWrite;
 		uint32_t max_binding = 0;
 		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
 		vk::DescriptorImageInfo default_img

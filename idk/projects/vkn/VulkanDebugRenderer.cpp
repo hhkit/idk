@@ -26,6 +26,8 @@
 #include <ds/span.inl>
 #include <ds/result.inl>
 
+#include <vkn/VulkanMesh.h>
+
 namespace idk::vkn
 {
 	

@@ -35,6 +35,9 @@
 
 #include <time.h>
 
+#include<vkn/UboManager.h>
+#include <vkn/FrameRenderer.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];

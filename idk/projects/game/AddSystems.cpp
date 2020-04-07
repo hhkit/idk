@@ -8,6 +8,7 @@
 
 #include <res/CompiledAssets.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/VulkanMesh.h>
 #include <vkn/VknTexture.h>
 #include <vkn/VknFontAtlas.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>

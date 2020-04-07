@@ -1274,6 +1274,7 @@ namespace idk::vkn
 	{
 		return _states[0].signal;
 	}
+#pragma optimize("",off)
 	void FrameRenderer::GrowStates(vector<RenderStateV2>& states, size_t new_min_size)
 	{
 		auto device = *View().Device();

@@ -12,6 +12,12 @@ namespace idk::vkn
 		std::optional<uint32_t> GetBinding(uint32_t location)const;
 		const vector<buffer_desc>& GetDescriptors()const;
 		hash_table<uint32_t, uint32_t> loc2bind;
+		void Reset()
+		{
+			loc2bind.clear();
+			pipeline_helper.Reset();
+			_config = {};
+		}
 	private:
 		void UpdateLoc();
 		PipelineDescHelper pipeline_helper;

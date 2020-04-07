@@ -219,6 +219,10 @@ namespace idk::vkn
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
 
 		UboManager* _default_ubo_manager = {};
+
+		//vector<UniformManager> _uniform_managers;
+		vector<DescriptorUpdateData> _duds;
+
 		PipelineManager* _default_pipeline_manager= {};
 
 		TempGraph tmp_graph;

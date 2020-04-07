@@ -16,6 +16,12 @@ namespace idk::vkn
 		//Does not help you store your overrides.
 		//Does not help you store your overrides.
 		void UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config);
+
+		void Reset()
+		{
+			buffer_desc_overrides.clear();
+			override_attr_mapping.clear();
+		}
 	private:
 		void ApplyBufferDescOverrides(pipeline_config& config);
 	};

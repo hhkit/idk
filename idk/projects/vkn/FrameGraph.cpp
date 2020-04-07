@@ -5,6 +5,8 @@
 #include <vkn/VknTextureView.h>
 #include <res/ResourceHandle.inl>
 
+#include <vkn/RenderBundle.h>
+
 #include <vkn/DebugUtil.h>
 namespace idk::vkn
 {
@@ -350,8 +352,26 @@ namespace idk::vkn
 	}
 	void FrameGraph::Execute()
 	{
-		_contexts.clear();
-		_contexts.reserve(execution_order.size());
+		/*
+		if (_uniform_managers.empty())
+			_uniform_managers.emplace_back();
+		/*/
+		//if (_uniform_managers.size() < execution_order.size())
+		//{
+		//	_uniform_managers.resize(execution_order.size());
+		//}
+		//for (auto& um : _uniform_managers)
+		//{
+		//	um.Reset();
+		//}
+		//*/
+		for (auto& ctx : _contexts)
+		{
+			ctx.Reset();
+		}
+		//_contexts.clear();
+		if (_contexts.size() < execution_order.size())
+			_contexts.resize(execution_order.size());
 		auto& rsc_manager = GetResourceManager();
 		for (auto index : execution_order)
 		{
@@ -359,7 +379,9 @@ namespace idk::vkn
 			auto& rp = *render_passes[node.id];
 			//TODO: Thread this
 			{
-				auto& context = _contexts.emplace_back();
+				//auto& context = _contexts.emplace_back(_uniform_managers.back());
+				auto& context = _contexts.at(index);
+				context.FlagUsed();
 				context.SetPipelineManager(*_default_pipeline_manager);
 				context.SetUboManager(*_default_ubo_manager);
 				//Transition all the resources that are gonna be read (and are not input attachments)
@@ -392,6 +414,16 @@ namespace idk::vkn
 	void FrameGraph::ProcessBatches(RenderBundle& bundle)
 	{
 		size_t i = 0;
+		if (_duds.empty())
+		{
+			_duds.emplace_back();//Consider scaling with threads
+		}
+		for (auto& rt : _contexts)
+		{
+			_duds.back().Reset();
+			rt.PreprocessDescriptors(_duds.back(),bundle._d_manager);
+			_duds.back().SendUpdates();
+		}
 		for (auto& rt : _contexts)
 		{
 			rt.ProcessBatches(bundle);

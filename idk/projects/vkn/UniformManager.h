@@ -128,6 +128,11 @@ namespace idk::vkn
 			bool BindAttachment(UniInfo info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
 			bool is_bound(set_t set, uint32_t binding_index, uint32_t array_index)const noexcept;
+
+			void Reset()
+			{
+				curr_bindings.clear();
+			}
 		};
 	};
 
@@ -160,7 +165,16 @@ namespace idk::vkn
 		//set, bindings
 		using set_binding_t = std::pair<uint32_t, binding_manager::binding_span>;
 		std::optional<vector_span<set_binding_t>> FinalizeCurrent(vector<set_binding_t>& all_sets);
-		void GenerateDescriptorSets(span<const set_binding_t> bindings,DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_managers);
+		void GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorUpdateData& dud,DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_managers);
+		void Reset()
+		{
+			_uniform_names.clear();
+			_bindings.Reset();
+			_collated_layouts.clear();
+			_buffer.clear();
+			//_dud.Reset();
+			_dbg.Reset();
+		}
 	private:
 		hash_table<string, UniInfo> _uniform_names;
 		UboManager* _ubo_manager;
@@ -168,7 +182,7 @@ namespace idk::vkn
 		CollatedLayouts_t _collated_layouts;
 		vector<BindingInfo> _buffer;
 		vector_span_builder<BindingInfo> _buffer_builder{ _buffer };
-		DescriptorUpdateData _dud;
+		//DescriptorUpdateData _dud;
 		struct DebugInfo
 		{
 			struct Set
@@ -183,6 +197,11 @@ namespace idk::vkn
 			void MarkSet(uint32_t set);
 
 			bool Validate(const binding_manager& _bindings)const;
+
+			void Reset()
+			{
+				sets.clear();
+			}
 		};
 		DebugInfo _dbg;
 	};

@@ -3,47 +3,46 @@
 
 namespace idk
 {
-	template<typename T>
+	template<typename T,typename arena_block_t>
 	template<typename Y>
-	inline ArenaAllocator<T>::ArenaAllocator(Y* pool, size_t bytes) noexcept
+	inline ArenaAllocator<T,arena_block_t>::ArenaAllocator(Y* pool, size_t bytes) 
 	{
-		auto ptr = reinterpret_cast<unsigned char*>(pool);
-		auto aligned_ptr = align<arena_block>(ptr);
-		auto start = aligned_ptr + 1;
-		new (aligned_ptr) arena_block{ start, bytes - static_cast<size_t>(reinterpret_cast<unsigned char*>(start) - ptr) };
-		arena = aligned_ptr;
+		if (pool)
+		{
+			arena = arena_block_t::init(reinterpret_cast<unsigned char*>(pool), bytes);
+		}
 	}
-	template<typename T>
-	inline typename ArenaAllocator<T>::ptr_t ArenaAllocator<T>::allocate_fallback(size_t n)
+	template<typename T, typename arena_block_t>
+	inline typename ArenaAllocator<T,arena_block_t>::ptr_t ArenaAllocator<T,arena_block_t>::allocate_fallback(size_t n)
 	{
 		return (ptr_t) new empty[n];
 	}
-	template<typename T>
-	inline void ArenaAllocator<T>::deallocate_fallback(ptr_t ptr)
+	template<typename T, typename arena_block_t>
+	inline void ArenaAllocator<T,arena_block_t>::deallocate_fallback(ptr_t ptr)
 	{
 		delete[](empty*)ptr;
 	}
-	template<typename T>
-	typename ArenaAllocator<T>::ptr_t ArenaAllocator<T>::allocate(size_t n)
+	template<typename T, typename arena_block_t>
+	typename ArenaAllocator<T,arena_block_t>::ptr_t ArenaAllocator<T,arena_block_t>::allocate(size_t n)
 	{
-		if (!arena)
-			return allocate_fallback(n);
-		ptr_t result = align<T>(arena->next);
-		auto new_next = reinterpret_cast<unsigned char*>(result + n * sizeof(T));
-
-		if (new_next > arena->end)
+		auto num_bytes = n * sizeof(T);
+		if (arena && (arena->end - arena->arena) >= static_cast<ptrdiff_t>(num_bytes))
 		{
-			return allocate_fallback(n);
+			auto result = arena->try_allocate<T>(num_bytes);
+			if (result)
+				return result;
 		}
-		arena->next = new_next;
-		return result;
+		return allocate_fallback(n);
 	}
-	template<typename T>
-	inline void ArenaAllocator<T>::deallocate(ptr_t ptr, size_t N) noexcept
+	template<typename T, typename arena_block_t>
+	inline void ArenaAllocator<T,arena_block_t>::deallocate(ptr_t ptr, size_t N) noexcept
 	{
 		auto cptr = reinterpret_cast<unsigned char*>(ptr);
 		if (arena && cptr >= arena->arena && cptr < arena->end)
-			arena->try_release(ptr, N); // tiny optimization for stuff like stacks w/ lifo allocation
+		{
+			arena->try_release(ptr, N*sizeof(T)); // tiny optimization for stuff like stacks w/ lifo allocation
+				//_free_list.Free(cptr - arena->arena, N);
+		}
 		else
 			deallocate_fallback(ptr);
 	}

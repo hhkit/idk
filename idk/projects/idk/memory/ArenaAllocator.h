@@ -1,15 +1,24 @@
 #pragma once
 namespace idk
 {
+	template<typename T, typename U>
+	T* align(U* a) noexcept
+	{
+		auto ptr = reinterpret_cast<size_t>(a);
+		constexpr size_t align_of = alignof(T);
+		auto mod = (ptr % align_of);
+		return reinterpret_cast<T*>(ptr + (mod ? align_of - mod : 0));
+	}
+
 
 namespace detail
 {
 
-	template<template<typename>typename TM, typename T>
+	template<template<typename...>typename TM, typename T>
 	struct IsAllocator : std::false_type {};
 
-	template<template<typename>typename TM, typename T>
-	struct IsAllocator<TM, TM<T>> :std::true_type {};
+	template<template<typename...>typename TM, typename ...Args>
+	struct IsAllocator<TM, TM<Args...>> :std::true_type {};
 
 }
 
@@ -19,6 +28,16 @@ struct IsAllocator : detail::IsAllocator<TM, std::decay_t<T>> {};
 //MUST HAVE TRIVIAL DESTRUCTOR, we will not be destroying this. (Avoiding overhead of refcounting)
 struct arena_block
 {
+	using ctrl_block_ptr_t = arena_block *;
+
+	static ctrl_block_ptr_t init(unsigned char* ptr,size_t bytes)
+	{
+		auto aligned_ptr = align<arena_block>(ptr);
+		auto start = aligned_ptr + 1;
+		new (aligned_ptr) arena_block{ start, bytes - static_cast<size_t>(reinterpret_cast<unsigned char*>(start) - ptr) };
+		return aligned_ptr;
+	}
+
 	unsigned char* arena{};
 	unsigned char* next{};
 	unsigned char* end{};
@@ -30,30 +49,37 @@ struct arena_block
 	{
 	}
 	template<typename T>
+	T* try_allocate(size_t num_bytes)
+	{
+		auto result = align<T>(next);
+		auto new_next = reinterpret_cast<unsigned char*>(result ) + num_bytes;
+
+		if (new_next > end)
+		{
+			return nullptr;
+		}
+		next = new_next;
+		return result;
+	}
+
+	template<typename T>
 	bool try_release(T* ptr, size_t N) noexcept
 	{
-		bool release = reinterpret_cast<unsigned char*>(ptr + N) == next;
+		auto cptr = reinterpret_cast<unsigned char*>(ptr);
+		bool release = cptr+ N == next;
 		if (release)
-			next = reinterpret_cast<unsigned char*>(ptr);
+			next = cptr;
+		
+
 		return release;
 	}
 };
-template<typename T, typename U>
-T* align(U* a) noexcept
-{
-	auto ptr = reinterpret_cast<size_t>(a);
-	constexpr size_t align_of = alignof(T);
-	auto mod = (ptr % align_of);
-	return reinterpret_cast<T*>(ptr + (mod ? align_of - mod : 0));
-}
-
 
 //std::ostream& operator<<(std::ostream& out, const arena_block& block)
 //{
 //	return out << "{" << (void*)block.arena << ": next:" << (void*)block.next << " , end:" << (void*)block.end << ", LEFT: " << (block.end - block.next) << "}";
 //}
-
-template<typename T>
+template<typename T,typename arena_block_t = arena_block>
 struct ArenaAllocator
 {
 	using ptr_t = T *;
@@ -69,15 +95,17 @@ struct ArenaAllocator
 	using is_allocator_t = std::enable_if_t<IsAllocator<idk::ArenaAllocator, std::remove_const_t<std::remove_reference_t<A>>>::value>;
 	template<typename A>
 	using is_not_allocator_t = std::enable_if_t<!IsAllocator<idk::ArenaAllocator, std::remove_const_t<std::remove_reference_t<A>>>::value>;
-	arena_block* arena = nullptr;
+	typename arena_block_t::ctrl_block_ptr_t arena = {};
 	ArenaAllocator() { }
 	~ArenaAllocator() {}
 	template<typename Y>
-	ArenaAllocator(Y* pool, size_t bytes) noexcept;
+	ArenaAllocator(Y* pool, size_t bytes) ;
 	template<typename Y, size_t N>
-	ArenaAllocator(Y(&pool)[N]) noexcept : ArenaAllocator{ pool, N * sizeof(Y) } {
+	ArenaAllocator(Y(&pool)[N]) : ArenaAllocator{ pool, N * sizeof(Y) } {
 	}
-
+	template<typename Y, size_t N>
+	ArenaAllocator(std::array<Y,N>& pool) : ArenaAllocator{ std::data(pool), N * sizeof(Y) } {
+	}
 	template<typename A, typename = is_allocator_t<A>>
 	ArenaAllocator(A && a) : arena{ a.arena }
 	{
@@ -85,7 +113,8 @@ struct ArenaAllocator
 	template<typename A, typename = is_allocator_t<A>>
 	ArenaAllocator & operator=(A&& a) noexcept
 	{
-		return arena = a.arena;
+		arena = a.arena;
+		return *this;
 	}
 	struct alignas(T) empty
 	{

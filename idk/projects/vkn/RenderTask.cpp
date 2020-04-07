@@ -25,9 +25,10 @@ void dbg_chk([[maybe_unused]]vk::Image img)
 namespace idk::vkn
 {
 
-	RenderTask::RenderTask() //:ppm{std::make_unique<PipelineManager>()}
+	
+	RenderTask::RenderTask()//UniformManager& um) : _uniform_manager{um}
 	{
-		batches.reserve(256);
+		//batches.reserve(256);
 	}
 	void RenderTask::DebugLabel(LabelLevel type, string label)
 	{
@@ -313,6 +314,14 @@ namespace idk::vkn
 		_clear_depth_stencil = clear_value;
 	}
 
+	void RenderTask::PreprocessDescriptors(DescriptorUpdateData& dud, DescriptorsManager& dm)
+	{
+		vector<vk::DescriptorSet>& uniform_sets = _descriptor_sets;
+		uniform_sets.resize(_uniform_sets.size());
+
+		_uniform_manager.GenerateDescriptorSets(span{ _uniform_sets },dud, dm, uniform_sets);
+	}
+
 	uint32_t compute_clear_info(size_t num_output_attachments,span<const color> clear_colors, std::optional<vk::ClearValue> clear_depth_stencil,
 		vector<vk::ClearValue>& clear
 		)
@@ -334,6 +343,8 @@ namespace idk::vkn
 //#pragma optimize("",off)
 	void RenderTask::ProcessBatches(RenderBundle& render_bundle)
 	{
+		if (!used)
+			return;
 		//AddToBatch(_current_batch);
 		_start_new_batch = false;
 		StartNewBatch();//flush the current batch
@@ -350,12 +361,8 @@ namespace idk::vkn
 		if (!_skip_render_pass)
 		{
 
+			const vector<vk::DescriptorSet>& uniform_sets = _descriptor_sets;
 
-			auto& d_manager = render_bundle._d_manager;
-			vector<vk::DescriptorSet> uniform_sets(_uniform_sets.size());
-
-
-			_uniform_manager.GenerateDescriptorSets(span{ _uniform_sets }, d_manager, uniform_sets);
 
 			vector<vk::Viewport> viewports;
 			vector<vk::Rect2D> scissors;
@@ -469,6 +476,38 @@ namespace idk::vkn
 		{
 			dbg::EndLabel(cmd_buffer);
 		}
+	}
+
+	template<typename Vec>
+	void ClearSwap(Vec& dst, Vec& src) noexcept
+	{
+		src.clear();
+		std::swap(dst, src);
+	}
+	void RenderTask::Reset()
+	{
+		if (!used)
+			return;
+		_uniform_manager.Reset();
+		_vtx_binding_tracker.Reset();
+		RenderTask tmp;
+		std::swap(tmp, *this);
+
+		ClearSwap(_rect_buffer        ,tmp._rect_buffer);
+		ClearSwap(batches             ,tmp.batches);
+		ClearSwap(_copy_commands      ,tmp._copy_commands);
+		std::swap(_uniform_manager    , tmp._uniform_manager);
+		std::swap(this->_dc_builder   ,tmp._dc_builder);
+		std::swap(this->_rect_builder ,tmp._rect_builder);
+		ClearSwap(_descriptor_sets    ,tmp._descriptor_sets);
+		ClearSwap(_uniform_sets       ,tmp._uniform_sets);
+		ClearSwap(_vertex_bindings    ,tmp._vertex_bindings);
+		std::swap(_vtx_binding_tracker,tmp._vtx_binding_tracker);
+
+	}
+	void RenderTask::FlagUsed()
+	{
+		used = true;
 	}
 	void RenderTask::BindInputAttachmentToCurrent()
 	{

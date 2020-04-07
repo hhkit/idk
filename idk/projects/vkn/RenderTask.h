@@ -73,7 +73,9 @@ namespace idk::vkn
 			eWhole,
 		};
 
-		RenderTask();
+		RenderTask();//UniformManager& um);
+		RenderTask(RenderTask&&) = default;//UniformManager& um);
+		RenderTask& operator=(RenderTask&&)=default;//UniformManager& um);
 
 		void DebugLabel(LabelLevel, string);
 
@@ -140,7 +142,13 @@ namespace idk::vkn
 		void SetOutputAttachmentSize(size_t size);
 		void SetClearDepthStencil(std::optional<vk::ClearValue> clear_value = {});
 
+		void PreprocessDescriptors(DescriptorUpdateData& dud, DescriptorsManager& dm);
+
 		void ProcessBatches(RenderBundle& render_bundle);
+
+		void Reset();
+
+		void FlagUsed();
 
 	private:
 		struct DrawCall;
@@ -241,6 +249,7 @@ namespace idk::vkn
 		std::optional<string> _label;
 
 		vector<UniformManager::set_binding_t> _uniform_sets;
+		vector<vk::DescriptorSet> _descriptor_sets;
 		vector<VertexBindingData> _vertex_bindings;
 		UniformManager _uniform_manager;
 		DrawCallBuilder _dc_builder{_vertex_bindings};
@@ -249,6 +258,7 @@ namespace idk::vkn
 
 		vector<CopyCommand> _copy_commands;
 		VertexBindingTracker _vtx_binding_tracker;
+		bool used = false;
 	};
 
 

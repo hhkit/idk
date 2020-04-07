@@ -8,6 +8,9 @@
 #include <res/ResourceHandle.inl>
 #include <res/ResourceMeta.inl>
 
+#include <vkn/VknFontAtlas.h>
+
+
 //Resources
 #include <iostream>
 
