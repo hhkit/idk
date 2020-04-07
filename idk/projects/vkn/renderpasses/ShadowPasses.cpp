@@ -303,23 +303,21 @@ namespace idk::vkn::renderpasses
 	void AddShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
-
+		if (!light.update_shadow)
+			return;
 
 		switch (light.index)
 		{
 		case kPointLight:
-			if (!light.update_shadow)
-				return;
+			
 			AddPointShadowPass(frame_graph, shadow_range, state);
 			break;
 		case kDirectionalLight:
-			if (!light.update_shadow)
-				return;
+
 			AddDirectionalShadowPass(frame_graph, shadow_range, state);
 			break;
 		case kSpotLight:
-			if (!light.update_shadow)
-				return;
+			
 			AddSpotlightShadowPass(frame_graph, shadow_range, state);
 			break;
 
