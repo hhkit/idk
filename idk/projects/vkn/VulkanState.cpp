@@ -526,7 +526,7 @@ namespace idk::vkn
 			//elem->CreateImageViewWithCurrImgs(*view_);
 
 		m_swapchain->m_graphics.CreateImagePool(*view_);
-		auto& images = m_swapchain->m_graphics.Images();
+		[[maybe_unused]] auto& images = m_swapchain->m_graphics.Images();
 		for (auto& elem : m_swapchain->m_inBetweens)
 		{
 			elem->CreateImagePool(*view_);
