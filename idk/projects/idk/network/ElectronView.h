@@ -17,7 +17,7 @@ namespace idk
 		function<T()>                          getter;
 		function<void(const T&)>               setter;
 		function<void(const T&)>               custom_move;
-		function <T(const T&, const T&, real)> interpolator = [](const T& lhs, const T& rhs, real) { return rhs; };
+		function <T(const T&, const T&, real)> interpolator = []([[maybe_unused]] const T& lhs, const T& rhs, real) { return rhs; };
 		function <T(const T&, const T&)>       differ = [](const T& lhs, const T& rhs) -> T { return lhs - rhs; };
 		function <T(const T&, const T&)>       adder  = [](const T& lhs, const T& rhs) -> T { return lhs + rhs; };
 		function<bool(const T&, const T&)>     equater = std::equal_to<T>{};
@@ -114,7 +114,7 @@ namespace idk
 		struct MoveObjectData
 		{
 			// SequenceNumber, acknowledgement state, move
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo)>;
+			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo), void(bool, SeqNo)>;
 
 			SeqNo last_received;
 

@@ -80,7 +80,7 @@ namespace idk
 				elem->GetMaster()->CacheValue(curr_seq);
 		}
 	}
-	void ElectronView::PrepareDataForSending(SeqNo curr_seq)
+	void ElectronView::PrepareDataForSending([[maybe_unused]] SeqNo curr_seq)
 	{
 		state_mask = 0;
 		if (std::get_if<Master>(&ghost_state))
@@ -224,12 +224,12 @@ namespace idk
 		template<typename T>
 		void operator()(const T&, SeqNo) {}
 
-		void operator()(const vec3& v, SeqNo seq)
+		void operator()([[maybe_unused]] const vec3& v, [[maybe_unused]] SeqNo seq)
 		{
 		//	logger << "[" << seq.value <<"]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x <<"," << v.y <<"," << v.z <<")" << "\n";
 		}
 
-		void operator()(const quat& v, SeqNo seq)
+		void operator()([[maybe_unused]] const quat& v, [[maybe_unused]] SeqNo seq)
 		{
 		//	logger << "[" << seq.value << "]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" << "\n";
 		}
@@ -237,8 +237,6 @@ namespace idk
 
 	void ElectronView::DumpToLog()
 	{
-		erased_visitor<void(int)> hey{ [](int a) {} };
-
 		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
 		for (auto& elem : parameters)
 		{

@@ -122,7 +122,7 @@ namespace idk
 				throw;
 		}
 
-		small_vector<SeqAndPack> PackData(SeqNo curr_seq) override
+		small_vector<SeqAndPack> PackData([[maybe_unused]] SeqNo curr_seq) override
 		{
 			small_vector<SeqAndPack> retval;
 			for (auto& elem : buffer)

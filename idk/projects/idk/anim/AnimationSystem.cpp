@@ -768,7 +768,7 @@ namespace idk
 					return i;
 			}
 
-			return vec.size() - 1;
+			return static_cast<int>(vec.size()) - 1;
 		};
 
 		const auto find_key_r = [&](const auto& vec, float ticks) -> int
@@ -781,7 +781,7 @@ namespace idk
 				}
 			}
 
-			return vec.size() - 1;
+			return static_cast<int>(vec.size()) - 1;
 		};
 
 		const auto valid_index = [&](const auto& vec, int index) ->bool
@@ -805,7 +805,7 @@ namespace idk
 					start = find_key_r(keys, time_in_ticks);
 					next = start - 1;
 					if (next < 0)
-						next = keys.size() - 1;
+						next = static_cast<int>(keys.size()) - 1;
 				}
 
 				bool start_valid = valid_index(keys, start), next_valid = valid_index(keys, next);
