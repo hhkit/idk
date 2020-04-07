@@ -347,10 +347,10 @@ namespace idk::vkn::gt
 			for (size_t i = 0; i < light_indices.size();i+= stride)
 			{
 				lights.clear();
-				for (size_t j = 0; j + i < light_indices.size() && j < stride; ++j)
+				for (size_t j = 0, k = i; (k < light_indices.size()) && (j < stride); ++j, ++k)
 				{
-					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[i+j]]);
-					context.BindUniform("shadow_maps", s_cast<uint32_t>(j), gfx_state.shadow_maps_2d[i+j].as<VknTexture>());
+					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[k]]);
+					context.BindUniform("shadow_maps", s_cast<uint32_t>(j), gfx_state.shadow_maps_2d[k].as<VknTexture>());
 				}
 				
 				auto light_data = PrepareLightBlock(gfx_state.camera, lights);

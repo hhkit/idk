@@ -22,26 +22,32 @@ namespace idk::vkn
 		active_lights.clear();
 		active_dir_lights.clear();
 		{
-			size_t i = 0;
+			//size_t i = 0;
 			RscHandle<Texture> def_2d;
 			RscHandle<CubeMap> def_cube;
 
 			active_lights.insert(active_lights.end(), all_active_lights.begin() + data.light_begin, all_active_lights.begin() + data.light_end);
-			shadow_maps_2d.resize(active_lights.size(), def_2d);
+			//active_lights.emplace_back(all_active_lights);
+			//shadow_maps_2d.resize(active_lights.size(), def_2d);
 			active_dir_lights.insert(active_dir_lights.end(), active_directional_light.begin() + data.dir_light_begin, active_directional_light.begin() + data.dir_light_end);
 			//shadow_maps_directional.resize(active_directional_light.size(), def_2d);
 			//shadow_maps_cube.resize(active_lights.size(), def_cube);
-			for (auto& light_idx : active_lights)
-			{
-				auto& light = lights_data[light_idx];
-				if (light.index == 2)//spotlight
-				{
-					for(auto& elem: light.light_maps)
-						shadow_maps_2d[i]=(s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
-					//shadow_maps_cube[i]=(def_cube);
-				}
-				++i;				
-			}
+			//for (auto& light_idx : active_lights)
+			//{
+			//	auto& light = lights_data[light_idx];
+			//	if (light.index == 2)//spotlight
+			//	{
+			//		for(auto& elem: light.light_maps)
+			//			if(elem.light_map)
+			//				shadow_maps_2d[i]=(s_cast<RscHandle<Texture>>(elem.light_map->DepthAttachment()));
+			//		//shadow_maps_cube[i]=(def_cube);
+			//	}
+			//	else
+			//	{
+			//		shadow_maps_2d[i] = RscHandle<Texture>{};
+			//	}
+			//	++i;				
+			//}
 			//for (auto& dir_light_idx : active_directional_light)
 			//{
 			//	auto& light = lights_data[dir_light_idx];

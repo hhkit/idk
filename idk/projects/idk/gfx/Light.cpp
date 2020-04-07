@@ -196,7 +196,7 @@ namespace idk
 					//vp = :spotlight.attenuation_radius)*look_at(retval.v_pos, retval.v_pos + retval.v_dir, vec3{ 0,1,0 });
 				}
 				retval.shadow_layers = shadow_layers;
-				retval.update_shadow = update_shadow;
+				//retval.update_shadow = update_shadow;
 				retval.shadow_bias = shadow_bias;
 				retval.v = LightCameraView{ this }(light_variant);
 				retval.p = LightCameraProj{}(light_variant);

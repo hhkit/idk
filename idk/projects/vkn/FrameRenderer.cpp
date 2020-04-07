@@ -585,7 +585,7 @@ namespace idk::vkn
 			cmd_buffer.begin(begin_info, dispatcher);
 			//renderpasses::Add445_75Test(_pimpl->graph, state);
 
-			for (auto range : lights)
+			for (auto& range : lights)
 			{
 				PreRenderShadow(range, state);
 			}

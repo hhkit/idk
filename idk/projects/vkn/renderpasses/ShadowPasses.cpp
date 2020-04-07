@@ -243,6 +243,7 @@ namespace idk::vkn::renderpasses
 		};
 		frame_graph.addRenderPass<PassSetPair<DirectionalShadow::RenderPass, DirectionalShadow::DrawSetBinding>>("directional light", std::move(derp), elem.light_map);
 	}
+//#pragma optimize("",off)
 	void AddSpotlightShadowPass  (FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
@@ -317,6 +318,8 @@ namespace idk::vkn::renderpasses
 			AddDirectionalShadowPass(frame_graph, shadow_range, state);
 			break;
 		case kSpotLight:
+			if (!light.update_shadow)
+				return;
 			AddSpotlightShadowPass(frame_graph, shadow_range, state);
 			break;
 

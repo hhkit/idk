@@ -37,7 +37,7 @@ namespace idk
 		vector<Lightmap> light_maps;
 		//alignas(16) mat4 w {};
 		CameraData camDataRef{};
-		bool update_shadow=true;
+		bool update_shadow=false;
 		LayerMask shadow_layers; //Layers that contribute to shadows.
 	};
 
@@ -65,7 +65,8 @@ namespace idk
 		real         shadow_bias   { epsilon };
 		bool         casts_shadows { true };
 		bool         isolate       { false };
-		bool         update_shadow { true };
+		//Force the shadow to always update
+		//bool         update_shadow { false };
 		LayerMask    shadow_layers {~0};
 
 		Light() = default;
