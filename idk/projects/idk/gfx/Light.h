@@ -66,7 +66,7 @@ namespace idk
 		bool         casts_shadows { true };
 		bool         isolate       { false };
 		//Force the shadow to always update
-		//bool         update_shadow { false };
+		bool         update_shadow { false };
 		LayerMask    shadow_layers {~0};
 
 		Light() = default;
