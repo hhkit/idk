@@ -53,7 +53,7 @@ namespace idk::reflect
 
 		dynamic copy() const override
 		{
-			return dynamic(t, obj);
+			return t._context->copy_construct(obj);
 		}
 	};
 
