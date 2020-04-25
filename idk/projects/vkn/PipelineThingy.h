@@ -99,17 +99,23 @@ namespace idk::vkn
 		struct set_bindings
 		{
 			vk::DescriptorSetLayout layout;
-			hash_table<uint32_t,vector<std::optional<ProcessedRO::BindingInfo>>>  bindings;
+			hash_table<uint32_t, vector<std::optional<ProcessedRO::BindingInfo>>>  bindings;
 			DsCountArray total_desc;
 			bool dirty = false;
 
 			vector<ProcessedRO::BindingInfo> scratch_out;
 
-			void SetLayout(vk::DescriptorSetLayout new_layout,const DsCountArray& total_descriptors, bool clear_bindings = false);
+			void SetLayout(vk::DescriptorSetLayout new_layout, const DsCountArray& total_descriptors, bool clear_bindings = false);
 			void Bind(ProcessedRO::BindingInfo info);
 			void Unbind(uint32_t binding);
 			monadic::result< vector<ProcessedRO::BindingInfo>, string> FinalizeDC(CollatedLayouts_t& collated_layouts);
 		};
+
+		PipelineThingy(std::shared_ptr<DescriptorUpdateData> d = std::make_shared<DescriptorUpdateData>())
+			: dud{ d }
+		{
+
+		}
 		
 		void SetRef(
 			//set, bindings
@@ -155,7 +161,7 @@ namespace idk::vkn
 		std::optional<BoundIndexBuffer> index_buffer{};
 		size_t num_vertices{};
 
-		DescriptorUpdateData dud{};
+		std::shared_ptr<DescriptorUpdateData> dud{};
 		std::optional<RscHandle<ShaderProgram>> shaders[static_cast<size_t>(ShaderStage::Size)];
 		vector<ProcessedRO> draw_calls;
 

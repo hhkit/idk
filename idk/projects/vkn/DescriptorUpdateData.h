@@ -155,6 +155,7 @@ namespace idk
 
 				if (new_next < next)
 				{
+					DebugBreak();
 					return nullptr;
 				}
 				auto offset = start - arena;
@@ -172,6 +173,7 @@ namespace idk
 
 			if (new_next > rnext)
 			{
+				DebugBreak();
 				return nullptr;
 			}
 			auto offset = next - arena;
@@ -243,15 +245,55 @@ namespace idk::vkn
 		template<typename T, size_t N>
 		static constexpr size_t num_bytes = std::max(sizeof(T) * N, sizeof(size_t) * N);
 	}
+	bool some_func();
 	namespace detail
 	{
-		template<size_t NumBytes>
-		struct FixedInternal
+		struct InternalBase
 		{
-			std::array<char, NumBytes> buffer;
+			span<char> buffer{};
+		};
+		template<size_t NumBytes>
+		struct FixedInternal :InternalBase
+		{
+			std::array<char, NumBytes> _buffer;
+			FixedInternal() :InternalBase{ {std::data(_buffer),std::data(_buffer) + std::size(_buffer)} } { }
+			~FixedInternal() { }
 		};
 	}
+	template<typename proxy_t>
+	struct AllocatorProxy
+	{
+		using ptr_t = typename proxy_t::ptr_t;
+		using value_type = typename proxy_t::value_type;
+		using size_type = typename proxy_t::size_type;
+		using difference_type = typename proxy_t::difference_type;
+		using reference = typename proxy_t::reference;
+		using const_reference = typename proxy_t::const_reference;
+		using pointer = typename proxy_t::pointer;
+		using const_pointer = typename proxy_t::const_pointer;
 
+		proxy_t* proxy_ptr;
+
+		ptr_t allocate(size_t n)
+		{
+			return proxy_ptr->allocate(n);
+		}
+
+		void deallocate(ptr_t ptr, size_t N)noexcept
+		{
+			return proxy_ptr->deallocate(ptr, N);
+		}
+		template<typename A>
+		bool operator==(const A & rhs)const noexcept
+		{
+			return proxy_ptr->operator==(rhs);
+		}
+		bool operator!=(const proxy_t& rhs)const noexcept
+		{
+			return proxy_ptr->operator!=(rhs);
+		}
+
+	};
 
 	struct DescriptorUpdateData
 	{
@@ -264,9 +306,10 @@ namespace idk::vkn
 
 		static void JustBreak();
 
-		template<typename T, size_t NumBytes=1<<16,typename base_t = ArenaAllocator<T,arena_block_free>>
+		template<typename T, size_t NumBytes=1<<20, typename proxy_t = ArenaAllocator<T, arena_block_free>,typename base_t = AllocatorProxy<proxy_t>>
 		struct FixedArenaAllocator : base_t
 		{
+			;
 			template<typename T>
 			static ArenaAllocator<T>& GetAllocatorBase(ArenaAllocator<T>& base) noexcept
 			{
@@ -279,26 +322,50 @@ namespace idk::vkn
 			{
 				using other = FixedArenaAllocator<U,NumBytes>;
 			};
-			std::shared_ptr<Internal> _internal;
+			std::shared_ptr<detail::InternalBase> _internal;
+			proxy_t allocator;
 			template<typename U, typename Base>
 			bool operator==(const FixedArenaAllocator<U, NumBytes, Base>& rhs) noexcept
 			{
-				return _internal == rhs._internal;
+				return *_internal == *rhs._internal;
 			}
 			//alignas(T) std::array<char, sizeof(T) * 2048> buffer;
-			FixedArenaAllocator() 
+			FixedArenaAllocator() :
+				base_t{&allocator},
+				_internal{ std::make_shared<Internal>() },
+				allocator{ _internal->buffer }
 			{
-				_internal = std::make_shared<Internal>();
-				base_t* ptr = this;
-				new (ptr) base_t{ _internal->buffer };
+				//_internal = std::make_shared<Internal>();
+				//proxy_t* ptr = &allocator;
+				//new (ptr) ;
+				//this->proxy_ptr = ptr;
 			}
-			FixedArenaAllocator(const FixedArenaAllocator& rhs) = default;
+			template<typename U,size_t N>
+			FixedArenaAllocator(const FixedArenaAllocator<U,N>& rhs)
+				: base_t{ &allocator },
+				_internal{ rhs._internal },
+				allocator{ rhs.allocator }
+			{
+
+			}
+			FixedArenaAllocator(const FixedArenaAllocator& rhs)
+				: base_t{&allocator},
+				_internal{ rhs._internal },
+				allocator{ rhs.allocator }
+			{
+
+			}
 			template<
 				typename U,
 				typename = 
 					std::enable_if_t<!std::is_same_v<FixedArenaAllocator<T,NumBytes>, FixedArenaAllocator<U, NumBytes> >>
 			>
-			FixedArenaAllocator(const FixedArenaAllocator<U, NumBytes>& rhs) : base_t{ GetAllocatorBase(rhs) }, _internal{ rhs._internal } {  }
+			FixedArenaAllocator(const FixedArenaAllocator<U, NumBytes>& rhs) :
+				base_t{&allocator},
+				_internal{ rhs._internal } ,
+				allocator { rhs.allocator }
+			{ 
+			}
 			
 			FixedArenaAllocator& operator=(const FixedArenaAllocator&) = delete;
 			template<
@@ -310,15 +377,26 @@ namespace idk::vkn
 			~FixedArenaAllocator() = default;
 		};
 		template<typename T>
-		using vector_a = std::vector<T, FixedArenaAllocator<T>>;
-		
-		vector_a<vk::WriteDescriptorSet> descriptorWrite;
-		std::forward_list<vector_a<vk::DescriptorImageInfo>> image_infos;
-		std::forward_list<vk::DescriptorBufferInfo> buffer_infos;
+		using allocator_t = FixedArenaAllocator<T>;
+		template<typename T,size_t N>
+		using allocator_n_t = FixedArenaAllocator<T,N>;
+		template<typename T>
+		using vector_a = std::vector<T, allocator_t<T>>;
+		template<typename T>
+		using fwd_list_a = std::forward_list<T>;//, allocator_t<T >> ;
+		allocator_t<char> alloc{};
+		allocator_n_t<char, 1 <<20> list_alloc{};
+		allocator_n_t<char,1<<20> list_alloc2{};
 
-		vector_a<vk::WriteDescriptorSet> scratch_descriptorWrite;
-		vector_a<vector_a<vk::DescriptorImageInfo>> scratch_image_info;
-		std::forward_list<vk::DescriptorBufferInfo> scratch_buffer_infos;
+		vector_a<vk::WriteDescriptorSet> descriptorWrite{ alloc };
+		fwd_list_a<vector_a<vk::DescriptorImageInfo>> image_infos{};// list_alloc};
+		fwd_list_a<vk::DescriptorBufferInfo> buffer_infos{};// list_alloc2 };
+
+		vector_a<vk::WriteDescriptorSet> scratch_descriptorWrite{ alloc };
+		vector_a<vector_a<vk::DescriptorImageInfo>> scratch_image_info{ alloc };
+		fwd_list_a<vk::DescriptorBufferInfo> scratch_buffer_infos{};// list_alloc2};
+
+
 		void AbsorbFromScratch();
 		void SendUpdates();
 		void Reset();

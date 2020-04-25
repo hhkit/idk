@@ -3,7 +3,6 @@
 #include <vkn/VulkanView.h>
 namespace idk::vkn
 {
-#pragma optimize("",off)
 	void* DescriptorUpdateData::derp(void* ptr)
 	{
 		//while (true);
@@ -40,6 +39,15 @@ void DescriptorUpdateData::Reset()
 	descriptorWrite.clear();
 	image_infos.clear();
 	buffer_infos.clear();
+}
+
+static bool some_value = false;
+static bool some_toggle = false;
+bool some_func()
+{
+	bool value = some_value;
+	some_value = some_toggle;
+	return value;
 }
 
 }
@@ -90,8 +98,16 @@ namespace idk
 		bool handled = false;
 		while (itr)
 		{
-			if (itr->offset < offset)
+			//new guy is infront and connects with current node's start exactly
+			if (itr->offset == offset + size)
 			{
+				itr->offset = offset;
+				itr->size += size;
+				handled = true;
+				break;
+			}else if (itr->offset < offset) //new guy is after the current node's start
+			{
+				//Current node connects exactly with new guy's front
 				if (itr->offset + itr->size == offset)
 				{
 					itr->size += size;
@@ -103,19 +119,21 @@ namespace idk
 						next = itr->next;
 					}
 					handled = true;
-				}
-				else if (!itr->next || itr->next->offset > offset)
-				{
-					insert(&(*insert_ptr)->next, construct(Record{ offset, size }));
-					handled = true;
-				}
-				if(handled)
 					break;
+				}
+				////nothing next or new guy is infront of next guy
+				//else if (!itr->next || itr->next->offset > offset)
+				//{
+				//	insert(&(*insert_ptr)->next, construct(Record{ offset, size }));
+				//	handled = true;
+				//}
+				//if(handled)
+				//	break;
 			}
-			else if (itr->offset == offset + size)
+			else //New guy is infront, but does not connect exactly with current
 			{
-				itr->offset = offset;
-				itr->size += size;
+				//None of the subsequent nodes can infront of new guy, insert now.
+				insert(insert_ptr, construct(Record{ offset, size }));
 				handled = true;
 				break;
 			}
@@ -127,13 +145,13 @@ namespace idk
 		{
 			insert(insert_ptr, construct(Record{ offset, size }));
 		}
-		auto tmp = _head;
-		while (tmp && tmp->next)
-		{
-			if (tmp->offset > tmp->next->offset)
-				DebugBreak();
-			tmp = tmp->next;
-		}
+		//auto tmp = _head;
+		//while (tmp && tmp->next)
+		//{
+		//	if (tmp->offset > tmp->next->offset)
+		//		DebugBreak();
+		//	tmp = tmp->next;
+		//}
 
 	}
 	std::optional<std::pair<size_t, size_t>> FreeList::PopBoundary(size_t boundary)
@@ -196,9 +214,9 @@ namespace idk
 		r->~Record();
 		_allocator.deallocate(r);
 	}
-#pragma optimize("",off)
 	void free_block(arena_block_free* ptr) 
 	{
+		while (true);
 		ptr->~arena_block_free(); 
 	}
 }

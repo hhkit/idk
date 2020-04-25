@@ -416,7 +416,7 @@ namespace idk::vkn
 		size_t i = 0;
 		if (_duds.empty())
 		{
-			_duds.emplace_back();//Consider scaling with threads
+			_duds.emplace_back(DescriptorUpdateData{ alloc });//Consider scaling with threads
 		}
 		for (auto& rt : _contexts)
 		{

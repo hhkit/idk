@@ -103,6 +103,9 @@ struct ArenaAllocator
 	template<typename Y, size_t N>
 	ArenaAllocator(Y(&pool)[N]) : ArenaAllocator{ pool, N * sizeof(Y) } {
 	}
+	template<typename Y>
+	ArenaAllocator(span<Y> pool) : ArenaAllocator{ pool.data(), pool.size()* sizeof(Y) } {
+	}
 	template<typename Y, size_t N>
 	ArenaAllocator(std::array<Y,N>& pool) : ArenaAllocator{ std::data(pool), N * sizeof(Y) } {
 	}

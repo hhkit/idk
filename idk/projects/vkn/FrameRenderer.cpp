@@ -1274,7 +1274,6 @@ namespace idk::vkn
 	{
 		return _states[0].signal;
 	}
-#pragma optimize("",off)
 	void FrameRenderer::GrowStates(vector<RenderStateV2>& states, size_t new_min_size)
 	{
 		auto device = *View().Device();
@@ -1286,7 +1285,7 @@ namespace idk::vkn
 				auto cmd_pool = View().vulkan().CreateGfxCommandPool();
 				auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ *cmd_pool,vk::CommandBufferLevel::ePrimary, 1}, vk::DispatchLoaderDefault{});
 				auto& buffer = buffers[0];
-				states.emplace_back(RenderStateV2{std::move(cmd_pool), std::move(buffer),UboManager{View()},PresentationSignals{},DescriptorsManager{View()},CubemapRenderer{} }).signal.Init(View());
+				states.emplace_back(RenderStateV2{std::move(cmd_pool), std::move(buffer),UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
 				//_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}

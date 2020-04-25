@@ -221,6 +221,7 @@ namespace idk::vkn
 		UboManager* _default_ubo_manager = {};
 
 		//vector<UniformManager> _uniform_managers;
+		DescriptorUpdateData::allocator_n_t<char,1<<20> alloc;
 		vector<DescriptorUpdateData> _duds;
 
 		PipelineManager* _default_pipeline_manager= {};

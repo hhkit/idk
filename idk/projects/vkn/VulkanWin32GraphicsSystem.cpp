@@ -224,8 +224,12 @@ namespace idk::vkn
 	{
 		Core::GetSystem<GraphicsSystem>().LoadShaders();
 	}
+
+	void profile_bp_start();
+	void profile_bp_end();
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		profile_bp_start();
 		auto d_start = std::chrono::high_resolution_clock::now();
 
 		auto dump = []() {
@@ -472,6 +476,7 @@ namespace idk::vkn
 			dump();
 			throw;
 		}
+		profile_bp_end();
 	}
 //
 	void VulkanWin32GraphicsSystem::SwapBuffer()
@@ -613,4 +618,19 @@ namespace idk::vkn
 		debugMessenger = VkHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>{ tmp };
 	}
 	*/
+	void DoNothing();
+	namespace wtfareyoudoing
+	{
+		static int a = 0;
+	}
+#pragma optimize("",off)
+	void profile_bp_start()
+	{
+		wtfareyoudoing::a++;
+		DoNothing();
+	}
+	void profile_bp_end()
+	{
+		DoNothing();
+	}
 }

@@ -19,7 +19,7 @@ namespace idk::vkn
 	VulkanView& View();
 	struct DSUpdater
 	{
-		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos;
+		decltype(DescriptorUpdateData::scratch_buffer_infos)& buffer_infos;
 		DescriptorUpdateData::vector_a<DescriptorUpdateData::vector_a<vk::DescriptorImageInfo>>& image_infos;
 		const ProcessedRO::BindingInfo& binding;
 		const vk::DescriptorSet& dset;
@@ -147,6 +147,7 @@ namespace idk::vkn
 		auto& buffer_infos = out.scratch_buffer_infos;
 		auto& image_infos = out.scratch_image_info;
 		auto  &descriptorWrite = out.scratch_descriptorWrite;
+		using img_vec_t = std::remove_reference_t<decltype(image_infos[0])>;
 		uint32_t max_binding = 0;
 		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
 		vk::DescriptorImageInfo default_img
@@ -160,7 +161,7 @@ namespace idk::vkn
 			if (max_binding > descriptorWrite.size())
 			{
 				descriptorWrite.resize(max_binding, vk::WriteDescriptorSet{});
-				image_infos.resize(max_binding);
+				image_infos.resize(max_binding, img_vec_t(out.alloc));
 			}
 			auto& curr = descriptorWrite[binding.binding];
 			if (binding.IsImage() || binding.IsAttachment())
@@ -448,11 +449,11 @@ namespace idk::vkn
 				}(bindings);
 				auto ds = dsl.find(layout)->second.GetNext();
 				vk::Device device = *View().Device();
-				UpdateUniformDS( ds, bindings,dud);
+				UpdateUniformDS( ds, bindings,*dud);
 				p_ro.SetDescriptorSet(set,ds);
 			}
 		}
-		dud.SendUpdates();
+		dud->SendUpdates();
 	}
 	void PipelineThingy::UpdateUboBuffers()
 	{

@@ -20,7 +20,7 @@ struct RenderStateV2
 	DescriptorsManager dpools;
 
 	//Cubemap renderer here
-	CubemapRenderer skyboxRenderer;
+	//CubemapRenderer skyboxRenderer;
 
 	DeferredPass deferred_pass;
 
