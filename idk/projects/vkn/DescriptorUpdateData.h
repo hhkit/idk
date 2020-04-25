@@ -96,6 +96,11 @@ namespace idk
 
 		using pool_t = size_pool<sizeof(T), alignof(T), ChunkSize>;
 
+		template<typename U>
+		bool operator==(const PoolAllocator<U, ChunkSize>& rhs)const noexcept
+		{
+			return &pool_t::GetInst() == (typename PoolAllocator<U, ChunkSize>::pool_t)::GetInst();
+		}
 
 		T* allocate(size_t n=1)
 		{
