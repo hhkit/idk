@@ -33,6 +33,9 @@
 #include <vkn/VulkanGlslLoader.h>
 #include <gfx/ShaderSnippetLoader.h>
 
+#include <vkn/VulkanMesh.h>
+#include <vkn/VknFontAtlas.h>
+
 #include <test/TestSystem.h>
 
 #include <shellapi.h>//CommandLineToArgv
