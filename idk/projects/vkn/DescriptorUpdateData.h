@@ -5,13 +5,15 @@
 #include <idk/memory/ArenaAllocator.inl>
 namespace idk
 {
-	template<typename T, size_t ChunkSize = 16>
-	struct PoolAllocator
+	template<size_t obj_size, size_t align,size_t ChunkSize>
+	struct size_pool
 	{
+		static_assert(obj_size >= sizeof(void*));
+		using T = std::array<std::byte, obj_size>;
 		struct Chunk
 		{
 			static constexpr size_t num_bytes = sizeof(T) * ChunkSize;
-			alignas(T) std::array<std::byte, num_bytes> chunk;
+			alignas(align) std::array<std::byte, num_bytes> chunk;
 			std::unique_ptr<Chunk> next = {};
 			Chunk(std::unique_ptr<Chunk> tail, T*& free_head) : next{ std::move(tail) }
 			{
@@ -26,36 +28,93 @@ namespace idk
 				free_head = reinterpret_cast<T*>(std::data(chunk));
 			}
 		};
-
-
-
-		T* allocate()
+		struct Internal
 		{
-			if (!_free_head)
+			std::unique_ptr<Chunk> _head;
+			T* _free_head = nullptr;
+			void* allocate()
 			{
-				NewChunk();
+				if (!_free_head)
+				{
+					NewChunk();
+				}
+				return pop_free();
 			}
-			return pop_free();
-		}
-		void deallocate(T* ptr)
+			void deallocate(void* ptr)
+			{
+				new (ptr) T* { reinterpret_cast<T*>(_free_head) };
+				_free_head = reinterpret_cast<T*>(ptr);
+			}
+		private:
+			T* pop_free() //check if free is empty before popping
+			{
+				auto result = _free_head;
+				//if(_free_head)
+				_free_head = *reinterpret_cast<T * *>(_free_head);
+				return result;
+			}
+			void NewChunk()
+			{
+				_head = std::make_unique<Chunk>(std::move(_head), _free_head);
+			}
+		};
+		//maybe change to thread local to be thread safe?
+
+		static Internal& GetInst()
 		{
-			new (ptr) T* { reinterpret_cast<T*>(_free_head) };
-			_free_head = ptr;
+			static Internal i;
+			return i;
+		}
+
+		static void* allocate()
+		{
+			return GetInst().allocate();
+		}
+		static void deallocate(void* ptr)
+		{
+			GetInst().deallocate(ptr);
 		}
 	private:
-		T* pop_free() //check if free is empty before popping
+	};
+	template<typename T, size_t ChunkSize = 16>
+	struct PoolAllocator
+	{
+		using value_type = typename T;
+		using size_type = typename size_t;
+		using difference_type = typename ptrdiff_t;
+		using reference = typename T&;
+		using const_reference = typename const T&;
+		using pointer = typename T*;
+		using const_pointer = typename const T*;
+
+		template<typename U>
+		struct rebind
 		{
-			auto result = _free_head;
-			//if(_free_head)
-			_free_head = *reinterpret_cast<T * *>(_free_head);
-			return result;
-		}
-		void NewChunk()
+			using other = PoolAllocator<U, ChunkSize>;
+		};
+
+
+		using pool_t = size_pool<sizeof(T), alignof(T), ChunkSize>;
+
+
+		T* allocate(size_t n=1)
 		{
-			_head = std::make_unique<Chunk>(std::move(_head), _free_head);
+			if (n > 1)
+				throw;
+			return reinterpret_cast<T*>(pool_t::allocate());
+			//if (!_free_head)
+			//{
+			//	NewChunk();
+			//}
+			//return pop_free();
 		}
-		std::unique_ptr<Chunk> _head;
-		T* _free_head = nullptr;
+		void deallocate(T* ptr,size_t =1)
+		{
+			pool_t::deallocate(ptr);
+			//new (ptr) T* { reinterpret_cast<T*>(_free_head) };
+			//_free_head = ptr;
+		}
+	private:
 	};
 
 	struct FreeList
@@ -383,7 +442,7 @@ namespace idk::vkn
 		template<typename T>
 		using vector_a = std::vector<T, allocator_t<T>>;
 		template<typename T>
-		using fwd_list_a = std::forward_list<T>;//, allocator_t<T >> ;
+		using fwd_list_a = std::forward_list<T, PoolAllocator<T >> ;
 		allocator_t<char> alloc{};
 		allocator_n_t<char, 1 <<20> list_alloc{};
 		allocator_n_t<char,1<<20> list_alloc2{};
