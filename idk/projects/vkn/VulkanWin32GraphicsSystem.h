@@ -11,9 +11,14 @@
 namespace idk::win
 {
 	class Windows;
+	
 }
 namespace idk::vkn
 {
+	namespace dbg
+	{
+		class time_log;
+	}
 	class FrameRenderer;
 	class PipelineManager;
 	using Windows = win::Windows;
@@ -38,6 +43,8 @@ namespace idk::vkn
 		
 		VulkanState& Instance() { return *instance_; }
 		VulkanView&  View()const { return instance_->View();}
+
+		dbg::time_log& TimeLog();
 
 		VulkanState& GetVulkanHandle();
 	private:

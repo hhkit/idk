@@ -5,6 +5,9 @@
 #include <vkn/VknTextureView.h>
 #include <res/ResourceHandle.inl>
 
+#include <vkn/Stopwatch.h>
+#include <vkn/time_log.h>
+
 #include <vkn/RenderBundle.h>
 
 #include <vkn/DebugUtil.h>
@@ -350,8 +353,11 @@ namespace idk::vkn
 		}
 		return valid;
 	}
+	dbg::time_log& GetGfxTimeLog();
 	void FrameGraph::Execute()
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		/*
 		if (_uniform_managers.empty())
 			_uniform_managers.emplace_back();
@@ -365,14 +371,18 @@ namespace idk::vkn
 		//	um.Reset();
 		//}
 		//*/
+		//GetGfxTimeLog().push_level();
+		//GetGfxTimeLog().pop_level();
 		for (auto& ctx : _contexts)
 		{
 			ctx.Reset();
 		}
+		GetGfxTimeLog().log("Reset Ctx", timer.lap());
 		//_contexts.clear();
 		if (_contexts.size() < execution_order.size())
 			_contexts.resize(execution_order.size());
 		auto& rsc_manager = GetResourceManager();
+		hash_table<string, dbg::milliseconds> lut;
 		for (auto index : execution_order)
 		{
 			auto& node = nodes[index];
@@ -392,6 +402,7 @@ namespace idk::vkn
 				}
 				context.SetRscManager(rsc_manager);
 				rp.PreExecute(node, context);
+				lut["Pre Execute"] +=timer.lap();
 				auto copy_span = node.GetCopySpan();
 				for (auto& copy_req : copy_span)
 				{
@@ -404,9 +415,16 @@ namespace idk::vkn
 						dst_layout = dst_layout;
 					context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,copy_req.options.src_range,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.dst_range,copy_req.options.regions});
 				}
+				lut["Copy"] += timer.lap();
 				rp.Execute(context);
+				lut["Execute"] += timer.lap();
 				rp.PostExecute(node, context);
+				lut["PostExecute"] += timer.lap();
 			}
+		}
+		for (auto& [name, duration] : lut)
+		{
+			GetGfxTimeLog().log_n_store(name, duration);
 		}
 	}
 

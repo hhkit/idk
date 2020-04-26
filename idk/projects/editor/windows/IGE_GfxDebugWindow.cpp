@@ -16,6 +16,9 @@
 
 #include <editor/imguidk.h>
 
+#include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/time_log.h>
+
 //#pragma optimize("",off)
 namespace idk
 {
@@ -74,6 +77,80 @@ namespace idk
 }
 namespace idk
 {
+	struct RtlnData
+	{
+		float align_x;
+		float total;
+
+	};
+	template<typename Nodes>
+	void RenderTimeLogNode(const RtlnData& extra,const Nodes& nodes, const vkn::dbg::time_log::node& curr, string& offset)
+	{
+		auto& record = curr.data;
+		string txt = record.section;
+		ImGui::Text("%s%s", offset.c_str(),txt.c_str());
+		ImGui::SameLine(extra.align_x);
+		auto duration = record.duration.count();
+		ImGui::Text("\t%8.3f ms \t %.3f%%", duration, 100 * duration / extra.total);
+		offset += "\t";
+		for (auto index : curr.sub_nodes)
+		{
+			RenderTimeLogNode(extra,nodes, nodes[index], offset);
+		}
+		offset.pop_back();
+	}
+
+	void RenderTimeLog(vkn::dbg::time_log& log)
+	{
+		
+		if (ImGui::CollapsingHeader("Time log"))
+		{
+			auto&& [nodes,master_indices] = log.get_records();
+			
+			size_t max_chars = 0;
+			float total = nodes[master_indices.back()].data.duration.count();
+			{
+				vector<size_t> indices{ master_indices.begin(),master_indices.end() };
+				std::reverse(indices.begin(), indices.end());
+				size_t last_max = indices.size();
+				size_t i = 0;
+				while (!indices.empty())
+				{
+					if (i++ == last_max)
+					{
+						max_chars += 2;//tablen
+						last_max = indices.size();
+					}
+					auto index = indices.back();
+					indices.pop_back();
+					auto& node = nodes[index];
+					auto& record = node.data;
+					indices.insert(indices.end(), node.sub_nodes.begin(), node.sub_nodes.end());
+
+					max_chars = std::max(record.section.size(), max_chars);
+				}
+			}
+			string txt(max_chars,'A');
+			auto max_size = ImGui::CalcTextSize(txt.c_str());
+			string offset;
+			RtlnData extra{ max_size.x,total };
+			for (auto& index : master_indices)
+			{
+				RenderTimeLogNode(extra,nodes, nodes[index], offset);
+			}
+			/*
+			for (auto& record : records)
+			{
+				txt = record.section;
+				ImGui::Text("%s", txt.c_str());
+				ImGui::SameLine(max_size.x);
+				auto duration = record.duration.count();
+				ImGui::Text("%8.3f ms \t %.3f%%", duration, 100*duration/total );
+			}*/
+		}
+		log.reset();
+	}
+
 	struct IGE_GfxDebugWindow::Pimpl
 	{
 		string new_var = "New Var";
@@ -131,6 +208,7 @@ namespace idk
 		}
 		if (ImGui::CollapsingHeader("More Gfx Debug Stuff"))
 		{
+			RenderTimeLog(Core::GetSystem<vkn::VulkanWin32GraphicsSystem>().TimeLog());
 			ImGui::InputText("LUT Save path: ", &_pimpl->lut_path);
 			if (ImGui::Button("Save Default Color Grade LUT"))
 			{

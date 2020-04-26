@@ -394,8 +394,10 @@
     <ClInclude Include="StandardFragmentBinding.h" />
     <ClInclude Include="StandardMaterialBindings.h" />
     <ClInclude Include="StandardVertexBindings.h" />
+    <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="TexturePool.h" />
     <ClInclude Include="TextureTracker.h" />
+    <ClInclude Include="time_log.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="topological_sort.h" />
     <ClInclude Include="TransparentBlendBindings.h" />
@@ -524,8 +526,10 @@
     <ClCompile Include="StandardFragmentBinding.cpp" />
     <ClCompile Include="StandardMaterialBindings.cpp" />
     <ClCompile Include="StandardVertexBindings.cpp" />
+    <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="TextureTracker.cpp" />
+    <ClCompile Include="time_log.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="topological_sort.cpp" />
     <ClCompile Include="TransparentBlendBindings.cpp" />

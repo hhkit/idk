@@ -38,6 +38,9 @@
 #include<vkn/UboManager.h>
 #include <vkn/FrameRenderer.h>
 
+#include <vkn/time_log.h>
+#include <vkn/Stopwatch.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -81,8 +84,14 @@ namespace idk::vkn
 		std::unique_ptr<hlp::MemoryAllocator> allocator;
 		vk::UniqueFence fence;
 		bool rendered_brdf = false;
+		dbg::time_log timelog;
+		dbg::stopwatch timer;
 		RscHandle<Texture> BrdfLookupTable;
 	};
+	dbg::time_log& GetGfxTimeLog()
+	{
+		return Core::GetSystem<VulkanWin32GraphicsSystem>().TimeLog();
+	}
 
 	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
@@ -229,6 +238,7 @@ namespace idk::vkn
 	void profile_bp_end();
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		_pimpl->timer.start();
 		profile_bp_start();
 		auto d_start = std::chrono::high_resolution_clock::now();
 
@@ -250,6 +260,8 @@ namespace idk::vkn
 
 		auto d_af_start = std::chrono::high_resolution_clock::now();
 		instance_->AcquireFrame(*curr_signal.image_available);
+		_pimpl->timelog.log("Acquire Frame", _pimpl->timer.lap());
+
 		auto d_af_end = std::chrono::high_resolution_clock::now();
 		//auto e_time = (d_af_end - d_af_start).count();
 		//LOG_CRASH_TO(LogPool::GFX, "Acquired Frame time: %d", std::chrono::duration_cast<std::chrono::microseconds>((d_af_end - d_af_start)).count());
@@ -266,9 +278,11 @@ namespace idk::vkn
 				var.Set(name, false);
 			}
 		}
+		_pimpl->timelog.log("Process Updated Resources", _pimpl->timer.lap());
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
+		_pimpl->timelog.log("Update Pipelines", _pimpl->timer.lap());
 
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
 
@@ -312,6 +326,7 @@ namespace idk::vkn
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		if (&curr_buffer.skeleton_transforms != pre_render_data.skeleton_transforms)
 			throw;
+		_pimpl->timelog.log("Init Pre render data", _pimpl->timer.lap());
 
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
 
@@ -393,6 +408,8 @@ namespace idk::vkn
 			}
 			//_debug_renderer->Render(curr_state.camera.view_matrix, mat4{1,0,0,0,   0,-1,0,0,   0,0,0.5f,0.5f, 0,0,0,1}*curr_state.camera.projection_matrix);
 		}
+		_pimpl->timelog.log("Init render data", _pimpl->timer.lap());
+
 		if (will_draw_debug)
 		{
 			for (auto& [buffer, data] : _debug_renderer->BufferUpdateInfo())
@@ -406,6 +423,7 @@ namespace idk::vkn
 			if (prt->NeedsFinalizing())
 				prt->Finalize();
 		}
+		_pimpl->timelog.log("Finalize render targets", _pimpl->timer.lap());
 		{
 			auto& mat_cache = curr_frame.GetMatInstCache();
 			hash_set<ShaderModule*> shaders;
@@ -423,6 +441,7 @@ namespace idk::vkn
 			}
 			mat_cache.ProcessCreation();
 		}
+		_pimpl->timelog.log("Process Material Cache", _pimpl->timer.lap());
 		if (RscHandle<VknRenderTarget>{}->NeedsFinalizing())
 			RscHandle<VknRenderTarget>{}->Finalize();
 		// */
@@ -432,20 +451,26 @@ namespace idk::vkn
 
 
 		curr_frame.ColorPick(std::move(request_buffer));
+		_pimpl->timelog.log("Color pick init", _pimpl->timer.lap());
 		curr_frame.PreRenderGraphicsStates(pre_render_data, curr_index); //TODO move this to Prerender
+		_pimpl->timelog.log("Pre render", _pimpl->timer.lap());
 #if 0
 		{
 			auto str = dbg::DumpFrameBufferAllocs();
 		}
 #endif
 		//std::reverse(curr_states.begin(), curr_states.end());
+		_pimpl->timelog.push_level();
 		curr_frame.RenderGraphicsStates(curr_states, curr_index);
+		_pimpl->timelog.pop_level();
+		_pimpl->timelog.log("Render", _pimpl->timer.lap());
 #if 0
 		{
 			auto str = dbg::DumpFrameBufferAllocs();
 		}
 #endif
 		curr_frame.PostRenderGraphicsStates(post_render_data, curr_index);
+		_pimpl->timelog.log("Post Render", _pimpl->timer.lap());
 
 
 		//vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
@@ -477,6 +502,9 @@ namespace idk::vkn
 			throw;
 		}
 		profile_bp_end();
+		_pimpl->timelog.log("Misc", _pimpl->timer.lap());
+		_pimpl->timer.stop();
+		_pimpl->timelog.log("Total", _pimpl->timer.time());
 	}
 //
 	void VulkanWin32GraphicsSystem::SwapBuffer()
@@ -511,6 +539,10 @@ namespace idk::vkn
 		if(instance_->View().CurrFrame()==1)
 			if (!_pimpl->rendered_brdf)
 				RenderBRDF(renderer_fragment_shaders[FBrdf]);
+	}
+	dbg::time_log& VulkanWin32GraphicsSystem::TimeLog()
+	{
+		return _pimpl->timelog;
 	}
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{

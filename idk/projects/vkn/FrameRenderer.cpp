@@ -63,6 +63,9 @@
 
 #include <vkn/MaterialInstanceCache.h>
 
+#include <vkn/time_log.h>
+#include <vkn/Stopwatch.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<NonThreadedRender>()
@@ -85,6 +88,7 @@ namespace idk::vkn
 		uint32_t gfx_state_index = 0;
 
 		uint32_t testing = 0;
+
 	};
 
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
@@ -945,6 +949,8 @@ namespace idk::vkn
 
 		void GraphDeferredTest(const CoreGraphicsState& gfx_state, RenderStateV2& rs);
 	}
+	dbg::time_log& GetGfxTimeLog();
+
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
 		_pimpl->gfx_state_index = 0;
@@ -1030,7 +1036,11 @@ namespace idk::vkn
 			thread->Join();
 		}
 		{
+			dbg::stopwatch timer;
+			timer.start();
+			GetGfxTimeLog().push_level();
 			_pimpl->graph.Compile();
+			GetGfxTimeLog().log("Compile", timer.lap());
 			const auto& graph = _pimpl->graph;
 
 			const auto kNameShowDbgLifetimes = "Show Dbg Lifetimes";
@@ -1045,16 +1055,25 @@ namespace idk::vkn
 			_pimpl->graph.AllocateResources();
 			_pimpl->graph.BuildRenderPasses();
 			_pimpl->graph.SetPipelineManager(*this->_pipeline_manager);
+			GetGfxTimeLog().log("AllocRsc & BuildRP", timer.lap());
+			GetGfxTimeLog().push_level();
 			_pimpl->graph.Execute();
+			GetGfxTimeLog().pop_level();
+			GetGfxTimeLog().log("Execute", timer.lap());
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 			dbg::BeginLabel(rb._cmd_buffer, "Framegraph in RenderGraphicsStates starting.", color{ 0.3f, 0.4f, 0.f });
 			_pimpl->graph.ProcessBatches(rb);
+			GetGfxTimeLog().log("ProcBatches", timer.lap());
 			state.ubo_manager.UpdateAllBuffers();
+			GetGfxTimeLog().log("Update Ubo Buffers", timer.lap());
 			dbg::EndLabel(rb._cmd_buffer);
 			rb._cmd_buffer.end();
 			state.FlagRendered();
+			GetGfxTimeLog().pop_level();
+			timer.stop();
+			GetGfxTimeLog().log("Render Graph",timer.time());
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
 		vector<vk::CommandBuffer> buffers{};

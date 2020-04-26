@@ -416,6 +416,12 @@
     <ClInclude Include="VulkanIttfLoader.h">
       <Filter>resource\Loaders</Filter>
     </ClInclude>
+    <ClInclude Include="Stopwatch.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="time_log.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -718,6 +724,10 @@
     <ClCompile Include="VulkanIttfLoader.cpp">
       <Filter>resource\Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="Stopwatch.cpp">
+      <Filter>utils\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="time_log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
