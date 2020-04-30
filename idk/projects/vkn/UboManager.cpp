@@ -3,8 +3,43 @@
 #include "BufferHelpers.h"
 #include <string>
 
+#include <vkn/Stopwatch.h>
+
+#include <vkn/MemoryCollator.h>
 namespace idk::vkn
 {
+	struct UboManager::DataPair
+	{
+		vk::UniqueBuffer buffer{};
+		std::basic_string<char, std::char_traits<char>, tallocator<char>> data{};
+		size_t initial_offset{};
+		size_t block_size;
+		MemoryCollator collator;
+		uint32_t alignment{};
+		uint32_t sz_alignment{};
+		bool resetted = false;
+		size_t old_alignment = 0;
+
+
+		//DataPair() = default;
+		//DataPair(DataPair&&) noexcept = default;
+		//DataPair(const DataPair&) = delete;
+		bool CanAdd(size_t len)const;
+		size_t AlignmentOffset()const;
+		void Align();
+		uint32_t Add(size_t len, const void* data_);
+		void Free(uint32_t offset, size_t len);
+		vk::Buffer& Buffer() { return *buffer; }
+
+		void Reset();
+	};
+	namespace dbg
+	{
+		hash_table<string_view, float>& get_rendertask_durations();
+		void add_rendertask_durations(string_view name, float duration);
+
+	}
+	using dbg::add_rendertask_durations;
 
 
 
@@ -56,6 +91,8 @@ namespace idk::vkn
 
 	UboManager::DataPair& UboManager::FindPair(size_t size)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		while (_buffers.size() > _curr_buffer_idx && !_buffers[_curr_buffer_idx].CanAdd(size))
 		{
 			++_curr_buffer_idx;
@@ -69,7 +106,10 @@ namespace idk::vkn
 			tmp.alignment = OffsetAlignment();
 			tmp.sz_alignment = SizeAlignment();
 			_allocation_table.emplace(_buffers.size() - 1,_memory_blocks.size() - 1);
+			tmp.Reset();
 		}
+		timer.stop();
+		add_rendertask_durations("Ubo Find Pair", timer.time().count());
 		return _buffers[_curr_buffer_idx];
 	}
 
@@ -77,6 +117,14 @@ namespace idk::vkn
 	{
 		_alignment = view.BufferOffsetAlignment();
 	}
+
+	UboManager::UboManager(UboManager&&) = default;
+
+
+	//UboManager& UboManager::operator=(const UboManager&) = default;
+
+	//UboManager& UboManager::operator=(UboManager&&) = default;
+
 
 	uint32_t UboManager::OffsetAlignment()const { return view.BufferOffsetAlignment(); }
 
@@ -140,6 +188,7 @@ namespace idk::vkn
 		}
 		_curr_buffer_idx = 0;
 	}
+	UboManager::~UboManager() = default;
 	uint32_t SizeAlignmentOffset(size_t sz, size_t alignment)
 	{
 		return s_cast<uint32_t>(sz + ((sz % alignment) ? alignment - (sz % alignment) : 0));
@@ -174,25 +223,35 @@ namespace idk::vkn
 	}
 	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) 
 	{
-		if (collator.free_range == collator.full_range)
-		{
-			//Initial offset to ensure that the memory we are dealing with is aligned
-			initial_offset = InitialOffset(data.data(), alignment);
-			data.resize(block_size+initial_offset);
-		}
+		dbg::stopwatch timer;
+		timer.start();
+		if (!resetted || alignment!=old_alignment)
+			throw;
+		//if (collator.free_range == collator.full_range)
+		//{
+		//	//Initial offset to ensure that the memory we are dealing with is aligned
+		//	initial_offset = InitialOffset(data.data(), alignment);
+		//	data.resize(block_size+initial_offset);
+		//}
+		//add_rendertask_durations("DP resize", timer.lap().count());
 
 		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
+		add_rendertask_durations("DP collator allocate", timer.lap().count());
 		if (!opt)
 			throw;
 		auto [unaligned_offset,aligned_offset] = *opt;
 		//free the alignment stuff so that we just need to free the allocated block later
 		if(aligned_offset - unaligned_offset!=0)
 			collator.mark_freed({ unaligned_offset,aligned_offset });
+		add_rendertask_durations("DP mark free", timer.lap().count());
 
 		auto actual_offset = initial_offset + aligned_offset;
 		if (len+ aligned_offset > 65536)
 			throw;
 		memcpy_s(data.data() +actual_offset, data.size()-actual_offset, data_, len);
+		add_rendertask_durations("DP memcpy", timer.lap().count());
+		timer.stop();
+		add_rendertask_durations("DP Add", timer.time().count());
 		return static_cast<uint32_t>(aligned_offset);
 	}
 
@@ -203,7 +262,16 @@ namespace idk::vkn
 
 	void UboManager::DataPair::Reset() 
 	{
+		resetted = true;
 		collator.reset();
+		data.reserve(block_size + alignment);
+		initial_offset = InitialOffset(data.data(), alignment);
+		data.resize(block_size + initial_offset);
+		old_alignment = alignment;
 	}
 
+	std::pair<vk::Buffer, uint32_t> UboManager::make_buffer_pair(DataPair& pair, size_t buffer_len, const void* data)
+	{
+		return std::make_pair(pair.Buffer(), pair.Add(buffer_len, data));
+	}
 }

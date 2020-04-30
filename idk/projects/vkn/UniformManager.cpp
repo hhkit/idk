@@ -1,8 +1,17 @@
 #include "pch.h"
 #include "UniformManager.h"
 #include <vkn/ShaderModule.h>
+#include <vkn/Stopwatch.h>
+static bool constexpr dbg_uniform = false;
 namespace idk::vkn
 {
+	namespace dbg
+	{
+		hash_table<string_view, float>& get_rendertask_durations();
+		void add_rendertask_durations(string_view name, float duration);
+
+	}
+	using dbg::add_rendertask_durations;
 
 	std::optional<UniformUtils::BufferBinding> UniformUtils::BindingInfo::GetBuffer() const
 	{
@@ -230,11 +239,15 @@ namespace idk::vkn
 	{
 		//if (bindings.size() <= info.binding)
 		//	bindings.resize(static_cast<size_t>(info.binding) + 1);
+		dbg::stopwatch timer;
+		timer.start();
 		auto& vec = bindings[info.binding];
 		if (vec.size() <= info.arr_index)
 			vec.resize(info.arr_index + 1);
 		vec[info.arr_index] = std::move(info);
 		dirty = true;
+		timer.stop();
+		add_rendertask_durations("Bind", timer.time().count());
 	}
 	void UniformUtils::binding_manager::set_bindings::Unbind(uint32_t binding)
 	{
@@ -320,6 +333,8 @@ namespace idk::vkn
 
 	bool UniformManager::RegisterUniforms(string name, binding_manager::set_t set, uint32_t binding, uint32_t size)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		auto& bindings = _bindings.curr_bindings;
 		auto set_info = bindings.find(set);
 		bool can_set = set_info != bindings.end();
@@ -328,6 +343,8 @@ namespace idk::vkn
 			_uniform_names[std::move(name)] = UniInfo{ set,binding,size,set_info->second.layout };
 			_dbg.RegisterRequiredBinding(set, binding);
 		}
+		timer.stop();
+		add_rendertask_durations("Register Uniforms", timer.time().count());
 		return can_set;
 	}
 	void UniformManager::RemoveBinding(binding_manager::set_t set)
@@ -398,7 +415,11 @@ namespace idk::vkn
 	}
 	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		auto [buffer, offset] = _ubo_manager->Add(data);
+		timer.stop();
+		add_rendertask_durations("Ubo Add", timer.time().count());
 		return _bindings.BindUniformBuffer(info, array_index, buffer, offset,data.size(), skip_if_bound);
 	}
 	bool UniformManager::BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
@@ -433,6 +454,8 @@ namespace idk::vkn
 
 	std::optional<vector_span<UniformManager::set_binding_t>>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		vector_span_builder builder{ all_sets };
 		builder.start();
 		
@@ -451,6 +474,8 @@ namespace idk::vkn
 				std::visit(visitors::FinalizeChecker{ builder,index }, *bindings);
 			}
 		}
+		timer.stop();
+		add_rendertask_durations("finalize current", timer.time().count());
 		return builder.end();
 	}
 //#pragma optimize("",off)
@@ -588,6 +613,10 @@ namespace idk::vkn
 	}
 	void UniformManager::DebugInfo::RegisterRequiredBinding(uint32_t set_idx, uint32_t binding_idx)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
 		auto& set = sets[set_idx];
 		auto& binding = set.bindings[binding_idx];
 		if(!binding)
@@ -596,16 +625,28 @@ namespace idk::vkn
 	}
 	void UniformManager::DebugInfo::RemoveRequiredSet(uint32_t set)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return ;
+		}
 		sets[set].bindings.clear();
 		sets[set].bound =0;
 	}
 	void UniformManager::DebugInfo::MarkBinding(uint32_t set, uint32_t binding)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
 		sets[set].bindings[binding] = false;
 	}
 	//DescriptorUpdateData UniformManager::_dud = {};
 	void UniformManager::DebugInfo::MarkSet(uint32_t set)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
 		for (auto& binding : sets[set].bindings)
 		{
 			binding = false;
@@ -613,6 +654,10 @@ namespace idk::vkn
 	}
 	bool UniformManager::DebugInfo::Validate(const binding_manager& _bindings) const
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return true;
+		}
 		uint32_t set_index = 0;
 		for (auto& set : sets)
 		{
@@ -643,5 +688,13 @@ namespace idk::vkn
 			++set_index;
 		}
 		return true;
+	}
+	void UniformManager::DebugInfo::Reset()
+	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
+		sets.clear();
 	}
 }

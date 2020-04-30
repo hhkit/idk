@@ -422,6 +422,12 @@
     <ClInclude Include="time_log.h">
       <Filter>utils\Debug</Filter>
     </ClInclude>
+    <ClInclude Include="FreeList.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolAllocator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -728,6 +734,7 @@
       <Filter>utils\Debug</Filter>
     </ClCompile>
     <ClCompile Include="time_log.cpp" />
+    <ClCompile Include="FreeList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

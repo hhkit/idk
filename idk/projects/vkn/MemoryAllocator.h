@@ -2,7 +2,6 @@
 #include <idk.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/SimpleLock.h>
-#include <vkn/MemoryCollator.h>
 size_t Track(size_t s);
 namespace idk::vkn::hlp
 {
@@ -12,20 +11,7 @@ namespace idk::vkn::hlp
 		using aligned_t = size_t;
 	struct Memories
 	{
-		struct Memory
-		{
-			Memory(vk::UniqueDeviceMemory&& mem, size_t size) :memory{ std::move(mem) }, collator{ {0,size} }{}
-
-			void Free(size_t offset, size_t size);
-			//Returns offset if it is allocated
-			std::optional<std::pair<unaligned_t,aligned_t>> Allocate(size_t size,size_t alignment);
-
-			vk::UniqueDeviceMemory memory;
-			size_t sz()const noexcept;
-			MemoryCollator collator;
-
-
-		};
+		struct Memory;
 		vk::Device device;
 		uint32_t type;
 		vector<Memory> memories;
@@ -36,6 +22,9 @@ namespace idk::vkn::hlp
 			uint32_t mem_type,
 			size_t chunkSize = default_chunk_size 
 		);
+		Memories(Memories&&)noexcept;
+		Memories& operator=(Memories&&)noexcept;
+		~Memories();
 		Memory& Add(size_t min_size);
 
 		std::pair<uint32_t, std::pair<unaligned_t, aligned_t>> Allocate(size_t size, size_t alignment);
@@ -52,7 +41,7 @@ namespace idk::vkn::hlp
 			vk::DeviceMemory Memory()const { return control.Memory(); }
 			size_t           Offset()const { return control.offset; }
 			size_t           Size()const { return control.size; }
-			size_t           BlockSize()const { return control.IntMemory().sz(); }
+			size_t           BlockSize()const;
 			Alloc(Memories& mem, uint32_t index,size_t u_offset, size_t offset, size_t size) :control{ &mem,index,u_offset,offset,size } {}
 			Alloc(const Alloc&) = delete;
 			Alloc(Alloc&&) = default;

@@ -2,84 +2,6 @@
 #include "MemoryCollator.h"
 namespace idk::vkn
 {
-//#pragma optimize("",off)
-	bool MemoryCollator::can_allocate(size_t size, size_t alignment) const
-	{
-		bool result = false;
-		for (auto& range : free_list)
-		{
-			if (range.can_split(size, alignment))
-			{
-				result = true;
-				break;
-			}
-		}
-
-		result |= (!result && free_range.can_split(size, alignment));
-		return result;
-	
-	}
-	std::optional<std::pair<size_t, size_t>> MemoryCollator::allocate(size_t size,size_t alignment)
-	{
-		std::optional<MemoryRange> result_range;
-		for (auto& range : free_list)
-		{
-			if (range.can_split(size, alignment))
-			{
-				auto new_range = range;
-				result_range = new_range.split(size, alignment);
-				free_list.erase(range);
-				if (new_range)
-					free_list.emplace(new_range);
-				break;
-			}
-		}
-
-		if (!result_range && free_range.can_split(size, alignment))
-		{
-			result_range = *free_range.split(size, alignment);
-			//
-		}
-		std::optional<std::pair<size_t, size_t>> result{};
-		if (result_range)
-		{
-			result = { result_range->_begin, Aligned(result_range->_begin, alignment) };
-		}
-		return result;
-	}
-
-	void MemoryCollator::mark_freed(index_span to_free)
-	{
-		MemoryRange range = to_free;
-		//TODO use some kind of find closest (maybe upper bound)?
-		for (auto& freed : free_list)
-		{
-			if (freed.overlaps(range))
-			{
-				auto new_range = freed;
-				free_list.erase(freed);
-				new_range.absorb(range);
-				auto itr = free_list.lower_bound(new_range);
-				if (itr != free_list.end() && itr->overlaps(new_range))
-				{
-					new_range.absorb(*itr);
-					free_list.erase(itr);
-				}
-				range = new_range;
-				break;
-			}
-		}
-		if (range._end == free_range._begin)
-			free_range._begin = range._begin;
-		else
-			free_list.emplace(range);
-	}
-
-	void MemoryCollator::reset()
-	{
-		free_list.clear();
-		free_range = full_range;
-	}
 
 	size_t Aligned(size_t offset, size_t alignment)
 	{
@@ -87,7 +9,98 @@ namespace idk::vkn
 		return offset + ((mod) ? (alignment - mod) : 0);
 	}
 
+	size_t compute_aligned_alloc(size_t size, size_t alignment)
+	{
+		if (size == alignment && size == 0)
+			throw std::runtime_error("Invalid allocation size!");
+		return size + alignment ;
+	}
+	//#pragma optimize("",off)
+	bool MemoryCollator::can_allocate(size_t size, size_t alignment) const
+	{
+		bool result = free_list.CanAllocate(compute_aligned_alloc(size, alignment));
+		return result;
+
+	}
+	std::optional<std::pair<size_t, size_t>> MemoryCollator::allocate(size_t size, size_t alignment)
+	{
+		static size_t allocation_count = 0;
+		std::optional<MemoryRange> result_range;
+
+		{
+			const auto offset = free_list.Allocate(size,alignment);
+			allocation_count++;
+			if (full_range._begin != 0)
+				throw;
+			if (offset < full_range.size())
+			{
+				if (offset == (size_t)-1)
+					throw;
+				const auto aligned = Aligned(offset, alignment);
+				result_range = index_span{ offset,aligned + size };
+			}
+		}
+
+		std::optional<std::pair<size_t, size_t>> result{};
+		if (result_range)
+		{
+			result = { result_range->_begin, Aligned(result_range->_begin, alignment) };
+			//if(!allocated.emplace(result_range->_begin,result_range->size()).second)
+			//	DebugBreak();
+			//validate();
+		}
+		return result;
+	}
+
+	void MemoryCollator::mark_freed(index_span to_free)
+	{
+		//bool freed = false;
+		//auto itr = allocated.find(to_free._begin);
+		//if (itr == allocated.end())
+		//	DebugBreak();
+		//if(itr->second < to_free.size())
+		//	DebugBreak();
+		//auto sz = itr->second;
+		//allocated.erase(itr);
+		//if (itr->second > to_free.size())
+		//{
+		//	allocated.emplace(to_free._end, sz - to_free.size());
+		//}
+		//validate();
+		free_list.Free(to_free._begin, to_free.size());
+	}
+
+	void MemoryCollator::reset()
+	{
+		allocated.clear();
+		free_list.clear();
+		free_list.Free(full_range._begin, full_range.size());
+	}
+	static constexpr bool should_validate = false;
+	void MemoryCollator::validate()
+	{
+		if (!should_validate)
+			return;
+		for (auto itr=allocated.begin(),end=allocated.end();itr!=end;++itr)
+		{
+			auto& [start, size] = *itr;
+			for (auto itr2 = itr; ++itr2 != end;)
+			{
+				auto& [start2, size2] = *itr2;
+				if (start + size <= start2)
+					break;
+				DebugBreak();
+			}
+		}
+	}
+
+
 	//returns true if absorbed (overlapping)
+
+	bool MemoryCollator::MemoryRange::overlap_excluding_boundary(const MemoryRange& range) const noexcept
+	{
+		return !(_begin >= range._end || _end <= range._begin);
+	}
 
 	bool MemoryCollator::MemoryRange::overlaps(const MemoryRange& range) const noexcept
 	{

@@ -10,6 +10,10 @@
 
 #include <vkn/DebugUtil.h>
 
+#include <vkn/Stopwatch.h>
+
+using idk::vkn::dbg::add_rendertask_durations;
+
 //#pragma optimize("",off)
 static void DoNothing()
 {
@@ -89,7 +93,11 @@ namespace idk::vkn
 	}
 	void RenderTask::BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		_uniform_manager.BindUniformBuffer(name, index, data,skip_if_bound);
+		timer.stop();
+		add_rendertask_durations("bind ubo", timer.time().count());
 	}
 	//void RenderTask::BindUniform(vk::DescriptorSet ds, std::optional<string_view> data)
 	//{
@@ -99,8 +107,11 @@ namespace idk::vkn
 	static void DoNothing() {}
 	void RenderTask::BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
-		dbg_chk(texture.Image());
+		dbg::stopwatch timer;
+		timer.start();
 		_uniform_manager.BindSampler(name, index, texture, skip_if_bound,layout);
+		timer.stop();
+		add_rendertask_durations("bind tex", timer.time().count());
 	}
 	void RenderTask::BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader_handle)
 	{
@@ -649,5 +660,21 @@ namespace idk::vkn
 	{
 		cmd_buffer.draw(di.num_vertices, di.num_instances, di.first_vertex, di.first_instance);
 	}
+
+}
+
+namespace idk::vkn::dbg
+{
+
+hash_table<string_view, float>& get_rendertask_durations()
+{
+	static hash_table<string_view, float> durations;
+	return durations;
+}
+
+void add_rendertask_durations(string_view name, float duration)
+{
+	get_rendertask_durations()[name]+=duration;
+}
 
 }

@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vkn/VulkanView.h>
 #include <meta/stl_hack.h>
-#include <vkn/MemoryCollator.h>
+#include <ds/index_span.h>
 namespace idk::vkn
 {
 	template<typename T>
@@ -15,6 +15,7 @@ namespace idk::vkn
 
 
 		UboManager(VulkanView& view = View());
+		UboManager(UboManager&&);
 
 		uint32_t OffsetAlignment()const;
 		uint32_t SizeAlignment()  const;
@@ -26,31 +27,9 @@ namespace idk::vkn
 
 		void UpdateAllBuffers();
 		void Clear();
-
+		~UboManager();
 	private:
-		struct DataPair
-		{
-			vk::UniqueBuffer buffer{};
-			std::basic_string<char,std::char_traits<char>,tallocator<char>> data{};
-			size_t initial_offset{};
-			size_t block_size;
-			MemoryCollator collator;
-			uint32_t alignment{};
-			uint32_t sz_alignment{};
-
-
-			//DataPair() = default;
-			//DataPair(DataPair&&) noexcept = default;
-			//DataPair(const DataPair&) = delete;
-			bool CanAdd(size_t len)const;
-			size_t AlignmentOffset()const;
-			void Align();
-			uint32_t Add(size_t len, const void* data_);
-			void Free(uint32_t offset, size_t len);
-			vk::Buffer& Buffer() { return *buffer; }
-
-			void Reset();
-		};
+		struct DataPair;
 		struct Memory
 		{
 			vk::UniqueDeviceMemory memory;
@@ -78,6 +57,7 @@ namespace idk::vkn
 		std::pair<vk::UniqueBuffer,size_t> MakeBuffer();
 
 		DataPair& FindPair(size_t size);
+		std::pair<vk::Buffer, uint32_t> make_buffer_pair(DataPair& pair, size_t buffer_len, const void* data);
 	};
 	/*
 	template<typename T>

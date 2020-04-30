@@ -330,8 +330,10 @@
     <ClInclude Include="DrawSetRenderPass.h" />
     <ClInclude Include="FencePool.h" />
     <ClInclude Include="binding_util.h" />
+    <ClInclude Include="FreeList.h" />
     <ClInclude Include="MaterialInstanceCache.h" />
     <ClInclude Include="MemoryCollator.h" />
+    <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="renderpasses\BloomPass.h" />
     <ClInclude Include="renderpasses\DebugDrawPass.h" />
     <ClInclude Include="renderpasses\MaskedPass.h" />
@@ -471,6 +473,7 @@
     <ClCompile Include="CanvasVertexBindings.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
     <ClCompile Include="FencePool.cpp" />
+    <ClCompile Include="FreeList.cpp" />
     <ClCompile Include="LightBinding.cpp" />
     <ClCompile Include="MaterialInstanceCache.cpp" />
     <ClCompile Include="MemoryCollator.cpp" />

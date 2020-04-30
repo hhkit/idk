@@ -264,7 +264,12 @@ namespace idk::vkn
 
 
 
+	namespace dbg
+	{
+		hash_table<string_view, float>& get_rendertask_durations();
+		void add_rendertask_durations(string_view name,float duration);
 
+	}
 
 
 

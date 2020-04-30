@@ -373,6 +373,7 @@ namespace idk::vkn
 		//*/
 		//GetGfxTimeLog().push_level();
 		//GetGfxTimeLog().pop_level();
+		dbg::get_rendertask_durations().clear();
 		for (auto& ctx : _contexts)
 		{
 			ctx.Reset();
@@ -426,6 +427,19 @@ namespace idk::vkn
 		{
 			GetGfxTimeLog().log_n_store(name, duration);
 		}
+		auto& duray = dbg::get_rendertask_durations();
+		GetGfxTimeLog().push_level();
+		dbg::milliseconds total{};
+		for (auto& [name, fduration] : duray)
+		{
+			auto duration = dbg::milliseconds{ fduration };
+			total += duration;
+			GetGfxTimeLog().log_n_store(name, duration);
+		}
+		GetGfxTimeLog().pop_level();
+		GetGfxTimeLog().log_n_store("render task extras", total);
+
+
 	}
 
 

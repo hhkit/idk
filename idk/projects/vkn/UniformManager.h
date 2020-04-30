@@ -198,10 +198,7 @@ namespace idk::vkn
 
 			bool Validate(const binding_manager& _bindings)const;
 
-			void Reset()
-			{
-				sets.clear();
-			}
+			void Reset();
 		};
 		DebugInfo _dbg;
 	};
