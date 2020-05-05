@@ -2,7 +2,7 @@
 #include "SwapchainInfo.h"
 
 namespace idk::vkn {
-//#pragma optimize("",off)
+
 	SwapChainInfo::SwapChainInfo(VulkanView& view, vk::UniqueSwapchainKHR s, vk::PresentModeKHR pm, vk::SurfaceFormatKHR sf, vk::Extent2D e)
 		:swap_chain{std::move(s) },
 		present_mode{ pm },

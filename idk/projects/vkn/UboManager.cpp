@@ -193,7 +193,7 @@ namespace idk::vkn
 	{
 		return s_cast<uint32_t>(sz + ((sz % alignment) ? alignment - (sz % alignment) : 0));
 	}
-//#pragma optimize("",off)
+
 	uint32_t aaaa2 = 0;
 	bool UboManager::DataPair::CanAdd(size_t len) const
 	{

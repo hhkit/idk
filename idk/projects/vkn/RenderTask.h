@@ -145,12 +145,16 @@ namespace idk::vkn
 		void PreprocessDescriptors(DescriptorUpdateData& dud, DescriptorsManager& dm);
 
 		void ProcessBatches(RenderBundle& render_bundle);
+		void ProcessBatches(vk::CommandBuffer cmd_buffer);
+
+		bool BeginSecondaryCmdBuffer(vk::CommandBuffer cmd_buffer);
+		bool BeginRenderPass(vk::CommandBuffer cmd_buffer);
 
 		void Reset();
 
 		void FlagUsed();
 
-	private:
+	public:
 		struct DrawCall;
 
 		void BindInputAttachmentToCurrent();
@@ -160,6 +164,7 @@ namespace idk::vkn
 		void StartNewBatch(bool start = true);
 
 		void ProcessCopies(RenderBundle& render_bundle);
+		void ProcessCopies(vk::CommandBuffer render_bundle);
 
 		struct VertexBindingData
 		{
@@ -195,6 +200,7 @@ namespace idk::vkn
 		{
 			using uniform_t = UniformManager::set_binding_t;
 			DrawCallBuilder( vector<VertexBindingData>&);
+			void set_bindings(vector<VertexBindingData>&);
 			void SetLabel(LabelType, string);
 			void AddVertexBuffer(VertexBindingData);
 			void SetIndexBuffer(IndexBindingData);
@@ -250,9 +256,18 @@ namespace idk::vkn
 
 		vector<UniformManager::set_binding_t> _uniform_sets;
 		vector<vk::DescriptorSet> _descriptor_sets;
-		vector<VertexBindingData> _vertex_bindings;
 		UniformManager _uniform_manager;
-		DrawCallBuilder _dc_builder{_vertex_bindings};
+		struct DCMoveWrapper
+		{
+			vector<VertexBindingData> _vertex_bindings;
+			DrawCallBuilder _dc_builder{ _vertex_bindings };
+			DCMoveWrapper() = default;
+			DCMoveWrapper(DCMoveWrapper&& rhs);
+			DCMoveWrapper&operator=(DCMoveWrapper&&rhs);
+		};
+		DCMoveWrapper _dc_bindings;
+		//vector<VertexBindingData> _vertex_bindings;
+		//DrawCallBuilder _dc_builder{_vertex_bindings};
 
 		vector<RenderBatch> batches;
 

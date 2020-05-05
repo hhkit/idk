@@ -888,7 +888,7 @@ namespace idk::vkn::renderpasses
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
 	using AccumDrawSet = CombinedMeshDrawSet<AccumLightDrawSet, AccumAmbientDrawSet>;
-	//#pragma optimize("",off)
+	
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, [[maybe_unused]] RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
 		using AccumPassSetPair = PassSetPair<AccumPass, AccumDrawSet>;

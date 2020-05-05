@@ -139,7 +139,7 @@ namespace idk::vkn::renderpasses
 		//	});
 
 	}
-	//#pragma optimize("",off)
+	
 	void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass Combine");
@@ -258,7 +258,7 @@ namespace idk::vkn::renderpasses
 		//	});
 
 	}
-	//#pragma optimize("",off)
+	
 	void BloomPassH::Execute(FrameGraphDetail::Context_t context)
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom PassH");
@@ -389,7 +389,7 @@ namespace idk::vkn::renderpasses
 		//		//vk::ComponentMapping mapping{};
 		//	});
 	}
-	//#pragma optimize("",off)
+	
 	void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom PassW");

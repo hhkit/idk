@@ -11,6 +11,10 @@
 #include <vkn/RenderBundle.h>
 
 #include <vkn/DebugUtil.h>
+
+#include <parallel/ThreadPool.h>
+#include <numeric>
+
 namespace idk::vkn
 {
 	void DoNothing();
@@ -441,26 +445,111 @@ namespace idk::vkn
 
 
 	}
+	struct count_duration
+	{
+		int count{};
+		dbg::milliseconds total_duration;
+		count_duration& operator+=(count_duration rhs)
+		{
+			count += rhs.count;
+			total_duration += rhs.total_duration;
+			return *this;
+		}
+	};
 
+	hash_table<string, count_duration>& ProcBatchLut()
+	{
+		static hash_table<string, count_duration> lut;
+		return lut;
+	}
 
 	void FrameGraph::ProcessBatches(RenderBundle& bundle)
 	{
-		size_t i = 0;
+		dbg::stopwatch timer;
+		timer.start();
+		GetGfxTimeLog().push_level();
+
 		if (_duds.empty())
 		{
 			_duds.emplace_back(DescriptorUpdateData{ alloc });//Consider scaling with threads
 		}
+		GetGfxTimeLog().push_level();
+		dbg::stopwatch timer2;
+		timer2.start();
 		for (auto& rt : _contexts)
 		{
 			_duds.back().Reset();
+			//GetGfxTimeLog().log("Dud Reset", timer2.lap());
 			rt.PreprocessDescriptors(_duds.back(),bundle._d_manager);
+			//GetGfxTimeLog().log("Dud Pre Proc", timer2.lap());
 			_duds.back().SendUpdates();
+			//GetGfxTimeLog().log("Dud SendUpdates", timer2.lap());
 		}
+		GetGfxTimeLog().pop_level();
+		GetGfxTimeLog().log("Dud Stuff", timer.lap());
+		GetGfxTimeLog().push_level();
+		ProcBatchLut().clear();
+		//std::mutex mutex;
+		using buffer_pair_t = std::pair<RenderTask*, vk::CommandBuffer>;
+		vector<buffer_pair_t> buffers;
+		hash_table<RenderTask*, buffer_pair_t*> task_buffers;
+		vector<mt::Future<void>> futures;
+		_cmd_buffers.Reset();
+		buffers.resize(_contexts.size());
+		auto buffer_itr = buffers.data();
 		for (auto& rt : _contexts)
 		{
-			rt.ProcessBatches(bundle);
-			++i;
+			buffer_itr->first = &rt;
+			task_buffers[&rt] = buffer_itr++;
 		}
+		futures.reserve(_contexts.size());
+		std::array<dbg::milliseconds, 10> tmp_duration{};
+		GetGfxTimeLog().log("Rsc Reserve", timer.lap());
+		for (auto& rt : _contexts)
+		{
+			futures.emplace_back(Core::GetThreadPool().Post(
+				[&tmp_duration,&rt,&task_buffers, this]() {
+					dbg::stopwatch tmp_timer;
+					tmp_timer.start();
+					auto buffer = _cmd_buffers.GetCommandBuffer();
+					if (rt.BeginSecondaryCmdBuffer(buffer))
+					{
+					tmp_timer.stop();
+					tmp_duration.at(mt::thread_id()) += tmp_timer.time();
+						rt.ProcessBatches(buffer);
+						buffer.end();
+					}
+					{
+						task_buffers.at(&rt)->second = buffer;
+						//std::lock_guard lock{ mutex };
+						////must still place even if BeginSecondaryCmdBuffer returns false, there maybe non-renderpass stuff that needs executing.
+						//buffers.emplace_back(buffer,&rt);
+					}
+				}
+			));
+		}
+		for (auto& future : futures)
+			future.get();
+		GetGfxTimeLog().log("Get Command Buffer & begin secondary buffer",std::reduce(tmp_duration.begin(), tmp_duration.end()));
+		GetGfxTimeLog().log("Threaded stuff", timer.lap());
+		for (auto& [p_rt, buffer] : buffers)
+		{
+			if (p_rt->BeginRenderPass(bundle._cmd_buffer))
+			{
+				bundle._cmd_buffer.executeCommands(buffer);
+				bundle._cmd_buffer.endRenderPass();
+			}
+		}
+		GetGfxTimeLog().log("Execute Secondary Command Buffers", timer.lap());
+		//for (auto& [name, pair] : ProcBatchLut())
+		//{
+		//	auto& [count, time] = pair;
+		//	GetGfxTimeLog().log_n_store(name + string{ std::to_string(count) }, time);
+		//}
+		GetGfxTimeLog().pop_level();
+		GetGfxTimeLog().log("Proc Batches", timer.lap());
+		GetGfxTimeLog().pop_level();
+		GetGfxTimeLog().log("Compile", timer.lap());
 	}
 
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)

@@ -231,7 +231,7 @@ namespace idk::vkn::dbg
 		string derp = out.str();
 		return derp;
 	}
-//#pragma optimize("",off)
+
 	string DumpMemoryAllocs()
 	{
 		return hlp::DumpAllocators();

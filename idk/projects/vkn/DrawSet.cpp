@@ -9,7 +9,7 @@
 #include <vkn/vector_buffer.h>
 namespace idk::vkn
 {
-//#pragma optimize("",off)
+
 	InstMeshDrawSet::InstMeshDrawSet(span<const InstRenderObjects> inst_draw_range, vk::Buffer inst_mesh_render_buffer) : 
 		_inst_draw_range{ inst_draw_range },
 		_inst_mesh_render_buffer{ inst_mesh_render_buffer }
@@ -117,7 +117,7 @@ namespace idk::vkn
 			}
 		}//End of draw_call loop
 	}
-//#pragma optimize("",off)
+
 	
 	renderer_attributes FsqDrawSet::_req = { {
 			std::make_pair(vtx::Attrib::Position, 0),
@@ -173,7 +173,7 @@ namespace idk::vkn
 			++i;
 		}
 	}
-//#pragma optimize("",off)
+
 	void PerLightDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& bindings)
 	{
 		bindings.Bind(the_interface);

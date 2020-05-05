@@ -1064,7 +1064,9 @@ namespace idk::vkn
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 			dbg::BeginLabel(rb._cmd_buffer, "Framegraph in RenderGraphicsStates starting.", color{ 0.3f, 0.4f, 0.f });
+			GetGfxTimeLog().push_level();
 			_pimpl->graph.ProcessBatches(rb);
+			GetGfxTimeLog().pop_level();
 			GetGfxTimeLog().log("ProcBatches", timer.lap());
 			state.ubo_manager.UpdateAllBuffers();
 			GetGfxTimeLog().log("Update Ubo Buffers", timer.lap());

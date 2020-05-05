@@ -80,7 +80,7 @@ namespace idk::vkn::renderpasses
 		};
 
 	}
-//#pragma optimize("",off)
+
 	namespace PointShadow
 	{
 		using Bindings = bindings::PointShadowBinding;

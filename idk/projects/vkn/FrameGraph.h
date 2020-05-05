@@ -12,7 +12,7 @@
 
 
 #include <vkn/RenderPassPool.h>
-
+#include <vkn/CommandCluster.h>
 //MARK_NON_COPY_CTORABLE(idk::vkn::FrameGraphDetail::Context);
 namespace idk::vkn
 {
@@ -220,6 +220,7 @@ namespace idk::vkn
 
 		UboManager* _default_ubo_manager = {};
 
+		CommandCluster _cmd_buffers;
 		//vector<UniformManager> _uniform_managers;
 		DescriptorUpdateData::allocator_n_t<char,1<<20> alloc;
 		vector<DescriptorUpdateData> _duds;

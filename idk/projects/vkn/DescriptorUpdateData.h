@@ -200,6 +200,76 @@ namespace idk::vkn
 
 	};
 
+	template<typename T, size_t NumBytes = 1 << 20, typename proxy_t = ArenaAllocator<T, arena_block_free>, typename base_t = AllocatorProxy<proxy_t>>
+	struct FixedArenaAllocator : base_t
+	{
+		;
+		template<typename T>
+		static ArenaAllocator<T>& GetAllocatorBase(ArenaAllocator<T>& base) noexcept
+		{
+			return base;
+		}
+
+		using Internal = detail::FixedInternal<NumBytes>;
+		template<typename U>
+		struct rebind
+		{
+			using other = FixedArenaAllocator<U, NumBytes>;
+		};
+		std::shared_ptr<detail::InternalBase> _internal;
+		proxy_t allocator;
+		template<typename U, typename Base>
+		bool operator==(const FixedArenaAllocator<U, NumBytes, Base>& rhs) noexcept
+		{
+			return *_internal == *rhs._internal;
+		}
+		//alignas(T) std::array<char, sizeof(T) * 2048> buffer;
+		FixedArenaAllocator() :
+			base_t{ &allocator },
+			_internal{ std::make_shared<Internal>() },
+			allocator{ _internal->buffer }
+		{
+			//_internal = std::make_shared<Internal>();
+			//proxy_t* ptr = &allocator;
+			//new (ptr) ;
+			//this->proxy_ptr = ptr;
+		}
+		template<typename U, size_t N>
+		FixedArenaAllocator(const FixedArenaAllocator<U, N>& rhs)
+			: base_t{ &allocator },
+			_internal{ rhs._internal },
+			allocator{ rhs.allocator }
+		{
+
+		}
+		FixedArenaAllocator(const FixedArenaAllocator& rhs)
+			: base_t{ &allocator },
+			_internal{ rhs._internal },
+			allocator{ rhs.allocator }
+		{
+
+		}
+		template<
+			typename U,
+			typename =
+			std::enable_if_t<!std::is_same_v<FixedArenaAllocator<T, NumBytes>, FixedArenaAllocator<U, NumBytes> >>
+		>
+			FixedArenaAllocator(const FixedArenaAllocator<U, NumBytes>& rhs) :
+			base_t{ &allocator },
+			_internal{ rhs._internal },
+			allocator{ rhs.allocator }
+		{
+		}
+
+		FixedArenaAllocator& operator=(const FixedArenaAllocator&) = delete;
+		template<
+			typename U,
+			typename =
+			std::enable_if_t<!std::is_same_v<FixedArenaAllocator<T, NumBytes>, FixedArenaAllocator<U, NumBytes> >>
+		>
+			FixedArenaAllocator& operator=(const FixedArenaAllocator<U, NumBytes>&) = delete;
+		~FixedArenaAllocator() = default;
+	};
 	struct DescriptorUpdateData
 	{
 		static void* derp(void* ptr);
@@ -211,76 +281,6 @@ namespace idk::vkn
 
 		static void JustBreak();
 
-		template<typename T, size_t NumBytes=1<<20, typename proxy_t = ArenaAllocator<T, arena_block_free>,typename base_t = AllocatorProxy<proxy_t>>
-		struct FixedArenaAllocator : base_t
-		{
-			;
-			template<typename T>
-			static ArenaAllocator<T>& GetAllocatorBase(ArenaAllocator<T>& base) noexcept
-			{
-				return base;
-			}
-
-			using Internal = detail::FixedInternal<NumBytes>;
-			template<typename U>
-			struct rebind
-			{
-				using other = FixedArenaAllocator<U,NumBytes>;
-			};
-			std::shared_ptr<detail::InternalBase> _internal;
-			proxy_t allocator;
-			template<typename U, typename Base>
-			bool operator==(const FixedArenaAllocator<U, NumBytes, Base>& rhs) noexcept
-			{
-				return *_internal == *rhs._internal;
-			}
-			//alignas(T) std::array<char, sizeof(T) * 2048> buffer;
-			FixedArenaAllocator() :
-				base_t{&allocator},
-				_internal{ std::make_shared<Internal>() },
-				allocator{ _internal->buffer }
-			{
-				//_internal = std::make_shared<Internal>();
-				//proxy_t* ptr = &allocator;
-				//new (ptr) ;
-				//this->proxy_ptr = ptr;
-			}
-			template<typename U,size_t N>
-			FixedArenaAllocator(const FixedArenaAllocator<U,N>& rhs)
-				: base_t{ &allocator },
-				_internal{ rhs._internal },
-				allocator{ rhs.allocator }
-			{
-
-			}
-			FixedArenaAllocator(const FixedArenaAllocator& rhs)
-				: base_t{&allocator},
-				_internal{ rhs._internal },
-				allocator{ rhs.allocator }
-			{
-
-			}
-			template<
-				typename U,
-				typename = 
-					std::enable_if_t<!std::is_same_v<FixedArenaAllocator<T,NumBytes>, FixedArenaAllocator<U, NumBytes> >>
-			>
-			FixedArenaAllocator(const FixedArenaAllocator<U, NumBytes>& rhs) :
-				base_t{&allocator},
-				_internal{ rhs._internal } ,
-				allocator { rhs.allocator }
-			{ 
-			}
-			
-			FixedArenaAllocator& operator=(const FixedArenaAllocator&) = delete;
-			template<
-				typename U,
-				typename = 
-					std::enable_if_t<!std::is_same_v<FixedArenaAllocator<T, NumBytes>, FixedArenaAllocator<U, NumBytes> >>
-			>
-			FixedArenaAllocator& operator=(const FixedArenaAllocator<U, NumBytes>& ) =delete;
-			~FixedArenaAllocator() = default;
-		};
 		template<typename T>
 		using allocator_t = FixedArenaAllocator<T>;
 		template<typename T,size_t N>

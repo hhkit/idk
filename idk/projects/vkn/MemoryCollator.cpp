@@ -15,7 +15,7 @@ namespace idk::vkn
 			throw std::runtime_error("Invalid allocation size!");
 		return size + alignment ;
 	}
-	//#pragma optimize("",off)
+	
 	bool MemoryCollator::can_allocate(size_t size, size_t alignment) const
 	{
 		bool result = free_list.CanAllocate(compute_aligned_alloc(size, alignment));

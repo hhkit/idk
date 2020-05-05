@@ -428,6 +428,9 @@
     <ClInclude Include="PoolAllocator.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="CommandCluster.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -735,6 +738,7 @@
     </ClCompile>
     <ClCompile Include="time_log.cpp" />
     <ClCompile Include="FreeList.cpp" />
+    <ClCompile Include="CommandCluster.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

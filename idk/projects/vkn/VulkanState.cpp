@@ -753,7 +753,7 @@ namespace idk::vkn
 		for (auto& rs : rss)
 			rs.RenderPass() = *m_crenderpass;
 	}
-//#pragma optimize("",off)
+
 	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format fmt, vk::ImageTiling tiling, vk::ImageUsageFlags usage, [[maybe_unused]] vk::MemoryPropertyFlags ppts, vk::Image& image, hlp::MemoryAllocator& allocator, hlp::UniqueAlloc& alloc)
 	{
 		if (!imageFence)

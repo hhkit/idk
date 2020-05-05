@@ -120,7 +120,7 @@ namespace idk::vkn
 		}
 	};
 	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw);
-//#pragma optimize("",off)
+
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
 		span<UniformUtils::BindingInfo> bindings,
@@ -451,7 +451,6 @@ namespace idk::vkn
 			}
 		};
 	}
-
 	std::optional<vector_span<UniformManager::set_binding_t>>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
 	{
 		dbg::stopwatch timer;
@@ -478,7 +477,7 @@ namespace idk::vkn
 		add_rendertask_durations("finalize current", timer.time().count());
 		return builder.end();
 	}
-//#pragma optimize("",off)
+
 	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorUpdateData& dud, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
 	{
 		//_dud.Reset();

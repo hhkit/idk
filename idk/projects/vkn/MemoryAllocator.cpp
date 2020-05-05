@@ -86,7 +86,7 @@ namespace idk::vkn::hlp
 	using detail::Memories;
 
 
-//#pragma optimize("",off)
+
 
 	static size_t dbg_threshold = 100000000;
 

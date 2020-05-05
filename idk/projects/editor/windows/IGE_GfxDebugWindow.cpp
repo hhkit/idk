@@ -164,7 +164,7 @@ namespace idk
 		std::string dump;
 	};
 
-	IGE_GfxDebugWindow::IGE_GfxDebugWindow() : IGE_IWindow{"Graphics Debug",false}, _pimpl{std::make_unique<Pimpl>()}
+	IGE_GfxDebugWindow::IGE_GfxDebugWindow() : IGE_IWindow{ "Graphics Debug",false,ImVec2{1920/4.5f,650.0f} }, _pimpl{ std::make_unique<Pimpl>() }
 	{
 	}
 	void IGE_GfxDebugWindow::Update()

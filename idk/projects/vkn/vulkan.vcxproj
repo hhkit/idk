@@ -327,6 +327,7 @@
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CanvasVertexBindings.h" />
     <ClInclude Include="ColorPickRenderer.h" />
+    <ClInclude Include="CommandCluster.h" />
     <ClInclude Include="DrawSetRenderPass.h" />
     <ClInclude Include="FencePool.h" />
     <ClInclude Include="binding_util.h" />
@@ -472,6 +473,7 @@
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CanvasVertexBindings.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
+    <ClCompile Include="CommandCluster.cpp" />
     <ClCompile Include="FencePool.cpp" />
     <ClCompile Include="FreeList.cpp" />
     <ClCompile Include="LightBinding.cpp" />
