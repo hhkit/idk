@@ -67,6 +67,7 @@ namespace idk::vkn
 		//	allocated.emplace(to_free._end, sz - to_free.size());
 		//}
 		//validate();
+		if(!skip_free)
 		free_list.Free(to_free._begin, to_free.size());
 	}
 

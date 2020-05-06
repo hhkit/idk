@@ -256,7 +256,8 @@ namespace idk::vkn
 		try
 		{
 
-		auto& curr_signal = instance_->View().CurrPresentationSignals();
+			_pimpl->timelog.log("AcquirePre Frame", _pimpl->timer.lap());
+			auto& curr_signal = instance_->View().CurrPresentationSignals();
 
 		auto d_af_start = std::chrono::high_resolution_clock::now();
 		instance_->AcquireFrame(*curr_signal.image_available);

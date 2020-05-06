@@ -293,17 +293,17 @@ namespace idk::vkn
 	{
 		StartNewBatch();
 		r = ViewportScissors(r, fb_size);
-		_rect_builder.start();
-		_rect_builder.emplace_back(r);
-		_current_batch.scissor = _rect_builder.end();
+		_rect_builder->start();
+		_rect_builder->emplace_back(r);
+		_current_batch.scissor = _rect_builder->end();
 	}
 	void RenderTask::SetViewport(rect r)
 	{
 		StartNewBatch();
 		r = ViewportScissors(r, fb_size);
-		_rect_builder.start();
-		_rect_builder.emplace_back(r);
-		_current_batch.viewport = _rect_builder.end();
+		_rect_builder->start();
+		_rect_builder->emplace_back(r);
+		_current_batch.viewport = _rect_builder->end();
 	}
 	void RenderTask::SetScissorsViewport(rect r)
 	{
@@ -796,12 +796,13 @@ namespace idk::vkn::dbg
 
 hash_table<string_view, float>& get_rendertask_durations()
 {
-	static hash_table<string_view, float> durations;
+	thread_local static hash_table<string_view, float> durations;
 	return durations;
 }
 
 void add_rendertask_durations(string_view name, float duration)
 {
+	return;
 	get_rendertask_durations()[name]+=duration;
 }
 

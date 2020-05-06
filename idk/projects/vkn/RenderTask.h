@@ -236,8 +236,9 @@ namespace idk::vkn
 
 #pragma region Pipeline State
 		pipeline_config curr_config;
+
 		vector<rect> _rect_buffer;
-		vector_span_builder<rect> _rect_builder{ _rect_buffer };
+		std::unique_ptr<vector_span_builder<rect>> _rect_builder{ std::make_unique< vector_span_builder<rect>>(vector_span_builder<rect>{_rect_buffer}) };
 		span<VknTextureView> _input_attachments;
 		size_t _num_output_attachments;
 		rect render_area;

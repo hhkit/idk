@@ -298,6 +298,7 @@ namespace idk::vkn::renderpasses
 
 	void AddShadowPass(FrameGraph& frame_graph, GraphicsSystem::LightRenderRange shadow_range, const PreRenderData& state)
 	{
+		return;
 		auto& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
 
 

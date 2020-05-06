@@ -25,8 +25,8 @@ namespace idk::vkn
 		{
 			//TODO put the stuff that needs to be read from here.
 			const FrameGraphResourceManager& Resources()const noexcept{ return *resources; }
-			FrameGraphResourceManager& Resources() noexcept { return *resources; }
-			void SetRscManager(FrameGraphResourceManager& mgr)
+			//FrameGraphResourceManager& Resources() noexcept { return *resources; }
+			void SetRscManager(const FrameGraphResourceManager& mgr)
 			{
 				resources = &mgr;
 			}
@@ -41,7 +41,7 @@ namespace idk::vkn
 			Context& operator=(const Context&) = default;
 			Context& operator=(Context&&) = default;
 		private:
-			FrameGraphResourceManager* resources;
+			const FrameGraphResourceManager* resources;
 		};
 
 		using Context_t = Context&;

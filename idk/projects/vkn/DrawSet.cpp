@@ -103,7 +103,6 @@ namespace idk::vkn
 	}
 	void SkinnedMeshDrawSet::Render(RenderInterface& the_interface, bindings::RenderBindings& binders)
 	{
-
 		the_interface.SetBufferDescriptions({});
 		binders.Bind(the_interface);
 		for (auto& ptr_dc : _draw_calls)

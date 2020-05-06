@@ -139,6 +139,13 @@ namespace idk::vkn
 	}
 	void FrameGraph::Reset()
 	{
+		for (auto& p_ubo_managers : _ubo_managers)
+		{
+			if (p_ubo_managers)
+			{
+				p_ubo_managers->Clear();
+			}
+		}
 		nodes.clear();
 		render_passes.clear();
 		execution_order.clear();
@@ -388,49 +395,100 @@ namespace idk::vkn
 			_contexts.resize(execution_order.size());
 		auto& rsc_manager = GetResourceManager();
 		hash_table<string, dbg::milliseconds> lut;
+		std::array<dbg::milliseconds, 12> lut2{};
+		std::array<string_view, 12> lut2s{};
+		vector<mt::Future<void>> futures;
+		size_t i = 0;
 		for (auto index : execution_order)
 		{
-			auto& node = nodes[index];
-			auto& rp = *render_passes[node.id];
-			//TODO: Thread this
-			{
-				//auto& context = _contexts.emplace_back(_uniform_managers.back());
-				auto& context = _contexts.at(index);
-				context.FlagUsed();
-				context.SetPipelineManager(*_default_pipeline_manager);
-				context.SetUboManager(*_default_ubo_manager);
-				//Transition all the resources that are gonna be read (and are not input attachments)
-				auto input_span = node.GetReadSpan();
-				for (auto& input : input_span)
+			i = 0;
+			futures.emplace_back( Core::GetThreadPool().Post(
+				[&rsc_manager,index, this]()
 				{
-					TransitionResource(context, rsc_manager.TransitionInfo(input));
+					auto& node = nodes[index];
+					auto& rp = *render_passes[node.id];
+					auto& p_ubo_manager = _ubo_managers.at(mt::thread_id());
+					if (!p_ubo_manager)
+						p_ubo_manager = std::make_unique<UboManager>(View());
+					//TODO: Thread this
+					{
+						//auto& context = _contexts.emplace_back(_uniform_managers.back());
+						auto& context = _contexts.at(index);
+						context.FlagUsed();
+						context.SetPipelineManager(*_default_pipeline_manager);
+						context.SetUboManager(*p_ubo_manager);
+						//Transition all the resources that are gonna be read (and are not input attachments)
+						auto input_span = node.GetReadSpan();
+						for (auto& input : input_span)
+						{
+							TransitionResource(context, rsc_manager.TransitionInfo(input));
+						}
+						context.SetRscManager(rsc_manager);
+						rp.PreExecute(node, context);
+						//lut[] +=timer.lap();
+						//lut2s[i] = "Pre Execute";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] += lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i - 1], lap);
+						//}
+						auto copy_span = node.GetCopySpan();
+						for (auto& copy_req : copy_span)
+						{
+							CopyCommand cmd;
+							auto src_layout = GetSourceLayout(copy_req.src.id);
+							if (!ValidateImageLayout(src_layout))
+								src_layout = src_layout;
+							auto dst_layout = copy_req.options.dest_layout;
+							if (!ValidateImageLayout(dst_layout))
+								dst_layout = dst_layout;
+							context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,copy_req.options.src_range,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.dst_range,copy_req.options.regions });
+						}
+						//lut2s[i] = "Copy";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] += lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i - 1], lap);
+						//}
+						//lut["Copy"] += timer.lap();
+						rp.Execute(context);
+						//lut2s[i] = "Execute";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] += lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i - 1], lap);
+						//}
+						//lut["Execute"] += timer.lap();
+						rp.PostExecute(node, context);
+						//lut2s[i] = "Post Execute";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] +=lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i-1], lap);
+						//}
+
+						//lut["PostExecute"] += timer.lap();
+
+					}
 				}
-				context.SetRscManager(rsc_manager);
-				rp.PreExecute(node, context);
-				lut["Pre Execute"] +=timer.lap();
-				auto copy_span = node.GetCopySpan();
-				for (auto& copy_req : copy_span)
-				{
-					CopyCommand cmd;
-					auto src_layout = GetSourceLayout(copy_req.src.id);
-					if (!ValidateImageLayout(src_layout))
-						src_layout = src_layout;
-					auto dst_layout = copy_req.options.dest_layout;
-					if (!ValidateImageLayout(dst_layout))
-						dst_layout = dst_layout;
-					context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,copy_req.options.src_range,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.dst_range,copy_req.options.regions});
-				}
-				lut["Copy"] += timer.lap();
-				rp.Execute(context);
-				lut["Execute"] += timer.lap();
-				rp.PostExecute(node, context);
-				lut["PostExecute"] += timer.lap();
-			}
+			));
 		}
-		for (auto& [name, duration] : lut)
+		for (auto& future : futures)
 		{
-			GetGfxTimeLog().log_n_store(name, duration);
+			future.get();
 		}
+		for (size_t j = 0; j < i; ++j)
+		{
+			GetGfxTimeLog().log(lut2s[j], lut2[j]);
+		}
+		//for (auto& [name, duration] : lut)
+		//{
+		//	GetGfxTimeLog().log_n_store(name, duration);
+		//}
 		auto& duray = dbg::get_rendertask_durations();
 		GetGfxTimeLog().push_level();
 		dbg::milliseconds total{};
@@ -550,6 +608,13 @@ namespace idk::vkn
 		GetGfxTimeLog().log("Proc Batches", timer.lap());
 		GetGfxTimeLog().pop_level();
 		GetGfxTimeLog().log("Compile", timer.lap());
+		for (auto& ubo_manager : _ubo_managers)
+		{
+			if (ubo_manager)
+			{
+				ubo_manager->UpdateAllBuffers();
+			}
+		}
 	}
 
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)

@@ -217,6 +217,8 @@ namespace idk::vkn
 		vector<size_t> execution_order;
 		vector<std::tuple<string_view,BaseRenderPass*, FrameGraphNode*>> _dbg_execution_order;
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
+		static inline constexpr size_t max_num_job_threads = 16;
+		std::array<std::unique_ptr<UboManager>, max_num_job_threads> _ubo_managers{};
 
 		UboManager* _default_ubo_manager = {};
 

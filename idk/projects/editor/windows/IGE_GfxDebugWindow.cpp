@@ -108,6 +108,8 @@ namespace idk
 			auto&& [nodes,master_indices] = log.get_records();
 			
 			size_t max_chars = 0;
+			if (!nodes.size())
+				return;
 			float total = nodes[master_indices.back()].data.duration.count();
 			{
 				vector<size_t> indices{ master_indices.begin(),master_indices.end() };

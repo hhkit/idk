@@ -31,6 +31,7 @@ namespace idk::vkn
 		};
 
 		MemoryCollator(index_span allocated_span) :full_range{ allocated_span } { reset(); }
+		bool skip_free = false;
 		//unaligned, aligned offsets
 		bool can_allocate(size_t size, size_t alignment) const;
 		std::optional<std::pair<size_t, size_t>> allocate(size_t size, size_t alignment);

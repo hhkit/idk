@@ -4,45 +4,59 @@
 #include <ds/span.inl>
 namespace idk::vkn::dbg
 {
+	static inline constexpr bool enabled = false;
 	void time_log::log(string_view section, milliseconds duration)
 	{
-		//Track this in the current level
-		if(push_stack.size())
-			push_stack.back().emplace_back(nodes.size());
-		else
+		if constexpr (enabled)
 		{
-			master_indices.emplace_back(nodes.size());
-		}
-		//Add it in
-		auto& n = nodes.emplace_back(node{ record{ section, duration } });
-		//Add popped list in, if applicable.
-		if (last_popped)
-		{
-			n.sub_nodes = std::move(*last_popped);
-			last_popped.reset();
+			//Track this in the current level
+			if (push_stack.size())
+				push_stack.back().emplace_back(nodes.size());
+			else
+			{
+				master_indices.emplace_back(nodes.size());
+			}
+			//Add it in
+			auto& n = nodes.emplace_back(node{ record{ section, duration } });
+			//Add popped list in, if applicable.
+			if (last_popped)
+			{
+				n.sub_nodes = std::move(*last_popped);
+				last_popped.reset();
+			}
 		}
 	}
 	void time_log::log_n_store(string name, milliseconds duration)
 	{
-		string_view section;
-		auto& str = str_owners.emplace_back(std::move(name));
-		section = str;
-		log(section, duration);
+		if constexpr (enabled)
+		{
+
+			string_view section;
+			auto& str = str_owners.emplace_back(std::move(name));
+			section = str;
+			log(section, duration);
+		}
 
 	}
 	void time_log::reset()
 	{
-		nodes.clear();
-		master_indices.clear();
-		last_popped.reset();
-		push_stack.clear();
+		if constexpr (enabled)
+		{
+			nodes.clear();
+			master_indices.clear();
+			last_popped.reset();
+			push_stack.clear();
 
-		str_owners.clear();
+			str_owners.clear();
+		}
 	}
 
 	time_log::record_tree time_log::get_records() const
 	{
-		return record_tree{nodes,master_indices};
+		if constexpr (enabled)
+			return record_tree{nodes,master_indices};
+		else
+			return record_tree{ };
 	}
 
 }

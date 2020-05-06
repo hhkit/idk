@@ -76,7 +76,8 @@ namespace idk::vkn
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
 		FrameGraph graph{};
-		gt::GraphTest test{ graph };
+		FrameGraph gtest_graph{};
+		gt::GraphTest test{gtest_graph};
 
 		MaterialInstanceCache mat_inst_cache;
 
@@ -1260,7 +1261,11 @@ namespace idk::vkn
 
 		if (Core::GetSystem<GraphicsSystem>().extra_vars.Get<float>("gamma_correction"))
 		{
-			ConvertToNonSRGB(_post_states[curr_state++],_pimpl->test);
+			auto& rs = _post_states[curr_state++];
+			auto& graph = _pimpl->gtest_graph;
+			graph.SetDefaultUboManager(rs.ubo_manager);
+			graph.SetPipelineManager(GetPipelineManager());
+			ConvertToNonSRGB(rs,_pimpl->test);
 		}
 
 		//TODO: Submit the command buffers

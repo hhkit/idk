@@ -180,8 +180,31 @@ namespace idk::vkn
 		}
 	}
 
+	struct memcpy_info
+	{
+		size_t total_bytes_copied = 0;
+		//numbytes,num occurences
+		hash_table<size_t, size_t> num_occurences;
+		void log(size_t num_bytes)
+		{
+			num_occurences[num_bytes]++;
+			total_bytes_copied += num_bytes;
+		}
+#pragma optimize("",off)
+		void reset()
+		{
+			total_bytes_copied = 0;
+			for (auto& [bytes, num] : num_occurences)
+			{
+				num = 0;
+			}
+		}
+#pragma optimize("",on)
+	};
+	static memcpy_info mem_info;
 	void UboManager::Clear()
 	{
+		mem_info.reset();
 		for (auto& data_pair : _buffers)
 		{
 			data_pair.Reset();
@@ -221,6 +244,42 @@ namespace idk::vkn
 	{
 		return lhs._begin == rhs._begin && lhs._end == rhs._end;
 	}
+
+	void alt_memcpy(void* dest, const void* data, size_t len)
+	{
+		using elem_t = size_t;
+		constexpr size_t cacheline_sz = 64;
+		constexpr size_t stride = sizeof(elem_t);
+		constexpr size_t cacheline_stride = cacheline_sz/stride;
+		size_t num_elems = len / stride;
+		const elem_t* ptr = (const elem_t*)data;
+		const elem_t* end = ptr + num_elems-cacheline_stride;
+		elem_t* dst = (elem_t*)dest;
+		while(ptr<end)
+		{
+			PrefetchForWrite(dst + cacheline_stride);
+			PreFetchCacheLine(PF_NON_TEMPORAL_LEVEL_ALL,ptr + cacheline_stride);
+			*(dst+0) = (*ptr+0);
+			*(dst + 1) = (*ptr + 1);
+			*(dst + 2) = (*ptr + 2);
+			*(dst + 3) = (*ptr + 3);
+			*(dst + 4) = (*ptr + 4);
+			*(dst + 5) = (*ptr + 5);
+			*(dst + 6) = (*ptr + 6);
+			*(dst + 7) = (*ptr + 7);
+			ptr+=8;
+			dst+=8;
+		}
+		auto d2 = (byte*)dst;
+		auto src = (const byte*)ptr;
+		auto end2 = ((const byte*)data) + len;
+		while (src < end2)
+		{
+			*d2 = *src;
+			++src;
+			++d2;
+		}
+	}
 	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) 
 	{
 		dbg::stopwatch timer;
@@ -234,7 +293,7 @@ namespace idk::vkn
 		//	data.resize(block_size+initial_offset);
 		//}
 		//add_rendertask_durations("DP resize", timer.lap().count());
-
+		collator.skip_free = true;
 		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
 		add_rendertask_durations("DP collator allocate", timer.lap().count());
 		if (!opt)
@@ -246,11 +305,17 @@ namespace idk::vkn
 		add_rendertask_durations("DP mark free", timer.lap().count());
 
 		auto actual_offset = initial_offset + aligned_offset;
-		if (len+ aligned_offset > 65536)
-			throw;
+		//if (len+ aligned_offset > 65536)
+		//	throw;
+		//if (len + actual_offset > data.size())
+		//	throw;
+		add_rendertask_durations("DP pre memcpy", timer.lap().count());
+		//alt_memcpy(data.data() + actual_offset, data_, len);
+		//std::memcpy(data.data() + actual_offset, data_, len);
 		memcpy_s(data.data() +actual_offset, data.size()-actual_offset, data_, len);
-		add_rendertask_durations("DP memcpy", timer.lap().count());
+		mem_info.log(len);
 		timer.stop();
+		add_rendertask_durations("DP memcpy", timer.lap().count());
 		add_rendertask_durations("DP Add", timer.time().count());
 		return static_cast<uint32_t>(aligned_offset);
 	}

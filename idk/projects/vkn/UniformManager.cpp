@@ -413,6 +413,7 @@ namespace idk::vkn
 		}
 		return bound;
 	}
+#pragma optimize("",off)
 	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
 		dbg::stopwatch timer;
@@ -422,6 +423,7 @@ namespace idk::vkn
 		add_rendertask_durations("Ubo Add", timer.time().count());
 		return _bindings.BindUniformBuffer(info, array_index, buffer, offset,data.size(), skip_if_bound);
 	}
+#pragma optimize("",on)
 	bool UniformManager::BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
 	{
 		return _bindings.BindSampler(info, array_index, texture, skip_if_bound, layout);;

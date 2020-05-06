@@ -50,7 +50,7 @@ namespace idk::win
 		MyRegisterClass();
 
 		InitInstance(nCmdShow); 
-		SetFullscreen(true);
+		//SetFullscreen(true);
 		//hAccelTable = LoadAccelerators(hInstance, 0);
 
 	}
@@ -565,7 +565,7 @@ namespace idk::win
 			return FALSE;
 		}
 
-		ShowWindow(hWnd, SW_MAXIMIZE);
+		ShowWindow(hWnd, SW_NORMAL);
 		UpdateWindow(hWnd);
 
 		return TRUE;
