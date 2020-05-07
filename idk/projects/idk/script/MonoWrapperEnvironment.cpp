@@ -1470,6 +1470,7 @@ namespace idk::mono
 
             switch (hash)
             {
+				VALIDATE_RESOURCE(Texture);
 				VALIDATE_RESOURCE(Material);
 				VALIDATE_RESOURCE(MaterialInstance);
 				VALIDATE_RESOURCE(Prefab);
@@ -1492,6 +1493,7 @@ namespace idk::mono
 
             switch (hash)
             {
+				NAME_OF_RESOURCE(Texture);
 				NAME_OF_RESOURCE(Material);
 				NAME_OF_RESOURCE(MaterialInstance);
 				NAME_OF_RESOURCE(Prefab);
@@ -1593,6 +1595,15 @@ namespace idk::mono
 				return;
 			handle->SetUniform(s.get(), tex);
         }
+		BIND_END();
+
+		// Texture
+		BIND_START("idk.Bindings::TextureGetSize", vec2ret, RscHandle<Texture> handle)
+		{
+			if (!handle) { return vec2ret{ 0, 0 }; }
+			uvec2 ret = handle->Size();
+			return vec2ret{ static_cast<float>(ret.x), static_cast<float>(ret.y) };
+		}
 		BIND_END();
 
 		// //////TextMesh///////////////
