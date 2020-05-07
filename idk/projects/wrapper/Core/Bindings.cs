@@ -804,6 +804,12 @@ namespace idk
         public extern static void MaterialInstanceSetTexture(System.Guid guid, string name, Guid tex);
 
         /*
+         * Texture
+         */
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector2 TextureGetSize(System.Guid guid);
+
+        /*
          * Input
          */
         [MethodImpl(MethodImplOptions.InternalCall)]

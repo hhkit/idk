@@ -346,10 +346,32 @@ namespace idk::vkn::gt
 			for (size_t i = 0; i < light_indices.size();i+= stride)
 			{
 				lights.clear();
-				for (size_t j = 0; j + i < light_indices.size() && j < stride; ++j)
+				for (size_t j = 0, k = i; (k < light_indices.size()) && (j < stride); ++j, ++k)
 				{
-					lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[i+j]]);
-					context.BindUniform("shadow_maps", s_cast<uint32_t>(j), gfx_state.shadow_maps_2d[i+j].as<VknTexture>());
+					auto & l = lights.emplace_back((*gfx_state.shared_gfx_state->lights)[light_indices[k]]);
+					if (l.index == 0)
+					{
+						//if (!light.light_maps.empty())
+						context.BindUniform("shadow_maps", s_cast<uint32_t>(j), *RscHandle<VknTexture>{});
+					}
+					else if (l.index == 1)
+					{
+						//if (!light.light_maps.empty())
+						context.BindUniform("shadow_maps", s_cast<uint32_t>(j), *RscHandle<VknTexture>{});
+					}
+					else if (l.index == 2)
+					{
+						VknTextureView txt;
+						for (auto& elem : l.light_maps)
+						{
+							auto& fb = elem.light_map.as<VknFrameBuffer>();
+							auto& db = fb.DepthAttachment();
+							auto& v = db.buffer;
+							txt = v.as<VknTexture>();
+						}
+						context.BindUniform("shadow_maps", s_cast<uint32_t>(j), txt);
+					}
+					
 				}
 				
 				auto light_data = PrepareLightBlock(gfx_state.camera, lights);

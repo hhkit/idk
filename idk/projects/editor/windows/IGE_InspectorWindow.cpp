@@ -1159,8 +1159,16 @@ namespace idk {
                 if (const auto iter = inject_draw_table->find(display.curr_prop_path); iter != inject_draw_table->end())
                 {
                     auto copy = val;
+                    if constexpr (std::is_same_v<T, reflect::dynamic>)
+                        copy.swap(val.copy());
+
                     auto edit_state = iter->second(copy);
-                    if (edit_state == EditState::Editing)
+                    if (edit_state == EditState::Activated)
+                    {
+                        StoreOriginalValues(display.curr_prop_path);
+                        val = copy;
+                    }
+                    else if (edit_state == EditState::Editing)
                     {
                         changed = true;
                         val = copy;

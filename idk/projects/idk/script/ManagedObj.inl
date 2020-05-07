@@ -178,6 +178,7 @@ namespace idk::mono
 				}
 				RSCHANDLE_ASSIGN(Prefab);
 				RSCHANDLE_ASSIGN(MaterialInstance);
+				RSCHANDLE_ASSIGN(Texture);
 				RSCHANDLE_ASSIGN(Scene);
 #undef RSCHANDLE_ASSIGN
 			}
@@ -295,6 +296,7 @@ namespace idk::mono
 				MONO_COMPLEX_TYPE(color, envi.Type("Color")->Raw());
 
 				MONO_RESOURCE_TYPE(MaterialInstance);
+				MONO_RESOURCE_TYPE(Texture);
 				MONO_RESOURCE_TYPE(Prefab);
 				MONO_RESOURCE_TYPE(Scene);
 
@@ -403,6 +405,7 @@ namespace idk::mono
 			MONO_BASE_TYPE_CONST(color, envi.Type("Color")->Raw());
 
 			MONO_RESOURCE_TYPE_CONST(MaterialInstance);
+			MONO_RESOURCE_TYPE_CONST(Texture);
 			MONO_RESOURCE_TYPE_CONST(Prefab);
 			MONO_RESOURCE_TYPE_CONST(Scene);
 

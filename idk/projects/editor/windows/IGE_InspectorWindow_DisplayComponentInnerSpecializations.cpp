@@ -703,8 +703,7 @@ namespace idk
 
         constexpr auto draw_audio_volume = [](const reflect::dynamic& dyn)
         {
-            bool changed = false;
-            bool changed_and_deactivated = false;
+            EditState ret = EditState::None;
 
             auto& audio_clip_volume = dyn.get<vector<float>>();
 
@@ -717,21 +716,21 @@ namespace idk
                     ImGui::Text("[%d]", i);
                     ImGui::SameLine();
                     ImGui::PushID(i);
-                    if (ImGui::DragFloat("##audioVol", &(static_audiosource->audio_clip_volume[i]), 0.01f, 0, 1, "%.2f", 1.0f)) {
-                        changed = true;
-                    }
+                    if (ImGui::DragFloat("##audioVol", &(static_audiosource->audio_clip_volume[i]), 0.01f, 0, 1, "%.2f", 1.0f))
+                        ret = EditState::Editing;
                     if (ImGui::IsItemDeactivatedAfterEdit())
-                        changed_and_deactivated = true;
+                        ret = EditState::Completed;
+                    if (ImGui::IsItemActive() && ImGui::GetCurrentContext()->ActiveIdIsJustActivated)
+                        ret = EditState::Activated;
 
                     ImGui::PopID();
-
                 }
 
                 ImGui::EndChild();
                 ImGui::Separator();
             }
 
-            return changed ? (changed_and_deactivated ? EditState::Completed : EditState::Editing) : EditState::None;
+            return ret;
         };
 
         constexpr auto draw_soundGroup = [](const reflect::dynamic& dyn)

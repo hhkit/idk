@@ -51,7 +51,7 @@ namespace idk::vkn::bindings
 		}
 		bool Skip([[maybe_unused]] RenderInterface& context, [[maybe_unused]] const RenderObject& ro) override
 		{
-			return i  >= _state._light_indices.size();
+			return k  >= _state._light_indices.size();
 		}
 
 
@@ -90,12 +90,12 @@ namespace idk::vkn::bindings
 			d_block += string{ reinterpret_cast<const char*>(tmp_dlight.data()), hlp::buffer_size(tmp_dlight) };
 			return d_block;
 		}
-
+//#pragma optimize("",off)
 		void Bind(RenderInterface& context, const RenderObject&)
 		{
 			const auto& light_indices = _state._light_indices;
 			const auto& all_lights = _state.all_lights;
-			//auto all_shadows = _state.all_shadows;
+			//const auto& all_shadows = _state.all_shadows;
 			const auto& _view_matrix = _state._view_matrix;
 			vector<LightData> lights;
 			vector<VknTextureView> shadow_maps;
@@ -104,15 +104,16 @@ namespace idk::vkn::bindings
 			vector<DLightData> directional_vp{};
 			mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
 			lights.clear();
-			for (size_t j = 0; j + i < light_indices.size() && j < stride; ++j)
+			shadow_maps.resize(stride, *RscHandle<VknTexture>());
+			for (size_t j = 0, u = j+k; u < light_indices.size() && j < stride; ++j, ++u)
 			{
-				auto& light = all_lights[light_indices[i + j]];
+				auto& light = all_lights[light_indices[u]];
 				lights.emplace_back(light);
-				
+				//shadow_maps.emplace_back(all_shadows[light_indices[u]].as<VknTexture>());
 				if (light.index == 0)
 				{
-					if (!light.light_maps.empty())
-						shadow_maps.emplace_back(*RscHandle<VknTexture>{});
+					//if (!light.light_maps.empty())
+					shadow_maps[j] = *RscHandle<VknTexture>{};
 
 					for (auto& elem : light.light_maps)
 					{
@@ -124,8 +125,8 @@ namespace idk::vkn::bindings
 				}
 				else if (light.index == 1)
 				{
-					if (!light.light_maps.empty())
-						shadow_maps.emplace_back(*RscHandle<VknTexture>{});
+					//if (!light.light_maps.empty())
+					shadow_maps[j] = *RscHandle<VknTexture>{};
 
 					for (auto& elem : light.light_maps)//state.d_lightmaps->at(cam.obj_id).cam_lightmaps)
 					{
@@ -140,7 +141,7 @@ namespace idk::vkn::bindings
 						auto& fb = elem.light_map.as<VknFrameBuffer>();
 						auto& db = fb.DepthAttachment();
 						auto& v = db.buffer;
-						shadow_maps.emplace_back(v.as<VknTexture>());
+						shadow_maps[j] = v.as<VknTexture>();
 					}
 				}
 			}
@@ -153,7 +154,7 @@ namespace idk::vkn::bindings
 			BindShadows(context, "shadow_map_point", shadow_maps_point);
 			BindShadows(context, "shadow_maps", shadow_maps);
 
-			i += stride;
+			k += stride;
 		}
 		struct State
 		{
@@ -168,7 +169,7 @@ namespace idk::vkn::bindings
 			_state = state;
 		}
 	private:
-		size_t i = 0;
+		size_t k = 0;
 		State _state;
 	};
 	class DeferredLightFsq : public RenderBindings

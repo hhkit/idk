@@ -1,6 +1,6 @@
 #pragma once
 #include <network/ack_utils.h>
-#pragma optimize("", off)
+#pragma optimize("", on)
 namespace idk
 {
 	template<typename T>

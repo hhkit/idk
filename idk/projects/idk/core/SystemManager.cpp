@@ -28,12 +28,26 @@ namespace idk
 	{
 		for (auto& elem : reverse(_list))
 			if (elem)
-				elem->EarlyShutdown();
+			{
+				try
+				{
+					elem->EarlyShutdown();
+				}
+				catch(...)
+				{ }
+			}
 	}
 	void SystemManager::ShutdownSystems()
 	{
 		for (auto& elem : reverse(_list))
 			if (elem)
-				elem->Shutdown();
+			{
+				try
+				{
+					elem->Shutdown();
+				}
+				catch(...)
+				{ }
+			}
 	}
 }

@@ -37,10 +37,10 @@ namespace idk
 
 	void SceneManager::EarlyShutdown()
 	{
-		for (auto& elem : GameState::GetGameState().GetObjectsOfType<GameObject>())
-			GameState::GetGameState().DestroyObject(elem.GetHandle());
-
-		GameState::GetGameState().DestroyQueue();
+		// for (auto& elem : GameState::GetGameState().GetObjectsOfType<GameObject>())
+		// 	GameState::GetGameState().DestroyObject(elem.GetHandle());
+		// 
+		// GameState::GetGameState().DestroyQueue();
 	}
 
 	void SceneManager::Shutdown()

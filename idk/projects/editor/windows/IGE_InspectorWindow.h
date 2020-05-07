@@ -53,7 +53,7 @@ namespace idk {
 
         enum class EditState : char
         {
-            None = 0, Editing, Completed, CompletedInOneFrame
+            None = 0, Activated, Editing, Completed, CompletedInOneFrame
         };
 
         bool _debug_mode = false;

@@ -534,13 +534,13 @@ namespace idk
 				{
 					sphere sphere{ invert_rotation(light.v)[3],light.falloff };
 					color col = color{ 0.3f,0.6f,0.2f,1.0f };
-					light.update_shadow = false;
+					//light.update_shadow = false;
 					if (frustum.contains(sphere))
 					{
 						active_light_buffer.emplace_back(i);
 						info.active_lights[i] = true;
 						col = color{ 0.5f,0.0f,0.4f,1.0f };
-						//if (light.cast_shadow)
+						if (light.cast_shadow)
 						{
 							light.update_shadow = true;				
 							//for (auto& elem : light.light_maps)
@@ -563,7 +563,7 @@ namespace idk
 				auto sphere = bounding_box_to_loose_sphere(bounding_box);
 
 				color col = color{ 0.3f,0.2f,0.6f,1.0f };
-				light.update_shadow = false;
+				//light.update_shadow = false;
 				//light.update_shadow = true;
 				if (frustum.contains(sphere))
 				{
@@ -590,7 +590,7 @@ namespace idk
 
 				copy_light.light_maps = sm_pool.GetShadowMaps(copy_light.index, copy_light.light_maps);
 
-				light.update_shadow = false;
+				//light.update_shadow = false;
 				if (light.cast_shadow)
 				{
 					unsigned k = 0;// , j = 1;
@@ -1164,26 +1164,6 @@ namespace idk
 		lights_used_t lights_used(alloc);
 		lights_used.resize(lights.size(), false);
 
-		
-		//POST()
-		for (auto& request : this->request_buffer)
-		{
-			auto& cam = request.data.camera;
-			
-			if(cam.enabled){
-				auto& out_instanced_mesh_render = result.instanced_mesh_render;
-				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
-				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
-				request.data.inst_mesh_render_begin = start_index;
-				request.data.inst_mesh_render_end = end_index;
-			}
-			else
-			{
-				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
-			}
-		}
-		//POST_END();
-
 		//POST()
 		{
 			vector<LightData> new_lights;
@@ -1220,6 +1200,26 @@ namespace idk
 			//append the added lights at the back of the light range
 			result.lights.insert(result.lights.end(), new_lights.begin(), new_lights.end());
 		}
+		
+		//POST()
+		for (auto& request : this->request_buffer)
+		{
+			auto& cam = request.data.camera;
+			
+			if(cam.enabled){
+				auto& out_instanced_mesh_render = result.instanced_mesh_render;
+				auto& out_inst_mesh_render_buffer = result.inst_mesh_render_buffer;
+				const auto [start_index, end_index] = CullAndBatchRenderObjects(cam, result.mesh_render, bounding_vols, out_instanced_mesh_render, out_inst_mesh_render_buffer,&request.data.handles);
+				request.data.inst_mesh_render_begin = start_index;
+				request.data.inst_mesh_render_end = end_index;
+			}
+			else
+			{
+				request.data.inst_mesh_render_begin = request.data.inst_mesh_render_end = 0;
+			}
+		}
+		//POST_END();
+
 		result.active_light_indices.reserve(lights_used.size());
 		for (size_t i = 0; i < lights_used.size(); i++)
 		{
@@ -1237,7 +1237,7 @@ namespace idk
 			size_t lm_i = 0;
 			const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
 			if (light.index == 1)
-			{			
+			{
 				for (auto& lightmap : light.light_maps)
 				{
 					range.light_map_index = lm_i;
@@ -1248,13 +1248,13 @@ namespace idk
 						}
 						else
 						{
-							light_cam_info.projection_matrix = lightmap.cascade_projection;
+							light_cam_info.projection_matrix = { lightmap.cascade_projection };
 							CullBatchOpt opt{};
-
+			
 							opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
-
+			
 							const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
-
+			
 							range.inst_mesh_render_begin = start_index;
 							range.inst_mesh_render_end = end_index;
 						}
@@ -1285,77 +1285,81 @@ namespace idk
 					++lm_i;
 				}
 			}
-			
 		}
 		//POST_END();
 
 		//for (auto& elem : futures)
 		//	elem.get();
 		//futures.clear();
-		//for (auto& light_idx : result.active_light_indices)
+		//for (auto& elem : result.culled_render_range)
 		//{
-		//	auto& light = result.lights[light_idx];
-		//	CameraData light_cam_info{};
-		//	light_cam_info.view_matrix = { light.v };
-		//	light_cam_info.projection_matrix = { light.p };
-		//	LightRenderRange range{ light_idx };
-		//	// TODO: Cull cascaded directional light
-		//	size_t lm_i = 0;
-		//	if (light.index == 1)
+		//	auto r = elem.light_end - elem.light_begin;
+		//	for (auto iter = elem.light_begin; iter < r; ++iter)
 		//	{
-		//		const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-		//		for (auto& lightmap : light.light_maps)
+		//		auto& light_idx = result.active_light_buffer[iter];
+		//		auto& light = result.lights[light_idx];
+		//		CameraData light_cam_info{};
+		//		light_cam_info.view_matrix = { light.v };
+		//		light_cam_info.projection_matrix = { light.p };
+		//		LightRenderRange range{ light_idx };
+		//		// TODO: Cull cascaded directional light
+		//		size_t lm_i = 0;
+		//		if (light.index == 1)
 		//		{
-		//			range.light_map_index = lm_i;
+		//			const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
+		//			for (auto& lightmap : light.light_maps)
 		//			{
-		//				if (!light.update_shadow)
+		//				range.light_map_index = lm_i;
 		//				{
-		//					range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
-		//				}
-		//				else
-		//				{
-		//					light_cam_info.projection_matrix = { lightmap.cascade_projection };
-		//					CullBatchOpt opt{};
+		//					if (!light.update_shadow)
+		//					{
+		//						range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+		//					}
+		//					else
+		//					{
+		//						light_cam_info.projection_matrix = { lightmap.cascade_projection };
+		//						CullBatchOpt opt{};
 		//
-		//					opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
-		//					
-		//					const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
-		//					
-		//					range.inst_mesh_render_begin = start_index;
-		//					range.inst_mesh_render_end = end_index;
+		//						opt.in_mask ^= FrustumFaceBits::eNear | FrustumFaceBits::eFar;
+		//
+		//						const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer, {}, opt);
+		//
+		//						range.inst_mesh_render_begin = start_index;
+		//						range.inst_mesh_render_end = end_index;
+		//					}
 		//				}
+		//				result.culled_light_render_range.emplace_back(range);
+		//				++lm_i;
 		//			}
-		//			result.culled_light_render_range.emplace_back(range);
-		//			++lm_i;
 		//		}
-		//	}
-		//	else
-		//	{
-		//		const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
-		//		for ([[maybe_unused]] auto& lightmap : light.light_maps)
+		//		else
 		//		{
-		//			range.light_map_index = lm_i;
+		//			const auto frust = camera_vp_to_frustum(light_cam_info.projection_matrix * light_cam_info.view_matrix);
+		//			for ([[maybe_unused]] auto& lightmap : light.light_maps)
 		//			{
-		//				if (!light.update_shadow)
+		//				range.light_map_index = lm_i;
 		//				{
-		//					range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+		//					if (!light.update_shadow)
+		//					{
+		//						range.inst_mesh_render_begin = range.inst_mesh_render_end = 0;
+		//					}
+		//					else
+		//					{
+		//						const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
+		//						range.inst_mesh_render_begin = start_index;
+		//						range.inst_mesh_render_end = end_index;
+		//					}
 		//				}
-		//				else
-		//				{
-		//					const auto [start_index, end_index] = CullAndBatchRenderObjectsForShadow(light_cam_info, frust, result.mesh_render, bounding_vols, result.instanced_mesh_render, result.inst_mesh_render_buffer);
-		//					range.inst_mesh_render_begin = start_index;
-		//					range.inst_mesh_render_end = end_index;
-		//				}
+		//				result.culled_light_render_range.emplace_back(range);
+		//				++lm_i;
 		//			}
-		//			result.culled_light_render_range.emplace_back(range);
-		//			++lm_i;
 		//		}
+		//		//{
+		//		//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);
+		//		//	range.inst_mesh_render_begin = start_index;
+		//		//	range.inst_mesh_render_end = end_index;
+		//		//}
 		//	}
-		//	//{
-		//	//	auto [start_index, end_index] = CullAndBatchAnimatedRenderObjects(frustum, result.skinned_mesh_render, result.instanced_skinned_mesh_render);
-		//	//	range.inst_mesh_render_begin = start_index;
-		//	//	range.inst_mesh_render_end = end_index;
-		//	//}
 		//}
 
 #ifdef FLATTEN_UNI //This block is for when we wanna flatten the uniforms

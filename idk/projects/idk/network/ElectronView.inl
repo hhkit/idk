@@ -125,7 +125,7 @@ namespace idk
 	{
 		auto ptr = std::make_unique<DerivedParameter<T>>(param);
 		ptr->param_name = string{ name };
-		auto& impl = ptr->param;
+
 		auto& emplaced = parameters.emplace_back(std::move(ptr)); 
 		emplaced->interp_over = interp;
 		return emplaced.get();
