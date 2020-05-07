@@ -238,6 +238,7 @@ namespace idk::vkn
 	void profile_bp_end();
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		_pimpl->timelog.reset();
 		_pimpl->timer.start();
 		profile_bp_start();
 		auto d_start = std::chrono::high_resolution_clock::now();

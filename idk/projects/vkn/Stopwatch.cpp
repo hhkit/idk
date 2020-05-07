@@ -3,7 +3,7 @@
 
 namespace idk::vkn::dbg
 {
-	static inline constexpr bool active = true;
+	static inline constexpr bool active = false;
 
 void stopwatch::start()
 {

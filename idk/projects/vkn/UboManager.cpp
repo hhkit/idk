@@ -187,19 +187,19 @@ namespace idk::vkn
 		hash_table<size_t, size_t> num_occurences;
 		void log(size_t num_bytes)
 		{
+			return;
 			num_occurences[num_bytes]++;
 			total_bytes_copied += num_bytes;
 		}
-#pragma optimize("",off)
 		void reset()
 		{
+			return;
 			total_bytes_copied = 0;
 			for (auto& [bytes, num] : num_occurences)
 			{
 				num = 0;
 			}
 		}
-#pragma optimize("",on)
 	};
 	static memcpy_info mem_info;
 	void UboManager::Clear()

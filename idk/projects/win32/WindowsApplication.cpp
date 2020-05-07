@@ -565,7 +565,7 @@ namespace idk::win
 			return FALSE;
 		}
 
-		ShowWindow(hWnd, SW_NORMAL);
+		ShowWindow(hWnd, SW_MAXIMIZE);
 		UpdateWindow(hWnd);
 
 		return TRUE;
