@@ -871,7 +871,7 @@ namespace idk
             ImGui::PopItemWidth();
             ImGui::PopStyleVar();
 
-            return changed ? EditState::Editing : EditState::None;
+            return changed ? EditState::Editing : ret;
         };
         InjectDrawTable inject{ { "emission/bursts", CustomDrawFn(draw_bursts) } };
 
