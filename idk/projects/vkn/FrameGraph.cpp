@@ -584,7 +584,8 @@ namespace idk::vkn
 						//buffers.emplace_back(buffer,&rt);
 					}
 				}
-			));
+			));/*
+			();		//*/
 		}
 		for (auto& future : futures)
 			future.get();
