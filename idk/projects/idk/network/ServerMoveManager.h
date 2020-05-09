@@ -11,6 +11,7 @@ namespace idk
 		void SubscribeEvents(ClientConnectionManager& client) override;
 		void SubscribeEvents(ServerConnectionManager& server) override;
 
+		void SendControlObjects(span<ElectronView>);
 	private:
 		void OnMoveReceived(MoveClientMessage&);
 	};

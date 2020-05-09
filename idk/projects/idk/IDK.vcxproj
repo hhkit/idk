@@ -41,6 +41,8 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="network\ControlObjectMessage.h" />
+    <ClInclude Include="network\gbn_sliding_window.h" />
     <ClInclude Include="ui\AspectRatioFitter.h" />
     <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipLoader.h" />
@@ -54,8 +56,6 @@
     <ClInclude Include="gfx\PostProcessEffect.h" />
     <ClInclude Include="meta\erased_visitor.h" />
     <ClInclude Include="network\ack_utils.h" />
-    <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
-    <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
     <ClInclude Include="gfx\ColorGrade.h" />
     <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />

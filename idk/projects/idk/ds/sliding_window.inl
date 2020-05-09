@@ -1,6 +1,7 @@
 #pragma once
 #include "sliding_window.h"
 #include <stdexcept>
+
 namespace idk
 {
 
@@ -232,6 +233,7 @@ namespace idk
 	{
 		return MaxObject * 2;
 	}
+
 
 	template<typename T, size_t MaxObject>
 	typename sliding_window<T, MaxObject>::size_t sliding_window<T, MaxObject>::pop_front()

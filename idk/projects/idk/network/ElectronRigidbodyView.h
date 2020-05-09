@@ -10,9 +10,6 @@ namespace idk
 	public:
 		bool sync_velocity{true};
 
-		void SetVelocity(const vec3&);
-		void AddForce(const vec3&);
-
 		void Start();
 		NetworkID GetNetworkID() const;
 		Handle<ElectronView> GetView() const;

@@ -82,6 +82,9 @@ namespace idk
 			if (view.network_id == 0)
 				continue;
 
+			if (view.owner == target_host)
+				continue;
+
 			const bool is_ghost = std::get_if<ElectronView::Master>(&view.ghost_state);
 
 			// recompose state mask

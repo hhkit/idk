@@ -16,7 +16,7 @@ namespace idk
 
 		value_type value;
 
-		explicit constexpr seq_num_t(value_type number = {}) : value{ number } {}
+		explicit constexpr seq_num_t(value_type number = {}) noexcept : value{ number } {}
 
 		seq_num_t& operator++();
 		seq_num_t  operator++(int);

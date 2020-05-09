@@ -59,10 +59,10 @@ namespace idk
 				end_value = param.getter();
 			}
 
-			void UnpackData(SeqNo index, string_view data) override
+			void UnpackData(SeqNo index, string_view data) final
 			{
 				// newer data has arrived
-				if (seqno_greater_than(index, value_index))
+				if (index > value_index)
 				{
 					if (auto val = parse_binary<T>(data))
 					{
@@ -74,7 +74,7 @@ namespace idk
 				}
 			}
 
-			void Update(real dt) override
+			void Update(real dt) final
 			{
 				// if interpolation function is defined
 				if (param.interpolator)
@@ -88,9 +88,14 @@ namespace idk
 				}
 				else // else snap to value
 				{
-					t = 1;
-					param.setter(end_value);
+					Snap();
 				}
+			}
+
+			void Snap() final
+			{
+				t = 1;
+				param.setter(end_value);
 			}
 
 		};
@@ -101,21 +106,15 @@ namespace idk
 		ParameterImpl<T> param;
 		DerivedMasterData master_data;
 		DerivedGhostData  ghost_data;
-		DerivedMoveObjectData client_object_data;
-		DerivedControlObjectData control_object_data;
 
 		DerivedParameter(ParameterImpl<T> param_impl)
 			: param{ std::move(param_impl) }
 			, ghost_data          { param }
 			, master_data         { param }
-			, client_object_data  { param }
-			, control_object_data { param }
 		{
 			master_data.cached_value = param.getter();
 		}
 
-		DerivedControlObjectData* GetControlObject() override { return &control_object_data; }
-		DerivedMoveObjectData* GetClientObject() override { return &client_object_data; };
 		DerivedMasterData* GetMaster() override { return &master_data; }
 		DerivedGhostData*  GetGhost()  override { return &ghost_data; }
 	};
@@ -131,6 +130,3 @@ namespace idk
 		return emplaced.get();
 	}
 }
-
-#include <network/ElectronView_DerivedMoveObject.h>
-#include <network/ElectronView_DerivedControlObject.h>

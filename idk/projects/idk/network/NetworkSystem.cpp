@@ -180,9 +180,6 @@ namespace idk
 	void NetworkSystem::PreparePackets(span<ElectronView> electron_views)
 	{
 		for (auto& ev : electron_views)
-			ev.DumpToLog();
-
-		for (auto& ev : electron_views)
 		{
 			ev.PrepareDataForSending(frame_counter);
 		}

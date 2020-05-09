@@ -15,14 +15,14 @@ namespace idk
 	{
 	}
 
-	ElectronView::ElectronView(ElectronView&&) noexcept = default;
+	ElectronView::ElectronView(ElectronView&&) = default;
 
 	ElectronView& ElectronView::operator=(const ElectronView&)
 	{
 		throw;
 	}
 
-	ElectronView& ElectronView::operator=(ElectronView&&) noexcept = default;
+	ElectronView& ElectronView::operator=(ElectronView&&) = default;
 
 	ElectronView::~ElectronView() = default;
 	
@@ -62,15 +62,15 @@ namespace idk
 	void ElectronView::SetAsClientObject()
 	{
 		ghost_state = std::monostate{};
-		move_state = ElectronView::MoveObject{};
-
-		for (unsigned i = 0; i < parameters.size(); ++i)
-		{
-			auto& param = parameters[i];
-			IDK_ASSERT(param);
-			param->GetClientObject()->Init(Core::GetSystem<NetworkSystem>().GetSequenceNumber());
-		}
+		move_state = ElectronView::ClientSideInputs{};
 	}
+
+	void ElectronView::SetAsControlObject()
+	{
+		ghost_state = std::monostate{};
+		move_state = ServerSideInputs{};
+	}
+
 	void ElectronView::CacheSentData()
 	{
 		if (std::get_if<Master>(&ghost_state))
@@ -97,15 +97,6 @@ namespace idk
 
 	void ElectronView::MoveGhost(seconds delta)
 	{
-		if (std::get_if<ControlObject>(&move_state))
-		{
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				param->GetControlObject()->ApplyMove();
-			}
-		}
-
 		if (std::get_if<Ghost>(&ghost_state))
 		{
 			for (unsigned i = 0; i < parameters.size(); ++i)
@@ -117,36 +108,19 @@ namespace idk
 					param->GetGhost()->Update(1.f);
 			}
 		}
-
-		if (std::get_if<MoveObject>(&move_state))
-		{
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				param->GetClientObject()->UpdateGhost(interp_bias);
-			}
-
-		}
 	}
 
 	MovePack ElectronView::PackMoveData(SeqNo curr_seq)
 	{
 		MovePack move_pack;
-		if (std::get_if<MoveObject>(&move_state))
+		if (auto* move_obj = std::get_if<ClientSideInputs>(&move_state))
 		{
 			move_pack.network_id = network_id;
 
-			for (unsigned i = 0; i < parameters.size(); ++i)
-			{
-				auto& param = parameters[i];
-				auto val = param->GetClientObject()->PackData(curr_seq);
-				if (val.size())
-				{
-					move_pack.state_mask |= 1 << i;
-					move_pack.packs.emplace_back(std::move(val));
-				}
-			}
+			for (auto& elem : move_obj->moves)
+				move_pack.packs.emplace_back(SeqAndMove{ elem.index, elem.payload });
 		}
+
 		return move_pack;
 	}
 
@@ -184,66 +158,17 @@ namespace idk
 			{
 				auto& param = parameters[i];
 				auto& pack = ghost_pack.data_packs[pack_index++];
-				if (std::get_if<Ghost>(&ghost_state))
-					param->GetGhost()->UnpackData(sequence_number, pack);
-				if (std::get_if<MoveObject>(&move_state))
-					param->GetClientObject()->UnpackGhost(sequence_number, pack);
+				param->GetGhost()->UnpackData(sequence_number, pack);
 			}
 		}
 	}
 
 	void ElectronView::UnpackMoveData(const MovePack& data_pack)
 	{
-		const auto sm = data_pack.state_mask;
-		auto pack_ptr = 0;
-
-		for (unsigned i = 0; i < parameters.size(); ++i)
+		if (auto inputs = std::get_if<ServerSideInputs>(&move_state))
 		{
-			if (sm & (1 << i))
-			{
-				auto& move_pack = data_pack.packs[pack_ptr++];
-				parameters[i]->GetControlObject()->UnpackMove(move_pack);
-			//	LOG_TO(LogPool::NETWORK, "unpacking %d moves", unpacked);
-			}
-		}
-	}
-
-	struct MoveBuffLogger
-	{
-		std::stringstream logger{};
-
-		MoveBuffLogger() = default;
-		MoveBuffLogger(MoveBuffLogger&&) = default;
-		MoveBuffLogger& operator=(MoveBuffLogger&&) = default;
-
-		~MoveBuffLogger()
-		{
-		//	LOG_TO(LogPool::NETWORK, logger.str().data());
-		}
-
-		template<typename T>
-		void operator()(const T&, SeqNo) {}
-
-		void operator()([[maybe_unused]] const vec3& v, [[maybe_unused]] SeqNo seq)
-		{
-		//	logger << "[" << seq.value <<"]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x <<"," << v.y <<"," << v.z <<")" << "\n";
-		}
-
-		void operator()([[maybe_unused]] const quat& v, [[maybe_unused]] SeqNo seq)
-		{
-		//	logger << "[" << seq.value << "]" << (acknowledged ? "ACK" : "~~~") << "   (" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" << "\n";
-		}
-	};
-
-	void ElectronView::DumpToLog()
-	{
-		auto curr_seq = Core::GetSystem<NetworkSystem>().GetSequenceNumber();
-		for (auto& elem : parameters)
-		{
-			if (std::get_if<MoveObject>(&move_state))
-				elem->GetClientObject()->VisitMoveBuffer(MoveBuffLogger{});
-			if (std::get_if<ControlObject>(&move_state))
-				elem->GetControlObject()->VisitMoveBuffer(MoveBuffLogger{});
+			for (auto& move : data_pack.packs)
+				inputs->moves.emplace(move.seq, move.move);
 		}
 	}
 

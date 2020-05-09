@@ -11,6 +11,7 @@
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
 #include <network/ack_utils.h>
+#include <network/ControlObjectMessage.h>
 
 namespace idk
 {
@@ -24,9 +25,9 @@ namespace idk
 		return true;
 	}
 
-	void ClientMoveManager::SubscribeEvents([[maybe_unused]] ClientConnectionManager& client)
+	void ClientMoveManager::SubscribeEvents(ClientConnectionManager& client)
 	{
-
+		client.Subscribe<ControlObjectMessage>([this](ControlObjectMessage& msg) {this->OnControlObject(msg); });
 	}
 
 	void ClientMoveManager::SubscribeEvents(ServerConnectionManager&)
@@ -40,13 +41,14 @@ namespace idk
 		vector<MovePack> move_packs;
 		for (auto& elem : views)
 		{
-			auto move_data = elem.PackMoveData(curr_seq);
-			if (move_data.packs.size())
+			if (std::get_if<ElectronView::ClientSideInputs>(&elem.move_state))
 			{
-				LOG_TO(LogPool::NETWORK, "packing %d moves for object %d", (int) move_data.packs.size(), elem.network_id);
-				move_packs.emplace_back(std::move(move_data));
+				auto move_data = elem.PackMoveData(curr_seq);
+				if (move_data.packs.size())
+					move_packs.emplace_back(std::move(move_data));
 			}
 		}
+
 		if (move_packs.size())
 		{
 			connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::UNRELIABLE, [&](MoveClientMessage& msg)
@@ -56,4 +58,28 @@ namespace idk
 			);
 		}
 	}
+
+	void ClientMoveManager::OnControlObject(ControlObjectMessage& msg)
+	{
+		auto ev = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(msg.network_id);
+
+		if (ev)
+		{
+			if (auto val = std::get_if<ElectronView::ClientSideInputs>(&ev->move_state))
+			{
+				auto& move_buffer = val->moves;
+				while(move_buffer.size() && move_buffer.front().index < msg.move_ack)
+					move_buffer.pop_front();
+
+				auto params = ev->GetParameters();
+				for (unsigned i = 0; i < params.size(); ++i)
+				{
+					auto& param = params[i];
+					auto& payload = msg.control_object_data[i];
+
+					auto& ghost = *param->GetGhost();
+					ghost.UnpackData(msg.move_ack, payload);
+				}
+			}
+		}
 }
