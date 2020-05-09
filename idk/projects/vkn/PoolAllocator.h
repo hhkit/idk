@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <mutex>
 namespace idk
 {
 	template<size_t obj_size, size_t align, size_t ChunkSize>
@@ -31,6 +32,7 @@ namespace idk
 			T* _free_head = nullptr;
 			void* allocate()
 			{
+				std::lock_guard guard{ lock };
 				if (!_free_head)
 				{
 					NewChunk();
@@ -39,6 +41,7 @@ namespace idk
 			}
 			void deallocate(void* ptr)
 			{
+				std::lock_guard guard{ lock };
 				new (ptr) T* { reinterpret_cast<T*>(_free_head) };
 				_free_head = reinterpret_cast<T*>(ptr);
 			}
@@ -54,6 +57,7 @@ namespace idk
 			{
 				_head = std::make_unique<Chunk>(std::move(_head), _free_head);
 			}
+			std::mutex lock;
 		};
 		//maybe change to thread local to be thread safe?
 
