@@ -169,7 +169,7 @@ namespace idk
 			client->SendPackets();
 	}
 
-	void NetworkSystem::UpdatePredictions(span<ElectronView> electron_views)
+	void NetworkSystem::MoveGhosts(span<ElectronView> electron_views)
 	{
 		for (auto& ev : electron_views)
 		{

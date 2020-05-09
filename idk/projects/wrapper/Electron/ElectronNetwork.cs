@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace idk
 {
@@ -56,6 +59,26 @@ namespace idk
         public static void RemoveCallbackTarget(MonoBehavior target)
         {
             Bindings.NetworkRemoveCallback(target.handle);
+        }
+
+
+        internal static byte[] Serialize(object serialize_me)
+        {
+            var formatter = new BinaryFormatter();
+            using (MemoryStream stream = new MemoryStream())
+            {
+                formatter.Serialize(stream, serialize_me);
+                return stream.ToArray();
+            }
+        }
+
+        internal static object Reserialize(byte[] bytes)
+        {
+            var formatter = new BinaryFormatter();
+            using (MemoryStream stream = new MemoryStream(bytes))
+            {
+                return formatter.Deserialize(stream);
+            }
         }
     }
 }

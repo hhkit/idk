@@ -917,35 +917,10 @@ namespace idk
                     if (is_client_obj)
                     {
                         ImGui::Text("Move Object");
-
-                        elem->GetClientObject()->VisitMoveBuffer([](auto move, SeqNo seq)
-                            {
-                                using T = std::decay_t<decltype(move)>;
-
-                                ImGui::Text("[%d]", seq.value);
-                                ImGui::SameLine();
-
-                                if constexpr (std::is_same_v<T, vec3>)
-                                {
-                                    ImGui::DragFloat3("", move.data());
-                                }
-                            });
                     }
                     if (is_control_obj)
                     {
                         ImGui::Text("Control Object");
-                        elem->GetControlObject()->VisitMoveBuffer([](auto move, SeqNo seq)
-                            {
-                                using T = std::decay_t<decltype(move)>;
-
-                                ImGui::Text("[%d]", seq.value);
-                                ImGui::SameLine();
-
-                                if constexpr (std::is_same_v<T, vec3>)
-                                {
-                                    ImGui::DragFloat3("", move.data());
-                                }
-                            });
                     }
                 }
                 ImGuidk::PopDisabled();

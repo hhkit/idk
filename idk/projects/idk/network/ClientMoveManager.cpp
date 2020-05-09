@@ -68,7 +68,7 @@ namespace idk
 			if (auto val = std::get_if<ElectronView::ClientSideInputs>(&ev->move_state))
 			{
 				auto& move_buffer = val->moves;
-				while(move_buffer.size() && move_buffer.front().index < msg.move_ack)
+				while (move_buffer.size() && move_buffer.front().index < msg.move_ack)
 					move_buffer.pop_front();
 
 				auto params = ev->GetParameters();
@@ -82,4 +82,5 @@ namespace idk
 				}
 			}
 		}
+	}
 }

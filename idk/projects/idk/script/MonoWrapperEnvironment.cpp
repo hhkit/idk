@@ -71,6 +71,11 @@ namespace idk::mono
 		IDK_ASSERT_MSG(ev_itr != _types.end(), "cannot find idk.ElectronView");
 		IDK_ASSERT_MSG(ev_itr->second.CacheThunk("Reserialize", 1), "could not cache Deserialize");
 
+		auto en_itr = _types.find("ElectronNetwork");
+		IDK_ASSERT_MSG(en_itr != _types.end(), "cannot find idk.ElectronView");
+		IDK_ASSERT_MSG(en_itr->second.CacheThunk("Serialize", 1), "could not cache ElectronNetwork.Seserialize");
+		IDK_ASSERT_MSG(en_itr->second.CacheThunk("Reserialize", 1), "could not cache ElectronNetwork.Deserialize");
+
 	}
 
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
