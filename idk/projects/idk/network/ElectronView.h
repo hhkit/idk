@@ -47,11 +47,14 @@ namespace idk
 			struct MoveNode
 			{
 				seq_num_t index;
-				unsigned  send_count = 3;
 				string    payload;
+				unsigned  send_count = 3;
 			};
 			std::deque<MoveNode> moves;
 			seq_num_t next_move_index{};
+
+			seq_num_t last_received_control_object{};
+			bool      dirty_control_object = false;
 		};
 
 		struct ServerSideInputs

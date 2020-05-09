@@ -32,7 +32,10 @@
 
 namespace idk
 {
-// #pragma optimize("", off)
+	void PhysicsSystem::SimulateOneObject(Handle<class RigidBody> rb)
+	{
+	}
+	// #pragma optimize("", off)
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)
 	{
 		const auto dt = Core::GetDT().count();

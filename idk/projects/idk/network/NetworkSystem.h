@@ -46,6 +46,9 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
+		void Rollback(span<ElectronView>);
+		void CollectInputs(span<ElectronView>);
+
 		void MoveGhosts(span<ElectronView>);
 		void PreparePackets(span<ElectronView>);
 

@@ -977,9 +977,6 @@
     <ClInclude Include="network\PersistManager.h">
       <Filter>network\managers</Filter>
     </ClInclude>
-    <ClInclude Include="network\ClassRep.h">
-      <Filter>network\managers</Filter>
-    </ClInclude>
     <ClInclude Include="network\EventManager.h">
       <Filter>network\substream managers</Filter>
     </ClInclude>

@@ -118,7 +118,13 @@ namespace idk
 			move_pack.network_id = network_id;
 
 			for (auto& elem : move_obj->moves)
-				move_pack.packs.emplace_back(SeqAndMove{ elem.index, elem.payload });
+			{
+				if (elem.send_count > 0)
+				{
+					move_pack.packs.emplace_back(SeqAndMove{ elem.index, elem.payload });
+					elem.send_count--;
+				}
+			}
 		}
 
 		return move_pack;

@@ -126,7 +126,6 @@
     <ClInclude Include="parallel\multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Address.h" />
-    <ClInclude Include="network\ClassRep.h" />
     <ClInclude Include="network\Client.h" />
     <ClInclude Include="network\ClientConnectionManager.h" />
     <ClInclude Include="network\ElectronTransformView.h" />

@@ -18,7 +18,10 @@
 #include <network/GhostManager.h>
 #include <core/GameState.h>
 #include <core/Scheduler.h>
-
+#include <core/GameObject.inl>
+#include <script/MonoBehavior.h>
+#include <script/ScriptSystem.h>
+#include <phys/PhysicsSystem.h>
 #include <thread>
 
 namespace idk
@@ -167,6 +170,113 @@ namespace idk
 
 		if (client)
 			client->SendPackets();
+	}
+
+	void NetworkSystem::Rollback(span<ElectronView> evs)
+	{
+		auto& physics_system = Core::GetSystem<PhysicsSystem>();
+		auto& script_system  = Core::GetSystem<mono::ScriptSystem>();
+
+		auto reserialize_thunk = std::get<mono::ManagedThunk>(script_system.Environment().Type("ElectronNetwork")->GetMethod("Reserialize", 1));
+
+		for (auto& ev : evs)
+		{
+			if (auto client_inputs = std::get_if<ElectronView::ClientSideInputs>(&ev.move_state))
+			{
+				if (client_inputs->dirty_control_object == false)
+					continue;
+
+				for (auto& move : client_inputs->moves)
+				{
+					auto array = mono_array_new(mono_domain_get(), mono_get_byte_class(), move.payload.size());
+					for (unsigned i = 0; i < move.payload.size(); ++i)
+						mono_array_set(array, unsigned char, i, move.payload[i]);
+
+					auto input = reserialize_thunk.Invoke((MonoObject*)array);
+					
+					// execute input
+					for (auto& behavior : ev.GetGameObject()->GetComponents<mono::Behavior>())
+					{
+						auto& obj = behavior->GetObject();
+						auto& type = *obj.Type();
+						auto method = type.GetMethod("ProcessInput", 1);
+						if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+						{
+							LOG_TO(LogPool::NETWORK, "Rollback Input Tick %d", move.index.value);
+							thunk->Invoke(obj, input);
+						}
+					}
+
+					// simulate physics
+					
+				}
+			}
+
+			if (auto server_inputs = std::get_if<ElectronView::ServerSideInputs>(&ev.move_state))
+			{
+				if (auto move = server_inputs->moves.pop_front())
+				{
+					auto array = mono_array_new(mono_domain_get(), mono_get_byte_class(), move->size());
+					for (unsigned i = 0; i < move->size(); ++i)
+						mono_array_set(array, unsigned char, i, (*move)[i]);
+
+					auto input = reserialize_thunk.Invoke((MonoObject*)array);
+
+					// execute input
+					for (auto& behavior : ev.GetGameObject()->GetComponents<mono::Behavior>())
+					{
+						auto& obj = behavior->GetObject();
+						auto& type = *obj.Type();
+						auto method = type.GetMethod("ProcessInput", 1);
+						if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+						{
+							LOG_TO(LogPool::NETWORK, "Processed Move %d");
+							thunk->Invoke(obj, input);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void NetworkSystem::CollectInputs(span<ElectronView> evs)
+	{
+		auto& physics_system = Core::GetSystem<PhysicsSystem>();
+		auto& script_system = Core::GetSystem<mono::ScriptSystem>();
+
+		auto serialize_thunk = std::get<mono::ManagedThunk>(script_system.Environment().Type("ElectronNetwork")->GetMethod("Serialize", 1));
+		const auto curr_frameid = GetSequenceNumber();
+
+		for (auto& ev : evs)
+		{
+			if (auto client_inputs = std::get_if<ElectronView::ClientSideInputs>(&ev.move_state))
+			{
+				// execute input
+				for (auto& behavior : ev.GetGameObject()->GetComponents<mono::Behavior>())
+				{
+					auto& obj = behavior->GetObject();
+					auto& type = *obj.Type();
+					auto method = type.GetMethod("GetInput", 1);
+					if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+					{
+
+						auto input = thunk->Invoke(obj);
+
+						auto array = (MonoArray*) serialize_thunk.Invoke((MonoObject*) input);
+
+						std::string payload;
+						payload.resize(mono_array_length(array));
+
+						for (unsigned i = 0; i < payload.size(); ++i)
+							payload[i] = mono_array_get(array, unsigned char, i);
+
+						client_inputs->moves.emplace_back(ElectronView::ClientSideInputs::MoveNode{ client_inputs->next_move_index, payload });
+						client_inputs->next_move_index++;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	void NetworkSystem::MoveGhosts(span<ElectronView> electron_views)

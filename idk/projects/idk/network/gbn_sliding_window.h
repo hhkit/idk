@@ -9,7 +9,7 @@ namespace idk
 	class gbn_sliding_window
 	{
 	public:
-		explicit gbn_sliding_window(seq_num_t first_message);
+		explicit gbn_sliding_window(seq_num_t first_message) : next_seq_expected_{ first_message } {}
 		seq_num_t base() const { return buffer_.size() ? buffer_.front().sequence_number : next_seq_expected_; }
 		template<typename ... Args>
 		bool emplace(seq_num_t num, Args&& ... args);

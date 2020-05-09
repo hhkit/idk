@@ -67,6 +67,10 @@ namespace idk
 		{
 			if (auto val = std::get_if<ElectronView::ClientSideInputs>(&ev->move_state))
 			{
+				// ignore message if the control object is old
+				if (val->last_received_control_object >= msg.move_ack)
+					return;
+
 				auto& move_buffer = val->moves;
 				while (move_buffer.size() && move_buffer.front().index < msg.move_ack)
 					move_buffer.pop_front();
@@ -74,12 +78,14 @@ namespace idk
 				auto params = ev->GetParameters();
 				for (unsigned i = 0; i < params.size(); ++i)
 				{
+					const auto& payload = msg.control_object_data[i];
 					auto& param = params[i];
-					auto& payload = msg.control_object_data[i];
 
 					auto& ghost = *param->GetGhost();
 					ghost.UnpackData(msg.move_ack, payload);
 				}
+
+				val->last_received_control_object = msg.move_ack;
 			}
 		}
 	}
