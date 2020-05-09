@@ -10,10 +10,13 @@
 #include <vkn/DescriptorsManager.h>
 #include <vkn/DescriptorUpdateData.h>
 
+#include <vkn/BufferNBuilder.h>
+
 #include <ds/lazy_vector.h>
 
 namespace idk::vkn
 {
+
 	class ShaderModule;
 	struct UboData {};
 	struct TexData {};
@@ -171,7 +174,7 @@ namespace idk::vkn
 			_uniform_names.clear();
 			_bindings.Reset();
 			_collated_layouts.clear();
-			_buffer.clear();
+			_binding_info_builder.buffer.clear();
 			//_dud.Reset();
 			_dbg.Reset();
 		}
@@ -180,8 +183,9 @@ namespace idk::vkn
 		UboManager* _ubo_manager;
 		binding_manager _bindings;
 		CollatedLayouts_t _collated_layouts;
-		vector<BindingInfo> _buffer;
-		vector_span_builder<BindingInfo> _buffer_builder{ _buffer };
+		BufferNBuilder<BindingInfo> _binding_info_builder;
+		//vector<BindingInfo> _buffer; //TODO: Move protection
+		//vector_span_builder<BindingInfo> _buffer_builder{ _buffer };
 		//DescriptorUpdateData _dud;
 		struct DebugInfo
 		{

@@ -431,6 +431,9 @@
     <ClInclude Include="CommandCluster.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="BufferNBuilder.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

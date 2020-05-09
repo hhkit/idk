@@ -467,7 +467,7 @@ namespace idk::vkn
 
 		for (auto& [index, set] : _bindings.curr_bindings)
 		{
-			auto bindings = set.FinalizeDC(_collated_layouts,_buffer_builder);
+			auto bindings = set.FinalizeDC(_collated_layouts,_binding_info_builder.builder);
 			if (bindings)
 			{
 				std::visit(visitors::FinalizeChecker{ builder,index }, *bindings);
