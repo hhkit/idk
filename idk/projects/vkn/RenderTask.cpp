@@ -623,12 +623,15 @@ namespace idk::vkn
 		RenderTask tmp;
 		std::swap(tmp, *this);
 
-		ClearSwap(_rect_buffer        ,tmp._rect_buffer);
+		std::swap(_rect_buffer, tmp._rect_buffer);
+		_rect_buffer->clear();
+		//ClearSwap(_rect_buffer        ,tmp._rect_buffer);
 		ClearSwap(batches             ,tmp.batches);
 		ClearSwap(_copy_commands      ,tmp._copy_commands);
 		std::swap(_uniform_manager    , tmp._uniform_manager);
 		std::swap(this->_dc_bindings,tmp._dc_bindings);
 		_dc_bindings._vertex_bindings.clear();
+		_dc_bindings._dc_builder.clear();
 		//std::swap(this->_dc_bindings._dc_builder   ,tmp._dc_bindings._dc_builder);
 		std::swap(this->_rect_builder ,tmp._rect_builder);
 		ClearSwap(_descriptor_sets    ,tmp._descriptor_sets);

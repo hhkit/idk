@@ -205,6 +205,11 @@ namespace idk::vkn
 			void AddVertexBuffer(VertexBindingData);
 			void SetIndexBuffer(IndexBindingData);
 			DrawCall end(draw_info, vector_span<UniformManager::set_binding_t> uniforms);
+			void clear()
+			{
+				_vertex_bindings.clear();
+				current_draw_call = {};
+			}
 		private:
 			DrawCall current_draw_call;
 			
@@ -217,7 +222,7 @@ namespace idk::vkn
 		{
 			pipeline_config pipeline;
 			const VulkanPipeline* pipeline_override=nullptr;
-			vector_span<rect> scissor, viewport;
+			vector_span<rect> scissor{}, viewport{};
 			//RenderPassObj render_pass;
 			//vk::Framebuffer frame_buffer;
 			Shaders shaders;
@@ -237,8 +242,8 @@ namespace idk::vkn
 #pragma region Pipeline State
 		pipeline_config curr_config;
 
-		vector<rect> _rect_buffer;
-		std::unique_ptr<vector_span_builder<rect>> _rect_builder{ std::make_unique< vector_span_builder<rect>>(vector_span_builder<rect>{_rect_buffer}) };
+		std::unique_ptr<vector<rect>> _rect_buffer = std::make_unique<vector<rect>>();
+		std::unique_ptr<vector_span_builder<rect>> _rect_builder{ std::make_unique< vector_span_builder<rect>>(vector_span_builder<rect>{*_rect_buffer}) };
 		span<VknTextureView> _input_attachments;
 		size_t _num_output_attachments;
 		rect render_area;
