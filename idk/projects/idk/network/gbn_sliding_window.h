@@ -33,7 +33,7 @@ namespace idk
 
 		const auto insert = std::find_if(buffer_.begin(), buffer_.end(), [num](const Node& val)
 		{
-			return val.sequence_number > num;
+			return val.sequence_number >= num;
 		});
 
 		if (insert != buffer_.end())

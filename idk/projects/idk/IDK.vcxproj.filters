@@ -1760,6 +1760,7 @@
     <ClCompile Include="gfx\RenderTargetFactory.cpp" />
     <ClCompile Include="gfx\ColorGrade.cpp" />
     <ClCompile Include="network\ack_utils.cpp" />
+    <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <cmath>
+
 #include <core/GameObject.inl>
 #include <common/Transform.h>
 #include <common/Layer.h>
@@ -32,11 +34,6 @@
 
 namespace idk
 {
-	constexpr float baumgarte = .2f;
-	constexpr float penetration_slop = 0.05f;
-	constexpr float margin = 0.2f;
-	constexpr int	collision_threshold = 64;
-
 	void CollisionManager::InitializeNewFrame(span<class RigidBody>, span<class Collider> colliders)
 	{
 		const auto dt = Core::GetDT().count();
@@ -128,7 +125,6 @@ namespace idk
 
 				// Reset the global inertia tensor
 				collider_info.rb->_global_inertia_tensor = mat3{ scale(vec3{ 0.0f }) };
-				// collider_info.rb->_forces_applied = false;
 				_dynamic_info.emplace_back(collider_info);
 			}
 		}
@@ -163,7 +159,6 @@ namespace idk
 					rigidbody.linear_velocity *= 1.0f / (1.0f + dt * rigidbody.linear_damping);
 
 					// Compute the angular stuff here too. 
-					// body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * m_dt;
 					if (!rigidbody.freeze_rotation)
 						rigidbody.angular_velocity *= 1.0f / (1.0f + dt * rigidbody.angular_damping);
 
@@ -415,7 +410,7 @@ namespace idk
 		{
 			for (int i = 0; i < constraint_states.size(); ++i)
 			{
-				ContactConstraintState* cs = constraint_states.data() + i;
+				ContactConstraintState* cs = &constraint_states[i];
 
 				vec3 vA = cs->rbA->linear_velocity;
 				vec3 wA = cs->rbA->angular_velocity;
@@ -439,45 +434,14 @@ namespace idk
 
 							// Calculate frictional impulse
 							float maxLambda = cs->static_friction * c->normalImpulse; 
-							if (abs(lambda) < maxLambda)
-							{
-								// LOG_TO(LogPool::PHYS, "STATIC CHOSEN");
-							}
-							else
-							{
+							if (abs(lambda) >= maxLambda)
 								maxLambda = cs->friction * c->normalImpulse;
-								// LOG_TO(LogPool::PHYS, "DYNAMIC CHOSEN");
-							} 
 
 							// Clamp frictional impulse
-							// float oldStatic = c->tangentStaticImpulse[k];
-							// c->tangentStaticImpulse[k] = [&](float min, float max, float a) -> float
-							// {
-							// 	if (a < min)
-							// 		return min;
-							// 
-							// 	if (a > max)
-							// 		return max;
-							// 
-							// 	return a;
-							// }(-maxStatic, maxStatic, oldStatic + lambda);
-							// float newStatic = c->tangentStaticImpulse[k] - oldStatic;
-
-							// Clamp frictional impulse
-							float oldPT = c->tangentImpulse[k];
-							c->tangentImpulse[k] = [&](float min, float max, float a) -> float
-							{
-								if (a < min)
-									return min;
-
-								if (a > max)
-									return max;
-
-								return a;
-							}(-maxLambda, maxLambda, oldPT + lambda);
+							float oldPT = c->tangentImpulse[k]; 
+							c->tangentImpulse[k] = std::clamp(oldPT + lambda, -maxLambda, maxLambda);
 
 							lambda = c->tangentImpulse[k] - oldPT;
-							// lambda = abs(lambda) < newStatic ? newStatic : lambda;
 
 							// Apply friction impulse
 							vec3 impulse = cs->tangentVectors[k] * lambda;
@@ -522,11 +486,12 @@ namespace idk
 					cs->rbB->angular_velocity = wB;
 				}
 			}
-			if (constraint_states.size() > 0)
-			{
-				const auto vel = constraint_states[0].rbA->linear_velocity;
-				//LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
-			}
+
+			// if (constraint_states.size() > 0)
+			// {
+			// 	const auto vel = constraint_states[0].rbA->linear_velocity;
+			// 	LOG_TO(LogPool::PHYS, "Solved Velocity: (%f, %f, %f)", vel.x, vel.y, vel.z);
+			// }
 			
 		}
 	}

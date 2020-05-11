@@ -34,6 +34,8 @@ namespace idk
 {
 	void PhysicsSystem::SimulateOneObject(Handle<class RigidBody> rb)
 	{
+		_col_manager.SimulateOneObject(rb);
+		FirePhysicsEvents();
 	}
 	// #pragma optimize("", off)
 	void PhysicsSystem::PhysicsTick(span<class RigidBody> rbs, span<class Collider> colliders, span<class Transform>)

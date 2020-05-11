@@ -160,7 +160,7 @@ namespace idk::mono
 				find_method(type, "Update");
 				find_method(type, "PausedUpdate");
 				find_method(type, "UpdateCoroutines");
-				find_method(type, "GenerateInput", 1);
+				find_method(type, "GenerateInput");
 				find_method(type, "ProcessInput", 1);
 				type.FindRPCs();
 				

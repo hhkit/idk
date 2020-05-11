@@ -472,6 +472,7 @@
     <ClCompile Include="phys\AabbTree.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\CollisionManager.cpp" />
+    <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp" />

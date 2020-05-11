@@ -102,6 +102,7 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkPredict>(&NetworkSystem::CollectInputs, "Move ghosts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkPredict>(&NetworkSystem::MoveGhosts, "Move ghosts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkPredict>(&NetworkSystem::Rollback,   "Execute rollbacks");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");

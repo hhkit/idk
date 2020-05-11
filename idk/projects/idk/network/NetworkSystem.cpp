@@ -10,6 +10,7 @@
 #include <network/ServerConnectionManager.h>
 #include <network/ClientConnectionManager.h>
 #include <network/ClientMoveManager.h>
+#include <network/ServerMoveManager.h>
 #include <network/ConnectionManager.inl>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
@@ -208,7 +209,8 @@ namespace idk
 					}
 
 					// simulate physics
-					
+					if (auto rb = ev.GetGameObject()->GetComponent<RigidBody>())
+						physics_system.SimulateOneObject(rb);
 				}
 			}
 
@@ -256,7 +258,7 @@ namespace idk
 				{
 					auto& obj = behavior->GetObject();
 					auto& type = *obj.Type();
-					auto method = type.GetMethod("GetInput", 1);
+					auto method = type.GetMethod("GenerateInput");
 					if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
 					{
 
@@ -265,10 +267,11 @@ namespace idk
 						auto array = (MonoArray*) serialize_thunk.Invoke((MonoObject*) input);
 
 						std::string payload;
+						//payload.insert(payload.end(), array, (char*)array + mono_array_length(array));
 						payload.resize(mono_array_length(array));
 
 						for (unsigned i = 0; i < payload.size(); ++i)
-							payload[i] = mono_array_get(array, unsigned char, i);
+							payload[i] = mono_array_get(array, char, i);
 
 						client_inputs->moves.emplace_back(ElectronView::ClientSideInputs::MoveNode{ client_inputs->next_move_index, payload });
 						client_inputs->next_move_index++;
@@ -300,6 +303,7 @@ namespace idk
 				continue;
 
 			elem->GetManager<GhostManager>()->SendGhosts(electron_views);
+			elem->GetManager<ServerMoveManager>()->SendControlObjects(electron_views);
 		}
 
 		// if client
