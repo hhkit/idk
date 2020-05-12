@@ -954,6 +954,7 @@ namespace idk::vkn
 
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
+		//GetGfxTimeLog().push_level("RenderGraphicsState");
 		_pimpl->gfx_state_index = 0;
 		_current_frame_index = frame_index;
 		//Update all the resources that need to be updated.
@@ -1039,9 +1040,10 @@ namespace idk::vkn
 		{
 			dbg::stopwatch timer;
 			timer.start();
-			GetGfxTimeLog().push_level();
+			GetGfxTimeLog().start("Render Graph");
+			GetGfxTimeLog().start("Compile");
 			_pimpl->graph.Compile();
-			GetGfxTimeLog().log("Compile", timer.lap());
+			GetGfxTimeLog().end_then_start("AllocRsc & BuildRP");
 			const auto& graph = _pimpl->graph;
 
 			const auto kNameShowDbgLifetimes = "Show Dbg Lifetimes";
@@ -1056,27 +1058,23 @@ namespace idk::vkn
 			_pimpl->graph.AllocateResources();
 			_pimpl->graph.BuildRenderPasses();
 			_pimpl->graph.SetPipelineManager(*this->_pipeline_manager);
-			GetGfxTimeLog().log("AllocRsc & BuildRP", timer.lap());
-			GetGfxTimeLog().push_level();
+			GetGfxTimeLog().end_then_start("Execute");
 			_pimpl->graph.Execute();
-			GetGfxTimeLog().pop_level();
-			GetGfxTimeLog().log("Execute", timer.lap());
+			GetGfxTimeLog().end_then_start("ProcBatches");
+
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 			dbg::BeginLabel(rb._cmd_buffer, "Framegraph in RenderGraphicsStates starting.", color{ 0.3f, 0.4f, 0.f });
-			GetGfxTimeLog().push_level();
 			_pimpl->graph.ProcessBatches(rb);
-			GetGfxTimeLog().pop_level();
-			GetGfxTimeLog().log("ProcBatches", timer.lap());
+			GetGfxTimeLog().end_then_start("Update Ubo Buffers");
 			state.ubo_manager.UpdateAllBuffers();
-			GetGfxTimeLog().log("Update Ubo Buffers", timer.lap());
+			GetGfxTimeLog().end_then_start("Misc");
 			dbg::EndLabel(rb._cmd_buffer);
-			rb._cmd_buffer.end();
 			state.FlagRendered();
-			GetGfxTimeLog().pop_level();
 			timer.stop();
-			GetGfxTimeLog().log("Render Graph",timer.time());
+			GetGfxTimeLog().end();//Misc
+			GetGfxTimeLog().end();//Render Graph
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
 		vector<vk::CommandBuffer> buffers{};
@@ -1158,6 +1156,7 @@ namespace idk::vkn
 		auto copy = View().Swapchain().m_graphics.Images();
 		copy[View().vulkan().rv ]= RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 		View().Swapchain().m_graphics.Images(std::move(copy));
+		//GetGfxTimeLog().pop_level();
 	}
 
 	void ConvertToNonSRGB(RenderStateV2& rs,gt::GraphTest& gtest)

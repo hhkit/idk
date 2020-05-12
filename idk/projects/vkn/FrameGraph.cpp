@@ -368,6 +368,7 @@ namespace idk::vkn
 	void FrameGraph::Execute()
 	{
 		dbg::stopwatch timer;
+	GetGfxTimeLog().start("Reset Ctx");
 		timer.start();
 		/*
 		if (_uniform_managers.empty())
@@ -389,7 +390,7 @@ namespace idk::vkn
 		{
 			ctx.Reset();
 		}
-		GetGfxTimeLog().log("Reset Ctx", timer.lap());
+	GetGfxTimeLog().end();// "Reset Ctx");
 		//_contexts.clear();
 		if (_contexts.size() < execution_order.size())
 			_contexts.resize(execution_order.size());
@@ -481,25 +482,19 @@ namespace idk::vkn
 		{
 			future.get();
 		}
-		for (size_t j = 0; j < i; ++j)
-		{
-			GetGfxTimeLog().log(lut2s[j], lut2[j]);
-		}
-		//for (auto& [name, duration] : lut)
+		//for (size_t j = 0; j < i; ++j)
 		//{
+		//	GetGfxTimeLog().log(lut2s[j], lut2[j]);
+		//}
+		//auto& duray = dbg::get_rendertask_durations();
+		//dbg::milliseconds total{};
+		//for (auto& [name, fduration] : duray)
+		//{
+		//	auto duration = dbg::milliseconds{ fduration };
+		//	total += duration;
 		//	GetGfxTimeLog().log_n_store(name, duration);
 		//}
-		auto& duray = dbg::get_rendertask_durations();
-		GetGfxTimeLog().push_level();
-		dbg::milliseconds total{};
-		for (auto& [name, fduration] : duray)
-		{
-			auto duration = dbg::milliseconds{ fduration };
-			total += duration;
-			GetGfxTimeLog().log_n_store(name, duration);
-		}
-		GetGfxTimeLog().pop_level();
-		GetGfxTimeLog().log_n_store("render task extras", total);
+		//GetGfxTimeLog().log_n_store("render task extras", total);
 
 
 	}
@@ -525,27 +520,27 @@ namespace idk::vkn
 	{
 		dbg::stopwatch timer;
 		timer.start();
-		GetGfxTimeLog().push_level();
+
+GetGfxTimeLog().start("Compile");
 
 		if (_duds.empty())
 		{
 			_duds.emplace_back(DescriptorUpdateData{ alloc });//Consider scaling with threads
 		}
-		GetGfxTimeLog().push_level();
+	GetGfxTimeLog().start("Dud Stuff");
 		dbg::stopwatch timer2;
 		timer2.start();
 		for (auto& rt : _contexts)
 		{
 			_duds.back().Reset();
-			//GetGfxTimeLog().log("Dud Reset", timer2.lap());
+			//GetGfxTimeLog().end_then_start("Dud Reset", timer2.lap());
 			rt.PreprocessDescriptors(_duds.back(),bundle._d_manager);
-			//GetGfxTimeLog().log("Dud Pre Proc", timer2.lap());
+			//GetGfxTimeLog().end_then_start("Dud Pre Proc", timer2.lap());
 			_duds.back().SendUpdates();
-			//GetGfxTimeLog().log("Dud SendUpdates", timer2.lap());
+			//GetGfxTimeLog().end_then_start("Dud SendUpdates", timer2.lap());
 		}
-		GetGfxTimeLog().pop_level();
-		GetGfxTimeLog().log("Dud Stuff", timer.lap());
-		GetGfxTimeLog().push_level();
+	GetGfxTimeLog().end_then_start("Proc Batches");
+		GetGfxTimeLog().start("Rsc Reserve");
 		ProcBatchLut().clear();
 		//std::mutex mutex;
 		using buffer_pair_t = std::pair<RenderTask*, vk::CommandBuffer>;
@@ -562,7 +557,7 @@ namespace idk::vkn
 		}
 		futures.reserve(_contexts.size());
 		std::array<dbg::milliseconds, 10> tmp_duration{};
-		GetGfxTimeLog().log("Rsc Reserve", timer.lap());
+		GetGfxTimeLog().end_then_start("Threaded stuff");
 		for (auto& rt : _contexts)
 		{
 			futures.emplace_back(Core::GetThreadPool().Post(
@@ -589,8 +584,8 @@ namespace idk::vkn
 		}
 		for (auto& future : futures)
 			future.get();
-		GetGfxTimeLog().log("Get Command Buffer & begin secondary buffer",std::reduce(tmp_duration.begin(), tmp_duration.end()));
-		GetGfxTimeLog().log("Threaded stuff", timer.lap());
+		//GetGfxTimeLog().end_then_start("Get Command Buffer & begin secondary buffer",std::reduce(tmp_duration.begin(), tmp_duration.end()));
+		GetGfxTimeLog().end_then_start("Execute Secondary Command Buffers");
 		for (auto& [p_rt, buffer] : buffers)
 		{
 			if (p_rt->BeginRenderPass(bundle._cmd_buffer))
@@ -599,16 +594,16 @@ namespace idk::vkn
 				bundle._cmd_buffer.endRenderPass();
 			}
 		}
-		GetGfxTimeLog().log("Execute Secondary Command Buffers", timer.lap());
+		GetGfxTimeLog().end();
 		//for (auto& [name, pair] : ProcBatchLut())
 		//{
 		//	auto& [count, time] = pair;
 		//	GetGfxTimeLog().log_n_store(name + string{ std::to_string(count) }, time);
 		//}
-		GetGfxTimeLog().pop_level();
-		GetGfxTimeLog().log("Proc Batches", timer.lap());
-		GetGfxTimeLog().pop_level();
-		GetGfxTimeLog().log("Compile", timer.lap());
+	GetGfxTimeLog().end();// "Proc Batches");
+GetGfxTimeLog().end();// "Compile");
+
+GetGfxTimeLog().start("Update Ubo Managers");// "Compile");
 		for (auto& ubo_manager : _ubo_managers)
 		{
 			if (ubo_manager)
@@ -616,6 +611,7 @@ namespace idk::vkn
 				ubo_manager->UpdateAllBuffers();
 			}
 		}
+GetGfxTimeLog().end();// "Update Ubo Managers");// "Compile");
 	}
 
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)

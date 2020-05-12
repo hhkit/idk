@@ -434,6 +434,9 @@
     <ClInclude Include="BufferNBuilder.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="SubDurations.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -742,6 +745,9 @@
     <ClCompile Include="time_log.cpp" />
     <ClCompile Include="FreeList.cpp" />
     <ClCompile Include="CommandCluster.cpp" />
+    <ClCompile Include="SubDurations.cpp">
+      <Filter>utils\Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

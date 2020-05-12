@@ -3,6 +3,7 @@
 #include <ds/span.h>
 #include <vkn/vector_span.h>
 #include <vkn/vector_span_builder.h>
+#include <vkn/Stopwatch.h>
 namespace idk::vkn::dbg
 {
 	class time_log
@@ -13,15 +14,19 @@ namespace idk::vkn::dbg
 		{
 			string_view section;
 			milliseconds duration;
+			void timer_start();
+			milliseconds timer_end();
+			stopwatch timer;
 		};
 		struct node
 		{
+			size_t parent = static_cast<size_t>(-1);
 			record data;
 			vector<size_t> sub_nodes;
+			using subnode_index_t = size_t;
+			hash_table<string_view, subnode_index_t> existing_subnodes;
 		};
 		
-		void log_n_store(string name, milliseconds duration);
-		void log(string_view name,  milliseconds duration);
 
 		struct push_guard
 		{
@@ -35,16 +40,23 @@ namespace idk::vkn::dbg
 			}
 		};
 
-		time_log* push_level()
+		time_log* push_level(string_view name);
+		void pop_level(milliseconds duration= milliseconds{});
+
+		void start_n_store(string name);
+		void start(string_view name);
+		void end(milliseconds duration);
+		void end();
+		void end_then_start(string_view name)
 		{
-			push_stack.emplace_back();
-			return this;
+			end();
+			start(name);
 		}
-		void pop_level()
-		{
-			last_popped = std::move(push_stack.back());
-			push_stack.pop_back();
-		}
+
+
+
+		//time_log* push_level();
+		//void pop_level();
 
 		void reset();
 		struct record_tree
@@ -55,6 +67,13 @@ namespace idk::vkn::dbg
 		//record string_views are invalidated upon reset.
 		record_tree get_records()const;
 	private:
+		string_view store(string&& str);
+		void log(string_view name, milliseconds duration);
+		void log_n_store(string name, milliseconds duration);
+		size_t current=static_cast<size_t >(-1);
+		size_t get_sub_node_idx(string_view name);
+		node& get_sub_node(string_view name);
+		node& Curr();
 		using indices = vector<size_t>;
 
 		vector<node> nodes;

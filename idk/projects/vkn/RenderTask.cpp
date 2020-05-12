@@ -796,7 +796,22 @@ namespace idk::vkn
 
 namespace idk::vkn::dbg
 {
-
+	struct SubDurations
+	{
+		hash_table<string_view, float> durations{};
+		void clear()
+		{
+			for (auto& [name, duration] : durations)
+			{
+				name;
+				duration = 0;
+			}
+		}
+		void add(string_view name, float duration)
+		{
+			durations[name] += duration;
+		}
+	};
 hash_table<string_view, float>& get_rendertask_durations()
 {
 	thread_local static hash_table<string_view, float> durations;

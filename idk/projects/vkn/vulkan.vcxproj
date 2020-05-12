@@ -399,6 +399,7 @@
     <ClInclude Include="StandardMaterialBindings.h" />
     <ClInclude Include="StandardVertexBindings.h" />
     <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="SubDurations.h" />
     <ClInclude Include="TexturePool.h" />
     <ClInclude Include="TextureTracker.h" />
     <ClInclude Include="time_log.h" />
@@ -533,6 +534,7 @@
     <ClCompile Include="StandardMaterialBindings.cpp" />
     <ClCompile Include="StandardVertexBindings.cpp" />
     <ClCompile Include="Stopwatch.cpp" />
+    <ClCompile Include="SubDurations.cpp" />
     <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="TextureTracker.cpp" />
     <ClCompile Include="time_log.cpp" />
