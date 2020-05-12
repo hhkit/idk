@@ -2,10 +2,11 @@
 
 layout (input_attachment_index=1, set=2, binding=0) uniform subpassInput color_input;
 layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput depth_input;
+layout (input_attachment_index=3, set=2, binding=2) uniform subpassInput gView_pos;
 
 
 layout(location=0) out vec4 out_color;
-layout(location=3) out vec4 out_hdr;
+//layout(location=4) out vec4 out_hdr;
 out float gl_FragDepth;
 
 S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
@@ -13,7 +14,6 @@ S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
 	vec3 threshold;
-	vec3 fogColor;
 	float fogDensity;
 
 	//Bloom
@@ -22,12 +22,14 @@ S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 	
 	int useFog;
 	int useBloom;
+	
+	vec4 fogColor;
 }ppb;
 
 //(Relative luminance, obtained from wiki)
 float Luminance(vec3 color)
 {
-	return 0.2126*color.r + 0.7152*color.g + 0.0722*color.b;
+	return 0.2126f*color.r + 0.7152f*color.g + 0.0722f*color.b;
 }
 
 //Tone Mapping
@@ -47,11 +49,11 @@ float Luminance(vec3 color)
 vec3 ReinhardOperator(vec3 color)
 {
 	float L = Luminance(color.rgb); 
-	return color/(L+1);
+	return color/(L+1.f);
 }
 vec3 sizeSpace(vec3 coords)
 {
-	return coords*15;
+	return coords*15.f;
 }
 
 vec3 directSample(ivec3 sizeSpace)
@@ -63,7 +65,7 @@ vec3 directSample(ivec3 sizeSpace)
 vec3 interp(vec3 c0, vec3 c1, float t)
 {
 	//t = smoothstep(0,1,t);
-	return (1-t)*c0+t*c1;
+	return (1.f-t)*c0+t*c1;
 }
 vec3 linearSample(ivec3 p0, ivec3 p1, float t)
 {
@@ -85,30 +87,51 @@ vec3 trilinearSample(ivec3 p, ivec3 d0, ivec3 d1, ivec3 d2, vec3 uvw)
 }
 
 
+float d0 =7.f, dmax = 55.f;   //magic numbers verified by YY
+float d_max0 = dmax - d0;
+float fog_cap = 0.028125f; //magic number verified by YY
 
+float ungamma = 1.f/2.2f;
 
 
 void main()
 {
 	float depth = subpassLoad(depth_input).r;
-	if(depth == 1)
+	if(depth == 1.f)
 		discard;
 	vec3  light = subpassLoad(color_input).rgb;
+	
+	if(ppb.useFog == 1)
+	{
+		vec4 view_pos = subpassLoad(gView_pos);
+		
+		//range based
+		float dist = (abs(view_pos.z)-d0)/d_max0; //magic number verified by YY
+		//Exponential fog                      //magic number verified by YY
+		float d = 1.f - 1.f/exp(dist * ppb.fogDensity); //magic number verified by YY
+		d = pow(d,4);                          //magic number verified by YY
+		
+		//float fogFactor = d;//1.0 /exp( d );
+		float fogFactor = clamp( d, 0.f, fog_cap );
+	
+		light = mix(light,ppb.fogColor.rgb,fogFactor);
+	}
+	
 	vec3 rh_light = ReinhardOperator(light);
 	
-	float brightness = dot(light, ppb.threshold);
-	 if(brightness > 1.0)
-        out_hdr = vec4(light, 1.0);
-    else
-        out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
-	
+	//float brightness = dot(light, ppb.threshold);
+	// if(brightness > 1.0)
+    //    out_hdr = vec4(light, 1.0);
+    //else
+    //    out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
+		
 	out_color = vec4(rh_light,1);
 		
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
 	
 	//Only use if deferred bloom is unused
-	vec3 og = pow(out_color.rgb,vec3(1/2.2));
+	vec3 og = pow(out_color.rgb,vec3(ungamma));
 	vec3 p = sizeSpace(og);
 	vec3 p0 =floor(p);
 	vec3 p1 =ceil(p);
@@ -118,7 +141,7 @@ void main()
 	vec3 t = (p - p0);// /(p1-p0);
 	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);
 	
-	out_color.rgb = pow(out_color.rgb,vec3(2.2));
+	out_color.rgb = pow(out_color.rgb,vec3(2.2f));
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 	
 }
