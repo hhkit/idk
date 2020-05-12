@@ -5,8 +5,11 @@
 #include <ds/span.inl>
 #include <vkn/MaterialInstanceCache.h>
 #include <res/ResourceHandle.inl>
+
+#include <vkn/time_log.h>
 namespace idk::vkn
 {
+	dbg::time_log& GetGfxTimeLog();
 	const LightData* GraphicsState::ActiveLight(size_t light_index) const
 	{
 		return &shared_gfx_state->Lights()[light_index];
@@ -71,9 +74,13 @@ namespace idk::vkn
 		
 		auto AddMatInst = [](auto& material_instances,RscHandle<MaterialInstance> mat_inst)
 		{
-			if (material_instances.find(mat_inst) == material_instances.end())
+			GetGfxTimeLog().start("find");
+			auto itr = material_instances.find(mat_inst);
+			GetGfxTimeLog().end();
+			if (itr == material_instances.end())
 			{
-				auto [itr,success]=material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
+				//auto [itr,success]=
+					material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
 			}
 		};
 		for (auto& p_ro : mesh_render)
@@ -115,6 +122,21 @@ void SharedGraphicsState::Init(const vector<LightData>& light_data, const vector
 	lights = &light_data;
 	instanced_ros = &iro;
 	//shadow_maps.resize(light_data.size());
+}
+
+void SharedGraphicsState::ProcessMaterialInstances(hash_set<RscHandle<MaterialInstance>> active_materials)
+{
+	for (auto& mat_inst : active_materials)
+	{
+		GetGfxTimeLog().start("find");
+		auto itr = material_instances.find(mat_inst);
+		GetGfxTimeLog().end();
+		if (itr == material_instances.end())
+		{
+			//auto [itr,success]=
+			material_instances.emplace(mat_inst, ProcessedMaterial{ mat_inst });
+		}
+	}
 }
 
 void SharedGraphicsState::Reset()
@@ -162,6 +184,7 @@ void PreRenderData::Init(const vector<RenderObject>& render_objects, const vecto
 
 ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 {
+	GetGfxTimeLog().start("ProcessedMaterial Ctor");
 	inst_guid = inst.guid;
 	{
 		auto& mat_inst = *inst;
@@ -211,6 +234,7 @@ ProcessedMaterial::ProcessedMaterial(RscHandle<MaterialInstance> inst)
 		}
 		shader = mat._shader_program;
 	}
+	GetGfxTimeLog().end();
 }
 
 void DbgDrawCall::RegisterBuffer([[maybe_unused]]DbgBufferType type, uint32_t binding, buffer_info info)

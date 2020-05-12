@@ -1062,6 +1062,22 @@ namespace idk
 		futures.clear();
 
 		POST()
+		for (auto& ro : result.mesh_render)
+		{
+			result.active_materials.emplace(ro.material_instance);
+		}
+		for (auto& ro : result.skinned_mesh_render)
+		{
+			result.active_materials.emplace(ro.material_instance);
+		}
+		for (auto& ro : result.particle_render_data)
+		{
+			result.active_materials.emplace(ro.material_instance);
+		}
+
+		POST_END();
+
+		POST()
 		{
 			auto& unique_particles = result.particle_render_data;
 			const size_t avg_particle_count = 100;

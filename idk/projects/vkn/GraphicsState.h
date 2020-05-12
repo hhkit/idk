@@ -108,6 +108,8 @@ namespace idk::vkn
 
 		void Init(const vector<LightData>& light_data, const vector<InstRenderObjects>& iro);
 
+		void ProcessMaterialInstances(hash_set<RscHandle<MaterialInstance>> active_materials);
+
 		void Reset();
 
 		const vector<LightData>& Lights()const;
