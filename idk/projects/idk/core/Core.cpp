@@ -102,9 +102,9 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets, "Receive Packets");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::MoveGhosts, "Move ghosts");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::Rollback,   "Execute rollbacks");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::CollectInputs, "Move ghosts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkPredict>(&NetworkSystem::MoveGhosts, "Move ghosts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkPredict>(&NetworkSystem::Rollback,   "Execute rollbacks");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::Fixed>     (&PhysicsSystem::PhysicsTick,           "Physics Update")
 			                                              .IfPausedThen(&PhysicsSystem::DebugDrawColliders);

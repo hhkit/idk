@@ -917,6 +917,17 @@ namespace idk
                     if (is_client_obj)
                     {
                         ImGui::Text("Move Object");
+						for (auto& elem : c_ev->GetParameters())
+						{
+							elem->GetGhost()->Debug([&](auto val) -> void
+							{
+								using T = std::decay_t<decltype(val)>;
+								if constexpr (std::is_same_v<T, vec3>)
+									ImGui::DragFloat3(elem->param_name.data(), val.data());
+								if constexpr (std::is_same_v<T, quat>)
+									ImGui::DragFloat4(elem->param_name.data(), val.data());
+							});
+						}
                     }
                     if (is_control_obj)
                     {

@@ -119,7 +119,8 @@ namespace TestAndSeek
             Debug.Log("" + (input.turn_left ? 1 : 0)
                 + (input.turn_right? 1 : 0)
                 + (input.move_forward ? 1 : 0)
-                + (input.jump ? 1 : 0));
+                + (input.jump ? 1 : 0)
+                + (on_floor ? " grounded" : " in air"));
 
             if (on_floor)
             {

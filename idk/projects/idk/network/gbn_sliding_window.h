@@ -52,7 +52,7 @@ namespace idk
 		if (buffer_.empty())
 			return std::nullopt;
 
-		auto retval = buffer_.front();
+		auto retval = std::move(buffer_.front());
 		buffer_.pop_front();
 		next_seq_expected_ = retval.sequence_number + 1;
 

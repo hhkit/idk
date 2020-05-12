@@ -59,6 +59,16 @@ namespace idk
 				end_value = param.getter();
 			}
 
+			void ForceUnpack(string_view data) final
+			{
+				if (auto val = parse_binary<T>(data))
+				{
+					t = 1;
+					start_value = param.getter();
+					end_value = *val;
+				}
+			}
+
 			void UnpackData(SeqNo index, string_view data) final
 			{
 				// newer data has arrived
@@ -96,6 +106,11 @@ namespace idk
 			{
 				t = 1;
 				param.setter(end_value);
+			}
+
+			virtual void Debug(erased_visitor<void(bool), void(int), void(float), void(vec3), void(quat)> visitor) final
+			{
+				visitor(end_value);
 			}
 
 		};

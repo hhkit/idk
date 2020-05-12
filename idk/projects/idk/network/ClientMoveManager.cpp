@@ -82,9 +82,11 @@ namespace idk
 					auto& param = params[i];
 
 					auto& ghost = *param->GetGhost();
-					ghost.UnpackData(msg.move_ack, payload);
+					ghost.ForceUnpack(payload);
+					ghost.Snap();
 				}
 
+				LOG_TO(LogPool::NETWORK, "Move ACK: %d", msg.move_ack.value);
 				val->last_received_control_object = msg.move_ack;
 				val->dirty_control_object = true;
 			}

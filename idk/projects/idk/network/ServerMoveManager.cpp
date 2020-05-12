@@ -32,7 +32,7 @@ namespace idk
 			if (ev.owner == target)
 			{
 				// create 
-				auto inputs = std::get<ElectronView::ServerSideInputs>(ev.move_state);
+				auto& inputs = std::get<ElectronView::ServerSideInputs>(ev.move_state);
 				const auto move_ack = inputs.moves.base();
 
 				vector<string> packs;
