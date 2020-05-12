@@ -205,6 +205,7 @@ namespace idk
 						{
 							LOG_TO(LogPool::NETWORK, "Rollback Input Tick %d", move.index.value);
 							thunk->Invoke(obj, input);
+							break;
 						}
 					}
 
@@ -216,6 +217,7 @@ namespace idk
 
 			if (auto server_inputs = std::get_if<ElectronView::ServerSideInputs>(&ev.move_state))
 			{
+				auto base = server_inputs->moves.base();
 				if (auto move = server_inputs->moves.pop_front())
 				{
 					auto array = mono_array_new(mono_domain_get(), mono_get_byte_class(), move->size());
@@ -232,7 +234,7 @@ namespace idk
 						auto method = type.GetMethod("ProcessInput", 1);
 						if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
 						{
-							LOG_TO(LogPool::NETWORK, "Processed Move %d");
+							LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
 							thunk->Invoke(obj, input);
 						}
 					}

@@ -13,6 +13,7 @@
     name: Directional Light
   - !Light 
     casts_shadows: 1
+    enabled: 1
     light: !DirectionalLight 
       bottom: -5
       far: 5
@@ -56,6 +57,19 @@
     is_orthographic: 0
     layer_mask: {mask: 4294967295}
     near_plane: 0.1
+    orthographic_size: 1
+    ppe: 
+      blurScale: 2
+      blurStrength: 1.2
+      fogColor: 
+        a: 1
+        b: 0.5
+        g: 0.5
+        r: 0.5
+      fogDensity: 1.8
+      threshold: {x: 0.1, y: 0.9, z: 0.9}
+      useBloom: 1
+      useFog: 1
     render_target: {guid: 00000000-0000-0000-0000-000000000000}
     viewport: 
       position: {x: 0, y: 0}
@@ -76,10 +90,10 @@
   - !MonoBehavior 
     enabled: 1
     script_data: !NetworkClientTester 
-      a: 10
-      b: 84
-      c: 42
-      d: 103
+      a: 192
+      b: 168
+      c: 72
+      d: 57
   - !MonoBehavior 
     enabled: 1
     script_data: !NetworkHostTester 

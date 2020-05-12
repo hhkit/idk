@@ -86,6 +86,7 @@ namespace idk
 				}
 
 				val->last_received_control_object = msg.move_ack;
+				val->dirty_control_object = true;
 			}
 		}
 	}
