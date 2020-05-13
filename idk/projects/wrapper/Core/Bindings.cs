@@ -903,6 +903,19 @@ namespace idk
         public extern static Device[] NetworkGetDevices();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Address[] NetworkGetDiscoveredServers();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool NetworkGetIsListeningForServers();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkSetIsListeningForServers(bool set);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool NetworkGetIsBroadcastingServerIP();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkSetIsBroadcastingServerIP(bool set);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Address[] NetworkDeviceGetAddresses(string device);
 
         [MethodImpl(MethodImplOptions.InternalCall)]

@@ -26,7 +26,7 @@ namespace TestAndSeek
         {
             if (blend_next)
             {
-                anim.CrossFade(name);
+                anim.BlendTo(name);
             }
             else
                 anim.Play(name);

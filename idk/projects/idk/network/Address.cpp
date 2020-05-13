@@ -12,4 +12,16 @@ namespace idk
 			sprintf_s(buf, "%d.%d.%d.%d", a, b, c, d);
 		return buf;
 	}
+	bool Address::operator<(const Address& rhs) const
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			if (nums[i] < rhs.nums[i])
+				return true;
+			if (nums[i] > rhs.nums[i])
+				return false;
+		}
+
+		return port < rhs.port;
+	}
 }

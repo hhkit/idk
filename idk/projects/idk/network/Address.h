@@ -19,6 +19,7 @@ namespace idk
 		{}
 
 		explicit operator string() const;
+		bool operator<(const Address& rhs) const;
 	};
 
 	constexpr auto localhost = Address{ 127,0,0,1,8000 };

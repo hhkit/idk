@@ -26,6 +26,8 @@ namespace idk
 		Server(const Address& address);
 		~Server();
 
+		Address GetAddress() const { return address_; }
+
 		void ProcessMessages();
 
 		void ReceivePackets();
@@ -45,6 +47,7 @@ namespace idk
 		Adapter           adapter;
 		GameConfiguration config;
 		yojimbo::Server   server;
+		Address           address_;
 
 		void ProcessMessage(int clientIndex, yojimbo::Message* message);
 	};
