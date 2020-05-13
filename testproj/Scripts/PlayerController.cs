@@ -120,7 +120,9 @@ namespace TestAndSeek
                 + (input.turn_right? 1 : 0)
                 + (input.move_forward ? 1 : 0)
                 + (input.jump ? 1 : 0)
-                + (on_floor ? " grounded" : " in air"));
+                + (on_floor ? " grounded" : " in air") 
+                + "pos: " + transform.position + "\t"
+                + "vel: " + rb.velocity);
 
             if (on_floor)
             {
