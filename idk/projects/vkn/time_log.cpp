@@ -4,14 +4,20 @@
 #include <ds/span.inl>
 namespace idk::vkn::dbg
 {
-	static inline constexpr bool enabled = true;
+	static inline constexpr bool enabled = false;
 	string_view time_log::store(string&& name)
 	{
-
-		string_view section;
-		auto& str = str_owners.emplace_back(std::move(name));
-		section = str;
-		return section;
+		if constexpr (enabled)
+		{
+			string_view section;
+			auto& str = str_owners.emplace_back(std::move(name));
+			section = str;
+			return section;
+		}
+		else
+		{
+			return "";
+		}
 	}
 	void time_log::log(string_view section, milliseconds duration)
 	{
@@ -50,34 +56,44 @@ namespace idk::vkn::dbg
 	}
 	time_log* time_log::push_level(string_view name)
 	{
-		current = get_sub_node_idx(name);
+		if constexpr (enabled)
+			current = get_sub_node_idx(name);
 		return this;
 	}
 	void time_log::pop_level(milliseconds duration)
 	{
-		node& curr = Curr();
-		curr.data.duration += duration;
-		current = curr.parent;
+		if constexpr (enabled)
+		{
+			node& curr = Curr();
+			curr.data.duration += duration;
+			current = curr.parent;
+		}
 		//last_popped = std::move(push_stack.back());
 		//push_stack.pop_back();
 	}
 	void time_log::start_n_store(string name)
 	{
-		start(store(std::move(name)));
+		if constexpr (enabled)
+			start(store(std::move(name)));
 
 	}
 	void time_log::start(string_view name)
 	{
-		push_level(name);
-		Curr().data.timer_start();
+		if constexpr (enabled)
+		{
+			push_level(name);
+			Curr().data.timer_start();
+		}
 	}
 	void time_log::end(milliseconds duration)
 	{
-		pop_level(duration);
+		if constexpr (enabled)
+			pop_level(duration);
 	}
 	void time_log::end()
 	{
-		end(Curr().data.timer_end());
+		if constexpr (enabled)
+			end(Curr().data.timer_end());
 	}
 	void time_log::reset()
 	{
