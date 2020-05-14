@@ -320,6 +320,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AsyncTexLoadInfo.h" />
     <ClInclude Include="AttachmentDescription.h" />
     <ClInclude Include="BaseRenderPass.h" />
     <ClInclude Include="BufferedObj.h" />
@@ -332,6 +333,7 @@
     <ClInclude Include="DrawSetRenderPass.h" />
     <ClInclude Include="FencePool.h" />
     <ClInclude Include="binding_util.h" />
+    <ClInclude Include="FixedArenaAllocator.h" />
     <ClInclude Include="FreeList.h" />
     <ClInclude Include="MaterialInstanceCache.h" />
     <ClInclude Include="MemoryCollator.h" />
@@ -424,6 +426,7 @@
     <ClInclude Include="vector_span.h" />
     <ClInclude Include="vector_span_builder.h" />
     <ClInclude Include="VertexBindingTracker.h" />
+    <ClInclude Include="VknAsyncTexLoader.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
@@ -544,6 +547,7 @@
     <ClCompile Include="UniformManager.cpp" />
     <ClCompile Include="UnlitBindings.cpp" />
     <ClCompile Include="VertexBindingTracker.cpp" />
+    <ClCompile Include="VknAsyncTexLoader.cpp" />
     <ClCompile Include="VknTextureView.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />

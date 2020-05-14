@@ -4,6 +4,8 @@
 #include <vkn/VulkanView.h>
 #include <vkn/VulkanState.inl>
 #include <parallel/ThreadPool.h>
+#include <idk.h>
+#include <core/Core.inl>
 namespace idk::vkn
 {
 	CommandCluster::CommandCluster(vk::CommandBufferLevel level):_buffer_level{level}
@@ -27,9 +29,20 @@ namespace idk::vkn
 
 void CommandCluster::Reset()
 {
+	vector<mt::Future<void>> futures;
 	for (auto& [id, pool] : _pools)
 	{
-		pool.reset();
+		futures.emplace_back(Core::GetThreadPool().Post( 
+			[this, &pool]() {
+				pool.reset();
+			}
+		))/*
+			()//*/
+		;
+	}
+	for (auto& future : futures) 
+	{
+		future.get(); 
 	}
 }
 

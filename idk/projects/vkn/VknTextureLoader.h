@@ -87,9 +87,9 @@ namespace idk::vkn
 			vk::Fence load_fence;
 			bool end_and_submit = true;
 		};
-		void LoadTexture(SubmissionObjs sub,VknTexture& texture, hlp::MemoryAllocator& allocator,std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+		std::optional< std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> LoadTexture(SubmissionObjs sub,VknTexture& texture, hlp::MemoryAllocator& allocator,std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
 		void LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence,std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
-		mt::ThreadPool::Future<void> LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+		mt::ThreadPool::Future<void> LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
 
 		hlp::SimpleLock lock;
 		int abc = 0;

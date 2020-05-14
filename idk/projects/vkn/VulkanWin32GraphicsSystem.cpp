@@ -42,6 +42,8 @@
 #include <vkn/Stopwatch.h>
 #include <vkn/SubDurations.h>
 
+#include <vkn/VknAsyncTexLoader.h>
+
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -88,6 +90,7 @@ namespace idk::vkn
 		dbg::time_log timelog;
 		dbg::stopwatch timer;
 		RscHandle<Texture> BrdfLookupTable;
+		AsyncTexLoader tex_loader;
 	};
 	dbg::time_log& GetGfxTimeLog()
 	{
@@ -556,6 +559,10 @@ namespace idk::vkn
 	dbg::time_log& VulkanWin32GraphicsSystem::TimeLog()
 	{
 		return _pimpl->timelog;
+	}
+	AsyncTexLoader& VulkanWin32GraphicsSystem::GetAsyncTexLoader()
+	{
+		return _pimpl->tex_loader;
 	}
 	VulkanState& VulkanWin32GraphicsSystem::GetVulkanHandle()
 	{

@@ -552,7 +552,6 @@ namespace idk::vkn
 		cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit|vk::CommandBufferUsageFlagBits::eRenderPassContinue,&info });
 		return true;
 	}
-
 	bool RenderTask::BeginRenderPass(vk::CommandBuffer cmd_buffer)
 	{
 		if (ProcBatchLut().empty())
@@ -618,11 +617,50 @@ namespace idk::vkn
 	{
 		if (!used)
 			return;
-		_uniform_manager.Reset();
-		_vtx_binding_tracker.Reset();
-		RenderTask tmp;
-		std::swap(tmp, *this);
+		GetGfxTimeLog().start("reset uniform_manager & vtx_binding");
+		//_uniform_manager.Reset();
+		//_vtx_binding_tracker.Reset();
+		//GetGfxTimeLog().end_then_start("tmp render task");
+		//RenderTask tmp;
+		//GetGfxTimeLog().end_then_start("swap");
+		//std::swap(tmp, *this);
+		GetGfxTimeLog().end_then_start("reset");
 
+		
+		this->attachment_offset = 0;
+		this->batches.clear();
+		this->clear_colors.clear();
+		this->clear_depths.reset();
+		this->clear_stencil.reset();
+		this->curr_frame_buffer = nullptr;
+		this->curr_rp.reset();
+		this->ppm = nullptr;
+		this->used = false;
+		GetGfxTimeLog().end_then_start("reset 2");
+		this->_clear_depth_stencil.reset();
+		this->_copy_commands.clear();
+		this->_current_batch = {};
+		this->_dc_bindings._vertex_bindings.clear();
+		this->_descriptor_sets.clear();
+		this->_input_attachments = {};
+		this->_label = {};
+		this->_num_output_attachments = {};
+		this->_rect_buffer->clear();
+		this->_skip_render_pass = false;
+		this->_start_new_batch = true;
+		GetGfxTimeLog().end_then_start("UM reset");
+		this->_uniform_manager.Reset();
+		GetGfxTimeLog().end_then_start("reset 3");
+		this->_uniform_sets.clear();
+		GetGfxTimeLog().end_then_start("vtx binding");
+		this->_vtx_binding_tracker.Reset();
+		//*/
+		//
+		//
+		//
+		//
+		//
+		/*
 		std::swap(_rect_buffer, tmp._rect_buffer);
 		_rect_buffer->clear();
 		//ClearSwap(_rect_buffer        ,tmp._rect_buffer);
@@ -638,7 +676,8 @@ namespace idk::vkn
 		ClearSwap(_uniform_sets       ,tmp._uniform_sets);
 		//ClearSwap(_dc_bindings._vertex_bindings    ,tmp._dc_bindings._vertex_bindings);
 		std::swap(_vtx_binding_tracker,tmp._vtx_binding_tracker);
-
+		*/
+		GetGfxTimeLog().end();
 	}
 	void RenderTask::FlagUsed()
 	{

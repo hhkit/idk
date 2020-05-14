@@ -437,6 +437,15 @@
     <ClInclude Include="SubDurations.h">
       <Filter>utils\Debug</Filter>
     </ClInclude>
+    <ClInclude Include="FixedArenaAllocator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VknAsyncTexLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncTexLoadInfo.h">
+      <Filter>resource\Loaders\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -748,6 +757,7 @@
     <ClCompile Include="SubDurations.cpp">
       <Filter>utils\Debug</Filter>
     </ClCompile>
+    <ClCompile Include="VknAsyncTexLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -818,6 +828,9 @@
     </Filter>
     <Filter Include="utils\Objects">
       <UniqueIdentifier>{9d275880-a222-4440-b265-138a872904b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Loaders\Util">
+      <UniqueIdentifier>{a5eae55c-176a-4017-a9a0-f3964b2096ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

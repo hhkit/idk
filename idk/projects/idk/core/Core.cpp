@@ -64,6 +64,7 @@ namespace idk
 		: _pimpl{std::make_unique<PImpl>()}
 	{
 		_instance = this;
+		_pimpl->_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 	}
 
 	Core::~Core()
@@ -152,7 +153,6 @@ namespace idk
 	
 		// main loop
 		_pimpl->_scheduler->Setup();
-		_pimpl->_thread_pool = std::make_unique<mt::ThreadPool>(std::thread::hardware_concurrency() - 2);
 		auto& app = Core::GetSystem<Application>();
 
         Core::GetSystem<SceneManager>().BuildSceneGraph(Core::GetGameState().GetObjectsOfType<const GameObject>());

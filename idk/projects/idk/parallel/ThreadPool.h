@@ -41,6 +41,7 @@ namespace idk::mt
 		Future() = default;
 		Future(ThreadPool* in_pool, std::future<T>&& in_fut) : pool{ in_pool }, future{ std::move(in_fut) }{}
 		T get();
+		bool ready();
 	private:
 		ThreadPool* pool = nullptr;
 		std::future<T> future;
@@ -95,6 +96,12 @@ namespace idk::mt
 		while (future.wait_for(std::chrono::nanoseconds{5}) != std::future_status::ready)
 			pool->ExecuteJob(thread_id(), thread_id() != 0);
 		return future.get();
+	}
+
+	template<typename T>
+	bool ThreadPool::Future<T>::ready()
+	{
+		return future.wait_for(std::chrono::nanoseconds{ 0 }) == std::future_status::ready;
 	}
 
 	template<typename T>

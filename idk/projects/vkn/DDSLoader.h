@@ -2,6 +2,7 @@
 #include <idk.h>
 #include <res/FileLoader.h>
 #include <vkn/VknTextureLoader.h>
+#include <vkn/AsyncTexLoadInfo.h>
 namespace idk::vkn
 {
 	enum class BlockType
@@ -53,6 +54,14 @@ namespace idk::vkn
 		uint32_t BlockSize()const;
 		size_t NumBytes()const;
 		string_view Data()const {return string_view{ data,NumBytes() };}
+		bool IsValid()const
+		{
+			return (magic[0] == 'D' &&
+				    magic[1] == 'D' &&
+				    magic[2] == 'S' &&
+				    magic[3] == ' '
+				);
+		}
 	};
 
 	struct DdsFile
@@ -96,12 +105,18 @@ namespace idk::vkn
 	public:
 		DdsLoader();
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
-		void LoadTexture(VknTexture& tex,string_view entire_file, const TextureOptions& tex_opt);
+		void LoadTexture(VknTexture& tex, string_view entire_file, const TextureOptions& tex_opt);
+
+		AsyncTexLoadInfo GenerateTexInfo(string entire_file, const TextureOptions& tex_opt);
+
+		mt::Future<void> LoadTextureAsync(VknTexture& tex,string_view entire_file, const TextureOptions& tex_opt, FencePool& fences,CmdBufferPool& cmd_buffers);
 		const hlp::MemoryAllocator& Allocator()const;
 	private:
 		vk::UniqueFence load_fence;
 		TextureLoader loader;
 		hlp::MemoryAllocator allocator;
+		
+
 	};
 
 }

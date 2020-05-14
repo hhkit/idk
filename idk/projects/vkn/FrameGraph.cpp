@@ -540,23 +540,25 @@ GetGfxTimeLog().start("Compile");
 			//GetGfxTimeLog().end_then_start("Dud SendUpdates", timer2.lap());
 		}
 	GetGfxTimeLog().end_then_start("Proc Batches");
-		GetGfxTimeLog().start("Rsc Reserve");
-		ProcBatchLut().clear();
-		//std::mutex mutex;
-		using buffer_pair_t = std::pair<RenderTask*, vk::CommandBuffer>;
-		vector<buffer_pair_t> buffers;
-		hash_table<RenderTask*, buffer_pair_t*> task_buffers;
-		vector<mt::Future<void>> futures;
-		_cmd_buffers.Reset();
-		buffers.resize(_contexts.size());
-		auto buffer_itr = buffers.data();
-		for (auto& rt : _contexts)
-		{
-			buffer_itr->first = &rt;
-			task_buffers[&rt] = buffer_itr++;
-		}
-		futures.reserve(_contexts.size());
-		std::array<dbg::milliseconds, 10> tmp_duration{};
+		GetGfxTimeLog().start("reset cmd clusters");
+			ProcBatchLut().clear();
+			_cmd_buffers.Reset();
+		GetGfxTimeLog().end_then_start("Rsc Reserve");
+			//std::mutex mutex;
+			using buffer_pair_t = std::pair<RenderTask*, vk::CommandBuffer>;
+			FixedArenaAllocator<char> allocator{};
+			std::vector<buffer_pair_t,FixedArenaAllocator<buffer_pair_t>> buffers{ allocator };
+			hash_table<RenderTask*, buffer_pair_t*> task_buffers;
+			vector<mt::Future<void>> futures;
+			buffers.resize(_contexts.size());
+			auto buffer_itr = buffers.data();
+			for (auto& rt : _contexts)
+			{
+				buffer_itr->first = &rt;
+				task_buffers[&rt] = buffer_itr++;
+			}
+			futures.reserve(_contexts.size());
+			std::array<dbg::milliseconds, 10> tmp_duration{};
 		GetGfxTimeLog().end_then_start("Threaded stuff");
 		for (auto& rt : _contexts)
 		{
@@ -586,8 +588,10 @@ GetGfxTimeLog().start("Compile");
 			future.get();
 		//GetGfxTimeLog().end_then_start("Get Command Buffer & begin secondary buffer",std::reduce(tmp_duration.begin(), tmp_duration.end()));
 		GetGfxTimeLog().end_then_start("Execute Secondary Command Buffers");
-		for (auto& [p_rt, buffer] : buffers)
+		
+		for (size_t i = 0; i<buffers.size();++i)
 		{
+			auto& [p_rt, buffer] = buffers.at(i);
 			if (p_rt->BeginRenderPass(bundle._cmd_buffer))
 			{
 				bundle._cmd_buffer.executeCommands(buffer);

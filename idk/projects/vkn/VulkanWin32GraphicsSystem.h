@@ -15,6 +15,7 @@ namespace idk::win
 }
 namespace idk::vkn
 {
+	struct AsyncTexLoader;
 	namespace dbg
 	{
 		class time_log;
@@ -45,6 +46,7 @@ namespace idk::vkn
 		VulkanView&  View()const { return instance_->View();}
 
 		dbg::time_log& TimeLog();
+		AsyncTexLoader& GetAsyncTexLoader();
 
 		VulkanState& GetVulkanHandle();
 	private:

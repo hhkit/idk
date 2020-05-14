@@ -3,8 +3,11 @@
 #include <vulkan/vulkan.hpp>
 #include <gfx/pipeline_config.h>
 
+#include <vkn/FixedArenaAllocator.h>
 namespace idk::vkn
 {
+	//template<typename K, typename T>
+	//using hash_table_t = std::unordered_map<K, T, std::hash<K>, std::equal_to<K>, FixedArenaAllocator<std::pair<const K, T>>>;
 	struct PipelineDescHelper
 	{
 
