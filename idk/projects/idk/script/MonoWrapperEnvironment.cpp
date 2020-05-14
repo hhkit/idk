@@ -32,6 +32,7 @@
 
 #include <res/ResourceHandle.inl>
 
+#include <meta/variant.inl>
 
 namespace idk::mono
 {
@@ -1639,6 +1640,51 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::GraphicsVarBoolIsSet", bool, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return itr != vars.end() && itr->second.index() == index_in_variant_v<bool, decltype(itr->second)>;
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsGetVarBool", bool, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return itr != vars.end() && itr->second.index() == index_in_variant_v<bool, decltype(itr->second)>&& std::get<bool>(itr->second);
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsSetVarBool", void, MonoString* str, bool b)
+		{
+			string name = unbox(str).get();
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set(name,b);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GraphicsVarIntIsSet", bool, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return itr != vars.end() && itr->second.index() == index_in_variant_v<int, decltype(itr->second)>;
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsGetVarInt", int, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return itr != vars.end() && itr->second.index() == index_in_variant_v<int, decltype(itr->second)>&& std::get<int>(itr->second);
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsSetVarInt", void, MonoString* str, int b)
+		{
+			string name = unbox(str).get();
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set(name, b);
+		}
+		BIND_END();
 		//BIND_START("idk.Bindings::GraphicsGetGammaCorrection", float)
 		//{
 		//	return Core::GetSystem<GraphicsSystem>().extra_vars.Get;

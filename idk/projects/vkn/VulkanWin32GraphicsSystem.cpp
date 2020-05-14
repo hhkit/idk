@@ -286,10 +286,25 @@ namespace idk::vkn
 				var.Set(name, false);
 			}
 		}
+		{
+			auto& var = extra_vars;
+			auto name = "Reload Textures";
+			var.SetIfUnset(name, false);
+			if (*var.Get<bool>(name))
+			{
+				auto textures = Core::GetResourceManager().GetAll<VknTexture>();
+				for (auto& tex : textures)
+				{
+					tex->BeginAsyncReload();
+				}
+				var.Set(name, false);
+			}
+		}
 		_pimpl->timelog.end_then_start("Update Pipelines");
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
+		_pimpl->tex_loader.UpdateTextures();
 		_pimpl->timelog.end_then_start("Init Pre render data");
 
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());

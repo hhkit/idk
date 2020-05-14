@@ -914,6 +914,7 @@ namespace idk::vkn
 			state.ubo_manager.UpdateAllBuffers();
 			GetGfxTimeLog().end_then_start("Misc");
 			dbg::EndLabel(rb._cmd_buffer);
+			rb._cmd_buffer.end();
 			state.FlagRendered();
 			timer.stop();
 			GetGfxTimeLog().end();//Misc

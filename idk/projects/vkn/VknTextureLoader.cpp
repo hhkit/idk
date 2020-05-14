@@ -3,6 +3,7 @@
 #include <vkn/MemoryAllocator.h>
 #include <vkn/BufferHelpers.h>
 #include <vkn/VknTexture.h>
+#include <vkn/VknTextureData.h>
 #include <vkn/VulkanView.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/utils/utils.h> //ReverseMap
@@ -89,7 +90,7 @@ namespace idk::vkn
 	}
 
 
-	std::optional< std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> TextureLoader::LoadTexture(SubmissionObjs sub, VknTexture& texture, hlp::MemoryAllocator& allocator, std::optional<TextureOptions> ooptions, const TexCreateInfo& _load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	std::optional< std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> TextureLoader::LoadTexture(SubmissionObjs sub, VknTextureData& texture, hlp::MemoryAllocator& allocator, std::optional<TextureOptions> ooptions, const TexCreateInfo& _load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		auto load_fence = sub.load_fence;
 		TextureOptions options{};
@@ -178,14 +179,19 @@ namespace idk::vkn
 	}
 	void TextureLoader::LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
+		VknTextureData tmp;
+		LoadTexture(tmp, allocator,load_fence, ooptional, load_info, in_info, guid);
+		tmp.ApplyOnTexture(texture);
+	}
+	void TextureLoader::LoadTexture(VknTextureData& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	{
 		LoadTexture(SubmissionObjs{ {},load_fence }, texture, allocator, ooptional, load_info, in_info, guid);
-		texture.MarkLoaded(true);
 	}
 	namespace Nope
 	{
 		struct Derp
 		{
-			VknTexture& texture;
+			std::variant<VknTextureData*,VknTexture*> texture;
 			hlp::MemoryAllocator& allocator;
 			FenceObj load_fence;
 			CmdBufferObj cmd_buffer;
@@ -199,34 +205,47 @@ namespace idk::vkn
 	static void DoNothing() {}
 	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
+		return LoadTextureAsync(&texture, allocator, load_fence, cmd_buffers, std::move(ooptional), load_info, std::move(in_info), guid);
+	}
+	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTextureData& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	{
+		return LoadTextureAsync(&texture, allocator, load_fence, cmd_buffers, std::move(ooptional), load_info, std::move(in_info), guid);
+	}
+	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(std::variant<VknTextureData*, VknTexture*> texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	{
 		auto fence = load_fence.AcquireFence();
 		auto cmd_buffer = cmd_buffers.AcquireCmdBuffer();
 		abc++;
 		if (!*cmd_buffer)
 			__debugbreak();
 		return Core::GetThreadPool().Post(
-			[loader  = this](const shared_ptr<Nope::Derp>& _derp) ->void
+			[loader = this](const shared_ptr<Nope::Derp>& _derp) ->void
 			{
 				auto& derp = *_derp;
 				auto& lock = loader->lock;
+				VknTextureData tmp;
+				bool is_data = derp.texture.index() == index_in_variant_v<VknTextureData*,decltype(derp.texture)>;
+				auto& tex = (is_data) ? *std::get<VknTextureData*>(derp.texture) : tmp;
 				lock.Lock();
 				auto cmd_buffer = (*derp.cmd_buffer);
-				cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+				cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 				lock.Unlock();
-				auto&& staging = loader->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, derp.texture, derp.allocator,  derp.ooptional, derp.load_info, derp.in_info, derp.guid);
+				auto&& staging = loader->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, tex, derp.allocator, derp.ooptional, derp.load_info, derp.in_info, derp.guid);
 				auto device = *View().Device();
 				auto fence = *derp.load_fence;
-				derp.texture.dbg_name = derp.texture.Name();
-				dbg::NameObject(derp.texture.Image(true), derp.texture.dbg_name);
+				tex.dbg_name = tex.Name();
+				dbg::NameObject(tex.Image(true), tex.dbg_name);
 				device.resetFences(fence);
 				lock.Lock();
-				hlp::EndSingleTimeCbufferCmd(cmd_buffer, View().GraphicsQueue(), false, fence);
+				hlp::EndSingleTimeCbufferCmd(cmd_buffer, View().GraphicsTexQueue(), false, fence);
 				lock.Unlock();
-				dbg_chk(derp.texture.Image(true));
+				dbg_chk(tex.Image(true));
 				uint64_t wait_for_milli_seconds = 1;
 				[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
 				//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
 				while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout) std::this_thread::yield();
+				if (!is_data)
+					tmp.ApplyOnTexture(*std::get<VknTexture*>(derp.texture));
 				return (void)0;
 			},
 			std::make_shared<Nope::Derp>(Nope::Derp{ texture, allocator, std::move(fence), std::move(cmd_buffer), ooptional, load_info, in_info, guid }));

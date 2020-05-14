@@ -464,6 +464,7 @@
     <ClInclude Include="VulkanMeshFactory.h" />
     <ClInclude Include="VulkanState.h" />
     <ClInclude Include="VulkanPipeline.h" />
+    <ClInclude Include="VknTextureData.h" />
     <ClInclude Include="VulkanTextureFactory.h" />
     <ClInclude Include="VulkanTtfLoader.h" />
     <ClInclude Include="VulkanTypeDescriptors.h" />
@@ -552,6 +553,7 @@
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanIttfLoader.cpp" />
+    <ClCompile Include="VknTextureData.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="utils\GlslToSpirv.cpp" />

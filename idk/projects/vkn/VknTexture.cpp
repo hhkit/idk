@@ -8,6 +8,7 @@
 
 #include <vkn/VulkanWin32GraphicsSystem.h>
 #include <vkn/VknAsyncTexLoader.h>
+#include <vkn/VknTextureData.h>
 namespace idk::vkn {
 	namespace hlp
 	{
@@ -32,10 +33,11 @@ namespace idk::vkn {
 		//	string test2 = ss.str();
 		//	DoNothing();
 		//}
-
+		//loader.LoadTexture(*this,data, compiled_tex);
 		auto info = loader.GenerateTexInfo(data,compiled_tex);
-		Core::GetSystem<VulkanWin32GraphicsSystem>().GetAsyncTexLoader().Load(std::move(info), *this,RscHandle<VknTexture>{compiled_tex.guid});
+		_tex_load_info = info;
 		MarkLoaded(false);
+		BeginAsyncReload(compiled_tex.guid);
 		texture_bytes += this->sizeOnDevice;
 	}
 	vk::ImageAspectFlags VknTexture::ImageAspects() const
@@ -133,6 +135,25 @@ namespace idk::vkn {
 	bool VknTexture::IsLoaded() const
 	{
 		return _loaded;
+	}
+
+	void VknTexture::SetTexLoadInfo(std::optional<AsyncTexLoadInfo> info)
+	{
+		_tex_load_info = std::move(info);
+	}
+
+	const std::optional<AsyncTexLoadInfo>& VknTexture::GetTexLoadInfo() const
+	{
+		return _tex_load_info;
+	}
+
+	void VknTexture::BeginAsyncReload(std::optional<Guid> guid)
+	{
+		if (_tex_load_info)
+		{
+			auto copy = *_tex_load_info;
+			Core::GetSystem<VulkanWin32GraphicsSystem>().GetAsyncTexLoader().Load(std::move(copy), *this, guid ? RscHandle<VknTexture>{ *guid } : RscHandle < VknTexture>{ GetHandle() });
+		}
 	}
 
 	const VknTexture& VknTexture::GetEffective(bool ignore_default) const

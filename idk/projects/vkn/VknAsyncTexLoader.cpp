@@ -20,11 +20,15 @@ namespace idk::vkn
 void AsyncTexLoader::Load(AsyncTexLoadInfo&& load_info, VknTexture& tex, RscHandle<VknTexture> tex_handle)
 {
 	tex.MarkLoaded(false);
+	auto data_ptr = std::make_unique<VknTextureData>();
+	auto fut = _loader.LoadTextureAsync(*data_ptr, _allocator, _load_fences, _cmd_buffers, load_info.to, load_info.tci, load_info.iti);
 	_results.emplace_back(
 		OpData{
-		_loader.LoadTextureAsync(tex, _allocator, _load_fences, _cmd_buffers, load_info.to, load_info.tci, load_info.iti),
+	//	.get(); 
+			std::move(fut),
 		tex_handle,
-		std::move(load_info)
+		std::move(load_info),
+		std::move(data_ptr)
 		}
 	);
 }
@@ -34,12 +38,15 @@ void AsyncTexLoader::UpdateTextures()
 	size_t i = 0;
 	while (i<_results.size())
 	{
-		auto& [future, handle,ctx] = _results.at(i);
+		auto& [future, handle,ctx, data] = _results.at(i);
 		if (future.ready())
 		{
 			future.get();
 			if (handle)
+			{
+				data->ApplyOnTexture(*handle);
 				handle->MarkLoaded(true);
+			}
 			//UpdateHandle(handle, future.get());
 			i = erase_result(i);
 		}

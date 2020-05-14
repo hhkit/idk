@@ -10,6 +10,10 @@
 #include <vkn/VknTexture.h>
 #include <vkn/AsyncTexLoadInfo.h>
 
+#include <vkn/FencePool.h>
+#include <vkn/VknTextureLoader.h>
+#include <vkn/VknTextureData.h>
+
 namespace idk::vkn
 {
 	struct AsyncTexLoader
@@ -24,6 +28,7 @@ namespace idk::vkn
 			mt::Future<void> future;
 			RscHandle<VknTexture> handle;
 			AsyncTexLoadInfo info;
+			std::unique_ptr<VknTextureData> data;
 		};
 		vector<OpData> _results;
 		FencePool _load_fences;

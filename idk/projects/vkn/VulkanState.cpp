@@ -413,7 +413,7 @@ namespace idk::vkn
 			info.emplace_back(
 				vk::DeviceQueueCreateFlags{}
 				, uniqueQueueFamily
-				, 1
+				, 2
 				, &queuePriority);
 		}
 		auto extensions = GetDeviceExtensions();
@@ -442,6 +442,7 @@ namespace idk::vkn
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
 		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
+		m_graphics_tex_queue = m_device->getQueue(*m_queue_family.graphics_family, 1, dispatcher);
 		m_present_queue = m_device->getQueue(*m_queue_family.present_family, 0, dispatcher);
 		//m_transfer_queue = m_device->getQueue(*m_queue_family.transfer_family, 0, dispatcher);
 	}

@@ -6,6 +6,9 @@
 #include <gfx/CompiledTexture.h>
 #include <meta/stl_hack.h>
 #include <vkn/VulkanResourceManager.h>
+
+#include <vkn/AsyncTexLoadInfo.h>
+
 namespace idk::vkn {
 
 	struct VknTexture
@@ -57,7 +60,12 @@ namespace idk::vkn {
 		bool MarkLoaded(bool loaded);
 		bool IsLoaded()const;
 
+		void SetTexLoadInfo(std::optional<AsyncTexLoadInfo>);
+		const std::optional<AsyncTexLoadInfo>& GetTexLoadInfo()const;
+		void BeginAsyncReload(std::optional<Guid> guid = {});
+
 	private:
+		std::optional<AsyncTexLoadInfo> _tex_load_info;
 		const VknTexture& GetEffective(bool ignore_default=false)const;
 		bool _loaded = true;
 		uint32_t                _layers;
@@ -65,6 +73,7 @@ namespace idk::vkn {
 		void UpdateUV(UVMode);
 
 	};
+
 };
 
 MARK_NON_COPY_CTORABLE(idk::vkn::VknTexture)

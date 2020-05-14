@@ -25,6 +25,7 @@ namespace idk::vkn
 		vk::UniqueDevice&                   Device()const;
 		QueueFamilyIndices&                 QueueFamily()const;
 		vk::Queue&                          GraphicsQueue()const;
+		vk::Queue&                          GraphicsTexQueue()const;
 		vk::Queue&                          PresentQueue()const;
 		SwapChainInfo&                      Swapchain()const;
 		uint32_t                            CurrFrame()const;
