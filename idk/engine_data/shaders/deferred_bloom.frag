@@ -13,7 +13,6 @@ S_LAYOUT(2,1) uniform BLOCK(blurBlock)
 S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
 	vec3 threshold;
-	vec4 fogColor;
 	float fogDensity;
 
 	//Bloom
@@ -22,6 +21,8 @@ S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 	
 	int useFog;
 	int useBloom;
+	
+	vec4 fogColor;
 }ppb;
 
 S_LAYOUT(5,0) uniform BLOCK(ViewportBlock)

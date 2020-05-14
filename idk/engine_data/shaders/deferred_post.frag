@@ -101,86 +101,45 @@ void main()
 		Light curr_light = LightBlk.lights[i];
 		vec3 result = pbr_metallic(curr_light, view_pos.xyz, normal, reflected, albedo, metallic, roughness, ambient_o); 
 		vec4 cascade_c = vec4(0,0,0,0);
-		//if(curr_light.type == 0)
-		//{
-		//	
-		//	if(curr_light.cast_shadow!=0)
-		//	{
-		//		result *= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
-		//		//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_map_point[k],curr_light.v_dir,normal , world_pos, curr_light.falloff, curr_light.v_pos)));
-		//	}
-		//	
-		//	++k;
-		//}
-		if (curr_light.type == 1)
+
+		if(curr_light.cast_shadow!=0)
 		{
-			if(curr_light.cast_shadow!=0)
+			if (curr_light.type == 1)
 			{
+				
 				vec3 shadow_factor = vec3(1.f,1.f,1.f);
 				if(view_z_abs <= DirectionalBlk.directional_vp[j].far_plane)
 				{
 					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-		
 				}
 				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				{
-					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-					
+					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));				
 				}
-				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
-				//{
-				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-				//}
+	
 				result *= shadow_factor;
 				//shadow_accum -= shadow_factor;				
 				++j;
 				
 				//dir_light_accum = result * shadow_factor;
 			}
-			else
+			else if (curr_light.type == 2)
 			{
-				j+=2;
-			}
-			//vvvp = curr_light.vp;
+				
+				result *= (vec3(1.f-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+				//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));	
+				
+			} 
 		}
-		else if (curr_light.type == 2)
-		{
-			if(curr_light.cast_shadow!=0)
-			{
-				result *= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
-				//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
-			
-			}
-		} 
 		
 		light_accum += result;// + cascade_c.xyz;
 	}
 	
-	//distance
-	
-	//int remain = MAX_LIGHTS - LightBlk.light_count;
-	//vec3 accum_for_fog = light_accum;
 	
 	
-	//float dist = 0;
-	//float fogFactor = 0;
-	//
-	////range based
-	//dist = length(view_pos);
-	// 
-	////Exponential fog
-	//float d = dist * FogDensity;
-	//fogFactor = 1.0 /exp( d );
-	//fogFactor = clamp( fogFactor, 0.0, 1.0 );
-	//
-	//light_accum = mix(fogColor,light_accum,fogFactor);
-	
-	//light_accum = light_accum* ext + fogColor * (1.0 - insc);
-	
-	
-	vec3 F = mix(vec3(0.04), albedo, metallic);
+	vec3 F = mix(vec3(0.04f), albedo, metallic);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
-	vec3 kD = 1.0 - kS;
-	kD *= 1.0 - metallic;
+	vec3 kD = 1.0f - kS;
+	kD *= 1.0f - metallic;
 import /engine_data/shaders/pbr_end.glsl
 }

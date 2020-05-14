@@ -2388,6 +2388,44 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkGetDiscoveredServers", MonoArray*)
+		{
+			auto discovered = Core::GetSystem<NetworkSystem>().GetDiscoveredServers();
+
+			const auto address_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Address");
+			auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), discovered.size());
+
+			for (unsigned j = 0; j < discovered.size(); ++j)
+				mono_array_set(retval, Address, j, discovered[j]);
+
+			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetIsListeningForServers", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().IsSearching();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSetIsListeningForServers", void, bool set)
+		{
+			Core::GetSystem<NetworkSystem>().SetSearch(set);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetIsBroadcastingServerIP", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().IsBroadcasting();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSetIsBroadcastingServerIP", void, bool set)
+		{
+			Core::GetSystem<NetworkSystem>().SetBroadcast(set);
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::NetworkDeviceGetAddresses", MonoArray*, MonoString* mac_address)
 		{
 			auto mac_addr_str = unbox(mac_address);

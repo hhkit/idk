@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "idk.h"
 #include "WindowsApplication.h"
+#include "WindowsSocket.h"
 #include <winsock2.h>
 #include <iphlpapi.h>
 #include <ws2tcpip.h>
@@ -99,6 +100,11 @@ namespace idk
 		if (pAdapterInfo)
 			free(pAdapterInfo);
 		return devices;
+	}
+
+	unique_ptr<Socket> win::Windows::CreateSocket()
+	{
+		return std::make_unique<WindowsSocket>();
 	}
 
 }

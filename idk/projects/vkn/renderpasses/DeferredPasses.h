@@ -111,7 +111,7 @@ namespace idk::vkn::renderpasses
 
 		PostProcessEffect ppe;
 
-		CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex,FrameGraphResource out_color_tex,  FrameGraphResource out_depth_tex);
+		CombinePass(FrameGraphBuilder& builder, rect viewport, FrameGraphResource in_color_tex, FrameGraphResource in_depth_tex,FrameGraphResource out_color_tex,  FrameGraphResource out_depth_tex, FrameGraphResource view_pass_color);
 		void Execute(FrameGraphDetail::Context_t context) override;
 		rect _viewport;
 	};

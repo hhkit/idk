@@ -1225,6 +1225,7 @@
     <ClInclude Include="ui\AspectRatioFitter.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="network\Socket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

@@ -13,7 +13,7 @@ S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 //(Relative luminance, obtained from wiki)
 float Luminance(vec3 color)
 {
-	return 0.2126*color.r + 0.7152*color.g + 0.0722*color.b;
+	return 0.2126f*color.r + 0.7152f*color.g + 0.0722f*color.b;
 }
 
 //Tone Mapping
@@ -33,23 +33,23 @@ float Luminance(vec3 color)
 vec3 ReinhardOperator(vec3 color)
 {
 	float L = Luminance(color.rgb); 
-	return color/(L+1);
+	return color/(L+1.f);
 }
 vec3 sizeSpace(vec3 coords)
 {
-	return coords*15;
+	return coords*15.f;
 }
 
 vec3 directSample(ivec3 sizeSpace)
 {
-	ivec2 uv = ivec2(sizeSpace.x + sizeSpace.z*16,sizeSpace.y);
+	ivec2 uv = ivec2(sizeSpace.x + sizeSpace.z*16.f,sizeSpace.y);
 	vec3 result = texelFetch(ColCorrectLut[0],uv,0).rgb;
 	return result;//pow(result,vec3(1/1.01));
 }
 vec3 interp(vec3 c0, vec3 c1, float t)
 {
 	//t = smoothstep(0,1,t);
-	return (1-t)*c0+t*c1;
+	return (1.f-t)*c0+t*c1;
 }
 vec3 linearSample(ivec3 p0, ivec3 p1, float t)
 {
@@ -71,29 +71,29 @@ vec3 trilinearSample(ivec3 p, ivec3 d0, ivec3 d1, ivec3 d2, vec3 uvw)
 }
 
 
-
+float ungamma = 1.f/2.2f;
 
 
 void main()
 {
 	float depth = subpassLoad(depth_input).r;
 	
-	if(depth == 1)
+	if(depth == 1.f)
 		discard;
 		
 	vec3  light = subpassLoad(color_input).rgb;
 	
-	float brightness = dot(light, vec3(0.9,0.9,0.9));
+	float brightness = dot(light, vec3(0.9f,0.9f,0.9f));
 	//if(brightness > 1.0)
     //    out_hdr = vec4(light, 1.0);
     //else
     //    out_hdr = vec4(0.0, 0.0, 0.0, 1.0);
 	
-	out_color = vec4(ReinhardOperator(light),1);
+	out_color = vec4(ReinhardOperator(light),1.f);
 		
 	out_color = clamp(out_color,0,1); //Cannot afford to have it go outside of its LUT
 	
-	vec3 og = pow(out_color.rgb,vec3(1/2.2));
+	vec3 og = pow(out_color.rgb,vec3(ungamma));
 	vec3 p = sizeSpace(og);
 	vec3 p0 =floor(p);
 	vec3 p1 =ceil(p);
@@ -111,7 +111,7 @@ void main()
 	//	out_color.g=1;
 	//if(out_color.b<=err)
 	//	out_color.b=1;
-	out_color.rgb = pow(out_color.rgb,vec3(2.2));
+	out_color.rgb = pow(out_color.rgb,vec3(2.2f));
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 	
 }
