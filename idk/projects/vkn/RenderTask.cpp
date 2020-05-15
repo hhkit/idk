@@ -640,6 +640,7 @@ namespace idk::vkn
 		this->_clear_depth_stencil.reset();
 		this->_copy_commands.clear();
 		this->_current_batch = {};
+		this->_dc_bindings._dc_builder.clear();
 		this->_dc_bindings._vertex_bindings.clear();
 		this->_descriptor_sets.clear();
 		this->_input_attachments = {};
