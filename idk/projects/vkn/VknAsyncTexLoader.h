@@ -27,6 +27,8 @@ namespace idk::vkn
 		void Load(AsyncTexLoadInfo&& load_info, VknTexture& tex,RscHandle<VknTexture> tex_handle);
 		void UpdateTextures();
 
+		void ClearQueue();
+
 		size_t num_pending()const noexcept;
 
 		struct ExecProxy

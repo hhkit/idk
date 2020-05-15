@@ -292,6 +292,7 @@ namespace idk::vkn
 			var.SetIfUnset(name, false);
 			if (*var.Get<bool>(name))
 			{
+				_pimpl->tex_loader.ClearQueue();
 				auto textures = Core::GetResourceManager().GetAll<VknTexture>();
 				for (auto& tex : textures)
 				{

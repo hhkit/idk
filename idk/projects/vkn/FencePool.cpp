@@ -23,13 +23,14 @@ namespace idk::vkn
 		{
 			GrowFences();
 		}
-		auto get_handle = [this]() {
+		auto get_handle = [this,mtx = &this->handle_lock]() {
 			auto guard = _ctrl_block->lock();
 
 			auto index = _handles.back();
 			_handles.pop_back();
 			return index;
 		};
+		auto gd = std::lock_guard{ handle_lock };
 		auto index = get_handle();
 
 		return FenceObj{ *_fences[index],index,this,_ctrl_block };
@@ -37,6 +38,7 @@ namespace idk::vkn
 
 	void FencePool::Free(FenceObj&& obj)
 	{
+		auto gd = std::lock_guard{ handle_lock };
 		_handles.emplace_back(obj.Id());
 	}
 
@@ -70,6 +72,7 @@ namespace idk::vkn
 	{
 		auto new_size = _fences.size() + growth_amount();
 		_fences.reserve(new_size);
+		auto gd = std::lock_guard{ handle_lock };
 		while (_fences.size() < new_size)
 		{
 			_handles.emplace_back(_fences.size());

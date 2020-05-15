@@ -255,11 +255,15 @@ namespace idk::vkn
 				id_buffer[i_ro.instanced_index] = counter++;
 			}
 		}
-		_pimpl->id_buffer.resize(hlp::buffer_size(id_buffer));
-		dbg::BeginLabel(cmd_buffer, "Updating Color Buffer");
-		_pimpl->id_buffer.update<uint32_t>(0, id_buffer, cmd_buffer);
-		dbg::EndLabel(cmd_buffer);
+		if (id_buffer.size())
+		{
 
+			_pimpl->id_buffer.resize(hlp::buffer_size(id_buffer));
+			dbg::BeginLabel(cmd_buffer, "Updating Color Buffer");
+			_pimpl->id_buffer.update<uint32_t>(0, id_buffer, cmd_buffer);
+			dbg::EndLabel(cmd_buffer);
+
+		}
 		auto curr_fb_size = _pimpl->frame_buffer->Size();
 		if (curr_fb_size.x < max_size.x || curr_fb_size.y < max_size.y)
 		{

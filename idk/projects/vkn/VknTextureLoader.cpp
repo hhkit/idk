@@ -199,6 +199,8 @@ namespace idk::vkn
 			TexCreateInfo load_info;
 			std::optional<InputTexInfo> in_info;
 			std::optional<Guid> guid;
+			int usage = 0;
+			FencePool* fp;
 		};
 	}
 
@@ -210,7 +212,9 @@ namespace idk::vkn
 	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTextureData& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		return LoadTextureAsync(&texture, allocator, load_fence, cmd_buffers, std::move(ooptional), load_info, std::move(in_info), guid);
-	}
+	}			
+	static std::mutex fence_mutex;
+	static std::unordered_set<VkFence> fences;
 	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(std::variant<VknTextureData*, VknTexture*> texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
 		lock.Lock();
@@ -221,9 +225,19 @@ namespace idk::vkn
 		if (!*cmd_buffer)
 			__debugbreak();
 		return Core::GetThreadPool().Post(
-			[loader = this](const shared_ptr<Nope::Derp>& _derp) ->void
+			[loader = this,fence_pool = &load_fence](const shared_ptr<Nope::Derp>& _derp) ->void
 			{
 				auto& derp = *_derp;
+				auto device = *View().Device();
+				auto fence = *derp.load_fence;
+				constexpr bool test_acquire_bug = false;
+				if constexpr(test_acquire_bug)
+				{
+					std::lock_guard guard{ fence_mutex };
+					if (!fences.emplace(fence.operator VkFence()).second)
+						DebugBreak();
+				}
+				derp.usage++;
 				auto& lock = loader->lock;
 				VknTextureData tmp;
 				bool is_data = derp.texture.index() == index_in_variant_v<VknTextureData*,decltype(derp.texture)>;
@@ -232,12 +246,10 @@ namespace idk::vkn
 				auto cmd_buffer = (*derp.cmd_buffer);
 				cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 				lock.Unlock();
-				auto&& staging = loader->LoadTexture(SubmissionObjs{ cmd_buffer, *derp.load_fence,false }, tex, derp.allocator, derp.ooptional, derp.load_info, derp.in_info, derp.guid);
-				auto device = *View().Device();
-				auto fence = *derp.load_fence;
+				device.resetFences(fence);
+				auto&& staging = loader->LoadTexture(SubmissionObjs{ cmd_buffer, vk::Fence{},false }, tex, derp.allocator, derp.ooptional, derp.load_info, derp.in_info, derp.guid);
 				tex.dbg_name = tex.Name();
 				dbg::NameObject(tex.Image(true), tex.dbg_name);
-				device.resetFences(fence);
 				lock.Lock();
 				hlp::EndSingleTimeCbufferCmd(cmd_buffer, (is_data)?View().GraphicsTexQueue():View().GraphicsQueue(), false, fence);
 				lock.Unlock();
@@ -246,11 +258,17 @@ namespace idk::vkn
 				[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
 				//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
 				while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout) std::this_thread::yield();
+
+				if constexpr (test_acquire_bug)
+				{
+					std::lock_guard guard{ fence_mutex };
+					fences.erase(fence.operator VkFence());
+				}
 				if (!is_data)
 					tmp.ApplyOnTexture(*std::get<VknTexture*>(derp.texture));
 				return (void)0;
 			},
-			std::make_shared<Nope::Derp>(Nope::Derp{ texture, allocator, std::move(fence), std::move(cmd_buffer), ooptional, load_info, in_info, guid }));
+			std::make_shared<Nope::Derp>(Nope::Derp{ texture, allocator, std::move(fence), std::move(cmd_buffer), ooptional, load_info, in_info, guid ,0,&load_fence}));
 	}
 	hash_table<TextureFormat, vk::Format> FormatMap();
 
@@ -682,6 +700,8 @@ namespace idk::vkn
 		//}
 		if (sub.end_and_submit)
 		{
+			if (!fence)
+				DebugBreak();
 			device.resetFences(fence);
 			hlp::EndSingleTimeCbufferCmd(cmd_buffer, view.GraphicsQueue(), false, fence);
 			uint64_t wait_for_milli_seconds = 1;
