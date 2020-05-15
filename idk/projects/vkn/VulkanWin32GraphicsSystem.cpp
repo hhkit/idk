@@ -304,6 +304,7 @@ namespace idk::vkn
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
+		extra_vars.Set("pending_textures", (int)_pimpl->tex_loader.num_pending());
 		_pimpl->tex_loader.UpdateTextures();
 		_pimpl->timelog.end_then_start("Init Pre render data");
 

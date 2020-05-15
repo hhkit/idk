@@ -213,8 +213,10 @@ namespace idk::vkn
 	}
 	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(std::variant<VknTextureData*, VknTexture*> texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
 	{
+		lock.Lock();
 		auto fence = load_fence.AcquireFence();
 		auto cmd_buffer = cmd_buffers.AcquireCmdBuffer();
+		lock.Unlock();
 		abc++;
 		if (!*cmd_buffer)
 			__debugbreak();

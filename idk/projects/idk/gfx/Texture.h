@@ -17,6 +17,7 @@ namespace idk
 		bool        is_srgb            = true;
 		bool        force_uncompressed = false;
 		unsigned    mipmap_level       = 0;
+		bool        wait_loaded        = false;
 	};
 
 	class Texture

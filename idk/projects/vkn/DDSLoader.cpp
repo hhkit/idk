@@ -106,8 +106,19 @@ namespace idk::vkn
 			)
 			throw std::runtime_error("Invalid DDS");
 		auto iti = GetDdsIti(dds, to);
-		auto tci = GetDdsTci(dds, iti);
-		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti, to.guid);
+		LoadTexture(tex, AsyncTexLoadInfo
+			{
+				{},
+				iti,
+				GetDdsTci(dds, iti),
+				to
+			});
+	}
+	void DdsLoader::LoadTexture(VknTexture& tex, const AsyncTexLoadInfo& info)
+	{
+		auto&& iti = info.iti;
+		auto&& tci = info.tci;
+		loader.LoadTexture(tex, allocator, *load_fence, info.to, tci, iti, info.to.guid);
 	}
 	AsyncTexLoadInfo DdsLoader::GenerateTexInfo(string entire_file, const TextureOptions& to)
 	{

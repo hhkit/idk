@@ -10,20 +10,28 @@
 
         public static void SetGraphicsQuality(Quality quality)
         {
-            switch(quality)
+            switch (quality)
             {
                 case Quality.eHigh:
-                Bindings.GraphicsSetVarBool("HalfMip",false);
-                break;
+                    Bindings.GraphicsSetVarBool("HalfMip", false);
+                    break;
                 case Quality.eLow:
-                Bindings.GraphicsSetVarBool("HalfMip",true);
-                break;
+                    Bindings.GraphicsSetVarBool("HalfMip", true);
+                    break;
             }
-            Bindings.GraphicsSetVarBool("Reload Textures",true);
+            Bindings.GraphicsSetVarBool("Reload Textures", true);
         }
         public static Quality GetGraphicsQuality()
         {
-            return Bindings.GraphicsGetVarBool("HalfMip")?Quality.eLow:Quality.eHigh;
+            return Bindings.GraphicsGetVarBool("HalfMip") ? Quality.eLow : Quality.eHigh;
+        }
+
+        public static int pendingTexturesCount
+        {
+            get
+            {
+                return Bindings.GraphicsGetVarInt("pending_textures");
+            }
         }
 
         public static float gammaCorrection

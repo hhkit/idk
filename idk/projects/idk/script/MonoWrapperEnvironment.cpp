@@ -1676,7 +1676,7 @@ namespace idk::mono
 			string name = unbox(str).get();
 			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
 			auto itr = vars.find(name);
-			return itr != vars.end() && itr->second.index() == index_in_variant_v<int, decltype(itr->second)>&& std::get<int>(itr->second);
+			return (itr != vars.end() && itr->second.index() == index_in_variant_v<int, decltype(itr->second)>) ? std::get<int>(itr->second) : -1;
 		}
 		BIND_END();
 		BIND_START("idk.Bindings::GraphicsSetVarInt", void, MonoString* str, int b)

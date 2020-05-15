@@ -106,6 +106,7 @@ namespace idk::vkn
 		DdsLoader();
 		ResourceBundle LoadFile(PathHandle path_to_resource, const MetaBundle& path_to_meta) override;
 		void LoadTexture(VknTexture& tex, string_view entire_file, const TextureOptions& tex_opt);
+		void LoadTexture(VknTexture& tex, const AsyncTexLoadInfo& info);
 
 		AsyncTexLoadInfo GenerateTexInfo(string entire_file, const TextureOptions& tex_opt);
 

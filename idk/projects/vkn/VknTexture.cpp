@@ -34,10 +34,17 @@ namespace idk::vkn {
 		//	DoNothing();
 		//}
 		//loader.LoadTexture(*this,data, compiled_tex);
-		auto info = loader.GenerateTexInfo(data,compiled_tex);
+		auto info = loader.GenerateTexInfo(data, compiled_tex);
 		_tex_load_info = info;
-		MarkLoaded(false);
-		BeginAsyncReload(compiled_tex.guid);
+		if (compiled_tex.wait_loaded)
+		{
+			loader.LoadTexture(*this,*_tex_load_info);
+		}
+		else
+		{
+			MarkLoaded(false);
+			BeginAsyncReload(compiled_tex.guid);
+		}
 		texture_bytes += this->sizeOnDevice;
 	}
 	vk::ImageAspectFlags VknTexture::ImageAspects() const

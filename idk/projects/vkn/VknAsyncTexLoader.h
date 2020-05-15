@@ -27,6 +27,8 @@ namespace idk::vkn
 		void Load(AsyncTexLoadInfo&& load_info, VknTexture& tex,RscHandle<VknTexture> tex_handle);
 		void UpdateTextures();
 
+		size_t num_pending()const noexcept;
+
 		struct ExecProxy
 		{
 			AsyncTexLoader* ptr;
@@ -53,7 +55,7 @@ namespace idk::vkn
 		CmdBufferPool _cmd_buffers;
 		TextureLoader _loader;
 		hlp::MemoryAllocator _allocator;
-		dbg::milliseconds time_slice{ 5 };
+		dbg::milliseconds time_slice{ 10 };
 	};
 }
 

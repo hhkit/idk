@@ -74,6 +74,11 @@ void AsyncTexLoader::UpdateTextures()
 	ProcessFrame();
 }
 
+size_t AsyncTexLoader::num_pending() const noexcept
+{
+	return _queued.size();
+}
+
 //void UpdateHandle(RscHandle<VknTexture> tex, AsyncTexResult&& result)
 //{
 //	//Only update if the handle is still valid.
@@ -121,13 +126,23 @@ void AsyncTexLoader::ExecProxy::exec()
 	dbg::stopwatch timer;
 	timer.start();
 	do {
-		auto& curr = ptr->_queued.back();
-		auto fut =ptr->_loader.LoadTextureAsync(*curr.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr.info.to, curr.info.tci, curr.info.iti);
+		auto& curr2 = ptr->_queued.back();
+		auto fut = ptr->_loader.LoadTextureAsync(*curr2.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr2.info.to, curr2.info.tci, curr2.info.iti);
+
+		if (ptr->_queued.size() > 1)
+		{
+			auto& curr2 = ptr->_queued.at(ptr->_queued.size()-2);
+			auto fut2 = ptr->_loader.LoadTextureAsync(*curr2.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr2.info.to, curr2.info.tci, curr2.info.iti);
+			while (!fut2.ready()) std::this_thread::yield();
+			ptr->_results.emplace_back(std::move(curr2));
+		}
 		while (!fut.ready()) std::this_thread::yield();
-		ptr->_results.emplace_back(std::move(curr));
+		ptr->_results.emplace_back(std::move(curr2));
 		ptr->_queued.pop_back();
+		if (ptr->_queued.size())
+			ptr->_queued.pop_back();
 		timer.stop();
-	} while (timer.time() > ptr->time_slice && ptr->_queued.size());
+	} while (timer.time() < ptr->time_slice && ptr->_queued.size());
 }
 
 }
