@@ -947,7 +947,7 @@ namespace idk
 					else if (tex_aspect < rt_aspect) // vertically longer
 						new_sz.x = new_sz.y * tex_aspect;
 
-					const vec2 tl{ (rt.pivot - vec2(0.5f, 0.5f)) * (sz - new_sz) };
+					const vec2 tl{ (rt.pivot - vec2(0.5f, 0.5f)) * (sz - new_sz) * 2.0f };
 					render_data.transform = rt._matrix * translate(vec3{ tl, 0 }) * mat4 { scale(vec3{ new_sz, 1.0f }) };
 				}
 				else
