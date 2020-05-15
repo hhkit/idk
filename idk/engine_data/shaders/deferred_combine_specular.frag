@@ -83,7 +83,7 @@ void main()
 		
 	vec3  light = subpassLoad(color_input).rgb;
 	
-	float brightness = dot(light, vec3(0.9f,0.9f,0.9f));
+	//float brightness = dot(light, vec3(0.9f,0.9f,0.9f));
 	//if(brightness > 1.0)
     //    out_hdr = vec4(light, 1.0);
     //else
