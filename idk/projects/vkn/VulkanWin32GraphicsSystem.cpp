@@ -531,6 +531,17 @@ namespace idk::vkn
 			dump();
 			throw;
 		}
+		catch (std::exception& e)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Exception: %s", e.what());
+			dump();
+			throw;
+		}
+		catch (...)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Unknown exception thrown");
+			throw;
+		}
 		profile_bp_end();
 		_pimpl->timelog.end();
 		_pimpl->timer.stop();

@@ -19,42 +19,59 @@ namespace idk::vkn
 	//};
 void AsyncTexLoader::Load(AsyncTexLoadInfo&& load_info, VknTexture& tex, RscHandle<VknTexture> tex_handle)
 {
-	tex.MarkLoaded(false);
+	//tex.MarkLoaded(false);
 	auto data_ptr = std::make_unique<VknTextureData>();
-	auto fut = _loader.LoadTextureAsync(*data_ptr, _allocator, _load_fences, _cmd_buffers, load_info.to, load_info.tci, load_info.iti);
-	_results.emplace_back(
+	_queued.emplace_back(
 		OpData{
-	//	.get(); 
-			std::move(fut),
+			{},
 		tex_handle,
 		std::move(load_info),
 		std::move(data_ptr)
-		}
-	);
+		});
+	//auto fut = _loader.LoadTextureAsync(*data_ptr, _allocator, _load_fences, _cmd_buffers, load_info.to, load_info.tci, load_info.iti);
+	//_results.emplace_back(
+	//	OpData{
+	////	.get(); 
+	//		std::move(fut),
+	//	tex_handle,
+	//	std::move(load_info),
+	//	std::move(data_ptr)
+	//	}
+	//);
 }
 
 void AsyncTexLoader::UpdateTextures()
 {
-	size_t i = 0;
-	while (i<_results.size())
+	if (ready && ready->ready())
 	{
-		auto& [future, handle,ctx, data] = _results.at(i);
-		if (future.ready())
+		//Done processing the last frame's stuff
+		ready->get();
+		ready.reset();
+		size_t i = 0;
+		while (i < _results.size())
 		{
-			future.get();
-			if (handle)
+			auto& [future, handle, ctx, data] = _results.at(i);
+			//if (future.ready())
 			{
-				data->ApplyOnTexture(*handle);
-				handle->MarkLoaded(true);
+				//future.get();
+				if (handle)
+				{
+					data->ApplyOnTexture(*handle);
+					handle->MarkLoaded(true);
+				}
+				//UpdateHandle(handle, future.get());
+			//	i = erase_result(i);
 			}
-			//UpdateHandle(handle, future.get());
-			i = erase_result(i);
-		}
-		else
-		{
+			//else
+			//{
 			++i;
+			//}
 		}
+		_results.clear();
 	}
+	else if (ready && !ready->ready())
+		return;//currently processing something, don't start another one.
+	ProcessFrame();
 }
 
 //void UpdateHandle(RscHandle<VknTexture> tex, AsyncTexResult&& result)
@@ -84,6 +101,33 @@ size_t AsyncTexLoader::erase_result(size_t i)
 	}
 	_results.resize(back);
 	return i;
+}
+
+void AsyncTexLoader::ProcessFrame()
+{
+	ready = Core::GetThreadPool().Post(
+		[](ExecProxy proxy)
+		{
+			proxy.exec();
+		},
+		ExecProxy{this}
+	);
+}
+
+void AsyncTexLoader::ExecProxy::exec()
+{
+	if (ptr->_queued.empty())
+		return;
+	dbg::stopwatch timer;
+	timer.start();
+	do {
+		auto& curr = ptr->_queued.back();
+		auto fut =ptr->_loader.LoadTextureAsync(*curr.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr.info.to, curr.info.tci, curr.info.iti);
+		while (!fut.ready()) std::this_thread::yield();
+		ptr->_results.emplace_back(std::move(curr));
+		ptr->_queued.pop_back();
+		timer.stop();
+	} while (timer.time() > ptr->time_slice && ptr->_queued.size());
 }
 
 }

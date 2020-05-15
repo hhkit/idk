@@ -237,7 +237,7 @@ namespace idk::vkn
 				dbg::NameObject(tex.Image(true), tex.dbg_name);
 				device.resetFences(fence);
 				lock.Lock();
-				hlp::EndSingleTimeCbufferCmd(cmd_buffer, View().GraphicsTexQueue(), false, fence);
+				hlp::EndSingleTimeCbufferCmd(cmd_buffer, (is_data)?View().GraphicsTexQueue():View().GraphicsQueue(), false, fence);
 				lock.Unlock();
 				dbg_chk(tex.Image(true));
 				uint64_t wait_for_milli_seconds = 1;

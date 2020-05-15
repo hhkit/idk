@@ -14,6 +14,11 @@
 #include <vkn/VknTextureLoader.h>
 #include <vkn/VknTextureData.h>
 
+#include <vkn/Stopwatch.h>
+
+#include <meta/stl_hack.h>
+
+
 namespace idk::vkn
 {
 	struct AsyncTexLoader
@@ -21,8 +26,13 @@ namespace idk::vkn
 	public:
 		void Load(AsyncTexLoadInfo&& load_info, VknTexture& tex,RscHandle<VknTexture> tex_handle);
 		void UpdateTextures();
+
+		struct ExecProxy
+		{
+			AsyncTexLoader* ptr;
+			void exec();
+		};
 	private:
-		size_t erase_result(size_t i);
 		struct OpData
 		{
 			mt::Future<void> future;
@@ -30,10 +40,21 @@ namespace idk::vkn
 			AsyncTexLoadInfo info;
 			std::unique_ptr<VknTextureData> data;
 		};
+
+
+		size_t erase_result(size_t i);
+
+		void ProcessFrame();
+
+		std::optional<mt::Future<void>> ready;
+		vector<OpData> _queued;
 		vector<OpData> _results;
 		FencePool _load_fences;
 		CmdBufferPool _cmd_buffers;
 		TextureLoader _loader;
 		hlp::MemoryAllocator _allocator;
+		dbg::milliseconds time_slice{ 5 };
 	};
 }
+
+MARK_NON_COPY_CTORABLE(idk::vkn::AsyncTexLoader::OpData)
