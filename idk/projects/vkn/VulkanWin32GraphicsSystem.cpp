@@ -690,7 +690,7 @@ namespace idk::vkn
 	{
 		static int a = 0;
 	}
-#pragma optimize("",off)
+//#pragma optimize("",off)
 	void profile_bp_start()
 	{
 		wtfareyoudoing::a++;

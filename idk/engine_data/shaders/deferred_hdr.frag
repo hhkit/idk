@@ -38,15 +38,17 @@ vec3 ReinhardOperator(vec3 color)
 void main()
 {
 	float metallic_depth = subpassLoad(metallic_depth_input).r;
-	vec3  metallic_light = subpassLoad(metallic_light_accum_input).rgb;
 	float specular_depth = subpassLoad(specular_depth_input).r;
-	vec3  specular_light = subpassLoad(specular_light_accum_input).rgb;
 	
 	float depth =min(metallic_depth,specular_depth);
-	vec3 light =(metallic_depth<specular_depth)?metallic_light:specular_light;
 	if(depth==1)
 		discard;
+		
+	vec3  specular_light = subpassLoad(specular_light_accum_input).rgb;
+	vec3  metallic_light = subpassLoad(metallic_light_accum_input).rgb;
+	
+	vec3 light =(metallic_depth<specular_depth)?metallic_light:specular_light;
 	vec3 color = ReinhardOperator(light); 
-	out_color = vec4(color,1);
+	out_color = vec4(color,1.f);
 	gl_FragDepth = depth;
 }
