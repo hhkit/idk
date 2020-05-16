@@ -13,6 +13,7 @@ namespace idk
 	class IDManager;
 	class ClientConnectionManager;
 	class ServerConnectionManager;
+	class Socket;
 
 	class NetworkSystem
 		: public ISystem
@@ -57,6 +58,13 @@ namespace idk
 		span<const Handle<mono::Behavior>> GetCallbackTargets() const;
 
 		template<typename ... Objects> void SubscribePacketResponse(void(*fn)(span<Objects...>));
+
+		// for discovery
+		void SetSearch(bool enable);
+		bool IsSearching() const { return static_cast<bool>(client_listen_socket); }
+		void SetBroadcast(bool enable);
+		bool IsBroadcasting() const { return static_cast<bool>(server_broadcast_socket); }
+		vector<Address> GetDiscoveredServers() const;
 	private:
 		struct ResponseCallback {
 			void* fn_ptr;
@@ -77,6 +85,14 @@ namespace idk
 
 		SeqNo frame_counter{};
 		Host my_id = Host::NONE;
+
+		unique_ptr<Socket> client_listen_socket;
+		unique_ptr<Socket> server_broadcast_socket;
+
+		static constexpr seconds server_broadcast_limit = seconds{ 5 };
+		static constexpr seconds server_entry_time_to_live = seconds{ 10 };
+		seconds server_timer{};
+		std::map<Address, seconds> client_address_cooldown;
 
 		void Init() override;
 		void LateInit() override;

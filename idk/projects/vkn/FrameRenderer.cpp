@@ -63,6 +63,9 @@
 
 #include <vkn/MaterialInstanceCache.h>
 
+#include <vkn/time_log.h>
+#include <vkn/Stopwatch.h>
+
 namespace idk::vkn
 {
 #define CreateRenderThread() std::make_unique<NonThreadedRender>()
@@ -73,7 +76,8 @@ namespace idk::vkn
 		vector<ColorPickRequest> color_pick_requests;
 		ColorPickRenderer color_picker;
 		FrameGraph graph{};
-		gt::GraphTest test{ graph };
+		FrameGraph gtest_graph{};
+		gt::GraphTest test{gtest_graph};
 
 		MaterialInstanceCache mat_inst_cache;
 
@@ -85,6 +89,7 @@ namespace idk::vkn
 		uint32_t gfx_state_index = 0;
 
 		uint32_t testing = 0;
+
 	};
 
 	//from: https://riptutorial.com/cplusplus/example/30142/semaphore-cplusplus-11
@@ -772,126 +777,6 @@ namespace idk::vkn
 	{
 		renderpasses::AddShadowPass(_pimpl->graph, shadow_range, state);
 		return;
-		//const LightData& light = state.shared_gfx_state->Lights()[shadow_range.light_index];
-		//auto& rs = r[curr_state];
-		//vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-		//
-		//if (light.index == 1)
-		//{
-		//	//auto& camData = *state.cameras->begin();
-		//	{
-		//		
-		//		
-		//		//auto cam = CameraData{ GenericHandle {}, LayerMask{0xFFFFFFFF }, light.v, light.v * camData.tight_projection_matrix };
-		//		static const mat4 clip_mat = mat4{ vec4{1,0,0,0},vec4{0,1,0,0},vec4{0,0,0.5f,0},vec4{0,0,0.5f,1} };
-		//		//for (auto& e : *state.d_lightmaps)
-		//		{
-		//			//for (auto& elem : light.light_maps)
-		//			auto& elem = light.light_maps[shadow_range.light_map_index];
-		//			{
-		//				auto cam = CameraData{ Handle<GameObject>{}, light.shadow_layers, light.v, clip_mat *elem.cascade_projection };
-		//				ShadowBinding shadow_binding;
-		//				shadow_binding.for_each_binder<has_setstate>(
-		//					[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
-		//				{
-		//					binder.SetState(cam, skel);
-		//				},
-		//					cam,
-		//					*state.skeleton_transforms);
-		//				GraphicsStateInterface gsi = { state };
-		//				gsi.range = shadow_range;
-		//				auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-		//				the_interface.GenerateDS(rs.dpools,false);
-
-		//				//auto& swapchain = view.Swapchain();
-
-
-		//				//auto lm = elem.light_map->DepthAttachment().buffer;
-		//				auto sz = elem.light_map->DepthAttachment().buffer->Size();
-
-		//				vk::Rect2D render_area
-		//				{
-		//					vk::Offset2D{},
-		//					vk::Extent2D{sz.x,sz.y}
-		//				};
-		//				auto& rt = elem.light_map.as<VknFrameBuffer>();
-		//				vk::Framebuffer fb = rt.GetFramebuffer();
-		//				auto  rp = rt.GetRenderPass();
-		//				rt.PrepareDraw(cmd_buffer);
-		//				vector<vec4> clear_colors
-		//				{
-		//					vec4{1}
-		//				};
-		//				//if (the_interface.DrawCalls().size())
-		//					rs.FlagRendered();
-		//				dbg::BeginLabel(cmd_buffer, "directional shadow", color{ 0,0.3f,0.3f,1 });
-		//				RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
-		//				dbg::EndLabel(cmd_buffer);
-		//				cmd_buffer.endRenderPass();
-		//			}
-		//			//cmd_buffer.end();
-		//			//rs.ubo_manager.UpdateAllBuffers();
-		//		}
-		//	}
-		//}
-		//else
-		//{
-
-		//	auto cam = CameraData{ Handle<GameObject> {}, light.shadow_layers, light.v, light.p };
-		//	ShadowBinding shadow_binding;
-		//	shadow_binding.for_each_binder<has_setstate>(
-		//		[](auto& binder, const CameraData& cam, const vector<SkeletonTransforms>& skel)
-		//	{
-		//		binder.SetState(cam, skel);
-		//	},
-		//		cam,
-		//		*state.skeleton_transforms);
-
-		//	GraphicsStateInterface gsi = { state };
-		//	gsi.range = shadow_range;
-
-		//	//for (auto& elem : light.light_maps)
-		//	auto& elem = light.light_maps[shadow_range.light_map_index];
-		//	{
-		//		//auto& rs = r[curr_state];
-		//		auto the_interface = vkn::ProcessRoUniforms(gsi, rs.ubo_manager, shadow_binding);
-		//		the_interface.GenerateDS(rs.dpools,false);
-
-
-		//		//auto& swapchain = view.Swapchain();
-		//		//auto dispatcher = vk::DispatchLoaderDefault{};
-		//		//vk::CommandBuffer cmd_buffer = rs.CommandBuffer();
-		//		//vk::CommandBufferBeginInfo begin_info{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit,nullptr };
-		//		//
-		//		//
-		//		//cmd_buffer.begin(begin_info, dispatcher);
-		//		auto sz = elem.light_map->DepthAttachment().buffer->Size();
-		//		vk::Rect2D render_area
-		//		{
-		//			vk::Offset2D{},
-		//			vk::Extent2D{sz.x,sz.y}
-		//		};
-		//		auto& rt = elem.light_map.as<VknFrameBuffer>();
-		//		vk::Framebuffer fb = rt.GetFramebuffer();
-		//		auto  rp = rt.GetRenderPass();
-		//		dbg::BeginLabel(cmd_buffer, "other shadow", color{ 0,0.2f,0.4f,1 });
-		//		rt.PrepareDraw(cmd_buffer);
-		//		vector<vec4> clear_colors
-		//		{
-		//			vec4{1}
-		//		};
-		//		if (the_interface.DrawCalls().size())
-		//			rs.FlagRendered();
-		//		RenderPipelineThingy(*state.shared_gfx_state, the_interface, GetPipelineManager(), cmd_buffer, clear_colors, fb, rp, true, render_area, render_area, frame_index);
-
-		//		cmd_buffer.endRenderPass();
-		//		dbg::EndLabel(cmd_buffer);
-
-		//		//cmd_buffer.end();
-
-		//	}
-		//}
-
 	}
 
 	void FrameRenderer::PostRenderCanvas(size_t& ui_elem_count, size_t& text_count, RscHandle<RenderTarget> rr, const vector<UIRenderObject>& canvas_data, const PostRenderData& state, RenderStateV2& rs, uint32_t frame_index)
@@ -942,11 +827,13 @@ namespace idk::vkn
 //
 	namespace gt
 	{
-
 		void GraphDeferredTest(const CoreGraphicsState& gfx_state, RenderStateV2& rs);
 	}
+	dbg::time_log& GetGfxTimeLog();
+
 	void FrameRenderer::RenderGraphicsStates(const vector<GraphicsState>& gfx_states, uint32_t frame_index)
 	{
+		//GetGfxTimeLog().push_level("RenderGraphicsState");
 		_pimpl->gfx_state_index = 0;
 		_current_frame_index = frame_index;
 		//Update all the resources that need to be updated.
@@ -962,45 +849,6 @@ namespace idk::vkn
 		{
 			state.Reset();
 		}
-		/*
-		uvec2 max_size{};
-		for (auto& gfx_state : gfx_states)
-		{
-			auto sz = gfx_state.camera.render_target->Size();
-			max_size.x = std::max(sz.x, max_size.x);
-			max_size.y = std::max(sz.y, max_size.y);
-		}
-		if (max_size.x > _gbuffer_size.x || max_size.y > _gbuffer_size.y)
-		{
-			for (auto& gbuffer : _gbuffers)
-			{
-				if(gbuffer.Init(max_size))
-					_pimpl->deferred_buffers.clear();
-			}
-		}
-		for (auto i = gfx_states.size(); i-- > 0;)
-		{
-			if (Core::GetSystem<GraphicsSystem>().is_deferred())
-			{
-				auto& camera = gfx_states[i].camera;
-				auto& deferred_pass=_states[i].deferred_pass;
-				deferred_pass.fullscreen_quad_vert = Core::GetSystem<GraphicsSystem>().renderer_vertex_shaders[VertexShaders::VFsq];
-				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eMetallic)] = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPost];
-				deferred_pass.deferred_post_frag[EGBufferType::map(GBufferType::eSpecular)]= Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostSpecular];
-				deferred_pass.deferred_post_ambient = Core::GetSystem<GraphicsSystem>().renderer_fragment_shaders[FragmentShaders::FDeferredPostAmbient];
-				auto& rt = camera.render_target.as<VknRenderTarget>();
-				//auto& deferred_buffers = _pimpl->deferred_buffers;
-				//auto color_buffer = rt.GetColorBuffer();
-				//auto hdr_itr = deferred_buffers.find(color_buffer);
-				//if (hdr_itr != deferred_buffers.end())
-				//{
-				//	deferred_pass.hdr_buffer = hdr_itr->second;
-				//}
-				deferred_pass.Init(rt,_gbuffers);
-				//deferred_buffers[color_buffer] = deferred_pass.hdr_buffer;
-			}
-		}
-		*/
 		bool rendered = false;
 		{
 			;
@@ -1029,8 +877,16 @@ namespace idk::vkn
 			auto& thread = _render_threads[j];
 			thread->Join();
 		}
+
+
+
 		{
+			dbg::stopwatch timer;
+			timer.start();
+			GetGfxTimeLog().start("Render Graph");
+			GetGfxTimeLog().start("Compile");
 			_pimpl->graph.Compile();
+			GetGfxTimeLog().end_then_start("AllocRsc & BuildRP");
 			const auto& graph = _pimpl->graph;
 
 			const auto kNameShowDbgLifetimes = "Show Dbg Lifetimes";
@@ -1045,16 +901,24 @@ namespace idk::vkn
 			_pimpl->graph.AllocateResources();
 			_pimpl->graph.BuildRenderPasses();
 			_pimpl->graph.SetPipelineManager(*this->_pipeline_manager);
+			GetGfxTimeLog().end_then_start("Execute");
 			_pimpl->graph.Execute();
+			GetGfxTimeLog().end_then_start("ProcBatches");
+
 
 			RenderBundle rb{ state.CommandBuffer() ,state.dpools };
 			rb._cmd_buffer.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 			dbg::BeginLabel(rb._cmd_buffer, "Framegraph in RenderGraphicsStates starting.", color{ 0.3f, 0.4f, 0.f });
 			_pimpl->graph.ProcessBatches(rb);
+			GetGfxTimeLog().end_then_start("Update Ubo Buffers");
 			state.ubo_manager.UpdateAllBuffers();
+			GetGfxTimeLog().end_then_start("Misc");
 			dbg::EndLabel(rb._cmd_buffer);
 			rb._cmd_buffer.end();
 			state.FlagRendered();
+			timer.stop();
+			GetGfxTimeLog().end();//Misc
+			GetGfxTimeLog().end();//Render Graph
 		}
 		pri_buffer->reset({}, vk::DispatchLoaderDefault{});
 		vector<vk::CommandBuffer> buffers{};
@@ -1136,6 +1000,7 @@ namespace idk::vkn
 		auto copy = View().Swapchain().m_graphics.Images();
 		copy[View().vulkan().rv ]= RscHandle<VknRenderTarget>()->GetColorBuffer().as<VknTexture>().Image();
 		View().Swapchain().m_graphics.Images(std::move(copy));
+		//GetGfxTimeLog().pop_level();
 	}
 
 	void ConvertToNonSRGB(RenderStateV2& rs,gt::GraphTest& gtest)
@@ -1155,9 +1020,8 @@ namespace idk::vkn
 		auto total_post_states = canvas.size() + num_conv_states + num_instanced_buffer_state + num_gamma_conv;
 		GrowStates(_post_states, total_post_states);
 		for (auto& pos_state : _post_states)
-		{
 			pos_state.Reset();
-		}
+		
 		size_t curr_state = 0;
 		std::optional<vk::Semaphore> copy_semaphore{};
 		{
@@ -1172,13 +1036,10 @@ namespace idk::vkn
 
 			if (state.shared_gfx_state->ui_canvas && state.shared_gfx_state->ui_canvas->size())
 			{
-				//auto& canvas_data = canvas;
 				auto& pos_buffer = state.shared_gfx_state->ui_buffer_pos;
 				auto& uv_buffer = state.shared_gfx_state->ui_buffer_uv;
 				auto& color_buffer = state.shared_gfx_state->ui_buffer_color;
-				//auto& buffer = state.shared_gfx_state->ui_text_buffer;
 				auto& doto = *state.shared_gfx_state->ui_attrib_data;
-				//auto& canvas_range_data = *state.shared_gfx_state->ui_canvas_range;
 
 				pos_buffer.resize(doto.size());
 				uv_buffer.resize(doto.size());
@@ -1186,22 +1047,24 @@ namespace idk::vkn
 
 				for (size_t i = 0; i < doto.size(); ++i)
 				{
-					if (doto[i].pos.size())
+					auto& elem = doto[i];
+					
+					if (elem.pos.size())
 					{
-						pos_buffer[i].resize(hlp::buffer_size(doto[i].pos));
-						pos_buffer[i].update<const vec2>(0, doto[i].pos, cmd_buffer);
+						pos_buffer[i].resize(hlp::buffer_size(elem.pos));
+						pos_buffer[i].update<const vec2>(0, elem.pos, cmd_buffer);
 
-						uv_buffer[i].resize(hlp::buffer_size(doto[i].uv));
-						uv_buffer[i].update<const vec2>(0, doto[i].uv, cmd_buffer);
+						uv_buffer[i].resize(hlp::buffer_size(elem.uv));
+						uv_buffer[i].update<const vec2>(0, elem.uv, cmd_buffer);
 					}
 
-					color_buffer[i].resize(hlp::buffer_size(doto[i].color));
-					color_buffer[i].update<const color>(0, doto[i].color, cmd_buffer);
+					color_buffer[i].resize(hlp::buffer_size(elem.color));
+					color_buffer[i].update<const color>(0, elem.color, cmd_buffer);
 				}
 				
 			}
 			cmd_buffer.end();
-			//copy_state.FlagRendered();//Don't flag, we want to submit this separately.
+			//Don't flag, we want to submit this separately.
 
 			vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eTransfer };
 			vk::SubmitInfo submit_info
@@ -1217,21 +1080,13 @@ namespace idk::vkn
 			queue.submit(submit_info, vk::Fence{}, vk::DispatchLoaderDefault{});
 		}
 
+
+
 		//Do post pass here
 		//Canvas pass
-		//if (state.shared_gfx_state->ui_canvas)
-		//	for (auto& ui_canvas : *state.shared_gfx_state->ui_canvas)
-		//	{
-		//		
-		//	}
 		size_t i = 0, j = 0;
 		for (auto& elem : canvas)
 		{
-			//for (auto& ui_ro : elem.ui_ro)
-			//{
-			//	if (std::holds_alternative<ImageData>(ui_ro.data))
-			//		state.shared_gfx_state->material_instances.emplace(ui_ro.material, ProcessedMaterial{ ui_ro.material });
-			//}
 			auto& rs = _post_states[curr_state++];
 			//if(elem.render_target) //Default render target is null. Don't ignore it.
 			PostRenderCanvas(i, j, elem.render_target, elem.ui_ro, state, rs, frame_index);
@@ -1239,7 +1094,11 @@ namespace idk::vkn
 
 		if (Core::GetSystem<GraphicsSystem>().extra_vars.Get<float>("gamma_correction"))
 		{
-			ConvertToNonSRGB(_post_states[curr_state++],_pimpl->test);
+			auto& rs = _post_states[curr_state++];
+			auto& graph = _pimpl->gtest_graph;
+			graph.SetDefaultUboManager(rs.ubo_manager);
+			graph.SetPipelineManager(GetPipelineManager());
+			ConvertToNonSRGB(rs,_pimpl->test);
 		}
 
 		//TODO: Submit the command buffers
@@ -1285,7 +1144,7 @@ namespace idk::vkn
 				auto cmd_pool = View().vulkan().CreateGfxCommandPool();
 				auto&& buffers = device.allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{ *cmd_pool,vk::CommandBufferLevel::ePrimary, 1}, vk::DispatchLoaderDefault{});
 				auto& buffer = buffers[0];
-				states.emplace_back(RenderStateV2{std::move(cmd_pool), std::move(buffer),UboManager{View()},PresentationSignals{},DescriptorsManager{View()},CubemapRenderer{} }).signal.Init(View());
+				states.emplace_back(RenderStateV2{std::move(cmd_pool), std::move(buffer),UboManager{View()},PresentationSignals{},DescriptorsManager{View()} }).signal.Init(View());
 				//_state_cmd_buffers.emplace_back(std::move(buffer));
 			}
 		}

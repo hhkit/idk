@@ -32,6 +32,7 @@
 
 #include <res/ResourceHandle.inl>
 
+#include <meta/variant.inl>
 
 namespace idk::mono
 {
@@ -1644,6 +1645,51 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::GraphicsVarBoolIsSet", bool, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return itr != vars.end() && itr->second.index() == index_in_variant_v<bool, decltype(itr->second)>;
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsGetVarBool", bool, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return itr != vars.end() && itr->second.index() == index_in_variant_v<bool, decltype(itr->second)>&& std::get<bool>(itr->second);
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsSetVarBool", void, MonoString* str, bool b)
+		{
+			string name = unbox(str).get();
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set(name,b);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::GraphicsVarIntIsSet", bool, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return itr != vars.end() && itr->second.index() == index_in_variant_v<int, decltype(itr->second)>;
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsGetVarInt", int, MonoString* str)
+		{
+			string name = unbox(str).get();
+			auto& vars = Core::GetSystem<GraphicsSystem>().extra_vars.extra_vars;
+			auto itr = vars.find(name);
+			return (itr != vars.end() && itr->second.index() == index_in_variant_v<int, decltype(itr->second)>) ? std::get<int>(itr->second) : -1;
+		}
+		BIND_END();
+		BIND_START("idk.Bindings::GraphicsSetVarInt", void, MonoString* str, int b)
+		{
+			string name = unbox(str).get();
+			Core::GetSystem<GraphicsSystem>().extra_vars.Set(name, b);
+		}
+		BIND_END();
 		//BIND_START("idk.Bindings::GraphicsGetGammaCorrection", float)
 		//{
 		//	return Core::GetSystem<GraphicsSystem>().extra_vars.Get;
@@ -2390,6 +2436,44 @@ namespace idk::mono
 			}
 
 			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetDiscoveredServers", MonoArray*)
+		{
+			auto discovered = Core::GetSystem<NetworkSystem>().GetDiscoveredServers();
+
+			const auto address_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Address");
+			auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), discovered.size());
+
+			for (unsigned j = 0; j < discovered.size(); ++j)
+				mono_array_set(retval, Address, j, discovered[j]);
+
+			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetIsListeningForServers", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().IsSearching();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSetIsListeningForServers", void, bool set)
+		{
+			Core::GetSystem<NetworkSystem>().SetSearch(set);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetIsBroadcastingServerIP", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().IsBroadcasting();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSetIsBroadcastingServerIP", void, bool set)
+		{
+			Core::GetSystem<NetworkSystem>().SetBroadcast(set);
 		}
 		BIND_END();
 

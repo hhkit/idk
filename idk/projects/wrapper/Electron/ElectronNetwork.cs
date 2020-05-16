@@ -25,6 +25,18 @@ namespace idk
         public static int      ping        { get => Bindings.NetworkGetPing(); }
         public static Device[] devices     { get => Bindings.NetworkGetDevices(); }
 
+        public static Address[] discoveredServers { get => Bindings.NetworkGetDiscoveredServers(); }
+        public static bool isListeningForServers
+        {
+            get => Bindings.NetworkGetIsListeningForServers();
+            set => Bindings.NetworkSetIsListeningForServers(value);
+        }
+        public static bool isBroadcastingServerIP
+        {
+            get => Bindings.NetworkGetIsBroadcastingServerIP();
+            set => Bindings.NetworkSetIsBroadcastingServerIP(value);
+        }
+
         public static void Disconnect() => Bindings.NetworkDisconnect();
         public static void CreateLobby() => Bindings.NetworkCreateLobby(devices[0].mac_addr);
         public static void Connect(Address a) => Bindings.NetworkConnect(a);

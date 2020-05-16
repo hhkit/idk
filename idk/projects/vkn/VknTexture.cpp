@@ -5,6 +5,10 @@
 #include <res/ResourceManager.inl>
 #include <sstream>
 #include <vkn/TextureTracker.h>
+
+#include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/VknAsyncTexLoader.h>
+#include <vkn/VknTextureData.h>
 namespace idk::vkn {
 	namespace hlp
 	{
@@ -29,13 +33,23 @@ namespace idk::vkn {
 		//	string test2 = ss.str();
 		//	DoNothing();
 		//}
-
-		loader.LoadTexture(*this,data,compiled_tex);
+		//loader.LoadTexture(*this,data, compiled_tex);
+		auto info = loader.GenerateTexInfo(data, compiled_tex);
+		_tex_load_info = info;
+		if (compiled_tex.wait_loaded)
+		{
+			loader.LoadTexture(*this,*_tex_load_info);
+		}
+		else
+		{
+			MarkLoaded(false);
+			BeginAsyncReload(compiled_tex.guid);
+		}
 		texture_bytes += this->sizeOnDevice;
 	}
 	vk::ImageAspectFlags VknTexture::ImageAspects() const
 	{
-		return img_aspect;
+		return GetEffective().img_aspect;
 	}
 	uint32_t& VknTexture::Layers(uint32_t layers) noexcept
 	{
@@ -43,11 +57,11 @@ namespace idk::vkn {
 	}
 	uint32_t VknTexture::Layers()const noexcept
 	{
-		return _layers;
+		return GetEffective()._layers;
 	}
 	vk::ImageSubresourceRange VknTexture::FullRange() const
 	{
-		return range;
+		return GetEffective().range;
 	}
 	void VknTexture::FullRange(vk::ImageSubresourceRange range_)
 	{
@@ -91,6 +105,22 @@ namespace idk::vkn {
 		return *this;
 	}
 
+	vk::Sampler VknTexture::Sampler() const 
+	{
+		return *GetEffective().sampler;
+	}
+
+	vk::Image VknTexture::Image(bool ignore_effective) const 
+	{ 
+
+		return *GetEffective(ignore_effective).image_;
+	}
+
+	vk::ImageView VknTexture::ImageView() const 
+	{
+		return *GetEffective().imageView;
+	}
+
 	uvec2 VknTexture::Size(uvec2 new_size)
 	{
 		return Texture::Size(new_size);
@@ -102,6 +132,40 @@ namespace idk::vkn {
 	{
 		//Should be descriptor set 
 		return r_cast<void*>(imageView->operator VkImageView());
+	}
+
+	bool VknTexture::MarkLoaded(bool loaded)
+	{
+		return _loaded = loaded;
+	}
+
+	bool VknTexture::IsLoaded() const
+	{
+		return _loaded;
+	}
+
+	void VknTexture::SetTexLoadInfo(std::optional<AsyncTexLoadInfo> info)
+	{
+		_tex_load_info = std::move(info);
+	}
+
+	const std::optional<AsyncTexLoadInfo>& VknTexture::GetTexLoadInfo() const
+	{
+		return _tex_load_info;
+	}
+
+	void VknTexture::BeginAsyncReload(std::optional<Guid> guid)
+	{
+		if (_tex_load_info)
+		{
+			auto copy = *_tex_load_info;
+			Core::GetSystem<VulkanWin32GraphicsSystem>().GetAsyncTexLoader().Load(std::move(copy), *this, guid ? RscHandle<VknTexture>{ *guid } : RscHandle < VknTexture>{ GetHandle() });
+		}
+	}
+
+	const VknTexture& VknTexture::GetEffective(bool ignore_default) const
+	{
+		return (ignore_default||IsLoaded()) ? *this : *RscHandle<VknTexture>{};
 	}
 
 	void VknTexture::OnMetaUpdate(const TextureMeta&)

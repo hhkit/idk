@@ -93,6 +93,7 @@ namespace idk::vkn::bindings
 	}
 	void PointStandardVertexBindings::BindAni(RenderInterface& the_interface, const AnimatedRenderObject& dc)
 	{
+		DebugBreak();
 		the_interface.BindUniform("BoneMat4Block", 0, hlp::to_data((*state.skeletons)[dc.skeleton_index].bones_transforms));
 	}
 }

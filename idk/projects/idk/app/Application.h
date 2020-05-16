@@ -4,6 +4,7 @@
 #include <app/Keys.h>
 #include <event/Signal.h>
 #include <network/Device.h>
+#include <network/Socket.h>
 
 namespace idk
 {
@@ -59,5 +60,6 @@ namespace idk
 
 		// networking
 		virtual vector<Device> GetNetworkDevices() = 0;
+		virtual unique_ptr<Socket> CreateSocket() = 0;
 	};
 }

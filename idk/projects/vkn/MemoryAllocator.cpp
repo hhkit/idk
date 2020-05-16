@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <ds/index_span.inl>
+#include <vkn/MemoryCollator.h>
 namespace idk::vkn
 {
 	VulkanView& View();
@@ -15,6 +16,22 @@ namespace idk::vkn
 }
 namespace idk::vkn::hlp
 {
+
+	struct detail::Memories::Memory
+	{
+		Memory(vk::UniqueDeviceMemory&& mem, size_t size) :memory{ std::move(mem) }, collator{ {0,size} }{}
+
+		void Free(size_t offset, size_t size);
+		//Returns offset if it is allocated
+		std::optional<std::pair<unaligned_t, aligned_t>> Allocate(size_t size, size_t alignment);
+
+		vk::UniqueDeviceMemory memory;
+		size_t sz()const noexcept;
+		MemoryCollator collator;
+
+
+	};
+
 	using dbg::num_bytes_to_str;
 	static hash_set<MemoryAllocator*> _allocators;
 	std::pair<size_t,size_t> DumpAllocator(std::ostream& out,const MemoryAllocator& alloc)
@@ -29,7 +46,7 @@ namespace idk::vkn::hlp
 			for (auto& mem : mems.second.memories)
 			{
 				size_t free = 0;
-				for (auto& freed : mem.collator.free_list)
+				for (auto&& freed : mem.collator.free_list)
 				{
 					free += freed.size();
 				}
@@ -69,7 +86,7 @@ namespace idk::vkn::hlp
 	using detail::Memories;
 
 
-//#pragma optimize("",off)
+
 
 	static size_t dbg_threshold = 100000000;
 
@@ -132,6 +149,8 @@ namespace idk::vkn::hlp
 		}
 	}
 
+	size_t MemoryAllocator::Alloc::BlockSize() const { return control.IntMemory().sz(); }
+
 	MemoryAllocator::Alloc::~Alloc() = default;
 
 //// 
@@ -159,6 +178,9 @@ namespace idk::vkn::hlp
 	) : device{ d },
 		type{ mem_type },
 		chunk_size{ chunkSize }{}
+	detail::Memories::Memories(Memories&&) noexcept = default;
+	Memories& detail::Memories::operator=(Memories&&)noexcept = default;
+	detail::Memories::~Memories() = default;
 	Memories::Memory& Memories::Add(size_t min)
 	{
 		auto sz = std::max(chunk_size, min);
@@ -189,6 +211,8 @@ namespace idk::vkn::hlp
 		{
 			auto& mem = Add(size);
 			alloc_offset = mem.Allocate(size, alignment);
+			if (!alloc_offset)
+				throw std::runtime_error("Failed to allocate graphics memory");
 		}
 		return std::make_pair(index, *alloc_offset);
 	}

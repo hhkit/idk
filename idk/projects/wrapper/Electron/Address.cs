@@ -13,5 +13,14 @@
             d = (byte) _d;
             port = 0;
         }
+
+        public override string ToString()
+        {
+            return "" + a
+                + "." + b
+                + "." + c
+                + "." + d
+                + ":" + port;
+        }
     }
 }

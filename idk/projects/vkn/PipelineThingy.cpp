@@ -19,8 +19,8 @@ namespace idk::vkn
 	VulkanView& View();
 	struct DSUpdater
 	{
-		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos;
+		decltype(DescriptorUpdateData::scratch_buffer_infos)& buffer_infos;
+		DescriptorUpdateData::vector_a<DescriptorUpdateData::vector_a<vk::DescriptorImageInfo>>& image_infos;
 		const ProcessedRO::BindingInfo& binding;
 		const vk::DescriptorSet& dset;
 		vk::WriteDescriptorSet& curr;
@@ -52,7 +52,7 @@ namespace idk::vkn
 		void operator()(ProcessedRO::image_t ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
@@ -66,7 +66,7 @@ namespace idk::vkn
 		void operator()(ProcessedRO::AttachmentBinding ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
@@ -78,7 +78,7 @@ namespace idk::vkn
 			curr.descriptorType = vk::DescriptorType::eInputAttachment;
 		}
 	};
-	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw)
+	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw)
 	{
 		auto insert_itr = dsw.begin();
 		for (auto itr = dsw.begin(); itr != dsw.end(); ++itr)
@@ -144,9 +144,10 @@ namespace idk::vkn
 		DescriptorUpdateData& out
 	)
 	{
-		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos = out.scratch_buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos = out.scratch_image_info;
-		vector<vk::WriteDescriptorSet> &descriptorWrite = out.scratch_descriptorWrite;
+		auto& buffer_infos = out.scratch_buffer_infos;
+		auto& image_infos = out.scratch_image_info;
+		auto  &descriptorWrite = out.scratch_descriptorWrite;
+		using img_vec_t = std::remove_reference_t<decltype(image_infos[0])>;
 		uint32_t max_binding = 0;
 		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
 		vk::DescriptorImageInfo default_img
@@ -160,7 +161,7 @@ namespace idk::vkn
 			if (max_binding > descriptorWrite.size())
 			{
 				descriptorWrite.resize(max_binding, vk::WriteDescriptorSet{});
-				image_infos.resize(max_binding);
+				image_infos.resize(max_binding, img_vec_t(out.alloc));
 			}
 			auto& curr = descriptorWrite[binding.binding];
 			if (binding.IsImage() || binding.IsAttachment())
@@ -206,7 +207,7 @@ namespace idk::vkn
 		return ProcessedRO::BindingInfo
 		{
 			obj_uni.binding,
-			ProcessedRO::ImageBinding{ val.ImageView(),*val.sampler,layout },
+			ProcessedRO::ImageBinding{ val.ImageView(),val.Sampler(),layout },
 			0,
 			arr_index,
 			obj_uni.size,
@@ -448,11 +449,11 @@ namespace idk::vkn
 				}(bindings);
 				auto ds = dsl.find(layout)->second.GetNext();
 				vk::Device device = *View().Device();
-				UpdateUniformDS( ds, bindings,dud);
+				UpdateUniformDS( ds, bindings,*dud);
 				p_ro.SetDescriptorSet(set,ds);
 			}
 		}
-		dud.SendUpdates();
+		dud->SendUpdates();
 	}
 	void PipelineThingy::UpdateUboBuffers()
 	{

@@ -177,6 +177,7 @@ namespace idk
 			alignas(machine::cache_line_sz) vector<LightRenderRange> culled_light_render_range;
 			alignas(machine::cache_line_sz) vector<CanvasRenderRange> canvas_render_range;
 
+			alignas(machine::cache_line_sz) hash_set<RscHandle<MaterialInstance>>       active_materials;
 			//RscHandle<ShaderProgram> mesh_vtx;
 			//RscHandle<ShaderProgram> skinned_mesh_vtx;
 			alignas(machine::cache_line_sz) array<RscHandle<ShaderProgram>, VertexShaders::VMax>   renderer_vertex_shaders;

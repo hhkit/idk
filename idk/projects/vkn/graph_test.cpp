@@ -16,7 +16,6 @@
 #include <vkn/utils/VknUtil.h>
 
 #include <vkn/renderpasses/DeferredPasses.h>
-#pragma optimize("",on)
 namespace idk::vkn
 {
 

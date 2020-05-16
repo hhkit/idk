@@ -154,6 +154,7 @@ namespace idk::vkn
 		vk::UniqueDevice                 m_device;
 		QueueFamilyIndices               m_queue_family = {};
 		vk::Queue                        m_graphics_queue = {};
+		vk::Queue                        m_graphics_tex_queue = {};
 		vk::Queue                        m_present_queue = {};
 		vk::UniqueDescriptorPool         m_descriptorpool;
 

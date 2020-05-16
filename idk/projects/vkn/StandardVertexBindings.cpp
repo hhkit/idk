@@ -17,7 +17,7 @@ namespace idk::vkn::bindings
 	{
 		state.SetState(cam, skel);
 	}
-//#pragma optimize("",off)
+
 	void StandardVertexBindings::Bind(RenderInterface& the_interface)
 	{
 		//map back into z: (0,1)

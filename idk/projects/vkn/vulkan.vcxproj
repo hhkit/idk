@@ -320,18 +320,24 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AsyncTexLoadInfo.h" />
     <ClInclude Include="AttachmentDescription.h" />
     <ClInclude Include="BaseRenderPass.h" />
     <ClInclude Include="BufferedObj.h" />
+    <ClInclude Include="BufferNBuilder.h" />
     <ClInclude Include="CameraViewportBindings.h" />
     <ClInclude Include="CanvasRenderer.h" />
     <ClInclude Include="CanvasVertexBindings.h" />
     <ClInclude Include="ColorPickRenderer.h" />
+    <ClInclude Include="CommandCluster.h" />
     <ClInclude Include="DrawSetRenderPass.h" />
     <ClInclude Include="FencePool.h" />
     <ClInclude Include="binding_util.h" />
+    <ClInclude Include="FixedArenaAllocator.h" />
+    <ClInclude Include="FreeList.h" />
     <ClInclude Include="MaterialInstanceCache.h" />
     <ClInclude Include="MemoryCollator.h" />
+    <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="renderpasses\BloomPass.h" />
     <ClInclude Include="renderpasses\DebugDrawPass.h" />
     <ClInclude Include="renderpasses\MaskedPass.h" />
@@ -394,8 +400,11 @@
     <ClInclude Include="StandardFragmentBinding.h" />
     <ClInclude Include="StandardMaterialBindings.h" />
     <ClInclude Include="StandardVertexBindings.h" />
+    <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="SubDurations.h" />
     <ClInclude Include="TexturePool.h" />
     <ClInclude Include="TextureTracker.h" />
+    <ClInclude Include="time_log.h" />
     <ClInclude Include="TmpTest.h" />
     <ClInclude Include="topological_sort.h" />
     <ClInclude Include="TransparentBlendBindings.h" />
@@ -417,6 +426,7 @@
     <ClInclude Include="vector_span.h" />
     <ClInclude Include="vector_span_builder.h" />
     <ClInclude Include="VertexBindingTracker.h" />
+    <ClInclude Include="VknAsyncTexLoader.h" />
     <ClInclude Include="VknCubemap.h" />
     <ClInclude Include="VknCubeMapLoader.h" />
     <ClInclude Include="VknFontAtlas.h" />
@@ -454,6 +464,7 @@
     <ClInclude Include="VulkanMeshFactory.h" />
     <ClInclude Include="VulkanState.h" />
     <ClInclude Include="VulkanPipeline.h" />
+    <ClInclude Include="VknTextureData.h" />
     <ClInclude Include="VulkanTextureFactory.h" />
     <ClInclude Include="VulkanTtfLoader.h" />
     <ClInclude Include="VulkanTypeDescriptors.h" />
@@ -468,7 +479,9 @@
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CanvasVertexBindings.cpp" />
     <ClCompile Include="ColorPickRenderer.cpp" />
+    <ClCompile Include="CommandCluster.cpp" />
     <ClCompile Include="FencePool.cpp" />
+    <ClCompile Include="FreeList.cpp" />
     <ClCompile Include="LightBinding.cpp" />
     <ClCompile Include="MaterialInstanceCache.cpp" />
     <ClCompile Include="MemoryCollator.cpp" />
@@ -524,18 +537,23 @@
     <ClCompile Include="StandardFragmentBinding.cpp" />
     <ClCompile Include="StandardMaterialBindings.cpp" />
     <ClCompile Include="StandardVertexBindings.cpp" />
+    <ClCompile Include="Stopwatch.cpp" />
+    <ClCompile Include="SubDurations.cpp" />
     <ClCompile Include="TexturePool.cpp" />
     <ClCompile Include="TextureTracker.cpp" />
+    <ClCompile Include="time_log.cpp" />
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="topological_sort.cpp" />
     <ClCompile Include="TransparentBlendBindings.cpp" />
     <ClCompile Include="UniformManager.cpp" />
     <ClCompile Include="UnlitBindings.cpp" />
     <ClCompile Include="VertexBindingTracker.cpp" />
+    <ClCompile Include="VknAsyncTexLoader.cpp" />
     <ClCompile Include="VknTextureView.cpp" />
     <ClCompile Include="VulkanFontAtlasFactory.cpp" />
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanIttfLoader.cpp" />
+    <ClCompile Include="VknTextureData.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="utils\GlslToSpirv.cpp" />

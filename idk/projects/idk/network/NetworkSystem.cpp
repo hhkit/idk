@@ -52,6 +52,8 @@ namespace idk
 		};
 		id_manager = std::make_unique<IDManager>();
 		EventManager::Init();
+
+		SetBroadcast(true);
 	}
 
 	void NetworkSystem::ConnectToServer(const Address& d)
@@ -147,6 +149,8 @@ namespace idk
 			client->SetLatency(time);
 	}
 
+	const static string_view discovery_message = "tian shou the millenial";
+
 	void NetworkSystem::ReceivePackets()
 	{
 		if (lobby || client)
@@ -162,6 +166,31 @@ namespace idk
 		{
 			client->ReceivePackets();
 		}
+
+		if (client_listen_socket)
+		{
+			if (auto pMsg = client_listen_socket->Receive())
+			{
+				const auto& msg = *pMsg;
+				LOG_TO(LogPool::NETWORK, "RECEIVED MSG OF LENGTH %d ON LISTEN SOCKET", (int) msg.buffer.size());
+				if (discovery_message.size() < msg.buffer.size()
+					&& std::equal(discovery_message.begin(), discovery_message.end(), msg.buffer.begin()))
+				{
+					LOG_TO(LogPool::NETWORK, "LOCATED SERVER @ %d.%d.%d.%d",
+						(int)msg.buffer[discovery_message.size() + 0],
+						(int)msg.buffer[discovery_message.size() + 1],
+						(int)msg.buffer[discovery_message.size() + 2],
+						(int)msg.buffer[discovery_message.size() + 3]);
+
+					Address addr;
+					addr.a = msg.buffer[discovery_message.size() + 0];
+					addr.b = msg.buffer[discovery_message.size() + 1];
+					addr.c = msg.buffer[discovery_message.size() + 2];
+					addr.d = msg.buffer[discovery_message.size() + 3];
+					client_address_cooldown[addr] = server_entry_time_to_live;
+				}
+			}
+		}
 	}
 
 	void NetworkSystem::SendPackets()
@@ -171,6 +200,30 @@ namespace idk
 
 		if (client)
 			client->SendPackets();
+
+		if (server_broadcast_socket)
+		{ 
+			server_timer += Core::GetDT();
+			if (server_timer > server_broadcast_limit)
+			{
+				server_timer -= server_broadcast_limit;
+
+				Message msg;
+				msg.dest = broadcast_address;
+				msg.dest.port = client_listen_port;
+				msg.buffer.insert(msg.buffer.end(),
+					std::begin(discovery_message),
+					std::end(discovery_message)
+				);
+
+				auto addr = lobby->GetAddress();
+				msg.buffer.push_back(addr.a);
+				msg.buffer.push_back(addr.b);
+				msg.buffer.push_back(addr.c);
+				msg.buffer.push_back(addr.d);
+				server_broadcast_socket->Send(msg);
+			}
+		}
 	}
 
 	void NetworkSystem::Rollback(span<ElectronView> evs)
@@ -363,9 +416,55 @@ namespace idk
 		client_connection_manager.reset();
 		client.reset();
 		id_manager.reset();
+		client_listen_socket.reset();
+		server_broadcast_socket.reset();
 
 		// network ids no longer relevant
 		for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
 			elem.network_id = 0;
+	}
+
+	void NetworkSystem::SetSearch(bool enable)
+	{
+		if (enable)
+		{
+			if (!client_listen_socket)
+			{
+				client_listen_socket = Core::GetSystem<Application>().CreateSocket();
+				client_listen_socket->Bind(client_listen_port);
+				client_listen_socket->EnableBroadcast();
+			}
+		}
+		else
+		{
+			client_listen_socket.reset();
+		}
+	}
+
+	void NetworkSystem::SetBroadcast(bool enable)
+	{
+		if (!lobby)
+			return;
+
+		if (enable)
+		{
+			if (!server_broadcast_socket)
+			{
+				server_broadcast_socket = Core::GetSystem<Application>().CreateSocket();
+				server_broadcast_socket->EnableBroadcast();
+				server_timer = server_broadcast_limit;
+			}
+		}
+		else
+		{
+			server_broadcast_socket.reset();
+		}
+	}
+	vector<Address> NetworkSystem::GetDiscoveredServers() const
+	{
+		vector<Address> addrs;
+		for (auto [ip, ttl] : client_address_cooldown)
+			addrs.emplace_back(ip);
+		return addrs;
 	}
 }

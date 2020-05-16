@@ -9,7 +9,7 @@
 
 namespace idk::vkn
 {
-//#pragma optimize("",off)
+
 	struct MaterialInstanceCache::PImpl
 	{
 		DescriptorsManager _dm;

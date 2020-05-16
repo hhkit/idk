@@ -79,6 +79,7 @@ namespace idk::vkn
 		vector<size_t> _handles;
 		vector<vk::UniqueFence> _fences;
 		std::shared_ptr<FencePoolCtrlBlock> _ctrl_block = std::make_shared<FencePoolCtrlBlock>();
+		std::mutex handle_lock;
 	};
 
 	class CmdBufferPool;

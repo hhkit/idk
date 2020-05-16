@@ -45,6 +45,7 @@ namespace idk
 		t.filter_mode = t_meta.filter_mode;
 		t.pixel_buffer = std::move(binary_data);
 		t.force_uncompiled = t_meta.force_uncompressed;
+		t.wait_loaded = t_meta.wait_loaded;
 		return AssetBundle{ updated_meta_bundle, {{ t_guid, std::move(t)} } };
 	}
 }

@@ -21,6 +21,7 @@ namespace idk::vkn::bindings
 
 	void ParticleVertexBindings::Bind(RenderInterface& the_interface)
 	{
+		the_interface.SetDepthWrite(false);
 		//map back into z: (0,1)
 		mat4 projection_trf = mat4{ 1,0,0,0,
 							0,1,0,0,

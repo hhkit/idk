@@ -1222,6 +1222,7 @@
     </ClInclude>
     <ClInclude Include="network\gbn_sliding_window.h" />
     <ClInclude Include="network\ControlObjectMessage.h" />
+    <ClInclude Include="network\Socket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">

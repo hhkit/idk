@@ -43,6 +43,7 @@
     <ClInclude Include="app\Keys.h" />
     <ClInclude Include="network\ControlObjectMessage.h" />
     <ClInclude Include="network\gbn_sliding_window.h" />
+    <ClInclude Include="network\Socket.h" />
     <ClInclude Include="ui\AspectRatioFitter.h" />
     <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipLoader.h" />

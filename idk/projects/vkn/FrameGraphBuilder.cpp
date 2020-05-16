@@ -121,7 +121,7 @@ namespace idk::vkn
 		curr_rsc.input_attachments[attachment_index] = { in_rsc.id,attachment_desc };
 		rsc_manager.MarkUsage(in_rsc.id, vk::ImageUsageFlagBits::eInputAttachment);
 	}
-//#pragma optimize("",off)
+
 
 	void FrameGraphBuilder::set_output_attachment(FrameGraphResourceMutable out_rsc, uint32_t attachment_index, AttachmentDescription attachment_desc)
 	{

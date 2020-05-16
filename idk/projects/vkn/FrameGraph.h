@@ -12,7 +12,7 @@
 
 
 #include <vkn/RenderPassPool.h>
-
+#include <vkn/CommandCluster.h>
 //MARK_NON_COPY_CTORABLE(idk::vkn::FrameGraphDetail::Context);
 namespace idk::vkn
 {
@@ -217,8 +217,16 @@ namespace idk::vkn
 		vector<size_t> execution_order;
 		vector<std::tuple<string_view,BaseRenderPass*, FrameGraphNode*>> _dbg_execution_order;
 		hash_table<fg_id, std::unique_ptr<BaseRenderPass>> render_passes;
+		static inline constexpr size_t max_num_job_threads = 16;
+		std::array<std::unique_ptr<UboManager>, max_num_job_threads> _ubo_managers{};
 
 		UboManager* _default_ubo_manager = {};
+
+		CommandCluster _cmd_buffers;
+		//vector<UniformManager> _uniform_managers;
+		DescriptorUpdateData::allocator_n_t<char,1<<20> alloc;
+		vector<DescriptorUpdateData> _duds;
+
 		PipelineManager* _default_pipeline_manager= {};
 
 		TempGraph tmp_graph;

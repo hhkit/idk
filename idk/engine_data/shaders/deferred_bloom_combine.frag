@@ -3,7 +3,7 @@
 layout (input_attachment_index=1, set=2, binding=0) uniform subpassInput color_input;
 layout (input_attachment_index=2, set=2, binding=1) uniform subpassInput depth_input;
 layout (input_attachment_index=3, set=2, binding=2) uniform subpassInput gView_pos;
-layout (input_attachment_index=4, set=2, binding=3) uniform subpassInput bright_input;
+//layout (input_attachment_index=4, set=2, binding=3) uniform subpassInput bright_input;
 
 //S_LAYOUT(3,1) uniform sampler2D brightness_input;
 
@@ -12,7 +12,6 @@ S_LAYOUT(7,0) uniform sampler2D ColCorrectLut[1];
 S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 {
 	vec3 threshold;
-	vec4 fogColor;
 	float fogDensity;
 
 	//Bloom
@@ -21,6 +20,8 @@ S_LAYOUT(4,0) uniform BLOCK(PostProcessingBlock)
 	
 	int useFog;
 	int useBloom;
+	
+	vec4 fogColor;
 }ppb;
 
 //S_LAYOUT(5,0) uniform BLOCK(ViewportBlock)
@@ -117,11 +118,11 @@ void main()
 		frag_color = mix(frag_color,ppb.fogColor.rgb,fogFactor);
 	}
 	
-	if(ppb.useBloom == 1)
-	{
-		vec3 brightness = subpassLoad(bright_input).rgb;
-		frag_color += brightness * 0.15f; 
-	}
+	//if(ppb.useBloom == 1)
+	//{
+	//	vec3 brightness = subpassLoad(bright_input).rgb;
+	//	frag_color += brightness * 0.15f; 
+	//}
 	
 
 	out_color = vec4(ReinhardOperator(frag_color),1);
@@ -130,16 +131,16 @@ void main()
 	
 	
 	//LUT colour correction shifted here
-	vec3 og = pow(out_color.rgb,vec3(1/2.2));
-	vec3 p = sizeSpace(og);
-	vec3 p0 =floor(p);
-	vec3 p1 =ceil(p);
-	ivec3 ip0 = ivec3(p0);
-	ivec3 ip1 = ivec3(p1);
-	
-	vec3 t = (p - p0);// /(p1-p0);
-	out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);	
-	out_color.rgb = pow(out_color.rgb,vec3(2.2));
+	//vec3 og = pow(out_color.rgb,vec3(1/2.2));
+	//vec3 p = sizeSpace(og);
+	//vec3 p0 =floor(p);
+	//vec3 p1 =ceil(p);
+	//ivec3 ip0 = ivec3(p0);
+	//ivec3 ip1 = ivec3(p1);
+	//
+	//vec3 t = (p - p0);// /(p1-p0);
+	//out_color.rgb = trilinearSample(ip0, ivec3(1,0,0),ivec3(0,1,0),ivec3(0,0,1), t);	
+	//out_color.rgb = pow(out_color.rgb,vec3(2.2));
 	
 	gl_FragDepth = depth; //write this for late depth test, let the gpu discard this if it's smaller
 }

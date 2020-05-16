@@ -36,7 +36,10 @@ namespace TestAndSeek
             if (Input.GetKey(KeyCode.Shift))
             {
                 if (Input.GetKeyDown(KeyCode.H))
+                {
                     ElectronNetwork.CreateLobby();
+                    ElectronNetwork.isBroadcastingServerIP = true;
+                }
 
                 if (Input.GetKeyDown(KeyCode.S))
                     ElectronNetwork.LoadScene(scene);

@@ -5,8 +5,11 @@ namespace idk::vkn
 {
 	void RenderPassObj::reset(vk::RenderPass const& value)
 	{
-		ctrl_blk->my_rp.reset(value);
+		if (!ctrl_blk && !value)
+			return;
 		ctrl_blk.reset();
+		//ctrl_blk->my_rp.reset(value);
+		//ctrl_blk.reset();
 	}
 
 	vk::RenderPass RenderPassObj::release()

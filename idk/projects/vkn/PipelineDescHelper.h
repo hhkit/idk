@@ -3,8 +3,11 @@
 #include <vulkan/vulkan.hpp>
 #include <gfx/pipeline_config.h>
 
+#include <vkn/FixedArenaAllocator.h>
 namespace idk::vkn
 {
+	//template<typename K, typename T>
+	//using hash_table_t = std::unordered_map<K, T, std::hash<K>, std::equal_to<K>, FixedArenaAllocator<std::pair<const K, T>>>;
 	struct PipelineDescHelper
 	{
 
@@ -16,6 +19,12 @@ namespace idk::vkn
 		//Does not help you store your overrides.
 		//Does not help you store your overrides.
 		void UseShaderAttribs(const vector<RscHandle<ShaderProgram>>& shader_handles, pipeline_config& config);
+
+		void Reset()
+		{
+			buffer_desc_overrides.clear();
+			override_attr_mapping.clear();
+		}
 	private:
 		void ApplyBufferDescOverrides(pipeline_config& config);
 	};

@@ -24,10 +24,13 @@
 #include <event/Signal.inl>
 
 #include "WinMessageTable.h"
-
+#include <WinSock2.h>
 namespace idk::win
 {
 #define _DEBUG
+
+	static WSADATA wsaData;
+
 	Windows::Windows(HINSTANCE _hInstance, int nCmdShow)
 		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}
 	{
@@ -50,12 +53,19 @@ namespace idk::win
 		MyRegisterClass();
 
 		InitInstance(nCmdShow); 
-		SetFullscreen(true);
+		//SetFullscreen(true);
 		//hAccelTable = LoadAccelerators(hInstance, 0);
 
+		int iResult;
+		u_long iMode = 0;
+
+		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	}
 
-	Windows::~Windows() = default;
+	Windows::~Windows()
+	{
+		WSACleanup();
+	}
 
 	void Windows::PollEvents()
 	{

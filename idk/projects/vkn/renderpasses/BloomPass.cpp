@@ -49,7 +49,7 @@ namespace idk::vkn::renderpasses
 		auto derp2 = builder.read(depth);
 		auto derp3 = builder.read(gViewPos);
 		//brightness_read_only = builder.read(hdr, true);
-		auto derp4 = builder.read(hdr);
+		//auto derp4 = builder.read(hdr);
 
 		builder.set_input_attachment(derp1, 1, AttachmentDescription
 			{
@@ -101,23 +101,23 @@ namespace idk::vkn::renderpasses
 			}
 		);
 
-		builder.set_input_attachment(derp4, 4, AttachmentDescription
-			{
-				vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
-				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
-				vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
-				vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
-				vk::ImageSubresourceRange
-				{
-					vk::ImageAspectFlagBits::eColor,0,1,0,1
-				},//vk::ImageSubresourceRange sub_resource_range{};
-				//std::optional<vk::ClearValue> clear_value;
-				//std::optional<vk::Format> format{};
-				//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
-				//vk::ComponentMapping mapping{};
-			}
-		);
+		//builder.set_input_attachment(derp4, 4, AttachmentDescription
+		//	{
+		//		vk::AttachmentLoadOp::eLoad,//vk::AttachmentLoadOp load_op;
+		//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+		//		vk::AttachmentLoadOp::eDontCare,//vk::AttachmentLoadOp  stencil_load_op;
+		//		vk::AttachmentStoreOp::eDontCare,//vk::AttachmentStoreOp stencil_store_op;
+		//		vk::ImageLayout::eShaderReadOnlyOptimal,//vk::ImageLayout layout{vk::ImageLayout::eGeneral}; //layout after RenderPass
+		//		vk::ImageSubresourceRange
+		//		{
+		//			vk::ImageAspectFlagBits::eColor,0,1,0,1
+		//		},//vk::ImageSubresourceRange sub_resource_range{};
+		//		//std::optional<vk::ClearValue> clear_value;
+		//		//std::optional<vk::Format> format{};
+		//		//vk::ImageViewType view_type{ vk::ImageViewType::e2D };
+		//		//vk::ComponentMapping mapping{};
+		//	}
+		//);
 
 		//_viewport.size = vec2{ rt_size };
 
@@ -139,7 +139,7 @@ namespace idk::vkn::renderpasses
 		//	});
 
 	}
-	//#pragma optimize("",off)
+	
 	void BloomPass::Execute(FrameGraphDetail::Context_t context)
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom Pass Combine");
@@ -258,7 +258,7 @@ namespace idk::vkn::renderpasses
 		//	});
 
 	}
-	//#pragma optimize("",off)
+	
 	void BloomPassH::Execute(FrameGraphDetail::Context_t context)
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom PassH");
@@ -389,7 +389,7 @@ namespace idk::vkn::renderpasses
 		//		//vk::ComponentMapping mapping{};
 		//	});
 	}
-	//#pragma optimize("",off)
+	
 	void BloomPassW::Execute(FrameGraphDetail::Context_t context)
 	{
 		context.DebugLabel(RenderTask::LabelLevel::eWhole, "FG: Bloom PassW");

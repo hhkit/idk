@@ -6,6 +6,9 @@
 #include <gfx/CompiledTexture.h>
 #include <meta/stl_hack.h>
 #include <vkn/VulkanResourceManager.h>
+
+#include <vkn/AsyncTexLoadInfo.h>
+
 namespace idk::vkn {
 
 	struct VknTexture
@@ -39,9 +42,9 @@ namespace idk::vkn {
 
 
 		VknTexture& operator=(VknTexture&&) noexcept;
-		vk::Sampler Sampler()const { return *sampler; }
-		vk::Image Image()const { return *image_; }
-		vk::ImageView ImageView()const { return *imageView; }
+		vk::Sampler Sampler()const;
+		vk::Image Image(bool ignore_effective=false)const;
+		vk::ImageView ImageView()const;
 		vk::ImageAspectFlags ImageAspects()const;
 		uint32_t& Layers(uint32_t layers)noexcept;
 		uint32_t Layers()const noexcept;
@@ -54,12 +57,23 @@ namespace idk::vkn {
 		//Required if you want the image to be able to be used in imgui (Cast to ImTextureID)
 		void* ID() const override;
 
+		bool MarkLoaded(bool loaded);
+		bool IsLoaded()const;
+
+		void SetTexLoadInfo(std::optional<AsyncTexLoadInfo>);
+		const std::optional<AsyncTexLoadInfo>& GetTexLoadInfo()const;
+		void BeginAsyncReload(std::optional<Guid> guid = {});
+
 	private:
+		std::optional<AsyncTexLoadInfo> _tex_load_info;
+		const VknTexture& GetEffective(bool ignore_default=false)const;
+		bool _loaded = true;
 		uint32_t                _layers;
 		void OnMetaUpdate(const TextureMeta&);
 		void UpdateUV(UVMode);
 
 	};
+
 };
 
 MARK_NON_COPY_CTORABLE(idk::vkn::VknTexture)

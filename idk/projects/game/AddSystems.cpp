@@ -8,6 +8,7 @@
 
 #include <res/CompiledAssets.h>
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <vkn/VulkanMesh.h>
 #include <vkn/VknTexture.h>
 #include <vkn/VknFontAtlas.h>
 #include <opengl/system/OpenGLGraphicsSystem.h>
@@ -28,7 +29,7 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 {
 	using namespace idk;
 	auto& windows = c->AddSystem<Windows>(hInstance, nCmdShow);
-	windows.SetFullscreen(false);
+	//windows.SetFullscreen(false);
 	GetHWND()=windows.GetWindowHandle();
 	c->AddSystem<win::XInputSystem>();
 

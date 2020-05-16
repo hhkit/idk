@@ -413,7 +413,7 @@ namespace idk::vkn
 			info.emplace_back(
 				vk::DeviceQueueCreateFlags{}
 				, uniqueQueueFamily
-				, 1
+				, 2
 				, &queuePriority);
 		}
 		auto extensions = GetDeviceExtensions();
@@ -442,6 +442,7 @@ namespace idk::vkn
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
 		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
+		m_graphics_tex_queue = m_device->getQueue(*m_queue_family.graphics_family, 1, dispatcher);
 		m_present_queue = m_device->getQueue(*m_queue_family.present_family, 0, dispatcher);
 		//m_transfer_queue = m_device->getQueue(*m_queue_family.transfer_family, 0, dispatcher);
 	}
@@ -753,7 +754,7 @@ namespace idk::vkn
 		for (auto& rs : rss)
 			rs.RenderPass() = *m_crenderpass;
 	}
-//#pragma optimize("",off)
+
 	void VulkanState::createImage(uint32_t width, uint32_t height, vk::Format fmt, vk::ImageTiling tiling, vk::ImageUsageFlags usage, [[maybe_unused]] vk::MemoryPropertyFlags ppts, vk::Image& image, hlp::MemoryAllocator& allocator, hlp::UniqueAlloc& alloc)
 	{
 		if (!imageFence)
@@ -981,12 +982,14 @@ namespace idk::vkn
 	{
 		return *view_;
 	}
-
+#pragma optimize("",off)
 	void VulkanState::AcquireFrame(vk::Semaphore signal)
 	{
 		auto cf = current_frame;
 		auto& current_signal = m_swapchain->m_graphics.pSignals[cf];
-		m_device->waitForFences(1, &*current_signal.inflight_fence(), VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
+		auto wait_result =m_device->waitForFences(1, &*current_signal.inflight_fence(), VK_TRUE, std::numeric_limits<uint64_t>::max(), dispatcher);
+		if (wait_result != vk::Result::eSuccess)
+			DebugBreak();
 		m_device->resetFences(*current_signal.inflight_fence());
 		auto res = m_device->acquireNextImageKHR(*m_swapchain->swap_chain, std::numeric_limits<uint32_t>::max(), signal, {}, dispatcher);
 		rv = res.value;
@@ -1003,6 +1006,7 @@ namespace idk::vkn
 		imageIndex = res.value;
 		m_swapchain->curr_index = res.value;
 	}
+#pragma optimize("",on)
 	void VulkanState::DrawFrame(vk::Semaphore wait, vk::Semaphore signal, span<RscHandle<RenderTarget>> to_transition)
 	{
 		//AcquireFrame();

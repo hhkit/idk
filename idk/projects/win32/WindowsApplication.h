@@ -48,6 +48,7 @@ namespace idk::win
 
 		// network
 		vector<Device> GetNetworkDevices() override;
+		unique_ptr<Socket> CreateSocket() override;
 
 		void Shutdown() override {}
 		string GetExecutableDir() override;
@@ -87,7 +88,6 @@ namespace idk::win
 		vector<intptr_t> children;
 
 		static inline Windows* instance = nullptr;
-
 
 		ATOM MyRegisterClass();
 		BOOL InitInstance(int nCmdShow);

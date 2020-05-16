@@ -416,6 +416,39 @@
     <ClInclude Include="VulkanIttfLoader.h">
       <Filter>resource\Loaders</Filter>
     </ClInclude>
+    <ClInclude Include="Stopwatch.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="time_log.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeList.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolAllocator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandCluster.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferNBuilder.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SubDurations.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="FixedArenaAllocator.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="VknAsyncTexLoader.h">
+      <Filter>resource\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncTexLoadInfo.h">
+      <Filter>resource\Loaders\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="VknTextureData.h">
+      <Filter>resource\Loaders\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -718,13 +751,21 @@
     <ClCompile Include="VulkanIttfLoader.cpp">
       <Filter>resource\Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="Stopwatch.cpp">
+      <Filter>utils\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="time_log.cpp" />
+    <ClCompile Include="FreeList.cpp" />
+    <ClCompile Include="CommandCluster.cpp" />
+    <ClCompile Include="SubDurations.cpp">
+      <Filter>utils\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="VknAsyncTexLoader.cpp" />
+    <ClCompile Include="VknTextureData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
       <UniqueIdentifier>{ae16a2ac-34ab-44fe-88cf-fbbb70a7cb46}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="utils">
-      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
     </Filter>
     <Filter Include="buffer">
       <UniqueIdentifier>{93364066-fc1f-4a19-8df1-752682cc0020}</UniqueIdentifier>
@@ -783,11 +824,17 @@
     <Filter Include="render\new_testament\Bindings\Standard">
       <UniqueIdentifier>{4a6c78a0-a8b5-47cd-b918-a9e326886fb0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{874f5050-9f80-44cb-8453-c2c3f9bed318}</UniqueIdentifier>
+    </Filter>
     <Filter Include="utils\Debug">
       <UniqueIdentifier>{7604bcde-49a7-49fc-aff5-56fcda6ada1c}</UniqueIdentifier>
     </Filter>
     <Filter Include="utils\Objects">
       <UniqueIdentifier>{9d275880-a222-4440-b265-138a872904b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Loaders\Util">
+      <UniqueIdentifier>{a5eae55c-176a-4017-a9a0-f3964b2096ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

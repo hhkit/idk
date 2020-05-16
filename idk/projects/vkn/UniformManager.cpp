@@ -1,8 +1,17 @@
 #include "pch.h"
 #include "UniformManager.h"
 #include <vkn/ShaderModule.h>
+#include <vkn/Stopwatch.h>
+static bool constexpr dbg_uniform = false;
 namespace idk::vkn
 {
+	namespace dbg
+	{
+		hash_table<string_view, float>& get_rendertask_durations();
+		void add_rendertask_durations(string_view name, float duration);
+
+	}
+	using dbg::add_rendertask_durations;
 
 	std::optional<UniformUtils::BufferBinding> UniformUtils::BindingInfo::GetBuffer() const
 	{
@@ -51,8 +60,8 @@ namespace idk::vkn
 
 	struct DSUpdater
 	{
-		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos;
+		decltype(DescriptorUpdateData::buffer_infos)& buffer_infos;
+		DescriptorUpdateData::vector_a<DescriptorUpdateData::vector_a<vk::DescriptorImageInfo>>& image_infos;
 		const UniformUtils::BindingInfo& binding;
 		const vk::DescriptorSet& dset;
 		vk::WriteDescriptorSet& curr;
@@ -84,7 +93,7 @@ namespace idk::vkn
 		void operator()(UniformUtils::image_t ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
@@ -98,7 +107,7 @@ namespace idk::vkn
 		void operator()(UniformUtils::AttachmentBinding ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			vector<vk::DescriptorImageInfo>& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 					{}
@@ -110,17 +119,18 @@ namespace idk::vkn
 			curr.descriptorType = vk::DescriptorType::eInputAttachment;
 		}
 	};
-	void CondenseDSW(vector<vk::WriteDescriptorSet>& dsw);
-//#pragma optimize("",off)
+	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw);
+
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
 		span<UniformUtils::BindingInfo> bindings,
 		DescriptorUpdateData& out
 	)
 	{
-		std::forward_list<vk::DescriptorBufferInfo>& buffer_infos = out.scratch_buffer_infos;
-		vector<vector<vk::DescriptorImageInfo>>& image_infos = out.scratch_image_info;
-		vector<vk::WriteDescriptorSet>& descriptorWrite = out.scratch_descriptorWrite;
+		auto& buffer_infos = out.scratch_buffer_infos;
+		auto& image_infos = out.scratch_image_info;
+		auto& descriptorWrite = out.scratch_descriptorWrite;
+		using img_vec_t = std::remove_reference_t<decltype(image_infos[0])>;
 		uint32_t max_binding = 0;
 		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
 		vk::DescriptorImageInfo default_img
@@ -133,7 +143,7 @@ namespace idk::vkn
 			if (max_binding > descriptorWrite.size())
 			{
 				descriptorWrite.resize(max_binding, vk::WriteDescriptorSet{});
-				image_infos.resize(max_binding);
+				image_infos.resize(max_binding, img_vec_t(out.alloc));
 			}
 			auto& curr = descriptorWrite[binding.binding];
 			if (binding.IsImage() || binding.IsAttachment())
@@ -229,11 +239,15 @@ namespace idk::vkn
 	{
 		//if (bindings.size() <= info.binding)
 		//	bindings.resize(static_cast<size_t>(info.binding) + 1);
+		dbg::stopwatch timer;
+		timer.start();
 		auto& vec = bindings[info.binding];
 		if (vec.size() <= info.arr_index)
 			vec.resize(info.arr_index + 1);
 		vec[info.arr_index] = std::move(info);
 		dirty = true;
+		timer.stop();
+		add_rendertask_durations("Bind", timer.time().count());
 	}
 	void UniformUtils::binding_manager::set_bindings::Unbind(uint32_t binding)
 	{
@@ -319,6 +333,8 @@ namespace idk::vkn
 
 	bool UniformManager::RegisterUniforms(string name, binding_manager::set_t set, uint32_t binding, uint32_t size)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		auto& bindings = _bindings.curr_bindings;
 		auto set_info = bindings.find(set);
 		bool can_set = set_info != bindings.end();
@@ -327,6 +343,8 @@ namespace idk::vkn
 			_uniform_names[std::move(name)] = UniInfo{ set,binding,size,set_info->second.layout };
 			_dbg.RegisterRequiredBinding(set, binding);
 		}
+		timer.stop();
+		add_rendertask_durations("Register Uniforms", timer.time().count());
 		return can_set;
 	}
 	void UniformManager::RemoveBinding(binding_manager::set_t set)
@@ -397,7 +415,11 @@ namespace idk::vkn
 	}
 	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		auto [buffer, offset] = _ubo_manager->Add(data);
+		timer.stop();
+		add_rendertask_durations("Ubo Add", timer.time().count());
 		return _bindings.BindUniformBuffer(info, array_index, buffer, offset,data.size(), skip_if_bound);
 	}
 	bool UniformManager::BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound, vk::ImageLayout layout)
@@ -429,9 +451,10 @@ namespace idk::vkn
 			}
 		};
 	}
-
 	std::optional<vector_span<UniformManager::set_binding_t>>  UniformManager::FinalizeCurrent(vector<set_binding_t>& all_sets)
 	{
+		dbg::stopwatch timer;
+		timer.start();
 		vector_span_builder builder{ all_sets };
 		builder.start();
 		
@@ -444,18 +467,20 @@ namespace idk::vkn
 
 		for (auto& [index, set] : _bindings.curr_bindings)
 		{
-			auto bindings = set.FinalizeDC(_collated_layouts,_buffer_builder);
+			auto bindings = set.FinalizeDC(_collated_layouts,_binding_info_builder.builder);
 			if (bindings)
 			{
 				std::visit(visitors::FinalizeChecker{ builder,index }, *bindings);
 			}
 		}
+		timer.stop();
+		add_rendertask_durations("finalize current", timer.time().count());
 		return builder.end();
 	}
-//#pragma optimize("",off)
-	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
+
+	void UniformManager::GenerateDescriptorSets(span<const set_binding_t> bindings, DescriptorUpdateData& dud, DescriptorsManager& dm, vector<vk::DescriptorSet>& descriptor_sets)
 	{
-		_dud.Reset();
+		//_dud.Reset();
 		auto dsl = dm.Allocate(_collated_layouts);
 		size_t i = 0;
 		for (auto& [set, bindingv] : bindings)
@@ -486,7 +511,7 @@ namespace idk::vkn
 				{
 					auto ds = itr->second.GetNext();
 					//TODO update ds
-					UpdateUniformDS(ds, binding.to_span(), _dud);
+					UpdateUniformDS(ds, binding.to_span(), dud);
 					result = ds;
 				}
 
@@ -494,7 +519,7 @@ namespace idk::vkn
 			descriptor_sets[i] = result;
 			++i;
 		}
-		_dud.SendUpdates();
+		//_dud.SendUpdates();
 	}
 	std::optional<vk::DescriptorSetLayout> UniformUtils::binding_manager::GetLayout(set_t set)
 	{
@@ -587,6 +612,10 @@ namespace idk::vkn
 	}
 	void UniformManager::DebugInfo::RegisterRequiredBinding(uint32_t set_idx, uint32_t binding_idx)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
 		auto& set = sets[set_idx];
 		auto& binding = set.bindings[binding_idx];
 		if(!binding)
@@ -595,15 +624,28 @@ namespace idk::vkn
 	}
 	void UniformManager::DebugInfo::RemoveRequiredSet(uint32_t set)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return ;
+		}
 		sets[set].bindings.clear();
 		sets[set].bound =0;
 	}
 	void UniformManager::DebugInfo::MarkBinding(uint32_t set, uint32_t binding)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
 		sets[set].bindings[binding] = false;
 	}
+	//DescriptorUpdateData UniformManager::_dud = {};
 	void UniformManager::DebugInfo::MarkSet(uint32_t set)
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
 		for (auto& binding : sets[set].bindings)
 		{
 			binding = false;
@@ -611,6 +653,10 @@ namespace idk::vkn
 	}
 	bool UniformManager::DebugInfo::Validate(const binding_manager& _bindings) const
 	{
+		if constexpr (!dbg_uniform)
+		{
+			return true;
+		}
 		uint32_t set_index = 0;
 		for (auto& set : sets)
 		{
@@ -641,5 +687,13 @@ namespace idk::vkn
 			++set_index;
 		}
 		return true;
+	}
+	void UniformManager::DebugInfo::Reset()
+	{
+		if constexpr (!dbg_uniform)
+		{
+			return;
+		}
+		sets.clear();
 	}
 }

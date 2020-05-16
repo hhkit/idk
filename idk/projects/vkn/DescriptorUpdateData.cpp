@@ -3,8 +3,16 @@
 #include <vkn/VulkanView.h>
 namespace idk::vkn
 {
-
-void DescriptorUpdateData::AbsorbFromScratch()
+	void* DescriptorUpdateData::derp(void* ptr)
+	{
+		//while (true);
+		return ptr;
+	}
+	void DescriptorUpdateData::JustBreak()
+	{
+	//	while (true);
+	}
+	void DescriptorUpdateData::AbsorbFromScratch()
 {
 	auto& dsw = scratch_descriptorWrite;
 	descriptorWrite.insert(descriptorWrite.end(), dsw.begin(), dsw.end());
@@ -33,4 +41,21 @@ void DescriptorUpdateData::Reset()
 	buffer_infos.clear();
 }
 
+static bool some_value = false;
+static bool some_toggle = false;
+bool some_func()
+{
+	bool value = some_value;
+	some_value = some_toggle;
+	return value;
+}
+
+}
+namespace idk
+{
+	void free_block(arena_block_free* ptr) 
+	{
+		while (true);
+		ptr->~arena_block_free(); 
+	}
 }

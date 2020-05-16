@@ -73,7 +73,9 @@ namespace idk::vkn
 			eWhole,
 		};
 
-		RenderTask();
+		RenderTask();//UniformManager& um);
+		RenderTask(RenderTask&&) = default;//UniformManager& um);
+		RenderTask& operator=(RenderTask&&)=default;//UniformManager& um);
 
 		void DebugLabel(LabelLevel, string);
 
@@ -140,9 +142,19 @@ namespace idk::vkn
 		void SetOutputAttachmentSize(size_t size);
 		void SetClearDepthStencil(std::optional<vk::ClearValue> clear_value = {});
 
-		void ProcessBatches(RenderBundle& render_bundle);
+		void PreprocessDescriptors(DescriptorUpdateData& dud, DescriptorsManager& dm);
 
-	private:
+		void ProcessBatches(RenderBundle& render_bundle);
+		void ProcessBatches(vk::CommandBuffer cmd_buffer);
+
+		bool BeginSecondaryCmdBuffer(vk::CommandBuffer cmd_buffer);
+		bool BeginRenderPass(vk::CommandBuffer cmd_buffer);
+
+		void Reset();
+
+		void FlagUsed();
+
+	public:
 		struct DrawCall;
 
 		void BindInputAttachmentToCurrent();
@@ -152,6 +164,7 @@ namespace idk::vkn
 		void StartNewBatch(bool start = true);
 
 		void ProcessCopies(RenderBundle& render_bundle);
+		void ProcessCopies(vk::CommandBuffer render_bundle);
 
 		struct VertexBindingData
 		{
@@ -187,10 +200,16 @@ namespace idk::vkn
 		{
 			using uniform_t = UniformManager::set_binding_t;
 			DrawCallBuilder( vector<VertexBindingData>&);
+			void set_bindings(vector<VertexBindingData>&);
 			void SetLabel(LabelType, string);
 			void AddVertexBuffer(VertexBindingData);
 			void SetIndexBuffer(IndexBindingData);
 			DrawCall end(draw_info, vector_span<UniformManager::set_binding_t> uniforms);
+			void clear()
+			{
+				_vertex_bindings.clear();
+				current_draw_call = {};
+			}
 		private:
 			DrawCall current_draw_call;
 			
@@ -203,7 +222,7 @@ namespace idk::vkn
 		{
 			pipeline_config pipeline;
 			const VulkanPipeline* pipeline_override=nullptr;
-			vector_span<rect> scissor, viewport;
+			vector_span<rect> scissor{}, viewport{};
 			//RenderPassObj render_pass;
 			//vk::Framebuffer frame_buffer;
 			Shaders shaders;
@@ -222,8 +241,9 @@ namespace idk::vkn
 
 #pragma region Pipeline State
 		pipeline_config curr_config;
-		vector<rect> _rect_buffer;
-		vector_span_builder<rect> _rect_builder{ _rect_buffer };
+
+		std::unique_ptr<vector<rect>> _rect_buffer = std::make_unique<vector<rect>>();
+		std::unique_ptr<vector_span_builder<rect>> _rect_builder{ std::make_unique< vector_span_builder<rect>>(vector_span_builder<rect>{*_rect_buffer}) };
 		span<VknTextureView> _input_attachments;
 		size_t _num_output_attachments;
 		rect render_area;
@@ -241,20 +261,36 @@ namespace idk::vkn
 		std::optional<string> _label;
 
 		vector<UniformManager::set_binding_t> _uniform_sets;
-		vector<VertexBindingData> _vertex_bindings;
+		vector<vk::DescriptorSet> _descriptor_sets;
 		UniformManager _uniform_manager;
-		DrawCallBuilder _dc_builder{_vertex_bindings};
+		struct DCMoveWrapper
+		{
+			vector<VertexBindingData> _vertex_bindings;
+			DrawCallBuilder _dc_builder{ _vertex_bindings };
+			DCMoveWrapper() = default;
+			DCMoveWrapper(DCMoveWrapper&& rhs);
+			DCMoveWrapper&operator=(DCMoveWrapper&&rhs);
+		};
+		DCMoveWrapper _dc_bindings;
+		//vector<VertexBindingData> _vertex_bindings;
+		//DrawCallBuilder _dc_builder{_vertex_bindings};
 
 		vector<RenderBatch> batches;
 
 		vector<CopyCommand> _copy_commands;
 		VertexBindingTracker _vtx_binding_tracker;
+		bool used = false;
 	};
 
 
 
 
+	namespace dbg
+	{
+		hash_table<string_view, float>& get_rendertask_durations();
+		void add_rendertask_durations(string_view name,float duration);
 
+	}
 
 
 

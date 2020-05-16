@@ -308,7 +308,7 @@ namespace idk::vkn
 		//TODO actually create a default framebuffer and use it here
 		return fb;
 	}
-//#pragma optimize("",off)
+
 
 	RscHandle<VknTexture> derp(RscHandle<Texture> tex)
 	{

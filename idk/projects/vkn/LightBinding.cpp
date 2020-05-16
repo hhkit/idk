@@ -3,6 +3,10 @@
 #include <res/ResourceManager.inl>
 #include <res/ResourceHandle.inl>
 #include <ds/result.inl>
+
+#include <vkn/ShaderModule.h>
+#include <vkn/VknCubemap.h>
+
 namespace idk::vkn::bindings
 {
 //#pragma optimize ("",off)

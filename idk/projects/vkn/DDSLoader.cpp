@@ -69,6 +69,32 @@ namespace idk::vkn
 		}
 		return result;
 	}
+	InputTexInfo GetDdsIti(DdsFile dds, const TextureOptions& to)
+	{
+
+		InputTexInfo iti;
+		iti.data = dds.Data().data();
+		iti.len = dds.size();
+		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
+		iti.format = UnSrgb(iti.format);
+		if (to.input_is_srgb)
+			iti.format = ToSrgb(iti.format);
+		return iti;
+
+	}
+	TexCreateInfo GetDdsTci(DdsFile dds, const InputTexInfo& iti)
+	{
+		TexCreateInfo tci;
+		tci.aspect = vk::ImageAspectFlagBits::eColor;
+		tci.width = dds.Dimensions().x;
+		tci.height = dds.Dimensions().y;
+		tci.mipmap_level = std::max(dds.File().header.mip_map_count, 1u);
+		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width, tci.height);
+		tci.internal_format = iti.format;// MapFormat(to.internal_format);
+		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
+		tci.component_mapping = vk::ComponentMapping{ MaskToSwizzle(dds.File().header.pf.rBitMask),MaskToSwizzle(dds.File().header.pf.gBitMask),MaskToSwizzle(dds.File().header.pf.bBitMask),MaskToSwizzle(dds.File().header.pf.aBitMask) };
+		return tci;
+	}
 
 	void DdsLoader::LoadTexture(VknTexture& tex, string_view entire_file, const TextureOptions& to)
 	{
@@ -79,24 +105,43 @@ namespace idk::vkn
 			dds.File().magic[3] != ' '
 			)
 			throw std::runtime_error("Invalid DDS");
-		InputTexInfo iti;
-		iti.data = dds.Data().data();
-		iti.len = dds.size();
-		iti.format = MapFormat(BlockTypeToTextureFormat(dds.File().GetBlockType()));
-		iti.format = UnSrgb(iti.format);
-		if (to.input_is_srgb)
-			iti.format = ToSrgb(iti.format);
-		TexCreateInfo tci;
-		tci.aspect = vk::ImageAspectFlagBits::eColor;
-		tci.width = dds.Dimensions().x;
-		tci.height = dds.Dimensions().y;
-		tci.mipmap_level = std::max(dds.File().header.mip_map_count, 1u);
-		tci.mipmap_level = validate_mipmap_level(tci.mipmap_level, tci.width, tci.height);
-		tci.internal_format = iti.format;// MapFormat(to.internal_format);
-		tci.image_usage = vk::ImageUsageFlagBits::eSampled;
-		tci.component_mapping = vk::ComponentMapping{MaskToSwizzle(dds.File().header.pf.rBitMask),MaskToSwizzle(dds.File().header.pf.gBitMask),MaskToSwizzle(dds.File().header.pf.bBitMask),MaskToSwizzle(dds.File().header.pf.aBitMask) };
-
-		loader.LoadTexture(tex, allocator, *load_fence, to, tci, iti,to.guid);
+		auto iti = GetDdsIti(dds, to);
+		LoadTexture(tex, AsyncTexLoadInfo
+			{
+				{},
+				iti,
+				GetDdsTci(dds, iti),
+				to
+			});
+	}
+	void DdsLoader::LoadTexture(VknTexture& tex, const AsyncTexLoadInfo& info)
+	{
+		auto&& iti = info.iti;
+		auto&& tci = info.tci;
+		loader.LoadTexture(tex, allocator, *load_fence, info.to, tci, iti, info.to.guid);
+	}
+	AsyncTexLoadInfo DdsLoader::GenerateTexInfo(string entire_file, const TextureOptions& to)
+	{
+		auto ctx = std::make_shared<DdsFile>(std::move(entire_file) );
+		DdsFile& dds = *ctx;// { entire_file };
+		if (!dds.File().IsValid())
+			throw std::runtime_error("Invalid DDS");
+		auto iti = GetDdsIti(dds, to);
+		auto tci = GetDdsTci(dds, iti);
+		return AsyncTexLoadInfo{ctx,iti,tci,to};
+	}
+	mt::Future<void> DdsLoader::LoadTextureAsync(VknTexture& tex, string_view entire_file, const TextureOptions& to, FencePool& fences, CmdBufferPool& cmd_buffers)
+	{
+		DdsFile dds{ entire_file };
+		if (dds.File().magic[0] != 'D' ||
+			dds.File().magic[1] != 'D' ||
+			dds.File().magic[2] != 'S' ||
+			dds.File().magic[3] != ' '
+			)
+			throw std::runtime_error("Invalid DDS");
+		auto iti = GetDdsIti(dds,to);
+		auto tci = GetDdsTci(dds, iti);
+		return loader.LoadTextureAsync(tex, allocator, fences,cmd_buffers, to, tci, iti, to.guid);
 	}
 	const hlp::MemoryAllocator& DdsLoader::Allocator() const
 	{

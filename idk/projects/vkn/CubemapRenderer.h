@@ -33,7 +33,8 @@ namespace idk::vkn
 
 		DescriptorsManager ds_manager;
 
-		PipelineThingy thingy{};
+		std::shared_ptr<DescriptorUpdateData> dud = std::make_shared< DescriptorUpdateData>();
+		PipelineThingy thingy{dud};
 
 		string EpName()const;
 		string M4Name()const;

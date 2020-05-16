@@ -543,6 +543,19 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void GraphicsSetGammaCorrection(float gamma_correction);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GraphicsSetVarBool(string var_name, bool val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool GraphicsGetVarBool(string var_name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool GraphicsVarBoolIsSet(string var_name);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void GraphicsSetVarInt(string var_name, int val);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int GraphicsGetVarInt(string var_name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool GraphicsVarIntIsSet(string var_name);
         /*
         * Camera
         */
@@ -901,6 +914,19 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Device[] NetworkGetDevices();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Address[] NetworkGetDiscoveredServers();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool NetworkGetIsListeningForServers();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkSetIsListeningForServers(bool set);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool NetworkGetIsBroadcastingServerIP();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkSetIsBroadcastingServerIP(bool set);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Address[] NetworkDeviceGetAddresses(string device);

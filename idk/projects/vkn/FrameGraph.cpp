@@ -5,7 +5,16 @@
 #include <vkn/VknTextureView.h>
 #include <res/ResourceHandle.inl>
 
+#include <vkn/Stopwatch.h>
+#include <vkn/time_log.h>
+
+#include <vkn/RenderBundle.h>
+
 #include <vkn/DebugUtil.h>
+
+#include <parallel/ThreadPool.h>
+#include <numeric>
+
 namespace idk::vkn
 {
 	void DoNothing();
@@ -130,6 +139,13 @@ namespace idk::vkn
 	}
 	void FrameGraph::Reset()
 	{
+		for (auto& p_ubo_managers : _ubo_managers)
+		{
+			if (p_ubo_managers)
+			{
+				p_ubo_managers->Clear();
+			}
+		}
 		nodes.clear();
 		render_passes.clear();
 		execution_order.clear();
@@ -348,55 +364,258 @@ namespace idk::vkn
 		}
 		return valid;
 	}
+	dbg::time_log& GetGfxTimeLog();
 	void FrameGraph::Execute()
 	{
-		_contexts.clear();
-		_contexts.reserve(execution_order.size());
+		dbg::stopwatch timer;
+	GetGfxTimeLog().start("Reset Ctx");
+		timer.start();
+		/*
+		if (_uniform_managers.empty())
+			_uniform_managers.emplace_back();
+		/*/
+		//if (_uniform_managers.size() < execution_order.size())
+		//{
+		//	_uniform_managers.resize(execution_order.size());
+		//}
+		//for (auto& um : _uniform_managers)
+		//{
+		//	um.Reset();
+		//}
+		//*/
+		//GetGfxTimeLog().push_level();
+		//GetGfxTimeLog().pop_level();
+		dbg::get_rendertask_durations().clear();
+		for (auto& ctx : _contexts)
+		{
+			ctx.Reset();
+		}
+	GetGfxTimeLog().end();// "Reset Ctx");
+		//_contexts.clear();
+		if (_contexts.size() < execution_order.size())
+			_contexts.resize(execution_order.size());
 		auto& rsc_manager = GetResourceManager();
+		hash_table<string, dbg::milliseconds> lut;
+		std::array<dbg::milliseconds, 12> lut2{};
+		std::array<string_view, 12> lut2s{};
+		vector<mt::Future<void>> futures;
+		size_t i = 0;
 		for (auto index : execution_order)
 		{
-			auto& node = nodes[index];
-			auto& rp = *render_passes[node.id];
-			//TODO: Thread this
-			{
-				auto& context = _contexts.emplace_back();
-				context.SetPipelineManager(*_default_pipeline_manager);
-				context.SetUboManager(*_default_ubo_manager);
-				//Transition all the resources that are gonna be read (and are not input attachments)
-				auto input_span = node.GetReadSpan();
-				for (auto& input : input_span)
+			i = 0;
+			futures.emplace_back( Core::GetThreadPool().Post(
+				[&rsc_manager,index, this]()
 				{
-					TransitionResource(context, rsc_manager.TransitionInfo(input));
-				}
-				context.SetRscManager(rsc_manager);
-				rp.PreExecute(node, context);
-				auto copy_span = node.GetCopySpan();
-				for (auto& copy_req : copy_span)
-				{
-					CopyCommand cmd;
-					auto src_layout = GetSourceLayout(copy_req.src.id);
-					if (!ValidateImageLayout(src_layout))
-						src_layout = src_layout;
-					auto dst_layout = copy_req.options.dest_layout;
-					if (!ValidateImageLayout(dst_layout))
-						dst_layout = dst_layout;
-					context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,copy_req.options.src_range,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.dst_range,copy_req.options.regions});
-				}
-				rp.Execute(context);
-				rp.PostExecute(node, context);
-			}
-		}
-	}
+					auto& node = nodes[index];
+					auto& rp = *render_passes[node.id];
+					auto& p_ubo_manager = _ubo_managers.at(mt::thread_id());
+					if (!p_ubo_manager)
+						p_ubo_manager = std::make_unique<UboManager>(View());
+					//TODO: Thread this
+					{
+						//auto& context = _contexts.emplace_back(_uniform_managers.back());
+						auto& context = _contexts.at(index);
+						context.FlagUsed();
+						context.SetPipelineManager(*_default_pipeline_manager);
+						context.SetUboManager(*p_ubo_manager);
+						//Transition all the resources that are gonna be read (and are not input attachments)
+						auto input_span = node.GetReadSpan();
+						for (auto& input : input_span)
+						{
+							TransitionResource(context, rsc_manager.TransitionInfo(input));
+						}
+						context.SetRscManager(rsc_manager);
+						rp.PreExecute(node, context);
+						//lut[] +=timer.lap();
+						//lut2s[i] = "Pre Execute";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] += lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i - 1], lap);
+						//}
+						auto copy_span = node.GetCopySpan();
+						for (auto& copy_req : copy_span)
+						{
+							CopyCommand cmd;
+							auto src_layout = GetSourceLayout(copy_req.src.id);
+							if (!ValidateImageLayout(src_layout))
+								src_layout = src_layout;
+							auto dst_layout = copy_req.options.dest_layout;
+							if (!ValidateImageLayout(dst_layout))
+								dst_layout = dst_layout;
+							context.Copy(CopyCommand{ rsc_manager.Get<VknTextureView>(copy_req.src.id),src_layout,copy_req.options.src_range,rsc_manager.Get<VknTextureView>(copy_req.dest.id),dst_layout,copy_req.options.dst_range,copy_req.options.regions });
+						}
+						//lut2s[i] = "Copy";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] += lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i - 1], lap);
+						//}
+						//lut["Copy"] += timer.lap();
+						rp.Execute(context);
+						//lut2s[i] = "Execute";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] += lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i - 1], lap);
+						//}
+						//lut["Execute"] += timer.lap();
+						rp.PostExecute(node, context);
+						//lut2s[i] = "Post Execute";
+						//{
+						//	auto lap = timer.lap();
+						//	lut2[i++] +=lap;
+						//
+						//	GetGfxTimeLog().log(lut2s[i-1], lap);
+						//}
 
+						//lut["PostExecute"] += timer.lap();
+
+					}
+				}
+			));
+		}
+		for (auto& future : futures)
+		{
+			future.get();
+		}
+		//for (size_t j = 0; j < i; ++j)
+		//{
+		//	GetGfxTimeLog().log(lut2s[j], lut2[j]);
+		//}
+		//auto& duray = dbg::get_rendertask_durations();
+		//dbg::milliseconds total{};
+		//for (auto& [name, fduration] : duray)
+		//{
+		//	auto duration = dbg::milliseconds{ fduration };
+		//	total += duration;
+		//	GetGfxTimeLog().log_n_store(name, duration);
+		//}
+		//GetGfxTimeLog().log_n_store("render task extras", total);
+
+
+	}
+	struct count_duration
+	{
+		int count{};
+		dbg::milliseconds total_duration;
+		count_duration& operator+=(count_duration rhs)
+		{
+			count += rhs.count;
+			total_duration += rhs.total_duration;
+			return *this;
+		}
+	};
+
+	hash_table<string, count_duration>& ProcBatchLut()
+	{
+		static hash_table<string, count_duration> lut;
+		return lut;
+	}
 
 	void FrameGraph::ProcessBatches(RenderBundle& bundle)
 	{
-		size_t i = 0;
+		dbg::stopwatch timer;
+		timer.start();
+
+GetGfxTimeLog().start("Compile");
+
+		if (_duds.empty())
+		{
+			_duds.emplace_back(DescriptorUpdateData{ alloc });//Consider scaling with threads
+		}
+	GetGfxTimeLog().start("Dud Stuff");
+		dbg::stopwatch timer2;
+		timer2.start();
 		for (auto& rt : _contexts)
 		{
-			rt.ProcessBatches(bundle);
-			++i;
+			_duds.back().Reset();
+			//GetGfxTimeLog().end_then_start("Dud Reset", timer2.lap());
+			rt.PreprocessDescriptors(_duds.back(),bundle._d_manager);
+			//GetGfxTimeLog().end_then_start("Dud Pre Proc", timer2.lap());
+			_duds.back().SendUpdates();
+			//GetGfxTimeLog().end_then_start("Dud SendUpdates", timer2.lap());
 		}
+	GetGfxTimeLog().end_then_start("Proc Batches");
+		GetGfxTimeLog().start("reset cmd clusters");
+			ProcBatchLut().clear();
+			_cmd_buffers.Reset();
+		GetGfxTimeLog().end_then_start("Rsc Reserve");
+			//std::mutex mutex;
+			using buffer_pair_t = std::pair<RenderTask*, vk::CommandBuffer>;
+			FixedArenaAllocator<char> allocator{};
+			std::vector<buffer_pair_t,FixedArenaAllocator<buffer_pair_t>> buffers{ allocator };
+			hash_table<RenderTask*, buffer_pair_t*> task_buffers;
+			vector<mt::Future<void>> futures;
+			buffers.resize(_contexts.size());
+			auto buffer_itr = buffers.data();
+			for (auto& rt : _contexts)
+			{
+				buffer_itr->first = &rt;
+				task_buffers[&rt] = buffer_itr++;
+			}
+			futures.reserve(_contexts.size());
+			std::array<dbg::milliseconds, 10> tmp_duration{};
+		GetGfxTimeLog().end_then_start("Threaded stuff");
+		for (auto& rt : _contexts)
+		{
+			futures.emplace_back(Core::GetThreadPool().Post(
+				[&tmp_duration,&rt,&task_buffers, this]() {
+					dbg::stopwatch tmp_timer;
+					tmp_timer.start();
+					auto buffer = _cmd_buffers.GetCommandBuffer();
+					if (rt.BeginSecondaryCmdBuffer(buffer))
+					{
+					tmp_timer.stop();
+					tmp_duration.at(mt::thread_id()) += tmp_timer.time();
+						rt.ProcessBatches(buffer);
+						buffer.end();
+					}
+					{
+						task_buffers.at(&rt)->second = buffer;
+						//std::lock_guard lock{ mutex };
+						////must still place even if BeginSecondaryCmdBuffer returns false, there maybe non-renderpass stuff that needs executing.
+						//buffers.emplace_back(buffer,&rt);
+					}
+				}
+			));/*
+			();		//*/
+		}
+		for (auto& future : futures)
+			future.get();
+		//GetGfxTimeLog().end_then_start("Get Command Buffer & begin secondary buffer",std::reduce(tmp_duration.begin(), tmp_duration.end()));
+		GetGfxTimeLog().end_then_start("Execute Secondary Command Buffers");
+		
+		for (size_t i = 0; i<buffers.size();++i)
+		{
+			auto& [p_rt, buffer] = buffers.at(i);
+			if (p_rt->BeginRenderPass(bundle._cmd_buffer))
+			{
+				bundle._cmd_buffer.executeCommands(buffer);
+				bundle._cmd_buffer.endRenderPass();
+			}
+		}
+		GetGfxTimeLog().end();
+		//for (auto& [name, pair] : ProcBatchLut())
+		//{
+		//	auto& [count, time] = pair;
+		//	GetGfxTimeLog().log_n_store(name + string{ std::to_string(count) }, time);
+		//}
+	GetGfxTimeLog().end();// "Proc Batches");
+GetGfxTimeLog().end();// "Compile");
+
+GetGfxTimeLog().start("Update Ubo Managers");// "Compile");
+		for (auto& ubo_manager : _ubo_managers)
+		{
+			if (ubo_manager)
+			{
+				ubo_manager->UpdateAllBuffers();
+			}
+		}
+GetGfxTimeLog().end();// "Update Ubo Managers");// "Compile");
 	}
 
 	RenderPassCreateInfoBundle FrameGraph::CreateRenderPassInfo(span<const std::optional<FrameGraphAttachmentInfo>> input_rscs, span<const std::optional<FrameGraphAttachmentInfo>> output_rscs, std::optional<FrameGraphAttachmentInfo> depth)

@@ -7,15 +7,20 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_win32.h>
 #include <vkn/GraphicsState.h>
-#include<vkn/UboManager.h>
-#include <vkn/FrameRenderer.h>
 
 namespace idk::win
 {
 	class Windows;
+	
 }
 namespace idk::vkn
 {
+	struct AsyncTexLoader;
+	namespace dbg
+	{
+		class time_log;
+	}
+	class FrameRenderer;
 	class PipelineManager;
 	using Windows = win::Windows;
 	class VulkanState;
@@ -39,6 +44,9 @@ namespace idk::vkn
 		
 		VulkanState& Instance() { return *instance_; }
 		VulkanView&  View()const { return instance_->View();}
+
+		dbg::time_log& TimeLog();
+		AsyncTexLoader& GetAsyncTexLoader();
 
 		VulkanState& GetVulkanHandle();
 	private:

@@ -4,6 +4,9 @@
 #include <vkn/RenderUtil.h>
 
 #include <vkn/VulkanWin32GraphicsSystem.h>
+
+#include <vkn/VknFrameBuffer.h>
+
 namespace idk::vkn::bindings
 {
 	class AdditiveBlendBindings :public RenderBindings

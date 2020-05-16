@@ -89,53 +89,44 @@ void main()
 		vec3 result = pbr_specular(curr_light, view_pos.xyz, normal, reflected, albedo, specular, roughness, ambient_o); 
 		
 		vec4 cascade_c = vec4(0,0,0,0);
-		if (curr_light.type == 1)
+		
+		if(curr_light.cast_shadow!=0)
 		{
-			if(curr_light.cast_shadow==1)
+			if (curr_light.type == 1)
 			{
-				//result *= vec3(1.f - ShadowCalculation(curr_light,shadow_maps[i],(curr_light.v_dir) ,normal ,curr_light.vp * world_pos));			
 				
 				vec3 shadow_factor = vec3(1.f,1.f,1.f);
 				if(view_z_abs <= DirectionalBlk.directional_vp[j].far_plane)
 				{
 					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-					//shadow_factor *= shadow_factor;
-					//cascade_c = vec4(0.1,0,0,0);
 				}
 				else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
 				{
-					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-					//shadow_factor *= shadow_factor;
-					//cascade_c = vec4(0,0.1,0,0);
+					shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));				
 				}
-				//else if(view_z_abs <= DirectionalBlk.directional_vp[++j].far_plane)
-				//{
-				//	shadow_factor = vec3(1.f - ShadowCalculation(curr_light,shadow_map_directional[j],(curr_light.v_dir) ,normal ,DirectionalBlk.directional_vp[j].vp * world_pos));
-				//	//shadow_factor *= shadow_factor;
-				//	//cascade_c = vec4(0,0,0.1,0);
-				//}
-				
+	
 				result *= shadow_factor;
+				//shadow_accum -= shadow_factor;				
+				++j;
 				
 				//dir_light_accum = result * shadow_factor;
-				j = 0;
-				
 			}
-			//vvvp = curr_light.vp;
-		}
-		else if (curr_light.type == 2)
-		{
-			if(curr_light.cast_shadow!=0)
-				result *= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+			else if (curr_light.type == 2)
+			{
+				
+				result *= (vec3(1.f-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));
+				//shadow_accum -= (vec3(1-ShadowCalculation(curr_light,shadow_maps[i],curr_light.v_dir,normal ,curr_light.vp * world_pos)));	
+				
+			} 
 		}
 		
 		light_accum += result;
 	}
 	
 	
-	vec3 F = mix(vec3(0.04), albedo, specular);
+	vec3 F = mix(vec3(0.04f), albedo, specular);
 	vec3 kS = fresnelRoughness(max(dot(normal,view_dir), 0.0), F, roughness);
-	vec3 kD = 1.0 - kS;
-	kD *= 1.0 - specular;
+	vec3 kD = 1.0f - kS;
+	kD *= 1.0f - specular;
 import /engine_data/shaders/pbr_end.glsl
 }

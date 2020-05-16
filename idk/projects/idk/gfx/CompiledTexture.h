@@ -16,6 +16,7 @@ namespace idk
 		bool is_srgb{};
 		bool force_uncompiled{};
 		unsigned generate_mipmaps{};
+		bool wait_loaded=false;
 		string pixel_buffer;
 
 		EXTENSION(".idds");
