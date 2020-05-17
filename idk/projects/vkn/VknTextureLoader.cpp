@@ -227,6 +227,9 @@ namespace idk::vkn
 		return Core::GetThreadPool().Post(
 			[loader = this,fence_pool = &load_fence](const shared_ptr<Nope::Derp>& _derp) ->void
 			{
+				try
+				{
+
 				auto& derp = *_derp;
 				auto device = *View().Device();
 				auto fence = *derp.load_fence;
@@ -254,7 +257,7 @@ namespace idk::vkn
 				hlp::EndSingleTimeCbufferCmd(cmd_buffer, (is_data)?View().GraphicsTexQueue():View().GraphicsQueue(), false, fence);
 				lock.Unlock();
 				dbg_chk(tex.Image(true));
-				uint64_t wait_for_milli_seconds = 1;
+				uint64_t wait_for_milli_seconds = 0;
 				[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
 				//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
 				while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout) std::this_thread::yield();
@@ -266,6 +269,21 @@ namespace idk::vkn
 				}
 				if (!is_data)
 					tmp.ApplyOnTexture(*std::get<VknTexture*>(derp.texture));
+
+				}
+				catch (vk::Error& err)
+				{
+					LOG_ERROR_TO(LogPool::GFX, "LoadTexAsync Error: %s", err.what());
+				}
+				catch (std::exception& e)
+				{
+					LOG_ERROR_TO(LogPool::GFX, "LoadTexAsync Exception thrown: %s", e.what());
+				}
+				catch (...)
+				{
+					LOG_ERROR_TO(LogPool::GFX, "LoadTexAsync unknown exception thrown.");
+
+				}
 				return (void)0;
 			},
 			std::make_shared<Nope::Derp>(Nope::Derp{ texture, allocator, std::move(fence), std::move(cmd_buffer), ooptional, load_info, in_info, guid ,0,&load_fence}));

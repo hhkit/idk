@@ -274,18 +274,6 @@ namespace idk::vkn
 		//auto e_time = (d_af_end - d_af_start).count();
 		//LOG_CRASH_TO(LogPool::GFX, "Acquired Frame time: %d", std::chrono::duration_cast<std::chrono::microseconds>((d_af_end - d_af_start)).count());
 
-		auto curr_index = instance_->View().CurrFrame();
-		instance_->ResourceManager().ProcessQueue(curr_index);
-		{
-			auto& var = extra_vars;
-			auto name = "Reload Deferred";
-			var.SetIfUnset(name, false);
-			if (*var.Get<bool>(name))
-			{
-				ReloadDeferredShaders();
-				var.Set(name, false);
-			}
-		}
 		{
 			auto& var = extra_vars;
 			auto name = "Reload Textures";
@@ -301,12 +289,24 @@ namespace idk::vkn
 				var.Set(name, false);
 			}
 		}
+		extra_vars.Set("pending_textures", (int)_pimpl->tex_loader.num_pending());
+		_pimpl->tex_loader.UpdateTextures();
+		auto curr_index = instance_->View().CurrFrame();
+		instance_->ResourceManager().ProcessQueue(curr_index);
+		{
+			auto& var = extra_vars;
+			auto name = "Reload Deferred";
+			var.SetIfUnset(name, false);
+			if (*var.Get<bool>(name))
+			{
+				ReloadDeferredShaders();
+				var.Set(name, false);
+			}
+		}
 		_pimpl->timelog.end_then_start("Update Pipelines");
 		auto& curr_frame = _frame_renderers[curr_index];
 		auto& curr_buffer = object_buffer[curr_draw_buffer];
 		_pm->CheckForUpdates(curr_index);
-		extra_vars.Set("pending_textures", (int)_pimpl->tex_loader.num_pending());
-		_pimpl->tex_loader.UpdateTextures();
 		_pimpl->timelog.end_then_start("Init Pre render data");
 
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());
