@@ -67,6 +67,9 @@ namespace idk::vkn
 
 			string data_cache;
 			string texture_cache;
+			string scratch_data_cache;
+			string scratch_texture_cache;
+			vector<vk::Image> image_cache;
 
 			vector< descriptors_t> descriptors;
 			//indexes into descriptors
