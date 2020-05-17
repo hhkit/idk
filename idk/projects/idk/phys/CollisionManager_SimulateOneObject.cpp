@@ -29,6 +29,7 @@
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
+#include <scene/SceneGraph.inl>
 
 #include <ds/result.inl>
 
@@ -231,7 +232,11 @@ namespace idk
 
 					constraint_states.emplace_back(ccs);
 				}
-				new_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, col_val);
+
+				if (i->collider->GetHandle().id < j->collider->GetHandle().id)
+					new_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, col_val);
+				else
+					new_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, -col_val);
 			}
 		}
 

@@ -323,7 +323,10 @@ namespace idk
 
 					constraint_states.emplace_back(ccs);
 				}
-				_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, col_val);
+				if (i->collider->GetHandle().id < j->collider->GetHandle().id)
+					_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, col_val);
+				else
+					_collisions.emplace(CollisionPair{ i->collider->GetHandle(), j->collider->GetHandle() }, -col_val);
 			}
 		}
 	}

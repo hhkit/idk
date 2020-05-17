@@ -24,7 +24,17 @@ namespace idk
 	};
 
 	// ContactConstraint == CollisionPair
-	struct CollisionPair { Handle<Collider> lhs, rhs; auto operator<=>(const CollisionPair&) const = default; };
+	struct CollisionPair { 
+		Handle<Collider> lhs, rhs; 
+		CollisionPair(Handle<Collider> colA, Handle<Collider> colB)
+			: lhs{colA}
+			, rhs{colB}
+		{
+			if (rhs.id < lhs.id)
+				std::swap(lhs, rhs);
+		}
+		auto operator<=>(const CollisionPair&) const = default; 
+	};
 
 	struct pair_hasher { size_t operator()(const CollisionPair&) const; };
 	using CollisionList = hash_table<CollisionPair, phys::col_success, pair_hasher>;
