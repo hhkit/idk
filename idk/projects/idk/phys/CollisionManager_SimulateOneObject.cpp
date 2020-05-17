@@ -142,7 +142,7 @@ namespace idk
 		auto sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(rb->GetGameObject());
 		sg.Visit([&](Handle<GameObject> elem, int)
 		{
-			if (auto col = elem->GetComponent <Collider>())
+			for (auto& col : elem->GetComponents<Collider>())
 				cols.emplace_back(col);
 		});
 
