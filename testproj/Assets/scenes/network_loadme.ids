@@ -136,6 +136,14 @@
       component_nth: 0
       property_path: name
       value: !string NewPrefab
+    - component_name: Collider
+      component_nth: 1
+      property_path: shape/center
+      value: !vec3 {x: 0, y: 0.38, z: 0}
+    - component_name: MonoBehavior
+      component_nth: 0
+      property_path: script_data/jump_force
+      value: !float 3000
     prefab: {guid: 07b290d5-46fc-4b5c-a34d-1fa42571308a}
     removed_components: []
 - !51539673088 

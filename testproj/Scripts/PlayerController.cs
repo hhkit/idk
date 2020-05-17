@@ -75,7 +75,10 @@ namespace TestAndSeek
             {
                 on_floor = true;
                 if (transfer && p != null)
-                        ev.TransferOwnership(p);
+                {
+                    ev.TransferOwnership(p);
+                    transfer = false;
+                }
             }
         }
         void OnTriggerExit(Collider other)
@@ -116,55 +119,53 @@ namespace TestAndSeek
 
         public void ProcessInput(PlayerInput input)
         {
-            Debug.Log("" + (input.turn_left ? 1 : 0)
-                + (input.turn_right? 1 : 0)
+            string debug_state = "" + (input.turn_left ? 1 : 0)
+                + (input.turn_right ? 1 : 0)
                 + (input.move_forward ? 1 : 0)
                 + (input.jump ? 1 : 0)
-                + (on_floor ? " grounded" : " in air") 
-                + "pos: " + transform.position + "\t"
-                + "vel: " + rb.velocity);
+                + (on_floor ? " grounded" : " in air");
+
+
+            //debug_state += "\nOLD ["
+            //    + "pos: " + transform.position + "\t"
+            //    + "vel: " + rb.velocity
+            //    + "]";
 
             if (on_floor)
             {
                 if (input.turn_left)
-                    transform.rotation = Quaternion.AngleAxis(rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
+                    transform.rotation = (Quaternion.AngleAxis(rot_speed * Time.fixedDeltaTime, Vector3.up) * transform.rotation).normalized;
 
                 if (input.turn_right)
-                    transform.rotation = Quaternion.AngleAxis(-rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
+                    transform.rotation = (Quaternion.AngleAxis(-rot_speed * Time.fixedDeltaTime, Vector3.up) * transform.rotation).normalized;
 
                 if (input.move_forward)
                     rb.velocity = transform.forward * move_speed;
 
-                if (jump_count > 0)
+                if (input.jump)
                 {
-                    if (input.jump)
-                    {
-                        --jump_count;
-                        StartCoroutine(JumpCooldown());
-                        rb.AddForce(Vector3.up * jump_force);
-                    }
+                    rb.AddForce(Vector3.up * jump_force * Time.fixedDeltaTime);
                 }
             }
             else
             {
                 if (input.turn_left)
-                    transform.rotation = Quaternion.AngleAxis(rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
+                    transform.rotation = Quaternion.AngleAxis(rot_speed * air_turn_control * Time.fixedDeltaTime, Vector3.up) * transform.rotation;
 
                 if (input.turn_right)
-                    transform.rotation = Quaternion.AngleAxis(-rot_speed * Time.deltaTime, Vector3.up) * transform.rotation;
-
-                if (input.move_forward)
-                    rb.velocity = transform.forward * move_speed;
-
-                if (input.turn_left)
-                    transform.rotation = Quaternion.AngleAxis(rot_speed * air_turn_control * Time.deltaTime, Vector3.up) * transform.rotation;
-
-                if (input.turn_right)
-                    transform.rotation = Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.deltaTime, Vector3.up) * transform.rotation;
+                    transform.rotation = Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.fixedDeltaTime, Vector3.up) * transform.rotation;
 
                 if (input.move_forward)
                     rb.velocity = transform.forward * move_speed * air_move_control;
             }
+
+
+            // debug_state += "\nNEW ["
+            //     + "pos: " + transform.position + "\t"
+            //     + "vel: " + rb.velocity
+            //     + "]";
+
+            Debug.Log(debug_state);
         }
     }
 }

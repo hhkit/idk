@@ -23,7 +23,10 @@
 #include <script/MonoBehavior.h>
 #include <script/ScriptSystem.h>
 #include <phys/PhysicsSystem.h>
-#include <thread>
+#include <gfx/DebugRenderer.h>
+#include <core/GameObject.h>
+#include <common/Transform.h>
+#include <phys/RigidBody.h>
 
 namespace idk
 {
@@ -240,6 +243,7 @@ namespace idk
 				if (client_inputs->dirty_control_object == false)
 					continue;
 
+				Core::GetSystem<DebugRenderer>().Draw(sphere{ ev.GetGameObject()->Transform()->position, 0.5f }, color{ 1,0,0 }, Core::GetDT());
 				for (auto& move : client_inputs->moves)
 				{
 					auto array = mono_array_new(mono_domain_get(), mono_get_byte_class(), move.payload.size());
@@ -264,8 +268,19 @@ namespace idk
 
 					// simulate physics
 					if (auto rb = ev.GetGameObject()->GetComponent<RigidBody>())
+					{
 						physics_system.SimulateOneObject(rb);
+						auto pos = ev.GetGameObject()->Transform()->position;
+						auto vel = rb->velocity();
+						LOG_TO(LogPool::NETWORK, "MOVE %d: POS[ %f,%f,%f ], VEL[%f, %f, %f]",
+							move.index, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+					}
+
+					Core::GetSystem<DebugRenderer>().Draw(sphere{ ev.GetGameObject()->Transform()->position, 0.5f }, 
+						color{0,1,0}, Core::GetDT());
+
 				}
+				client_inputs->dirty_control_object = false;
 			}
 
 			if (auto server_inputs = std::get_if<ElectronView::ServerSideInputs>(&ev.move_state))
@@ -467,4 +482,4 @@ namespace idk
 			addrs.emplace_back(ip);
 		return addrs;
 	}
-}
+};

@@ -66,6 +66,8 @@ namespace idk
 					t = 1;
 					start_value = param.getter();
 					end_value = *val;
+					if constexpr (std::is_same_v<T, vec3>)
+						LOG_TO(LogPool::NETWORK, "UNPACKED: %f, %f, %f", end_value.x, end_value.y, end_value.z);
 				}
 			}
 

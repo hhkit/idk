@@ -69,7 +69,7 @@ namespace idk
 		seconds    _accumulated_game_dt;
 		seconds    _accumulated_network_dt;
 		seconds    _accumulated_predict_dt;
-		seconds    _fixed_dt       = seconds{ 1.0 / 15 };
+		seconds    _fixed_dt       = seconds{ 1.0 / 30 };
 
 		vector<Pass> _passes[static_cast<int>(UpdatePhase::MAX)];
 

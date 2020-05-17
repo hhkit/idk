@@ -81,7 +81,8 @@ namespace idk
 			rigidbody.torque = vec3{ 0.0f };
 		}
 
-		auto [broad_phase, pred_shape] = std::visit([&](const auto& shape) 
+		vector<ColliderInfo> collidees;
+		auto collider_creator = [&](const auto& shape) 
 		{ 
 			auto pred_shape = shape * rb->_global_cache; 
 			auto& rb = rigidbody;
@@ -128,15 +129,28 @@ namespace idk
 				rb.freeze_rotation = true;
 			}
 
-			return std::tuple<aabb, CollidableShapes>(pred_shape.bounds(), pred_shape);
-		}, rigidbody.GetGameObject()->GetComponent<Collider>()->shape);
+			ColliderInfo one_obj_info;
+			one_obj_info.rb = &rigidbody;
+			one_obj_info.broad_phase = pred_shape.bounds();
+			one_obj_info.layer = rigidbody.GetGameObject()->Layer();
+			one_obj_info.predicted_shape = pred_shape;
+			return one_obj_info;
+		};
 
-		ColliderInfo one_obj_info;
-		one_obj_info.rb = &rigidbody;
-		one_obj_info.broad_phase = broad_phase;
-		one_obj_info.layer = rigidbody.GetGameObject()->Layer();
-		one_obj_info.collider = &*rigidbody.GetGameObject()->GetComponent<Collider>(); // todo: fix this
-		one_obj_info.predicted_shape = pred_shape;
+		vector<Handle<Collider>> cols;
+		// assemble all colliders in tree
+		auto sg = Core::GetSystem<SceneManager>().FetchSceneGraphFor(rb->GetGameObject());
+		sg.Visit([&](Handle<GameObject> elem, int)
+		{
+			if (auto col = elem->GetComponent <Collider>())
+				cols.emplace_back(col);
+		});
+
+		for (auto& elem : cols)
+		{
+			auto& val = collidees.emplace_back(std::visit(collider_creator, elem->shape));
+			val.collider = &*elem;
+		}
 
 		// test collisions
 		auto& phys = Core::GetSystem<PhysicsSystem>();
@@ -144,27 +158,28 @@ namespace idk
 		_info.reserve(_dynamic_info.size() * 4);
 
 		// Dynamic vs Dynamic Broadphase
+		for (auto& left_elem : collidees)
 		{
 			const auto& lrigidbody = rigidbody;
 			const bool lrb_sleeping = lrigidbody.sleeping();
-			for (auto& elem : _dynamic_info)
+			for (auto& right_elem : _dynamic_info)
 			{
-				const auto& rrigidbody = *elem.rb;
+				const auto& rrigidbody = *right_elem.rb;
 
 				if (lrb_sleeping && rrigidbody.sleeping())
 					continue;
 				if (lrigidbody.GetHandle() == rrigidbody.GetHandle())
 					continue;
-				if (!phys.AreLayersCollidable(one_obj_info.layer, elem.layer))
+				if (!phys.AreLayersCollidable(left_elem.layer, right_elem.layer))
 					continue;
-				if (!broad_phase.overlaps(elem.broad_phase))
+				if (!left_elem.broad_phase.overlaps(right_elem.broad_phase))
 					continue;
 
-				_info.emplace_back(ColliderInfoPair{ &one_obj_info, &elem });
+				_info.emplace_back(ColliderInfoPair{ &left_elem, &right_elem });
 			}
 
 			// Static vs Dynamic Broadphase
-			_static_broadphase.query_collisions(one_obj_info, _info);
+			_static_broadphase.query_collisions(left_elem, _info);
 		}
 
 		// Narrow phase.
