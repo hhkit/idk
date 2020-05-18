@@ -41,6 +41,8 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="network\ControlObjectMessage.h" />
+    <ClInclude Include="network\gbn_sliding_window.h" />
     <ClInclude Include="network\Socket.h" />
     <ClInclude Include="ui\AspectRatioFitter.h" />
     <ClInclude Include="audio\AudioListener.h" />
@@ -55,8 +57,6 @@
     <ClInclude Include="gfx\PostProcessEffect.h" />
     <ClInclude Include="meta\erased_visitor.h" />
     <ClInclude Include="network\ack_utils.h" />
-    <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
-    <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
     <ClInclude Include="gfx\ColorGrade.h" />
     <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
@@ -127,7 +127,6 @@
     <ClInclude Include="parallel\multithread_control.h" />
     <ClInclude Include="network\Adapter.h" />
     <ClInclude Include="network\Address.h" />
-    <ClInclude Include="network\ClassRep.h" />
     <ClInclude Include="network\Client.h" />
     <ClInclude Include="network\ClientConnectionManager.h" />
     <ClInclude Include="network\ElectronTransformView.h" />
@@ -474,6 +473,7 @@
     <ClCompile Include="phys\AabbTree.cpp" />
     <ClCompile Include="phys\Collider.cpp" />
     <ClCompile Include="phys\CollisionManager.cpp" />
+    <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box.cpp" />
     <ClCompile Include="phys\collision_detection\collision_box_sphere.cpp" />
     <ClCompile Include="phys\collision_detection\collision_capsule.cpp" />

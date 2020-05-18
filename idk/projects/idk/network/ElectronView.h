@@ -5,6 +5,7 @@
 #include <network/GhostPack.h>
 #include <network/MovePack.h>
 #include <meta/erased_visitor.h>
+#include <network/gbn_sliding_window.h>
 
 namespace idk
 {
@@ -41,14 +42,31 @@ namespace idk
 		struct Master {};        // master object for the server. server owns this regardless of object ownership
 		struct Ghost  {};         // ghost object for clients
 
-		struct MoveObject {};  // when the client owns the object, the move_state is placed into clientobject
-		struct ControlObject {}; // the server holds the controlobject
+		struct ClientSideInputs // when the client owns the object, the move_state is placed into clientobject
+		{
+			struct MoveNode
+			{
+				seq_num_t index;
+				string    payload;
+				unsigned  send_count = 3;
+			};
+			std::deque<MoveNode> moves;
+			seq_num_t next_move_index{};
+
+			seq_num_t last_received_control_object{};
+			bool      dirty_control_object = false;
+		};
+
+		struct ServerSideInputs
+		{
+			gbn_sliding_window<string> moves{ seq_num_t{} };
+		}; 
 
 		ElectronView() = default;
 		ElectronView(const ElectronView&);
-		ElectronView(ElectronView&&) noexcept;
+		ElectronView(ElectronView&&);
 		ElectronView& operator=(const ElectronView&) ;
-		ElectronView& operator=(ElectronView&&) noexcept ;
+		ElectronView& operator=(ElectronView&&) ;
 		~ElectronView();
 
 		NetworkID network_id{};
@@ -60,7 +78,7 @@ namespace idk
 		Host owner = Host::SERVER;
 
 		variant<monostate, Master, Ghost> ghost_state;
-		variant<monostate, MoveObject, ControlObject> move_state;
+		variant<monostate, ClientSideInputs, ServerSideInputs> move_state;
 
 		bool IsMine() const;
 
@@ -77,7 +95,6 @@ namespace idk
 		void UnpackGhostData(SeqNo sequence_number, const GhostPack& data_pack);
 		void UnpackMoveData(const MovePack& data_pack);
 
-		void DumpToLog();
 		span<const unique_ptr<BaseParameter>> GetParameters() const;
 
 		template<typename T>
@@ -105,40 +122,12 @@ namespace idk
 			SeqNo value_index;
 			real t = 1;
 
+			virtual void ForceUnpack(string_view) = 0;
 			virtual void UnpackData(SeqNo index, string_view) = 0;
 			virtual void Update(real dt) = 0;
+			virtual void Snap() = 0;
+			virtual void Debug(erased_visitor<void(bool), void(int), void(float), void(vec3), void(quat)>) = 0;
 			virtual ~GhostData() = default;
-		};
-
-		// move data
-		struct MoveObjectData
-		{
-			// SequenceNumber, acknowledgement state, move
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo), void(float, SeqNo), void(bool, SeqNo)>;
-
-			SeqNo last_received;
-
-			virtual void Init(SeqNo initial_frame) = 0;
-			virtual void PushMove(SeqNo curr_seq, int move_type, const SyncableValue&) = 0;
-			virtual small_vector<SeqAndPack> PackData(SeqNo curr_seq) = 0;
-
-			virtual void UnpackGhost(SeqNo index, string_view data) = 0;
-			virtual void UpdateGhost(real ghost_bias = 0.03f) = 0;
-
-			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
-			virtual ~MoveObjectData() = default;
-		};
-
-		struct ControlObjectData
-		{
-			// SequenceNumber, guess verification state, guess
-			using BufferVisitor = erased_visitor<void(vec3, SeqNo), void(quat, SeqNo), void(int, SeqNo), void(float, SeqNo), void(bool, SeqNo)>;
-
-			virtual void Init(SeqNo initial_frame) = 0;
-			virtual int  UnpackMove(span<const SeqAndPack>) = 0;
-			virtual void ApplyMove() = 0;
-			virtual void VisitMoveBuffer(const BufferVisitor& visit) = 0;
-			virtual ~ControlObjectData() = default;
 		};
 
 		string param_name;
@@ -146,8 +135,6 @@ namespace idk
 
 		virtual GhostData*         GetGhost() = 0;
 		virtual MasterData*        GetMaster() = 0;
-		virtual MoveObjectData*    GetClientObject() = 0;
-		virtual ControlObjectData* GetControlObject() = 0;
 		virtual ~BaseParameter() = default;
 	};
 

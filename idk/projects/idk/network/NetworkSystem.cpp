@@ -10,6 +10,7 @@
 #include <network/ServerConnectionManager.h>
 #include <network/ClientConnectionManager.h>
 #include <network/ClientMoveManager.h>
+#include <network/ServerMoveManager.h>
 #include <network/ConnectionManager.inl>
 #include <network/IDManager.h>
 #include <network/ElectronView.h>
@@ -18,8 +19,16 @@
 #include <network/GhostManager.h>
 #include <core/GameState.h>
 #include <core/Scheduler.h>
-
-#include <thread>
+#include <core/GameObject.inl>
+#include <script/MonoBehavior.h>
+#include <script/ScriptSystem.h>
+#include <phys/PhysicsSystem.h>
+#include <gfx/DebugRenderer.h>
+#include <core/GameObject.h>
+#include <common/Transform.h>
+#include <phys/RigidBody.h>
+#include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 
 namespace idk
 {
@@ -222,7 +231,139 @@ namespace idk
 		}
 	}
 
-	void NetworkSystem::UpdatePredictions(span<ElectronView> electron_views)
+	void NetworkSystem::Rollback(span<ElectronView> evs)
+	{
+		auto& physics_system = Core::GetSystem<PhysicsSystem>();
+		auto& script_system  = Core::GetSystem<mono::ScriptSystem>();
+
+		auto reserialize_thunk = std::get<mono::ManagedThunk>(script_system.Environment().Type("ElectronNetwork")->GetMethod("Reserialize", 1));
+
+		for (auto& ev : evs)
+		{
+			if (auto client_inputs = std::get_if<ElectronView::ClientSideInputs>(&ev.move_state))
+			{
+				if (client_inputs->dirty_control_object == false)
+					continue;
+
+				Core::GetSystem<DebugRenderer>().Draw(sphere{ ev.GetGameObject()->Transform()->position, 0.5f }, color{ 1,0,0 }, Core::GetDT());
+				for (auto& move : client_inputs->moves)
+				{
+					auto array = mono_array_new(mono_domain_get(), mono_get_byte_class(), move.payload.size());
+					for (unsigned i = 0; i < move.payload.size(); ++i)
+						mono_array_set(array, unsigned char, i, move.payload[i]);
+
+					auto input = reserialize_thunk.Invoke((MonoObject*)array);
+					
+					// execute input
+					for (auto& comp : ev.observed_components)
+					{
+						if (comp.is_type<mono::Behavior>())
+						{
+							auto behavior = handle_cast<mono::Behavior>(comp);
+							auto& obj = behavior->GetObject();
+							auto& type = *obj.Type();
+							auto method = type.GetMethod("ProcessInput", 1);
+							if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+							{
+								LOG_TO(LogPool::NETWORK, "Rollback Input Tick %d", move.index.value);
+								thunk->Invoke(obj, input);
+								break;
+							}
+						}
+					}
+
+					// simulate physics
+					if (auto rb = ev.GetGameObject()->GetComponent<RigidBody>())
+					{
+						physics_system.SimulateOneObject(rb);
+						auto pos = ev.GetGameObject()->Transform()->position;
+						auto vel = rb->velocity();
+						LOG_TO(LogPool::NETWORK, "MOVE %d: POS[ %f,%f,%f ], VEL[%f, %f, %f]",
+							move.index, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+					}
+
+					Core::GetSystem<DebugRenderer>().Draw(sphere{ ev.GetGameObject()->Transform()->position, 0.5f }, 
+						color{0,1,0}, Core::GetDT());
+
+				}
+				client_inputs->dirty_control_object = false;
+			}
+
+			if (auto server_inputs = std::get_if<ElectronView::ServerSideInputs>(&ev.move_state))
+			{
+				const auto base = server_inputs->moves.base();
+				if (auto move = server_inputs->moves.pop_front())
+				{
+					auto array = mono_array_new(mono_domain_get(), mono_get_byte_class(), move->size());
+					for (unsigned i = 0; i < move->size(); ++i)
+						mono_array_set(array, unsigned char, i, (*move)[i]);
+
+					auto input = reserialize_thunk.Invoke((MonoObject*)array);
+
+					// execute input
+					for (auto& comp : ev.observed_components)
+					{
+						if (comp.is_type<mono::Behavior>())
+						{
+							auto behavior = handle_cast<mono::Behavior>(comp);
+							auto& obj = behavior->GetObject();
+							auto& type = *obj.Type();
+							auto method = type.GetMethod("ProcessInput", 1);
+							if (const auto thunk = std::get_if<mono::ManagedThunk>(&method))
+							{
+								LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
+								thunk->Invoke(obj, input);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void NetworkSystem::CollectInputs(span<ElectronView> evs)
+	{
+		auto& physics_system = Core::GetSystem<PhysicsSystem>();
+		auto& script_system = Core::GetSystem<mono::ScriptSystem>();
+
+		auto serialize_thunk = std::get<mono::ManagedThunk>(script_system.Environment().Type("ElectronNetwork")->GetMethod("Serialize", 1));
+		const auto curr_frameid = GetSequenceNumber();
+
+		for (auto& ev : evs)
+		{
+			if (auto client_inputs = std::get_if<ElectronView::ClientSideInputs>(&ev.move_state))
+			{
+				// execute input
+				for (auto& comp : ev.observed_components)
+				{
+					if (comp.is_type<mono::Behavior>())
+					{
+						auto behavior = handle_cast<mono::Behavior>(comp);
+						auto& obj = behavior->GetObject();
+						auto& type = *obj.Type();
+						auto method = type.GetMethod("GenerateInput");
+						if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+						{
+							auto input = thunk->Invoke(obj);
+							auto array = (MonoArray*)serialize_thunk.Invoke((MonoObject*)input);
+
+							std::string payload;
+							//payload.insert(payload.end(), array, (char*)array + mono_array_length(array));
+							payload.resize(mono_array_length(array));
+
+							for (unsigned i = 0; i < payload.size(); ++i)
+								payload[i] = mono_array_get(array, char, i);
+
+							client_inputs->moves.emplace_back(ElectronView::ClientSideInputs::MoveNode{ client_inputs->next_move_index, payload });
+							client_inputs->next_move_index++;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void NetworkSystem::MoveGhosts(span<ElectronView> electron_views)
 	{
 		for (auto& ev : electron_views)
 		{
@@ -232,9 +373,6 @@ namespace idk
 
 	void NetworkSystem::PreparePackets(span<ElectronView> electron_views)
 	{
-		for (auto& ev : electron_views)
-			ev.DumpToLog();
-
 		for (auto& ev : electron_views)
 		{
 			ev.PrepareDataForSending(frame_counter);
@@ -246,6 +384,7 @@ namespace idk
 				continue;
 
 			elem->GetManager<GhostManager>()->SendGhosts(electron_views);
+			elem->GetManager<ServerMoveManager>()->SendControlObjects(electron_views);
 		}
 
 		// if client
@@ -354,4 +493,4 @@ namespace idk
 			addrs.emplace_back(ip);
 		return addrs;
 	}
-}
+};

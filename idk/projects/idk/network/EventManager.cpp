@@ -190,7 +190,7 @@ namespace idk
 		}
 
 		transfer->owner = target_host;
-		transfer->move_state = ElectronView::ControlObject{};
+		transfer->move_state = ElectronView::ServerSideInputs{};
 
 		const auto go = transfer->GetGameObject();
 

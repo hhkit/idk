@@ -22,15 +22,6 @@ namespace idk
 		NetworkID GetNetworkID() const;
 		Handle<ElectronView> GetView() const;
 
-		void SetPosition(const vec3& p);
-		void ApplyTranslation(const vec3& trans);
-
-		void SetRotation(const quat& q);
-		void ApplyRotation(const quat& q);
-
-		void SetScale(const vec3& p);
-		void GrowScale(const vec3& trans);
-
 	private:
 		Handle<Transform> transform;
 		ElectronView::BaseParameter* pos_param{};

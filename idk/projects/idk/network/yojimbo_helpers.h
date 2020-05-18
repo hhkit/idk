@@ -8,6 +8,10 @@
 	vec.resize(count);                                \
 }
 
+#define serialize_byte_stream(stream, vec) \
+	serialize_bytes(stream, (uint8_t*) vec.data(), static_cast<int>(vec.size()));
+
+
 #define serialize_dataonly_struct(stream, obj) \
 	serialize_bytes(stream, (uint8_t*) &obj, sizeof(obj))
 

@@ -905,8 +905,8 @@ namespace idk
         ImGui::Text("Network ID: %d", c_ev->network_id);
         ImGui::Text("Network Frame: %d", Core::GetSystem<NetworkSystem>().GetSequenceNumber());
         ImGui::SliderFloat("Interp Bias", &c_ev->interp_bias, 0, 1);
-        const bool is_client_obj = std::get_if<ElectronView::MoveObject>(&c_ev->move_state);
-        const bool is_control_obj = std::get_if<ElectronView::ControlObject>(&c_ev->move_state);
+        const bool is_client_obj = std::get_if<ElectronView::ClientSideInputs>(&c_ev->move_state);
+        const bool is_control_obj = std::get_if<ElectronView::ServerSideInputs>(&c_ev->move_state);
 
         for (auto& elem : c_ev->GetParameters())
         {
@@ -917,35 +917,21 @@ namespace idk
                     if (is_client_obj)
                     {
                         ImGui::Text("Move Object");
-
-                        elem->GetClientObject()->VisitMoveBuffer([](auto move, SeqNo seq)
-                            {
-                                using T = std::decay_t<decltype(move)>;
-
-                                ImGui::Text("[%d]", seq.value);
-                                ImGui::SameLine();
-
-                                if constexpr (std::is_same_v<T, vec3>)
-                                {
-                                    ImGui::DragFloat3("", move.data());
-                                }
-                            });
+						for (auto& elem : c_ev->GetParameters())
+						{
+							elem->GetGhost()->Debug([&](auto val) -> void
+							{
+								using T = std::decay_t<decltype(val)>;
+								if constexpr (std::is_same_v<T, vec3>)
+									ImGui::DragFloat3(elem->param_name.data(), val.data());
+								if constexpr (std::is_same_v<T, quat>)
+									ImGui::DragFloat4(elem->param_name.data(), val.data());
+							});
+						}
                     }
                     if (is_control_obj)
                     {
                         ImGui::Text("Control Object");
-                        elem->GetControlObject()->VisitMoveBuffer([](auto move, SeqNo seq)
-                            {
-                                using T = std::decay_t<decltype(move)>;
-
-                                ImGui::Text("[%d]", seq.value);
-                                ImGui::SameLine();
-
-                                if constexpr (std::is_same_v<T, vec3>)
-                                {
-                                    ImGui::DragFloat3("", move.data());
-                                }
-                            });
                     }
                 }
                 ImGuidk::PopDisabled();

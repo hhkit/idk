@@ -28,6 +28,7 @@ namespace idk
 		: public ConfigurableSystem<PhysicsConfig>
 	{
 	public:
+		void SimulateOneObject(Handle<class RigidBody> rb);
 		void PhysicsTick            (span <class RigidBody> rbs, span<class Collider> colliders, span<class Transform>);
 		void FirePhysicsEvents();
 		void DrawCollider           (const Collider& collider) const;

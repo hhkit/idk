@@ -4,6 +4,11 @@
 
 namespace idk
 {
+	static constexpr float baumgarte = .2f;
+	static constexpr float penetration_slop = 0.05f;
+	static constexpr float margin = 0.2f;
+	static constexpr int   collision_threshold = 64;
+
 	struct ContactState
 	{
 		vec3 ra{ 0.0f };					// Vector from C.O.M to contact position
@@ -42,6 +47,7 @@ namespace idk
 		void Init();
 
 		// Will also cache all dynamic bodies for TestCollisions.
+		void SimulateOneObject(Handle<RigidBody> rb);
 		void InitializeNewFrame(span<class RigidBody> rbs, span<class Collider> colliders);
 		void ApplyGravityAndForces(span<class RigidBody> rbs);
 		void UpdateDynamics();

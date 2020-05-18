@@ -68,17 +68,23 @@ namespace idk
             if (!ElectronNetwork.isHost)
                 throw new InvalidRPCTargetException("Only the server may target players.");
 
-            byte[][] bytes = new byte[parameters.Length][];
+            Bindings.ViewExecRPCOnPlayer(handle, methodName, targetPlayer.ActorNumber, Serialize(parameters));
+        }
+
+        internal static byte[][] Serialize(object[] objects)
+        {
+            byte[][] bytes = new byte[objects.Length][];
             var formatter = new BinaryFormatter();
-            for (int count = 0; count < parameters.Length; ++count)
+            for (int count = 0; count < objects.Length; ++count)
             {
                 using (MemoryStream stream = new MemoryStream())
                 {
-                    formatter.Serialize(stream, parameters[count]);
+                    formatter.Serialize(stream, objects[count]);
                     bytes[count] = stream.ToArray();
                 }
             }
-            Bindings.ViewExecRPCOnPlayer(handle, methodName, targetPlayer.ActorNumber, bytes);
+
+            return bytes;
         }
 
         internal static object[] Reserialize(byte[][] bytes)
@@ -103,6 +109,7 @@ namespace idk
         {
             info.AddValue("viewID", InstantiationId, typeof(uint));
         }
+
         public ElectronView()
         {
             handle = 0;

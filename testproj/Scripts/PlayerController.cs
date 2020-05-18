@@ -1,10 +1,21 @@
 ﻿using idk;
 using System.Collections;
+using System;
 
 namespace TestAndSeek
 {
+    [Serializable]
+    struct PlayerInput
+    {
+        public bool turn_left;
+        public bool turn_right;
+        public bool move_forward;
+        public bool jump;
+    }
+
     class PlayerController
         : MonoBehavior
+        , INetworkInputProcessor<PlayerInput>
     {
         public float jump_force = 25f;
         public float move_speed = 45f;
@@ -13,6 +24,8 @@ namespace TestAndSeek
         public float air_move_control = 0.25f;
 
         public float rot_speed = 90f;
+
+        PlayerInput input;
 
         bool on_floor = false;
         int jump_count = 1;
@@ -62,7 +75,10 @@ namespace TestAndSeek
             {
                 on_floor = true;
                 if (transfer && p != null)
-                        ev.TransferOwnership(p);
+                {
+                    ev.TransferOwnership(p);
+                    transfer = false;
+                }
             }
         }
         void OnTriggerExit(Collider other)
@@ -75,10 +91,11 @@ namespace TestAndSeek
             yield return new WaitForSeconds(0.5);
             jump_count++;
         }
+
         void FixedUpdate()
         {
 
-            if (ev.IsMine) // ev.owner == me
+            if (!ElectronNetwork.isConnected || ev.IsMine) // ev.owner == me
             {
                 if (Input.GetKey(KeyCode.Shift))
                 {
@@ -86,39 +103,69 @@ namespace TestAndSeek
                         ev.RPC("ExecuteMeCheckingForSender", RPCTarget.Server, "help me");
                 }
 
-                if (on_floor)
+                input.turn_left = Input.GetKey(KeyCode.A);
+                input.turn_right = Input.GetKey(KeyCode.D);
+                input.move_forward = Input.GetKey(KeyCode.W);
+                input.jump = Input.GetKey(KeyCode.J);
+
+                ProcessInput(input);
+            }
+        }
+
+        public PlayerInput GenerateInput()
+        {
+            return input;
+        }
+
+        public void ProcessInput(PlayerInput input)
+        {
+            string debug_state = "" + (input.turn_left ? 1 : 0)
+                + (input.turn_right ? 1 : 0)
+                + (input.move_forward ? 1 : 0)
+                + (input.jump ? 1 : 0)
+                + (on_floor ? " grounded" : " in air");
+
+
+            //debug_state += "\nOLD ["
+            //    + "pos: " + transform.position + "\t"
+            //    + "vel: " + rb.velocity
+            //    + "]";
+
+            if (on_floor)
+            {
+                if (input.turn_left)
+                    transform.rotation = (Quaternion.AngleAxis(rot_speed * Time.fixedDeltaTime, Vector3.up) * transform.rotation).normalized;
+
+                if (input.turn_right)
+                    transform.rotation = (Quaternion.AngleAxis(-rot_speed * Time.fixedDeltaTime, Vector3.up) * transform.rotation).normalized;
+
+                if (input.move_forward)
+                    rb.velocity = transform.forward * move_speed;
+
+                if (input.jump)
                 {
-                    if (Input.GetKey(KeyCode.A))
-                        etransform.Rotate(Quaternion.AngleAxis(rot_speed * Time.deltaTime, Vector3.up));
-
-                    if (Input.GetKey(KeyCode.D))
-                        etransform.Rotate(Quaternion.AngleAxis(-rot_speed * Time.deltaTime, Vector3.up));
-
-                    if (Input.GetKey(KeyCode.W))
-                        erbv.velocity = transform.forward * move_speed;
-
-                    if (jump_count > 0)
-                    {
-                        if (Input.GetKey(KeyCode.J))
-                        {
-                            --jump_count;
-                            StartCoroutine(JumpCooldown());
-                            erbv.AddForce(Vector3.up * jump_force);
-                        }
-                    }
-                }
-                else
-                {
-                    if (Input.GetKey(KeyCode.A))
-                        etransform.Rotate(Quaternion.AngleAxis(rot_speed * air_turn_control * Time.deltaTime, Vector3.up));
-
-                    if (Input.GetKey(KeyCode.D))
-                        etransform.Rotate(Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.deltaTime, Vector3.up));
-
-                    if (Input.GetKey(KeyCode.W))
-                        erbv.velocity = transform.forward * move_speed * air_move_control;
+                    rb.AddForce(Vector3.up * jump_force * Time.fixedDeltaTime);
                 }
             }
+            else
+            {
+                if (input.turn_left)
+                    transform.rotation = Quaternion.AngleAxis(rot_speed * air_turn_control * Time.fixedDeltaTime, Vector3.up) * transform.rotation;
+
+                if (input.turn_right)
+                    transform.rotation = Quaternion.AngleAxis(-rot_speed * air_turn_control * Time.fixedDeltaTime, Vector3.up) * transform.rotation;
+
+                if (input.move_forward)
+                    rb.velocity = transform.forward * move_speed * air_move_control;
+            }
+
+
+            // debug_state += "\nNEW ["
+            //     + "pos: " + transform.position + "\t"
+            //     + "vel: " + rb.velocity
+            //     + "]";
+
+            Debug.Log(debug_state);
         }
     }
 }

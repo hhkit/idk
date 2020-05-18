@@ -72,6 +72,11 @@ namespace idk::mono
 		IDK_ASSERT_MSG(ev_itr != _types.end(), "cannot find idk.ElectronView");
 		IDK_ASSERT_MSG(ev_itr->second.CacheThunk("Reserialize", 1), "could not cache Deserialize");
 
+		auto en_itr = _types.find("ElectronNetwork");
+		IDK_ASSERT_MSG(en_itr != _types.end(), "cannot find idk.ElectronView");
+		IDK_ASSERT_MSG(en_itr->second.CacheThunk("Serialize", 1), "could not cache ElectronNetwork.Seserialize");
+		IDK_ASSERT_MSG(en_itr->second.CacheThunk("Reserialize", 1), "could not cache ElectronNetwork.Deserialize");
+
 	}
 
 	bool MonoWrapperEnvironment::IsPrivate(MonoClassField* field)
@@ -2634,46 +2639,5 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::ElectronTransformSetPosition", void, Handle<ElectronTransformView> e_tfm, vec3 new_pos)
-		{
-			e_tfm->SetPosition(new_pos);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::ElectronTransformTranslate", void, Handle<ElectronTransformView> e_tfm, vec3 new_pos)
-		{
-			e_tfm->ApplyTranslation(new_pos);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::ElectronTransformSetRotation", void, Handle<ElectronTransformView> e_tfm, quat new_rot)
-		{
-			e_tfm->SetRotation(new_rot);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::ElectronTransformRotate", void, Handle<ElectronTransformView> e_tfm, quat new_rot)
-		{
-			e_tfm->ApplyRotation(new_rot);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::ElectronTransformSetScale", void, Handle<ElectronTransformView> e_tfm, vec3 new_scl)
-		{
-			e_tfm->SetScale(new_scl);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::ElectronRigidBodySetVelocity", void, Handle<ElectronRigidbodyView> e_rb, vec3 val)
-		{
-			e_rb->SetVelocity(val);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::ElectronRigidBodyAddForce", void, Handle<ElectronRigidbodyView> e_rb, vec3 force)
-		{
-			e_rb->AddForce(force);
-		}
-		BIND_END();
 	}
 }

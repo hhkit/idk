@@ -977,9 +977,6 @@
     <ClInclude Include="network\PersistManager.h">
       <Filter>network\managers</Filter>
     </ClInclude>
-    <ClInclude Include="network\ClassRep.h">
-      <Filter>network\managers</Filter>
-    </ClInclude>
     <ClInclude Include="network\EventManager.h">
       <Filter>network\substream managers</Filter>
     </ClInclude>
@@ -1215,8 +1212,6 @@
     <ClInclude Include="network\SeqNo.h" />
     <ClInclude Include="network\ack_utils.h" />
     <ClInclude Include="meta\erased_visitor.h" />
-    <ClInclude Include="network\ElectronView_DerivedControlObject.h" />
-    <ClInclude Include="network\ElectronView_DerivedMoveObject.h" />
     <ClInclude Include="gfx\RenderTargetFactory.h" />
     <ClInclude Include="gfx\ColorGrade.h" />
     <ClInclude Include="gfx\PostProcessEffect.h">
@@ -1225,6 +1220,8 @@
     <ClInclude Include="ui\AspectRatioFitter.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="network\gbn_sliding_window.h" />
+    <ClInclude Include="network\ControlObjectMessage.h" />
     <ClInclude Include="network\Socket.h" />
   </ItemGroup>
   <ItemGroup>
@@ -1764,6 +1761,7 @@
     <ClCompile Include="gfx\RenderTargetFactory.cpp" />
     <ClCompile Include="gfx\ColorGrade.cpp" />
     <ClCompile Include="network\ack_utils.cpp" />
+    <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

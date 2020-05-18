@@ -93,14 +93,14 @@ namespace idk
 		return rhs > lhs;
 	}
 
-	bool operator>(seq_num_t lhs, seq_num_t rhs) 
+	bool operator>(seq_num_t lhs, seq_num_t rhs)
 	{
 		constexpr auto half_wrap = seq_num_t::value_type((seq_num_t::max_value >> 1) + 1); // RANGE = HIGH - LOW + 1
-		return (lhs.value > rhs.value) && (lhs.value - rhs.value <= half_wrap) 
-			|| (lhs.value < rhs.value) && (rhs.value - lhs.value  > half_wrap);
+		return (lhs.value > rhs.value) && (lhs.value - rhs.value <= half_wrap)
+			|| (lhs.value < rhs.value) && (rhs.value - lhs.value > half_wrap);
 	}
 
-	bool operator<=(seq_num_t lhs, seq_num_t rhs) 
+	bool operator<=(seq_num_t lhs, seq_num_t rhs)
 	{
 		return !(lhs > rhs);
 	}
