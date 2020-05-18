@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "VulkanResourceManager.h"
 #include <vkn/VulkanWin32GraphicsSystem.h>
+#include <mutex>
 namespace idk::vkn
 {
 VulkanResourceManager* idk::vkn::impl::GetRscManager()
@@ -15,14 +16,16 @@ VulkanResourceManager* idk::vkn::impl::GetRscManager()
 managed.emplace_back(rsc);
 }*/
 
+static std::mutex derp;
 void VulkanResourceManager::QueueToDestroy(ptr_t obj_to_destroy)
 {
+	std::lock_guard guard{ derp };
 	managed.emplace_back(std::move(obj_to_destroy));
 }
-
 void VulkanResourceManager::ProcessQueue(uint32_t frame_index)
 {
-	if(destroy_queue.size()!=0|| frame_index!=0)
+	std::lock_guard guard{ derp };
+	//if(destroy_queue.size()!=0|| frame_index!=0)
 		std::swap(destroy_queue[frame_index], managed);
 	managed.clear();
 }

@@ -51,12 +51,14 @@ namespace idk::vkn
 		void ProcessFrame();
 
 		std::optional<mt::Future<void>> ready;
-		vector<OpData> _queued;
-		vector<OpData> _results;
+		hlp::MemoryAllocator _allocator;
 		FencePool _load_fences;
 		CmdBufferPool _cmd_buffers;
+		std::mutex _queue_lock;
+		vector<OpData> _queued;
+		vector<OpData> _process_queue;
+		vector<OpData> _results;
 		TextureLoader _loader;
-		hlp::MemoryAllocator _allocator;
 		dbg::milliseconds time_slice{ 10 };
 	};
 }

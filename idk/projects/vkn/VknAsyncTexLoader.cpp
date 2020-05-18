@@ -17,10 +17,13 @@ namespace idk::vkn
 	//	vk::ImageSubresourceRange	_range     {};
 	//	uint32_t					 mipmap_level = 1;
 	//};
+//static hash_set<RscHandle<VknTexture>> handles;
 void AsyncTexLoader::Load(AsyncTexLoadInfo&& load_info, VknTexture& tex, RscHandle<VknTexture> tex_handle)
 {
 	//tex.MarkLoaded(false);
 	auto data_ptr = std::make_unique<VknTextureData>();
+	//if (!handles.emplace(tex_handle).second)
+	//	return;
 	_queued.emplace_back(
 		OpData{
 			{},
@@ -47,10 +50,12 @@ void AsyncTexLoader::UpdateTextures()
 		//Done processing the last frame's stuff
 		ready->get();
 		ready.reset();
-		size_t i = 0;
-		while (i < _results.size())
+		//size_t i = 0;
+		//while (i < _results.size())
+		//{
+		//	auto& [future, handle, ctx, data] = _results.at(i);
+		for(auto& [future, handle, ctx, data]:  _results)
 		{
-			auto& [future, handle, ctx, data] = _results.at(i);
 			//if (future.ready())
 			{
 				//future.get();
@@ -64,9 +69,14 @@ void AsyncTexLoader::UpdateTextures()
 			}
 			//else
 			//{
-			++i;
+		//	++i;
 			//}
 		}
+		//static vector<OpData> tmp;
+		//for (auto& derp : _results)
+		//{
+		//	tmp.emplace_back(std::move(derp));
+		//}
 		_results.clear();
 	}
 	else if (ready && !ready->ready())
@@ -81,12 +91,14 @@ void AsyncTexLoader::ClearQueue()
 		ready->get();
 		ready.reset();
 		_queued.clear();
+		_process_queue.clear();
+		//handles.clear();
 	}
 }
 
 size_t AsyncTexLoader::num_pending() const noexcept
 {
-	return _queued.size();
+	return _queued.size() + _process_queue.size();
 }
 
 //void UpdateHandle(RscHandle<VknTexture> tex, AsyncTexResult&& result)
@@ -120,6 +132,11 @@ size_t AsyncTexLoader::erase_result(size_t i)
 
 void AsyncTexLoader::ProcessFrame()
 {
+	auto tail = _process_queue.size();
+	_process_queue.resize(tail + _queued.size());
+
+	std::move(_queued.begin(), _queued.end(), _process_queue.begin() + tail);
+	_queued.clear();
 	ready = Core::GetThreadPool().Post(
 		[](ExecProxy proxy)
 		{
@@ -131,28 +148,32 @@ void AsyncTexLoader::ProcessFrame()
 
 void AsyncTexLoader::ExecProxy::exec()
 {
-	if (ptr->_queued.empty())
+	if (ptr->_process_queue.empty())
 		return;
 	dbg::stopwatch timer;
 	timer.start();
 	do {
-		auto& curr = ptr->_queued.back();
+		auto& curr = ptr->_process_queue.back();
 		auto fut = ptr->_loader.LoadTextureAsync(*curr.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr.info.to, curr.info.tci, curr.info.iti);
 
-		if (ptr->_queued.size() > 1)
+		if (ptr->_process_queue.size() > 1)
 		{
-			auto& curr2 = ptr->_queued.at(ptr->_queued.size()-2);
+			auto& curr2 = ptr->_process_queue.at(ptr->_process_queue.size()-2);
 			auto fut2 = ptr->_loader.LoadTextureAsync(*curr2.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr2.info.to, curr2.info.tci, curr2.info.iti);
-			while (!fut2.ready()) std::this_thread::yield();
+			while (!fut2.ready() && Core::IsRunning()) std::this_thread::yield();
+			//fut2.get();
 			ptr->_results.emplace_back(std::move(curr2));
+			//handles.erase(curr2.handle);
 		}
-		while (!fut.ready()) std::this_thread::yield();
+		//fut.get();
+		while (!fut.ready() && Core::IsRunning()) std::this_thread::yield();
+		//handles.erase(curr.handle);
 		ptr->_results.emplace_back(std::move(curr));
-		ptr->_queued.pop_back();
-		if (ptr->_queued.size())
-			ptr->_queued.pop_back();
+		ptr->_process_queue.pop_back();
+		if (ptr->_process_queue.size())
+			ptr->_process_queue.pop_back();
 		timer.stop();
-	} while (timer.time() < ptr->time_slice && ptr->_queued.size());
+	} while (timer.time() < ptr->time_slice && ptr->_process_queue.size());
 }
 
 }

@@ -13,6 +13,7 @@ namespace idk::vkn
 		VulkanRscBase() = default;
 		VulkanRscBase(VulkanRscBase&&)noexcept = default;
 		//destroys/releases the object immediately (it is possible for this function to not be called before destroying via destructor)
+		virtual void* Data() = 0;
 		virtual void Destroy()=0;
 		virtual ~VulkanRscBase()=default;
 	};
@@ -33,6 +34,10 @@ namespace idk::vkn
 			*this = VulkanRscDel{ std::move(rhs) };
 			return *this;
 		}
+		void* Data() override
+		{
+			return *reinterpret_cast<void**>(&Base::get());
+		}
 		void Destroy() override
 		{
 			this->reset();
@@ -44,6 +49,10 @@ namespace idk::vkn
 		using Base = ManagedT;
 		using Base::Base;
 		ManagedRscDel(Base&& base)noexcept :Base{ std::move(base) } {}
+		void* Data() override
+		{
+			return nullptr;
+		}
 		ManagedRscDel& operator=(ManagedRscDel&& rhs)
 		{
 			auto& tmp = s_cast<Base&>(*this);

@@ -132,7 +132,6 @@ namespace idk::vkn
 			return r;
 		}
 	};
-
 	void MaterialInstanceCache::InstCachedInfo::Update(const ProcessedMaterial& mat_inst, UpdateInfo& update_info)
 	{
 		
@@ -144,21 +143,44 @@ namespace idk::vkn
 		if (!shader || !shader.as<ShaderModule>().HasCurrent())
 			return;
 		auto& mod = shader.as<ShaderModule>();
-		auto compute_pair = [](const ProcessedMaterial& mat_inst)
+		auto compute_pair = [](const InstCachedInfo& cached)
 		{
 			
-			size_t data_block_hash = 0;
 			std::hash<string> hasher;
-			//hash_combine(data_block_hash, mat_inst.data_block);
-			data_block_hash = hasher(mat_inst.data_block);
-			size_t texture_block_hash = 0;
-			texture_block_hash = hasher(hlp::to_data(mat_inst.texture_block));
+			size_t data_block_hash = data_block_hash = hasher(cached.scratch_data_cache);
+			size_t texture_block_hash = hasher(hlp::to_data(cached.scratch_texture_cache));
 			return std::make_pair(data_block_hash, texture_block_hash);
 		};
+		auto convert_to_images = [](vector<vk::Image>& textures, const ProcessedMaterial& mat_inst)
+		{
+			textures.resize(mat_inst.texture_block.size());
+			std::transform(mat_inst.texture_block.begin(), mat_inst.texture_block.end(), textures.begin(), [](RscHandle<Texture> tex)
+				{
+					return tex.as<VknTexture>().Image();
+				});
+		};
+		auto update_texture_scratch = [convert_to_images](InstCachedInfo& cached, const ProcessedMaterial& mat_inst)->void
+		{
+			thread_local static vector<vk::Image> textures;
+			convert_to_images(textures, mat_inst);
+			auto sz = hlp::buffer_size(textures);
+			cached.scratch_texture_cache.resize(sz);
+			std::memcpy(hlp::buffer_data(cached.scratch_data_cache), hlp::buffer_data(textures), sz);
+		};
+		auto update_data_scratch = [](InstCachedInfo& cached, const ProcessedMaterial& mat_inst)->void
+		{
+			cached.scratch_data_cache = mat_inst.data_block;
+		};
+
+		update_data_scratch(*this, mat_inst);
+		update_texture_scratch(*this, mat_inst);
 		auto is_exact_same= [this,compute_pair](const ProcessedMaterial& mat_inst)->bool 
 		{
-			auto [db_hash, tb_hash] = compute_pair(mat_inst);
-			return data_hash == db_hash && tb_hash == texture_hash;
+			auto [db_hash, tb_hash] = compute_pair(*this);
+
+			bool is_hash_same = data_hash == db_hash && tb_hash == texture_hash;
+
+			return is_hash_same && scratch_data_cache == data_cache && scratch_texture_cache == texture_cache;
 		};
 		auto shader_is_same = [this](const ProcessedMaterial& mat_inst)->bool
 		{
@@ -168,14 +190,25 @@ namespace idk::vkn
 		const bool exact_same = is_exact_same(mat_inst);
 		const bool same_shader = shader_is_same(mat_inst);
 		//Update the hashes
-		auto [db_hash, tb_hash] = compute_pair(mat_inst);
+		auto [db_hash, tb_hash] = compute_pair(*this);
 		data_hash = db_hash;
 		texture_hash = tb_hash;
+		std::swap(data_cache, scratch_data_cache);
+		std::swap(texture_cache, scratch_texture_cache);
 		frag_shader=mod.Module();
 		if (same_shader)
 		{
 			if (exact_same)
+			{
+				size_t i = 0;
+				for (auto& tex : mat_inst.texture_block)
+				{
+					auto& t = tex.as<VknTexture>();
+					if (t.Image() != image_cache.at(i++))
+						DebugBreak();
+				}
 				return;
+			}
 			auto UpdateDataBuffer = [this](const ProcessedMaterial& mat_inst, UboManager& ubo_manager)->void
 			{
 				for(auto& binfo : buffers)
@@ -196,11 +229,12 @@ namespace idk::vkn
 				auto& [set,dsl,ds] = descriptors.at(descriptor_indices.at(info.set));
 				ds_updater.associate(ds,bd);
 			}
-
+			convert_to_images(image_cache,mat_inst);
 			return UpdateDataBuffer(mat_inst,ubo_manager);
 		}
 
 
+		convert_to_images(image_cache, mat_inst);
 		creation_buffer.emplace_back(*this, mat_inst);
 		
 	}
