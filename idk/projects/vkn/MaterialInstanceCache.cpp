@@ -19,6 +19,11 @@ namespace idk::vkn
 		vector <vk::DescriptorImageInfo> scratch;
 		vector<vk::DescriptorBufferInfo> buffer_scratch;
 		DsUpdater updater;
+
+		hash_set<Guid> processed;
+
+		hash_set<RscHandle<MaterialInstance>> actives;
+
 	};
 
 	struct SetCollation {
@@ -38,6 +43,14 @@ namespace idk::vkn
 	{
 		CollatedLayouts_t layouts;
 	};
+	void MaterialInstanceCache::Start()
+	{
+		//_pimpl->processed.clear();
+	}
+	void MaterialInstanceCache::SetTotal(hash_set<RscHandle<MaterialInstance>> materials)
+	{
+		//_pimpl->actives = std::move(materials);
+	}
 	void MaterialInstanceCache::CacheMaterialInstance(const ProcessedMaterial& inst)
 	{
 		if (inst.shader)
@@ -53,6 +66,7 @@ namespace idk::vkn
 					_pimpl->_ubo_manager,
 					_pimpl->updater,
 					_pimpl->scratch};
+				//_pimpl->processed.emplace(inst.inst_guid);
 				cache.Update(inst,ui );
 				return;
 
@@ -64,16 +78,35 @@ namespace idk::vkn
 				}
 			}
 		}
-		cached_info.erase(inst.inst_guid);
+		if(cached_info.find(inst.inst_guid)!= cached_info.end())
+			cached_info.erase(inst.inst_guid);
 	}
 	bool MaterialInstanceCache::IsCached(RscHandle<MaterialInstance> mat_inst) const
 	{
-		return cached_info.find(mat_inst)!=cached_info.end();
+		//bool result = _pimpl->processed.find(mat_inst.guid) != _pimpl->processed.end();
+		//if (!result)
+		//	DebugBreak();
+		return cached_info.find(mat_inst) != cached_info.end();//&& result;
+	}
+	namespace dbg
+	{
+		void UpdateUsage(vk::DescriptorSet ds);
+		void UpdateUsage(vk::Sampler sampler, vk::DescriptorSet ds);
+		hash_table<void*, size_t>& get_tracker();
+		size_t get_counter();
+		bool GetValid(vk::DescriptorSet ds);
 	}
 	span<const MaterialInstanceCache::descriptors_t> MaterialInstanceCache::GetDescriptorSets(RscHandle<MaterialInstance> inst)const
 	{
-		span<descriptors_t> result{};
-		return cached_info.at(inst).descriptors;
+		//if (_pimpl->processed.find(inst.guid) == _pimpl->processed.end())
+		//	DebugBreak();
+		span<const descriptors_t> result = cached_info.at(inst).descriptors;
+		//for (auto& [i,dsl,ds] : result)
+		//{
+		//	if (!dbg::GetValid(ds))
+		//		DebugBreak();
+		//}
+		return result;
 	}
 
 	void MaterialInstanceCache::UpdateUniformBuffers()
@@ -117,9 +150,15 @@ namespace idk::vkn
 			data = {};
 		}
 
-
 		vk::WriteDescriptorSet GetWriteInfo(vk::DescriptorSet ds)const
 		{
+			//if (tex)
+			//{
+			//	for (auto& t : tex->to_span())
+			//	{
+			//		dbg::UpdateUsage(t.sampler,ds);
+			//	}
+			//}
 			vk::WriteDescriptorSet r{
 				ds,
 				binding,0,
@@ -132,9 +171,12 @@ namespace idk::vkn
 			return r;
 		}
 	};
+	//namespace dbg
+	//{
+	//	size_t get_counter();
+	//}
 	void MaterialInstanceCache::InstCachedInfo::Update(const ProcessedMaterial& mat_inst, UpdateInfo& update_info)
 	{
-		
 		auto& creation_buffer = update_info.create_buffer;
 		auto& ubo_manager = update_info.ubo_manager;
 		auto& ds_updater = update_info.ds_updater;
