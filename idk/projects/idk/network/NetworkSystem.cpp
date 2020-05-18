@@ -27,6 +27,8 @@
 #include <core/GameObject.h>
 #include <common/Transform.h>
 #include <phys/RigidBody.h>
+#include <scene/SceneManager.h>
+#include <scene/SceneGraph.inl>
 
 namespace idk
 {
@@ -253,16 +255,20 @@ namespace idk
 					auto input = reserialize_thunk.Invoke((MonoObject*)array);
 					
 					// execute input
-					for (auto& behavior : ev.GetGameObject()->GetComponents<mono::Behavior>())
+					for (auto& comp : ev.observed_components)
 					{
-						auto& obj = behavior->GetObject();
-						auto& type = *obj.Type();
-						auto method = type.GetMethod("ProcessInput", 1);
-						if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+						if (comp.is_type<mono::Behavior>())
 						{
-							LOG_TO(LogPool::NETWORK, "Rollback Input Tick %d", move.index.value);
-							thunk->Invoke(obj, input);
-							break;
+							auto behavior = handle_cast<mono::Behavior>(comp);
+							auto& obj = behavior->GetObject();
+							auto& type = *obj.Type();
+							auto method = type.GetMethod("ProcessInput", 1);
+							if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+							{
+								LOG_TO(LogPool::NETWORK, "Rollback Input Tick %d", move.index.value);
+								thunk->Invoke(obj, input);
+								break;
+							}
 						}
 					}
 
@@ -295,15 +301,19 @@ namespace idk
 					auto input = reserialize_thunk.Invoke((MonoObject*)array);
 
 					// execute input
-					for (auto& behavior : ev.GetGameObject()->GetComponents<mono::Behavior>())
+					for (auto& comp : ev.observed_components)
 					{
-						auto& obj = behavior->GetObject();
-						auto& type = *obj.Type();
-						auto method = type.GetMethod("ProcessInput", 1);
-						if (const auto thunk = std::get_if<mono::ManagedThunk>(&method))
+						if (comp.is_type<mono::Behavior>())
 						{
-							LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
-							thunk->Invoke(obj, input);
+							auto behavior = handle_cast<mono::Behavior>(comp);
+							auto& obj = behavior->GetObject();
+							auto& type = *obj.Type();
+							auto method = type.GetMethod("ProcessInput", 1);
+							if (const auto thunk = std::get_if<mono::ManagedThunk>(&method))
+							{
+								LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
+								thunk->Invoke(obj, input);
+							}
 						}
 					}
 				}
@@ -324,28 +334,29 @@ namespace idk
 			if (auto client_inputs = std::get_if<ElectronView::ClientSideInputs>(&ev.move_state))
 			{
 				// execute input
-				for (auto& behavior : ev.GetGameObject()->GetComponents<mono::Behavior>())
+				for (auto& comp : ev.observed_components)
 				{
-					auto& obj = behavior->GetObject();
-					auto& type = *obj.Type();
-					auto method = type.GetMethod("GenerateInput");
-					if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+					if (comp.is_type<mono::Behavior>())
 					{
+						auto behavior = handle_cast<mono::Behavior>(comp);
+						auto& obj = behavior->GetObject();
+						auto& type = *obj.Type();
+						auto method = type.GetMethod("GenerateInput");
+						if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+						{
+							auto input = thunk->Invoke(obj);
+							auto array = (MonoArray*)serialize_thunk.Invoke((MonoObject*)input);
 
-						auto input = thunk->Invoke(obj);
+							std::string payload;
+							//payload.insert(payload.end(), array, (char*)array + mono_array_length(array));
+							payload.resize(mono_array_length(array));
 
-						auto array = (MonoArray*) serialize_thunk.Invoke((MonoObject*) input);
+							for (unsigned i = 0; i < payload.size(); ++i)
+								payload[i] = mono_array_get(array, char, i);
 
-						std::string payload;
-						//payload.insert(payload.end(), array, (char*)array + mono_array_length(array));
-						payload.resize(mono_array_length(array));
-
-						for (unsigned i = 0; i < payload.size(); ++i)
-							payload[i] = mono_array_get(array, char, i);
-
-						client_inputs->moves.emplace_back(ElectronView::ClientSideInputs::MoveNode{ client_inputs->next_move_index, payload });
-						client_inputs->next_move_index++;
-						break;
+							client_inputs->moves.emplace_back(ElectronView::ClientSideInputs::MoveNode{ client_inputs->next_move_index, payload });
+							client_inputs->next_move_index++;
+						}
 					}
 				}
 			}

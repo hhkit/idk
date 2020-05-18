@@ -4,6 +4,8 @@
 #include <scene/SceneManager.h>
 #include <scene/SceneGraph.inl>
 #include <phys/RigidBody.h>
+#include <script/ManagedType.h>
+#include <script/MonoBehavior.h>
 
 #include <network/ElectronTransformView.h>
 #include <network/ElectronRigidbodyView.h>
@@ -47,6 +49,17 @@ namespace idk
 						animator_view->Start(GetHandle());
 						return false;
 					}
+					for (auto& behavior : go->GetComponents<mono::Behavior>())
+					{
+						auto& obj = behavior->GetObject();
+						auto& type = *obj.Type();
+						auto method = type.GetMethod("ProcessInput", 1);
+						if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+						{
+							observed_components.push_back(behavior);
+							return false;
+						}
+					}
 					return true;
 				}
 			);
@@ -63,12 +76,64 @@ namespace idk
 	{
 		ghost_state = std::monostate{};
 		move_state = ElectronView::ClientSideInputs{};
+		if (const auto sg_handle = Core::GetSystem<SceneManager>().FetchSceneGraphFor(GetGameObject()))
+		{
+			sg_handle.Visit([&](Handle<GameObject> go, int) -> bool
+			{
+				if (auto animator_view = go->GetComponent<ElectronAnimatorView>())
+				{
+					animator_view->Start(GetHandle());
+					return false;
+				}
+				for (auto& behavior : go->GetComponents<mono::Behavior>())
+				{
+					auto& obj = behavior->GetObject();
+					auto& type = *obj.Type();
+					auto method = type.GetMethod("ProcessInput", 1);
+					if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+					{
+						observed_components.push_back(behavior);
+						return false;
+					}
+				}
+				return true;
+			}
+			);
+		}
+		std::sort(observed_components.begin(), observed_components.end());
+		observed_components.erase(std::unique(observed_components.begin(), observed_components.end()), observed_components.end());
 	}
 
 	void ElectronView::SetAsControlObject()
 	{
 		ghost_state = std::monostate{};
 		move_state = ServerSideInputs{};
+		if (const auto sg_handle = Core::GetSystem<SceneManager>().FetchSceneGraphFor(GetGameObject()))
+		{
+			sg_handle.Visit([&](Handle<GameObject> go, int) -> bool
+			{
+				if (auto animator_view = go->GetComponent<ElectronAnimatorView>())
+				{
+					animator_view->Start(GetHandle());
+					return false;
+				}
+				for (auto& behavior : go->GetComponents<mono::Behavior>())
+				{
+					auto& obj = behavior->GetObject();
+					auto& type = *obj.Type();
+					auto method = type.GetMethod("ProcessInput", 1);
+					if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
+					{
+						observed_components.push_back(behavior);
+						return false;
+					}
+				}
+				return true;
+			}
+			);
+		}
+		std::sort(observed_components.begin(), observed_components.end());
+		observed_components.erase(std::unique(observed_components.begin(), observed_components.end()), observed_components.end());
 	}
 
 	void ElectronView::CacheSentData()

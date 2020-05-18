@@ -40,6 +40,7 @@ namespace idk::win
 		bool GetKey(Key) override;
 		bool GetKeyUp(Key) override;
 		char GetChar() override;
+		void SwapInputBuffers() override;
 		// windows
 		bool GetFullscreen() const override;
 		bool SetFullscreen(bool) override;

@@ -45,18 +45,24 @@ namespace idk
 			{
 				auto move_data = elem.PackMoveData(curr_seq);
 				if (move_data.packs.size())
+				{
 					move_packs.emplace_back(std::move(move_data));
+				}
+				else
+					LOG_TO(LogPool::NETWORK, "EMPTY PACK");
 			}
 		}
 
 		if (move_packs.size())
 		{
 			connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::UNRELIABLE, [&](MoveClientMessage& msg)
-				{
-					msg.move_packs = std::move(move_packs);
-				}
+			{
+				msg.move_packs = std::move(move_packs);
+			}
 			);
 		}
+		else
+			LOG_TO(LogPool::NETWORK, "NO MOVES TO SEND");
 	}
 
 	void ClientMoveManager::OnControlObject(ControlObjectMessage& msg)
