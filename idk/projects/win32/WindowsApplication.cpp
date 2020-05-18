@@ -268,6 +268,11 @@ namespace idk::win
 		return _input_manager->GetChar();
 	}
 
+	void Windows::SwapInputBuffers()
+	{
+		_input_manager->SwapBuffers();
+	}
+
 	bool Windows::GetFullscreen() const
 	{
 		return _fullscreen;

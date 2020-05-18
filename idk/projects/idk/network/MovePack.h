@@ -5,25 +5,17 @@
 
 namespace idk
 {
-	struct SeqAndPack 
+	struct SeqAndMove
 	{
-		static constexpr auto set_move = 0;
-		static constexpr auto delta_move = 1;
-		static constexpr auto custom_move = 2;
-		static constexpr auto move_limit = 3;
-
 		SeqNo  seq; 
-		string pack; 
-		int    move_type = set_move;
-		int    send_count = move_limit;
+		string move;
 	};
 
 	struct MovePack
 	{
-		using MoveList = small_vector<SeqAndPack>;
+		using MoveList = small_vector<SeqAndMove>;
 
 		NetworkID network_id{};
-		unsigned state_mask{};
-		vector<MoveList> packs;
+		small_vector<SeqAndMove> packs;
 	};
 }

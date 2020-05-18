@@ -43,41 +43,4 @@ namespace idk
 	{
 		return GetGameObject()->GetComponent<ElectronView>();
 	}
-
-	void ElectronTransformView::SetPosition(const vec3& p)
-	{
-		if (pos_param)
-			pos_param->GetClientObject()->PushMove(Core::GetSystem<NetworkSystem>().GetSequenceNumber(), SeqAndPack::set_move, p);
-	}
-
-	void ElectronTransformView::ApplyTranslation(const vec3& trans)
-	{
-		if (pos_param)
-			pos_param->GetClientObject()->PushMove(Core::GetSystem<NetworkSystem>().GetSequenceNumber(), SeqAndPack::delta_move, trans);
-	}
-
-	void ElectronTransformView::SetRotation(const quat& q)
-	{
-		if (rot_param)
-			rot_param->GetClientObject()->PushMove(Core::GetSystem<NetworkSystem>().GetSequenceNumber(), SeqAndPack::set_move, q);
-	}
-
-	void ElectronTransformView::ApplyRotation(const quat& q)
-	{
-		if (rot_param)
-			rot_param->GetClientObject()->PushMove(Core::GetSystem<NetworkSystem>().GetSequenceNumber(), SeqAndPack::delta_move, q);
-	}
-
-	void ElectronTransformView::SetScale(const vec3& p)
-	{
-		if (scale_param)
-			scale_param->GetClientObject()->PushMove(Core::GetSystem<NetworkSystem>().GetSequenceNumber(), SeqAndPack::set_move, p);
-	}
-
-	void ElectronTransformView::GrowScale(const vec3& scale_by)
-	{
-		if (scale_param)
-			scale_param->GetClientObject()->PushMove(Core::GetSystem<NetworkSystem>().GetSequenceNumber(), SeqAndPack::delta_move, scale_by);
-	}
-
 }

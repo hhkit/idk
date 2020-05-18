@@ -16,7 +16,7 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_int(stream, base_ack.value, 0, SeqNo::max_value);
-			serialize_int(stream, ack_field, 0, std::numeric_limits<unsigned>::max());
+			serialize_int(stream, ack_field, 0, std::numeric_limits<int>::max());
 			return true;
 		}
 

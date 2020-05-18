@@ -7,29 +7,6 @@
 
 namespace idk
 {
-	void ElectronRigidbodyView::SetVelocity(const vec3& v)
-	{
-		if (velocity_param)
-			velocity_param->GetClientObject()->PushMove(
-				Core::GetSystem<NetworkSystem>().GetSequenceNumber(), 
-				SeqAndPack::set_move, 
-				v
-			);
-
-	}
-
-	void ElectronRigidbodyView::AddForce(const vec3& force)
-	{
-		if (velocity_param)
-		{
-			velocity_param->GetClientObject()->PushMove(
-				Core::GetSystem<NetworkSystem>().GetSequenceNumber(),
-				SeqAndPack::custom_move,
-				force
-			);
-		}
-	}
-
 	void ElectronRigidbodyView::Start()
 	{
 		auto view = GetGameObject()->GetComponent<ElectronView>();

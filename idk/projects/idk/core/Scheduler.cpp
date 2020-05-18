@@ -42,26 +42,27 @@ namespace idk
 			}
 		};
 
-		const auto execute_network = _accumulated_network_dt > _network_update;
-		if (execute_network)
-			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
+		//const auto execute_network = _accumulated_network_dt > _network_update;
+		//if (execute_network)
+			
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::FrameStart)]);
-		execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkPredict)]);
 
 		while (_accumulated_fixed_dt > _fixed_dt)
 		{
 			_accumulated_fixed_dt -= _fixed_dt;
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickStart)]);
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkPredict)]);
 			execute_pass(_passes[s_cast<size_t>(UpdatePhase::Fixed)]);
+			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickEnd)]);
 		}
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::MainUpdate)]);
 
-		if (execute_network)
-		{
-			execute_pass(_passes[s_cast<size_t>(UpdatePhase::NetworkTickEnd)]);
-			_accumulated_network_dt -= _network_update;
-		}
+		// if (execute_network)
+		// {
+		// 	_accumulated_network_dt -= _network_update;
+		// }
 
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::PreRender)]);
 		execute_pass(_passes[s_cast<size_t>(UpdatePhase::Render)]);

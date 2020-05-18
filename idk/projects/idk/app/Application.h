@@ -44,6 +44,7 @@ namespace idk
 		virtual bool GetKey(Key) = 0;
 		virtual bool GetKeyUp(Key) = 0;
 		virtual char GetChar() = 0;
+		virtual void SwapInputBuffers() = 0;
 
 		// windows
 		virtual bool  GetFullscreen()const { return false; };
