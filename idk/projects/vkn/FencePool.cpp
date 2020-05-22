@@ -17,6 +17,14 @@ namespace idk::vkn
 		}
 	}
 
+	FenceObj& FenceObj::operator=(FenceObj&& rhs) noexcept
+	{
+		std::swap(_fence, rhs._fence);
+		std::swap(_id, rhs._id);
+		std::swap(_src, rhs._src);
+		std::swap(_ctrl, rhs._ctrl);
+		return *this;
+	}
 	FenceObj FencePool::AcquireFence()
 	{
 		if (_handles.empty())

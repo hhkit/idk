@@ -205,19 +205,23 @@ namespace idk::vkn
 	}
 
 	static void DoNothing() {}
-	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid, AsyncResult* result)
 	{
-		return LoadTextureAsync(&texture, allocator, load_fence, cmd_buffers, std::move(ooptional), load_info, std::move(in_info), guid);
+		return LoadTextureAsync(&texture, allocator, load_fence, cmd_buffers, std::move(ooptional), load_info, std::move(in_info), guid,result);
 	}
-	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTextureData& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(VknTextureData& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid, AsyncResult* result)
 	{
-		return LoadTextureAsync(&texture, allocator, load_fence, cmd_buffers, std::move(ooptional), load_info, std::move(in_info), guid);
+		return LoadTextureAsync(&texture, allocator, load_fence, cmd_buffers, std::move(ooptional), load_info, std::move(in_info), guid,result);
 	}			
 	static std::mutex fence_mutex;
 	static std::unordered_set<VkFence> fences;
-	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(std::variant<VknTextureData*, VknTexture*> texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid)
+	mt::ThreadPool::Future<void> TextureLoader::LoadTextureAsync(std::variant<VknTextureData*, VknTexture*> texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid, AsyncResult* result)
 	{
 		lock.Lock();
+		static size_t shared_invocation_count = 0;
+		size_t invocation_count = 0;
+		if(result)
+			invocation_count = shared_invocation_count++;
 		auto fence = load_fence.AcquireFence();
 		auto cmd_buffer = cmd_buffers.AcquireCmdBuffer();
 		lock.Unlock();
@@ -225,7 +229,7 @@ namespace idk::vkn
 		if (!*cmd_buffer)
 			__debugbreak();
 		return Core::GetThreadPool().Post(
-			[loader = this,fence_pool = &load_fence](const shared_ptr<Nope::Derp>& _derp) ->void
+			[loader = this,fence_pool = &load_fence,result,invocation_count](const shared_ptr<Nope::Derp>& _derp) ->void
 			{
 				try
 				{
@@ -233,13 +237,6 @@ namespace idk::vkn
 				auto& derp = *_derp;
 				auto device = *View().Device();
 				auto fence = *derp.load_fence;
-				constexpr bool test_acquire_bug = false;
-				if constexpr(test_acquire_bug)
-				{
-					std::lock_guard guard{ fence_mutex };
-					if (!fences.emplace(fence.operator VkFence()).second)
-						DebugBreak();
-				}
 				derp.usage++;
 				auto& lock = loader->lock;
 				VknTextureData tmp;
@@ -250,26 +247,48 @@ namespace idk::vkn
 				cmd_buffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 				lock.Unlock();
 				device.resetFences(fence);
+
+				static std::mutex ic_mtx;
+
+				if (result)
+				{
+					std::lock_guard guard{ ic_mtx };
+					LOG_TO(LogPool::GFX, "Async[%llu]:Calling load tex ", invocation_count);
+				}
 				auto&& staging = loader->LoadTexture(SubmissionObjs{ cmd_buffer, vk::Fence{},false }, tex, derp.allocator, derp.ooptional, derp.load_info, derp.in_info, derp.guid);
+				if (result)
+				{
+					std::lock_guard guard{ ic_mtx };
+					LOG_TO(LogPool::GFX, "Async[%llu]returned from load tex", invocation_count);
+				}
 				tex.dbg_name = tex.Name();
 				dbg::NameObject(tex.Image(true), tex.dbg_name);
 				lock.Lock();
 				hlp::EndSingleTimeCbufferCmd(cmd_buffer, (is_data)?View().GraphicsTexQueue():View().GraphicsQueue(), false, fence);
+				if (result)
+				{
+					std::lock_guard guard{ ic_mtx };
+					LOG_TO(LogPool::GFX, "Async[%llu]:ended cmd buffer", invocation_count);
+				}
 				lock.Unlock();
 				dbg_chk(tex.Image(true));
 				uint64_t wait_for_milli_seconds = 0;
 				[[maybe_unused]] uint64_t wait_for_micro_seconds = wait_for_milli_seconds * 0;
 				//uint64_t wait_for_nano_seconds = wait_for_micro_seconds * 1000;
-				while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout) std::this_thread::yield();
-
-				if constexpr (test_acquire_bug)
+				if(!result)
+					while (device.waitForFences(fence, VK_TRUE, wait_for_milli_seconds) == vk::Result::eTimeout) std::this_thread::yield();
+				else
 				{
-					std::lock_guard guard{ fence_mutex };
-					fences.erase(fence.operator VkFence());
+					result->cmd_buffer = std::move(derp.cmd_buffer);
+					result->fence      = std::move(derp.load_fence);
+					result->staging = std::move(staging);
+					static int counter = 0;
+					counter++;
+					if(counter ==5)
+						throw "Test";
 				}
 				if (!is_data)
 					tmp.ApplyOnTexture(*std::get<VknTexture*>(derp.texture));
-
 				}
 				catch (vk::Error& err)
 				{
@@ -758,5 +777,12 @@ namespace idk::vkn
 		min_filter = mag_filter = filter_mode = meta.filter_mode;
 		uv_mode = meta.mode;
 		internal_format = ToInternalFormat(meta.internal_format, input_is_srgb = meta.is_srgb);
+	}
+	bool TextureLoader::AsyncResult::ready() const
+	{
+		auto device = *View().Device();
+		if(*fence)
+			return (device.waitForFences(*fence, VK_TRUE, 0) != vk::Result::eTimeout);
+		return true;
 	}
 }

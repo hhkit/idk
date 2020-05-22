@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "VknAsyncTexLoader.h"
-
+#include <vkn/BufferHelpers.inl>
 namespace idk::vkn
 {
 
@@ -45,6 +45,10 @@ void AsyncTexLoader::Load(AsyncTexLoadInfo&& load_info, VknTexture& tex, RscHand
 
 void AsyncTexLoader::UpdateTextures()
 {
+	state.pending_queue = _process_queue.size();
+	state.pending_scratch_queue = _queued.size();
+
+	state.has_future_before_update = ready.operator bool();
 	if (ready && ready->ready())
 	{
 		//Done processing the last frame's stuff
@@ -82,6 +86,7 @@ void AsyncTexLoader::UpdateTextures()
 	else if (ready && !ready->ready())
 		return;//currently processing something, don't start another one.
 	ProcessFrame();
+	state.has_future_after_update = ready.operator bool();
 }
 
 void AsyncTexLoader::ClearQueue()
@@ -154,19 +159,45 @@ void AsyncTexLoader::ExecProxy::exec()
 	timer.start();
 	do {
 		auto& curr = ptr->_process_queue.back();
-		auto fut = ptr->_loader.LoadTextureAsync(*curr.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr.info.to, curr.info.tci, curr.info.iti);
+		ptr->state.load1 = true;
+		TextureLoader::AsyncResult a1, a2;
+		auto f1 = ptr->_load_fences.AcquireFence();
+		auto c1 = ptr->_cmd_buffers.AcquireCmdBuffer();
 
+		(*c1).begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+		a1.staging =ptr->_loader.LoadTexture(TextureLoader::SubmissionObjs{ *c1 ,*f1,false}, *curr.data, ptr->_allocator, curr.info.to, curr.info.tci, curr.info.iti);
+		View().Device()->resetFences(*f1);
+		hlp::EndSingleTimeCbufferCmd(*c1, View().GraphicsTexQueue(), false, *f1);
+		a1.fence = std::move(f1);
+		a1.cmd_buffer= std::move(c1);
 		if (ptr->_process_queue.size() > 1)
 		{
 			auto& curr2 = ptr->_process_queue.at(ptr->_process_queue.size()-2);
-			auto fut2 = ptr->_loader.LoadTextureAsync(*curr2.data, ptr->_allocator, ptr->_load_fences, ptr->_cmd_buffers, curr2.info.to, curr2.info.tci, curr2.info.iti);
-			while (!fut2.ready() && Core::IsRunning()) std::this_thread::yield();
-			//fut2.get();
+			ptr->state.load2 = true;
+			
+			auto f2 = ptr->_load_fences.AcquireFence();
+			auto c2 = ptr->_cmd_buffers.AcquireCmdBuffer();
+			(*c2).begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+			a2.staging = ptr->_loader.LoadTexture(TextureLoader::SubmissionObjs{ *c2 ,*f2,false }, *curr2.data, ptr->_allocator, curr2.info.to, curr2.info.tci, curr2.info.iti);
+			View().Device()->resetFences(*f2);
+			hlp::EndSingleTimeCbufferCmd(*c2, View().GraphicsTexQueue() , false, *f2);
+			a2.fence = std::move(f2);
+			a2.cmd_buffer = std::move(c2);
+			//while (!fut2.ready() && Core::IsRunning()) std::this_thread::yield();
+			ptr->state.load2 = false;
 			ptr->_results.emplace_back(std::move(curr2));
 			//handles.erase(curr2.handle);
 		}
-		//fut.get();
-		while (!fut.ready() && Core::IsRunning()) std::this_thread::yield();
+		ptr->state.wait_results = true;
+
+		while (!a1.ready());
+		ptr->state.wait_results = false;
+		ptr->state.wait_results2 = true;
+		while( !a2.ready());
+		;
+		ptr->state.load1 = false;
+		ptr->state.wait_results2 = false;
+		//while (!fut.ready() && Core::IsRunning()) std::this_thread::yield();
 		//handles.erase(curr.handle);
 		ptr->_results.emplace_back(std::move(curr));
 		ptr->_process_queue.pop_back();

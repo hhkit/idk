@@ -38,13 +38,22 @@ namespace idk::vkn
 		std::optional< std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> LoadTexture(SubmissionObjs sub,VknTextureData& texture, hlp::MemoryAllocator& allocator,std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
 		void LoadTexture(VknTexture& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence, std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
 		void LoadTexture(VknTextureData& texture, hlp::MemoryAllocator& allocator, vk::Fence load_fence,std::optional<TextureOptions> ooptional, const TexCreateInfo& load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
-		mt::ThreadPool::Future<void> LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
-		mt::ThreadPool::Future<void> LoadTextureAsync(VknTextureData& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+
+		struct AsyncResult
+		{
+			FenceObj fence;
+			CmdBufferObj cmd_buffer;
+			std::optional< std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>> staging;
+			bool ready()const;
+		};
+
+		mt::ThreadPool::Future<void> LoadTextureAsync(VknTexture& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {}    ,AsyncResult* result=nullptr);
+		mt::ThreadPool::Future<void> LoadTextureAsync(VknTextureData& texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {},AsyncResult* result=nullptr);
 
 		hlp::SimpleLock lock;
 		int abc = 0;
 	private:
-		mt::ThreadPool::Future<void> LoadTextureAsync(std::variant<VknTextureData*,VknTexture*> texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {});
+		mt::ThreadPool::Future<void> LoadTextureAsync(std::variant<VknTextureData*,VknTexture*> texture, hlp::MemoryAllocator& allocator, FencePool& load_fence, CmdBufferPool& cmd_buffers, std::optional<TextureOptions> ooptional, TexCreateInfo load_info, std::optional<InputTexInfo> in_info, std::optional<Guid> guid = {}, AsyncResult* result = nullptr);
 	};
 
 	struct ImageViewInfo
