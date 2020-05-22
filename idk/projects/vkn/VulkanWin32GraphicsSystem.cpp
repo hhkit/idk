@@ -207,6 +207,9 @@ namespace idk::vkn
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
 		GraphicsSystem::LateInit();
+		auto queue_families = View().PDevice().getQueueFamilyProperties();
+		
+		LOG_TO(LogPool::GFX, "Graphics Queue Family has %d queues", (int)queue_families[*View().QueueFamily().graphics_family].queueCount);
 		_debug_renderer = std::make_unique<VulkanDebugRenderer>();
 		_debug_renderer->Init();
 		_frame_renderers.resize(instance_->MaxFramesInFlight());//instance_->View().Swapchain().frame_objects.size());
@@ -305,6 +308,18 @@ namespace idk::vkn
 				var.Set(name, false);
 			}
 		}
+		{
+			auto& tl_state = _pimpl->tex_loader.state;
+			extra_vars.Set("tl:queued", (int)tl_state.pending_queue);
+			extra_vars.Set("tl:q 4 q 4 thds", (int)tl_state.pending_scratch_queue);
+			extra_vars.Set("tl:before_update_future_present", tl_state.has_future_before_update);
+			extra_vars.Set("tl:after_update_future_present", tl_state.has_future_after_update);
+			extra_vars.Set("tl:wait_load_complete", tl_state.wait_results);
+			extra_vars.Set("tl:wait_load2_complete", tl_state.wait_results2);
+			extra_vars.Set("tl:1_loading", tl_state.load1);
+			extra_vars.Set("tl:2_loading", tl_state.load2);
+		}
+
 		extra_vars.Set("pending_textures", (int)_pimpl->tex_loader.num_pending());
 		_pimpl->tex_loader.UpdateTextures();
 		_pimpl->timelog.end_then_start("Init Pre render data");
