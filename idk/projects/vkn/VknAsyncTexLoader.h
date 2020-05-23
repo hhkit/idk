@@ -31,6 +31,20 @@ namespace idk::vkn
 
 		size_t num_pending()const noexcept;
 
+		struct DbgState
+		{
+			bool load1=false;
+			bool load2=false;
+			bool wait_results = false;
+			bool wait_results2 = false;
+			bool has_future_before_update = false;
+			bool has_future_after_update = false;
+			size_t pending_scratch_queue=0;
+			size_t pending_queue=0;
+		};
+
+		DbgState state;
+
 		struct ExecProxy
 		{
 			AsyncTexLoader* ptr;

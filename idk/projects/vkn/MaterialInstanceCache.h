@@ -79,6 +79,7 @@ namespace idk::vkn
 		};
 
 		void Start();
+		void SetTotal(hash_set<RscHandle<MaterialInstance>> materials);
 		void CacheMaterialInstance(const ProcessedMaterial& inst);
 		//Does not check if inst is invalid
 		bool IsCached(RscHandle<MaterialInstance> mat_inst)const;

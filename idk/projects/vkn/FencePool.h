@@ -50,8 +50,10 @@ namespace idk::vkn
 	struct FenceObj
 	{
 		using handle_t = size_t;
+		FenceObj() = default;
 		FenceObj(vk::Fence fence, handle_t id, FencePool* src, std::weak_ptr<FencePoolCtrlBlock> ctrl) : _fence{ fence }, _id{ id }, _src{ src }, _ctrl{ ctrl }{}
 		FenceObj(FenceObj&& rhs) noexcept : _fence{ rhs._fence }, _id{ rhs._id }, _src{ rhs._src }, _ctrl{ std::move(rhs._ctrl) }{rhs._src = nullptr; rhs._src = {}; }
+		FenceObj& operator=(FenceObj&& rhs) noexcept;
 		vk::Fence operator*() const
 		{
 			return _fence;
@@ -60,10 +62,10 @@ namespace idk::vkn
 
 		handle_t Id()const { return _id; }
 	private:
-		vk::Fence _fence;
-		handle_t _id;
-		FencePool* _src;
-		std::weak_ptr<FencePoolCtrlBlock> _ctrl;
+		vk::Fence _fence{};
+		handle_t _id{};
+		FencePool* _src{};
+		std::weak_ptr<FencePoolCtrlBlock> _ctrl{};
 	};
 	class FencePool
 	{
@@ -86,15 +88,22 @@ namespace idk::vkn
 	struct CmdBufferObj
 	{
 		using handle_t = size_t;
+		CmdBufferObj() = default;
 		CmdBufferObj( handle_t id, CmdBufferPool* src) : _id{ id }, _src{ src }{}
 		CmdBufferObj(CmdBufferObj&& rhs) noexcept : _id{ rhs._id }, _src{ rhs._src }{rhs._src = nullptr; rhs._src = {}; }
+		CmdBufferObj& operator=(CmdBufferObj&& rhs) noexcept 
+		{
+			std::swap(_id, rhs._id);
+			std::swap(_src, rhs._src);
+			return *this;
+		};
 		vk::CommandBuffer operator*() const;
 		~CmdBufferObj();
 
 		handle_t Id()const { return _id; }
 	private:
-		handle_t _id;
-		CmdBufferPool* _src;
+		handle_t _id{};
+		CmdBufferPool* _src{};
 	};
 	class CmdBufferPool
 	{

@@ -8,6 +8,7 @@ namespace idk::vkn
 
 void VknTextureData::ApplyOnTexture(VknTexture& tex)
 {
+	//last = RscHandle<VknTexture>{ tex.GetHandle() };
 	tex.Size(size);
 	tex.image_	      = std::move(image_);
 	tex.format	      = std::move(format);
@@ -44,5 +45,14 @@ string_view VknTextureData::Name()
 {
 	return dbg_name;
 }
+
+//namespace dbg
+//{
+//	hash_table<void*, RscHandle<Texture>>& LUT();
+//}
+//VknTextureData::~VknTextureData()
+//{
+//	dbg::LUT()[sampler->operator VkSampler()] = last;
+//}
 
 }

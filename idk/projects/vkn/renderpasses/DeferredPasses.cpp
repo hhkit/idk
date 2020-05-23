@@ -905,6 +905,8 @@ namespace idk::vkn::renderpasses
 	using ClearCubeSet = GenericDrawSet<bindings::SkyboxBindings, FsqDrawSet>;
 	using DeferredPbrSet = CombinedMeshDrawSet<DeferredPbrAniDrawSet, DeferredPbrInstDrawSet>;
 	using AccumDrawSet = CombinedMeshDrawSet<AccumLightDrawSet, AccumAmbientDrawSet>;
+
+	//static hash_table<RscHandle<MaterialInstance>, ProcessedMaterial>::iterator derp_itr;
 	
 	std::pair<FrameGraphResource, FrameGraphResource> DeferredRendering::MakePass(FrameGraph& graph, [[maybe_unused]] RscHandle<VknRenderTarget> rt, const GraphicsState& gfx_state, RenderStateV2& rs)
 	{
@@ -931,6 +933,14 @@ namespace idk::vkn::renderpasses
 		};
 		auto make_gbuffer_set = [&](const bindings::DeferredPbrInfo& info)
 		{ 
+			//for (auto& i_ro : *gfx_state.shared_gfx_state->instanced_ros)
+			//{
+			//	derp_itr = gfx_state.shared_gfx_state->material_instances.find(i_ro.material_instance);
+			//	if (derp_itr == gfx_state.shared_gfx_state->material_instances.end())
+			//	{
+			//		DebugBreak();
+			//	}
+			//}
 			return DeferredPbrSet{
 				{
 					DeferredPbrAniDrawSet{

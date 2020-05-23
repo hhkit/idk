@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vkn/ManagedVulkanObjs.h>
 #include <vkn/MemoryAllocator.h>
+//#include <res/ResourceHandle.h>
 namespace idk::vkn
 {
 	struct VknTexture;
@@ -28,10 +29,16 @@ namespace idk::vkn
 
 		uint32_t						layers       ;
 
+		//RscHandle<VknTexture> last;
+
 		void ApplyOnTexture(VknTexture& tex);
 		vk::Image Image(bool = false)const;
 		void Size(uvec2);
 		void Layers(uint32_t);
 		string_view Name();
+		VknTextureData() = default;
+		VknTextureData(VknTextureData&&) = default;
+		VknTextureData& operator=(VknTextureData&&) = default;
+		//~VknTextureData();
 	};
 }

@@ -184,7 +184,7 @@ namespace idk::vkn::hlp
 	Memories::Memory& Memories::Add(size_t min)
 	{
 		auto sz = std::max(chunk_size, min);
-		LOG_TO(LogPool::GFX, "Allocating %ull", sz);
+		//LOG_TO(LogPool::GFX, "Allocating %ull", sz);
 		memories.emplace_back(device.allocateMemoryUnique(
 			vk::MemoryAllocateInfo{
 				Track(sz),type

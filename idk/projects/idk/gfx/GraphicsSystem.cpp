@@ -1060,12 +1060,26 @@ namespace idk
 		for (auto& elem : futures)
 			elem.get();
 		futures.clear();
+		POST()
+			std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
+		POST_END();
 
 		POST()
-		for (auto& ro : result.mesh_render)
-		{
-			result.active_materials.emplace(ro.material_instance);
-		}
+			std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
+		POST_END();
+
+		for (auto& elem : futures)
+			elem.get();
+		futures.clear();
+		POST()
+			for (auto& ro : result.mesh_render)
+			{
+				result.active_materials.emplace(ro.material_instance);
+			}
+		//for (auto& ro : result.instanced_mesh_render)
+		//{
+		//	result.active_materials.emplace(ro.material_instance);
+		//}
 		for (auto& ro : result.skinned_mesh_render)
 		{
 			result.active_materials.emplace(ro.material_instance);
@@ -1074,9 +1088,7 @@ namespace idk
 		{
 			result.active_materials.emplace(ro.material_instance);
 		}
-
-		POST_END();
-
+		POST_END()
 		POST()
 		{
 			auto& unique_particles = result.particle_render_data;
@@ -1094,13 +1106,6 @@ namespace idk
 		}
 		POST_END();
 		
-		POST()
-			std::sort(result.skinned_mesh_render.begin(), result.skinned_mesh_render.end(), aro_inst_comp{});
-		POST_END();
-
-		POST()
-			std::sort(result.mesh_render.begin(), result.mesh_render.end(), ro_inst_comp{});
-		POST_END();
 
 		POST()
 #pragma region FOR UI
@@ -1162,16 +1167,11 @@ namespace idk
 #pragma endregion
 		POST_END();
 
-		for (auto& elem : futures)
-			elem.get();
-		futures.clear();
 
 		result.active_light_buffer.reserve(result.camera.size() + result.lights.size());
 		result.directional_light_buffer.reserve(result.camera.size());
 		vector<sphere> bounding_vols;
-		bounding_vols.resize(result.mesh_render.size());
-		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
-
+		
 		constexpr auto kDbgLightVol = "DebugLights";
 		extra_vars.SetIfUnset(kDbgLightVol,-1);
 		auto debug_light_vol = *extra_vars.Get<int>(kDbgLightVol);
@@ -1179,6 +1179,15 @@ namespace idk
 		ArenaAllocator<char_bool> alloc{ buff };
 		lights_used_t lights_used(alloc);
 		lights_used.resize(lights.size(), false);
+		POST()
+		bounding_vols.resize(result.mesh_render.size());
+		std::transform(result.mesh_render.begin(), result.mesh_render.end(), bounding_vols.begin(), [](const RenderObject& ro) { return ro.mesh->bounding_volume * ro.transform; });
+		POST_END();
+
+
+		for (auto& elem : futures)
+			elem.get();
+		futures.clear();
 
 		//POST()
 		{

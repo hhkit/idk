@@ -307,7 +307,7 @@ namespace idk::vkn
 				{
 					result.present_family = static_cast<uint32_t>(i);
 				}
-				if (family.queueFlags & vk::QueueFlagBits::eGraphics)
+				if (family.queueFlags & vk::QueueFlagBits::eGraphics && family.queueCount>2)
 				{
 					result.graphics_family = static_cast<uint32_t>(i);
 				}
@@ -399,7 +399,7 @@ namespace idk::vkn
 		buffer_offset_alignment = s_cast<decltype(buffer_offset_alignment )>(pdevice.getProperties().limits.minUniformBufferOffsetAlignment);
 		buffer_size_alignment = s_cast<decltype(buffer_size_alignment)>(pdevice.getProperties().limits.nonCoherentAtomSize);
 	}
-
+#pragma optimize("",off)
 	void VulkanState::createLogicalDevice()
 	{
 		QueueFamilyIndices indices = findQueueFamilies(pdevice);
@@ -441,12 +441,13 @@ namespace idk::vkn
 		//createInfo.setPNext(&aaaaaaaa);
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
-		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
-		m_graphics_tex_queue = m_device->getQueue(*m_queue_family.graphics_family, 1, dispatcher);
+		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 1, dispatcher);
+		m_graphics_tex_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
 		m_present_queue = m_device->getQueue(*m_queue_family.present_family, 0, dispatcher);
 		//m_transfer_queue = m_device->getQueue(*m_queue_family.transfer_family, 0, dispatcher);
 	}
 
+#pragma optimize("",on)
 	void VulkanState::createSwapChain() {
 		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(pdevice);
 
