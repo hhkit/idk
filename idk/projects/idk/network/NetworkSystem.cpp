@@ -276,10 +276,10 @@ namespace idk
 					if (auto rb = ev.GetGameObject()->GetComponent<RigidBody>())
 					{
 						physics_system.SimulateOneObject(rb);
-						auto pos = ev.GetGameObject()->Transform()->position;
-						auto vel = rb->velocity();
-						LOG_TO(LogPool::NETWORK, "MOVE %d: POS[ %f,%f,%f ], VEL[%f, %f, %f]",
-							move.index, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+						// auto pos = ev.GetGameObject()->Transform()->position;
+						// auto vel = rb->velocity();
+						// LOG_TO(LogPool::NETWORK, "MOVE %d: POS[ %f,%f,%f ], VEL[%f, %f, %f]",
+						// 	move.index, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 					}
 
 					Core::GetSystem<DebugRenderer>().Draw(sphere{ ev.GetGameObject()->Transform()->position, 0.5f }, 
@@ -311,7 +311,7 @@ namespace idk
 							auto method = type.GetMethod("ProcessInput", 1);
 							if (const auto thunk = std::get_if<mono::ManagedThunk>(&method))
 							{
-								LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
+								// LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
 								thunk->Invoke(obj, input);
 							}
 						}

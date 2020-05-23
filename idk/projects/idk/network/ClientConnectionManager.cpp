@@ -68,11 +68,11 @@ namespace idk
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
 
-		if (   id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
-			&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
-			&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
-			)
-		LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
+		// if (   id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+		// 	&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+		// 	&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+		// 	)
+		// LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
 		return client.CreateMessage(static_cast<int>(id));
 	}
 

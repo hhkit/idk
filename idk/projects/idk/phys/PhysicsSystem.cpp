@@ -112,12 +112,15 @@ namespace idk
 		
 		// fire events
 
-		const auto collider_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Collider");;
+		const auto collider_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Collider");
 
 		const auto FireEvent = [&](const PairList& list, string_view trigger_method, string_view collision_method)
 		{
 			for (auto& [lhs, rhs] : list)
 			{
+				if (!(lhs && rhs))
+					continue;
+
 				if (lhs->is_trigger || rhs->is_trigger)
 				{
 					// fire lhs events
