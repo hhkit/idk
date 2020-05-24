@@ -138,7 +138,7 @@ else VARIANT_CASE(1, 0)
         last_depth = depth;
 
         ++depth;
-		if constexpr (std::is_same_v<std::invoke_result<decltype(visitor), K, V, int&>, bool>) // does it return bool?
+		if constexpr (std::is_same_v<std::invoke_result_t<decltype(visitor), K, V, int&>, bool>) // does it return bool?
 		{
 			if (visitor(std::forward<K>(key), std::forward<V>(val), depth_change)) // if false, stop recursive
 			{
