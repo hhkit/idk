@@ -49,7 +49,7 @@ namespace idk::phys
 			// ray is flying towards
 			const auto ray_pt = l_ray.get_point_after(t);
 
-			const auto collision_pt = [&]() -> vec3
+			const auto collision_pt = [&, other1, other2]() -> vec3
 			{
 				auto retval = ray_pt;
 				retval.*other1 = std::clamp(ray_pt.*other1, r_aabb.min.*other1, r_aabb.max.*other1);
