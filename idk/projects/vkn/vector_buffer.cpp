@@ -58,6 +58,8 @@ namespace idk::vkn
 				LOG_TO(LogPool::GFX, "Failed to update vector buffer at [Offset:%llu] with data of [Length:%llu], exceeding [Capacity:%llu]", offset, len, _capacity);
 				return;
 			}
+			if (!len)
+				return;
 			constexpr size_t limit = 65536;
 			size_t limit_offset = 0;
 			do {

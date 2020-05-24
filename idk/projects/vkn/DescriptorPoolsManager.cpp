@@ -108,7 +108,7 @@ namespace idk::vkn
 		}
 		vk::DescriptorPoolCreateInfo create_info
 		{
-			 vk::DescriptorPoolCreateFlagBits{} //Flag if we'll be deleting or updating the descriptor sets afterwards
+			 vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet //Flag if we'll be deleting or updating the descriptor sets afterwards
 			,max_sets
 			,total_types//hlp::arr_count(pool_size)
 			,std::data(pool_size)

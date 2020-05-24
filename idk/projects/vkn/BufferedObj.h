@@ -1,5 +1,6 @@
 #pragma once
 #include <idk.h>
+#include <vkn/VulkanResourceManager.h>
 namespace idk::vkn
 {
 
@@ -29,9 +30,9 @@ namespace idk::vkn
 		void UpdateCurrent(size_t curr_index);
 	protected:
 
-		unique_ptr<BufferedData> _current;
-		unique_ptr<BufferedData> _back;
-		unique_ptr<BufferedData> _old;
+		ManagedRsc<unique_ptr<BufferedData>> _current;
+		ManagedRsc<unique_ptr<BufferedData>> _back;
+		ManagedRsc<unique_ptr<BufferedData>> _old;
 		size_t _cycle;
 	};
 

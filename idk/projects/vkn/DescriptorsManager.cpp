@@ -5,6 +5,8 @@
 #include <vkn/VulkanState.h>
 #include <vkn/VulkanView.h>
 #include <vkn/DescriptorCountArray.h>
+#include <ds/index_span.inl>
+
 //hash_table<vk::DescriptorSetLayout, DescriptorSetManager> ds_sets;
 
 namespace idk::vkn
@@ -70,6 +72,7 @@ namespace idk::vkn
 			if (opt)
 				result[layout] = std::move(*opt);
 			else throw "AAAA";
+			last_use[layout] = std::chrono::high_resolution_clock::now();
 		}
 		return result;
 	}
@@ -87,14 +90,16 @@ namespace idk::vkn
 			//Grow should have ensured that we have the capacity.
 			IDK_ASSERT(opt);
 			result[layout] = *opt;
+			last_use[layout] = std::chrono::high_resolution_clock::now();
 		}
 		return result;
 	}
 
 	void DescriptorsManager::Free(vk::DescriptorSetLayout layout, vk::DescriptorSet ds)
 	{
-		auto itr = free_dses.find(layout);
-		itr->second.FreeDS(ds);
+		//auto itr = free_dses.find(layout);
+		//itr->second.FreeDS(ds);
+		free_dses[layout].FreeDS(ds);
 	}
 
 
@@ -166,10 +171,47 @@ namespace idk::vkn
 			for (auto& range : alloc_info.ranges)
 			{
 				auto layout = alloc_info.layouts[range.first];
-				auto& curr_vec = free_dses[layout].sets;
+				auto& dss = free_dses[layout];
+				auto& src_pools = dss.src_pools;
+				auto& curr_vec = dss.sets;
+				auto& alloc_vec = dss.alloced_sets;
 				//Insert the new descriptor sets into the respective free list
+				src_pools.emplace_back(index_span{ curr_vec.size(),curr_vec.size() + range.second - range.first }, pool);
 				curr_vec.insert(curr_vec.end(), alloc_chunk.begin() + range.first, alloc_chunk.begin() + range.second);
+				alloc_vec.insert(alloc_vec.end(), alloc_chunk.begin() + range.first, alloc_chunk.begin() + range.second);
+
 			}
+		}
+	}
+
+	void DescriptorsManager::Cull()
+	{/*
+		auto now = std::chrono::high_resolution_clock::now();
+		for (auto itr = last_use.begin();itr!=last_use.end();)
+		{
+			auto& [layout, time] = *itr;
+			auto next = itr;
+			++next;
+			if ( (now-time) > std::chrono::milliseconds{ 300 })
+			{
+				auto fitr = free_dses.find(layout);
+				if (fitr != free_dses.end())
+				{
+					free_dses.erase(fitr);
+					next = last_use.erase(itr);
+				}
+			}
+			itr = next;
+
+		}*/
+		auto itr = free_dses.begin();
+		while (itr != free_dses.end())
+		{
+			auto next = itr;
+			next++;
+			if (!itr->second.size())
+				next = free_dses.erase(itr);
+			itr = next;
 		}
 	}
 
@@ -357,6 +399,19 @@ namespace idk::vkn
 				curr_index--;
 				break;
 			}
+		}
+		if (curr_index == 0)
+		{
+			for (auto& [range, pool] : src_pools)
+			{
+				vk::ArrayProxy<const vk::DescriptorSet> ap( static_cast<uint32_t>(range.size()),range.to_span(alloced_sets).data());
+				View().Device()->freeDescriptorSets(pool,ap);
+			}
+			sets.clear();
+			alloced_sets.clear();
+			src_pools.clear();
+			curr_index = 0;
+			//View().Device()->freeDescriptorSets()
 		}
 	}
 }

@@ -4,14 +4,18 @@
 #include <vkn/DescriptorPoolsManager.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/vulkan_enum_info.h>
-
+#include <ds/index_span.h>
 #include <vkn/VulkanView.h>
+
+#include <chrono>
 
 namespace idk::vkn
 {
 struct DescriptorSets
 {
 	vector<vk::DescriptorSet> sets{};
+	vector<vk::DescriptorSet> alloced_sets{};
+	vector<std::pair<index_span, vk::DescriptorPool>> src_pools;
 	uint32_t curr_index{};
 
 	uint32_t size()const;
@@ -32,6 +36,8 @@ struct DescriptorsManager
 
 	//DescriptorSetLookup allocated_dses;
 	DescriptorSetLookup free_dses;
+	using time_point = std::chrono::high_resolution_clock::time_point;
+	hash_table<vk::DescriptorSetLayout, time_point> last_use;
 
 	DescriptorsManager(VulkanView& view = vkn::View());
 
@@ -42,6 +48,8 @@ struct DescriptorsManager
 
 	void Grow(const hash_table<vk::DescriptorSetLayout, std::pair<vk::DescriptorType, uint32_t>>& allocations);
 	void Grow(const hash_table<vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>& allocations);
+
+	void Cull();
 
 	void Reset();
 };
