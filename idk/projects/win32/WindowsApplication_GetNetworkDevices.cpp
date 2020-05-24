@@ -13,7 +13,8 @@ namespace idk
 	{
 		char buf[BUFSIZ];
 		memset(buf, 0, BUFSIZ);
-		WideCharToMultiByte(CP_ACP, 0, aa->FriendlyName, (int) wcslen(aa->FriendlyName), buf, BUFSIZ, NULL, NULL);
+		//WideCharToMultiByte(CP_ACP, 0, aa->AdapterName, (int) wcslen(aa->AdapterName), buf, BUFSIZ, NULL, NULL);
+		strcpy_s(buf, aa->AdapterName);
 		return buf;
 	}
 
@@ -76,6 +77,7 @@ namespace idk
 				Device d;
 				d.name = pAdapter->AdapterName;
 				d.description = pAdapter->Description;
+				
 
 				{ // find IP addresses
 					Address addr;
@@ -87,6 +89,21 @@ namespace idk
 						if (inet_pton(AF_INET, ip->IpAddress.String, &addr) == 1)
 						{
 							d.ip_addresses.emplace_back(addr);
+							unsigned mask[4];
+							sscanf_s(ip->IpMask.String, "%d.%d.%d.%d", &mask[0], &mask[1], &mask[2], &mask[3]);
+
+							unsigned short bit_count = 0;
+
+							for (auto& elem : mask)
+							{
+								while (elem)
+								{
+									if (elem & 1)
+										++bit_count;
+									elem >>= 1;
+								}
+							}
+							d.subnet_length = bit_count;
 						}
 					}
 					

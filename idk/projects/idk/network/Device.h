@@ -9,5 +9,6 @@ namespace idk
 		idk::small_string<char> name;
 		idk::small_string<char> description;
 		vector<Address> ip_addresses;
+		unsigned short subnet_length = 32;
 	};
 }

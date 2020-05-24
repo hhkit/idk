@@ -1,5 +1,5 @@
 metadatas: 
-- guid: a30133e4-39ce-45c1-a7b5-5deadff75d30
-  metadata: "filter_mode: Linear\nforce_uncompressed: 0\ninternal_format: Automatic\nis_srgb: 1\nuv_mode: Repeat\n"
+- guid: 40d653fe-3822-4b99-ab1c-559e1194c4ed
+  metadata: "filter_mode: Linear\nforce_uncompressed: 0\ninternal_format: Automatic\nis_srgb: 1\nuv_mode: Repeat\nwait_loaded: 0\n"
   name: ""
   t_hash: idk::Texture
