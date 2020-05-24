@@ -295,6 +295,7 @@ namespace idk::shadergraph
         string code = resolve_node(nodes.at(master_node), state);
         string uniforms_str = "";
         uniforms.clear();
+		hidden_uniforms.clear();
 
         array<string, ValueType::count + 1> uniform_blocks;
 
