@@ -175,6 +175,7 @@ namespace idk::vkn
 	//{
 	//	size_t get_counter();
 	//}
+#pragma optimize("",off)
 	void MaterialInstanceCache::InstCachedInfo::Update(const ProcessedMaterial& mat_inst, UpdateInfo& update_info)
 	{
 		auto& creation_buffer = update_info.create_buffer;
@@ -206,8 +207,9 @@ namespace idk::vkn
 			thread_local static vector<vk::Image> textures;
 			convert_to_images(textures, mat_inst);
 			auto sz = hlp::buffer_size(textures);
-			cached.scratch_texture_cache.resize(sz);
-			std::memcpy(hlp::buffer_data(cached.scratch_data_cache), hlp::buffer_data(textures), sz);
+			auto& buf = cached.scratch_texture_cache;
+			buf.resize(sz);
+			std::memcpy(hlp::buffer_data(buf), hlp::buffer_data(textures), sz);
 		};
 		auto update_data_scratch = [](InstCachedInfo& cached, const ProcessedMaterial& mat_inst)->void
 		{
