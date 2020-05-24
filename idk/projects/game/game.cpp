@@ -65,12 +65,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 
 	auto c = std::make_unique<Core>();
-	
-	AddSystems(c, hInstance, nCmdShow, command_lines, num_args);
+	try
+	{
 
-	ConfigAppDataAndLogger();
+		AddSystems(c, hInstance, nCmdShow, command_lines, num_args);
 
-	c->Setup();
-	c->Run();
+		ConfigAppDataAndLogger();
+
+		c->Setup();
+		c->Run();
+	}
+	catch (...)
+	{
+
+	}
+
 	return c->GetSystem<Windows>().GetReturnVal();
 }

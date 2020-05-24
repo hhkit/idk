@@ -48,8 +48,6 @@ namespace idk
 				{
 					move_packs.emplace_back(std::move(move_data));
 				}
-				else
-					LOG_TO(LogPool::NETWORK, "EMPTY PACK");
 			}
 		}
 
@@ -61,8 +59,6 @@ namespace idk
 			}
 			);
 		}
-		else
-			LOG_TO(LogPool::NETWORK, "NO MOVES TO SEND");
 	}
 
 	void ClientMoveManager::OnControlObject(ControlObjectMessage& msg)
@@ -92,7 +88,7 @@ namespace idk
 					ghost.Snap();
 				}
 
-				LOG_TO(LogPool::NETWORK, "Move ACK: %d", msg.move_ack.value);
+				// LOG_TO(LogPool::NETWORK, "Move ACK: %d", msg.move_ack.value);
 				val->last_received_control_object = msg.move_ack;
 				val->dirty_control_object = true;
 			}

@@ -1497,6 +1497,8 @@ namespace idk::mono
             auto s = unbox(type);
             auto hash = string_hash(s.get());
 
+			LOG_TO(LogPool::MONO, "GET RESOURCE %s: %s", s.get(), string{ guid }.c_str());
+
             switch (hash)
             {
 				NAME_OF_RESOURCE(Texture);

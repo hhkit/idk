@@ -192,10 +192,26 @@ namespace idk
 					addr.b = msg.buffer[discovery_message.size() + 1];
 					addr.c = msg.buffer[discovery_message.size() + 2];
 					addr.d = msg.buffer[discovery_message.size() + 3];
-					client_address_cooldown[addr] = server_entry_time_to_live;
+
+					if (std::equal(std::begin(addr.nums), std::end(addr.nums),  std::begin(pMsg->src.nums)))
+						client_address_cooldown[addr] = server_entry_time_to_live;
+					else
+						LOG_TO(LogPool::NETWORK, "REJECTED BROADCAST FROM SERVER %d, %d, %d, %d: MISMATCH SRC AND EXTERNAL IP", 
+							(int) pMsg->src.a, (int) pMsg->src.b, (int) pMsg->src.c, (int) pMsg->src.d);
 				}
 			}
 		}
+
+		vector<Address> deleteus;
+		for (auto& [addr, ttl] : client_address_cooldown)
+		{
+			ttl -= Core::GetDT();
+			if (ttl < seconds{})
+				deleteus.push_back(addr);
+		}
+
+		for (auto& elem : deleteus)
+			client_address_cooldown.erase(elem);
 	}
 
 	void NetworkSystem::SendPackets()
@@ -265,7 +281,7 @@ namespace idk
 							auto method = type.GetMethod("ProcessInput", 1);
 							if (auto thunk = std::get_if<mono::ManagedThunk>(&method))
 							{
-								LOG_TO(LogPool::NETWORK, "Rollback Input Tick %d", move.index.value);
+								// LOG_TO(LogPool::NETWORK, "Rollback Input Tick %d", move.index.value);
 								thunk->Invoke(obj, input);
 								break;
 							}
@@ -276,10 +292,10 @@ namespace idk
 					if (auto rb = ev.GetGameObject()->GetComponent<RigidBody>())
 					{
 						physics_system.SimulateOneObject(rb);
-						auto pos = ev.GetGameObject()->Transform()->position;
-						auto vel = rb->velocity();
-						LOG_TO(LogPool::NETWORK, "MOVE %d: POS[ %f,%f,%f ], VEL[%f, %f, %f]",
-							move.index, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+						// auto pos = ev.GetGameObject()->Transform()->position;
+						// auto vel = rb->velocity();
+						// LOG_TO(LogPool::NETWORK, "MOVE %d: POS[ %f,%f,%f ], VEL[%f, %f, %f]",
+						// 	move.index, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 					}
 
 					Core::GetSystem<DebugRenderer>().Draw(sphere{ ev.GetGameObject()->Transform()->position, 0.5f }, 
@@ -311,7 +327,7 @@ namespace idk
 							auto method = type.GetMethod("ProcessInput", 1);
 							if (const auto thunk = std::get_if<mono::ManagedThunk>(&method))
 							{
-								LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
+								// LOG_TO(LogPool::NETWORK, "Processed Move %d", base.value);
 								thunk->Invoke(obj, input);
 							}
 						}
@@ -356,6 +372,7 @@ namespace idk
 
 							client_inputs->moves.emplace_back(ElectronView::ClientSideInputs::MoveNode{ client_inputs->next_move_index, payload });
 							client_inputs->next_move_index++;
+							break;
 						}
 					}
 				}
