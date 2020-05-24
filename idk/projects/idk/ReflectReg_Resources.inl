@@ -158,7 +158,7 @@
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::CompiledTexture, "CompiledTexture")
-	REFLECT_VARS(internal_format, mode, filter_mode, size, is_srgb, generate_mipmaps, pixel_buffer)
+	REFLECT_VARS(internal_format, mode, filter_mode, size, is_srgb, generate_mipmaps, pixel_buffer,wait_loaded)
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::CharacterInfo, "CharacterInfo")
