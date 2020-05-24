@@ -333,7 +333,7 @@ namespace idk::vkn
 		info.extracted_desc.clear();//invalid now
 	}
 
-void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& buffer)
+void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& buffer, string glsl )
 {
 	string_view byte_code{r_cast<const char*>(buffer.data()),hlp::buffer_size(buffer)};
 	auto& view = Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View();
@@ -344,15 +344,16 @@ void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc
 	FillDefaultBufferDesc(extracted,descriptors);
 	back->stage = single_stage;
 	back->attrib_descriptions = std::move(descriptors);
+	back->glsl = std::move(glsl);
 	NewlyLoaded(true);
 	buf_obj->WriteToBack(std::move(back));
 }
-void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, string_view byte_code)
+void ShaderModule::Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, string_view byte_code, string glsl)
 {
 	vector<unsigned int> buffer;
 	buffer.resize(byte_code.size()/sizeof(uint32_t));
 	std::memcpy(buffer.data(), byte_code.data(), byte_code.size());
-	Load(single_stage, descriptors, buffer);
+	Load(single_stage, descriptors, buffer,std::move(glsl));
 }
 
 bool ShaderModule::HasLayout(const string& uniform_name) const

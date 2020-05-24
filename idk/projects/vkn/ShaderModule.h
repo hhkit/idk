@@ -59,10 +59,11 @@ namespace idk::vkn
 
 		operator bool()const { return buf_obj->HasCurrent(); }
 
-		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& byte_code);
-		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors,string_view byte_code);
+		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, const vector<unsigned int>& byte_code, string glsl = {});
+		void Load(vk::ShaderStageFlagBits single_stage, vector<buffer_desc> descriptors, string_view byte_code, string glsl = {});
 		vk::ShaderStageFlagBits Stage()const { return Current().stage; }
 		vk::ShaderModule        Module()const { return *Current().module; }
+		string_view				GLSL() const { return Current().glsl; }
 		void AttribDescriptions(vector<buffer_desc>&& attribs){ Current().attrib_descriptions = std::move(attribs); }
 		const vector<buffer_desc>& AttribDescriptions()const { return Current().attrib_descriptions; }
 		bool HasLayout(const string& uniform_name)const;
@@ -101,6 +102,7 @@ namespace idk::vkn
 			hash_table<uint32_t, uint32_t> loc_to_bind;
 			std::optional<uint32_t> GetBinding(uint32_t location)const;
 			vk::UniqueShaderModule module;
+			string glsl;
 		};
 		Data& Current()
 		{
@@ -110,7 +112,7 @@ namespace idk::vkn
 		{
 			return buf_obj->Current();
 		}
-		ManagedRsc<unique_ptr<BufferedObj<Data>>> buf_obj = std::make_unique<BufferedObj<Data>>();
+		unique_ptr<BufferedObj<Data>> buf_obj = std::make_unique<BufferedObj<Data>>();
 		//vk::UniqueShaderModule back_module;//To load into, will move into module when no buffers are using it
 	};
 }

@@ -42,12 +42,12 @@ namespace idk::vkn
 			: Core::GetResourceManager().LoaderEmplaceResource<ShaderModule>();
 		auto& filepath = path_to_resource;
 		auto shader_stream = filepath.Open(FS_PERMISSIONS::READ);
-		string val = stringify(shader_stream);
+		string glsl = stringify(shader_stream);
 
 		auto shader_enum = GetShaderType(filepath.GetExtension());
-		auto spirv = GlslToSpirv::spirv(val, shader_enum,path_to_resource.GetFileName());
+		auto spirv = GlslToSpirv::spirv(glsl, shader_enum,path_to_resource.GetFileName());
 		if (spirv)
-			program->Load(shader_enum, {}, string_view{ r_cast<const char*>(spirv->data()),hlp::buffer_size(*spirv) });
+			program->Load(shader_enum, {}, string_view{ r_cast<const char*>(spirv->data()),hlp::buffer_size(*spirv) }, glsl);
 		return program;
 	}
 

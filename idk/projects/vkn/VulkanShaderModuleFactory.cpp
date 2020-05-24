@@ -24,7 +24,7 @@ namespace idk::vkn
 		ret = static_cast<bool>(spirv);
 		if (ret && spirv)
 		{
-			prog->Load(vk::ShaderStageFlagBits::eFragment, {}, *spirv);
+			prog->Load(vk::ShaderStageFlagBits::eFragment, {}, *spirv,glsl_code);
 			return ShaderBuildResult::Ok;
 		}
 		return ShaderBuildResult::Err_InvalidGLSL;
