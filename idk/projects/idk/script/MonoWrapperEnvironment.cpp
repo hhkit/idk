@@ -1874,6 +1874,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::CameraGetDepth", float, Handle<Camera> h)
+		{
+			return h->depth;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetDepth", void, Handle<Camera> h, int d)
+		{
+			h->depth = d;
+		}
+		BIND_END();
+
 		// //////lights////////////////
 		BIND_START("idk.Bindings::LightGetEnabled", bool, Handle<Light> h)
 		{
@@ -2431,8 +2443,9 @@ namespace idk::mono
 			{
 				const auto& elem = devices[i];
 				auto csh_device = device_type->Construct();
-				auto str = (MonoObject*) mono_string_new(mono_domain_get(), elem.name.data());
+				auto str = (MonoObject*) mono_string_new(mono_domain_get(), elem.description.data());
 				csh_device.Assign("mac_addr", str);
+				csh_device.Assign("subnet_bits", elem.subnet_length);
 
 				mono_array_setref(retval, i, csh_device.Raw());
 			}

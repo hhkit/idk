@@ -81,5 +81,11 @@
             get => Bindings.CameraGetBlurScale(handle);
             set => Bindings.CameraSetBlurScale(handle, value);
         }
+
+        public int depth
+        {
+            get => Bindings.CameraGetDepth(handle);
+            set => Bindings.CameraSetDepth(handle, value);
+        }
     }
 }

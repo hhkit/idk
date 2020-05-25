@@ -40,6 +40,7 @@ namespace idk
 		ResetNetwork();
 		frame_counter = SeqNo{};
 		my_id = Host::SERVER;
+
 		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
 		lobby->OnClientConnect += [this](int clientid)
 		{
@@ -437,7 +438,7 @@ namespace idk
 	{
 		for (auto& device : Core::GetSystem<Application>().GetNetworkDevices())
 		{
-			LOG_TO(LogPool::NETWORK, "Found %s device (%s) with address %s.", device.name.c_str(), device.description.c_str(), string{ device.ip_addresses[0] }.c_str());
+			LOG_TO(LogPool::NETWORK, "Found %s device (%s) with address %s/%d.", device.name.c_str(), device.description.c_str(), string{ device.ip_addresses[0] }.c_str(), device.subnet_length);
 		}
 	}
 
