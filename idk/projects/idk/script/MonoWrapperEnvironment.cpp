@@ -2500,7 +2500,7 @@ namespace idk::mono
 
 			for (auto& elem : devices)
 			{
-				if (elem.name == mac_addr_str.get())
+				if (elem.description == mac_addr_str.get())
 				{
 					auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), devices.size());
 					for (unsigned j = 0; j < elem.ip_addresses.size(); ++j)
@@ -2530,7 +2530,7 @@ namespace idk::mono
 			auto mac_addr = unbox(mac_address);
 			for (auto& elem : Core::GetSystem<Application>().GetNetworkDevices())
 			{
-				if (elem.name == mac_addr.get())
+				if (elem.description == mac_addr.get())
 				{
 					try
 					{

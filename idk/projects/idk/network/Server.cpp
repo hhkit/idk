@@ -20,7 +20,7 @@ namespace idk
 	}
 
 	Server::Server(const Address& address)
-		: adapter{ this }, server{ yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY, yojimbo::Address{0,0,0, 0, address.port}, config, adapter, 0.0 }
+		: adapter{ this }, server{ yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY, yojimbo::Address{address.a,address.b,address.c,address.d, address.port}, config, adapter, 0.0 }
 		, address_{address}
 	{
 		server.Start(GameConfiguration::MAX_CLIENTS);
