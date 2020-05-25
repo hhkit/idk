@@ -39,6 +39,7 @@ namespace idk
 
         public static void Disconnect() => Bindings.NetworkDisconnect();
         public static void CreateLobby() => Bindings.NetworkCreateLobby(devices[0].mac_addr);
+        public static void CreateLobby(Device d) => Bindings.NetworkCreateLobby(d.mac_addr);
         public static void Connect(Address a) => Bindings.NetworkConnect(a);
         public static void LoadScene(Scene scene)
         {

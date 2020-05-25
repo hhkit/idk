@@ -6,6 +6,8 @@
 #include <ds/circular_buffer.inl>
 #include <serialize/binary.inl>
 #include <reflect/reflect.inl>
+#include <network/NetworkSystem.h>
+#include <network/ConnectionManager.h>
 #include <debug/Log.h>
 #include <sstream>
 namespace idk
@@ -51,12 +53,12 @@ namespace idk
 			ParameterImpl<T>& param;
 			T start_value;
 			T end_value;
+			T prev_value;
 
 			DerivedGhostData(ParameterImpl<T>& p)
 				: param{ p }
 			{
-				start_value = param.getter();
-				end_value = param.getter();
+				start_value = end_value = prev_value = param.getter();
 			}
 
 			void ForceUnpack(string_view data) final
@@ -66,8 +68,6 @@ namespace idk
 					t = 1;
 					start_value = param.getter();
 					end_value = *val;
-					if constexpr (std::is_same_v<T, vec3>)
-						LOG_TO(LogPool::NETWORK, "UNPACKED: %f, %f, %f", end_value.x, end_value.y, end_value.z);
 				}
 			}
 
@@ -76,12 +76,18 @@ namespace idk
 				// newer data has arrived
 				if (index > value_index)
 				{
-					if (auto val = parse_binary<T>(data))
+					if (auto pval = parse_binary<T>(data))
 					{
-						value_index = index;
+						auto val = *pval;
+						// interp between vals
+						auto diff = (index - value_index);
+						auto diff_dt = diff * Core::GetDT();
+						auto rtt = Core::GetSystem<NetworkSystem>().GetConnectionTo(Host::SERVER)->GetRTT();
+						end_value = param.interpolator(prev_value, val, (rtt + diff_dt) / diff_dt);
+						prev_value = val;
 						t = 0;
 						start_value = param.getter();
-						end_value = *val;
+						value_index = index;
 					}
 				}
 			}
