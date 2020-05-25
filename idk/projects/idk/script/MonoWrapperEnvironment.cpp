@@ -1874,6 +1874,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::CameraGetDepth", float, Handle<Camera> h)
+		{
+			return h->depth;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::CameraSetDepth", void, Handle<Camera> h, int d)
+		{
+			h->depth = d;
+		}
+		BIND_END();
+
 		// //////lights////////////////
 		BIND_START("idk.Bindings::LightGetEnabled", bool, Handle<Light> h)
 		{

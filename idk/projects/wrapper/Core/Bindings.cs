@@ -69,6 +69,7 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void GameObjectSetTag(ulong gamehandle, string tag);
 
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int GameObjectGetLayer(ulong gamehandle);
 
@@ -637,6 +638,11 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void CameraSetBlurScale(ulong id, float value);
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void CameraSetDepth(ulong handle, int value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int CameraGetDepth(ulong handle);
 
         /*
         * Light
