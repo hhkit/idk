@@ -19,6 +19,8 @@
         /// </summary>
         public int ActorNumber { get => connectionId; }
 
+        public void Evict() => Bindings.NetworkEvictClient(connectionId);
+
         internal Client(int i)
         {
             connectionId = i;

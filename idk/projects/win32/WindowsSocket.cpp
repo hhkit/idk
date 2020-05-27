@@ -31,6 +31,25 @@ namespace idk::win
 			wprintf(L"bind returned success\n");
 	}
 
+	void WindowsSocket::Bind(const Address& addr)
+	{
+		sockaddr_in service;
+		service.sin_family = AF_INET;
+		service.sin_addr.S_un.S_un_b.s_b1 = addr.a;
+		service.sin_addr.S_un.S_un_b.s_b2 = addr.b;
+		service.sin_addr.S_un.S_un_b.s_b3 = addr.c;
+		service.sin_addr.S_un.S_un_b.s_b4 = addr.d;
+		service.sin_port = htons(addr.port);
+
+		//----------------------
+		// Bind the socket.
+		auto iResult = bind(skt_, (SOCKADDR*)&service, sizeof(service));
+		if (iResult == SOCKET_ERROR)
+			wprintf(L"bind failed with error %u\n", WSAGetLastError());
+		else
+			wprintf(L"bind returned success\n");
+	}
+
 	void WindowsSocket::Listen()
 	{
 	}

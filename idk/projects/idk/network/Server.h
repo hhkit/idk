@@ -33,6 +33,7 @@ namespace idk
 		void ReceivePackets();
 		void SendPackets();
 
+		void EvictClient(int clientId);
 		void SetPacketLoss(float percent_loss);
 		void SetLatency(seconds dur);
 		float GetRTT(int clientIndex) const;

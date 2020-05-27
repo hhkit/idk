@@ -30,8 +30,13 @@
 #include <scene/SceneManager.h>
 #include <scene/SceneGraph.inl>
 
+#include <algorithm>
+#include <iterator>
+
 namespace idk
 {
+	static inline unsigned short subnet_bits;
+
 	NetworkSystem::NetworkSystem() = default;
 	NetworkSystem::~NetworkSystem() = default;
 
@@ -40,6 +45,22 @@ namespace idk
 		ResetNetwork();
 		frame_counter = SeqNo{};
 		my_id = Host::SERVER;
+
+		for (auto& device : Core::GetSystem<Application>().GetNetworkDevices())
+		{
+			bool found = false;
+			for (auto& addr : device.ip_addresses)
+			{
+				if (std::equal(std::begin(addr.nums), std::end(addr.nums), std::begin(d.nums)))
+				{
+					subnet_bits = device.subnet_length;
+					found = true;
+					break;
+				}
+			}
+			if (found)
+				break;
+		}
 
 		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
 		lobby->OnClientConnect += [this](int clientid)
@@ -88,6 +109,12 @@ namespace idk
 	void NetworkSystem::Disconnect()
 	{
 		ResetNetwork();
+	}
+
+	void NetworkSystem::EvictClient(int clientID)
+	{
+		if (lobby)
+			lobby->EvictClient(clientID);
 	}
 
 	array<ConnectionManager*, 5> NetworkSystem::GetConnectionManagers()
@@ -194,8 +221,15 @@ namespace idk
 					addr.c = msg.buffer[discovery_message.size() + 2];
 					addr.d = msg.buffer[discovery_message.size() + 3];
 
-					if (std::equal(std::begin(addr.nums), std::end(addr.nums),  std::begin(pMsg->src.nums)))
-						client_address_cooldown[addr] = server_entry_time_to_live;
+					unsigned char clients = msg.buffer[discovery_message.size() + 4];
+
+					if (std::equal(std::begin(addr.nums), std::end(addr.nums), std::begin(pMsg->src.nums)))
+					{
+						auto& info = client_address_cooldown[addr];
+						info.time_to_live = server_entry_time_to_live;
+						info.address = addr;
+						info.client_count = clients;
+					}
 					else
 						LOG_TO(LogPool::NETWORK, "REJECTED BROADCAST FROM SERVER %d, %d, %d, %d: MISMATCH SRC AND EXTERNAL IP", 
 							(int) pMsg->src.a, (int) pMsg->src.b, (int) pMsg->src.c, (int) pMsg->src.d);
@@ -204,8 +238,9 @@ namespace idk
 		}
 
 		vector<Address> deleteus;
-		for (auto& [addr, ttl] : client_address_cooldown)
+		for (auto& [addr, info] : client_address_cooldown)
 		{
+			auto& ttl = info.time_to_live;
 			ttl -= Core::GetDT();
 			if (ttl < seconds{})
 				deleteus.push_back(addr);
@@ -230,6 +265,7 @@ namespace idk
 			{
 				server_timer -= server_broadcast_limit;
 
+				auto addr = lobby->GetAddress();
 				Message msg;
 				msg.dest = broadcast_address;
 				msg.dest.port = client_listen_port;
@@ -238,11 +274,17 @@ namespace idk
 					std::end(discovery_message)
 				);
 
-				auto addr = lobby->GetAddress();
 				msg.buffer.push_back(addr.a);
 				msg.buffer.push_back(addr.b);
 				msg.buffer.push_back(addr.c);
 				msg.buffer.push_back(addr.d);
+
+				unsigned char clients = 0;
+				for (auto& elem : server_connection_manager)
+					if (elem)
+						++clients;
+
+				msg.buffer.push_back(clients);
 				server_broadcast_socket->Send(msg);
 			}
 		}
@@ -431,6 +473,18 @@ namespace idk
 
 	void NetworkSystem::Init()
 	{
+		yojimbo_log_level(YOJIMBO_LOG_LEVEL_ERROR);
+		yojimbo_set_printf_function([](const char* fmt, ...) -> int
+		{
+			static char buf[1024];
+			va_list args;
+			va_start(args, fmt);
+			vsprintf_s(buf, fmt, args);
+			va_end(args);
+
+			LOG_TO(LogPool::NETWORK, buf);
+
+		});
 		InitializeYojimbo();
 	}
 
@@ -495,6 +549,9 @@ namespace idk
 			if (!server_broadcast_socket)
 			{
 				server_broadcast_socket = Core::GetSystem<Application>().CreateSocket();
+				auto server_addr = lobby->GetAddress();
+				server_addr.port = 2000;
+				server_broadcast_socket->Bind(server_addr);
 				server_broadcast_socket->EnableBroadcast();
 				server_timer = server_broadcast_limit;
 			}
@@ -504,11 +561,11 @@ namespace idk
 			server_broadcast_socket.reset();
 		}
 	}
-	vector<Address> NetworkSystem::GetDiscoveredServers() const
+	vector<ServerInfo> NetworkSystem::GetDiscoveredServers() const
 	{
-		vector<Address> addrs;
-		for (auto [ip, ttl] : client_address_cooldown)
-			addrs.emplace_back(ip);
+		vector<ServerInfo> addrs;
+		for (auto [ip, info] : client_address_cooldown)
+			addrs.emplace_back(info);
 		return addrs;
 	}
 };

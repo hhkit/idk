@@ -20,6 +20,15 @@ namespace idk
 
 		explicit operator string() const;
 		bool operator<(const Address& rhs) const;
+		
+		friend constexpr bool operator==(const Address& lhs, const Address& rhs) noexcept
+		{
+			for (unsigned i = 0; i < 4; ++i)
+				if (lhs.nums[i] != rhs.nums[i])
+					return false;
+
+			return true;
+		}
 	};
 
 	constexpr auto localhost = Address{ 127,0,0,1,8000 };

@@ -25,6 +25,9 @@ namespace idk
         public extern static void SceneChangeScene(Guid guid);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkEvictClient(int connectionId);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid SceneGetActiveScene();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -53,6 +56,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior GameObjectAddGameComponent(ulong gamehandle, string component);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int GetServerClientCount(Address server_address);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior GameObjectGetGameComponent(ulong gamehandle, string component);

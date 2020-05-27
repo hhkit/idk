@@ -21,6 +21,7 @@ namespace idk
 		virtual ~Socket() = default;
 
 		virtual void Bind(unsigned short port) = 0;
+		virtual void Bind(const Address& addr) = 0;
 		virtual void Listen() = 0;
 		virtual void EnableBroadcast() = 0;
 

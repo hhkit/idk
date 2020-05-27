@@ -41,6 +41,7 @@ namespace idk
         public static void CreateLobby() => Bindings.NetworkCreateLobby(devices[0].mac_addr);
         public static void CreateLobby(Device d) => Bindings.NetworkCreateLobby(d.mac_addr);
         public static void Connect(Address a) => Bindings.NetworkConnect(a);
+        public static int GetServerClientCount(Address server_address) => Bindings.GetServerClientCount(server_address);
         public static void LoadScene(Scene scene)
         {
             if (!isHost)

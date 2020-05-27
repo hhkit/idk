@@ -15,6 +15,14 @@ namespace idk
 	class ServerConnectionManager;
 	class Socket;
 
+	struct ServerInfo
+	{
+		Address address;
+		int client_count;
+		bool is_broadcasting;
+		seconds time_to_live;
+	};
+
 	class NetworkSystem
 		: public ISystem
 	{
@@ -28,6 +36,7 @@ namespace idk
 		void ConnectToServer(const Address& d);
 
 		void Disconnect();
+		void EvictClient(int clientID);
 
 		Client& GetClient() { return *client; }
 		Server& GetServer() { return *lobby; }
@@ -64,7 +73,7 @@ namespace idk
 		bool IsSearching() const { return static_cast<bool>(client_listen_socket); }
 		void SetBroadcast(bool enable);
 		bool IsBroadcasting() const { return static_cast<bool>(server_broadcast_socket); }
-		vector<Address> GetDiscoveredServers() const;
+		vector<ServerInfo> GetDiscoveredServers() const;
 	private:
 		struct ResponseCallback {
 			void* fn_ptr;
@@ -92,7 +101,7 @@ namespace idk
 		static constexpr seconds server_broadcast_limit = seconds{ 5 };
 		static constexpr seconds server_entry_time_to_live = seconds{ 10 };
 		seconds server_timer{};
-		std::map<Address, seconds> client_address_cooldown;
+		std::map<Address, ServerInfo> client_address_cooldown;
 
 		void Init() override;
 		void LateInit() override;

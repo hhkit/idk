@@ -1488,8 +1488,10 @@ namespace idk::mono
 #undef VALIDATE_RESOURCE
 
 #define NAME_OF_RESOURCE(RES) case string_hash(#RES): { \
-	auto path = Core::GetResourceManager().GetPath(RscHandle<RES>(guid)); auto name = Core::GetResourceManager().Get<RES>(guid).Name(); \
-	return mono_string_new(mono_domain_get(), name.size() ? name.data() : PathHandle{ *path }.GetStem().data()); }
+	auto rid = RscHandle<RES>(guid); \
+	auto path = Core::GetResourceManager().GetPath(RscHandle<RES>(guid)); \
+	auto name = RscHandle<RES>(guid) ? Core::GetResourceManager().Get<RES>(guid).Name() : string_view{""}; \
+	return mono_string_new(mono_domain_get(), rid ? (name.size() ? name.data() : PathHandle{ *path }.GetStem().data()) : ""); }
         BIND_START("idk.Bindings::ResourceGetName",  MonoString*, Guid guid, MonoString* type)
         {
             // TODO: make get jumptable...
@@ -1504,6 +1506,12 @@ namespace idk::mono
 				NAME_OF_RESOURCE(Texture);
 				NAME_OF_RESOURCE(Material);
 				NAME_OF_RESOURCE(MaterialInstance);
+			//case string_hash("MaterialInstance"): 
+			//{ 
+			//	auto path = Core::GetResourceManager().GetPath(RscHandle<MaterialInstance>(guid)); 
+			//	auto name = Core::GetResourceManager().Get<MaterialInstance>(guid).Name(); 
+			//	return mono_string_new(mono_domain_get(), name.size() ? name.data() : PathHandle{ *path }.GetStem().data()); 
+			//}
 				NAME_OF_RESOURCE(Prefab);
 				NAME_OF_RESOURCE(Scene);
                 default: return mono_string_empty(mono_domain_get());
@@ -2462,9 +2470,27 @@ namespace idk::mono
 			auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), discovered.size());
 
 			for (unsigned j = 0; j < discovered.size(); ++j)
-				mono_array_set(retval, Address, j, discovered[j]);
+				mono_array_set(retval, Address, j, discovered[j].address);
 
 			return retval;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetServerClientsConnected", int, Address addr)
+		{
+			auto discovered = Core::GetSystem<NetworkSystem>().GetDiscoveredServers();
+
+			for (unsigned j = 0; j < discovered.size(); ++j)
+				if (discovered[j].address == addr)
+					return discovered[j].client_count;
+
+			return -1;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkEvictClient", void, int id)
+		{
+			Core::GetSystem<NetworkSystem>().EvictClient(id);
 		}
 		BIND_END();
 

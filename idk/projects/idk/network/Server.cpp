@@ -80,6 +80,11 @@ namespace idk
 		server.SendPackets();
 	}
 
+	void Server::EvictClient(int clientId)
+	{
+		server.DisconnectClient(clientId);
+	}
+
 	void Server::SetPacketLoss(float percent_loss)
 	{
 		server.SetPacketLoss(percent_loss);
