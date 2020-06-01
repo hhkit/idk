@@ -48,7 +48,7 @@ namespace idk
 			{
 				seq_num_t index;
 				string    payload;
-				unsigned  send_count = 3;
+				unsigned  send_count = 10;
 			};
 			std::deque<MoveNode> moves;
 			seq_num_t next_move_index{};

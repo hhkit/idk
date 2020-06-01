@@ -127,6 +127,7 @@ namespace idk
 #pragma region Editor Functionality
 	void Animator::Reset()
 	{
+		offset = vec3{};
 		preview_playback = false;
 		for(auto& layer : layers)
 			layer.Reset();

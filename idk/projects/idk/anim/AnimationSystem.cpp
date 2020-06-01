@@ -750,6 +750,9 @@ namespace idk
 				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone.global_inverse_bind_pose;
 			}
 		}
+		
+		for (auto& elem : animator.final_bone_transforms)
+			elem[3] += vec4{ animator.offset, 0 };
 
 		animator.ResetTriggers();
 	}

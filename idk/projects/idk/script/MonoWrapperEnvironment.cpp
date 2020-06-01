@@ -1162,6 +1162,18 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::AnimatorGetOffset", vec3, Handle<Animator> animator)
+		{
+			return animator->offset;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::AnimatorSetOffset", void, Handle<Animator> animator, vec3 offset)
+		{
+			animator->offset = offset;
+		}
+		BIND_END();
+
 		//AudioListener
 		//----------------------------------------------------------------------------------------------------
 		BIND_START("idk.Bindings::AudioListenerGetEnabledState", bool, Handle<AudioListener> audiolistener)
@@ -2183,6 +2195,12 @@ namespace idk::mono
 
 
         // Time
+
+		BIND_START("idk.Bindings::TimeGetAccumTime", float)
+		{
+			return Core::GetScheduler().GetRemainingTime().count();
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::TimeGetTimeScale", float)
 		{

@@ -13,6 +13,8 @@ namespace idk
 		:public Component<Animator> 
 	{
 	public:
+		vec3 offset = vec3{};
+
 		// Contructor
 		Animator();
 

@@ -41,6 +41,13 @@
             get => Bindings.TimeGetTimeScale();
             set => Bindings.TimeSetTimeScale(value);
         }
+
+
+        public static float accumulatedTime
+        {
+            get => Bindings.TimeGetAccumTime();
+        }
+
         //
         //public static float unscaledTime
         //{

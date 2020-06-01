@@ -3,6 +3,12 @@ namespace idk
     public class Animator
         : Component
     {
+        public Vector3 offset
+        {
+            get => Bindings.AnimatorGetOffset(handle);
+            set => Bindings.AnimatorSetOffset(handle, value);
+        }
+
         public bool Play(string name)
              => Bindings.AnimatorPlay(handle, name);
         public bool Play(string name, string layer)

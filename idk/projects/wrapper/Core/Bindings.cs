@@ -11,6 +11,8 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ObjectValidate(ulong handle);
 
+
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ObjectDestroy(ulong handle);
 
@@ -379,6 +381,11 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorSetWeight(ulong id, float weight, string name = "");
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static Vector3 AnimatorGetOffset(ulong handle);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void AnimatorSetOffset(ulong handle, Vector3 value);
 
         /*
          * AudioListener
@@ -885,6 +892,9 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetTimeSinceStart();
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float TimeGetAccumTime();
+
         /*
          * Debug
          */
@@ -981,5 +991,6 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ViewDestroy(ulong handle);
+
     }
 }
