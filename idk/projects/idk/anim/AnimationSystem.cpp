@@ -716,9 +716,10 @@ namespace idk
 					const mat4& p_transform = animator.pre_global_transforms[parent_index];
 					animator.pre_global_transforms[i] = p_transform * curr_go->Transform()->LocalMatrix();
 				}
-				else
+				else // root
 				{
 					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
+					animator.pre_global_transforms[i][3] += vec4(animator.offset, 0);
 				}
 
 				animator.final_bone_transforms[i] = global_inverse * animator.pre_global_transforms[i] * curr_bone.global_inverse_bind_pose;
@@ -745,14 +746,12 @@ namespace idk
 				else
 				{
 					animator.pre_global_transforms[i] = curr_go->Transform()->LocalMatrix();
+					animator.pre_global_transforms[i][3] += vec4(animator.offset, 0);
 				}
 				//const auto test = decompose(_pre_global_transforms[i]);
 				animator.final_bone_transforms[i] = animator.pre_global_transforms[i] * curr_bone.global_inverse_bind_pose;
 			}
 		}
-		
-		for (auto& elem : animator.final_bone_transforms)
-			elem[3] += vec4{ animator.offset, 0 };
 
 		animator.ResetTriggers();
 	}

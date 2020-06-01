@@ -15,6 +15,7 @@
 #include <network/IDManager.h>
 
 #include <core/Scheduler.h>
+#include <core/Scheduler.inl>
 #include <core/NullHandleException.h>
 #include <IncludeComponents.h>
 #include <IncludeResources.h>

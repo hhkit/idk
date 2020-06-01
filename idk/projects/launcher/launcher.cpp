@@ -215,7 +215,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	load_scene->LoadFromResourcePath();
 	Core::GetScheduler().SetPauseState(UnpauseAll);
 	Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
-	//Core::GetSystem<Application>().SetFullscreen(true);
+	Core::GetSystem<Application>().SetFullscreen(true);
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }

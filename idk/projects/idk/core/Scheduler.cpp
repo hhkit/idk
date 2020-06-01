@@ -18,7 +18,7 @@ namespace idk
 	}
 	void Scheduler::SequentialUpdate()
 	{
-		constexpr auto dt_limit = seconds{0.25};
+		constexpr auto dt_limit = seconds{1.f};
 
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
@@ -86,6 +86,10 @@ namespace idk
 	seconds Scheduler::GetUnscaledDeltaTime() noexcept
 	{
 		return _real_dt;
+	}
+	seconds Scheduler::GetRemainingTime() noexcept
+	{
+		return _accumulated_fixed_dt;
 	}
 	time_point Scheduler::GetProgramStart() noexcept
 	{
