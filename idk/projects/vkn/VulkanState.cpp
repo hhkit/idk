@@ -406,9 +406,10 @@ namespace idk::vkn
 		m_queue_family = indices;
 		constexpr uint32_t num_queues = 2;//this be hack
 		float queuePriority[num_queues] = {};
+		int num = 1;
 		for (auto& queuePri : queuePriority)
 		{
-			queuePri = 1.0f;
+			queuePri = num++*1.0f/std::size(queuePriority);
 		}
 		auto uniqueQueues = m_queue_family.unique_queues();
 
