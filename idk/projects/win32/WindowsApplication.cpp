@@ -590,10 +590,12 @@ namespace idk::win
 
 	BOOL Windows::InitInstance([[maybe_unused]]int nCmdShow)
 	{
-		int w = GetSystemMetrics(SM_CXSCREEN);
-		int h = GetSystemMetrics(SM_CYSCREEN);
-        hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_POPUP,
-			0, 0, w, h, nullptr, nullptr, hInstance, nullptr);
+		hWnd = CreateWindowW(szWindowClass, L"Hyde & Seek", WS_OVERLAPPEDWINDOW,
+							 CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+		//int w = GetSystemMetrics(SM_CXSCREEN);
+		//int h = GetSystemMetrics(SM_CYSCREEN);
+  //      hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_POPUP,
+		//	0, 0, w, h, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)
 		{
