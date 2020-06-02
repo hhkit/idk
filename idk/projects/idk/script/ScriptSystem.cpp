@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ScriptSystem.h"
 
+#include <app/Application.h>
 #include <file/FileSystem.h>
 
 #include <mono/metadata/assembly.h>
@@ -140,6 +141,11 @@ namespace idk::mono
 		for (auto& elem : behaviors)
 			if (elem.enabled && elem.GetGameObject()->ActiveInHierarchy() && elem.GetHandle().scene != Scene::prefab)
 				elem.Update();
+
+
+		auto& app = Core::GetSystem<Application>();
+		if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
+			Core::Shutdown();
 	}
 
 	void ScriptSystem::ScriptPausedUpdate(span<Behavior> behaviors)

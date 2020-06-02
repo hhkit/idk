@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Scheduler.inl"
 #include <ds/span.inl>
-
+#include <app/Application.h>
 namespace idk
 {
 	Scheduler::Scheduler()
@@ -19,6 +19,8 @@ namespace idk
 	void Scheduler::SequentialUpdate()
 	{
 		constexpr auto dt_limit = seconds{1.f};
+
+		auto& app = Core::GetSystem<Application>();
 
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);

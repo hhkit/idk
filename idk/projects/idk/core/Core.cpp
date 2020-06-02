@@ -175,9 +175,6 @@ namespace idk
 			while (_pimpl->_running)
 			{
 				_pimpl->_scheduler->SequentialUpdate(); // to swap for parallelized update in the future
-				if (app.GetKey(Key::Alt) && app.GetKeyDown(Key::F4))
-					Core::Shutdown();
-				
 			}
 		}
 		_pimpl->_system_manager.EarlyShutdownSystems();
