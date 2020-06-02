@@ -53,7 +53,7 @@ namespace idk
 
 		if (move_packs.size())
 		{
-			connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::UNRELIABLE, [&](MoveClientMessage& msg)
+			connection_manager->CreateAndSendMessage<MoveClientMessage>(GameChannel::FASTEST_GUARANTEED, [&](MoveClientMessage& msg)
 			{
 				msg.move_packs = std::move(move_packs);
 			}

@@ -18,7 +18,8 @@ namespace idk
 		struct Data
 		{
 			NetworkID invoke_on_id = 0;
-			char method_name[64];
+			//char method_name[64];
+			int method_id = 0;
 			unsigned param_count = 0;
 			vector<Param> param_buffer;
 		} payload;
@@ -27,7 +28,7 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_int(stream, payload.invoke_on_id, 0, 4096);
-			serialize_string(stream, payload.method_name, 64);
+			serialize_int(stream, payload.method_id, -1, 255);
 			serialize_uint32(stream, payload.param_count);
 			payload.param_buffer.resize(payload.param_count);
 

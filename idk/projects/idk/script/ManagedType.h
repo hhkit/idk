@@ -43,8 +43,9 @@ namespace idk::mono
 		MonoClass* type{};
 		string name;
 		hash_table<string, ManagedThunk> thunks;
+	public:
 		hash_table<string, RPCMethod> rpcs;
-
+	private:
 		MonoMethod* FindMethod(string_view method_name, int param_count) const;
 	};
 

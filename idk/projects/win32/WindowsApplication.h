@@ -21,14 +21,16 @@ namespace idk::win
 		: public Application
 	{
 	public:
-		Windows(HINSTANCE hInstance, int nCmdShow);
+		Windows(HINSTANCE hInstance, int nCmdShow, HICON = 0);
 		~Windows();
+		void SetIcon(HICON icon);
 		void PollEvents() override;
 		string Exec(string_view path, span<const char*> argv, bool wait) override;
 		void WaitForChildren() override;
 
 		int GetReturnVal();
-		void Init() override {}
+		void Init() override;
+		void LateInit() override;
 		ivec2 GetScreenSize() override;
 		vec2 GetMouseScreenPos() override; 
 		vec2 GetMouseScreenDel() override;
@@ -65,6 +67,7 @@ namespace idk::win
 		HINSTANCE hInstance;
 		HWND      hWnd;
 		HACCEL    hAccelTable;
+		HICON     icon{};
 		WCHAR     szWindowClass[MAX_LOADSTRING]{L"idk"};
 		int       retval;
 		ivec2	  screenpos;

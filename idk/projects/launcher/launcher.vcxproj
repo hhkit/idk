@@ -247,6 +247,15 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     <ClCompile Include="launcher.cpp" />
     <ClCompile Include="RenderDocExt.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="41 Game Launcher.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\Icon.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

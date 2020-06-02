@@ -98,8 +98,8 @@ namespace idk
 		unique_ptr<Socket> client_listen_socket;
 		unique_ptr<Socket> server_broadcast_socket;
 
-		static constexpr seconds server_broadcast_limit = seconds{ 5 };
-		static constexpr seconds server_entry_time_to_live = seconds{ 10 };
+		static constexpr seconds server_broadcast_limit = seconds{ 1 };
+		static constexpr seconds server_entry_time_to_live = seconds{ 5 };
 		seconds server_timer{};
 		std::map<Address, ServerInfo> client_address_cooldown;
 

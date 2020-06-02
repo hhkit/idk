@@ -83,6 +83,25 @@ namespace idk::mono
 	{
 		return span<const char* const>(name_list);
 	}
+
+	RpcId MonoBehaviorEnvironment::GetRpcIdFor(string_view function_name) const
+	{
+		auto itr = rpcmap.find_second(function_name);
+		if (itr != rpcmap.end())
+			return itr->first;
+		else
+			return -1;
+	}
+
+	string_view MonoBehaviorEnvironment::GetFunctionNameFromRpcId(RpcId id) const
+	{
+		auto itr = rpcmap.find_first(id);
+		if (itr != rpcmap.end())
+			return itr->second;
+		else
+			return "INVALID";
+	}
+
 	void MonoBehaviorEnvironment::Execute()
 	{
 	}
@@ -165,8 +184,14 @@ namespace idk::mono
 				type.FindRPCs();
 				
 
+				for (auto& elem : type.rpcs)
+				{
+					if (this->rpcmap.emplace(rpc_count, elem.first))
+						++rpc_count;
+				}
+
 				//if (!Core::GetSystem<ScriptSystem>().Environment().IsAbstract(mono_class_get_type(type.Raw())))
-					mono_behaviors.emplace(class_name, &type);
+				mono_behaviors.emplace(class_name, &type);
 			}
 		}
 

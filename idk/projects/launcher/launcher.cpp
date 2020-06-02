@@ -38,6 +38,7 @@
 
 #include <test/TestSystem.h>
 
+#include "resource.h"
 #include <shellapi.h>//CommandLineToArgv
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
@@ -95,9 +96,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	auto c = std::make_unique<Core>();
 
-	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow);
+	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow, LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2)));
 	if (!HasArg(L"--ignoreAltTabMin", command_lines, num_args))
 		MinimizeOnAltTab(win);
+	Core::GetSystem<Application>().SetFullscreen(true);
 	c->AddSystem<win::XInputSystem>();
 	GraphicsSystem* gSys = nullptr;
 	auto gfx_api = HasArg(L"--opengl", command_lines, num_args) ? GraphicsAPI::OpenGL : GraphicsAPI::Vulkan;
@@ -215,7 +217,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	load_scene->LoadFromResourcePath();
 	Core::GetScheduler().SetPauseState(UnpauseAll);
 	Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
-	Core::GetSystem<Application>().SetFullscreen(true);
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }

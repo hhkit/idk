@@ -101,8 +101,8 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::ReceivePackets,  "Receive Packets");
 
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets,  "Receive Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::MoveGhosts,      "Move ghosts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::Rollback,        "Execute rollbacks");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");
@@ -112,7 +112,7 @@ namespace idk
 		// _pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&Application::SwapInputBuffers,     "Swap Input Buffers ");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::CollectInputs,     "Collect Inputs");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::PreparePackets,    "Prepare to Packets");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickEnd>(&NetworkSystem::SendPackets,       "Send Packets");
+
 
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&TestSystem::TestSpan,                 "Test system");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&GamepadSystem::Update,                "Update gamepad states");
@@ -130,6 +130,7 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects, "Destroy Objects");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&Application::PollEvents,              "Poll OS Events");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&NetworkSystem::SendPackets,           "Send Packets");
 
 		if (editor)
 		{

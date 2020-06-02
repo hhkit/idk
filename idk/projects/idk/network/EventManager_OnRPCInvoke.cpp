@@ -33,7 +33,8 @@ namespace idk
 		EventInvokeRPCMessage::Data prototype_message;
 		{
 			prototype_message.invoke_on_id = ev->network_id;
-			strncpy_s(prototype_message.method_name, method_name.data(), method_name.size());
+			//strncpy_s(prototype_message.method_name, method_name.data(), method_name.size());
+			prototype_message.method_id = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().GetRpcIdFor(method_name);
 			prototype_message.param_count = (int)buffer.size();
 			prototype_message.param_buffer.clear();
 			prototype_message.param_buffer.resize(prototype_message.param_count);
@@ -57,7 +58,8 @@ namespace idk
 		EventInvokeRPCMessage::Data prototype_message;
 		{
 			prototype_message.invoke_on_id = ev->network_id;
-			strncpy_s(prototype_message.method_name, method_name.data(), method_name.size());
+			//strncpy_s(prototype_message.method_name, method_name.data(), method_name.size());
+			prototype_message.method_id = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().GetRpcIdFor(method_name);
 			prototype_message.param_count = (int)buffer.size();
 			prototype_message.param_buffer.clear();
 			prototype_message.param_buffer.resize(prototype_message.param_count);
@@ -121,7 +123,9 @@ namespace idk
 
 	static void InvokeRPC(Host sender, const EventInvokeRPCMessage::Data& msg)
 	{
-		LOG_TO(LogPool::NETWORK, "Received RPC for object %d to invoke %s", msg.invoke_on_id, msg.method_name);
+		auto method_name = Core::GetSystem<mono::ScriptSystem>().ScriptEnvironment().GetFunctionNameFromRpcId(msg.method_id);
+
+		LOG_TO(LogPool::NETWORK, "Received RPC for object %d to invoke %s", msg.invoke_on_id, method_name.data());
 		const auto view = Core::GetSystem<NetworkSystem>().GetIDManager().GetViewFromId(msg.invoke_on_id);
 		if (view)
 		{
@@ -159,13 +163,13 @@ namespace idk
 			unsigned successes{};
 			for (auto& elem : view->GetGameObject()->GetComponents<mono::Behavior>())
 			{
-				if (elem->InvokeRPC(msg.method_name, params, message_info.Raw()))
+				if (elem->InvokeRPC(method_name.data(), params, message_info.Raw()))
 					++successes;
 			}
 			if (successes == 0)
-				LOG_TO(LogPool::NETWORK, "Called nonexistent RPC (%s)", msg.method_name);
+				LOG_TO(LogPool::NETWORK, "Called nonexistent RPC (%s)", method_name.data());
 			else
-				LOG_TO(LogPool::NETWORK, "Executed RPC (%s) %d times ", msg.method_name, successes);
+				LOG_TO(LogPool::NETWORK, "Executed RPC (%s) %d times ", method_name.data(), successes);
 		}
 	}
 }

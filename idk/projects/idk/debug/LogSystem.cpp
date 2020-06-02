@@ -21,6 +21,7 @@ namespace idk
 
 	LogSystem::~LogSystem()
 	{
+		if (0)
 		if (!Core::IsRunning())
 		{
 			int i = 0;
@@ -57,6 +58,7 @@ namespace idk
 			"edit",
 		};
 
+		if (0)
 		for (unsigned i = 0; i < s_cast<unsigned>(LogPool::COUNT); ++i)
 		{
 			auto& loghandle = log_files[i];

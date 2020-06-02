@@ -39,7 +39,7 @@ namespace idk
 				for (auto& elem : ev.GetParameters())
 					packs.emplace_back(elem->GetMaster()->PackData());
 
-				connection_manager->CreateAndSendMessage<ControlObjectMessage>(GameChannel::UNRELIABLE, [&](ControlObjectMessage& msg)
+				connection_manager->CreateAndSendMessage<ControlObjectMessage>(GameChannel::FASTEST_GUARANTEED, [&](ControlObjectMessage& msg)
 				{
 					msg.network_id = ev.network_id;
 					msg.move_ack = move_ack;

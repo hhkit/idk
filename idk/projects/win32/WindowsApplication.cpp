@@ -25,14 +25,17 @@
 
 #include "WinMessageTable.h"
 #include <WinSock2.h>
+
+static HCURSOR prevCursor;
+
 namespace idk::win
 {
 #define _DEBUG
 
 	static WSADATA wsaData;
 
-	Windows::Windows(HINSTANCE _hInstance, int nCmdShow)
-		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}
+	Windows::Windows(HINSTANCE _hInstance, int nCmdShow, HICON icon)
+		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}, icon{icon}
 	{
 		instance = this;
 		// Initialize global strings
@@ -65,6 +68,11 @@ namespace idk::win
 	Windows::~Windows()
 	{
 		WSACleanup();
+	}
+
+	void Windows::SetIcon(HICON icon)
+	{
+		this->icon = icon;
 	}
 
 	void Windows::PollEvents()
@@ -214,6 +222,13 @@ namespace idk::win
 	int Windows::GetReturnVal()
 	{
 		return retval;
+	}
+	void Windows::Init()
+	{
+	}
+	void Windows::LateInit()
+	{
+		prevCursor = SetCursor(NULL);
 	}
 	ivec2 Windows::GetScreenSize() 
 	{
@@ -500,10 +515,13 @@ namespace idk::win
 		break;
 		case WM_SETFOCUS:
 			OnFocusGain.Fire();
+			prevCursor = SetCursor(NULL);
 			_focused = true;
 			break;
 		case WM_KILLFOCUS:
 			OnFocusLost.Fire();
+			SetCursor(prevCursor);
+			prevCursor = NULL;
 			_focused = false;
 			_input_manager->FlushCurrentBuffer();
 			break;
@@ -560,20 +578,22 @@ namespace idk::win
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = 0;
 		wcex.hInstance = hInstance;
-		wcex.hIcon = 0;  
-		wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		wcex.hIcon = icon;  
+		wcex.hCursor = NULL;
 		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 		wcex.lpszMenuName = 0;  
 		wcex.lpszClassName = szWindowClass;
-		wcex.hIconSm = 0;
+		wcex.hIconSm = icon;
 
 		return RegisterClassExW(&wcex);
 	}
 
 	BOOL Windows::InitInstance([[maybe_unused]]int nCmdShow)
 	{
-        hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_OVERLAPPEDWINDOW,
-                             CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+		int w = GetSystemMetrics(SM_CXSCREEN);
+		int h = GetSystemMetrics(SM_CYSCREEN);
+        hWnd = CreateWindowW(szWindowClass, L"IDK 0.1a", WS_POPUP,
+			0, 0, w, h, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)
 		{

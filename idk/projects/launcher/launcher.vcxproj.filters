@@ -24,4 +24,13 @@
       <UniqueIdentifier>{a84265a2-8bcb-4c93-9646-227b418f1a59}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="41 Game Launcher.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\Icon.ico" />
+  </ItemGroup>
 </Project>

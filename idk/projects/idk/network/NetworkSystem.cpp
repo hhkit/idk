@@ -241,7 +241,7 @@ namespace idk
 		for (auto& [addr, info] : client_address_cooldown)
 		{
 			auto& ttl = info.time_to_live;
-			ttl -= Core::GetDT();
+			ttl -= Core::GetRealDT();
 			if (ttl < seconds{})
 				deleteus.push_back(addr);
 		}
@@ -260,7 +260,7 @@ namespace idk
 
 		if (server_broadcast_socket)
 		{ 
-			server_timer += Core::GetDT();
+			server_timer += Core::GetRealDT();
 			if (server_timer > server_broadcast_limit)
 			{
 				server_timer -= server_broadcast_limit;
