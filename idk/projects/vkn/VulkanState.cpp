@@ -409,7 +409,12 @@ namespace idk::vkn
 		int num = 1;
 		for (auto& queuePri : queuePriority)
 		{
-			queuePri = num++*1.0f/std::size(queuePriority);
+			queuePri = num++ * 1.0f / std::size(queuePriority);
+		}
+		for (auto& queuePri : queuePriority)
+		{
+			queuePri = std::min(1.0f, queuePri);
+			queuePri = std::max(0.0f, queuePri);
 		}
 		auto uniqueQueues = m_queue_family.unique_queues();
 
@@ -447,8 +452,8 @@ namespace idk::vkn
 		//createInfo.setPNext(&aaaaaaaa);
 		//m_device.~UniqueHandle();
 		m_device = vk::UniqueDevice{ pdevice.createDevice(createInfo, nullptr, dispatcher) };
-		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 1, dispatcher);
-		m_graphics_tex_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
+		m_graphics_queue = m_device->getQueue(*m_queue_family.graphics_family, 0, dispatcher);
+		m_graphics_tex_queue = m_device->getQueue(*m_queue_family.graphics_family, 1, dispatcher);
 		m_present_queue = m_device->getQueue(*m_queue_family.present_family, 0, dispatcher);
 		//m_transfer_queue = m_device->getQueue(*m_queue_family.transfer_family, 0, dispatcher);
 	}
