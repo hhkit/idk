@@ -404,7 +404,12 @@ namespace idk::vkn
 	{
 		QueueFamilyIndices indices = findQueueFamilies(pdevice);
 		m_queue_family = indices;
-		float queuePriority = 1.0f;
+		constexpr uint32_t num_queues = 2;//this be hack
+		float queuePriority[num_queues] = {};
+		for (auto& queuePri : queuePriority)
+		{
+			queuePri = 1.0f;
+		}
 		auto uniqueQueues = m_queue_family.unique_queues();
 
 		std::vector<vk::DeviceQueueCreateInfo> info;
@@ -413,8 +418,8 @@ namespace idk::vkn
 			info.emplace_back(
 				vk::DeviceQueueCreateFlags{}
 				, uniqueQueueFamily
-				, 2
-				, &queuePriority);
+				, num_queues
+				, queuePriority);
 		}
 		auto extensions = GetDeviceExtensions();
 		//vk::DeviceQueueCreateInfo queueCreateInfo{
