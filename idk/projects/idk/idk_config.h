@@ -69,6 +69,7 @@ namespace idk
 		// low level
 		,	class FileSystem
 		,	class LogSystem
+		,	class SteamManager // for overlays to work, init before graphics
 		,	class GamepadSystem
 		,	class NetworkSystem
 

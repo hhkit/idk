@@ -44,6 +44,7 @@
     <ClInclude Include="network\ControlObjectMessage.h" />
     <ClInclude Include="network\gbn_sliding_window.h" />
     <ClInclude Include="network\Socket.h" />
+    <ClInclude Include="steam\SteamManager.h" />
     <ClInclude Include="ui\AspectRatioFitter.h" />
     <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipLoader.h" />
@@ -541,6 +542,7 @@
     </ClCompile>
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="steam\SteamManager.cpp" />
     <ClCompile Include="test\TestComponent.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
@@ -835,7 +837,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmodL_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmodL_vc.lib;steam_api64.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -903,7 +905,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib;steam_api64.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -932,7 +934,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib;steam_api64.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>

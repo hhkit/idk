@@ -101,7 +101,8 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SceneManager::ChangeScene,            "Change Scene");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::ReceivePackets,  "Receive Packets");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SteamManager::RunCallbacks,           "Run Steam Callbacks");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::ReceivePackets,        "Receive Packets");
 
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::MoveGhosts,      "Move ghosts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::Rollback,        "Execute rollbacks");
@@ -127,7 +128,7 @@ namespace idk
 												          .IfPausedThen(&AnimationSystem::UpdatePaused);
         _pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&ParticleSystemUpdater::Update,        "Update Particle Systems");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&ScriptSystem::ScriptLateUpdate,       "Late Update Scripts");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects, "Destroy Objects");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 		_pimpl->_scheduler->SchedulePass      <UpdatePhase::MainUpdate>(&Application::PollEvents,              "Poll OS Events");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::MainUpdate>(&NetworkSystem::SendPackets,           "Send Packets");
@@ -136,7 +137,7 @@ namespace idk
 		{
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&ResourceManager::WatchDirectory,      "Watch files");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&IEditor::EditorUpdate,                "Editor Update");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&SceneManager::DestroyQueuedObjects,         "Destroy Objects Again");
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&SceneManager::DestroyQueuedObjects,   "Destroy Objects Again");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&SceneManager::BuildSceneGraph,        "Build scene graph");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&ResourceManager::SaveDirtyMetadata,   "Save dirty resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::PreRender>(&ResourceManager::SaveDirtyFiles,      "Save dirty files");

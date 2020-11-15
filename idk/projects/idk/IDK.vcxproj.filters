@@ -1223,6 +1223,7 @@
     <ClInclude Include="network\gbn_sliding_window.h" />
     <ClInclude Include="network\ControlObjectMessage.h" />
     <ClInclude Include="network\Socket.h" />
+    <ClInclude Include="steam\SteamManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1762,6 +1763,7 @@
     <ClCompile Include="gfx\ColorGrade.cpp" />
     <ClCompile Include="network\ack_utils.cpp" />
     <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp" />
+    <ClCompile Include="steam\SteamManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

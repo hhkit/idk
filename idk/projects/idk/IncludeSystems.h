@@ -26,4 +26,6 @@
 
 #include <script/ScriptSystem.h>
 
+#include <steam/SteamManager.h>
+
 #include <test/TestSystem.h>
