@@ -14,7 +14,7 @@ namespace idk
 	{
 		WriteStream stream{ out_message_buffer };
 
-		stream.SerializeUInt8(MessageID<T>);
+		stream.SerializeUInt8(MessageID<std::decay_t<T>>);
 		if (message.SerializeInternal(stream))
 		{
 			auto sz = stream.GetSize();

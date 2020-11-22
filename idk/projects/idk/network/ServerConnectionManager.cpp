@@ -117,6 +117,7 @@ namespace idk
 		for (int i = 0; i < count; ++i)
 		{
 			auto* msg = in_messages[i];
+			std::memcpy(in_message_buffer, msg->m_pData, msg->m_cbSize);
 			ReadStream stream{ in_message_buffer, static_cast<uint32_t>(msg->m_cbSize) };
 			uint8_t type; 
 			stream.SerializeUInt8(type);

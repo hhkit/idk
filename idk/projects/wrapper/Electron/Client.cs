@@ -1,10 +1,16 @@
-﻿namespace idk
+﻿using System.Runtime.InteropServices;
+
+namespace idk
 {
     /// <summary>
     /// An identifier for a player on the network.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Client
     {
+
+        public static Client Server => new Client(-1);
+
         int connectionId;
 
         /// <summary>

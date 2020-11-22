@@ -583,7 +583,7 @@ namespace idk::win
 		//					 CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 		int w = GetSystemMetrics(SM_CXSCREEN);
 		int h = GetSystemMetrics(SM_CYSCREEN);
-        hWnd = CreateWindowW(szWindowClass, L"Hyde & Seek", WS_POPUP,
+        hWnd = CreateWindowW(szWindowClass, L"Hyde & Seek", WS_OVERLAPPEDWINDOW,
 			0, 0, w, h, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)

@@ -36,6 +36,10 @@
 #include <algorithm>
 #include <iterator>
 
+#include <network/TestMessage.h>
+
+#pragma optimize("", off)
+
 namespace idk
 {
 	static inline unsigned short subnet_bits;
@@ -49,6 +53,8 @@ namespace idk
 		frame_counter = SeqNo{};
 
 		SteamMatchmaking()->CreateLobby(k_ELobbyTypePublic, GameConfiguration::MAX_LOBBY_MEMBERS);
+
+		SteamNetworkingUtils()->InitRelayNetworkAccess();
 	}
 
 	void NetworkSystem::OnLobbyCreated(LobbyCreated_t* callback)
@@ -86,18 +92,20 @@ namespace idk
 		frame_counter = SeqNo{};
 
 		SteamMatchmaking()->JoinLobby(lobby_id);
+
+		SteamNetworkingUtils()->InitRelayNetworkAccess();
 	}
 
 	void NetworkSystem::OnJoinedLobby(LobbyEnter_t* callback)
 	{
 		if (callback->m_EChatRoomEnterResponse == k_EChatRoomEnterResponseSuccess)
 		{
-			lobby_id = callback->m_ulSteamIDLobby;
-			client = std::make_unique<Client>(lobby_id);
-			id_manager = std::make_unique<IDManager>();
-
 			if (my_id == Host::NONE)
 			{
+				lobby_id = callback->m_ulSteamIDLobby;
+				client = std::make_unique<Client>(lobby_id);
+				id_manager = std::make_unique<IDManager>();
+
 				// obtain preexisting lobby members
 				int num = SteamMatchmaking()->GetNumLobbyMembers(lobby_id);
 				for (int i = 0; i < num; ++i)
@@ -183,7 +191,12 @@ namespace idk
 				lobby_members[index].host = host;
 
 				for (auto& target : callback_objects)
-					target->FireMessage("OnLobbyMemberJoined", index);
+				{
+					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
+					auto player = player_type->ConstructTemporary(index);
+
+					target->FireMessage("OnLobbyMemberJoined", player);
+				}
 			}
 		}
 		else if (callback->m_rgfChatMemberStateChange & ~k_EChatMemberStateChangeEntered)
@@ -194,8 +207,11 @@ namespace idk
 				if (lobby_members[i].id == id)
 				{
 					lobby_members[i].id = k_steamIDNil;
+
+					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
+					auto player = player_type->ConstructTemporary(i);
 					for (auto& target : callback_objects)
-						target->FireMessage("OnLobbyMemberLeft", i);
+						target->FireMessage("OnLobbyMemberLeft", player);
 					break;
 				}
 			}
@@ -254,7 +270,7 @@ namespace idk
 		}
 
 		SteamNetworkingIdentity identity;
-		identity.SetSteamID(lobby_id);
+		identity.SetSteamID(owner);
 		SteamNetworkingSockets()->ConnectP2P(identity, 0, 0, nullptr);
 	}
 
@@ -269,7 +285,7 @@ namespace idk
 			&& callback->m_info.m_hListenSocket != k_HSteamListenSocket_Invalid)
 		{
 			auto res = SteamNetworkingSockets()->AcceptConnection(callback->m_hConn);
-			if (res == k_EResultInvalidState)
+			if (res == k_EResultInvalidState || res == k_EResultInvalidParam)
 				LOG_CRASH_TO(LogPool::NETWORK, "Could not connect to client P2P!");
 			else
 			{
@@ -281,15 +297,19 @@ namespace idk
 						continue;
 
 					int clientIndex = static_cast<int>(lobby_members[i].host);
+
 					server_connection_manager[clientIndex] = std::make_unique<ServerConnectionManager>(clientIndex, *server, callback->m_hConn);
-
-					server->ClientConnected(clientIndex);
-
 					server_connection_manager[clientIndex]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [&](EventDataBlockFrameNumber& msg)
 					{
 						msg.frame_count = frame_counter;
 					});
-					server_connection_manager[i]->GetManager<EventManager>()->SendBufferedEvents();
+					server_connection_manager[clientIndex]->GetManager<EventManager>()->SendBufferedEvents();
+
+					LOG_TO(LogPool::NETWORK, "Client %d connected", clientIndex);
+					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
+					auto player = player_type->ConstructTemporary(clientIndex);
+					for (auto& target : callback_objects)
+						target->FireMessage("OnClientConnected", player);
 
 					break;
 				}
@@ -301,13 +321,18 @@ namespace idk
 		///   Some connections might transition to k_ESteamNetworkingConnectionState_FindingRoute first.
 		else if (callback->m_eOldState == k_ESteamNetworkingConnectionState_Connecting
 				 && (callback->m_info.m_eState == k_ESteamNetworkingConnectionState_Connected
-				 	 || callback->m_info.m_eState == k_ESteamNetworkingConnectionState_FindingRoute))
+				 	 || callback->m_info.m_eState == k_ESteamNetworkingConnectionState_FindingRoute)
+				 && callback->m_info.m_hListenSocket == k_HSteamListenSocket_Invalid) // invalid == we initiated
 		{
 			client_connection_manager = std::make_unique<ClientConnectionManager>(*client, callback->m_hConn);
 			client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber& event)
 			{
 				frame_counter = event.frame_count;
 			});
+
+			LOG_TO(LogPool::NETWORK, "Connected to server");
+			for (auto& target : callback_objects)
+				target->FireMessage("OnConnectedToServer");
 		}
 		/// - A connection has been actively rejected or closed by the remote host.
 		///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting or k_ESteamNetworkingConnectionState_Connected,
@@ -322,6 +347,10 @@ namespace idk
 		{
 			if (client)
 			{
+				LOG_TO(LogPool::NETWORK, "Disconnected from server");
+				for (auto& target : callback_objects)
+					target->FireMessage("OnDisconnectedFromServer");
+
 				ResetNetwork();
 			}
 			else
@@ -330,6 +359,13 @@ namespace idk
 				{
 					if (!server_connection_manager[i] || server_connection_manager[i]->GetHandle() != callback->m_hConn)
 						continue;
+
+					LOG_TO(LogPool::NETWORK, "Client %d disconnected", i);
+					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
+					auto player = player_type->ConstructTemporary(i);
+					for (auto& target : callback_objects)
+						target->FireMessage("OnClientDisconnected", player);
+
 					server_connection_manager[i].reset();
 					for (auto& elem : lobby_members)
 					{
@@ -358,6 +394,10 @@ namespace idk
 		{
 			if (client)
 			{
+				LOG_TO(LogPool::NETWORK, "Disconnected from server");
+				for (auto& target : callback_objects)
+					target->FireMessage("OnDisconnectedFromServer");
+
 				ResetNetwork();
 			}
 			else
@@ -366,6 +406,13 @@ namespace idk
 				{
 					if (!server_connection_manager[i] || server_connection_manager[i]->GetHandle() != callback->m_hConn)
 						continue;
+
+					LOG_TO(LogPool::NETWORK, "Client %d disconnected", i);
+					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
+					auto player = player_type->ConstructTemporary(i);
+					for (auto& target : callback_objects)
+						target->FireMessage("OnClientDisconnected", player);
+
 					server_connection_manager[i].reset();
 					for (auto& elem : lobby_members)
 					{
@@ -386,7 +433,7 @@ namespace idk
 	{
 		if (!callback->m_bSuccess)
 			return;
-		if (callback->m_ulSteamIDMember == lobby_id)
+		if (callback->m_ulSteamIDMember != lobby_id)
 			return;
 
 		for (auto& target : callback_objects)
@@ -713,6 +760,7 @@ namespace idk
 
 		//});
 		//InitializeYojimbo();
+
 	}
 
 	void NetworkSystem::LateInit()
