@@ -8,7 +8,7 @@ namespace idk
 	void ClientConnectionManager::Subscribe2(Func&& func)
 	{
 		OnMessageReceived_slots.push_back(EventSlot{ MessageID<Message>, 
-			client.OnMessageReceived[MessageID<Message>].Listen([fn = std::forward<Func>(func)](yojimbo::Message* message)
+			client.OnMessageReceived[MessageID<Message>].Listen([fn = std::forward<Func>(func)](idk::Message* message)
 			{
 				return fn(*static_cast<Message*>(message));
 			})

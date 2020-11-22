@@ -6,20 +6,31 @@ using System.Threading.Tasks;
 
 namespace idk
 {
-    /// <summary>
-    /// For server-side, detects when players connect to the server.
-    /// </summary>
     public interface ILobbyCallbacks
     {
         /// <summary>
-        /// Fires event when a single player joins the server
+        /// Called when THIS player creates a lobby.
         /// </summary>
-        /// <param name="p"></param>
-        void OnClientConnect(Client p);
+        void OnLobbyCreated(bool success);
+
         /// <summary>
-        /// Fires event when a player disconnects from the server
+        /// Called when THIS player joins a lobby.
         /// </summary>
-        /// <param name="p"></param>
-        void OnClientDisconnect(Client p);
+        void OnLobbyJoined(bool success);
+
+        void OnLobbyMemberJoined(Client client);
+        void OnLobbyMemberLeft(Client client);
+
+        /// <summary>
+        /// Called when lobby metadata changed. Use ElectronNetwork.GetLobbyData() to get data.
+        /// </summary>
+        void OnLobbyDataUpdated();
+
+        /// <summary>
+        /// Called on lobby retrieval from ElectronNetwork.FindLobbies.
+        /// </summary>
+        void OnLobbyMatchList(Lobby[] lobbies);
+
+        void OnLobbyChatMsg(Client sender, string message);
     }
 }

@@ -7,13 +7,33 @@
 #include <network/GhostManager.h>
 #include <network/NetworkTuple.inl>
 #include <meta/variant.inl>
+#include <steam/isteamnetworkingsockets.h>
+#include <network/IncludeMessages.h>
 #undef SendMessage
 
 namespace idk
 {
 	namespace detail
 	{
-		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
+		template<typename T> struct NetworkMessageHelper;
+
+		template<typename ... Ts>
+		class NetworkMessageHelper<std::tuple<Ts...>>
+		{
+			static constexpr array<void (*)(Server& server, int clientid, ReadStream& stream), sizeof...(Ts)> ProcessMessageJT{
+				[](Server& server, int clientid, ReadStream& stream) {
+					Ts msg;
+					msg.SerializeInternal(stream);
+					server.ProcessMessage(clientid, &msg, MessageID<Ts>);
+				} ...
+			};
+
+		public:
+			void ProcessMessage(Server& server, int clientid, uint8_t message_type, ReadStream& stream)
+			{
+				ProcessMessageJT[message_type](server, clientid, stream);
+			}
+		};
 	}
 
 	template<typename RealSubstreamManager>
@@ -26,15 +46,14 @@ namespace idk
 		return static_cast<RealSubstreamManager&>(*ptr);
 	}
 
-	ServerConnectionManager::ServerConnectionManager(int _clientID, Server& _server)
-		: clientID{_clientID}, server { _server }
+	ServerConnectionManager::ServerConnectionManager(int _clientID, Server& _server, HSteamNetConnection handle)
+		: ConnectionManager(handle), clientID{ _clientID }, server{ _server }
 	{
 		InstantiateSubmanagers();
 	}
 
 	ServerConnectionManager::~ServerConnectionManager()
 	{
-		server.OnClientDisconnect.Fire(clientID);
 		for (const auto& [type, slot] : OnMessageReceived_slots)
 			server.OnMessageReceived[clientID][(int)type].Unlisten(slot);
 	}
@@ -51,31 +70,26 @@ namespace idk
 			elem->NetworkFrameEnd();
 	}
 
-	seconds ServerConnectionManager::GetRTT() const
-	{
-		return duration_cast<seconds>(std::chrono::duration<float, std::milli>(server.GetRTT(clientID)));
-	}
-
 	Host ServerConnectionManager::GetConnectedHost() const
 	{
 		return (Host) clientID;
 	}
 
-	yojimbo::Message* ServerConnectionManager::CreateMessage(size_t id)
-	{
-		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+	//yojimbo::Message* ServerConnectionManager::CreateMessage(size_t id)
+	//{
+	//	constexpr auto message_name_array = detail::NetworkHelper::GenNames();
 
-		// if (id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
-		// 	&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
-		// 	&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
-		// 	)
-		// 	LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), clientID);
-		return server.CreateMessage(clientID, static_cast<int>(id));
-	}
+	//	// if (id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+	//	// 	&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+	//	// 	&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+	//	// 	)
+	//	// 	LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), clientID);
+	//	return server.CreateMessage(clientID, static_cast<int>(id));
+	//}
 
-	void ServerConnectionManager::SendMessage(yojimbo::Message* message, GameChannel delivery_mode)
+	void ServerConnectionManager::SendMessage(SteamNetworkingMessage_t* message)
 	{
-		server.SendMessage(clientID, message, delivery_mode);
+		server.SendMessage(message);
 	}
 
 	BaseSubstreamManager* ServerConnectionManager::GetManager(size_t substream_type_id)
@@ -93,5 +107,23 @@ namespace idk
 		AddSubstreamManager<ServerMoveManager>();
 		AddSubstreamManager<EventManager>();
 		AddSubstreamManager<GhostManager>();
+	}
+
+	void ServerConnectionManager::ReceiveMessages()
+	{
+		auto helper = detail::NetworkMessageHelper<NetworkMessageTuple>();
+
+		int count = SteamNetworkingSockets()->ReceiveMessagesOnConnection(handle, in_messages, std::size(in_messages));
+		for (int i = 0; i < count; ++i)
+		{
+			auto* msg = in_messages[i];
+			ReadStream stream{ in_message_buffer, static_cast<uint32_t>(msg->m_cbSize) };
+			uint8_t type; 
+			stream.SerializeUInt8(type);
+
+			helper.ProcessMessage(server, clientID, type, stream);
+
+			msg->Release();
+		}
 	}
 }

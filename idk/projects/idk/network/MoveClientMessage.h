@@ -1,17 +1,15 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
+#include <network/Message.h>
+
 #include <idk.h>
 #include <network/network.h>
 #include <network/MovePack.h>
-#include <network/yojimbo_helpers.h>
 #include "GhostFlags.h"
 
 namespace idk
 {
-
-
 	class MoveClientMessage
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		vector<MovePack> move_packs;
@@ -36,6 +34,6 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

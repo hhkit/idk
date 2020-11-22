@@ -1,12 +1,12 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/network.h>
+#include <network/Message.h>
 
 namespace idk
 {
 	class EventTransferOwnershipMessage
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		NetworkID object_to_transfer = 0;
@@ -18,6 +18,6 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

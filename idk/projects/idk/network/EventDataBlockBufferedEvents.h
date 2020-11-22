@@ -1,14 +1,13 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <scene/Scene.h>
 #include <network/network.h>
-#include <network/yojimbo_helpers.h>
+#include <network/Message.h>
 
 namespace idk
 {
 	class EventDataBlockBufferedEvents
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		struct ObjectAndID
@@ -62,6 +61,6 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

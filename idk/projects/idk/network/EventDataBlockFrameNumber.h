@@ -1,27 +1,27 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/network.h>
+#include <network/Message.h>
 
 namespace idk
 {
 	class EventDataBlockFrameNumber
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		SeqNo frame_count;
-		Host player_id;
+		//Host player_id;
 
 		template <typename Stream>
 		bool Serialize(Stream& stream)
 		{
-			int player_id_conv = static_cast<int>(player_id);
+			//int player_id_conv = static_cast<int>(player_id);
 			serialize_int(stream, frame_count.value, 0, SeqNo::max_value);
-			serialize_int(stream, player_id_conv, 0, (int)Host::CLIENT_MAX);
-			player_id = static_cast<Host>(player_id_conv);
+			//serialize_int(stream, player_id_conv, 0, GameConfiguration::MAX_LOBBY_MEMBERS);
+			//player_id = static_cast<Host>(player_id_conv);
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

@@ -1,13 +1,14 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/network.h>
 #include <network/GhostFlags.h>
 #include <network/GhostPack.h>
+#include <network/Message.h>
+
 namespace idk
 {
 	class GhostMessage
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		SeqNo sequence_number;
@@ -47,6 +48,6 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

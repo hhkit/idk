@@ -24,16 +24,11 @@
 #include <event/Signal.inl>
 
 #include "WinMessageTable.h"
-#include <WinSock2.h>
 
 static HCURSOR prevCursor;
 
 namespace idk::win
 {
-#define _DEBUG
-
-	static WSADATA wsaData;
-
 	Windows::Windows(HINSTANCE _hInstance, int nCmdShow, HICON icon)
 		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}, icon{icon}
 	{
@@ -58,16 +53,10 @@ namespace idk::win
 		InitInstance(nCmdShow); 
 		//SetFullscreen(true);
 		//hAccelTable = LoadAccelerators(hInstance, 0);
-
-		int iResult;
-		u_long iMode = 0;
-
-		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	}
 
 	Windows::~Windows()
 	{
-		WSACleanup();
 	}
 
 	void Windows::SetIcon(HICON icon)

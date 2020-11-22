@@ -173,10 +173,10 @@ namespace idk
 	}
 
 	// static
-	void EventManager::SendTransferOwnership(Handle<ElectronView> transfer, Host target_host)
+	void EventManager::SendTransferOwnership(Handle<ElectronView> transfer, Host target_owner)
 	{
-		LOG_TO(LogPool::NETWORK, "Transferring ownership of %d to %d", transfer->network_id, (int) target_host);
-		auto conn_man = Core::GetSystem<NetworkSystem>().GetConnectionTo(target_host);
+		LOG_TO(LogPool::NETWORK, "Transferring ownership of %d to %d", transfer->network_id, target_owner);
+		auto conn_man = Core::GetSystem<NetworkSystem>().GetConnectionTo(target_owner);
 		if (!conn_man)
 		{
 			LOG_TO(LogPool::NETWORK, "Tried to transfer to a nonexistent host");
@@ -189,7 +189,7 @@ namespace idk
 			return;
 		}
 
-		transfer->owner = target_host;
+		transfer->owner = target_owner;
 		transfer->move_state = ElectronView::ServerSideInputs{};
 
 		const auto go = transfer->GetGameObject();

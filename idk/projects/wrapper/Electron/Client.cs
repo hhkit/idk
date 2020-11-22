@@ -3,35 +3,34 @@
     /// <summary>
     /// An identifier for a player on the network.
     /// </summary>
-    public class Client
+    public struct Client
     {
-        /// <summary>
-        /// The Server's ActorNumber is hardcoded to -1.
-        /// </summary>
-        public static int ServerId { get => -1; }
-        public static Client Server { get => new Client(ServerId); }
-
         int connectionId;
 
         /// <summary>
         /// The Network Identifier for the player.
-        /// Values range from 0 to 3 for up to 4 conections. -1 corresponds to the Server.
+        /// Values range from 0 to 2 for up to 3 connections. -1 corresponds to the Server.
         /// </summary>
-        public int ActorNumber { get => connectionId; }
+        public int actorNumber { get => connectionId; }
 
-        public void Evict() => Bindings.NetworkEvictClient(connectionId);
+        /// <summary>
+        /// The Network Identifier for the player.
+        /// Values range from 0 to 2 for up to 3 connections. -1 corresponds to the Server.
+        /// </summary>
+        public int lobbyIndex => Bindings.NetworkClientLobbyIndex(connectionId);
+
+        public string name => Bindings.NetworkClientName(connectionId);
 
         internal Client(int i)
         {
             connectionId = i;
         }
 
+        public void Evict() => Bindings.NetworkEvictClient(connectionId);
+
         public override string ToString()
         {
-            if (connectionId == ServerId)
-                return "Server";
-            else
-                return "Client " + connectionId;
+            return "Client " + actorNumber;
         }
 
         public static bool operator ==(Client lhs, Client rhs)

@@ -100,8 +100,7 @@
     <Compile Include="Core\IDK.cs" />
     <Compile Include="Core\Object.cs" />
     <Compile Include="Debug\NullRef.cs" />
-    <Compile Include="Electron\Address.cs" />
-    <Compile Include="Electron\Device.cs" />
+    <Compile Include="Electron\Lobby.cs" />
     <Compile Include="Electron\ElectronStream.cs" />
     <Compile Include="Electron\ElectronView.cs" />
     <Compile Include="Electron\ElectronNetwork.cs" />

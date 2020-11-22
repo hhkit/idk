@@ -11,6 +11,7 @@
 #include <script/MonoBehavior.h>
 #include <network/NetworkTuple.inl>
 #include <meta/variant.inl>
+#include <steam/isteamnetworkingsockets.h>
 #undef SendMessage
 
 namespace idk
@@ -20,106 +21,94 @@ namespace idk
 		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
 	}
 
-	Client::Client(const Address& server_addr)
-		: client(yojimbo::GetDefaultAllocator(), yojimbo::Address("0.0.0.0"), config, adapter, 0.0)
+	Client::Client(CSteamID lobby_id)
 	{
-		uint64_t clientId;
-		yojimbo::random_bytes((uint8_t*)&clientId, 8);
-		client.InsecureConnect(DEFAULT_PRIVATE_KEY, clientId, yojimbo::Address{ server_addr.a, server_addr.b, server_addr.c, server_addr.d, server_addr.port }); 
-
-		LOG_TO(LogPool::NETWORK, "Try connecting to %s", string{ server_addr }.c_str());
-		OnConnectionToServer += []() { LOG_TO(LogPool::NETWORK, "Connected to server"); };
-		OnDisconnectionFromServer += []() { LOG_TO(LogPool::NETWORK, "Disconnected from server"); };
 	}
 
 	Client::~Client()
 	{
-		client.Disconnect();
-	}
-
-	bool Client::IsConnected() const
-	{
-		return client.IsConnected();
-	}
-
-	void Client::ProcessMessages()
-	{
-		for (int i = 0; i < config.numChannels; i++) 
-		{
-			while (auto message = client.ReceiveMessage(i)) 
-			{
-				ProcessMessage(message);
-				client.ReleaseMessage(message);
-			}
-		}
 
 	}
 
-	void Client::ReceivePackets()
-	{
-		client.AdvanceTime(client.GetTime() + Core::GetScheduler().GetNetworkTick().count() );
-		client.ReceivePackets();
+	//void Client::ProcessMessages()
+	//{
+	//	for (int i = 0; i < config.numChannels; i++) 
+	//	{
+	//		while (auto message = client.ReceiveMessage(i)) 
+	//		{
+	//			ProcessMessage(message);
+	//			client.ReleaseMessage(message);
+	//		}
+	//	}
 
-		// get rtt
+	//}
 
-		auto connected_this_frame = client.IsConnected();
-		if (connected_this_frame && !connected_last_frame)
-		{
-			OnConnectionToServer.Fire();
-			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-				target->FireMessage("OnConnectedToServer");
-		}
-		if (!connected_this_frame && connected_last_frame)
-		{
-			OnDisconnectionFromServer.Fire();
-			for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-				target->FireMessage("OnDisconnectionFromServer");
-		}
-		if (connected_this_frame)
-			ProcessMessages();
+	//void Client::ReceivePackets()
+	//{
+	//	client.AdvanceTime(client.GetTime() + Core::GetScheduler().GetNetworkTick().count() );
+	//	client.ReceivePackets();
 
-		connected_last_frame = connected_this_frame;
-	}
+	//	// get rtt
+
+	//	auto connected_this_frame = client.IsConnected();
+	//	if (connected_this_frame && !connected_last_frame)
+	//	{
+	//		OnConnectionToServer.Fire();
+	//		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+	//			target->FireMessage("OnConnectedToServer");
+	//	}
+	//	if (!connected_this_frame && connected_last_frame)
+	//	{
+	//		OnDisconnectionFromServer.Fire();
+	//		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
+	//			target->FireMessage("OnDisconnectedFromServer");
+	//	}
+	//	if (connected_this_frame)
+	//		ProcessMessages();
+
+	//	connected_last_frame = connected_this_frame;
+	//}
 	void Client::SendPackets()
 	{
-		client.SendPackets();
+		SteamNetworkingSockets()->SendMessages(out_messages.size(), out_messages.data(), nullptr);
+		out_messages.clear();
 	}
 
 	void Client::SetPacketLoss(float percent_loss)
 	{
-		client.SetPacketLoss(percent_loss);
+		//client.SetPacketLoss(percent_loss);
 	}
 
 	void Client::SetLatency(seconds dur)
 	{
-		client.SetLatency(duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
+		//client.SetLatency(duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
 	}
 
-	float Client::GetRTT()
+	//float Client::GetRTT()
+	//{
+	//	yojimbo::NetworkInfo info;
+	//	client.GetNetworkInfo(info);
+	//	return info.RTT;
+	//}
+
+	//yojimbo::Message* Client::CreateMessage(int id)
+	//{
+	//	return client.CreateMessage(id);
+	//}
+
+	void Client::SendMessage(SteamNetworkingMessage_t* message)
 	{
-		yojimbo::NetworkInfo info;
-		client.GetNetworkInfo(info);
-		return info.RTT;
+		out_messages.push_back(message);
 	}
 
-	yojimbo::Message* Client::CreateMessage(int id)
-	{
-		return client.CreateMessage(id);
-	}
-
-	void Client::SendMessage(yojimbo::Message* message, GameChannel delivery_mode)
-	{
-		client.SendMessage((int)(delivery_mode), message);
-	}
-
-	void Client::ProcessMessage(yojimbo::Message* message)
+	void Client::ProcessMessage(Message* message, uint32_t id)
 	{
 		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
-		if (message->GetType() != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
-			&& message->GetType() != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
-			&& message->GetType() != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+		if (id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+			&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+			&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
 			)
-		LOG_TO(LogPool::NETWORK, "Received %s message", message_name_array[message->GetType()].data());
-		OnMessageReceived[message->GetType()].Fire(message);
+		LOG_TO(LogPool::NETWORK, "Received %s message", message_name_array[id].data());
+		OnMessageReceived[id].Fire(message);
 	}
 }

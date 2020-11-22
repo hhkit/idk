@@ -19,29 +19,59 @@ namespace idk
                 return retval;
             } 
         }
-
+        
         public static bool     isHost      { get => Bindings.NetworkGetIsHost(); }
         public static bool     isConnected { get => Bindings.NetworkGetIsConnected(); }
         public static int      ping        { get => Bindings.NetworkGetPing(); }
-        public static Device[] devices     { get => Bindings.NetworkGetDevices(); }
 
-        public static Address[] discoveredServers { get => Bindings.NetworkGetDiscoveredServers(); }
-        public static bool isListeningForServers
-        {
-            get => Bindings.NetworkGetIsListeningForServers();
-            set => Bindings.NetworkSetIsListeningForServers(value);
-        }
-        public static bool isBroadcastingServerIP
-        {
-            get => Bindings.NetworkGetIsBroadcastingServerIP();
-            set => Bindings.NetworkSetIsBroadcastingServerIP(value);
-        }
+
 
         public static void Disconnect() => Bindings.NetworkDisconnect();
-        public static void CreateLobby() => Bindings.NetworkCreateLobby(devices[0].mac_addr);
-        public static void CreateLobby(Device d) => Bindings.NetworkCreateLobby(d.mac_addr);
-        public static void Connect(Address a) => Bindings.NetworkConnect(a);
-        public static int GetServerClientCount(Address server_address) => Bindings.GetServerClientCount(server_address);
+
+
+
+        /// <summary>
+        /// TODO: lobby type
+        /// callback: ILobbyCallbacks.OnLobbyCreated + ILobbyCallbacks.OnLobbyJoined
+        /// </summary>
+        public static void CreateLobby() => Bindings.NetworkCreateLobby();
+
+        /// <summary>
+        /// Joins the specified lobby. Use FindLobbies
+        /// callback: ILobbyCallbacks.OnLobbyJoined
+        /// </summary>
+        public static void JoinLobby(Lobby lobby) => Bindings.NetworkJoinLobby(lobby.id);
+
+        /// <summary>
+        /// Leaves the current lobby.
+        /// callback for other members: ILobbyCallbacks.OnLobbyMemberLeft
+        /// </summary>
+        public static void LeaveLobby() => Bindings.NetworkLeaveLobby();
+
+        /// <summary>
+        /// Activates the Steam Overlay to open the invite dialog for the current lobby.
+        /// </summary>
+        public static void OpenLobbyInviteDialog() => Bindings.NetworkOpenLobbyInviteDialog();
+
+        /// <summary>
+        /// Requests a list of lobbies.
+        /// Callback: ILobbyCallbacks.OnLobbyMatchList
+        /// </summary>
+        public static void FindLobbies() => Bindings.NetworkFindLobbies();
+
+        /// <summary>
+        /// Sets the current lobby data. You can only do this if you're the lobby owner.
+        /// </summary>
+        public static void SetLobbyData(string key, string value) => Bindings.NetworkSetLobbyData(key, value);
+
+        /// <summary>
+        /// Connects P2P to the owner of the current lobby.
+        /// see IConnectionCallbacks
+        /// </summary>
+        public static void ConnectToLobbyOwner() => Bindings.NetworkConnectToLobbyOwner();
+
+
+
         public static void LoadScene(Scene scene)
         {
             if (!isHost)

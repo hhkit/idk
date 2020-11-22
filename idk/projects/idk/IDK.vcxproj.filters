@@ -950,25 +950,16 @@
     <ClInclude Include="memory\ArenaAllocator.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\circular_buffer.h">
-      <Filter>ds</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\ColorPickRequest.h">
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="network\Player.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="network\Address.h">
-      <Filter>network\data</Filter>
-    </ClInclude>
     <ClInclude Include="network\Server.h">
       <Filter>network\system</Filter>
     </ClInclude>
     <ClInclude Include="network\NetworkSystem.h">
-      <Filter>network\system</Filter>
-    </ClInclude>
-    <ClInclude Include="network\Adapter.h">
       <Filter>network\system</Filter>
     </ClInclude>
     <ClInclude Include="network\Client.h">
@@ -1156,9 +1147,6 @@
     <ClInclude Include="res\compiled_asset_tags.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="network\Device.h">
-      <Filter>network</Filter>
-    </ClInclude>
     <ClInclude Include="network\NetworkTuple.inl">
       <Filter>network</Filter>
     </ClInclude>
@@ -1204,8 +1192,6 @@
     <ClInclude Include="network\MovePack.h">
       <Filter>network\messages</Filter>
     </ClInclude>
-    <ClInclude Include="network\EventDataBlockBufferedEvents.h" />
-    <ClInclude Include="network\yojimbo_helpers.h" />
     <ClInclude Include="network\GhostAcknowledgementMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
@@ -1222,8 +1208,16 @@
     </ClInclude>
     <ClInclude Include="network\gbn_sliding_window.h" />
     <ClInclude Include="network\ControlObjectMessage.h" />
-    <ClInclude Include="network\Socket.h" />
     <ClInclude Include="steam\SteamManager.h" />
+    <ClInclude Include="network\Message.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="network\EventDataBlockBufferedEvents.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\circular_buffer.h">
+      <Filter>parallel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1635,16 +1629,10 @@
     <ClCompile Include="gfx\ShaderSnippetLoader.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
-    <ClCompile Include="network\Address.cpp">
-      <Filter>network\data</Filter>
-    </ClCompile>
     <ClCompile Include="network\Server.cpp">
       <Filter>network\system</Filter>
     </ClCompile>
     <ClCompile Include="network\NetworkSystem.cpp">
-      <Filter>network\system</Filter>
-    </ClCompile>
-    <ClCompile Include="network\Adapter.cpp">
       <Filter>network\system</Filter>
     </ClCompile>
     <ClCompile Include="network\Client.cpp">
@@ -1655,9 +1643,6 @@
     </ClCompile>
     <ClCompile Include="network\ServerConnectionManager.cpp">
       <Filter>network\managers</Filter>
-    </ClCompile>
-    <ClCompile Include="network\GameConfiguration.cpp">
-      <Filter>network</Filter>
     </ClCompile>
     <ClCompile Include="util\easing.cpp">
       <Filter>math</Filter>
@@ -1764,6 +1749,9 @@
     <ClCompile Include="network\ack_utils.cpp" />
     <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp" />
     <ClCompile Include="steam\SteamManager.cpp" />
+    <ClCompile Include="network\ConnectionManager.cpp">
+      <Filter>network\managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math\matrix.inl">

@@ -3,6 +3,7 @@
 #include <res/ResourceHandle.h>
 #include <network/network.h>
 #include <network/RPCTarget.h>
+#include <steam/steam_api_common.h>
 
 namespace idk
 {
@@ -29,7 +30,7 @@ namespace idk
 		static void Init();
 		static void ResetEventBuffer();
 		static Handle<GameObject> BroadcastInstantiatePrefab(RscHandle<Prefab> prefab, opt<vec3> position, opt<quat> quaternion = {});
-		static void SendTransferOwnership(Handle<ElectronView> transfer, Host target_host);
+		static void SendTransferOwnership(Handle<ElectronView> transfer, Host target_owner);
 		static void BroadcastLoadLevel(RscHandle<Scene> scene);
 		static void BroadcastDestroyView(Handle<ElectronView> view);
 		static void BroadcastRPC(Handle<ElectronView> ev, RPCTarget target, string_view method_name, span<vector<unsigned char>> buffer);

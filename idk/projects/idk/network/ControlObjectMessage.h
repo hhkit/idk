@@ -1,15 +1,14 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/network.h>
 #include <network/MovePack.h>
-#include <network/yojimbo_helpers.h>
+#include <network/Message.h>
 #include "GhostFlags.h"
 
 namespace idk
 {
 	class ControlObjectMessage
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		NetworkID network_id;
@@ -32,6 +31,6 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

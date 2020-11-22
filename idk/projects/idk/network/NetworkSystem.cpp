@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "pch_common.h"
-#include <yojimbo/yojimbo.h>
 
 #include "NetworkSystem.h"
 
@@ -30,6 +29,10 @@
 #include <scene/SceneManager.h>
 #include <scene/SceneGraph.inl>
 
+#include <steam/steam_api_common.h>
+#include <steam/isteamuser.h>
+#include <steam/steamnetworkingtypes.h>
+
 #include <algorithm>
 #include <iterator>
 
@@ -40,70 +43,385 @@ namespace idk
 	NetworkSystem::NetworkSystem() = default;
 	NetworkSystem::~NetworkSystem() = default;
 
-	void NetworkSystem::InstantiateServer(const Address& d)
+	void NetworkSystem::CreateLobby()
 	{
 		ResetNetwork();
 		frame_counter = SeqNo{};
-		my_id = Host::SERVER;
 
-		for (auto& device : Core::GetSystem<Application>().GetNetworkDevices())
+		SteamMatchmaking()->CreateLobby(k_ELobbyTypePublic, GameConfiguration::MAX_LOBBY_MEMBERS);
+	}
+
+	void NetworkSystem::OnLobbyCreated(LobbyCreated_t* callback)
+	{
+		if (callback->m_eResult == k_EResultOK)
 		{
-			bool found = false;
-			for (auto& addr : device.ip_addresses)
+			lobby_id = callback->m_ulSteamIDLobby;
+			my_id = Host::SERVER;
+			lobby_members[0].id = SteamUser()->GetSteamID();
+			lobby_members[0].host = my_id;
+
+			LOG_TO(LogPool::NETWORK, "Lobby Steam ID is %llu", lobby_id.ConvertToUint64());
+
+			server = std::make_unique<Server>(lobby_id);
+			id_manager = std::make_unique<IDManager>();
+			EventManager::Init();
+
+			listen_socket = SteamNetworkingSockets()->CreateListenSocketP2P(0, 0, nullptr);
+
+			for (auto& target : callback_objects)
+				target->FireMessage("OnLobbyCreated", true);
+		}
+		else
+		{
+			LOG_CRASH_TO(LogPool::NETWORK, "Could not create server! EResult Code: %d", callback->m_eResult);
+
+			for (auto& target : callback_objects)
+				target->FireMessage("OnLobbyCreated", false);
+		}
+	}
+
+	void NetworkSystem::JoinLobby(CSteamID lobby_id)
+	{
+		ResetNetwork();
+		frame_counter = SeqNo{};
+
+		SteamMatchmaking()->JoinLobby(lobby_id);
+	}
+
+	void NetworkSystem::OnJoinedLobby(LobbyEnter_t* callback)
+	{
+		if (callback->m_EChatRoomEnterResponse == k_EChatRoomEnterResponseSuccess)
+		{
+			lobby_id = callback->m_ulSteamIDLobby;
+			client = std::make_unique<Client>(lobby_id);
+			id_manager = std::make_unique<IDManager>();
+
+			if (my_id == Host::NONE)
 			{
-				if (std::equal(std::begin(addr.nums), std::end(addr.nums), std::begin(d.nums)))
+				// obtain preexisting lobby members
+				int num = SteamMatchmaking()->GetNumLobbyMembers(lobby_id);
+				for (int i = 0; i < num; ++i)
 				{
-					subnet_bits = device.subnet_length;
-					found = true;
+					CSteamID id = SteamMatchmaking()->GetLobbyMemberByIndex(lobby_id, i);
+					const char* info = SteamMatchmaking()->GetLobbyMemberData(lobby_id, id, "info");
+					int index = info[0] - '0';
+					Host host = static_cast<Host>(info[1] - '0');
+
+					lobby_members[index].id = id;
+					lobby_members[index].host = host;
+				}
+
+				// find appropriate host
+				Host host = Host::CLIENT0;
+				int index = -1;
+				for (int i = 0; i < GameConfiguration::MAX_LOBBY_MEMBERS; ++i)
+				{
+					if (lobby_members[i].id.IsValid() && lobby_members[i].host == host)
+					{
+						host = static_cast<Host>(static_cast<int>(host) + 1);
+						i = -1;
+						continue;
+					}
+					if (index == -1 && !lobby_members[i].id.IsValid())
+						index = i;
+				}
+				if (index >= 0)
+				{
+					lobby_members[index].id = SteamUser()->GetSteamID();
+					lobby_members[index].host = my_id = host;
+				}
+			}
+			int my_index = -1;
+			for (my_index = 0; my_index < GameConfiguration::MAX_LOBBY_MEMBERS; ++my_index)
+			{
+				if (lobby_members[my_index].host == my_id)
+					break;
+			}
+
+			// on join, store my lobby member index and my host id
+			char buf[3] { 0, 0, 0 };
+			buf[0] = '0' + my_index;
+			buf[1] = '0' + static_cast<int>(my_id);
+			SteamMatchmaking()->SetLobbyMemberData(lobby_id, "info", buf);
+
+			for (auto& target : callback_objects)
+				target->FireMessage("OnLobbyJoined", true);
+		}
+		else
+		{
+			LOG_CRASH_TO(LogPool::NETWORK, "Could not connect to lobby! EChatRoomEnterResponse Code: %d", callback->m_EChatRoomEnterResponse);
+			for (auto& target : callback_objects)
+				target->FireMessage("OnLobbyJoined", false);
+		}
+	}
+
+	// other members join or leave
+	void NetworkSystem::OnLobbyChatUpdated(LobbyChatUpdate_t* callback)
+	{
+		if (callback->m_rgfChatMemberStateChange & k_EChatMemberStateChangeEntered)
+		{
+			CSteamID id = callback->m_ulSteamIDUserChanged;
+
+			// find appropriate host
+			Host host = Host::CLIENT0;
+			int index = -1;
+			for (int i = 0; i < GameConfiguration::MAX_LOBBY_MEMBERS; ++i)
+			{
+				if (lobby_members[i].id.IsValid() && lobby_members[i].host == host)
+				{
+					host = static_cast<Host>(static_cast<int>(host) + 1);
+					i = -1;
+					continue;
+				}
+				if (index == -1 && !lobby_members[i].id.IsValid())
+					index = i;
+			}
+
+			if (index >= 0)
+			{
+				lobby_members[index].id = id;
+				lobby_members[index].host = host;
+
+				for (auto& target : callback_objects)
+					target->FireMessage("OnLobbyMemberJoined", index);
+			}
+		}
+		else if (callback->m_rgfChatMemberStateChange & ~k_EChatMemberStateChangeEntered)
+		{
+			CSteamID id = callback->m_ulSteamIDUserChanged;
+			for (int i = 0; i < GameConfiguration::MAX_LOBBY_MEMBERS; ++i)
+			{
+				if (lobby_members[i].id == id)
+				{
+					lobby_members[i].id = k_steamIDNil;
+					for (auto& target : callback_objects)
+						target->FireMessage("OnLobbyMemberLeft", i);
 					break;
 				}
 			}
-			if (found)
-				break;
 		}
-
-		lobby = std::make_unique<Server>(Address{d.a,d.b,d.c,d.d, server_listen_port});
-		lobby->OnClientConnect += [this](int clientid)
-		{
-			server_connection_manager[clientid] = std::make_unique<ServerConnectionManager>(clientid, *lobby);
-			server_connection_manager[clientid]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [&](EventDataBlockFrameNumber& msg)
-				{
-					msg.frame_count = frame_counter;
-					msg.player_id = static_cast<Host>(clientid);
-				});
-			server_connection_manager[clientid]->GetManager<EventManager>()->SendBufferedEvents();
-		};
-		lobby->OnClientDisconnect += [this](int clientid)
-		{
-			server_connection_manager[clientid].reset();
-		};
-		id_manager = std::make_unique<IDManager>();
-		EventManager::Init();
-
-		SetBroadcast(true);
 	}
 
-	void NetworkSystem::ConnectToServer(const Address& d)
+	void NetworkSystem::LeaveLobby()
 	{
+		if (IsHost())
+			SteamMatchmaking()->LeaveLobby(lobby_id);
+
 		ResetNetwork();
 		frame_counter = SeqNo{};
-		client = std::make_unique<Client>(Address{ d.a,d.b,d.c,d.d, server_listen_port });
-		client->OnConnectionToServer += [this]()
-		{
-			client_connection_manager = std::make_unique<ClientConnectionManager>(*client);
-			client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber& event)
-				{
-					frame_counter = event.frame_count;
-					my_id = event.player_id;
-				});
-		};
+	}
 
-		client->OnDisconnectionFromServer += [this]()
+	void NetworkSystem::SendLobbyMsg(const string& msg)
+	{
+		SteamMatchmaking()->SendLobbyChatMsg(lobby_id, msg.data(), msg.size() + 1);
+	}
+
+	void NetworkSystem::FindLobbies()
+	{
+		SteamMatchmaking()->RequestLobbyList();
+	}
+
+	CSteamID NetworkSystem::GetLobbyMember(Host host)
+	{
+		for (auto& elem : lobby_members)
 		{
-			my_id = Host::NONE;
-			client_connection_manager.reset();
-		};
-		id_manager = std::make_unique<IDManager>();
+			if (elem.host == host)
+				return elem.id;
+		}
+		return k_steamIDNil;
+	}
+
+	int NetworkSystem::GetLobbyMemberIndex(Host host)
+	{
+		for (int i = 0; i < GameConfiguration::MAX_LOBBY_MEMBERS; ++i)
+		{
+			if (lobby_members[i].host == host)
+				return i;
+		}
+		return -1;
+	}
+
+	void NetworkSystem::ConnectToLobbyOwner()
+	{
+		if (IsHost())
+			return;
+
+		auto owner = SteamMatchmaking()->GetLobbyOwner(lobby_id);
+		if (owner == k_steamIDNil)
+		{
+			LOG_CRASH_TO(LogPool::NETWORK, "Cannot connect to invalid lobby or lobby you're not a member of!");
+			return;
+		}
+
+		SteamNetworkingIdentity identity;
+		identity.SetSteamID(lobby_id);
+		SteamNetworkingSockets()->ConnectP2P(identity, 0, 0, nullptr);
+	}
+
+	void NetworkSystem::OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t* callback)
+	{
+		/// - A new connection arrives on a listen socket.
+		///   m_info.m_hListenSocket will be set, m_eOldState = k_ESteamNetworkingConnectionState_None,
+		///   and m_info.m_eState = k_ESteamNetworkingConnectionState_Connecting.
+		///   See ISteamNetworkigSockets::AcceptConnection.
+		if (callback->m_eOldState == k_ESteamNetworkingConnectionState_None
+			&& callback->m_info.m_eState == k_ESteamNetworkingConnectionState_Connecting
+			&& callback->m_info.m_hListenSocket != k_HSteamListenSocket_Invalid)
+		{
+			auto res = SteamNetworkingSockets()->AcceptConnection(callback->m_hConn);
+			if (res == k_EResultInvalidState)
+				LOG_CRASH_TO(LogPool::NETWORK, "Could not connect to client P2P!");
+			else
+			{
+				CSteamID id = callback->m_info.m_identityRemote.GetSteamID();
+
+				for (size_t i = 0; i < GameConfiguration::MAX_LOBBY_MEMBERS; ++i)
+				{
+					if (lobby_members[i].id != id)
+						continue;
+
+					int clientIndex = static_cast<int>(lobby_members[i].host);
+					server_connection_manager[clientIndex] = std::make_unique<ServerConnectionManager>(clientIndex, *server, callback->m_hConn);
+
+					server->ClientConnected(clientIndex);
+
+					server_connection_manager[clientIndex]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [&](EventDataBlockFrameNumber& msg)
+					{
+						msg.frame_count = frame_counter;
+					});
+					server_connection_manager[i]->GetManager<EventManager>()->SendBufferedEvents();
+
+					break;
+				}
+			}
+		}
+		/// - A connection you initiated has been accepted by the remote host.
+		///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting, and
+		///   m_info.m_eState = k_ESteamNetworkingConnectionState_Connected.
+		///   Some connections might transition to k_ESteamNetworkingConnectionState_FindingRoute first.
+		else if (callback->m_eOldState == k_ESteamNetworkingConnectionState_Connecting
+				 && (callback->m_info.m_eState == k_ESteamNetworkingConnectionState_Connected
+				 	 || callback->m_info.m_eState == k_ESteamNetworkingConnectionState_FindingRoute))
+		{
+			client_connection_manager = std::make_unique<ClientConnectionManager>(*client, callback->m_hConn);
+			client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber& event)
+			{
+				frame_counter = event.frame_count;
+			});
+		}
+		/// - A connection has been actively rejected or closed by the remote host.
+		///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting or k_ESteamNetworkingConnectionState_Connected,
+		///   and m_info.m_eState = k_ESteamNetworkingConnectionState_ClosedByPeer.  m_info.m_eEndReason
+		///   and m_info.m_szEndDebug will have for more details.
+		///   NOTE: upon receiving this callback, you must still destroy the connection using
+		///   ISteamNetworkingSockets::CloseConnection to free up local resources.  (The details
+		///   passed to the function are not used in this case, since the connection is already closed.)
+		else if ((callback->m_eOldState == k_ESteamNetworkingConnectionState_Connecting
+				  || callback->m_eOldState == k_ESteamNetworkingConnectionState_Connected)
+				 && callback->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer)
+		{
+			if (client)
+			{
+				ResetNetwork();
+			}
+			else
+			{
+				for (size_t i = 0; i < GameConfiguration::MAX_CLIENTS; ++i)
+				{
+					if (!server_connection_manager[i] || server_connection_manager[i]->GetHandle() != callback->m_hConn)
+						continue;
+					server_connection_manager[i].reset();
+					for (auto& elem : lobby_members)
+					{
+						if (elem.host == static_cast<Host>(i))
+						{
+							elem.host = Host::NONE;
+							elem.id = k_steamIDNil;
+							break;
+						}
+					}
+					break;
+				}
+			}
+		}
+		/// - A problem was detected with the connection, and it has been closed by the local host.
+		///   The most common failure is timeout, but other configuration or authentication failures
+		///   can cause this.  m_eOldState = k_ESteamNetworkingConnectionState_Connecting or
+		///   k_ESteamNetworkingConnectionState_Connected, and m_info.m_eState = k_ESteamNetworkingConnectionState_ProblemDetectedLocally.
+		///   m_info.m_eEndReason and m_info.m_szEndDebug will have for more details.
+		///   NOTE: upon receiving this callback, you must still destroy the connection using
+		///   ISteamNetworkingSockets::CloseConnection to free up local resources.  (The details
+		///   passed to the function are not used in this case, since the connection is already closed.)
+		else if ((callback->m_eOldState == k_ESteamNetworkingConnectionState_Connecting
+				  || callback->m_eOldState == k_ESteamNetworkingConnectionState_Connected)
+				 && callback->m_info.m_eState == k_ESteamNetworkingConnectionState_ProblemDetectedLocally)
+		{
+			if (client)
+			{
+				ResetNetwork();
+			}
+			else
+			{
+				for (size_t i = 0; i < GameConfiguration::MAX_CLIENTS; ++i)
+				{
+					if (!server_connection_manager[i] || server_connection_manager[i]->GetHandle() != callback->m_hConn)
+						continue;
+					server_connection_manager[i].reset();
+					for (auto& elem : lobby_members)
+					{
+						if (elem.host == static_cast<Host>(i))
+						{
+							elem.host = Host::NONE;
+							elem.id = k_steamIDNil;
+							break;
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	void NetworkSystem::OnLobbyDataUpdated(LobbyDataUpdate_t* callback)
+	{
+		if (!callback->m_bSuccess)
+			return;
+		if (callback->m_ulSteamIDMember == lobby_id)
+			return;
+
+		for (auto& target : callback_objects)
+			target->FireMessage("OnLobbyDataUpdated");
+	}
+
+	void NetworkSystem::OnLobbyMatchList(LobbyMatchList_t* callback)
+	{
+		auto* arr = mono_array_new(mono_domain_get(), mono_get_uint64_class(), callback->m_nLobbiesMatching);
+		for (uint32 i = 0; i < callback->m_nLobbiesMatching; ++i)
+		{
+			auto lobby = SteamMatchmaking()->GetLobbyByIndex(i);
+			mono_array_set(arr, uint64, i, lobby.ConvertToUint64());
+		}
+
+		for (auto& target : callback_objects)
+			target->FireMessage("OnLobbyMatchList", arr);
+	}
+
+	void NetworkSystem::OnLobbyChatMsg(LobbyChatMsg_t* callback)
+	{
+		char buf[128];
+		SteamMatchmaking()->GetLobbyChatEntry(lobby_id, callback->m_iChatID, nullptr, buf, 128, nullptr);
+
+		CSteamID id = callback->m_ulSteamIDUser;
+		for (int i = 0; i < GameConfiguration::MAX_LOBBY_MEMBERS; ++i)
+		{
+			if (lobby_members[i].id == id)
+			{
+				MonoString* str = mono_string_new(mono_domain_get(), buf);
+				for (auto& target : callback_objects)
+					target->FireMessage("OnLobbyChatMsg", lobby_members[i].host, str);
+				break;
+			}
+		}
 	}
 
 	void NetworkSystem::Disconnect()
@@ -113,24 +431,13 @@ namespace idk
 
 	void NetworkSystem::EvictClient(int clientID)
 	{
-		if (lobby)
-			lobby->EvictClient(clientID);
-	}
-
-	array<ConnectionManager*, 5> NetworkSystem::GetConnectionManagers()
-	{
-		return array<ConnectionManager*, 5>{
-			client_connection_manager.get(),
-				server_connection_manager[0].get(),
-				server_connection_manager[1].get(),
-				server_connection_manager[2].get(),
-				server_connection_manager[3].get(),
-		};
+		if (server)
+			server->EvictClient(clientID);
 	}
 
 	bool NetworkSystem::IsHost()
 	{
-		return static_cast<bool>(lobby);
+		return static_cast<bool>(server);
 	}
 
 	Host NetworkSystem::GetMe()
@@ -147,11 +454,10 @@ namespace idk
 	{
 		switch (host)
 		{
-		case Host::SERVER:  return client_connection_manager.get();
+		case Host::SERVER: return client_connection_manager.get();
 		case Host::CLIENT0: return server_connection_manager[0].get();
 		case Host::CLIENT1: return server_connection_manager[1].get();
 		case Host::CLIENT2: return server_connection_manager[2].get();
-		case Host::CLIENT3: return server_connection_manager[3].get();
 		case Host::ANY:
 		{
 			if (client_connection_manager)
@@ -166,8 +472,8 @@ namespace idk
 
 	void NetworkSystem::SetPacketLoss(float percent)
 	{
-		if (lobby)
-			lobby->SetPacketLoss(percent);
+		if (server)
+			server->SetPacketLoss(percent);
 
 		if (client)
 			client->SetPacketLoss(percent);
@@ -175,8 +481,8 @@ namespace idk
 
 	void NetworkSystem::SetLatency(seconds time)
 	{
-		if (lobby)
-			lobby->SetLatency(time);
+		if (server)
+			server->SetLatency(time);
 
 		if (client)
 			client->SetLatency(time);
@@ -186,108 +492,29 @@ namespace idk
 
 	void NetworkSystem::ReceivePackets()
 	{
-		if (lobby || client)
+		if (server || client)
 		{
 			++frame_counter;
 		}
 
-		if (lobby)
+		for (auto& manager : server_connection_manager)
 		{
-			lobby->ReceivePackets();
+			if (manager)
+				manager->ReceiveMessages();
 		}
-		if (client)
+		if (client_connection_manager)
 		{
-			client->ReceivePackets();
+			client_connection_manager->ReceiveMessages();
 		}
-
-		if (client_listen_socket)
-		{
-			if (auto pMsg = client_listen_socket->Receive())
-			{
-				const auto& msg = *pMsg;
-				LOG_TO(LogPool::NETWORK, "RECEIVED MSG OF LENGTH %d ON LISTEN SOCKET", (int) msg.buffer.size());
-				if (discovery_message.size() < msg.buffer.size()
-					&& std::equal(discovery_message.begin(), discovery_message.end(), msg.buffer.begin()))
-				{
-					LOG_TO(LogPool::NETWORK, "LOCATED SERVER @ %d.%d.%d.%d",
-						(int)msg.buffer[discovery_message.size() + 0],
-						(int)msg.buffer[discovery_message.size() + 1],
-						(int)msg.buffer[discovery_message.size() + 2],
-						(int)msg.buffer[discovery_message.size() + 3]);
-
-					Address addr;
-					addr.a = msg.buffer[discovery_message.size() + 0];
-					addr.b = msg.buffer[discovery_message.size() + 1];
-					addr.c = msg.buffer[discovery_message.size() + 2];
-					addr.d = msg.buffer[discovery_message.size() + 3];
-
-					unsigned char clients = msg.buffer[discovery_message.size() + 4];
-
-					if (std::equal(std::begin(addr.nums), std::end(addr.nums), std::begin(pMsg->src.nums)))
-					{
-						auto& info = client_address_cooldown[addr];
-						info.time_to_live = server_entry_time_to_live;
-						info.address = addr;
-						info.client_count = clients;
-					}
-					else
-						LOG_TO(LogPool::NETWORK, "REJECTED BROADCAST FROM SERVER %d, %d, %d, %d: MISMATCH SRC AND EXTERNAL IP", 
-							(int) pMsg->src.a, (int) pMsg->src.b, (int) pMsg->src.c, (int) pMsg->src.d);
-				}
-			}
-		}
-
-		vector<Address> deleteus;
-		for (auto& [addr, info] : client_address_cooldown)
-		{
-			auto& ttl = info.time_to_live;
-			ttl -= Core::GetRealDT();
-			if (ttl < seconds{})
-				deleteus.push_back(addr);
-		}
-
-		for (auto& elem : deleteus)
-			client_address_cooldown.erase(elem);
 	}
 
 	void NetworkSystem::SendPackets()
 	{
-		if (lobby)
-			lobby->SendPackets();
+		if (server)
+			server->SendPackets();
 
 		if (client)
 			client->SendPackets();
-
-		if (server_broadcast_socket)
-		{ 
-			server_timer += Core::GetRealDT();
-			if (server_timer > server_broadcast_limit)
-			{
-				server_timer -= server_broadcast_limit;
-
-				auto addr = lobby->GetAddress();
-				Message msg;
-				msg.dest = broadcast_address;
-				msg.dest.port = client_listen_port;
-				msg.buffer.insert(msg.buffer.end(),
-					std::begin(discovery_message),
-					std::end(discovery_message)
-				);
-
-				msg.buffer.push_back(addr.a);
-				msg.buffer.push_back(addr.b);
-				msg.buffer.push_back(addr.c);
-				msg.buffer.push_back(addr.d);
-
-				unsigned char clients = 0;
-				for (auto& elem : server_connection_manager)
-					if (elem)
-						++clients;
-
-				msg.buffer.push_back(clients);
-				server_broadcast_socket->Send(msg);
-			}
-		}
 	}
 
 	void NetworkSystem::Rollback(span<ElectronView> evs)
@@ -473,27 +700,23 @@ namespace idk
 
 	void NetworkSystem::Init()
 	{
-		yojimbo_log_level(YOJIMBO_LOG_LEVEL_ERROR);
-		yojimbo_set_printf_function([](const char* fmt, ...) -> int
-		{
-			static char buf[1024];
-			va_list args;
-			va_start(args, fmt);
-			vsprintf_s(buf, fmt, args);
-			va_end(args);
+		//yojimbo_log_level(YOJIMBO_LOG_LEVEL_ERROR);
+		//yojimbo_set_printf_function([](const char* fmt, ...) -> int
+		//{
+		//	static char buf[1024];
+		//	va_list args;
+		//	va_start(args, fmt);
+		//	vsprintf_s(buf, fmt, args);
+		//	va_end(args);
 
-			LOG_TO(LogPool::NETWORK, buf);
+		//	LOG_TO(LogPool::NETWORK, buf);
 
-		});
-		InitializeYojimbo();
+		//});
+		//InitializeYojimbo();
 	}
 
 	void NetworkSystem::LateInit()
 	{
-		for (auto& device : Core::GetSystem<Application>().GetNetworkDevices())
-		{
-			LOG_TO(LogPool::NETWORK, "Found %s device (%s) with address %s/%d.", device.name.c_str(), device.description.c_str(), string{ device.ip_addresses[0] }.c_str(), device.subnet_length);
-		}
 	}
 
 	void NetworkSystem::EarlyShutdown()
@@ -503,69 +726,27 @@ namespace idk
 
 	void NetworkSystem::Shutdown()
 	{
-		ShutdownYojimbo();
+		//ShutdownYojimbo();
 	}
 	void NetworkSystem::ResetNetwork()
 	{
 		my_id = Host::NONE;
 		for (auto& elem : server_connection_manager)
 			elem.reset();
-		lobby.reset();
+		server.reset();
 		client_connection_manager.reset();
 		client.reset();
 		id_manager.reset();
-		client_listen_socket.reset();
-		server_broadcast_socket.reset();
+		for (auto& elem : lobby_members)
+		{
+			elem.host = Host::NONE;
+			elem.id = k_steamIDNil;
+		}
+		lobby_id = k_steamIDNil;
 
 		// network ids no longer relevant
 		for (auto& elem : Core::GetGameState().GetObjectsOfType<ElectronView>())
 			elem.network_id = 0;
 	}
 
-	void NetworkSystem::SetSearch(bool enable)
-	{
-		if (enable)
-		{
-			if (!client_listen_socket)
-			{
-				client_listen_socket = Core::GetSystem<Application>().CreateSocket();
-				client_listen_socket->Bind(client_listen_port);
-				client_listen_socket->EnableBroadcast();
-			}
-		}
-		else
-		{
-			client_listen_socket.reset();
-		}
-	}
-
-	void NetworkSystem::SetBroadcast(bool enable)
-	{
-		if (!lobby)
-			return;
-
-		if (enable)
-		{
-			if (!server_broadcast_socket)
-			{
-				server_broadcast_socket = Core::GetSystem<Application>().CreateSocket();
-				auto server_addr = lobby->GetAddress();
-				server_addr.port = 2000;
-				server_broadcast_socket->Bind(server_addr);
-				server_broadcast_socket->EnableBroadcast();
-				server_timer = server_broadcast_limit;
-			}
-		}
-		else
-		{
-			server_broadcast_socket.reset();
-		}
-	}
-	vector<ServerInfo> NetworkSystem::GetDiscoveredServers() const
-	{
-		vector<ServerInfo> addrs;
-		for (auto [ip, info] : client_address_cooldown)
-			addrs.emplace_back(info);
-		return addrs;
-	}
 };

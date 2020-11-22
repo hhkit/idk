@@ -49,10 +49,6 @@ namespace idk::win
 		bool SetScreenSize(ivec2) override { return false; }
 		void SetTitle(string_view new_title) override;
 
-		// network
-		vector<Device> GetNetworkDevices() override;
-		unique_ptr<Socket> CreateSocket() override;
-
 		void Shutdown() override {}
 		string GetExecutableDir() override;
 		string GetAppData() override ;

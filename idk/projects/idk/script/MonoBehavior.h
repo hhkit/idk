@@ -23,7 +23,15 @@ namespace idk::mono
 		ManagedObject& GetObject() { return script_data; };
 		const ManagedObject& GetObject() const { return script_data; };
 
-		void FireMessage(string_view msg, void* args[] = { nullptr });
+		template<typename ... Args> // TODO: Research perfect forwarding
+		void FireMessage(string_view msg, Args&&... args)
+		{
+			if (script_data)
+			{
+				if (auto thunk = script_data.Type()->GetThunk(msg))
+					thunk->Invoke(script_data.Raw(), std::forward<Args>(args)...);
+			}
+		}
 
 		void Awake();
 		void Start();

@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace idk
 {
-    /// <summary>
-    /// For Client-side, detects when the client connects to the server.
-    /// </summary>
     public interface IConnectionCallbacks
     {
         void OnConnectedToServer();
-        void OnDisconnectionFromServer();
+        void OnDisconnectedFromServer();
+        void OnClientConnected(Client client);
+        void OnClientDisconnected(Client client);
     }
 }

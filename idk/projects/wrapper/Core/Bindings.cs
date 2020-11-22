@@ -5,13 +5,11 @@ namespace idk
 {
     internal class Bindings
     {
-        /*
-         * Object
-         */
+
+        #region Object
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ObjectValidate(ulong handle);
-
-
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ObjectDestroy(ulong handle);
@@ -19,15 +17,12 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior[] ObjectGetObjectsOfType(string type);
 
-        /*
-         * Scene
-         */
+        #endregion
+
+        #region Scene
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void SceneChangeScene(Guid guid);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkEvictClient(int connectionId);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid SceneGetActiveScene();
@@ -38,9 +33,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void EngineKill();
 
-        /**
-* Game Object
-*/
+        #endregion
+
+        #region Game Object
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool GameObjectGetActiveInHierarchy(ulong gamehandle);
 
@@ -58,9 +54,6 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior GameObjectAddGameComponent(ulong gamehandle, string component);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static int GetServerClientCount(Address server_address);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static MonoBehavior GameObjectGetGameComponent(ulong gamehandle, string component);
@@ -90,24 +83,27 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static GameObject[] GameObjectFindGameObjectsWithTag(string tag);
 
-        /*
-         * Component
-         */
+        #endregion
+
+        #region Component
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong ComponentGetGameObject(ulong componenthandle);
 
-        /*
-         * Behavior
-         */
+        #endregion
+
+        #region Behavior
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool MonoBehaviorGetEnable(ulong componenthandle);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void MonoBehaviorSetEnable(ulong componenthandle, bool enable);
 
-        /*
-         * Transform
-         */
+        #endregion
+
+        #region Transform
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector3 TransformGetPosition(ulong id);
 
@@ -165,17 +161,19 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TransformSetForward(ulong id, Vector3 fwd);
 
-        /*
-         * Physics
-         */
+        #endregion
+
+        #region Physics
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ManagedRaycast PhysicsRaycast(Vector3 origin, Vector3 dir, float max_dist, int mask, bool hit_triggers);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ManagedRaycast[] PhysicsRaycastAll(Vector3 origin, Vector3 dir, float max_dist, int mask, bool hit_triggers);
 
-        /*
-         * RigidBody
-         */
+        #endregion
+
+        #region RigidBody
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float RigidBodyGetMass(ulong id);
         
@@ -221,9 +219,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RigidBodyAddForce(ulong id, Vector3 force);
         
-        /*
-         * Collider
-         */
+        #endregion
+
+        #region Collider
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ColliderSetEnabled(ulong id, bool val);
 
@@ -254,9 +253,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float ColliderGetBounciness(ulong id);
 
-        /*
-         * BoxCollider
-         */
+        #endregion
+
+        #region BoxCollider
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ColliderBoxSetCenter(ulong id, Vector3 val);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -266,9 +266,11 @@ namespace idk
         public extern static void ColliderBoxSetSize(ulong id, Vector3 val);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector3 ColliderBoxGetSize(ulong id);
-        /*
-         * SphereCollider
-         */
+
+        #endregion
+
+        #region SphereCollider
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ColliderSphereSetCenter(ulong id, Vector3 val);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -278,9 +280,10 @@ namespace idk
         public extern static void ColliderSphereSetRadius(ulong id, float val);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float ColliderSphereGetRadius(ulong id);
-        /*
-         * Capsule Collider
-         */
+
+        #endregion
+
+        #region Capsule Collider
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ColliderCapsuleSetCenter(ulong id, Vector3 val);
@@ -301,9 +304,11 @@ namespace idk
         public extern static void ColliderCapsuleSetHeight(ulong id, float val);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float ColliderCapsuleGetHeight(ulong id);
-        /*
-         * Animator
-         */
+
+        #endregion
+
+        #region Animator
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AnimatorPlay(ulong id, string name, string layer = "");
 
@@ -387,9 +392,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AnimatorSetOffset(ulong handle, Vector3 value);
 
-        /*
-         * AudioListener
-         */
+        #endregion
+
+        #region AudioListener
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool AudioListenerGetEnabledState(ulong id);
 
@@ -397,9 +403,10 @@ namespace idk
         public extern static bool AudioListenerSetEnabledState(ulong id, bool c);
 
 
-        /*
-         * AudioSource
-         */
+        #endregion
+
+        #region AudioSource
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSourcePlay(ulong id, int index = 0);
 
@@ -450,9 +457,11 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int AddAudioClip(ulong id, string name);
-        /*
-         * AudioSystem
-         */
+
+        #endregion
+
+        #region AudioSystem
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSystemSetMASTERVolume(float newVolume);
 
@@ -515,19 +524,13 @@ namespace idk
         public extern static bool AudioSystemGetDIALOGUEPause();
 
 
-
-
-
-
-
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void AudioSystemStopAll();
 
+        #endregion
 
+        #region TextMesh
 
-        /*
-        * TextMesh
-        */
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string TextMeshGetText(ulong id);
 
@@ -539,9 +542,11 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TextMeshSetColor(ulong id, Color c);
-        /*
-         * Graphics 
-         */
+
+        #endregion
+
+        #region Graphics 
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool GraphicsGetSRGB();
 
@@ -570,9 +575,11 @@ namespace idk
         public extern static int GraphicsGetVarInt(string var_name);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool GraphicsVarIntIsSet(string var_name);
-        /*
-        * Camera
-        */
+
+        #endregion
+
+        #region Camera
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float CameraGetFOV(ulong id);
 
@@ -657,9 +664,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int CameraGetDepth(ulong handle);
 
-        /*
-        * Light
-        */
+        #endregion
+
+        #region Light
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool LightGetEnabled(ulong id);
 
@@ -714,9 +722,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void LightSetOuterSpotAngle(ulong id, float i);
 
-        /*
-         * Renderer
-         */
+        #endregion
+
+        #region Renderer
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid RendererGetMaterialInstance(ulong id);
 
@@ -729,9 +738,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RendererSetActive(ulong id, bool active);
 
-        /*
-         * RectTransform
-         */
+        #endregion
+
+        #region RectTransform
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 RectTransformGetOffsetMin(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -759,9 +769,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void RectTransformSetAnchoredPosition(ulong id, Vector2 value);
 
-        /*
-         * Image
-         */
+        #endregion
+
+        #region Image
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Guid ImageGetTexture(ulong id);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -775,9 +786,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ImageSetColor(ulong id, Color color);
 
-        /*
-         * Text
-         */
+        #endregion
+
+        #region Text
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string TextGetText(ulong id);
 
@@ -796,23 +808,26 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void TextSetFontSize(ulong id, uint value);
 
-        /*
-         * Resource
-         */
+        #endregion
+
+        #region Resource
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool ResourceValidate(System.Guid guid, string type);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string ResourceGetName(System.Guid guid, string type);
 
-        /*
-         * Prefab
-         */
+        #endregion
+
+        #region Prefab
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong PrefabInstantiate(System.Guid guid);
 
-        /*
-         * MaterialInstance
-         */
+        #endregion
+
+        #region MaterialInstance
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float MaterialInstanceGetFloat(System.Guid guid, string name);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -835,15 +850,17 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void MaterialInstanceSetTexture(System.Guid guid, string name, Guid tex);
 
-        /*
-         * Texture
-         */
+        #endregion
+
+        #region Texture
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Vector2 TextureGetSize(System.Guid guid);
 
-        /*
-         * Input
-         */
+        #endregion
+
+        #region Input
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool InputGetKey(int key);
 
@@ -868,9 +885,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static byte InputGetConnectedPlayers();
 
-        /*
-         * Time
-         */
+        #endregion
+
+        #region Time
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetTimeScale();
 
@@ -895,24 +913,27 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float TimeGetAccumTime();
 
-        /*
-         * Debug
-         */
+        #endregion
+
+        #region Debug
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static float DebugLog(string preface, string message);
 
-        /*
-         * LayerMask
-         */
+        #endregion
+
+        #region LayerMask
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string LayerMaskLayerToName(int layerIndex);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int LayerMaskNameToLayer(string name);
 
-        /*
-         * Network
-         */
+        #endregion
+
+        #region Network
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool NetworkGetIsConnected();
 
@@ -923,38 +944,49 @@ namespace idk
         public extern static int NetworkGetPing();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool NetworkCreateLobby(string mac_address);
+        public extern static void NetworkCreateLobby();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkJoinLobby(ulong lobby);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkLeaveLobby();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkOpenLobbyInviteDialog();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkFindLobbies();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string NetworkGetLobbyData(ulong lobby, string key);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkSetLobbyData(string key, string value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int NetworkGetLobbyNumMembers(ulong lobby);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int NetworkClientLobbyIndex(int id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string NetworkClientName(int id);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkConnectToLobbyOwner();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int[] NetworkGetClients();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkEvictClient(int connectionId);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkAddCallback(ulong handle);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkRemoveCallback(ulong handle);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Device[] NetworkGetDevices();
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Address[] NetworkGetDiscoveredServers();
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool NetworkGetIsListeningForServers();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkSetIsListeningForServers(bool set);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool NetworkGetIsBroadcastingServerIP();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkSetIsBroadcastingServerIP(bool set);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Address[] NetworkDeviceGetAddresses(string device);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkConnect(Address a);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkDisconnect();
@@ -968,9 +1000,10 @@ namespace idk
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static ulong NetworkInstantiatePrefabPositionRotation(Guid guid, Vector3 pos, Quaternion rot);
 
-        /*
-         * ElectronView
-         */
+        #endregion
+
+        #region ElectronView
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static uint ViewGetNetworkId(ulong handle);
 
@@ -991,6 +1024,8 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void ViewDestroy(ulong handle);
+
+        #endregion
 
     }
 }

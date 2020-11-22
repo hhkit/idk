@@ -8,6 +8,8 @@
 #include <network/GhostManager.h>
 #include <network/NetworkTuple.inl>
 #include <meta/variant.inl>
+#include <steam/isteamnetworkingsockets.h>
+#include <network/IncludeMessages.h>
 
 #undef SendMessage
 
@@ -15,7 +17,25 @@ namespace idk
 {
 	namespace detail
 	{
-		using NetworkHelper = NetworkTuple<NetworkMessageTuple>;
+		template<typename T> struct NetworkMessageHelper;
+
+		template<typename ... Ts>
+		class NetworkMessageHelper<std::tuple<Ts...>>
+		{
+			static constexpr array<void (*)(Client& client, ReadStream& stream), sizeof...(Ts)> ProcessMessageJT{
+				[](Client& client, ReadStream& stream) {
+					Ts msg;
+					msg.SerializeInternal(stream);
+					client.ProcessMessage(&msg, MessageID<Ts>);
+				} ...
+			};
+
+		public:
+			void ProcessMessage(Client& client, uint8_t message_type, ReadStream& stream)
+			{
+				ProcessMessageJT[message_type](client, stream);
+			}
+		};
 	}
 
 	template<typename RealSubstreamManager>
@@ -28,23 +48,17 @@ namespace idk
 		return static_cast<RealSubstreamManager&>(*ptr);
 	}
 
-	ClientConnectionManager::ClientConnectionManager(Client& _client)
-		: client{ _client }
+	ClientConnectionManager::ClientConnectionManager(Client& client, HSteamNetConnection handle)
+		: ConnectionManager(handle), client{ client }
 	{
 		InstantiateSubmanagers();
 	}
 
 	ClientConnectionManager::~ClientConnectionManager()
 	{
-		if (client.IsConnected())
-			client.OnDisconnectionFromServer.Fire();
+		SteamNetworkingSockets()->CloseConnection(handle, 0, nullptr, false);
 		for (const auto& [type, slot] : OnMessageReceived_slots)
 			client.OnMessageReceived[(int) type].Unlisten(slot);
-	}
-
-	seconds ClientConnectionManager::GetRTT() const
-	{
-		return duration_cast<seconds>(std::chrono::duration<float, std::milli>(client.GetRTT()));
 	}
 
 	void ClientConnectionManager::FrameStartManagers()
@@ -64,21 +78,21 @@ namespace idk
 		return Host::SERVER;
 	}
 
-	yojimbo::Message* ClientConnectionManager::CreateMessage(size_t id)
-	{
-		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+	//yojimbo::Message* ClientConnectionManager::CreateMessage(size_t id)
+	//{
+	//	constexpr auto message_name_array = detail::NetworkHelper::GenNames();
 
-		// if (   id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
-		// 	&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
-		// 	&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
-		// 	)
-		// LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
-		return client.CreateMessage(static_cast<int>(id));
-	}
+	//	// if (   id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+	//	// 	&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+	//	// 	&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+	//	// 	)
+	//	// LOG_TO(LogPool::NETWORK, "creating %s message", message_name_array[id].data());
+	//	return client.CreateMessage(static_cast<int>(id));
+	//}
 
-	void ClientConnectionManager::SendMessage(yojimbo::Message* message, GameChannel delivery_mode)
+	void ClientConnectionManager::SendMessage(SteamNetworkingMessage_t* message)
 	{
-		client.SendMessage(message, delivery_mode);
+		client.SendMessage(message);
 	}
 
 	BaseSubstreamManager* ClientConnectionManager::GetManager(size_t substream_type_id)
@@ -96,5 +110,23 @@ namespace idk
 		AddSubstreamManager<ClientMoveManager>();
 		AddSubstreamManager<EventManager>();
 		AddSubstreamManager<GhostManager>();
+	}
+
+	void ClientConnectionManager::ReceiveMessages()
+	{
+		auto helper = detail::NetworkMessageHelper<NetworkMessageTuple>();
+
+		int count = SteamNetworkingSockets()->ReceiveMessagesOnConnection(handle, in_messages, std::size(in_messages));
+		for (int i = 0; i < count; ++i)
+		{
+			auto* msg = in_messages[i];
+			ReadStream stream{ in_message_buffer, static_cast<uint32_t>(msg->m_cbSize) };
+			uint8_t type;
+			stream.SerializeUInt8(type);
+
+			helper.ProcessMessage(client, type, stream);
+
+			msg->Release();
+		}
 	}
 }

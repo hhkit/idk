@@ -12,22 +12,23 @@ namespace idk
 		: public ConnectionManager
 	{
 	public:
-		ClientConnectionManager(Client& client);
+		ClientConnectionManager(Client& client, HSteamNetConnection handle);
 		~ClientConnectionManager();
 
-		using ConnectionManager::CreateMessage;
 		using ConnectionManager::SendMessage;
 		using ConnectionManager::GetManager;
-
 
 		template<typename MessageType, typename Func, typename = sfinae<std::is_invocable_v<Func, MessageType&>>>
 		void Subscribe(Func&& func)
 		{
 			Subscribe2<MessageType>(std::forward<Func>(func)); //Forward hack cause MSVC bug? in 16.2.3
 		}
-		seconds GetRTT() const override;
+
 		void FrameStartManagers() override;
 		void FrameEndManagers() override;
+
+		void ReceiveMessages();
+
 	private:
 		struct EventSlot { unsigned type; SignalBase::SlotId slot; };
 		Client& client;
@@ -38,8 +39,7 @@ namespace idk
 
 		template<typename MessageType, typename Func>
 		void Subscribe2(Func&& func);
-		yojimbo::Message* CreateMessage(size_t id) override;
-		void SendMessage(yojimbo::Message* message, GameChannel delivery_mode) override;
+		void SendMessage(SteamNetworkingMessage_t* message) override;
 		class BaseSubstreamManager* GetManager(size_t substream_type_id) override;
 
 		void InstantiateSubmanagers();

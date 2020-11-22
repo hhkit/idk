@@ -1,13 +1,13 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/network.h>
+#include <network/Message.h>
 #include <res/ResourceHandle.h>
 
 namespace idk
 {
 	class EventDestroyObjectMessage
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		NetworkID id;
@@ -19,7 +19,7 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 
 }
