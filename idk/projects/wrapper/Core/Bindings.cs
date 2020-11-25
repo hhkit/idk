@@ -944,13 +944,19 @@ namespace idk
         public extern static int NetworkGetPing();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkCreateLobby();
+        public extern static void NetworkCreateLobby(int lobbyType);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkJoinLobby(ulong lobby);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkLeaveLobby();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static ulong NetworkGetCurrentLobby();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int NetworkGetLocalClient();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkOpenLobbyInviteDialog();
@@ -963,6 +969,9 @@ namespace idk
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkSetLobbyData(string key, string value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkSendLobbyMsg(string msg);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int NetworkGetLobbyNumMembers(ulong lobby);

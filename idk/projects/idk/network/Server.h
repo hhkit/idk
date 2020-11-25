@@ -40,9 +40,6 @@ namespace idk
 
 		void SendMessage(SteamNetworkingMessage_t* message);
 
-		void ClientConnected(int clientIndex);
-		void ClientDisconnected(int clientIndex);
-
 	private:
 		CSteamID lobby_id;
 		std::vector<SteamNetworkingMessage_t*> out_messages;

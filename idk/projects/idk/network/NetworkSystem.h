@@ -29,7 +29,7 @@ namespace idk
 		~NetworkSystem();
 
 		CSteamID GetLobbyID() { return lobby_id; }
-		void CreateLobby();
+		void CreateLobby(ELobbyType lobby_type);
 		void JoinLobby(CSteamID lobby_id);
 		void LeaveLobby();
 		void SendLobbyMsg(const string& msg);

@@ -1,14 +1,10 @@
-﻿using System.Runtime.InteropServices;
-
-namespace idk
+﻿namespace idk
 {
     /// <summary>
     /// An identifier for a player on the network.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Client
+    public class Client
     {
-
         public static Client Server => new Client(-1);
 
         int connectionId;
@@ -20,8 +16,9 @@ namespace idk
         public int actorNumber { get => connectionId; }
 
         /// <summary>
-        /// The Network Identifier for the player.
-        /// Values range from 0 to 2 for up to 3 connections. -1 corresponds to the Server.
+        /// The index of the player in the current lobby.
+        /// Values range from 0 to 3. Server can be any number, unlike actorNumber.
+        /// This value won't change until you leave the lobby.
         /// </summary>
         public int lobbyIndex => Bindings.NetworkClientLobbyIndex(connectionId);
 
@@ -36,7 +33,7 @@ namespace idk
 
         public override string ToString()
         {
-            return "Client " + actorNumber;
+            return connectionId == -1 ? "Server" : ("Client " + actorNumber);
         }
 
         public static bool operator ==(Client lhs, Client rhs)

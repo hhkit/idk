@@ -1895,7 +1895,7 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::CameraGetDepth", float, Handle<Camera> h)
+		BIND_START("idk.Bindings::CameraGetDepth", int, Handle<Camera> h)
 		{
 			return h->depth;
 		}
@@ -2471,9 +2471,9 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkCreateLobby", void)
+		BIND_START("idk.Bindings::NetworkCreateLobby", void, int lobby_type)
 		{
-			Core::GetSystem<NetworkSystem>().CreateLobby();
+			Core::GetSystem<NetworkSystem>().CreateLobby(static_cast<ELobbyType>(lobby_type));
 		}
 		BIND_END();
 
@@ -2486,6 +2486,18 @@ namespace idk::mono
 		BIND_START("idk.Bindings::NetworkLeaveLobby", void)
 		{
 			Core::GetSystem<NetworkSystem>().LeaveLobby();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetCurrentLobby", uint64_t)
+		{
+			return Core::GetSystem<NetworkSystem>().GetLobbyID().ConvertToUint64();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetLocalClient", int)
+		{
+			return static_cast<int>(Core::GetSystem<NetworkSystem>().GetMe());
 		}
 		BIND_END();
 
@@ -2510,6 +2522,12 @@ namespace idk::mono
 		BIND_START("idk.Bindings::NetworkSetLobbyData", void, MonoString* key, MonoString* value)
 		{
 			SteamMatchmaking()->SetLobbyData(Core::GetSystem<NetworkSystem>().GetLobbyID(), unbox(key).get(), unbox(value).get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSendLobbyMsg", void, MonoString* msg)
+		{
+			SteamMatchmaking()->SendLobbyChatMsg(Core::GetSystem<NetworkSystem>().GetLobbyID(), unbox(msg).get(), mono_string_length(msg) + 1);
 		}
 		BIND_END();
 

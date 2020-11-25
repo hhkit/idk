@@ -102,27 +102,4 @@ namespace idk
 		out_messages.push_back(message);
 	}
 
-	void Server::ClientConnected(int clientIndex)
-	{
-		LOG_TO(LogPool::NETWORK, "Client %d connected", clientIndex);
-
-		//auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
-		//auto player = player_type->ConstructTemporary(clientIndex);
-		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-		{
-			target->FireMessage("OnClientConnected", clientIndex);
-		}
-	}
-
-	void Server::ClientDisconnected(int clientIndex)
-	{
-		LOG_TO(LogPool::NETWORK, "Client %d disconnected", clientIndex);
-
-		//auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
-		//auto player = player_type->ConstructTemporary(clientIndex);
-		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-		{
-			target->FireMessage("OnClientDisconnected", clientIndex);
-		}
-	}
 }

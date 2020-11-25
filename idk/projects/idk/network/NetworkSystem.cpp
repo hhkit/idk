@@ -42,17 +42,15 @@
 
 namespace idk
 {
-	static inline unsigned short subnet_bits;
-
 	NetworkSystem::NetworkSystem() = default;
 	NetworkSystem::~NetworkSystem() = default;
 
-	void NetworkSystem::CreateLobby()
+	void NetworkSystem::CreateLobby(ELobbyType lobby_type)
 	{
 		ResetNetwork();
 		frame_counter = SeqNo{};
 
-		SteamMatchmaking()->CreateLobby(k_ELobbyTypePublic, GameConfiguration::MAX_LOBBY_MEMBERS);
+		SteamMatchmaking()->CreateLobby(lobby_type, GameConfiguration::MAX_LOBBY_MEMBERS);
 
 		SteamNetworkingUtils()->InitRelayNetworkAccess();
 	}
@@ -193,7 +191,7 @@ namespace idk
 				for (auto& target : callback_objects)
 				{
 					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
-					auto player = player_type->ConstructTemporary(index);
+					auto player = player_type->ConstructTemporary(host);
 
 					target->FireMessage("OnLobbyMemberJoined", player);
 				}
@@ -209,7 +207,7 @@ namespace idk
 					lobby_members[i].id = k_steamIDNil;
 
 					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
-					auto player = player_type->ConstructTemporary(i);
+					auto player = player_type->ConstructTemporary(lobby_members[i].host);
 					for (auto& target : callback_objects)
 						target->FireMessage("OnLobbyMemberLeft", player);
 					break;
@@ -442,11 +440,12 @@ namespace idk
 
 	void NetworkSystem::OnLobbyMatchList(LobbyMatchList_t* callback)
 	{
-		auto* arr = mono_array_new(mono_domain_get(), mono_get_uint64_class(), callback->m_nLobbiesMatching);
+		auto lobby_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Lobby");
+		auto* arr = mono_array_new(mono_domain_get(), lobby_type->Raw(), callback->m_nLobbiesMatching);
 		for (uint32 i = 0; i < callback->m_nLobbiesMatching; ++i)
 		{
-			auto lobby = SteamMatchmaking()->GetLobbyByIndex(i);
-			mono_array_set(arr, uint64, i, lobby.ConvertToUint64());
+			auto lobby = lobby_type->ConstructTemporary(SteamMatchmaking()->GetLobbyByIndex(i).ConvertToUint64());
+			mono_array_setref(arr, i, lobby);
 		}
 
 		for (auto& target : callback_objects)
@@ -464,8 +463,10 @@ namespace idk
 			if (lobby_members[i].id == id)
 			{
 				MonoString* str = mono_string_new(mono_domain_get(), buf);
+				auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
+				auto player = player_type->ConstructTemporary(lobby_members[i].host);
 				for (auto& target : callback_objects)
-					target->FireMessage("OnLobbyChatMsg", lobby_members[i].host, str);
+					target->FireMessage("OnLobbyChatMsg", player, str);
 				break;
 			}
 		}
