@@ -9,16 +9,23 @@ namespace idk
     public interface ILobbyCallbacks
     {
         /// <summary>
-        /// Called when THIS player creates a lobby.
+        /// Called when the local player creates a lobby.
         /// </summary>
         void OnLobbyCreated(bool success);
 
         /// <summary>
-        /// Called when THIS player joins a lobby.
+        /// Called when the local player joins a lobby.
         /// </summary>
         void OnLobbyJoined(bool success);
 
+        /// <summary>
+        /// Called when another member joins the lobby the local player is in.
+        /// </summary>
         void OnLobbyMemberJoined(Client client);
+
+        /// <summary>
+        /// Called when another member leaves the lobby the local player is in.
+        /// </summary>
         void OnLobbyMemberLeft(Client client);
 
         /// <summary>
@@ -31,6 +38,10 @@ namespace idk
         /// </summary>
         void OnLobbyMatchList(Lobby[] lobbies);
 
-        void OnLobbyChatMsg(Client sender, string message);
+        /// <summary>
+        /// Gets called every frame for messages received in the lobby, sent by ElectronNetwork.SendLobbyMsg
+        /// Also received by the sender.
+        /// </summary>
+        void OnLobbyChatMsg(Client sender, byte[] message);
     }
 }

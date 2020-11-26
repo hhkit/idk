@@ -108,7 +108,7 @@ namespace idk
         /// These messages are sent via the Steam back-end, and so the bandwidth available is limited.
         /// For higher-volume traffic like voice or game data, you'll want to use P2P functionality. See ConnectToLobbyOwner.
         /// </summary>
-        public static void SendLobbyMsg(string msg) => Bindings.NetworkSendLobbyMsg(msg);
+        public static void SendLobbyMsg(byte[] msg) => Bindings.NetworkSendLobbyMsg(msg);
 
         /// <summary>
         /// Connects P2P to the owner of the current lobby. This is required for P2P functionality and network synchronization.<br />

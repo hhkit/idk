@@ -2525,9 +2525,11 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkSendLobbyMsg", void, MonoString* msg)
+		BIND_START("idk.Bindings::NetworkSendLobbyMsg", void, MonoArray* msg)
 		{
-			SteamMatchmaking()->SendLobbyChatMsg(Core::GetSystem<NetworkSystem>().GetLobbyID(), unbox(msg).get(), mono_string_length(msg) + 1);
+			int sz = static_cast<int>(mono_array_length(msg));
+			auto* bytes = mono_array_addr(msg, std::byte, 0);
+			SteamMatchmaking()->SendLobbyChatMsg(Core::GetSystem<NetworkSystem>().GetLobbyID(), bytes, sz);
 		}
 		BIND_END();
 

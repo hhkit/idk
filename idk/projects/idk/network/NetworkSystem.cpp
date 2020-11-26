@@ -454,19 +454,22 @@ namespace idk
 
 	void NetworkSystem::OnLobbyChatMsg(LobbyChatMsg_t* callback)
 	{
-		char buf[128];
-		SteamMatchmaking()->GetLobbyChatEntry(lobby_id, callback->m_iChatID, nullptr, buf, 128, nullptr);
+		std::byte buf[128];
+		int sz = SteamMatchmaking()->GetLobbyChatEntry(lobby_id, callback->m_iChatID, nullptr, buf, 128, nullptr);
 
 		CSteamID id = callback->m_ulSteamIDUser;
 		for (int i = 0; i < GameConfiguration::MAX_LOBBY_MEMBERS; ++i)
 		{
 			if (lobby_members[i].id == id)
 			{
-				MonoString* str = mono_string_new(mono_domain_get(), buf);
+				MonoArray* arr = mono_array_new(mono_domain_get(), mono_get_byte_class(), sz);
+				std::memcpy(mono_array_addr(arr, std::byte, 0), buf, sz);
+
 				auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
 				auto player = player_type->ConstructTemporary(lobby_members[i].host);
+
 				for (auto& target : callback_objects)
-					target->FireMessage("OnLobbyChatMsg", player, str);
+					target->FireMessage("OnLobbyChatMsg", player, arr);
 				break;
 			}
 		}

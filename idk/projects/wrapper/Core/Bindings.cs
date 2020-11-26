@@ -971,7 +971,7 @@ namespace idk
         public extern static void NetworkSetLobbyData(string key, string value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkSendLobbyMsg(string msg);
+        public extern static void NetworkSendLobbyMsg(byte[] msg);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int NetworkGetLobbyNumMembers(ulong lobby);
