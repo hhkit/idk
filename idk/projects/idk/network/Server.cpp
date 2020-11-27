@@ -69,14 +69,8 @@ namespace idk
 
 	void Server::SendPackets()
 	{
-		SteamNetworkingSockets()->SendMessages(out_messages.size(), out_messages.data(), nullptr);
+		SteamNetworkingSockets()->SendMessages(static_cast<int>(out_messages.size()), out_messages.data(), nullptr);
 		out_messages.clear();
-	}
-
-	void Server::EvictClient(int clientId)
-	{
-		// todo send kick
-		//server.DisconnectClient(clientId);
 	}
 
 	void Server::SetPacketLoss(float percent_loss)

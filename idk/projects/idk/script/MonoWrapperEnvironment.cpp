@@ -2459,12 +2459,6 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkEvictClient", void, int id)
-		{
-			Core::GetSystem<NetworkSystem>().EvictClient(id);
-		}
-		BIND_END();
-
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
 			Core::GetSystem<NetworkSystem>().Disconnect();

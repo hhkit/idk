@@ -84,12 +84,12 @@ namespace idk
 		}
 	}
 
-	void NetworkSystem::JoinLobby(CSteamID lobby_id)
+	void NetworkSystem::JoinLobby(CSteamID _lobby_id)
 	{
 		ResetNetwork();
 		frame_counter = SeqNo{};
 
-		SteamMatchmaking()->JoinLobby(lobby_id);
+		SteamMatchmaking()->JoinLobby(_lobby_id);
 
 		SteamNetworkingUtils()->InitRelayNetworkAccess();
 	}
@@ -146,8 +146,8 @@ namespace idk
 
 			// on join, store my lobby member index and my host id
 			char buf[3] { 0, 0, 0 };
-			buf[0] = '0' + my_index;
-			buf[1] = '0' + static_cast<int>(my_id);
+			buf[0] = '0' + static_cast<char>(my_index);
+			buf[1] = '0' + static_cast<char>(my_id);
 			SteamMatchmaking()->SetLobbyMemberData(lobby_id, "info", buf);
 
 			for (auto& target : callback_objects)
@@ -482,12 +482,6 @@ namespace idk
 	void NetworkSystem::Disconnect()
 	{
 		ResetNetwork();
-	}
-
-	void NetworkSystem::EvictClient(int clientID)
-	{
-		if (server)
-			server->EvictClient(clientID);
 	}
 
 	bool NetworkSystem::IsHost()

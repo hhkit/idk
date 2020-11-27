@@ -29,8 +29,6 @@
             connectionId = i;
         }
 
-        public void Evict() => Bindings.NetworkEvictClient(connectionId);
-
         public override string ToString()
         {
             return connectionId == -1 ? "Server" : ("Client " + actorNumber);

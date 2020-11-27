@@ -36,9 +36,7 @@ namespace idk
 		CSteamID GetLobbyMember(Host host);
 		int GetLobbyMemberIndex(Host host);
 		void ConnectToLobbyOwner();
-
 		void Disconnect();
-		void EvictClient(int clientID);
 
 		Client& GetClient() { return *client; }
 		Server& GetServer() { return *server; }

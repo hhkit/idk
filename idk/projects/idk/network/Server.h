@@ -31,9 +31,6 @@ namespace idk
 		CSteamID GetLobbyID() { return lobby_id; }
 		void SetPacketLoss(float percent_loss);
 		void SetLatency(seconds dur);
-		float GetRTT(int clientIndex) const;
-
-		void EvictClient(int clientId);
 
 		void ProcessMessage(int clientIndex, Message* message, uint32_t id);
 		void SendPackets();

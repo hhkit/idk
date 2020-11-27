@@ -989,9 +989,6 @@ namespace idk
         public extern static int[] NetworkGetClients();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NetworkEvictClient(int connectionId);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static void NetworkAddCallback(ulong handle);
 
         [MethodImpl(MethodImplOptions.InternalCall)]

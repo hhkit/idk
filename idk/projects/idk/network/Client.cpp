@@ -22,6 +22,7 @@ namespace idk
 	}
 
 	Client::Client(CSteamID lobby_id)
+		: lobby_id{ lobby_id }
 	{
 	}
 
@@ -70,7 +71,7 @@ namespace idk
 	//}
 	void Client::SendPackets()
 	{
-		SteamNetworkingSockets()->SendMessages(out_messages.size(), out_messages.data(), nullptr);
+		SteamNetworkingSockets()->SendMessages(static_cast<int>(out_messages.size()), out_messages.data(), nullptr);
 		out_messages.clear();
 	}
 

@@ -15,10 +15,10 @@ namespace idk
 {
 	namespace detail
 	{
-		template<typename T> struct NetworkMessageHelper;
+		template<typename T> struct ServerMessageHelper;
 
 		template<typename ... Ts>
-		class NetworkMessageHelper<std::tuple<Ts...>>
+		class ServerMessageHelper<std::tuple<Ts...>>
 		{
 			static constexpr array<void (*)(Server& server, int clientid, ReadStream& stream), sizeof...(Ts)> ProcessMessageJT{
 				[](Server& server, int clientid, ReadStream& stream) {
@@ -111,9 +111,9 @@ namespace idk
 
 	void ServerConnectionManager::ReceiveMessages()
 	{
-		auto helper = detail::NetworkMessageHelper<NetworkMessageTuple>();
+		auto helper = detail::ServerMessageHelper<NetworkMessageTuple>();
 
-		int count = SteamNetworkingSockets()->ReceiveMessagesOnConnection(handle, in_messages, std::size(in_messages));
+		int count = SteamNetworkingSockets()->ReceiveMessagesOnConnection(handle, in_messages, static_cast<int>(std::size(in_messages)));
 		for (int i = 0; i < count; ++i)
 		{
 			auto* msg = in_messages[i];
