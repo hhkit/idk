@@ -225,11 +225,6 @@ namespace idk
 		frame_counter = SeqNo{};
 	}
 
-	void NetworkSystem::SendLobbyMsg(const string& msg)
-	{
-		SteamMatchmaking()->SendLobbyChatMsg(lobby_id, msg.data(), msg.size() + 1);
-	}
-
 	void NetworkSystem::FindLobbies()
 	{
 		SteamMatchmaking()->RequestLobbyList();
@@ -473,6 +468,15 @@ namespace idk
 				break;
 			}
 		}
+	}
+
+	void NetworkSystem::OnLobbyJoinRequested(GameLobbyJoinRequested_t* callback)
+	{
+		auto lobby_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Lobby");
+		auto lobby = lobby_type->ConstructTemporary(callback->m_steamIDLobby);
+
+		for (auto& target : callback_objects)
+			target->FireMessage("OnLobbyJoinRequested", lobby);
 	}
 
 	void NetworkSystem::Disconnect()

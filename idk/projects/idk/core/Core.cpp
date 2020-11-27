@@ -69,6 +69,8 @@ namespace idk
 
 	Core::~Core()
 	{
+		if (_pimpl)
+			Shutdown();
 	}
 
 	void Core::Init()

@@ -39,9 +39,15 @@ namespace idk
         void OnLobbyMatchList(Lobby[] lobbies);
 
         /// <summary>
-        /// Gets called every frame for messages received in the lobby, sent by ElectronNetwork.SendLobbyMsg
+        /// Gets called every frame for messages received in the lobby, sent by ElectronNetwork.SendLobbyMsg().
         /// Also received by the sender.
         /// </summary>
         void OnLobbyChatMsg(Client sender, byte[] message);
+
+        /// <summary>
+        /// Called when the user tries to join a lobby from their friends list.
+        /// Game client should attempt to connect to specified lobby when this is received
+        /// </summary>
+        void OnLobbyJoinRequested(Lobby lobby);
     }
 }

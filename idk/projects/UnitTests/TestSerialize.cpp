@@ -3,25 +3,10 @@
 #include <common/Transform.h>
 #include <scene/SceneManager.h>
 #include <serialize/yaml.inl>
-#include <util/enum.h>
-#include <ReflectReg_Common.inl>
 #include <res/ResourceHandle.inl>
-#include <res/guid.inl>
+#include "TestStructures.h"
 
 using namespace idk;
-
-ENUM(testserialize_enum, int, PI, TAU)
-REFLECT_ENUM(testserialize_enum, "testserialize_enum")
-
-struct serialize_this
-{
-	Guid guid;
-	vec4 vec;
-	int f = 69;
-};
-REFLECT_BEGIN(serialize_this, "serialize_this")
-REFLECT_VARS(guid, vec, f)
-REFLECT_END()
 
 TEST(Serialize, TestYaml)
 {
@@ -122,20 +107,6 @@ TEST(Serialize, TestSerializeBasic)
     EXPECT_EQ(yolo[0], "");
 }
 
-struct serialize_this_bs
-{
-	int start = 0;
-	vector<string> string_vec;
-	float mid = 1.0f;
-	hash_table<Guid, string> hashtable;
-	char end = '2';
-};
-REFLECT_BEGIN(decltype(serialize_this_bs::hashtable), "hash_table<Guid,string>")
-REFLECT_END()
-REFLECT_BEGIN(serialize_this_bs, "serialize_this_bs")
-REFLECT_VARS(start, string_vec, mid, hashtable, end)
-REFLECT_END()
-
 TEST(Serialize, TestSerializeComplex)
 {
 	serialize_this_bs bs;
@@ -159,20 +130,10 @@ TEST(Serialize, TestSerializeComplex)
 	EXPECT_EQ(bs2.hashtable[(++bs.hashtable.begin())->first], (++bs.hashtable.begin())->second);
 }
 
-struct serialass : serialize_this
-{
-	UniformInstanceValue var;
-	testserialize_enum x = testserialize_enum::TAU;
-};
-REFLECT_BEGIN(serialass, "serialass")
-REFLECT_PARENT(serialize_this)
-REFLECT_VARS(var, x)
-REFLECT_END()
-
 TEST(Serialize, TestSerializeUnknownAndParentAndVariant)
 {
 	serialass s;
-	s.var = mat4{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+	s.var = vec2{ 6.0f, 9.0f };
 	s.guid = Guid::Make();
 	s.vec = vec4{ 100, 200, 300, 400 };
 
@@ -257,13 +218,6 @@ TEST(Serialize, TestParseScene)
 	EXPECT_EQ(o1.Parent(), o0.GetHandle());
 }
 
-struct structthatcontainsdyn
-{
-    reflect::dynamic dyn;
-};
-REFLECT_BEGIN(structthatcontainsdyn, "structthatcontainsdyn")
-REFLECT_VARS(dyn)
-REFLECT_END()
 TEST(Serialize, TestSerializeStructThatContainsDyn)
 {
     structthatcontainsdyn x{ string("hello") };
@@ -272,17 +226,6 @@ TEST(Serialize, TestSerializeStructThatContainsDyn)
     ASSERT_EQ(x.dyn.get<string>(), x2.dyn.get<string>());
 }
 
-struct structonparse
-{
-    int x = 0;
-    void on_parse()
-    {
-        x = 999;
-    }
-};
-REFLECT_BEGIN(structonparse, "structonparse")
-REFLECT_VARS(x)
-REFLECT_END()
 TEST(Serialize, TestOnParseCallback)
 {
     structonparse x;

@@ -1,25 +1,10 @@
 #include "pch.h"
-#include <reflect/reflect.h>
-#include <util/enum.h>
+#include <reflect/reflect.inl>
 #include <meta/variant.h>
+#include "TestStructures.h"
 #include <res/Guid.inl>
-#include <ReflectReg_Common.inl>
 
 using namespace idk;
-//
-//template<typename T>
-//struct ClassName
-//{
-//	constexpr static char m_Name[] = typeid(T).name();
-//};
-//
-//#define REFLECT_NAME_CLASS(CLASS_TYPE,Alias) template<>struct ClassName<CLASS_TYPE> { constexpr static char m_Name[] = Alias; };
-//#define REFLECT_TEMPLATE_NAME_CLASS(TEMPLATE_ARGS,CLASS_TYPE,Alias) template<TEMPLATE_ARGS>struct ClassName<CLASS_TYPE> { constexpr static char m_Name[] = Alias; };
-//#define REFLECT_TEMPLATE_BEGIN(TEMPLATE_ARGS,CLASS_TYPE, ALIAS)		template<TEMPLATE_ARGS> struct property::opin::def<CLASS_TYPE>{ using t_self = CLASS_TYPE; constexpr static char m_Name[] = ClassName<CLASS_TYPE>::m_Name; inline static const idk::reflect::detail::table_storage m_Storage { idk::reflect::detail::class_holder<t_self>{},
-//
-//REFLECT_TEMPLATE_BEGIN(typename T,RscHandle<T>, (STRINGIFY(ResourceHandle_) STRINGIFY(T)))
-//REFLECT_VAR(guid)
-//REFLECT_END()
 
 TEST(Reflect, TestReflectBasic)
 {
@@ -51,20 +36,6 @@ TEST(Reflect, TestReflectBasic)
     EXPECT_EQ(x[2], reflect::get_type<vec3>());
 }
 
-struct reflect_this
-{
-	vec4 vec;
-	int f = 69;
-	vector<string> container;
-	double blaze_it = 420.0;
-	hash_table<Guid, string> hashtable;
-};
-REFLECT_BEGIN(decltype(reflect_this::hashtable), "hash_table<Guid,string>")
-REFLECT_END()
-REFLECT_BEGIN(reflect_this, "reflect_this")
-REFLECT_VARS(vec, f, container, blaze_it, hashtable)
-REFLECT_END()
-
 TEST(Reflect, TestReflectConstexpr)
 {
 	auto t = reflect::get_type("vec3");
@@ -77,7 +48,7 @@ TEST(Reflect, TestReflectConstexpr)
 
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<float>() }.c_str(), "float");
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<vec4>() }.c_str(), "idk::tvec<float,4>");
-	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<reflect_this>() }.c_str(), "reflect_this");
+	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<reflect_this>() }.c_str(), "idk::reflect_this");
 	EXPECT_STREQ(string{ reflect::fully_qualified_nameof<array>() }.c_str(), "idk::array");
 
 	int switch_case = 0;
@@ -192,7 +163,7 @@ TEST(Reflect, TestReflectRangeFor)
 	std::vector<string_view> names;
 	std::vector<reflect::dynamic> values;
 
-	for (auto& [name, val] : dyn.get_property("vec").value)
+	for (auto [name, val] : dyn.get_property("vec").value)
 	{
 		names.push_back(name);
 		values.emplace_back(val);
@@ -208,7 +179,7 @@ TEST(Reflect, TestReflectRangeFor)
 	EXPECT_EQ(values[2].get<float>(), 3.0f);
 	EXPECT_EQ(values[3].get<float>(), 4.0f);
 
-	for (auto& [name, val] : dyn.get_property("vec").value)
+	for (auto [name, val] : dyn.get_property("vec").value)
 	{
 		val.get<float>() *= 2.0f;
 	}
@@ -225,7 +196,7 @@ TEST(Reflect, TestReflectUniContainer)
 		EXPECT_TRUE(container.type.is_template<std::array>());
 
 		std::vector<reflect::dynamic> values;
-		for (auto& elem : container)
+		for (auto elem : container)
 		{
 			values.push_back(elem);
 		}
@@ -248,7 +219,7 @@ TEST(Reflect, TestReflectUniContainer)
 		container.add(5.0f);
 
 		std::vector<reflect::dynamic> values;
-		for (auto& elem : container)
+		for (auto elem : container)
 		{
 			values.push_back(elem);
 		}
@@ -273,7 +244,7 @@ TEST(Reflect, TestReflectUniContainer)
 		container.add(std::pair<const char, double>{ 'e', 5.0f });
 
 		std::vector<reflect::dynamic> values;
-		for (auto& elem : container)
+		for (auto elem : container)
 		{
 			values.push_back(elem);
 		}
@@ -287,12 +258,6 @@ TEST(Reflect, TestReflectUniContainer)
 		EXPECT_EQ(container.size(), 0);
 	}
 }
-
-namespace idk
-{
-	ENUM(testenum, char, IVAN = 5, IS, A, WEEB)
-}
-REFLECT_ENUM(idk::testenum, "testenum")
 
 TEST(Reflect, TestReflectEnum)
 {
@@ -326,15 +291,6 @@ TEST(Reflect, TestReflectEnum)
 	EXPECT_EQ(ivan, testenum(testenum::WEEB));
 }
 
-struct unknowntest : reflect_this
-{
-	testenum t = testenum::A;
-};
-REFLECT_BEGIN(unknowntest, "unknowntest")
-REFLECT_PARENT(reflect_this)
-REFLECT_VARS(t)			    
-REFLECT_END()
-
 TEST(Reflect, TestParentAndUnknownVisit)
 {
 	unknowntest v;
@@ -348,16 +304,9 @@ TEST(Reflect, TestParentAndUnknownVisit)
 	EXPECT_EQ(count, 1 + reflect::get_type<reflect_this>().count() + 4 + 1);
 }
 
-struct varianttest
-{
-	UniformInstanceValue uniform;
-};
-REFLECT_BEGIN(varianttest, "varianttest")
-REFLECT_VARS(uniform)
-REFLECT_END()
 TEST(Reflect, TestVisitVariant)
 {
-	varianttest test{ mat4{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 } };
+	varianttest test{ vec4{ 3.0f, 141.0f, 592.0f, 65.0f } };
 
 	std::vector<reflect::dynamic> visited_keys;
 	std::vector<reflect::dynamic> visited_values;
@@ -369,7 +318,6 @@ TEST(Reflect, TestVisitVariant)
 	});
 
 	EXPECT_STREQ(visited_keys[0].get<const char*>(), "uniform");
-	EXPECT_TRUE(visited_keys[1].get<reflect::type>().is<mat4>());
-    constexpr size_t index = index_in_variant_v<mat4, UniformInstanceValue>;
-	EXPECT_EQ(visited_values[1].get<mat4>(), std::get<index>(test.uniform));
+	EXPECT_TRUE(visited_keys[1].get<reflect::type>().is<vec4>());
+	EXPECT_EQ(visited_values[1].get<vec4>(), std::get<vec4>(test.uniform));
 }

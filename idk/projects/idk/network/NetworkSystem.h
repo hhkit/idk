@@ -32,7 +32,6 @@ namespace idk
 		void CreateLobby(ELobbyType lobby_type);
 		void JoinLobby(CSteamID lobby_id);
 		void LeaveLobby();
-		void SendLobbyMsg(const string& msg);
 		void FindLobbies();
 		CSteamID GetLobbyMember(Host host);
 		int GetLobbyMemberIndex(Host host);
@@ -119,6 +118,9 @@ namespace idk
 		STEAM_CALLBACK(NetworkSystem, OnLobbyDataUpdated, LobbyDataUpdate_t);
 		STEAM_CALLBACK(NetworkSystem, OnLobbyMatchList, LobbyMatchList_t);
 		STEAM_CALLBACK(NetworkSystem, OnLobbyChatMsg, LobbyChatMsg_t);
+
+	public:
+		STEAM_CALLBACK(NetworkSystem, OnLobbyJoinRequested, GameLobbyJoinRequested_t);
 
 	};
 }

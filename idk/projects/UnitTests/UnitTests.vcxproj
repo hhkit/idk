@@ -48,6 +48,7 @@
   <ItemGroup>
     <ClInclude Include="core_setup.h" />
     <ClInclude Include="pch.h" />
+    <ClCompile Include="ReflectReg_TestStructures.cpp" />
     <ClCompile Include="Reflect\ReflectRegistered.cpp" />
     <ClCompile Include="Reflect\ReflectReg_AnimComponents.cpp" />
     <ClCompile Include="Reflect\ReflectReg_Components.cpp" />
@@ -70,6 +71,7 @@
       <FileType>CppCode</FileType>
     </ClCompile>
     <ClInclude Include="TestApplication.h" />
+    <ClInclude Include="TestStructures.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SpeedTest.cpp" />
@@ -139,7 +141,7 @@
       <SubSystem>Console</SubSystem>
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)dep\lib\yojimboD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
@@ -185,7 +187,7 @@
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)dep\lib\yojimbo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>

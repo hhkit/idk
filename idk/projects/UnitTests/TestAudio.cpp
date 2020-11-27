@@ -86,12 +86,12 @@ TEST(Audio, AudioSystemClassTest)
 	time_point timeStartTest = Clock::now();
 	seconds elapsed = time_point::clock::now() - timeStartTest;
 
-	bool testCase1 = false;
-	bool testCase2 = false;
-	bool testCase3 = false;
-	bool testCase4 = false;
-	bool testCase5 = false;
-	bool testCase6 = false;
+	//bool testCase1 = false;
+	//bool testCase2 = false;
+	//bool testCase3 = false;
+	//bool testCase4 = false;
+	//bool testCase5 = false;
+	//bool testCase6 = false;
 
 
 
@@ -113,34 +113,34 @@ TEST(Audio, AudioSystemClassTest)
 			//	testCase2 = true;
 			//}
 
-			if (elapsed.count() > 4 && !testCase3) {
-				std::cout << "Playing second sound to MUSIC group\n";
-				audioPtr2->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_MUSIC);
+			//if (elapsed.count() > 4 && !testCase3) {
+			//	std::cout << "Playing second sound to MUSIC group\n";
+			//	audioPtr2->ReassignSoundGroup(SubSoundGroup::SubSoundGroup_MUSIC);
 
-				//audioPtr2->Play();
-				testCase3 = true;
-			}
-			if (elapsed.count() > 5 && !testCase4) {
-				std::cout << "Stopping first music\n";
+			//	//audioPtr2->Play();
+			//	testCase3 = true;
+			//}
+			//if (elapsed.count() > 5 && !testCase4) {
+			//	std::cout << "Stopping first music\n";
 
-				//audioPtr1->Stop();
-				testCase4 = true;
-			}
+			//	//audioPtr1->Stop();
+			//	testCase4 = true;
+			//}
 
-			if (elapsed.count() > 6 && !testCase5) {
-				std::cout << "Playing another misc music and stopping second music\n";
+			//if (elapsed.count() > 6 && !testCase5) {
+			//	std::cout << "Playing another misc music and stopping second music\n";
 
-				//audioPtr3->Play();
-				//audioPtr2->Stop();
+			//	//audioPtr3->Play();
+			//	//audioPtr2->Stop();
 
-				testCase5 = true;
-			}
-			if (elapsed.count() > 8 && !testCase6) {
-				std::cout << "Setting third music to loop and high pitched\n";
-				//audioPtr3->Play(); //Plays another audio
+			//	testCase5 = true;
+			//}
+			//if (elapsed.count() > 8 && !testCase6) {
+			//	std::cout << "Setting third music to loop and high pitched\n";
+			//	//audioPtr3->Play(); //Plays another audio
 
-				testCase6 = true;
-			}
+			//	testCase6 = true;
+			//}
 
 		}
 		catch (EXCEPTION_AudioSystem i) {
@@ -149,6 +149,7 @@ TEST(Audio, AudioSystemClassTest)
 			break;
 		}
 	}
+
 	try {
 		core.Shutdown();
 	}

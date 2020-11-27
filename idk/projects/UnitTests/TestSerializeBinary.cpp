@@ -1,20 +1,11 @@
 #include "pch.h"
 #include <serialize/binary.inl>
-#include <ReflectReg_Common.inl>
-
 #include <res/ResourceHandle.inl>
+#include "TestStructures.h"
+#include <res/Guid.inl>
+#include <reflect/reflect.inl>
 
 using namespace idk;
-
-struct serialize_this
-{
-    Guid guid;
-    vec4 vec;
-    int f = 69;
-};
-REFLECT_BEGIN(serialize_this, "serialize_this")
-REFLECT_VARS(guid, vec, f)
-REFLECT_END()
 
 TEST(Serialize, TestSerializeBinaryBasic)
 {
@@ -53,8 +44,6 @@ TEST(Serialize, TestSerializeBinaryVectorOfDynamics)
     EXPECT_EQ(v[2].get<UniformInstance>().value, UniformInstanceValue(420.0f));
 }
 
-ENUM(testenumber, int, One = 1, Two, Three)
-REFLECT_ENUM(testenumber, "testenumber")
 TEST(Serialize, TestSerializeBinaryHashTable)
 {
     hash_table<string, testenumber> ht;

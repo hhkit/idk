@@ -15,29 +15,28 @@ public:
 
     // app
     void PollEvents() override { ++i; }
-    string Exec(std::string_view path, idk::span<const char*> argv, bool wait) override { };
+    string Exec(std::string_view path, idk::span<const char*> argv, bool wait) override { return {}; }
 
     // movement
-    idk::vec2 GetMouseScreenPos() override { return idk::vec2{}; };
-    idk::vec2 GetMouseScreenDel() override { return idk::vec2{}; };
-    idk::ivec2 GetMousePixelPos() override { return idk::ivec2{}; };
-    idk::ivec2 GetMousePixelDel() override { return idk::ivec2{}; };
+    idk::vec2 GetMouseScreenPos() override { return idk::vec2{}; }
+    idk::vec2 GetMouseScreenDel() override { return idk::vec2{}; }
+    idk::ivec2 GetMousePixelPos() override { return idk::ivec2{}; }
+    idk::ivec2 GetMousePixelDel() override { return idk::ivec2{}; }
     idk::ivec2 GetMouseScroll() override { return {}; }
-    bool GetKeyDown(idk::Key) override { return false; };
-    bool GetKey(idk::Key) override { return false; };
-    bool GetKeyUp(idk::Key) override { return false; };
+    bool GetKeyDown(idk::Key) override { return false; }
+    bool GetKey(idk::Key) override { return false; }
+    bool GetKeyUp(idk::Key) override { return false; }
     char GetChar() override { return 0; }
+    void SwapInputBuffers() override {}
 
     // windows
     idk::ivec2 GetScreenSize() override { return idk::ivec2{}; }
-    bool SetFullscreen(bool) override { return false; };
-    bool SetScreenSize(idk::ivec2) override { return false; };
+    bool SetFullscreen(bool) override { return false; }
+    bool SetScreenSize(idk::ivec2) override { return false; }
 
     // file IO
-    string GetExecutableDir() { return {}; };
-    string GetAppData() { return {}; };
-    string GetCurrentWorkingDir() { return {}; };
-    std::optional<string> OpenFileDialog(const idk::DialogOptions&) override { return {}; };
-
-    idk::vector<idk::Device> GetNetworkDevices() { return{}; };
+    string GetExecutableDir() { return {}; }
+    string GetAppData() { return {}; }
+    string GetCurrentWorkingDir() { return {}; }
+    std::optional<string> OpenFileDialog(const idk::DialogOptions&) override { return {}; }
 };

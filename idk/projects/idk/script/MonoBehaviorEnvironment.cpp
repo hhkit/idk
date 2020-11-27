@@ -172,6 +172,7 @@ namespace idk::mono
 				find_method(type, "OnLobbyDataUpdated");
 				find_method(type, "OnLobbyMatchList", 1);
 				find_method(type, "OnLobbyChatMsg", 2);
+				find_method(type, "OnLobbyJoinRequested", 1);
 				find_method(type, "OnConnectedToServer");
 				find_method(type, "OnDisconnectedFromServer");
 				find_method(type, "OnClientConnected", 1);

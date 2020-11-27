@@ -134,9 +134,6 @@
     <Filter Include="memory">
       <UniqueIdentifier>{5ac86b7f-b5d8-4550-99cd-75d596f6a49b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="network\data">
-      <UniqueIdentifier>{b24b3ed7-5420-4408-ac31-0cbad7e5fce3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="network\system">
       <UniqueIdentifier>{9206de05-115a-4361-83f9-8cd4a78421fb}</UniqueIdentifier>
     </Filter>
@@ -944,17 +941,11 @@
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="pch_common.h" />
-    <ClInclude Include="gfx\ColorPickResult.h">
-      <Filter>gfx\object</Filter>
-    </ClInclude>
     <ClInclude Include="memory\ArenaAllocator.h">
       <Filter>memory</Filter>
     </ClInclude>
     <ClInclude Include="gfx\ColorPickRequest.h">
       <Filter>gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="network\Player.h">
-      <Filter>network</Filter>
     </ClInclude>
     <ClInclude Include="network\Server.h">
       <Filter>network\system</Filter>
@@ -1093,9 +1084,6 @@
     </ClInclude>
     <ClInclude Include="gfx\RenderTargetMeta.h" />
     <ClInclude Include="gfx\TextureInternalFormat.h" />
-    <ClInclude Include="gfx\CascadedSet.h">
-      <Filter>gfx\light</Filter>
-    </ClInclude>
     <ClInclude Include="gfx\Lightmap.h">
       <Filter>gfx\light</Filter>
     </ClInclude>
@@ -1116,9 +1104,6 @@
     </ClInclude>
     <ClInclude Include="scene\SceneGraph.h">
       <Filter>scene</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx\ShadowMapPool.h">
-      <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="util\property_path.h">
       <Filter>util</Filter>
@@ -1150,7 +1135,6 @@
     <ClInclude Include="network\NetworkTuple.inl">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\DefaultShaders.h" />
     <ClInclude Include="network\RPCTarget.h">
       <Filter>network</Filter>
     </ClInclude>
@@ -1166,8 +1150,6 @@
     <ClInclude Include="network\EventDestroyObjectMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
-    <ClInclude Include="gfx\FakeMat4.h" />
-    <ClInclude Include="gfx\GfxDebugData.h" />
     <ClInclude Include="phys\CollisionManager.h">
       <Filter>phys</Filter>
     </ClInclude>
@@ -1195,19 +1177,12 @@
     <ClInclude Include="network\GhostAcknowledgementMessage.h">
       <Filter>network\messages</Filter>
     </ClInclude>
-    <ClInclude Include="network\SeqNo.h" />
-    <ClInclude Include="network\ack_utils.h" />
-    <ClInclude Include="meta\erased_visitor.h" />
-    <ClInclude Include="gfx\RenderTargetFactory.h" />
-    <ClInclude Include="gfx\ColorGrade.h" />
     <ClInclude Include="gfx\PostProcessEffect.h">
       <Filter>gfx</Filter>
     </ClInclude>
     <ClInclude Include="ui\AspectRatioFitter.h">
       <Filter>ui</Filter>
     </ClInclude>
-    <ClInclude Include="network\gbn_sliding_window.h" />
-    <ClInclude Include="network\ControlObjectMessage.h" />
     <ClInclude Include="steam\SteamManager.h" />
     <ClInclude Include="network\Message.h">
       <Filter>network\messages</Filter>
@@ -1217,6 +1192,42 @@
     </ClInclude>
     <ClInclude Include="parallel\circular_buffer.h">
       <Filter>parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\RenderTargetFactory.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ack_utils.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\DefaultShaders.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="network\SeqNo.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ColorGrade.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ColorPickResult.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="network\ControlObjectMessage.h">
+      <Filter>network\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="meta\erased_visitor.h">
+      <Filter>meta</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\FakeMat4.h">
+      <Filter>gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\ShadowMapPool.h">
+      <Filter>gfx\light</Filter>
+    </ClInclude>
+    <ClInclude Include="network\gbn_sliding_window.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx\GfxDebugData.h">
+      <Filter>gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1687,9 +1698,6 @@
       <Filter>network\substream managers</Filter>
     </ClCompile>
     <ClCompile Include="gfx\TextureInternalFormat.cpp" />
-    <ClCompile Include="gfx\CascadedSet.cpp">
-      <Filter>gfx\light</Filter>
-    </ClCompile>
     <ClCompile Include="gfx\Lightmap.cpp">
       <Filter>gfx\light</Filter>
     </ClCompile>
@@ -1697,9 +1705,6 @@
       <Filter>phys\broadphase</Filter>
     </ClCompile>
     <ClCompile Include="gfx\ColorPickRequest.cpp">
-      <Filter>gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="gfx\ShadowMapPool.cpp">
       <Filter>gfx</Filter>
     </ClCompile>
     <ClCompile Include="util\property_path.cpp">
@@ -1717,16 +1722,12 @@
     <ClCompile Include="parallel\multithread_control.cpp">
       <Filter>parallel</Filter>
     </ClCompile>
-    <ClCompile Include="network\ElectronView.cpp">
-      <Filter>network</Filter>
-    </ClCompile>
     <ClCompile Include="network\EventLoadLevelMessage.cpp">
       <Filter>network\messages</Filter>
     </ClCompile>
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp">
       <Filter>network\substream managers</Filter>
     </ClCompile>
-    <ClCompile Include="gfx\Material.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
     <ClCompile Include="phys\CollisionManager.cpp">
       <Filter>phys</Filter>
@@ -1743,14 +1744,33 @@
     <ClCompile Include="network\ElectronRigidbodyView.cpp">
       <Filter>network\views</Filter>
     </ClCompile>
-    <ClCompile Include="network\SeqNo.cpp" />
-    <ClCompile Include="gfx\RenderTargetFactory.cpp" />
-    <ClCompile Include="gfx\ColorGrade.cpp" />
-    <ClCompile Include="network\ack_utils.cpp" />
-    <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp" />
     <ClCompile Include="steam\SteamManager.cpp" />
     <ClCompile Include="network\ConnectionManager.cpp">
       <Filter>network\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\RenderTargetFactory.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ack_utils.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="phys\CollisionManager_SimulateOneObject.cpp">
+      <Filter>phys</Filter>
+    </ClCompile>
+    <ClCompile Include="network\SeqNo.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ColorGrade.cpp">
+      <Filter>gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\Material.cpp">
+      <Filter>gfx\object</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx\ShadowMapPool.cpp">
+      <Filter>gfx\light</Filter>
+    </ClCompile>
+    <ClCompile Include="network\ElectronView.cpp">
+      <Filter>network\views</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2011,6 +2031,8 @@
     <Natvis Include="_natvis\filesystem.natvis">
       <Filter>_natvis</Filter>
     </Natvis>
-    <Natvis Include="_natvis\circular_buffer.natvis" />
+    <Natvis Include="_natvis\circular_buffer.natvis">
+      <Filter>_natvis</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

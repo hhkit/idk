@@ -91,7 +91,6 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\Lightmap.h" />
-    <ClInclude Include="gfx\CascadedSet.h" />
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
@@ -144,7 +143,6 @@
     <ClInclude Include="network\GameConfiguration.h" />
     <ClInclude Include="network\NetworkSystem.h" />
     <ClInclude Include="network\PersistManager.h" />
-    <ClInclude Include="network\Player.h" />
     <ClInclude Include="network\Server.h" />
     <ClInclude Include="network\TestMessage.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
@@ -410,7 +408,6 @@
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\Lightmap.cpp" />
-    <ClCompile Include="gfx\CascadedSet.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />
     <ClCompile Include="gfx\FontAtlasFactory.cpp" />
