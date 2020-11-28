@@ -18,9 +18,7 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_int(stream, sequence_number.value, 0, SeqNo::max_value);
-			auto count = ghost_packs.size();
-			serialize_int(stream, count, 0, 4096);
-			ghost_packs.resize(count);
+			serialize_vector_count(stream, ghost_packs, 4096);
 
 			for (auto& elem : ghost_packs)
 			{

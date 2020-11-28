@@ -29,6 +29,9 @@
     <ProjectName>50 Unit Testing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
@@ -55,6 +58,7 @@
     <ClCompile Include="Reflect\ReflectReg_GfxComponents.cpp" />
     <ClCompile Include="Reflect\ReflectReg_Resources.cpp" />
     <ClCompile Include="TestGeometry.cpp" />
+    <ClCompile Include="TestMessageStream.cpp" />
     <ClCompile Include="TestSerializeBinary.cpp" />
     <ClCompile Include="TestSlidingWindow.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />

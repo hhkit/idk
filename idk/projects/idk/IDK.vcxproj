@@ -41,6 +41,7 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="network\MessageStream.h" />
     <ClInclude Include="network\ControlObjectMessage.h" />
     <ClInclude Include="network\gbn_sliding_window.h" />
     <ClInclude Include="network\Message.h" />
@@ -446,9 +447,8 @@
     <ClCompile Include="network\EventManager.cpp" />
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
     <ClCompile Include="network\GhostManager.cpp" />
-    <ClCompile Include="network\GhostMessage.cpp" />
     <ClCompile Include="network\IDManager.cpp" />
-    <ClCompile Include="network\MoveClientMessage.cpp" />
+    <ClCompile Include="network\MessageStream.cpp" />
     <ClCompile Include="network\network.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\SeqNo.cpp" />

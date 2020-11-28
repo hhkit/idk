@@ -161,12 +161,17 @@ namespace idk
 					msg.use_position = true;
 					msg.position = tfm.position;
 				}
+				else
+					msg.use_position = false;
+
 				if (rotation)
 				{
 					msg.use_rotation = true;
 					for (unsigned i = 0; i < 4; ++i)
 						msg.rotation[i] = tfm.rotation[i];
 				}
+				else
+					msg.use_rotation = false;
 			});
 
 		return obj;

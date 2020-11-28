@@ -29,7 +29,7 @@ namespace idk
 			};
 
 		public:
-			void ProcessMessage(Server& server, int clientid, uint8_t message_type, ReadStream& stream)
+			void ProcessMessage(Server& server, int clientid, uint8_t message_type, ReadStream& stream) const
 			{
 				ProcessMessageJT[message_type](server, clientid, stream);
 			}
@@ -54,6 +54,7 @@ namespace idk
 
 	ServerConnectionManager::~ServerConnectionManager()
 	{
+		SteamNetworkingSockets()->CloseConnection(GetHandle(), 0, nullptr, false);
 		for (const auto& [type, slot] : OnMessageReceived_slots)
 			server.OnMessageReceived[clientID][(int)type].Unlisten(slot);
 	}
@@ -75,23 +76,6 @@ namespace idk
 		return (Host) clientID;
 	}
 
-	//yojimbo::Message* ServerConnectionManager::CreateMessage(size_t id)
-	//{
-	//	constexpr auto message_name_array = detail::NetworkHelper::GenNames();
-
-	//	// if (id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
-	//	// 	&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
-	//	// 	&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
-	//	// 	)
-	//	// 	LOG_TO(LogPool::NETWORK, "creating %s message for client %d", message_name_array[id].data(), clientID);
-	//	return server.CreateMessage(clientID, static_cast<int>(id));
-	//}
-
-	void ServerConnectionManager::SendMessage(SteamNetworkingMessage_t* message)
-	{
-		server.SendMessage(message);
-	}
-
 	BaseSubstreamManager* ServerConnectionManager::GetManager(size_t substream_type_id)
 	{
 		for (auto& elem : substream_managers)
@@ -109,22 +93,14 @@ namespace idk
 		AddSubstreamManager<GhostManager>();
 	}
 
-	void ServerConnectionManager::ReceiveMessages()
+	void ServerConnectionManager::SendMessage(SteamNetworkingMessage_t* message)
 	{
-		auto helper = detail::ServerMessageHelper<NetworkMessageTuple>();
+		server.SendMessage(message);
+	}
 
-		int count = SteamNetworkingSockets()->ReceiveMessagesOnConnection(handle, in_messages, static_cast<int>(std::size(in_messages)));
-		for (int i = 0; i < count; ++i)
-		{
-			auto* msg = in_messages[i];
-			std::memcpy(in_message_buffer, msg->m_pData, msg->m_cbSize);
-			ReadStream stream{ in_message_buffer, static_cast<uint32_t>(msg->m_cbSize) };
-			uint8_t type; 
-			stream.SerializeUInt8(type);
-
-			helper.ProcessMessage(server, clientID, type, stream);
-
-			msg->Release();
-		}
+	void ServerConnectionManager::ProcessMessage(uint8_t type, ReadStream& stream)
+	{
+		static constexpr auto helper = detail::ServerMessageHelper<NetworkMessageTuple>();
+		helper.ProcessMessage(server, clientID, static_cast<uint8_t>(type), stream);
 	}
 }

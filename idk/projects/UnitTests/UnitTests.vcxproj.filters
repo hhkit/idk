@@ -61,6 +61,7 @@
     <ClCompile Include="ReflectReg_TestStructures.cpp">
       <Filter>Reflect</Filter>
     </ClCompile>
+    <ClCompile Include="TestMessageStream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

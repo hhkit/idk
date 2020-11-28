@@ -31,44 +31,6 @@ namespace idk
 
 	}
 
-	//void Client::ProcessMessages()
-	//{
-	//	for (int i = 0; i < config.numChannels; i++) 
-	//	{
-	//		while (auto message = client.ReceiveMessage(i)) 
-	//		{
-	//			ProcessMessage(message);
-	//			client.ReleaseMessage(message);
-	//		}
-	//	}
-
-	//}
-
-	//void Client::ReceivePackets()
-	//{
-	//	client.AdvanceTime(client.GetTime() + Core::GetScheduler().GetNetworkTick().count() );
-	//	client.ReceivePackets();
-
-	//	// get rtt
-
-	//	auto connected_this_frame = client.IsConnected();
-	//	if (connected_this_frame && !connected_last_frame)
-	//	{
-	//		OnConnectionToServer.Fire();
-	//		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-	//			target->FireMessage("OnConnectedToServer");
-	//	}
-	//	if (!connected_this_frame && connected_last_frame)
-	//	{
-	//		OnDisconnectionFromServer.Fire();
-	//		for (auto& target : Core::GetSystem<NetworkSystem>().GetCallbackTargets())
-	//			target->FireMessage("OnDisconnectedFromServer");
-	//	}
-	//	if (connected_this_frame)
-	//		ProcessMessages();
-
-	//	connected_last_frame = connected_this_frame;
-	//}
 	void Client::SendPackets()
 	{
 		SteamNetworkingSockets()->SendMessages(static_cast<int>(out_messages.size()), out_messages.data(), nullptr);
@@ -85,18 +47,6 @@ namespace idk
 		//client.SetLatency(duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
 	}
 
-	//float Client::GetRTT()
-	//{
-	//	yojimbo::NetworkInfo info;
-	//	client.GetNetworkInfo(info);
-	//	return info.RTT;
-	//}
-
-	//yojimbo::Message* Client::CreateMessage(int id)
-	//{
-	//	return client.CreateMessage(id);
-	//}
-
 	void Client::SendMessage(SteamNetworkingMessage_t* message)
 	{
 		out_messages.push_back(message);
@@ -104,12 +54,12 @@ namespace idk
 
 	void Client::ProcessMessage(Message* message, uint32_t id)
 	{
-		constexpr auto message_name_array = detail::NetworkHelper::GenNames();
-		if (id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
-			&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
-			&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
-			)
-		LOG_TO(LogPool::NETWORK, "Received %s message", message_name_array[id].data());
+		//constexpr auto message_name_array = detail::NetworkHelper::GenNames();
+		//if (id != index_in_tuple_v<GhostMessage, NetworkMessageTuple>
+		//	&& id != index_in_tuple_v<GhostAcknowledgementMessage, NetworkMessageTuple>
+		//	&& id != index_in_tuple_v<MoveClientMessage, NetworkMessageTuple>
+		//	)
+		//	LOG_TO(LogPool::NETWORK, "Received %s message", message_name_array[id].data());
 		OnMessageReceived[id].Fire(message);
 	}
 }

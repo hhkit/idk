@@ -24,8 +24,6 @@ namespace idk
 		void FrameStartManagers() override;
 		void FrameEndManagers() override;
 
-		void ReceiveMessages() override;
-
 	private:
 		struct EventSlot { unsigned type; SignalBase::SlotId slot; };
 
@@ -34,12 +32,13 @@ namespace idk
 		vector<EventSlot> OnMessageReceived_slots;
 		vector<unique_ptr<BaseSubstreamManager>> substream_managers;
 
-
 		template<typename MessageType, typename Func>
 		void Subscribe2(Func&& func);
-		void SendMessage(SteamNetworkingMessage_t* message) override;
 		BaseSubstreamManager* GetManager(size_t substream_type_id) override;
 		void InstantiateSubmanagers();
 		template<typename RealSubstreamManager> RealSubstreamManager& AddSubstreamManager();
+
+		void SendMessage(SteamNetworkingMessage_t* message) override;
+		void ProcessMessage(uint8_t type, ReadStream& stream) override;
 	};
 }

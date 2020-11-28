@@ -280,7 +280,29 @@ namespace idk
 			auto res = SteamNetworkingSockets()->AcceptConnection(callback->m_hConn);
 			if (res == k_EResultInvalidState || res == k_EResultInvalidParam)
 				LOG_CRASH_TO(LogPool::NETWORK, "Could not connect to client P2P!");
-			else
+		}
+		/// - A connection you initiated has been accepted by the remote host.
+		///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting, and
+		///   m_info.m_eState = k_ESteamNetworkingConnectionState_Connected.
+		///   Some connections might transition to k_ESteamNetworkingConnectionState_FindingRoute first.
+		else if (callback->m_eOldState == k_ESteamNetworkingConnectionState_Connecting
+				 && (callback->m_info.m_eState == k_ESteamNetworkingConnectionState_Connected
+				 	 || callback->m_info.m_eState == k_ESteamNetworkingConnectionState_FindingRoute))
+		{
+			if (client)
+			{
+				client_connection_manager = std::make_unique<ClientConnectionManager>(*client, callback->m_hConn);
+					client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber& event)
+				{
+					frame_counter = event.frame_count;
+					LOG_TO(LogPool::NETWORK, "Receiving frame number: %u", frame_counter.value);
+				});
+
+					LOG_TO(LogPool::NETWORK, "Connected to server");
+				for (auto& target : callback_objects)
+					target->FireMessage("OnConnectedToServer");
+			}
+			else if (server)
 			{
 				CSteamID id = callback->m_info.m_identityRemote.GetSteamID();
 
@@ -295,6 +317,7 @@ namespace idk
 					server_connection_manager[clientIndex]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [&](EventDataBlockFrameNumber& msg)
 					{
 						msg.frame_count = frame_counter;
+						LOG_TO(LogPool::NETWORK, "Sending frame number: %u", frame_counter.value);
 					});
 					server_connection_manager[clientIndex]->GetManager<EventManager>()->SendBufferedEvents();
 
@@ -307,25 +330,6 @@ namespace idk
 					break;
 				}
 			}
-		}
-		/// - A connection you initiated has been accepted by the remote host.
-		///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting, and
-		///   m_info.m_eState = k_ESteamNetworkingConnectionState_Connected.
-		///   Some connections might transition to k_ESteamNetworkingConnectionState_FindingRoute first.
-		else if (callback->m_eOldState == k_ESteamNetworkingConnectionState_Connecting
-				 && (callback->m_info.m_eState == k_ESteamNetworkingConnectionState_Connected
-				 	 || callback->m_info.m_eState == k_ESteamNetworkingConnectionState_FindingRoute)
-				 && callback->m_info.m_hListenSocket == k_HSteamListenSocket_Invalid) // invalid == we initiated
-		{
-			client_connection_manager = std::make_unique<ClientConnectionManager>(*client, callback->m_hConn);
-			client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber& event)
-			{
-				frame_counter = event.frame_count;
-			});
-
-			LOG_TO(LogPool::NETWORK, "Connected to server");
-			for (auto& target : callback_objects)
-				target->FireMessage("OnConnectedToServer");
 		}
 		/// - A connection has been actively rejected or closed by the remote host.
 		///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting or k_ESteamNetworkingConnectionState_Connected,
@@ -346,7 +350,7 @@ namespace idk
 
 				ResetNetwork();
 			}
-			else
+			else if (server)
 			{
 				for (size_t i = 0; i < GameConfiguration::MAX_CLIENTS; ++i)
 				{
@@ -393,7 +397,7 @@ namespace idk
 
 				ResetNetwork();
 			}
-			else
+			else if (server)
 			{
 				for (size_t i = 0; i < GameConfiguration::MAX_CLIENTS; ++i)
 				{
