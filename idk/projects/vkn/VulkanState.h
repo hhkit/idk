@@ -156,6 +156,7 @@ namespace idk::vkn
 		vk::Queue                        m_graphics_queue = {};
 		vk::Queue                        m_graphics_tex_queue = {};
 		vk::Queue                        m_present_queue = {};
+		std::mutex						 m_graphics_tex_mutex;
 		vk::UniqueDescriptorPool         m_descriptorpool;
 
 		vk::DispatchLoaderDefault        dispatcher = {};

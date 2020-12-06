@@ -41,6 +41,11 @@ namespace idk::vkn
 		QueueFamilyIndices& VulkanView::QueueFamily()const { return vulkan().m_queue_family; }
 		vk::Queue& VulkanView::GraphicsQueue()const { return vulkan().m_graphics_queue; }
 		vk::Queue& VulkanView::GraphicsTexQueue()const { return vulkan().m_graphics_tex_queue; }
+		std::mutex& VulkanView::GraphicsTexMutex() const
+		{
+			// TODO: insert return statement here
+			return vulkan().m_graphics_tex_mutex;
+		}
 		vk::Queue& VulkanView::PresentQueue()const { return vulkan().m_present_queue; }
 		//vk::Queue          m_transfer_queue = {}{}					                  				 ;
 		SwapChainInfo& VulkanView::Swapchain()const { return *vulkan().m_swapchain; }

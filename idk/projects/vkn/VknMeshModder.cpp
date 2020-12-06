@@ -64,8 +64,13 @@ namespace idk::vkn
 		auto& m_device = vview.Device();
 		auto num_vtx_bytes = hlp::buffer_size(raw_data);
 		auto data = std::data(raw_data);
+		std::unique_lock create_allock{ create_alloc_mutex };
 		auto&& [pbuffer, palloc] = hlp::CreateAllocBindBuffer(vview.PDevice(), *vview.Device(), num_vtx_bytes, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, allocator, vview.Dispatcher());
-		hlp::TransferData(*vview.Commandpool(), vview.GraphicsQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+		create_allock.unlock();
+		{
+			std::lock_guard lock{ View().GraphicsTexMutex() };
+			hlp::TransferData(*vview.Commandpool(), vview.GraphicsTexQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+		}
 		return std::make_shared<MeshBuffer::Managed>(std::move(pbuffer), std::move(palloc), num_vtx_bytes);
 	}
 

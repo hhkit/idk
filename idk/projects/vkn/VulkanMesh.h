@@ -38,7 +38,7 @@ namespace idk::vkn
 	public:
 		using buffers_t = hash_table<attrib_index, MeshBuffer>;
 		VulkanMesh() = default;
-		VulkanMesh(const CompiledMesh& m);
+		VulkanMesh(CompiledMesh&& m);
 
 		VulkanMesh(VulkanMesh&& m) = default;
 		VulkanMesh& operator=(VulkanMesh&& m) = default;
@@ -51,18 +51,23 @@ namespace idk::vkn
 
 		const MeshBuffer& Get(attrib_index index)const;
 		bool Has(attrib_index index)const;
-		const buffers_t& Buffers()const { return buffers; }
+		const buffers_t& Buffers()const;
 		int GetAttribs() const override;
-		const std::optional<MeshBuffer>& GetIndexBuffer()const { return index_buffer; }
+		const std::optional<MeshBuffer>& GetIndexBuffer()const;
 		uint32_t IndexCount()const { return index_count; }
 		void SetIndexBuffer(MeshBuffer&& buffer, uint32_t count, vk::IndexType type);
 		void SetBuffer(attrib_index type, MeshBuffer&& buffer);
 		vk::IndexType IndexType()const { return index_type; }
+
+		//Set to false when done loading. Defaults to true.
+		void use_default(bool value);
+
 	private:
 		buffers_t buffers{};
 		vk::IndexType index_type = vk::IndexType::eUint16;
 		uint32_t index_count{};
 		std::optional<MeshBuffer> index_buffer;
+		bool use_default_=false;
 	};
 
 }

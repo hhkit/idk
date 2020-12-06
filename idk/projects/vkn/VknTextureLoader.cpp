@@ -264,7 +264,11 @@ namespace idk::vkn
 				tex.dbg_name = tex.Name();
 				dbg::NameObject(tex.Image(true), tex.dbg_name);
 				lock.Lock();
-				hlp::EndSingleTimeCbufferCmd(cmd_buffer, (is_data)?View().GraphicsTexQueue():View().GraphicsQueue(), false, fence);
+
+				{
+					std::lock_guard lock{ View().GraphicsTexMutex() };
+					hlp::EndSingleTimeCbufferCmd(cmd_buffer, (is_data) ? View().GraphicsTexQueue() : View().GraphicsQueue(), false, fence);
+				}
 				if (result)
 				{
 					std::lock_guard guard{ ic_mtx };

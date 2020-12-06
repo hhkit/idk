@@ -2,6 +2,10 @@
 #include <idk.h>
 #include <vulkan/vulkan.hpp>
 #include <vkn/vulkan_state_fwd.h>
+namespace std
+{
+	class mutex; //fwd decl
+}
 namespace idk::vkn
 {
 	class VulkanState;
@@ -26,6 +30,7 @@ namespace idk::vkn
 		QueueFamilyIndices&                 QueueFamily()const;
 		vk::Queue&                          GraphicsQueue()const;
 		vk::Queue&                          GraphicsTexQueue()const;
+		std::mutex&                          GraphicsTexMutex()const;
 		vk::Queue&                          PresentQueue()const;
 		SwapChainInfo&                      Swapchain()const;
 		uint32_t                            CurrFrame()const;

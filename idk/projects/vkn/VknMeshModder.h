@@ -25,6 +25,7 @@ namespace idk::vkn
 		void SetIndexBuffer32(VulkanMesh& mesh, shared_ptr<MeshBuffer::Managed> index_buffer, uint32_t num_indices);
 	private:
 		hlp::MemoryAllocator allocator;
+		std::mutex create_alloc_mutex,transfer_mutex;
 	};
 
 }

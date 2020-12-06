@@ -167,7 +167,10 @@ void AsyncTexLoader::ExecProxy::exec()
 		(*c1).begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 		a1.staging =ptr->_loader.LoadTexture(TextureLoader::SubmissionObjs{ *c1 ,*f1,false}, *curr.data, ptr->_allocator, curr.info.to, curr.info.tci, curr.info.iti);
 		View().Device()->resetFences(*f1);
-		hlp::EndSingleTimeCbufferCmd(*c1, View().GraphicsTexQueue(), false, *f1);
+		{
+			std::lock_guard lock{ View().GraphicsTexMutex() };
+			hlp::EndSingleTimeCbufferCmd(*c1, View().GraphicsTexQueue(), false, *f1);
+		}
 		a1.fence = std::move(f1);
 		a1.cmd_buffer= std::move(c1);
 		if (ptr->_process_queue.size() > 1)
@@ -177,7 +180,10 @@ void AsyncTexLoader::ExecProxy::exec()
 			
 			auto f2 = ptr->_load_fences.AcquireFence();
 			auto c2 = ptr->_cmd_buffers.AcquireCmdBuffer();
-			(*c2).begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+			{
+				std::lock_guard lock{ View().GraphicsTexMutex() };
+				(*c2).begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+			}
 			a2.staging = ptr->_loader.LoadTexture(TextureLoader::SubmissionObjs{ *c2 ,*f2,false }, *curr2.data, ptr->_allocator, curr2.info.to, curr2.info.tci, curr2.info.iti);
 			View().Device()->resetFences(*f2);
 			hlp::EndSingleTimeCbufferCmd(*c2, View().GraphicsTexQueue() , false, *f2);
