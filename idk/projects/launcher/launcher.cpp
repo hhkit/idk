@@ -14,6 +14,7 @@
 
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
+#include <script/MonoBehavior.h>
 
 #include <prefab/Prefab.h>
 #include <anim/Animation.h>

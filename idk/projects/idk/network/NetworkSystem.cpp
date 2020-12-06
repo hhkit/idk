@@ -38,7 +38,7 @@
 
 #include <network/TestMessage.h>
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 
 namespace idk
 {

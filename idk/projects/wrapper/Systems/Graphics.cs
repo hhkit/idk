@@ -4,51 +4,39 @@
     {
         public enum Quality
         {
-            eLow,
-            eHigh
+            Low,
+            High
         }
 
-        public static void SetGraphicsQuality(Quality quality)
-        {
-            switch (quality)
-            {
-                case Quality.eHigh:
-                    Bindings.GraphicsSetVarBool("HalfMip", false);
-                    break;
-                case Quality.eLow:
-                    Bindings.GraphicsSetVarBool("HalfMip", true);
-                    break;
-            }
-            Bindings.GraphicsSetVarBool("Reload Textures", true);
-        }
-        public static Quality GetGraphicsQuality()
-        {
-            return Bindings.GraphicsGetVarBool("HalfMip") ? Quality.eLow : Quality.eHigh;
-        }
-
-        public static int pendingTexturesCount
+        public static Quality quality
         {
             get
             {
-                return Bindings.GraphicsGetVarInt("pending_textures");
-            }
-        }
-
-        public static float gammaCorrection
-        {
-            get
-            {
-                return Bindings.GraphicsGetGammaCorrection();
+                return Bindings.GraphicsGetVarBool("HalfMip") ? Quality.Low : Quality.High;
             }
             set
             {
-                Bindings.GraphicsSetGammaCorrection(value);
+                switch (value)
+                {
+                    case Quality.High:
+                        Bindings.GraphicsSetVarBool("HalfMip", false);
+                        break;
+                    case Quality.Low:
+                        Bindings.GraphicsSetVarBool("HalfMip", true);
+                        break;
+                }
+                Bindings.GraphicsSetVarBool("Reload Textures", true);
             }
         }
-        public static void SetGammaCorrection(float gamma_value)
+
+        public static int pendingTexturesCount => Bindings.GraphicsGetVarInt("pending_textures");
+
+        public static float gammaCorrection
         {
-            Bindings.GraphicsSetGammaCorrection(gamma_value);
+            get => Bindings.GraphicsGetGammaCorrection();
+            set => Bindings.GraphicsSetGammaCorrection(value);
         }
+
         public static void DisableGammaCorrection()
         {
             Bindings.GraphicsDisableGammaCorrection();

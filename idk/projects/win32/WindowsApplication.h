@@ -70,16 +70,8 @@ namespace idk::win
 		ivec2     old_screenpos;
 		ivec2	  screendel;
 		vec2	  ndc_screendel;
+		WINDOWPLACEMENT wp_prev{ sizeof(WINDOWPLACEMENT) };
 
-        struct SavedWindowInfo
-        {
-            bool maximized;
-            LONG style;
-            LONG ex_style;
-            RECT window_rect;    
-        } _saved_win_info;
-
-        bool _fullscreen = false;
 		bool _dragging{ false };
 		bool _focused{ true };
 		vector<std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)>> winProcList;
