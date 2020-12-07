@@ -4,6 +4,8 @@
 
 namespace idk
 {
+	class MoveClientMessage;
+
 	class ServerMoveManager
 		: public SubstreamManager<MoveManager>
 	{

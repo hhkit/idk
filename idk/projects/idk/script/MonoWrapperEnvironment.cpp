@@ -35,6 +35,8 @@
 
 #include <meta/variant.inl>
 
+#include "ManagedObj.inl"
+
 namespace idk::mono
 {
 	MonoWrapperEnvironment::MonoWrapperEnvironment(string_view full_path_to_game_dll)

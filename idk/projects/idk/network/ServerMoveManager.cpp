@@ -10,7 +10,7 @@
 #include <network/ElectronView.h>
 #include <network/ElectronTransformView.h>
 #include <serialize/binary.inl>
-
+#include "ConnectionManager.inl"
 namespace idk
 {
 	void ServerMoveManager::SubscribeEvents(ClientConnectionManager&)

@@ -2,8 +2,10 @@
 #include "SteamManager.h"
 #include <core/Core.inl>
 #include <editor/IEditor.h>
-
+#pragma warning(push)
+#pragma warning(disable:4996)
 #include <steam/steam_api.h>
+#pragma warning(pop)
 
 namespace idk
 {
