@@ -46,20 +46,20 @@ namespace idk::mt
 	template<typename T, size_t MaxThds>
 	T* HazardPointerDL<T, MaxThds>::protect(T* ptr, const int id)
 	{
-		hazard_ptrs[id].value.store(ptr);
+		hazard_ptrs.at(id).value.store(ptr);
 		return ptr;
 	}
 	
 	template<typename T, size_t MaxThds>
 	void HazardPointerDL<T, MaxThds>::clear(const int id)
 	{
-		hazard_ptrs[id].value.store(nullptr, std::memory_order_release);
+		hazard_ptrs.at(id).value.store(nullptr, std::memory_order_release);
 	}
 	
 	template<typename T, size_t MaxThds>
 	void HazardPointerDL<T, MaxThds>::free(T* ptr, T* tail, const int id)
 	{
-		auto& curr_list = retire_list[id].value;
+		auto& curr_list = retire_list.at(id).value;
 		for (auto& elem : curr_list)
 			IDK_ASSERT(elem != ptr);
 		curr_list.push_back(ptr);
@@ -68,7 +68,7 @@ namespace idk::mt
 			
 		for (unsigned i = 0; i < curr_list.size();)
 		{
-			auto freeme = curr_list[i];
+			auto freeme = curr_list.at(i);
 			if (freeme->next.load() == tail)
 			{
 				// can't delete the node before the current tail
@@ -78,7 +78,7 @@ namespace idk::mt
 			bool canDelete = true;
 			for (int thd = 0; thd < MaxThds; ++thd)
 			{
-				T* curr_hazard_ptr = hazard_ptrs[thd].value.load();
+				T* curr_hazard_ptr = hazard_ptrs.at(thd).value.load();
 				// if we are trying to free a ptr that is
 				// 	1. protected
 				//	3. the next of a protected ptr 

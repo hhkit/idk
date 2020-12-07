@@ -96,7 +96,7 @@ namespace idk::mt
 			
 			if (casHead(lhead, lnext))
 			{
-				auto retval = std::move(lnext->data);
+				auto retval = std::move(lhead->data);
 				IDK_ASSERT(retval);
 				hazards.clear(tid);
 				hazards.free(lhead, tail.load(), tid);
