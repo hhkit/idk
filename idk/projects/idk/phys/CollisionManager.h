@@ -6,7 +6,7 @@ namespace idk
 {
 	static constexpr float baumgarte = .2f;
 	static constexpr float penetration_slop = 0.05f;
-	static constexpr float margin = 0.2f;
+	static constexpr float aabb_margin = 0.2f;
 	static constexpr int   collision_threshold = 64;
 
 	struct ContactState

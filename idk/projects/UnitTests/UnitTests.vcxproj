@@ -29,6 +29,9 @@
     <ProjectName>50 Unit Testing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <EnableUnitySupport>false</EnableUnitySupport>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
@@ -48,12 +51,14 @@
   <ItemGroup>
     <ClInclude Include="core_setup.h" />
     <ClInclude Include="pch.h" />
+    <ClCompile Include="ReflectReg_TestStructures.cpp" />
     <ClCompile Include="Reflect\ReflectRegistered.cpp" />
     <ClCompile Include="Reflect\ReflectReg_AnimComponents.cpp" />
     <ClCompile Include="Reflect\ReflectReg_Components.cpp" />
     <ClCompile Include="Reflect\ReflectReg_GfxComponents.cpp" />
     <ClCompile Include="Reflect\ReflectReg_Resources.cpp" />
     <ClCompile Include="TestGeometry.cpp" />
+    <ClCompile Include="TestMessageStream.cpp" />
     <ClCompile Include="TestSerializeBinary.cpp" />
     <ClCompile Include="TestSlidingWindow.cpp" />
     <ClCompile Include="TestStaticCollision.cpp" />
@@ -70,6 +75,7 @@
       <FileType>CppCode</FileType>
     </ClCompile>
     <ClInclude Include="TestApplication.h" />
+    <ClInclude Include="TestStructures.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SpeedTest.cpp" />
@@ -139,7 +145,7 @@
       <SubSystem>Console</SubSystem>
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)dep\lib\yojimboD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>
@@ -185,7 +191,7 @@
       <AdditionalOptions>/ignore:4075 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)dep\lib\yojimbo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>xcopy "$(SolutionDir)dep\dll" "$(OutDir)"  /i /c /y /d</Command>

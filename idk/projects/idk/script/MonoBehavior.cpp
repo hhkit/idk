@@ -36,15 +36,6 @@ namespace idk::mono
 		script_data = {};
 	}
 
-	void Behavior::FireMessage(string_view msg, [[maybe_unused]] void* args[])
-	{
-		if (script_data)
-		{
-			if (auto thunk = script_data.Type()->GetThunk(msg))
-				thunk->Invoke(script_data.Raw()); // handle args?
-		}
-	}
-
 	void Behavior::Awake()
 	{
 		if (!_awake && script_data)

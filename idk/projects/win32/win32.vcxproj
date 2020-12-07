@@ -255,7 +255,6 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="WindowsApplication.h" />
-    <ClInclude Include="WindowsSocket.h" />
     <ClInclude Include="WinMessageTable.h" />
     <ClInclude Include="XInputSystem.h" />
   </ItemGroup>
@@ -270,8 +269,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="WindowsApplication.cpp" />
-    <ClCompile Include="WindowsApplication_GetNetworkDevices.cpp" />
-    <ClCompile Include="WindowsSocket.cpp" />
     <ClCompile Include="WinMessageTable.cpp" />
     <ClCompile Include="XInputSystem.cpp" />
   </ItemGroup>

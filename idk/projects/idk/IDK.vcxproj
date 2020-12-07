@@ -41,9 +41,11 @@
     <ClInclude Include="app\Application.h" />
     <ClInclude Include="app\GamepadSystem.h" />
     <ClInclude Include="app\Keys.h" />
+    <ClInclude Include="network\MessageStream.h" />
     <ClInclude Include="network\ControlObjectMessage.h" />
     <ClInclude Include="network\gbn_sliding_window.h" />
-    <ClInclude Include="network\Socket.h" />
+    <ClInclude Include="network\Message.h" />
+    <ClInclude Include="steam\SteamManager.h" />
     <ClInclude Include="ui\AspectRatioFitter.h" />
     <ClInclude Include="audio\AudioListener.h" />
     <ClInclude Include="audio\AudioClipLoader.h" />
@@ -90,7 +92,6 @@
     <ClInclude Include="gfx\Buffer.h" />
     <ClInclude Include="gfx\CameraClear.h" />
     <ClInclude Include="gfx\Lightmap.h" />
-    <ClInclude Include="gfx\CascadedSet.h" />
     <ClInclude Include="gfx\CompiledMesh.h" />
     <ClInclude Include="gfx\CompiledTexture.h" />
     <ClInclude Include="gfx\GraphFactory.h" />
@@ -123,10 +124,7 @@
     <ClInclude Include="network\NetworkTuple.inl" />
     <ClInclude Include="network\RPCTarget.h" />
     <ClInclude Include="network\SeqNo.h" />
-    <ClInclude Include="network\yojimbo_helpers.h" />
     <ClInclude Include="parallel\multithread_control.h" />
-    <ClInclude Include="network\Adapter.h" />
-    <ClInclude Include="network\Address.h" />
     <ClInclude Include="network\Client.h" />
     <ClInclude Include="network\ClientConnectionManager.h" />
     <ClInclude Include="network\ElectronTransformView.h" />
@@ -142,12 +140,10 @@
     <ClInclude Include="network\ServerConnectionManager.h" />
     <ClInclude Include="network\SubstreamManager.h" />
     <ClInclude Include="network\ConnectionManager.h" />
-    <ClInclude Include="network\Device.h" />
     <ClInclude Include="network\EventManager.h" />
     <ClInclude Include="network\GameConfiguration.h" />
     <ClInclude Include="network\NetworkSystem.h" />
     <ClInclude Include="network\PersistManager.h" />
-    <ClInclude Include="network\Player.h" />
     <ClInclude Include="network\Server.h" />
     <ClInclude Include="network\TestMessage.h" />
     <ClInclude Include="parallel\cache_aligned_wrapper.h" />
@@ -408,11 +404,11 @@
     <ClCompile Include="gfx\RenderTargetFactory.cpp" />
     <ClCompile Include="gfx\ShadowMapPool.cpp" />
     <ClCompile Include="network\ack_utils.cpp" />
+    <ClCompile Include="network\ConnectionManager.cpp" />
     <ClCompile Include="network\ElectronAnimatorView.cpp" />
     <ClCompile Include="network\ElectronRigidbodyView.cpp" />
     <ClCompile Include="file\PathHandle.cpp" />
     <ClCompile Include="gfx\Lightmap.cpp" />
-    <ClCompile Include="gfx\CascadedSet.cpp" />
     <ClCompile Include="gfx\CubeMap.cpp" />
     <ClCompile Include="gfx\FontAtlas.cpp" />
     <ClCompile Include="gfx\FontAtlasFactory.cpp" />
@@ -442,8 +438,6 @@
     <ClCompile Include="math\shapes\capsule.cpp" />
     <ClCompile Include="math\shapes\frustum.cpp" />
     <ClCompile Include="math\shapes\halfspace.cpp" />
-    <ClCompile Include="network\Adapter.cpp" />
-    <ClCompile Include="network\Address.cpp" />
     <ClCompile Include="network\Client.cpp" />
     <ClCompile Include="network\ClientConnectionManager.cpp" />
     <ClCompile Include="network\ClientMoveManager.cpp" />
@@ -452,11 +446,9 @@
     <ClCompile Include="network\EventLoadLevelMessage.cpp" />
     <ClCompile Include="network\EventManager.cpp" />
     <ClCompile Include="network\EventManager_OnRPCInvoke.cpp" />
-    <ClCompile Include="network\GameConfiguration.cpp" />
     <ClCompile Include="network\GhostManager.cpp" />
-    <ClCompile Include="network\GhostMessage.cpp" />
     <ClCompile Include="network\IDManager.cpp" />
-    <ClCompile Include="network\MoveClientMessage.cpp" />
+    <ClCompile Include="network\MessageStream.cpp" />
     <ClCompile Include="network\network.cpp" />
     <ClCompile Include="network\NetworkSystem.cpp" />
     <ClCompile Include="network\SeqNo.cpp" />
@@ -541,6 +533,7 @@
     </ClCompile>
     <ClCompile Include="serialize\yaml.cpp" />
     <ClCompile Include="serialize\yaml_dump.cpp" />
+    <ClCompile Include="steam\SteamManager.cpp" />
     <ClCompile Include="test\TestComponent.cpp" />
     <ClCompile Include="test\TestSystem.cpp" />
     <ClCompile Include="common\Transform.cpp" />
@@ -835,7 +828,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmodL_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmodL_vc.lib;steam_api64.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -903,7 +896,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib;steam_api64.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -932,7 +925,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\;%VULKAN_SDK%\Lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>MonoPosixHelper.lib;mono-2.0-sgen.lib;fmod_vc.lib;steam_api64.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>

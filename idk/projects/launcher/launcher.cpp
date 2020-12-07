@@ -14,6 +14,7 @@
 
 #include <script/ScriptSystem.h>
 #include <script/MonoBehaviorEnvironment.h>
+#include <script/MonoBehavior.h>
 
 #include <prefab/Prefab.h>
 #include <anim/Animation.h>
@@ -38,7 +39,10 @@
 
 #include <test/TestSystem.h>
 
+#include <network/NetworkSystem.h>
+
 #include "resource.h"
+#include <codecvt>
 #include <shellapi.h>//CommandLineToArgv
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
@@ -217,6 +221,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	load_scene->LoadFromResourcePath();
 	Core::GetScheduler().SetPauseState(UnpauseAll);
 	Core::GetSystem<mono::ScriptSystem>().run_scripts = true;
+
+	uint64_t connect_lobby = 0;
+	for (int i = 0; i < num_args - 1; ++i)
+	{
+		if (command_lines[i] == L"+connect_lobby")
+		{
+			auto str = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(command_lines[i + 1]);
+			auto res = parse_text<uint64_t>(str);
+			connect_lobby = res.value_or(0);
+			break;
+		}
+	}
+	if (connect_lobby)
+	{
+		Core::GetSystem<mono::ScriptSystem>().ScriptStart(Core::GetGameState().GetObjectsOfType<mono::Behavior>());
+		GameLobbyJoinRequested_t callback;
+		callback.m_steamIDLobby = connect_lobby;
+		Core::GetSystem<NetworkSystem>().OnLobbyJoinRequested(&callback);
+	}
+
 	c->Run();
 	return c->GetSystem<Windows>().GetReturnVal();
 }

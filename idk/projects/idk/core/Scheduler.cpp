@@ -20,8 +20,6 @@ namespace idk
 	{
 		constexpr auto dt_limit = seconds{1.f};
 
-		auto& app = Core::GetSystem<Application>();
-
 		_this_frame = Clock::now();
 		_real_dt = duration_cast<seconds>(_this_frame - _last_frame);
 		_accumulated_network_dt += _real_dt;

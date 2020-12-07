@@ -37,6 +37,7 @@ Accessible through Core::GetSystem<IDE>() [#include <IDE.h>]
 #include <script/ScriptSystem.h>
 #include <audio/AudioSystem.h>
 #include <network/NetworkSystem.h>
+#include <steam/SteamManager.h>
 
 // resource importing
 #include <res/ResourceHandle.inl>
@@ -565,6 +566,11 @@ namespace idk
 
 	void IDE::Play()
 	{
+		if (Core::GetSystem<SteamManager>().SteamInit())
+		{
+			LOG_TO(LogPool::SYS, "Steam Init success");
+		}
+
 		HotReloadDLL();
 		FindWindow<IGE_InspectorWindow>()->Reset();
 		Core::GetScheduler().SetPauseState(UnpauseAll);
@@ -607,6 +613,8 @@ namespace idk
 		Core::GetSystem<NetworkSystem>().Disconnect();
 		_game_running = false;
 		_game_frozen = false;
+
+		Core::GetSystem<SteamManager>().SteamShutdown();
 	}
 
 	void IDE::ClearScene()

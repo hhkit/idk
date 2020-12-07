@@ -132,7 +132,7 @@ TEST(Math, MatrixDecomposition)
 	auto m      = decompost.recompose();
 	auto decomp = decompose(m);
 	
-	for (auto& [lcol, rcol] : zip(m, decomp.recompose()))
-		for (auto& [elem, erem] : zip(lcol, rcol))
+	for (auto [lcol, rcol] : zip(m, decomp.recompose()))
+		for (auto [elem, erem] : zip(lcol, rcol))
 			EXPECT_LE(abs(elem - erem), epsilon * 4);
 }

@@ -109,11 +109,11 @@ namespace idk
 					}, elem.shape);
 				if (to_insert)
 				{
-					_static_broadphase.insert(elem, collider_info, margin);
+					_static_broadphase.insert(elem, collider_info, aabb_margin);
 				}
 				else
 				{
-					_static_broadphase.update(elem, collider_info, margin);
+					_static_broadphase.update(elem, collider_info, aabb_margin);
 				}
 			}
 			else

@@ -19,7 +19,7 @@ namespace idk
 
         public bool IsMine { get => Bindings.ViewIsMine(handle); }
         public uint InstantiationId { get => Bindings.ViewGetNetworkId(handle); }
-        public void TransferOwnership(Client newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.ActorNumber : -1);
+        public void TransferOwnership(Client newOwner) => Bindings.ViewTransferOwnership(handle, newOwner != null ? newOwner.actorNumber : -1);
 
         public void DestroyObject()
         {
@@ -68,7 +68,7 @@ namespace idk
             if (!ElectronNetwork.isHost)
                 throw new InvalidRPCTargetException("Only the server may target players.");
 
-            Bindings.ViewExecRPCOnPlayer(handle, methodName, targetPlayer.ActorNumber, Serialize(parameters));
+            Bindings.ViewExecRPCOnPlayer(handle, methodName, targetPlayer.actorNumber, Serialize(parameters));
         }
 
         internal static byte[][] Serialize(object[] objects)

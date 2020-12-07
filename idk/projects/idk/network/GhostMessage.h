@@ -1,13 +1,14 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <idk.h>
 #include <network/network.h>
 #include <network/GhostFlags.h>
 #include <network/GhostPack.h>
+#include <network/Message.h>
+
 namespace idk
 {
 	class GhostMessage
-		: public yojimbo::Message
+		: public Message
 	{
 	public:
 		SeqNo sequence_number;
@@ -17,9 +18,7 @@ namespace idk
 		bool Serialize(Stream& stream)
 		{
 			serialize_int(stream, sequence_number.value, 0, SeqNo::max_value);
-			auto count = ghost_packs.size();
-			serialize_int(stream, count, 0, 4096);
-			ghost_packs.resize(count);
+			serialize_vector_count(stream, ghost_packs, 4096);
 
 			for (auto& elem : ghost_packs)
 			{
@@ -47,6 +46,6 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

@@ -1,9 +1,13 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
-#include <event/Signal.h>
-#include "Adapter.h"
 #include "GameConfiguration.h"
-#include "Address.h"
+#include <event/Signal.h>
+#include <network/Message.h>
+#include <steam/steam_api_common.h>
+#pragma warning(push)
+#pragma warning(disable:4996)
+#include <steam/isteammatchmaking.h>
+#pragma warning(pop)
+#include <steam/steamnetworkingtypes.h>
 
 #undef SendMessage
 
@@ -18,38 +22,23 @@ namespace idk
 		static constexpr auto ALL_CLIENTS = -1;
 
 		// signals
-		Signal<int>               OnClientConnect;
-		Signal<int>               OnClientDisconnect;
-		Signal<yojimbo::Message*> OnMessageReceived[GameConfiguration::MAX_CLIENTS][MessageCount];
+		Signal<Message*> OnMessageReceived[GameConfiguration::MAX_CLIENTS][MessageCount];
 
 		// ctor
-		Server(const Address& address);
+		Server(CSteamID lobby_id);
 		~Server();
 
-		Address GetAddress() const { return address_; }
-
-		void ProcessMessages();
-
-		void ReceivePackets();
-		void SendPackets();
-
-		void EvictClient(int clientId);
+		CSteamID GetLobbyID() { return lobby_id; }
 		void SetPacketLoss(float percent_loss);
 		void SetLatency(seconds dur);
-		float GetRTT(int clientIndex) const;
 
-		yojimbo::Message* CreateMessage(int client, int type_id) { return server.CreateMessage(client, type_id); }
-		void SendMessage(int clientIndex, yojimbo::Message* message, GameChannel delivery_mode);
+		void ProcessMessage(int clientIndex, Message* message, uint32_t id);
+		void SendPackets();
 
-		// callbacks
-		void ClientConnected(int clientIndex);
-		void ClientDisconnected(int clientIndex);
+		void SendMessage(SteamNetworkingMessage_t* message);
+
 	private:
-		Adapter           adapter;
-		GameConfiguration config;
-		yojimbo::Server   server;
-		Address           address_;
-
-		void ProcessMessage(int clientIndex, yojimbo::Message* message);
+		CSteamID lobby_id;
+		std::vector<SteamNetworkingMessage_t*> out_messages;
 	};
 }

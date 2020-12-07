@@ -1,8 +1,7 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
-#include "Adapter.h"
 #include "GameConfiguration.h"
-#include "Address.h"
+#include <network/Message.h>
+#include <steam/steam_api_common.h>
 
 #undef SendMessage
 
@@ -13,31 +12,26 @@ namespace idk
 	class Client
 	{
 	public:
-		Signal<> OnConnectionToServer;
-		Signal<> OnDisconnectionFromServer;
-		Signal<yojimbo::Message*> OnMessageReceived[MessageCount];
+		Signal<Message*> OnMessageReceived[MessageCount];
 
-		Client(const Address& addr);
+		Client(CSteamID lobby_id);
 		~Client();
 
-		bool IsConnected() const;
-		void ProcessMessages();
-		void ReceivePackets();
+		CSteamID GetLobbyID() { return lobby_id; }
+		//void ProcessMessages();
+		void ProcessMessage(Message* message, uint32_t id);
+		//void ReceivePackets();
 		void SendPackets();
 
 		void SetPacketLoss(float percent_loss);
 		void SetLatency(seconds dur);
 
-		float GetRTT();
+		//float GetRTT();
 
-		yojimbo::Message* CreateMessage(int id);
-		void SendMessage(yojimbo::Message* message, GameChannel delivery_mode);
+		void SendMessage(SteamNetworkingMessage_t* message);
+
 	private:
-		Adapter           adapter;
-		GameConfiguration config;
-		yojimbo::Client   client;
-		bool connected_last_frame = false;
-
-		void ProcessMessage(yojimbo::Message* message);
+		CSteamID lobby_id;
+		std::vector<SteamNetworkingMessage_t*> out_messages;
 	};
 }

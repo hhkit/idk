@@ -24,21 +24,33 @@ namespace idk
             get => Bindings.AudioSystemGetMASTERVolume();
             set => Bindings.AudioSystemSetMASTERVolume(value);
         }
+        /// <summary>
+        /// Clamps to 0...1
+        /// </summary>
         public static float sfxVolume
         {
             get => Bindings.AudioSystemGetSFXVolume();
             set => Bindings.AudioSystemSetSFXVolume(value);
         }
+        /// <summary>
+        /// Clamps to 0...1
+        /// </summary>
         public static float musicVolume
         {
             get => Bindings.AudioSystemGetMUSICVolume();
             set => Bindings.AudioSystemSetMUSICVolume(value);
         }
+        /// <summary>
+        /// Clamps to 0...1
+        /// </summary>
         public static float ambientVolume
         {
             get => Bindings.AudioSystemGetAMBIENTVolume();
             set => Bindings.AudioSystemSetAMBIENTVolume(value);
         }
+        /// <summary>
+        /// Clamps to 0...1
+        /// </summary>
         public static float dialogueVolume
         {
             get => Bindings.AudioSystemGetDIALOGUEVolume();

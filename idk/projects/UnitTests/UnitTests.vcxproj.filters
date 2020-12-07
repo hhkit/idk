@@ -58,11 +58,16 @@
     </ClCompile>
     <ClCompile Include="TestTest.cpp" />
     <ClCompile Include="TestSlidingWindow.cpp" />
+    <ClCompile Include="ReflectReg_TestStructures.cpp">
+      <Filter>Reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="TestMessageStream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="TestApplication.h" />
     <ClInclude Include="core_setup.h" />
+    <ClInclude Include="TestStructures.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

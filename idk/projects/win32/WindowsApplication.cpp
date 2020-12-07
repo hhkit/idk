@@ -24,16 +24,11 @@
 #include <event/Signal.inl>
 
 #include "WinMessageTable.h"
-#include <WinSock2.h>
 
 static HCURSOR prevCursor;
 
 namespace idk::win
 {
-#define _DEBUG
-
-	static WSADATA wsaData;
-
 	Windows::Windows(HINSTANCE _hInstance, int nCmdShow, HICON icon)
 		: hInstance{ _hInstance }, _input_manager{std::make_unique<InputManager>()}, icon{icon}
 	{
@@ -58,16 +53,10 @@ namespace idk::win
 		InitInstance(nCmdShow); 
 		//SetFullscreen(true);
 		//hAccelTable = LoadAccelerators(hInstance, 0);
-
-		int iResult;
-		u_long iMode = 0;
-
-		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	}
 
 	Windows::~Windows()
 	{
-		WSACleanup();
 	}
 
 	void Windows::SetIcon(HICON icon)
@@ -290,64 +279,40 @@ namespace idk::win
 
 	bool Windows::GetFullscreen() const
 	{
-		return _fullscreen;
+		DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
+		return !(dwStyle & WS_OVERLAPPEDWINDOW);
 	}
 
 	bool Windows::SetFullscreen(bool fullscreen)
     {
-        // stolen from chromium
+		// https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
 
-        if (!_fullscreen)
-        {
-            // Save current window information.  We force the window into restored mode
-            // before going fullscreen because Windows doesn't seem to hide the
-            // taskbar if the window is in the maximized state.
-            _saved_win_info.maximized = !!::IsZoomed(hWnd);
-            if (_saved_win_info.maximized)
-                ::SendMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
-            _saved_win_info.style = GetWindowLong(hWnd, GWL_STYLE);
-            _saved_win_info.ex_style = GetWindowLong(hWnd, GWL_EXSTYLE);
-            GetWindowRect(hWnd, &_saved_win_info.window_rect);
-        }
+		DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
 
-        _fullscreen = fullscreen;
-
-        if (_fullscreen)
-        {
-            // Set new window style and size.
-            SetWindowLong(hWnd, GWL_STYLE,
-                          _saved_win_info.style & ~(WS_CAPTION | WS_THICKFRAME));
-            SetWindowLong(hWnd, GWL_EXSTYLE,
-                          _saved_win_info.ex_style & ~(WS_EX_DLGMODALFRAME |
-                                                       WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
-
-            // On expand, if we're given a window_rect, grow to it, otherwise do
-            // not resize.
-            MONITORINFO monitor_info;
-            monitor_info.cbSize = sizeof(monitor_info);
-            GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST),
-                            &monitor_info);
-            const auto& rect = monitor_info.rcMonitor;
-            SetWindowPos(hWnd, NULL, rect.left, rect.top,
-                         rect.right - rect.left, rect.bottom - rect.top,
-                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-        }
-        else
-        {
-            // Reset original window style and size.  The multiple window size/moves
-            // here are ugly, but if SetWindowPos() doesn't redraw, the taskbar won't be
-            // repainted.  Better-looking methods welcome.
-            SetWindowLong(hWnd, GWL_STYLE, _saved_win_info.style);
-            SetWindowLong(hWnd, GWL_EXSTYLE, _saved_win_info.ex_style);
-
-                // On restore, resize to the previous saved rect size.
-            const auto& rect = _saved_win_info.window_rect;
-            SetWindowPos(hWnd, NULL, rect.left, rect.top,
-                         rect.right - rect.left, rect.bottom - rect.top,
-                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-            if (_saved_win_info.maximized)
-                ::SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-        }
+		if (fullscreen && (dwStyle & WS_OVERLAPPEDWINDOW))
+		{
+			MONITORINFO mi{ sizeof(mi) };
+			if (GetWindowPlacement(hWnd, &wp_prev) &&
+				GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY), &mi))
+			{
+				SetWindowLong(hWnd, GWL_STYLE,
+							  dwStyle & ~WS_OVERLAPPEDWINDOW);
+				SetWindowPos(hWnd, HWND_TOP,
+							 mi.rcMonitor.left, mi.rcMonitor.top,
+							 mi.rcMonitor.right - mi.rcMonitor.left,
+							 mi.rcMonitor.bottom - mi.rcMonitor.top,
+							 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+			}
+		}
+		else if(!fullscreen && !(dwStyle & WS_OVERLAPPEDWINDOW))
+		{
+			SetWindowLong(hWnd, GWL_STYLE,
+						  dwStyle | WS_OVERLAPPEDWINDOW);
+			SetWindowPlacement(hWnd, &wp_prev);
+			SetWindowPos(hWnd, NULL, 0, 0, 0, 0,
+						 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+						 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+		}
 
         return true;
     }
@@ -594,7 +559,7 @@ namespace idk::win
 		//					 CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 		int w = GetSystemMetrics(SM_CXSCREEN);
 		int h = GetSystemMetrics(SM_CYSCREEN);
-        hWnd = CreateWindowW(szWindowClass, L"Hyde & Seek", WS_POPUP,
+        hWnd = CreateWindowW(szWindowClass, L"Hyde & Seek", WS_OVERLAPPEDWINDOW,
 			0, 0, w, h, nullptr, nullptr, hInstance, nullptr);
 
 		if (!hWnd)

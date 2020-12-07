@@ -1895,7 +1895,7 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::CameraGetDepth", float, Handle<Camera> h)
+		BIND_START("idk.Bindings::CameraGetDepth", int, Handle<Camera> h)
 		{
 			return h->depth;
 		}
@@ -2459,137 +2459,96 @@ namespace idk::mono
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkGetDevices", MonoArray*)
-		{
-			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
-			auto retval = mono_array_new(mono_domain_get(), mono_get_object_class(), devices.size());
-
-			const auto device_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Device");
-
-			for (unsigned i = 0; i < devices.size(); ++i)
-			{
-				const auto& elem = devices[i];
-				auto csh_device = device_type->Construct();
-				auto str = (MonoObject*) mono_string_new(mono_domain_get(), elem.description.data());
-				csh_device.Assign("mac_addr", str);
-				csh_device.Assign("subnet_bits", elem.subnet_length);
-
-				mono_array_setref(retval, i, csh_device.Raw());
-			}
-
-			return retval;
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkGetDiscoveredServers", MonoArray*)
-		{
-			auto discovered = Core::GetSystem<NetworkSystem>().GetDiscoveredServers();
-
-			const auto address_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Address");
-			auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), discovered.size());
-
-			for (unsigned j = 0; j < discovered.size(); ++j)
-				mono_array_set(retval, Address, j, discovered[j].address);
-
-			return retval;
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkGetServerClientsConnected", int, Address addr)
-		{
-			auto discovered = Core::GetSystem<NetworkSystem>().GetDiscoveredServers();
-
-			for (unsigned j = 0; j < discovered.size(); ++j)
-				if (discovered[j].address == addr)
-					return discovered[j].client_count;
-
-			return -1;
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkEvictClient", void, int id)
-		{
-			Core::GetSystem<NetworkSystem>().EvictClient(id);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkGetIsListeningForServers", bool)
-		{
-			return Core::GetSystem<NetworkSystem>().IsSearching();
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkSetIsListeningForServers", void, bool set)
-		{
-			Core::GetSystem<NetworkSystem>().SetSearch(set);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkGetIsBroadcastingServerIP", bool)
-		{
-			return Core::GetSystem<NetworkSystem>().IsBroadcasting();
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkSetIsBroadcastingServerIP", void, bool set)
-		{
-			Core::GetSystem<NetworkSystem>().SetBroadcast(set);
-		}
-		BIND_END();
-
-		BIND_START("idk.Bindings::NetworkDeviceGetAddresses", MonoArray*, MonoString* mac_address)
-		{
-			auto mac_addr_str = unbox(mac_address);
-			auto devices = Core::GetSystem<Application>().GetNetworkDevices();
-			const auto address_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Address");
-
-			for (auto& elem : devices)
-			{
-				if (elem.description == mac_addr_str.get())
-				{
-					auto retval = mono_array_new(mono_domain_get(), address_type->Raw(), devices.size());
-					for (unsigned j = 0; j < elem.ip_addresses.size(); ++j)
-						mono_array_set(retval, Address, j, elem.ip_addresses[j]);
-					return retval;
-				}
-			}
-
-			return nullptr;
-		}
-		BIND_END();
-
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
 			Core::GetSystem<NetworkSystem>().Disconnect();
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkConnect", void, Address a)
+		BIND_START("idk.Bindings::NetworkCreateLobby", void, int lobby_type)
 		{
-			Core::GetSystem<NetworkSystem>().ConnectToServer(a);
+			Core::GetSystem<NetworkSystem>().CreateLobby(static_cast<ELobbyType>(lobby_type));
 		}
 		BIND_END();
 
-		BIND_START("idk.Bindings::NetworkCreateLobby", bool, MonoString* mac_address)
+		BIND_START("idk.Bindings::NetworkJoinLobby", void, CSteamID lobby_id)
 		{
-			auto mac_addr = unbox(mac_address);
-			for (auto& elem : Core::GetSystem<Application>().GetNetworkDevices())
-			{
-				if (elem.description == mac_addr.get())
-				{
-					try
-					{
-						Core::GetSystem<NetworkSystem>().InstantiateServer(elem.ip_addresses[0]);
-						return true;
-					}
-					catch (...)
-					{
-						LOG_TO(LogPool::NETWORK, "Failed to create server.");
-						return false;
-					}
-				}
-			}
-			return false;
+			Core::GetSystem<NetworkSystem>().JoinLobby(lobby_id);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkLeaveLobby", void)
+		{
+			Core::GetSystem<NetworkSystem>().LeaveLobby();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetCurrentLobby", uint64_t)
+		{
+			return Core::GetSystem<NetworkSystem>().GetLobbyID().ConvertToUint64();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetLocalClient", int)
+		{
+			return static_cast<int>(Core::GetSystem<NetworkSystem>().GetMe());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkOpenLobbyInviteDialog", void)
+		{
+			SteamFriends()->ActivateGameOverlayInviteDialog(Core::GetSystem<NetworkSystem>().GetLobbyID());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkFindLobbies", void)
+		{
+			Core::GetSystem<NetworkSystem>().FindLobbies();
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetLobbyData", MonoString*, CSteamID lobby_id, MonoString* key)
+		{
+			return mono_string_new(mono_domain_get(), SteamMatchmaking()->GetLobbyData(lobby_id, unbox(key).get()));
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSetLobbyData", void, MonoString* key, MonoString* value)
+		{
+			SteamMatchmaking()->SetLobbyData(Core::GetSystem<NetworkSystem>().GetLobbyID(), unbox(key).get(), unbox(value).get());
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSendLobbyMsg", void, MonoArray* msg)
+		{
+			int sz = static_cast<int>(mono_array_length(msg));
+			auto* bytes = mono_array_addr(msg, std::byte, 0);
+			SteamMatchmaking()->SendLobbyChatMsg(Core::GetSystem<NetworkSystem>().GetLobbyID(), bytes, sz);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkGetLobbyNumMembers", int, CSteamID lobby_id)
+		{
+			return SteamMatchmaking()->GetNumLobbyMembers(lobby_id);
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkClientLobbyIndex", int, int id)
+		{
+			return Core::GetSystem<NetworkSystem>().GetLobbyMemberIndex(static_cast<Host>(id));
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkClientName", MonoString*, int id)
+		{
+			auto steamid = Core::GetSystem<NetworkSystem>().GetLobbyMember(static_cast<Host>(id));
+			return mono_string_new(mono_domain_get(), SteamFriends()->GetFriendPersonaName(steamid));
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkConnectToLobbyOwner", void)
+		{
+			Core::GetSystem<NetworkSystem>().ConnectToLobbyOwner();
 		}
 		BIND_END();
 

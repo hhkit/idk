@@ -10,10 +10,8 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
-    - uses: warrenbuckley/Setup-MSBuild@v1
+    - uses: actions/checkout@v2
+    - uses: microsoft/setup-msbuild@v1.0.2
     - uses: nuget/setup-nuget@v1
 
     - name: Pre-build

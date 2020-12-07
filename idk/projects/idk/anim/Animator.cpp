@@ -208,11 +208,11 @@ namespace idk
 #pragma endregion
 
 #pragma region Script Functions
-	bool Animator::Play(string_view animation_name, float offset, int layer_index)
+	bool Animator::Play(string_view animation_name, float _offset, int layer_index)
 	{
 		if (layer_index >= layers.size())
 			return false;
-		return layers[layer_index].Play(animation_name, offset);
+		return layers[layer_index].Play(animation_name, _offset);
 	}
 
 	bool Animator::BlendTo(string_view animation_name, float time, int layer_index)

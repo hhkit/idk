@@ -3,8 +3,6 @@
 #include <core/ISystem.h>
 #include <app/Keys.h>
 #include <event/Signal.h>
-#include <network/Device.h>
-#include <network/Socket.h>
 
 namespace idk
 {
@@ -58,9 +56,5 @@ namespace idk
 		virtual string GetAppData() = 0;
 		virtual string GetCurrentWorkingDir() = 0;
 		virtual opt<string> OpenFileDialog(const DialogOptions& dialog) = 0;
-
-		// networking
-		virtual vector<Device> GetNetworkDevices() = 0;
-		virtual unique_ptr<Socket> CreateSocket() = 0;
 	};
 }

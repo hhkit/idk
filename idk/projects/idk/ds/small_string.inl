@@ -1203,7 +1203,7 @@ namespace idk
 			for (std::streamsize i = 0; i < w; ++i)
 			{
                 char c = is.get();
-				if (is.eof() || std::isspace(c, is.getloc()))
+				if (is.eof() || std::isspace(c))
 					break;
 				str.push_back(c);
 			}

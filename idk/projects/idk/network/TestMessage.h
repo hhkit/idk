@@ -1,9 +1,10 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
+#include <network/Message.h>
+
 namespace idk
 {
 	class TestMessage
-		: public yojimbo::Message 
+		: public Message 
 	{
 	public:
 		int i = 0;
@@ -14,6 +15,6 @@ namespace idk
 			return true;
 		}
 
-		YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+		NETWORK_MESSAGE_VIRTUAL_SERIALIZE_FUNCTIONS()
 	};
 }

@@ -1,10 +1,16 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
 #include <core/ISystem.h>
-#include <network/Address.h>
 #include <network/GameConfiguration.h>
 #include <event/Signal.h>
 #include <network/network.h>
+#include <network/Message.h>
+#include <steam/steam_api_common.h>
+#pragma warning(push)
+#pragma warning(disable:4996)
+#include <steam/isteammatchmaking.h>
+#pragma warning(pop)
+#include <steam/isteamnetworkingsockets.h>
+
 namespace idk
 {
 	class Client;
@@ -15,32 +21,25 @@ namespace idk
 	class ServerConnectionManager;
 	class Socket;
 
-	struct ServerInfo
-	{
-		Address address;
-		int client_count;
-		bool is_broadcasting;
-		seconds time_to_live;
-	};
-
 	class NetworkSystem
 		: public ISystem
 	{
-		static constexpr unsigned short server_listen_port = 8080;
-		static constexpr unsigned short client_listen_port = 8000;
 	public:
 		NetworkSystem();
 		~NetworkSystem();
 
-		void InstantiateServer(const Address& d);
-		void ConnectToServer(const Address& d);
-
+		CSteamID GetLobbyID() { return lobby_id; }
+		void CreateLobby(ELobbyType lobby_type);
+		void JoinLobby(CSteamID lobby_id);
+		void LeaveLobby();
+		void FindLobbies();
+		CSteamID GetLobbyMember(Host host);
+		int GetLobbyMemberIndex(Host host);
+		void ConnectToLobbyOwner();
 		void Disconnect();
-		void EvictClient(int clientID);
 
 		Client& GetClient() { return *client; }
-		Server& GetServer() { return *lobby; }
-		array<ConnectionManager*, 5> GetConnectionManagers();
+		Server& GetServer() { return *server; }
 
 		bool IsHost();
 		Host GetMe();
@@ -68,22 +67,27 @@ namespace idk
 
 		template<typename ... Objects> void SubscribePacketResponse(void(*fn)(span<Objects...>));
 
-		// for discovery
-		void SetSearch(bool enable);
-		bool IsSearching() const { return static_cast<bool>(client_listen_socket); }
-		void SetBroadcast(bool enable);
-		bool IsBroadcasting() const { return static_cast<bool>(server_broadcast_socket); }
-		vector<ServerInfo> GetDiscoveredServers() const;
 	private:
-		struct ResponseCallback {
+		struct ResponseCallback
+		{
 			void* fn_ptr;
 			function<void()> callback;
 		};
+		struct LobbyMember
+		{
+			CSteamID id;
+			Host host;
+		};
 
-		unique_ptr<Server> lobby;
+		unique_ptr<Server> server;
 		unique_ptr<Client> client;
 		unique_ptr<ServerConnectionManager> server_connection_manager[GameConfiguration::MAX_CLIENTS];
 		unique_ptr<ClientConnectionManager> client_connection_manager;
+
+		SeqNo frame_counter{};
+		Host my_id;
+		CSteamID lobby_id;
+		LobbyMember lobby_members[GameConfiguration::MAX_LOBBY_MEMBERS];
 
 		unique_ptr<IDManager> id_manager;
 
@@ -92,16 +96,9 @@ namespace idk
 
 		vector<Handle<mono::Behavior>> callback_objects;
 
-		SeqNo frame_counter{};
-		Host my_id = Host::NONE;
+		HSteamListenSocket listen_socket;
 
-		unique_ptr<Socket> client_listen_socket;
-		unique_ptr<Socket> server_broadcast_socket;
 
-		static constexpr seconds server_broadcast_limit = seconds{ 1 };
-		static constexpr seconds server_entry_time_to_live = seconds{ 5 };
-		seconds server_timer{};
-		std::map<Address, ServerInfo> client_address_cooldown;
 
 		void Init() override;
 		void LateInit() override;
@@ -109,5 +106,19 @@ namespace idk
 		void Shutdown() override;
 
 		void ResetNetwork();
+
+
+
+		STEAM_CALLBACK(NetworkSystem, OnLobbyCreated, LobbyCreated_t);
+		STEAM_CALLBACK(NetworkSystem, OnJoinedLobby, LobbyEnter_t);
+		STEAM_CALLBACK(NetworkSystem, OnConnectionStatusChanged, SteamNetConnectionStatusChangedCallback_t);
+		STEAM_CALLBACK(NetworkSystem, OnLobbyChatUpdated, LobbyChatUpdate_t);
+		STEAM_CALLBACK(NetworkSystem, OnLobbyDataUpdated, LobbyDataUpdate_t);
+		STEAM_CALLBACK(NetworkSystem, OnLobbyMatchList, LobbyMatchList_t);
+		STEAM_CALLBACK(NetworkSystem, OnLobbyChatMsg, LobbyChatMsg_t);
+
+	public:
+		STEAM_CALLBACK(NetworkSystem, OnLobbyJoinRequested, GameLobbyJoinRequested_t);
+
 	};
 }
