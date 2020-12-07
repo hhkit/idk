@@ -57,17 +57,20 @@ namespace idk::vkn
 	const MeshBuffer& VulkanMesh::Get(attrib_index index) const
 	{
 		HANDLE_DEFAULT(Get(index));
-		auto itr = buffers.find(index);
-		if (itr != buffers.end())
-			return itr->second;
+		//auto itr = buffers.find(index);
+		//if (itr != buffers.end())
+		//	return itr->second;
+		if (Has(index))
+			return buffers.at(index).second;
 		throw std::exception{ "Attempting to get invalid attrib index from vulkan mesh." };
 		//return MeshBuffer{};
 	}
 	bool VulkanMesh::Has(attrib_index index) const
 	{
 		HANDLE_DEFAULT(Has(index));
-		auto itr = buffers.find(index);
-		return (itr != buffers.end());
+		return occupied.at(index);
+		//auto itr = buffers.find(index);
+		//return (itr != buffers.end());
 	}
 	const VulkanMesh::buffers_t& VulkanMesh::Buffers() const 
 	{
@@ -90,7 +93,8 @@ void VulkanMesh::SetIndexBuffer(MeshBuffer&& buffer, uint32_t count, vk::IndexTy
 
 void VulkanMesh::SetBuffer(attrib_index type, MeshBuffer&& buffer)
 {
-	buffers[type] = std::move(buffer);
+	buffers[type] = std::pair{ type,std::move(buffer) };
+	occupied[type] = true;
 }
 #pragma optimize("",off)
 void VulkanMesh::use_default(bool value)

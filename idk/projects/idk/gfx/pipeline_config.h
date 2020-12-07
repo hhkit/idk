@@ -5,6 +5,9 @@
 #include <gfx/ShaderProgram.h>
 #include <gfx/BasicRenderPasses.h>
 #include <ds/Flags.h>
+
+#include <util/PoolContainer.h>
+
 namespace idk
 {
 
@@ -102,7 +105,7 @@ namespace idk
 		RscHandle<ShaderProgram> vert_shader{};
 		std::optional<ivec2> viewport_offset{};
 		std::optional<uvec2> viewport_size{};
-		vector<buffer_desc> buffer_descriptions;
+		PooledContainer<vector<buffer_desc>> buffer_descriptions;
 		FillType fill_type = eFill;
 		PrimitiveTopology prim_top = eTriangleList;
 		BasicRenderPasses render_pass_type = {};
@@ -113,6 +116,6 @@ namespace idk
 		bool depth_write = true;
 		bool stencil_test = true;
 		bool stencil_write =true;
-		vector<AttachmentBlendConfig> attachment_configs = { AttachmentBlendConfig{} };
+		PooledContainer<vector<AttachmentBlendConfig>> attachment_configs = { AttachmentBlendConfig{} };
 	};
 }

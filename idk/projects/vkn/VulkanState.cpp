@@ -399,7 +399,6 @@ namespace idk::vkn
 		buffer_offset_alignment = s_cast<decltype(buffer_offset_alignment )>(pdevice.getProperties().limits.minUniformBufferOffsetAlignment);
 		buffer_size_alignment = s_cast<decltype(buffer_size_alignment)>(pdevice.getProperties().limits.nonCoherentAtomSize);
 	}
-#pragma optimize("",off)
 	void VulkanState::createLogicalDevice()
 	{
 		QueueFamilyIndices indices = findQueueFamilies(pdevice);

@@ -29,7 +29,7 @@ namespace idk::vkn
 	using CollatedLayouts_t = hash_table < vk::DescriptorSetLayout, std::pair<uint32_t, DsCountArray>>;
 	template<vk::DescriptorType type>
 	static constexpr size_t desc_type_index = desc_type_info::map<type>();
-
+#if 0
 	class binding_manager 
 	{
 		using set_t = uint32_t;
@@ -90,7 +90,7 @@ namespace idk::vkn
 			return  itr != bindings.end() && itr->second.size() > array_index && itr->second[array_index];
 		}
 	};
-
+#endif
 	class PipelineThingy
 	{
 	public:
@@ -174,7 +174,7 @@ namespace idk::vkn
 
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
-		vector<ProcessedRO::BindingInfo> bindings,
+		span<ProcessedRO::BindingInfo> bindings,
 		DescriptorUpdateData& ds_update_data
 	);
 

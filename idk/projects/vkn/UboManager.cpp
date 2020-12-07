@@ -160,6 +160,7 @@ namespace idk::vkn
 		}
 		//free it.
 	}
+	//TODO: Try having a set of buffers that are persistantly mapped instead.
 	void UboManager::UpdateAllBuffers()
 	{
 		for (auto& [buffer_idx,memory_idx] : _allocation_table)

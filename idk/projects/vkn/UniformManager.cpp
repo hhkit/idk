@@ -56,8 +56,6 @@ namespace idk::vkn
 	{
 		return layout;
 	}
-
-
 	struct DSUpdater
 	{
 		decltype(DescriptorUpdateData::buffer_infos)& buffer_infos;
@@ -65,10 +63,13 @@ namespace idk::vkn
 		const UniformUtils::BindingInfo& binding;
 		const vk::DescriptorSet& dset;
 		vk::WriteDescriptorSet& curr;
+		size_t image_offset = 0;
 		void operator()(UniformUtils::BufferBinding& ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			buffer_infos.emplace_front(
+			//auto& dset = ds2[i++];
+			auto buffer_idx = buffer_infos.size() + 1;//+1 to distinguish from null
+			buffer_infos.emplace_back(
 				vk::DescriptorBufferInfo{
 				  ubuffer.buffer
 				, ubuffer.offset
@@ -85,7 +86,7 @@ namespace idk::vkn
 					,1
 					,vk::DescriptorType::eUniformBuffer
 					,nullptr
-					,&buffer_infos.front()
+					,reinterpret_cast<decltype(buffer_infos.data())>(buffer_idx)
 					,nullptr
 			}
 			;
@@ -93,7 +94,7 @@ namespace idk::vkn
 		void operator()(UniformUtils::image_t ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			auto& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding + image_offset];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 				  ubuffer.sampler
@@ -107,7 +108,7 @@ namespace idk::vkn
 		void operator()(UniformUtils::AttachmentBinding ubuffer)
 		{
 			//auto& dset = ds2[i++];
-			auto& bufferInfo = image_infos[binding.binding];
+			auto& bufferInfo = image_infos[binding.binding + image_offset];
 			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
 				vk::DescriptorImageInfo{
 					{}
@@ -119,52 +120,88 @@ namespace idk::vkn
 			curr.descriptorType = vk::DescriptorType::eInputAttachment;
 		}
 	};
-	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw);
-
+	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw)
+	{
+		auto insert_itr = dsw.begin();
+		for (auto itr = dsw.begin(); itr != dsw.end(); ++itr)
+		{
+			if (itr->descriptorCount != 0)
+			{
+				if (itr != insert_itr)
+					std::swap((*(insert_itr)), (*itr));
+				++insert_itr;
+			}
+		}
+		dsw.resize(insert_itr - dsw.begin());
+	}
+	//void UpdateUniformDS(
+	//	vk::DescriptorSet& dset,
+	//	vector<ProcessedRO::BindingInfo> bindings,
+	//	DescriptorUpdateData& out
+	//)
+	//{
+	//	//out.AbsorbFromScratch();
+	//}
 	void UpdateUniformDS(
 		vk::DescriptorSet& dset,
 		span<UniformUtils::BindingInfo> bindings,
 		DescriptorUpdateData& out
 	)
 	{
-		auto& buffer_infos = out.scratch_buffer_infos;
-		auto& image_infos = out.scratch_image_info;
-		auto& descriptorWrite = out.scratch_descriptorWrite;
+		static size_t counter = 0;
+		counter++;
+		auto& buffer_infos = out.buffer_infos;
+		auto& image_infos = out.image_infos;
+		auto& descriptorWrite = out.descriptorWrite;
+		size_t descriptor_write_offset = descriptorWrite.size();
+		size_t image_info_offset = image_infos.size();
+		auto DsWriteIdx = [descriptor_write_offset](size_t idx)
+		{
+			return descriptor_write_offset + idx;
+		};
+		auto ImgInfoIdx = [image_info_offset](size_t idx)
+		{
+			return image_info_offset + idx;
+		};
 		using img_vec_t = std::remove_reference_t<decltype(image_infos[0])>;
-		uint32_t max_binding = 0;
+		uint32_t  max_binding = 0;
 		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
 		vk::DescriptorImageInfo default_img
 		{
 			def.Sampler(),def.ImageView(),vk::ImageLayout::eGeneral,
 		};
+
 		for (auto& binding : bindings)
 		{
 			max_binding = std::max(binding.binding + 1, max_binding);
-			if (max_binding > descriptorWrite.size())
-			{
-				descriptorWrite.resize(max_binding, vk::WriteDescriptorSet{});
-				image_infos.resize(max_binding, img_vec_t(out.alloc));
-			}
-			auto& curr = descriptorWrite[binding.binding];
+		}
+		if (DsWriteIdx(max_binding) > descriptorWrite.size())
+		{
+			descriptorWrite.resize(DsWriteIdx(max_binding), vk::WriteDescriptorSet{});
+		}
+		if (image_info_offset + max_binding > image_infos.size())
+		{
+			image_infos.resize(image_info_offset + max_binding);
+		}
+		for (auto& binding : bindings)
+		{
+			auto& curr = descriptorWrite[DsWriteIdx(binding.binding)];
 			if (binding.IsImage() || binding.IsAttachment())
 			{
-				image_infos[binding.binding].resize(binding.size, default_img);
+				image_infos[ImgInfoIdx(binding.binding)].resize(binding.size, default_img);
 				curr.descriptorCount = static_cast<uint32_t>(binding.size);
 			}
 			curr.dstSet = dset;
 			curr.dstBinding = binding.binding;
 			curr.dstArrayElement = 0;
 		}
-		
 		//TODO: Handle Other DSes as well
 		for (auto& binding : bindings)
 		{
-			DSUpdater updater{ buffer_infos,image_infos,binding,dset,descriptorWrite[binding.binding] };
+			DSUpdater updater{ buffer_infos,image_infos,binding,dset,descriptorWrite[DsWriteIdx(binding.binding)],image_info_offset};
 			std::visit(updater, binding.ubuffer);
 		}
-		
 		CondenseDSW(descriptorWrite);
-		out.AbsorbFromScratch();
 	}
 	UniformUtils::BindingInfo::BindingInfo(
 		uint32_t binding_,

@@ -121,10 +121,10 @@ namespace idk::vkn
 		auto oitr = renamed_original.find(rsc.id);
 		if (itr == resource_handles.end() || oitr == renamed_original.end())
 			throw;
-		resource_handles.emplace(next_id, itr->second);
-		renamed_resources.emplace(next_id, rsc.id);
-		renamed_rsc_next.emplace(rsc.id, next_id);
-		renamed_original.emplace(next_id, oitr->second);
+		resource_handles.emplace(std::pair{ next_id, itr->second });
+		renamed_resources.emplace(std::pair{ next_id, rsc.id });
+		renamed_rsc_next.emplace(std::pair{ rsc.id, next_id });
+		renamed_original.emplace(std::pair{ next_id, oitr->second });
 		return FrameGraphResource{ next_id };
 	}
 

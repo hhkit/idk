@@ -75,9 +75,6 @@
     <ClInclude Include="VknImageData.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="VknMeshModder.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="SpinLock.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -449,6 +446,12 @@
     <ClInclude Include="VknTextureData.h">
       <Filter>resource\Loaders\Util</Filter>
     </ClInclude>
+    <ClInclude Include="VknMeshModder.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="UniformUtils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -516,9 +519,6 @@
     </ClCompile>
     <ClCompile Include="TmpTest.cpp" />
     <ClCompile Include="VulkanResourceManager.cpp">
-      <Filter>resource</Filter>
-    </ClCompile>
-    <ClCompile Include="VknMeshModder.cpp">
       <Filter>resource</Filter>
     </ClCompile>
     <ClCompile Include="utils\GlslToSpirv.cpp">
@@ -762,6 +762,9 @@
     </ClCompile>
     <ClCompile Include="VknAsyncTexLoader.cpp" />
     <ClCompile Include="VknTextureData.cpp" />
+    <ClCompile Include="VknMeshModder.cpp">
+      <Filter>resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">

@@ -3,7 +3,7 @@
 #include <vkn/utils/utils.inl>
 namespace idk::vkn
 {
-
+/*
 std::optional<vk::Buffer> ProcessedRO::BindingInfo::GetBuffer() const
 {
 	std::optional<vk::Buffer> ret;
@@ -46,6 +46,7 @@ vk::DescriptorSetLayout ProcessedRO::BindingInfo::GetLayout() const
 {
 	return layout;
 }
+*/
 
 const RenderObject& ProcessedRO::Object() const
 {

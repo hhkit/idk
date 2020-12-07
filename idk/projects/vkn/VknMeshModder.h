@@ -11,6 +11,7 @@ namespace idk::vkn
 	{
 
 		MeshModder();
+		~MeshModder();
 
 		//Pass in a string view with the correct number of bytes for the buffer
 		std::shared_ptr<MeshBuffer::Managed> CreateBuffer(string_view raw_data);
@@ -26,6 +27,8 @@ namespace idk::vkn
 	private:
 		hlp::MemoryAllocator allocator;
 		std::mutex create_alloc_mutex,transfer_mutex;
+		struct PImpl;
+		std::unique_ptr<PImpl> pimpl_;
 	};
 
 }

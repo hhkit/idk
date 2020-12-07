@@ -108,10 +108,10 @@ namespace idk::vkn::hlp
 		};
 		auto handle = device.mapMemory(memory, mmr.offset, mmr.size, vk::MemoryMapFlags{}, dispatcher);
 		memcpy_s(handle, mmr.size, src_start, mmr.size);
-		std::vector<decltype(mmr)> memory_ranges
-		{
-			mmr
-		};
+		//std::vector<decltype(mmr)> memory_ranges
+		//{
+		//	mmr
+		//};
 		//Not necessary rn since we set the HostCoherent bit 
 		//This command only guarantees that the memory(on gpu) will be updated by vkQueueSubmit
 		//device.flushMappedMemoryRanges(memory_ranges, dispatcher);

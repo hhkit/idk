@@ -400,12 +400,22 @@ namespace idk::vkn
 		std::array<string_view, 12> lut2s{};
 		vector<mt::Future<void>> futures;
 		size_t i = 0;
+		std::atomic<double> pre_execute_duration{};
+		std::atomic<double> execute_duration{};
+		std::array<bool, 8> thd_is_old{};
 		for (auto index : execution_order)
 		{
 			i = 0;
 			futures.emplace_back( Core::GetThreadPool().Post(
-				[&rsc_manager,index, this]()
+				[&rsc_manager,index,&thd_is_old,&pre_execute_duration, &execute_duration, this]()
 				{
+					thread_local float tpre_dur = 0;
+					thread_local float tdur = 0;
+					if (!thd_is_old[mt::thread_id()])
+					{
+						thd_is_old[mt::thread_id()] = true;
+						tpre_dur = tdur = 0;
+					}
 					auto& node = nodes[index];
 					auto& rp = *render_passes[node.id];
 					auto& p_ubo_manager = _ubo_managers.at(mt::thread_id());
@@ -425,7 +435,17 @@ namespace idk::vkn
 							TransitionResource(context, rsc_manager.TransitionInfo(input));
 						}
 						context.SetRscManager(rsc_manager);
+						dbg::stopwatch timer;
+						timer.start();
 						rp.PreExecute(node, context);
+						pre_execute_duration += timer.lap().count();
+						{
+
+							auto dur = tpre_dur += timer.lap().count();
+							auto old = pre_execute_duration.load();
+							while (dur > old && !pre_execute_duration.compare_exchange_weak(old, dur));
+						}
+						
 						//lut[] +=timer.lap();
 						//lut2s[i] = "Pre Execute";
 						//{
@@ -455,6 +475,13 @@ namespace idk::vkn
 						//}
 						//lut["Copy"] += timer.lap();
 						rp.Execute(context);
+
+						{
+
+						auto dur = tdur+=timer.lap().count();
+						auto old = execute_duration.load();
+						while(dur >old && !execute_duration.compare_exchange_weak(old,dur));
+						}
 						//lut2s[i] = "Execute";
 						//{
 						//	auto lap = timer.lap();
@@ -482,6 +509,10 @@ namespace idk::vkn
 		{
 			future.get();
 		}
+		GetGfxTimeLog().start("PreExecute");
+		GetGfxTimeLog().end(dbg::milliseconds{ pre_execute_duration.load() });
+		GetGfxTimeLog().start("SubExecute");
+		GetGfxTimeLog().end(dbg::milliseconds{ execute_duration.load() });
 		//for (size_t j = 0; j < i; ++j)
 		//{
 		//	GetGfxTimeLog().log(lut2s[j], lut2[j]);
@@ -525,18 +556,19 @@ GetGfxTimeLog().start("Compile");
 
 		if (_duds.empty())
 		{
-			_duds.emplace_back(DescriptorUpdateData{ alloc });//Consider scaling with threads
+			_duds.emplace_back(DescriptorUpdateData{});//Consider scaling with threads
 		}
 	GetGfxTimeLog().start("Dud Stuff");
 		dbg::stopwatch timer2;
 		timer2.start();
+		DescriptorUpdateData dud;// = _duds.back();
 		for (auto& rt : _contexts)
 		{
-			_duds.back().Reset();
+			dud.Reset();
 			//GetGfxTimeLog().end_then_start("Dud Reset", timer2.lap());
-			rt.PreprocessDescriptors(_duds.back(),bundle._d_manager);
+			rt.PreprocessDescriptors(dud,bundle._d_manager);
 			//GetGfxTimeLog().end_then_start("Dud Pre Proc", timer2.lap());
-			_duds.back().SendUpdates();
+			dud.SendUpdates();
 			//GetGfxTimeLog().end_then_start("Dud SendUpdates", timer2.lap());
 		}
 	GetGfxTimeLog().end_then_start("Proc Batches");

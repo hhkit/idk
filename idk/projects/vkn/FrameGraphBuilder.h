@@ -6,6 +6,9 @@
 #include "FrameGraphResourceManager.h"
 #include "FrameGraphCopyResource.h"
 #include <vkn/IdGenerator.h>
+
+#include <util/PoolContainer.h>
+
 namespace idk::vkn
 {
 	struct NodeBuffer
@@ -75,15 +78,15 @@ namespace idk::vkn
 		{
 			string name;
 			bool no_rp=false;
-			vector<FrameGraphResource> input_resources;
-			vector<FrameGraphResource> read_resources;
-			vector<FrameGraphResource> output_resources;
-			vector<FrameGraphResource> modified_resources;
+			PooledContainer<vector<FrameGraphResource>> input_resources;
+			PooledContainer<vector<FrameGraphResource>> read_resources;
+			PooledContainer<vector<FrameGraphResource>> output_resources;
+			PooledContainer<vector<FrameGraphResource>> modified_resources;
 
-			vector<FrameGraphCopyResource> copies;
+			PooledContainer<vector<FrameGraphCopyResource>> copies;
 
-			vector<std::optional<FrameGraphAttachmentInfo>> input_attachments;
-			vector<std::optional<FrameGraphAttachmentInfo>> output_attachments;
+			PooledContainer<vector<std::optional<FrameGraphAttachmentInfo>>> input_attachments;
+			PooledContainer<vector<std::optional<FrameGraphAttachmentInfo>>> output_attachments;
 			std::optional<FrameGraphAttachmentInfo> depth_attachment;
 			void reset();
 		};

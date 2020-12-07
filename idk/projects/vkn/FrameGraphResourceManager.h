@@ -7,6 +7,9 @@
 #include <vkn/IdGenerator.h>
 #include <vkn/VknTextureView.h>
 #include <vkn/TexturePool.h>
+
+#include <util/PoolContainer.h>
+
 namespace idk::vkn
 {
 	//All the necessary information to transition a resource to its target configuration
@@ -83,18 +86,18 @@ namespace idk::vkn
 		void FinishInstantiation();
 		void Reset();
 
-		vector<TextureDescription> resources;
+		PooledContainer < vector<TextureDescription>> resources;
 
-		vector<actual_resource_t> concrete_resources;
-		hash_table<fgr_id, actual_rsc_index_t> resource_map;
+		PooledContainer < vector<actual_resource_t> > concrete_resources;
+		PooledContainer < hash_table<fgr_id, actual_rsc_index_t>> resource_map;
 
-		hash_table<fgr_id, rsc_index_t> resource_handles;
+		PooledContainer<hash_table<fgr_id, rsc_index_t>> resource_handles;
 		//old to new(first), new to old(second)
 		dual_set<fgr_id, fgr_id> write_renamed;
 		//new to old(second)
-		hash_table<fgr_id, fgr_id> renamed_resources;
-		hash_table<fgr_id, fgr_id> renamed_rsc_next;
-		hash_table<fgr_id, fgr_id> renamed_original;
+		PooledContainer<hash_table<fgr_id, fgr_id>> renamed_resources;
+		PooledContainer<hash_table<fgr_id, fgr_id>> renamed_rsc_next;
+		PooledContainer<hash_table<fgr_id, fgr_id>> renamed_original;
 		struct OverrideTracker
 		{
 			hash_table<Guid, fgr_id> override_to_original;

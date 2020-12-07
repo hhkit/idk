@@ -1,6 +1,7 @@
 #pragma once
 #include <idk.h>
 #include <optional>
+#include <util/PoolContainer.h>
 namespace idk
 {
 	enum VertexRate
@@ -42,7 +43,7 @@ namespace idk
 			bool  fixed_location = false;
 		};
 		binding_info           binding = {};
-		vector<attribute_info> attributes = {};
+		PooledContainer<vector<attribute_info>> attributes = {};
 
 		size_t AddAttribute(AttribFormat format
 			//Must offset the next location by 3/4 when AttribFormat is Mat3/4

@@ -13,22 +13,24 @@
 
 #include <vkn/RenderPassPool.h>
 #include <vkn/CommandCluster.h>
+
+#include <util/PoolContainer.h>
 //MARK_NON_COPY_CTORABLE(idk::vkn::FrameGraphDetail::Context);
 namespace idk::vkn
 {
 
 	struct TempGraph
 	{
-		hash_table<fgr_id, fg_id> src_node;
+		PooledContainer<hash_table<fgr_id, fg_id>> src_node;
 		using fgr_span = index_span;
-		hash_table<fg_id, fgr_span> in_nodes;
+		PooledContainer < hash_table<fg_id, fgr_span>> in_nodes;
 		const NodeBuffer* buffer;
 	};
 	struct ActualGraph
 	{
-		hash_table<fgr_id, fg_id>  src_node;
-		hash_table<fg_id, span<const FrameGraphResource>> in_rsc_nodes;
-		hash_table<fg_id, index_span> in_nodes;
+		PooledContainer<hash_table<fgr_id, fg_id>>  src_node;
+		PooledContainer<hash_table<fg_id, span<const FrameGraphResource>>> in_rsc_nodes;
+		PooledContainer<hash_table<fg_id, index_span>> in_nodes;
 
 		auto get_input_nodes(fg_id id)const
 		{
@@ -224,7 +226,7 @@ namespace idk::vkn
 
 		CommandCluster _cmd_buffers;
 		//vector<UniformManager> _uniform_managers;
-		DescriptorUpdateData::allocator_n_t<char,1<<20> alloc;
+		//DescriptorUpdateData::allocator_n_t<char,1<<20> alloc;
 		vector<DescriptorUpdateData> _duds;
 
 		PipelineManager* _default_pipeline_manager= {};

@@ -3,6 +3,9 @@
 #include "FrameGraphResource.h"
 #include "AttachmentDescription.h"
 #include <ds/index_span.inl>
+
+#include <util/PoolContainer.h>
+
 namespace idk::vkn
 {
 	using FrameGraphAttachmentInfo = std::pair<fgr_id, AttachmentDescription>;
@@ -23,8 +26,8 @@ namespace idk::vkn
 		
 		index_span copied_resources;
 
-		vector<std::optional<FrameGraphAttachmentInfo>> input_attachments;
-		vector<std::optional<FrameGraphAttachmentInfo>> output_attachments;
+		PooledContainer<vector<std::optional<FrameGraphAttachmentInfo>>> input_attachments;
+		PooledContainer<vector<std::optional<FrameGraphAttachmentInfo>>> output_attachments;
 		std::optional<FrameGraphAttachmentInfo> depth_stencil;
 
 		bool skip_render_pass = false;

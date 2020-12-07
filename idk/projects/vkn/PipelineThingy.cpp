@@ -17,81 +17,6 @@
 namespace idk::vkn
 {
 	VulkanView& View();
-	struct DSUpdater
-	{
-		decltype(DescriptorUpdateData::scratch_buffer_infos)& buffer_infos;
-		DescriptorUpdateData::vector_a<DescriptorUpdateData::vector_a<vk::DescriptorImageInfo>>& image_infos;
-		const ProcessedRO::BindingInfo& binding;
-		const vk::DescriptorSet& dset;
-		vk::WriteDescriptorSet& curr;
-		void operator()(vk::Buffer ubuffer)
-		{
-			//auto& dset = ds2[i++];
-			buffer_infos.emplace_front(
-				vk::DescriptorBufferInfo{
-				  ubuffer
-				, binding.buffer_offset
-				, binding.size
-				}
-			);
-			;
-
-			
-			curr=vk::WriteDescriptorSet{
-					dset
-					,binding.binding
-					,binding.arr_index
-					,1
-					,vk::DescriptorType::eUniformBuffer
-					,nullptr
-					,&buffer_infos.front()
-					,nullptr
-			}
-			;
-		}
-		void operator()(ProcessedRO::image_t ubuffer)
-		{
-			//auto& dset = ds2[i++];
-			auto& bufferInfo = image_infos[binding.binding];
-			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
-				vk::DescriptorImageInfo{
-				  ubuffer.sampler
-				  ,ubuffer.view
-				  ,ubuffer.layout
-				}
-			);
-			curr.pImageInfo = std::data(bufferInfo);
-			curr.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-		}
-		void operator()(ProcessedRO::AttachmentBinding ubuffer)
-		{
-			//auto& dset = ds2[i++];
-			auto& bufferInfo = image_infos[binding.binding];
-			bufferInfo[binding.arr_index - curr.dstArrayElement] = (
-				vk::DescriptorImageInfo{
-				  ubuffer.sampler
-				  ,ubuffer.view
-				  ,ubuffer.layout
-				}
-			);
-			curr.pImageInfo = std::data(bufferInfo);
-			curr.descriptorType = vk::DescriptorType::eInputAttachment;
-		}
-	};
-	void CondenseDSW(DescriptorUpdateData::vector_a<vk::WriteDescriptorSet>& dsw)
-	{
-		auto insert_itr = dsw.begin();
-		for (auto itr = dsw.begin(); itr != dsw.end(); ++itr)
-		{
-			if (itr->descriptorCount != 0)
-			{
-				if (itr != insert_itr)
-					std::swap((*(insert_itr)), (*itr));
-				++insert_itr;
-			}
-		}
-		dsw.resize(insert_itr - dsw.begin());
-	}
 	/*
 	void UpdateUniformDS(
 		vk::Device& device,
@@ -138,50 +63,6 @@ namespace idk::vkn
 	}
 
 	*/
-	void UpdateUniformDS(
-		vk::DescriptorSet& dset,
-		vector<ProcessedRO::BindingInfo> bindings,
-		DescriptorUpdateData& out
-	)
-	{
-		auto& buffer_infos = out.scratch_buffer_infos;
-		auto& image_infos = out.scratch_image_info;
-		auto  &descriptorWrite = out.scratch_descriptorWrite;
-		using img_vec_t = std::remove_reference_t<decltype(image_infos[0])>;
-		uint32_t max_binding = 0;
-		VknTexture& def = RscHandle<VknTexture>{}.as<VknTexture>();
-		vk::DescriptorImageInfo default_img
-		{
-			def.Sampler(),def.ImageView(),vk::ImageLayout::eGeneral,
-		};
-
-		for (auto& binding : bindings)
-		{
-			max_binding = std::max(binding.binding + 1, max_binding);
-			if (max_binding > descriptorWrite.size())
-			{
-				descriptorWrite.resize(max_binding, vk::WriteDescriptorSet{});
-				image_infos.resize(max_binding, img_vec_t(out.alloc));
-			}
-			auto& curr = descriptorWrite[binding.binding];
-			if (binding.IsImage() || binding.IsAttachment())
-			{
-				image_infos[binding.binding].resize(binding.size, default_img);
-				curr.descriptorCount = static_cast<uint32_t>(binding.size);
-			}
-			curr.dstSet = dset;
-			curr.dstBinding = binding.binding;
-			curr.dstArrayElement = 0;
-		}
-		//TODO: Handle Other DSes as well
-		for (auto& binding : bindings)
-		{
-			DSUpdater updater{ buffer_infos,image_infos,binding,dset,descriptorWrite[binding.binding] };
-			std::visit(updater, binding.ubuffer);
-		}
-		CondenseDSW(descriptorWrite);
-		out.AbsorbFromScratch();
-	}
 
 	ProcessedRO::BindingInfo CreateBindingInfoAtt(const UboInfo& obj_uni, uint32_t arr_index, const VknTexture& val, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal)
 	{
@@ -190,8 +71,9 @@ namespace idk::vkn
 		return ProcessedRO::BindingInfo
 		{
 			obj_uni.binding,
-			ProcessedRO::AttachmentBinding{ val.ImageView(),val.Sampler(),layout},
-			0,
+			ProcessedRO::AttachmentBinding{ val.ImageView(),//val.Sampler(),
+			layout},
+			//0,
 			arr_index,
 			obj_uni.size,
 			obj_uni.layout
@@ -207,8 +89,7 @@ namespace idk::vkn
 		return ProcessedRO::BindingInfo
 		{
 			obj_uni.binding,
-			ProcessedRO::ImageBinding{ val.ImageView(),val.Sampler(),layout },
-			0,
+			ProcessedRO::ImageBinding{ val.ImageView(),val.Sampler(),layout },			
 			arr_index,
 			obj_uni.size,
 			obj_uni.layout
@@ -224,7 +105,6 @@ namespace idk::vkn
 		{
 			obj_uni.binding,
 			ProcessedRO::ImageBinding{ val.ImageView(),val.Sampler(),layout },
-			0,
 			arr_index,
 			obj_uni.size,
 			obj_uni.layout
@@ -409,7 +289,7 @@ namespace idk::vkn
 		{
 			prev_config = next_config = ro.config;
 		}
-		auto& p_ro = draw_calls.emplace_back(ProcessedRO{ &ro,std::move(attrib_buffers), std::move(index_buffer),num_vertices,std::move(sets),next_config,shaders[static_cast<size_t>(ShaderStage::Vertex)],shaders[static_cast<size_t>(ShaderStage::Geometry)],shaders[static_cast<size_t>(ShaderStage::Fragment)] });
+		auto& p_ro = draw_calls.emplace_back(ProcessedRO{ {}, &ro,std::move(attrib_buffers), std::move(index_buffer),num_vertices,std::move(sets),next_config,shaders[static_cast<size_t>(ShaderStage::Vertex)],shaders[static_cast<size_t>(ShaderStage::Geometry)],shaders[static_cast<size_t>(ShaderStage::Fragment)] });
 		p_ro.rebind_shaders = shader_changed;
 		p_ro.config = ro.config;
 		attrib_buffers = {};

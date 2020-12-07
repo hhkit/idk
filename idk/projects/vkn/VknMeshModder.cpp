@@ -52,8 +52,25 @@ namespace idk::vkn
 		}
 
 	}
+	struct MeshModder::PImpl
+	{
+		vk::UniqueCommandPool cmd_pool_{};
+		PImpl()
+		{
+			vk::CommandPoolCreateInfo cpci
+			{
+				vk::CommandPoolCreateFlagBits::eTransient| vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+				*View().QueueFamily().graphics_family
+			};
+			cmd_pool_ = View().Device()->createCommandPoolUnique(cpci);
+		}
+	};
+	MeshModder::MeshModder() :allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }, pimpl_{std::make_unique<PImpl>()}
+	{
+		
+	}
 
-	MeshModder::MeshModder() :allocator{ *Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().Device(),Core::GetSystem<VulkanWin32GraphicsSystem>().Instance().View().PDevice() }
+	MeshModder::~MeshModder()
 	{
 	}
 
@@ -69,7 +86,7 @@ namespace idk::vkn
 		create_allock.unlock();
 		{
 			std::lock_guard lock{ View().GraphicsTexMutex() };
-			hlp::TransferData(*vview.Commandpool(), vview.GraphicsTexQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
+			hlp::TransferData(*pimpl_->cmd_pool_, vview.GraphicsTexQueue(), vview.PDevice(), *m_device, 0, num_vtx_bytes, data, *pbuffer);
 		}
 		return std::make_shared<MeshBuffer::Managed>(std::move(pbuffer), std::move(palloc), num_vtx_bytes);
 	}

@@ -4,6 +4,9 @@
 #include <gfx/pipeline_config.h>
 
 #include <vkn/FixedArenaAllocator.h>
+
+#include <util/PoolContainer.h>
+
 namespace idk::vkn
 {
 	//template<typename K, typename T>
@@ -11,8 +14,8 @@ namespace idk::vkn
 	struct PipelineDescHelper
 	{
 
-		vector<buffer_desc> buffer_desc_overrides;
-		hash_table<uint32_t, size_t> override_attr_mapping;
+		PooledContainer<vector<buffer_desc>> buffer_desc_overrides;
+		PooledContainer<hash_table<uint32_t, size_t>> override_attr_mapping;
 
 		//Store first
 		void StoreBufferDescOverrides(const pipeline_config& config);

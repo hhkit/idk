@@ -22,6 +22,8 @@
 
 #include <vkn/VertexBindingTracker.h>
 
+#include <util/PoolContainer.h>
+
 namespace idk::vkn
 {
 	
@@ -226,7 +228,7 @@ namespace idk::vkn
 			//RenderPassObj render_pass;
 			//vk::Framebuffer frame_buffer;
 			Shaders shaders;
-			vector<DrawCall> draw_calls;
+			PooledContainer<vector<DrawCall>> draw_calls;
 			std::optional<string> label;
 		};
 

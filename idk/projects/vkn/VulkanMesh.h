@@ -7,6 +7,7 @@
 
 #include <vkn/VulkanResourceManager.h>
 #include <editorstatic\imgui\imgui.h>
+#include <idk/ds/lazy_vector.h>
 namespace idk
 {
 	struct CompiledMesh;
@@ -36,7 +37,7 @@ namespace idk::vkn
 	class VulkanMesh : public Mesh
 	{
 	public:
-		using buffers_t = hash_table<attrib_index, MeshBuffer>;
+		using buffers_t = lazy_vector<std::pair<attrib_index,MeshBuffer>>;
 		VulkanMesh() = default;
 		VulkanMesh(CompiledMesh&& m);
 
@@ -64,6 +65,7 @@ namespace idk::vkn
 
 	private:
 		buffers_t buffers{};
+		lazy_vector<uint8_t> occupied{};
 		vk::IndexType index_type = vk::IndexType::eUint16;
 		uint32_t index_count{};
 		std::optional<MeshBuffer> index_buffer;

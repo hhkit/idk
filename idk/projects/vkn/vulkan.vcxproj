@@ -409,6 +409,7 @@
     <ClInclude Include="topological_sort.h" />
     <ClInclude Include="TransparentBlendBindings.h" />
     <ClInclude Include="UniformManager.h" />
+    <ClInclude Include="UniformUtils.h" />
     <ClInclude Include="UnlitBindings.h" />
     <ClInclude Include="utils\Flags.h" />
     <ClInclude Include="utils\FrameObjects.h" />

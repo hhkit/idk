@@ -19,7 +19,11 @@ namespace idk::vkn
 		
 #endif
 		if (messageSeverity == VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
- 			DoNothing();
+		{
+			DoNothing();
+			//static bool infi = true;
+			//while (infi);
+		}
 		return VK_FALSE;
 	}
 #pragma optimize("",on)

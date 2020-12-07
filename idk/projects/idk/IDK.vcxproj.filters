@@ -1232,6 +1232,9 @@
     <ClInclude Include="network\MessageStream.h">
       <Filter>network\messages</Filter>
     </ClInclude>
+    <ClInclude Include="util\PoolContainer.h">
+      <Filter>util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -1771,6 +1774,9 @@
     </ClCompile>
     <ClCompile Include="network\MessageStream.cpp">
       <Filter>network\messages</Filter>
+    </ClCompile>
+    <ClCompile Include="util\PoolContainer.cpp">
+      <Filter>util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

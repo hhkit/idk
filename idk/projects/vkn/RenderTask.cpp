@@ -237,7 +237,8 @@ namespace idk::vkn
 	void RenderTask::SetBufferDescriptions(span<const buffer_desc> descriptions)
 	{
 		StartNewBatch();
-		_current_batch.pipeline.buffer_descriptions = {descriptions.begin(),descriptions.end()};
+		_current_batch.pipeline.buffer_descriptions.clear();
+		_current_batch.pipeline.buffer_descriptions.insert(std::end(_current_batch.pipeline.buffer_descriptions), descriptions.begin(), descriptions.end());
 		auto& vtx_shader = _current_batch.shaders.shaders[static_cast<int>(ShaderStage::Vertex)];
 		if(vtx_shader)
 			_vtx_binding_tracker.Update(_current_batch.pipeline,*vtx_shader);

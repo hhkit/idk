@@ -5,6 +5,8 @@
 #include <gfx/pipeline_config.h>
 #include <meta/stl_hack.h>
 
+#include "UniformUtils.h"
+
 namespace idk
 {
 	struct RenderObject;
@@ -22,9 +24,10 @@ namespace idk::vkn
 		size_t offset{};
 		vk::IndexType index_type{};
 	};
-	struct ProcessedRO
+	struct ProcessedRO :UniformUtils
 	{
 #pragma region Type declarations
+		/*
 		struct ImageBinding
 		{
 			vk::ImageView view;
@@ -103,7 +106,8 @@ namespace idk::vkn
 			bool IsImage()const;
 			bool IsAttachment()const;
 			vk::DescriptorSetLayout GetLayout()const;
-		};
+		};*/
+		using BindingInfo = UniformUtils::BindingInfo;
 #pragma endregion
 		//set, update_instr
 		const RenderObject* itr=nullptr;
