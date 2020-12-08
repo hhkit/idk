@@ -212,9 +212,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			Core::GetResourceManager().Load(elem, false);
 	}
 
-	for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
-		Core::GetResourceManager().LoadCompiledAsset(elem);
-
+	// loaded in ResourceManager::LateInit()
+	//for (auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::FILE | FS_FILTERS::RECURSE_DIRS))
+	//	Core::GetResourceManager().LoadCompiledAsset(elem);
 
 	auto load_scene = RscHandle<Scene>{ Guid{ "8574c366-ca08-4da1-ba2e-70e092184dfa" } };
 	Core::GetSystem<SceneManager>().SetActiveScene(load_scene);

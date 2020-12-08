@@ -188,11 +188,8 @@ namespace idk
 			func(this);
 		SaveDirtyMetadata();
 
-		for(auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::ALL | FS_FILTERS::FILE))
-		{
-			if (elem.GetMountPath().starts_with("/build") && elem.IsFile())
-				LoadCompiledAsset(elem);
-		}
+		for(auto& elem : Core::GetSystem<FileSystem>().GetEntries("/build", FS_FILTERS::RECURSE_DIRS | FS_FILTERS::FILE))
+			LoadCompiledAsset(elem);
 	}
 
 	void ResourceManager::Shutdown()
