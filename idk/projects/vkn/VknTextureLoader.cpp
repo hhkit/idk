@@ -675,6 +675,7 @@ namespace idk::vkn
 					copy_regions[0] = (region);
 				}
 				size_t offset = single_level_size;
+				uint32_t adjusted_mip_levels = imageInfo.mipLevels;
 				for (uint32_t i = 1; i < imageInfo.mipLevels; ++i)
 				{
 				vk::BufferImageCopy region{};
@@ -693,12 +694,19 @@ namespace idk::vkn
 					height >>i,
 					1
 				};
+				if (region.imageExtent.width * region.imageExtent.depth * region.imageExtent.height == 0)
+				{
+					adjusted_mip_levels = i;
+					break;
+				}
 				copy_regions[i]=(region);
 				auto lenggth = ComputeTextureLength(region.imageExtent.width, region.imageExtent.height, format);
 				if (load_info.view_type == vk::ImageViewType::eCube)
 					lenggth *= 6;
 				offset += lenggth;//single_level_size >> (2 * i);
 				}
+				copy_regions.resize(adjusted_mip_levels);
+				imageInfo.mipLevels = adjusted_mip_levels;
 				//vector<vk::BufferImageCopy>
 
 				//if (View().DynDispatcher().vkSetDebugUtilsObjectNameEXT)
