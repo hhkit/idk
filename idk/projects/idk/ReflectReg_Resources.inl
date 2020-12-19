@@ -154,7 +154,7 @@
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::CompiledMesh, "CompiledMesh")
-	REFLECT_VARS(buffers, element_buffer, bounding_volume)
+	REFLECT_VARS(guid,buffers, element_buffer, bounding_volume)
 	REFLECT_END()
 
 	REFLECT_BEGIN(idk::CompiledTexture, "CompiledTexture")

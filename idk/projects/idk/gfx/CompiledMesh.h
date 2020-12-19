@@ -13,6 +13,7 @@ namespace idk
 
 	struct CompiledMesh
 	{
+		Guid guid;//hack
 		vector<CompiledBuffer> buffers;
 		vector<unsigned>       element_buffer;
 		sphere                 bounding_volume;

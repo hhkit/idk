@@ -72,6 +72,7 @@ namespace idk
 				mesh_names[t_guid] = t_meta.name;
 				mesh_handles.push_back(t_guid);
 				updated_metas.metadatas.emplace_back(t_meta);
+				mesh.guid = t_guid;//HACK
 				generated_resources.emplace_back(t_guid, std::move(mesh));
 			}
 		}
