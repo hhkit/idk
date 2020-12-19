@@ -28,6 +28,7 @@ namespace idk::vkn
 		void UpdateAllBuffers();
 		void Clear();
 		~UboManager();
+		constexpr static uint32_t              _chunk_size = 1 << 20;
 	private:
 		struct DataPair;
 		struct Memory
@@ -41,7 +42,6 @@ namespace idk::vkn
 		};
 		VulkanView& view;
 		uint32_t                               _alignment = 0x16;
-		constexpr static uint32_t              _chunk_size = 1 << 16;
 		size_t                                 _memory_chunk_size = 1 << 20; //Replace this with the limit obtained from device.
 		//Maybe replace with allocator
 		vector<Memory>                         _memory_blocks;

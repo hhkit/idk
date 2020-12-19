@@ -6,6 +6,10 @@
 #include <vkn/Stopwatch.h>
 
 #include <vkn/MemoryCollator.h>
+
+#include <core/Core.inl>
+#include <parallel/ThreadPool.h>
+
 namespace idk::vkn
 {
 	struct UboManager::DataPair
@@ -69,7 +73,7 @@ namespace idk::vkn
 		}
 		return result;
 	}
-
+//#pragma optimize("",off)
 	size_t UboManager::AllocateAndBind(vk::Buffer& buffer)
 	{
 		if (!_memory_blocks.size() || _memory_blocks.back().can_allocate(_chunk_size))
@@ -163,8 +167,10 @@ namespace idk::vkn
 	//TODO: Try having a set of buffers that are persistantly mapped instead.
 	void UboManager::UpdateAllBuffers()
 	{
+		std::vector<mt::Future<void>> futures;
 		for (auto& [buffer_idx,memory_idx] : _allocation_table)
 		{
+			//futures.emplace_back(Core::GetThreadPool().Post([&]() {
 			auto& block = _memory_blocks[memory_idx];
 			auto& memory = block.memory;
 			auto& buffer = _buffers[buffer_idx];
@@ -178,6 +184,11 @@ namespace idk::vkn
 				IDK_ASSERT(src_size <= dst_size);
 				hlp::MapMemory(*view.Device(), *memory, /*buffer.initial_offset*/0, std::data(buffer.data) + initial_offset, dst_size, view.Dispatcher());
 			}
+			//	}));
+		}
+		for (auto& future : futures)
+		{
+			future.get();
 		}
 	}
 

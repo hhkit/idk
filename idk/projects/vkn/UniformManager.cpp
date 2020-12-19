@@ -218,7 +218,7 @@ namespace idk::vkn
 		layout{ layout_ },
 		type_index{ desc_type_idx<vk::DescriptorType::eUniformBuffer> }
 	{
-		if (buffer_offset_ + size_ > 65536 || size_==0)
+		if (buffer_offset_ + size_ > UboManager::_chunk_size || size_==0)
 			throw;
 	}
 	UniformUtils::BindingInfo::BindingInfo(
