@@ -92,6 +92,8 @@ namespace idk::vkn
 		dbg::stopwatch timer;
 		RscHandle<Texture> BrdfLookupTable;
 		AsyncTexLoader tex_loader;
+		size_t initial_texture_count=0;
+		bool inited = false;
 		AsyncLoaders async_loaders;
 	};
 	dbg::time_log& GetGfxTimeLog()
@@ -233,6 +235,7 @@ namespace idk::vkn
 		TexCreateInfo info = ColorBufferTexInfo(512, 512);
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
+
 	}
 
 	namespace hlp
@@ -249,6 +252,11 @@ namespace idk::vkn
 	void profile_bp_end();
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		if (!_pimpl->inited)
+		{
+			_pimpl->initial_texture_count = _pimpl->tex_loader.num_pending();
+			_pimpl->inited = true;
+		}
 		_pimpl->timelog.reset();
 		_pimpl->timer.start();
 		_pimpl->timelog.start("Total");
@@ -309,6 +317,8 @@ namespace idk::vkn
 				{
 					tex->BeginAsyncReload();
 				}
+				
+				_pimpl->initial_texture_count = _pimpl->tex_loader.num_pending();
 				var.Set(name, false);
 			}
 		}
@@ -326,8 +336,8 @@ namespace idk::vkn
 
 		extra_vars.Set("pending_textures", (int)_pimpl->tex_loader.num_pending());
 		extra_vars.Set("pending_resources", (int)(_pimpl->async_loaders.NumAdded() - _pimpl->async_loaders.NumProcessed() + _pimpl->tex_loader.num_pending()));
-		extra_vars.Set("total_async_resources", (int)(_pimpl->async_loaders.NumAdded() ) );
-		extra_vars.Set("async_resources_loaded", (int)( _pimpl->async_loaders.NumProcessed()));
+		extra_vars.Set("total_async_resources", (int)(_pimpl->async_loaders.NumAdded() + _pimpl->initial_texture_count ) );
+		extra_vars.Set("async_resources_loaded", (int)( _pimpl->async_loaders.NumProcessed()+ (_pimpl->initial_texture_count -_pimpl->tex_loader.num_pending())));
 		_pimpl->tex_loader.UpdateTextures();
 		_pimpl->async_loaders.UpdateLoaders();
 		_pimpl->timelog.end_then_start("Init Pre render data");

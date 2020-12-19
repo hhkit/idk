@@ -33,6 +33,17 @@ namespace idk::vkn
 			}
 
 		}
+		void ResetCounters()
+		{
+
+			for (auto& wptr : loaders_)
+			{
+				if (auto ptr = wptr.lock())
+				{
+					ptr->ClearAndResetCounters();
+				}
+			}
+		}
 		size_t NumAdded()const
 		{
 			size_t total = 0;

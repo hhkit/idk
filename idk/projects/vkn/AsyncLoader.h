@@ -33,6 +33,14 @@ namespace idk::vkn
 		{
 			return processed_counter_;
 		}
+		void ClearAndResetCounters()override
+		{
+			queued_counter_ = 0;
+			processed_counter_ = 0;
+			std::lock_guard lock{ pending_mutex };
+			pending_stack.clear();
+			process_list.clear();
+		}
 		void Add(Entry&& entry)
 		{
 			std::lock_guard lock{ pending_mutex };
@@ -54,9 +62,9 @@ namespace idk::vkn
 		}
 		void Update()override
 		{
-			FlagProcessedAsReady();
 			if (proc && proc->ready())
 			{
+				FlagProcessedAsReady();
 				proc->get();
 				proc.reset();
 			}
