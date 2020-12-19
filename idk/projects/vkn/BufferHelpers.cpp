@@ -98,7 +98,7 @@ vk::CommandBuffer BeginSingleTimeCBufferCmd(vk::CommandBuffer cmd_buffer,vk::Com
 	return cmd_buffer;
 }
 
-void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional<vk::Semaphore> signal = {}, std::optional<vk::Fence> fence = {})
+void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue, std::optional<vk::Semaphore> wait = {}, std::optional<vk::PipelineStageFlags> stage = {}, std::optional<vk::Semaphore> signal = {}, std::optional<vk::Fence> fence = {}, bool wait_idle=true)
 {
 	vk::DispatchLoaderDefault dispatcher{};
 	cmd_buffer.end(dispatcher);
@@ -118,12 +118,12 @@ void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue, std:
 	if (fence)
 		f = *fence;
 	queue.submit(submitInfo, f, dispatcher);
-	if(!signal)
+	if(!signal && wait_idle)
 	//Not very efficient, would be better to use fences instead.
 		queue.waitIdle(dispatcher);
 }
 
-void CopyBuffer(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
+void CopyBuffer(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size, std::optional<vk::Fence> fence , bool wait_idle )
 {
 	BeginSingleTimeCBufferCmd(cmd_buffer);
 
@@ -133,8 +133,7 @@ void CopyBuffer(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer srcBuf
 		0,0,size
 	};
 	cmd_buffer.copyBuffer(srcBuffer, dstBuffer, copyRegion, dispatcher);
-	
-	EndSingleTimeCbufferCmd(cmd_buffer,queue);
+	EndSingleTimeCbufferCmd(cmd_buffer, queue, {}, {}, {}, fence,wait_idle);
 }
 
 void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer& buffer, VknTexture& img)

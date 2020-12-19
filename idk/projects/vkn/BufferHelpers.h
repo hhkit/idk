@@ -9,7 +9,13 @@ namespace idk::vkn::hlp
 	uint32_t findMemoryType(vk::PhysicalDevice const& physical_device, uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	vk::UniqueCommandBuffer BeginSingleTimeCBufferCmd(vk::Device device, vk::CommandPool pool, vk::CommandBufferInheritanceInfo* info = nullptr);
 
-
+	struct SubmitOptions
+	{
+		std::optional<vk::Fence>     fence  = {};
+		std::optional<vk::Semaphore> wait   = {};
+		std::optional<vk::Semaphore> signal = {};
+	};
+	
 	void EndSingleTimeCbufferCmd(vk::CommandBuffer cmd_buffer, vk::Queue queue,
 		bool wait_for_idle,
 		std::optional<vk::Fence> fence = {},
@@ -65,7 +71,7 @@ namespace idk::vkn::hlp
 	template<typename T, typename Dispatcher = vk::DispatchLoaderDefault>
 	void MapMemory(vk::Device device, vk::DeviceMemory memory, vk::DeviceSize dest_offset, T* src_start, vk::DeviceSize trf_size, Dispatcher const& dispatcher = {});
 
-	void CopyBuffer(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
+	void CopyBuffer(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size, std::optional<vk::Fence> fence = {}, bool wait_for_idle=true);
 
 	void CopyBufferToImage(vk::CommandBuffer cmd_buffer, vk::Queue queue, vk::Buffer buffer, VknTexture& img);
 
