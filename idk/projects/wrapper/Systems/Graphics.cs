@@ -29,7 +29,27 @@
             }
         }
 
-        public static int pendingTexturesCount => Bindings.GraphicsGetVarInt("pending_textures");
+        private static int totalTextures = 0;
+        public static float loadPercent
+        {
+            get
+            {
+                int pendingTextures = Bindings.GraphicsGetVarInt("pending_textures");
+                totalTextures = pendingTextures > totalTextures ? pendingTextures : totalTextures;
+                int loadedTextures = totalTextures - pendingTextures;
+
+                int totalModels = Bindings.GraphicsGetVarInt("total_async_resources");
+                int loadedModels = Bindings.GraphicsGetVarInt("async_resources_loaded");
+
+                int total = totalTextures + totalModels;
+                int loaded = loadedTextures + loadedModels;
+
+                if (total == 0 || loaded == 0)
+                    return 0;
+                else
+                    return (float)loaded / total;
+            }
+        }
 
         public static float gammaCorrection
         {
