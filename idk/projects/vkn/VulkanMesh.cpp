@@ -78,7 +78,7 @@ namespace idk::vkn
 	bool VulkanMesh::Has(attrib_index index) const
 	{
 		HANDLE_DEFAULT(Has(index));
-		return occupied.at(index);
+		return occupied.size()>index?occupied[index]:false;
 		//auto itr = buffers.find(index);
 		//return (itr != buffers.end());
 	}
