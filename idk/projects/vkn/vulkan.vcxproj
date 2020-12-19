@@ -320,6 +320,8 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AsyncLoader.h" />
+    <ClInclude Include="AsyncLoaders.h" />
     <ClInclude Include="AsyncTexLoadInfo.h" />
     <ClInclude Include="AttachmentDescription.h" />
     <ClInclude Include="BaseRenderPass.h" />
@@ -335,6 +337,7 @@
     <ClInclude Include="binding_util.h" />
     <ClInclude Include="FixedArenaAllocator.h" />
     <ClInclude Include="FreeList.h" />
+    <ClInclude Include="IAsyncLoader.h" />
     <ClInclude Include="MaterialInstanceCache.h" />
     <ClInclude Include="MemoryCollator.h" />
     <ClInclude Include="PoolAllocator.h" />
@@ -446,6 +449,7 @@
     <ClInclude Include="VulkanGlslLoader.h" />
     <ClInclude Include="VulkanHashes.h" />
     <ClInclude Include="VulkanIttfLoader.h" />
+    <ClInclude Include="VulkanMeshAsyncLoader.h" />
     <ClInclude Include="VulkanPngLoader.h" />
     <ClInclude Include="VulkanResourceManager.h" />
     <ClInclude Include="VulkanShaderModuleFactory.h" />
@@ -555,6 +559,7 @@
     <ClCompile Include="VknTextureRenderMeta.cpp" />
     <ClCompile Include="VulkanIttfLoader.cpp" />
     <ClCompile Include="VknTextureData.cpp" />
+    <ClCompile Include="VulkanMeshAsyncLoader.cpp" />
     <ClCompile Include="VulkanTtfLoader.cpp" />
     <ClCompile Include="UboManager.cpp" />
     <ClCompile Include="utils\GlslToSpirv.cpp" />

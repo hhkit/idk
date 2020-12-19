@@ -43,7 +43,8 @@
 #include <vkn/SubDurations.h>
 
 #include <vkn/VknAsyncTexLoader.h>
-
+#include <vkn/AsyncLoaders.h>
+#include <vkn/VulkanMeshFactory.h>
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -91,6 +92,7 @@ namespace idk::vkn
 		dbg::stopwatch timer;
 		RscHandle<Texture> BrdfLookupTable;
 		AsyncTexLoader tex_loader;
+		AsyncLoaders async_loaders;
 	};
 	dbg::time_log& GetGfxTimeLog()
 	{
@@ -120,6 +122,8 @@ namespace idk::vkn
 		_pimpl = std::make_unique<Pimpl>();
 		_pimpl->allocator = std::make_unique<hlp::MemoryAllocator>(*instance_->View().Device(), instance_->View().PDevice());
 		_pimpl->fence = instance_->View().Device()->createFenceUnique({});
+
+		_pimpl->async_loaders.AddLoader(std::dynamic_pointer_cast<IAsyncLoader>(Core::GetResourceManager().GetFactory<MeshFactory>().async_loader));
 	}
 	void VulkanWin32GraphicsSystem::RenderBRDF(RscHandle<ShaderProgram> prog)
 	{
@@ -321,7 +325,9 @@ namespace idk::vkn
 		}
 
 		extra_vars.Set("pending_textures", (int)_pimpl->tex_loader.num_pending());
+		extra_vars.Set("pending_resources", (int)(_pimpl->async_loaders.NumAdded()- _pimpl->async_loaders.NumProcessed() + _pimpl->tex_loader.num_pending()));
 		_pimpl->tex_loader.UpdateTextures();
+		_pimpl->async_loaders.UpdateLoaders();
 		_pimpl->timelog.end_then_start("Init Pre render data");
 
 		std::vector<GraphicsState> curr_states(curr_buffer.camera.size());

@@ -8,6 +8,9 @@
 #include <vkn/VulkanResourceManager.h>
 #include <editorstatic\imgui\imgui.h>
 #include <idk/ds/lazy_vector.h>
+
+#include <parallel/ThreadPool.h>
+
 namespace idk
 {
 	struct CompiledMesh;
@@ -48,28 +51,39 @@ namespace idk::vkn
 		VulkanMesh(const VulkanMesh& m) = delete;
 		VulkanMesh& operator=(const VulkanMesh& m) = delete;
 
-
+		~VulkanMesh();
 
 		const MeshBuffer& Get(attrib_index index)const;
 		bool Has(attrib_index index)const;
 		const buffers_t& Buffers()const;
 		int GetAttribs() const override;
 		const std::optional<MeshBuffer>& GetIndexBuffer()const;
-		uint32_t IndexCount()const { return index_count; }
+		uint32_t IndexCount()const;
 		void SetIndexBuffer(MeshBuffer&& buffer, uint32_t count, vk::IndexType type);
 		void SetBuffer(attrib_index type, MeshBuffer&& buffer);
-		vk::IndexType IndexType()const { return index_type; }
+		vk::IndexType IndexType()const;
 
 		//Set to false when done loading. Defaults to true.
 		void use_default(bool value);
-
+		
 	private:
+		struct MoveDetector
+		{
+			MoveDetector() = default;
+			MoveDetector(const MoveDetector&) = default;
+			MoveDetector(MoveDetector&&);
+			MoveDetector& operator=(MoveDetector&&);
+			~MoveDetector() = default;
+		};
 		buffers_t buffers{};
 		lazy_vector<uint8_t> occupied{};
 		vk::IndexType index_type = vk::IndexType::eUint16;
 		uint32_t index_count{};
 		std::optional<MeshBuffer> index_buffer;
 		bool use_default_=false;
+		MoveDetector mv;
+		std::optional<mt::Future<void>> async_result;
+		bool pending_destruction = false;
 	};
 
 }

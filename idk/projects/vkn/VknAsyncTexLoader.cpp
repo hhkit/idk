@@ -186,7 +186,10 @@ void AsyncTexLoader::ExecProxy::exec()
 			}
 			a2.staging = ptr->_loader.LoadTexture(TextureLoader::SubmissionObjs{ *c2 ,*f2,false }, *curr2.data, ptr->_allocator, curr2.info.to, curr2.info.tci, curr2.info.iti);
 			View().Device()->resetFences(*f2);
-			hlp::EndSingleTimeCbufferCmd(*c2, View().GraphicsTexQueue() , false, *f2);
+			{
+				std::lock_guard lock{ View().GraphicsTexMutex() };
+				hlp::EndSingleTimeCbufferCmd(*c2, View().GraphicsTexQueue() , false, *f2);
+			}
 			a2.fence = std::move(f2);
 			a2.cmd_buffer = std::move(c2);
 			//while (!fut2.ready() && Core::IsRunning()) std::this_thread::yield();

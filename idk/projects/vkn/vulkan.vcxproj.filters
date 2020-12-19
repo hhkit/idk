@@ -452,6 +452,18 @@
     <ClInclude Include="UniformUtils.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="IAsyncLoader.h">
+      <Filter>resource\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncLoaders.h">
+      <Filter>resource\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncLoader.h">
+      <Filter>resource\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMeshAsyncLoader.h">
+      <Filter>resource\Async\RscLoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -765,6 +777,7 @@
     <ClCompile Include="VknMeshModder.cpp">
       <Filter>resource</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanMeshAsyncLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="system">
@@ -838,6 +851,12 @@
     </Filter>
     <Filter Include="resource\Loaders\Util">
       <UniqueIdentifier>{a5eae55c-176a-4017-a9a0-f3964b2096ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Async">
+      <UniqueIdentifier>{18cdf031-6f1d-4a9d-8fa7-0ebb0821e057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource\Async\RscLoader">
+      <UniqueIdentifier>{4b7e1bc0-a06a-486b-86fc-6b9cd64a4d2f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
