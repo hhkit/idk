@@ -41,18 +41,24 @@ namespace idk::vkn
 		}
 		void FlagProcessedAsReady()
 		{
+			size_t i = 0;
 			for (auto& entry : process_list)
 			{
-				Traits::FlagAsReady(entry);
+				if (processed_flags_.at(i))
+				{
+					Traits::FlagAsReady(entry);
+					processed_flags_.at(i) = false;//mark it false again to prevent double ready setting
+				}
+				++i;
 			}
 		}
 		void Update()override
 		{
+			FlagProcessedAsReady();
 			if (proc && proc->ready())
 			{
 				proc->get();
 				proc.reset();
-				FlagProcessedAsReady();
 			}
 			if (!proc) //Not processing anything right now.
 			{
@@ -67,22 +73,30 @@ namespace idk::vkn
 		}
 		void Process()
 		{
+			size_t i = 0;
 			for (auto& entry : process_list)
 			{
 				ProcessEntry(entry);
+				processed_flags_[i] = true;
+				++i;
 				++processed_counter_;
 			}
 		}
 		void SwapBuffers()
 		{
 			process_list.clear();
+			processed_flags_.clear();
+			{
 			std::lock_guard lock{ pending_mutex };//Ensure no one is modifying pending_stack
 			std::swap(pending_stack, process_list);
+			}
+			processed_flags_.resize(process_list.size(), false);
 		}
 	private:
 		size_t queued_counter_{};//Guarded by pending_mutex
 		size_t processed_counter_{};
 		std::vector<Entry> process_list;
+		std::vector<bool> processed_flags_;
 		std::mutex pending_mutex;
 		std::vector<Entry> pending_stack;
 		std::optional<mt::Future<void>> proc;
