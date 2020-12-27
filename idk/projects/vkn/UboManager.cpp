@@ -57,31 +57,33 @@ namespace idk::vkn
 		);
 	}
 
-	bool UboManager::Memory::can_allocate(size_t chunk) const {
-		return(size + chunk <= capacity);
+	bool UboManager::Memory::can_allocate(size_t chunk,size_t alignment) const {
+		return(Aligned(size,alignment) + chunk <= capacity);
 	}
 
 	//Returns the offset to start from
 
-	std::optional<size_t> UboManager::Memory::allocate(size_t chunk)
+	std::optional<size_t> UboManager::Memory::allocate(size_t chunk,size_t alignment)
 	{
 		std::optional<size_t>result{};
-		if (can_allocate(chunk))
+		if (can_allocate(chunk,alignment))
 		{
-			result = size;
-			size += chunk;
+			result = Aligned(size,alignment);
+			size = *result + chunk;
 		}
 		return result;
 	}
 //#pragma optimize("",off)
 	size_t UboManager::AllocateAndBind(vk::Buffer& buffer)
 	{
-		if (!_memory_blocks.size() || _memory_blocks.back().can_allocate(_chunk_size))
+		auto req = View().Device()->getBufferMemoryRequirements(buffer);
+		
+		if (!_memory_blocks.size() || _memory_blocks.back().can_allocate(_chunk_size,req.alignment))
 		{
 			_memory_blocks.emplace_back(view, buffer, _memory_chunk_size);
 		}
 		auto& memory = _memory_blocks.back();
-		uint32_t offset = s_cast<uint32_t>(*memory.allocate(_chunk_size));
+		uint32_t offset = s_cast<uint32_t>(*memory.allocate(_chunk_size,req.alignment));
 		hlp::BindBufferMemory(*view.Device(), buffer, *memory.memory, offset, view.Dispatcher());
 		return offset;
 	}

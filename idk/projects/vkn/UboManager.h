@@ -36,9 +36,9 @@ namespace idk::vkn
 			vk::UniqueDeviceMemory memory;
 			size_t size{}, capacity{};
 			Memory(VulkanView& view, vk::Buffer& buffer, size_t capacity_);
-			bool can_allocate(size_t chunk)const;
+			bool can_allocate(size_t chunk,size_t alignment)const;
 			//Returns the offset to start from
-			std::optional<size_t> allocate(size_t chunk);
+			std::optional<size_t> allocate(size_t chunk,size_t alignment);
 		};
 		VulkanView& view;
 		uint32_t                               _alignment = 0x16;
