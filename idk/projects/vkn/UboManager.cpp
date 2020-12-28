@@ -78,12 +78,13 @@ namespace idk::vkn
 	{
 		auto req = View().Device()->getBufferMemoryRequirements(buffer);
 		
-		if (!_memory_blocks.size() || _memory_blocks.back().can_allocate(_chunk_size,req.alignment))
+		if (!_memory_blocks.size() || !_memory_blocks.back().can_allocate(_chunk_size,req.alignment))
 		{
 			_memory_blocks.emplace_back(view, buffer, _memory_chunk_size);
 		}
 		auto& memory = _memory_blocks.back();
 		uint32_t offset = s_cast<uint32_t>(*memory.allocate(_chunk_size,req.alignment));
+
 		hlp::BindBufferMemory(*view.Device(), buffer, *memory.memory, offset, view.Dispatcher());
 		return offset;
 	}

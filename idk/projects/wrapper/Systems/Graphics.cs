@@ -34,15 +34,8 @@
         {
             get
             {
-                int pendingTextures = Bindings.GraphicsGetVarInt("pending_textures");
-                totalTextures = pendingTextures > totalTextures ? pendingTextures : totalTextures;
-                int loadedTextures = totalTextures - pendingTextures;
-
-                int totalModels = Bindings.GraphicsGetVarInt("total_async_resources");
-                int loadedModels = Bindings.GraphicsGetVarInt("async_resources_loaded");
-
-                int total = totalTextures + totalModels;
-                int loaded = loadedTextures + loadedModels;
+                int total = Bindings.GraphicsGetVarInt("total_async_resources");
+                int loaded = Bindings.GraphicsGetVarInt("async_resources_loaded");
 
                 if (total == 0 || loaded == 0)
                     return 0;
