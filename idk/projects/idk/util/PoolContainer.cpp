@@ -35,15 +35,9 @@ namespace idk
 		}
 		return sz;
 	}
-	static std::atomic<int> fuckla = 0;
-	static std::atomic<int> fuckla2 =0;
-	#pragma optimize("",off)
+	//#pragma optimize("",off)
 	void DoNothing2(bool a)
 	{
-		if (a)
-			++fuckla;
-		else
-			++fuckla2;
 		while (PCTracker::should_block);
 	}
 }
