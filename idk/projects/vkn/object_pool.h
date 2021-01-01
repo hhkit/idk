@@ -46,6 +46,10 @@ public:
 	{
 		objects.reserve(num_elems);
 	}
+	size_t capacity()
+	{
+		return objects.capacity();
+	}
 
 	template<typename...Args>
 	handle_t add(Args&& ... args)

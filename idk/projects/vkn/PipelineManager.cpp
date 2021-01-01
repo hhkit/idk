@@ -222,7 +222,8 @@ namespace idk::vkn
 		{
 			pipelines.free(handle);
 		}*/
-		pipelines.reserve(100 + pipelines.size() * 2);
+		if(pipelines.capacity() < 100 + (pipelines.size()*3) / 2)
+			pipelines.reserve(100 + pipelines.size() * 2);
 	}
 
 	//PipelineObject() = default;
