@@ -115,31 +115,31 @@ void VulkanMesh::SetBuffer(attrib_index type, MeshBuffer&& buffer)
 	HANDLE_DEFAULT(IndexType());
 	return index_type; 
 }
-#pragma optimize("",off)
-int some_possibly_externed_value = 0;
+//#pragma optimize("",off)
+//int some_possibly_externed_value = 0;
 void VulkanMesh::use_default(bool value)
 {
 	use_default_ = value;
 }
-static void DoNothingAAAAA()
-{
-	while (true);
-	if (some_possibly_externed_value)
-	{
-		//some_possibly_externed_value++;
-		exit(0);
-	}
-}
-VulkanMesh::MoveDetector::MoveDetector(MoveDetector&&) 
-{
-	DoNothingAAAAA();
-}
-
-VulkanMesh::MoveDetector& VulkanMesh::MoveDetector::operator=(MoveDetector&&) 
-{
-	// TODO: insert return statement here
-	DoNothingAAAAA();
-	return*this;
-}
+//static void DoNothingAAAAA()
+//{
+//	while (true);
+//	if (some_possibly_externed_value)
+//	{
+//		//some_possibly_externed_value++;
+//		exit(0);
+//	}
+//}
+//VulkanMesh::MoveDetector::MoveDetector(MoveDetector&&) 
+//{
+//	DoNothingAAAAA();
+//}
+//
+//VulkanMesh::MoveDetector& VulkanMesh::MoveDetector::operator=(MoveDetector&&) 
+//{
+//	// TODO: insert return statement here
+//	DoNothingAAAAA();
+//	return*this;
+//}
 
 }

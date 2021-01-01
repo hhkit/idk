@@ -295,8 +295,7 @@ namespace idk::win
 			if (GetWindowPlacement(hWnd, &wp_prev) &&
 				GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY), &mi))
 			{
-				SetWindowLong(hWnd, GWL_STYLE,
-							  dwStyle & ~WS_OVERLAPPEDWINDOW);
+				SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
 				SetWindowPos(hWnd, HWND_TOP,
 							 mi.rcMonitor.left, mi.rcMonitor.top,
 							 mi.rcMonitor.right - mi.rcMonitor.left,
@@ -306,8 +305,7 @@ namespace idk::win
 		}
 		else if(!fullscreen && !(dwStyle & WS_OVERLAPPEDWINDOW))
 		{
-			SetWindowLong(hWnd, GWL_STYLE,
-						  dwStyle | WS_OVERLAPPEDWINDOW);
+			SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE | WS_OVERLAPPEDWINDOW);
 			SetWindowPlacement(hWnd, &wp_prev);
 			SetWindowPos(hWnd, NULL, 0, 0, 0, 0,
 						 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
@@ -568,6 +566,8 @@ namespace idk::win
 		}
 
 		ShowWindow(hWnd, SW_MAXIMIZE);
+		SetForegroundWindow(hWnd);
+		SetFocus(hWnd);
 		UpdateWindow(hWnd);
 
 		return TRUE;
