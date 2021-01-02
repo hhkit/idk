@@ -39,6 +39,7 @@ namespace idk::vkn {
 		VknTexture(VknTexture && rhs) noexcept;
 		//VknTexture(const VknTexture& rhs);
 		VknTexture(const CompiledTexture&);
+		VknTexture(CompiledTexture&&);
 
 
 		VknTexture& operator=(VknTexture&&) noexcept;

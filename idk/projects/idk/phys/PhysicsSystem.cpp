@@ -237,38 +237,68 @@ namespace idk
 		auto colliders = GameState::GetGameState().GetObjectsOfType<Collider>();
 		vector<RaycastHit> retval;
 
+		auto static_aabb_hits = _col_manager._static_broadphase.query_raycast(r, layer_mask);
+
 		for (auto& c : colliders)
 		{
+			if (c._static_cache)
+				continue;
+			if (!hit_triggers && c.is_trigger)
+				continue;
+
 			{
 				auto layer = c.GetGameObject()->GetComponent<Layer>();
-				auto mask = layer ? layer->mask() : LayerMask{ 1 << 0 };
-				if (!(mask & layer_mask))
+				if (!layer || !(layer->mask() & layer_mask))
 					continue;
 			}
 
-			if (c.is_trigger && hit_triggers == false)
+			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
+			{
+				using RShape = std::decay_t<decltype(shape)>;
+
+				if constexpr (std::is_same_v<RShape, sphere>)
+					return phys::collide_ray_sphere(
+						r, calc_shape(shape, c));
+				else
+				if constexpr (std::is_same_v<RShape, box>)
+					return phys::collide_ray_box(
+						r, calc_shape(shape, c));
+				else
+				if constexpr (std::is_same_v<RShape, capsule>)
+					return phys::collide_ray_capsule(
+						r, calc_shape(shape, c));
+				else
+					return phys::raycast_failure{};
+			}, c.shape);
+
+			if (result)
+				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
+		}
+
+		for (const auto& hit : static_aabb_hits)
+		{
+			auto& c = *hit.collider;
+			if (!hit_triggers && c.is_trigger)
 				continue;
 
 			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
-				{
-					using RShape = std::decay_t<decltype(shape)>;
+			{
+				using RShape = std::decay_t<decltype(shape)>;
 
-					const auto rShape = calc_shape(shape, c);
-
-					if constexpr (std::is_same_v<RShape, sphere>)
-						return phys::collide_ray_sphere(
-							r, rShape);
-					else
-					if constexpr (std::is_same_v<RShape, box>)
-						return phys::collide_ray_box(
-							r, rShape);
-					else
-					if constexpr (std::is_same_v<RShape, capsule>)
-						return phys::collide_ray_capsule(
-							r, rShape);
-					else
-						return phys::raycast_failure{};
-				}, c.shape);
+				if constexpr (std::is_same_v<RShape, sphere>)
+					return phys::collide_ray_sphere(
+						r, calc_shape(shape, c));
+				else
+				if constexpr (std::is_same_v<RShape, box>)
+					return phys::collide_ray_box(
+						r, calc_shape(shape, c));
+				else
+				if constexpr (std::is_same_v<RShape, capsule>)
+					return phys::collide_ray_capsule(
+						r, calc_shape(shape, c));
+				else
+					return phys::raycast_failure{};
+			}, c.shape);
 
 			if (result)
 				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });

@@ -69,7 +69,7 @@ namespace idk::vkn
 		}
 		return result;
 	}
-	InputTexInfo GetDdsIti(DdsFile dds, const TextureOptions& to)
+	InputTexInfo GetDdsIti(const DdsFile& dds, const TextureOptions& to)
 	{
 
 		InputTexInfo iti;
@@ -82,7 +82,7 @@ namespace idk::vkn
 		return iti;
 
 	}
-	TexCreateInfo GetDdsTci(DdsFile dds, const InputTexInfo& iti)
+	TexCreateInfo GetDdsTci(const DdsFile& dds, const InputTexInfo& iti)
 	{
 		TexCreateInfo tci;
 		tci.aspect = vk::ImageAspectFlagBits::eColor;
