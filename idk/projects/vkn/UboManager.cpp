@@ -23,7 +23,7 @@ namespace idk::vkn
 		uint32_t sz_alignment{};
 		bool resetted = false;
 		size_t old_alignment = 0;
-
+		bool dirty = false;
 
 		//DataPair() = default;
 		//DataPair(DataPair&&) noexcept = default;
@@ -149,6 +149,7 @@ namespace idk::vkn
 		{
 			if (dp.Buffer() == buffer)
 			{
+				dp.dirty = true;
 				memcpy_s(dp.data.data()+dp.initial_offset+range._begin, dp.data.size()-range._begin, data.data(),data.size());
 				return;
 			}
@@ -180,12 +181,13 @@ namespace idk::vkn
 			auto initial_offset = buffer.initial_offset;//InitialOffset(buffer.data.data(), _alignment);
 
 
-			if (buffer.data.size())
+			if (buffer.data.size() && buffer.dirty)
 			{
 				auto dst_size = block.size ;
 				auto src_size = buffer.data.size() - initial_offset;
 				IDK_ASSERT(src_size <= dst_size);
 				hlp::MapMemory(*view.Device(), *memory, /*buffer.initial_offset*/0, std::data(buffer.data) + initial_offset, dst_size, view.Dispatcher());
+				buffer.dirty = false;
 			}
 			//	}));
 		}
@@ -332,6 +334,7 @@ namespace idk::vkn
 		timer.stop();
 		add_rendertask_durations("DP memcpy", timer.lap().count());
 		add_rendertask_durations("DP Add", timer.time().count());
+		dirty = true;
 		return static_cast<uint32_t>(aligned_offset);
 	}
 
@@ -348,6 +351,7 @@ namespace idk::vkn
 		initial_offset = InitialOffset(data.data(), alignment);
 		data.resize(block_size + initial_offset);
 		old_alignment = alignment;
+		dirty = false;
 	}
 
 	std::pair<vk::Buffer, uint32_t> UboManager::make_buffer_pair(DataPair& pair, size_t buffer_len, const void* data)
