@@ -67,21 +67,21 @@ namespace idk::vkn
 		void use_default(bool value);
 		
 	private:
-		struct MoveDetector
-		{
-			MoveDetector() = default;
-			MoveDetector(const MoveDetector&) = default;
-			MoveDetector(MoveDetector&&);
-			MoveDetector& operator=(MoveDetector&&);
-			~MoveDetector() = default;
-		};
+		//struct MoveDetector
+		//{
+		//	MoveDetector() = default;
+		//	MoveDetector(const MoveDetector&) = default;
+		//	MoveDetector(MoveDetector&&);
+		//	MoveDetector& operator=(MoveDetector&&);
+		//	~MoveDetector() = default;
+		//};
 		buffers_t buffers{};
 		lazy_vector<uint8_t> occupied{};
 		vk::IndexType index_type = vk::IndexType::eUint16;
 		uint32_t index_count{};
 		std::optional<MeshBuffer> index_buffer;
 		bool use_default_=false;
-		MoveDetector mv;
+		//MoveDetector mv;
 		std::optional<mt::Future<void>> async_result;
 		bool pending_destruction = false;
 	};

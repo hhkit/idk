@@ -15,15 +15,15 @@ namespace idk::vkn {
 		string DumpAllocators();
 		std::pair<size_t, size_t> DumpAllocator(std::ostream& out, const MemoryAllocator& alloc);
 	}
-	void DoNothing();
-	static size_t counter = 0;
-	static size_t texture_bytes=0;
+	//void DoNothing();
+	//static size_t counter = 0;
+	//static size_t texture_bytes=0;
 	VknTexture::VknTexture(const CompiledTexture& compiled_tex)
 	{
 		if (compiled_tex.pixel_buffer.size() == 0)
 			return;
 		string_view data = { reinterpret_cast<const char*>(compiled_tex.pixel_buffer.data()), compiled_tex.pixel_buffer.size()};
-		++counter;
+		//++counter;
 		auto& loader = Core::GetResourceManager().GetFactory<VulkanTextureFactory>().GetDdsLoader();
 		//if (counter == 103)
 		//{
@@ -34,8 +34,7 @@ namespace idk::vkn {
 		//	DoNothing();
 		//}
 		//loader.LoadTexture(*this,data, compiled_tex);
-		auto info = loader.GenerateTexInfo(data, compiled_tex);
-		_tex_load_info = info;
+		_tex_load_info = loader.GenerateTexInfo(data, compiled_tex);
 		if (compiled_tex.wait_loaded)
 		{
 			loader.LoadTexture(*this,*_tex_load_info);
@@ -45,8 +44,26 @@ namespace idk::vkn {
 			MarkLoaded(false);
 			BeginAsyncReload(compiled_tex.guid);
 		}
-		texture_bytes += this->sizeOnDevice;
+		//texture_bytes += this->sizeOnDevice;
 	}
+	VknTexture::VknTexture(CompiledTexture&& compiled_tex)
+	{
+		if (compiled_tex.pixel_buffer.size() == 0)
+			return;
+		auto& loader = Core::GetResourceManager().GetFactory<VulkanTextureFactory>().GetDdsLoader();
+		_tex_load_info = loader.GenerateTexInfo(std::move(compiled_tex.pixel_buffer), compiled_tex);
+
+		if (compiled_tex.wait_loaded)
+		{
+			loader.LoadTexture(*this, *_tex_load_info);
+		}
+		else
+		{
+			MarkLoaded(false);
+			BeginAsyncReload(compiled_tex.guid);
+		}
+	}
+
 	vk::ImageAspectFlags VknTexture::ImageAspects() const
 	{
 		return GetEffective().img_aspect;

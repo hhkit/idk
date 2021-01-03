@@ -94,7 +94,7 @@ namespace idk::vkn
 		const DdsFileInternal& File()const { return *file; }
 		ivec2 Dimensions()const { return ivec2{ file->header.width, file->header.height }; }
 	private:
-		std::optional<std::string> _memory;
+		std::optional<string> _memory;
 		string_view _view;
 		const DdsFileInternal* file;
 	};
