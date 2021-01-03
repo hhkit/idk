@@ -760,14 +760,10 @@ namespace idk
 	{
 		const auto find_key = [&](const auto& vec, float ticks) -> int
 		{
-			for (unsigned i = 0; i < vec.size(); ++i)
+			for (unsigned i = 1; i < vec.size(); ++i)
 			{
-				if (ticks < static_cast<float>(vec[i].time))
-				{
+				if (ticks < vec[i].time)
 					return i - 1;
-				}
-				else if (ticks == static_cast<float>(vec[i].time))
-					return i;
 			}
 
 			return static_cast<int>(vec.size()) - 1;
