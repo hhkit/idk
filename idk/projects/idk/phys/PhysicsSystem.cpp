@@ -281,24 +281,28 @@ namespace idk
 			if (!hit_triggers && c.is_trigger)
 				continue;
 
+			// dont recalc shape again
+			const auto& shape =
+				_col_manager._static_broadphase._nodes[_col_manager._static_broadphase.find(hit.collider)].info.predicted_shape;
+
 			auto result = std::visit([&](const auto& shape) -> phys::raycast_result
 			{
 				using RShape = std::decay_t<decltype(shape)>;
 
 				if constexpr (std::is_same_v<RShape, sphere>)
 					return phys::collide_ray_sphere(
-						r, calc_shape(shape, c));
+						r, shape);
 				else
 				if constexpr (std::is_same_v<RShape, box>)
 					return phys::collide_ray_box(
-						r, calc_shape(shape, c));
+						r, shape);
 				else
 				if constexpr (std::is_same_v<RShape, capsule>)
 					return phys::collide_ray_capsule(
-						r, calc_shape(shape, c));
+						r, shape);
 				else
 					return phys::raycast_failure{};
-			}, c.shape);
+			}, shape);
 
 			if (result)
 				retval.emplace_back(RaycastHit{ c.GetHandle(), std::move(*result) });
@@ -307,7 +311,7 @@ namespace idk
 		std::sort(retval.begin(), retval.end(),
 			[](const RaycastHit& lhs, const RaycastHit& rhs)
 			{
-				return abs(lhs.raycast_succ.distance_to_collision) < abs(rhs.raycast_succ.distance_to_collision);
+				return lhs.raycast_succ.distance_to_collision < rhs.raycast_succ.distance_to_collision;
 			}
 		);
 
