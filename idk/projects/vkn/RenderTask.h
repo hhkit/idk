@@ -93,6 +93,7 @@ namespace idk::vkn
 
 #pragma region Uniforms
 		void BindDescriptorSet(uint32_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl) override;
+		void BindUniform(string_view name, uint32_t index, vk::Buffer buffer, uint32_t buffer_offset, uint32_t size,bool skip_if_bound = false)override;
 		void BindUniform(string_view name, uint32_t index, string_view data, bool skip_if_bound = false)override;
 		//void BindUniform(vk::DescriptorSet ds, std::optional<string_view> data = {})override;
 		void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false,vk::ImageLayout layout= vk::ImageLayout::eGeneral)override;
@@ -100,6 +101,7 @@ namespace idk::vkn
 
 		void BindShader(ShaderStage stage,RscHandle<ShaderProgram> shader)override;
 		void UnbindShader(ShaderStage shader_stage)override;
+		UboManager& GetUboManager()override;//HACK
 		void SetRenderPass(VknRenderPass render_pass);
 		void SetFrameBuffer(const Framebuffer& fb,uvec2 size);
 

@@ -120,6 +120,10 @@ namespace idk::vkn
 	{
 		_uniform_manager.BindDescriptorSet(set,ds,dsl);
 	}
+	void RenderTask::BindUniform(string_view name, uint32_t index, vk::Buffer buffer, uint32_t buffer_offset, uint32_t size, bool skip_if_bound)
+	{
+		_uniform_manager.BindUniformBuffer(name, index, buffer,buffer_offset,size, skip_if_bound);
+	}
 	void RenderTask::BindUniform(string_view name, uint32_t index, string_view data,bool skip_if_bound)
 	{
 		dbg::stopwatch timer;
@@ -170,6 +174,10 @@ namespace idk::vkn
 			_uniform_manager.RemoveShader(shader);
 			oshader.reset();
 		}
+	}
+	UboManager& RenderTask::GetUboManager()
+	{
+		return _uniform_manager.GetUboManager();
 	}
 	void RenderTask::SetRenderPass(VknRenderPass render_pass)
 	{

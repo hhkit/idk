@@ -32,6 +32,7 @@ namespace idk::vkn
 		using set_bindings = binding_manager::set_bindings;
 
 		void SetUboManager(UboManager& ubo_manager) noexcept;
+		UboManager& GetUboManager();
 
 		//Helper function to call the relevant registration functions
 		void AddShader(const ShaderModule& module);
@@ -45,10 +46,12 @@ namespace idk::vkn
 		void RemoveBinding(binding_manager::set_t set);
 
 		bool BindDescriptorSet(uint32_t set, vk::DescriptorSet ds, vk::DescriptorSetLayout dsl);
+		bool BindUniformBuffer(string_view uniform_name, uint32_t array_index, vk::Buffer buffer, uint32_t offset, uint32_t size, bool skip_if_bound = false);
 		bool BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound = false);
 		bool BindSampler(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 		bool BindAttachment(string_view uniform_name, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);
 
+		bool BindUniformBuffer(const UniInfo& info, uint32_t array_index, vk::Buffer buffer,uint32_t offset, uint32_t size, bool skip_if_bound = false);
 		bool BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound = false);
 		bool BindSampler(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral);
 		bool BindAttachment(const UniInfo& info, uint32_t array_index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eShaderReadOnlyOptimal);

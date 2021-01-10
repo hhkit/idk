@@ -12,6 +12,7 @@ namespace idk::vkn
 	using VertexBuffer = vk::Buffer;
 	using VknRenderPass = RenderPassObj;
 	struct VulkanPipeline;
+	struct UboManager;
 
 	//enum class IndexType { e16, e32 };
 	using IndexType = vk::IndexType;
@@ -50,10 +51,13 @@ namespace idk::vkn
 
 #pragma region Uniforms
 		virtual void BindDescriptorSet(uint32_t set,vk::DescriptorSet ds,vk::DescriptorSetLayout dsl) = 0;
+		virtual void BindUniform(string_view name, uint32_t index, vk::Buffer buffer, uint32_t buffer_offset,uint32_t size, bool skip_if_bound = false                                                                 )=0;
 		virtual void BindUniform(string_view name, uint32_t index, string_view data, bool skip_if_bound = false                                                                 )=0;
 		virtual void BindUniform(string_view name, uint32_t index, const VknTextureView& texture, bool skip_if_bound = false, vk::ImageLayout layout = vk::ImageLayout::eGeneral)=0;
 		//virtual void BindUniform(vk::DescriptorSet ds, std::optional<string_view> data                                                                                          )=0;
 #pragma endregion
+		virtual UboManager& GetUboManager()=0;//HACK
+
 
 		virtual void BindVertexBufferByBinding(uint32_t binding, VertexBuffer vertex_buffer, size_t byte_offset) = 0;
 		virtual void BindVertexBuffer(uint32_t location, VertexBuffer vertex_buffer, size_t byte_offset) = 0;

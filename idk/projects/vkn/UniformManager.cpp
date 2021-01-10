@@ -342,6 +342,10 @@ namespace idk::vkn
 	{
 		_ubo_manager = &ubo_manager;
 	}
+	UboManager& UniformManager::GetUboManager()
+	{
+		return *_ubo_manager;
+	}
 	void UniformManager::AddShader(const ShaderModule& shader)
 	{
 		for (auto itr = shader.LayoutsBegin(), end = shader.LayoutsEnd(); itr != end; ++itr)
@@ -411,6 +415,19 @@ namespace idk::vkn
 		_dbg.MarkSet(set);
 		return _bindings.SetOverride(set, ds,dsl);
 	}
+	bool UniformManager::BindUniformBuffer(string_view uniform_name, uint32_t array_index, vk::Buffer buffer, uint32_t offset, uint32_t size, bool skip_if_bound)
+	{
+		auto itr = _uniform_names.find(uniform_name);
+		bool bound = false;
+		if (itr != _uniform_names.end())
+		{
+			auto& info = itr->second;
+			bound = BindUniformBuffer(info, array_index, buffer,offset,size, skip_if_bound);
+			if (bound)
+				_dbg.MarkBinding(info.set, info.binding);
+		}
+		return bound;
+	}
 	bool UniformManager::BindUniformBuffer(string_view uniform_name, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
 		auto itr = _uniform_names.find(uniform_name);
@@ -449,6 +466,10 @@ namespace idk::vkn
 				_dbg.MarkBinding(info.set,info.binding);
 		}
 		return bound;
+	}
+	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, vk::Buffer buffer, uint32_t offset,uint32_t size, bool skip_if_bound)
+	{
+		return _bindings.BindUniformBuffer(info, array_index, buffer, offset, size, skip_if_bound);
 	}
 	bool UniformManager::BindUniformBuffer(const UniInfo& info, uint32_t array_index, string_view data, bool skip_if_bound)
 	{
