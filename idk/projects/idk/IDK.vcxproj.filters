@@ -1235,6 +1235,9 @@
     <ClInclude Include="util\PoolContainer.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="ds\strided_span.h">
+      <Filter>ds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="math\matrix.cpp">
@@ -2004,6 +2007,9 @@
     </None>
     <None Include="scene\SceneGraph.inl">
       <Filter>scene</Filter>
+    </None>
+    <None Include="ds\strided_span.inl">
+      <Filter>ds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
