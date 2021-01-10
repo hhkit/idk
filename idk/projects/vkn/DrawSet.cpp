@@ -78,10 +78,14 @@ namespace idk::vkn
 				//	range_opt = GraphicsSystem::RenderRange{ CameraData{},0,state.inst_ro->size() };
 
 				//auto& inst_draw_range = *range_opt;
-				for (auto& dc : _inst_draw_range)
+				auto indices = binders.ProcessableIndices(the_interface, _inst_draw_range);
+				binders.PrepareBindRange(the_interface, _inst_draw_range, indices);
+				for (auto& idx: indices)
 				{
+					auto& dc = _inst_draw_range[idx];
 					auto& mat_inst = *dc.material_instance;
-					if (mat_inst.material && !binders.Skip(the_interface, dc))
+					//if (mat_inst.material && 
+					//	!binders.Skip(the_interface, dc))
 					{
 						binders.Bind(the_interface, dc);
 						auto& req = *dc.renderer_req;

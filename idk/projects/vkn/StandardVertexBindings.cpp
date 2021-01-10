@@ -28,13 +28,50 @@ namespace idk::vkn::bindings
 		}*state.proj_trf;//map back into z: (0,1)
 		the_interface.BindUniform("CameraBlock", 0, hlp::to_data(projection_trf));
 	}
+	constexpr size_t elem_sz = sizeof(mat4) * 2;
 
 	void StandardVertexBindings::Bind(RenderInterface& the_interface, const RenderObject& dc)
 	{
-		mat4 obj_trf = state.view_trf * dc.transform;
-		mat4 obj_ivt = obj_trf.inverse().transpose();
-		vector<mat4> mat4_block{ obj_trf,obj_ivt };
-		the_interface.BindUniform("ObjectMat4Block", 0, hlp::to_data(mat4_block));
+		if (cache_.empty())
+		{
+			mat4 obj_trf = state.view_trf * dc.transform;
+			mat4 obj_ivt = obj_trf.inverse().transpose();
+			vector<mat4> mat4_block{ obj_trf,obj_ivt };
+			the_interface.BindUniform("ObjectMat4Block", 0, hlp::to_data(mat4_block));
+		}
+		else
+		{
+			auto& [buffer,offset] = cache_.back();
+			the_interface.BindUniform("ObjectMat4Block", 0, buffer,offset,elem_sz);
+			cache_.pop_back();
+		}
+	}
+
+	void StandardVertexBindings::PrepareBindRange(RenderInterface& the_interface, strided_span<const RenderObject> dc_span, span<const size_t> indices)
+	{
+		cache_.clear();
+		auto& ubo_manager=the_interface.GetUboManager();
+		auto buffer = ubo_manager.Acquire(elem_sz + indices.size());
+		cache_.reserve(indices.size());
+		uint32_t offset = 0;
+		for (auto idx : indices)
+		{
+			cache_.emplace_back(UboCache{ buffer.buffer,buffer.buffer_offset+offset });
+			offset += elem_sz;
+		}
+		offset = 0;
+		for (auto itr = std::make_reverse_iterator(indices.end()),end = std::make_reverse_iterator(indices.begin()); itr!=end;++itr)
+		{
+			auto idx = *itr;
+			auto& dc = dc_span[idx];
+			mat4 trfs[2];
+			mat4& obj_trf = trfs[0];
+			mat4& obj_ivt = trfs[1];
+			obj_trf = state.view_trf* dc.transform;
+			obj_ivt = obj_trf.inverse().transpose();
+			auto subspan =buffer.data_buffer.subspan(offset,elem_sz);
+			memcpy(subspan.data(),&trfs, sizeof(elem_sz));
+		}
 	}
 
 	void StandardVertexBindings::Bind(RenderInterface& the_interface, const AnimatedRenderObject& dc)

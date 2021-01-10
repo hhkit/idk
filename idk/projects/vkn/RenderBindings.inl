@@ -54,6 +54,13 @@ namespace idk::vkn::bindings
 			}, the_interface, dc);
 	}
 	template<typename ...Args>
+	inline void CombinedBindings<Args...>::PrepareBindRange(RenderInterface& the_interface, strided_span<const RenderObject> dc, span<const size_t> processable_indices)
+	{
+		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface, auto& dc, span<const size_t> processable_indices) {
+			binder.PrepareBindRange(the_interface, dc,processable_indices);
+			}, the_interface, dc,processable_indices);
+	}
+	template<typename ...Args>
 	void CombinedBindings<Args...>::BindAni(RenderInterface& the_interface, const AnimatedRenderObject& dc)
 	{
 		meta::for_each_tuple_element(binders, [](RenderBindings& binder, auto& the_interface, auto& dc) {

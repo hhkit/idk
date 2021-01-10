@@ -1,5 +1,6 @@
 #pragma once
 #include <vkn/RenderBindings.h>
+#include <util/PoolContainer.h>
 namespace idk::vkn::bindings
 {
 	struct VertexShaderBinding : RenderBindings
@@ -24,8 +25,17 @@ namespace idk::vkn::bindings
 		void SetState(const GraphicsState& vstate);
 		void SetState(const CameraData& camera, const vector<SkeletonTransforms>& skel);
 
+		struct UboCache
+		{
+			vk::Buffer buffer;
+			uint32_t offset;
+		};
+
+		PooledContainer<std::vector<UboCache>> cache_;
+
 		void Bind(RenderInterface& the_interface)override;
 		void Bind(RenderInterface& the_interface, const RenderObject& dc)override;
+		void PrepareBindRange(RenderInterface& the_interface, strided_span<const RenderObject> dc,span<const size_t> indices)override;
 		void Bind(RenderInterface& the_interface, const  AnimatedRenderObject& dc);
 		void BindAni(RenderInterface& the_interface, const AnimatedRenderObject& dc)override;
 

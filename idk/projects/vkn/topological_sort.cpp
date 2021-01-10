@@ -81,7 +81,7 @@ namespace idk
 namespace idk::graph_theory
 {
 
-#pragma	optimize("",off)
+//#pragma	optimize("",off)
 //returns a pair of vector of indices and a boolean to see if it succeeded(failure means it's cyclic)
 std::pair<vector<index_t>, bool> KahnsAlgorithm(IntermediateGraph graph)
 {
