@@ -32,8 +32,16 @@ namespace idk::vkn
 		size_t AlignmentOffset()const;
 		void Align();
 		uint32_t Add(size_t len, const void* data_);
+		uint32_t allocate(size_t len);
 		void Free(uint32_t offset, size_t len);
 		vk::Buffer& Buffer() { return *buffer; }
+		span<std::byte> DataBuffer() {
+			return span
+			{
+				reinterpret_cast<std::byte*>(data.data() + initial_offset),
+				reinterpret_cast<std::byte*>(data.data() + data.size())
+			};
+		}
 
 		void Reset();
 	};
@@ -125,7 +133,7 @@ namespace idk::vkn
 		_alignment = view.BufferOffsetAlignment();
 	}
 
-	UboManager::UboManager(UboManager&&) = default;
+	UboManager::UboManager(UboManager&&) noexcept = default;
 
 
 	//UboManager& UboManager::operator=(const UboManager&) = default;
@@ -142,6 +150,17 @@ namespace idk::vkn
 	{
 		uint32_t mod = s_cast<uint32_t>((r_cast<intptr_t>(ptr) % alignment));
 		return (mod) ? alignment - mod : 0;
+	}
+	UboManager::UboSection UboManager::Acquire(uint32_t num_bytes)
+	{
+		dbg::stopwatch timer;
+		timer.start();
+		auto size = num_bytes;
+		DataPair& pair = FindPair(size);
+		timer.stop();
+		add_rendertask_durations("Ubo Add-FindPair", timer.time().count());
+		auto offset = pair.allocate(num_bytes);
+		return UboSection{ pair.Buffer(),offset,pair.DataBuffer().subspan(offset,num_bytes)};
 	}
 	void UboManager::Update(vk::Buffer buffer, index_span range, string_view data)
 	{
@@ -299,42 +318,44 @@ namespace idk::vkn
 	}
 	uint32_t UboManager::DataPair::Add(size_t len, const void* data_) 
 	{
-		dbg::stopwatch timer;
-		timer.start();
-		if (!resetted || alignment!=old_alignment)
-			throw;
-		//if (collator.free_range == collator.full_range)
-		//{
-		//	//Initial offset to ensure that the memory we are dealing with is aligned
-		//	initial_offset = InitialOffset(data.data(), alignment);
-		//	data.resize(block_size+initial_offset);
-		//}
-		//add_rendertask_durations("DP resize", timer.lap().count());
-		collator.skip_free = true;
-		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
-		add_rendertask_durations("DP collator allocate", timer.lap().count());
-		if (!opt)
-			throw;
-		auto [unaligned_offset,aligned_offset] = *opt;
-		//free the alignment stuff so that we just need to free the allocated block later
-		if(aligned_offset - unaligned_offset!=0)
-			collator.mark_freed({ unaligned_offset,aligned_offset });
-		add_rendertask_durations("DP mark free", timer.lap().count());
-
+		auto aligned_offset=allocate(len);
 		auto actual_offset = initial_offset + aligned_offset;
-		//if (len+ aligned_offset > 65536)
-		//	throw;
-		//if (len + actual_offset > data.size())
-		//	throw;
+#if DEBUG_TIMER
 		add_rendertask_durations("DP pre memcpy", timer.lap().count());
-		//alt_memcpy(data.data() + actual_offset, data_, len);
-		//std::memcpy(data.data() + actual_offset, data_, len);
+#endif
 		memcpy_s(data.data() +actual_offset, data.size()-actual_offset, data_, len);
 		mem_info.log(len);
+#if DEBUG_TIMER
 		timer.stop();
 		add_rendertask_durations("DP memcpy", timer.lap().count());
 		add_rendertask_durations("DP Add", timer.time().count());
+#endif
 		dirty = true;
+		return static_cast<uint32_t>(aligned_offset);
+	}
+
+	uint32_t UboManager::DataPair::allocate(size_t len)
+	{
+#if DEBUG_TIMER
+		dbg::stopwatch timer;
+		timer.start();
+#endif
+		if (!resetted || alignment != old_alignment)
+			throw;
+		collator.skip_free = true;
+		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
+#if DEBUG_TIMER
+		add_rendertask_durations("DP collator allocate", timer.lap().count());
+#endif
+		if (!opt)
+			throw;
+		auto [unaligned_offset, aligned_offset] = *opt;
+		//free the alignment stuff so that we just need to free the allocated block later
+		if (aligned_offset - unaligned_offset != 0)
+			collator.mark_freed({ unaligned_offset,aligned_offset });
+#if DEBUG_TIMER
+		add_rendertask_durations("DP mark free", timer.lap().count());
+#endif
 		return static_cast<uint32_t>(aligned_offset);
 	}
 

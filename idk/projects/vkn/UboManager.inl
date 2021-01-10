@@ -2,6 +2,7 @@
 #include "UboManager.h"
 #include <vkn/BufferHelpers.inl>
 #include <vkn/Stopwatch.h>
+#include <ds/span.inl>
 namespace idk::vkn
 {
 
@@ -12,8 +13,15 @@ namespace idk::vkn
 
 	}
 	using dbg::add_rendertask_durations;
+	
 	template<typename T>
 	std::pair<vk::Buffer, uint32_t> UboManager::Add(const T& data)
+	{
+		span data_span = span{ hlp::buffer_data(data),hlp::buffer_data(data)+hlp::arr_count(data) };
+		return Add(data_span);
+	}
+	template<typename T>
+	inline std::pair<vk::Buffer, uint32_t> UboManager::Add(span<const T> data)
 	{
 		dbg::stopwatch timer;
 		timer.start();
