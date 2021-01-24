@@ -14,6 +14,7 @@ namespace idk
 		template<typename ... Args>
 		bool emplace(seq_num_t num, Args&& ... args);
 		opt<T> pop_front();
+		size_t size() const { return buffer_.size(); }
 	private:
 		struct Node
 		{

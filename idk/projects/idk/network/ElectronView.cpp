@@ -240,6 +240,9 @@ namespace idk
 		{
 			for (auto& move : data_pack.packs)
 				inputs->moves.emplace(move.seq, move.move);
+
+			while (inputs->moves.size() > 15)
+				inputs->moves.pop_front();
 		}
 	}
 
