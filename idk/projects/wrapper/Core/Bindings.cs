@@ -935,6 +935,12 @@ namespace idk
         #region Network
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static float NetworkGetPredictionWeight();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static void NetworkSetPredictionWeight(float new_weight);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool NetworkGetIsConnected();
 
         [MethodImpl(MethodImplOptions.InternalCall)]

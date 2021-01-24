@@ -25,6 +25,8 @@ namespace idk
 		: public ISystem
 	{
 	public:
+		static inline real prediction_weight = 1.0; 
+
 		NetworkSystem();
 		~NetworkSystem();
 

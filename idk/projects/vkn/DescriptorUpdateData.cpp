@@ -19,7 +19,7 @@ namespace idk::vkn
 			if (ds_write.pBufferInfo)
 			{
 				auto idx = reinterpret_cast<size_t>(ds_write.pBufferInfo)-1;
-				assert(idx < buffer_infos.data());//catch when Convert was called twice.
+				//assert(idx < buffer_infos.data());//catch when Convert was called twice.
 				ds_write.pBufferInfo = buffer_infos.data()+idx;
 			}
 		}

@@ -2432,6 +2432,17 @@ namespace idk::mono
 		BIND_END();
 
 		// Networking
+		BIND_START("idk.Bindings::NetworkGetPredictionWeight", real)
+		{
+			return Core::GetSystem<NetworkSystem>().prediction_weight;
+		}
+		BIND_END();
+
+		BIND_START("idk.Bindings::NetworkSetPredictionWeight", void, real weight)
+		{
+			Core::GetSystem<NetworkSystem>().prediction_weight = weight;
+		}
+		BIND_END();
 
 		BIND_START("idk.Bindings::NetworkGetIsHost", bool)
 		{

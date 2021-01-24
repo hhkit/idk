@@ -88,7 +88,7 @@ namespace idk
 
 		void CacheSentData();
 		void PrepareDataForSending(SeqNo curr_seq);
-		void MoveGhost(seconds delta);
+		void MoveGhost(seconds delta, real prediction_weight);
 		MovePack PackMoveData(SeqNo curr_seq);
 		GhostPack PackGhostData(int incoming_state_mask);
 
@@ -124,7 +124,7 @@ namespace idk
 
 			virtual void ForceUnpack(string_view) = 0;
 			virtual void UnpackData(SeqNo index, string_view) = 0;
-			virtual void Update(real dt) = 0;
+			virtual void Update(real dt, real prediction_weight) = 0;
 			virtual void Snap() = 0;
 			virtual void Debug(erased_visitor<void(bool), void(int), void(float), void(vec3), void(quat)>) = 0;
 			virtual ~GhostData() = default;

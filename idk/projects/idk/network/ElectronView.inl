@@ -52,13 +52,14 @@ namespace idk
 		{
 			ParameterImpl<T>& param;
 			T start_value;
-			T end_value;
+			T presented_value;
+			T latest_value;
 			T prev_value;
 
 			DerivedGhostData(ParameterImpl<T>& p)
 				: param{ p }
 			{
-				start_value = end_value = prev_value = param.getter();
+				start_value = presented_value = latest_value = prev_value = param.getter();
 			}
 
 			void ForceUnpack(string_view data) final
@@ -67,7 +68,8 @@ namespace idk
 				{
 					t = 1;
 					start_value = param.getter();
-					end_value = *val;
+					latest_value = *val;
+					presented_value = *val;
 				}
 			}
 
@@ -78,13 +80,13 @@ namespace idk
 				{
 					if (auto pval = parse_binary<T>(data))
 					{
-						auto val = *pval;
+						latest_value = *pval;
 						// interp between vals
 						auto diff = (index - value_index);
 						auto diff_dt = diff * Core::GetDT();
 						auto rtt = Core::GetSystem<NetworkSystem>().GetConnectionTo(Host::SERVER)->GetRTT();
-						end_value = param.interpolator(prev_value, val, (rtt + diff_dt) / diff_dt);
-						prev_value = val;
+						presented_value = param.interpolator(prev_value, latest_value, (rtt + diff_dt) / diff_dt);
+						prev_value = latest_value;
 						t = 0;
 						start_value = param.getter();
 						value_index = index;
@@ -92,7 +94,7 @@ namespace idk
 				}
 			}
 
-			void Update(real dt) final
+			void Update(real dt, real prediction_weight) final
 			{
 				// if interpolation function is defined
 				if (param.interpolator)
@@ -101,7 +103,9 @@ namespace idk
 					if (t != new_t)
 					{
 						t = new_t;
-						param.setter(param.interpolator(start_value, end_value, t));
+						auto predicted_val = param.interpolator(start_value, presented_value, t);
+						auto final_val = param.interpolator(latest_value, predicted_val, prediction_weight);
+						param.setter(final_val);
 					}
 				}
 				else // else snap to value
@@ -113,12 +117,12 @@ namespace idk
 			void Snap() final
 			{
 				t = 1;
-				param.setter(end_value);
+				param.setter(latest_value);
 			}
 
 			virtual void Debug(erased_visitor<void(bool), void(int), void(float), void(vec3), void(quat)> visitor) final
 			{
-				visitor(end_value);
+				visitor(presented_value);
 			}
 
 		};
