@@ -707,7 +707,7 @@ namespace idk
 	{
 		for (auto& ev : electron_views)
 		{
-			ev.MoveGhost(Core::GetScheduler().GetRealDeltaTime(), prediction_weight);
+			ev.MoveGhost(Core::GetScheduler().GetFixedDeltaTime(), prediction_weight);
 		}
 	}
 

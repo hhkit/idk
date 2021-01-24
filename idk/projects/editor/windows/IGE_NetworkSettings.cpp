@@ -27,16 +27,16 @@ namespace idk
 		if (auto conn_man = Core::GetSystem<NetworkSystem>().GetConnectionTo(idk::Host::SERVER))
 		{
 			ImGui::Text("To Server");
-			ImGui::Text("RTT: %f", conn_man->GetRTT());
+			ImGui::Text("RTT: %f", conn_man->GetRTT().count());
 			ImGui::Separator();
 		}
 
-		for (int i = 0; i < static_cast<int>(idk::Host::CLIENT_MAX); +i)
+		for (int i = 0; i < static_cast<int>(idk::Host::CLIENT_MAX); ++i)
 		{
 			if (auto conn_man = Core::GetSystem<NetworkSystem>().GetConnectionTo((idk::Host)i)) 
 			{
 				ImGui::Text("To Client %i", i);
-				ImGui::Text("RTT: %f", conn_man->GetRTT());
+				ImGui::Text("RTT: %f", conn_man->GetRTT().count());
 				ImGui::Separator();
 					
 			}
