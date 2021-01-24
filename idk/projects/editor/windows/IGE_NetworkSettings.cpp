@@ -23,6 +23,8 @@ namespace idk
 			Core::GetSystem<NetworkSystem>().SetPacketLoss(packet_loss);
 		}
 
+		ImGui::Text("Curr Seq: %d", netsys.GetSequenceNumber().value);
+
 		ImGui::Separator();
 		if (auto conn_man = Core::GetSystem<NetworkSystem>().GetConnectionTo(idk::Host::SERVER))
 		{

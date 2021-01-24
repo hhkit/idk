@@ -100,7 +100,7 @@ namespace idk
 				if (param.interpolator)
 				{
 					auto new_t = std::min(t + dt, 1.f);
-					//if (t != new_t)
+					if (t != new_t)
 					{
 						t = new_t;
 						auto predicted_val = param.interpolator(start_value, presented_value, t);
