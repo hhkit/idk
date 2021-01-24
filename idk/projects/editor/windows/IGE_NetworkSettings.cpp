@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "IGE_NetworkSettings.h"
 #include <network/NetworkSystem.h>
+#include <network/Client.h>
+#include <network/Server.h>
+#include <network/ConnectionManager.h>
+
 namespace idk
 {
 	IGE_NetworkSettings::IGE_NetworkSettings()
@@ -9,13 +13,35 @@ namespace idk
 	}
 	void IGE_NetworkSettings::Update()
 	{
+		auto& netsys = Core::GetSystem<NetworkSystem>();
 		ImGui::DragFloat("Latency (s)", &network_time, 0.005f, 0.f, 1.f);
 		ImGui::SliderFloat("Packet Loss", &packet_loss, 0.f, 100.f);
-		
+
 		if (ImGui::Button("Set Network Simulation"))
 		{
 			Core::GetSystem<NetworkSystem>().SetLatency(seconds{ network_time });
 			Core::GetSystem<NetworkSystem>().SetPacketLoss(packet_loss);
+		}
+
+		ImGui::Separator();
+		if (netsys.IsHost())
+		{
+			ImGui::Text("To Server");
+			ImGui::Text("RTT: %f", Core::GetSystem<NetworkSystem>().GetConnectionTo(idk::Host::SERVER)->GetRTT());
+			ImGui::Separator();
+		}
+		else
+		{
+			for (int i = 0; i < static_cast<int>(idk::Host::CLIENT_MAX); +i)
+			{
+				if (auto conn_man = Core::GetSystem<NetworkSystem>().GetConnectionTo((idk::Host)i)) 
+				{
+					ImGui::Text("To Client %i", i);
+					ImGui::Text("RTT: %f", conn_man->GetRTT());
+					ImGui::Separator();
+					
+				}
+			}
 		}
 	}
 
