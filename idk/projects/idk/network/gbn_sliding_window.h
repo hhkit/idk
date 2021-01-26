@@ -11,6 +11,7 @@ namespace idk
 	public:
 		explicit gbn_sliding_window(seq_num_t first_message) : next_seq_expected_{ first_message } {}
 		seq_num_t base() const { return buffer_.size() ? buffer_.front().sequence_number : next_seq_expected_; }
+		seq_num_t expected() const { return next_seq_expected_; }
 		template<typename ... Args>
 		bool emplace(seq_num_t num, Args&& ... args);
 		opt<T> pop_front();
@@ -43,6 +44,8 @@ namespace idk
 				return false;
 		}
 
+		if (buffer_.empty())
+			next_seq_expected_ = num + 1;
 		buffer_.emplace(insert, Node{ num, std::forward<Args>(args)... });
 		return true;
 	}
@@ -59,4 +62,4 @@ namespace idk
 
 		return std::move(retval.value);
 	}
-}
+}  

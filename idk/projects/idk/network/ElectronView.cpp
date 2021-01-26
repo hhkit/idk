@@ -239,7 +239,10 @@ namespace idk
 		if (auto inputs = std::get_if<ServerSideInputs>(&move_state))
 		{
 			for (auto& move : data_pack.packs)
-				inputs->moves.emplace(move.seq, move.move);
+				if (inputs->moves.emplace(move.seq, move.move) == false)
+				{
+				//	LOG_TO(LogPool::NETWORK, "Dropped move %d at frame %d (base was %d)", move.seq.value, Core::GetSystem<NetworkSystem>().GetSequenceNumber(), inputs->moves.base());
+				}
 
 			while (inputs->moves.size() > 15)
 				inputs->moves.pop_front();
