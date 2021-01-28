@@ -8,6 +8,7 @@ namespace idk::vkn
 		virtual size_t NumAdded()const = 0;
 		virtual size_t NumProcessed()const = 0;
 		virtual void ClearAndResetCounters() = 0;
+		std::string future_err;
 		virtual ~IAsyncLoader() = default;
 	};
 }

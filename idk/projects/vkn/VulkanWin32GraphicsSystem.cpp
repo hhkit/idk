@@ -338,6 +338,8 @@ namespace idk::vkn
 		extra_vars.Set("pending_resources", (int)(_pimpl->async_loaders.NumAdded() - _pimpl->async_loaders.NumProcessed() + _pimpl->tex_loader.num_pending()));
 		extra_vars.Set("total_async_resources", (int)(_pimpl->async_loaders.NumAdded() + _pimpl->initial_texture_count ) );
 		extra_vars.Set("async_resources_loaded", (int)( _pimpl->async_loaders.NumProcessed()+ (_pimpl->initial_texture_count -_pimpl->tex_loader.num_pending())));
+		extra_vars.Set("async tex loading exception", _pimpl->tex_loader.state.future_err);
+		extra_vars.Set("async loading exceptions", _pimpl->async_loaders.future_errs);
 		_pimpl->tex_loader.UpdateTextures();
 		_pimpl->async_loaders.UpdateLoaders();
 		_pimpl->timelog.end_then_start("Init Pre render data");

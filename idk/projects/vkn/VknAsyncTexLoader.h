@@ -39,6 +39,7 @@ namespace idk::vkn
 			bool wait_results2 = false;
 			bool has_future_before_update = false;
 			bool has_future_after_update = false;
+			std::string future_err;
 			size_t pending_scratch_queue=0;
 			size_t pending_queue=0;
 		};

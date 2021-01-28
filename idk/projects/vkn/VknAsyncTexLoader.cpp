@@ -52,7 +52,27 @@ void AsyncTexLoader::UpdateTextures()
 	if (ready && ready->ready())
 	{
 		//Done processing the last frame's stuff
+		try
+		{
+
 		ready->get();
+		}
+		catch (vk::Error& e)
+		{
+			state.future_err = e.what();
+			throw;
+		}
+		catch(std::exception& e)
+		{
+			state.future_err = e.what();
+			throw;
+		}
+		catch (...)
+		{
+			state.future_err = "Unknown exception";
+			throw;
+
+		}
 		ready.reset();
 		//size_t i = 0;
 		//while (i < _results.size())
@@ -159,6 +179,9 @@ void AsyncTexLoader::ExecProxy::exec()
 	timer.start();
 	do {
 		auto& curr = ptr->_process_queue.back();
+		try
+		{
+
 		ptr->state.load1 = true;
 		TextureLoader::AsyncResult a1, a2;
 		auto f1 = ptr->_load_fences.AcquireFence();
@@ -209,6 +232,20 @@ void AsyncTexLoader::ExecProxy::exec()
 		//while (!fut.ready() && Core::IsRunning()) std::this_thread::yield();
 		//handles.erase(curr.handle);
 		ptr->_results.emplace_back(std::move(curr));
+		}
+		catch (vk::Error& e)
+		{
+			ptr->state.future_err += e.what();
+		}
+		catch (std::exception& e)
+		{
+			ptr->state.future_err += e.what();
+		}
+		catch (...)
+		{
+			ptr->state.future_err += "Unknown Exception";
+		}
+		//We pop anyway so that we don't keep retrying problematic items
 		ptr->_process_queue.pop_back();
 		if (ptr->_process_queue.size())
 			ptr->_process_queue.pop_back();

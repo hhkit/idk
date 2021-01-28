@@ -65,7 +65,23 @@ namespace idk::vkn
 			if (proc && proc->ready())
 			{
 				FlagProcessedAsReady();
+				try
+				{
+
 				proc->get();
+				}
+				catch (std::exception& e)
+				{
+					future_err += e.what();
+				}
+				catch (vk::Error& e)
+				{
+					future_err += e.what();
+				}
+				catch (...)
+				{
+					future_err += "Unknown exception";
+				}
 				proc.reset();
 			}
 			if (!proc) //Not processing anything right now.
@@ -84,8 +100,24 @@ namespace idk::vkn
 			size_t i = 0;
 			for (auto& entry : process_list)
 			{
+				try
+				{
+
 				ProcessEntry(entry);
 				processed_flags_[i] = true;
+				}
+				catch (std::exception& e)
+				{
+					future_err += e.what();
+				}
+				catch (vk::Error& e)
+				{
+					future_err += e.what();
+				}
+				catch (...)
+				{
+					future_err += "Unknown exception";
+				}
 				++i;
 				++processed_counter_;
 			}

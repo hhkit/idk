@@ -7,6 +7,7 @@ namespace idk::vkn
 	class AsyncLoaders
 	{
 	public:
+		std::string future_errs;
 		void AddLoader(std::weak_ptr<IAsyncLoader> loader)
 		{
 			loaders_.emplace_back(loader);
@@ -23,15 +24,20 @@ namespace idk::vkn
 				}
 				else
 				{
-					invalid_indices_.emplace_back();
+					invalid_indices_.emplace_back(i);
 				}
+				++i;
 			}
 			while (!invalid_indices_.empty())
 			{
 				loaders_.erase(loaders_.begin() + invalid_indices_.back());
 				invalid_indices_.pop_back();
 			}
-
+			future_errs.clear();
+			for (auto& wloader : loaders_)
+			{
+				future_errs += wloader.lock()->future_err + "\n";
+			}
 		}
 		void ResetCounters()
 		{
