@@ -4,7 +4,13 @@ namespace idk
 {
     public enum LobbyType
     {
-        Private = 0,
+        /// <summary>
+        /// Visible to friends or invitees only
+        /// </summary>
+        Private = 1,
+        /// <summary>
+        /// Visible to everyone
+        /// </summary>
         Public = 2
     }
 
