@@ -26,6 +26,7 @@ namespace idk
 	{
 	public:
 		static inline real prediction_weight = 1.0; 
+		static inline CSteamID connect_lobby_first_frame{};
 
 		NetworkSystem();
 		~NetworkSystem();
