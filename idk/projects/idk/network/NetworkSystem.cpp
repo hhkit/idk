@@ -585,6 +585,7 @@ namespace idk
 
 		auto reserialize_thunk = std::get<mono::ManagedThunk>(script_system.Environment().Type("ElectronNetwork")->GetMethod("Reserialize", 1));
 
+		is_rolling_back = true;
 		for (auto& ev : evs)
 		{
 			if (auto client_inputs = std::get_if<ElectronView::ClientSideInputs>(&ev.move_state))
@@ -666,6 +667,7 @@ namespace idk
 				}
 			}
 		}
+		is_rolling_back = false;
 	}
 
 	void NetworkSystem::CollectInputs(span<ElectronView> evs)
