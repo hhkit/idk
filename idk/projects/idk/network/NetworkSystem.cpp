@@ -568,6 +568,14 @@ namespace idk
 
 		if (client)
 			client->SendPackets();
+
+		if (connect_lobby_first_frame.IsValid())
+		{
+			GameLobbyJoinRequested_t callback;
+			callback.m_steamIDLobby = connect_lobby_first_frame;
+			connect_lobby_first_frame = k_steamIDNil;
+			OnLobbyJoinRequested(&callback);
+		}
 	}
 
 	void NetworkSystem::Rollback(span<ElectronView> evs)
@@ -707,7 +715,7 @@ namespace idk
 	{
 		for (auto& ev : electron_views)
 		{
-			ev.MoveGhost(Core::GetScheduler().GetRealDeltaTime());
+			ev.MoveGhost(Core::GetScheduler().GetFixedDeltaTime(), prediction_weight);
 		}
 	}
 
