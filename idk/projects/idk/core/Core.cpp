@@ -104,8 +104,8 @@ namespace idk
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ResourceManager::EmptyNewResources,   "Clear new resources");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&ScriptSystem::ScriptStart,            "Start and Awake Scripts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&SteamManager::RunCallbacks,           "Run Steam Callbacks");
-		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::FrameStart>(&NetworkSystem::ReceivePackets,        "Receive Packets");
 
+		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::ReceivePackets,        "Receive Packets");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::MoveGhosts,      "Move ghosts");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::NetworkTickStart>(&NetworkSystem::Rollback,        "Execute rollbacks");
 		_pimpl->_scheduler->ScheduleFencedPass<UpdatePhase::Fixed>     (&ScriptSystem::ScriptFixedUpdate,      "Script Fixed Update");

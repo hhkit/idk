@@ -160,7 +160,7 @@ namespace idk
 		}
 	}
 
-	void ElectronView::MoveGhost(seconds delta)
+	void ElectronView::MoveGhost(seconds delta, real prediction_weight)
 	{
 		if (std::get_if<Ghost>(&ghost_state))
 		{
@@ -168,9 +168,9 @@ namespace idk
 			{
 				auto& param = parameters[i];
 				if (param->interp_over > 0.0001f)
-					param->GetGhost()->Update(delta.count() / param->interp_over);
+					param->GetGhost()->Update(delta.count() / param->interp_over, prediction_weight);
 				else
-					param->GetGhost()->Update(1.f);
+					param->GetGhost()->Update(1.f, 0.0f);
 			}
 		}
 	}
@@ -239,7 +239,13 @@ namespace idk
 		if (auto inputs = std::get_if<ServerSideInputs>(&move_state))
 		{
 			for (auto& move : data_pack.packs)
-				inputs->moves.emplace(move.seq, move.move);
+				if (inputs->moves.emplace(move.seq, move.move) == false)
+				{
+				//	LOG_TO(LogPool::NETWORK, "Dropped move %d at frame %d (base was %d)", move.seq.value, Core::GetSystem<NetworkSystem>().GetSequenceNumber(), inputs->moves.base());
+				}
+
+			while (inputs->moves.size() > 15)
+				inputs->moves.pop_front();
 		}
 	}
 
