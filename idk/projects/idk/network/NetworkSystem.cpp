@@ -204,11 +204,14 @@ namespace idk
 			{
 				if (lobby_members[i].id == id)
 				{
+					auto copy = lobby_members[i];
+
 					lobby_members[i].id = k_steamIDNil;
 					for (int j = i; j < GameConfiguration::MAX_LOBBY_MEMBERS - 1; ++j)
 					{
 						lobby_members[j] = lobby_members[j + 1];
 					}
+					lobby_members[GameConfiguration::MAX_LOBBY_MEMBERS - 1] = copy;
 
 					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
 					auto player = player_type->ConstructTemporary(lobby_members[i].host);
