@@ -206,15 +206,15 @@ namespace idk
 				{
 					auto copy = lobby_members[i];
 
-					lobby_members[i].id = k_steamIDNil;
 					for (int j = i; j < GameConfiguration::MAX_LOBBY_MEMBERS - 1; ++j)
 					{
 						lobby_members[j] = lobby_members[j + 1];
 					}
 					lobby_members[GameConfiguration::MAX_LOBBY_MEMBERS - 1] = copy;
+					lobby_members[GameConfiguration::MAX_LOBBY_MEMBERS - 1].id = k_steamIDNil;
 
 					auto player_type = Core::GetSystem<mono::ScriptSystem>().Environment().Type("Client");
-					auto player = player_type->ConstructTemporary(lobby_members[i].host);
+					auto player = player_type->ConstructTemporary(copy.host);
 					for (auto& target : callback_objects)
 						target->FireMessage("OnLobbyMemberLeft", player);
 					break;
@@ -225,8 +225,7 @@ namespace idk
 
 	void NetworkSystem::LeaveLobby()
 	{
-		if (IsHost())
-			SteamMatchmaking()->LeaveLobby(lobby_id);
+		SteamMatchmaking()->LeaveLobby(lobby_id);
 
 		ResetNetwork();
 		frame_counter = SeqNo{};
@@ -255,6 +254,11 @@ namespace idk
 				return i;
 		}
 		return -1;
+	}
+
+	Host NetworkSystem::GetLobbyMemberAtIndex(int i)
+	{
+		return lobby_members[i].host;
 	}
 
 	void NetworkSystem::ConnectToLobbyOwner()
