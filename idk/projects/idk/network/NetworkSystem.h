@@ -39,6 +39,7 @@ namespace idk
 		void FindLobbies();
 		CSteamID GetLobbyMember(Host host);
 		int GetLobbyMemberIndex(Host host);
+		Host GetLobbyMemberAtIndex(int i);
 		void ConnectToLobbyOwner();
 		void Disconnect();
 

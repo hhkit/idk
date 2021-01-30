@@ -8,7 +8,9 @@ namespace idk
 {
     public static class ElectronNetwork
     {
-
+        /// <summary>
+        /// Get the clients connected to this server (clients must use ElectronNetwork.ConnectToLobbyOwner()).
+        /// </summary>
         public static IList<Client> clients 
         { 
             get
@@ -20,11 +22,12 @@ namespace idk
             } 
         }
         
-        public static bool     isHost      { get => Bindings.NetworkGetIsHost(); }
-        public static bool     isConnected { get => Bindings.NetworkGetIsConnected(); }
-        public static int      ping        { get => Bindings.NetworkGetPing(); }
-        public static bool isRollingBack   { get => Bindings.NetworkGetIsRollingBack(); }
-        public static float    predictionWeight 
+        public static bool  isHost          { get => Bindings.NetworkGetIsHost(); }
+        public static bool  isConnected     { get => Bindings.NetworkGetIsConnected(); }
+
+        public static int   ping            { get => Bindings.NetworkGetPing(); }
+        public static bool  isRollingBack   { get => Bindings.NetworkGetIsRollingBack(); }
+        public static float predictionWeight 
         { 
             get => Bindings.NetworkGetPredictionWeight();
             set => Bindings.NetworkSetPredictionWeight(value);
@@ -90,6 +93,11 @@ namespace idk
         /// Callback: ILobbyCallbacks.OnLobbyMatchList
         /// </summary>
         public static void FindLobbies() => Bindings.NetworkFindLobbies();
+
+        /// <summary>
+        /// Get the member at the specified index of the current lobby. Works for all lobby members.
+        /// </summary>
+        public static Client GetLobbyMember(int i) => new Client(Bindings.NetworkGetLobbyMember(i));
 
         /// <summary>
         /// Sets the current lobby data. You can only do this if you're the lobby owner.

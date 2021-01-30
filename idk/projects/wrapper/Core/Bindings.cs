@@ -986,6 +986,9 @@ namespace idk
         public extern static int NetworkGetLobbyNumMembers(ulong lobby);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int NetworkGetLobbyMember(int i);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int NetworkClientLobbyIndex(int id);
 
         [MethodImpl(MethodImplOptions.InternalCall)]

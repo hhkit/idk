@@ -2552,6 +2552,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkGetLobbyMember", int, int i)
+		{
+			return static_cast<int>(Core::GetSystem<NetworkSystem>().GetLobbyMemberAtIndex(i));
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::NetworkClientLobbyIndex", int, int id)
 		{
 			return Core::GetSystem<NetworkSystem>().GetLobbyMemberIndex(static_cast<Host>(id));
