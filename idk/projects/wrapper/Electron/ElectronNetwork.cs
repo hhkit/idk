@@ -23,6 +23,7 @@ namespace idk
         public static bool     isHost      { get => Bindings.NetworkGetIsHost(); }
         public static bool     isConnected { get => Bindings.NetworkGetIsConnected(); }
         public static int      ping        { get => Bindings.NetworkGetPing(); }
+        public static bool isRollingBack   { get => Bindings.NetworkGetIsRollingBack(); }
         public static float    predictionWeight 
         { 
             get => Bindings.NetworkGetPredictionWeight();

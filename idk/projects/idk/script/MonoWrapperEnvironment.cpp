@@ -2472,6 +2472,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::NetworkGetIsRollingBack", bool)
+		{
+			return Core::GetSystem<NetworkSystem>().is_rolling_back;
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::NetworkDisconnect", void)
 		{
 			Core::GetSystem<NetworkSystem>().Disconnect();

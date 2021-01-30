@@ -944,6 +944,9 @@ namespace idk
         public extern static bool NetworkGetIsConnected();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool NetworkGetIsRollingBack();
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool NetworkGetIsHost();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
