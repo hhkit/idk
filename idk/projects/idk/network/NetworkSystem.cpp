@@ -225,7 +225,8 @@ namespace idk
 
 	void NetworkSystem::LeaveLobby()
 	{
-		SteamMatchmaking()->LeaveLobby(lobby_id);
+		if (lobby_id.IsValid())
+			SteamMatchmaking()->LeaveLobby(lobby_id);
 
 		ResetNetwork();
 		frame_counter = SeqNo{};
@@ -289,8 +290,8 @@ namespace idk
 			&& callback->m_info.m_hListenSocket != k_HSteamListenSocket_Invalid)
 		{
 			auto res = SteamNetworkingSockets()->AcceptConnection(callback->m_hConn);
-			if (res == k_EResultInvalidState || res == k_EResultInvalidParam)
-				LOG_CRASH_TO(LogPool::NETWORK, "Could not connect to client P2P!");
+			//if (res == k_EResultInvalidState || res == k_EResultInvalidParam)
+			//	LOG_CRASH_TO(LogPool::NETWORK, "Could not connect to client P2P!");
 		}
 		/// - A connection you initiated has been accepted by the remote host.
 		///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting, and
@@ -306,7 +307,6 @@ namespace idk
 					client_connection_manager->Subscribe<EventDataBlockFrameNumber>([this](EventDataBlockFrameNumber& event)
 				{
 					frame_counter = event.frame_count;
-					LOG_TO(LogPool::NETWORK, "Receiving frame number: %u", frame_counter.value);
 				});
 
 					LOG_TO(LogPool::NETWORK, "Connected to server");
@@ -328,7 +328,6 @@ namespace idk
 					server_connection_manager[clientIndex]->CreateAndSendMessage<EventDataBlockFrameNumber>(GameChannel::RELIABLE, [&](EventDataBlockFrameNumber& msg)
 					{
 						msg.frame_count = frame_counter;
-						LOG_TO(LogPool::NETWORK, "Sending frame number: %u", frame_counter.value);
 					});
 					server_connection_manager[clientIndex]->GetManager<EventManager>()->SendBufferedEvents();
 
@@ -359,7 +358,7 @@ namespace idk
 				for (auto& target : callback_objects)
 					target->FireMessage("OnDisconnectedFromServer");
 
-				ResetNetwork();
+				client_connection_manager.reset();
 			}
 			else if (server)
 			{
@@ -375,15 +374,6 @@ namespace idk
 						target->FireMessage("OnClientDisconnected", player);
 
 					server_connection_manager[i].reset();
-					for (auto& elem : lobby_members)
-					{
-						if (elem.host == static_cast<Host>(i))
-						{
-							elem.host = Host::NONE;
-							elem.id = k_steamIDNil;
-							break;
-						}
-					}
 					break;
 				}
 			}
@@ -406,7 +396,7 @@ namespace idk
 				for (auto& target : callback_objects)
 					target->FireMessage("OnDisconnectedFromServer");
 
-				ResetNetwork();
+				client_connection_manager.reset();
 			}
 			else if (server)
 			{
@@ -422,15 +412,6 @@ namespace idk
 						target->FireMessage("OnClientDisconnected", player);
 
 					server_connection_manager[i].reset();
-					for (auto& elem : lobby_members)
-					{
-						if (elem.host == static_cast<Host>(i))
-						{
-							elem.host = Host::NONE;
-							elem.id = k_steamIDNil;
-							break;
-						}
-					}
 					break;
 				}
 			}
@@ -496,7 +477,9 @@ namespace idk
 
 	void NetworkSystem::Disconnect()
 	{
-		ResetNetwork();
+		for (auto& elem : server_connection_manager)
+			elem.reset();
+		client_connection_manager.reset();
 	}
 
 	bool NetworkSystem::IsHost()
@@ -803,6 +786,7 @@ namespace idk
 	{
 		//ShutdownYojimbo();
 	}
+
 	void NetworkSystem::ResetNetwork()
 	{
 		my_id = Host::NONE;

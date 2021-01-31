@@ -610,7 +610,7 @@ namespace idk
 		Core::GetSystem<AudioSystem>().SetSystemPaused(false);
 		Core::GetSystem<AudioSystem>().StopAllAudio();
 		Core::GetSystem<PhysicsSystem>().Reset();
-		Core::GetSystem<NetworkSystem>().Disconnect();
+		Core::GetSystem<NetworkSystem>().LeaveLobby();
 		_game_running = false;
 		_game_frozen = false;
 
