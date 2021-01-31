@@ -12,6 +12,7 @@
 
 namespace idk
 {
+#pragma optimize("",off)
     bool ImGuidk::InputResourceEx(const char* label, GenericResourceHandle* handle, [[maybe_unused]] size_t base_resource_id)
     {
         using namespace ImGui;
@@ -105,8 +106,15 @@ namespace idk
 					{
 						auto name = handle_i->Name();
 						auto path = Core::GetResourceManager().GetPath(handle_i);
+                        string tmp;
+                        if (!path)
+                        {
+                            //tmp = static_cast<string>(handle_i.guid);
+                            path = tmp;
+                        }
 						auto str = name.empty() ? string{ path->substr(0, path->rfind('.')) } : string{ name };
-						table.emplace(str, handle_i);
+                        if(!str.empty())
+				    		table.emplace(str, handle_i);
 					}
                 }
 
