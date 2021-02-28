@@ -27,6 +27,7 @@ HWND& GetHWND()
 }
 void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow, LPWSTR* command_lines, int num_args)
 {
+	idk::hack::LogSystemConfig::GetSingleton().enabled = HasArg(L"--log", command_lines, num_args);
 	using namespace idk;
 	auto& windows = c->AddSystem<Windows>(hInstance, nCmdShow);
 	windows.SetFullscreen(false);

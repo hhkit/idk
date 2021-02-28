@@ -21,7 +21,7 @@ namespace idk
 
 	LogSystem::~LogSystem()
 	{
-		if (0)
+		if (_enabled)
 		if (!Core::IsRunning())
 		{
 			int i = 0;
@@ -42,8 +42,8 @@ namespace idk
 	void LogSystem::Init()
 	{
         if (_log_dir.empty())
-            throw; // set a log path first you dumbass
-
+            throw ; // set a log path first you dumbass
+		_enabled = hack::LogSystemConfig::GetSingleton().enabled;
         const auto logroot = _log_dir + '/' + curr_datetime();
         const auto start = Core::GetScheduler().GetProgramStart();
 		constexpr array<string_view, s_cast<size_t>(LogPool::COUNT)> names
@@ -58,7 +58,7 @@ namespace idk
 			"edit",
 		};
 
-		if (0)
+		if (_enabled)
 		for (unsigned i = 0; i < s_cast<unsigned>(LogPool::COUNT); ++i)
 		{
 			auto& loghandle = log_files[i];
@@ -101,4 +101,14 @@ namespace idk
 			);
 		}
 	}
+}
+
+namespace idk::hack
+{
+	static LogSystemConfig config;
+LogSystemConfig& LogSystemConfig::GetSingleton()
+{
+	return config;
+}
+
 }

@@ -101,6 +101,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	auto c = std::make_unique<Core>();
 
 	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow, LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2)));
+	idk::hack::LogSystemConfig::GetSingleton().enabled = HasArg(L"--log", command_lines, num_args);
+
 	if (!HasArg(L"--ignoreAltTabMin", command_lines, num_args))
 		MinimizeOnAltTab(win);
 	Core::GetSystem<Application>().SetFullscreen(true);
