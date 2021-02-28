@@ -9,6 +9,16 @@
 // #undef max
 namespace idk::mt
 {
+	static std::optional<int> helper_thread_override;
+	namespace hack
+	{
+
+		void SetHelperThreadOverride(int num)
+		{
+			helper_thread_override = num;
+		}
+	}
+
 	thread_local int _thread_id = 0;
 
 	int thread_id()
@@ -28,7 +38,7 @@ namespace idk::mt
 
 	ThreadPool::ThreadPool(const int thread_count)
 	{
-		const auto helper_thds = std::max(0, thread_count - 1);
+		const auto helper_thds = std::max(0,helper_thread_override?*helper_thread_override:( thread_count - 1));
 		LOG_TO(LogPool::SYS, "spawning %d threads\n", helper_thds);
 		//SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 		

@@ -88,6 +88,11 @@ void MinimizeOnAltTab(idk::Windows& windows)
 	};
 	windows.OnFocusLost.Listen(on_alt_tab);
 }
+namespace idk::mt::hack
+{
+
+	void SetHelperThreadOverride(int num);
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -98,10 +103,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	int num_args = 0;
 	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
 
+	if (HasArg(L"--single_thd", command_lines, num_args))
+	{
+		idk::mt::hack::SetHelperThreadOverride(0);
+	}
 	auto c = std::make_unique<Core>();
 
 	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow, LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2)));
 	idk::hack::LogSystemConfig::GetSingleton().enabled = HasArg(L"--log", command_lines, num_args);
+
 
 	if (!HasArg(L"--ignoreAltTabMin", command_lines, num_args))
 		MinimizeOnAltTab(win);

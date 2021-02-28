@@ -30,6 +30,11 @@ RENDERDOC_API_1_1_2*& GetRDocApi()
 	static RENDERDOC_API_1_1_2* ptr;
 	return ptr;
 }
+namespace idk::mt::hack
+{
+
+	void SetHelperThreadOverride(int num);
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -62,6 +67,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
+	if (HasArg(L"--single_thd", command_lines, num_args))
+	{
+		idk::mt::hack::SetHelperThreadOverride(0);
+	}
 	using namespace idk;
 
 	auto c = std::make_unique<Core>();
