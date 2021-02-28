@@ -112,20 +112,39 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Init()
 	{
-		windows_ = &Core::GetSystem<win::Windows>();
-		instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
-		windows_->OnScreenSizeChanged.Listen([this](const ivec2&) { Instance().OnResize(); });
+		try
+		{
 
-		if (!instance_)
+			windows_ = &Core::GetSystem<win::Windows>();
+			instance_->InitVulkanEnvironment(window_info{ windows_->GetScreenSize(),windows_->GetWindowHandle(),windows_->GetInstance() });
+			windows_->OnScreenSizeChanged.Listen([this](const ivec2&) { Instance().OnResize(); });
+
+			//if (!instance_)
+			//	throw;
+			RegisterFactories();
+			_pm = std::make_unique<PipelineManager>();
+
+			_pimpl = std::make_unique<Pimpl>();
+			_pimpl->allocator = std::make_unique<hlp::MemoryAllocator>(*instance_->View().Device(), instance_->View().PDevice());
+			_pimpl->fence = instance_->View().Device()->createFenceUnique({});
+
+			_pimpl->async_loaders.AddLoader(std::dynamic_pointer_cast<IAsyncLoader>(Core::GetResourceManager().GetFactory<MeshFactory>().async_loader));
+		}
+		catch (std::exception& e)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Failed to init vulkan system %s", e.what());
 			throw;
-		RegisterFactories();
-		_pm = std::make_unique<PipelineManager>();
-
-		_pimpl = std::make_unique<Pimpl>();
-		_pimpl->allocator = std::make_unique<hlp::MemoryAllocator>(*instance_->View().Device(), instance_->View().PDevice());
-		_pimpl->fence = instance_->View().Device()->createFenceUnique({});
-
-		_pimpl->async_loaders.AddLoader(std::dynamic_pointer_cast<IAsyncLoader>(Core::GetResourceManager().GetFactory<MeshFactory>().async_loader));
+		}
+		catch (vk::Error& e)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Failed to init vulkan system %s", e.what());
+			throw;
+		}
+		catch (...)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Failed to init vulkan system, unknown exception type thrown");
+			throw;
+		}
 	}
 	void VulkanWin32GraphicsSystem::RenderBRDF(RscHandle<ShaderProgram> prog)
 	{
@@ -212,6 +231,9 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::LateInit()
 	{
+		try
+		{
+
 		GraphicsSystem::LateInit();
 		auto queue_families = View().PDevice().getQueueFamilyProperties();
 		
@@ -235,6 +257,22 @@ namespace idk::vkn
 		TexCreateInfo info = ColorBufferTexInfo(512, 512);
 		info.image_usage |= vk::ImageUsageFlagBits::eColorAttachment;
 		loader.LoadTexture(brdf_texture.as<VknTexture>(), *_pimpl->allocator, *_pimpl->fence, options, info, {});
+		}
+		catch (std::exception& e)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Failed to late init vulkan system %s", e.what());
+			throw;
+		}
+		catch (vk::Error& e)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Failed to late init vulkan system %s", e.what());
+			throw;
+		}
+		catch (...)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Failed to late init vulkan system, unknown exception type thrown");
+			throw;
+		}
 
 	}
 
@@ -517,7 +555,6 @@ namespace idk::vkn
 		// */
 		//string test = hlp::DumpAllocators();
 
-		
 
 
 		curr_frame.ColorPick(std::move(request_buffer));
@@ -565,19 +602,19 @@ namespace idk::vkn
 		}
 		catch (vk::SystemError& err)
 		{
-			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
+			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in renderenderbuffer: %s", err.what());
 			dump();
 			throw;
 		}
 		catch (std::exception& e)
 		{
-			LOG_CRASH_TO(LogPool::GFX, "Exception: %s", e.what());
+			LOG_CRASH_TO(LogPool::GFX, "Exception in renderenderbuffer: %s", e.what());
 			dump();
 			throw;
 		}
 		catch (...)
 		{
-			LOG_CRASH_TO(LogPool::GFX, "Unknown exception thrown");
+			LOG_CRASH_TO(LogPool::GFX, "Unknown exception thrown in renderenderbuffer");
 			throw;
 		}
 		profile_bp_end();
@@ -593,9 +630,9 @@ namespace idk::vkn
 		{
 			instance_->PresentFrame2();
 		}
-		catch (vk::SystemError& err)
+		catch (vk::Error& err)
 		{
-			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error: %s", err.what());
+			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in swap buffer: %s", err.what());
 			throw;
 		}
 	}
@@ -616,9 +653,27 @@ namespace idk::vkn
 	}
 	void VulkanWin32GraphicsSystem::Prerender()
 	{
+		try {
+
 		if(instance_->View().CurrFrame()==1)
 			if (!_pimpl->rendered_brdf)
 				RenderBRDF(renderer_fragment_shaders[FBrdf]);
+		}
+		catch (vk::SystemError& err)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in prerender: %s", err.what());
+			throw;
+		}
+		catch (std::exception& e)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Exception: in prerender %s", e.what());
+			throw;
+		}
+		catch (...)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Unknown exception thrown in prerender");
+			throw;
+		}
 	}
 	dbg::time_log& VulkanWin32GraphicsSystem::TimeLog()
 	{
