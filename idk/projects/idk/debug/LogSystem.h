@@ -23,6 +23,7 @@ namespace idk
 		~LogSystem();
 		static constexpr size_t log_buffer_size = 2048;
         void SetLogDir(string_view dir);
+		void FlushAllLogs();
 
 	private:
 		struct LogHandle

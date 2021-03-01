@@ -5,7 +5,6 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="game.cpp" />
     <ClCompile Include="AddSystems.cpp" />
     <ClCompile Include="ReflectReg_AnimComponents.cpp">
       <Filter>Shared</Filter>
@@ -22,6 +21,7 @@
     <ClCompile Include="ReflectRegistered.cpp">
       <Filter>Shared</Filter>
     </ClCompile>
+    <ClCompile Include="editor_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shared">

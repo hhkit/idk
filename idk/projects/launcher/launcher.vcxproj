@@ -245,7 +245,7 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
     <ClCompile Include="..\game\ReflectReg_Components.cpp" />
     <ClCompile Include="..\game\ReflectReg_GfxComponents.cpp" />
     <ClCompile Include="..\game\ReflectReg_Resources.cpp" />
-    <ClCompile Include="launcher.cpp" />
+    <ClCompile Include="game_main.cpp" />
     <ClCompile Include="RenderDocExt.cpp" />
   </ItemGroup>
   <ItemGroup>

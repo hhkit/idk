@@ -45,6 +45,8 @@
 #include <codecvt>
 #include <shellapi.h>//CommandLineToArgv
 
+#include <errhandlingapi.h>
+
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {
 	bool result = false;
@@ -54,6 +56,7 @@ bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 	}
 	return result;
 }
+
 std::optional<std::wstring_view> GetArgValue(std::wstring_view arg, LPWSTR* args, int num_args)
 {
 	std::optional<std::wstring_view> result;
@@ -90,7 +93,6 @@ void MinimizeOnAltTab(idk::Windows& windows)
 }
 namespace idk::mt::hack
 {
-
 	void SetHelperThreadOverride(int num);
 }
 
@@ -102,6 +104,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 	int num_args = 0;
 	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
+	SetUnhandledExceptionFilter( [](_In_ struct _EXCEPTION_POINTERS* info) -> LONG {
+		Core::GetSystem<LogSystem>().FlushAllLogs();
+		return EXCEPTION_EXECUTE_HANDLER;
+		});
 
 	if (HasArg(L"--single_thd", command_lines, num_args))
 	{

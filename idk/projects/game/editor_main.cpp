@@ -3,6 +3,8 @@
 #include <crtdbg.h>
 
 #include <core/Core.h>
+#include <core/Core.inl>
+#include <debug/LogSystem.h>
 #include <win32/WindowsApplication.h>
 
 
@@ -12,6 +14,7 @@
 #include <shellapi.h>//CommandLineToArgv
 
 #include <natvis_ids.h>
+#include <errhandlingapi.h>
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {
@@ -49,6 +52,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//_CrtSetBreakAlloc(884500); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	//_CrtSetBreakAlloc(884499); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	//_CrtSetBreakAlloc(895231); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	SetUnhandledExceptionFilter([](_In_ struct _EXCEPTION_POINTERS* info) -> LONG {
+		idk::Core::GetSystem<idk::LogSystem>().FlushAllLogs();
+		return EXCEPTION_EXECUTE_HANDLER;
+		});
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);

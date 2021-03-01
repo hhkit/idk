@@ -301,7 +301,7 @@ if %errorlevel% NEQ 0 exit /b %errorlevel%</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddSystems.cpp" />
-    <ClCompile Include="game.cpp">
+    <ClCompile Include="editor_main.cpp">
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</PreprocessToFile>
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">false</PreprocessToFile>
