@@ -32,7 +32,8 @@ vec3 Normal()
 }
 vec3 Tangent()
 {
-	return normalize(Load(gTangent).rgb);
+return _gTangent;
+	//return normalize(Load(gTangent).rgb);
 }
 #define FRAG_NORMAL Normal()
 #define FRAG_TANGENT Tangent()
