@@ -104,7 +104,7 @@ namespace idk::vkn
 	VulkanWin32GraphicsSystem::VulkanWin32GraphicsSystem() :  instance_{ std::make_unique<VulkanState>() }
 	{
 		if (!instance_)
-			throw;
+			throw std::runtime_error("Failed to instantiate VulkanState");
 		assert(instance_);
 	}
 	VulkanWin32GraphicsSystem::~VulkanWin32GraphicsSystem()
@@ -133,17 +133,17 @@ namespace idk::vkn
 		catch (std::exception& e)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Failed to init vulkan system %s", e.what());
-			throw;
+			throw;//Rethrow
 		}
 		catch (vk::Error& e)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Failed to init vulkan system %s", e.what());
-			throw;
+			throw;//Rethrow
 		}
 		catch (...)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Failed to init vulkan system, unknown exception type thrown");
-			throw;
+			throw;//Rethrow
 		}
 	}
 	void VulkanWin32GraphicsSystem::RenderBRDF(RscHandle<ShaderProgram> prog)
@@ -261,17 +261,17 @@ namespace idk::vkn
 		catch (std::exception& e)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Failed to late init vulkan system %s", e.what());
-			throw;
+			throw;//Rethrow
 		}
 		catch (vk::Error& e)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Failed to late init vulkan system %s", e.what());
-			throw;
+			throw;//Rethrow
 		}
 		catch (...)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Failed to late init vulkan system, unknown exception type thrown");
-			throw;
+			throw;//Rethrow
 		}
 
 	}
@@ -424,7 +424,7 @@ namespace idk::vkn
 
 		pre_render_data.Init(curr_buffer.mesh_render, curr_buffer.skinned_mesh_render, curr_buffer.skeleton_transforms,curr_buffer.inst_mesh_render_buffer);
 		if (&curr_buffer.skeleton_transforms != pre_render_data.skeleton_transforms)
-			throw;
+			throw std::runtime_error("Skeleton Transforms corrupted");
 		_pimpl->timelog.end_then_start("Init render data");
 
 		pre_render_data.shadow_ranges = &curr_buffer.culled_light_render_range;
@@ -604,18 +604,18 @@ namespace idk::vkn
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in renderenderbuffer: %s", err.what());
 			dump();
-			throw;
+			throw; //Rethrow
 		}
 		catch (std::exception& e)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Exception in renderenderbuffer: %s", e.what());
 			dump();
-			throw;
+			throw;//Rethrow
 		}
 		catch (...)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Unknown exception thrown in renderenderbuffer");
-			throw;
+			throw;//Rethrow
 		}
 		profile_bp_end();
 		_pimpl->timelog.end();
@@ -633,7 +633,7 @@ namespace idk::vkn
 		catch (vk::Error& err)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in swap buffer: %s", err.what());
-			throw;
+			throw;//Rethrow
 		}
 	}
 	void VulkanWin32GraphicsSystem::Shutdown()
@@ -662,17 +662,17 @@ namespace idk::vkn
 		catch (vk::SystemError& err)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in prerender: %s", err.what());
-			throw;
+			throw;//Rethrow
 		}
 		catch (std::exception& e)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Exception: in prerender %s", e.what());
-			throw;
+			throw;//Rethrow
 		}
 		catch (...)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Unknown exception thrown in prerender");
-			throw;
+			throw;//Rethrow
 		}
 	}
 	dbg::time_log& VulkanWin32GraphicsSystem::TimeLog()

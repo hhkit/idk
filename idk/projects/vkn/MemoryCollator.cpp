@@ -31,11 +31,11 @@ namespace idk::vkn
 			const auto offset = free_list.Allocate(size,alignment);
 			allocation_count++;
 			if (full_range._begin != 0)
-				throw;
+				throw std::runtime_error("Memory Collator's range has been compromised.");;
 			if (offset < full_range.size())
 			{
 				if (offset == (size_t)-1)
-					throw;
+					throw std::runtime_error("Invalid allocation in memory collator");;
 				const auto aligned = Aligned(offset, alignment);
 				result_range = index_span{ offset,aligned + size };
 			}

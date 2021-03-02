@@ -106,7 +106,7 @@ namespace idk
 		T* allocate(size_t n = 1)
 		{
 			if (n > 1)
-				throw;
+				throw std::runtime_error("Attempting to allocate more than one object from a pool allocator at a time.");
 			return reinterpret_cast<T*>(pool_t::allocate());
 			//if (!_free_head)
 			//{

@@ -218,8 +218,10 @@ namespace idk::vkn
 		layout{ layout_ },
 		type_index{ desc_type_idx<vk::DescriptorType::eUniformBuffer> }
 	{
-		if (buffer_offset_ + size_ > UboManager::_chunk_size || size_==0)
-			throw;
+		if(size_ == 0)
+			throw std::runtime_error("Attempting to bind a ubo of size 0.");
+		if (buffer_offset_ + size_ > UboManager::_chunk_size )
+			throw std::runtime_error("Attempting to bind a ubo that is larger than the supported chunk size. Chunksize: "+std::to_string(UboManager::_chunk_size)+" buffer end: "+ std::to_string(buffer_offset_ + size_));
 	}
 	UniformUtils::BindingInfo::BindingInfo(
 		uint32_t binding_,
@@ -638,7 +640,7 @@ namespace idk::vkn
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
 			if (texture.ImageView() == vk::ImageView())
-				throw;
+				throw std::runtime_error("Attempting to bind an invalid imageview");
 			curr_bindings[info.set].Bind(BindingInfo{ info.binding,ImageBinding{texture.ImageView(),texture.Sampler(),layout}, array_index, info.size, info.layout });
 			bound = true;
 		}
@@ -651,7 +653,7 @@ namespace idk::vkn
 		if (!skip_if_bound || itr2 == curr_bindings.end() || !detail::is_bound(itr2->second, info.binding, array_index))
 		{
 			if (texture.ImageView() == vk::ImageView())
-				throw;
+				throw std::runtime_error("Attempting to bind an invalid imageview");
 			curr_bindings[info.set].Bind(BindingInfo{ info.binding,AttachmentBinding{texture.ImageView(),layout}, array_index, info.size, info.layout });
 			bound = true;
 		}

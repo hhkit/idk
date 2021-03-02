@@ -707,7 +707,8 @@ GetGfxTimeLog().end();// "Update Ubo Managers");// "Compile");
 						if (itr != copy_src_nodes.end())
 							return itr->second;
 					}
-					throw;
+					throw std::runtime_error("This function shouldn't even be called.");;
+					throw ;
 					return fg_id{};
 				};
 				vk::ImageLayout prev_layout = att_opt.layout;

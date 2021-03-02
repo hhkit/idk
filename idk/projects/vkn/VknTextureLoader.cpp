@@ -561,7 +561,7 @@ namespace idk::vkn
 		std::optional<vk::ImageSubresourceRange> range{};
 
 		if (load_info.layers == 0)
-			throw;
+			throw std::runtime_error("Unable to load a texture with 0 layers");
 		vk::MemoryPropertyFlags mem_property = vk::MemoryPropertyFlagBits::eDeviceLocal;
 		//if (!(vk::ImageUsageFlagBits::eColorAttachment| vk::ImageUsageFlagBits::eDepthStencilAttachment) & load_info.image_usage)
 		//{

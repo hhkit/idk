@@ -120,7 +120,7 @@ namespace idk::vkn
 		auto itr = resource_handles.find(rsc.id);
 		auto oitr = renamed_original.find(rsc.id);
 		if (itr == resource_handles.end() || oitr == renamed_original.end())
-			throw;
+			throw std::runtime_error("Attempting to rename a resource that doesnt' exist.");;
 		resource_handles.emplace(std::pair{ next_id, itr->second });
 		renamed_resources.emplace(std::pair{ next_id, rsc.id });
 		renamed_rsc_next.emplace(std::pair{ rsc.id, next_id });
