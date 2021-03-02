@@ -35,6 +35,8 @@ namespace idk::vkn
 		//TODO actually get the file name
 		return string(path_to_resource.GetFullPath());
 	}
+	string PreprocessGlsl(string glsl);
+
 	ResourceBundle VulkanGlslLoader::LoadFile(PathHandle path_to_resource, const MetaBundle& meta)
 	{
 		auto m = meta.FetchMeta<ShaderProgram>();
@@ -45,6 +47,7 @@ namespace idk::vkn
 		string glsl = stringify(shader_stream);
 
 		auto shader_enum = GetShaderType(filepath.GetExtension());
+		glsl = PreprocessGlsl(glsl);
 		auto spirv = GlslToSpirv::spirv(glsl, shader_enum,path_to_resource.GetFileName());
 		if (spirv)
 			program->Load(shader_enum, {}, string_view{ r_cast<const char*>(spirv->data()),hlp::buffer_size(*spirv) }, glsl);
