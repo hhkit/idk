@@ -18,6 +18,8 @@
 #include <file/FileSystem.h>
 #include <debug/LogSystem.h>
 
+#include <vkn/ExtraConfigs.h>
+
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args);
 
 HWND& GetHWND()
@@ -41,6 +43,11 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	case GraphicsAPI::Vulkan:
 	{
 		auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+		if (HasArg(L"--simulate", command_lines, num_args))
+		{
+			vkn::ExtraConfigs ec{ .enable_simulation = true };
+			sys.SetExtraConfigs(ec);
+		}
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledFontAtlas, vkn::VknFontAtlas>>();

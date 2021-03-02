@@ -26,6 +26,7 @@
 
 namespace idk::vkn 
 {
+	struct ExtraConfigs;
 	
 	inline BasicRenderPasses operator++(BasicRenderPasses& type)
 	{
@@ -137,6 +138,7 @@ namespace idk::vkn
 		vk::UniqueCommandPool CreateGfxCommandPool();
 #pragma endregion
 		uint32_t					rv;
+		const ExtraConfigs* extra_configs;
 	private:
 		bool enable_validation = false;
 		// type aliases
@@ -252,6 +254,7 @@ namespace idk::vkn
 
 		QueueFamilyIndices                   findQueueFamilies(vk::PhysicalDevice const& device);
 		SwapChainSupportDetails              querySwapChainSupport(const vk::PhysicalDevice& device);
+
 	};
 }
 

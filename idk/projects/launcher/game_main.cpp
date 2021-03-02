@@ -47,6 +47,8 @@
 
 #include <errhandlingapi.h>
 
+#include <vkn/ExtraConfigs.h>
+
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {
 	bool result = false;
@@ -130,6 +132,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	case GraphicsAPI::Vulkan:
 	{
 		auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+		if (HasArg(L"--simulate", command_lines, num_args))
+		{
+			vkn::ExtraConfigs ec{ .enable_simulation=true };
+			sys.SetExtraConfigs(ec);
+		}
 		gSys = &sys;
 		if (HasArg(L"--validation", command_lines, num_args))
 			sys.Instance().EnableValidation();

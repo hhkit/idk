@@ -45,6 +45,7 @@
 #include <vkn/VknAsyncTexLoader.h>
 #include <vkn/AsyncLoaders.h>
 #include <vkn/VulkanMeshFactory.h>
+#include <vkn/ExtraConfigs.h>
 bool operator<(const idk::Guid& lhs, const idk::Guid& rhs)
 {
 	using num_array_t = const uint64_t[2];
@@ -106,9 +107,22 @@ namespace idk::vkn
 		if (!instance_)
 			throw std::runtime_error("Failed to instantiate VulkanState");
 		assert(instance_);
+		instance_->extra_configs = &GetExtraConfigs();
 	}
 	VulkanWin32GraphicsSystem::~VulkanWin32GraphicsSystem()
 	{
+	}
+	void VulkanWin32GraphicsSystem::SetExtraConfigs(const ExtraConfigs& extra_configs)
+	{
+		if (!_extra_configs)
+			_extra_configs = std::make_unique<ExtraConfigs>();
+		*_extra_configs = extra_configs;
+	}
+	ExtraConfigs& VulkanWin32GraphicsSystem::GetExtraConfigs() 
+	{
+		if (!_extra_configs)
+			_extra_configs = std::make_unique<ExtraConfigs>();
+		return *_extra_configs;
 	}
 	void VulkanWin32GraphicsSystem::Init()
 	{
