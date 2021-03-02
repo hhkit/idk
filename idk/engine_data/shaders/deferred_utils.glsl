@@ -12,7 +12,7 @@ layout(input_attachment_index = eAlbedoAmbOcc       ,set=2, binding=0) uniform s
 layout(input_attachment_index = eUvMetallicRoughness,set=2, binding=1) uniform subpassInput gUvMetRough;
 layout(input_attachment_index = eViewPos            ,set=2, binding=2) uniform subpassInput gViewPos;
 layout(input_attachment_index = eNormal             ,set=2, binding=3) uniform subpassInput gNormal;
-layout(input_attachment_index = eTangent            ,set=2, binding=4) uniform subpassInput gTangent;
+//layout(input_attachment_index = eTangent            ,set=2, binding=4) uniform subpassInput gTangent;
 layout(input_attachment_index = eEmissive           ,set=2, binding=5) uniform subpassInput gEmissive;
 layout(input_attachment_index = eDepth              ,set=2, binding=6) uniform subpassInput gDepth;
 
