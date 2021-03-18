@@ -21,7 +21,7 @@ namespace idk
 
 	LogSystem::~LogSystem()
 	{
-		if (0)
+		if (_enabled)
 		if (!Core::IsRunning())
 		{
 			int i = 0;
@@ -38,12 +38,23 @@ namespace idk
     {
         _log_dir = dir;
     }
+
+	void LogSystem::FlushAllLogs()
+	{
+		for (auto& elem : log_files) {
+			if (elem.stream) {
+				elem.stream << "Induced flush\n";
+				elem.stream.flush();
+			}
+		}
+	}
+
 	thread_local string log_buffer(LogSystem::log_buffer_size*2,' ');
 	void LogSystem::Init()
 	{
         if (_log_dir.empty())
-            throw; // set a log path first you dumbass
-
+            throw ; // set a log path first you dumbass
+		_enabled = hack::LogSystemConfig::GetSingleton().enabled;
         const auto logroot = _log_dir + '/' + curr_datetime();
         const auto start = Core::GetScheduler().GetProgramStart();
 		constexpr array<string_view, s_cast<size_t>(LogPool::COUNT)> names
@@ -58,7 +69,7 @@ namespace idk
 			"edit",
 		};
 
-		if (0)
+		if (_enabled)
 		for (unsigned i = 0; i < s_cast<unsigned>(LogPool::COUNT); ++i)
 		{
 			auto& loghandle = log_files[i];
@@ -66,39 +77,53 @@ namespace idk
 			loghandle.filepath = logroot + "_" + serialize_text(i) + "_" + string{ names[i] } + ".txt";
 			stream.open(loghandle.filepath);
 			if (stream)
-			loghandle.signal_id = LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
-				[&stream, start](LogLevel level, time_point time, string_view preface, string_view message)
 			{
-				//char buf[log_buffer_size*2];
-				if (log_buffer.size() < message.size())
-					log_buffer.resize(message.size() * 2);
-				auto buf = log_buffer.data();
-				unsigned moved = 0;
+				stream << "Begin logging\n";
+				stream.flush();
+				loghandle.signal_id = LogSingleton::Get().SignalFor(s_cast<LogPool>(i)).Listen(
+					[&stream, start](LogLevel level, time_point time, string_view preface, string_view message)
+					{
+						//char buf[log_buffer_size*2];
+						if (log_buffer.size() < message.size())
+							log_buffer.resize(message.size() * 2);
+						auto buf = log_buffer.data();
+						unsigned moved = 0;
 
-				switch (level)
-				{
-				case LogLevel::INFO:    strcpy_s(buf,std::size(log_buffer), "[INFO]  "); break;
-				case LogLevel::WARNING: strcpy_s(buf,std::size(log_buffer), "[WARN]  "); break;
-				case LogLevel::ERR:     strcpy_s(buf,std::size(log_buffer), "[ERROR] "); break;
-				case LogLevel::FATAL:   strcpy_s(buf,std::size(log_buffer), "[FATAL] "); break;
-				}
-				moved = 8;
+						switch (level)
+						{
+						case LogLevel::INFO:    strcpy_s(buf, std::size(log_buffer), "[INFO]  "); break;
+						case LogLevel::WARNING: strcpy_s(buf, std::size(log_buffer), "[WARN]  "); break;
+						case LogLevel::ERR:     strcpy_s(buf, std::size(log_buffer), "[ERROR] "); break;
+						case LogLevel::FATAL:   strcpy_s(buf, std::size(log_buffer), "[FATAL] "); break;
+						}
+						moved = 8;
 
-				const auto time_since_start = time - start;
+						const auto time_since_start = time - start;
 
-				int h = duration_cast<std::chrono::hours>(time_since_start).count();
-				int m = duration_cast<std::chrono::minutes>(time_since_start).count() % 60;
-				int s = duration_cast<std::chrono::seconds>(time_since_start).count() % 60;
-				int ms = duration_cast<std::chrono::milliseconds>(time_since_start).count() % 100;
+						int h = duration_cast<std::chrono::hours>(time_since_start).count();
+						int m = duration_cast<std::chrono::minutes>(time_since_start).count() % 60;
+						int s = duration_cast<std::chrono::seconds>(time_since_start).count() % 60;
+						int ms = duration_cast<std::chrono::milliseconds>(time_since_start).count() % 100;
 
-				moved += sprintf_s(buf + moved, std::size(log_buffer) - moved, "%d:%.2d:%.2d.%.3d: ", h, m, s, ms);
-				moved += sprintf_s(buf + moved, std::size(log_buffer) - moved, preface.data());
-				snprintf(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
-				stream << buf;
-				if (level == LogLevel::FATAL)
-					stream << std::flush;
+						moved += sprintf_s(buf + moved, std::size(log_buffer) - moved, "%d:%.2d:%.2d.%.3d: ", h, m, s, ms);
+						moved += sprintf_s(buf + moved, std::size(log_buffer) - moved, preface.data());
+						snprintf(buf + moved, sizeof(buf) - moved, "\t%s\n", message.data());
+						stream << buf;
+						if (level == LogLevel::FATAL)
+							stream << std::flush;
+					}
+				);
 			}
-			);
 		}
 	}
+}
+
+namespace idk::hack
+{
+	static LogSystemConfig config;
+LogSystemConfig& LogSystemConfig::GetSingleton()
+{
+	return config;
+}
+
 }

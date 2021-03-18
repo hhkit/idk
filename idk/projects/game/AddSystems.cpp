@@ -18,6 +18,8 @@
 #include <file/FileSystem.h>
 #include <debug/LogSystem.h>
 
+#include <vkn/ExtraConfigs.h>
+
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args);
 
 HWND& GetHWND()
@@ -27,6 +29,7 @@ HWND& GetHWND()
 }
 void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow, LPWSTR* command_lines, int num_args)
 {
+	idk::hack::LogSystemConfig::GetSingleton().enabled = HasArg(L"--log", command_lines, num_args);
 	using namespace idk;
 	auto& windows = c->AddSystem<Windows>(hInstance, nCmdShow);
 	windows.SetFullscreen(false);
@@ -40,6 +43,11 @@ void AddSystems(idk::unique_ptr<idk::Core>& c, HINSTANCE hInstance, int nCmdShow
 	case GraphicsAPI::Vulkan:
 	{
 		auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+		if (HasArg(L"--simulate", command_lines, num_args))
+		{
+			vkn::ExtraConfigs ec{ .enable_simulation = true };
+			sys.SetExtraConfigs(ec);
+		}
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledMesh, vkn::VulkanMesh>>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledTexture, vkn::VknTexture>>();
 		Core::GetResourceManager().RegisterAssetLoader<CompiledAssetLoader<CompiledFontAtlas, vkn::VknFontAtlas>>();

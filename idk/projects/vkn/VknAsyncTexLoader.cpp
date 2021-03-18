@@ -60,17 +60,17 @@ void AsyncTexLoader::UpdateTextures()
 		catch (vk::Error& e)
 		{
 			state.future_err = e.what();
-			throw;
+			throw;//Rethrow
 		}
 		catch(std::exception& e)
 		{
 			state.future_err = e.what();
-			throw;
+			throw;//Rethrow
 		}
 		catch (...)
 		{
 			state.future_err = "Unknown exception";
-			throw;
+			throw;//Rethrow
 
 		}
 		ready.reset();

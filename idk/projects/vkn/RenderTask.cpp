@@ -704,7 +704,7 @@ namespace idk::vkn
 		while (itr != end)
 		{
 			auto& info = itr->second;
-			auto input_att_index = info.input_attachment_index + attachment_offset;
+			auto input_att_index = info.input_attachment_index;// +attachment_offset;
 			if (info.type == uniform_layout_t::UniformType::eAttachment && input_att_index <input_attachments.size())
 			{
 				auto texture = input_attachments[input_att_index];

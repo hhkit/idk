@@ -1,18 +1,18 @@
 
-const int eAlbedoAmbOcc        = 1       ;
-const int eUvMetallicRoughness = 2       ;
-const int eViewPos             = 3       ;
-const int eNormal              = 4       ;
+const int eAlbedoAmbOcc        = 0       ;
+const int eUvMetallicRoughness = 1       ;
+const int eViewPos             = 2       ;
+const int eNormal              = 3       ;
 const int eTangent             = 5       ;
-const int eEmissive            = 5       ;
-const int eDepth               = 6       ;
+const int eEmissive            = 4       ;
+const int eDepth               = 5       ;
 const int eGBufferSize         = eDepth+1;
 
 layout(input_attachment_index = eAlbedoAmbOcc       ,set=2, binding=0) uniform subpassInput gAlbAmbOcc;
 layout(input_attachment_index = eUvMetallicRoughness,set=2, binding=1) uniform subpassInput gUvMetRough;
 layout(input_attachment_index = eViewPos            ,set=2, binding=2) uniform subpassInput gViewPos;
 layout(input_attachment_index = eNormal             ,set=2, binding=3) uniform subpassInput gNormal;
-layout(input_attachment_index = eTangent            ,set=2, binding=4) uniform subpassInput gTangent;
+//layout(input_attachment_index = eTangent            ,set=2, binding=4) uniform subpassInput gTangent;
 layout(input_attachment_index = eEmissive           ,set=2, binding=5) uniform subpassInput gEmissive;
 layout(input_attachment_index = eDepth              ,set=2, binding=6) uniform subpassInput gDepth;
 
@@ -22,7 +22,12 @@ vec4 Load(subpassInput input_att)
 	return subpassLoad(input_att);
 }
 
-
+vec3 LoadTangent()
+{
+	return vec3(Load(gViewPos).a,
+	Load(gNormal).a,
+	Load(gEmissive).a)*2-1.0;
+}
 
 #define LoadGBuffers(view_pos, normal, tangent, metallic, roughness, albedo,ambient_occ, uv, emissive) \
 if(Load(gDepth).r==1)                                                                           \
@@ -38,6 +43,7 @@ vec4 deep_depth  = Load(gDepth );                                               
 vec3 view_pos   = view_pos_.rgb;                                                                \
 vec3 normal   = normal_.rgb   *2 - 1;                                                                    \
 /*vec3 tangent   = tangent_.rgb *2 - 1;*/                                                                  \
+_gTangent = LoadTangent();                                                                         \
 float metallic   = uv_met_rou_.z;                                                                \
 float roughness  = uv_met_rou_.w;                                                                \
 vec3  albedo     = alb_amb_occ_.rgb;                                                             \
@@ -46,3 +52,5 @@ vec2 uv        = uv_met_rou_.xy;                                                
 vec3  emissive   = e_emissive.rgb;                                       \
 float depth_r = deep_depth.r;                                                               \
 																				   
+																				   
+vec3 _gTangent;

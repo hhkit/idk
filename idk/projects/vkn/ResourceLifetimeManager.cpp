@@ -105,7 +105,7 @@ namespace idk::vkn
 			auto rsc_desc = rsc_manager.GetResourceDescription(rsc_id);
 			if (base_desc->format != rsc_desc->format)
 			{
-				throw;
+				throw std::runtime_error("Resource Lifetime Manager: Resource format mismatch between base and alias.");
 			}
 			{
 				auto& desc = *base_desc;
@@ -119,7 +119,7 @@ namespace idk::vkn
 					break;
 				default:
 					if (desc.usage & vk::ImageUsageFlagBits::eDepthStencilAttachment)
-						throw;
+						throw std::runtime_error("Resource Lifetime Manager: Attempting to use unsupported depthstencilattachment format.");
 					break;
 				}
 			}
@@ -135,7 +135,7 @@ namespace idk::vkn
 					break;
 				default:
 					if (desc.usage & vk::ImageUsageFlagBits::eDepthStencilAttachment)
-						throw;
+						throw std::runtime_error("Resource Lifetime Manager: Attempting to use unsupported depthstencilattachment format.");
 					break;
 				}
 

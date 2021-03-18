@@ -8,6 +8,14 @@
 
 namespace idk
 {
+	namespace hack
+	{
+		struct LogSystemConfig
+		{
+			bool enabled = false;
+			static LogSystemConfig& GetSingleton();
+		};
+	}
 	class LogSystem
 		: public ISystem
 	{
@@ -15,6 +23,7 @@ namespace idk
 		~LogSystem();
 		static constexpr size_t log_buffer_size = 2048;
         void SetLogDir(string_view dir);
+		void FlushAllLogs();
 
 	private:
 		struct LogHandle
@@ -28,5 +37,6 @@ namespace idk
 		void Shutdown() override {}
 		array<LogHandle, static_cast<size_t>(LogPool::COUNT)> log_files;
         string _log_dir;
+		bool _enabled = false;
 	};
 }

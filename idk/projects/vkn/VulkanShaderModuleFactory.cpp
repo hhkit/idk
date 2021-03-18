@@ -13,13 +13,14 @@
 
 namespace idk::vkn
 {
+	string PreprocessGlsl(string glsl);
 	ShaderBuildResult VulkanShaderModuleFactory::BuildGLSL(const RscHandle<ShaderProgram>& program, ShaderStage, string_view glsl_code)
 	{
 		auto prog = RscHandle<ShaderModule>{ program };
 		bool ret = false;
 		string kill_me = {glsl_code.data(),glsl_code.size()};
 
-
+		glsl_code = PreprocessGlsl(glsl_code);
 		auto spirv = [](auto& program, auto& glsl_code) { if(program->Name().size())return GlslToSpirv::spirv(glsl_code, vk::ShaderStageFlagBits::eFragment, program->Name());  return GlslToSpirv::spirv(glsl_code, vk::ShaderStageFlagBits::eFragment); }(program,glsl_code);
 		ret = static_cast<bool>(spirv);
 		if (ret && spirv)

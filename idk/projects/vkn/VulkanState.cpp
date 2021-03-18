@@ -27,7 +27,7 @@
 #include <stb/stb_image.h>
 size_t Track(size_t s);
 
-
+#include "ExtraConfigs.h"
 namespace idk
 {
 	template<typename Key,typename Val>
@@ -192,12 +192,15 @@ namespace idk::vkn
 
 	std::vector<const char*> VulkanState::GetValidationLayers()
 	{
-		std::vector<const char*> layers
-		{
-			"VK_LAYER_KHRONOS_validation"
-		};
+		std::vector<const char*> layers;
+
 		
-		return (enable_validation) ? layers : decltype(layers){};
+		if (enable_validation)
+			layers.emplace_back("VK_LAYER_KHRONOS_validation");
+		if(this->extra_configs && this->extra_configs->enable_simulation)
+			layers.emplace_back("VK_LAYER_LUNARG_device_simulation");
+		
+		return layers;//(enable_validation) ? layers : decltype(layers){};
 	}
 
 	std::vector<const char*> VulkanState::GetExtensions(vk::Optional<const std::string>)

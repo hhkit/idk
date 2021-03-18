@@ -258,7 +258,7 @@ namespace idk::vkn
 	{
 		aaaa2++;
 		if (data.size() > block_size+initial_offset)
-			throw;
+			throw std::runtime_error("data buffer overflowed.");
 		return collator.can_allocate(Aligned(len, sz_alignment), alignment);
 		return block_size >= 
 			data.size() + AlignmentOffset() +
@@ -341,14 +341,14 @@ namespace idk::vkn
 		timer.start();
 #endif
 		if (!resetted || alignment != old_alignment)
-			throw;
+			throw std::runtime_error("Attempting to reallocate before resetting.");
 		collator.skip_free = true;
 		auto opt = collator.allocate(Aligned(len, sz_alignment), alignment);
 #if DEBUG_TIMER
 		add_rendertask_durations("DP collator allocate", timer.lap().count());
 #endif
 		if (!opt)
-			throw;
+			throw std::runtime_error("Failed to allocate from collator");
 		auto [unaligned_offset, aligned_offset] = *opt;
 		//free the alignment stuff so that we just need to free the allocated block later
 		if (aligned_offset - unaligned_offset != 0)

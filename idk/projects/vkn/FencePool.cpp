@@ -112,7 +112,7 @@ namespace idk::vkn
 	{
 		auto cmd_buffer = _src->Get(_id);
 		if (!cmd_buffer)
-			throw;
+			throw std::runtime_error("Attempting to dereference an invalid CmdBufferObj.");
 		return cmd_buffer;
 	}
 	CmdBufferPool::CmdBufferPool() :_cmd_pools{}

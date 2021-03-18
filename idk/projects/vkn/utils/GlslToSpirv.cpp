@@ -81,17 +81,28 @@ shaderc_shader_kind ConvertStageSC(vk::ShaderStageFlagBits stage)
 	return itr->second;
 }
 void DoNothing();
-std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk::ShaderStageFlagBits v_stage, string_view code_id)
+string PreprocessGlsl(string glsl)
 {
-	string val = static_cast<string>(glsl);
-	string shader_code = val;
+	string shader_code = glsl;
 
 	shader_code = ProcessIncludes(shader_code);
 
 	auto version_pos = shader_code.find("#version");
 	auto version_end = shader_code.find("\n", version_pos);
 
-	val = shader_code.substr(0, version_end) + replacer + shader_code.substr(version_end, shader_code.size() - version_end);
+	return shader_code.substr(0, version_end) + replacer + shader_code.substr(version_end, shader_code.size() - version_end);
+}
+std::optional<std::vector<unsigned int>> GlslToSpirv::spirv(string_view glsl, vk::ShaderStageFlagBits v_stage, string_view code_id)
+{
+	string val = static_cast<string>(glsl);
+	//string shader_code = val;
+	//
+	//shader_code = ProcessIncludes(shader_code);
+	//
+	//auto version_pos = shader_code.find("#version");
+	//auto version_end = shader_code.find("\n", version_pos);
+	//
+	//val = shader_code.substr(0, version_end) + replacer + shader_code.substr(version_end, shader_code.size() - version_end);
 	std::optional<std::vector<unsigned int>> spirv_out;/*
 	auto stage = ConvertStage(v_stage);
 	glslang::InitializeProcess();

@@ -3,6 +3,8 @@
 #include <crtdbg.h>
 
 #include <core/Core.h>
+#include <core/Core.inl>
+#include <debug/LogSystem.h>
 #include <win32/WindowsApplication.h>
 
 
@@ -12,6 +14,7 @@
 #include <shellapi.h>//CommandLineToArgv
 
 #include <natvis_ids.h>
+#include <errhandlingapi.h>
 
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {
@@ -30,6 +33,11 @@ RENDERDOC_API_1_1_2*& GetRDocApi()
 	static RENDERDOC_API_1_1_2* ptr;
 	return ptr;
 }
+namespace idk::mt::hack
+{
+
+	void SetHelperThreadOverride(int num);
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -44,6 +52,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//_CrtSetBreakAlloc(884500); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	//_CrtSetBreakAlloc(884499); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
 	//_CrtSetBreakAlloc(895231); //To break at a specific allocation number. Useful if your memory leak is consistently at the same spot.
+	SetUnhandledExceptionFilter([](_In_ struct _EXCEPTION_POINTERS* info) -> LONG {
+		idk::Core::GetSystem<idk::LogSystem>().FlushAllLogs();
+		return EXCEPTION_EXECUTE_HANDLER;
+		});
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -62,6 +74,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
+	if (HasArg(L"--single_thd", command_lines, num_args))
+	{
+		idk::mt::hack::SetHelperThreadOverride(0);
+	}
 	using namespace idk;
 
 	auto c = std::make_unique<Core>();

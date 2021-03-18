@@ -45,6 +45,10 @@
 #include <codecvt>
 #include <shellapi.h>//CommandLineToArgv
 
+#include <errhandlingapi.h>
+
+#include <vkn/ExtraConfigs.h>
+
 bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 {
 	bool result = false;
@@ -54,6 +58,7 @@ bool HasArg(std::wstring_view arg, LPWSTR* args, int num_args)
 	}
 	return result;
 }
+
 std::optional<std::wstring_view> GetArgValue(std::wstring_view arg, LPWSTR* args, int num_args)
 {
 	std::optional<std::wstring_view> result;
@@ -88,6 +93,10 @@ void MinimizeOnAltTab(idk::Windows& windows)
 	};
 	windows.OnFocusLost.Listen(on_alt_tab);
 }
+namespace idk::mt::hack
+{
+	void SetHelperThreadOverride(int num);
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -97,10 +106,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	using namespace idk;
 	int num_args = 0;
 	auto command_lines = CommandLineToArgvW(lpCmdLine, &num_args);
+	SetUnhandledExceptionFilter( [](_In_ struct _EXCEPTION_POINTERS* info) -> LONG {
+		Core::GetSystem<LogSystem>().FlushAllLogs();
+		return EXCEPTION_EXECUTE_HANDLER;
+		});
 
+	if (HasArg(L"--single_thd", command_lines, num_args))
+	{
+		idk::mt::hack::SetHelperThreadOverride(0);
+	}
 	auto c = std::make_unique<Core>();
 
 	auto& win = c->AddSystem<Windows>(hInstance, nCmdShow, LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2)));
+	idk::hack::LogSystemConfig::GetSingleton().enabled = HasArg(L"--log", command_lines, num_args);
+
+
 	if (!HasArg(L"--ignoreAltTabMin", command_lines, num_args))
 		MinimizeOnAltTab(win);
 	Core::GetSystem<Application>().SetFullscreen(true);
@@ -112,6 +132,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	case GraphicsAPI::Vulkan:
 	{
 		auto& sys = c->AddSystem<vkn::VulkanWin32GraphicsSystem>();
+		if (HasArg(L"--simulate", command_lines, num_args))
+		{
+			vkn::ExtraConfigs ec{ .enable_simulation=true };
+			sys.SetExtraConfigs(ec);
+		}
 		gSys = &sys;
 		if (HasArg(L"--validation", command_lines, num_args))
 			sys.Instance().EnableValidation();

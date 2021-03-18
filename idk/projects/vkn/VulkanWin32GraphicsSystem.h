@@ -26,12 +26,18 @@ namespace idk::vkn
 	class VulkanState;
 	class VulkanDebugRenderer;
 
+	struct ExtraConfigs;
+
 	class VulkanWin32GraphicsSystem
 		: public GraphicsSystem
 	{
 	public:
 		VulkanWin32GraphicsSystem();
 		~VulkanWin32GraphicsSystem();
+
+		void SetExtraConfigs(const ExtraConfigs&);
+		ExtraConfigs& GetExtraConfigs();
+
 		void Init() override ;
 		void LateInit() override;
 
@@ -63,5 +69,6 @@ namespace idk::vkn
 
 		struct Pimpl;
 		std::unique_ptr<Pimpl> _pimpl;
+		std::unique_ptr<ExtraConfigs> _extra_configs;
 	};
 }

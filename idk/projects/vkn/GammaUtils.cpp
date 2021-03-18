@@ -69,7 +69,7 @@ namespace idk::vkn
 					0ui32,0ui32,1ui32
 				},
 				vk::Offset3D{0,0,0},
-				vk::Extent3D{src.Size().x,src.Size().y}
+				vk::Extent3D{src.Size().x,src.Size().y,1}
 			}
 		);
 
