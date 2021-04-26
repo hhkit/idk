@@ -21,6 +21,11 @@ namespace idk
                 return retval;
             } 
         }
+
+        /// <summary>
+        /// Checks if Steamworks is initialized and the user is logged in (not in offline mode)
+        /// </summary>
+        public static bool  loggedOn        { get => Bindings.SteamLoggedOn(); }
         
         public static bool  isHost          { get => Bindings.NetworkGetIsHost(); }
         public static bool  isConnected     { get => Bindings.NetworkGetIsConnected(); }

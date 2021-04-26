@@ -1020,6 +1020,9 @@ namespace idk
 
         #endregion
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool SteamLoggedOn();
+
         #region ElectronView
 
         [MethodImpl(MethodImplOptions.InternalCall)]

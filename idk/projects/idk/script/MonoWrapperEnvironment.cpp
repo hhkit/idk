@@ -2608,6 +2608,12 @@ namespace idk::mono
 		}
 		BIND_END();
 
+		BIND_START("idk.Bindings::SteamLoggedOn", bool)
+		{
+			return Core::GetSystem<SteamManager>().SteamLoggedOn();
+		}
+		BIND_END();
+
 		BIND_START("idk.Bindings::ViewGetNetworkId", NetworkID, Handle<ElectronView> ev)
 		{
 			return ev->network_id;

@@ -42,4 +42,9 @@ namespace idk
         SteamAPI_RunCallbacks();
     }
 
+    bool SteamManager::SteamLoggedOn()
+    {
+        return _init && SteamUser()->BLoggedOn();
+    }
+
 }
