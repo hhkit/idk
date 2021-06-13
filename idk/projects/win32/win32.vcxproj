@@ -125,8 +125,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)engine\</OutDir>
-    <IntDir>$(SolutionDir)build\win32\</IntDir>
+    <OutDir>$(SolutionDir)engine\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\win32\$(Configuration)\</IntDir>
     <TargetName>win32</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

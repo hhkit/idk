@@ -21,6 +21,7 @@ namespace idk::vkn
 			   //LessChain(lhs.guid.Data1,rhs.guid.Data1,lhs.guid.Data2 , rhs.guid.Data2)|| && lhs.guid.Data3 < rhs.guid.Data3 && reinterpret_cast<uint64_t>(lhs.guid.Data4) < reinterpret_cast<uint64_t>(rhs.guid.Data4);
 	}
 //// 
+#pragma optimize("",off)
 	VulkanPipeline& PipelineManager::GetPipeline(const pipeline_config& config, const vector<RscHandle<ShaderProgram>>& modules, uint32_t frame_index, std::optional<RenderPassObj> render_pass, bool has_depth_stencil, VulkanPipeline::Options opt)
 	{
 		std::optional<handle_t> prev{};
@@ -29,6 +30,7 @@ namespace idk::vkn
 		char buffer[16384] = {};
 
 		ArenaAllocator<char> allocator{buffer};
+		std::vector<ShaderModule*> shader_ptrs;
 		std::basic_string<char, std::char_traits<char>, ArenaAllocator<char>> combi{ allocator };
 		size_t arr[16] = {};
 		for (size_t i = 0; i < modules.size(); ++i)
@@ -42,6 +44,7 @@ namespace idk::vkn
 		{
 			auto module = modules[arr[i]].as<ShaderModule>().Module().operator VkShaderModule();
 			combi.append(r_cast<const char*>(&module),sizeof(module));
+			shader_ptrs.emplace_back(&modules[arr[i]].as < ShaderModule>());
 		}
 
 		RenderPassObj rp = View().BasicRenderPass(config.render_pass_type);

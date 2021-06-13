@@ -1,5 +1,7 @@
 #version 450
 
+#define POST
+
 #define MAX_LIGHTS 8
 #define MAX_MAP  8
 
@@ -42,17 +44,6 @@ S_LAYOUT(11, 1) uniform BLOCK(DirectionalBlock)
 	DLight directional_vp[MAX_MAP];
 }DirectionalBlk;
 
-vec3 Normal()
-{
-	return normalize(Load(gNormal).rgb );
-}
-vec3 Tangent()
-{
-	return _gTangent;
-	//return normalize(Load(gTangent).rgb);
-}
-#define FRAG_NORMAL Normal()
-#define FRAG_TANGENT Tangent()
 import /engine_data/shaders/utils.glsl
 import /engine_data/shaders/pbr_utils.glsl
 

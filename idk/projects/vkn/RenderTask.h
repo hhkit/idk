@@ -24,9 +24,17 @@
 
 #include <util/PoolContainer.h>
 
+#include <vkn/RenderPassCreateInfoBundle.h>
 namespace idk::vkn
 {
-	
+
+	struct DbgRpInfo
+	{
+		uint32_t input_att_count;
+		uint32_t output_att_count;
+		RenderPassCreateInfoBundle bundle;
+		vk::RenderPass rp;
+	};
 
 	struct UboManager;
 	class PipelineManager;
@@ -284,6 +292,7 @@ namespace idk::vkn
 		vector<CopyCommand> _copy_commands;
 		VertexBindingTracker _vtx_binding_tracker;
 		bool used = false;
+		//std::shared_ptr<DbgRpInfo> bundle;
 	};
 
 

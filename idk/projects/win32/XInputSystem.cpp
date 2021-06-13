@@ -6,17 +6,34 @@
 #include <core/Core.h>
 
 #undef max
-
+#if DEBUG_XINPUT
+#include <fstream>
+#include <iostream>
+#include <bitset>
+#endif
 namespace idk::win
 {
 
     // number of seconds between each check for new player
     constexpr static auto check_for_new_connection_delay = 3.0f;
-
+#if DEBUG_XINPUT
+    static std::ofstream log;
+    std::ostream& logger()  
+    {
+        std::ostream& ret = log ? log : std::cout;
+        return ret;
+    }
+#endif
     void XInputSystem::Init()
     {
+#if DEBUG_XINPUT
+        AllocConsole();
+        FILE* result;
+        freopen_s(&result,"CONOUT$", "w", stdout);
+        //log = std::ofstream{"xinput.log"};
+        logger() << "Init"<<std::endl;
+#endif
         ZeroMemory(&_buffers, sizeof(_buffers));
-
         DWORD dwResult;
         for (DWORD i = 0; i < XUSER_MAX_COUNT; i++)
         {
@@ -46,7 +63,7 @@ namespace idk::win
     void XInputSystem::Shutdown()
     {
     }
-
+#pragma optimize("",off)
     void XInputSystem::Update()
     {
         _swap_bufs();
@@ -55,7 +72,6 @@ namespace idk::win
         const bool check_for_new_connection = _new_connection_check_timer <= 0;
         if (check_for_new_connection)
             _new_connection_check_timer = check_for_new_connection_delay;
-
         DWORD dwResult;
         for (DWORD i = 0; i < XUSER_MAX_COUNT; i++)
         {
@@ -79,9 +95,23 @@ namespace idk::win
             }
             else
             {
-                // Controller is not connected 
+                // Controller is not connected
                 _connected_users &= ~(1 << i);
                 _curr_buf()[i] = _prev_buf()[i] = x_gamepad_state{ 0, 0, 0, 0, 0, 0, 0 };
+            }
+            if (_curr_buf()[i].buttons)
+            {
+                auto& var = _curr_buf()[i].buttons;
+#if DEBUG_XINPUT
+                std::bitset<sizeof(var) * 8> bitfield{ var };
+                logger() <<"Player["<<i<<"]buttons: "<<bitfield<< std::endl;
+#endif 
+            }
+            else
+            {
+#if DEBUG_XINPUT
+                logger() <<"Player["<<i<<"]" << " No buttons pressed" << std::endl;
+#endif
             }
         }
     }

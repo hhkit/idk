@@ -42,6 +42,7 @@ namespace idk::vkn
 	*/
 	void BaseRenderPass::BeginRenderPass(Context_t context)
 	{
+		//context.bundle = this->dbg;
 		context.SetRenderPass(this->render_pass);
 	}
 

@@ -464,6 +464,9 @@
     <ClInclude Include="VulkanMeshAsyncLoader.h">
       <Filter>resource\Async\RscLoader</Filter>
     </ClInclude>
+    <ClInclude Include="ExtraConfigs.h">
+      <Filter>utils\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

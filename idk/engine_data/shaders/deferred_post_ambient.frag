@@ -1,5 +1,5 @@
 #version 450
-
+#define POST
 #define MAX_LIGHTS 8
 
 import /engine_data/shaders/deferred_utils.glsl
@@ -26,17 +26,6 @@ import /engine_data/shaders/light.glsl
 
 // lighting functions 
 
-vec3 Normal()
-{
-	return normalize(Load(gNormal).rgb );
-}
-vec3 Tangent()
-{
-return _gTangent;
-	//return normalize(Load(gTangent).rgb);
-}
-#define FRAG_NORMAL Normal()
-#define FRAG_TANGENT Tangent()
 import /engine_data/shaders/utils.glsl
 import /engine_data/shaders/pbr_utils.glsl
 

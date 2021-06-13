@@ -16,7 +16,6 @@ layout(location = 0) out vec4 out_albedo_amb_o;
 layout(location = 1) out vec4 out_uv_metallic_roughness;
 layout(location = 2) out vec4 out_view_pos;
 layout(location = 3) out vec4 out_normal;
-//layout(location = 4) out vec4 out_tangent;
 layout(location = 4) out vec4 out_emissive;
 
 vec3 Normal()
@@ -51,12 +50,14 @@ void main()
 
 
 	//__MATERIAL_CODE__;
+
+	//Tangent is no longer relevant after this point.
+	//It was only used to compute the actual normals(in unpack normal) and should be done by now.
 	normal  = normal  *0.5 + 0.5;
-	tangent = tangent *0.5 + 0.5;
 	out_albedo_amb_o = vec4(albedo,ambient_o);
 	out_uv_metallic_roughness = vec4(fs_in.uv,metallic,roughness);
-	out_view_pos = vec4(fs_in.position,tangent.r);
-	out_normal = vec4(normal,tangent.g);
-	out_emissive = vec4(emissive,tangent.b);
+	out_view_pos = vec4(fs_in.position,0.0f);
+	out_normal = vec4(normal,0.0f);
+	out_emissive = vec4(emissive,0.0f);
 	
 }

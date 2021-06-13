@@ -4,7 +4,7 @@
 #include <ds/span.inl>
 namespace idk::vkn::dbg
 {
-	static inline constexpr bool enabled = false;
+	static inline constexpr bool enabled = true;
 	string_view time_log::store(string&& name)
 	{
 		if constexpr (enabled)

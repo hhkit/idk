@@ -708,7 +708,7 @@ GetGfxTimeLog().end();// "Update Ubo Managers");// "Compile");
 							return itr->second;
 					}
 					throw std::runtime_error("This function shouldn't even be called.");;
-					throw ;
+					throw;
 					return fg_id{};
 				};
 				vk::ImageLayout prev_layout = att_opt.layout;
@@ -887,6 +887,7 @@ GetGfxTimeLog().end();// "Update Ubo Managers");// "Compile");
 				size.x,size.y,num_layers
 			}),virtual_size };
 	}
+#pragma optimize("",off)
 	void FrameGraph::CreateRenderPasses()
 	{
 		vector < std::tuple<FrameGraphNode*,BaseRenderPass*, vk::RenderPassCreateInfo>> create_info{};
@@ -901,6 +902,12 @@ GetGfxTimeLog().end();// "Update Ubo Managers");// "Compile");
 			if (!rp.skip_render_pass)
 			{
 				rp.render_pass = CreateRenderPass(node.name, input_attachments, output_attachments, node.depth_stencil);
+				//if(!rp.dbg)
+				//	rp.dbg = std::make_unique<DbgRpInfo>();
+				//rp.dbg->bundle = CreateRenderPassInfo(input_attachments, output_attachments, node.depth_stencil);
+				//rp.dbg->input_att_count = input_attachments.size();
+				//rp.dbg->output_att_count = output_attachments.size();
+				//rp.dbg->rp = *rp.render_pass;
 				auto [fb, size] = CreateFrameBuffer(rp.render_pass, input_attachments, output_attachments, node.depth_stencil);
 				rp.frame_buffer = fb;
 				rp.fb_size = size;
