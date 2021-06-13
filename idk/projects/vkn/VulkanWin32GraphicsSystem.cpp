@@ -304,6 +304,8 @@ namespace idk::vkn
 	void profile_bp_end();
 	void VulkanWin32GraphicsSystem::RenderRenderBuffer()
 	{
+		if (instance_->m_ShouldResize)
+			instance_->RecreateSwapChain();
 		if (!_pimpl->inited)
 		{
 			_pimpl->initial_texture_count = _pimpl->tex_loader.num_pending();
@@ -335,6 +337,10 @@ namespace idk::vkn
 			auto& curr_signal = instance_->View().CurrPresentationSignals();
 
 		auto d_af_start = std::chrono::high_resolution_clock::now();
+
+		if (instance_->extent.height * instance_->extent.width == 0)
+			return; //Skip rendering if there's nothing to render
+
 		instance_->AcquireFrame(*curr_signal.image_available);
 		_pimpl->timelog.end_then_start("Process Updated Resources");
 		auto d_af_end = std::chrono::high_resolution_clock::now();
@@ -614,6 +620,11 @@ namespace idk::vkn
 		}
 
 		}
+		catch (vk::OutOfDateKHRError& err)
+		{
+			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in renderenderbuffer: %s", err.what());
+			//non-fatal
+		}
 		catch (vk::SystemError& err)
 		{
 			LOG_CRASH_TO(LogPool::GFX, "Vulkan Error in renderenderbuffer: %s", err.what());
@@ -640,6 +651,9 @@ namespace idk::vkn
 //
 	void VulkanWin32GraphicsSystem::SwapBuffer()
 	{
+
+		if (instance_->extent.height * instance_->extent.width == 0)
+			return; //Skip swapping if there was nothing to render
 		try
 		{
 			instance_->PresentFrame2();

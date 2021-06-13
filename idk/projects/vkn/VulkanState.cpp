@@ -339,9 +339,9 @@ namespace idk::vkn
 	{
 
 		vk::ApplicationInfo appInfo = {
-			"Hello Triangle",         //pApplicationName
-			VK_MAKE_VERSION(1, 0, 0), //applicationVersion
-			"No Engine",			  //pEngineName 
+			"Hyde&Seek",         //pApplicationName
+			VK_MAKE_VERSION(1, 0, 1), //applicationVersion
+			"IDK",			  //pEngineName 
 			VK_MAKE_VERSION(1, 0, 0), //engineVersion
 			VK_API_VERSION_1_0,		  //apiVersion   
 									  //vk::StructureType::eApplicationInfo ,
@@ -948,6 +948,13 @@ namespace idk::vkn
 
 	void VulkanState::RecreateSwapChain()
 	{
+		//update extent
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(pdevice);
+		extent = chooseSwapExtent(swapChainSupport.capabilities);
+		if (extent.width * extent.height == 0)
+		{
+			return;
+		}
 		m_device->waitIdle(dispatcher);
 		CleanupSwapChain();
 
@@ -962,6 +969,7 @@ namespace idk::vkn
 		//createDescriptorSet();
 		createCommandBuffers();
 		createSemaphores();
+		m_ShouldResize = false;
 	}
 	void PrintFormatBlitCompatibility();
 	void VulkanState::InitVulkanEnvironment(window_info info)
@@ -1169,7 +1177,7 @@ namespace idk::vkn
 			case vk::Result::eSuboptimalKHR:
 				m_ScreenResized = false;
 				m_ScreenResizedForImGui = true;
-				RecreateSwapChain();
+				m_ShouldResize = true;
 				break;
 			case vk::Result::eSuccess:
 				break;
