@@ -602,7 +602,7 @@ GetGfxTimeLog().start("Compile");
 					if (rt.BeginSecondaryCmdBuffer(buffer))
 					{
 					tmp_timer.stop();
-					tmp_duration.at(mt::thread_id()) += tmp_timer.time();
+					//tmp_duration.at(mt::thread_id()) += tmp_timer.time();
 						rt.ProcessBatches(buffer);
 						buffer.end();
 					}
