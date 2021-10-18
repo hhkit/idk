@@ -139,6 +139,7 @@ namespace idk::vkn
 #pragma endregion
 		uint32_t					rv;
 		const ExtraConfigs* extra_configs;
+		bool m_ShouldResize = false;
 	private:
 		bool enable_validation = false;
 		// type aliases
@@ -169,6 +170,7 @@ namespace idk::vkn
 		window_info m_window;
 		bool m_ScreenResized = false;
 		bool m_ScreenResizedForImGui = false;
+		
 		uint32_t WIDTH = 1280, HEIGHT = 720;
 		uint32_t current_frame = 0, max_frames_in_flight = 2;
 		vk::UniqueSurfaceKHR                 m_surface;
